@@ -154,6 +154,13 @@ export const SubmissionType = ({
     ) => {
         if (isNewSubmission) {
             try {
+                if (!values.populationCovered) {
+                    console.info(
+                        'unexpected error, attempting to submit without population covered',
+                        values.submissionType
+                    )
+                    return
+                }
                 if (
                     !(
                         values.submissionType === 'CONTRACT_ONLY' ||

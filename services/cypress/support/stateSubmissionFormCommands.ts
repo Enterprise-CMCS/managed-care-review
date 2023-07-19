@@ -1,4 +1,3 @@
-import { aliasMutation } from '../utils/graphql-test-utils'
 Cypress.Commands.add('startNewContractOnlySubmissionWithBaseContract', () => {
     // Must be on '/submissions/new'
     cy.findByTestId('dashboard-page').should('exist')

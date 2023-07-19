@@ -9,6 +9,7 @@ describe('createHealthPlanPackage', () => {
         const server = await constructTestPostgresServer()
 
         const input: CreateHealthPlanPackageInput = {
+            populationCovered: 'MEDICAID',
             programIDs: [
                 '5c10fe9f-bec9-416f-a20c-718b152ad633',
                 '037af66b-81eb-4472-8b80-01edf17d12d9',
@@ -44,6 +45,7 @@ describe('createHealthPlanPackage', () => {
     it('returns an error if the program id is not in valid', async () => {
         const server = await constructTestPostgresServer()
         const input: CreateHealthPlanPackageInput = {
+            populationCovered: 'MEDICAID',
             programIDs: ['xyz123'],
             riskBasedContract: false,
             submissionType: 'CONTRACT_ONLY',
@@ -69,6 +71,7 @@ describe('createHealthPlanPackage', () => {
         })
 
         const input: CreateHealthPlanPackageInput = {
+            populationCovered: 'MEDICAID',
             programIDs: ['xyz123'],
             riskBasedContract: false,
             submissionType: 'CONTRACT_ONLY',

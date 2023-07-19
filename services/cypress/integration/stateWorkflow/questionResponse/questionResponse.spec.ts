@@ -8,7 +8,6 @@ describe('Q&A', () => {
     it('can add questions and responses', () => {
         cy.interceptFeatureFlags({
             'cms-questions': true,
-            'chip-only-form': true,
         })
 
         // Assign Division to CMS user zuko
