@@ -37,6 +37,7 @@ import {
     EmailParameterStore,
 } from '../parameterStore'
 import statePrograms from 'app-web/src/common-code/data/statePrograms.json'
+import { testLDService } from './launchDarklyHelpers'
 import { LDService } from '../launchDarkly/launchDarkly'
 import { insertUserToLocalAurora } from '../authn'
 import { testStateUser } from './userHelpers'
@@ -83,6 +84,7 @@ const constructTestPostgresServer = async (opts?: {
     const emailer = opts?.emailer || constructTestEmailer()
     const parameterStore =
         opts?.emailParameterStore || newLocalEmailParameterStore()
+    const ldService = opts?.ldService || testLDService()
 
     const prismaClient = await sharedTestPrismaClient()
     const postgresStore = opts?.store || NewPostgresStore(prismaClient)
@@ -92,7 +94,8 @@ const constructTestPostgresServer = async (opts?: {
     const postgresResolvers = configureResolvers(
         postgresStore,
         emailer,
-        parameterStore
+        parameterStore,
+        ldService
     )
 
     return new ApolloServer({

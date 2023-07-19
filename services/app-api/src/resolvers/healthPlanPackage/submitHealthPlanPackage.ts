@@ -6,7 +6,6 @@ import {
     hasAnyValidRateData,
     isContractAndRates,
     removeRatesData,
-    hasValidPopulationCoverage,
     removeInvalidProvisionsAndAuthorities,
     isValidAndCurrentLockedHealthPlanFormData,
     hasValidSupportingDocumentCategories,
@@ -76,18 +75,9 @@ function submit(
         submittedAt: new Date(),
     }
 
-    // move this check into isValidContract when feature flag is removed
-    const validPopulationCovered = hasValidPopulationCoverage(
-        maybeStateSubmission as LockedHealthPlanFormDataType
-    )
-
-    if (
-        isValidAndCurrentLockedHealthPlanFormData(maybeStateSubmission) &&
-        validPopulationCovered
-    )
+    if (isValidAndCurrentLockedHealthPlanFormData(maybeStateSubmission))
         return maybeStateSubmission
     else if (
-        !validPopulationCovered ||
         !hasValidContract(maybeStateSubmission as LockedHealthPlanFormDataType)
     ) {
         return {
