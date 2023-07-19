@@ -277,7 +277,7 @@ jobs:
       needs.api-unit-tests.result == 'success' &&
       needs.build-prisma-client-lambda-layer.result == 'success' &&
       needs.begin-deployment.result == 'success'
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@ma_3212_migration_lambda
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
