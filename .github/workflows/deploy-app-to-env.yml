@@ -140,6 +140,7 @@ jobs:
       - name: invoke proto_to_db lambda
         id: invoke-proto_to_db
         working-directory: services/app-api
+        continue-on-error: true
         env:
           STAGE_NAME: ${{ inputs.stage_name }}
         run: |
