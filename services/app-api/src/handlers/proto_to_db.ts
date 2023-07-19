@@ -1,4 +1,4 @@
-import { Handler } from 'aws-lambda'
+import { Handler, APIGatewayProxyResultV2 } from 'aws-lambda'
 import { initTracer, initMeter } from '../../../uploads/src/lib/otel'
 import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
@@ -47,7 +47,10 @@ export const getRevisions = async (
     return result
 }
 
-export const main: Handler = async (event, context) => {
+export const main: Handler = async (
+    event,
+    context
+): Promise<APIGatewayProxyResultV2> => {
     // Check on the values for our required config
     const stageName = process.env.stage ?? 'stageNotSet'
     const serviceName = `proto_to_db_lambda-${stageName}`
@@ -78,5 +81,5 @@ export const main: Handler = async (event, context) => {
             message: 'Lambda function executed successfully',
             packageId: pkgID,
         }),
-    }
+    } as APIGatewayProxyResultV2
 }
