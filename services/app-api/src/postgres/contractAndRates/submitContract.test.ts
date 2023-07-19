@@ -5,8 +5,7 @@ import { insertDraftContract } from './insertContract'
 import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
 import { updateDraftRate } from './updateDraftRate'
-import { must } from '../../testHelpers'
-import { createDraftContractData } from '../../testHelpers/contractAndRates/contractHelpers'
+import { must, createInsertContractData } from '../../testHelpers'
 
 describe('submitContract', () => {
     it('creates a submission from a draft', async () => {
@@ -29,7 +28,7 @@ describe('submitContract', () => {
         ).toBeInstanceOf(Error)
 
         // create a draft contract
-        const draftContractData = createDraftContractData({
+        const draftContractData = createInsertContractData({
             submissionDescription: 'one contract',
         })
         const contractA = must(
@@ -90,7 +89,7 @@ describe('submitContract', () => {
         )
 
         // create a draft contract
-        const draftContractData = createDraftContractData({
+        const draftContractData = createInsertContractData({
             submissionDescription: 'first contract',
         })
         const contractA = must(
@@ -145,6 +144,9 @@ describe('submitContract', () => {
                             submissionType: 'CONTRACT_AND_RATES',
                             submissionDescription: 'second contract revision',
                             contractType: 'BASE',
+                            programIDs: ['PMAP'],
+                            populationCovered: 'MEDICAID',
+                            riskBasedContract: false,
                         },
                     },
                 },
@@ -192,7 +194,7 @@ describe('submitContract', () => {
             },
         })
 
-        const draftContractData = createDraftContractData({
+        const draftContractData = createInsertContractData({
             submissionDescription: 'one contract',
         })
         const contractA = must(

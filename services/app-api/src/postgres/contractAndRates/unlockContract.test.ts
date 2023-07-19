@@ -11,8 +11,7 @@ import { updateDraftContract } from './updateDraftContract'
 import { updateDraftRate } from './updateDraftRate'
 import { submitContract } from './submitContract'
 import { findContractWithHistory } from './findContractWithHistory'
-import { must } from '../../testHelpers'
-import { createDraftContractData } from '../../testHelpers/contractAndRates/contractHelpers'
+import { must, createInsertContractData } from '../../testHelpers'
 
 describe('unlockContract', () => {
     it('Unlocks a rate without breaking connected draft contract', async () => {
@@ -39,7 +38,7 @@ describe('unlockContract', () => {
             },
         })
 
-        const draftContractData = createDraftContractData({
+        const draftContractData = createInsertContractData({
             submissionDescription: 'Contract 1.0',
         })
 
@@ -130,7 +129,7 @@ describe('unlockContract', () => {
             },
         })
 
-        const draftContractData = createDraftContractData({
+        const draftContractData = createInsertContractData({
             submissionDescription: 'Contract 1.0',
         })
 
@@ -225,7 +224,7 @@ describe('unlockContract', () => {
             },
         })
 
-        const draftContractData = createDraftContractData({
+        const draftContractData = createInsertContractData({
             submissionDescription: 'Contract 1.0',
         })
 
@@ -327,7 +326,7 @@ describe('unlockContract', () => {
             },
         })
 
-        const draftContractData = createDraftContractData({
+        const draftContractData = createInsertContractData({
             submissionDescription: 'Contract 1.0',
         })
 
@@ -378,7 +377,7 @@ describe('unlockContract', () => {
             },
         })
 
-        const draftContractData = createDraftContractData({
+        const draftContractData = createInsertContractData({
             submissionDescription: 'Contract 1.0',
         })
 

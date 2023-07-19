@@ -14,13 +14,21 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql/index'
+import { LDService } from '../../launchDarkly/launchDarkly'
+import { convertContractToUnlockedHealthPlanPackage } from '../../domain-models'
 
 export function createHealthPlanPackageResolver(
-    store: Store
+    store: Store,
+    launchDarkly: LDService
 ): MutationResolvers['createHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
         setResolverDetailsOnActiveSpan('createHealthPlanPackage', user, span)
+
+        const ratesDatabaseRefactor = await launchDarkly.getFeatureFlag(
+            context,
+            'rates-db-refactor'
+        )
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
@@ -71,24 +79,63 @@ export function createHealthPlanPackageResolver(
             contractType: input.contractType,
         }
 
-        const pkgResult = await store.insertHealthPlanPackage(insertArgs)
-        if (isStoreError(pkgResult)) {
-            const errMessage = `Error creating a package of type ${pkgResult.code}. Message: ${pkgResult.message}`
-            logError('createHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
+        //Here is where we flag the insert
+        if (ratesDatabaseRefactor) {
+            const contractResult = await store.insertDraftContract(insertArgs)
+            if (contractResult instanceof Error) {
+                const errMessage = `Error creating a draft contract. Message: ${contractResult.message}`
+                logError('createHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
+            }
 
-        logSuccess('createHealthPlanPackage')
-        setSuccessAttributesOnActiveSpan(span)
+            // Now we do the conversions
+            const pkg =
+                convertContractToUnlockedHealthPlanPackage(contractResult)
 
-        return {
-            pkg: pkgResult,
+            if (pkg instanceof Error) {
+                const errMessage = `Error converting draft contract. Message: ${pkg.message}`
+                logError('createHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'PROTO_DECODE_ERROR',
+                    },
+                })
+            }
+
+            logSuccess('createHealthPlanPackage')
+            setSuccessAttributesOnActiveSpan(span)
+
+            return {
+                pkg,
+            }
+        } else {
+            const pkgResult = await store.insertHealthPlanPackage(insertArgs)
+            if (isStoreError(pkgResult)) {
+                const errMessage = `Error creating a package of type ${pkgResult.code}. Message: ${pkgResult.message}`
+                logError('createHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
+            }
+
+            logSuccess('createHealthPlanPackage')
+            setSuccessAttributesOnActiveSpan(span)
+
+            return {
+                pkg: pkgResult,
+            }
         }
     }
 }

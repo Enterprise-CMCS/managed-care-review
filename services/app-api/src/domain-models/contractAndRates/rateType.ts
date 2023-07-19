@@ -1,5 +1,7 @@
-import { UpdateInfoType } from '../index'
-import { ContractRevision } from './contractType'
+import {
+    ContractRevisionType,
+    UpdateInfoType,
+} from './contractAndRatesZodSchema'
 
 // Rate represents the rate specific information in a submission package
 // All that data is contained in revisions, each revision represents the data in a single submission
@@ -19,7 +21,7 @@ interface RateRevision {
     submitInfo?: UpdateInfoType
 
     revisionFormData: string
-    contractRevisions?: ContractRevision[]
+    contractRevisions?: ContractRevisionType[]
 }
 
 export type { Rate, RateRevision }
