@@ -137,7 +137,7 @@ jobs:
         run: |
           ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_NAME-migrate \$LATEST "Migration of the database failed."
 
-      - name: invoke proto_to_db lambda
+      - name: invoke proto_to_db lambda -- (rates refactor migrate)
         id: invoke-proto_to_db
         working-directory: services/app-api
         continue-on-error: true
