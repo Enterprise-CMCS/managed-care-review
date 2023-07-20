@@ -75,9 +75,9 @@
     "@apollo/query-graphs" "2.4.1"
 
 "@apollo/explorer@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@apollo/explorer/-/explorer-3.0.0.tgz#b569a309c3ccadf7d3eee9d88a4e8679bddcd13b"
-  integrity sha512-7euwlv4sXjed6Z/aGlkHchKjoRy+OuRT160r2Sl49/Nd4rH0wxuMceDY+KOAYPS7ZCJjhXmUDPub1diEyTLaFw==
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/@apollo/explorer/-/explorer-3.5.0.tgz#a63595f837744f6725ab80c666b8b5e801427954"
+  integrity sha512-c/QHXvxaEdi7k9ApcjkGmyO6GHwPxQxPFc2aN37i+lg0FqhMImO0fcLOKq4UuvESsRv144o9g8nzTV74G7CInA==
   dependencies:
     "@types/whatwg-mimetype" "^3.0.0"
     graphql-ws "^5.9.0"
