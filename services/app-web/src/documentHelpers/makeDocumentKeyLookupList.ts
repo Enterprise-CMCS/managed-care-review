@@ -4,7 +4,7 @@ import { getAllDocuments } from './getAllDocuments'
 
 // CurrentPreviousDocsLookup - array of document keys for currentDocuments and previousDocuments
 
-type LookupListType = {
+type DocumentKeyLookupType = {
     currentDocuments: string[]
     previousDocuments: string[]
 }
@@ -19,7 +19,7 @@ const getKey = (s3URL: string) => {
 
 function makeDocumentS3KeyLookup(
     revisionsLookup: RevisionsLookupType
-): LookupListType {
+): DocumentKeyLookupType {
     const currentDocumentsSet = new Set<string>()
     const previousDocumentsSet = new Set<string>()
 
@@ -61,3 +61,4 @@ function makeDocumentS3KeyLookup(
 }
 
 export { makeDocumentS3KeyLookup }
+export type {DocumentKeyLookupType}

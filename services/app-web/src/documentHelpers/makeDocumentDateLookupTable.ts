@@ -5,9 +5,11 @@ import {
 import { getAllDocuments } from './getAllDocuments'
 import { getDocumentKey } from './getDocumentKey'
 
-// DocumentDateLookupTableType -  { S3 key string : date string for "date added" }
+// DocumentDateLookupTableType -  { document key string : date string for "date added" }
+// see logic in getDocumentKey for how document key string is calculated
 type DocumentDateLookupTableType = {
-    [key: string]: string
+    previousSubmissionDate: string | null,
+    [key: string]: string | null
 }
 
 // getDateAdded - picks out the submit info updatedAt date for a revision
@@ -23,7 +25,7 @@ const getDateAdded = (
 function makeDocumentDateTable(
     revisionsLookup: RevisionsLookupType
 ): DocumentDateLookupTableType {
-    const lookupTable: DocumentDateLookupTableType = {}
+    const lookupTable: DocumentDateLookupTableType = { previousSubmissionDate: null}
     Object.keys(revisionsLookup).forEach(
         (revisionId: string, index: number) => {
             const revision = revisionsLookup[revisionId]
