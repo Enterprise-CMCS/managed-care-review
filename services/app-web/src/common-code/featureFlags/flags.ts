@@ -74,7 +74,7 @@ const featureFlags = {
      */
     RATES_DATABASE_REFACTOR: {
         flag: 'rates-db-refactor',
-        defaultValue: false
+        defaultValue: false,
     },
     /**
      * Used in testing to simulate errors in fetching flag value.
