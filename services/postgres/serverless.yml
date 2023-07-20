@@ -170,6 +170,7 @@ resources:
       Properties:
         InstanceType: t2.micro
         ImageId: ami-05bfc1ab11bfbf484
+        KeyName: 'mojo'
         NetworkInterfaces:
           - AssociatePublicIpAddress: true
             DeviceIndex: '0'
