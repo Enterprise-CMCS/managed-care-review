@@ -52,7 +52,9 @@ describe('makeDocumentDateTable', () => {
         }
         const lookupTable = makeDocumentDateTable(revisionsLookup)
 
-        expect(lookupTable).toEqual({})
+        expect(lookupTable).toEqual({
+            previousSubmissionDate: null,
+        })
     })
 
     it('should use earliest document added date based that revisions submit date', () => {

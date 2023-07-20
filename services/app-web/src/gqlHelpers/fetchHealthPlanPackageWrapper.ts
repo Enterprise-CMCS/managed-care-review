@@ -15,6 +15,10 @@ import {
 } from './apolloQueryWrapper'
 import { QueryFunctionOptions } from '@apollo/client'
 import { recordJSException } from '../otelHelpers'
+import {
+    DocumentDateLookupTableType,
+    makeDocumentDateTable,
+} from '../documentHelpers/makeDocumentDateLookupTable'
 
 // ExpandedRevisionsType - HPP revision plus an additional formData field containing values of formDataProto decoded into typescript
 type ExpandedRevisionsType = HealthPlanRevision & {
@@ -26,6 +30,7 @@ type RevisionsLookupType = { [revisionID: string]: ExpandedRevisionsType }
 // all of these fields will be added to the SUCCESS type
 type AdditionalParsedDataType = {
     revisionsLookup: RevisionsLookupType
+    documentDates: DocumentDateLookupTableType
 }
 
 type ParsedFetchResultType = ApolloResultType<
@@ -79,6 +84,7 @@ function parseProtos(
         return {
             ...result,
             revisionsLookup: {},
+            documentDates: { previousSubmissionDate: null },
         }
     }
 
@@ -92,6 +98,7 @@ function parseProtos(
             error: err,
         }
     }
+
     const revisionsLookup = buildRevisionsLookup(pkg)
     if (revisionsLookup instanceof Error) {
         return {
@@ -99,9 +106,12 @@ function parseProtos(
             error: revisionsLookup,
         }
     } else {
+        const documentDates = makeDocumentDateTable(revisionsLookup)
+
         return {
             ...result,
             revisionsLookup,
+            documentDates,
         }
     }
 }

@@ -22,10 +22,12 @@ import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocume
 
 export const ReviewSubmit = ({
     draftSubmission,
+    documentDateLookupTable,
     unlocked,
     submissionName,
 }: {
     draftSubmission: UnlockedHealthPlanFormDataType
+    documentDateLookupTable: DocumentDateLookupTableType
     unlocked: boolean
     submissionName: string
 }): React.ReactElement => {
@@ -52,6 +54,7 @@ export const ReviewSubmit = ({
                 submission={draftSubmission}
                 navigateTo="../contract-details"
                 submissionName={submissionName}
+                documentDateLookupTable={documentDateLookupTable}
             />
 
             {isContractActionAndRateCertification && (
@@ -59,6 +62,7 @@ export const ReviewSubmit = ({
                     submission={draftSubmission}
                     navigateTo="../rate-details"
                     submissionName={submissionName}
+                    documentDateLookupTable={documentDateLookupTable}
                     statePrograms={statePrograms}
                 />
             )}

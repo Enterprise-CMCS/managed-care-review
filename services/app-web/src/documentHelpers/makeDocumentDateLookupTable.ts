@@ -8,7 +8,7 @@ import { getDocumentKey } from './getDocumentKey'
 // DocumentDateLookupTableType -  { document key string : date string for "date added" }
 // see logic in getDocumentKey for how document key string is calculated
 type DocumentDateLookupTableType = {
-    previousSubmissionDate: string | null,
+    previousSubmissionDate: string | null
     [key: string]: string | null
 }
 
@@ -25,14 +25,17 @@ const getDateAdded = (
 function makeDocumentDateTable(
     revisionsLookup: RevisionsLookupType
 ): DocumentDateLookupTableType {
-    const lookupTable: DocumentDateLookupTableType = { previousSubmissionDate: null}
+    const lookupTable: DocumentDateLookupTableType = {
+        previousSubmissionDate: null,
+    }
     Object.keys(revisionsLookup).forEach(
         (revisionId: string, index: number) => {
             const revision = revisionsLookup[revisionId]
             if (index === 1) {
                 // second most recent revision
                 const previousSubmission = getDateAdded(revision) // used in UploadedDocumentsTable to determine if we should show NEW tag
-                if (previousSubmission) lookupTable['previousSubmissionDate'] = previousSubmission
+                if (previousSubmission)
+                    lookupTable['previousSubmissionDate'] = previousSubmission
             }
 
             const allDocuments = getAllDocuments(revision.formData)
@@ -43,7 +46,6 @@ function makeDocumentDateTable(
             })
         }
     )
-
     return lookupTable
 }
 

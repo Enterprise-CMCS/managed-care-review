@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from '@trussworks/react-uswds'
-import { NavLink, useOutletContext } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
 import styles from './UploadedDocumentsTable.module.scss'
@@ -8,18 +8,24 @@ import { usePreviousSubmission } from '../../../hooks'
 import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { DocumentTag } from './DocumentTag'
 import { useDocument } from '../../../hooks/useDocument'
-import { SubmissionOutletContextType } from '../../../pages/SubmissionOutlet/SubmissionOutlet'
+import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
+import { getDocumentKey } from '../../../documentHelpers'
+
 export type UploadedDocumentsTableProps = {
     documents: SubmissionDocument[]
     caption: string | null
     packagesWithSharedRateCerts?: SharedRateCertDisplay[]
+    documentDateLookupTable: DocumentDateLookupTableType
     isSupportingDocuments?: boolean
     documentCategory?: string // if this prop is not included, do not show category column
     isEditing?: boolean
     isCMSUser?: boolean
 }
 // TODO - get the api to return documents in this state rather than frontend generating on demand
-type DocumentWithS3Data = { url: string | null, s3Key: string | null } & SubmissionDocument
+type DocumentWithS3Data = {
+    url: string | null
+    s3Key: string | null
+} & SubmissionDocument
 
 const isBothContractAndRateSupporting = (doc: SubmissionDocument) =>
     doc.documentCategories.includes('CONTRACT_RELATED') &&
@@ -68,15 +74,14 @@ export const UploadedDocumentsTable = ({
     documentCategory,
     packagesWithSharedRateCerts,
     isSupportingDocuments = false,
+    documentDateLookupTable,
     isEditing = false,
     isCMSUser,
 }: UploadedDocumentsTableProps): React.ReactElement => {
-    const { documentDatesLookup } =
-        useOutletContext<SubmissionOutletContextType>()
     const initialDocState = documents.map((doc) => ({
         ...doc,
         url: null,
-        s3Key: null
+        s3Key: null,
     }))
     const { getDocumentsWithS3KeyAndUrl } = useDocument()
     const [refreshedDocs, setRefreshedDocs] =
@@ -87,33 +92,27 @@ export const UploadedDocumentsTable = ({
     )
 
     // this is util needed to guard against passing in null or undefined to dayjs  - we  would get back today's date
-    const canDisplayDateAddedForDocument = (doc: DocumentWithS3Data) =>{
-        console.log(doc, doc.s3Key, documentDatesLookup[
-            doc.s3Key!
-        ])
-    return doc.s3Key && documentDatesLookup[
-        doc.s3Key
-    ]
-}
+    const canDisplayDateAddedForDocument = (doc: DocumentWithS3Data) => {
+        const documentKey = getDocumentKey(doc)
+        return documentKey && documentDateLookupTable[documentKey]
+    }
 
     const shouldHaveNewTag = (doc: DocumentWithS3Data) => {
         if (!isCMSUser) {
             return false // design requirement, don't show new tag to state users  on review submit
         }
 
-        if (!documentDatesLookup || !doc || !doc.s3Key) {
+        if (!documentDateLookupTable || !doc || !doc.s3Key) {
             return false // this is a document with bad s3 data
         }
-        const documentDate = documentDatesLookup?.[doc.s3Key]
-        const previousSubmissionDate = documentDatesLookup.previousSubmissionDate
+        const documentDate = documentDateLookupTable?.[doc.s3Key]
+        const previousSubmissionDate =
+            documentDateLookupTable.previousSubmissionDate
 
         if (!documentDate || !previousSubmissionDate) {
             return false // this document is on an initial submission or not submitted yet
         }
-        return (
-            documentDate >
-            previousSubmissionDate
-        )
+        return documentDate > previousSubmissionDate
     }
 
     const hasSharedRateCert =
@@ -144,22 +143,19 @@ export const UploadedDocumentsTable = ({
     )
 
     useEffect(() => {
-        console.log(' in effect ')
         const refreshDocuments = async () => {
-            const newDocuments = await getDocumentsWithS3KeyAndUrl(
+            const newDocuments = (await getDocumentsWithS3KeyAndUrl(
                 documents,
                 'HEALTH_PLAN_DOCS'
-            ) as DocumentWithS3Data[]
-
-            console.log('new documents', newDocuments)
+            )) as DocumentWithS3Data[]
             if (newDocuments.length) {
-                console.log(newDocuments)
                 setRefreshedDocs(newDocuments)
             }
         }
 
         void refreshDocuments()
     }, [documents, getDocumentsWithS3KeyAndUrl])
+
     // Empty State
     if (refreshedDocs.length === 0) {
         return (
@@ -213,7 +209,7 @@ export const UploadedDocumentsTable = ({
                                         target="_blank"
                                     >
                                         {isSupportingDocuments &&
-                                            isBothContractAndRateSupporting(doc)
+                                        isBothContractAndRateSupporting(doc)
                                             ? `*${doc.name}`
                                             : doc.name}
                                     </Link>
@@ -227,27 +223,28 @@ export const UploadedDocumentsTable = ({
                                 </td>
                             )}
                             <td>
-                                {canDisplayDateAddedForDocument(doc) && !isEditing
+                                {canDisplayDateAddedForDocument(doc) &&
+                                !isEditing
                                     ? dayjs(
-                                        documentDatesLookup[
-                                        // can disable non-null here because we check in canDisplayDateAddedForDocument
-                                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                                        doc.s3Key!
-                                        ]
-                                    ).format('M/D/YY')
+                                          documentDateLookupTable[
+                                              // can disable non-null here because we check in canDisplayDateAddedForDocument
+                                              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                                              doc.s3Key!
+                                          ]
+                                      ).format('M/D/YY')
                                     : ''}
                             </td>
                             {documentCategory && <td>{documentCategory}</td>}
                             {showSharedInfo
                                 ? packagesWithSharedRateCerts && (
-                                    <td>
-                                        {linkedPackagesList({
-                                            unlinkDrafts: Boolean(isCMSUser),
-                                            packages:
-                                                packagesWithSharedRateCerts,
-                                        })}
-                                    </td>
-                                )
+                                      <td>
+                                          {linkedPackagesList({
+                                              unlinkDrafts: Boolean(isCMSUser),
+                                              packages:
+                                                  packagesWithSharedRateCerts,
+                                          })}
+                                      </td>
+                                  )
                                 : null}
                         </tr>
                     ))}

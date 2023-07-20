@@ -45,7 +45,7 @@ export const QATable = ({
     round: number
     user: User
 }) => {
-    const { getDocumentsUrl } = useDocument()
+    const { getDocumentsWithS3KeyAndUrl } = useDocument()
     const tableDocuments = [
         ...question.documents.map((doc) => ({
             ...doc,
@@ -84,7 +84,7 @@ export const QATable = ({
 
     useDeepCompareEffect(() => {
         const refreshDocuments = async () => {
-            const newDocuments = await getDocumentsUrl(
+            const newDocuments = await getDocumentsWithS3KeyAndUrl(
                 tableDocuments,
                 'QUESTION_ANSWER_DOCS'
             )
@@ -94,7 +94,7 @@ export const QATable = ({
         }
 
         void refreshDocuments()
-    }, [tableDocuments, getDocumentsUrl, setRefreshedDocs])
+    }, [tableDocuments, getDocumentsWithS3KeyAndUrl, setRefreshedDocs])
 
     return (
         <>

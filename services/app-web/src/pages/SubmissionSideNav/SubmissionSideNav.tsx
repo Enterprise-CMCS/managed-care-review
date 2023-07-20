@@ -28,7 +28,10 @@ import {
 } from '../../common-code/healthPlanFormDataType'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
-import { DocumentDateLookupTableType, makeDocumentDateTable } from '../../documentHelpers/makeDocumentDateLookupTable'
+import {
+    DocumentDateLookupTableType,
+    makeDocumentDateTable,
+} from '../../documentHelpers/makeDocumentDateLookupTable'
 
 export type SideNavOutletContextType = {
     pkg: HealthPlanPackage

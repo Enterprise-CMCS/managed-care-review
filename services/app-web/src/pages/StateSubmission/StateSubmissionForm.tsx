@@ -318,6 +318,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         element={
                             <ReviewSubmit
                                 draftSubmission={formDataFromLatestRevision}
+                                documentDateLookupTable={documentDates}
                                 unlocked={!!unlockedInfo}
                                 submissionName={computedSubmissionName}
                             />

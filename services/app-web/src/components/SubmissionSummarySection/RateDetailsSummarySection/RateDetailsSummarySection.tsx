@@ -23,8 +23,7 @@ import { DataDetailContactField } from '../../DataDetail/DataDetailContactField/
 import { v4 as uuidv4 } from 'uuid'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
-import { SideNavOutletContextType } from '../../../pages/SubmissionSideNav/SubmissionSideNav'
-import { useOutletContext } from 'react-router-dom'
+import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 
 // Used for refreshed packages names keyed by their package id
 // package name includes (Draft) for draft packages.
@@ -39,6 +38,7 @@ type PackageNamesLookupType = {
 export type RateDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
     navigateTo?: string
+    documentDateLookupTable: DocumentDateLookupTableType
     isCMSUser?: boolean
     submissionName: string
     statePrograms: Program[]
@@ -47,6 +47,7 @@ export type RateDetailsSummarySectionProps = {
 export const RateDetailsSummarySection = ({
     submission,
     navigateTo,
+    documentDateLookupTable,
     isCMSUser,
     submissionName,
     statePrograms,
@@ -57,8 +58,6 @@ export const RateDetailsSummarySection = ({
         featureFlags.SUPPORTING_DOCS_BY_RATE.flag,
         featureFlags.SUPPORTING_DOCS_BY_RATE.defaultValue
     )
-    const { documentDates } =
-    useOutletContext<SideNavOutletContextType>()
 
     const [packageNamesLookup, setPackageNamesLookup] =
         React.useState<PackageNamesLookupType | null>(null)
@@ -340,7 +339,7 @@ export const RateDetailsSummarySection = ({
                                             rateInfo
                                         )}
                                         documentDateLookupTable={
-                                            documentDates
+                                            documentDateLookupTable
                                         }
                                         isCMSUser={isCMSUser}
                                         caption="Rate certification"
@@ -356,7 +355,7 @@ export const RateDetailsSummarySection = ({
                                             rateInfo
                                         )}
                                         documentDateLookupTable={
-                                            documentDates
+                                            documentDateLookupTable
                                         }
                                         isCMSUser={isCMSUser}
                                         caption="Rate supporting documents"
@@ -378,7 +377,7 @@ export const RateDetailsSummarySection = ({
                 !supportingDocsByRate && (
                     <UploadedDocumentsTable
                         documents={submissionLevelRateSupportingDocuments}
-                        documentDateLookupTable={documentDates}
+                        documentDateLookupTable={documentDateLookupTable}
                         isCMSUser={isCMSUser}
                         caption="Rate supporting documents"
                         documentCategory="Rate-supporting"

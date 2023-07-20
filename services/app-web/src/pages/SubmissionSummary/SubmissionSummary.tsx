@@ -65,7 +65,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         featureFlags.CMS_QUESTIONS.defaultValue
     )
 
-    const { pkg, currentRevision, packageData, user} =
+    const { pkg, currentRevision, packageData, user, documentDates } =
         useOutletContext<SideNavOutletContextType>()
 
     const isCMSUser = user?.role === 'CMS_USER'
@@ -160,6 +160,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     initiallySubmittedAt={pkg.initiallySubmittedAt}
                 />
                 <ContractDetailsSummarySection
+                    documentDateLookupTable={documentDates}
                     submission={packageData}
                     isCMSUser={isCMSUser}
                     submissionName={packageName(packageData, statePrograms)}
@@ -167,6 +168,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 {isContractActionAndRateCertification && (
                     <RateDetailsSummarySection
+                        documentDateLookupTable={documentDates}
                         submission={packageData}
                         submissionName={packageName(packageData, statePrograms)}
                         isCMSUser={isCMSUser}

@@ -29,12 +29,12 @@ import {
     HealthPlanFormDataType,
     federalAuthorityKeysForCHIP,
 } from '../../../common-code/healthPlanFormDataType'
-import { useOutletContext } from 'react-router-dom'
-import { SideNavOutletContextType } from '../../../pages/SubmissionSideNav/SubmissionSideNav'
+import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
     navigateTo?: string
+    documentDateLookupTable: DocumentDateLookupTableType
     isCMSUser?: boolean
     submissionName: string
 }
@@ -42,6 +42,7 @@ export type ContractDetailsSummarySectionProps = {
 export const ContractDetailsSummarySection = ({
     submission,
     navigateTo, // this is the edit link for the section. When this prop exists, summary section is loaded in edit mode
+    documentDateLookupTable,
     isCMSUser,
     submissionName,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
@@ -62,8 +63,7 @@ export const ContractDetailsSummarySection = ({
     const [modifiedProvisions, unmodifiedProvisions] =
         sortModifiedProvisions(submission)
     const provisionsAreInvalid = isMissingProvisions(submission) && isEditing
-    const { documentDates } =
-    useOutletContext<SideNavOutletContextType>()
+
     useEffect(() => {
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
@@ -168,7 +168,11 @@ export const ContractDetailsSummarySection = ({
                     <DoubleColumnGrid>
                         <DataDetail
                             id="modifiedProvisions"
-                            label={isBaseContract(submission)? "This contract action includes provisions related to the following" : "This contract action includes new or modified provisions related to the following"}
+                            label={
+                                isBaseContract(submission)
+                                    ? 'This contract action includes provisions related to the following'
+                                    : 'This contract action includes new or modified provisions related to the following'
+                            }
                             explainMissingData={
                                 provisionsAreInvalid && !isSubmitted(submission)
                             }
@@ -176,7 +180,7 @@ export const ContractDetailsSummarySection = ({
                             {provisionsAreInvalid ? null : (
                                 <DataDetailCheckboxList
                                     list={modifiedProvisions}
-                                    dict={getProvisionDictionary(submission) }
+                                    dict={getProvisionDictionary(submission)}
                                     displayEmptyList
                                 />
                             )}
@@ -184,7 +188,11 @@ export const ContractDetailsSummarySection = ({
 
                         <DataDetail
                             id="unmodifiedProvisions"
-                            label={isBaseContract(submission)? "This contract action does NOT include provisions related to the following": "This contract action does NOT include new or modified provisions related to the following"}
+                            label={
+                                isBaseContract(submission)
+                                    ? 'This contract action does NOT include provisions related to the following'
+                                    : 'This contract action does NOT include new or modified provisions related to the following'
+                            }
                             explainMissingData={
                                 provisionsAreInvalid && !isSubmitted(submission)
                             }
@@ -202,14 +210,14 @@ export const ContractDetailsSummarySection = ({
             </dl>
             <UploadedDocumentsTable
                 documents={submission.contractDocuments}
-                documentDateLookupTable={documentDates}
+                documentDateLookupTable={documentDateLookupTable}
                 isCMSUser={isCMSUser}
                 caption="Contract"
                 documentCategory="Contract"
             />
             <UploadedDocumentsTable
                 documents={contractSupportingDocuments}
-                documentDateLookupTable={documentDates}
+                documentDateLookupTable={documentDateLookupTable}
                 isCMSUser={isCMSUser}
                 caption="Contract supporting documents"
                 documentCategory="Contract-supporting"

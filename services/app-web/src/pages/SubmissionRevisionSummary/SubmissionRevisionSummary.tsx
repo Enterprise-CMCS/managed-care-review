@@ -20,7 +20,6 @@ import { recordJSException } from '../../otelHelpers/tracingHelper'
 import { useFetchHealthPlanPackageWrapper } from '../../gqlHelpers'
 import { ApolloError } from '@apollo/client'
 import { handleApolloError } from '../../gqlHelpers/apolloErrors'
-import { makeDocumentDateTable } from '../../documentHelpers/makeDocumentDateLookupTable'
 
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
@@ -61,7 +60,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         return <GenericErrorPage /> // api failure or protobuf decode failure
     }
 
-    const { data, revisionsLookup } = fetchResult
+    const { data, revisionsLookup, documentDates } = fetchResult
     const pkg = data.fetchHealthPlanPackage.pkg
 
     // fetchHPP returns null if no package is found with the given ID
@@ -79,7 +78,6 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         return <Error404 />
     }
     const packageData = revisionsLookup[revision.id].formData
-    const documentDates = makeDocumentDateTable(revisionsLookup)
 
     const statePrograms = pkg.state.programs
     const name = packageName(packageData, statePrograms)
@@ -121,13 +119,14 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
 
                 <ContractDetailsSummarySection
                     submission={packageData}
+                    documentDateLookupTable={documentDates}
                     submissionName={packageName(packageData, statePrograms)}
                 />
 
                 {isContractActionAndRateCertification && (
                     <RateDetailsSummarySection
                         submission={packageData}
-
+                        documentDateLookupTable={documentDates}
                         submissionName={packageName(packageData, statePrograms)}
                         statePrograms={statePrograms}
                     />
