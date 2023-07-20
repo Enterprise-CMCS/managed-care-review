@@ -5,6 +5,8 @@ import {
     fetchCurrentUserMock,
     mockValidCMSUser,
 } from '../../../testHelpers/apolloMocks'
+import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
+import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
 
 describe('UploadedDocumentsTable', () => {
     const emptyDocumentsTable = () => {
@@ -153,7 +155,7 @@ describe('UploadedDocumentsTable', () => {
         })
     })
     it('renders date added when supplied with a date lookup table', async () => {
-        const testDocuments = [
+        const testDocuments: SubmissionDocument[] = [
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
@@ -173,7 +175,7 @@ describe('UploadedDocumentsTable', () => {
                 ],
             },
         ]
-        const dateLookupTable = {
+        const dateLookupTable: DocumentDateLookupTableType = {
             's3://foo/bar/test-1':
                 'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
             's3://foo/bar/test-2':
@@ -213,7 +215,7 @@ describe('UploadedDocumentsTable', () => {
         })
     })
     it('shows the NEW tag when a document is submitted after the last submission', async () => {
-        const testDocuments = [
+        const testDocuments: SubmissionDocument[] = [
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
@@ -233,7 +235,7 @@ describe('UploadedDocumentsTable', () => {
                 ],
             },
         ]
-        const dateLookupTable = {
+        const dateLookupTable: DocumentDateLookupTableType = {
             's3://foo/bar/test-1':
                 'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
             's3://foo/bar/test-2':

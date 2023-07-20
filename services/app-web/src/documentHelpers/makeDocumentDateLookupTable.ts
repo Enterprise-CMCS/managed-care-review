@@ -5,8 +5,8 @@ import {
 import { getAllDocuments } from './getAllDocuments'
 import { getDocumentKey } from './getDocumentKey'
 
-// DocumentDateLookupTableType -  { document key string : date string for "date added" }
-// see logic in getDocumentKey for how document key string is calculated
+// DocumentDateLookupTableType -  { document lookup key string : date string for "date added" }
+// see logic in getDocumentKey for how document lookup key string is calculated. This can be simplified once we have doc.sha everywhere
 type DocumentDateLookupTableType = {
     previousSubmissionDate: string | null
     [key: string]: string | null

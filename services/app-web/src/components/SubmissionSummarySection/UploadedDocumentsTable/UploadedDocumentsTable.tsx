@@ -93,11 +93,12 @@ export const UploadedDocumentsTable = ({
 
     // this is util needed to guard against passing in null or undefined to dayjs  - we  would get back today's date
     const canDisplayDateAddedForDocument = (doc: DocumentWithS3Data) => {
-        const documentKey = getDocumentKey(doc)
-        return documentKey && documentDateLookupTable[documentKey]
+        const documentLookupKey = getDocumentKey(doc)
+        return documentLookupKey && documentDateLookupTable[documentLookupKey]
     }
 
     const shouldHaveNewTag = (doc: DocumentWithS3Data) => {
+        const documentLookupKey = getDocumentKey(doc)
         if (!isCMSUser) {
             return false // design requirement, don't show new tag to state users  on review submit
         }
@@ -105,7 +106,7 @@ export const UploadedDocumentsTable = ({
         if (!documentDateLookupTable || !doc || !doc.s3Key) {
             return false // this is a document with bad s3 data
         }
-        const documentDate = documentDateLookupTable?.[doc.s3Key]
+        const documentDate = documentDateLookupTable?.[documentLookupKey]
         const previousSubmissionDate =
             documentDateLookupTable.previousSubmissionDate
 
@@ -227,9 +228,7 @@ export const UploadedDocumentsTable = ({
                                 !isEditing
                                     ? dayjs(
                                           documentDateLookupTable[
-                                              // can disable non-null here because we check in canDisplayDateAddedForDocument
-                                              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                                              doc.s3Key!
+                                              getDocumentKey(doc)
                                           ]
                                       ).format('M/D/YY')
                                     : ''}
