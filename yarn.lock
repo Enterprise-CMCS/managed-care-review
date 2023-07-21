@@ -18850,9 +18850,9 @@ cypress-pipe@^2.0.0:
   integrity sha512-KW9s+bz4tFLucH3rBGfjW+Q12n7S4QpUSSyxiGrgPOfoHlbYWzAGB3H26MO0VTojqf9NVvfd5Kt0MH5XMgbfyg==
 
 cypress@^12.16.0:
-  version "12.17.1"
-  resolved "https://registry.yarnpkg.com/cypress/-/cypress-12.17.1.tgz#777fdcceec4ecd642fc90795f5994853b6ea03f8"
-  integrity sha512-eKfBgO6t8waEyhegL4gxD7tcI6uTCGttu+ZU7y9Hq8BlpMztd7iLeIF4AJFAnbZH1xjX+wwgg4cRKFNSvv3VWQ==
+  version "12.17.2"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-12.17.2.tgz#040ac55de1e811f6e037d231a2869d5ab8c29c85"
+  integrity sha512-hxWAaWbqQBzzMuadSGSuQg5PDvIGOovm6xm0hIfpCVcORsCAj/gF2p0EvfnJ4f+jK2PCiDgP6D2eeE9/FK4Mjg==
   dependencies:
     "@cypress/request" "^2.88.11"
     "@cypress/xvfb" "^1.2.4"
@@ -24760,10 +24760,10 @@ launchdarkly-js-sdk-common@5.0.3:
     fast-deep-equal "^2.0.1"
     uuid "^8.0.0"
 
-launchdarkly-node-server-sdk@7.0.1:
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/launchdarkly-node-server-sdk/-/launchdarkly-node-server-sdk-7.0.1.tgz#4476a55fa4eb416ea9c3c93a4643af28b28b0efd"
-  integrity sha512-vliVBgoO3eZVBXl7LWE3hsB+8WEeyYS2Hf0BzgNx5yYrlFDHSAB2Ug+GEawgQEd9kxWESc3n5WyCn1sdMhG1xA==
+launchdarkly-node-server-sdk@7.0.2:
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/launchdarkly-node-server-sdk/-/launchdarkly-node-server-sdk-7.0.2.tgz#589df28d9e78fdac46a377b624f44ff06ca3b6d1"
+  integrity sha512-br1rr6CmNBcjVt43xSvk1KD1Ak2jL3NNeciBrPb1mGeaACwVogival//1nuAjjTBt6BB2JSN0bftGNGKAJvc4g==
   dependencies:
     async "^3.2.4"
     launchdarkly-eventsource "1.4.4"
