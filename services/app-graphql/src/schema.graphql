@@ -240,7 +240,7 @@ type Mutation {
 
 input CreateHealthPlanPackageInput {
     "Population that the contract covers"
-    populationCovered: PopulationCoveredType
+    populationCovered: PopulationCoveredType!
     "An array of managed care program IDs this package covers"
     programIDs: [ID!]!
     "Whether or not this contract is risk based"
