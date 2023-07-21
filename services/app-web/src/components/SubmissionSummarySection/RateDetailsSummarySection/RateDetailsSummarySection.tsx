@@ -341,9 +341,9 @@ export const RateDetailsSummarySection = ({
                                         documentDateLookupTable={
                                             documentDateLookupTable
                                         }
-                                        isCMSUser={isCMSUser}
                                         caption="Rate certification"
                                         documentCategory="Rate certification"
+                                        isEditing={isEditing}
                                     />
                                 ) : (
                                     <span className="srOnly">'LOADING...'</span>
@@ -357,7 +357,6 @@ export const RateDetailsSummarySection = ({
                                         documentDateLookupTable={
                                             documentDateLookupTable
                                         }
-                                        isCMSUser={isCMSUser}
                                         caption="Rate supporting documents"
                                         isSupportingDocuments
                                         documentCategory="Rate-supporting"
@@ -378,7 +377,6 @@ export const RateDetailsSummarySection = ({
                     <UploadedDocumentsTable
                         documents={submissionLevelRateSupportingDocuments}
                         documentDateLookupTable={documentDateLookupTable}
-                        isCMSUser={isCMSUser}
                         caption="Rate supporting documents"
                         documentCategory="Rate-supporting"
                         isSupportingDocuments

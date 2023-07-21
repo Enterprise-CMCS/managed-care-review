@@ -6,7 +6,6 @@ import { getAllDocuments } from './getAllDocuments'
 import { getDocumentKey } from './getDocumentKey'
 
 // DocumentDateLookupTableType -  { document lookup key string : date string for "date added" }
-// see logic in getDocumentKey for how document lookup key string is calculated. This can be simplified once we have doc.sha everywhere
 type DocumentDateLookupTableType = {
     previousSubmissionDate: string | null
     [key: string]: string | null
@@ -19,9 +18,10 @@ const getDateAdded = (
 ): string | undefined => {
     return revisionData.submitInfo?.updatedAt
 }
-// makeDateTable - generates document S3 keys and their "date added"
+// makeDateTable - generates unique document keys and their "date added"
 // used for date added column on UploadedDocumentsTable displayed in SubmissionSummary and ReviewSubmit
-// documents without a date added all together are excluded
+// documents without a submitted date are excluded from list
+// logic for unique document keys comes from getDocumentKey -  This can be simplified once we have doc.sha everywhere
 function makeDocumentDateTable(
     revisionsLookup: RevisionsLookupType
 ): DocumentDateLookupTableType {

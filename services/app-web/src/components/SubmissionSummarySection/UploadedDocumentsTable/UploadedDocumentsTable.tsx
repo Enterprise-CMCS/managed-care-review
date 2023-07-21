@@ -10,6 +10,7 @@ import { DocumentTag } from './DocumentTag'
 import { useDocument } from '../../../hooks/useDocument'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 import { getDocumentKey } from '../../../documentHelpers'
+import { useAuth } from '../../../contexts/AuthContext'
 
 export type UploadedDocumentsTableProps = {
     documents: SubmissionDocument[]
@@ -18,54 +19,7 @@ export type UploadedDocumentsTableProps = {
     documentDateLookupTable: DocumentDateLookupTableType
     isSupportingDocuments?: boolean
     documentCategory?: string // if this prop is not included, do not show category column
-    isEditing?: boolean
-    isCMSUser?: boolean
-}
-// TODO - get the api to return documents in this state rather than frontend generating on demand
-type DocumentWithS3Data = {
-    url: string | null
-    s3Key: string | null
-} & SubmissionDocument
-
-const isBothContractAndRateSupporting = (doc: SubmissionDocument) =>
-    doc.documentCategories.includes('CONTRACT_RELATED') &&
-    doc.documentCategories.includes('RATES_RELATED')
-
-type LinkedPackagesListProps = {
-    unlinkDrafts: boolean
-    packages: SharedRateCertDisplay[]
-}
-
-const linkedPackagesList = ({
-    unlinkDrafts,
-    packages,
-}: LinkedPackagesListProps): React.ReactElement[] => {
-    return packages.map((item, index) => {
-        const maybeComma = index > 0 ? ', ' : ''
-        const linkedPackageIsDraft =
-            item.packageName && item.packageName.includes('(Draft)')
-
-        if (linkedPackageIsDraft && unlinkDrafts) {
-            return (
-                <span key={item.packageId}>
-                    {maybeComma}
-                    <span>{item.packageName}</span>
-                </span>
-            )
-        } else {
-            return (
-                <span key={item.packageId}>
-                    {maybeComma}
-                    <Link
-                        asCustom={NavLink}
-                        to={`/submissions/${item.packageId}`}
-                    >
-                        {item.packageName}
-                    </Link>
-                </span>
-            )
-        }
-    })
+    isEditing?: boolean // by default assume we are on summary page, if true, assume review and submit page
 }
 
 export const UploadedDocumentsTable = ({
@@ -76,13 +30,14 @@ export const UploadedDocumentsTable = ({
     isSupportingDocuments = false,
     documentDateLookupTable,
     isEditing = false,
-    isCMSUser,
 }: UploadedDocumentsTableProps): React.ReactElement => {
     const initialDocState = documents.map((doc) => ({
         ...doc,
         url: null,
         s3Key: null,
     }))
+    const { loggedInUser } = useAuth()
+    const isCMSUser = loggedInUser?.__typename === 'CMSUser'
     const { getDocumentsWithS3KeyAndUrl } = useDocument()
     const [refreshedDocs, setRefreshedDocs] =
         useState<DocumentWithS3Data[]>(initialDocState)
@@ -90,8 +45,8 @@ export const UploadedDocumentsTable = ({
     const shouldShowAsteriskExplainer = refreshedDocs.some((doc) =>
         isBothContractAndRateSupporting(doc)
     )
-
-    // this is util needed to guard against passing in null or undefined to dayjs  - we  would get back today's date
+    // canDisplayDateAddedForDocument -  guards against passing in null or undefined to dayjs
+    // dates will be undefined in lookup table we are dealing with a new initial submission
     const canDisplayDateAddedForDocument = (doc: DocumentWithS3Data) => {
         const documentLookupKey = getDocumentKey(doc)
         return documentLookupKey && documentDateLookupTable[documentLookupKey]
@@ -224,14 +179,15 @@ export const UploadedDocumentsTable = ({
                                 </td>
                             )}
                             <td>
-                                {canDisplayDateAddedForDocument(doc) &&
-                                !isEditing
-                                    ? dayjs(
-                                          documentDateLookupTable[
-                                              getDocumentKey(doc)
-                                          ]
-                                      ).format('M/D/YY')
-                                    : ''}
+                                {canDisplayDateAddedForDocument(doc) ? (
+                                    dayjs(
+                                        documentDateLookupTable[
+                                            getDocumentKey(doc)
+                                        ]
+                                    ).format('M/D/YY')
+                                ) : (
+                                    <span className="srOnly">N/A</span>
+                                )}
                             </td>
                             {documentCategory && <td>{documentCategory}</td>}
                             {showSharedInfo
@@ -256,4 +212,51 @@ export const UploadedDocumentsTable = ({
             )}
         </>
     )
+}
+
+// TODO - get the api to return documents in this state rather than frontend generating on demand
+type DocumentWithS3Data = {
+    url: string | null
+    s3Key: string | null
+} & SubmissionDocument
+
+const isBothContractAndRateSupporting = (doc: SubmissionDocument) =>
+    doc.documentCategories.includes('CONTRACT_RELATED') &&
+    doc.documentCategories.includes('RATES_RELATED')
+
+type LinkedPackagesListProps = {
+    unlinkDrafts: boolean
+    packages: SharedRateCertDisplay[]
+}
+
+const linkedPackagesList = ({
+    unlinkDrafts,
+    packages,
+}: LinkedPackagesListProps): React.ReactElement[] => {
+    return packages.map((item, index) => {
+        const maybeComma = index > 0 ? ', ' : ''
+        const linkedPackageIsDraft =
+            item.packageName && item.packageName.includes('(Draft)')
+
+        if (linkedPackageIsDraft && unlinkDrafts) {
+            return (
+                <span key={item.packageId}>
+                    {maybeComma}
+                    <span>{item.packageName}</span>
+                </span>
+            )
+        } else {
+            return (
+                <span key={item.packageId}>
+                    {maybeComma}
+                    <Link
+                        asCustom={NavLink}
+                        to={`/submissions/${item.packageId}`}
+                    >
+                        {item.packageName}
+                    </Link>
+                </span>
+            )
+        }
+    })
 }

@@ -211,14 +211,13 @@ export const ContractDetailsSummarySection = ({
             <UploadedDocumentsTable
                 documents={submission.contractDocuments}
                 documentDateLookupTable={documentDateLookupTable}
-                isCMSUser={isCMSUser}
                 caption="Contract"
                 documentCategory="Contract"
+                isEditing={isEditing}
             />
             <UploadedDocumentsTable
                 documents={contractSupportingDocuments}
                 documentDateLookupTable={documentDateLookupTable}
-                isCMSUser={isCMSUser}
                 caption="Contract supporting documents"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
