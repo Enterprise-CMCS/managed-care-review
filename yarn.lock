@@ -75,9 +75,9 @@
     "@apollo/query-graphs" "2.4.1"
 
 "@apollo/explorer@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@apollo/explorer/-/explorer-3.0.0.tgz#b569a309c3ccadf7d3eee9d88a4e8679bddcd13b"
-  integrity sha512-7euwlv4sXjed6Z/aGlkHchKjoRy+OuRT160r2Sl49/Nd4rH0wxuMceDY+KOAYPS7ZCJjhXmUDPub1diEyTLaFw==
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/@apollo/explorer/-/explorer-3.5.0.tgz#a63595f837744f6725ab80c666b8b5e801427954"
+  integrity sha512-c/QHXvxaEdi7k9ApcjkGmyO6GHwPxQxPFc2aN37i+lg0FqhMImO0fcLOKq4UuvESsRv144o9g8nzTV74G7CInA==
   dependencies:
     "@types/whatwg-mimetype" "^3.0.0"
     graphql-ws "^5.9.0"
@@ -8688,7 +8688,7 @@
     debug "4.2.0"
     find-yarn-workspace-root "^2.0.0"
 
-"@cypress/request@^2.88.10":
+"@cypress/request@^2.88.11":
   version "2.88.11"
   resolved "https://registry.yarnpkg.com/@cypress/request/-/request-2.88.11.tgz#5a4c7399bc2d7e7ed56e92ce5acb620c8b187047"
   integrity sha512-M83/wfQ1EkspjkE2lNWNV5ui2Cv7UCv1swW1DqljahbzLVWltcsexQh8jYtuS/vzFXP+HySntGM83ZXA9fn17w==
@@ -9146,13 +9146,13 @@
     tslib "~2.5.0"
 
 "@graphql-codegen/typescript-operations@^4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@graphql-codegen/typescript-operations/-/typescript-operations-4.0.0.tgz#cb803ae0dc4695b1fc052a81c207cdcd361e4696"
-  integrity sha512-4juN+rCeyXx97zHg5FF2s6u9lfgVHY2ee+5S+P3X+nr2X0m93yFKJhbbEYKYMdE0d/nPPl5mxUiUGb/vzrDCig==
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@graphql-codegen/typescript-operations/-/typescript-operations-4.0.1.tgz#930af3e2d2ae8ff06de696291be28fe7046a2fef"
+  integrity sha512-GpUWWdBVUec/Zqo23aFLBMrXYxN2irypHqDcKjN78JclDPdreasAEPcIpMfqf4MClvpmvDLy4ql+djVAwmkjbw==
   dependencies:
     "@graphql-codegen/plugin-helpers" "^5.0.0"
-    "@graphql-codegen/typescript" "^4.0.0"
-    "@graphql-codegen/visitor-plugin-common" "4.0.0"
+    "@graphql-codegen/typescript" "^4.0.1"
+    "@graphql-codegen/visitor-plugin-common" "4.0.1"
     auto-bind "~4.0.0"
     tslib "~2.5.0"
 
@@ -9190,14 +9190,14 @@
     auto-bind "~4.0.0"
     tslib "~2.5.0"
 
-"@graphql-codegen/typescript@^4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@graphql-codegen/typescript/-/typescript-4.0.0.tgz#8742f6d022564bbc7626a5a68cd90ca1841f5339"
-  integrity sha512-9Wv050+a4O/c3RRDbXKVnm0e45mhmb8XuW3ICsmmwPUVJ5oX8NOLYIMU8ie1/gNTTCfJNwOtZr5EwX2yhXYUfQ==
+"@graphql-codegen/typescript@^4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@graphql-codegen/typescript/-/typescript-4.0.1.tgz#7481d68f59bea802dd10e278dce73c8a1552b2a4"
+  integrity sha512-3YziQ21dCVdnHb+Us1uDb3pA6eG5Chjv0uTK+bt9dXeMlwYBU8MbtzvQTo4qvzWVC1AxSOKj0rgfNu1xCXqJyA==
   dependencies:
     "@graphql-codegen/plugin-helpers" "^5.0.0"
     "@graphql-codegen/schema-ast" "^4.0.0"
-    "@graphql-codegen/visitor-plugin-common" "4.0.0"
+    "@graphql-codegen/visitor-plugin-common" "4.0.1"
     auto-bind "~4.0.0"
     tslib "~2.5.0"
 
@@ -9249,10 +9249,10 @@
     parse-filepath "^1.0.2"
     tslib "~2.5.0"
 
-"@graphql-codegen/visitor-plugin-common@4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@graphql-codegen/visitor-plugin-common/-/visitor-plugin-common-4.0.0.tgz#b1db0138ea78b96a1f78b78ebce0443faee27fba"
-  integrity sha512-OFWr5tkrG4nCcE7AI9BSAwuA0VLP16uNCLssbmXpBa1rKR6b4mX+rJTQCoz47TFV5hii8yp8xaWfXVUcsNY39w==
+"@graphql-codegen/visitor-plugin-common@4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@graphql-codegen/visitor-plugin-common/-/visitor-plugin-common-4.0.1.tgz#64e293728b3c186f6767141e41fcdb310e50d367"
+  integrity sha512-Bi/1z0nHg4QMsAqAJhds+ForyLtk7A3HQOlkrZNm3xEkY7lcBzPtiOTLBtvziwopBsXUxqeSwVjOOFPLS5Yw1Q==
   dependencies:
     "@graphql-codegen/plugin-helpers" "^5.0.0"
     "@graphql-tools/optimize" "^2.0.0"
@@ -18850,11 +18850,11 @@ cypress-pipe@^2.0.0:
   integrity sha512-KW9s+bz4tFLucH3rBGfjW+Q12n7S4QpUSSyxiGrgPOfoHlbYWzAGB3H26MO0VTojqf9NVvfd5Kt0MH5XMgbfyg==
 
 cypress@^12.16.0:
-  version "12.17.0"
-  resolved "https://registry.yarnpkg.com/cypress/-/cypress-12.17.0.tgz#3a907a41c4afbb44be7b84e822e4914d734a6bb0"
-  integrity sha512-nq0ug8Zrjq/2khHU1PTNxg+3/n1oqtmAFCxwQhS6QzkQ4mR6RLitX+cGIOuIMfnEbDAtVub0hZh661FOA16JxA==
+  version "12.17.1"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-12.17.1.tgz#777fdcceec4ecd642fc90795f5994853b6ea03f8"
+  integrity sha512-eKfBgO6t8waEyhegL4gxD7tcI6uTCGttu+ZU7y9Hq8BlpMztd7iLeIF4AJFAnbZH1xjX+wwgg4cRKFNSvv3VWQ==
   dependencies:
-    "@cypress/request" "^2.88.10"
+    "@cypress/request" "^2.88.11"
     "@cypress/xvfb" "^1.2.4"
     "@types/node" "^14.14.31"
     "@types/sinonjs__fake-timers" "8.1.1"

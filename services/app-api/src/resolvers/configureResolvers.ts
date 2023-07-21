@@ -31,7 +31,7 @@ export function configureResolvers(
     store: Store,
     emailer: Emailer,
     emailParameterStore: EmailParameterStore,
-    _launchDarkly: LDService
+    launchDarkly: LDService
 ): Resolvers {
     const resolvers: Resolvers = {
         Date: GraphQLDate,
@@ -49,7 +49,10 @@ export function configureResolvers(
             ),
         },
         Mutation: {
-            createHealthPlanPackage: createHealthPlanPackageResolver(store),
+            createHealthPlanPackage: createHealthPlanPackageResolver(
+                store,
+                launchDarkly
+            ),
             updateHealthPlanFormData: updateHealthPlanFormDataResolver(store),
             submitHealthPlanPackage: submitHealthPlanPackageResolver(
                 store,

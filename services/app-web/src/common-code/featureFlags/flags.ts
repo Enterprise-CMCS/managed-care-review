@@ -63,6 +63,13 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
+     * Rates refactor database handlers live behind this flag. We will use this to switchover to the new database tables when we migrate.
+     */
+    RATES_DATABASE_REFACTOR: {
+        flag: 'rates-db-refactor',
+        defaultValue: false,
+    },
+    /**
      * Used in testing to simulate errors in fetching flag value.
      * This flag does not exist in LaunchDarkly dashboard so fetching this will return the defaultValue.
      */
