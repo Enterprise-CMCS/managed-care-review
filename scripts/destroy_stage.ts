@@ -117,7 +117,7 @@ async function getStacksFromStage(stageName: string): Promise<string[]> {
 
             stacksToDestroy.push(...types)
         } catch (err) {
-            console.error(`${stackName} errored: getStacksFromStage ${err}`)
+            console.error(`getStacksFromStage ${err}. Skipping.`)
         }
     }
     return stacksToDestroy
