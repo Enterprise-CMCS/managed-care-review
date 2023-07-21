@@ -7,6 +7,7 @@ plugins:
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   - serverless-iam-helper
+  - serverless-scriptable-plugin
 
 provider:
   name: aws
@@ -73,6 +74,10 @@ custom:
     other: 0.5
     val: 1
     prod: 1
+  scriptable:
+    hooks:
+      before:package:createDeploymentArtifacts: yarn build
+      before:deploy:finalize: node scripts/uploadScripts.js
 
 package:
   individually: true
@@ -155,9 +160,17 @@ resources:
         DBClusterIdentifier: !Ref PostgresAuroraV2
         AutoMinorVersionUpgrade: true
 
+    PostgresVMScriptsBucket:
+      Type: 'AWS::S3::Bucket'
+      Condition: IsDevValProd
+      Properties:
+        BucketName: !Sub ${self:service}-${sls:stage}-postgres-infra-scripts
+        AccessControl: Private
+
     PostgresVM:
       Type: 'AWS::EC2::Instance'
       Condition: IsDevValProd
+      DependsOn: PostgresVMScriptsBucket
       Metadata:
         AWS::CloudFormation::Init:
           config:
@@ -177,6 +190,15 @@ resources:
             GroupSet:
               - !Ref PostgresVmSg
             SubnetId: !Sub ${self:custom.publicSubnetA}
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-startup.sh /usr/local/bin/vm-startup.sh
+            aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-shutdown.sh /usr/local/bin/vm-shutdown.sh
+            aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/slack-notify.service /etc/systemd/system/notify-slack.service
+            chmod +x /usr/local/bin/vm-startup.sh
+            chmod +x /usr/local/bin/vm-shutdown.sh
+            chmod +x /etc/systemd/system/notify-slack.service
 
     PostgresVmSg:
       Type: 'AWS::EC2::SecurityGroup'
@@ -225,3 +247,5 @@ resources:
   Outputs:
     PostgresAuroraV2Arn:
       Value: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAuroraV2}'
+    PostgresVMScriptsBucket:
+      Value: !Ref PostgresVMScriptsBucket
