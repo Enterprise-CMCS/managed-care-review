@@ -18,7 +18,7 @@ const Template: Story<TextInputProps> = (args) => (
         initialValues={{ submissionDescription: '' }}
         validationSchema={schema}
         validateOnMount={true}
-        onSubmit={(e) => console.log('submitted')}
+        onSubmit={(e) => console.info('submitted')}
     >
         <FieldTextInput {...args} />
     </Formik>

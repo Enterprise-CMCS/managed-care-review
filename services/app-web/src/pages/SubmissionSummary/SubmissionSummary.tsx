@@ -28,10 +28,6 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
 import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
 
-export type DocumentDateLookupTable = {
-    [key: string]: string
-}
-
 function UnlockModalButton({
     disabled,
     modalRef,
@@ -164,17 +160,17 @@ export const SubmissionSummary = (): React.ReactElement => {
                     initiallySubmittedAt={pkg.initiallySubmittedAt}
                 />
                 <ContractDetailsSummarySection
-                    submission={packageData}
                     documentDateLookupTable={documentDates}
+                    submission={packageData}
                     isCMSUser={isCMSUser}
                     submissionName={packageName(packageData, statePrograms)}
                 />
 
                 {isContractActionAndRateCertification && (
                     <RateDetailsSummarySection
+                        documentDateLookupTable={documentDates}
                         submission={packageData}
                         submissionName={packageName(packageData, statePrograms)}
-                        documentDateLookupTable={documentDates}
                         isCMSUser={isCMSUser}
                         statePrograms={statePrograms}
                     />
