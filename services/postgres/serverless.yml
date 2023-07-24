@@ -183,6 +183,7 @@ resources:
       Properties:
         InstanceType: t2.micro
         ImageId: ami-05bfc1ab11bfbf484
+        IamInstanceProfile: !Ref PgVMIAMInstanceProfile
         KeyName: 'mojo'
         NetworkInterfaces:
           - AssociatePublicIpAddress: true
@@ -193,12 +194,39 @@ resources:
         UserData:
           Fn::Base64: !Sub |
             #!/bin/bash
+            sudo apt install awscli -y
             aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-startup.sh /usr/local/bin/vm-startup.sh
             aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-shutdown.sh /usr/local/bin/vm-shutdown.sh
             aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/slack-notify.service /etc/systemd/system/notify-slack.service
             chmod +x /usr/local/bin/vm-startup.sh
             chmod +x /usr/local/bin/vm-shutdown.sh
             chmod +x /etc/systemd/system/notify-slack.service
+
+    PgVMIAMRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: ec2.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: 's3Access'
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: 'Allow'
+                  Action:
+                    - 's3:GetObject'
+                  Resource: !GetAtt PostgresVMScriptsBucket.Arn
+
+    PgVMIAMInstanceProfile:
+      Type: AWS::IAM::InstanceProfile
+      Properties:
+        Roles:
+          - !Ref PgVMIAMRole
 
     PostgresVmSg:
       Type: 'AWS::EC2::SecurityGroup'
