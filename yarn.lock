@@ -10387,6 +10387,28 @@
   resolved "https://registry.yarnpkg.com/@kwsites/promise-deferred/-/promise-deferred-1.1.1.tgz#8ace5259254426ccef57f3175bc64ed7095ed919"
   integrity sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==
 
+"@launchdarkly/js-sdk-common@1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-1.0.2.tgz#8496cb007e88c7402a5d6aacf21dd75ac762de55"
+  integrity sha512-xNZqTHJ9rbmPPSabAwhizRQZU+JSFTAQvGKR0nam6qHeB3CG67n658EomItGycPmqwvv4BYML4wVXhVX3lt4Dg==
+
+"@launchdarkly/js-server-sdk-common@1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-1.0.6.tgz#d54a5ee6e05aa7f10e8cfde4234267ed93757e04"
+  integrity sha512-Rawmorlpq7F+nt+5VgSAZUATQr26oBKHHHqeMPk2ITRjcva9A/SEcNW3v8iCa1s79DDO2JQ8D4/sXXVcOcHWSQ==
+  dependencies:
+    "@launchdarkly/js-sdk-common" "1.0.2"
+    semver "7.4.0"
+
+"@launchdarkly/node-server-sdk@8.1.0":
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-8.1.0.tgz#7c58bc32f9b3b5578801370060f2ae77a3ed8ac1"
+  integrity sha512-gsT+vKJ1XwTzsmsfQ5TJ/UNc7WUKGFqNxWVEPnKiSsb/5igap8HiizmSzU/9vF2xrVnUSdt7xyQuIazq3+ITRA==
+  dependencies:
+    "@launchdarkly/js-server-sdk-common" "1.0.6"
+    https-proxy-agent "^5.0.1"
+    launchdarkly-eventsource "2.0.0"
+
 "@leichtgewicht/ip-codec@^2.0.1":
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz#b2ac626d6cb9c8718ab459166d4bb405b8ffa78b"
@@ -16335,7 +16357,7 @@ async-retry@^1.2.1, async-retry@^1.3.3:
   dependencies:
     retry "0.13.1"
 
-async@^3.2.0, async@^3.2.3, async@^3.2.4:
+async@^3.2.0, async@^3.2.3:
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/async/-/async-3.2.4.tgz#2d22e00f8cddeb5fde5dd33522b56d1cf569a81c"
   integrity sha512-iAB+JbDEGXhyIUavoDl9WP/Jj106Kz9DEn1DPgYw5ruDn0e3Wgi3sKFm55sASdGBNOQB8F59d9qQ7deqrHA8wQ==
@@ -17914,11 +17936,6 @@ clone-response@^1.0.2:
   integrity sha512-ROoL94jJH2dUVML2Y/5PEDNaSHgeOdSDicUyS7izcF63G6sTc/FTjLub4b8Il9S8S0beOfYt0TaA5qvFK+w0wA==
   dependencies:
     mimic-response "^1.0.0"
-
-clone@2.x:
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/clone/-/clone-2.1.2.tgz#1b7f4b9f591f1e8f83670401600345a02887435f"
-  integrity sha512-3Pe/CF1Nn94hyhIYpjtiLhdCoEoz0DqQ+988E9gmeEdQZlojxnOb74wctFyuwWQHzqyf9X7C7MG8juUpqBJT8w==
 
 clone@^1.0.2:
   version "1.0.4"
@@ -24738,10 +24755,10 @@ language-tags@^1.0.5:
   dependencies:
     language-subtag-registry "~0.3.2"
 
-launchdarkly-eventsource@1.4.4:
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/launchdarkly-eventsource/-/launchdarkly-eventsource-1.4.4.tgz#fa595af8602e487c61520787170376c6a1104459"
-  integrity sha512-GL+r2Y3WccJlhFyL2buNKel+9VaMnYpbE/FfCkOST5jSNSFodahlxtGyrE8o7R+Qhobyq0Ree4a7iafJDQi9VQ==
+launchdarkly-eventsource@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/launchdarkly-eventsource/-/launchdarkly-eventsource-2.0.0.tgz#2832e73fa8bc0c103a7f8c6dbc3b1b53d22f9acc"
+  integrity sha512-fxZ4IN46juAc3s8/geiutRPbI8cvUBz0Lcsayh3wfd97edYWLIsnaThw2esQ3zc6vgZ1v5IjTbdumNgoT3iRnw==
 
 launchdarkly-js-client-sdk@^3.1.3:
   version "3.1.3"
@@ -24759,19 +24776,6 @@ launchdarkly-js-sdk-common@5.0.3:
     base64-js "^1.3.0"
     fast-deep-equal "^2.0.1"
     uuid "^8.0.0"
-
-launchdarkly-node-server-sdk@7.0.2:
-  version "7.0.2"
-  resolved "https://registry.yarnpkg.com/launchdarkly-node-server-sdk/-/launchdarkly-node-server-sdk-7.0.2.tgz#589df28d9e78fdac46a377b624f44ff06ca3b6d1"
-  integrity sha512-br1rr6CmNBcjVt43xSvk1KD1Ak2jL3NNeciBrPb1mGeaACwVogival//1nuAjjTBt6BB2JSN0bftGNGKAJvc4g==
-  dependencies:
-    async "^3.2.4"
-    launchdarkly-eventsource "1.4.4"
-    lru-cache "^6.0.0"
-    node-cache "^5.1.0"
-    semver "^7.3.0"
-    tunnel "0.0.6"
-    uuid "^8.3.2"
 
 launchdarkly-react-client-sdk@^3.0.1:
   version "3.0.6"
@@ -26244,13 +26248,6 @@ node-addon-api@^3.2.1:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-3.2.1.tgz#81325e0a2117789c0128dab65e7e38f07ceba161"
   integrity sha512-mmcei9JghVNDYydghQmeDX8KoAm0FAiYyIcUt/N4nhyAipB17pllZQDOJD2fotxABnt4Mdz+dKTO7eftLg4d0A==
-
-node-cache@^5.1.0:
-  version "5.1.2"
-  resolved "https://registry.yarnpkg.com/node-cache/-/node-cache-5.1.2.tgz#f264dc2ccad0a780e76253a694e9fd0ed19c398d"
-  integrity sha512-t1QzWwnk4sjLWaQAS8CHgOJ+RAfmHpxFWmc36IWTiWHQfs0w5JDMBS1b1ZxQteo0vVVuWJvIUKHDkkeK7vIGCg==
-  dependencies:
-    clone "2.x"
 
 node-cleanup@^2.1.2:
   version "2.1.2"
@@ -30035,7 +30032,14 @@ semver@7.3.4:
   dependencies:
     lru-cache "^6.0.0"
 
-semver@7.x, semver@^7.0.0, semver@^7.1.1, semver@^7.3.0, semver@^7.3.2, semver@^7.3.4, semver@^7.3.5, semver@^7.3.7, semver@^7.3.8, semver@^7.5.1, semver@^7.5.3:
+semver@7.4.0:
+  version "7.4.0"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.4.0.tgz#8481c92feffc531ab1e012a8ffc15bdd3a0f4318"
+  integrity sha512-RgOxM8Mw+7Zus0+zcLEUn8+JfoLpj/huFTItQy2hsM4khuC1HYRDp0cU482Ewn/Fcy6bCjufD8vAj7voC66KQw==
+  dependencies:
+    lru-cache "^6.0.0"
+
+semver@7.x, semver@^7.0.0, semver@^7.1.1, semver@^7.3.2, semver@^7.3.4, semver@^7.3.5, semver@^7.3.7, semver@^7.3.8, semver@^7.5.1, semver@^7.5.3:
   version "7.5.4"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.5.4.tgz#483986ec4ed38e1c6c48c34894a9182dbff68a6e"
   integrity sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==
@@ -32042,7 +32046,7 @@ tunnel-agent@^0.6.0:
   dependencies:
     safe-buffer "^5.0.1"
 
-tunnel@0.0.6, tunnel@^0.0.6:
+tunnel@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/tunnel/-/tunnel-0.0.6.tgz#72f1314b34a5b192db012324df2cc587ca47f92c"
   integrity sha512-1h/Lnq9yajKY2PEbBadPXj3VxsDDu844OnaAo52UVmIzIvwwtBPIuNvkjuzBlTWpfJyUbG3ez0KSBibQkj4ojg==
