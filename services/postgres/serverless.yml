@@ -50,6 +50,7 @@ custom:
     - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
   publicSubnetA: ${ssm:/configuration/${sls:stage}/vpc/subnets/public/a/id, ssm:/configuration/default/vpc/subnets/public/a/id}
   rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-rotator'
+  slackWebhookUrl: ${env:SLACK_WEBHOOK}
   serverless-offline-ssm:
     stages:
       - local
@@ -194,13 +195,14 @@ resources:
         UserData:
           Fn::Base64: !Sub |
             #!/bin/bash
-            sudo apt install awscli -y
+            apt install awscli -y
             aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-startup.sh /usr/local/bin/vm-startup.sh
             aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-shutdown.sh /usr/local/bin/vm-shutdown.sh
             aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/slack-notify.service /etc/systemd/system/notify-slack.service
             chmod +x /usr/local/bin/vm-startup.sh
             chmod +x /usr/local/bin/vm-shutdown.sh
             chmod +x /etc/systemd/system/notify-slack.service
+            echo export SLACK_WEBHOOK="${custom:slackWebhookUrl}" > /etc/profile.d/slack.sh
 
     PgVMIAMRole:
       Type: AWS::IAM::Role
@@ -223,7 +225,7 @@ resources:
                 - Effect: 'Allow'
                   Action:
                     - 's3:GetObject'
-                  Resource: !GetAtt PostgresVMScriptsBucket.Arn
+                  Resource: !GetAtt PostgresVMScriptsBucket.Arn/*
 
     PgVMIAMInstanceProfile:
       Type: AWS::IAM::InstanceProfile
