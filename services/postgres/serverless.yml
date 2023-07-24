@@ -202,7 +202,7 @@ resources:
             chmod +x /usr/local/bin/vm-startup.sh
             chmod +x /usr/local/bin/vm-shutdown.sh
             chmod +x /etc/systemd/system/notify-slack.service
-            echo export SLACK_WEBHOOK="${custom:slackWebhookUrl}" > /etc/profile.d/slack.sh
+            echo export SLACK_WEBHOOK="${self:custom.slackWebhookUrl}" > /etc/profile.d/slack.sh
 
     PgVMIAMRole:
       Type: AWS::IAM::Role
