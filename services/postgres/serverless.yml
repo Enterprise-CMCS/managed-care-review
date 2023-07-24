@@ -207,6 +207,7 @@ resources:
       Properties:
         Path: '/delegatedadmin/developer/'
         PermissionsBoundary: !Sub 'arn:aws:iam::${AWS::AccountId}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy'
+        RoleName: !Sub 'postgresvm-${sls:stage}-ServiceRole'
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
           Statement:
@@ -227,6 +228,7 @@ resources:
     PgVMIAMInstanceProfile:
       Type: AWS::IAM::InstanceProfile
       Properties:
+        Path: '/delegatedadmin/developer/'
         Roles:
           - !Ref PgVMIAMRole
 
