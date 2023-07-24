@@ -49,49 +49,50 @@ async function main() {
         process.exit(1)
     }
 
-    const stacksToDestroy = await getStacksFromStage(stage)
-    console.info(`debug: ${stacksToDestroy}`)
-    if (process.env.CI === 'true' && stacksToDestroy.length === 0) {
-        console.warn(
-            `We're in CI and there are no stacks to destroy. Alerting.`
+    try {
+        const stacksToDestroy = await getStacksFromStage(stage)
+        if (process.env.CI === 'true' && stacksToDestroy.length === 0) {
+            console.warn(
+                `We're in CI and there are no stacks to destroy. Alerting.`
+            )
+            process.exit(1)
+        }
+        if (stacksToDestroy.length === 0) {
+            console.info(`No stacks to destroy. Skipping destroy.`)
+            process.exit(0)
+        }
+
+        console.info(
+            `Getting ready to remove the following stacks: ${stacksToDestroy}`
         )
+
+        // AWS can rate limit us if we go too fast. Using a regular
+        // for construct to wait on async to slow us down a bit.
+        for (const stack of stacksToDestroy) {
+            console.info(`Destroying stack: ${stack}`)
+
+            const clearBucketOutput = await clearServerlessDeployBucket(stack)
+            if (clearBucketOutput instanceof Error) {
+                // We don't process.exit(1) here because sometimes buckets in a stack
+                // have already been removed. We can still delete the stack.
+                console.info(`Could not clear buckets in ${stack}`)
+            }
+
+            const deleteStackOutput = await deleteStack(stack)
+            if (deleteStackOutput instanceof Error) {
+                console.info(`Could not delete ${stack}. ${deleteStackOutput}`)
+                continue
+            }
+
+            console.info(`Destroy successful: ${stack}`)
+        }
+    } catch (err) {
+        console.error(`Destroy was not successful: ${err}`)
         process.exit(1)
-    }
-    if (stacksToDestroy.length === 0) {
-        console.info(`No stacks to destroy. Skipping destroy.`)
-        process.exit(0)
-    }
-
-    // AWS can rate limit us if we go too fast. Using a regular
-    // for construct to wait on async to slow us down a bit.
-    for (const stack of stacksToDestroy) {
-        if (stack instanceof Error) {
-            console.error(`Could not delete stack: ${stack}`)
-            process.exit(1)
-        }
-        console.info(`Destroying stack: ${stack}`)
-
-        const clearBucketOutput = await clearServerlessDeployBucket(stack)
-        if (clearBucketOutput instanceof Error) {
-            // We don't process.exit(1) here because sometimes buckets in a stack
-            // have already been removed. We can still delete the stack.
-            console.info(`Could not clear buckets in ${stack}`)
-        }
-
-        const deleteStackOutput = await deleteStack(stack)
-        if (deleteStackOutput instanceof Error) {
-            console.info(`Could not delete ${stack}. ${deleteStackOutput}`)
-            process.exit(1)
-        }
-
-        console.info(`Destroy successful: ${stack}`)
     }
 }
 
-async function getStacksFromStage(
-    stageName: string
-): Promise<string[] | Error[]> {
-    let errors: Error[] = []
+async function getStacksFromStage(stageName: string): Promise<string[]> {
     let stacksToDestroy: string[] = []
     for (const prefix of stackPrefixes) {
         const stackName = `${prefix}-${stageName}`
@@ -100,10 +101,9 @@ async function getStacksFromStage(
                 StackName: stackName,
             })
             const stacks = await cf.send(commandDescribeStacks)
-
-            if (!stacks.Stacks) {
-                console.info(`Stack ${stackName} does not exist. Skipping.`)
-                return []
+            if (stacks.Stacks == undefined) {
+                console.info(`Stack ${stackName} was not found. Skipping`)
+                continue
             }
 
             // type guard
@@ -117,12 +117,8 @@ async function getStacksFromStage(
 
             stacksToDestroy.push(...types)
         } catch (err) {
-            const error = new Error(err)
-            errors.push(error)
+            console.error(`getStacksFromStage ${err}. Skipping.`)
         }
-    }
-    if (errors.length != 0) {
-        return errors
     }
     return stacksToDestroy
 }
