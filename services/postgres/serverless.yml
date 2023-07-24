@@ -205,6 +205,8 @@ resources:
     PgVMIAMRole:
       Type: AWS::IAM::Role
       Properties:
+        Path: '/delegatedadmin/developer/'
+        PermissionsBoundary: !Sub 'arn:aws:iam::${AWS::AccountId}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy'
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
           Statement:
