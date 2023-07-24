@@ -224,8 +224,10 @@ resources:
               Statement:
                 - Effect: 'Allow'
                   Action:
-                    - 's3:GetObject'
-                  Resource: !GetAtt PostgresVMScriptsBucket.Arn/*
+                    - 's3:*'
+                  Resource:
+                    - !GetAtt PostgresVMScriptsBucket.Arn
+                    - !Join ['', [!GetAtt PostgresVMScriptsBucket.Arn, '/*']]
 
     PgVMIAMInstanceProfile:
       Type: AWS::IAM::InstanceProfile
