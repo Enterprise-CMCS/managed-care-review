@@ -191,18 +191,19 @@ resources:
             DeviceIndex: '0'
             GroupSet:
               - !Ref PostgresVmSg
+              - ${self:custom.sgId}
             SubnetId: !Sub ${self:custom.publicSubnetA}
         UserData:
           Fn::Base64: !Sub |
             #!/bin/bash
-            apt install awscli -y
-            aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-startup.sh /usr/local/bin/vm-startup.sh
-            aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-shutdown.sh /usr/local/bin/vm-shutdown.sh
-            aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/slack-notify.service /etc/systemd/system/notify-slack.service
-            chmod +x /usr/local/bin/vm-startup.sh
-            chmod +x /usr/local/bin/vm-shutdown.sh
-            chmod +x /etc/systemd/system/notify-slack.service
-            echo export SLACK_WEBHOOK="${self:custom.slackWebhookUrl}" > /etc/profile.d/slack.sh
+            sudo apt update && apt install awscli postgresql postgresql-contrib -y
+            sudo aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-startup.sh /usr/local/bin/vm-startup.sh
+            sudo aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-shutdown.sh /usr/local/bin/vm-shutdown.sh
+            sudo aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/slack-notify.service /etc/systemd/system/notify-slack.service
+            sudo chmod +x /usr/local/bin/vm-startup.sh
+            sudo chmod +x /usr/local/bin/vm-shutdown.sh
+            sudo chmod +x /etc/systemd/system/notify-slack.service
+            sudo echo export SLACK_WEBHOOK="${self:custom.slackWebhookUrl}" > /etc/profile.d/slack.sh
 
     PgVMIAMRole:
       Type: AWS::IAM::Role
