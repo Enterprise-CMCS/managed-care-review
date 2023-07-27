@@ -45,7 +45,7 @@ export function fetchHealthPlanPackageResolver(
             )
 
             if (isStoreError(contractWithHistory)) {
-                const errMessage = `Issue finding a package with id ${input.pkgID}. Message: ${contractWithHistory.message}`
+                const errMessage = `Issue finding a contract with history with id ${input.pkgID}. Message: ${contractWithHistory.message}`
                 logError('fetchHealthPlanPackage', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
 
@@ -59,7 +59,7 @@ export function fetchHealthPlanPackageResolver(
             }
 
             if (contractWithHistory instanceof Error) {
-                const errMessage = `Issue finding a package with id ${input.pkgID}. Message: ${contractWithHistory.message}`
+                const errMessage = `Issue finding a contract with history with id ${input.pkgID}. Message: ${contractWithHistory.message}`
                 logError('fetchHealthPlanPackage', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new GraphQLError(errMessage, {
@@ -74,7 +74,7 @@ export function fetchHealthPlanPackageResolver(
                 const draftRevision = await store.findDraftContract(input.pkgID)
                 if (draftRevision instanceof Error) {
                     // If draft returns undefined we error because a draft submission should always have a draft revision.
-                    const errMessage = `Issue finding a package with id ${input.pkgID}. Message: ${draftRevision.message}`
+                    const errMessage = `Issue finding a draft contract with id ${input.pkgID}. Message: ${draftRevision.message}`
                     logError('fetchHealthPlanPackage', errMessage)
                     setErrorAttributesOnActiveSpan(errMessage, span)
                     throw new GraphQLError(errMessage, {
@@ -86,7 +86,7 @@ export function fetchHealthPlanPackageResolver(
                 }
 
                 if (draftRevision === undefined) {
-                    const errMessage = `Issue finding a package with id ${input.pkgID}. Message: Result was undefined.`
+                    const errMessage = `Issue finding a draft contract with id ${input.pkgID}. Message: Result was undefined.`
                     logError('fetchHealthPlanPackage', errMessage)
                     setErrorAttributesOnActiveSpan(errMessage, span)
                     throw new GraphQLError(errMessage, {
