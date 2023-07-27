@@ -11,6 +11,7 @@ import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
 import { must, createInsertContractData } from '../../testHelpers'
+import { isStoreError } from '../storeError'
 
 describe('findContract', () => {
     it('finds a stripped down contract with history', async () => {
@@ -92,9 +93,8 @@ describe('findContract', () => {
         must(await submitRate(client, rate3.id, stateUser.id, '3.0 create'))
 
         // Now, find that contract and assert the history is what we expected
-        const threeContract = await findContractWithHistory(
-            client,
-            contractA.id
+        const threeContract = must(
+            await findContractWithHistory(client, contractA.id)
         )
         if (threeContract instanceof Error) {
             throw threeContract
@@ -114,7 +114,9 @@ describe('findContract', () => {
         must(await submitRate(client, rate2.id, stateUser.id, '2.1 remove'))
 
         // Now, find that contract and assert the history is what we expected
-        const twoContract = await findContractWithHistory(client, contractA.id)
+        const twoContract = must(
+            await findContractWithHistory(client, contractA.id)
+        )
         if (twoContract instanceof Error) {
             throw twoContract
         }
@@ -131,9 +133,8 @@ describe('findContract', () => {
         must(await submitRate(client, rate1.id, stateUser.id, '1.1 new name'))
 
         // Now, find that contract and assert the history is what we expected
-        const backAgainContract = await findContractWithHistory(
-            client,
-            contractA.id
+        const backAgainContract = must(
+            await findContractWithHistory(client, contractA.id)
         )
         if (backAgainContract instanceof Error) {
             throw backAgainContract
@@ -159,9 +160,8 @@ describe('findContract', () => {
         )
 
         // Now, find that contract and assert the history is what we expected
-        let testingContract = await findContractWithHistory(
-            client,
-            contractA.id
+        let testingContract = must(
+            await findContractWithHistory(client, contractA.id)
         )
         if (testingContract instanceof Error) {
             throw testingContract
@@ -202,16 +202,17 @@ describe('findContract', () => {
         )
 
         // Now, find that contract and assert the history is what we expected
-        testingContract = await findContractWithHistory(client, contractA.id)
+        testingContract = must(
+            await findContractWithHistory(client, contractA.id)
+        )
         if (testingContract instanceof Error) {
             throw testingContract
         }
         expect(testingContract.revisions).toHaveLength(8)
 
         // Now, find that contract and assert the history is what we expected
-        const resultingContract = await findContractWithHistory(
-            client,
-            contractA.id
+        const resultingContract = must(
+            await findContractWithHistory(client, contractA.id)
         )
         if (resultingContract instanceof Error) {
             throw resultingContract
@@ -453,9 +454,8 @@ describe('findContract', () => {
         )
 
         // Now, find that contract and assert the history is what we expected
-        const resultingContract = await findContractWithHistory(
-            client,
-            contractA.id
+        const resultingContract = must(
+            await findContractWithHistory(client, contractA.id)
         )
         if (resultingContract instanceof Error) {
             throw resultingContract
@@ -624,15 +624,11 @@ describe('findContract', () => {
             stateUser.id,
             'third submit'
         )
-        if (!(contractA_1_Error instanceof Error)) {
+        if (!isStoreError(contractA_1_Error)) {
             throw new Error('Should be impossible to submit twice in a row.')
         }
 
-        const res = await findContractWithHistory(client, contractA.id)
-
-        if (res instanceof Error) {
-            throw res
-        }
+        const res = must(await findContractWithHistory(client, contractA.id))
 
         const revisions = res.revisions.reverse()
 

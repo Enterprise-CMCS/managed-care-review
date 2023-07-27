@@ -6,6 +6,7 @@ import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
 import { updateDraftRate } from './updateDraftRate'
 import { must, createInsertContractData } from '../../testHelpers'
+import { isStoreError } from '../storeError'
 
 describe('submitContract', () => {
     it('creates a submission from a draft', async () => {
@@ -22,10 +23,19 @@ describe('submitContract', () => {
             },
         })
 
-        // submitting before there's a draft should be an error
-        expect(
-            await submitContract(client, '1111', '1111', 'failed submit')
-        ).toBeInstanceOf(Error)
+        // submitting before there's a draft should be a store error
+        const storeError = await submitContract(
+            client,
+            '1111',
+            '1111',
+            'failed submit'
+        )
+        expect(isStoreError(storeError)).toBeTruthy()
+        expect(storeError).toEqual(
+            expect.objectContaining({
+                code: 'NOT_FOUND_ERROR',
+            })
+        )
 
         // create a draft contract
         const draftContractData = createInsertContractData({
@@ -61,15 +71,20 @@ describe('submitContract', () => {
             })
         )
 
-        // resubmitting should be an error
-        expect(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'initial submit'
-            )
-        ).toBeInstanceOf(Error)
+        const resubmitStoreError = await submitContract(
+            client,
+            contractA.id,
+            stateUser.id,
+            'initial submit'
+        )
+
+        // resubmitting should be a store error
+        expect(isStoreError(resubmitStoreError)).toBeTruthy()
+        expect(resubmitStoreError).toEqual(
+            expect.objectContaining({
+                code: 'NOT_FOUND_ERROR',
+            })
+        )
     })
 
     it('invalidates old revisions when new revisions are submitted', async () => {

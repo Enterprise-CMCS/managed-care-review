@@ -460,8 +460,8 @@ describe('fetchHealthPlanPackage rates-db-refactor flag on tests', () => {
         const resultErr = result.errors[0]
 
         expect(resultErr?.message).toBe(
-            `Issue finding a package with id ${input.pkgID}. Message: PRISMA ERROR: Cannot find contract with id: BOGUS-ID`
+            `Issue finding a package with id ${input.pkgID}. Message: An operation failed because it depends on one or more records that were required but not found.`
         )
-        expect(resultErr?.extensions?.code).toBe('INTERNAL_SERVER_ERROR')
+        expect(resultErr?.extensions?.code).toBe('NOT_FOUND')
     })
 })
