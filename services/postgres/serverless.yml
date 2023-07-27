@@ -196,7 +196,9 @@ resources:
         UserData:
           Fn::Base64: !Sub |
             #!/bin/bash
-            sudo apt update && apt install awscli postgresql postgresql-contrib -y
+            sudo apt update && apt install unzip postgresql postgresql-contrib -y
+            sudo curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip
+            sudo ./aws/install
             sudo aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-startup.sh /usr/local/bin/vm-startup.sh
             sudo aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-shutdown.sh /usr/local/bin/vm-shutdown.sh
             sudo aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/slack-notify.service /etc/systemd/system/notify-slack.service
