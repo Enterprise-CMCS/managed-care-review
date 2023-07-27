@@ -51,11 +51,19 @@ export function fetchHealthPlanPackageResolver(
 
                 if (contractWithHistory?.code === 'NOT_FOUND_ERROR') {
                     throw new GraphQLError(errMessage, {
-                        extensions: { code: 'NOT_FOUND' },
+                        extensions: {
+                            code: 'NOT_FOUND',
+                            cause: 'DB_ERROR',
+                        },
                     })
                 }
 
-                throw new Error(errMessage)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
             }
 
             if (contractWithHistory instanceof Error) {
@@ -90,7 +98,10 @@ export function fetchHealthPlanPackageResolver(
                     logError('fetchHealthPlanPackage', errMessage)
                     setErrorAttributesOnActiveSpan(errMessage, span)
                     throw new GraphQLError(errMessage, {
-                        extensions: { code: 'NOT_FOUND' },
+                        extensions: {
+                            code: 'NOT_FOUND',
+                            cause: 'DB_ERROR',
+                        },
                     })
                 }
 
@@ -125,16 +136,19 @@ export function fetchHealthPlanPackageResolver(
                 throw new Error(errMessage)
             }
 
-            pkg = result
-        }
+            if (result === undefined) {
+                const errMessage = `Issue finding a package with id ${input.pkgID}. Message: Result was undefined.`
+                logError('fetchHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'NOT_FOUND',
+                        cause: 'DB_ERROR',
+                    },
+                })
+            }
 
-        if (pkg === undefined) {
-            const errMessage = `Issue finding a package with id ${input.pkgID}. Message: Result was undefined.`
-            logError('fetchHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: { code: 'NOT_FOUND' },
-            })
+            pkg = result
         }
 
         // Authorization CMS users can view, state users can only view if the state matches
