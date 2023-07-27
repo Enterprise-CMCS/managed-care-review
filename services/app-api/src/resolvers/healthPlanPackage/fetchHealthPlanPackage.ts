@@ -44,6 +44,20 @@ export function fetchHealthPlanPackageResolver(
                 input.pkgID
             )
 
+            if (isStoreError(contractWithHistory)) {
+                const errMessage = `Issue finding a package with id ${input.pkgID}. Message: ${contractWithHistory.message}`
+                logError('fetchHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+
+                if (contractWithHistory?.code === 'NOT_FOUND_ERROR') {
+                    throw new GraphQLError(errMessage, {
+                        extensions: { code: 'NOT_FOUND' },
+                    })
+                }
+
+                throw new Error(errMessage)
+            }
+
             if (contractWithHistory instanceof Error) {
                 const errMessage = `Issue finding a package with id ${input.pkgID}. Message: ${contractWithHistory.message}`
                 logError('fetchHealthPlanPackage', errMessage)
