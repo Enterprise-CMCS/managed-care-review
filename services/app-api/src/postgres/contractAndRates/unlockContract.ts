@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { ContractType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import { findContractWithHistory } from './findContractWithHistory'
+import { StoreError, convertPrismaErrorToStoreError } from '../storeError'
 
 // Unlock the given contract
 // * copy form data
@@ -10,14 +11,14 @@ async function unlockContract(
     contractID: string,
     unlockedByUserID: string,
     unlockReason: string
-): Promise<ContractType | Error> {
+): Promise<ContractType | StoreError | Error> {
     const groupTime = new Date()
 
     try {
         return await client.$transaction(async (tx) => {
             // Given all the Rates associated with this draft, find the most recent submitted
             // rateRevision to attach to this contract on submit.
-            const currentRev = await tx.contractRevisionTable.findFirst({
+            const currentRev = await tx.contractRevisionTable.findFirstOrThrow({
                 where: {
                     contractID: contractID,
                 },
@@ -35,15 +36,6 @@ async function unlockContract(
                     },
                 },
             })
-            if (!currentRev) {
-                console.error(
-                    'Programming Error: cannot find the current revision to submit'
-                )
-                return new Error(
-                    'Programming Error: cannot find the current revision to submit'
-                )
-            }
-
             if (!currentRev.submitInfoID) {
                 console.error(
                     'Programming Error: cannot unlock a already unlocked contract'
@@ -95,8 +87,8 @@ async function unlockContract(
             return findContractWithHistory(tx, contractID)
         })
     } catch (err) {
-        console.error('SUBMIT PRISMA CONTRACT ERR', err)
-        return err
+        console.error('PRISMA CONTRACT ERR', err)
+        return convertPrismaErrorToStoreError(err)
     }
 }
 

@@ -136,7 +136,7 @@ type Store = {
 
     findContractWithHistory: (
         contractID: string
-    ) => Promise<ContractType | Error>
+    ) => Promise<ContractType | StoreError | Error>
 
     findDraftContract: (
         contractID: string
