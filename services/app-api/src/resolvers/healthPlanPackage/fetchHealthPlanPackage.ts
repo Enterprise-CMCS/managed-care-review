@@ -118,9 +118,9 @@ export function fetchHealthPlanPackageResolver(
             const errMessage = `Issue finding a package with id ${input.pkgID}. Message: Result was undefined.`
             logError('fetchHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            return {
-                pkg: undefined,
-            }
+            throw new GraphQLError(errMessage, {
+                extensions: { code: 'NOT_FOUND' },
+            })
         }
 
         // Authorization CMS users can view, state users can only view if the state matches
