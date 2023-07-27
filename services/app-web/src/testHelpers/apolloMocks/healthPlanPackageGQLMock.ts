@@ -63,17 +63,22 @@ const fetchHealthPlanPackageMockSuccess = ({
 const fetchHealthPlanPackageMockNotFound = ({
     id,
 }: fetchHealthPlanPackageMockProps): MockedResponse<FetchHealthPlanPackageQuery> => {
+    const graphQLError = new GraphQLError(
+        'Issue finding a package with id a6039ed6-39cc-4814-8eaa-0c99f25e325d. Message: Result was undefined.',
+        {
+            extensions: {
+                code: 'NOT_FOUND',
+            },
+        }
+    )
+
     return {
         request: {
             query: FetchHealthPlanPackageDocument,
             variables: { input: { pkgID: id } },
         },
         result: {
-            data: {
-                fetchHealthPlanPackage: {
-                    pkg: undefined,
-                },
-            },
+            errors: [graphQLError],
         },
     }
 }
