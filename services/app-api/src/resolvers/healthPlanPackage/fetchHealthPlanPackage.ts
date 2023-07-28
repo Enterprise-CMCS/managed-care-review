@@ -10,7 +10,7 @@ import {
 import { isHelpdeskUser } from '../../domain-models/user'
 import { QueryResolvers, State } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import { isStoreError, Store, StoreError } from '../../postgres'
+import { isStoreError, Store } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
@@ -32,7 +32,7 @@ export function fetchHealthPlanPackageResolver(
             'rates-db-refactor'
         )
 
-        let pkg: HealthPlanPackageType = <HealthPlanPackageType>{}
+        let pkg: HealthPlanPackageType
 
         // Here is where we flag finding health plan
         if (ratesDatabaseRefactor) {
@@ -126,9 +126,8 @@ export function fetchHealthPlanPackageResolver(
 
             pkg = convertedPkg
         } else {
-            const result = (await store.findHealthPlanPackage(input.pkgID)) as
-                | HealthPlanPackageType
-                | StoreError
+            const result = await store.findHealthPlanPackage(input.pkgID)
+
             if (isStoreError(result)) {
                 const errMessage = `Issue finding a package of type ${result.code}. Message: ${result.message}`
                 logError('fetchHealthPlanPackage', errMessage)
