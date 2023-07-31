@@ -57,8 +57,7 @@ export function configureResolvers(
             submitHealthPlanPackage: submitHealthPlanPackageResolver(
                 store,
                 emailer,
-                emailParameterStore,
-                launchDarkly
+                emailParameterStore
             ),
             unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
                 store,

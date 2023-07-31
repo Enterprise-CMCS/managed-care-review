@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
-import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
@@ -24,6 +23,7 @@ import { DataDetailContactField } from '../../DataDetail/DataDetailContactField/
 import { v4 as uuidv4 } from 'uuid'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
+import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 
 // Used for refreshed packages names keyed by their package id
 // package name includes (Draft) for draft packages.
@@ -38,7 +38,7 @@ type PackageNamesLookupType = {
 export type RateDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
     navigateTo?: string
-    documentDateLookupTable?: DocumentDateLookupTable
+    documentDateLookupTable: DocumentDateLookupTableType
     isCMSUser?: boolean
     submissionName: string
     statePrograms: Program[]
@@ -341,9 +341,9 @@ export const RateDetailsSummarySection = ({
                                         documentDateLookupTable={
                                             documentDateLookupTable
                                         }
-                                        isCMSUser={isCMSUser}
                                         caption="Rate certification"
                                         documentCategory="Rate certification"
+                                        isEditing={isEditing}
                                     />
                                 ) : (
                                     <span className="srOnly">'LOADING...'</span>
@@ -357,7 +357,6 @@ export const RateDetailsSummarySection = ({
                                         documentDateLookupTable={
                                             documentDateLookupTable
                                         }
-                                        isCMSUser={isCMSUser}
                                         caption="Rate supporting documents"
                                         isSupportingDocuments
                                         documentCategory="Rate-supporting"
@@ -378,7 +377,6 @@ export const RateDetailsSummarySection = ({
                     <UploadedDocumentsTable
                         documents={submissionLevelRateSupportingDocuments}
                         documentDateLookupTable={documentDateLookupTable}
-                        isCMSUser={isCMSUser}
                         caption="Rate supporting documents"
                         documentCategory="Rate-supporting"
                         isSupportingDocuments

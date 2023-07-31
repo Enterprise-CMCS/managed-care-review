@@ -28,14 +28,17 @@ import {
 } from '../../common-code/healthPlanFormDataType'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
-import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
+import {
+    DocumentDateLookupTableType,
+    makeDocumentDateTable,
+} from '../../documentHelpers/makeDocumentDateLookupTable'
 
 export type SideNavOutletContextType = {
     pkg: HealthPlanPackage
     packageName: string
     currentRevision: HealthPlanRevision
     packageData: HealthPlanFormDataType
-    documentDates: DocumentDateLookupTable
+    documentDates: DocumentDateLookupTableType
     user: User
 }
 
@@ -86,7 +89,7 @@ export const SubmissionSideNav = () => {
         )
     }
 
-    const { data, formDatas, documentDates } = fetchResult
+    const { data, revisionsLookup } = fetchResult
     const pkg = data.fetchHealthPlanPackage.pkg
 
     // Display generic error page if getting logged in user returns undefined.
@@ -98,7 +101,6 @@ export const SubmissionSideNav = () => {
     if (!pkg) {
         return <Error404 />
     }
-
     const submissionStatus = pkg.status
 
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
@@ -130,9 +132,9 @@ export const SubmissionSideNav = () => {
         return <GenericErrorPage />
     }
     const currentRevision = edge.node
-    const packageData = formDatas[currentRevision.id]
+    const packageData = revisionsLookup[currentRevision.id].formData
     const pkgName = packageName(packageData, pkg.state.programs)
-
+    const documentDates = makeDocumentDateTable(revisionsLookup)
     const outletContext: SideNavOutletContextType = {
         pkg,
         packageName: pkgName,

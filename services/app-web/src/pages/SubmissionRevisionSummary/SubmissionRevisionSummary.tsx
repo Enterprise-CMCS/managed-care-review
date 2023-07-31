@@ -60,7 +60,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         return <GenericErrorPage /> // api failure or protobuf decode failure
     }
 
-    const { data, formDatas, documentDates } = fetchResult
+    const { data, revisionsLookup, documentDates } = fetchResult
     const pkg = data.fetchHealthPlanPackage.pkg
 
     // fetchHPP returns null if no package is found with the given ID
@@ -77,7 +77,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         console.info('no revision found at index', revisionIndex)
         return <Error404 />
     }
-    const packageData = formDatas[revision.id]
+    const packageData = revisionsLookup[revision.id].formData
 
     const statePrograms = pkg.state.programs
     const name = packageName(packageData, statePrograms)

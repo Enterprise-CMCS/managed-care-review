@@ -23,7 +23,6 @@ import {
     getTestStateAnalystsEmails,
 } from '../../testHelpers/parameterStoreHelpers'
 import * as awsSESHelpers from '../../testHelpers/awsSESHelpers'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 
 describe('submitHealthPlanPackage', () => {
@@ -903,10 +902,7 @@ describe('submitHealthPlanPackage', () => {
 
 describe('Feature flagged population coverage question test', () => {
     it('errors when population coverage question is undefined', async () => {
-        const mockLDService = testLDService({ 'chip-only-form': true })
-        const server = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const server = await constructTestPostgresServer()
 
         // setup
         const initialPkg = await createAndUpdateTestHealthPlanPackage(server, {

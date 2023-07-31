@@ -18,7 +18,7 @@ import { PopulationCoveredType } from '../../gen/gqlServer'
 
 export type InsertHealthPlanPackageArgsType = {
     stateCode: string
-    populationCovered?: PopulationCoveredType
+    populationCovered: PopulationCoveredType
     programIDs: string[]
     riskBasedContract?: boolean
     submissionType: SubmissionType

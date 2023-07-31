@@ -10,7 +10,7 @@ export default {
 const Template: Story<FieldRadioProps> = (args) => (
     <Formik
         initialValues={{ input1: '' }}
-        onSubmit={(e) => console.log('submitted')}
+        onSubmit={(e) => console.info('submitted')}
     >
         <FieldRadio {...args} />
     </Formik>

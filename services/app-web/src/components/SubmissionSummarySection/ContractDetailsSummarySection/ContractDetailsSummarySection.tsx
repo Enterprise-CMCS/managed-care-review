@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
-import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import {
     ContractExecutionStatusRecord,
     FederalAuthorityRecord,
@@ -30,11 +29,12 @@ import {
     HealthPlanFormDataType,
     federalAuthorityKeysForCHIP,
 } from '../../../common-code/healthPlanFormDataType'
+import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
     navigateTo?: string
-    documentDateLookupTable?: DocumentDateLookupTable
+    documentDateLookupTable: DocumentDateLookupTableType
     isCMSUser?: boolean
     submissionName: string
 }
@@ -168,7 +168,11 @@ export const ContractDetailsSummarySection = ({
                     <DoubleColumnGrid>
                         <DataDetail
                             id="modifiedProvisions"
-                            label={isBaseContract(submission)? "This contract action includes provisions related to the following" : "This contract action includes new or modified provisions related to the following"}
+                            label={
+                                isBaseContract(submission)
+                                    ? 'This contract action includes provisions related to the following'
+                                    : 'This contract action includes new or modified provisions related to the following'
+                            }
                             explainMissingData={
                                 provisionsAreInvalid && !isSubmitted(submission)
                             }
@@ -176,7 +180,7 @@ export const ContractDetailsSummarySection = ({
                             {provisionsAreInvalid ? null : (
                                 <DataDetailCheckboxList
                                     list={modifiedProvisions}
-                                    dict={getProvisionDictionary(submission) }
+                                    dict={getProvisionDictionary(submission)}
                                     displayEmptyList
                                 />
                             )}
@@ -184,7 +188,11 @@ export const ContractDetailsSummarySection = ({
 
                         <DataDetail
                             id="unmodifiedProvisions"
-                            label={isBaseContract(submission)? "This contract action does NOT include provisions related to the following": "This contract action does NOT include new or modified provisions related to the following"}
+                            label={
+                                isBaseContract(submission)
+                                    ? 'This contract action does NOT include provisions related to the following'
+                                    : 'This contract action does NOT include new or modified provisions related to the following'
+                            }
                             explainMissingData={
                                 provisionsAreInvalid && !isSubmitted(submission)
                             }
@@ -203,14 +211,13 @@ export const ContractDetailsSummarySection = ({
             <UploadedDocumentsTable
                 documents={submission.contractDocuments}
                 documentDateLookupTable={documentDateLookupTable}
-                isCMSUser={isCMSUser}
                 caption="Contract"
                 documentCategory="Contract"
+                isEditing={isEditing}
             />
             <UploadedDocumentsTable
                 documents={contractSupportingDocuments}
                 documentDateLookupTable={documentDateLookupTable}
-                isCMSUser={isCMSUser}
                 caption="Contract supporting documents"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments

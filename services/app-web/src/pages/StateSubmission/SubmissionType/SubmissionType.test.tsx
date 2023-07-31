@@ -3,10 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { screen, waitFor, within } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
-import {
-    ldUseClientSpy,
-    renderWithProviders,
-} from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SubmissionType, SubmissionTypeFormValues } from './'
 import { Formik } from 'formik'
 import { contractOnly } from '../../../common-code/healthPlanFormDataMocks'
@@ -50,20 +47,20 @@ describe('SubmissionType', () => {
         )
 
         expect(
-            await screen.getByRole('form', { name: 'Submission Type Form' })
+            screen.getByRole('form', { name: 'Submission Type Form' })
         ).toBeInTheDocument()
         expect(
-            await screen.getByRole('button', {
+            screen.getByRole('button', {
                 name: 'Save as draft',
             })
         ).toBeDefined()
         expect(
-            await screen.getByRole('button', {
+            screen.getByRole('button', {
                 name: 'Cancel',
             })
         ).toBeDefined()
         expect(
-            await screen.getByRole('button', {
+            screen.getByRole('button', {
                 name: 'Continue',
             })
         ).toBeDefined()
@@ -80,306 +77,299 @@ describe('SubmissionType', () => {
         })
 
         expect(
-            await screen.getByRole('form', { name: 'New Submission Form' })
+            screen.getByRole('form', { name: 'New Submission Form' })
         ).toBeInTheDocument()
         expect(
-            await screen.queryByRole('button', {
+            screen.queryByRole('button', {
                 name: 'Save as draft',
             })
         ).toBeNull()
 
         expect(
-            await screen.getByRole('button', {
+            screen.getByRole('button', {
                 name: 'Cancel',
             })
         ).toBeDefined()
         expect(
-            await screen.getByRole('button', {
+            screen.getByRole('button', {
                 name: 'Continue',
             })
         ).toBeDefined()
     })
 
-    describe('Feature flagged population coverage questions', () => {
-        beforeEach(() => {
-            ldUseClientSpy({ 'chip-only-form': true })
-        })
-        it('displays population coverage question', async () => {
-            renderWithProviders(
-                <Formik
-                    initialValues={SubmissionTypeInitialValues}
-                    onSubmit={jest.fn()}
-                >
-                    <SubmissionType updateDraft={updateDraftMock} />
-                </Formik>,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
+    it('displays population coverage question', async () => {
+        renderWithProviders(
+            <Formik
+                initialValues={SubmissionTypeInitialValues}
+                onSubmit={jest.fn()}
+            >
+                <SubmissionType updateDraft={updateDraftMock} />
+            </Formik>,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        expect(
+            screen.getByText(
+                'Which populations does this contract action cover?'
             )
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('radio', { name: 'Medicaid' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('radio', { name: 'CHIP-only' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('radio', { name: 'Medicaid and CHIP' })
+        ).toBeInTheDocument()
+    })
+    it('disables contract and rates submission type radio and displays hint when CHIP only is selected', async () => {
+        renderWithProviders(
+            <Formik
+                initialValues={SubmissionTypeInitialValues}
+                onSubmit={jest.fn()}
+            >
+                <SubmissionType updateDraft={updateDraftMock} />
+            </Formik>,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
 
-            expect(
-                await screen.getByText(
-                    'Which populations does this contract action cover?'
-                )
-            ).toBeInTheDocument()
-            expect(
-                await screen.getByRole('radio', { name: 'Medicaid' })
-            ).toBeInTheDocument()
-            expect(
-                await screen.getByRole('radio', { name: 'CHIP-only' })
-            ).toBeInTheDocument()
-            expect(
-                await screen.getByRole('radio', { name: 'Medicaid and CHIP' })
-            ).toBeInTheDocument()
-        })
-        it('disables contract and rates submission type radio and displays hint when CHIP only is selected', async () => {
-            renderWithProviders(
-                <Formik
-                    initialValues={SubmissionTypeInitialValues}
-                    onSubmit={jest.fn()}
-                >
-                    <SubmissionType updateDraft={updateDraftMock} />
-                </Formik>,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
+        expect(
+            screen.getByText(
+                'Which populations does this contract action cover?'
             )
-
-            expect(
-                await screen.getByText(
-                    'Which populations does this contract action cover?'
-                )
-            ).toBeInTheDocument()
-            const chipOnlyRadio = await screen.getByRole('radio', {
-                name: 'CHIP-only',
-            })
-
-            // Select Chip only population coverage
-            await userEvent.click(chipOnlyRadio)
-
-            // Contract and rates radio is disabled
-            expect(
-                await screen.getByRole('radio', {
-                    name: 'Contract action and rate certification',
-                })
-            ).toHaveAttribute('disabled')
-
-            // Shows hint for submission type
-            expect(
-                await screen.getByText(
-                    'States are not required to submit rates with CHIP-only contracts.'
-                )
-            ).toBeInTheDocument()
+        ).toBeInTheDocument()
+        const chipOnlyRadio = screen.getByRole('radio', {
+            name: 'CHIP-only',
         })
-        it('switches submission type to contract only when changing existing population coverage to CHIP-only', async () => {
-            renderWithProviders(
-                <Formik
-                    initialValues={SubmissionTypeInitialValues}
-                    onSubmit={jest.fn()}
-                >
-                    <SubmissionType updateDraft={updateDraftMock} />
-                </Formik>,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
 
-            expect(
-                await screen.getByText(
-                    'Which populations does this contract action cover?'
-                )
-            ).toBeInTheDocument()
-            const medicaidRadio = await screen.getByRole('radio', {
-                name: 'Medicaid',
-            })
-            const contractAndRatesRadio = await screen.getByRole('radio', {
+        // Select Chip only population coverage
+        await userEvent.click(chipOnlyRadio)
+
+        // Contract and rates radio is disabled
+        expect(
+            screen.getByRole('radio', {
                 name: 'Contract action and rate certification',
             })
+        ).toHaveAttribute('disabled')
 
-            // Click Medicaid population coverage radio
-            await userEvent.click(medicaidRadio)
+        // Shows hint for submission type
+        expect(
+            screen.getByText(
+                'States are not required to submit rates with CHIP-only contracts.'
+            )
+        ).toBeInTheDocument()
+    })
+    it('switches submission type to contract only when changing existing population coverage to CHIP-only', async () => {
+        renderWithProviders(
+            <Formik
+                initialValues={SubmissionTypeInitialValues}
+                onSubmit={jest.fn()}
+            >
+                <SubmissionType updateDraft={updateDraftMock} />
+            </Formik>,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
 
-            // Click contract and rates submission type
-            await userEvent.click(contractAndRatesRadio)
-
-            // Expect contract and rates radio to be selected
-            expect(contractAndRatesRadio).toBeChecked()
-
-            const chipOnlyRadio = await screen.getByRole('radio', {
-                name: 'CHIP-only',
-            })
-            const contractOnlyRadio = await screen.getByRole('radio', {
-                name: 'Contract action only',
-            })
-
-            // Change population coverage to Chip only
-            await userEvent.click(chipOnlyRadio)
-
-            // Contract and rates radio is unselected and disabled
-            expect(contractAndRatesRadio).not.toBeChecked()
-            expect(contractAndRatesRadio).toHaveAttribute('disabled')
-
-            // Contract only radio is selected
-            expect(contractOnlyRadio).toBeChecked()
-
-            // Shows hint for submission type
-            expect(
-                await screen.getByText(
-                    'States are not required to submit rates with CHIP-only contracts.'
-                )
-            ).toBeInTheDocument()
+        expect(
+            screen.getByText(
+                'Which populations does this contract action cover?'
+            )
+        ).toBeInTheDocument()
+        const medicaidRadio = screen.getByRole('radio', {
+            name: 'Medicaid',
         })
-        it('new submissions does not automatically select contract only submission type when selecting CHIP-only coverage', async () => {
-            renderWithProviders(
-                <Formik
-                    initialValues={SubmissionTypeInitialValues}
-                    onSubmit={jest.fn()}
-                >
-                    <SubmissionType updateDraft={updateDraftMock} />
-                </Formik>,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
-
-            expect(
-                await screen.getByText(
-                    'Which populations does this contract action cover?'
-                )
-            ).toBeInTheDocument()
-            const medicaidRadio = await screen.getByRole('radio', {
-                name: 'Medicaid',
-            })
-            const chipOnlyRadio = await screen.getByRole('radio', {
-                name: 'CHIP-only',
-            })
-            const medicaidAndChipRadio = await screen.getByRole('radio', {
-                name: 'Medicaid and CHIP',
-            })
-            const contractAndRatesRadio = await screen.getByRole('radio', {
-                name: 'Contract action and rate certification',
-            })
-            const contractOnlyRadio = await screen.getByRole('radio', {
-                name: 'Contract action only',
-            })
-
-            // Click on each of the population covered radios
-            await userEvent.click(medicaidRadio)
-            await userEvent.click(chipOnlyRadio)
-            await userEvent.click(medicaidAndChipRadio)
-
-            // Expect contract and rates radio to not be selected
-            expect(contractAndRatesRadio).not.toBeChecked()
-            expect(contractOnlyRadio).not.toBeChecked()
-
-            // Change population coverage to Chip only
-            await userEvent.click(chipOnlyRadio)
-
-            // Expect the submission type radios to still be unselected
-            expect(contractAndRatesRadio).not.toBeChecked()
-            expect(contractOnlyRadio).not.toBeChecked()
-
-            // Shows hint for submission type
-            expect(
-                await screen.getByText(
-                    'States are not required to submit rates with CHIP-only contracts.'
-                )
-            ).toBeInTheDocument()
+        const contractAndRatesRadio = screen.getByRole('radio', {
+            name: 'Contract action and rate certification',
         })
-        it('does not clear contract only submission type radio when switching to CHIP-only population coverage', async () => {
-            renderWithProviders(
-                <Formik
-                    initialValues={SubmissionTypeInitialValues}
-                    onSubmit={jest.fn()}
-                >
-                    <SubmissionType updateDraft={updateDraftMock} />
-                </Formik>,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
 
-            expect(
-                await screen.getByText(
-                    'Which populations does this contract action cover?'
-                )
-            ).toBeInTheDocument()
-            const medicaidRadio = await screen.getByRole('radio', {
-                name: 'Medicaid',
-            })
-            const contractOnlyRadio = await screen.getByRole('radio', {
-                name: 'Contract action only',
-            })
+        // Click Medicaid population coverage radio
+        await userEvent.click(medicaidRadio)
 
-            // Click Medicaid population coverage radio
-            await userEvent.click(medicaidRadio)
+        // Click contract and rates submission type
+        await userEvent.click(contractAndRatesRadio)
 
-            // Click contract only submission type
-            await userEvent.click(contractOnlyRadio)
+        // Expect contract and rates radio to be selected
+        expect(contractAndRatesRadio).toBeChecked()
 
-            // Expect contract only radio to be selected
-            expect(contractOnlyRadio).toBeChecked()
-
-            const chipOnlyRadio = await screen.getByRole('radio', {
-                name: 'CHIP-only',
-            })
-
-            // Change population coverage to Chip only
-            await userEvent.click(chipOnlyRadio)
-
-            // Contract only radio is still selected
-            expect(contractOnlyRadio).toBeChecked()
+        const chipOnlyRadio = screen.getByRole('radio', {
+            name: 'CHIP-only',
         })
-        it('shows validation message when population coverage is not selected', async () => {
-            renderWithProviders(
-                <Formik
-                    initialValues={SubmissionTypeInitialValues}
-                    onSubmit={jest.fn()}
-                >
-                    <SubmissionType updateDraft={updateDraftMock} />
-                </Formik>,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
-
-            // Expect population coverage question and radios
-            expect(
-                await screen.getByText(
-                    'Which populations does this contract action cover?'
-                )
-            ).toBeInTheDocument()
-            expect(
-                await screen.getByRole('radio', { name: 'Medicaid' })
-            ).toBeInTheDocument()
-            expect(
-                await screen.getByRole('radio', { name: 'CHIP-only' })
-            ).toBeInTheDocument()
-            expect(
-                await screen.getByRole('radio', { name: 'Medicaid and CHIP' })
-            ).toBeInTheDocument()
-
-            // Test validations work.
-            await userEvent.click(
-                screen.getByRole('button', { name: 'Continue' })
-            )
-            await screen.findByTestId('error-summary')
-            await screen.findAllByText(
-                'You must select the population this contract covers'
-            )
+        const contractOnlyRadio = screen.getByRole('radio', {
+            name: 'Contract action only',
         })
+
+        // Change population coverage to Chip only
+        await userEvent.click(chipOnlyRadio)
+
+        // Contract and rates radio is unselected and disabled
+        expect(contractAndRatesRadio).not.toBeChecked()
+        expect(contractAndRatesRadio).toHaveAttribute('disabled')
+
+        // Contract only radio is selected
+        expect(contractOnlyRadio).toBeChecked()
+
+        // Shows hint for submission type
+        expect(
+            screen.getByText(
+                'States are not required to submit rates with CHIP-only contracts.'
+            )
+        ).toBeInTheDocument()
+    })
+    it('new submissions does not automatically select contract only submission type when selecting CHIP-only coverage', async () => {
+        renderWithProviders(
+            <Formik
+                initialValues={SubmissionTypeInitialValues}
+                onSubmit={jest.fn()}
+            >
+                <SubmissionType updateDraft={updateDraftMock} />
+            </Formik>,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        expect(
+            screen.getByText(
+                'Which populations does this contract action cover?'
+            )
+        ).toBeInTheDocument()
+        const medicaidRadio = screen.getByRole('radio', {
+            name: 'Medicaid',
+        })
+        const chipOnlyRadio = screen.getByRole('radio', {
+            name: 'CHIP-only',
+        })
+        const medicaidAndChipRadio = screen.getByRole('radio', {
+            name: 'Medicaid and CHIP',
+        })
+        const contractAndRatesRadio = screen.getByRole('radio', {
+            name: 'Contract action and rate certification',
+        })
+        const contractOnlyRadio = screen.getByRole('radio', {
+            name: 'Contract action only',
+        })
+
+        // Click on each of the population covered radios
+        await userEvent.click(medicaidRadio)
+        await userEvent.click(chipOnlyRadio)
+        await userEvent.click(medicaidAndChipRadio)
+
+        // Expect contract and rates radio to not be selected
+        expect(contractAndRatesRadio).not.toBeChecked()
+        expect(contractOnlyRadio).not.toBeChecked()
+
+        // Change population coverage to Chip only
+        await userEvent.click(chipOnlyRadio)
+
+        // Expect the submission type radios to still be unselected
+        expect(contractAndRatesRadio).not.toBeChecked()
+        expect(contractOnlyRadio).not.toBeChecked()
+
+        // Shows hint for submission type
+        expect(
+            screen.getByText(
+                'States are not required to submit rates with CHIP-only contracts.'
+            )
+        ).toBeInTheDocument()
+    })
+    it('does not clear contract only submission type radio when switching to CHIP-only population coverage', async () => {
+        renderWithProviders(
+            <Formik
+                initialValues={SubmissionTypeInitialValues}
+                onSubmit={jest.fn()}
+            >
+                <SubmissionType updateDraft={updateDraftMock} />
+            </Formik>,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        expect(
+            screen.getByText(
+                'Which populations does this contract action cover?'
+            )
+        ).toBeInTheDocument()
+        const medicaidRadio = screen.getByRole('radio', {
+            name: 'Medicaid',
+        })
+        const contractOnlyRadio = screen.getByRole('radio', {
+            name: 'Contract action only',
+        })
+
+        // Click Medicaid population coverage radio
+        await userEvent.click(medicaidRadio)
+
+        // Click contract only submission type
+        await userEvent.click(contractOnlyRadio)
+
+        // Expect contract only radio to be selected
+        expect(contractOnlyRadio).toBeChecked()
+
+        const chipOnlyRadio = screen.getByRole('radio', {
+            name: 'CHIP-only',
+        })
+
+        // Change population coverage to Chip only
+        await userEvent.click(chipOnlyRadio)
+
+        // Contract only radio is still selected
+        expect(contractOnlyRadio).toBeChecked()
+    })
+    it('shows validation message when population coverage is not selected', async () => {
+        renderWithProviders(
+            <Formik
+                initialValues={SubmissionTypeInitialValues}
+                onSubmit={jest.fn()}
+            >
+                <SubmissionType updateDraft={updateDraftMock} />
+            </Formik>,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        // Expect population coverage question and radios
+        expect(
+            screen.getByText(
+                'Which populations does this contract action cover?'
+            )
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('radio', { name: 'Medicaid' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('radio', { name: 'CHIP-only' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('radio', { name: 'Medicaid and CHIP' })
+        ).toBeInTheDocument()
+
+        // Test validations work.
+        await userEvent.click(screen.getByRole('button', { name: 'Continue' }))
+        await screen.findByTestId('error-summary')
+        await screen.findAllByText(
+            'You must select the population this contract covers'
+        )
     })
 
     it('displays programs select dropdown', async () => {
@@ -398,7 +388,7 @@ describe('SubmissionType', () => {
         )
 
         expect(
-            await screen.getByRole('combobox', {
+            screen.getByRole('combobox', {
                 name: 'Programs this contract action covers (required)',
             })
         ).toBeInTheDocument()
@@ -444,14 +434,14 @@ describe('SubmissionType', () => {
         )
         const combobox = await screen.findByRole('combobox')
 
-        await selectEvent.openMenu(combobox)
+        selectEvent.openMenu(combobox)
 
         await waitFor(() => {
             expect(screen.getByText('Program 3')).toBeInTheDocument()
         })
 
         await selectEvent.select(combobox, 'Program 1')
-        await selectEvent.openMenu(combobox)
+        selectEvent.openMenu(combobox)
         await selectEvent.select(combobox, 'Program 3')
 
         // in react-select, only items that are selected have a "remove item" label
@@ -475,10 +465,10 @@ describe('SubmissionType', () => {
         )
 
         expect(
-            await screen.getByRole('radio', { name: 'Contract action only' })
+            screen.getByRole('radio', { name: 'Contract action only' })
         ).toBeInTheDocument()
         expect(
-            await screen.getByRole('radio', {
+            screen.getByRole('radio', {
                 name: 'Contract action and rate certification',
             })
         ).toBeInTheDocument()
@@ -500,10 +490,10 @@ describe('SubmissionType', () => {
         )
 
         expect(
-            await screen.getByRole('radio', { name: 'Base contract' })
+            screen.getByRole('radio', { name: 'Base contract' })
         ).toBeInTheDocument()
         expect(
-            await screen.getByRole('radio', {
+            screen.getByRole('radio', {
                 name: 'Amendment to base contract',
             })
         ).toBeInTheDocument()
@@ -565,7 +555,7 @@ describe('SubmissionType', () => {
             }
         )
         expect(
-            await screen.getByRole('textbox', {
+            screen.getByRole('textbox', {
                 name: 'Submission description',
             })
         ).toBeInTheDocument()
@@ -582,14 +572,14 @@ describe('SubmissionType', () => {
                 }
             )
 
-            expect(await screen.getByRole('textbox')).not.toHaveClass(
+            expect(screen.getByRole('textbox')).not.toHaveClass(
                 'usa-input--error'
             )
             expect(
-                await screen.queryByText('You must choose a submission type')
+                screen.queryByText('You must choose a submission type')
             ).toBeNull()
             expect(
-                await screen.queryByText(
+                screen.queryByText(
                     'You must provide a description of any major changes or updates'
                 )
             ).toBeNull()
@@ -612,7 +602,7 @@ describe('SubmissionType', () => {
                 name: 'Submission description',
             })
 
-            expect(await textarea).toBeInTheDocument()
+            expect(textarea).toBeInTheDocument()
 
             //trigger validation
             await userEvent.type(textarea, 'something')
@@ -643,7 +633,7 @@ describe('SubmissionType', () => {
                 name: 'Submission description',
             })
 
-            expect(await textarea).toBeInTheDocument()
+            expect(textarea).toBeInTheDocument()
 
             const submissionType = await screen.findByText(
                 'Contract action only'

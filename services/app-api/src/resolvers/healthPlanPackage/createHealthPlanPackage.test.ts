@@ -37,6 +37,7 @@ describe.each(flagValueTestParameters)(
             })
 
             const input: CreateHealthPlanPackageInput = {
+                populationCovered: 'MEDICAID',
                 programIDs: [
                     '5c10fe9f-bec9-416f-a20c-718b152ad633',
                     '037af66b-81eb-4472-8b80-01edf17d12d9',
@@ -74,6 +75,7 @@ describe.each(flagValueTestParameters)(
                 ldService: mockLDService,
             })
             const input: CreateHealthPlanPackageInput = {
+                populationCovered: 'MEDICAID',
                 programIDs: ['xyz123'],
                 riskBasedContract: false,
                 submissionType: 'CONTRACT_ONLY',
@@ -100,6 +102,7 @@ describe.each(flagValueTestParameters)(
             })
 
             const input: CreateHealthPlanPackageInput = {
+                populationCovered: 'MEDICAID',
                 programIDs: ['xyz123'],
                 riskBasedContract: false,
                 submissionType: 'CONTRACT_ONLY',
