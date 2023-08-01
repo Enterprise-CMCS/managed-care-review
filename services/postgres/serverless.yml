@@ -203,8 +203,8 @@ resources:
             sudo chmod +x /usr/local/bin/vm-startup.sh
             sudo chmod +x /usr/local/bin/vm-shutdown.sh
             sudo chmod +x /etc/systemd/system/notify-slack.service
-            sudo sed -i "s,SLACK_WEBHOOK,${self:custom.slackWebookUrl},g" vm-startup.sh
-            sudo sed -i "s,SLACK_WEBHOOK,${self:custom.slackWebookUrl},g" vm-shutdown.sh
+            sudo sed -i "s,SLACK_WEBHOOK,${self:custom.slackWebhookUrl},g" vm-startup.sh
+            sudo sed -i "s,SLACK_WEBHOOK,${self:custom.slackWebhookUrl},g" vm-shutdown.sh
             sudo sed -i "s,STAGE,${self:custom.stage},g" vm-startup.sh 
             sudo sed -i "s,STAGE,${self:custom.stage},g" vm-shutdown.sh
 
