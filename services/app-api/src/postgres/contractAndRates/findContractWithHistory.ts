@@ -2,7 +2,7 @@ import { PrismaTransactionType } from '../prismaTypes'
 import { ContractType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import { parseContractWithHistory } from '../../domain-models/contractAndRates/parseDomainData'
 import { updateInfoIncludeUpdater } from '../prismaHelpers'
-import { convertPrismaErrorToStoreError, StoreError } from '../storeError'
+import { NotFoundError } from '../../errors'
 
 // findContractWithHistory returns a ContractType with a full set of
 // ContractRevisions in reverse chronological order. Each revision is a change to this
@@ -11,9 +11,9 @@ import { convertPrismaErrorToStoreError, StoreError } from '../storeError'
 async function findContractWithHistory(
     client: PrismaTransactionType,
     contractID: string
-): Promise<ContractType | StoreError | Error> {
+): Promise<ContractType | Error> {
     try {
-        const contract = await client.contractTable.findFirstOrThrow({
+        const contract = await client.contractTable.findFirst({
             where: {
                 id: contractID,
             },
@@ -46,10 +46,16 @@ async function findContractWithHistory(
             },
         })
 
+        if (!contract) {
+            const err = `PRISMA ERROR: Cannot find contract with id: ${contractID}`
+            console.error(err)
+            return new NotFoundError(err)
+        }
+
         return parseContractWithHistory(contract)
     } catch (err) {
         console.error('PRISMA ERROR', err)
-        return convertPrismaErrorToStoreError(err)
+        return err
     }
 }
 

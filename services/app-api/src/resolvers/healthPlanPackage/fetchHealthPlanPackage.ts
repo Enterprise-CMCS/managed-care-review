@@ -18,6 +18,7 @@ import {
 } from '../attributeHelper'
 import { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql/index'
+import { NotFoundError } from '../../errors'
 
 export function fetchHealthPlanPackageResolver(
     store: Store,
@@ -44,12 +45,12 @@ export function fetchHealthPlanPackageResolver(
                 input.pkgID
             )
 
-            if (isStoreError(contractWithHistory)) {
+            if (contractWithHistory instanceof Error) {
                 const errMessage = `Issue finding a contract with history with id ${input.pkgID}. Message: ${contractWithHistory.message}`
                 logError('fetchHealthPlanPackage', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
 
-                if (contractWithHistory?.code === 'NOT_FOUND_ERROR') {
+                if (contractWithHistory instanceof NotFoundError) {
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'NOT_FOUND',
@@ -58,18 +59,6 @@ export function fetchHealthPlanPackageResolver(
                     })
                 }
 
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'DB_ERROR',
-                    },
-                })
-            }
-
-            if (contractWithHistory instanceof Error) {
-                const errMessage = `Issue finding a contract with history with id ${input.pkgID}. Message: ${contractWithHistory.message}`
-                logError('fetchHealthPlanPackage', errMessage)
-                setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new GraphQLError(errMessage, {
                     extensions: {
                         code: 'INTERNAL_SERVER_ERROR',

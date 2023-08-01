@@ -6,7 +6,7 @@ import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
 import { updateDraftRate } from './updateDraftRate'
 import { must, createInsertContractData } from '../../testHelpers'
-import { isStoreError } from '../storeError'
+import { NotFoundError } from '../../errors'
 
 describe('submitContract', () => {
     it('creates a submission from a draft', async () => {
@@ -23,19 +23,14 @@ describe('submitContract', () => {
             },
         })
 
-        // submitting before there's a draft should be a store error
-        const storeError = await submitContract(
+        // submitting before there's a draft should be an error
+        const submitError = await submitContract(
             client,
             '1111',
             '1111',
             'failed submit'
         )
-        expect(isStoreError(storeError)).toBeTruthy()
-        expect(storeError).toEqual(
-            expect.objectContaining({
-                code: 'NOT_FOUND_ERROR',
-            })
-        )
+        expect(submitError).toBeInstanceOf(NotFoundError)
 
         // create a draft contract
         const draftContractData = createInsertContractData({
@@ -79,12 +74,7 @@ describe('submitContract', () => {
         )
 
         // resubmitting should be a store error
-        expect(isStoreError(resubmitStoreError)).toBeTruthy()
-        expect(resubmitStoreError).toEqual(
-            expect.objectContaining({
-                code: 'NOT_FOUND_ERROR',
-            })
-        )
+        expect(resubmitStoreError).toBeInstanceOf(NotFoundError)
     })
 
     it('invalidates old revisions when new revisions are submitted', async () => {

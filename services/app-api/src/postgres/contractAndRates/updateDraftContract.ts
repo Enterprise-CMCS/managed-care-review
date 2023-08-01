@@ -6,7 +6,7 @@ import {
 } from '@prisma/client'
 import { ContractType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import { findContractWithHistory } from './findContractWithHistory'
-import { StoreError, convertPrismaErrorToStoreError } from '../storeError'
+import { NotFoundError } from '../../errors'
 
 type UpdateContractArgsType = {
     populationCovered: PopulationCoverageType
@@ -25,16 +25,21 @@ async function updateDraftContract(
     contractID: string,
     formData: UpdateContractArgsType,
     rateIDs: string[]
-): Promise<ContractType | StoreError | Error> {
+): Promise<ContractType | Error> {
     try {
         // Given all the Rates associated with this draft, find the most recent submitted
         // rateRevision to update.
-        const currentRev = await client.contractRevisionTable.findFirstOrThrow({
+        const currentRev = await client.contractRevisionTable.findFirst({
             where: {
                 contractID: contractID,
                 submitInfoID: null,
             },
         })
+        if (!currentRev) {
+            const err = `PRISMA ERROR: Cannot find the current rev to update with contract id: ${contractID}`
+            console.error(err)
+            return new NotFoundError(err)
+        }
 
         await client.contractRevisionTable.update({
             where: {
@@ -64,8 +69,8 @@ async function updateDraftContract(
 
         return findContractWithHistory(client, contractID)
     } catch (err) {
-        console.error('SUBMIT PRISMA CONTRACT ERR', err)
-        return convertPrismaErrorToStoreError(err)
+        console.error('UPDATE PRISMA CONTRACT ERR', err)
+        return err
     }
 }
 

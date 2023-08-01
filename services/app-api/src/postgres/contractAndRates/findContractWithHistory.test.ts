@@ -11,7 +11,6 @@ import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
 import { must, createInsertContractData } from '../../testHelpers'
-import { isStoreError } from '../storeError'
 
 describe('findContract', () => {
     it('finds a stripped down contract with history', async () => {
@@ -624,7 +623,7 @@ describe('findContract', () => {
             stateUser.id,
             'third submit'
         )
-        if (!isStoreError(contractA_1_Error)) {
+        if (!(contractA_1_Error instanceof Error)) {
             throw new Error('Should be impossible to submit twice in a row.')
         }
 
