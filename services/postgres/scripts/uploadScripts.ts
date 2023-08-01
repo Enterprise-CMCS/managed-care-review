@@ -13,7 +13,12 @@ const files = ['vm-startup.sh', 'vm-shutdown.sh', 'slack-notify.service']
 let bucketName: string
 
 async function main() {
-    const stage = process.env.stage ?? 'unset'
+    if (process.argv.length === 2) {
+        console.error('You must pass the stage to uploadScripts. Exiting.')
+        process.exit(1)
+    }
+
+    const stage = process.argv[2] ?? 'unset'
     if (!stages.includes(stage)) {
         console.info(`Stage is ${stage}. Skipping postgres VM deployment`)
         return
