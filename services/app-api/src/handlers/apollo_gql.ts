@@ -34,8 +34,8 @@ import {
     ldService,
     offlineLDService,
 } from '../launchDarkly/launchDarkly'
-import { LDClient } from 'launchdarkly-node-server-sdk'
-import * as ld from 'launchdarkly-node-server-sdk'
+import { LDClient } from '@launchdarkly/node-server-sdk'
+import * as ld from '@launchdarkly/node-server-sdk'
 import {
     ApolloServerPluginLandingPageLocalDefault,
     ApolloServerPluginLandingPageDisabled,
