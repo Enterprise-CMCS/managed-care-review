@@ -1,7 +1,7 @@
 import { PrismaTransactionType } from '../prismaTypes'
 import { ContractType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
-import { parseContractWithHistory } from '../../domain-models/contractAndRates/parseDomainData'
 import { updateInfoIncludeUpdater } from '../prismaHelpers'
+import { parseContractWithHistory } from './prismaContractWithHistoryConverter'
 
 // findContractWithHistory returns a ContractType with a full set of
 // ContractRevisions in reverse chronological order. Each revision is a change to this
