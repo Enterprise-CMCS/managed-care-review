@@ -5,7 +5,7 @@ import {
     FeatureFlagLDConstant,
     FeatureFlagSettings,
 } from '../../../app-web/src/common-code/featureFlags'
-import { LDClient } from 'launchdarkly-node-server-sdk'
+import { LDClient } from '@launchdarkly/node-server-sdk'
 import { Context } from '../handlers/apollo_gql'
 import { logError } from '../logger'
 import { setErrorAttributesOnActiveSpan } from '../resolvers/attributeHelper'
