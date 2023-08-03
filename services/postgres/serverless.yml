@@ -220,7 +220,7 @@ resources:
                 echo "Failed to download vm scripts from s3. Retrying in 10 seconds..."
                 download_failures=$((download_failures+1))
 
-                if [ $download_failures -eq 10 ]; then
+                if [ $download_failures -eq 60 ]; then
                   echo "Maximum attempts of aws s3 cp reached. Exiting..."
                   break
                 fi
