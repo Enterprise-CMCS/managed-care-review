@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { ContractType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import { findContractWithHistory } from './findContractWithHistory'
+import { NotFoundError } from '../storeError'
 
 // Update the given revision
 // * invalidate relationships of previous revision
@@ -10,7 +11,7 @@ async function submitContract(
     contractID: string,
     submittedByUserID: string,
     submitReason: string
-): Promise<ContractType | Error> {
+): Promise<ContractType | NotFoundError | Error> {
     const groupTime = new Date()
 
     try {
@@ -38,9 +39,11 @@ async function submitContract(
                     },
                 },
             })
+
             if (!currentRev) {
-                console.error('No Unsubmitted Rev!')
-                return new Error('cant find the current rev to submit')
+                const err = `PRISMA ERROR: Cannot find the current rev to submit with contract id: ${contractID}`
+                console.error(err)
+                return new NotFoundError(err)
             }
 
             const submittedRateRevisions = currentRev.draftRates.map(
@@ -149,7 +152,7 @@ async function submitContract(
             return await findContractWithHistory(tx, contractID)
         })
     } catch (err) {
-        console.error('SUBMITeeee PRISMA CONTRACT ERR', err)
+        console.error('SUBMIT PRISMA CONTRACT ERR', err)
         return err
     }
 }

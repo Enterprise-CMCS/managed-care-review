@@ -106,7 +106,7 @@ export function updateCMSUserResolver(
             'Updated user assignments' // someday might have a note field and make this a param
         )
         if (isStoreError(result)) {
-            if (result.code === 'INSERT_ERROR') {
+            if (result.code === 'NOT_FOUND_ERROR') {
                 const errMsg = 'cmsUserID does not exist'
                 logError('updateCmsUser', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)

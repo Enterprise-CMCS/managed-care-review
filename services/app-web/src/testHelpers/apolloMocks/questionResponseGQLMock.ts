@@ -13,6 +13,7 @@ import {
 } from '../../gen/gqlClient'
 import { mockValidCMSUser } from './userGQLMock'
 import { mockSubmittedHealthPlanPackage, mockQuestionsPayload } from './'
+import { GraphQLError } from 'graphql'
 
 type fetchStateHealthPlanPackageWithQuestionsProps = {
     stateSubmission?: HealthPlanPackage | Partial<HealthPlanPackage>
@@ -109,17 +110,22 @@ const fetchStateHealthPlanPackageWithQuestionsMockSuccess = ({
 const fetchStateHealthPlanPackageWithQuestionsMockNotFound = ({
     id,
 }: fetchStateHealthPlanPackageWithQuestionsProps): MockedResponse<FetchHealthPlanPackageWithQuestionsQuery> => {
+    const graphQLError = new GraphQLError(
+        'Issue finding a package with id a6039ed6-39cc-4814-8eaa-0c99f25e325d. Message: Result was undefined.',
+        {
+            extensions: {
+                code: 'NOT_FOUND',
+            },
+        }
+    )
+
     return {
         request: {
             query: FetchHealthPlanPackageWithQuestionsDocument,
             variables: { input: { pkgID: id } },
         },
         result: {
-            data: {
-                fetchHealthPlanPackage: {
-                    pkg: undefined,
-                },
-            },
+            errors: [graphQLError],
         },
     }
 }

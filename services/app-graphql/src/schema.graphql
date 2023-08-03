@@ -264,7 +264,7 @@ input FetchHealthPlanPackageInput {
 
 type FetchHealthPlanPackagePayload {
     "A single HealthPlanPackage"
-    pkg: HealthPlanPackage
+    pkg: HealthPlanPackage!
 }
 
 type HealthPlanPackageEdge {

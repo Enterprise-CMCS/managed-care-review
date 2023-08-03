@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { ContractType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import { findContractWithHistory } from './findContractWithHistory'
+import { NotFoundError } from '../storeError'
 
 // Unlock the given contract
 // * copy form data
@@ -10,7 +11,7 @@ async function unlockContract(
     contractID: string,
     unlockedByUserID: string,
     unlockReason: string
-): Promise<ContractType | Error> {
+): Promise<ContractType | NotFoundError | Error> {
     const groupTime = new Date()
 
     try {
@@ -36,12 +37,9 @@ async function unlockContract(
                 },
             })
             if (!currentRev) {
-                console.error(
-                    'Programming Error: cannot find the current revision to submit'
-                )
-                return new Error(
-                    'Programming Error: cannot find the current revision to submit'
-                )
+                const err = `PRISMA ERROR: Cannot find the current revision to unlock with contract id: ${contractID}`
+                console.error(err)
+                return new NotFoundError(err)
             }
 
             if (!currentRev.submitInfoID) {
@@ -95,7 +93,7 @@ async function unlockContract(
             return findContractWithHistory(tx, contractID)
         })
     } catch (err) {
-        console.error('SUBMIT PRISMA CONTRACT ERR', err)
+        console.error('UNLOCK PRISMA CONTRACT ERR', err)
         return err
     }
 }
