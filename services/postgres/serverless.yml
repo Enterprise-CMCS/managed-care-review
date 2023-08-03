@@ -169,7 +169,9 @@ resources:
     PostgresVM:
       Type: 'AWS::EC2::Instance'
       Condition: IsDevValProd
-      DependsOn: PostgresVMScriptsBucket
+      DependsOn:
+        - PostgresVMScriptsBucket
+        - PostgresAuroraV2
       Metadata:
         AWS::CloudFormation::Init:
           config:
