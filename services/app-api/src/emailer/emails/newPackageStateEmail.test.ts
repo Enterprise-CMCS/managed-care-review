@@ -11,8 +11,10 @@ import {
     packageName,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { newPackageStateEmail } from './index'
+import { formatEmailAddresses } from '../formatters'
 
 const defaultSubmitters = ['submitter1@example.com', 'submitter2@example.com']
+const mcReviewHelpEmail = testEmailConfig().helpDeskEmail
 
 test('to addresses list includes submitter emails', async () => {
     const sub = mockContractOnlyFormData()
@@ -20,8 +22,9 @@ test('to addresses list includes submitter emails', async () => {
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
-        defaultStatePrograms
+        testEmailConfig(),
+        defaultStatePrograms,
+        mcReviewHelpEmail
     )
 
     if (template instanceof Error) {
@@ -56,8 +59,9 @@ test('to addresses list includes all state contacts on submission', async () => 
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
-        defaultStatePrograms
+        testEmailConfig(),
+        defaultStatePrograms,
+        mcReviewHelpEmail
     )
 
     if (template instanceof Error) {
@@ -94,8 +98,9 @@ test('to addresses list does not include duplicate state receiver emails on subm
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
-        defaultStatePrograms
+        testEmailConfig(),
+        defaultStatePrograms,
+        mcReviewHelpEmail
     )
 
     if (template instanceof Error) {
@@ -106,7 +111,7 @@ test('to addresses list does not include duplicate state receiver emails on subm
     expect(template.toAddresses).toEqual([
         'test1@example.com',
         ...defaultSubmitters,
-        ...testEmailConfig.devReviewTeamEmails,
+        ...testEmailConfig().devReviewTeamEmails,
     ])
 })
 
@@ -118,8 +123,9 @@ test('subject line is correct and clearly states submission is complete', async 
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
-        defaultStatePrograms
+        testEmailConfig(),
+        defaultStatePrograms,
+        mcReviewHelpEmail
     )
 
     if (template instanceof Error) {
@@ -145,8 +151,9 @@ test('includes mcog, rate, and team email addresses', async () => {
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
-        defaultStatePrograms
+        testEmailConfig(),
+        defaultStatePrograms,
+        mcReviewHelpEmail
     )
 
     if (template instanceof Error) {
@@ -174,7 +181,7 @@ test('includes mcog, rate, and team email addresses', async () => {
         expect.objectContaining({
             subject: expect.stringContaining(`${name} was sent to CMS`),
             bodyText: expect.stringContaining(
-                `please reach out to mc-review@example.com`
+                `please reach out to ${formatEmailAddresses(mcReviewHelpEmail)}`
             ),
         })
     )
@@ -186,8 +193,9 @@ test('includes link to submission', async () => {
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
-        defaultStatePrograms
+        testEmailConfig(),
+        defaultStatePrograms,
+        mcReviewHelpEmail
     )
 
     if (template instanceof Error) {
@@ -217,8 +225,9 @@ test('includes information about what is next', async () => {
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
-        defaultStatePrograms
+        testEmailConfig(),
+        defaultStatePrograms,
+        mcReviewHelpEmail
     )
 
     if (template instanceof Error) {
@@ -274,8 +283,9 @@ test('includes expected data summary for a contract and rates submission State e
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
-        defaultStatePrograms
+        testEmailConfig(),
+        defaultStatePrograms,
+        mcReviewHelpEmail
     )
 
     if (template instanceof Error) {
@@ -335,7 +345,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                  supportingDocuments: [],
+                supportingDocuments: [],
                 rateDateCertified: new Date('01/02/2021'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                 rateCertificationName:
@@ -363,7 +373,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                  supportingDocuments: [],
+                supportingDocuments: [],
                 rateDateCertified: new Date('02/02/2022'),
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                 rateCertificationName:
@@ -391,7 +401,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                  supportingDocuments: [],
+                supportingDocuments: [],
                 rateDateCertified: new Date('01/02/2021'),
                 rateProgramIDs: [
                     'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
@@ -423,8 +433,9 @@ test('includes expected data summary for a multi-rate contract and rates submiss
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
-        defaultStatePrograms
+        testEmailConfig(),
+        defaultStatePrograms,
+        mcReviewHelpEmail
     )
 
     if (template instanceof Error) {
@@ -502,7 +513,7 @@ test('includes expected data summary for a rate amendment submission State email
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                  supportingDocuments: [],
+                supportingDocuments: [],
                 rateDateCertified: new Date('10/19/2022'),
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                 rateCertificationName:
@@ -531,8 +542,9 @@ test('includes expected data summary for a rate amendment submission State email
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
-        statePrograms
+        testEmailConfig(),
+        statePrograms,
+        mcReviewHelpEmail
     )
 
     if (template instanceof Error) {
@@ -584,7 +596,7 @@ test('renders overall email for a new package with a rate amendment as expected'
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                  supportingDocuments: [],
+                supportingDocuments: [],
                 rateDateCertified: new Date('01/02/2021'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                 rateCertificationName:
@@ -612,8 +624,9 @@ test('renders overall email for a new package with a rate amendment as expected'
     const result = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
-        defaultStatePrograms
+        testEmailConfig(),
+        defaultStatePrograms,
+        mcReviewHelpEmail
     )
     if (result instanceof Error) {
         console.error(result)

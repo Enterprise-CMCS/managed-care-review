@@ -7,6 +7,6 @@
         For assistance on policy and actuarial issues, please reach out to <%= it. cmsRateHelpEmailAddress %>.
     </li>
     <li>
-        For issues related to MC-Review or all other inquiries, please reach out to <%= it.cmsDevTeamHelpEmailAddress %>.
+        For issues related to MC-Review or all other inquiries, please reach out to <%= it.mcReviewHelpEmail %>.
     </li>
 </ul>

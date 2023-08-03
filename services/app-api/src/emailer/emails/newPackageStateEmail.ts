@@ -18,7 +18,8 @@ export const newPackageStateEmail = async (
     formData: LockedHealthPlanFormDataType,
     submitterEmails: string[],
     config: EmailConfiguration,
-    statePrograms: ProgramType[]
+    statePrograms: ProgramType[],
+    mcReviewHelpEmail: string
 ): Promise<EmailData | Error> => {
     const stateContactEmails = formData.stateContacts.map(
         (contact) => contact.email
@@ -33,6 +34,7 @@ export const newPackageStateEmail = async (
     const packagePrograms = findPackagePrograms(formData, statePrograms)
 
     if (packagePrograms instanceof Error) {
+        console.info('DID I ERROR HERE?')
         return packagePrograms
     }
 
@@ -49,12 +51,7 @@ export const newPackageStateEmail = async (
         cmsReviewHelpEmailAddress: formatEmailAddresses(
             config.cmsReviewHelpEmailAddress
         ),
-        cmsRateHelpEmailAddress: formatEmailAddresses(
-            config.cmsRateHelpEmailAddress
-        ),
-        cmsDevTeamHelpEmailAddress: formatEmailAddresses(
-            config.cmsDevTeamHelpEmailAddress
-        ),
+        mcReviewHelpEmail: formatEmailAddresses(mcReviewHelpEmail),
         packageName,
         submissionType: SubmissionTypeRecord[formData.submissionType],
         submissionDescription: formData.submissionDescription,
@@ -100,6 +97,7 @@ export const newPackageStateEmail = async (
         return {
             toAddresses: receiverEmails,
             sourceEmail: config.emailSource,
+            replyToAddresses: [mcReviewHelpEmail],
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
             }${packageName} was sent to CMS`,
