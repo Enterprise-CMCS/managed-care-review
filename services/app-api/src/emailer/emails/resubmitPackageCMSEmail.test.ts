@@ -28,7 +28,7 @@ describe('with rates', () => {
         const template = await resubmitPackageCMSEmail(
             submission,
             resubmitData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -86,7 +86,7 @@ describe('with rates', () => {
         const template = await resubmitPackageCMSEmail(
             sub,
             resubmitData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -248,7 +248,7 @@ describe('with rates', () => {
         const template = await resubmitPackageCMSEmail(
             sub,
             resubmitData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -305,7 +305,7 @@ describe('with rates', () => {
         const template = await resubmitPackageCMSEmail(
             submission,
             resubmitData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -315,7 +315,7 @@ describe('with rates', () => {
             return
         }
 
-        testEmailConfig.dmcpEmails.forEach((emailAddress) => {
+        testEmailConfig().dmcpEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
@@ -323,7 +323,7 @@ describe('with rates', () => {
             )
         })
 
-        testEmailConfig.oactEmails.forEach((emailAddress) => {
+        testEmailConfig().oactEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
@@ -332,7 +332,7 @@ describe('with rates', () => {
         })
 
         // do not include dmco group emails - rely on state analysts instead
-        testEmailConfig.dmcoEmails.forEach((emailAddress) => {
+        testEmailConfig().dmcoEmails.forEach((emailAddress) => {
             expect(template).not.toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
@@ -345,7 +345,7 @@ describe('with rates', () => {
         const template = await resubmitPackageCMSEmail(
             submission,
             resubmitData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -358,7 +358,7 @@ describe('with rates', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.not.arrayContaining([
-                    testEmailConfig.cmsRateHelpEmailAddress,
+                    testEmailConfig().cmsRateHelpEmailAddress,
                 ]),
             })
         )
@@ -366,7 +366,7 @@ describe('with rates', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.not.arrayContaining([
-                    testEmailConfig.cmsReviewHelpEmailAddress,
+                    testEmailConfig().cmsReviewHelpEmailAddress,
                 ]),
             })
         )
@@ -376,13 +376,13 @@ describe('with rates', () => {
         const template = await resubmitPackageCMSEmail(
             submission,
             resubmitData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             defaultStatePrograms
         )
         const reviewerEmails = [
-            ...testEmailConfig.devReviewTeamEmails,
-            ...testEmailConfig.oactEmails,
+            ...testEmailConfig().devReviewTeamEmails,
+            ...testEmailConfig().oactEmails,
         ]
 
         if (template instanceof Error) {
@@ -442,7 +442,7 @@ describe('with rates', () => {
         const template = await resubmitPackageCMSEmail(
             sub,
             resubmitData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             msStatePrograms
         )
@@ -497,11 +497,11 @@ describe('with rates', () => {
         const template = await resubmitPackageCMSEmail(
             sub,
             resubmitData,
-            testEmailConfig,
+            testEmailConfig(),
             [],
             msStatePrograms
         )
-        const excludedEmails = [...testEmailConfig.oactEmails]
+        const excludedEmails = [...testEmailConfig().oactEmails]
 
         if (template instanceof Error) {
             console.error(template)
@@ -539,11 +539,11 @@ describe('contract only', () => {
         const contractOnlyTemplate = await resubmitPackageCMSEmail(
             submission,
             resubmitData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             defaultStatePrograms
         )
-        const rateReviewerEmails = [...testEmailConfig.oactEmails]
+        const rateReviewerEmails = [...testEmailConfig().oactEmails]
 
         if (contractOnlyTemplate instanceof Error) {
             console.error(contractOnlyTemplate)
@@ -563,7 +563,7 @@ describe('contract only', () => {
         const contractOnlyTemplate = await resubmitPackageCMSEmail(
             submission,
             resubmitData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -586,7 +586,7 @@ describe('contract only', () => {
         const contractOnlyTemplate = await resubmitPackageCMSEmail(
             submission,
             resubmitData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -607,7 +607,7 @@ describe('contract only', () => {
         const template = await resubmitPackageCMSEmail(
             mockContractOnlyFormData(),
             resubmitData,
-            testEmailConfig,
+            testEmailConfig(),
             [],
             defaultStatePrograms
         )
@@ -635,7 +635,7 @@ describe('contract only', () => {
         const template = await resubmitPackageCMSEmail(
             sub,
             resubmitData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             msStatePrograms
         )
@@ -664,11 +664,11 @@ describe('contract only', () => {
         const template = await resubmitPackageCMSEmail(
             sub,
             resubmitData,
-            testEmailConfig,
+            testEmailConfig(),
             [],
             msStatePrograms
         )
-        const excludedEmails = [...testEmailConfig.oactEmails]
+        const excludedEmails = [...testEmailConfig().oactEmails]
 
         if (template instanceof Error) {
             console.error(testStateAnalystEmails)
@@ -767,7 +767,7 @@ test('renders overall email as expected', async () => {
     const template = await resubmitPackageCMSEmail(
         submission,
         resubmitData,
-        testEmailConfig,
+        testEmailConfig(),
         testStateAnalystEmails,
         defaultStatePrograms
     )

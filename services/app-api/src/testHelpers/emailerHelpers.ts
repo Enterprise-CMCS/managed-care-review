@@ -18,7 +18,7 @@ import { StateUserType } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 import { testSendSESEmail } from './awsSESHelpers'
 
-const testEmailConfig: EmailConfiguration = {
+const testEmailConfig = (): EmailConfiguration => ({
     stage: 'LOCAL',
     baseUrl: 'http://localhost',
     emailSource: 'emailSource@example.com',
@@ -29,7 +29,8 @@ const testEmailConfig: EmailConfiguration = {
     oactEmails: ['ratesreview@example.com'],
     dmcpEmails: ['policyreview1@example.com'],
     dmcoEmails: ['overallreview@example.com'],
-}
+    helpDeskEmail: '"MC-Review Help Desk" <MC_Review_HelpDesk@example.com>',
+})
 
 const testDuplicateEmailConfig: EmailConfiguration = {
     stage: 'LOCAL',
@@ -46,6 +47,7 @@ const testDuplicateEmailConfig: EmailConfiguration = {
     oactEmails: ['duplicate@example.com', 'duplicate@example.com'],
     dmcpEmails: ['duplicate@example.com', 'duplicate@example.com'],
     dmcoEmails: ['duplicate@example.com', 'duplicate@example.com'],
+    helpDeskEmail: 'duplicate@example.com',
 }
 
 const testStateAnalystsEmails: string[] = [
@@ -59,7 +61,7 @@ const testDuplicateStateAnalystsEmails: string[] = [
 ]
 
 function testEmailer(customConfig?: EmailConfiguration): Emailer {
-    const config = customConfig || testEmailConfig
+    const config = customConfig || testEmailConfig()
     return {
         config,
         sendEmail: jest.fn(
@@ -73,7 +75,6 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
                                 JSON.stringify(err)
                         )
                     }
-
                     return new Error('SES email send failed. Error: ' + err)
                 }
             }
@@ -98,13 +99,15 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         sendStateNewPackage: async function (
             formData,
             submitterEmails,
-            statePrograms
+            statePrograms,
+            mcReviewHelpEmail
         ): Promise<void | Error> {
             const emailData = await newPackageStateEmail(
                 formData,
                 submitterEmails,
                 config,
-                statePrograms
+                statePrograms,
+                mcReviewHelpEmail
             )
             if (emailData instanceof Error) {
                 return emailData

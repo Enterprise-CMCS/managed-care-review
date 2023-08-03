@@ -117,6 +117,7 @@ const constructTestEmailer = (): Emailer => {
         oactEmails: ['testRate@example.com'],
         dmcpEmails: ['testPolicy@example.com'],
         dmcoEmails: ['testDmco@example.com'],
+        helpDeskEmail: 'MC_Review_HelpDesk@example.com>',
     }
     return newLocalEmailer(config)
 }

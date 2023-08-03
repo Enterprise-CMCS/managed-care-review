@@ -27,3 +27,7 @@ export {
     getSourceEmail,
     getSourceEmailLocal,
 } from './sourceEmail/getSourceEmail'
+export {
+    getHelpDeskEmailLocal,
+    getHelpDeskEmail,
+} from './helpDeskEmail/getHelpDeskEmail'

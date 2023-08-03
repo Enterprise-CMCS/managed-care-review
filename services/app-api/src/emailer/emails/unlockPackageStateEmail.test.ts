@@ -59,7 +59,7 @@ test('subject line is correct and clearly states submission is unlocked', async 
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms,
         defaultSubmitters
     )
@@ -82,7 +82,7 @@ test('includes expected data summary for a contract and rates submission unlock 
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms,
         defaultSubmitters
     )
@@ -232,7 +232,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms,
         defaultSubmitters
     )
@@ -302,7 +302,7 @@ it('does includes the correct submission URL', async () => {
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms,
         defaultSubmitters
     )
@@ -388,7 +388,7 @@ test('renders overall email as expected', async () => {
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms,
         defaultSubmitters
     )
