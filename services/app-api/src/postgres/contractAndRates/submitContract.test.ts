@@ -6,7 +6,7 @@ import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
 import { updateDraftRate } from './updateDraftRate'
 import { must, createInsertContractData } from '../../testHelpers'
-import { NotFoundError } from '../../errors'
+import { NotFoundError } from '../storeError'
 
 describe('submitContract', () => {
     it('creates a submission from a draft', async () => {
