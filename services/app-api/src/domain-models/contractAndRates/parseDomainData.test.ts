@@ -7,7 +7,6 @@ import {
 import {
     parseDraftContract,
     parseDraftContractRevision,
-    parseContractWithHistory,
 } from './parseDomainData'
 import { v4 as uuidv4 } from 'uuid'
 import {
@@ -15,6 +14,7 @@ import {
     createContractRevision,
     createDraftContractData,
 } from '../../testHelpers/'
+import { parseContractWithHistory } from '../../postgres/contractAndRates/prismaContractWithHistoryConverter'
 
 describe('parseDomainData', () => {
     describe('parseDraftContract', () => {

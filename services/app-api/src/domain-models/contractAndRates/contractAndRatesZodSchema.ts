@@ -104,3 +104,35 @@ export type {
     UpdateInfoType,
     ContractStatusType,
 }
+
+/// Returned By FindWithHistory, Submit
+// ContractWithRevisionsType
+// - ContractType
+// - revisions: ContractRevisionWithRateRevisionsType
+// -- ContractRevisionType
+// -- ContractFormDataType
+// -- rateRevisions: RateRevisionType
+// ---RateFormDataType
+// --- rate: RateType
+
+// returned by insertContract, unlockContract?, updateContract,
+// DraftContractType
+// - ContractType
+// - draftRevision: DraftContractRevisionType
+// -- ContractRevisionType
+// -- ContractFormDataType
+// -- rateRevisions: RateRevisionType
+// --- RateFormDataType
+// --- rate: RateType
+
+// ContractType
+// ContractWithRevisionsType
+// ContractRevisionType
+// ContractRevisionWithRateRevisionsType
+// ContractFormDataType
+
+// RateType
+// RateWithRevisionsType
+// RateRevisonType
+// RateRevisionWithContractRevisionsType
+// RateFormDataType

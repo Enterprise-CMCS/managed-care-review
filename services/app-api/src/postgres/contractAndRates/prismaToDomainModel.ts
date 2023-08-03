@@ -37,7 +37,7 @@ function getContractStatus(
         'createdAt' | 'submitInfo'
     >[]
 ): ContractStatusType {
-    // need to order revisions from latest to earlies
+    // need to order revisions from latest to earliest
     const latestToEarliestRev = revision.sort(
         (revA, revB) => revB.createdAt.getTime() - revA.createdAt.getTime()
     )

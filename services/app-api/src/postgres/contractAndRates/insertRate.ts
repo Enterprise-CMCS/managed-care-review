@@ -71,12 +71,7 @@ async function insertDraftRate(
                             updatedAt: contractRevision.updatedAt,
                             formData:
                                 contractFormDataToDomainModel(contractRevision),
-                            rateRevisions: contractRevision.rateRevisions.map(
-                                (rr) => ({
-                                    id: rr.rateRevisionID,
-                                    revisionFormData: rr.rateRevision.name,
-                                })
-                            ),
+                            rateRevisions: [],
                         })
                     ),
                 })),
