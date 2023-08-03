@@ -1,6 +1,12 @@
 // For use in TESTS only. Throws a returned error
-function must<T>(maybeErr: T | Error): T {
+import { isStoreError, StoreError } from '../postgres'
+
+function must<T>(maybeErr: T | Error | StoreError): T {
     if (maybeErr instanceof Error) {
+        throw maybeErr
+    }
+
+    if (isStoreError(maybeErr)) {
         throw maybeErr
     }
     return maybeErr

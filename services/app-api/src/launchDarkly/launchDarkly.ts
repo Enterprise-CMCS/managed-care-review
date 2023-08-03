@@ -11,14 +11,12 @@ import { logError } from '../logger'
 import { setErrorAttributesOnActiveSpan } from '../resolvers/attributeHelper'
 
 //Set up default feature flag values used to returned data
-const defaultFeatureFlags: FeatureFlagSettings = featureFlagKeys.reduce(
-    (a, c) => {
+const defaultFeatureFlags = (): FeatureFlagSettings =>
+    featureFlagKeys.reduce((a, c) => {
         const flag = featureFlags[c].flag
         const defaultValue = featureFlags[c].defaultValue
         return Object.assign(a, { [flag]: defaultValue })
-    },
-    {} as FeatureFlagSettings
-)
+    }, {} as FeatureFlagSettings)
 
 type LDService = {
     getFeatureFlag: (
@@ -50,7 +48,8 @@ function offlineLDService(): LDService {
                 `No connection to LaunchDarkly, fallback to offlineLDService with default value for ${flag}`,
                 context.span
             )
-            return defaultFeatureFlags[flag]
+            const featureFlags = defaultFeatureFlags()
+            return featureFlags[flag]
         },
     }
 }

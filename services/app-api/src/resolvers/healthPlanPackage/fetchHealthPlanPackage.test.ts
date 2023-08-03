@@ -9,6 +9,7 @@ import {
     resubmitTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 describe('fetchHealthPlanPackage', () => {
     const testUserCMS = testCMSUser()
@@ -48,6 +49,10 @@ describe('fetchHealthPlanPackage', () => {
             throw subData
         }
 
+        // When not using tables, the protobuf ID is used to as the HPP id when inserting a new HPP in the tables.
+        // So HPP id and proto id are the same.
+        // Now that our form data is in postgres contract revision table, the ids are not the same. So this expect is
+        // removed when flag is on.
         expect(subData.id).toEqual(createdID)
         expect(subData.programIDs).toEqual([
             '5c10fe9f-bec9-416f-a20c-718b152ad633',
@@ -63,7 +68,7 @@ describe('fetchHealthPlanPackage', () => {
         ])
     })
 
-    it('returns nothing if the ID doesnt exist', async () => {
+    it('returns error if the ID doesnt exist', async () => {
         const server = await constructTestPostgresServer()
 
         // then see if we can fetch that same submission
@@ -76,10 +81,17 @@ describe('fetchHealthPlanPackage', () => {
             variables: { input },
         })
 
-        expect(result.errors).toBeUndefined()
+        expect(result.errors).toBeDefined()
+        if (result.errors === undefined) {
+            throw new Error('annoying jest typing behavior')
+        }
+        expect(result.errors).toHaveLength(1)
+        const resultErr = result.errors[0]
 
-        const resultSub = result.data?.fetchHealthPlanPackage.pkg
-        expect(resultSub).toBeNull()
+        expect(resultErr?.message).toBe(
+            `Issue finding a package with id ${input.pkgID}. Message: Result was undefined.`
+        )
+        expect(resultErr?.extensions?.code).toBe('NOT_FOUND')
     })
 
     it('returns multiple submissions payload with multiple revisions', async () => {
@@ -375,5 +387,81 @@ describe('fetchHealthPlanPackage', () => {
             )
             mostRecentDate = rev.node.createdAt
         }
+    })
+})
+
+// Currently we cannot set up fetchHPP tests like createHPP because not all resolvers have been migrated yet.
+// Once all resolvers are migrated and tests in this describe block mirrors the ones above, we can then use describe.each
+describe('fetchHealthPlanPackage rates-db-refactor flag on tests', () => {
+    const mockLDService = testLDService({ 'rates-db-refactor': true })
+    it('returns package with one revision', async () => {
+        const server = await constructTestPostgresServer({
+            ldService: mockLDService,
+        })
+
+        // First, create a new submission
+        const stateSubmission = await createTestHealthPlanPackage(server)
+
+        const createdID = stateSubmission.id
+
+        // then see if we can fetch that same submission
+        const input = {
+            pkgID: createdID,
+        }
+
+        const result = await server.executeOperation({
+            query: FETCH_HEALTH_PLAN_PACKAGE,
+            variables: { input },
+        })
+
+        expect(result.errors).toBeUndefined()
+
+        const resultSub = result.data?.fetchHealthPlanPackage.pkg
+        expect(resultSub.id).toEqual(createdID)
+        expect(resultSub.revisions).toHaveLength(1)
+
+        const revision = resultSub.revisions[0].node
+
+        const subData = base64ToDomain(revision.formDataProto)
+        if (subData instanceof Error) {
+            throw subData
+        }
+
+        // Expect the created revision and the fetchHPP revision are the same.
+        expect(subData.id).toEqual(stateSubmission.revisions[0].node.id)
+
+        expect(subData.programIDs).toEqual([
+            '5c10fe9f-bec9-416f-a20c-718b152ad633',
+        ])
+        expect(subData.submissionDescription).toBe('A created submission')
+        expect(subData.documents).toEqual([])
+    })
+
+    it('returns error if the ID doesnt exist', async () => {
+        const server = await constructTestPostgresServer({
+            ldService: mockLDService,
+        })
+
+        // then see if we can fetch that same submission
+        const input = {
+            pkgID: 'BOGUS-ID',
+        }
+
+        const result = await server.executeOperation({
+            query: FETCH_HEALTH_PLAN_PACKAGE,
+            variables: { input },
+        })
+
+        expect(result.errors).toBeDefined()
+        if (result.errors === undefined) {
+            throw new Error('annoying jest typing behavior')
+        }
+        expect(result.errors).toHaveLength(1)
+        const resultErr = result.errors[0]
+
+        expect(resultErr?.message).toBe(
+            `Issue finding a contract with history with id ${input.pkgID}. Message: PRISMA ERROR: Cannot find contract with id: BOGUS-ID`
+        )
+        expect(resultErr?.extensions?.code).toBe('NOT_FOUND')
     })
 })

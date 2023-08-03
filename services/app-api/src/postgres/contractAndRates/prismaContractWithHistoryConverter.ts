@@ -87,6 +87,9 @@ function contractWithHistoryToDomainModel(
             continue
         }
 
+        // This initial entry is the first history record of this contract revision.
+        // Then the for loop with it's rateRevisions are additional history records for each change in rate revisions.
+        // This is why allRevisionSets could have more entries than contract revisions.
         const initialEntry: ContractRevisionSet = {
             contractRev,
             submitInfo: contractRev.submitInfo,
@@ -97,6 +100,7 @@ function contractWithHistoryToDomainModel(
         allRevisionSets.push(initialEntry)
 
         let lastEntry = initialEntry
+        // Now we construct a revision history for each change in rate revisions.
         // go through every rate revision in the join table in time order and construct a revisionSet
         // with (or without) the new rate revision in it.
         for (const rateRev of contractRev.rateRevisions) {
@@ -142,11 +146,9 @@ function contractWithHistoryToDomainModel(
 
     const revisions = contractRevToDomainModel(allRevisionSets).reverse()
 
-    const contractStatus = getContractStatus(contract.revisions)
-
     return {
         id: contract.id,
-        status: contractStatus,
+        status: getContractStatus(contract.revisions),
         stateCode: contract.stateCode,
         stateNumber: contract.stateNumber,
         revisions: revisions,

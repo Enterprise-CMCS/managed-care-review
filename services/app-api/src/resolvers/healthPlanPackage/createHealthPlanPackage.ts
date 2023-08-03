@@ -113,9 +113,7 @@ export function createHealthPlanPackageResolver(
             logSuccess('createHealthPlanPackage')
             setSuccessAttributesOnActiveSpan(span)
 
-            return {
-                pkg,
-            }
+            return { pkg }
         } else {
             const pkgResult = await store.insertHealthPlanPackage(insertArgs)
             if (isStoreError(pkgResult)) {

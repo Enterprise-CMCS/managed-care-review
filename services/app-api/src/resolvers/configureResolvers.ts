@@ -38,7 +38,10 @@ export function configureResolvers(
         DateTime: GraphQLDateTime,
         Query: {
             fetchCurrentUser: fetchCurrentUserResolver(),
-            fetchHealthPlanPackage: fetchHealthPlanPackageResolver(store),
+            fetchHealthPlanPackage: fetchHealthPlanPackageResolver(
+                store,
+                launchDarkly
+            ),
             indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
             indexUsers: indexUsersResolver(store),
             indexQuestions: indexQuestionsResolver(store),
