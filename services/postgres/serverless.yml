@@ -199,12 +199,40 @@ resources:
             sudo apt update && apt install unzip postgresql postgresql-contrib -y
             sudo curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip
             sudo ./aws/install
-            sudo aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-startup.sh /usr/local/bin/vm-startup.sh
-            sudo aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-shutdown.sh /usr/local/bin/vm-shutdown.sh
-            sudo aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/slack-notify.service /etc/systemd/system/notify-slack.service
+
+            # We need to make sure we download the vm scripts. There can be a lag between when 
+            # serverless uploads the scripts and the launch of the instance.
+            copy_files_from_s3() {
+              sudo aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-startup.sh /usr/local/bin/vm-startup.sh
+              sudo aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-shutdown.sh /usr/local/bin/vm-shutdown.sh
+              sudo aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/slack-notify.service /etc/systemd/system/notify-slack.service
+            }
+
+            download_failures=0
+            while true; do
+              copy_files_from_s3
+              exit_code=$?
+
+              if [ $exit_code -eq 0 ]; then
+                echo "Downloaded vm scripts from s3 successfully"
+                break
+              else
+                echo "Failed to download vm scripts from s3. Retrying in 10 seconds..."
+                download_failures=$((download_failures+1))
+
+                if [ $download_failures -eq 10 ]; then
+                  echo "Maximum attempts of aws s3 cp reached. Exiting..."
+                  break
+                fi
+
+                sleep 10
+              fi
+            done
+
             sudo chmod +x /usr/local/bin/vm-startup.sh
             sudo chmod +x /usr/local/bin/vm-shutdown.sh
             sudo chmod +x /etc/systemd/system/notify-slack.service
+
             sudo sed -i "s,SLACK_WEBHOOK,${self:custom.slackWebhookUrl},g" vm-startup.sh
             sudo sed -i "s,SLACK_WEBHOOK,${self:custom.slackWebhookUrl},g" vm-shutdown.sh
             sudo sed -i "s,STAGE,${self:custom.stage},g" vm-startup.sh 
