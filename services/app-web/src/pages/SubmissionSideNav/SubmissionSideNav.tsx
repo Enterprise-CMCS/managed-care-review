@@ -75,9 +75,13 @@ export const SubmissionSideNav = () => {
         console.error('Error from API fetch', fetchResult.error)
         if (err instanceof ApolloError) {
             handleApolloError(err, true)
-        } else {
-            recordJSException(err)
+
+            if (err.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+                return <Error404 />
+            }
         }
+
+        recordJSException(err)
         return <GenericErrorPage /> // api failure or protobuf decode failure
     }
 
@@ -97,10 +101,6 @@ export const SubmissionSideNav = () => {
         return <GenericErrorPage />
     }
 
-    // fetchHPP with questions returns null if no package or questions is found with the given ID
-    if (!pkg) {
-        return <Error404 />
-    }
     const submissionStatus = pkg.status
 
     const isCMSUser = loggedInUser?.role === 'CMS_USER'

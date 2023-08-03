@@ -7,7 +7,7 @@ import {
 import { defaultFeatureFlags } from '../launchDarkly/launchDarkly'
 
 function testLDService(mockFeatureFlags?: FeatureFlagSettings): LDService {
-    const featureFlags = defaultFeatureFlags
+    const featureFlags = defaultFeatureFlags()
 
     //Update featureFlags with mock flag values.
     if (mockFeatureFlags) {

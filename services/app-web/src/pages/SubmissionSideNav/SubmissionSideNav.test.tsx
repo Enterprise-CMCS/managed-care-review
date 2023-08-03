@@ -493,7 +493,7 @@ describe('SubmissionSideNav', () => {
             expect(await screen.findByText('System error')).toBeInTheDocument()
         })
 
-        it('shows a generic 404 page when package is undefined', async () => {
+        it('shows a generic 404 page when package is not found', async () => {
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>

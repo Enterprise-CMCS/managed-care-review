@@ -192,21 +192,20 @@ export const StateSubmissionForm = (): React.ReactElement => {
     if (fetchResult.status === 'ERROR') {
         const err = fetchResult.error
         console.error('Error from API fetch', fetchResult.error)
+
         if (err instanceof ApolloError) {
             handleApolloError(err, true)
-        } else {
-            recordJSException(err)
+            if (err.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+                return <Error404 />
+            }
         }
+
+        recordJSException(err)
         return <GenericErrorPage /> // api failure or protobuf decode failure
     }
 
     const { data, revisionsLookup } = fetchResult
     const pkg = data.fetchHealthPlanPackage.pkg
-
-    // fetchHPP returns null if no package is found with the given ID
-    if (!pkg) {
-        return <Error404 />
-    }
 
     // pull out the latest revision and document lookups
     const latestRevision = pkg.revisions[0].node
