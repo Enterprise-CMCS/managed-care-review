@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { ContractType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import { findContractWithHistory } from './findContractWithHistory'
-import { NotFoundError } from '../../errors'
+import { NotFoundError } from '../storeError'
 
 // Update the given revision
 // * invalidate relationships of previous revision
@@ -11,7 +11,7 @@ async function submitContract(
     contractID: string,
     submittedByUserID: string,
     submitReason: string
-): Promise<ContractType | Error> {
+): Promise<ContractType | NotFoundError | Error> {
     const groupTime = new Date()
 
     try {

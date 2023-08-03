@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { ContractType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import { findContractWithHistory } from './findContractWithHistory'
-import { NotFoundError } from '../../errors'
+import { NotFoundError } from '../storeError'
 
 // Unlock the given contract
 // * copy form data
@@ -11,7 +11,7 @@ async function unlockContract(
     contractID: string,
     unlockedByUserID: string,
     unlockReason: string
-): Promise<ContractType | Error> {
+): Promise<ContractType | NotFoundError | Error> {
     const groupTime = new Date()
 
     try {

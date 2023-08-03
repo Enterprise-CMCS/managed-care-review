@@ -6,7 +6,7 @@ import {
 } from '@prisma/client'
 import { ContractType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import { findContractWithHistory } from './findContractWithHistory'
-import { NotFoundError } from '../../errors'
+import { NotFoundError } from '../storeError'
 
 type UpdateContractArgsType = {
     populationCovered: PopulationCoverageType
@@ -25,7 +25,7 @@ async function updateDraftContract(
     contractID: string,
     formData: UpdateContractArgsType,
     rateIDs: string[]
-): Promise<ContractType | Error> {
+): Promise<ContractType | NotFoundError | Error> {
     try {
         // Given all the Rates associated with this draft, find the most recent submitted
         // rateRevision to update.

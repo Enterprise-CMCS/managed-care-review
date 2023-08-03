@@ -18,7 +18,7 @@ import {
 } from '../attributeHelper'
 import { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql/index'
-import { NotFoundError } from '../../errors'
+import { NotFoundError } from '../../postgres'
 
 export function fetchHealthPlanPackageResolver(
     store: Store,

@@ -90,4 +90,17 @@ const convertPrismaErrorToStoreError = (prismaErr: unknown): StoreError => {
     }
 }
 
-export { StoreError, isStoreError, convertPrismaErrorToStoreError }
+class NotFoundError extends Error {
+    constructor(message: string) {
+        super(message)
+
+        Object.setPrototypeOf(this, NotFoundError.prototype)
+    }
+}
+
+export {
+    NotFoundError,
+    StoreError,
+    isStoreError,
+    convertPrismaErrorToStoreError,
+}
