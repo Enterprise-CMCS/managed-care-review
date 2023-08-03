@@ -35,6 +35,9 @@ function mockEmailParameterStoreError(error?: string): EmailParameterStore {
         getSourceEmail: async (): Promise<Error> => {
             return new Error(message)
         },
+        getHelpDeskEmail: async (): Promise<Error> => {
+            return new Error(message)
+        },
     }
 }
 

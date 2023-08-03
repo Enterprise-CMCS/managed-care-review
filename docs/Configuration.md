@@ -201,6 +201,10 @@ We plan to move this to the DB down the road. Until then, know that if these val
 
 #### `/configuration/email/devTeamHelpAddress`
 
+*[same in prod/val]* This is the help address for the dev team address.
+
+#### `/configuration/email/helpDeskAddress`
+
 *[same in prod/val]* This is the help address displayed in state emails for contacting the MC-Review dev team.
 
 #### `/configuration/email/rateHelpAddress`

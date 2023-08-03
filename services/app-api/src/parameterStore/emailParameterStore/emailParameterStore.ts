@@ -20,6 +20,8 @@ import {
     getSourceEmail,
     getStateAnalystsSettings,
     getStateAnalystsSettingsLocal,
+    getHelpDeskEmail,
+    getHelpDeskEmailLocal,
 } from './'
 import type { StateAnalystsWithState } from './stateAnalystsEmails/getStateAnalystsSettings'
 
@@ -36,6 +38,7 @@ export type EmailParameterStore = {
     getOACTEmails: () => Promise<string[] | Error>
     getDMCOEmails: () => Promise<string[] | Error>
     getSourceEmail: () => Promise<string | Error>
+    getHelpDeskEmail: () => Promise<string | Error>
 }
 
 function newLocalEmailParameterStore(): EmailParameterStore {
@@ -50,6 +53,7 @@ function newLocalEmailParameterStore(): EmailParameterStore {
         getOACTEmails: getOACTEmailsLocal,
         getDMCOEmails: getDMCOEmailsLocal,
         getSourceEmail: getSourceEmailLocal,
+        getHelpDeskEmail: getHelpDeskEmailLocal,
     }
 }
 
@@ -65,6 +69,7 @@ function newAWSEmailParameterStore(): EmailParameterStore {
         getDMCPEmails: getDMCPEmails,
         getOACTEmails: getOACTEmails,
         getSourceEmail: getSourceEmail,
+        getHelpDeskEmail: getHelpDeskEmail,
     }
 }
 
