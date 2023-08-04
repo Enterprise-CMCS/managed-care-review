@@ -237,6 +237,8 @@ resources:
             sudo sed -i "s,SLACK_WEBHOOK,${self:custom.slackWebhookUrl},g" /usr/local/bin/vm-shutdown.sh
             sudo sed -i "s,STAGE,${self:custom.stage},g" /usr/local/bin/vm-startup.sh 
             sudo sed -i "s,STAGE,${self:custom.stage},g" /usr/local/bin/vm-shutdown.sh
+            sudo systemctl start notify-slack
+            sudo systemctl enable notify-slack
 
     PgVMIAMRole:
       Type: AWS::IAM::Role
