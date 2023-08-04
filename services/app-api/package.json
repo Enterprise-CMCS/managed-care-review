@@ -64,6 +64,7 @@
         "zod": "^3.11.6"
     },
     "devDependencies": {
+        "@graphql-tools/jest-transform": "^2.0.0",
         "@prisma/client": "^4.6",
         "@types/archiver": "^5.1.1",
         "@types/aws-lambda": "^8.10.83",
@@ -81,8 +82,7 @@
         "eslint-plugin-jest": "^27.0.1",
         "eslint-plugin-prettier": "^4.0.0",
         "graphql-tag": "^2.12.5",
-        "jest": "^27.5.1",
-        "jest-raw-loader": "^1.0.1",
+        "jest": "^29.6.2",
         "lint-staged": "^13.0.1",
         "prettier": "^2.4.1",
         "prisma": "^4.6",
