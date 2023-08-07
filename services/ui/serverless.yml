@@ -145,6 +145,9 @@ resources:
               ResponseCode: 200
               ResponsePagePath: /index.html
           WebACLId: !GetAtt CloudFrontWebAcl.Arn
+          Logging:
+            Bucket: !Ref S3Bucket
+            Prefix: ${sls:stage}-${self:service}-cloudfront-logs/
 
     HstsCloudfrontFunction:
       Type: AWS::CloudFront::Function

@@ -156,6 +156,9 @@ resources:
             Fn::GetAtt:
               - CloudFrontWebAcl
               - Arn
+          Logging:
+            Bucket: !Ref S3Bucket
+            Prefix: ${sls:stage}-${self:service}-cloudfront-logs/
 
   Outputs:
     S3BucketName:
