@@ -46,6 +46,10 @@ resources:
           ServerSideEncryptionConfiguration:
             - ServerSideEncryptionByDefault:
                 SSEAlgorithm: AES256
+        OwnershipControls:
+          Rules:
+            - ObjectOwnership: ObjectWriter
+
     BucketPolicy:
       Type: AWS::S3::BucketPolicy
       Properties:
@@ -71,6 +75,7 @@ resources:
                 - !Sub ${S3Bucket.Arn}/*
               Sid: DenyUnencryptedConnections
         Bucket: !Ref S3Bucket
+
     CloudFrontWebAcl:
       Type: AWS::WAFv2::WebACL
       Properties:
@@ -99,6 +104,7 @@ resources:
           CloudWatchMetricsEnabled: true
           SampledRequestsEnabled: true
           MetricName: ${sls:stage}-webacl
+
     CloudFrontOriginAccessIdentity:
       Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
       Properties:
@@ -157,7 +163,7 @@ resources:
               - CloudFrontWebAcl
               - Arn
           Logging:
-            Bucket: !Ref S3Bucket
+            Bucket: !Sub ${S3Bucket.DomainName}
             Prefix: ${sls:stage}-${self:service}-cloudfront-logs/
 
   Outputs:
