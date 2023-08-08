@@ -12,8 +12,13 @@ const draftContractRevisionsWithDraftRates = {
         include: {
             revisions: {
                 include: {
+                    rateDocuments: true,
+                    supportingDocuments: true,
+                    certifyingActuaryContacts: true,
+                    addtlActuaryContacts: true,
                     submitInfo: updateInfoIncludeUpdater,
                     unlockInfo: updateInfoIncludeUpdater,
+                    draftContracts: true,
                 },
                 where: {
                     submitInfoID: { not: null },

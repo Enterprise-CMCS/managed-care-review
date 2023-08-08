@@ -4,9 +4,9 @@ import {
 } from '../../postgres/prismaTypes'
 import {
     ContractType,
-    ContractRevisionType,
-    contractRevisionZodSchema,
     draftContractZodSchema,
+    contractRevisionWithRatesSchema,
+    ContractRevisionWithRatesType,
 } from './contractAndRatesZodSchema'
 import {
     draftContractToDomainModel,
@@ -15,9 +15,9 @@ import {
 
 function parseDraftContractRevision(
     revision: DraftContractRevisionTableWithRelations
-): ContractRevisionType | Error {
+): ContractRevisionWithRatesType | Error {
     const draftContractRevision = draftContractRevToDomainModel(revision)
-    const parseDraft = contractRevisionZodSchema.safeParse(
+    const parseDraft = contractRevisionWithRatesSchema.safeParse(
         draftContractRevision
     )
 

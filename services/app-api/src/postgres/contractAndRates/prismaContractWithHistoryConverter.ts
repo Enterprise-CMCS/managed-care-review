@@ -1,12 +1,12 @@
-import { RateRevisionTable } from '@prisma/client'
 import {
     ContractType,
-    ContractRevisionType,
     contractZodSchema,
+    ContractRevisionWithRatesType,
 } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import {
-    ContractRevisionTableWithRelations,
+    ContractRevisionTableWithRates,
     ContractTableWithRelations,
+    RateRevisionTableWithFormData,
     UpdateInfoTableWithUpdater,
 } from '../prismaTypes'
 import {
@@ -47,15 +47,15 @@ function parseContractWithHistory(
 // ContractRevisionSet is for the internal building of individual revisions
 // we convert them into ContractRevisions to return them
 interface ContractRevisionSet {
-    contractRev: ContractRevisionTableWithRelations
+    contractRev: ContractRevisionTableWithRates
     submitInfo: UpdateInfoTableWithUpdater
     unlockInfo: UpdateInfoTableWithUpdater | undefined
-    rateRevisions: RateRevisionTable[]
+    rateRevisions: RateRevisionTableWithFormData[]
 }
 
 function contractRevToDomainModel(
     revisions: ContractRevisionSet[]
-): ContractRevisionType[] {
+): ContractRevisionWithRatesType[] {
     const contractRevisions = revisions.map((entry) => ({
         id: entry.contractRev.id,
         submitInfo: convertUpdateInfoToDomainModel(entry.submitInfo),

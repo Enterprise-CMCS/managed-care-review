@@ -6,10 +6,7 @@ import {
     convertUpdateInfoToDomainModel,
     draftContractRevToDomainModel,
     draftContractToDomainModel,
-    contractRevToDomainModel,
     draftRatesToDomainModel,
-    ratesRevisionsToDomainModel,
-    contractWithHistoryToDomainModel,
     getContractStatus,
 } from './prismaToDomainModel'
 
@@ -21,10 +18,7 @@ export {
     convertUpdateInfoToDomainModel,
     draftContractRevToDomainModel,
     draftContractToDomainModel,
-    contractRevToDomainModel,
     draftRatesToDomainModel,
-    ratesRevisionsToDomainModel,
-    contractWithHistoryToDomainModel,
     getContractStatus,
 }
 

@@ -3,7 +3,7 @@ import { State } from '@prisma/client'
 import { must } from '../errorHelpers'
 import { PrismaClient } from '@prisma/client'
 import {
-    ContractRevisionTableWithRelations,
+    ContractRevisionTableWithRates,
     ContractTableWithRelations,
     DraftContractRevisionTableWithRelations,
     DraftContractTableWithRelations,
@@ -72,18 +72,17 @@ const createContractData = (
     revisions: contract?.revisions ?? [
         createContractRevision({
             draftRates: undefined,
-        }) as ContractRevisionTableWithRelations,
+        }) as ContractRevisionTableWithRates,
     ],
     ...contract,
 })
 
 const createContractRevision = (
     revision?: Partial<
-        | ContractRevisionTableWithRelations
-        | DraftContractRevisionTableWithRelations
+        ContractRevisionTableWithRates | DraftContractRevisionTableWithRelations
     >
 ):
-    | ContractRevisionTableWithRelations
+    | ContractRevisionTableWithRates
     | DraftContractRevisionTableWithRelations => ({
     id: uuidv4(),
     createdAt: new Date(),

@@ -12,6 +12,9 @@ import {
     UpdateInfoTable,
     User,
     ContractTable,
+    RateDocument,
+    RateSupportingDocument,
+    ActuaryContact,
 } from '@prisma/client'
 
 // This is the type returned by client.$transaction
@@ -27,11 +30,30 @@ type RateRevisionWithRelations = RateRevisionsOnContractRevisionsTable & {
     }
 }
 
-type DraftRateWithRelations = RateTable & {
-    revisions: RateRevisionTable[]
+type RateOnContractHistory = RateRevisionsOnContractRevisionsTable & {
+    rateRevision: RateRevisionTable & {
+        submitInfo?: UpdateInfoTableWithUpdater | null
+        unlockInfo?: UpdateInfoTableWithUpdater | null
+        rateDocuments: RateDocument[]
+        supportingDocuments: RateSupportingDocument[]
+        certifyingActuaryContacts: ActuaryContact[]
+        addtlActuaryContacts: ActuaryContact[]
+    }
 }
 
-type ContractRevisionTableWithRelations = ContractRevisionTable & {
+type RateRevisionTableWithFormData = RateRevisionTable & {
+    submitInfo?: UpdateInfoTableWithUpdater | null
+    unlockInfo?: UpdateInfoTableWithUpdater | null
+    rateDocuments: RateDocument[]
+    supportingDocuments: RateSupportingDocument[]
+    certifyingActuaryContacts: ActuaryContact[]
+    addtlActuaryContacts: ActuaryContact[]
+}
+type DraftRateWithRelations = RateTable & {
+    revisions: RateRevisionTableWithFormData[]
+}
+
+type ContractRevisionTableWithFormData = ContractRevisionTable & {
     submitInfo?: UpdateInfoTableWithUpdater | null
     unlockInfo?: UpdateInfoTableWithUpdater | null
     stateContacts: StateContact[]
@@ -39,7 +61,10 @@ type ContractRevisionTableWithRelations = ContractRevisionTable & {
     supportingDocuments: ContractSupportingDocument[]
     managedCareEntities: ManagedCareEntity[]
     federalAuthorities: FederalAuthority[]
-    rateRevisions: RateRevisionWithRelations[]
+}
+
+type ContractRevisionTableWithRates = ContractRevisionTableWithFormData & {
+    rateRevisions: RateOnContractHistory[]
 }
 
 type DraftContractRevisionTableWithRelations = ContractRevisionTable & {
@@ -58,12 +83,11 @@ type DraftContractTableWithRelations = ContractTable & {
 }
 
 type ContractTableWithRelations = ContractTable & {
-    revisions: ContractRevisionTableWithRelations[]
+    revisions: ContractRevisionTableWithRates[]
 }
 
 type ContractRevisionFormDataType = Omit<
-    | ContractRevisionTableWithRelations
-    | DraftContractRevisionTableWithRelations,
+    ContractRevisionTableWithRates | DraftContractRevisionTableWithRelations,
     'rateRevisions' | 'draftRates'
 >
 
@@ -72,11 +96,13 @@ type UpdateInfoTableWithUpdater = UpdateInfoTable & { updatedBy: User }
 export type {
     PrismaTransactionType,
     UpdateInfoTableWithUpdater,
-    ContractRevisionTableWithRelations,
+    ContractRevisionTableWithRates,
+    ContractRevisionTableWithFormData,
     DraftContractRevisionTableWithRelations,
     DraftContractTableWithRelations,
     RateRevisionWithRelations,
     DraftRateWithRelations,
+    RateRevisionTableWithFormData,
     ContractRevisionFormDataType,
     ContractTableWithRelations,
 }

@@ -47,7 +47,10 @@ describe('unlockContract', () => {
             await insertDraftContract(client, draftContractData)
         )
         const rate = must(
-            await insertDraftRate(client, { stateCode: 'MN', name: 'Rate 1.0' })
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+                rateCertificationName: 'Rate 1.0',
+            })
         )
 
         // Submit Rate A
@@ -138,7 +141,10 @@ describe('unlockContract', () => {
             await insertDraftContract(client, draftContractData)
         )
         const rate = must(
-            await insertDraftRate(client, { stateCode: 'MN', name: 'Rate 1.0' })
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+                rateCertificationName: 'Rate 1.0',
+            })
         )
 
         // Submit Rate A
@@ -233,7 +239,10 @@ describe('unlockContract', () => {
             await insertDraftContract(client, draftContractData)
         )
         const rate = must(
-            await insertDraftRate(client, { stateCode: 'MN', name: 'rate 1.0' })
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+                rateCertificationName: 'rate 1.0',
+            })
         )
 
         // Connect draft contract to submitted rate
@@ -335,7 +344,10 @@ describe('unlockContract', () => {
             await insertDraftContract(client, draftContractData)
         )
         const rate = must(
-            await insertDraftRate(client, { stateCode: 'MN', name: 'rate 1.0' })
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+                rateCertificationName: 'rate 1.0',
+            })
         )
 
         // Connect draft contract to submitted rate
@@ -388,7 +400,7 @@ describe('unlockContract', () => {
         const rateA = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'rate A 1.1',
+                rateCertificationName: 'rate A 1.1',
             })
         )
 

@@ -4,7 +4,7 @@ import {
 } from './prismaToDomainModel'
 import {
     ContractRevisionFormDataType,
-    ContractRevisionTableWithRelations,
+    ContractRevisionTableWithRates,
 } from '../prismaTypes'
 import { v4 as uuidv4 } from 'uuid'
 import { createContractRevision } from '../../testHelpers'
@@ -56,7 +56,7 @@ describe('prismaToDomainModel', () => {
     describe('getContractStatus', () => {
         const contractWithUnorderedRevs: {
             revision: Pick<
-                ContractRevisionTableWithRelations,
+                ContractRevisionTableWithRates,
                 'createdAt' | 'submitInfo'
             >[]
             testDescription: string

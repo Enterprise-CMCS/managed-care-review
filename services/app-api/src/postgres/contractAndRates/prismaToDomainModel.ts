@@ -1,21 +1,22 @@
 import {
     ContractType,
-    ContractRevisionType,
     ContractFormDataType,
     ContractStatusType,
+    RateRevisionType,
+    ContractRevisionWithRatesType,
+    RateFormDataType,
 } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
-import { RateRevision } from '../../domain-models/contractAndRates/rateType'
 import {
     DraftContractRevisionTableWithRelations,
     DraftContractTableWithRelations,
     UpdateInfoTableWithUpdater,
     DraftRateWithRelations,
-    ContractRevisionTableWithRelations,
+    ContractRevisionTableWithRates,
     ContractRevisionFormDataType,
+    RateRevisionTableWithFormData,
 } from '../prismaTypes'
 import { UpdateInfoType } from '../../domain-models'
 import { DocumentCategoryType } from 'app-web/src/common-code/healthPlanFormDataType'
-import { RateRevisionTable } from '@prisma/client'
 
 function convertUpdateInfoToDomainModel(
     info?: UpdateInfoTableWithUpdater | null
@@ -32,10 +33,7 @@ function convertUpdateInfoToDomainModel(
 }
 
 function getContractStatus(
-    revision: Pick<
-        ContractRevisionTableWithRelations,
-        'createdAt' | 'submitInfo'
-    >[]
+    revision: Pick<ContractRevisionTableWithRates, 'createdAt' | 'submitInfo'>[]
 ): ContractStatusType {
     // need to order revisions from latest to earliest
     const latestToEarliestRev = revision.sort(
@@ -125,27 +123,90 @@ function contractFormDataToDomainModel(
     }
 }
 
+const rateFormDataToDomainModel = (
+    rateRevision: RateRevisionTableWithFormData
+): RateFormDataType => {
+    return {
+        id: rateRevision.id,
+        rateType: rateRevision.rateType ?? undefined,
+        rateCapitationType: rateRevision.rateCapitationType ?? undefined,
+        rateDocuments: rateRevision.rateDocuments
+            ? rateRevision.rateDocuments.map((doc) => ({
+                  name: doc.name,
+                  s3URL: doc.s3URL,
+                  sha256: doc.sha256 ?? undefined,
+                  documentCategories: ['RATES'] as DocumentCategoryType[],
+              }))
+            : [],
+        supportingDocuments: rateRevision.supportingDocuments
+            ? rateRevision.supportingDocuments.map((doc) => ({
+                  name: doc.name,
+                  s3URL: doc.s3URL,
+                  sha256: doc.sha256 ?? undefined,
+                  documentCategories: [
+                      'RATES_RELATED',
+                  ] as DocumentCategoryType[],
+              }))
+            : [],
+        rateDateStart: rateRevision.rateDateStart ?? undefined,
+        rateDateEnd: rateRevision.rateDateEnd ?? undefined,
+        rateDateCertified: rateRevision.rateDateCertified ?? undefined,
+        amendmentEffectiveDateStart:
+            rateRevision.amendmentEffectiveDateStart ?? undefined,
+        amendmentEffectiveDateEnd:
+            rateRevision.amendmentEffectiveDateEnd ?? undefined,
+        rateProgramIDs: rateRevision.rateProgramIDs,
+        rateCertificationName: rateRevision.rateCertificationName ?? undefined,
+        certifyingActuaryContacts: rateRevision.certifyingActuaryContacts
+            ? rateRevision.certifyingActuaryContacts.map((actuary) => ({
+                  name: actuary.name,
+                  titleRole: actuary.titleRole,
+                  email: actuary.email,
+                  actuarialFirm: actuary.actuarialFirm,
+                  actuarialFirmOther: actuary.actuarialFirmOther ?? undefined,
+              }))
+            : [],
+        addtlActuaryContacts: rateRevision.addtlActuaryContacts
+            ? rateRevision.addtlActuaryContacts.map((actuary) => ({
+                  name: actuary.name,
+                  titleRole: actuary.titleRole,
+                  email: actuary.email,
+                  actuarialFirm: actuary.actuarialFirm,
+                  actuarialFirmOther: actuary.actuarialFirmOther ?? undefined,
+              }))
+            : [],
+        actuaryCommunicationPreference:
+            rateRevision.actuaryCommunicationPreference ?? undefined,
+        packagesWithSharedRateCerts: [], // intentionally not handling packagesWithSharedRates yet - this is MR-3568
+    }
+}
+
 function draftRatesToDomainModel(
     draftRates: DraftRateWithRelations[]
-): RateRevision[] {
-    return draftRates.map((dr) => ({
-        id: dr.revisions[0].id,
-        revisionFormData: dr.revisions[0].name,
-    }))
+): RateRevisionType[] {
+    return draftRates.map((dr) => rateReivisionToDomainModel(dr.revisions[0]))
+}
+
+function rateReivisionToDomainModel(
+    revision: RateRevisionTableWithFormData
+): RateRevisionType {
+    return {
+        id: revision.id,
+        createdAt: revision.createdAt,
+        updatedAt: revision.updatedAt,
+        revisionFormData: rateFormDataToDomainModel(revision),
+    }
 }
 
 function ratesRevisionsToDomainModel(
-    rateRevisions: RateRevisionTable[]
-): RateRevision[] {
-    return rateRevisions.map((rrev) => ({
-        id: rrev.id,
-        revisionFormData: rrev.name,
-    }))
+    rateRevisions: RateRevisionTableWithFormData[]
+): RateRevisionType[] {
+    return rateRevisions.map((rrev) => rateReivisionToDomainModel(rrev))
 }
 
 function draftContractRevToDomainModel(
     revision: DraftContractRevisionTableWithRelations
-): ContractRevisionType {
+): ContractRevisionWithRatesType {
     return {
         id: revision.id,
         createdAt: revision.createdAt,
@@ -174,9 +235,10 @@ function draftContractToDomainModel(
 export {
     contractFormDataToDomainModel,
     convertUpdateInfoToDomainModel,
+    ratesRevisionsToDomainModel,
+    rateFormDataToDomainModel,
     draftContractRevToDomainModel,
     draftContractToDomainModel,
     draftRatesToDomainModel,
-    ratesRevisionsToDomainModel,
     getContractStatus,
 }

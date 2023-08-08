@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
+import { RateType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import { findRateWithHistory } from './findRateWithHistory'
-import { Rate } from '../../domain-models/contractAndRates/rateType'
 
 // Update the given revision
 // * invalidate relationships of previous revision
@@ -10,7 +10,7 @@ async function submitRate(
     rateID: string,
     submittedByUserID: string,
     submitReason: string
-): Promise<Rate | Error> {
+): Promise<RateType | Error> {
     const groupTime = new Date()
 
     try {

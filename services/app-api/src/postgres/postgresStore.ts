@@ -44,7 +44,7 @@ import {
 } from './questionResponse'
 import { findAllSupportedStates } from './state'
 import {
-    ContractRevisionType,
+    ContractRevisionWithRatesType,
     ContractType,
 } from '../domain-models/contractAndRates/contractAndRatesZodSchema'
 import {
@@ -140,7 +140,7 @@ type Store = {
 
     findDraftContract: (
         contractID: string
-    ) => Promise<ContractRevisionType | undefined | Error>
+    ) => Promise<ContractRevisionWithRatesType | undefined | Error>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
