@@ -30,6 +30,7 @@ import {
     federalAuthorityKeysForCHIP,
 } from '../../../common-code/healthPlanFormDataType'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
+import { recordJSException } from '../../../otelHelpers'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -83,7 +84,9 @@ export const ContractDetailsSummarySection = ({
                 'HEALTH_PLAN_DOCS'
             )
             if (zippedURL instanceof Error) {
-                console.info('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
+                const msg = `Error: getBulkDlURL errored when generating url for contract documents on submission ${submission.id}. Error: ${zippedURL}`
+                console.info(msg)
+                recordJSException(msg)
                 return
             }
 

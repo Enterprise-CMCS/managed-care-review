@@ -204,7 +204,9 @@ export const RateDetailsSummarySection = ({
                 'HEALTH_PLAN_DOCS'
             )
             if (zippedURL instanceof Error) {
-                console.info('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
+                const msg = `Error: getBulkDlURL errored when generating url for rate documents on submission ${submission.id}. Error: ${zippedURL}`
+                console.info(msg)
+                recordJSException(msg)
                 return
             }
 
