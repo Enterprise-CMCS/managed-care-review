@@ -38,8 +38,8 @@ type EmailConfiguration = {
     */
     cmsReviewHelpEmailAddress: string //  managed care review group help
     cmsRateHelpEmailAddress: string //  rates help
-    cmsDevTeamHelpEmailAddress: string //  all other help when helpdesk feature flag is off
-    helpDeskEmail: string // all other help when helpdesk feature flag is on
+    cmsDevTeamHelpEmailAddress: string
+    helpDeskEmail: string // all other help
 }
 
 type StateAnalystsEmails = string[]
@@ -68,8 +68,7 @@ type Emailer = {
     sendStateNewPackage: (
         formData: LockedHealthPlanFormDataType,
         submitterEmails: string[],
-        statePrograms: ProgramType[],
-        mcReviewHelpEmail: string
+        statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendUnlockPackageCMSEmail: (
         formData: UnlockedHealthPlanFormDataType,
@@ -136,15 +135,13 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
         sendStateNewPackage: async function (
             formData,
             submitterEmails,
-            statePrograms,
-            mcReviewHelpEmail
+            statePrograms
         ) {
             const emailData = await newPackageStateEmail(
                 formData,
                 submitterEmails,
                 config,
-                statePrograms,
-                mcReviewHelpEmail
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -266,15 +263,13 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
         sendStateNewPackage: async (
             formData,
             submitterEmails,
-            statePrograms,
-            mcReviewHelpEmail
+            statePrograms
         ) => {
             const result = await newPackageStateEmail(
                 formData,
                 submitterEmails,
                 config,
-                statePrograms,
-                mcReviewHelpEmail
+                statePrograms
             )
             if (result instanceof Error) {
                 console.error(result)

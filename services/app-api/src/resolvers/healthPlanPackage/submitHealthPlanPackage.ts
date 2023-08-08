@@ -34,7 +34,6 @@ import type {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { LDService } from '../../launchDarkly/launchDarkly'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = (typeof SubmissionErrorCodes)[number] // iterable union type
@@ -125,19 +124,13 @@ function submit(
 export function submitHealthPlanPackageResolver(
     store: Store,
     emailer: Emailer,
-    emailParameterStore: EmailParameterStore,
-    launchDarkly: LDService
+    emailParameterStore: EmailParameterStore
 ): MutationResolvers['submitHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
         const { submittedReason, pkgID } = input
         setResolverDetailsOnActiveSpan('submitHealthPlanPackage', user, span)
         span?.setAttribute('mcreview.package_id', pkgID)
-
-        const helpDeskFlag = await launchDarkly.getFeatureFlag(
-            context,
-            'helpdesk-email'
-        )
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
@@ -307,11 +300,6 @@ export function submitHealthPlanPackageResolver(
         // Send emails!
         const status = packageStatus(updatedPackage)
 
-        // Get support help email for system notification emails
-        const mcReviewHelpEmail = helpDeskFlag
-            ? emailer.config.helpDeskEmail
-            : emailer.config.cmsDevTeamHelpEmailAddress
-
         // Get state analysts emails from parameter store
         let stateAnalystsEmails =
             await emailParameterStore.getStateAnalystsEmails(
@@ -366,8 +354,7 @@ export function submitHealthPlanPackageResolver(
             statePackageEmailResult = await emailer.sendStateNewPackage(
                 lockedFormData,
                 submitterEmails,
-                statePrograms,
-                mcReviewHelpEmail
+                statePrograms
             )
         }
 

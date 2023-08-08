@@ -24,7 +24,6 @@ import {
 } from '../../testHelpers/parameterStoreHelpers'
 import * as awsSESHelpers from '../../testHelpers/awsSESHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 describe('submitHealthPlanPackage', () => {
     const cmsUser = testCMSUser()
@@ -929,83 +928,4 @@ describe('Feature flagged population coverage question test', () => {
             'formData is missing required contract fields'
         )
     }, 20000)
-})
-
-describe('Feature flagged helpdesk-email tests', () => {
-    beforeEach(() => {
-        jest.resetAllMocks()
-        jest.restoreAllMocks()
-    })
-    it('send state email with mc-review dev team email', async () => {
-        const mockEmailer = testEmailer()
-        const server = await constructTestPostgresServer({
-            emailer: mockEmailer,
-            ldService: testLDService({ 'helpdesk-email': false }),
-        })
-
-        const draft = await createAndUpdateTestHealthPlanPackage(server, {})
-
-        const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
-            variables: {
-                input: {
-                    pkgID: draft.id,
-                },
-            },
-        })
-
-        expect(submitResult.errors).toBeUndefined()
-
-        const currentRevision =
-            submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
-
-        const sub = base64ToDomain(currentRevision.formDataProto)
-        if (sub instanceof Error) {
-            throw sub
-        }
-
-        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-            expect.objectContaining({
-                bodyText: expect.stringContaining(
-                    `For issues related to MC-Review or all other inquiries, please reach out to mc-review@example.com.`
-                ),
-            })
-        )
-    })
-    it('send state email with help desk email', async () => {
-        const mockEmailer = testEmailer()
-        const server = await constructTestPostgresServer({
-            emailer: mockEmailer,
-            ldService: testLDService({ 'helpdesk-email': true }),
-        })
-
-        const draft = await createAndUpdateTestHealthPlanPackage(server, {})
-
-        const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
-            variables: {
-                input: {
-                    pkgID: draft.id,
-                },
-            },
-        })
-
-        expect(submitResult.errors).toBeUndefined()
-
-        const currentRevision =
-            submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
-
-        const sub = base64ToDomain(currentRevision.formDataProto)
-        if (sub instanceof Error) {
-            throw sub
-        }
-
-        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-            expect.objectContaining({
-                bodyText: expect.stringContaining(
-                    `For issues related to MC-Review or all other inquiries, please reach out to MC_Review_HelpDesk@example.com.`
-                ),
-            })
-        )
-    })
 })

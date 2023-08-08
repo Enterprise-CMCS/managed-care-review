@@ -14,7 +14,6 @@ import { newPackageStateEmail } from './index'
 import { formatEmailAddresses } from '../formatters'
 
 const defaultSubmitters = ['submitter1@example.com', 'submitter2@example.com']
-const mcReviewHelpEmail = testEmailConfig().helpDeskEmail
 
 test('to addresses list includes submitter emails', async () => {
     const sub = mockContractOnlyFormData()
@@ -23,8 +22,7 @@ test('to addresses list includes submitter emails', async () => {
         sub,
         defaultSubmitters,
         testEmailConfig(),
-        defaultStatePrograms,
-        mcReviewHelpEmail
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {
@@ -60,8 +58,7 @@ test('to addresses list includes all state contacts on submission', async () => 
         sub,
         defaultSubmitters,
         testEmailConfig(),
-        defaultStatePrograms,
-        mcReviewHelpEmail
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {
@@ -99,8 +96,7 @@ test('to addresses list does not include duplicate state receiver emails on subm
         sub,
         defaultSubmitters,
         testEmailConfig(),
-        defaultStatePrograms,
-        mcReviewHelpEmail
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {
@@ -124,8 +120,7 @@ test('subject line is correct and clearly states submission is complete', async 
         sub,
         defaultSubmitters,
         testEmailConfig(),
-        defaultStatePrograms,
-        mcReviewHelpEmail
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {
@@ -152,8 +147,7 @@ test('includes mcog, rate, and team email addresses', async () => {
         sub,
         defaultSubmitters,
         testEmailConfig(),
-        defaultStatePrograms,
-        mcReviewHelpEmail
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {
@@ -181,7 +175,9 @@ test('includes mcog, rate, and team email addresses', async () => {
         expect.objectContaining({
             subject: expect.stringContaining(`${name} was sent to CMS`),
             bodyText: expect.stringContaining(
-                `please reach out to ${formatEmailAddresses(mcReviewHelpEmail)}`
+                `please reach out to ${formatEmailAddresses(
+                    testEmailConfig().helpDeskEmail
+                )}`
             ),
         })
     )
@@ -194,8 +190,7 @@ test('includes link to submission', async () => {
         sub,
         defaultSubmitters,
         testEmailConfig(),
-        defaultStatePrograms,
-        mcReviewHelpEmail
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {
@@ -226,8 +221,7 @@ test('includes information about what is next', async () => {
         sub,
         defaultSubmitters,
         testEmailConfig(),
-        defaultStatePrograms,
-        mcReviewHelpEmail
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {
@@ -284,8 +278,7 @@ test('includes expected data summary for a contract and rates submission State e
         sub,
         defaultSubmitters,
         testEmailConfig(),
-        defaultStatePrograms,
-        mcReviewHelpEmail
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {
@@ -434,8 +427,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
         sub,
         defaultSubmitters,
         testEmailConfig(),
-        defaultStatePrograms,
-        mcReviewHelpEmail
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {
@@ -543,8 +535,7 @@ test('includes expected data summary for a rate amendment submission State email
         sub,
         defaultSubmitters,
         testEmailConfig(),
-        statePrograms,
-        mcReviewHelpEmail
+        statePrograms
     )
 
     if (template instanceof Error) {
@@ -625,9 +616,9 @@ test('renders overall email for a new package with a rate amendment as expected'
         sub,
         defaultSubmitters,
         testEmailConfig(),
-        defaultStatePrograms,
-        mcReviewHelpEmail
+        defaultStatePrograms
     )
+
     if (result instanceof Error) {
         console.error(result)
         return

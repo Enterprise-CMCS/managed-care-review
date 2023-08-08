@@ -99,15 +99,13 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         sendStateNewPackage: async function (
             formData,
             submitterEmails,
-            statePrograms,
-            mcReviewHelpEmail
+            statePrograms
         ): Promise<void | Error> {
             const emailData = await newPackageStateEmail(
                 formData,
                 submitterEmails,
                 config,
-                statePrograms,
-                mcReviewHelpEmail
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
