@@ -82,3 +82,5 @@ export type { FilterAccordionPropType } from './FilterAccordion'
 
 export { ActionButton } from './ActionButton'
 export { Breadcrumbs } from './Breadcrumbs'
+
+export { InlineDocumentWarning } from './DocumentWarning'
