@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
@@ -30,6 +30,8 @@ import {
     federalAuthorityKeysForCHIP,
 } from '../../../common-code/healthPlanFormDataType'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
+import { recordJSException } from '../../../otelHelpers'
+import { InlineDocumentWarning } from '../../DocumentWarning'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -50,7 +52,9 @@ export const ContractDetailsSummarySection = ({
     const isPreviousSubmission = usePreviousSubmission()
     // Get the zip file for the contract
     const { getKey, getBulkDlURL } = useS3()
-    const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
+    const [zippedFilesURL, setZippedFilesURL] = useState<
+        string | undefined | Error
+    >(undefined)
     const contractSupportingDocuments = submission.documents.filter((doc) =>
         doc.documentCategories.includes('CONTRACT_RELATED' as const)
     )
@@ -67,6 +71,9 @@ export const ContractDetailsSummarySection = ({
     useEffect(() => {
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
+            // skip getting urls of this if this is a previous submission
+            if (!isSubmitted(submission) || isPreviousSubmission) return
+
             const keysFromDocs = submission.contractDocuments
                 .concat(contractSupportingDocuments)
                 .map((doc) => {
@@ -83,9 +90,9 @@ export const ContractDetailsSummarySection = ({
                 'HEALTH_PLAN_DOCS'
             )
             if (zippedURL instanceof Error) {
-                console.info('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
-                console.info(zippedURL)
-                return
+                const msg = `ERROR: getBulkDlURL failed to generate contract document URL. ID: ${submission.id} Error: ${zippedURL}`
+                console.info(msg)
+                recordJSException(msg)
             }
 
             setZippedFilesURL(zippedURL)
@@ -98,16 +105,21 @@ export const ContractDetailsSummarySection = ({
         submission,
         contractSupportingDocuments,
         submissionName,
+        isPreviousSubmission,
     ])
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>
             <SectionHeader header="Contract details" navigateTo={navigateTo}>
-                {isSubmitted(submission) && !isPreviousSubmission && (
-                    <DownloadButton
-                        text="Download all contract documents"
-                        zippedFilesURL={zippedFilesURL}
-                    />
-                )}
+                {zippedFilesURL &&
+                    // If error show error text
+                    (zippedFilesURL instanceof Error ? (
+                        <InlineDocumentWarning message="Contract document download is unavailable" />
+                    ) : (
+                        <DownloadButton
+                            text="Download all rate documents"
+                            zippedFilesURL={zippedFilesURL}
+                        />
+                    ))}
             </SectionHeader>
             <dl>
                 <DoubleColumnGrid>
