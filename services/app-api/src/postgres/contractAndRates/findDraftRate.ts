@@ -61,7 +61,7 @@ async function findDraftRate(
             createdAt: draftRate.createdAt,
             updatedAt: draftRate.updatedAt,
 
-            revisionFormData: rateFormDataToDomainModel(draftRate),
+            formData: rateFormDataToDomainModel(draftRate),
 
             contractRevisions: draftRate.draftContracts.map((dc) => ({
                 id: dc.revisions[0].id,

@@ -92,7 +92,7 @@ const ratesRevisionSchema = z.object({
     unlockInfo: updateInfoSchema.optional(),
     createdAt: z.date(),
     updatedAt: z.date(),
-    revisionFormData: rateFormDataSchema,
+    formData: rateFormDataSchema,
 })
 
 // ContractRevision has all the information in a single submission of this contract.

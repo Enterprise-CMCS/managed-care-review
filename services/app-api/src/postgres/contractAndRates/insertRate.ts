@@ -134,7 +134,7 @@ async function insertDraftRate(
                     id: rr.id,
                     createdAt: rr.createdAt,
                     updatedAt: rr.updatedAt,
-                    revisionFormData: rateFormDataToDomainModel(rr),
+                    formData: rateFormDataToDomainModel(rr),
 
                     contractRevisions: rr.contractRevisions.map(
                         ({ contractRevision }) => ({
@@ -143,7 +143,6 @@ async function insertDraftRate(
                             updatedAt: contractRevision.updatedAt,
                             formData:
                                 contractFormDataToDomainModel(contractRevision),
-                            rateRevisions: [],
                         })
                     ),
                 })),

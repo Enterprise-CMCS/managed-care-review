@@ -264,7 +264,7 @@ describe('findContract', () => {
 
         expect(revisionsInTimeOrder[5].rateRevisions).toHaveLength(2)
         expect(
-            revisionsInTimeOrder[5].rateRevisions[1].revisionFormData
+            revisionsInTimeOrder[5].rateRevisions[1].formData
                 .rateCertificationName
         ).toBe('onepointone')
         expect(revisionsInTimeOrder[5].unlockInfo?.updatedReason).toBe(
@@ -485,7 +485,7 @@ describe('findContract', () => {
 
         expect(revisions[5].rateRevisions).toHaveLength(2)
         expect(
-            revisions[5].rateRevisions[1].revisionFormData.rateCertificationName
+            revisions[5].rateRevisions[1].formData.rateCertificationName
         ).toBe('onepointone')
         expect(revisions[5].submitInfo?.updatedReason).toBe('1.1 new name')
 
@@ -650,7 +650,7 @@ describe('findContract', () => {
         // these revisions can be in any order because they were saved at the same time
         const revisionFormDatas = new Set(
             revisions[2].rateRevisions.map(
-                (rr) => rr.revisionFormData.rateCertificationName
+                (rr) => rr.formData.rateCertificationName
             )
         )
         const expectedFormDatas = new Set(['onepoint0', 'twopointone'])

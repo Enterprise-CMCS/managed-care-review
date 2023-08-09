@@ -136,7 +136,7 @@ function rateReivisionToDomainModel(
         id: revision.id,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
-        revisionFormData: rateFormDataToDomainModel(revision),
+        formData: rateFormDataToDomainModel(revision),
     }
 }
 

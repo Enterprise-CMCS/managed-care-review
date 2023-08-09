@@ -165,9 +165,9 @@ describe('findDraftContract', () => {
 
         expect(draft).toBeDefined()
         expect(draft.rateRevisions).toHaveLength(1)
-        expect(
-            draft.rateRevisions[0].revisionFormData.rateCertificationName
-        ).toBe('draft two')
+        expect(draft.rateRevisions[0].formData.rateCertificationName).toBe(
+            'draft two'
+        )
     })
 
     it('works on a later revision', async () => {

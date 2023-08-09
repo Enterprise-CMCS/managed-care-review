@@ -135,7 +135,7 @@ async function findRateWithHistory(
                 unlockInfo:
                     entry.unlockInfo &&
                     convertUpdateInfoToDomainModel(entry.unlockInfo),
-                revisionFormData: rateFormDataToDomainModel(entry.rateRev),
+                formData: rateFormDataToDomainModel(entry.rateRev),
                 contractRevisions: entry.contractRevs.map((crev) => ({
                     id: crev.id,
                     createdAt: crev.createdAt,

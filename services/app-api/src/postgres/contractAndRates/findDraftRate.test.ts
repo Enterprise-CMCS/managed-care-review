@@ -23,6 +23,6 @@ describe('findDraftRate', () => {
             throw draft
         }
 
-        expect(draft?.revisionFormData.rateCertificationName).toBe('draftData')
+        expect(draft?.formData.rateCertificationName).toBe('draftData')
     })
 })
