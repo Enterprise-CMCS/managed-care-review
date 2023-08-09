@@ -46,7 +46,7 @@ const rateRevisionWithContractsSchema = ratesRevisionSchema.extend({
     contractRevisions: z.array(contractRevisionSchema),
 })
 
-const rateZodSchema = z.object({
+const rateSchema = z.object({
     id: z.string().uuid(),
     status: z.union([z.literal('SUBMITTED'), z.literal('DRAFT')]),
     stateCode: z.string(),
@@ -54,7 +54,7 @@ const rateZodSchema = z.object({
     revisions: z.array(rateRevisionWithContractsSchema),
 })
 
-type RateType = z.infer<typeof rateZodSchema>
+type RateType = z.infer<typeof rateSchema>
 type RateRevisionType = z.infer<typeof ratesRevisionSchema>
 type RateRevisionWithContractsType = z.infer<
     typeof rateRevisionWithContractsSchema
