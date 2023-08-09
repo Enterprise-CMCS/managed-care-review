@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { ContractRevisionWithRatesType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
+import { ContractRevisionWithRatesType } from '../../domain-models/contractAndRates'
 import { parseDraftContractRevision } from './parseDraftContract'
 import { includeDraftContractRevisionsWithDraftRates } from './prismaDraftContractHelpers'
 

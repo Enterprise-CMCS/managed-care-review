@@ -1,8 +1,8 @@
 import {
     ContractType,
-    contractZodSchema,
+    contractSchema,
     ContractRevisionWithRatesType,
-} from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
+} from '../../domain-models/contractAndRates'
 import {
     contractFormDataToDomainModel,
     convertUpdateInfoToDomainModel,
@@ -32,7 +32,7 @@ function parseContractWithHistory(
         return contractWithHistory
     }
 
-    const parseContract = contractZodSchema.safeParse(contractWithHistory)
+    const parseContract = contractSchema.safeParse(contractWithHistory)
 
     if (!parseContract.success) {
         const error = `ERROR: attempting to parse prisma contract with history failed: ${parseContract.error}`

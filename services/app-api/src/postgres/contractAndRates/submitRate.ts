@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { RateType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
+import { RateType } from '../../domain-models/contractAndRates'
 import { findRateWithHistory } from './findRateWithHistory'
 
 // Update the given revision

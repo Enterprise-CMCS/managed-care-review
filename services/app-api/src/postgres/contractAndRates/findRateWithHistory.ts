@@ -3,7 +3,7 @@ import { PrismaTransactionType } from '../prismaTypes'
 import {
     RateRevisionWithContractsType,
     RateType,
-} from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
+} from '../../domain-models/contractAndRates'
 import {
     contractFormDataToDomainModel,
     ContractRevisionTableWithFormData,

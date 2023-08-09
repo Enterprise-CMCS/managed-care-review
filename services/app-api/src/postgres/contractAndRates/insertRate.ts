@@ -10,7 +10,7 @@ import {
     StateCodeType,
     RateType as DomainRateType,
 } from 'app-web/src/common-code/healthPlanFormDataType'
-import { RateType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
+import { RateType } from '../../domain-models/contractAndRates'
 import {
     contractFormDataToDomainModel,
     rateFormDataToDomainModel,

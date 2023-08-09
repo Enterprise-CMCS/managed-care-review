@@ -4,7 +4,7 @@ import {
     HealthPlanPackageType,
 } from './HealthPlanPackageType'
 import { pruneDuplicateEmails } from '../emailer/formatters'
-import { ContractType } from './contractAndRates/contractAndRatesZodSchema'
+import { ContractType } from './contractAndRates'
 import {
     SubmissionDocument,
     UnlockedHealthPlanFormDataType,

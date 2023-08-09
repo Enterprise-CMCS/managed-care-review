@@ -3,7 +3,7 @@ import {
     ContractRevisionWithRatesType,
     ContractType,
     RateRevisionType,
-} from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
+} from '../../domain-models/contractAndRates'
 import {
     contractFormDataToDomainModel,
     ContractRevisionTableWithFormData,

@@ -46,7 +46,7 @@ import { findAllSupportedStates } from './state'
 import {
     ContractRevisionWithRatesType,
     ContractType,
-} from '../domain-models/contractAndRates/contractAndRatesZodSchema'
+} from '../domain-models/contractAndRates'
 import {
     InsertContractArgsType,
     insertDraftContract,

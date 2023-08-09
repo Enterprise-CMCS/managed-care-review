@@ -16,11 +16,11 @@ import {
 import { DocumentCategoryType } from 'app-web/src/common-code/healthPlanFormDataType'
 import {
     ContractFormDataType,
-    ContractStatusType,
     RateFormDataType,
     RateRevisionType,
+    ContractStatusType,
     UpdateInfoType,
-} from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
+} from '../../domain-models/contractAndRates'
 
 const includeUpdateInfo = {
     include: {

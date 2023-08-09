@@ -2,8 +2,8 @@ import {
     contractRevisionWithRatesSchema,
     ContractRevisionWithRatesType,
     ContractType,
-    draftContractZodSchema,
-} from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
+    draftContractSchema,
+} from '../../domain-models/contractAndRates'
 import {
     DraftContractRevisionTableWithRelations,
     draftContractRevToDomainModel,
@@ -34,7 +34,7 @@ function parseDraftContract(
 ): ContractType | Error {
     const draftContract = draftContractToDomainModel(contract)
 
-    const parseDraft = draftContractZodSchema.safeParse(draftContract)
+    const parseDraft = draftContractSchema.safeParse(draftContract)
 
     if (!parseDraft.success) {
         console.warn(
