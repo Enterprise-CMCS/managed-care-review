@@ -1,29 +1,31 @@
-import { RateRevisionTable, UpdateInfoTable, User } from '@prisma/client'
+import { UpdateInfoTable, User } from '@prisma/client'
 import { PrismaTransactionType } from '../prismaTypes'
 import {
-    Rate,
-    RateRevision,
-} from '../../domain-models/contractAndRates/rateType'
+    RateRevisionWithContractsType,
+    RateType,
+} from '../../domain-models/contractAndRates'
 import {
     contractFormDataToDomainModel,
+    ContractRevisionTableWithFormData,
     convertUpdateInfoToDomainModel,
-} from './prismaToDomainModel'
-import { ContractRevisionTableWithRelations } from '../prismaTypes'
-import { updateInfoIncludeUpdater } from '../prismaHelpers'
+    includeUpdateInfo,
+    rateFormDataToDomainModel,
+    RateRevisionTableWithFormData,
+} from './prismaSharedContractRateHelpers'
 
 // this is for the internal building of individual revisions
 // we convert them into RateRevisons to return them
 interface RateRevisionSet {
-    rateRev: RateRevisionTable
+    rateRev: RateRevisionTableWithFormData
     submitInfo: UpdateInfoTable & { updatedBy: User }
     unlockInfo: (UpdateInfoTable & { updatedBy: User }) | undefined
-    contractRevs: ContractRevisionTableWithRelations[]
+    contractRevs: ContractRevisionTableWithFormData[]
 }
 
 async function findRateWithHistory(
     client: PrismaTransactionType,
     rateID: string
-): Promise<Rate | Error> {
+): Promise<RateType | Error> {
     try {
         const rateRevisions = await client.rateRevisionTable.findMany({
             where: {
@@ -33,22 +35,22 @@ async function findRateWithHistory(
                 createdAt: 'asc',
             },
             include: {
-                submitInfo: updateInfoIncludeUpdater,
-                unlockInfo: updateInfoIncludeUpdater,
+                submitInfo: includeUpdateInfo,
+                unlockInfo: includeUpdateInfo,
+                rateDocuments: true,
+                supportingDocuments: true,
+                certifyingActuaryContacts: true,
+                addtlActuaryContacts: true,
+                draftContracts: true,
                 contractRevisions: {
                     include: {
                         contractRevision: {
                             include: {
-                                submitInfo: updateInfoIncludeUpdater,
-                                unlockInfo: updateInfoIncludeUpdater,
+                                submitInfo: includeUpdateInfo,
+                                unlockInfo: includeUpdateInfo,
                                 stateContacts: true,
                                 contractDocuments: true,
                                 supportingDocuments: true,
-                                rateRevisions: {
-                                    include: {
-                                        rateRevision: true,
-                                    },
-                                },
                             },
                         },
                     },
@@ -124,29 +126,34 @@ async function findRateWithHistory(
             }
         }
 
-        const allRevisions: RateRevision[] = allEntries.map((entry) => ({
-            id: entry.rateRev.id,
-            submitInfo: convertUpdateInfoToDomainModel(entry.submitInfo),
-            unlockInfo:
-                entry.unlockInfo &&
-                convertUpdateInfoToDomainModel(entry.unlockInfo),
-            revisionFormData: entry.rateRev.name,
-            contractRevisions: entry.contractRevs.map((crev) => ({
-                id: crev.id,
-                createdAt: crev.createdAt,
-                updatedAt: crev.updatedAt,
-                formData: contractFormDataToDomainModel(crev),
-                rateRevisions: crev.rateRevisions.map((rr) => ({
-                    id: rr.rateRevisionID,
-                    revisionFormData: rr.rateRevision.name,
+        const allRevisions: RateRevisionWithContractsType[] = allEntries.map(
+            (entry) => ({
+                id: entry.rateRev.id,
+                createdAt: entry.rateRev.createdAt,
+                updatedAt: entry.rateRev.updatedAt,
+                submitInfo: convertUpdateInfoToDomainModel(entry.submitInfo),
+                unlockInfo:
+                    entry.unlockInfo &&
+                    convertUpdateInfoToDomainModel(entry.unlockInfo),
+                formData: rateFormDataToDomainModel(entry.rateRev),
+                contractRevisions: entry.contractRevs.map((crev) => ({
+                    id: crev.id,
+                    createdAt: crev.createdAt,
+                    updatedAt: crev.updatedAt,
+                    formData: contractFormDataToDomainModel(crev),
                 })),
-            })),
-        }))
+            })
+        )
 
-        return {
+        const finalRate: RateType = {
             id: rateID,
+            status: 'SUBMITTED',
+            stateCode: 'MN',
+            stateNumber: 4,
             revisions: allRevisions.reverse(),
         }
+
+        return finalRate
     } catch (err) {
         console.error('PRISMA ERROR', err)
         return err

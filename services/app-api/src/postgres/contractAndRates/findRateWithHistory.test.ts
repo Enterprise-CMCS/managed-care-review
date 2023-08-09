@@ -56,7 +56,7 @@ describe('findContract', () => {
         const rate1 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'someurle.en',
+                rateCertificationName: 'someurle.en',
             })
         )
         must(
@@ -69,7 +69,7 @@ describe('findContract', () => {
         const rate2 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'twopointo',
+                rateCertificationName: 'twopointo',
             })
         )
         must(
@@ -80,7 +80,7 @@ describe('findContract', () => {
         const rate3 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'threepointo',
+                rateCertificationName: 'threepointo',
             })
         )
         must(

@@ -124,7 +124,6 @@ model RateRevisionTable {
   submitInfoID                   String?
   submitInfo                     UpdateInfoTable?                        @relation("submitRateInfo", fields: [submitInfoID], references: [id])
 
-  name                           String
   rateType                       RateType?
   rateCapitationType             RateCapitationType?
   rateDocuments                  RateDocument[]

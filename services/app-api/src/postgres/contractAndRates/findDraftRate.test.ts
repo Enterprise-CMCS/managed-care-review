@@ -12,7 +12,7 @@ describe('findDraftRate', () => {
         const rate1 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'onepoint0',
+                rateCertificationName: 'onepoint0',
             })
         )
         must(await updateDraftRate(client, rate1.id, 'draftData', []))
@@ -23,6 +23,6 @@ describe('findDraftRate', () => {
             throw draft
         }
 
-        expect(draft?.revisionFormData).toBe('draftData')
+        expect(draft?.formData.rateCertificationName).toBe('draftData')
     })
 })

@@ -1,8 +1,8 @@
 import { PrismaTransactionType } from '../prismaTypes'
-import { ContractType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
-import { parseContractWithHistory } from '../../domain-models/contractAndRates/parseDomainData'
-import { updateInfoIncludeUpdater } from '../prismaHelpers'
+import { ContractType } from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../storeError'
+import { includeUpdateInfo } from './prismaSharedContractRateHelpers'
+import { parseContractWithHistory } from './parseContractWithHistory'
 
 // findContractWithHistory returns a ContractType with a full set of
 // ContractRevisions in reverse chronological order. Each revision is a change to this
@@ -23,14 +23,19 @@ async function findContractWithHistory(
                         createdAt: 'asc',
                     },
                     include: {
-                        submitInfo: updateInfoIncludeUpdater,
-                        unlockInfo: updateInfoIncludeUpdater,
+                        submitInfo: includeUpdateInfo,
+                        unlockInfo: includeUpdateInfo,
                         rateRevisions: {
                             include: {
                                 rateRevision: {
                                     include: {
-                                        submitInfo: updateInfoIncludeUpdater,
-                                        unlockInfo: updateInfoIncludeUpdater,
+                                        rateDocuments: true,
+                                        supportingDocuments: true,
+                                        certifyingActuaryContacts: true,
+                                        addtlActuaryContacts: true,
+                                        submitInfo: includeUpdateInfo,
+                                        unlockInfo: includeUpdateInfo,
+                                        draftContracts: true,
                                     },
                                 },
                             },

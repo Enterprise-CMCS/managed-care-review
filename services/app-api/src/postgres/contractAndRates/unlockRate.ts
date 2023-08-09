@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
+import { RateType } from '../../domain-models/contractAndRates'
 import { findRateWithHistory } from './findRateWithHistory'
-import { Rate } from '../../domain-models/contractAndRates/rateType'
 
 // Unlock the given rate
 // * copy form data
@@ -10,7 +10,7 @@ async function unlockRate(
     rateID: string,
     unlockedByUserID: string,
     unlockReason: string
-): Promise<Rate | Error> {
+): Promise<RateType | Error> {
     const groupTime = new Date()
 
     try {
@@ -65,7 +65,7 @@ async function unlockRate(
                             id: rateID,
                         },
                     },
-                    name: currentRev.name,
+                    rateCertificationName: currentRev.rateCertificationName,
                     unlockInfo: {
                         create: {
                             updatedAt: groupTime,

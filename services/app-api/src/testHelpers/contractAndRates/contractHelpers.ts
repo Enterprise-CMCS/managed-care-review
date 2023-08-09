@@ -2,13 +2,15 @@ import { InsertContractArgsType } from '../../postgres/contractAndRates/insertCo
 import { State } from '@prisma/client'
 import { must } from '../errorHelpers'
 import { PrismaClient } from '@prisma/client'
+import { v4 as uuidv4 } from 'uuid'
 import {
-    ContractRevisionTableWithRelations,
-    ContractTableWithRelations,
     DraftContractRevisionTableWithRelations,
     DraftContractTableWithRelations,
-} from '../../postgres/prismaTypes'
-import { v4 as uuidv4 } from 'uuid'
+} from '../../postgres/contractAndRates/prismaDraftContractHelpers'
+import {
+    ContractRevisionTableWithRates,
+    ContractTableWithRelations,
+} from '../../postgres/contractAndRates/prismaSubmittedContractHelpers'
 
 const createInsertContractData = (
     contractArgs?: Partial<InsertContractArgsType>
@@ -72,18 +74,17 @@ const createContractData = (
     revisions: contract?.revisions ?? [
         createContractRevision({
             draftRates: undefined,
-        }) as ContractRevisionTableWithRelations,
+        }) as ContractRevisionTableWithRates,
     ],
     ...contract,
 })
 
 const createContractRevision = (
     revision?: Partial<
-        | ContractRevisionTableWithRelations
-        | DraftContractRevisionTableWithRelations
+        ContractRevisionTableWithRates | DraftContractRevisionTableWithRelations
     >
 ):
-    | ContractRevisionTableWithRelations
+    | ContractRevisionTableWithRates
     | DraftContractRevisionTableWithRelations => ({
     id: uuidv4(),
     createdAt: new Date(),

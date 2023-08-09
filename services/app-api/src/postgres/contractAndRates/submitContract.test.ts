@@ -105,7 +105,7 @@ describe('submitContract', () => {
         const rateA = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'first rate',
+                rateCertificationName: 'first rate',
             })
         )
 
@@ -210,7 +210,7 @@ describe('submitContract', () => {
         const rate1 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'onepoint0',
+                rateCertificationName: 'onepoint0',
             })
         )
         must(

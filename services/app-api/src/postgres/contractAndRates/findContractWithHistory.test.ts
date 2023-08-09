@@ -57,7 +57,7 @@ describe('findContract', () => {
         const rate1 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'someurle.en',
+                rateCertificationName: 'someurle.en',
             })
         )
         must(
@@ -70,7 +70,7 @@ describe('findContract', () => {
         const rate2 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'twopointo',
+                rateCertificationName: 'twopointo',
             })
         )
         must(
@@ -81,7 +81,7 @@ describe('findContract', () => {
         const rate3 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'threepointo',
+                rateCertificationName: 'threepointo',
             })
         )
         must(
@@ -263,9 +263,10 @@ describe('findContract', () => {
         )
 
         expect(revisionsInTimeOrder[5].rateRevisions).toHaveLength(2)
-        expect(revisionsInTimeOrder[5].rateRevisions[1].revisionFormData).toBe(
-            'onepointone'
-        )
+        expect(
+            revisionsInTimeOrder[5].rateRevisions[1].formData
+                .rateCertificationName
+        ).toBe('onepointone')
         expect(revisionsInTimeOrder[5].unlockInfo?.updatedReason).toBe(
             'unlock for 1.1'
         )
@@ -346,7 +347,7 @@ describe('findContract', () => {
         const rate1 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'someurle.en',
+                rateCertificationName: 'someurle.en',
             })
         )
         must(
@@ -359,7 +360,7 @@ describe('findContract', () => {
         const rate2 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'twopointo',
+                rateCertificationName: 'twopointo',
             })
         )
         must(
@@ -370,7 +371,7 @@ describe('findContract', () => {
         const rate3 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'threepointo',
+                rateCertificationName: 'threepointo',
             })
         )
         must(
@@ -483,9 +484,9 @@ describe('findContract', () => {
         expect(revisions[4].rateRevisions).toHaveLength(2)
 
         expect(revisions[5].rateRevisions).toHaveLength(2)
-        expect(revisions[5].rateRevisions[1].revisionFormData).toBe(
-            'onepointone'
-        )
+        expect(
+            revisions[5].rateRevisions[1].formData.rateCertificationName
+        ).toBe('onepointone')
         expect(revisions[5].submitInfo?.updatedReason).toBe('1.1 new name')
 
         expect(revisions[6].rateRevisions).toHaveLength(2)
@@ -541,7 +542,7 @@ describe('findContract', () => {
         const rate1 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'onepoint0',
+                rateCertificationName: 'onepoint0',
             })
         )
         must(await updateDraftRate(client, rate1.id, 'onepoint0', []))
@@ -550,7 +551,7 @@ describe('findContract', () => {
         const rate2 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'twopointo',
+                rateCertificationName: 'twopointo',
             })
         )
         must(await updateDraftRate(client, rate2.id, 'twopointo', []))
@@ -648,7 +649,9 @@ describe('findContract', () => {
 
         // these revisions can be in any order because they were saved at the same time
         const revisionFormDatas = new Set(
-            revisions[2].rateRevisions.map((rr) => rr.revisionFormData)
+            revisions[2].rateRevisions.map(
+                (rr) => rr.formData.rateCertificationName
+            )
         )
         const expectedFormDatas = new Set(['onepoint0', 'twopointone'])
         expect(revisionFormDatas).toStrictEqual(expectedFormDatas)

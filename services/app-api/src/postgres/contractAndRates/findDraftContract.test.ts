@@ -30,7 +30,7 @@ describe('findDraftContract', () => {
         const rate1 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'onepoint0',
+                rateCertificationName: 'onepoint0',
             })
         )
         must(await updateDraftRate(client, rate1.id, 'onepoint0', []))
@@ -39,7 +39,7 @@ describe('findDraftContract', () => {
         const rate2 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'twopointo',
+                rateCertificationName: 'twopointo',
             })
         )
         must(await updateDraftRate(client, rate2.id, 'twopointo', []))
@@ -106,7 +106,7 @@ describe('findDraftContract', () => {
         const rate1 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'onepoint0',
+                rateCertificationName: 'onepoint0',
             })
         )
         must(await updateDraftRate(client, rate1.id, 'onepoint0', []))
@@ -165,7 +165,9 @@ describe('findDraftContract', () => {
 
         expect(draft).toBeDefined()
         expect(draft.rateRevisions).toHaveLength(1)
-        expect(draft.rateRevisions[0].revisionFormData).toBe('draft two')
+        expect(draft.rateRevisions[0].formData.rateCertificationName).toBe(
+            'draft two'
+        )
     })
 
     it('works on a later revision', async () => {

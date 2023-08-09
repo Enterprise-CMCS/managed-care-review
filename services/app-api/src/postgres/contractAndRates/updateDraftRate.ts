@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
+import { RateType } from '../../domain-models/contractAndRates'
 import { findRateWithHistory } from './findRateWithHistory'
-import { Rate } from '../../domain-models/contractAndRates/rateType'
 
 // Update the given draft
 // * can change the set of draftRates
@@ -10,7 +10,7 @@ async function updateDraftRate(
     rateID: string,
     formData: string,
     contractIDs: string[]
-): Promise<Rate | Error> {
+): Promise<RateType | Error> {
     try {
         // Given all the Rates associated with this draft, find the most recent submitted
         // rateRevision to update.
@@ -30,7 +30,7 @@ async function updateDraftRate(
                 id: currentRev.id,
             },
             data: {
-                name: formData,
+                rateCertificationName: formData,
                 draftContracts: {
                     set: contractIDs.map((rID) => ({
                         id: rID,
