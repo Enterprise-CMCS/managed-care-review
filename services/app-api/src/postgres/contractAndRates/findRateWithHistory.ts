@@ -1,19 +1,17 @@
 import { UpdateInfoTable, User } from '@prisma/client'
-import {
-    PrismaTransactionType,
-    RateRevisionTableWithFormData,
-} from '../prismaTypes'
-import {
-    contractFormDataToDomainModel,
-    convertUpdateInfoToDomainModel,
-    rateFormDataToDomainModel,
-} from './prismaToDomainModel'
-import { ContractRevisionTableWithFormData } from '../prismaTypes'
-import { updateInfoIncludeUpdater } from '../prismaHelpers'
+import { PrismaTransactionType } from '../prismaTypes'
 import {
     RateRevisionWithContractsType,
     RateType,
 } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
+import {
+    contractFormDataToDomainModel,
+    ContractRevisionTableWithFormData,
+    convertUpdateInfoToDomainModel,
+    includeUpdateInfo,
+    rateFormDataToDomainModel,
+    RateRevisionTableWithFormData,
+} from './prismaSharedContractRateHelpers'
 
 // this is for the internal building of individual revisions
 // we convert them into RateRevisons to return them
@@ -37,8 +35,8 @@ async function findRateWithHistory(
                 createdAt: 'asc',
             },
             include: {
-                submitInfo: updateInfoIncludeUpdater,
-                unlockInfo: updateInfoIncludeUpdater,
+                submitInfo: includeUpdateInfo,
+                unlockInfo: includeUpdateInfo,
                 rateDocuments: true,
                 supportingDocuments: true,
                 certifyingActuaryContacts: true,
@@ -48,8 +46,8 @@ async function findRateWithHistory(
                     include: {
                         contractRevision: {
                             include: {
-                                submitInfo: updateInfoIncludeUpdater,
-                                unlockInfo: updateInfoIncludeUpdater,
+                                submitInfo: includeUpdateInfo,
+                                unlockInfo: includeUpdateInfo,
                                 stateContacts: true,
                                 contractDocuments: true,
                                 supportingDocuments: true,

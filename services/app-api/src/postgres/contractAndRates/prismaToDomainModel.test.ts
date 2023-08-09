@@ -1,18 +1,18 @@
+import { v4 as uuidv4 } from 'uuid'
+import { createContractRevision } from '../../testHelpers'
+import { DraftContractRevisionTableWithRelations } from './prismaDraftContractHelpers'
 import {
     contractFormDataToDomainModel,
     getContractStatus,
-} from './prismaToDomainModel'
-import {
-    ContractRevisionFormDataType,
-    ContractRevisionTableWithRates,
-} from '../prismaTypes'
-import { v4 as uuidv4 } from 'uuid'
-import { createContractRevision } from '../../testHelpers'
+} from './prismaSharedContractRateHelpers'
+import { ContractRevisionTableWithRates } from './prismaSubmittedContractHelpers'
 
 describe('prismaToDomainModel', () => {
     describe('contractFormDataToDomainModel', () => {
         it('correctly adds document categories to each document', () => {
-            const contractRevision: ContractRevisionFormDataType =
+            const contractRevision:
+                | ContractRevisionTableWithRates
+                | DraftContractRevisionTableWithRelations =
                 createContractRevision()
 
             const domainFormData =

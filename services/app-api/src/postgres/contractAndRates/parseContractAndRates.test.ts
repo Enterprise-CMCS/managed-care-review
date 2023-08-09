@@ -1,20 +1,22 @@
 import {
-    DraftContractTableWithRelations,
-    DraftContractRevisionTableWithRelations,
-    ContractTableWithRelations,
-    ContractRevisionTableWithRates,
-} from '../../postgres/prismaTypes'
-import {
     parseDraftContract,
     parseDraftContractRevision,
-} from './parseDomainData'
+} from './parseDraftContract'
 import { v4 as uuidv4 } from 'uuid'
 import {
     createContractData,
     createContractRevision,
     createDraftContractData,
 } from '../../testHelpers/'
-import { parseContractWithHistory } from '../../postgres/contractAndRates/prismaContractWithHistoryConverter'
+import { parseContractWithHistory } from './parseContractWithHistory'
+import {
+    DraftContractRevisionTableWithRelations,
+    DraftContractTableWithRelations,
+} from './prismaDraftContractHelpers'
+import {
+    ContractRevisionTableWithRates,
+    ContractTableWithRelations,
+} from './prismaSubmittedContractHelpers'
 
 describe('parseDomainData', () => {
     describe('parseDraftContract', () => {

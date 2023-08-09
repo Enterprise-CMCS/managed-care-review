@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client'
+import { RateRevisionWithContractsType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import {
     contractFormDataToDomainModel,
+    includeUpdateInfo,
     rateFormDataToDomainModel,
-} from './prismaToDomainModel'
-import { updateInfoIncludeUpdater } from '../prismaHelpers'
-import { RateRevisionWithContractsType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
+} from './prismaSharedContractRateHelpers'
 
 // findDraftRate returns a draft (if any) for the given contract.
 async function findDraftRate(
@@ -18,8 +18,8 @@ async function findDraftRate(
                 submitInfo: null,
             },
             include: {
-                submitInfo: updateInfoIncludeUpdater,
-                unlockInfo: updateInfoIncludeUpdater,
+                submitInfo: includeUpdateInfo,
+                unlockInfo: includeUpdateInfo,
                 rateDocuments: true,
                 supportingDocuments: true,
                 certifyingActuaryContacts: true,
@@ -28,8 +28,8 @@ async function findDraftRate(
                     include: {
                         revisions: {
                             include: {
-                                submitInfo: updateInfoIncludeUpdater,
-                                unlockInfo: updateInfoIncludeUpdater,
+                                submitInfo: includeUpdateInfo,
+                                unlockInfo: includeUpdateInfo,
                                 stateContacts: true,
                                 contractDocuments: true,
                                 supportingDocuments: true,

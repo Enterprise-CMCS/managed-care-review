@@ -4,17 +4,17 @@ import {
     ContractRevisionWithRatesType,
 } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import {
-    ContractRevisionTableWithRates,
-    ContractTableWithRelations,
-    RateRevisionTableWithFormData,
-    UpdateInfoTableWithUpdater,
-} from '../prismaTypes'
-import {
     contractFormDataToDomainModel,
     convertUpdateInfoToDomainModel,
     getContractStatus,
+    RateRevisionTableWithFormData,
     ratesRevisionsToDomainModel,
-} from './prismaToDomainModel'
+    UpdateInfoTableWithUpdater,
+} from './prismaSharedContractRateHelpers'
+import {
+    ContractRevisionTableWithRates,
+    ContractTableWithRelations,
+} from './prismaSubmittedContractHelpers'
 
 // parseContractWithHistory returns a ContractType with a full set of
 // ContractRevisions in reverse chronological order. Each revision is a change to this
@@ -22,7 +22,6 @@ import {
 // to the data or relations of associate revisions will all surface as new ContractRevisions
 function parseContractWithHistory(
     contract: ContractTableWithRelations
-    //contractRevisions: ContractRevisionTableWithRelations[]
 ): ContractType | Error {
     const contractWithHistory = contractWithHistoryToDomainModel(contract)
 

@@ -1,8 +1,8 @@
 import { PrismaTransactionType } from '../prismaTypes'
 import { ContractType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
-import { updateInfoIncludeUpdater } from '../prismaHelpers'
 import { NotFoundError } from '../storeError'
-import { parseContractWithHistory } from './prismaContractWithHistoryConverter'
+import { includeUpdateInfo } from './prismaSharedContractRateHelpers'
+import { parseContractWithHistory } from './parseContractWithHistory'
 
 // findContractWithHistory returns a ContractType with a full set of
 // ContractRevisions in reverse chronological order. Each revision is a change to this
@@ -23,8 +23,8 @@ async function findContractWithHistory(
                         createdAt: 'asc',
                     },
                     include: {
-                        submitInfo: updateInfoIncludeUpdater,
-                        unlockInfo: updateInfoIncludeUpdater,
+                        submitInfo: includeUpdateInfo,
+                        unlockInfo: includeUpdateInfo,
                         rateRevisions: {
                             include: {
                                 rateRevision: {
@@ -33,8 +33,8 @@ async function findContractWithHistory(
                                         supportingDocuments: true,
                                         certifyingActuaryContacts: true,
                                         addtlActuaryContacts: true,
-                                        submitInfo: updateInfoIncludeUpdater,
-                                        unlockInfo: updateInfoIncludeUpdater,
+                                        submitInfo: includeUpdateInfo,
+                                        unlockInfo: includeUpdateInfo,
                                         draftContracts: true,
                                     },
                                 },

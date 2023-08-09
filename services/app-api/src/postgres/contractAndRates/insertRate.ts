@@ -14,7 +14,7 @@ import { RateType } from '../../domain-models/contractAndRates/contractAndRatesZ
 import {
     contractFormDataToDomainModel,
     rateFormDataToDomainModel,
-} from './prismaToDomainModel'
+} from './prismaSharedContractRateHelpers'
 
 type InsertRateArgsType = {
     stateCode: StateCodeType

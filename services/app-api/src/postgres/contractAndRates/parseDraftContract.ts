@@ -1,17 +1,15 @@
 import {
-    DraftContractRevisionTableWithRelations,
-    DraftContractTableWithRelations,
-} from '../../postgres/prismaTypes'
-import {
-    ContractType,
-    draftContractZodSchema,
     contractRevisionWithRatesSchema,
     ContractRevisionWithRatesType,
-} from './contractAndRatesZodSchema'
+    ContractType,
+    draftContractZodSchema,
+} from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import {
-    draftContractToDomainModel,
+    DraftContractRevisionTableWithRelations,
     draftContractRevToDomainModel,
-} from '../../postgres/contractAndRates/prismaToDomainModel'
+    DraftContractTableWithRelations,
+    draftContractToDomainModel,
+} from '../../postgres/contractAndRates/prismaDraftContractHelpers'
 
 function parseDraftContractRevision(
     revision: DraftContractRevisionTableWithRelations

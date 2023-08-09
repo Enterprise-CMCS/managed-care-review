@@ -5,8 +5,8 @@ import {
     ContractType as PrismaContractType,
 } from '@prisma/client'
 import { ContractType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
-import { parseDraftContract } from '../../domain-models/contractAndRates/parseDomainData'
-import { draftContractRevisionsWithDraftRates } from '../prismaHelpers'
+import { parseDraftContract } from './parseDraftContract'
+import { includeDraftContractRevisionsWithDraftRates } from './prismaDraftContractHelpers'
 
 type InsertContractArgsType = {
     stateCode: string
@@ -53,7 +53,7 @@ async function insertDraftContract(
                 },
                 include: {
                     revisions: {
-                        include: draftContractRevisionsWithDraftRates,
+                        include: includeDraftContractRevisionsWithDraftRates,
                     },
                 },
             })
