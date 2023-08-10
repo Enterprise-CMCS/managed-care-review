@@ -13,10 +13,7 @@ import {
     DraftContractRevisionTableWithRelations,
     DraftContractTableWithRelations,
 } from './prismaDraftContractHelpers'
-import {
-    ContractRevisionTableWithRates,
-    ContractTableWithRelations,
-} from './prismaSubmittedContractHelpers'
+import { ContractTableFullPayload } from './prismaSubmittedContractHelpers'
 
 describe('parseDomainData', () => {
     describe('parseDraftContract', () => {
@@ -143,7 +140,7 @@ describe('parseDomainData', () => {
         })
 
         const contractRevisionsWithInvalidData: {
-            contract: ContractTableWithRelations
+            contract: ContractTableFullPayload
             testDescription: string
         }[] = [
             {
@@ -196,7 +193,7 @@ describe('parseDomainData', () => {
                                     },
                                 },
                             ],
-                        }) as ContractRevisionTableWithRates,
+                        }) as ContractTableFullPayload['revisions'][0],
                     ],
                 }),
                 testDescription: 'unsubmitted rate',

@@ -67,37 +67,6 @@ export function fetchHealthPlanPackageResolver(
                 })
             }
 
-            if (contractWithHistory.status === 'DRAFT') {
-                const draftRevision = await store.findDraftContract(input.pkgID)
-                if (draftRevision instanceof Error) {
-                    // If draft returns undefined we error because a draft submission should always have a draft revision.
-                    const errMessage = `Issue finding a draft contract with id ${input.pkgID}. Message: ${draftRevision.message}`
-                    logError('fetchHealthPlanPackage', errMessage)
-                    setErrorAttributesOnActiveSpan(errMessage, span)
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'DB_ERROR',
-                        },
-                    })
-                }
-
-                if (draftRevision === undefined) {
-                    const errMessage = `Issue finding a draft contract with id ${input.pkgID}. Message: Result was undefined.`
-                    logError('fetchHealthPlanPackage', errMessage)
-                    setErrorAttributesOnActiveSpan(errMessage, span)
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'NOT_FOUND',
-                            cause: 'DB_ERROR',
-                        },
-                    })
-                }
-
-                // Pushing in the draft revision, so it would be first in the array of revisions.
-                contractWithHistory.revisions.push(draftRevision)
-            }
-
             const convertedPkg =
                 convertContractToUnlockedHealthPlanPackage(contractWithHistory)
 
