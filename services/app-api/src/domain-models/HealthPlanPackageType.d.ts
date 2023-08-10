@@ -27,7 +27,7 @@ type HealthPlanRevisionType = {
     formDataProto: Uint8Array
 }
 
-export {
+export type {
     HealthPlanPackageStatusType,
     HealthPlanPackageType,
     UpdateInfoType,

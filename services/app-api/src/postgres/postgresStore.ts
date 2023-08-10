@@ -205,4 +205,5 @@ function NewPostgresStore(client: PrismaClient): Store {
     }
 }
 
-export { NewPostgresStore, Store }
+export type { Store }
+export { NewPostgresStore }

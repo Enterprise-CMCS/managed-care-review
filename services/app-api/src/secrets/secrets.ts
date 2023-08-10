@@ -70,4 +70,5 @@ function getConnectionURL(secrets: Secret): string {
     return postgresURL
 }
 
-export { APISecrets, FetchSecrets, getConnectionURL }
+export type { APISecrets }
+export { FetchSecrets, getConnectionURL }
