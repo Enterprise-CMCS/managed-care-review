@@ -5,7 +5,6 @@ import { insertDraftContract } from './insertContract'
 import { unlockContract } from './unlockContract'
 import { insertDraftRate } from './insertRate'
 import { unlockRate } from './unlockRate'
-import { findDraftContract } from './findDraftContract'
 import { submitRate } from './submitRate'
 import { updateDraftContract } from './updateDraftContract'
 import { updateDraftRate } from './updateDraftRate'
@@ -75,7 +74,11 @@ describe('unlockContract', () => {
             )
         )
 
-        const draftContract = must(await findDraftContract(client, contract.id))
+        const fullDraftContract = must(
+            await findContractWithHistory(client, contract.id)
+        )
+
+        const draftContract = fullDraftContract.draftRevision
 
         if (draftContract === undefined) {
             throw Error('Contract data was undefined')
@@ -94,9 +97,11 @@ describe('unlockContract', () => {
             await submitRate(client, rate.id, stateUser.id, 'Updated things')
         )
 
-        const draftContractTwo = must(
-            await findDraftContract(client, contract.id)
+        const fullDraftContractTwo = must(
+            await findContractWithHistory(client, contract.id)
         )
+
+        const draftContractTwo = fullDraftContractTwo.draftRevision
 
         if (draftContractTwo === undefined) {
             throw Error('Contract data was undefined')

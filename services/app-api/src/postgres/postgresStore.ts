@@ -43,15 +43,11 @@ import {
     insertQuestionResponse,
 } from './questionResponse'
 import { findAllSupportedStates } from './state'
-import {
-    ContractRevisionWithRatesType,
-    ContractType,
-} from '../domain-models/contractAndRates'
+import { ContractType } from '../domain-models/contractAndRates'
 import {
     InsertContractArgsType,
     insertDraftContract,
     findContractWithHistory,
-    findDraftContract,
 } from './contractAndRates'
 
 type Store = {
@@ -137,10 +133,6 @@ type Store = {
     findContractWithHistory: (
         contractID: string
     ) => Promise<ContractType | Error>
-
-    findDraftContract: (
-        contractID: string
-    ) => Promise<ContractRevisionWithRatesType | undefined | Error>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -201,7 +193,6 @@ function NewPostgresStore(client: PrismaClient): Store {
         insertDraftContract: (args) => insertDraftContract(client, args),
         findContractWithHistory: (args) =>
             findContractWithHistory(client, args),
-        findDraftContract: (args) => findDraftContract(client, args),
     }
 }
 

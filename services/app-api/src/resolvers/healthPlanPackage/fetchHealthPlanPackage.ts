@@ -37,10 +37,7 @@ export function fetchHealthPlanPackageResolver(
 
         // Here is where we flag finding health plan
         if (ratesDatabaseRefactor) {
-            // Health plans can be in two states Draft and Submitted, and we have 2 postgres functions for each.
-            // findContractWithHistory gets all submitted revisions and findDraftContract gets just the one draft revision
-            // We don't have function that gets all revisions including draft. So we have to call both functions when a
-            // contract is DRAFT.
+            // Fetch the full contract
             const contractWithHistory = await store.findContractWithHistory(
                 input.pkgID
             )
