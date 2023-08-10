@@ -1,10 +1,7 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import UPDATE_CMS_USER from '../../../../app-graphql/src/mutations/updateCMSUser.graphql'
-import {
-    InsertUserArgsType,
-    isStoreError,
-    NewPostgresStore,
-} from '../../postgres'
+import type { InsertUserArgsType } from '../../postgres'
+import { isStoreError, NewPostgresStore } from '../../postgres'
 import { v4 as uuidv4 } from 'uuid'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import {
@@ -12,8 +9,9 @@ import {
     assertAnErrorCode,
     assertAnErrorExtensions,
 } from '../../testHelpers'
-import { State } from '../../gen/gqlServer'
-import { AuditAction, Division } from '@prisma/client'
+import type { State } from '../../gen/gqlServer'
+import type { Division } from '@prisma/client'
+import { AuditAction } from '@prisma/client'
 import { testAdminUser, testCMSUser } from '../../testHelpers/userHelpers'
 
 describe('updateCMSUser', () => {

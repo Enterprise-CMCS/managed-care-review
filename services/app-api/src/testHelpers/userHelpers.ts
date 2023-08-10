@@ -1,5 +1,6 @@
-import { InsertUserArgsType, isStoreError, NewPostgresStore } from '../postgres'
-import {
+import type { InsertUserArgsType } from '../postgres'
+import { isStoreError, NewPostgresStore } from '../postgres'
+import type {
     AdminUserType,
     CMSUserType,
     StateUserType,

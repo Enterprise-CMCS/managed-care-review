@@ -1,6 +1,6 @@
-import { CMSUserType } from './UserType'
-import { QuestionResponseType } from './QuestionResponseType'
-import { DivisionType } from './DivisionType'
+import type { CMSUserType } from './UserType'
+import type { QuestionResponseType } from './QuestionResponseType'
+import type { DivisionType } from './DivisionType'
 
 type Document = {
     name: string

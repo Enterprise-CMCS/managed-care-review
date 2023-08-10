@@ -1,11 +1,11 @@
-import {
+import type {
     StateUserType,
     CMSUserType,
     UserType,
     AdminUserType,
     HelpdeskUserType,
 } from './UserType'
-import { User as PrismaUser } from '@prisma/client'
+import type { User as PrismaUser } from '@prisma/client'
 
 function isUser(user: unknown): user is UserType {
     if (user && typeof user === 'object') {

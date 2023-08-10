@@ -1,11 +1,9 @@
-import {
-    LockedHealthPlanFormDataType,
-    packageName as generatePackageName,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import type { LockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { packageName as generatePackageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { formatEmailAddresses, pruneDuplicateEmails } from '../formatters'
-import { EmailConfiguration, EmailData } from '..'
-import { ProgramType } from '../../domain-models'
+import type { EmailConfiguration, EmailData } from '..'
+import type { ProgramType } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
     SubmissionTypeRecord,

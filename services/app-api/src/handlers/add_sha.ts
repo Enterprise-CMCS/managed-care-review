@@ -1,17 +1,18 @@
-import { Handler } from 'aws-lambda'
-import { Readable } from 'stream'
+import type { Handler } from 'aws-lambda'
+import type { Readable } from 'stream'
 import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
-import { HealthPlanRevisionTable } from '@prisma/client'
-import {
+import type { HealthPlanRevisionTable } from '@prisma/client'
+import type {
     HealthPlanFormDataType,
     SubmissionDocument,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import { isStoreError, StoreError } from '../postgres/storeError'
+import type { StoreError } from '../postgres/storeError'
+import { isStoreError } from '../postgres/storeError'
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
 import { createHash } from 'crypto'
-import { Store } from '../postgres'
+import type { Store } from '../postgres'
 import {
     parseKey,
     parseBucketName,

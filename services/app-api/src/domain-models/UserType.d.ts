@@ -1,5 +1,5 @@
-import { StateType } from './StateType'
-import { DivisionType } from './DivisionType'
+import type { StateType } from './StateType'
+import type { DivisionType } from './DivisionType'
 
 type UserType = StateUserType | CMSUserType | AdminUserType | HelpdeskUserType
 

@@ -1,5 +1,5 @@
 import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
-import { ProgramType } from '../../domain-models'
+import type { ProgramType } from '../../domain-models'
 
 // Currently relies on state programs json; does not query postgres
 function findStatePrograms(stateCode: string): ProgramType[] | Error {

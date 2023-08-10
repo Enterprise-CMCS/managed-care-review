@@ -2,7 +2,7 @@ import {
     SecretsManagerClient,
     GetSecretValueCommand,
 } from '@aws-sdk/client-secrets-manager'
-import { GetSecretValueResponse } from 'aws-sdk/clients/secretsmanager'
+import type { GetSecretValueResponse } from 'aws-sdk/clients/secretsmanager'
 
 interface APISecrets {
     pgConnectionURL: string
@@ -70,4 +70,5 @@ function getConnectionURL(secrets: Secret): string {
     return postgresURL
 }
 
-export { APISecrets, FetchSecrets, getConnectionURL }
+export type { APISecrets }
+export { FetchSecrets, getConnectionURL }

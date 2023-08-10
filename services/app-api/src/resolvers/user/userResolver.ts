@@ -1,4 +1,4 @@
-import { Resolvers } from '../../gen/gqlServer'
+import type { Resolvers } from '../../gen/gqlServer'
 import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
 
 export const stateUserResolver: Resolvers['StateUser'] = {

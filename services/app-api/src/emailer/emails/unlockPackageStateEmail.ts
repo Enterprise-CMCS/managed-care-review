@@ -1,7 +1,5 @@
-import {
-    UnlockedHealthPlanFormDataType,
-    packageName as generatePackageName,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import type { UnlockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { packageName as generatePackageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import {
     renderTemplate,
@@ -9,7 +7,7 @@ import {
     findPackagePrograms,
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration } from '../'
-import { ProgramType, UpdateInfoType } from '../../domain-models'
+import type { ProgramType, UpdateInfoType } from '../../domain-models'
 import { reviewAndSubmitURL } from '../generateURLs'
 import { pruneDuplicateEmails } from '../formatters'
 

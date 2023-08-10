@@ -1,4 +1,4 @@
-import {
+import type {
     ActuaryCommunication,
     ActuaryContact,
     PrismaClient,
@@ -6,11 +6,11 @@ import {
     RateDocument,
     RateSupportingDocument,
 } from '@prisma/client'
-import {
+import type {
     StateCodeType,
     RateType as DomainRateType,
 } from 'app-web/src/common-code/healthPlanFormDataType'
-import { RateType } from '../../domain-models/contractAndRates'
+import type { RateType } from '../../domain-models/contractAndRates'
 import {
     contractFormDataToDomainModel,
     rateFormDataToDomainModel,

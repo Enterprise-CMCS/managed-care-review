@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client'
-import { ContractType } from '../../domain-models/contractAndRates'
+import type { PrismaClient } from '@prisma/client'
+import type { ContractType } from '../../domain-models/contractAndRates'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../storeError'
 

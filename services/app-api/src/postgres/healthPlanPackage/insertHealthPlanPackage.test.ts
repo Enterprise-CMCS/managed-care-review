@@ -1,10 +1,8 @@
-import { HealthPlanPackageType } from '../../domain-models'
+import type { HealthPlanPackageType } from '../../domain-models'
 import { toDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import {
-    insertHealthPlanPackage,
-    InsertHealthPlanPackageArgsType,
-} from './insertHealthPlanPackage'
+import type { InsertHealthPlanPackageArgsType } from './insertHealthPlanPackage'
+import { insertHealthPlanPackage } from './insertHealthPlanPackage'
 import { isStoreError } from '../storeError'
 
 describe('insertHealthPlanPackage', () => {

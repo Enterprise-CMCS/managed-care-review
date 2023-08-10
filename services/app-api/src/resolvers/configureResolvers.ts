@@ -1,6 +1,6 @@
 import { GraphQLDate, GraphQLDateTime } from 'graphql-scalars'
 import type { Emailer } from '../emailer'
-import { Resolvers } from '../gen/gqlServer'
+import type { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
 import {
     createHealthPlanPackageResolver,
@@ -23,8 +23,8 @@ import {
     cmsUserResolver,
     indexUsersResolver,
 } from './user'
-import { EmailParameterStore } from '../parameterStore'
-import { LDService } from '../launchDarkly/launchDarkly'
+import type { EmailParameterStore } from '../parameterStore'
+import type { LDService } from '../launchDarkly/launchDarkly'
 import { fetchEmailSettingsResolver } from './email/fetchEmailSettings'
 
 export function configureResolvers(

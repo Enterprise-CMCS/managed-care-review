@@ -1,5 +1,5 @@
-import { EmailData } from '../emailer'
-import { SESServiceException } from '@aws-sdk/client-ses'
+import type { EmailData } from '../emailer'
+import type { SESServiceException } from '@aws-sdk/client-ses'
 
 async function testSendSESEmail(
     emailData: EmailData

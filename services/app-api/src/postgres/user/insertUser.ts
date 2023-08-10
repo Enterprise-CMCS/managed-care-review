@@ -1,6 +1,8 @@
-import { PrismaClient, Role } from '@prisma/client'
-import { StoreError, convertPrismaErrorToStoreError } from '../storeError'
-import { DivisionType, UserType, toDomainUser } from '../../domain-models'
+import type { PrismaClient, Role } from '@prisma/client'
+import type { StoreError } from '../storeError'
+import { convertPrismaErrorToStoreError } from '../storeError'
+import type { DivisionType, UserType } from '../../domain-models'
+import { toDomainUser } from '../../domain-models'
 
 export type InsertUserArgsType = {
     userID: string
