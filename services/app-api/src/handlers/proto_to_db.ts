@@ -1,10 +1,11 @@
-import { Handler, APIGatewayProxyResultV2 } from 'aws-lambda'
+import type { Handler, APIGatewayProxyResultV2 } from 'aws-lambda'
 import { initTracer, initMeter } from '../../../uploads/src/lib/otel'
 import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
-import { Store } from '../postgres'
-import { HealthPlanRevisionTable } from '@prisma/client'
-import { isStoreError, StoreError } from '../postgres/storeError'
+import type { Store } from '../postgres'
+import type { HealthPlanRevisionTable } from '@prisma/client'
+import type { StoreError } from '../postgres/storeError'
+import { isStoreError } from '../postgres/storeError'
 
 export const getDatabaseConnection = async (): Promise<Store> => {
     const dbURL = process.env.DATABASE_URL

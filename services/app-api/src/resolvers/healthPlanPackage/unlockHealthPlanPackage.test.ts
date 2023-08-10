@@ -1,6 +1,6 @@
-import { GraphQLError } from 'graphql'
+import type { GraphQLError } from 'graphql'
 import UNLOCK_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
-import { HealthPlanPackage } from '../../gen/gqlServer'
+import type { HealthPlanPackage } from '../../gen/gqlServer'
 import { todaysDate } from '../../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer,

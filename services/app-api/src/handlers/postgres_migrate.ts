@@ -1,4 +1,4 @@
-import { Handler, APIGatewayProxyResultV2 } from 'aws-lambda'
+import type { Handler, APIGatewayProxyResultV2 } from 'aws-lambda'
 import { RDSClient, CreateDBClusterSnapshotCommand } from '@aws-sdk/client-rds'
 import { spawnSync } from 'child_process'
 import { getDBClusterID, getPostgresURL } from './configuration'

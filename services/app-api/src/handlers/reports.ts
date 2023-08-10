@@ -1,18 +1,19 @@
-import { APIGatewayProxyHandler } from 'aws-lambda'
+import type { APIGatewayProxyHandler } from 'aws-lambda'
 import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { Parser, transforms } from 'json2csv'
-import { HealthPlanRevisionTable } from '@prisma/client'
-import { ProgramArgType } from '../../../app-web/src/common-code/healthPlanFormDataType/State'
-import {
+import type { HealthPlanRevisionTable } from '@prisma/client'
+import type { ProgramArgType } from '../../../app-web/src/common-code/healthPlanFormDataType/State'
+import type {
     HealthPlanFormDataType,
     RateInfoType,
-    packageName,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
+import { packageName } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import statePrograms from '../../../app-web/src/common-code/data/statePrograms.json'
-import { isStoreError, StoreError } from '../postgres/storeError'
-import { HealthPlanPackageStatusType } from '../domain-models'
+import type { StoreError } from '../postgres/storeError'
+import { isStoreError } from '../postgres/storeError'
+import type { HealthPlanPackageStatusType } from '../domain-models'
 import {
     userFromCognitoAuthProvider,
     userFromLocalAuthProvider,

@@ -1,4 +1,4 @@
-import {
+import type {
     ActuaryContact,
     ContractDocument,
     ContractRevisionTable,
@@ -13,8 +13,8 @@ import {
     UpdateInfoTable,
     User,
 } from '@prisma/client'
-import { DocumentCategoryType } from 'app-web/src/common-code/healthPlanFormDataType'
-import {
+import type { DocumentCategoryType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type {
     ContractFormDataType,
     RateFormDataType,
     RateRevisionType,

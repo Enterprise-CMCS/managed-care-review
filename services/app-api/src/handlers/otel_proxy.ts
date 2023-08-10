@@ -1,4 +1,4 @@
-import { APIGatewayProxyHandler } from 'aws-lambda'
+import type { APIGatewayProxyHandler } from 'aws-lambda'
 import axios from 'axios'
 
 export const main: APIGatewayProxyHandler = async (event) => {

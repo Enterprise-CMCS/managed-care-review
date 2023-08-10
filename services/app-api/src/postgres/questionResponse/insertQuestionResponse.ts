@@ -1,6 +1,7 @@
-import { PrismaClient } from '@prisma/client'
-import { convertPrismaErrorToStoreError, StoreError } from '../storeError'
-import {
+import type { PrismaClient } from '@prisma/client'
+import type { StoreError } from '../storeError'
+import { convertPrismaErrorToStoreError } from '../storeError'
+import type {
     InsertQuestionResponseArgs,
     QuestionResponseType,
     StateUserType,

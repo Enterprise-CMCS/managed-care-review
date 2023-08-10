@@ -1,13 +1,13 @@
 import * as Eta from 'eta'
 import * as path from 'path'
 
-import {
+import type {
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
     SubmissionType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { EmailConfiguration, StateAnalystsEmails } from '.'
-import { ProgramType } from '../domain-models'
+import type { EmailConfiguration, StateAnalystsEmails } from '.'
+import type { ProgramType } from '../domain-models'
 import { logError } from '../logger'
 import { pruneDuplicateEmails } from './formatters'
 

@@ -1,4 +1,4 @@
-import { IndexQuestionsPayload } from './QuestionsType'
+import type { IndexQuestionsPayload } from './QuestionsType'
 
 type HealthPlanPackageStatusType =
     | 'DRAFT'

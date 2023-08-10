@@ -1,11 +1,11 @@
 import { v4 as uuidv4 } from 'uuid'
 import { createContractRevision } from '../../testHelpers'
-import { DraftContractRevisionTableWithRelations } from './prismaDraftContractHelpers'
+import type { DraftContractRevisionTableWithRelations } from './prismaDraftContractHelpers'
 import {
     contractFormDataToDomainModel,
     getContractStatus,
 } from './prismaSharedContractRateHelpers'
-import { ContractRevisionTableWithRates } from './prismaSubmittedContractHelpers'
+import type { ContractRevisionTableWithRates } from './prismaSubmittedContractHelpers'
 
 describe('prismaToDomainModel', () => {
     describe('contractFormDataToDomainModel', () => {

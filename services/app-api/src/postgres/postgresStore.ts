@@ -1,10 +1,14 @@
-import { PrismaClient, HealthPlanRevisionTable, Division } from '@prisma/client'
-import {
+import type {
+    PrismaClient,
+    HealthPlanRevisionTable,
+    Division,
+} from '@prisma/client'
+import type {
     UnlockedHealthPlanFormDataType,
     HealthPlanFormDataType,
     StateCodeType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import {
+import type {
     ProgramType,
     HealthPlanPackageType,
     UpdateInfoType,
@@ -18,21 +22,21 @@ import {
     StateType,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
-import { StoreError } from './storeError'
+import type { StoreError } from './storeError'
+import type { InsertHealthPlanPackageArgsType } from './healthPlanPackage'
 import {
     findAllHealthPlanPackagesByState,
     findAllHealthPlanPackagesBySubmittedAt,
     findHealthPlanPackage,
     insertHealthPlanPackage,
-    InsertHealthPlanPackageArgsType,
     insertHealthPlanRevision,
     updateHealthPlanRevision,
     findAllRevisions,
 } from './healthPlanPackage'
+import type { InsertUserArgsType } from './user'
 import {
     findUser,
     insertUser,
-    InsertUserArgsType,
     updateCmsUserProperties,
     findAllUsers,
     insertManyUsers,
@@ -43,12 +47,12 @@ import {
     insertQuestionResponse,
 } from './questionResponse'
 import { findAllSupportedStates } from './state'
-import {
+import type {
     ContractRevisionWithRatesType,
     ContractType,
 } from '../domain-models/contractAndRates'
+import type { InsertContractArgsType } from './contractAndRates'
 import {
-    InsertContractArgsType,
     insertDraftContract,
     findContractWithHistory,
     findDraftContract,

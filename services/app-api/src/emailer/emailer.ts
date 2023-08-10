@@ -9,11 +9,11 @@ import {
     resubmitPackageStateEmail,
     resubmitPackageCMSEmail,
 } from './'
-import {
+import type {
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { UpdateInfoType, ProgramType } from '../domain-models'
+import type { UpdateInfoType, ProgramType } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 
 // See more discussion of configuration in docs/Configuration.md

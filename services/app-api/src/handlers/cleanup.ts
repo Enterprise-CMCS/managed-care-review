@@ -1,8 +1,10 @@
+import type {
+    DescribeDBClusterSnapshotsCommandInput,
+    DeleteDBClusterSnapshotCommandInput,
+} from '@aws-sdk/client-rds'
 import {
     RDSClient,
-    DescribeDBClusterSnapshotsCommandInput,
     DescribeDBClusterSnapshotsCommand,
-    DeleteDBClusterSnapshotCommandInput,
     DeleteDBClusterSnapshotCommand,
 } from '@aws-sdk/client-rds'
 

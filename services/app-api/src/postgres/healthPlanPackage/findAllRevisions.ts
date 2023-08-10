@@ -1,6 +1,9 @@
-import { PrismaClient } from '@prisma/client'
-import { HealthPlanPackageTable, HealthPlanRevisionTable } from '@prisma/client'
-import { StoreError } from '../storeError'
+import type { PrismaClient } from '@prisma/client'
+import type {
+    HealthPlanPackageTable,
+    HealthPlanRevisionTable,
+} from '@prisma/client'
+import type { StoreError } from '../storeError'
 export type PackagesAndRevisions = (HealthPlanPackageTable & {
     revisions: HealthPlanRevisionTable[]
 })[]

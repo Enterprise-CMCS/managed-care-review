@@ -1,17 +1,19 @@
-import {
+import type {
     ContractType,
-    contractSchema,
     ContractRevisionWithRatesType,
 } from '../../domain-models/contractAndRates'
+import { contractSchema } from '../../domain-models/contractAndRates'
+import type {
+    RateRevisionTableWithFormData,
+    UpdateInfoTableWithUpdater,
+} from './prismaSharedContractRateHelpers'
 import {
     contractFormDataToDomainModel,
     convertUpdateInfoToDomainModel,
     getContractStatus,
-    RateRevisionTableWithFormData,
     ratesRevisionsToDomainModel,
-    UpdateInfoTableWithUpdater,
 } from './prismaSharedContractRateHelpers'
-import {
+import type {
     ContractRevisionTableWithRates,
     ContractTableWithRelations,
 } from './prismaSubmittedContractHelpers'

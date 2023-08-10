@@ -1,9 +1,11 @@
 import { ForbiddenError } from 'apollo-server-lambda'
-import { isAdminUser, UserType } from '../../domain-models'
+import type { UserType } from '../../domain-models'
+import { isAdminUser } from '../../domain-models'
 import { isHelpdeskUser } from '../../domain-models/user'
-import { QueryResolvers } from '../../gen/gqlServer'
+import type { QueryResolvers } from '../../gen/gqlServer'
 import { logError } from '../../logger'
-import { isStoreError, Store } from '../../postgres'
+import type { Store } from '../../postgres'
+import { isStoreError } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
