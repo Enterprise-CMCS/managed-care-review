@@ -9,9 +9,34 @@ import {
     ContractRevisionTableWithFormData,
     getContractStatus,
     includeUpdateInfo,
-    rateReivisionToDomainModel,
+    rateRevisionToDomainModel,
     RateRevisionTableWithFormData,
 } from './prismaSharedContractRateHelpers'
+
+// TODO these should be separated into two files - contractHelpers and rateHelpers
+
+const includeDraftRateRevisionsWithDraftContracts = {
+    revisions: {
+        include: {
+            rateDocuments: true,
+            supportingDocuments: true,
+            certifyingActuaryContacts: true,
+            addtlActuaryContacts: true,
+            draftContracts: true,
+            contractRevisions: {
+                include: {
+                    contractRevision: {
+                        include: {
+                            stateContacts: true,
+                            contractDocuments: true,
+                            supportingDocuments: true,
+                        },
+                    },
+                },
+            },
+        },
+    },
+}
 
 // This is the include that gives us draft info
 const includeDraftContractRevisionsWithDraftRates = {
@@ -42,13 +67,18 @@ const includeDraftContractRevisionsWithDraftRates = {
     },
 } as const
 
-type DraftRateWithRelations = RateTable & {
+type DraftRateTableWithRelations = RateTable & {
     revisions: RateRevisionTableWithFormData[]
 }
 
+type DraftRateRevisionTableWithRelations =
+    RateRevisionTableWithFormData & {
+        draftContracts: DraftContractTableWithRelations[]
+    }
+
 type DraftContractRevisionTableWithRelations =
     ContractRevisionTableWithFormData & {
-        draftRates: DraftRateWithRelations[]
+        draftRates: DraftRateTableWithRelations[]
     }
 
 type DraftContractTableWithRelations = ContractTable & {
@@ -56,9 +86,9 @@ type DraftContractTableWithRelations = ContractTable & {
 }
 
 function draftRatesToDomainModel(
-    draftRates: DraftRateWithRelations[]
+    draftRates: DraftRateTableWithRelations[]
 ): RateRevisionType[] {
-    return draftRates.map((dr) => rateReivisionToDomainModel(dr.revisions[0]))
+    return draftRates.map((dr) => rateRevisionToDomainModel(dr.revisions[0]))
 }
 
 function draftContractRevToDomainModel(
@@ -92,10 +122,14 @@ function draftContractToDomainModel(
 export type {
     DraftContractTableWithRelations,
     DraftContractRevisionTableWithRelations,
+    DraftRateTableWithRelations,
+    DraftRateRevisionTableWithRelations
 }
 
 export {
     includeDraftContractRevisionsWithDraftRates,
+    includeDraftRateRevisionsWithDraftContracts,
     draftContractToDomainModel,
     draftContractRevToDomainModel,
+    draftRatesToDomainModel,
 }

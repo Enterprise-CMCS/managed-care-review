@@ -15,9 +15,9 @@ import {
     contractFormDataToDomainModel,
     rateFormDataToDomainModel,
 } from './prismaSharedContractRateHelpers'
+import { includeDraftRateRevisionsWithDraftContracts } from './prismaDraftContractHelpers'
 
-type InsertRateArgsType = {
-    stateCode: StateCodeType
+type RateFormEditable = {
     rateType?: DomainRateType
     rateCapitationType?: RateCapitationType
     rateDocuments?: RateDocument[]
@@ -32,6 +32,9 @@ type InsertRateArgsType = {
     certifyingActuaryContacts?: ActuaryContact[]
     addtlActuaryContacts?: ActuaryContact[]
     actuaryCommunicationPreference?: ActuaryCommunication
+}
+type InsertRateArgsType = RateFormEditable  & {
+    stateCode: StateCodeType
 }
 
 // creates a new contract, with a new revision
@@ -101,28 +104,7 @@ async function insertDraftRate(
                         },
                     },
                 },
-                include: {
-                    revisions: {
-                        include: {
-                            rateDocuments: true,
-                            supportingDocuments: true,
-                            certifyingActuaryContacts: true,
-                            addtlActuaryContacts: true,
-                            draftContracts: true,
-                            contractRevisions: {
-                                include: {
-                                    contractRevision: {
-                                        include: {
-                                            stateContacts: true,
-                                            contractDocuments: true,
-                                            supportingDocuments: true,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
+                include: includeDraftRateRevisionsWithDraftContracts
             })
 
             const finalRate: RateType = {
@@ -156,3 +138,4 @@ async function insertDraftRate(
 }
 
 export { insertDraftRate }
+export type {RateFormEditable, InsertRateArgsType}

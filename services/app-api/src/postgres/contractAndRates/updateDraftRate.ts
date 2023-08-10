@@ -1,16 +1,39 @@
 import { PrismaClient } from '@prisma/client'
 import { RateType } from '../../domain-models/contractAndRates'
 import { findRateWithHistory } from './findRateWithHistory'
+import { RateFormEditable } from './insertRate'
 
 // Update the given draft
 // * can change the set of draftRates
 // * set the formData
+
+type UpdateRateArgsType = {
+    rateID: string,
+    formData: RateFormEditable,
+    contractIDs: string[]
+}
+
 async function updateDraftRate(
     client: PrismaClient,
-    rateID: string,
-    formData: string,
-    contractIDs: string[]
+    args: UpdateRateArgsType
 ): Promise<RateType | Error> {
+    const {rateID, formData, contractIDs} = args
+    const {
+        rateType,
+        rateCapitationType,
+        rateDocuments,
+        supportingDocuments,
+        rateDateStart,
+        rateDateEnd,
+        rateDateCertified,
+        amendmentEffectiveDateStart,
+        amendmentEffectiveDateEnd,
+        rateProgramIDs,
+        rateCertificationName,
+        certifyingActuaryContacts,
+        addtlActuaryContacts,
+        actuaryCommunicationPreference,
+    } = formData
     try {
         // Given all the Rates associated with this draft, find the most recent submitted
         // rateRevision to update.
@@ -30,7 +53,28 @@ async function updateDraftRate(
                 id: currentRev.id,
             },
             data: {
-                rateCertificationName: formData,
+                rateType,
+                rateCapitationType,
+                rateDocuments: {
+                    create:rateDocuments
+                },
+                supportingDocuments: {
+                    create:supportingDocuments
+                },
+                rateDateStart,
+                rateDateEnd,
+                rateDateCertified,
+                amendmentEffectiveDateStart,
+                amendmentEffectiveDateEnd,
+                rateProgramIDs,
+                rateCertificationName,
+                certifyingActuaryContacts: {
+                    create: certifyingActuaryContacts
+                },
+                addtlActuaryContacts: {
+                    create: addtlActuaryContacts
+                },
+                actuaryCommunicationPreference,
                 draftContracts: {
                     set: contractIDs.map((rID) => ({
                         id: rID,
@@ -38,9 +82,20 @@ async function updateDraftRate(
                 },
             },
             include: {
+                rateDocuments: true,
+                supportingDocuments: true,
+                certifyingActuaryContacts: true,
+                addtlActuaryContacts: true,
+                draftContracts: true,
                 contractRevisions: {
                     include: {
-                        contractRevision: true,
+                        contractRevision: {
+                            include: {
+                                stateContacts: true,
+                                contractDocuments: true,
+                                supportingDocuments: true,
+                            },
+                        },
                     },
                 },
             },
