@@ -5,7 +5,7 @@ import {
     Link,
     Label,
 } from '@trussworks/react-uswds'
-import { Field, Formik, FormikErrors, FormikHelpers } from 'formik'
+import { Formik, FormikErrors, FormikHelpers } from 'formik'
 import React, { useEffect } from 'react'
 import {
     Link as ReactRouterLink,
@@ -39,14 +39,11 @@ import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
 import { GenericApiErrorBanner, ProgramSelect } from '../../../components'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
-import { useStatePrograms } from '../../../hooks/useStatePrograms'
 import {
     booleanAsYesNoFormValue,
     yesNoFormValueAsBoolean,
 } from '../../../components/Form/FieldYesNo/FieldYesNo'
 import { SubmissionTypeFormSchema } from './SubmissionTypeSchema'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
 
 export interface SubmissionTypeFormValues {
     populationCovered?: PopulationCoveredType
@@ -79,14 +76,6 @@ export const SubmissionType = ({
     const navigate = useNavigate()
     const location = useLocation()
     const isNewSubmission = location.pathname === '/submissions/new'
-
-    const ldClient = useLDClient()
-    const showCHIPOnlyForm = ldClient?.variation(
-        featureFlags.CHIP_ONLY_FORM.flag,
-        featureFlags.CHIP_ONLY_FORM.defaultValue
-    )
-
-    const statePrograms = useStatePrograms()
 
     const [createHealthPlanPackage, { error }] =
         useCreateHealthPlanPackageMutation({
@@ -165,6 +154,13 @@ export const SubmissionType = ({
     ) => {
         if (isNewSubmission) {
             try {
+                if (!values.populationCovered) {
+                    console.info(
+                        'unexpected error, attempting to submit without population covered',
+                        values.submissionType
+                    )
+                    return
+                }
                 if (
                     !(
                         values.submissionType === 'CONTRACT_ONLY' ||
@@ -292,9 +288,7 @@ export const SubmissionType = ({
         <Formik
             initialValues={submissionTypeInitialValues}
             onSubmit={handleFormSubmit}
-            validationSchema={SubmissionTypeFormSchema({
-                'chip-only-form': showCHIPOnlyForm,
-            })}
+            validationSchema={SubmissionTypeFormSchema()}
         >
             {({
                 values,
@@ -329,78 +323,71 @@ export const SubmissionType = ({
                                     headingRef={errorSummaryHeadingRef}
                                 />
                             )}
-
-                            {showCHIPOnlyForm && (
-                                <FormGroup
-                                    error={showFieldErrors(
-                                        errors.populationCovered
-                                    )}
+                            <FormGroup
+                                error={showFieldErrors(
+                                    errors.populationCovered
+                                )}
+                            >
+                                <Fieldset
+                                    className={styles.radioGroup}
+                                    role="radiogroup"
+                                    aria-required
+                                    legend="Which populations does this contract action cover?"
                                 >
-                                    <Fieldset
-                                        className={styles.radioGroup}
-                                        role="radiogroup"
-                                        aria-required
-                                        legend="Which populations does this contract action cover?"
-                                    >
-                                        {showFieldErrors(
-                                            errors.populationCovered
-                                        ) && (
-                                            <PoliteErrorMessage>
-                                                {errors.populationCovered}
-                                            </PoliteErrorMessage>
-                                        )}
-                                        <FieldRadio
-                                            id="medicaid"
-                                            name="populationCovered"
-                                            label={
-                                                PopulationCoveredRecord[
-                                                    'MEDICAID'
-                                                ]
-                                            }
-                                            value={'MEDICAID'}
-                                            onClick={() =>
-                                                handlePopulationCoveredClick(
-                                                    'MEDICAID',
-                                                    values,
-                                                    setFieldValue
-                                                )
-                                            }
-                                        />
-                                        <FieldRadio
-                                            id="medicaid-and-chip"
-                                            name="populationCovered"
-                                            label={
-                                                PopulationCoveredRecord[
-                                                    'MEDICAID_AND_CHIP'
-                                                ]
-                                            }
-                                            value={'MEDICAID_AND_CHIP'}
-                                            onClick={() =>
-                                                handlePopulationCoveredClick(
-                                                    'MEDICAID_AND_CHIP',
-                                                    values,
-                                                    setFieldValue
-                                                )
-                                            }
-                                        />
-                                        <FieldRadio
-                                            id="chip"
-                                            name="populationCovered"
-                                            label={
-                                                PopulationCoveredRecord['CHIP']
-                                            }
-                                            value={'CHIP'}
-                                            onClick={() =>
-                                                handlePopulationCoveredClick(
-                                                    'CHIP',
-                                                    values,
-                                                    setFieldValue
-                                                )
-                                            }
-                                        />
-                                    </Fieldset>
-                                </FormGroup>
-                            )}
+                                    {showFieldErrors(
+                                        errors.populationCovered
+                                    ) && (
+                                        <PoliteErrorMessage>
+                                            {errors.populationCovered}
+                                        </PoliteErrorMessage>
+                                    )}
+                                    <FieldRadio
+                                        id="medicaid"
+                                        name="populationCovered"
+                                        label={
+                                            PopulationCoveredRecord['MEDICAID']
+                                        }
+                                        value={'MEDICAID'}
+                                        onClick={() =>
+                                            handlePopulationCoveredClick(
+                                                'MEDICAID',
+                                                values,
+                                                setFieldValue
+                                            )
+                                        }
+                                    />
+                                    <FieldRadio
+                                        id="medicaid-and-chip"
+                                        name="populationCovered"
+                                        label={
+                                            PopulationCoveredRecord[
+                                                'MEDICAID_AND_CHIP'
+                                            ]
+                                        }
+                                        value={'MEDICAID_AND_CHIP'}
+                                        onClick={() =>
+                                            handlePopulationCoveredClick(
+                                                'MEDICAID_AND_CHIP',
+                                                values,
+                                                setFieldValue
+                                            )
+                                        }
+                                    />
+                                    <FieldRadio
+                                        id="chip"
+                                        name="populationCovered"
+                                        label={PopulationCoveredRecord['CHIP']}
+                                        value={'CHIP'}
+                                        onClick={() =>
+                                            handlePopulationCoveredClick(
+                                                'CHIP',
+                                                values,
+                                                setFieldValue
+                                            )
+                                        }
+                                    />
+                                </Fieldset>
+                            </FormGroup>
 
                             <FormGroup
                                 error={showFieldErrors(errors.programIDs)}
@@ -413,29 +400,12 @@ export const SubmissionType = ({
                                         {errors.programIDs}
                                     </PoliteErrorMessage>
                                 )}
-                                <Field name="programIDs">
-                                    {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-                                    {/* @ts-ignore */}
-                                    {({ form }) => (
-                                        <ProgramSelect
-                                            name="programIDs"
-                                            inputId="programIDs"
-                                            statePrograms={statePrograms}
-                                            programIDs={values.programIDs}
-                                            aria-label="Programs this contract action covers (required)"
-                                            onChange={(selectedOption) =>
-                                                form.setFieldValue(
-                                                    'programIDs',
-                                                    selectedOption.map(
-                                                        (item: {
-                                                            value: string
-                                                        }) => item.value
-                                                    )
-                                                )
-                                            }
-                                        />
-                                    )}
-                                </Field>
+                                <ProgramSelect
+                                    name="programIDs"
+                                    inputId="programIDs"
+                                    programIDs={values.programIDs}
+                                    aria-label="Programs this contract action covers (required)"
+                                />
                             </FormGroup>
                             <FormGroup
                                 error={showFieldErrors(errors.submissionType)}
@@ -472,22 +442,19 @@ export const SubmissionType = ({
                                         }
                                         value={'CONTRACT_AND_RATES'}
                                         disabled={
-                                            showCHIPOnlyForm &&
                                             values.populationCovered === 'CHIP'
                                         }
                                     />
-                                    {showCHIPOnlyForm &&
-                                        values.populationCovered === 'CHIP' && (
-                                            <div
-                                                role="note"
-                                                aria-labelledby="submissionType"
-                                                className="usa-hint padding-top-2"
-                                            >
-                                                States are not required to
-                                                submit rates with CHIP-only
-                                                contracts.
-                                            </div>
-                                        )}
+                                    {values.populationCovered === 'CHIP' && (
+                                        <div
+                                            role="note"
+                                            aria-labelledby="submissionType"
+                                            className="usa-hint padding-top-2"
+                                        >
+                                            States are not required to submit
+                                            rates with CHIP-only contracts.
+                                        </div>
+                                    )}
                                 </Fieldset>
                             </FormGroup>
                             <FormGroup

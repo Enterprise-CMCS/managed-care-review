@@ -1,4 +1,4 @@
-import { EmailParameterStore } from '../parameterStore'
+import type { EmailParameterStore } from '../parameterStore'
 
 function mockEmailParameterStoreError(error?: string): EmailParameterStore {
     const message = error || 'No store found'

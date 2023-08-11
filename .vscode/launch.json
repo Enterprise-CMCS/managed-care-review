@@ -18,7 +18,7 @@
             "internalConsoleOptions": "neverOpen"
         },
         {
-            "name": "Debug current file tests",
+            "name": "Debug current file web tests",
             "type": "node",
             "request": "launch",
             "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/react-scripts",
@@ -33,6 +33,19 @@
                 "--watchAll"
             ],
             "cwd": "${workspaceRoot}/services/app-web",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "name": "Debug current file api test",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/jest",
+            "env": {
+                "TZ": "utc"
+            },
+            "args": ["${file}", "--runInBand", "--no-cache", "--watchAll"],
+            "cwd": "${workspaceRoot}/services/app-api",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen"
         }

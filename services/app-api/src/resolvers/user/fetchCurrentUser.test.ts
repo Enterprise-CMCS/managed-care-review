@@ -1,4 +1,4 @@
-import { Context } from '../../handlers/apollo_gql'
+import type { Context } from '../../handlers/apollo_gql'
 
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import FETCH_CURRENT_USER from '../../../../app-graphql/src/queries/fetchCurrentUser.graphql'

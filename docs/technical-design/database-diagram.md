@@ -76,3 +76,84 @@ Question ||--o{ QuestionReponse: questionID
 QuestionReponse ||--o{ QuestionResponseDocument: questionResponseID
 User  }o--o{  State : ""
 ```
+
+
+## Contract & Rates DB
+
+This is the db diagram for the contracts and rates work, still disconnected from the rest of the db. 
+
+```mermaid
+erDiagram
+
+ContractTable {
+   String id
+}
+ContractRevisionTable {
+   String id
+   String contractID
+   DateTime createdAt
+   DateTime updatedAt
+
+   String unlockInfoID
+   String submitInfoID
+
+   String name
+}
+
+RateTable {
+   String id
+}
+RateRevisionTable {
+   String id
+   String rateID
+   DateTime createdAt
+   DateTime updatedAt
+
+   String unlockInfoID
+   String submitInfoID
+
+   String name
+}
+
+RateRevisionsOnContractRevisionsTable {
+   String rateRevisionID
+   String contractRevisionID
+
+   DateTime validAfter
+   DateTime validUntil
+   Boolean isRemoval
+   
+}
+
+UpdateInfoTable {
+   String id
+
+   DateTime updatedAt
+   String updatedByID
+   String updatedReason
+}
+
+ContractTable ||--|{ ContractRevisionTable : contract
+ContractTable ||--|{ RateRevisionTable: draftContracts
+RateTable ||--|{ RateRevisionTable : rate
+ContractRevisionTable }|--|{ RateRevisionsOnContractRevisionsTable : contractRevisions
+RateTable ||--|{ ContractRevisionTable: draftRates
+RateRevisionTable }|--|{ RateRevisionsOnContractRevisionsTable : rateRevisions
+
+
+ContractRevisionTable ||--|{ UpdateInfoTable: unlock-submit
+RateRevisionTable ||--|{ UpdateInfoTable: unlock-submit
+
+UpdateInfoTable }|--|{ User: updatedBy
+
+User {
+   String givenName
+   String familyName
+   String email
+   Role role
+   String stateCode
+   String id
+}
+
+
+```

@@ -84,7 +84,12 @@ describe('SubmissionRevisionSummary', () => {
             expect(rows).toHaveLength(2)
             expect(within(rows[0]).getByText('Date added')).toBeInTheDocument()
             expect(
-                within(rows[1]).getByText(dayjs(new Date()).format('M/D/YY'))
+                within(rows[1]).getByText(
+                    dayjs(
+                        mockSubmittedHealthPlanPackageWithRevisions()
+                            .revisions[2]?.node?.submitInfo?.updatedAt
+                    ).format('M/D/YY')
+                )
             ).toBeInTheDocument()
         })
     })

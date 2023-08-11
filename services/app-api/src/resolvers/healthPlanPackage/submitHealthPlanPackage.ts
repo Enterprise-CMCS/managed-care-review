@@ -6,32 +6,29 @@ import {
     hasAnyValidRateData,
     isContractAndRates,
     removeRatesData,
-    hasValidPopulationCoverage,
     removeInvalidProvisionsAndAuthorities,
     isValidAndCurrentLockedHealthPlanFormData,
     hasValidSupportingDocumentCategories,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType/healthPlanFormData'
+import type { UpdateInfoType, HealthPlanPackageType } from '../../domain-models'
 import {
-    UpdateInfoType,
     isStateUser,
-    HealthPlanPackageType,
     packageStatus,
     packageSubmitters,
 } from '../../domain-models'
-import { Emailer } from '../../emailer'
-import { MutationResolvers, State } from '../../gen/gqlServer'
+import type { Emailer } from '../../emailer'
+import type { MutationResolvers, State } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import { isStoreError, Store } from '../../postgres'
+import type { Store } from '../../postgres'
+import { isStoreError } from '../../postgres'
 import {
     setResolverDetailsOnActiveSpan,
     setErrorAttributesOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { toDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import { EmailParameterStore } from '../../parameterStore'
-import { LDService } from '../../launchDarkly/launchDarkly'
+import type { EmailParameterStore } from '../../parameterStore'
 import { GraphQLError } from 'graphql'
-import { FeatureFlagSettings } from 'app-web/src/common-code/featureFlags'
 
 import type {
     UnlockedHealthPlanFormDataType,
@@ -70,8 +67,7 @@ export function isSubmissionError(err: unknown): err is SubmissionError {
 // This strategy (returning a different type from validation) is taken from the
 // "parse, don't validate" article: https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
 function submit(
-    draft: UnlockedHealthPlanFormDataType,
-    featureFlags?: FeatureFlagSettings
+    draft: UnlockedHealthPlanFormDataType
 ): LockedHealthPlanFormDataType | SubmissionError {
     const maybeStateSubmission: Record<string, unknown> = {
         ...draft,
@@ -79,20 +75,9 @@ function submit(
         submittedAt: new Date(),
     }
 
-    // move this check into isValidContract when feature flag is removed
-    const validPopulationCovered = featureFlags?.['chip-only-form']
-        ? hasValidPopulationCoverage(
-              maybeStateSubmission as LockedHealthPlanFormDataType
-          )
-        : true
-
-    if (
-        isValidAndCurrentLockedHealthPlanFormData(maybeStateSubmission) &&
-        validPopulationCovered
-    )
+    if (isValidAndCurrentLockedHealthPlanFormData(maybeStateSubmission))
         return maybeStateSubmission
     else if (
-        !validPopulationCovered ||
         !hasValidContract(maybeStateSubmission as LockedHealthPlanFormDataType)
     ) {
         return {
@@ -139,19 +124,13 @@ function submit(
 export function submitHealthPlanPackageResolver(
     store: Store,
     emailer: Emailer,
-    emailParameterStore: EmailParameterStore,
-    launchDarkly: LDService
+    emailParameterStore: EmailParameterStore
 ): MutationResolvers['submitHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
         const { submittedReason, pkgID } = input
         setResolverDetailsOnActiveSpan('submitHealthPlanPackage', user, span)
         span?.setAttribute('mcreview.package_id', pkgID)
-
-        const chipOnlyFormFlag = await launchDarkly.getFeatureFlag(
-            context,
-            'chip-only-form'
-        )
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
@@ -284,9 +263,7 @@ export function submitHealthPlanPackageResolver(
         }
 
         // attempt to parse into a StateSubmission
-        const submissionResult = submit(draftResult, {
-            'chip-only-form': chipOnlyFormFlag,
-        })
+        const submissionResult = submit(draftResult)
 
         if (isSubmissionError(submissionResult)) {
             const errMessage = submissionResult.message

@@ -1,6 +1,7 @@
-import { HealthPlanPackageType } from '../../domain-models'
+import type { HealthPlanPackageType } from '../../domain-models'
 import { toDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import type { InsertHealthPlanPackageArgsType } from './insertHealthPlanPackage'
 import { insertHealthPlanPackage } from './insertHealthPlanPackage'
 import { isStoreError } from '../storeError'
 
@@ -13,13 +14,14 @@ describe('insertHealthPlanPackage', () => {
 
         const client = await sharedTestPrismaClient()
 
-        const args = {
+        const args: InsertHealthPlanPackageArgsType = {
             stateCode: 'FL',
+            populationCovered: 'MEDICAID',
             programIDs: ['smmc'],
             riskBasedContract: false,
-            submissionType: 'CONTRACT_ONLY' as const,
+            submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'concurrency state code test',
-            contractType: 'BASE' as const,
+            contractType: 'BASE',
         }
 
         const resultPromises = []

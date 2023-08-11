@@ -71,7 +71,8 @@ const hasValidContract = (sub: LockedHealthPlanFormDataType): boolean =>
     sub.managedCareEntities.length !== 0 &&
     sub.federalAuthorities.length !== 0 &&
     sub.riskBasedContract !== undefined &&
-    hasValidModifiedProvisions(sub)
+    hasValidModifiedProvisions(sub) &&
+    hasValidPopulationCoverage(sub)
 
 const hasValidPopulationCoverage = (
     sub: LockedHealthPlanFormDataType
@@ -305,7 +306,7 @@ const generateRateName = (
     return rateName
 }
 
- // This logic is no longer needed once SUPPORTING_DOCS_BY_RATE flag is on in production
+// This logic is no longer needed once SUPPORTING_DOCS_BY_RATE flag is on in production
 const convertRateSupportingDocs = (
     documents: SubmissionDocument[]
 ): SubmissionDocument[] => {

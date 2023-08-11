@@ -367,13 +367,13 @@ describe('SubmissionSummary', () => {
 
         it('extracts the correct dates from the submission and displays them in tables', async () => {
             const submission = mockSubmittedHealthPlanPackageWithRevision({
-                currentSubmissionData: {
+                currentSubmitInfo: {
                     updatedAt: new Date('2022-05-12T21:13:20.420Z'),
                 },
-                previousSubmissionData: {
+                previousSubmitInfo: {
                     updatedAt: new Date('2022-04-12T21:13:20.420Z'),
                 },
-                initialSubmissionData: {
+                initialSubmitInfo: {
                     updatedAt: new Date('2022-03-12T21:13:20.420Z'),
                 },
             })
@@ -408,7 +408,7 @@ describe('SubmissionSummary', () => {
             )
             await waitFor(() => {
                 const rows = screen.getAllByRole('row')
-                expect(rows).toHaveLength(10)
+                expect(rows).toHaveLength(8)
                 expect(
                     within(rows[0]).getByText('Date added')
                 ).toBeInTheDocument()
@@ -523,7 +523,7 @@ describe('SubmissionSummary', () => {
                 'src/common-code/proto/healthPlanFormDataProto/testData/'
             )
             .filter((f) => f.endsWith('.proto'))
-        /* as much as we'd like to loop over all the proto files here, looping and async tests, 
+        /* as much as we'd like to loop over all the proto files here, looping and async tests,
         which this one is (document loading) produces inconsistent results.  We have to copy/paste
         the test for each proto file. */
         it('loads outdated health plan packages with old protos as expected - 0', async () => {
@@ -582,10 +582,10 @@ describe('SubmissionSummary', () => {
                 expect(rows[0]).toHaveTextContent('Document name')
                 expect(rows[0]).toHaveTextContent('Document category')
                 expect(rows[1]).toHaveTextContent('contract doc')
-                expect(rows[1]).toHaveTextContent('8/19/22')
+                expect(rows[1]).toHaveTextContent('1/2/21')
                 expect(rows[1]).toHaveTextContent('Contract-supporting')
                 expect(rows[3]).toHaveTextContent('rates cert 1')
-                expect(rows[3]).toHaveTextContent('8/19/22')
+                expect(rows[3]).toHaveTextContent('11/2/21')
                 expect(rows[3]).toHaveTextContent('Rate certification')
                 expect(rows[4]).toHaveTextContent('rates cert 2')
                 expect(document.body).toHaveTextContent(/Submission type/)
@@ -714,9 +714,7 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(
-                        /Risk-sharing strategy/
-                    )
+                    screen.getByText(/Risk-sharing strategy/)
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
@@ -742,9 +740,7 @@ describe('SubmissionSummary', () => {
                     screen.getByText('Network adequacy standards')
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(
-                        /Non-risk payment arrangements/
-                    )
+                    screen.getByText(/Non-risk payment arrangements/)
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {
@@ -955,10 +951,10 @@ describe('SubmissionSummary', () => {
                 expect(rows[0]).toHaveTextContent('Document name')
                 expect(rows[0]).toHaveTextContent('Document category')
                 expect(rows[1]).toHaveTextContent('contract doc')
-                expect(rows[1]).toHaveTextContent('5/13/21')
+                expect(rows[1]).toHaveTextContent('1/2/21')
                 expect(rows[1]).toHaveTextContent('Contract')
                 expect(rows[3]).toHaveTextContent('contract doc')
-                expect(rows[3]).toHaveTextContent('5/13/21')
+                expect(rows[3]).toHaveTextContent('1/2/21')
                 expect(rows[3]).toHaveTextContent('Contract-supporting')
                 expect(rows[4]).toHaveTextContent('Document')
                 expect(document.body).toHaveTextContent(/Submission type/)
@@ -1086,9 +1082,7 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(
-                        /Risk-sharing strategy/
-                    )
+                    screen.getByText(/Risk-sharing strategy/)
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
@@ -1114,9 +1108,7 @@ describe('SubmissionSummary', () => {
                     screen.getByText('Network adequacy standards')
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(
-                        /Non-risk payment arrangements/
-                    )
+                    screen.getByText(/Non-risk payment arrangements/)
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {
@@ -1322,17 +1314,17 @@ describe('SubmissionSummary', () => {
                 expect(rows[0]).toHaveTextContent('Document name')
                 expect(rows[0]).toHaveTextContent('Document category')
                 expect(rows[1]).toHaveTextContent('contract doc')
-                expect(rows[1]).toHaveTextContent('5/13/21')
+                expect(rows[1]).toHaveTextContent('1/2/21')
                 expect(rows[1]).toHaveTextContent('Contract')
                 expect(rows[2]).toHaveTextContent('Document')
                 expect(rows[3]).toHaveTextContent('contract doc')
-                expect(rows[3]).toHaveTextContent('5/13/21')
+                expect(rows[3]).toHaveTextContent('1/2/21')
                 expect(rows[3]).toHaveTextContent('Contract-supporting')
                 expect(rows[4]).toHaveTextContent('Document')
                 expect(rows[5]).toHaveTextContent('rates cert 1')
-                expect(rows[5]).toHaveTextContent('5/13/21')
+                expect(rows[5]).toHaveTextContent('1/2/21')
                 expect(rows[5]).toHaveTextContent('Rate certification')
-                expect(rows[6]).toHaveTextContent('5/13/21')
+                expect(rows[6]).toHaveTextContent('1/2/21')
                 expect(document.body).toHaveTextContent(/Submission type/)
                 expect(
                     screen.getByRole('heading', {
@@ -1458,9 +1450,7 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(
-                        /Risk-sharing strategy/
-                    )
+                    screen.getByText(/Risk-sharing strategy/)
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
@@ -1486,9 +1476,7 @@ describe('SubmissionSummary', () => {
                     screen.getByText('Network adequacy standards')
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(
-                        /Non-risk payment arrangements/
-                    )
+                    screen.getByText(/Non-risk payment arrangements/)
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {
@@ -1693,17 +1681,17 @@ describe('SubmissionSummary', () => {
                 expect(rows[0]).toHaveTextContent('Document name')
                 expect(rows[0]).toHaveTextContent('Document category')
                 expect(rows[1]).toHaveTextContent('contract doc')
-                expect(rows[1]).toHaveTextContent('5/13/21')
+                expect(rows[1]).toHaveTextContent('1/2/21')
                 expect(rows[1]).toHaveTextContent('Contract')
                 expect(rows[2]).toHaveTextContent('Document')
                 expect(rows[3]).toHaveTextContent('contract doc')
-                expect(rows[3]).toHaveTextContent('5/13/21')
+                expect(rows[3]).toHaveTextContent('1/2/21')
                 expect(rows[3]).toHaveTextContent('Contract-supporting')
                 expect(rows[4]).toHaveTextContent('Document')
                 expect(rows[5]).toHaveTextContent('rates cert 1')
-                expect(rows[5]).toHaveTextContent('5/13/21')
+                expect(rows[5]).toHaveTextContent('1/2/21')
                 expect(rows[5]).toHaveTextContent('Rate certification')
-                expect(rows[6]).toHaveTextContent('5/13/21')
+                expect(rows[6]).toHaveTextContent('1/2/21')
                 expect(document.body).toHaveTextContent(/Submission type/)
                 expect(
                     screen.getByRole('heading', {
@@ -1829,9 +1817,7 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(
-                        /Risk-sharing strategy/
-                    )
+                    screen.getByText(/Risk-sharing strategy/)
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
@@ -1857,9 +1843,7 @@ describe('SubmissionSummary', () => {
                     screen.getByText('Network adequacy standards')
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(
-                        /Non-risk payment arrangements/
-                    )
+                    screen.getByText(/Non-risk payment arrangements/)
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {

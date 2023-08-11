@@ -1,4 +1,5 @@
-import { trace, Tracer } from '@opentelemetry/api'
+import type { Tracer } from '@opentelemetry/api'
+import { trace } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'

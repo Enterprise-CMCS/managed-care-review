@@ -1,11 +1,11 @@
 import React from 'react'
 import styles from '../Select.module.scss'
 import Select, { AriaOnFocus, Props } from 'react-select'
-import { Program } from '../../../gen/gqlClient'
+import { useField } from 'formik'
+import { useStatePrograms } from '../../../hooks'
 
 export type ProgramSelectPropType = {
     name: string
-    statePrograms: Program[]
     programIDs: string[]
 }
 
@@ -16,12 +16,21 @@ export interface ProgramOptionType {
     readonly isDisabled?: boolean
 }
 
+/**
+ * This component renders the react-select combobox
+ *
+ * It relies on the Formik useField hook to work, so it must ALWAYS be rendered
+ * inside of a Formik form context.
+ */
+
 export const ProgramSelect = ({
     name,
-    statePrograms,
     programIDs,
     ...selectProps
 }: ProgramSelectPropType & Props<ProgramOptionType, true>) => {
+    const [_field, _meta, helpers] = useField({ name })
+    const statePrograms = useStatePrograms()
+
     const programOptions: ProgramOptionType[] = statePrograms.map((program) => {
         return { value: program.id, label: program.name }
     })
@@ -59,6 +68,11 @@ export const ProgramSelect = ({
             ariaLiveMessages={{
                 onFocus,
             }}
+            onChange={(selectedOptions) =>
+                helpers.setValue(
+                    selectedOptions.map((item: { value: string }) => item.value)
+                )
+            }
             {...selectProps}
         />
     )

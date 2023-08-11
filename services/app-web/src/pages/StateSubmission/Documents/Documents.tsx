@@ -254,7 +254,7 @@ export const Documents = ({
                 const updatedSubmission = await updateDraft(draftSubmission)
                 if (updatedSubmission instanceof Error) {
                     console.info(
-                        'Error updating draft submission',
+                        'Error updating draft submission on docs page',
                         updatedSubmission
                     )
                     onUpdateDraftSubmissionError()

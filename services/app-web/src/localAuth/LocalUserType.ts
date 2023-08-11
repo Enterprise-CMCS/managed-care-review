@@ -1,7 +1,11 @@
 import { StateType } from '../common-code/healthPlanFormDataType'
 import { Division } from '../pages/QuestionResponse/QATable/QATable'
 
-type LocalUserType = LocalStateUserType | LocalCMSUserType | LocalAdminUserType
+type LocalUserType =
+    | LocalStateUserType
+    | LocalCMSUserType
+    | LocalAdminUserType
+    | LocalHelpdeskUserType
 
 type LocalStateUserType = {
     id: string
@@ -30,6 +34,14 @@ type LocalAdminUserType = {
     familyName: string
 }
 
+type LocalHelpdeskUserType = {
+    id: string
+    role: 'HELPDESK_USER'
+    email: string
+    givenName: string
+    familyName: string
+}
+
 function isLocalUser(user: unknown): user is LocalUserType {
     if (user && typeof user === 'object') {
         if ('role' in user) {
@@ -38,7 +50,8 @@ function isLocalUser(user: unknown): user is LocalUserType {
                 if (
                     roleUser.role === 'STATE_USER' ||
                     roleUser.role === 'CMS_USER' ||
-                    roleUser.role === 'ADMIN_USER'
+                    roleUser.role === 'ADMIN_USER' ||
+                    roleUser.role === 'HELPDESK_USER'
                 ) {
                     return true
                 }

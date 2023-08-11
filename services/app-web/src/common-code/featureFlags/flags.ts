@@ -56,17 +56,17 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
-     * Enables Chip-only form changes
-     */
-    CHIP_ONLY_FORM: {
-        flag: 'chip-only-form',
-        defaultValue: false,
-    },
-    /**
      * Enables supporting documents to be associated with a specific rate certification on the Rate Details page
      */
     SUPPORTING_DOCS_BY_RATE: {
         flag: 'supporting-docs-by-rate',
+        defaultValue: false,
+    },
+    /**
+     * Rates refactor database handlers live behind this flag. We will use this to switchover to the new database tables when we migrate.
+     */
+    RATES_DATABASE_REFACTOR: {
+        flag: 'rates-db-refactor',
         defaultValue: false,
     },
     /**
@@ -76,6 +76,13 @@ const featureFlags = {
     TEST_ERROR_FETCHING_FLAG: {
         flag: 'test-error-fetching-flag',
         defaultValue: undefined,
+    },
+    /* 
+    Temporary flag for the cutover to a new support email address 
+    */
+    HELPDESK_EMAIL: {
+        flag: 'helpdesk-email',
+        defaultValue: false,
     },
 } as const
 

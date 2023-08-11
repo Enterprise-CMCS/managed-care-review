@@ -1,13 +1,15 @@
-import { Result, ok, err } from 'neverthrow'
+import type { Result } from 'neverthrow'
+import { ok, err } from 'neverthrow'
+import type { UserType as CognitoUserType } from '@aws-sdk/client-cognito-identity-provider'
 import {
     CognitoIdentityProviderClient,
     ListUsersCommand,
-    UserType as CognitoUserType,
 } from '@aws-sdk/client-cognito-identity-provider'
 
-import { UserType } from '../domain-models'
+import type { UserType } from '../domain-models'
 import { performance } from 'perf_hooks'
-import { Store, InsertUserArgsType, isStoreError } from '../postgres'
+import type { Store, InsertUserArgsType } from '../postgres'
+import { isStoreError } from '../postgres'
 import { isValidCmsDivison } from '../domain-models'
 
 export function parseAuthProvider(
@@ -82,6 +84,7 @@ async function fetchUserFromCognito(
 const CMS_ROLE_ATTRIBUTE = 'macmcrrs-cms-user'
 const STATE_ROLE_ATTRIBUTE = 'macmcrrs-state-user'
 const ADMIN_ROLE_ATTRIBUTE = 'macmcrrs-approver'
+const HELPDESK_ROLE_ATTRIBUTE = 'macmcrrs-helpdesk'
 
 export function userTypeFromAttributes(
     id: string,
@@ -149,6 +152,17 @@ export function userTypeFromAttributes(
         return ok({
             id,
             role: 'ADMIN_USER',
+            email: attributes.email,
+            givenName: attributes.given_name,
+            familyName: attributes.family_name,
+            stateAssignments: [],
+        })
+    }
+
+    if (roles.includes(HELPDESK_ROLE_ATTRIBUTE)) {
+        return ok({
+            id,
+            role: 'HELPDESK_USER',
             email: attributes.email,
             givenName: attributes.given_name,
             familyName: attributes.family_name,

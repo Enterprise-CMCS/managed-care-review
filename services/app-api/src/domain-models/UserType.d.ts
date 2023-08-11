@@ -1,7 +1,7 @@
-import { StateType } from './StateType'
-import { DivisionType } from './DivisionType'
+import type { StateType } from './StateType'
+import type { DivisionType } from './DivisionType'
 
-type UserType = StateUserType | CMSUserType | AdminUserType
+type UserType = StateUserType | CMSUserType | AdminUserType | HelpdeskUserType
 
 type StateUserType = {
     id: string
@@ -30,4 +30,18 @@ type AdminUserType = {
     familyName: string
 }
 
-export type { CMSUserType, StateUserType, AdminUserType, UserType }
+type HelpdeskUserType = {
+    id: string
+    role: 'HELPDESK_USER'
+    email: string
+    givenName: string
+    familyName: string
+}
+
+export type {
+    CMSUserType,
+    StateUserType,
+    AdminUserType,
+    HelpdeskUserType,
+    UserType,
+}

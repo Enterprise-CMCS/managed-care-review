@@ -2,6 +2,7 @@ import React from 'react'
 import styles from '../Select.module.scss'
 import Select, { AriaOnFocus, Props } from 'react-select'
 import { Program } from '../../../gen/gqlClient'
+import { useField } from 'formik'
 
 export type PackageSelectPropType = {
     name: string
@@ -18,6 +19,12 @@ export type PackageOptionType = {
     readonly isFixed?: boolean
     readonly isDisabled?: boolean
 }
+/**
+ * This component renders the react-select combobox
+ *
+ * It relies on the Formik useField hook to work, so it must ALWAYS be rendered
+ * inside of a Formik form context.
+ */
 
 export const PackageSelect = ({
     name,
@@ -28,6 +35,7 @@ export const PackageSelect = ({
     error,
     ...selectProps
 }: PackageSelectPropType & Props<PackageOptionType, true>) => {
+    const [_field, _meta, helpers] = useField({ name })
     const { isLoading } = selectProps
 
     const onFocus: AriaOnFocus<PackageOptionType> = ({
@@ -68,12 +76,11 @@ export const PackageSelect = ({
         if (!packageOptions.length) {
             return 'No submissions found'
         }
-        return
     }
 
     return (
         <Select
-            defaultValue={defaultValues}
+            value={defaultValues}
             placeholder={isLoading ? 'Loading submissions...' : 'Select...'}
             noOptionsMessage={() => noOptionsMessage()}
             loadingMessage={() => 'Loading submissions...'}
@@ -89,6 +96,11 @@ export const PackageSelect = ({
             ariaLiveMessages={{
                 onFocus,
             }}
+            onChange={(selectedOptions) =>
+                helpers.setValue(
+                    selectedOptions.map((item: { value: string }) => item.value)
+                )
+            }
             {...selectProps}
         />
     )

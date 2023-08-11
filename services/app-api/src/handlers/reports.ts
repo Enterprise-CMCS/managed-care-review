@@ -1,22 +1,28 @@
-import { APIGatewayProxyHandler } from 'aws-lambda'
+import type { APIGatewayProxyHandler } from 'aws-lambda'
 import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { Parser, transforms } from 'json2csv'
-import { HealthPlanRevisionTable } from '@prisma/client'
-import { ProgramArgType } from '../../../app-web/src/common-code/healthPlanFormDataType/State'
-import {
+import type { HealthPlanRevisionTable } from '@prisma/client'
+import type { ProgramArgType } from '../../../app-web/src/common-code/healthPlanFormDataType/State'
+import type {
     HealthPlanFormDataType,
     RateInfoType,
-    packageName,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
+import { packageName } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import statePrograms from '../../../app-web/src/common-code/data/statePrograms.json'
-import { isStoreError, StoreError } from '../postgres/storeError'
-import { HealthPlanPackageStatusType } from '../domain-models'
+import type { StoreError } from '../postgres/storeError'
+import { isStoreError } from '../postgres/storeError'
+import type { HealthPlanPackageStatusType } from '../domain-models'
 import {
     userFromCognitoAuthProvider,
     userFromLocalAuthProvider,
 } from '../authn'
+import {
+    initTracer,
+    initMeter,
+    recordException,
+} from '../../../uploads/src/lib/otel'
 
 type RequiredRevisionWithDecodedProtobufProperties = {
     formDataProto: HealthPlanFormDataType | Error
@@ -72,7 +78,7 @@ const decodeRevisions = (
 
 export const main: APIGatewayProxyHandler = async (event, context) => {
     const authProvider =
-        event.requestContext.identity.cognitoAuthenticationProvider || ''
+        event.requestContext.identity.cognitoAuthenticationProvider ?? ''
     const programList = [] as ProgramArgType[]
     statePrograms.states.forEach((state) => {
         programList.push(...state.programs)
@@ -128,12 +134,26 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
         result,
         programList
     )
-
+    const stageName = process.env.stage ?? 'stageNotSet'
+    const serviceName = `reports_endpoint-${stageName}`
+    const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
+    if (otelCollectorURL) {
+        initTracer(serviceName, otelCollectorURL)
+    } else {
+        console.error(
+            'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
+        )
+    }
+    initMeter(serviceName)
     const bucket = [] as RevisionWithDecodedProtobuf[]
-    allDecodedRevisions.forEach((revision) => {
+    for (const revision of allDecodedRevisions) {
         if (revision.formDataProto instanceof Error) {
-            console.error('Error decoding revision')
-            throw new Error(`Error generating reports array`)
+            console.error('Error decoding revision', revision.id)
+            recordException(
+                revision.formDataProto,
+                serviceName,
+                'decode_revision'
+            )
         } else {
             // add the package name to the revision
             revision.packageName = packageName(
@@ -154,7 +174,7 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
                 bucket.push(revision)
             }
         }
-    })
+    }
     const parser = new Parser({
         transforms: [
             transforms.flatten({

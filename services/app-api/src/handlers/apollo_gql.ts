@@ -1,21 +1,16 @@
-import {
-    propagation,
-    ROOT_CONTEXT,
-    Span,
-    SpanKind,
-    Tracer,
-} from '@opentelemetry/api'
+import type { Span, Tracer } from '@opentelemetry/api'
+import { propagation, ROOT_CONTEXT, SpanKind } from '@opentelemetry/api'
 import { ApolloServer } from 'apollo-server-lambda'
-import {
+import type {
     APIGatewayProxyEvent,
     APIGatewayProxyHandler,
     Handler,
 } from 'aws-lambda'
 import typeDefs from '../../../app-graphql/src/schema.graphql'
 import { assertIsAuthMode } from '../../../app-web/src/common-code/config'
-import { UserType } from '../domain-models'
+import type { UserType } from '../domain-models'
+import type { userFromAuthProvider } from '../authn'
 import {
-    userFromAuthProvider,
     userFromCognitoAuthProvider,
     userFromLocalAuthProvider,
 } from '../authn'
@@ -29,13 +24,10 @@ import {
     newAWSEmailParameterStore,
     newLocalEmailParameterStore,
 } from '../parameterStore'
-import {
-    LDService,
-    ldService,
-    offlineLDService,
-} from '../launchDarkly/launchDarkly'
-import { LDClient } from 'launchdarkly-node-server-sdk'
-import * as ld from 'launchdarkly-node-server-sdk'
+import type { LDService } from '../launchDarkly/launchDarkly'
+import { ldService, offlineLDService } from '../launchDarkly/launchDarkly'
+import type { LDClient } from '@launchdarkly/node-server-sdk'
+import * as ld from '@launchdarkly/node-server-sdk'
 import {
     ApolloServerPluginLandingPageLocalDefault,
     ApolloServerPluginLandingPageDisabled,

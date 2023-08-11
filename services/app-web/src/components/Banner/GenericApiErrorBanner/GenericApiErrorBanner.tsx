@@ -1,7 +1,8 @@
 import React from 'react'
 import styles from '../Banner.module.scss'
-import { Alert, Link } from '@trussworks/react-uswds'
-import { MAIL_TO_SUPPORT, ERROR_MESSAGES } from '../../../constants/errors'
+import { Alert } from '@trussworks/react-uswds'
+import { ERROR_MESSAGES } from '../../../constants/errors'
+import { useStringConstants } from '../../../hooks/useStringConstants'
 
 export type GenericApiErrorProps = {
     heading?: string
@@ -14,6 +15,8 @@ export const GenericApiErrorBanner = ({
     message,
     suggestion,
 }: GenericApiErrorProps): React.ReactElement => {
+    const stringConstants = useStringConstants()
+    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     return (
         <Alert
             role="alert"
@@ -36,7 +39,14 @@ export const GenericApiErrorBanner = ({
                                 Please refresh your browser and if you continue
                                 to experience an error,&nbsp;
                             </span>
-                            <Link href={MAIL_TO_SUPPORT}>let us know.</Link>
+                            <a
+                                href={`mailto: ${MAIL_TO_SUPPORT}, mc-review-team@truss.works`}
+                                className="usa-link"
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                let us know.
+                            </a>
                         </>
                     )}
                 </p>

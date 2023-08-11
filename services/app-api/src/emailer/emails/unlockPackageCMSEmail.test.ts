@@ -7,10 +7,10 @@ import {
     mockMSState,
 } from '../../testHelpers/emailerHelpers'
 import { unlockPackageCMSEmail } from './index'
+import type { UnlockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 import {
     generateRateName,
     packageName,
-    UnlockedHealthPlanFormDataType,
 } from 'app-web/src/common-code/healthPlanFormDataType'
 
 const unlockData = {
@@ -172,7 +172,7 @@ describe('unlockPackageCMSEmail', () => {
                             documentCategories: ['RATES' as const],
                         },
                     ],
-                      supportingDocuments: [],
+                    supportingDocuments: [],
                     rateDateCertified: new Date('10/17/2022'),
                     rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                     rateCertificationName:
@@ -200,7 +200,7 @@ describe('unlockPackageCMSEmail', () => {
                             documentCategories: ['RATES' as const],
                         },
                     ],
-                      supportingDocuments: [],
+                    supportingDocuments: [],
                     rateDateCertified: new Date('10/17/2022'),
                     rateProgramIDs: [
                         'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
@@ -583,7 +583,7 @@ describe('unlockPackageCMSEmail', () => {
                             documentCategories: ['RATES' as const],
                         },
                     ],
-                      supportingDocuments: [],
+                    supportingDocuments: [],
                     rateDateStart: new Date(),
                     rateDateEnd: new Date(),
                     rateDateCertified: new Date(),
@@ -638,7 +638,7 @@ describe('unlockPackageCMSEmail', () => {
                             documentCategories: ['RATES' as const],
                         },
                     ],
-                      supportingDocuments: [],
+                    supportingDocuments: [],
                     rateDateStart: new Date(),
                     rateDateEnd: new Date(),
                     rateDateCertified: new Date(),

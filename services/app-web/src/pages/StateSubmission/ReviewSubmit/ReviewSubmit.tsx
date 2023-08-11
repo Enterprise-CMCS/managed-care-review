@@ -16,9 +16,9 @@ import { PageActionsContainer } from '../PageActions'
 import styles from './ReviewSubmit.module.scss'
 import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { ActionButton } from '../../../components/ActionButton'
-import { DocumentDateLookupTable } from '../../SubmissionSummary/SubmissionSummary'
 import { UnlockSubmitModal } from '../../../components/Modal/UnlockSubmitModal'
 import { useStatePrograms } from '../../../hooks/useStatePrograms'
+import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 
 export const ReviewSubmit = ({
     draftSubmission,
@@ -27,7 +27,7 @@ export const ReviewSubmit = ({
     submissionName,
 }: {
     draftSubmission: UnlockedHealthPlanFormDataType
-    documentDateLookupTable?: DocumentDateLookupTable
+    documentDateLookupTable: DocumentDateLookupTableType
     unlocked: boolean
     submissionName: string
 }): React.ReactElement => {

@@ -1,6 +1,7 @@
-import { Result, ok, err } from 'neverthrow'
+import type { Result } from 'neverthrow'
+import { ok, err } from 'neverthrow'
 import { parseAuthProvider, userTypeFromAttributes } from './cognitoAuthn'
-import { UserType } from '../domain-models'
+import type { UserType } from '../domain-models'
 
 describe('cognitoAuthn', () => {
     describe('parseAuthProvider', () => {
@@ -91,6 +92,22 @@ describe('cognitoAuthn', () => {
                     expectedResult: ok({
                         id: testID,
                         role: 'ADMIN_USER',
+                        email: 'gp@example.com',
+                        familyName: 'Person',
+                        givenName: 'Generic',
+                        stateAssignments: [],
+                    }),
+                },
+                {
+                    attributes: {
+                        'custom:role': 'macmcrrs-helpdesk',
+                        given_name: 'Generic',
+                        family_name: 'Person',
+                        email: 'gp@example.com',
+                    },
+                    expectedResult: ok({
+                        id: testID,
+                        role: 'HELPDESK_USER',
                         email: 'gp@example.com',
                         familyName: 'Person',
                         givenName: 'Generic',

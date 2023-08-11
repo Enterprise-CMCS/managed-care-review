@@ -39,4 +39,4 @@ export type {
     TealiumEvent,
 } from './tealium'
 
-export { MAIL_TO_SUPPORT, ERROR_MESSAGES } from './errors'
+export { ERROR_MESSAGES } from './errors'

@@ -1,4 +1,4 @@
-export { userFromAuthProvider } from './authn'
+export type { userFromAuthProvider } from './authn'
 
 export { userFromCognitoAuthProvider, lookupUserAurora } from './cognitoAuthn'
 

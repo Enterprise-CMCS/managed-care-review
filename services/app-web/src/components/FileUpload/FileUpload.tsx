@@ -42,7 +42,7 @@ export type FileUploadProps = {
     innerInputRef?: (el: HTMLInputElement) => void
 } & JSX.IntrinsicElements['input']
 
-/*  
+/*
     FileUpload handles async file upload to S3 and displays inline errors per file.
     Tracks files as they are uploaded. Once files are no longer processing passes data back up to parent with onFileItemsUpdate.
 
@@ -71,6 +71,7 @@ export const FileUpload = ({
     const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
     const summaryRef = useRef<HTMLHeadingElement>(null) // reference to the heading that we will focus
     const previousFileItems = usePrevious(fileItems)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
     const handleCheckboxClick = (
         event: React.ChangeEvent<HTMLInputElement>
@@ -97,7 +98,7 @@ export const FileUpload = ({
     }
 
     const inputRequired = inputProps['aria-required'] || inputProps.required
-    // update fileItems in parent
+
     React.useEffect(() => {
         if (JSON.stringify(fileItems) !== JSON.stringify(previousFileItems)) {
             onFileItemsUpdate({ fileItems })
@@ -424,11 +425,7 @@ export const FileUpload = ({
                 {label}
             </Label>
 
-            {error && (
-                <PoliteErrorMessage id={`${id}-error`}>
-                    {error}
-                </PoliteErrorMessage>
-            )}
+            <PoliteErrorMessage id={`${id}-error`}>{error}</PoliteErrorMessage>
             {hint && (
                 <span
                     id={`${id}-hint`}

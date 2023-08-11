@@ -1,7 +1,5 @@
+import type { EmailConfiguration, EmailData, Emailer } from '../emailer'
 import {
-    EmailConfiguration,
-    EmailData,
-    Emailer,
     newPackageCMSEmail,
     newPackageStateEmail,
     unlockPackageCMSEmail,
@@ -9,12 +7,12 @@ import {
     resubmitPackageStateEmail,
     resubmitPackageCMSEmail,
 } from '../emailer'
-import {
+import type {
     LockedHealthPlanFormDataType,
     ProgramArgType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { StateUserType } from '../domain-models'
+import type { StateUserType } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 import { testSendSESEmail } from './awsSESHelpers'
 

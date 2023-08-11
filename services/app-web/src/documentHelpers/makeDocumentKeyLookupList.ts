@@ -1,9 +1,10 @@
-import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto'
-import { HealthPlanPackage } from '../gen/gqlClient'
 import { parseKey } from '../common-code/s3URLEncoding'
-import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
+import { RevisionsLookupType } from '../gqlHelpers/fetchHealthPlanPackageWrapper'
+import { getAllDocuments } from './getAllDocuments'
 
-export type LookupListType = {
+// CurrentPreviousDocsLookup - array of document keys for currentDocuments and previousDocuments
+
+type DocumentKeyLookupType = {
     currentDocuments: string[]
     previousDocuments: string[]
 }
@@ -13,64 +14,51 @@ const getKey = (s3URL: string) => {
     return key instanceof Error ? null : key
 }
 
-export function makeDocumentListFromFormDatas(
-    formDatas: HealthPlanFormDataType[]
-): LookupListType {
-    const docBuckets = [
-        'contractDocuments',
-        'rateDocuments',
-        'documents',
-    ] as const
-    const lookupList: LookupListType = {
-        currentDocuments: [],
-        previousDocuments: [],
-    }
+// makeDocumentS3KeyLookup - generates list of currentDocuments and previousDocuments by s3Key
+// this is used to to determine if can delete a document from s3 after it removed from the FileUpload UI on the  documents pages - ContractDetails, RateDetails, Documents
 
-    for (let index = 0; index < formDatas.length; index++) {
-        const revisionData = formDatas[index]
-        docBuckets.forEach((bucket) => {
-            if (bucket === 'rateDocuments') {
-                revisionData.rateInfos.forEach((rateInfo) => {
-                    rateInfo[bucket].forEach((doc) => {
-                        const key = getKey(doc.s3URL)
-                        if (key && index === 0) {
-                            lookupList.currentDocuments.push(key)
-                        } else if (key && index > 0) {
-                            lookupList.previousDocuments.push(key)
-                        }
-                    })
+function makeDocumentS3KeyLookup(
+    revisionsLookup: RevisionsLookupType
+): DocumentKeyLookupType {
+    const currentDocumentsSet = new Set<string>()
+    const previousDocumentsSet = new Set<string>()
+
+    Object.keys(revisionsLookup).forEach(
+        (revisionId: string, index: number) => {
+            const revisionData = revisionsLookup[revisionId].formData
+            const allDocuments = getAllDocuments(revisionData)
+            if (index === 0) {
+                allDocuments.forEach((doc) => {
+                    const s3Key = getKey(doc.s3URL)
+                    if (!s3Key) {
+                        console.error(
+                            `makeDocumentS3KeyLookup- Failed to read S3 key for $${doc.name} - ${doc.s3URL}`
+                        )
+                        // fail silently, just return good documents
+                    } else {
+                        currentDocumentsSet.add(s3Key)
+                    }
                 })
             } else {
-                revisionData[bucket].forEach((doc) => {
-                    const key = getKey(doc.s3URL)
-                    if (key && index === 0) {
-                        lookupList.currentDocuments.push(key)
-                    } else if (key && index > 0) {
-                        lookupList.previousDocuments.push(key)
+                allDocuments.forEach((doc) => {
+                    const s3Key = getKey(doc.s3URL)
+                    if (!s3Key) {
+                        console.error(
+                            `makeDocumentS3KeyLookup - Failed to read S3 key for $${doc.name} - ${doc.s3URL}`
+                        )
+                        // fail silently, just return good documents
+                    } else {
+                        previousDocumentsSet.add(s3Key)
                     }
                 })
             }
-        })
-    }
-
-    return lookupList
-}
-
-export const makeDocumentList = (
-    submissions: HealthPlanPackage
-): LookupListType | Error => {
-    const revisions = submissions.revisions
-
-    const formDatas: HealthPlanFormDataType[] = []
-    for (let index = 0; index < revisions.length; index++) {
-        const revisionData = base64ToDomain(revisions[index].node.formDataProto)
-        if (revisionData instanceof Error) {
-            return new Error(
-                'Failed to read submission data; unable to display documents'
-            )
         }
-        formDatas.push(revisionData)
+    )
+    return {
+        currentDocuments: [...currentDocumentsSet],
+        previousDocuments: [...previousDocumentsSet],
     }
-
-    return makeDocumentListFromFormDatas(formDatas)
 }
+
+export { makeDocumentS3KeyLookup }
+export type { DocumentKeyLookupType }

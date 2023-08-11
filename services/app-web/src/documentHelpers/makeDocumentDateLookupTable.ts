@@ -1,58 +1,53 @@
-import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto'
-import { HealthPlanPackage } from '../gen/gqlClient'
-import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
-import { DocumentDateLookupTable } from '../pages/SubmissionSummary/SubmissionSummary'
-import { recordJSException } from '../otelHelpers/tracingHelper'
+import {
+    ExpandedRevisionsType,
+    RevisionsLookupType,
+} from '../gqlHelpers/fetchHealthPlanPackageWrapper'
+import { getAllDocuments } from './getAllDocuments'
 import { getDocumentKey } from './getDocumentKey'
 
-const DocBuckets = ['contractDocuments', 'rateDocuments', 'documents'] as const
+// DocumentDateLookupTableType -  { document lookup key string : date string for "date added" }
+type DocumentDateLookupTableType = {
+    previousSubmissionDate: string | null
+    [key: string]: string | null
+}
 
-export function makeDateTableFromFormData(
-    formDatas: HealthPlanFormDataType[]
-): DocumentDateLookupTable {
-    const lookupTable: DocumentDateLookupTable = {}
-
-    formDatas.forEach((revisionData, index) => {
-        if (index === 1) {
-            // second most recent revision
-            lookupTable['previousSubmissionDate'] = revisionData.updatedAt
-        }
-        DocBuckets.forEach((bucket) => {
-            if (bucket === 'rateDocuments') {
-                revisionData.rateInfos.forEach((rateInfo) => {
-                    rateInfo.rateDocuments.forEach((doc) => {
-                        const documentKey = getDocumentKey(doc)
-                        lookupTable[documentKey] = revisionData.updatedAt
-                    })
-                })
-            } else {
-                revisionData[bucket].forEach((doc) => {
-                    const documentKey = getDocumentKey(doc)
-                    lookupTable[documentKey] = revisionData.updatedAt
-                })
+// getDateAdded - picks out the submit info updatedAt date for a revision
+// value is undefined if document not yet submitted
+const getDateAdded = (
+    revisionData: ExpandedRevisionsType
+): string | undefined => {
+    return revisionData.submitInfo?.updatedAt
+}
+// makeDateTable - generates unique document keys and their "date added"
+// used for date added column on UploadedDocumentsTable displayed in SubmissionSummary and ReviewSubmit
+// documents without a submitted date are excluded from list
+// logic for unique document keys comes from getDocumentKey -  This can be simplified once we have doc.sha everywhere
+function makeDocumentDateTable(
+    revisionsLookup: RevisionsLookupType
+): DocumentDateLookupTableType {
+    const lookupTable: DocumentDateLookupTableType = {
+        previousSubmissionDate: null,
+    }
+    Object.keys(revisionsLookup).forEach(
+        (revisionId: string, index: number) => {
+            const revision = revisionsLookup[revisionId]
+            if (index === 1) {
+                // second most recent revision
+                const previousSubmission = getDateAdded(revision) // used in UploadedDocumentsTable to determine if we should show NEW tag
+                if (previousSubmission)
+                    lookupTable['previousSubmissionDate'] = previousSubmission
             }
-        })
-    })
 
+            const allDocuments = getAllDocuments(revision.formData)
+            allDocuments.forEach((doc) => {
+                const documentKey = getDocumentKey(doc)
+                const dateAdded = getDateAdded(revision)
+                if (dateAdded) lookupTable[documentKey] = dateAdded
+            })
+        }
+    )
     return lookupTable
 }
 
-export const makeDateTable = (
-    submissions: HealthPlanPackage
-): DocumentDateLookupTable | undefined => {
-    const formDatas: HealthPlanFormDataType[] = []
-    for (const revision of submissions.revisions) {
-        const revisionData = base64ToDomain(revision.node.formDataProto)
-
-        if (revisionData instanceof Error) {
-            recordJSException(
-                `makeDocumentLookupTable: failed to read submission data; unable to display document dates. ID: ${submissions.id} Error message: ${revisionData.message}`
-            )
-            // We are just ignoring this error in this code path.
-        } else {
-            formDatas.push(revisionData)
-        }
-    }
-
-    return makeDateTableFromFormData(formDatas)
-}
+export { makeDocumentDateTable }
+export type { DocumentDateLookupTableType }

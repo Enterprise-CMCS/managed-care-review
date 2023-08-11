@@ -23,7 +23,6 @@ import {
     getTestStateAnalystsEmails,
 } from '../../testHelpers/parameterStoreHelpers'
 import * as awsSESHelpers from '../../testHelpers/awsSESHelpers'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 
 describe('submitHealthPlanPackage', () => {
@@ -857,15 +856,12 @@ describe('submitHealthPlanPackage', () => {
         expect(submitResult.errors?.[0]).toEqual(
             expect.objectContaining({
                 message: 'Email failed',
-                locations: [{ line: 2, column: 5 }],
                 path: ['submitHealthPlanPackage'],
                 extensions: {
                     code: 'INTERNAL_SERVER_ERROR',
                     cause: 'EMAIL_ERROR',
                     exception: {
                         message: 'Email failed',
-                        path: undefined,
-                        locations: undefined,
                     },
                 },
             })
@@ -903,10 +899,7 @@ describe('submitHealthPlanPackage', () => {
 
 describe('Feature flagged population coverage question test', () => {
     it('errors when population coverage question is undefined', async () => {
-        const mockLDService = testLDService({ 'chip-only-form': true })
-        const server = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const server = await constructTestPostgresServer()
 
         // setup
         const initialPkg = await createAndUpdateTestHealthPlanPackage(server, {

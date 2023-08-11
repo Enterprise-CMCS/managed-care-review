@@ -21,6 +21,4 @@ const ERROR_MESSAGES = {
     email_error_generic: 'Error attempting to send email.',
 }
 
-const MAIL_TO_SUPPORT = 'mc-review@cms.hhs.gov'
-
-export { MAIL_TO_SUPPORT, ERROR_MESSAGES }
+export { ERROR_MESSAGES }

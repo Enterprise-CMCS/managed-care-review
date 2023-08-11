@@ -1,6 +1,12 @@
-# Feature Flag Lifecycles
+# How to Manage Feature Flag Lifecycles
 
-## Criteria for when a feature should be behind a flag
+## Background
+
+We use Launch Darkly to manage feature flags in the application. Without guidelines around when flags are added or removed from a codebase, feature flags can becomes a source of tech maintenance and confusion about when/if certain features are turned on. This document outlines how to add and remove feature flags.
+
+## General Guidance
+
+### Criteria for when a feature should be behind a flag
 
 A feature typically can be added behind a flag if:
 
@@ -18,7 +24,8 @@ A feature typically can be added behind a flag if:
 
 -   A/B testing of a feature
 
-## How to add a flag to the codebase
+## Steps
+### Add a flag to the codebase
 
 Flags are first added to Launch Darkly via their UI. As an authenticated Launch Darkly user, navigate to our feature flags and click “create flag”. Choose a human readable flag name and a ‘-’ delimited flag key. The flag key is what we use inside our code. Make sure to mark the flag as client side if it is meant to be user visible (rather than API only). If the flag is permanent, mark this as well.
 
@@ -50,10 +57,13 @@ import { featureFlags } from '../../common-code/featureFlags'
     )
 ```
 
-## Removing a flag from the codebase
+### Remove flag from the codebase
 
 Launch Darkly offers [code monitoring tools](https://docs.launchdarkly.com/home/code/code-references) to make removal of unused flags easier. Unfortunately, these are only offered to Enterprise plan subscribers, so this leaves flag monitoring [up to our team](https://docs.launchdarkly.com/guides/best-practices/technical-debt). We should schedule regular flag reviews as part of our sprint cadence to make sure we’re not keeping flags around that are no longer needed.
 
 To remove an unused flag, first remove it from the `common-code/featureFlags` file. You should now be able to use your editor/IDE (or build errors) to find the place(s) that the variation call should be removed.
 
 Once the flag has been removed from code, you’ll need to archive it in the Launch Darkly UI. This can be found under ‘Feature Flags > $flag-name > Settings` in the UI.
+
+## Related documentation
+- Setup steps for testing with Launch Darkly locally can be found in [testing approach documentation](./launch-darkly-feature-flag-lifecycles.md)

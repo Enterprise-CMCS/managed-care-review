@@ -84,7 +84,6 @@ Cypress.Commands.add('stubFeatureFlags', () => {
      * Useful if you want default feature flags for tests that are different than default values set in common-code featureFlags
      **/
     cy.interceptFeatureFlags({
-        'chip-only-form': true,
         'packages-with-shared-rates': true,
     })
 })

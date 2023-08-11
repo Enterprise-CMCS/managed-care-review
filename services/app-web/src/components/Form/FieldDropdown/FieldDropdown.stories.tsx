@@ -16,7 +16,7 @@ const Template: Story<FieldDropdownProps> = (args) => (
         initialValues={{ program: '' }}
         validationSchema={schema}
         validateOnMount={true}
-        onSubmit={(e) => console.log('submitted')}
+        onSubmit={(e) => console.info('submitted')}
     >
         <FieldDropdown {...args} />
     </Formik>

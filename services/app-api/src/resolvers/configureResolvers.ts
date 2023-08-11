@@ -1,6 +1,6 @@
 import { GraphQLDate, GraphQLDateTime } from 'graphql-scalars'
 import type { Emailer } from '../emailer'
-import { Resolvers } from '../gen/gqlServer'
+import type { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
 import {
     createHealthPlanPackageResolver,
@@ -23,8 +23,8 @@ import {
     cmsUserResolver,
     indexUsersResolver,
 } from './user'
-import { EmailParameterStore } from '../parameterStore'
-import { LDService } from '../launchDarkly/launchDarkly'
+import type { EmailParameterStore } from '../parameterStore'
+import type { LDService } from '../launchDarkly/launchDarkly'
 import { fetchEmailSettingsResolver } from './email/fetchEmailSettings'
 
 export function configureResolvers(
@@ -38,7 +38,10 @@ export function configureResolvers(
         DateTime: GraphQLDateTime,
         Query: {
             fetchCurrentUser: fetchCurrentUserResolver(),
-            fetchHealthPlanPackage: fetchHealthPlanPackageResolver(store),
+            fetchHealthPlanPackage: fetchHealthPlanPackageResolver(
+                store,
+                launchDarkly
+            ),
             indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
             indexUsers: indexUsersResolver(store),
             indexQuestions: indexQuestionsResolver(store),
@@ -49,13 +52,15 @@ export function configureResolvers(
             ),
         },
         Mutation: {
-            createHealthPlanPackage: createHealthPlanPackageResolver(store),
+            createHealthPlanPackage: createHealthPlanPackageResolver(
+                store,
+                launchDarkly
+            ),
             updateHealthPlanFormData: updateHealthPlanFormDataResolver(store),
             submitHealthPlanPackage: submitHealthPlanPackageResolver(
                 store,
                 emailer,
-                emailParameterStore,
-                launchDarkly
+                emailParameterStore
             ),
             unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
                 store,
@@ -75,6 +80,8 @@ export function configureResolvers(
                     return 'CMSUser'
                 } else if (obj.role === 'ADMIN_USER') {
                     return 'AdminUser'
+                } else if (obj.role === 'HELPDESK_USER') {
+                    return 'HelpdeskUser'
                 } else {
                     return 'StateUser'
                 }

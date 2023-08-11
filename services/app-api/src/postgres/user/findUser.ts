@@ -1,6 +1,7 @@
-import { PrismaClient } from '@prisma/client'
-import { convertPrismaErrorToStoreError, StoreError } from '../storeError'
-import { UserType } from '../../domain-models'
+import type { PrismaClient } from '@prisma/client'
+import type { StoreError } from '../storeError'
+import { convertPrismaErrorToStoreError } from '../storeError'
+import type { UserType } from '../../domain-models'
 import { domainUserFromPrismaUser } from './prismaDomainUser'
 
 export async function findUser(

@@ -1,6 +1,7 @@
-import { User, State } from '@prisma/client'
-import { UserType } from '../../domain-models'
-import { isStoreError, StoreError } from '../storeError'
+import type { User, State } from '@prisma/client'
+import type { UserType } from '../../domain-models'
+import type { StoreError } from '../storeError'
+import { isStoreError } from '../storeError'
 
 // We are storing all the possible values for any of the user types in the same
 // table in prisma, so we need to parse those into valid UserTypes or error if something
@@ -47,6 +48,14 @@ function domainUserFromPrismaUser(
             return {
                 id: prismaUser.id,
                 role: 'ADMIN_USER',
+                givenName: prismaUser.givenName,
+                familyName: prismaUser.familyName,
+                email: prismaUser.email,
+            }
+        case 'HELPDESK_USER':
+            return {
+                id: prismaUser.id,
+                role: 'HELPDESK_USER',
                 givenName: prismaUser.givenName,
                 familyName: prismaUser.familyName,
                 email: prismaUser.email,

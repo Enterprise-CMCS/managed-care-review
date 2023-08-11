@@ -240,7 +240,7 @@ type Mutation {
 
 input CreateHealthPlanPackageInput {
     "Population that the contract covers"
-    populationCovered: PopulationCoveredType
+    populationCovered: PopulationCoveredType!
     "An array of managed care program IDs this package covers"
     programIDs: [ID!]!
     "Whether or not this contract is risk based"
@@ -264,7 +264,7 @@ input FetchHealthPlanPackageInput {
 
 type FetchHealthPlanPackagePayload {
     "A single HealthPlanPackage"
-    pkg: HealthPlanPackage
+    pkg: HealthPlanPackage!
 }
 
 type HealthPlanPackageEdge {
@@ -417,7 +417,7 @@ scalar Date
 "DateTime is a moment in time with date and time information"
 scalar DateTime
 
-union User = StateUser | CMSUser | AdminUser
+union User = StateUser | CMSUser | AdminUser | HelpdeskUser
 
 "StateUser is a user that works for a state, submitting packages to be reviewed by CMSUsers"
 type StateUser {
@@ -446,6 +446,16 @@ type CMSUser {
 type AdminUser {
     id: ID!
     "will always be 'ADMIN_USER'"
+    role: String!
+    email: String!
+    givenName: String!
+    familyName: String!
+}
+
+"HelpdeskUser is a user that supports state and cms users"
+type HelpdeskUser {
+    id: ID!
+    "will always be 'HELPDESK_USER'"
     role: String!
     email: String!
     givenName: String!

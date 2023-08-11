@@ -1,8 +1,13 @@
 import { screen } from '@testing-library/react'
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import {
+    renderWithProviders,
+    ldUseClientSpy,
+} from '../../../testHelpers/jestHelpers'
 import { UserLoginInfo } from './UserLoginInfo'
+import { useStringConstants } from '../../../hooks/useStringConstants'
 
 describe('UserLoginInfo', () => {
+    afterEach(() => jest.clearAllMocks())
     const loggedInUser = {
         state: {
             name: 'Minnesota',
@@ -50,7 +55,10 @@ describe('UserLoginInfo', () => {
         expect(screen.getByText('bob@dmas.mn.gov')).toBeInTheDocument()
     })
 
-    it('renders submit feedback link', () => {
+    it('renders link to support email', () => {
+        ldUseClientSpy({ 'helpdesk-email': true })
+        const stringConstants = useStringConstants()
+        const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
         const jestFn = jest.fn()
 
         renderWithProviders(
@@ -63,11 +71,11 @@ describe('UserLoginInfo', () => {
             />
         )
         const feedbackLink = screen.getByRole('link', {
-            name: /Submit feedback/i,
+            name: `${MAIL_TO_SUPPORT}`,
         })
         expect(feedbackLink).toHaveAttribute(
             'href',
-            'mailto: mc-review@cms.hhs.gov, mc-review-team@truss.works'
+            `mailto: ${MAIL_TO_SUPPORT}, mc-review-team@truss.works`
         )
     })
 

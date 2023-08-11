@@ -18,6 +18,7 @@ import {
     UpdateHealthPlanFormDataMutation,
     CreateHealthPlanPackageDocument,
     CreateHealthPlanPackageMutation,
+    HealthPlanRevision,
 } from '../../gen/gqlClient'
 import {
     mockContractAndRatesDraft,
@@ -62,17 +63,22 @@ const fetchHealthPlanPackageMockSuccess = ({
 const fetchHealthPlanPackageMockNotFound = ({
     id,
 }: fetchHealthPlanPackageMockProps): MockedResponse<FetchHealthPlanPackageQuery> => {
+    const graphQLError = new GraphQLError(
+        'Issue finding a package with id a6039ed6-39cc-4814-8eaa-0c99f25e325d. Message: Result was undefined.',
+        {
+            extensions: {
+                code: 'NOT_FOUND',
+            },
+        }
+    )
+
     return {
         request: {
             query: FetchHealthPlanPackageDocument,
             variables: { input: { pkgID: id } },
         },
         result: {
-            data: {
-                fetchHealthPlanPackage: {
-                    pkg: undefined,
-                },
-            },
+            errors: [graphQLError],
         },
     }
 }
@@ -125,12 +131,18 @@ const fetchStateHealthPlanPackageMockSuccess = ({
 
 const mockSubmittedHealthPlanPackageWithRevision = ({
     currentSubmissionData,
+    currentSubmitInfo,
     previousSubmissionData,
+    previousSubmitInfo,
     initialSubmissionData,
+    initialSubmitInfo,
 }: {
     currentSubmissionData?: Partial<UnlockedHealthPlanFormDataType>
+    currentSubmitInfo?: Partial<HealthPlanRevision['submitInfo']>
     previousSubmissionData?: Partial<UnlockedHealthPlanFormDataType>
+    previousSubmitInfo?: Partial<HealthPlanRevision['submitInfo']>
     initialSubmissionData?: Partial<UnlockedHealthPlanFormDataType>
+    initialSubmitInfo?: Partial<HealthPlanRevision['submitInfo']>
 }): HealthPlanPackage => {
     const currentFiles: Partial<UnlockedHealthPlanFormDataType> = {
         contractDocuments: [
@@ -151,15 +163,21 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                     {
                         s3URL: 's3://bucketname/1648242665634-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf',
                         name: 'Amerigroup Texas, Inc.pdf',
-                        documentCategories: ['RATES_RELATED'],
+                        documentCategories: ['RATES'],
                     },
                     {
                         s3URL: 's3://bucketname/1648242711421-Amerigroup Texas Inc copy.pdf/Amerigroup Texas Inc copy.pdf',
                         name: 'Amerigroup Texas Inc copy.pdf',
+                        documentCategories: ['RATES'],
+                    },
+                ],
+                supportingDocuments: [
+                    {
+                        s3URL: 's3://bucketname/1648242873229-covid-ifc-2-flu-rsv-codes 5-5-2021.pdf/covid-ifc-2-flu-rsv-codes 5-5-2021.pdf',
+                        name: 'covid-ifc-2-flu-rsv-codes 5-5-2021.pdf',
                         documentCategories: ['RATES_RELATED'],
                     },
                 ],
-                supportingDocuments: [],
                 actuaryContacts: [],
                 packagesWithSharedRateCerts: [],
             },
@@ -169,11 +187,6 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                 s3URL: 's3://bucketname/1648242711421-529-10-0020-00003_Superior_Health Plan, Inc.pdf/529-10-0020-00003_Superior_Health Plan, Inc.pdf',
                 name: '529-10-0020-00003_Superior_Health Plan, Inc.pdf',
                 documentCategories: ['CONTRACT_RELATED'],
-            },
-            {
-                s3URL: 's3://bucketname/1648242873229-covid-ifc-2-flu-rsv-codes 5-5-2021.pdf/covid-ifc-2-flu-rsv-codes 5-5-2021.pdf',
-                name: 'covid-ifc-2-flu-rsv-codes 5-5-2021.pdf',
-                documentCategories: ['RATES_RELATED'],
             },
         ],
     }
@@ -214,7 +227,13 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                         documentCategories: ['RATES'],
                     },
                 ],
-                supportingDocuments: [],
+                supportingDocuments: [
+                    {
+                        s3URL: 's3://bucketname/1648242711421-529-10-0020-00003_Superior_Health Plan, Inc.pdf/529-10-0020-00003_Superior_Health Plan, Inc.pdf',
+                        name: '529-10-0020-00003_Superior_Health Plan, Inc.pdf',
+                        documentCategories: ['RATES_RELATED'],
+                    },
+                ],
                 actuaryContacts: [],
                 packagesWithSharedRateCerts: [],
             },
@@ -230,11 +249,6 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                 name: 'Amerigroup Texas Inc copy.pdf',
                 documentCategories: ['CONTRACT_RELATED'],
             },
-            {
-                s3URL: 's3://bucketname/1648242711421-529-10-0020-00003_Superior_Health Plan, Inc.pdf/529-10-0020-00003_Superior_Health Plan, Inc.pdf',
-                name: '529-10-0020-00003_Superior_Health Plan, Inc.pdf',
-                documentCategories: ['RATES_RELATED'],
-            },
         ],
     }
 
@@ -243,16 +257,36 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
         ...currentFiles,
         ...currentSubmissionData,
     })
+    const currentSubmit = {
+        updatedAt: '2022-03-28T17:56:32.952Z',
+        updatedBy: 'aang@example.com',
+        updatedReason: 'Placeholder resubmission reason',
+        ...currentSubmitInfo,
+    }
     const previousProto = domainToBase64({
         ...unlockedWithALittleBitOfEverything(),
         ...previousFiles,
         ...previousSubmissionData,
     })
+
+    const previousSubmit = {
+        updatedAt: '2022-03-25T21:14:43.057Z',
+        updatedBy: 'aang@example.com',
+        updatedReason: 'Placeholder resubmission reason',
+        ...previousSubmitInfo,
+    }
     const initialProto = domainToBase64({
         ...mockContractAndRatesDraft(),
         ...previousFiles,
         ...initialSubmissionData,
     })
+
+    const initialSubmit = {
+        updatedAt: '2022-03-25T21:13:20.419Z',
+        updatedBy: 'aang@example.com',
+        updatedReason: 'Initial submission',
+        ...initialSubmitInfo,
+    }
     return {
         __typename: 'HealthPlanPackage',
         id: '07f9efbf-d4d1-44ae-8674-56d9d6b75ce6',
@@ -278,9 +312,7 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                     },
                     submitInfo: {
                         __typename: 'UpdateInformation',
-                        updatedAt: '2022-03-28T17:56:32.952Z',
-                        updatedBy: 'aang@example.com',
-                        updatedReason: 'Placeholder resubmission reason',
+                        ...currentSubmit,
                     },
                     createdAt: '2022-03-28T17:54:39.175Z',
                     formDataProto: currentProto,
@@ -299,9 +331,7 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                     },
                     submitInfo: {
                         __typename: 'UpdateInformation',
-                        updatedAt: '2022-03-25T21:14:43.057Z',
-                        updatedBy: 'aang@example.com',
-                        updatedReason: 'Placeholder resubmission reason',
+                        ...previousSubmit,
                     },
                     createdAt: '2022-03-25T21:13:56.176Z',
                     formDataProto: previousProto,
@@ -315,9 +345,7 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                     unlockInfo: null,
                     submitInfo: {
                         __typename: 'UpdateInformation',
-                        updatedAt: '2022-03-25T21:13:20.419Z',
-                        updatedBy: 'aang@example.com',
-                        updatedReason: 'Initial submission',
+                        ...initialSubmit,
                     },
                     createdAt: '2022-03-25T03:28:56.244Z',
                     formDataProto: initialProto,

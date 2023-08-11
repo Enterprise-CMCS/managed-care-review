@@ -54,19 +54,18 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         console.error('Error from API fetch', fetchResult.error)
         if (err instanceof ApolloError) {
             handleApolloError(err, true)
-        } else {
-            recordJSException(err)
+
+            if (err.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+                return <Error404 />
+            }
         }
+
+        recordJSException(err)
         return <GenericErrorPage /> // api failure or protobuf decode failure
     }
 
-    const { data, formDatas, documentDates } = fetchResult
+    const { data, revisionsLookup, documentDates } = fetchResult
     const pkg = data.fetchHealthPlanPackage.pkg
-
-    // fetchHPP returns null if no package is found with the given ID
-    if (!pkg) {
-        return <Error404 />
-    }
 
     //We offset version by +1 of index, remove offset to find revision in revisions
     const revisionIndex = Number(revisionVersion) - 1
@@ -77,7 +76,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         console.info('no revision found at index', revisionIndex)
         return <Error404 />
     }
-    const packageData = formDatas[revision.id]
+    const packageData = revisionsLookup[revision.id].formData
 
     const statePrograms = pkg.state.programs
     const name = packageName(packageData, statePrograms)

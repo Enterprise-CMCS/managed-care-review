@@ -1,4 +1,4 @@
-import { StateUserType } from './UserType'
+import type { StateUserType } from './UserType'
 
 type QuestionResponseDocument = {
     name: string

@@ -1,46 +1,144 @@
 import { ForbiddenError } from 'apollo-server-lambda'
+import type { HealthPlanPackageType } from '../../domain-models'
 import {
     isCMSUser,
     isStateUser,
     isAdminUser,
-    HealthPlanPackageType,
     packageStatus,
+    convertContractToUnlockedHealthPlanPackage,
 } from '../../domain-models'
-import { QueryResolvers, State } from '../../gen/gqlServer'
+import { isHelpdeskUser } from '../../domain-models/user'
+import type { QueryResolvers, State } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import { isStoreError, Store } from '../../postgres'
+import type { Store } from '../../postgres'
+import { isStoreError } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
+import type { LDService } from '../../launchDarkly/launchDarkly'
+import { GraphQLError } from 'graphql/index'
+import { NotFoundError } from '../../postgres'
 
 export function fetchHealthPlanPackageResolver(
-    store: Store
+    store: Store,
+    launchDarkly: LDService
 ): QueryResolvers['fetchHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
         setResolverDetailsOnActiveSpan('fetchHealthPlanPackage', user, span)
-        // fetch from the store
-        const result = await store.findHealthPlanPackage(input.pkgID)
 
-        if (isStoreError(result)) {
-            const errMessage = `Issue finding a package of type ${result.code}. Message: ${result.message}`
-            logError('fetchHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
-        }
+        const ratesDatabaseRefactor = await launchDarkly.getFeatureFlag(
+            context,
+            'rates-db-refactor'
+        )
 
-        if (result === undefined) {
-            const errMessage = `Issue finding a package with id ${input.pkgID}. Message: Result was undefined `
-            logError('fetchHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            return {
-                pkg: undefined,
+        let pkg: HealthPlanPackageType
+
+        // Here is where we flag finding health plan
+        if (ratesDatabaseRefactor) {
+            // Health plans can be in two states Draft and Submitted, and we have 2 postgres functions for each.
+            // findContractWithHistory gets all submitted revisions and findDraftContract gets just the one draft revision
+            // We don't have function that gets all revisions including draft. So we have to call both functions when a
+            // contract is DRAFT.
+            const contractWithHistory = await store.findContractWithHistory(
+                input.pkgID
+            )
+
+            if (contractWithHistory instanceof Error) {
+                const errMessage = `Issue finding a contract with history with id ${input.pkgID}. Message: ${contractWithHistory.message}`
+                logError('fetchHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+
+                if (contractWithHistory instanceof NotFoundError) {
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'NOT_FOUND',
+                            cause: 'DB_ERROR',
+                        },
+                    })
+                }
+
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
             }
-        }
 
-        const pkg: HealthPlanPackageType = result
+            if (contractWithHistory.status === 'DRAFT') {
+                const draftRevision = await store.findDraftContract(input.pkgID)
+                if (draftRevision instanceof Error) {
+                    // If draft returns undefined we error because a draft submission should always have a draft revision.
+                    const errMessage = `Issue finding a draft contract with id ${input.pkgID}. Message: ${draftRevision.message}`
+                    logError('fetchHealthPlanPackage', errMessage)
+                    setErrorAttributesOnActiveSpan(errMessage, span)
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
+                }
+
+                if (draftRevision === undefined) {
+                    const errMessage = `Issue finding a draft contract with id ${input.pkgID}. Message: Result was undefined.`
+                    logError('fetchHealthPlanPackage', errMessage)
+                    setErrorAttributesOnActiveSpan(errMessage, span)
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'NOT_FOUND',
+                            cause: 'DB_ERROR',
+                        },
+                    })
+                }
+
+                // Pushing in the draft revision, so it would be first in the array of revisions.
+                contractWithHistory.revisions.push(draftRevision)
+            }
+
+            const convertedPkg =
+                convertContractToUnlockedHealthPlanPackage(contractWithHistory)
+
+            if (convertedPkg instanceof Error) {
+                const errMessage = `Issue converting contract. Message: ${convertedPkg.message}`
+                logError('fetchHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'PROTO_DECODE_ERROR',
+                    },
+                })
+            }
+
+            pkg = convertedPkg
+        } else {
+            const result = await store.findHealthPlanPackage(input.pkgID)
+
+            if (isStoreError(result)) {
+                const errMessage = `Issue finding a package of type ${result.code}. Message: ${result.message}`
+                logError('fetchHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new Error(errMessage)
+            }
+
+            if (result === undefined) {
+                const errMessage = `Issue finding a package with id ${input.pkgID}. Message: Result was undefined.`
+                logError('fetchHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'NOT_FOUND',
+                        cause: 'DB_ERROR',
+                    },
+                })
+            }
+
+            pkg = result
+        }
 
         // Authorization CMS users can view, state users can only view if the state matches
         if (isStateUser(context.user)) {
@@ -58,19 +156,21 @@ export function fetchHealthPlanPackageResolver(
                     'user not authorized to fetch data from a different state'
                 )
             }
-        } else if (isCMSUser(context.user) || isAdminUser(context.user)) {
+        } else if (
+            isCMSUser(context.user) ||
+            isAdminUser(context.user) ||
+            isHelpdeskUser(context.user)
+        ) {
             if (packageStatus(pkg) === 'DRAFT') {
                 logError(
                     'fetchHealthPlanPackage',
-                    'CMS user not authorized to fetch a draft'
+                    'user not authorized to fetch a draft'
                 )
                 setErrorAttributesOnActiveSpan(
-                    'CMS user not authorized to fetch a draft',
+                    'user not authorized to fetch a draft',
                     span
                 )
-                throw new ForbiddenError(
-                    'CMS user not authorized to fetch a draft'
-                )
+                throw new ForbiddenError('user not authorized to fetch a draft')
             }
         } else {
             logError('fetchHealthPlanPackage', 'unknown user type')

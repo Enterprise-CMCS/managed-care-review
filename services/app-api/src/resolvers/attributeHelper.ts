@@ -1,4 +1,4 @@
-import { Context } from '../handlers/apollo_gql'
+import type { Context } from '../handlers/apollo_gql'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import { SpanStatusCode } from '@opentelemetry/api'
 

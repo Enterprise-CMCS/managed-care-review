@@ -1,17 +1,17 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { GraphQLError } from 'graphql'
 import { isAdminUser, isValidCmsDivison } from '../../domain-models'
-import {
-    isValidStateCode,
-    StateCodeType,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { MutationResolvers } from '../../gen/gqlServer'
+import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { isValidStateCode } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import { isStoreError, Store } from '../../postgres'
+import type { Store } from '../../postgres'
+import { isStoreError } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
 } from '../attributeHelper'
+import { isHelpdeskUser } from '../../domain-models/user'
 
 export function updateCMSUserResolver(
     store: Store
@@ -21,7 +21,7 @@ export function updateCMSUserResolver(
         setResolverDetailsOnActiveSpan('updateCmsUser', currentUser, span)
 
         // This resolver is only callable by admin users
-        if (!isAdminUser(currentUser)) {
+        if (!(isAdminUser(currentUser) || isHelpdeskUser(currentUser))) {
             logError(
                 'updateHealthPlanFormData',
                 'user not authorized to modify assignments'
@@ -105,7 +105,7 @@ export function updateCMSUserResolver(
             'Updated user assignments' // someday might have a note field and make this a param
         )
         if (isStoreError(result)) {
-            if (result.code === 'INSERT_ERROR') {
+            if (result.code === 'NOT_FOUND_ERROR') {
                 const errMsg = 'cmsUserID does not exist'
                 logError('updateCmsUser', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)

@@ -1,14 +1,11 @@
-import { PrismaClient } from '@prisma/client'
-import { HealthPlanPackageType } from '../../domain-models'
-import {
-    convertPrismaErrorToStoreError,
-    isStoreError,
-    StoreError,
-} from '../storeError'
+import type { PrismaClient } from '@prisma/client'
+import type { HealthPlanPackageType } from '../../domain-models'
+import type { StoreError } from '../storeError'
+import { convertPrismaErrorToStoreError, isStoreError } from '../storeError'
+import type { HealthPlanPackageWithRevisionsTable } from './healthPlanPackageHelpers'
 import {
     convertToHealthPlanPackageType,
     getCurrentRevision,
-    HealthPlanPackageWithRevisionsTable,
 } from './healthPlanPackageHelpers'
 
 export async function findAllPackagesWrapper(

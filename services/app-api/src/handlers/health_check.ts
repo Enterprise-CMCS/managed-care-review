@@ -1,4 +1,4 @@
-import { APIGatewayProxyHandler } from 'aws-lambda'
+import type { APIGatewayProxyHandler } from 'aws-lambda'
 
 const ldClientKey = process.env.LD_SDK_KEY ?? ''
 if (ldClientKey === '') {

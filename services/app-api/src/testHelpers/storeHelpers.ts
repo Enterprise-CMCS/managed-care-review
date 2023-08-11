@@ -1,5 +1,6 @@
-import { PrismaClient } from '@prisma/client'
-import { NewPrismaClient, Store, StoreError } from '../postgres'
+import type { PrismaClient } from '@prisma/client'
+import type { Store, StoreError } from '../postgres'
+import { NewPrismaClient } from '../postgres'
 
 async function configurePrismaClient(): Promise<PrismaClient> {
     const dbURL = process.env.DATABASE_URL
@@ -95,6 +96,21 @@ function mockStoreThatErrors(): Store {
         },
         insertQuestionResponse: async (_ID) => {
             return genericStoreError
+        },
+        insertDraftContract: async (_ID) => {
+            return new Error(
+                'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
+            )
+        },
+        findContractWithHistory: async (_ID) => {
+            return new Error(
+                'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
+            )
+        },
+        findDraftContract: async (_ID) => {
+            return new Error(
+                'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
+            )
         },
     }
 }

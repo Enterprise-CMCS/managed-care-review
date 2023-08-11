@@ -13,10 +13,10 @@ export REACT_APP_LD_CLIENT_ID='Place Launch Darkly ID here'
 export LD_SDK_KEY='Place Launch Darkly SDK key here'
 ```
 - **Getting LaunchDarkly Client-side ID and SDK keys**:
-  - Log into [LaunchDarkly](https://app.launchdarkly.com/login).
+  - Log into [LaunchDarkly](https://app.launchdarkly.us). To login use trussworks email (e.g. `@teamtrussworks.com`) and any password, which will redirect you to CMS SSO login.
   - On the dashboard page click on `Account settings` tab form the side navigation.
   - Then, on the `Account settings` page, click on the `Projects` tab.
-  - You should see a `Projects` table. Select the project 'MC Review' from the table.
+  - You should see a `Projects` table. Select the project 'macpro-mc-review' from the table.
   - Finally, you should see a `Environments` table .
   - The keys for `Local` environment are the ones needed for local testing.
 

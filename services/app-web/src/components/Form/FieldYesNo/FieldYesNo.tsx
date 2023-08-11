@@ -24,7 +24,7 @@ export type FieldYesNoProps = {
     showError?: boolean
     id: string
     variant?: 'TOPLEVEL' | 'SUBHEAD' // subhead variant used for nested fields yes/no fields under an overarching heading
-} & JSX.IntrinsicElements['input']
+} & React.JSX.IntrinsicElements['input']
 
 export const FieldYesNo = ({
     name,
@@ -55,11 +55,9 @@ export const FieldYesNo = ({
             id={id}
             legend={label}
             className={classes}
-            data-testid='yes-no-radio-fieldset'
+            data-testid="yes-no-radio-fieldset"
         >
-            {showError && meta.error && (
-                <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>
-            )}
+            {showError && <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>}
             {hint && (
                 <div
                     role="note"

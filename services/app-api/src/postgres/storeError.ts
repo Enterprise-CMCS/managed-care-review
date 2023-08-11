@@ -1,7 +1,7 @@
 import {
     PrismaClientInitializationError,
     PrismaClientKnownRequestError,
-} from '@prisma/client/runtime'
+} from '@prisma/client/runtime/library'
 
 const StoreErrorCodes = [
     'CONFIGURATION_ERROR',
@@ -11,8 +11,9 @@ const StoreErrorCodes = [
     'USER_FORMAT_ERROR',
     'UNEXPECTED_EXCEPTION',
     'WRONG_STATUS',
+    'NOT_FOUND_ERROR',
 ] as const
-type StoreErrorCode = typeof StoreErrorCodes[number] // iterable union type
+type StoreErrorCode = (typeof StoreErrorCodes)[number] // iterable union type
 
 type StoreError = {
     code: StoreErrorCode
@@ -53,12 +54,11 @@ const convertPrismaErrorToStoreError = (prismaErr: unknown): StoreError => {
 
         // An operation failed because it depends on one or more records
         // that were required but not found.
-        // This is also returned when the userID doesn't exist in trying to connect
-        // a user and some states
         if (prismaErr.code === 'P2025') {
             return {
-                code: 'INSERT_ERROR',
-                message: 'insert failed because required record not found',
+                code: 'NOT_FOUND_ERROR',
+                message:
+                    'An operation failed because it depends on one or more records that were required but not found.',
             }
         }
 
@@ -90,4 +90,13 @@ const convertPrismaErrorToStoreError = (prismaErr: unknown): StoreError => {
     }
 }
 
-export { StoreError, isStoreError, convertPrismaErrorToStoreError }
+class NotFoundError extends Error {
+    constructor(message: string) {
+        super(message)
+
+        Object.setPrototypeOf(this, NotFoundError.prototype)
+    }
+}
+
+export type { StoreError }
+export { NotFoundError, isStoreError, convertPrismaErrorToStoreError }

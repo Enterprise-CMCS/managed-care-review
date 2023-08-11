@@ -127,7 +127,7 @@ jobs:
           path: ./services/app-web/coverage/coverage-final.json
 
       - name: publish code coverage
-        uses: paambaati/codeclimate-action@v4.0.0
+        uses: paambaati/codeclimate-action@v5.0.0
         continue-on-error: true
         env:
           CC_TEST_REPORTER_ID: f7474ffe9522492f5380eb86189480f352c841718c1fe6a63f169353c7cee243
@@ -179,7 +179,9 @@ jobs:
 
       - name: API Unit Tests
         env:
+          stage: ${steps.stage-name.outputs.stage-name-for-branch}
           NODE_OPTIONS: --max_old_space_size=6000
+          REACT_APP_OTEL_COLLECTOR_URL: ${{vars.REACT_APP_OTEL_COLLECTOR_URL}}
           REACT_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-api
@@ -193,7 +195,7 @@ jobs:
           path: ./services/app-api/coverage/coverage-final.json
 
       - name: publish code coverage
-        uses: paambaati/codeclimate-action@v4.0.0
+        uses: paambaati/codeclimate-action@v5.0.0
         continue-on-error: true
         env:
           CC_TEST_REPORTER_ID: f7474ffe9522492f5380eb86189480f352c841718c1fe6a63f169353c7cee243
@@ -275,7 +277,7 @@ jobs:
       needs.api-unit-tests.result == 'success' &&
       needs.build-prisma-client-lambda-layer.result == 'success' &&
       needs.begin-deployment.result == 'success'
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@ma_3212_migration_lambda
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
@@ -534,7 +536,7 @@ jobs:
           path: ./coverage-cypress/coverage-final.json
 
       - name: publish code coverage
-        uses: paambaati/codeclimate-action@v4.0.0
+        uses: paambaati/codeclimate-action@v5.0.0
         continue-on-error: true
         env:
           CC_TEST_REPORTER_ID: f7474ffe9522492f5380eb86189480f352c841718c1fe6a63f169353c7cee243
