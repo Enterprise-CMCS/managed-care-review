@@ -1,68 +1,46 @@
-import { ContractTable, RateTable } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import {
     ContractRevisionWithRatesType,
-    ContractType,
     RateRevisionType,
 } from '../../domain-models/contractAndRates'
 import {
     contractFormDataToDomainModel,
-    ContractRevisionTableWithFormData,
-    getContractStatus,
     includeUpdateInfo,
     rateReivisionToDomainModel,
-    RateRevisionTableWithFormData,
 } from './prismaSharedContractRateHelpers'
+import { ContractRevisionTableWithRates } from './prismaSubmittedContractHelpers'
 
-// This is the include that gives us draft info
-const includeDraftContractRevisionsWithDraftRates = {
-    stateContacts: true,
-    contractDocuments: true,
-    supportingDocuments: true,
-    draftRates: {
+const includeDraftRates = {
+    revisions: {
         include: {
-            revisions: {
-                include: {
-                    rateDocuments: true,
-                    supportingDocuments: true,
-                    certifyingActuaryContacts: true,
-                    addtlActuaryContacts: true,
-                    submitInfo: includeUpdateInfo,
-                    unlockInfo: includeUpdateInfo,
-                    draftContracts: true,
-                },
-                where: {
-                    submitInfoID: { not: null },
-                },
-                take: 1,
-                orderBy: {
-                    createdAt: 'desc',
-                },
-            },
+            rateDocuments: true,
+            supportingDocuments: true,
+            certifyingActuaryContacts: true,
+            addtlActuaryContacts: true,
+            submitInfo: includeUpdateInfo,
+            unlockInfo: includeUpdateInfo,
+        },
+        take: 1,
+        orderBy: {
+            createdAt: 'desc',
         },
     },
-} as const
+} satisfies Prisma.RateTableInclude
 
-type DraftRateWithRelations = RateTable & {
-    revisions: RateRevisionTableWithFormData[]
-}
-
-type DraftContractRevisionTableWithRelations =
-    ContractRevisionTableWithFormData & {
-        draftRates: DraftRateWithRelations[]
-    }
-
-type DraftContractTableWithRelations = ContractTable & {
-    revisions: DraftContractRevisionTableWithRelations[]
-}
+type DraftRatesTable = Prisma.RateTableGetPayload<{
+    include: typeof includeDraftRates
+}>
 
 function draftRatesToDomainModel(
-    draftRates: DraftRateWithRelations[]
+    draftRates: DraftRatesTable[]
 ): RateRevisionType[] {
     return draftRates.map((dr) => rateReivisionToDomainModel(dr.revisions[0]))
 }
 
+// -------------------
+
 function draftContractRevToDomainModel(
-    revision: DraftContractRevisionTableWithRelations
+    revision: ContractRevisionTableWithRates
 ): ContractRevisionWithRatesType {
     return {
         id: revision.id,
@@ -73,29 +51,4 @@ function draftContractRevToDomainModel(
     }
 }
 
-function draftContractToDomainModel(
-    contract: DraftContractTableWithRelations
-): ContractType {
-    const revisions = contract.revisions.map((cr) =>
-        draftContractRevToDomainModel(cr)
-    )
-
-    return {
-        id: contract.id,
-        status: getContractStatus(contract.revisions),
-        stateCode: contract.stateCode,
-        stateNumber: contract.stateNumber,
-        revisions,
-    }
-}
-
-export type {
-    DraftContractTableWithRelations,
-    DraftContractRevisionTableWithRelations,
-}
-
-export {
-    includeDraftContractRevisionsWithDraftRates,
-    draftContractToDomainModel,
-    draftContractRevToDomainModel,
-}
+export { includeDraftRates, draftContractRevToDomainModel }

@@ -617,7 +617,7 @@ describe('findContract', () => {
             ])
         )
 
-        // Draft should STILL pull revision 2.0 out, since 2.1 is not submitted
+        // Draft should now pull draft revision 2.1 out, even though its unsubmitted
         const draftPreRateSubmit = must(
             await findContractWithHistory(client, contractA.id)
         )
@@ -626,12 +626,12 @@ describe('findContract', () => {
             draftPreRateSubmit.draftRevision?.rateRevisions.map(
                 (rr) => rr.formData.rateCertificationName
             )
-        ).toEqual(['onepoint0', 'twopointo'])
+        ).toEqual(['onepoint0', 'twopointone'])
 
         // Submit Rate 2.1
         must(await submitRate(client, rate2.id, stateUser.id, '2.1 update'))
 
-        // Now Draft should pull revision 2.1 out
+        // raft should still pull revision 2.1 out
         const draftPostRateSubmit = must(
             await findContractWithHistory(client, contractA.id)
         )

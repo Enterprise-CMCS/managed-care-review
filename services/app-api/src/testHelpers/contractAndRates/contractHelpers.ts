@@ -4,10 +4,9 @@ import { must } from '../errorHelpers'
 import { PrismaClient } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
 import {
-    DraftContractRevisionTableWithRelations,
-    DraftContractTableWithRelations,
-} from '../../postgres/contractAndRates/prismaDraftContractHelpers'
-import { ContractTableFullPayload } from '../../postgres/contractAndRates/prismaSubmittedContractHelpers'
+    ContractRevisionTableWithRates,
+    ContractTableFullPayload,
+} from '../../postgres/contractAndRates/prismaSubmittedContractHelpers'
 
 const createInsertContractData = (
     contractArgs?: Partial<InsertContractArgsType>
@@ -44,8 +43,8 @@ const getStateRecord = async (
 }
 
 const createDraftContractData = (
-    contract?: Partial<DraftContractTableWithRelations>
-): DraftContractTableWithRelations => ({
+    contract?: Partial<ContractTableFullPayload>
+): ContractTableFullPayload => ({
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -55,7 +54,7 @@ const createDraftContractData = (
         createContractRevision({
             rateRevisions: undefined,
             submitInfo: null,
-        }) as DraftContractRevisionTableWithRelations,
+        }) as ContractRevisionTableWithRates,
     ],
     ...contract,
 })
@@ -71,14 +70,14 @@ const createContractData = (
     revisions: contract?.revisions ?? [
         createContractRevision({
             draftRates: undefined,
-        }) as ContractTableFullPayload['revisions'][0],
+        }) as ContractRevisionTableWithRates,
     ],
     ...contract,
 })
 
 const createContractRevision = (
-    revision?: Partial<ContractTableFullPayload['revisions'][0]>
-): ContractTableFullPayload['revisions'][0] => ({
+    revision?: Partial<ContractRevisionTableWithRates>
+): ContractRevisionTableWithRates => ({
     id: uuidv4(),
     createdAt: new Date(),
     updatedAt: new Date(),

@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
 import { createContractRevision } from '../../testHelpers'
-import { DraftContractRevisionTableWithRelations } from './prismaDraftContractHelpers'
 import {
     contractFormDataToDomainModel,
     getContractStatus,
@@ -10,10 +9,7 @@ import { ContractRevisionTableWithRates } from './prismaSubmittedContractHelpers
 describe('prismaToDomainModel', () => {
     describe('contractFormDataToDomainModel', () => {
         it('correctly adds document categories to each document', () => {
-            const contractRevision:
-                | ContractRevisionTableWithRates
-                | DraftContractRevisionTableWithRelations =
-                createContractRevision()
+            const contractRevision = createContractRevision()
 
             const domainFormData =
                 contractFormDataToDomainModel(contractRevision)
@@ -66,7 +62,7 @@ describe('prismaToDomainModel', () => {
                 revision: [
                     {
                         createdAt: new Date(21, 2, 1),
-                        submitInfo: undefined,
+                        submitInfo: null,
                     },
                     {
                         createdAt: new Date(21, 3, 1),
@@ -90,7 +86,7 @@ describe('prismaToDomainModel', () => {
                     },
                     {
                         createdAt: new Date(21, 1, 1),
-                        submitInfo: undefined,
+                        submitInfo: null,
                     },
                 ],
                 testDescription: 'latest revision has been submitted',
@@ -120,7 +116,7 @@ describe('prismaToDomainModel', () => {
                     },
                     {
                         createdAt: new Date(21, 3, 1),
-                        submitInfo: undefined,
+                        submitInfo: null,
                     },
                     {
                         createdAt: new Date(21, 1, 1),

@@ -250,7 +250,7 @@ describe('unlockContract', () => {
             })
         )
 
-        // Connect draft contract to submitted rate
+        // Connect draft contract to draft rate
         must(
             await updateDraftContract(
                 client,

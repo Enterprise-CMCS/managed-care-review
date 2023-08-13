@@ -1,8 +1,8 @@
-import { ContractTable, Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
+import { includeDraftRates } from './prismaDraftContractHelpers'
 import {
-    ContractRevisionTableWithFormData,
-    includeUpdateInfo,
-    RateOnContractHistory,
+    includeContractFormData,
+    includeRateFormData,
 } from './prismaSharedContractRateHelpers'
 
 // Generated Types
@@ -14,45 +14,16 @@ const includeFullContract = {
             createdAt: 'asc',
         },
         include: {
-            submitInfo: includeUpdateInfo,
-            unlockInfo: includeUpdateInfo,
-            stateContacts: true,
-            contractDocuments: true,
-            supportingDocuments: true,
+            ...includeContractFormData,
 
             draftRates: {
-                include: {
-                    revisions: {
-                        include: {
-                            rateDocuments: true,
-                            supportingDocuments: true,
-                            certifyingActuaryContacts: true,
-                            addtlActuaryContacts: true,
-                            submitInfo: includeUpdateInfo,
-                            unlockInfo: includeUpdateInfo,
-                        },
-                        take: 1,
-                        where: {
-                            submitInfoID: { not: null },
-                        },
-                        orderBy: {
-                            createdAt: 'desc',
-                        },
-                    },
-                },
+                include: includeDraftRates,
             },
 
             rateRevisions: {
                 include: {
                     rateRevision: {
-                        include: {
-                            rateDocuments: true,
-                            supportingDocuments: true,
-                            certifyingActuaryContacts: true,
-                            addtlActuaryContacts: true,
-                            submitInfo: includeUpdateInfo,
-                            unlockInfo: includeUpdateInfo,
-                        },
+                        include: includeRateFormData,
                     },
                 },
                 orderBy: {
@@ -71,18 +42,8 @@ type ContractTableFullPayload = Prisma.ContractTableGetPayload<{
     include: typeof includeFullContract
 }>
 
-type ContractRevisionTableWithRates = ContractRevisionTableWithFormData & {
-    rateRevisions: RateOnContractHistory[]
-}
-
-type ContractTableWithRelations = ContractTable & {
-    revisions: ContractRevisionTableWithRates[]
-}
+type ContractRevisionTableWithRates = ContractTableFullPayload['revisions'][0]
 
 export { includeFullContract }
 
-export type {
-    ContractTableWithRelations,
-    ContractRevisionTableWithRates,
-    ContractTableFullPayload,
-}
+export type { ContractRevisionTableWithRates, ContractTableFullPayload }

@@ -18,7 +18,7 @@ describe('insertContract', () => {
         )
 
         // Expect a single contract revision
-        expect(draftContract.revisions).toHaveLength(1)
+        expect(draftContract.revisions).toHaveLength(0)
 
         // Expect draft contract to contain expected data.
         expect(draftContract).toEqual(
@@ -27,18 +27,17 @@ describe('insertContract', () => {
                 stateCode: 'MN',
                 status: 'DRAFT',
                 stateNumber: expect.any(Number),
-                revisions: expect.arrayContaining([
-                    expect.objectContaining({
-                        formData: expect.objectContaining({
-                            submissionType: 'CONTRACT_AND_RATES',
-                            submissionDescription: 'Contract 1.0',
-                            contractType: 'BASE',
-                            programIDs: ['PMAP'],
-                            populationCovered: 'MEDICAID',
-                            riskBasedContract: false,
-                        }),
+                draftRevision: expect.objectContaining({
+                    formData: expect.objectContaining({
+                        submissionType: 'CONTRACT_AND_RATES',
+                        submissionDescription: 'Contract 1.0',
+                        contractType: 'BASE',
+                        programIDs: ['PMAP'],
+                        populationCovered: 'MEDICAID',
+                        riskBasedContract: false,
                     }),
-                ]),
+                }),
+                revisions: [],
             })
         )
     })

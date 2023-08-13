@@ -2,20 +2,19 @@ import {
     ContractType,
     contractSchema,
     ContractRevisionWithRatesType,
+    ContractRevisionType,
 } from '../../domain-models/contractAndRates'
 import { draftContractRevToDomainModel } from './prismaDraftContractHelpers'
 import {
     contractFormDataToDomainModel,
     convertUpdateInfoToDomainModel,
-    getContractStatus,
-    RateRevisionTableWithFormData,
     ratesRevisionsToDomainModel,
+    RateRevisionTableWithFormData,
     UpdateInfoTableWithUpdater,
+    getContractStatus,
+    ContractRevisionTableWithFormData,
 } from './prismaSharedContractRateHelpers'
-import {
-    ContractTableFullPayload,
-    ContractRevisionTableWithRates,
-} from './prismaSubmittedContractHelpers'
+import { ContractTableFullPayload } from './prismaSubmittedContractHelpers'
 
 // parseContractWithHistory returns a ContractType with a full set of
 // ContractRevisions in reverse chronological order. Each revision is a change to this
@@ -47,28 +46,45 @@ function parseContractWithHistory(
 // ContractRevisionSet is for the internal building of individual revisions
 // we convert them into ContractRevisions to return them
 interface ContractRevisionSet {
-    contractRev: ContractRevisionTableWithRates
+    contractRev: ContractRevisionTableWithFormData
     submitInfo: UpdateInfoTableWithUpdater
     unlockInfo: UpdateInfoTableWithUpdater | undefined
     rateRevisions: RateRevisionTableWithFormData[]
 }
 
-function contractRevToDomainModel(
+function contractSetsToDomainModel(
     revisions: ContractRevisionSet[]
 ): ContractRevisionWithRatesType[] {
     const contractRevisions = revisions.map((entry) => ({
-        id: entry.contractRev.id,
-        submitInfo: convertUpdateInfoToDomainModel(entry.submitInfo),
-        unlockInfo: entry.unlockInfo
-            ? convertUpdateInfoToDomainModel(entry.unlockInfo)
-            : undefined,
-        createdAt: entry.contractRev.createdAt,
-        updatedAt: entry.contractRev.updatedAt,
-        formData: contractFormDataToDomainModel(entry.contractRev),
+        ...contractRevisionToDomainModel(entry.contractRev),
         rateRevisions: ratesRevisionsToDomainModel(entry.rateRevisions),
+
+        // override this contractRevisions's update infos with the one that caused this revision to be created.
+        submitInfo: convertUpdateInfoToDomainModel(entry.submitInfo),
+        unlockInfo: convertUpdateInfoToDomainModel(entry.unlockInfo),
     }))
 
     return contractRevisions
+}
+
+function contractRevisionToDomainModel(
+    revision: ContractRevisionTableWithFormData
+): ContractRevisionType {
+    return {
+        id: revision.id,
+        createdAt: revision.createdAt,
+        updatedAt: revision.updatedAt,
+        submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
+        unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
+
+        formData: contractFormDataToDomainModel(revision),
+    }
+}
+
+function contractRevisionsToDomainModels(
+    contractRevisions: ContractRevisionTableWithFormData[]
+): ContractRevisionType[] {
+    return contractRevisions.map((crev) => contractRevisionToDomainModel(crev))
 }
 
 // contractWithHistoryToDomainModel constructs a history for this particular contract including changes to all of its
@@ -155,7 +171,7 @@ function contractWithHistoryToDomainModel(
         }
     }
 
-    const revisions = contractRevToDomainModel(allRevisionSets).reverse()
+    const revisions = contractSetsToDomainModel(allRevisionSets).reverse()
 
     return {
         id: contract.id,
@@ -167,4 +183,8 @@ function contractWithHistoryToDomainModel(
     }
 }
 
-export { parseContractWithHistory }
+export {
+    parseContractWithHistory,
+    contractRevisionToDomainModel,
+    contractRevisionsToDomainModels,
+}
