@@ -637,7 +637,7 @@ describe('findContract', () => {
             )
         )
 
-        // Unlock A, but don't resubmit it yet.
+        // Unlock contract A, but don't resubmit it yet.
         must(
             await unlockContract(
                 client,
@@ -646,6 +646,17 @@ describe('findContract', () => {
                 'unlock A Open'
             )
         )
+
+        // Draft should pull revision 2.0 out
+        const draftPreRateUnlock = must(
+            await findContractWithHistory(client, contractA.id)
+        )
+        expect(draftPreRateUnlock.draftRevision).toBeDefined()
+        expect(
+            draftPreRateUnlock.draftRevision?.rateRevisions.map(
+                (rr) => rr.formData.rateCertificationName
+            )
+        ).toEqual(['onepoint0', 'twopointo'])
 
         // unlock and submit second rate rev
         must(await unlockRate(client, rate2.id, cmsUser.id, 'unlock for 2.1'))
@@ -656,9 +667,33 @@ describe('findContract', () => {
                 contractIDs: [contractA.id],
             })
         )
+
+        // Draft should now pull draft revision 2.1 out, even though its unsubmitted
+        const draftPreRateSubmit = must(
+            await findContractWithHistory(client, contractA.id)
+        )
+        expect(draftPreRateSubmit.draftRevision).toBeDefined()
+        expect(
+            draftPreRateSubmit.draftRevision?.rateRevisions.map(
+                (rr) => rr.formData.rateCertificationName
+            )
+        ).toEqual(['onepoint0', 'twopointone'])
+
+        // Submit Rate 2.1
         must(await submitRate(client, rate2.id, stateUser.id, '2.1 update'))
 
-        // submit A1, now, should show up as a single new rev and have the latest rates
+        // raft should still pull revision 2.1 out
+        const draftPostRateSubmit = must(
+            await findContractWithHistory(client, contractA.id)
+        )
+        expect(draftPostRateSubmit.draftRevision).toBeDefined()
+        expect(
+            draftPostRateSubmit.draftRevision?.rateRevisions.map(
+                (rr) => rr.formData.rateCertificationName
+            )
+        ).toEqual(['onepoint0', 'twopointone'])
+
+        // submit contract A1, now, should show up as a single new rev and have the latest rates
         must(
             await submitContract(
                 client,

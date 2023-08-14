@@ -164,16 +164,6 @@ async function updateDraftContract(
                     })),
                 },
             },
-            include: {
-                contractDocuments: true,
-                supportingDocuments: true,
-                stateContacts: true,
-                rateRevisions: {
-                    include: {
-                        rateRevision: true,
-                    },
-                },
-            },
         })
 
         return findContractWithHistory(client, contractID)

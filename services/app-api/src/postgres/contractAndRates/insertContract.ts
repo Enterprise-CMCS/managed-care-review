@@ -5,8 +5,8 @@ import type {
     ContractType as PrismaContractType,
 } from '@prisma/client'
 import type { ContractType } from '../../domain-models/contractAndRates'
-import { parseDraftContract } from './parseDraftContract'
-import { includeDraftContractRevisionsWithDraftRates } from './prismaDraftContractHelpers'
+import { parseContractWithHistory } from './parseContractWithHistory'
+import { includeFullContract } from './prismaSubmittedContractHelpers'
 
 type InsertContractArgsType = {
     stateCode: string
@@ -51,14 +51,10 @@ async function insertDraftContract(
                         },
                     },
                 },
-                include: {
-                    revisions: {
-                        include: includeDraftContractRevisionsWithDraftRates,
-                    },
-                },
+                include: includeFullContract,
             })
 
-            return parseDraftContract(contract)
+            return parseContractWithHistory(contract)
         })
     } catch (err) {
         console.error('CONTRACT PRISMA ERR', err)

@@ -1,8 +1,8 @@
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { ContractType } from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../storeError'
-import { includeUpdateInfo } from './prismaSharedContractRateHelpers'
 import { parseContractWithHistory } from './parseContractWithHistory'
+import { includeFullContract } from './prismaSubmittedContractHelpers'
 
 // findContractWithHistory returns a ContractType with a full set of
 // ContractRevisions in reverse chronological order. Each revision is a change to this
@@ -17,38 +17,7 @@ async function findContractWithHistory(
             where: {
                 id: contractID,
             },
-            include: {
-                revisions: {
-                    orderBy: {
-                        createdAt: 'asc',
-                    },
-                    include: {
-                        submitInfo: includeUpdateInfo,
-                        unlockInfo: includeUpdateInfo,
-                        rateRevisions: {
-                            include: {
-                                rateRevision: {
-                                    include: {
-                                        rateDocuments: true,
-                                        supportingDocuments: true,
-                                        certifyingActuaryContacts: true,
-                                        addtlActuaryContacts: true,
-                                        submitInfo: includeUpdateInfo,
-                                        unlockInfo: includeUpdateInfo,
-                                        draftContracts: true,
-                                    },
-                                },
-                            },
-                            orderBy: {
-                                validAfter: 'asc',
-                            },
-                        },
-                        stateContacts: true,
-                        contractDocuments: true,
-                        supportingDocuments: true,
-                    },
-                },
-            },
+            include: includeFullContract,
         })
 
         if (!contract) {
