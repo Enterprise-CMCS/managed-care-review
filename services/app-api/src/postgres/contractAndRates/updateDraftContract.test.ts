@@ -6,6 +6,11 @@ import { PrismaClientValidationError } from '@prisma/client/runtime/library'
 import type { ContractType } from '@prisma/client'
 
 describe('updateDraftContract', () => {
+    afterEach( () => {
+        jest.clearAllMocks()
+    })
+
+
     it('updates drafts correctly', async () => {
         const client = await sharedTestPrismaClient()
 
@@ -30,13 +35,15 @@ describe('updateDraftContract', () => {
             })
         )
 
-        expect(draft.revisions).toHaveLength(1)
-        expect(draft?.revisions[0]?.formData.submissionDescription).toBe(
+        expect(draft.draftRevision).toBeDefined()
+        expect(draft.draftRevision?.formData.submissionDescription).toBe(
             'something else'
         )
     })
 
     it('returns an error when invalid form data for contract type provided', async () => {
+      jest.spyOn(console, 'error').mockImplementation()
+
         const client = await sharedTestPrismaClient()
         const draftContractInsert = createInsertContractData({})
         const newRate = must(
@@ -57,6 +64,8 @@ describe('updateDraftContract', () => {
     })
 
     it('returns an error when invalid contract ID provided', async () => {
+        jest.spyOn(console, 'error').mockImplementation()
+
         const client = await sharedTestPrismaClient()
 
         const draftContract = await updateDraftContract(client, {

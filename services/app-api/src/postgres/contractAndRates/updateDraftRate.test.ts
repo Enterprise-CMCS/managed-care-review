@@ -6,6 +6,10 @@ import { PrismaClientValidationError } from '@prisma/client/runtime/library'
 import type { RateType } from '@prisma/client'
 
 describe('updateDraftRate', () => {
+    afterEach( () => {
+        jest.clearAllMocks()
+    })
+
     it('updates drafts correctly', async () => {
         const client = await sharedTestPrismaClient()
 
@@ -27,14 +31,15 @@ describe('updateDraftRate', () => {
             })
         )
 
-        expect(draft.revisions).toHaveLength(1)
-        expect(draft?.revisions[0]?.formData.rateCertificationName).toBe(
+        expect(draft.draftRevision).toBeDefined()
+        expect(draft.draftRevision?.formData.rateCertificationName).toBe(
             'something else'
         )
     })
 
     it('returns an error when invalid form data for rate type provided', async () => {
-        const client = await sharedTestPrismaClient()
+        jest.spyOn(console, 'error').mockImplementation()
+          const client = await sharedTestPrismaClient()
         const newRate = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
@@ -55,6 +60,7 @@ describe('updateDraftRate', () => {
     })
 
     it('returns an error when invalid rate ID provided', async () => {
+        jest.spyOn(console, 'error').mockImplementation()
         const client = await sharedTestPrismaClient()
 
         const draftRate = await updateDraftRate(client, {
