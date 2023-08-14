@@ -106,8 +106,9 @@ resources:
       - !Equals ['${sls:stage}', 'mtdbvm']
   Mappings:
     Logins:
-      mojo:
-        sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDaR+UVq61k14jcuSFfoCfTxvB1IyhU3IQFp4OjpiN4fYMBjE9USeNoHon2ux8VTvL0nRc7Zn4g9HemxiDjdawUxh2oJ8GOTsiFTEWic2nf90SnbjBMn1OZELvMiZzoYDjQFvEp+AgETBA5nhrbHyxWQWIBa7A+XqiqnX0lcZ1p+x8sLIl4F0e583lJeuPQPVkpCicf2GDdtG1TnPxltqJgGaeVSONivpxeVofJwG4DCXy1b1xSo1NG0gzy9BWFJwOWKmZAk6nYq+rcxZg+TgU1x5WJ6z8/CS0PMSoTMRRIejm734PSmkGCU+WkR139Dl8o3DvQh/VQD71fxw30aONG98PSBJEUd5IouuiPPNYGP+fuDWgCBkaoA6JKlSVtbneNt1Qkm10FFHqExqzGWaSDeUCh6da3WG1BW4KZcC3MQ8CTEG47LFqUG5TvhklhiAAJH7cGF9W9SU1Beq2A6Wx1R/yGvgH/7U6X0/QfJi1ljY32pPzP2S+gzzOVGJgrMz3qRRgNvcY5k8EMbIuTK2yanFFHuVaWQq/zZW1T376oyHMfWdBB9WAtIKwpCgA5kYUu0XCo3XM0fWibZFIa/cEBNSKH1gEFKCBXolsc2+c4iZtdbG4YCHLgzOOqklERMEeK5dXq9Rz7UjoE91UVIyO2/d+mXmiVDRgtUsiQ34Sxyw== mojo.talantikite@gmail.com'
+      keys:
+        sshPublicKeys: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDaR+UVq61k14jcuSFfoCfTxvB1IyhU3IQFp4OjpiN4fYMBjE9USeNoHon2ux8VTvL0nRc7Zn4g9HemxiDjdawUxh2oJ8GOTsiFTEWic2nf90SnbjBMn1OZELvMiZzoYDjQFvEp+AgETBA5nhrbHyxWQWIBa7A+XqiqnX0lcZ1p+x8sLIl4F0e583lJeuPQPVkpCicf2GDdtG1TnPxltqJgGaeVSONivpxeVofJwG4DCXy1b1xSo1NG0gzy9BWFJwOWKmZAk6nYq+rcxZg+TgU1x5WJ6z8/CS0PMSoTMRRIejm734PSmkGCU+WkR139Dl8o3DvQh/VQD71fxw30aONG98PSBJEUd5IouuiPPNYGP+fuDWgCBkaoA6JKlSVtbneNt1Qkm10FFHqExqzGWaSDeUCh6da3WG1BW4KZcC3MQ8CTEG47LFqUG5TvhklhiAAJH7cGF9W9SU1Beq2A6Wx1R/yGvgH/7U6X0/QfJi1ljY32pPzP2S+gzzOVGJgrMz3qRRgNvcY5k8EMbIuTK2yanFFHuVaWQq/zZW1T376oyHMfWdBB9WAtIKwpCgA5kYUu0XCo3XM0fWibZFIa/cEBNSKH1gEFKCBXolsc2+c4iZtdbG4YCHLgzOOqklERMEeK5dXq9Rz7UjoE91UVIyO2/d+mXmiVDRgtUsiQ34Sxyw== mojo.talantikite@gmail.com \
+        ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDDeoQdyqwEhJJVziFKhftXMg0XoZq5yJVxqPkcTmRuDse91YyFirB2mKYdKcH5JSvoDRNcgmHlBAYhpA6hwqaQhjgnwwlFeR1C1W3WZoczOmtqoU5sC20cMYr1CJOJWvP3C1MwbJRDGNSLpi+HcIwEkGDbwxQSHy1/1eLU0CFdYgtFS/g3TYg61M75rQadJAZddFY9UVIxC7AIemdR1GBxo6NXtnuSnutNHAAYTWUYxwL2V/Tz59UmDJIN2DAC6TIH8ndDhloyTSJgoeLEyYm7V4B94CY1+JNRwk0SPvg5xYMyAoKAiLKCDq3TA3DnFo4utgxTv2vNnKREiRb3cZRAtnbv50Oz7WqH5nGPad3uUsQKWm9hCuBg9J/Q8620UE7pA/FymFsZBxoYFNt0yJJPZcdHgRgYqs7m3fdEOHz9bgRHQBPP9cORtsx/JcJk7QCBvYRFatQiQm5Whe0p5tJfowwyl4NNEqaRnQhCupXipxnDlh8esxHNUlrioLzTUSs= mojo@test'
 
   Resources:
     # VPC endpoint for rotation lambda
@@ -177,7 +178,7 @@ resources:
           config:
             files:
               '/home/ubuntu/.ssh/authorized_keys':
-                content: !FindInMap [Logins, 'mojo', 'sshPublicKey']
+                content: !FindInMap [Logins, 'keys', 'sshPublicKeys']
                 mode: '000600'
                 owner: 'ubuntu'
                 group: 'ubuntu'
@@ -196,7 +197,8 @@ resources:
         UserData:
           Fn::Base64: !Sub |
             #!/bin/bash
-            apt update && apt install unzip postgresql postgresql-contrib -y
+            apt update && apt install unzip postgresql postgresql-contrib build-essential python3-pip -y
+            pip3 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip
             ./aws/install
 
@@ -239,6 +241,11 @@ resources:
             sed -i "s,STAGE,${self:custom.stage},g" /usr/local/bin/vm-shutdown.sh
             systemctl start notify-slack
             systemctl enable notify-slack
+
+            /usr/local/bin/cfn-init -v \
+                  --stack ${AWS::StackName} \
+                  --resource PostgresVM \
+                  --region ${AWS::Region}
 
     PgVMIAMRole:
       Type: AWS::IAM::Role
