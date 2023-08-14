@@ -5,7 +5,7 @@ import {
     createDraftContractData,
 } from '../../testHelpers/'
 import { parseContractWithHistory } from './parseContractWithHistory'
-import { ContractTableFullPayload } from './prismaSubmittedContractHelpers'
+import type { ContractTableFullPayload } from './prismaSubmittedContractHelpers'
 
 describe('parseDomainData', () => {
     describe('parseDraftContract', () => {

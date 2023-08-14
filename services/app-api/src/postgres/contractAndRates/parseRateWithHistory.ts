@@ -50,11 +50,11 @@ function parseRateWithHistory(rate: RateTableFullPayload): RateType | Error {
     const rateRevisions = rate.revisions
     let draftRevision: RateRevisionWithContractsType | undefined = undefined
     for (const rateRev of rateRevisions) {
-        // no drafts allowed
+        // We have already set the draft revision aside, all ordered revisions here should be submitted
         if (!rateRev.submitInfo) {
             if (draftRevision) {
                 return new Error(
-                    'PROGRAMMING ERROR: a contract may not have multiple drafts simultaneously. ID: ' +
+                    'PROGRAMMING ERROR: a rate may not have multiple drafts simultaneously. ID: ' +
                         rate.id
                 )
             }

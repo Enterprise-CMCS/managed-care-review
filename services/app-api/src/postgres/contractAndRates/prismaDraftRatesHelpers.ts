@@ -1,15 +1,15 @@
-import { Prisma } from '@prisma/client'
-import {
+import type { Prisma } from '@prisma/client'
+import type {
     ContractRevisionType,
     RateRevisionWithContractsType,
 } from '../../domain-models/contractAndRates'
+import type { RateRevisionTableWithContracts } from './prismaSubmittedRateHelpers'
 import { contractRevisionToDomainModel } from './parseContractWithHistory'
 import {
     includeContractFormData,
     includeUpdateInfo,
     rateFormDataToDomainModel,
 } from './prismaSharedContractRateHelpers'
-import { RateRevisionTableWithContracts } from './prismaSubmittedRateHelpers'
 
 const includeDraftContracts = {
     revisions: {
