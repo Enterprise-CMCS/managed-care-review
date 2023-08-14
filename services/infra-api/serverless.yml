@@ -14,7 +14,7 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   wafExcludeRules:
     awsCommon:
-      - "SizeRestrictions_BODY"
+      - 'SizeRestrictions_BODY'
   nrLicenseKey: ${ssm:/configuration/nr_license_key}
   nrMetricStreamName: 'NewRelic-Metric-Stream'
   nrFirehoseStreamName: 'NewRelic-Delivery-Stream'
