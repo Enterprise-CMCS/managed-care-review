@@ -1,5 +1,5 @@
-import { PrismaTransactionType } from '../prismaTypes'
-import { ContractType } from '../../domain-models/contractAndRates'
+import type { PrismaTransactionType } from '../prismaTypes'
+import type { ContractType } from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../storeError'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaSubmittedContractHelpers'

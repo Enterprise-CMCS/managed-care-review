@@ -1,1 +1,2 @@
-export { APISecrets, FetchSecrets, getConnectionURL } from './secrets'
+export type { APISecrets } from './secrets'
+export { FetchSecrets, getConnectionURL } from './secrets'

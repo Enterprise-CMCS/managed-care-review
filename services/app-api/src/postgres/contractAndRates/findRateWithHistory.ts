@@ -1,8 +1,8 @@
-import { PrismaTransactionType } from '../prismaTypes'
-import { RateType } from '../../domain-models/contractAndRates'
+import type { PrismaTransactionType } from '../prismaTypes'
+import type { RateType } from '../../domain-models/contractAndRates'
+import { NotFoundError } from '../storeError'
 import { includeFullRate } from './prismaSubmittedRateHelpers'
 import { parseRateWithHistory } from './parseRateWithHistory'
-import { NotFoundError } from '../storeError'
 
 async function findRateWithHistory(
     client: PrismaTransactionType,

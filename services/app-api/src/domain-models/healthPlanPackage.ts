@@ -1,11 +1,11 @@
-import {
+import type {
     HealthPlanRevisionType,
     HealthPlanPackageStatusType,
     HealthPlanPackageType,
 } from './HealthPlanPackageType'
 import { pruneDuplicateEmails } from '../emailer/formatters'
-import { ContractType } from './contractAndRates'
-import {
+import type { ContractType } from './contractAndRates'
+import type {
     SubmissionDocument,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'

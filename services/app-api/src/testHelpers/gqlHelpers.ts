@@ -8,37 +8,37 @@ import CREATE_QUESTION from 'app-graphql/src/mutations/createQuestion.graphql'
 import INDEX_QUESTIONS from 'app-graphql/src/queries/indexQuestions.graphql'
 import CREATE_QUESTION_RESPONSE from 'app-graphql/src/mutations/createQuestionResponse.graphql'
 import typeDefs from 'app-graphql/src/schema.graphql'
-import {
+import type {
     HealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
     StateCodeType,
 } from 'app-web/src/common-code/healthPlanFormDataType'
-import {
+import type {
     CreateQuestionInput,
     InsertQuestionResponseArgs,
     ProgramType,
 } from '../domain-models'
-import { Emailer, newLocalEmailer } from '../emailer'
-import {
+import type { Emailer } from '../emailer'
+import { newLocalEmailer } from '../emailer'
+import type {
     CreateHealthPlanPackageInput,
     HealthPlanPackage,
     CreateQuestionResponsePayload,
     CreateQuestionPayload,
     IndexQuestionsPayload,
 } from '../gen/gqlServer'
-import { Context } from '../handlers/apollo_gql'
-import { NewPostgresStore, Store } from '../postgres'
+import type { Context } from '../handlers/apollo_gql'
+import type { Store } from '../postgres'
+import { NewPostgresStore } from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { latestFormData } from './healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from './storeHelpers'
 import { domainToBase64 } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
-import {
-    newLocalEmailParameterStore,
-    EmailParameterStore,
-} from '../parameterStore'
+import type { EmailParameterStore } from '../parameterStore'
+import { newLocalEmailParameterStore } from '../parameterStore'
 import statePrograms from 'app-web/src/common-code/data/statePrograms.json'
 import { testLDService } from './launchDarklyHelpers'
-import { LDService } from '../launchDarkly/launchDarkly'
+import type { LDService } from '../launchDarkly/launchDarkly'
 import { insertUserToLocalAurora } from '../authn'
 import { testStateUser } from './userHelpers'
 

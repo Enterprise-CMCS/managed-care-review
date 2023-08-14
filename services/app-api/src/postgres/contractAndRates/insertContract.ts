@@ -1,10 +1,10 @@
-import {
+import type {
     PrismaClient,
     PopulationCoverageType,
     SubmissionType,
     ContractType as PrismaContractType,
 } from '@prisma/client'
-import { ContractType } from '../../domain-models/contractAndRates'
+import type { ContractType } from '../../domain-models/contractAndRates'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaSubmittedContractHelpers'
 

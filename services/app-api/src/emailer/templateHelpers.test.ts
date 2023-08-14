@@ -3,14 +3,14 @@ import {
     generateCMSReviewerEmails,
     handleAsCHIPSubmission,
 } from './templateHelpers'
-import { UnlockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { UnlockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 import {
     mockUnlockedContractAndRatesFormData,
     mockUnlockedContractOnlyFormData,
     testEmailConfig,
     testStateAnalystsEmails,
 } from '../testHelpers/emailerHelpers'
-import { EmailConfiguration, StateAnalystsEmails } from './emailer'
+import type { EmailConfiguration, StateAnalystsEmails } from './emailer'
 
 describe('templateHelpers', () => {
     const contractOnlyWithValidRateData: {

@@ -1,12 +1,13 @@
-import { PrismaClient } from '@prisma/client'
-import {
+import type { PrismaClient } from '@prisma/client'
+import type {
     CMSUserType,
     QuestionResponseType,
     Question,
     CreateQuestionInput,
     DivisionType,
 } from '../../domain-models'
-import { convertPrismaErrorToStoreError, StoreError } from '../storeError'
+import type { StoreError } from '../storeError'
+import { convertPrismaErrorToStoreError } from '../storeError'
 import { v4 as uuidv4 } from 'uuid'
 
 export async function insertQuestion(

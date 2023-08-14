@@ -1,5 +1,5 @@
-import { LDService } from '../launchDarkly/launchDarkly'
-import {
+import type { LDService } from '../launchDarkly/launchDarkly'
+import type {
     FeatureFlagLDConstant,
     FeatureFlagSettings,
 } from 'app-web/src/common-code/featureFlags'

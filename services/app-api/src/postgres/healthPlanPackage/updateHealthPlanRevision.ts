@@ -1,16 +1,11 @@
-import { HealthPlanRevisionTable, PrismaClient } from '@prisma/client'
-import { HealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import type { HealthPlanRevisionTable, PrismaClient } from '@prisma/client'
+import type { HealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { toProtoBuffer } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import { UpdateInfoType, HealthPlanPackageType } from '../../domain-models'
-import {
-    convertPrismaErrorToStoreError,
-    isStoreError,
-    StoreError,
-} from '../storeError'
-import {
-    convertToHealthPlanPackageType,
-    HealthPlanPackageWithRevisionsTable,
-} from './healthPlanPackageHelpers'
+import type { UpdateInfoType, HealthPlanPackageType } from '../../domain-models'
+import type { StoreError } from '../storeError'
+import { convertPrismaErrorToStoreError, isStoreError } from '../storeError'
+import type { HealthPlanPackageWithRevisionsTable } from './healthPlanPackageHelpers'
+import { convertToHealthPlanPackageType } from './healthPlanPackageHelpers'
 
 export async function updateRevisionWrapper(
     client: PrismaClient,

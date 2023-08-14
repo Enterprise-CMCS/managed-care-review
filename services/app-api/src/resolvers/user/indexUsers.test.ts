@@ -1,13 +1,10 @@
-import {
-    InsertUserArgsType,
-    isStoreError,
-    NewPostgresStore,
-} from '../../postgres'
+import type { InsertUserArgsType } from '../../postgres'
+import { isStoreError, NewPostgresStore } from '../../postgres'
 import INDEX_USERS from '../../../../app-graphql/src/queries/indexUsers.graphql'
 import { v4 as uuidv4 } from 'uuid'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { UserEdge, User } from '../../gen/gqlServer'
+import type { UserEdge, User } from '../../gen/gqlServer'
 import { assertAnError } from '../../testHelpers'
 import { testAdminUser, testCMSUser } from '../../testHelpers/userHelpers'
 

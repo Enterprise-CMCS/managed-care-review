@@ -1,10 +1,10 @@
-import {
+import type {
     ContractType as PrismaContractType,
     PopulationCoverageType,
     PrismaClient,
     SubmissionType,
 } from '@prisma/client'
-import { ContractType } from '../../domain-models/contractAndRates'
+import type { ContractType } from '../../domain-models/contractAndRates'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../storeError'
 

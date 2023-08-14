@@ -19,4 +19,4 @@ export type {
     ContractFormDataType,
 } from './contractTypes'
 
-export { ContractStatusType, UpdateInfoType } from './updateInfoType'
+export type { ContractStatusType, UpdateInfoType } from './updateInfoType'

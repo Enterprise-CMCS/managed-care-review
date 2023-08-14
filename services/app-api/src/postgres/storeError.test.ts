@@ -1,7 +1,7 @@
 /* eslint-disable jest/no-conditional-expect */
 import { v4 as uuidv4 } from 'uuid'
 import { PrismaClient } from '@prisma/client'
-import { UnlockedHealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
+import type { UnlockedHealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { toProtoBuffer } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
 import { convertPrismaErrorToStoreError } from './storeError'

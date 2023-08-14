@@ -1,10 +1,11 @@
-import { PrismaClient } from '@prisma/client'
-import {
+import type { PrismaClient } from '@prisma/client'
+import type {
     CMSUserType,
     Question,
     QuestionResponseType,
 } from '../../domain-models'
-import { convertPrismaErrorToStoreError, StoreError } from '../storeError'
+import type { StoreError } from '../storeError'
+import { convertPrismaErrorToStoreError } from '../storeError'
 
 export async function findAllQuestionsByHealthPlanPackage(
     client: PrismaClient,

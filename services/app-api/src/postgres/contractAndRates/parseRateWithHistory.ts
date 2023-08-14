@@ -1,18 +1,20 @@
-import {
+import type {
     RateRevisionWithContractsType,
     RateType,
 } from '../../domain-models/contractAndRates'
 import { contractRevisionsToDomainModels } from './parseContractWithHistory'
 import { draftRateRevToDomainModel } from './prismaDraftRatesHelpers'
-import {
+import type {
     ContractRevisionTableWithFormData,
-    convertUpdateInfoToDomainModel,
-    getContractStatus,
-    rateReivisionToDomainModel,
     RateRevisionTableWithFormData,
     UpdateInfoTableWithUpdater,
 } from './prismaSharedContractRateHelpers'
-import { RateTableFullPayload } from './prismaSubmittedRateHelpers'
+import {
+    convertUpdateInfoToDomainModel,
+    getContractStatus,
+    rateReivisionToDomainModel,
+} from './prismaSharedContractRateHelpers'
+import type { RateTableFullPayload } from './prismaSubmittedRateHelpers'
 
 // this is for the internal building of individual revisions
 // we convert them into RateRevisons to return them

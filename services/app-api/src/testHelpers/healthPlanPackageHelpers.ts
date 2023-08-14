@@ -1,6 +1,6 @@
-import { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
+import type { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import { HealthPlanPackage } from '../gen/gqlServer'
+import type { HealthPlanPackage } from '../gen/gqlServer'
 
 // returns the latest form data for this package, will throw an error if unwrapping fails
 // hence, this function is meant for making clean tests, not for business logic.

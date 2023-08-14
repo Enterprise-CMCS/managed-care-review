@@ -1,9 +1,9 @@
-import { InsertContractArgsType } from '../../postgres/contractAndRates/insertContract'
-import { State } from '@prisma/client'
+import type { InsertContractArgsType } from '../../postgres/contractAndRates/insertContract'
+import type { State } from '@prisma/client'
 import { must } from '../errorHelpers'
-import { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
-import {
+import type {
     ContractRevisionTableWithRates,
     ContractTableFullPayload,
 } from '../../postgres/contractAndRates/prismaSubmittedContractHelpers'

@@ -1,6 +1,6 @@
-import { Prisma, UpdateInfoTable } from '@prisma/client'
-import { DocumentCategoryType } from 'app-web/src/common-code/healthPlanFormDataType'
-import {
+import type { Prisma, UpdateInfoTable } from '@prisma/client'
+import type { DocumentCategoryType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type {
     ContractFormDataType,
     RateFormDataType,
     RateRevisionType,

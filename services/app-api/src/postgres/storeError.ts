@@ -98,9 +98,5 @@ class NotFoundError extends Error {
     }
 }
 
-export {
-    NotFoundError,
-    StoreError,
-    isStoreError,
-    convertPrismaErrorToStoreError,
-}
+export type { StoreError }
+export { NotFoundError, isStoreError, convertPrismaErrorToStoreError }

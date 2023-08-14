@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { contractSchema } from './contractTypes'
+import type { contractSchema } from './contractTypes'
 
 const updateInfoSchema = z.object({
     updatedAt: z.date(),

@@ -1,11 +1,10 @@
-import {
-    SESClient,
+import type {
     SESServiceException,
     SendEmailRequest,
     SendEmailResponse,
-    SendEmailCommand,
 } from '@aws-sdk/client-ses'
-import { EmailData } from './'
+import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses'
+import type { EmailData } from './'
 
 const ses = new SESClient({ region: 'us-east-1' })
 

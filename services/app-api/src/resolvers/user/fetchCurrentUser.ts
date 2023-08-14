@@ -1,4 +1,4 @@
-import { QueryResolvers } from '../../gen/gqlServer'
+import type { QueryResolvers } from '../../gen/gqlServer'
 import { logSuccess } from '../../logger'
 import {
     setResolverDetailsOnActiveSpan,

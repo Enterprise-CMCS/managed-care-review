@@ -1,7 +1,9 @@
-import { PrismaClient } from '@prisma/client'
-import { StoreError, convertPrismaErrorToStoreError } from '../storeError'
-import { UserType, toDomainUser } from '../../domain-models'
-import { InsertUserArgsType } from './insertUser'
+import type { PrismaClient } from '@prisma/client'
+import type { StoreError } from '../storeError'
+import { convertPrismaErrorToStoreError } from '../storeError'
+import type { UserType } from '../../domain-models'
+import { toDomainUser } from '../../domain-models'
+import type { InsertUserArgsType } from './insertUser'
 
 export async function insertManyUsers(
     client: PrismaClient,

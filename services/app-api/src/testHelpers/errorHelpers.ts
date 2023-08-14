@@ -1,5 +1,6 @@
 // For use in TESTS only. Throws a returned error
-import { isStoreError, StoreError } from '../postgres'
+import type { StoreError } from '../postgres'
+import { isStoreError } from '../postgres'
 
 function must<T>(maybeErr: T | Error | StoreError): T {
     if (maybeErr instanceof Error) {

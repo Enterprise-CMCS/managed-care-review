@@ -1,26 +1,26 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import {
+import type {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { toDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import type { UpdateInfoType, HealthPlanPackageType } from '../../domain-models'
 import {
     isCMSUser,
-    UpdateInfoType,
-    HealthPlanPackageType,
     packageStatus,
     packageSubmitters,
 } from '../../domain-models'
-import { Emailer } from '../../emailer'
-import { MutationResolvers } from '../../gen/gqlServer'
+import type { Emailer } from '../../emailer'
+import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import { isStoreError, Store } from '../../postgres'
+import type { Store } from '../../postgres'
+import { isStoreError } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import { EmailParameterStore } from '../../parameterStore'
+import type { EmailParameterStore } from '../../parameterStore'
 import { GraphQLError } from 'graphql'
 
 // unlock is a state machine transforming a LockedFormData and turning it into UnlockedFormData

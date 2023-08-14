@@ -9,7 +9,10 @@ import {
     submitTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import { todaysDate } from '../../testHelpers/dateHelpers'
-import { HealthPlanPackageEdge, HealthPlanPackage } from '../../gen/gqlServer'
+import type {
+    HealthPlanPackageEdge,
+    HealthPlanPackage,
+} from '../../gen/gqlServer'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 

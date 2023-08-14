@@ -4,10 +4,10 @@ import {
     mockMNState,
 } from '../../testHelpers/emailerHelpers'
 import { unlockPackageStateEmail } from './index'
+import type { UnlockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 import {
     generateRateName,
     packageName,
-    UnlockedHealthPlanFormDataType,
 } from 'app-web/src/common-code/healthPlanFormDataType'
 
 const unlockData = {

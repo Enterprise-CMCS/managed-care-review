@@ -3,7 +3,7 @@ import {
     packageSubmittedAt,
     packageSubmitters,
 } from './healthPlanPackage'
-import {
+import type {
     HealthPlanPackageStatusType,
     HealthPlanPackageType,
 } from './HealthPlanPackageType'

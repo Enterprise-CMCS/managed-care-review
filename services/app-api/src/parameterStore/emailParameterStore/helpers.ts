@@ -1,4 +1,4 @@
-import { ParameterType } from '../awsParameterStore'
+import type { ParameterType } from '../awsParameterStore'
 
 const validateAndReturnValueArray = (
     storeResponse: ParameterType,

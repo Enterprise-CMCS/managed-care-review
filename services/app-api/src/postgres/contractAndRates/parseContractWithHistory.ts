@@ -1,20 +1,22 @@
-import {
+import type {
     ContractType,
-    contractSchema,
     ContractRevisionWithRatesType,
     ContractRevisionType,
 } from '../../domain-models/contractAndRates'
+import { contractSchema } from '../../domain-models/contractAndRates'
 import { draftContractRevToDomainModel } from './prismaDraftContractHelpers'
+import type {
+    RateRevisionTableWithFormData,
+    ContractRevisionTableWithFormData,
+    UpdateInfoTableWithUpdater,
+} from './prismaSharedContractRateHelpers'
 import {
     contractFormDataToDomainModel,
     convertUpdateInfoToDomainModel,
     ratesRevisionsToDomainModel,
-    RateRevisionTableWithFormData,
-    UpdateInfoTableWithUpdater,
     getContractStatus,
-    ContractRevisionTableWithFormData,
 } from './prismaSharedContractRateHelpers'
-import { ContractTableFullPayload } from './prismaSubmittedContractHelpers'
+import type { ContractTableFullPayload } from './prismaSubmittedContractHelpers'
 
 // parseContractWithHistory returns a ContractType with a full set of
 // ContractRevisions in reverse chronological order. Each revision is a change to this

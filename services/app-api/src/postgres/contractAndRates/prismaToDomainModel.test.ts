@@ -4,7 +4,7 @@ import {
     contractFormDataToDomainModel,
     getContractStatus,
 } from './prismaSharedContractRateHelpers'
-import { ContractRevisionTableWithRates } from './prismaSubmittedContractHelpers'
+import type { ContractRevisionTableWithRates } from './prismaSubmittedContractHelpers'
 
 describe('prismaToDomainModel', () => {
     describe('contractFormDataToDomainModel', () => {

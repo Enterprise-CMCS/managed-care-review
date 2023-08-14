@@ -1,12 +1,14 @@
-import {
-    featureFlagKeys,
-    featureFlags,
+import type {
     FlagValue,
     FeatureFlagLDConstant,
     FeatureFlagSettings,
 } from '../../../app-web/src/common-code/featureFlags'
-import { LDClient } from '@launchdarkly/node-server-sdk'
-import { Context } from '../handlers/apollo_gql'
+import {
+    featureFlagKeys,
+    featureFlags,
+} from '../../../app-web/src/common-code/featureFlags'
+import type { LDClient } from '@launchdarkly/node-server-sdk'
+import type { Context } from '../handlers/apollo_gql'
 import { logError } from '../logger'
 import { setErrorAttributesOnActiveSpan } from '../resolvers/attributeHelper'
 
