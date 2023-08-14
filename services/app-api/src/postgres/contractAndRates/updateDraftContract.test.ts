@@ -3,22 +3,25 @@ import { insertDraftContract } from './insertContract'
 import { createInsertContractData, must } from '../../testHelpers'
 import { updateDraftContract } from './updateDraftContract'
 import { PrismaClientValidationError } from '@prisma/client/runtime/library'
-import { ContractType} from '@prisma/client'
+import type { ContractType } from '@prisma/client'
 
 describe('updateDraftContract', () => {
     it('updates drafts correctly', async () => {
         const client = await sharedTestPrismaClient()
 
-        const draftContractForm1 =  createInsertContractData({})
+        const draftContractForm1 = createInsertContractData({})
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const {stateCode, ...draftContractFormData} = draftContractForm1
+        const { stateCode, ...draftContractFormData } = draftContractForm1
         const contract = must(
             await insertDraftContract(client, {
                 ...draftContractForm1,
             })
         )
 
-        const draftContractForm2 = { ...draftContractFormData, submissionDescription: 'something else'}
+        const draftContractForm2 = {
+            ...draftContractFormData,
+            submissionDescription: 'something else',
+        }
         const draft = must(
             await updateDraftContract(client, {
                 contractID: contract.id,
@@ -35,7 +38,7 @@ describe('updateDraftContract', () => {
 
     it('returns an error when invalid form data for contract type provided', async () => {
         const client = await sharedTestPrismaClient()
-        const draftContractInsert =  createInsertContractData({})
+        const draftContractInsert = createInsertContractData({})
         const newRate = must(
             await insertDraftContract(client, draftContractInsert)
         )

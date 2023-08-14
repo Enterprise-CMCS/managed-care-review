@@ -1,12 +1,12 @@
+import type { PutObjectCommandInput } from '@aws-sdk/client-s3'
 import {
     S3Client,
     GetObjectCommand,
     HeadObjectCommand,
-    PutObjectCommandInput,
 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { Readable, Writable, PassThrough } from 'stream'
-import { APIGatewayProxyHandler } from 'aws-lambda'
+import type { APIGatewayProxyHandler } from 'aws-lambda'
 import Archiver from 'archiver'
 
 const s3 = new S3Client({ region: 'us-east-1' })

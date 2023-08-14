@@ -1,23 +1,25 @@
-import { InsertContractArgsType } from '../../postgres/contractAndRates/insertContract'
-import { State } from '@prisma/client'
+import type { InsertContractArgsType } from '../../postgres/contractAndRates/insertContract'
+import type { State } from '@prisma/client'
 import { must } from '../errorHelpers'
-import { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
-import {
+import type {
     DraftContractRevisionTableWithRelations,
     DraftContractTableWithRelations,
 } from '../../postgres/contractAndRates/prismaDraftContractHelpers'
-import {
+import type {
     ContractRevisionTableWithRates,
     ContractTableWithRelations,
 } from '../../postgres/contractAndRates/prismaSubmittedContractHelpers'
-import { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
-import { ContractFormEditable } from '../../postgres/contractAndRates/updateDraftContract'
+import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { ContractFormEditable } from '../../postgres/contractAndRates/updateDraftContract'
 
-
-const createInsertContractData = ({stateCode, ...formData}:{
+const createInsertContractData = ({
+    stateCode,
+    ...formData
+}: {
     stateCode?: StateCodeType
-}  & Partial<ContractFormEditable>): InsertContractArgsType => {
+} & Partial<ContractFormEditable>): InsertContractArgsType => {
     return {
         stateCode: stateCode ?? 'MN',
         submissionType: formData?.submissionType ?? 'CONTRACT_AND_RATES',

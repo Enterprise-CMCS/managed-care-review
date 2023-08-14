@@ -10,24 +10,24 @@ import {
     isValidAndCurrentLockedHealthPlanFormData,
     hasValidSupportingDocumentCategories,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType/healthPlanFormData'
+import type { UpdateInfoType, HealthPlanPackageType } from '../../domain-models'
 import {
-    UpdateInfoType,
     isStateUser,
-    HealthPlanPackageType,
     packageStatus,
     packageSubmitters,
 } from '../../domain-models'
-import { Emailer } from '../../emailer'
-import { MutationResolvers, State } from '../../gen/gqlServer'
+import type { Emailer } from '../../emailer'
+import type { MutationResolvers, State } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import { isStoreError, Store } from '../../postgres'
+import type { Store } from '../../postgres'
+import { isStoreError } from '../../postgres'
 import {
     setResolverDetailsOnActiveSpan,
     setErrorAttributesOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { toDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import { EmailParameterStore } from '../../parameterStore'
+import type { EmailParameterStore } from '../../parameterStore'
 import { GraphQLError } from 'graphql'
 
 import type {

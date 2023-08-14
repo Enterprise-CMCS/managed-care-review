@@ -1,20 +1,16 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import {
-    UnlockedHealthPlanFormDataType,
-    convertRateSupportingDocs,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import type { UnlockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { convertRateSupportingDocs } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     base64ToDomain,
     toDomain,
 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import {
-    isStateUser,
-    HealthPlanPackageType,
-    packageStatus,
-} from '../../domain-models'
-import { MutationResolvers } from '../../gen/gqlServer'
+import type { HealthPlanPackageType } from '../../domain-models'
+import { isStateUser, packageStatus } from '../../domain-models'
+import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import { isStoreError, Store } from '../../postgres'
+import type { Store } from '../../postgres'
+import { isStoreError } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
@@ -192,7 +188,6 @@ export function updateHealthPlanFormDataResolver(
         }
 
         const editableRevision = planPackage.revisions[0]
-
 
         // This logic is no longer needed once SUPPORTING_DOCS_BY_RATE flag is on in production - it was used to remove rate supporting docs form contract only submisisons
         if (

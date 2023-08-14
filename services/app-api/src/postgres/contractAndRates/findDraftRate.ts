@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client'
-import { RateRevisionWithContractsType } from '../../domain-models/contractAndRates'
+import type { PrismaClient } from '@prisma/client'
+import type { RateRevisionWithContractsType } from '../../domain-models/contractAndRates'
 import {
     contractFormDataToDomainModel,
     includeUpdateInfo,

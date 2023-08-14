@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
 
 // This is the type returned by client.$transaction
 type PrismaTransactionType = Omit<

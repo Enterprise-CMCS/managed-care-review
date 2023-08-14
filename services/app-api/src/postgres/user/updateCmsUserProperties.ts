@@ -1,11 +1,9 @@
-import {
-    convertPrismaErrorToStoreError,
-    isStoreError,
-    StoreError,
-} from '../storeError'
-import { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
-import { Division, PrismaClient, AuditAction } from '@prisma/client'
-import { CMSUserType } from '../../domain-models'
+import type { StoreError } from '../storeError'
+import { convertPrismaErrorToStoreError, isStoreError } from '../storeError'
+import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { Division, PrismaClient } from '@prisma/client'
+import { AuditAction } from '@prisma/client'
+import type { CMSUserType } from '../../domain-models'
 import { domainUserFromPrismaUser } from './prismaDomainUser'
 
 export async function updateCmsUserProperties(

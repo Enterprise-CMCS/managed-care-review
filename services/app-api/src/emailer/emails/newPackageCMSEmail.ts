@@ -1,9 +1,7 @@
-import {
-    LockedHealthPlanFormDataType,
-    packageName as generatePackageName,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import type { LockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { packageName as generatePackageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
-import { EmailConfiguration, EmailData, StateAnalystsEmails } from '..'
+import type { EmailConfiguration, EmailData, StateAnalystsEmails } from '..'
 import {
     stripHTMLFromTemplate,
     SubmissionTypeRecord,
@@ -11,7 +9,7 @@ import {
     renderTemplate,
     findPackagePrograms,
 } from '../templateHelpers'
-import { ProgramType } from '../../domain-models'
+import type { ProgramType } from '../../domain-models'
 import { submissionSummaryURL } from '../generateURLs'
 
 export const newPackageCMSEmail = async (

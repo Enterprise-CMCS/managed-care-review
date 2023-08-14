@@ -1,16 +1,18 @@
-import { UpdateInfoTable, User } from '@prisma/client'
-import { PrismaTransactionType } from '../prismaTypes'
-import {
+import type { UpdateInfoTable, User } from '@prisma/client'
+import type { PrismaTransactionType } from '../prismaTypes'
+import type {
     RateRevisionWithContractsType,
     RateType,
 } from '../../domain-models/contractAndRates'
+import type {
+    ContractRevisionTableWithFormData,
+    RateRevisionTableWithFormData,
+} from './prismaSharedContractRateHelpers'
 import {
     contractFormDataToDomainModel,
-    ContractRevisionTableWithFormData,
     convertUpdateInfoToDomainModel,
     includeUpdateInfo,
     rateFormDataToDomainModel,
-    RateRevisionTableWithFormData,
 } from './prismaSharedContractRateHelpers'
 
 // this is for the internal building of individual revisions

@@ -1,5 +1,5 @@
-import { GraphQLResponse } from 'apollo-server-types'
-import { GraphQLFormattedError } from 'graphql'
+import type { GraphQLResponse } from 'apollo-server-types'
+import type { GraphQLFormattedError } from 'graphql'
 
 // assertAnError returns an the only error in a graphQL errors response
 function assertAnError(res: GraphQLResponse): GraphQLFormattedError {

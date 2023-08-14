@@ -9,11 +9,11 @@ import {
     createDraftContractData,
 } from '../../testHelpers/'
 import { parseContractWithHistory } from './parseContractWithHistory'
-import {
+import type {
     DraftContractRevisionTableWithRelations,
     DraftContractTableWithRelations,
 } from './prismaDraftContractHelpers'
-import {
+import type {
     ContractRevisionTableWithRates,
     ContractTableWithRelations,
 } from './prismaSubmittedContractHelpers'

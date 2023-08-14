@@ -1,12 +1,14 @@
 import { ForbiddenError } from 'apollo-server-lambda'
-import { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { isAdminUser, StateType } from '../../domain-models'
+import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import type { StateType } from '../../domain-models'
+import { isAdminUser } from '../../domain-models'
 import { isHelpdeskUser } from '../../domain-models/user'
-import { Emailer } from '../../emailer'
-import { QueryResolvers } from '../../gen/gqlServer'
+import type { Emailer } from '../../emailer'
+import type { QueryResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import { EmailParameterStore } from '../../parameterStore'
-import { isStoreError, Store } from '../../postgres'
+import type { EmailParameterStore } from '../../parameterStore'
+import type { Store } from '../../postgres'
+import { isStoreError } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,

@@ -1,4 +1,4 @@
-import {
+import type {
     ActuaryCommunication,
     ActuaryContact,
     PrismaClient,
@@ -6,11 +6,11 @@ import {
     RateDocument,
     RateSupportingDocument,
 } from '@prisma/client'
-import {
+import type {
     StateCodeType,
     RateType as DomainRateType,
 } from 'app-web/src/common-code/healthPlanFormDataType'
-import { RateType } from '../../domain-models/contractAndRates'
+import type { RateType } from '../../domain-models/contractAndRates'
 import {
     contractFormDataToDomainModel,
     includeUpdateInfo,
@@ -38,7 +38,7 @@ type InsertRateArgsType = RateFormEditable & {
 }
 
 /*
-    8.14.23 Hana Note - this is now a  temporary implementation as function is getting rewritten by MacRae to
+    8.14.23 Hana Note - this is now a  temporary implementation as function. We still intend to
     - use similar behavior to insertContract via a shared find with history helper
 */
 

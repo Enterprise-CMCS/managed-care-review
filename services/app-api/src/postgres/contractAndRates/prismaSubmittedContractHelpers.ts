@@ -1,5 +1,5 @@
-import { ContractTable } from '@prisma/client'
-import {
+import type { ContractTable } from '@prisma/client'
+import type {
     ContractRevisionTableWithFormData,
     RateOnContractHistory,
 } from './prismaSharedContractRateHelpers'

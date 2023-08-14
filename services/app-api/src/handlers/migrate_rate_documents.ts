@@ -1,11 +1,12 @@
-import { Handler } from 'aws-lambda'
+import type { Handler } from 'aws-lambda'
 import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
-import { HealthPlanRevisionTable } from '@prisma/client'
-import { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
+import type { HealthPlanRevisionTable } from '@prisma/client'
+import type { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import { isStoreError, StoreError } from '../postgres/storeError'
-import { Store } from '../postgres'
+import type { StoreError } from '../postgres/storeError'
+import { isStoreError } from '../postgres/storeError'
+import type { Store } from '../postgres'
 import {
     initTracer,
     initMeter,

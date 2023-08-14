@@ -1,6 +1,8 @@
-import { Result, ok, err } from 'neverthrow'
-import { UserType } from '../domain-models/index'
-import { Store, InsertUserArgsType, isStoreError } from '../postgres'
+import type { Result } from 'neverthrow'
+import { ok, err } from 'neverthrow'
+import type { UserType } from '../domain-models/index'
+import type { Store, InsertUserArgsType } from '../postgres'
+import { isStoreError } from '../postgres'
 import { lookupUserAurora } from './cognitoAuthn'
 
 export async function userFromLocalAuthProvider(

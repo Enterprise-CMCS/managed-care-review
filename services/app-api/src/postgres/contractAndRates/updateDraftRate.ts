@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client'
-import { RateType } from '../../domain-models/contractAndRates'
-import { RateFormEditable } from './insertRate'
+import type { PrismaClient } from '@prisma/client'
+import type { RateType } from '../../domain-models/contractAndRates'
+import type { RateFormEditable } from './insertRate'
 import {
     contractFormDataToDomainModel,
     includeUpdateInfo,
@@ -12,7 +12,7 @@ import {
 // * set the formData
 
 /*
-     8.14.23 Hana Note - this is now a  temporary implementation as entire function is getting rewritten by MacRae to
+     8.14.23 Hana Note - this is now a temporary implementation as entire function. We intend to
      - handle updateRate as a single query on the RateTable (not rate revision)
      - use similar behavior to updateContract via a shared find with history helper
 */

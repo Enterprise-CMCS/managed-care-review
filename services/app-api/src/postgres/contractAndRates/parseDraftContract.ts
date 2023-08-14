@@ -1,13 +1,17 @@
-import {
-    contractRevisionWithRatesSchema,
+import type {
     ContractRevisionWithRatesType,
     ContractType,
-    draftContractSchema,
 } from '../../domain-models/contractAndRates'
 import {
+    contractRevisionWithRatesSchema,
+    draftContractSchema,
+} from '../../domain-models/contractAndRates'
+import type {
     DraftContractRevisionTableWithRelations,
-    draftContractRevToDomainModel,
     DraftContractTableWithRelations,
+} from '../../postgres/contractAndRates/prismaDraftContractHelpers'
+import {
+    draftContractRevToDomainModel,
     draftContractToDomainModel,
 } from '../../postgres/contractAndRates/prismaDraftContractHelpers'
 

@@ -1,16 +1,18 @@
-import { ContractTable, RateTable } from '@prisma/client'
-import {
+import type { ContractTable, RateTable } from '@prisma/client'
+import type {
     ContractRevisionWithRatesType,
     ContractType,
     RateRevisionType,
 } from '../../domain-models/contractAndRates'
+import type {
+    ContractRevisionTableWithFormData,
+    RateRevisionTableWithFormData,
+} from './prismaSharedContractRateHelpers'
 import {
     contractFormDataToDomainModel,
-    ContractRevisionTableWithFormData,
     getContractStatus,
     includeUpdateInfo,
     rateRevisionToDomainModel,
-    RateRevisionTableWithFormData,
 } from './prismaSharedContractRateHelpers'
 
 // This is the include that gives us draft info

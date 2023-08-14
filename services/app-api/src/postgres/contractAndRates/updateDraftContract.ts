@@ -1,4 +1,4 @@
-import {
+import type {
     ContractType as PrismaContractType,
     PopulationCoverageType,
     PrismaClient,
@@ -10,7 +10,7 @@ import {
     ManagedCareEntity,
     FederalAuthority,
 } from '@prisma/client'
-import { ContractType } from '../../domain-models/contractAndRates'
+import type { ContractType } from '../../domain-models/contractAndRates'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../storeError'
 
@@ -55,7 +55,7 @@ type UpdateContractArgsType = {
 }
 
 /*
-     8.14.23 Hana Note - this is now a  temporary implementation as types are getting rewritten by MacRae to
+     8.14.23 Hana Note - this is now a  temporary implementation as types. We still intend to
      - handle updateContract as a single query on the ContractTable (not contract revision)
 */
 
@@ -184,4 +184,4 @@ async function updateDraftContract(
 }
 
 export { updateDraftContract }
-export type {ContractFormEditable}
+export type { ContractFormEditable }
