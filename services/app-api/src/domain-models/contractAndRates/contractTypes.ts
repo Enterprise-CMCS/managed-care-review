@@ -8,6 +8,8 @@ import {
     submissionDocumentSchema,
     submissionTypeSchema,
 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
+import { ratesRevisionSchema } from './rateTypes'
+import { updateInfoSchema } from './updateInfoType'
 
 const contractFormDataSchema = z.object({
     programIDs: z.array(z.string()),
@@ -43,12 +45,6 @@ const contractFormDataSchema = z.object({
     modifiedNonRiskPaymentArrangements: z.boolean().optional(),
 })
 
-const updateInfoSchema = z.object({
-    updatedAt: z.date(),
-    updatedBy: z.string().email(),
-    updatedReason: z.string(),
-})
-
 const contractRevisionSchema = z.object({
     id: z.string().uuid(),
     submitInfo: updateInfoSchema.optional(),
@@ -58,49 +54,50 @@ const contractRevisionSchema = z.object({
     formData: contractFormDataSchema,
 })
 
-const ratesRevisionSchema = z.object({
-    id: z.string().uuid(),
-    submitInfo: updateInfoSchema.optional(),
-    unlockInfo: updateInfoSchema.optional(),
-    revisionFormData: z.string(),
-})
-
 // ContractRevision has all the information in a single submission of this contract.
 // If a revision has been submitted it will have submitInfo (otherwise it will be a draft)
 // if a revision was unlocked, it will have unlock info, otherwise it was an initial submission
 // The set of rateRevisions hold exactly what rate data was present at the time this contract was submitted.
-const contractRevisionZodSchema = contractRevisionSchema.extend({
+const contractRevisionWithRatesSchema = contractRevisionSchema.extend({
     rateRevisions: z.array(ratesRevisionSchema),
 })
 
 // Contract represents the contract specific information in a submission package
 // All that data is contained in revisions, each revision represents the data in a single submission
 // submissions are kept intact here across time
-const contractZodSchema = z.object({
+const contractSchema = z.object({
     id: z.string().uuid(),
     status: z.union([z.literal('SUBMITTED'), z.literal('DRAFT')]),
     stateCode: z.string(),
     stateNumber: z.number().min(1),
-    revisions: z.array(contractRevisionZodSchema),
+    // If this contract is in a DRAFT or UNLOCKED status, there will be a draftRevision
+    draftRevision: contractRevisionWithRatesSchema.optional(),
+    // All revisions are submitted and in reverse chronological order
+    revisions: z.array(contractRevisionWithRatesSchema),
 })
 
-const draftContractZodSchema = contractZodSchema.extend({
+const draftContractSchema = contractSchema.extend({
     status: z.literal('DRAFT'),
-    revisions: z.array(contractRevisionZodSchema).min(1),
+    revisions: z.array(contractRevisionWithRatesSchema).min(1),
 })
 
+type ContractType = z.infer<typeof contractSchema>
+type ContractRevisionType = z.infer<typeof contractRevisionSchema>
+type ContractRevisionWithRatesType = z.infer<
+    typeof contractRevisionWithRatesSchema
+>
 type ContractFormDataType = z.infer<typeof contractFormDataSchema>
-type ContractType = z.infer<typeof contractZodSchema>
-type ContractRevisionType = z.infer<typeof contractRevisionZodSchema>
-type UpdateInfoType = z.infer<typeof updateInfoSchema>
-type ContractStatusType = z.infer<typeof contractZodSchema.shape.status>
 
-export { contractRevisionZodSchema, draftContractZodSchema, contractZodSchema }
+export {
+    contractRevisionSchema,
+    contractRevisionWithRatesSchema,
+    draftContractSchema,
+    contractSchema,
+}
 
 export type {
-    ContractFormDataType,
     ContractType,
     ContractRevisionType,
-    UpdateInfoType,
-    ContractStatusType,
+    ContractRevisionWithRatesType,
+    ContractFormDataType,
 }

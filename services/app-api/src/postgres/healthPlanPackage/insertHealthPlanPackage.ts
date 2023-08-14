@@ -1,20 +1,17 @@
-import { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
 import { Buffer } from 'buffer'
 import { v4 as uuidv4 } from 'uuid'
-import {
+import type {
     UnlockedHealthPlanFormDataType,
     SubmissionType,
     ContractType,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { HealthPlanPackageType } from '../../domain-models'
+import type { HealthPlanPackageType } from '../../domain-models'
 import { toProtoBuffer } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import {
-    convertPrismaErrorToStoreError,
-    isStoreError,
-    StoreError,
-} from '../storeError'
+import type { StoreError } from '../storeError'
+import { convertPrismaErrorToStoreError, isStoreError } from '../storeError'
 import { convertToHealthPlanPackageType } from './healthPlanPackageHelpers'
-import { PopulationCoveredType } from '../../gen/gqlServer'
+import type { PopulationCoveredType } from '../../gen/gqlServer'
 
 export type InsertHealthPlanPackageArgsType = {
     stateCode: string

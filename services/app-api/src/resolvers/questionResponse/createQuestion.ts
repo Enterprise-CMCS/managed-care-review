@@ -1,4 +1,4 @@
-import { MutationResolvers } from '../../gen/gqlServer'
+import type { MutationResolvers } from '../../gen/gqlServer'
 import { isCMSUser, packageStatus } from '../../domain-models'
 import { logError, logSuccess } from '../../logger'
 import {
@@ -6,7 +6,8 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import { isStoreError, Store } from '../../postgres'
+import type { Store } from '../../postgres'
+import { isStoreError } from '../../postgres'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison } from '../../domain-models'
 

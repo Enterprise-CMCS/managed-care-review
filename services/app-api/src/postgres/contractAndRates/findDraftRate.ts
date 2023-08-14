@@ -1,13 +1,16 @@
-import { PrismaClient } from '@prisma/client'
-import { RateRevision } from '../../domain-models/contractAndRates/rateType'
-import { contractFormDataToDomainModel } from './prismaToDomainModel'
-import { updateInfoIncludeUpdater } from '../prismaHelpers'
+import type { PrismaClient } from '@prisma/client'
+import type { RateRevisionWithContractsType } from '../../domain-models/contractAndRates'
+import {
+    contractFormDataToDomainModel,
+    includeUpdateInfo,
+    rateFormDataToDomainModel,
+} from './prismaSharedContractRateHelpers'
 
 // findDraftRate returns a draft (if any) for the given contract.
 async function findDraftRate(
     client: PrismaClient,
     rateID: string
-): Promise<RateRevision | undefined | Error> {
+): Promise<RateRevisionWithContractsType | undefined | Error> {
     try {
         const draftRate = await client.rateRevisionTable.findFirst({
             where: {
@@ -15,14 +18,18 @@ async function findDraftRate(
                 submitInfo: null,
             },
             include: {
-                submitInfo: updateInfoIncludeUpdater,
-                unlockInfo: updateInfoIncludeUpdater,
+                submitInfo: includeUpdateInfo,
+                unlockInfo: includeUpdateInfo,
+                rateDocuments: true,
+                supportingDocuments: true,
+                certifyingActuaryContacts: true,
+                addtlActuaryContacts: true,
                 draftContracts: {
                     include: {
                         revisions: {
                             include: {
-                                submitInfo: updateInfoIncludeUpdater,
-                                unlockInfo: updateInfoIncludeUpdater,
+                                submitInfo: includeUpdateInfo,
+                                unlockInfo: includeUpdateInfo,
                                 stateContacts: true,
                                 contractDocuments: true,
                                 supportingDocuments: true,
@@ -49,19 +56,18 @@ async function findDraftRate(
             return undefined
         }
 
-        const draft: RateRevision = {
+        const draft: RateRevisionWithContractsType = {
             id: draftRate.id,
-            revisionFormData: draftRate.name,
+            createdAt: draftRate.createdAt,
+            updatedAt: draftRate.updatedAt,
+
+            formData: rateFormDataToDomainModel(draftRate),
 
             contractRevisions: draftRate.draftContracts.map((dc) => ({
                 id: dc.revisions[0].id,
                 createdAt: dc.revisions[0].createdAt,
                 updatedAt: dc.revisions[0].updatedAt,
                 formData: contractFormDataToDomainModel(dc.revisions[0]),
-                rateRevisions: dc.revisions[0].rateRevisions.map((rr) => ({
-                    id: rr.rateRevisionID,
-                    revisionFormData: rr.rateRevision.name,
-                })),
             })),
         }
 

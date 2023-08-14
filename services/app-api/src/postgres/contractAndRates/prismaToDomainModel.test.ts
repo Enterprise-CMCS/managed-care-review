@@ -1,19 +1,15 @@
+import { v4 as uuidv4 } from 'uuid'
+import { createContractRevision } from '../../testHelpers'
 import {
     contractFormDataToDomainModel,
     getContractStatus,
-} from './prismaToDomainModel'
-import {
-    ContractRevisionFormDataType,
-    ContractRevisionTableWithRelations,
-} from '../prismaTypes'
-import { v4 as uuidv4 } from 'uuid'
-import { createContractRevision } from '../../testHelpers'
+} from './prismaSharedContractRateHelpers'
+import type { ContractRevisionTableWithRates } from './prismaSubmittedContractHelpers'
 
 describe('prismaToDomainModel', () => {
     describe('contractFormDataToDomainModel', () => {
         it('correctly adds document categories to each document', () => {
-            const contractRevision: ContractRevisionFormDataType =
-                createContractRevision()
+            const contractRevision = createContractRevision()
 
             const domainFormData =
                 contractFormDataToDomainModel(contractRevision)
@@ -56,7 +52,7 @@ describe('prismaToDomainModel', () => {
     describe('getContractStatus', () => {
         const contractWithUnorderedRevs: {
             revision: Pick<
-                ContractRevisionTableWithRelations,
+                ContractRevisionTableWithRates,
                 'createdAt' | 'submitInfo'
             >[]
             testDescription: string
@@ -66,7 +62,7 @@ describe('prismaToDomainModel', () => {
                 revision: [
                     {
                         createdAt: new Date(21, 2, 1),
-                        submitInfo: undefined,
+                        submitInfo: null,
                     },
                     {
                         createdAt: new Date(21, 3, 1),
@@ -90,7 +86,7 @@ describe('prismaToDomainModel', () => {
                     },
                     {
                         createdAt: new Date(21, 1, 1),
-                        submitInfo: undefined,
+                        submitInfo: null,
                     },
                 ],
                 testDescription: 'latest revision has been submitted',
@@ -120,7 +116,7 @@ describe('prismaToDomainModel', () => {
                     },
                     {
                         createdAt: new Date(21, 3, 1),
-                        submitInfo: undefined,
+                        submitInfo: null,
                     },
                     {
                         createdAt: new Date(21, 1, 1),

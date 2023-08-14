@@ -1,11 +1,11 @@
-import {
+import type {
     HealthPlanRevisionType,
     HealthPlanPackageStatusType,
     HealthPlanPackageType,
 } from './HealthPlanPackageType'
 import { pruneDuplicateEmails } from '../emailer/formatters'
-import { ContractType } from './contractAndRates/contractAndRatesZodSchema'
-import {
+import type { ContractType } from './contractAndRates'
+import type {
     SubmissionDocument,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
@@ -73,6 +73,11 @@ function convertContractToUnlockedHealthPlanPackage(
     contract: ContractType
 ): HealthPlanPackageType | Error {
     console.info('Attempting to convert contract to health plan package')
+
+    // Since drafts come in separate on the Contract type, we push it onto the revisions before converting below
+    if (contract.draftRevision) {
+        contract.revisions.unshift(contract.draftRevision)
+    }
 
     const healthPlanRevisions =
         convertContractRevisionToHealthPlanRevision(contract)

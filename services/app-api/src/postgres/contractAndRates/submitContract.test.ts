@@ -105,7 +105,7 @@ describe('submitContract', () => {
         const rateA = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'first rate',
+                rateCertificationName: 'first rate',
             })
         )
 
@@ -120,7 +120,7 @@ describe('submitContract', () => {
         )
 
         // submit the first draft rate
-        must(
+        const rateA1 = must(
             await submitRate(
                 client,
                 rateA.id,
@@ -132,7 +132,7 @@ describe('submitContract', () => {
         await client.rateRevisionsOnContractRevisionsTable.create({
             data: {
                 contractRevisionID: submittedContractA.revisions[0].id,
-                rateRevisionID: rateA.revisions[0].id,
+                rateRevisionID: rateA1.revisions[0].id,
                 validAfter: new Date(),
             },
         })
@@ -210,7 +210,7 @@ describe('submitContract', () => {
         const rate1 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'onepoint0',
+                rateCertificationName: 'onepoint0',
             })
         )
         must(

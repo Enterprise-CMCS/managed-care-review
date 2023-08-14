@@ -1,15 +1,12 @@
-import { Span } from '@opentelemetry/api'
+import type { Span } from '@opentelemetry/api'
 import { ForbiddenError } from 'apollo-server-lambda'
-import {
-    isStateUser,
-    HealthPlanPackageType,
-    isCMSUser,
-    isAdminUser,
-} from '../../domain-models'
+import type { HealthPlanPackageType } from '../../domain-models'
+import { isStateUser, isCMSUser, isAdminUser } from '../../domain-models'
 import { isHelpdeskUser } from '../../domain-models/user'
-import { QueryResolvers } from '../../gen/gqlServer'
+import type { QueryResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import { isStoreError, Store, StoreError } from '../../postgres'
+import type { Store, StoreError } from '../../postgres'
+import { isStoreError } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,

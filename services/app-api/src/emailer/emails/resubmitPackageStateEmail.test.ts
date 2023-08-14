@@ -4,9 +4,9 @@ import {
     mockMNState,
 } from '../../testHelpers/emailerHelpers'
 import { resubmitPackageStateEmail } from './index'
+import type { LockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 import {
     generateRateName,
-    LockedHealthPlanFormDataType,
     packageName,
 } from 'app-web/src/common-code/healthPlanFormDataType'
 

@@ -153,6 +153,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
         ): Promise<string> => {
             const result = await Storage.get(key, {
                 bucket: bucketConfig[bucket],
+                expires: 3600,
             })
             if (typeof result === 'string') {
                 return result
@@ -189,7 +190,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                 return error
             }
 
-            return await Storage.get(filename)
+            return await Storage.get(filename, { expires: 3600 })
         },
     }
 }

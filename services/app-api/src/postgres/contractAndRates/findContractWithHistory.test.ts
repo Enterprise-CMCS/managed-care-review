@@ -57,7 +57,7 @@ describe('findContract', () => {
         const rate1 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'someurle.en',
+                rateCertificationName: 'someurle.en',
             })
         )
         must(
@@ -70,7 +70,7 @@ describe('findContract', () => {
         const rate2 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'twopointo',
+                rateCertificationName: 'twopointo',
             })
         )
         must(
@@ -81,7 +81,7 @@ describe('findContract', () => {
         const rate3 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'threepointo',
+                rateCertificationName: 'threepointo',
             })
         )
         must(
@@ -263,9 +263,10 @@ describe('findContract', () => {
         )
 
         expect(revisionsInTimeOrder[5].rateRevisions).toHaveLength(2)
-        expect(revisionsInTimeOrder[5].rateRevisions[1].revisionFormData).toBe(
-            'onepointone'
-        )
+        expect(
+            revisionsInTimeOrder[5].rateRevisions[1].formData
+                .rateCertificationName
+        ).toBe('onepointone')
         expect(revisionsInTimeOrder[5].unlockInfo?.updatedReason).toBe(
             'unlock for 1.1'
         )
@@ -346,7 +347,7 @@ describe('findContract', () => {
         const rate1 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'someurle.en',
+                rateCertificationName: 'someurle.en',
             })
         )
         must(
@@ -359,7 +360,7 @@ describe('findContract', () => {
         const rate2 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'twopointo',
+                rateCertificationName: 'twopointo',
             })
         )
         must(
@@ -370,7 +371,7 @@ describe('findContract', () => {
         const rate3 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'threepointo',
+                rateCertificationName: 'threepointo',
             })
         )
         must(
@@ -483,9 +484,9 @@ describe('findContract', () => {
         expect(revisions[4].rateRevisions).toHaveLength(2)
 
         expect(revisions[5].rateRevisions).toHaveLength(2)
-        expect(revisions[5].rateRevisions[1].revisionFormData).toBe(
-            'onepointone'
-        )
+        expect(
+            revisions[5].rateRevisions[1].formData.rateCertificationName
+        ).toBe('onepointone')
         expect(revisions[5].submitInfo?.updatedReason).toBe('1.1 new name')
 
         expect(revisions[6].rateRevisions).toHaveLength(2)
@@ -541,7 +542,7 @@ describe('findContract', () => {
         const rate1 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'onepoint0',
+                rateCertificationName: 'onepoint0',
             })
         )
         must(await updateDraftRate(client, rate1.id, 'onepoint0', []))
@@ -550,7 +551,7 @@ describe('findContract', () => {
         const rate2 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'twopointo',
+                rateCertificationName: 'twopointo',
             })
         )
         must(await updateDraftRate(client, rate2.id, 'twopointo', []))
@@ -587,7 +588,7 @@ describe('findContract', () => {
             )
         )
 
-        // Unlock A, but don't resubmit it yet.
+        // Unlock contract A, but don't resubmit it yet.
         must(
             await unlockContract(
                 client,
@@ -597,6 +598,17 @@ describe('findContract', () => {
             )
         )
 
+        // Draft should pull revision 2.0 out
+        const draftPreRateUnlock = must(
+            await findContractWithHistory(client, contractA.id)
+        )
+        expect(draftPreRateUnlock.draftRevision).toBeDefined()
+        expect(
+            draftPreRateUnlock.draftRevision?.rateRevisions.map(
+                (rr) => rr.formData.rateCertificationName
+            )
+        ).toEqual(['onepoint0', 'twopointo'])
+
         // unlock and submit second rate rev
         must(await unlockRate(client, rate2.id, cmsUser.id, 'unlock for 2.1'))
         must(
@@ -604,9 +616,33 @@ describe('findContract', () => {
                 contractA.id,
             ])
         )
+
+        // Draft should now pull draft revision 2.1 out, even though its unsubmitted
+        const draftPreRateSubmit = must(
+            await findContractWithHistory(client, contractA.id)
+        )
+        expect(draftPreRateSubmit.draftRevision).toBeDefined()
+        expect(
+            draftPreRateSubmit.draftRevision?.rateRevisions.map(
+                (rr) => rr.formData.rateCertificationName
+            )
+        ).toEqual(['onepoint0', 'twopointone'])
+
+        // Submit Rate 2.1
         must(await submitRate(client, rate2.id, stateUser.id, '2.1 update'))
 
-        // submit A1, now, should show up as a single new rev and have the latest rates
+        // raft should still pull revision 2.1 out
+        const draftPostRateSubmit = must(
+            await findContractWithHistory(client, contractA.id)
+        )
+        expect(draftPostRateSubmit.draftRevision).toBeDefined()
+        expect(
+            draftPostRateSubmit.draftRevision?.rateRevisions.map(
+                (rr) => rr.formData.rateCertificationName
+            )
+        ).toEqual(['onepoint0', 'twopointone'])
+
+        // submit contract A1, now, should show up as a single new rev and have the latest rates
         must(
             await submitContract(
                 client,
@@ -648,7 +684,9 @@ describe('findContract', () => {
 
         // these revisions can be in any order because they were saved at the same time
         const revisionFormDatas = new Set(
-            revisions[2].rateRevisions.map((rr) => rr.revisionFormData)
+            revisions[2].rateRevisions.map(
+                (rr) => rr.formData.rateCertificationName
+            )
         )
         const expectedFormDatas = new Set(['onepoint0', 'twopointone'])
         expect(revisionFormDatas).toStrictEqual(expectedFormDatas)

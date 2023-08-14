@@ -52,11 +52,10 @@ submitContract
 unlockContract
 ```
 
-Plus a couple functions for inspecting them:
+Plus a function for inspecting them:
 
 ```
 findContractWithHistory
-findDraftContract
 ```
 
 The life cycle functions are used as follows:

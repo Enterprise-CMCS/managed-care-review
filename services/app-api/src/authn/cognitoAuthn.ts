@@ -1,13 +1,15 @@
-import { Result, ok, err } from 'neverthrow'
+import type { Result } from 'neverthrow'
+import { ok, err } from 'neverthrow'
+import type { UserType as CognitoUserType } from '@aws-sdk/client-cognito-identity-provider'
 import {
     CognitoIdentityProviderClient,
     ListUsersCommand,
-    UserType as CognitoUserType,
 } from '@aws-sdk/client-cognito-identity-provider'
 
-import { UserType } from '../domain-models'
+import type { UserType } from '../domain-models'
 import { performance } from 'perf_hooks'
-import { Store, InsertUserArgsType, isStoreError } from '../postgres'
+import type { Store, InsertUserArgsType } from '../postgres'
+import { isStoreError } from '../postgres'
 import { isValidCmsDivison } from '../domain-models'
 
 export function parseAuthProvider(

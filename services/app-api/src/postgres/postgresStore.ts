@@ -1,10 +1,14 @@
-import { PrismaClient, HealthPlanRevisionTable, Division } from '@prisma/client'
-import {
+import type {
+    PrismaClient,
+    HealthPlanRevisionTable,
+    Division,
+} from '@prisma/client'
+import type {
     UnlockedHealthPlanFormDataType,
     HealthPlanFormDataType,
     StateCodeType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import {
+import type {
     ProgramType,
     HealthPlanPackageType,
     UpdateInfoType,
@@ -18,21 +22,21 @@ import {
     StateType,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
-import { StoreError } from './storeError'
+import type { StoreError } from './storeError'
+import type { InsertHealthPlanPackageArgsType } from './healthPlanPackage'
 import {
     findAllHealthPlanPackagesByState,
     findAllHealthPlanPackagesBySubmittedAt,
     findHealthPlanPackage,
     insertHealthPlanPackage,
-    InsertHealthPlanPackageArgsType,
     insertHealthPlanRevision,
     updateHealthPlanRevision,
     findAllRevisions,
 } from './healthPlanPackage'
+import type { InsertUserArgsType } from './user'
 import {
     findUser,
     insertUser,
-    InsertUserArgsType,
     updateCmsUserProperties,
     findAllUsers,
     insertManyUsers,
@@ -43,16 +47,12 @@ import {
     insertQuestionResponse,
 } from './questionResponse'
 import { findAllSupportedStates } from './state'
+import type { ContractType } from '../domain-models/contractAndRates'
 import {
-    ContractRevisionType,
-    ContractType,
-} from '../domain-models/contractAndRates/contractAndRatesZodSchema'
-import {
-    InsertContractArgsType,
     insertDraftContract,
     findContractWithHistory,
-    findDraftContract,
 } from './contractAndRates'
+import type { InsertContractArgsType } from './contractAndRates'
 
 type Store = {
     findPrograms: (
@@ -137,10 +137,6 @@ type Store = {
     findContractWithHistory: (
         contractID: string
     ) => Promise<ContractType | Error>
-
-    findDraftContract: (
-        contractID: string
-    ) => Promise<ContractRevisionType | undefined | Error>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -201,8 +197,8 @@ function NewPostgresStore(client: PrismaClient): Store {
         insertDraftContract: (args) => insertDraftContract(client, args),
         findContractWithHistory: (args) =>
             findContractWithHistory(client, args),
-        findDraftContract: (args) => findDraftContract(client, args),
     }
 }
 
-export { NewPostgresStore, Store }
+export type { Store }
+export { NewPostgresStore }

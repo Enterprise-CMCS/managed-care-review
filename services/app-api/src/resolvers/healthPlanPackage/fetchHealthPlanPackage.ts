@@ -1,22 +1,23 @@
 import { ForbiddenError } from 'apollo-server-lambda'
+import type { HealthPlanPackageType } from '../../domain-models'
 import {
     isCMSUser,
     isStateUser,
     isAdminUser,
-    HealthPlanPackageType,
     packageStatus,
     convertContractToUnlockedHealthPlanPackage,
 } from '../../domain-models'
 import { isHelpdeskUser } from '../../domain-models/user'
-import { QueryResolvers, State } from '../../gen/gqlServer'
+import type { QueryResolvers, State } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import { isStoreError, Store } from '../../postgres'
+import type { Store } from '../../postgres'
+import { isStoreError } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import { LDService } from '../../launchDarkly/launchDarkly'
+import type { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql/index'
 import { NotFoundError } from '../../postgres'
 
@@ -37,10 +38,7 @@ export function fetchHealthPlanPackageResolver(
 
         // Here is where we flag finding health plan
         if (ratesDatabaseRefactor) {
-            // Health plans can be in two states Draft and Submitted, and we have 2 postgres functions for each.
-            // findContractWithHistory gets all submitted revisions and findDraftContract gets just the one draft revision
-            // We don't have function that gets all revisions including draft. So we have to call both functions when a
-            // contract is DRAFT.
+            // Fetch the full contract
             const contractWithHistory = await store.findContractWithHistory(
                 input.pkgID
             )
@@ -65,37 +63,6 @@ export function fetchHealthPlanPackageResolver(
                         cause: 'DB_ERROR',
                     },
                 })
-            }
-
-            if (contractWithHistory.status === 'DRAFT') {
-                const draftRevision = await store.findDraftContract(input.pkgID)
-                if (draftRevision instanceof Error) {
-                    // If draft returns undefined we error because a draft submission should always have a draft revision.
-                    const errMessage = `Issue finding a draft contract with id ${input.pkgID}. Message: ${draftRevision.message}`
-                    logError('fetchHealthPlanPackage', errMessage)
-                    setErrorAttributesOnActiveSpan(errMessage, span)
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'DB_ERROR',
-                        },
-                    })
-                }
-
-                if (draftRevision === undefined) {
-                    const errMessage = `Issue finding a draft contract with id ${input.pkgID}. Message: Result was undefined.`
-                    logError('fetchHealthPlanPackage', errMessage)
-                    setErrorAttributesOnActiveSpan(errMessage, span)
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'NOT_FOUND',
-                            cause: 'DB_ERROR',
-                        },
-                    })
-                }
-
-                // Pushing in the draft revision, so it would be first in the array of revisions.
-                contractWithHistory.revisions.push(draftRevision)
             }
 
             const convertedPkg =

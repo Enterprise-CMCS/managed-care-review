@@ -1,6 +1,7 @@
-import { Result, ok, err } from 'neverthrow'
+import type { Result } from 'neverthrow'
+import { ok, err } from 'neverthrow'
 import { parseAuthProvider, userTypeFromAttributes } from './cognitoAuthn'
-import { UserType } from '../domain-models'
+import type { UserType } from '../domain-models'
 
 describe('cognitoAuthn', () => {
     describe('parseAuthProvider', () => {

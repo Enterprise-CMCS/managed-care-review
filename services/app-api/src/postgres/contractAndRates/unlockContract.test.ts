@@ -5,7 +5,6 @@ import { insertDraftContract } from './insertContract'
 import { unlockContract } from './unlockContract'
 import { insertDraftRate } from './insertRate'
 import { unlockRate } from './unlockRate'
-import { findDraftContract } from './findDraftContract'
 import { submitRate } from './submitRate'
 import { updateDraftContract } from './updateDraftContract'
 import { updateDraftRate } from './updateDraftRate'
@@ -47,7 +46,10 @@ describe('unlockContract', () => {
             await insertDraftContract(client, draftContractData)
         )
         const rate = must(
-            await insertDraftRate(client, { stateCode: 'MN', name: 'Rate 1.0' })
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+                rateCertificationName: 'Rate 1.0',
+            })
         )
 
         // Submit Rate A
@@ -72,7 +74,11 @@ describe('unlockContract', () => {
             )
         )
 
-        const draftContract = must(await findDraftContract(client, contract.id))
+        const fullDraftContract = must(
+            await findContractWithHistory(client, contract.id)
+        )
+
+        const draftContract = fullDraftContract.draftRevision
 
         if (draftContract === undefined) {
             throw Error('Contract data was undefined')
@@ -91,9 +97,11 @@ describe('unlockContract', () => {
             await submitRate(client, rate.id, stateUser.id, 'Updated things')
         )
 
-        const draftContractTwo = must(
-            await findDraftContract(client, contract.id)
+        const fullDraftContractTwo = must(
+            await findContractWithHistory(client, contract.id)
         )
+
+        const draftContractTwo = fullDraftContractTwo.draftRevision
 
         if (draftContractTwo === undefined) {
             throw Error('Contract data was undefined')
@@ -138,7 +146,10 @@ describe('unlockContract', () => {
             await insertDraftContract(client, draftContractData)
         )
         const rate = must(
-            await insertDraftRate(client, { stateCode: 'MN', name: 'Rate 1.0' })
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+                rateCertificationName: 'Rate 1.0',
+            })
         )
 
         // Submit Rate A
@@ -233,10 +244,13 @@ describe('unlockContract', () => {
             await insertDraftContract(client, draftContractData)
         )
         const rate = must(
-            await insertDraftRate(client, { stateCode: 'MN', name: 'rate 1.0' })
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+                rateCertificationName: 'rate 1.0',
+            })
         )
 
-        // Connect draft contract to submitted rate
+        // Connect draft contract to draft rate
         must(
             await updateDraftContract(
                 client,
@@ -335,7 +349,10 @@ describe('unlockContract', () => {
             await insertDraftContract(client, draftContractData)
         )
         const rate = must(
-            await insertDraftRate(client, { stateCode: 'MN', name: 'rate 1.0' })
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+                rateCertificationName: 'rate 1.0',
+            })
         )
 
         // Connect draft contract to submitted rate
@@ -388,7 +405,7 @@ describe('unlockContract', () => {
         const rateA = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                name: 'rate A 1.1',
+                rateCertificationName: 'rate A 1.1',
             })
         )
 

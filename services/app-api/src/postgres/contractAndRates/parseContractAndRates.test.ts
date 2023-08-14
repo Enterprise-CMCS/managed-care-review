@@ -1,54 +1,35 @@
-import {
-    DraftContractTableWithRelations,
-    DraftContractRevisionTableWithRelations,
-    ContractTableWithRelations,
-    ContractRevisionTableWithRelations,
-} from '../../postgres/prismaTypes'
-import {
-    parseDraftContract,
-    parseDraftContractRevision,
-    parseContractWithHistory,
-} from './parseDomainData'
 import { v4 as uuidv4 } from 'uuid'
 import {
     createContractData,
     createContractRevision,
     createDraftContractData,
 } from '../../testHelpers/'
+import { parseContractWithHistory } from './parseContractWithHistory'
+import type { ContractTableFullPayload } from './prismaSubmittedContractHelpers'
 
 describe('parseDomainData', () => {
     describe('parseDraftContract', () => {
         it('can parse valid draft domain data with no errors', () => {
             const draftData = createDraftContractData()
-            const validatedDraft = parseDraftContract(draftData)
+            const validatedDraft = parseContractWithHistory(draftData)
             expect(validatedDraft).not.toBeInstanceOf(Error)
         })
 
         const draftContractWithInvalidData: {
-            contract: DraftContractTableWithRelations
+            contract: ContractTableFullPayload
             testDescription: string
         }[] = [
             {
                 contract: createDraftContractData({
-                    revisions: [],
-                }),
-                testDescription: 'no contract revisions',
-            },
-            {
-                contract: createDraftContractData({
                     stateNumber: 0,
-                    revisions: [
-                        createContractRevision() as DraftContractRevisionTableWithRelations,
-                    ],
+                    revisions: [createContractRevision()],
                 }),
                 testDescription: 'undefined stateNumber',
             },
             {
                 contract: createDraftContractData({
                     stateCode: undefined,
-                    revisions: [
-                        createContractRevision() as DraftContractRevisionTableWithRelations,
-                    ],
+                    revisions: [createContractRevision()],
                 }),
                 testDescription: 'invalid stateCode',
             },
@@ -74,7 +55,7 @@ describe('parseDomainData', () => {
                                     stateCode: 'OH',
                                 },
                             },
-                        }) as DraftContractRevisionTableWithRelations,
+                        }),
                     ],
                 }),
                 testDescription: 'invalid contract status of submitted',
@@ -83,53 +64,66 @@ describe('parseDomainData', () => {
         test.each(draftContractWithInvalidData)(
             'parseDraftContract returns an error when draft contract data is invalid: $testDescription',
             ({ contract }) => {
-                expect(parseDraftContract(contract)).toBeInstanceOf(Error)
+                expect(parseContractWithHistory(contract)).toBeInstanceOf(Error)
             }
         )
     })
     describe('parseDraftContractRevision', () => {
         it('cant parse valid contract revision with no errors', () => {
-            const contractRevision =
-                createContractRevision() as DraftContractRevisionTableWithRelations
+            const contractRevision = createContractData()
             expect(
-                parseDraftContractRevision(contractRevision)
+                parseContractWithHistory(contractRevision)
             ).not.toBeInstanceOf(Error)
         })
         const draftContractRevisionsWithInvalidData: {
-            revision: DraftContractRevisionTableWithRelations
+            contract: ContractTableFullPayload
             testDescription: string
         }[] = [
             {
-                revision: createContractRevision({
-                    submissionType: undefined,
-                }) as DraftContractRevisionTableWithRelations,
+                contract: createContractData({
+                    revisions: [
+                        createContractRevision({
+                            submissionType: undefined,
+                        }),
+                    ],
+                }),
                 testDescription: 'invalid submissionType',
             },
             {
-                revision: createContractRevision({
-                    submissionDescription: undefined,
-                }) as DraftContractRevisionTableWithRelations,
+                contract: createContractData({
+                    revisions: [
+                        createContractRevision({
+                            submissionDescription: undefined,
+                        }),
+                    ],
+                }),
                 testDescription: 'invalid submissionDescription',
             },
             {
-                revision: createContractRevision({
-                    contractType: undefined,
-                }) as DraftContractRevisionTableWithRelations,
+                contract: createContractData({
+                    revisions: [
+                        createContractRevision({
+                            contractType: undefined,
+                        }),
+                    ],
+                }),
                 testDescription: 'invalid contractType',
             },
             {
-                revision: createContractRevision({
-                    managedCareEntities: undefined,
-                }) as DraftContractRevisionTableWithRelations,
+                contract: createContractData({
+                    revisions: [
+                        createContractRevision({
+                            managedCareEntities: undefined,
+                        }),
+                    ],
+                }),
                 testDescription: 'invalid managedCareEntities',
             },
         ]
         test.each(draftContractRevisionsWithInvalidData)(
             'parseDraftContractRevision returns an error when draft contract data is invalid: $testDescription',
-            ({ revision }) => {
-                expect(parseDraftContractRevision(revision)).toBeInstanceOf(
-                    Error
-                )
+            ({ contract: revision }) => {
+                expect(parseContractWithHistory(revision)).toBeInstanceOf(Error)
             }
         )
     })
@@ -141,7 +135,7 @@ describe('parseDomainData', () => {
         })
 
         const contractRevisionsWithInvalidData: {
-            contract: ContractTableWithRelations
+            contract: ContractTableFullPayload
             testDescription: string
         }[] = [
             {
@@ -177,12 +171,15 @@ describe('parseDomainData', () => {
                                         submitInfo: null,
                                         unlockInfo: null,
                                         unlockInfoID: null,
-                                        name: 'some data',
                                         rateType: null,
                                         rateCapitationType: null,
                                         rateDateStart: null,
                                         rateDateEnd: null,
                                         rateDateCertified: null,
+                                        rateDocuments: [],
+                                        certifyingActuaryContacts: [],
+                                        addtlActuaryContacts: [],
+                                        supportingDocuments: [],
                                         amendmentEffectiveDateStart: null,
                                         amendmentEffectiveDateEnd: null,
                                         rateProgramIDs: [],
@@ -191,7 +188,7 @@ describe('parseDomainData', () => {
                                     },
                                 },
                             ],
-                        }) as ContractRevisionTableWithRelations,
+                        }) as ContractTableFullPayload['revisions'][0],
                     ],
                 }),
                 testDescription: 'unsubmitted rate',

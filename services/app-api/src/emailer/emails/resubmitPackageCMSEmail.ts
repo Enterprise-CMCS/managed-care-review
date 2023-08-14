@@ -1,7 +1,5 @@
-import {
-    LockedHealthPlanFormDataType,
-    packageName as generatePackageName,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import type { LockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { packageName as generatePackageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import {
     stripHTMLFromTemplate,
@@ -11,7 +9,7 @@ import {
 } from '../templateHelpers'
 
 import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
-import { ProgramType, UpdateInfoType } from '../../domain-models'
+import type { ProgramType, UpdateInfoType } from '../../domain-models'
 import { submissionSummaryURL } from '../generateURLs'
 
 export const resubmitPackageCMSEmail = async (

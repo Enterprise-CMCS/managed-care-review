@@ -1,14 +1,12 @@
-import { InsertContractArgsType } from '../../postgres/contractAndRates/insertContract'
-import { State } from '@prisma/client'
+import type { InsertContractArgsType } from '../../postgres/contractAndRates/insertContract'
+import type { State } from '@prisma/client'
 import { must } from '../errorHelpers'
-import { PrismaClient } from '@prisma/client'
-import {
-    ContractRevisionTableWithRelations,
-    ContractTableWithRelations,
-    DraftContractRevisionTableWithRelations,
-    DraftContractTableWithRelations,
-} from '../../postgres/prismaTypes'
+import type { PrismaClient } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
+import type {
+    ContractRevisionTableWithRates,
+    ContractTableFullPayload,
+} from '../../postgres/contractAndRates/prismaSubmittedContractHelpers'
 
 const createInsertContractData = (
     contractArgs?: Partial<InsertContractArgsType>
@@ -45,8 +43,8 @@ const getStateRecord = async (
 }
 
 const createDraftContractData = (
-    contract?: Partial<DraftContractTableWithRelations>
-): DraftContractTableWithRelations => ({
+    contract?: Partial<ContractTableFullPayload>
+): ContractTableFullPayload => ({
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -56,14 +54,14 @@ const createDraftContractData = (
         createContractRevision({
             rateRevisions: undefined,
             submitInfo: null,
-        }) as DraftContractRevisionTableWithRelations,
+        }) as ContractRevisionTableWithRates,
     ],
     ...contract,
 })
 
 const createContractData = (
-    contract?: Partial<ContractTableWithRelations>
-): ContractTableWithRelations => ({
+    contract?: Partial<ContractTableFullPayload>
+): ContractTableFullPayload => ({
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -72,19 +70,14 @@ const createContractData = (
     revisions: contract?.revisions ?? [
         createContractRevision({
             draftRates: undefined,
-        }) as ContractRevisionTableWithRelations,
+        }) as ContractRevisionTableWithRates,
     ],
     ...contract,
 })
 
 const createContractRevision = (
-    revision?: Partial<
-        | ContractRevisionTableWithRelations
-        | DraftContractRevisionTableWithRelations
-    >
-):
-    | ContractRevisionTableWithRelations
-    | DraftContractRevisionTableWithRelations => ({
+    revision?: Partial<ContractRevisionTableWithRates>
+): ContractRevisionTableWithRates => ({
     id: uuidv4(),
     createdAt: new Date(),
     updatedAt: new Date(),
