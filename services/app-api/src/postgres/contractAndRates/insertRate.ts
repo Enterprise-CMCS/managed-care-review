@@ -11,10 +11,8 @@ import type {
     RateType as DomainRateType,
 } from 'app-web/src/common-code/healthPlanFormDataType'
 import type { RateType } from '../../domain-models/contractAndRates'
-import {
-    contractFormDataToDomainModel,
-    rateFormDataToDomainModel,
-} from './prismaSharedContractRateHelpers'
+import { parseRateWithHistory } from './parseRateWithHistory'
+import { includeFullRate } from './prismaSubmittedRateHelpers'
 
 type InsertRateArgsType = {
     stateCode: StateCodeType
@@ -101,53 +99,10 @@ async function insertDraftRate(
                         },
                     },
                 },
-                include: {
-                    revisions: {
-                        include: {
-                            rateDocuments: true,
-                            supportingDocuments: true,
-                            certifyingActuaryContacts: true,
-                            addtlActuaryContacts: true,
-                            draftContracts: true,
-                            contractRevisions: {
-                                include: {
-                                    contractRevision: {
-                                        include: {
-                                            stateContacts: true,
-                                            contractDocuments: true,
-                                            supportingDocuments: true,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
+                include: includeFullRate,
             })
 
-            const finalRate: RateType = {
-                id: rate.id,
-                status: 'DRAFT',
-                stateCode: rate.stateCode,
-                stateNumber: rate.stateNumber,
-                revisions: rate.revisions.map((rr) => ({
-                    id: rr.id,
-                    createdAt: rr.createdAt,
-                    updatedAt: rr.updatedAt,
-                    formData: rateFormDataToDomainModel(rr),
-
-                    contractRevisions: rr.contractRevisions.map(
-                        ({ contractRevision }) => ({
-                            id: contractRevision.id,
-                            createdAt: contractRevision.createdAt,
-                            updatedAt: contractRevision.updatedAt,
-                            formData:
-                                contractFormDataToDomainModel(contractRevision),
-                        })
-                    ),
-                })),
-            }
-            return finalRate
+            return parseRateWithHistory(rate)
         })
     } catch (err) {
         console.error('RATE PRISMA ERR', err)

@@ -58,13 +58,6 @@ async function updateDraftContract(
                     })),
                 },
             },
-            include: {
-                rateRevisions: {
-                    include: {
-                        rateRevision: true,
-                    },
-                },
-            },
         })
 
         return findContractWithHistory(client, contractID)
