@@ -196,16 +196,16 @@ resources:
         UserData:
           Fn::Base64: !Sub |
             #!/bin/bash
-            sudo apt update && apt install unzip postgresql postgresql-contrib -y
-            sudo curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip
-            sudo ./aws/install
+            apt update && apt install unzip postgresql postgresql-contrib -y
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip
+            ./aws/install
 
             # We need to make sure we download the vm scripts. There can be a lag between when 
             # serverless uploads the scripts and the launch of the instance.
             copy_files_from_s3() {
-              sudo aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-startup.sh /usr/local/bin/vm-startup.sh
-              sudo aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-shutdown.sh /usr/local/bin/vm-shutdown.sh
-              sudo aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/slack-notify.service /etc/systemd/system/notify-slack.service
+              aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-startup.sh /usr/local/bin/vm-startup.sh
+              aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-shutdown.sh /usr/local/bin/vm-shutdown.sh
+              aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/slack-notify.service /etc/systemd/system/notify-slack.service
             }
 
             download_failures=0
@@ -229,16 +229,16 @@ resources:
               fi
             done
 
-            sudo chmod +x /usr/local/bin/vm-startup.sh
-            sudo chmod +x /usr/local/bin/vm-shutdown.sh
-            sudo chmod +x /etc/systemd/system/notify-slack.service
+            chmod +x /usr/local/bin/vm-startup.sh
+            chmod +x /usr/local/bin/vm-shutdown.sh
+            chmod +x /etc/systemd/system/notify-slack.service
 
-            sudo sed -i "s,SLACK_WEBHOOK,${self:custom.slackWebhookUrl},g" /usr/local/bin/vm-startup.sh
-            sudo sed -i "s,SLACK_WEBHOOK,${self:custom.slackWebhookUrl},g" /usr/local/bin/vm-shutdown.sh
-            sudo sed -i "s,STAGE,${self:custom.stage},g" /usr/local/bin/vm-startup.sh 
-            sudo sed -i "s,STAGE,${self:custom.stage},g" /usr/local/bin/vm-shutdown.sh
-            sudo systemctl start notify-slack
-            sudo systemctl enable notify-slack
+            sed -i "s,SLACK_WEBHOOK,${self:custom.slackWebhookUrl},g" /usr/local/bin/vm-startup.sh
+            sed -i "s,SLACK_WEBHOOK,${self:custom.slackWebhookUrl},g" /usr/local/bin/vm-shutdown.sh
+            sed -i "s,STAGE,${self:custom.stage},g" /usr/local/bin/vm-startup.sh 
+            sed -i "s,STAGE,${self:custom.stage},g" /usr/local/bin/vm-shutdown.sh
+            systemctl start notify-slack
+            systemctl enable notify-slack
 
     PgVMIAMRole:
       Type: AWS::IAM::Role
