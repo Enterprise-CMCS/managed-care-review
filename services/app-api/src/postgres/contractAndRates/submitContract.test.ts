@@ -214,7 +214,11 @@ describe('submitContract', () => {
             })
         )
         must(
-            await updateDraftRate(client, rate1.id, 'onepoint0', [contractA.id])
+            await updateDraftRate(client, {
+                rateID: rate1.id,
+                formData: { rateCertificationName: 'onepoint0' },
+                contractIDs: [contractA.id],
+            })
         )
         const result = await submitRate(
             client,

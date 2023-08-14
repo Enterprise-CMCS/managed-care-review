@@ -33,7 +33,13 @@ describe('findDraftContract', () => {
                 rateCertificationName: 'onepoint0',
             })
         )
-        must(await updateDraftRate(client, rate1.id, 'onepoint0', []))
+        must(
+            await updateDraftRate(client, {
+                rateID: rate1.id,
+                formData: { rateCertificationName: 'onepoint0' },
+                contractIDs: [],
+            })
+        )
         must(await submitRate(client, rate1.id, stateUser.id, 'Rate Submit'))
 
         const rate2 = must(
@@ -42,7 +48,13 @@ describe('findDraftContract', () => {
                 rateCertificationName: 'twopointo',
             })
         )
-        must(await updateDraftRate(client, rate2.id, 'twopointo', []))
+        must(
+            await updateDraftRate(client, {
+                rateID: rate2.id,
+                formData: { rateCertificationName: 'twopointo' },
+                contractIDs: [],
+            })
+        )
         must(await submitRate(client, rate2.id, stateUser.id, 'Rate Submit 2'))
 
         // add a draft contract that has both of them.
@@ -109,7 +121,13 @@ describe('findDraftContract', () => {
                 rateCertificationName: 'onepoint0',
             })
         )
-        must(await updateDraftRate(client, rate1.id, 'onepoint0', []))
+        must(
+            await updateDraftRate(client, {
+                rateID: rate1.id,
+                formData: { rateCertificationName: 'onepoint0' },
+                contractIDs: [],
+            })
+        )
         must(await submitRate(client, rate1.id, stateUser.id, 'Rate Submit'))
 
         const rate2 = must(
@@ -120,7 +138,13 @@ describe('findDraftContract', () => {
                 'to test out multiple revisions'
             )
         )
-        must(await updateDraftRate(client, rate2.id, 'draft two', []))
+        must(
+            await updateDraftRate(client, {
+                rateID: rate2.id,
+                formData: { rateCertificationName: 'draft two' },
+                contractIDs: [],
+            })
+        )
         must(await submitRate(client, rate2.id, stateUser.id, 'Rate Submit 2'))
 
         must(
@@ -131,7 +155,13 @@ describe('findDraftContract', () => {
                 'to test out unlocked rates being ignored'
             )
         )
-        must(await updateDraftRate(client, rate2.id, 'draft three', []))
+        must(
+            await updateDraftRate(client, {
+                rateID: rate2.id,
+                formData: { rateCertificationName: 'draft three' },
+                contractIDs: [],
+            })
+        )
 
         // add a draft contract that has both of them.
         const draftContractData = createInsertContractData({

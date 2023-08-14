@@ -9,13 +9,20 @@ describe('findDraftRate', () => {
         const client = await sharedTestPrismaClient()
 
         // Add 2 rates 1, 2
+        const draftRateForm = { rateCertificationName: 'draftData' }
         const rate1 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                rateCertificationName: 'onepoint0',
+                ...draftRateForm,
             })
         )
-        must(await updateDraftRate(client, rate1.id, 'draftData', []))
+        must(
+            await updateDraftRate(client, {
+                rateID: rate1.id,
+                formData: draftRateForm,
+                contractIDs: [],
+            })
+        )
 
         const draft = await findDraftRate(client, rate1.id)
 

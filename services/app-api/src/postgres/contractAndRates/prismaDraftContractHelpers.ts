@@ -13,31 +13,6 @@ import {
     RateRevisionTableWithFormData,
 } from './prismaSharedContractRateHelpers'
 
-// TODO these should be separated into two files - contractHelpers and rateHelpers
-
-const includeDraftRateRevisionsWithDraftContracts = {
-    revisions: {
-        include: {
-            rateDocuments: true,
-            supportingDocuments: true,
-            certifyingActuaryContacts: true,
-            addtlActuaryContacts: true,
-            draftContracts: true,
-            contractRevisions: {
-                include: {
-                    contractRevision: {
-                        include: {
-                            stateContacts: true,
-                            contractDocuments: true,
-                            supportingDocuments: true,
-                        },
-                    },
-                },
-            },
-        },
-    },
-}
-
 // This is the include that gives us draft info
 const includeDraftContractRevisionsWithDraftRates = {
     stateContacts: true,
@@ -71,10 +46,9 @@ type DraftRateTableWithRelations = RateTable & {
     revisions: RateRevisionTableWithFormData[]
 }
 
-type DraftRateRevisionTableWithRelations =
-    RateRevisionTableWithFormData & {
-        draftContracts: DraftContractTableWithRelations[]
-    }
+type DraftRateRevisionTableWithRelations = RateRevisionTableWithFormData & {
+    draftContracts: DraftContractTableWithRelations[]
+}
 
 type DraftContractRevisionTableWithRelations =
     ContractRevisionTableWithFormData & {
@@ -123,12 +97,11 @@ export type {
     DraftContractTableWithRelations,
     DraftContractRevisionTableWithRelations,
     DraftRateTableWithRelations,
-    DraftRateRevisionTableWithRelations
+    DraftRateRevisionTableWithRelations,
 }
 
 export {
     includeDraftContractRevisionsWithDraftRates,
-    includeDraftRateRevisionsWithDraftContracts,
     draftContractToDomainModel,
     draftContractRevToDomainModel,
     draftRatesToDomainModel,

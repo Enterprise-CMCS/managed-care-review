@@ -13,9 +13,9 @@ import {
 import { RateType } from '../../domain-models/contractAndRates'
 import {
     contractFormDataToDomainModel,
+    includeUpdateInfo,
     rateFormDataToDomainModel,
 } from './prismaSharedContractRateHelpers'
-import { includeDraftRateRevisionsWithDraftContracts } from './prismaDraftContractHelpers'
 
 type RateFormEditable = {
     rateType?: DomainRateType
@@ -33,9 +33,14 @@ type RateFormEditable = {
     addtlActuaryContacts?: ActuaryContact[]
     actuaryCommunicationPreference?: ActuaryCommunication
 }
-type InsertRateArgsType = RateFormEditable  & {
+type InsertRateArgsType = RateFormEditable & {
     stateCode: StateCodeType
 }
+
+/*
+    8.14.23 Hana Note - this is now a  temporary implementation as function is getting rewritten by MacRae to
+    - use similar behavior to insertContract via a shared find with history helper
+*/
 
 // creates a new contract, with a new revision
 async function insertDraftRate(
@@ -104,7 +109,36 @@ async function insertDraftRate(
                         },
                     },
                 },
-                include: includeDraftRateRevisionsWithDraftContracts
+                include: {
+                    revisions: {
+                        include: {
+                            rateDocuments: true,
+                            supportingDocuments: true,
+                            certifyingActuaryContacts: true,
+                            addtlActuaryContacts: true,
+                            submitInfo: includeUpdateInfo,
+                            draftContracts: {
+                                include: {
+                                    revisions: {
+                                        include: {
+                                            contractDocuments: true,
+                                            supportingDocuments: true,
+                                            stateContacts: true,
+                                            draftRates: true,
+                                        },
+                                        where: {
+                                            submitInfoID: { not: null },
+                                        },
+                                        take: 1,
+                                        orderBy: {
+                                            createdAt: 'desc',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             })
 
             const finalRate: RateType = {
@@ -118,15 +152,14 @@ async function insertDraftRate(
                     updatedAt: rr.updatedAt,
                     formData: rateFormDataToDomainModel(rr),
 
-                    contractRevisions: rr.contractRevisions.map(
-                        ({ contractRevision }) => ({
-                            id: contractRevision.id,
-                            createdAt: contractRevision.createdAt,
-                            updatedAt: contractRevision.updatedAt,
-                            formData:
-                                contractFormDataToDomainModel(contractRevision),
-                        })
-                    ),
+                    contractRevisions: rr.draftContracts.map((contract) => ({
+                        id: contract.id,
+                        createdAt: contract.createdAt,
+                        updatedAt: contract.updatedAt,
+                        formData: contractFormDataToDomainModel(
+                            contract.revisions[0]
+                        ),
+                    })),
                 })),
             }
             return finalRate
@@ -138,4 +171,4 @@ async function insertDraftRate(
 }
 
 export { insertDraftRate }
-export type {RateFormEditable, InsertRateArgsType}
+export type { RateFormEditable, InsertRateArgsType }

@@ -60,9 +60,11 @@ describe('findContract', () => {
             })
         )
         must(
-            await updateDraftRate(client, rate1.id, 'someurle.en', [
-                contractA.id,
-            ])
+            await updateDraftRate(client, {
+                rateID: rate1.id,
+                formData: { rateCertificationName: 'someurle.en' },
+                contractIDs: [contractA.id],
+            })
         )
         must(await submitRate(client, rate1.id, stateUser.id, 'Rate Submit'))
 
@@ -73,7 +75,11 @@ describe('findContract', () => {
             })
         )
         must(
-            await updateDraftRate(client, rate2.id, 'twopointo', [contractA.id])
+            await updateDraftRate(client, {
+                rateID: rate2.id,
+                formData: { rateCertificationName: 'twopointo' },
+                contractIDs: [contractA.id],
+            })
         )
         must(await submitRate(client, rate2.id, stateUser.id, 'RateSubmit 2'))
 
@@ -84,9 +90,11 @@ describe('findContract', () => {
             })
         )
         must(
-            await updateDraftRate(client, rate3.id, 'threepointo', [
-                contractA.id,
-            ])
+            await updateDraftRate(client, {
+                rateID: rate3.id,
+                formData: { rateCertificationName: 'threepointo' },
+                contractIDs: [contractA.id],
+            })
         )
         must(await submitRate(client, rate3.id, stateUser.id, '3.0 create'))
 
@@ -99,15 +107,23 @@ describe('findContract', () => {
                 'unlock for 2.1 remove'
             )
         )
-        must(await updateDraftRate(client, rate2.id, 'twopointone', []))
+        must(
+            await updateDraftRate(client, {
+                rateID: rate2.id,
+                formData: { rateCertificationName: 'twopointone' },
+                contractIDs: [],
+            })
+        )
         must(await submitRate(client, rate2.id, stateUser.id, '2.1 remove'))
 
         // update rate 1 to have a new version, should make one new rev.
         must(await unlockRate(client, rate1.id, cmsUser.id, 'unlock for 1.1'))
         must(
-            await updateDraftRate(client, rate1.id, 'onepointone', [
-                contractA.id,
-            ])
+            await updateDraftRate(client, {
+                rateID: rate1.id,
+                formData: { rateCertificationName: 'onepointone' },
+                contractIDs: [contractA.id],
+            })
         )
         must(await submitRate(client, rate1.id, stateUser.id, '1.1 new name'))
 
