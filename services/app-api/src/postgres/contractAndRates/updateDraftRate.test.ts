@@ -3,7 +3,7 @@ import { insertDraftRate } from './insertRate'
 import { must } from '../../testHelpers'
 import { updateDraftRate } from './updateDraftRate'
 import { PrismaClientValidationError } from '@prisma/client/runtime/library'
-import { RateType } from '@prisma/client'
+import type { RateType } from '@prisma/client'
 
 describe('updateDraftRate', () => {
     it('updates drafts correctly', async () => {

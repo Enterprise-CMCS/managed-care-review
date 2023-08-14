@@ -33,7 +33,7 @@ const rateFormDataSchema = z.object({
 // A Rate represents all the data associated with a single rate certification over time.
 // The rate's revisions field hold the array of rate revisions that show change history of specific rate data
 // The first revision (array index 0) is the current revision
-const ratesRevisionSchema = z.object({
+const rateRevisionSchema = z.object({
     id: z.string().uuid(),
     submitInfo: updateInfoSchema.optional(),
     unlockInfo: updateInfoSchema.optional(),
@@ -42,7 +42,7 @@ const ratesRevisionSchema = z.object({
     formData: rateFormDataSchema,
 })
 
-const rateRevisionWithContractsSchema = ratesRevisionSchema.extend({
+const rateRevisionWithContractsSchema = rateRevisionSchema.extend({
     contractRevisions: z.array(contractRevisionSchema),
 })
 
@@ -51,17 +51,27 @@ const rateSchema = z.object({
     status: z.union([z.literal('SUBMITTED'), z.literal('DRAFT')]),
     stateCode: z.string(),
     stateNumber: z.number().min(1),
+     // If this rate is in a DRAFT or UNLOCKED status, there will be a draftRevision
+     draftRevision: rateRevisionWithContractsSchema.optional(),
+     // All revisions are submitted and in reverse chronological order
     revisions: z.array(rateRevisionWithContractsSchema),
 })
 
+const draftRateSchema = rateSchema.extend({
+    status: z.literal('DRAFT'),
+    revisions: z.array(rateRevisionWithContractsSchema).min(1),
+})
 type RateType = z.infer<typeof rateSchema>
-type RateRevisionType = z.infer<typeof ratesRevisionSchema>
+type RateRevisionType = z.infer<typeof rateRevisionSchema>
 type RateRevisionWithContractsType = z.infer<
     typeof rateRevisionWithContractsSchema
 >
 type RateFormDataType = z.infer<typeof rateFormDataSchema>
 
-export { ratesRevisionSchema }
+export {   rateRevisionSchema,
+    rateRevisionWithContractsSchema,
+    draftRateSchema,
+    rateSchema}
 
 export type {
     RateType,

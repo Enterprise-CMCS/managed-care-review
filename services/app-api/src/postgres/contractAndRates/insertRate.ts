@@ -1,35 +1,13 @@
 import type {
-    ActuaryCommunication,
-    ActuaryContact,
-    PrismaClient,
-    RateCapitationType,
-    RateDocument,
-    RateSupportingDocument,
-} from '@prisma/client'
-import type {
     StateCodeType,
-    RateType as DomainRateType,
 } from 'app-web/src/common-code/healthPlanFormDataType'
 import type { RateType } from '../../domain-models/contractAndRates'
 import { parseRateWithHistory } from './parseRateWithHistory'
 import { includeFullRate } from './prismaSubmittedRateHelpers'
+import type { PrismaClient } from '@prisma/client'
+import type { RateFormEditable } from './updateDraftRate'
 
-type RateFormEditable = {
-    rateType?: DomainRateType
-    rateCapitationType?: RateCapitationType
-    rateDocuments?: RateDocument[]
-    supportingDocuments?: RateSupportingDocument[]
-    rateDateStart?: Date
-    rateDateEnd?: Date
-    rateDateCertified?: Date
-    amendmentEffectiveDateStart?: Date
-    amendmentEffectiveDateEnd?: Date
-    rateProgramIDs?: string[]
-    rateCertificationName?: string
-    certifyingActuaryContacts?: ActuaryContact[]
-    addtlActuaryContacts?: ActuaryContact[]
-    actuaryCommunicationPreference?: ActuaryCommunication
-}
+
 type InsertRateArgsType = RateFormEditable & {
     stateCode: StateCodeType
 }
@@ -107,7 +85,7 @@ async function insertDraftRate(
             return parseRateWithHistory(rate)
         })
     } catch (err) {
-        console.error('RATE PRISMA ERR', err)
+        console.error('Prisma error inserting rate', err)
         return err
     }
 }

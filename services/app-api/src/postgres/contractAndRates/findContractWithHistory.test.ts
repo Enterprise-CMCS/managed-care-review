@@ -593,13 +593,13 @@ describe('findContract', () => {
         const rate2 = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                rateCertificationName: 'twopointo',
+                rateCertificationName: 'twopoint0',
             })
         )
         must(
             await updateDraftRate(client, {
                 rateID: rate2.id,
-                formData: { rateCertificationName: 'wopointo' },
+                formData: { rateCertificationName: 'twopointo' },
                 contractIDs: [],
             })
         )

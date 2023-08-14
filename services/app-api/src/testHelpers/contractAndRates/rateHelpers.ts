@@ -1,14 +1,9 @@
-import { State } from '@prisma/client'
-import { must } from '../errorHelpers'
-import { PrismaClient } from '@prisma/client'
-import { v4 as uuidv4 } from 'uuid'
-import { InsertRateArgsType } from '../../postgres/contractAndRates/insertRate'
-import {
-    DraftRateRevisionTableWithRelations,
-    DraftRateTableWithRelations,
-} from '../../postgres/contractAndRates/prismaDraftContractHelpers'
-import { RateRevisionTableWithContracts, RateTableWithRelations } from '../../postgres/contractAndRates/prismaSubmittedRateHelpers'
 
+import { must } from '../errorHelpers'
+import { v4 as uuidv4 } from 'uuid'
+import type { PrismaClient,State } from '@prisma/client'
+import type { InsertRateArgsType } from '../../postgres/contractAndRates/insertRate'
+import type { RateTableFullPayload, RateRevisionTableWithContracts } from '../../postgres/contractAndRates/prismaSubmittedRateHelpers'
 const createInsertRateData = (
     rateArgs?: Partial<InsertRateArgsType>
 ): InsertRateArgsType => {
@@ -38,8 +33,8 @@ const getStateRecord = async (
 }
 
 const createDraftRateData = (
-    rate?: Partial<DraftRateTableWithRelations>
-): DraftRateTableWithRelations => ({
+    rate?: Partial<RateTableFullPayload>
+): RateTableFullPayload=> ({
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -49,14 +44,14 @@ const createDraftRateData = (
         createRateRevision({
             contractRevisions: undefined,
             submitInfo: null,
-        }) as DraftRateRevisionTableWithRelations,
+        }) as RateRevisionTableWithContracts,
     ],
     ...rate,
 })
 
 const createRateData = (
-    rate?: Partial<RateTableWithRelations>
-): RateTableWithRelations => ({
+    rate?: Partial<RateTableFullPayload>
+): RateTableFullPayload => ({
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -72,11 +67,10 @@ const createRateData = (
 
 const createRateRevision = (
     revision?: Partial<
-    RateRevisionTableWithContracts  | DraftRateRevisionTableWithRelations
+    RateRevisionTableWithContracts
     >
 ):
-    | RateRevisionTableWithContracts
-    | DraftRateRevisionTableWithRelations => ({
+    RateRevisionTableWithContracts => ({
     id: uuidv4(),
     createdAt: new Date(),
     updatedAt: new Date(),

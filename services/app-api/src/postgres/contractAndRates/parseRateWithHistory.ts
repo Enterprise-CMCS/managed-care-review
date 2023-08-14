@@ -1,7 +1,9 @@
 import type {
     RateRevisionWithContractsType,
     RateType,
+    RateRevisionType
 } from '../../domain-models/contractAndRates'
+import { rateSchema } from '../../domain-models/contractAndRates'
 import { contractRevisionsToDomainModels } from './parseContractWithHistory'
 import { draftRateRevToDomainModel } from './prismaDraftRatesHelpers'
 import type {
@@ -12,12 +14,33 @@ import type {
 import {
     convertUpdateInfoToDomainModel,
     getContractStatus,
-    rateReivisionToDomainModel,
+    rateFormDataToDomainModel,
 } from './prismaSharedContractRateHelpers'
 import type { RateTableFullPayload } from './prismaSubmittedRateHelpers'
 
-// this is for the internal building of individual revisions
-// we convert them into RateRevisons to return them
+function parseRateWithHistory(rate: RateTableFullPayload): RateType | Error {
+    const rateWithHistory = rateWithHistoryToDomainModel(rate)
+
+    if (rateWithHistory instanceof Error) {
+        console.warn(
+            `ERROR: attempting to parse prisma rate with history failed: ${rateWithHistory.message}`
+        )
+        return rateWithHistory
+    }
+
+    const parseRate = rateSchema.safeParse(rateWithHistory)
+
+    if (!parseRate.success) {
+        const error = `ERROR: attempting to parse prisma contract with history failed: ${parseRate.error}`
+        console.warn(error)
+        return parseRate.error
+    }
+
+    return parseRate.data
+}
+
+// RateRevisionSet is for the internal building of individual revisions
+// we convert them into RateRevisions to return them
 interface RateRevisionSet {
     rateRev: RateRevisionTableWithFormData
     submitInfo: UpdateInfoTableWithUpdater
@@ -29,7 +52,7 @@ function rateSetsToDomainModel(
     entries: RateRevisionSet[]
 ): RateRevisionWithContractsType[] {
     const revisions = entries.map((entry) => ({
-        ...rateReivisionToDomainModel(entry.rateRev),
+        ...rateRevisionToDomainModel(entry.rateRev),
 
         contractRevisions: contractRevisionsToDomainModels(entry.contractRevs),
 
@@ -40,9 +63,32 @@ function rateSetsToDomainModel(
 
     return revisions
 }
+function rateRevisionToDomainModel(
+    revision: RateRevisionTableWithFormData
+): RateRevisionType {
+    return {
+        id: revision.id,
+        createdAt: revision.createdAt,
+        updatedAt: revision.updatedAt,
+        submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
+        unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
 
-function parseRateWithHistory(rate: RateTableFullPayload): RateType | Error {
-    // so you get all the rate revisions. each one has a bunch of contracts
+        formData: rateFormDataToDomainModel(revision),
+    }
+}
+
+function rateRevisionsToDomainModels(
+    rateRevisions: RateRevisionTableWithFormData[]
+): RateRevisionType[] {
+    return rateRevisions.map((crev) => rateRevisionToDomainModel(crev))
+}
+
+// rateWithHistoryToDomainModel constructs a history for this particular contract including changes to all of its
+// revisions and all related rate revisions, including added and removed rates
+function rateWithHistoryToDomainModel(
+    rate: RateTableFullPayload
+): RateType | Error {
+      // so you get all the rate revisions. each one has a bunch of contracts
     // each set of contracts gets its own "revision" in the return list
     // further rateRevs naturally are their own "revision"
 
@@ -118,18 +164,19 @@ function parseRateWithHistory(rate: RateTableFullPayload): RateType | Error {
         }
     }
 
-    const allRevisions: RateRevisionWithContractsType[] =
-        rateSetsToDomainModel(allEntries)
+    const revisions = rateSetsToDomainModel(allEntries).reverse()
 
-    const finalRate: RateType = {
+    return {
         id: rate.id,
         status: getContractStatus(rate.revisions),
         stateCode: rate.stateCode,
         stateNumber: rate.stateNumber,
-        revisions: allRevisions.reverse(),
+        draftRevision,
+        revisions
     }
-
-    return finalRate
 }
-
-export { parseRateWithHistory }
+export {
+    parseRateWithHistory,
+    rateRevisionToDomainModel,
+    rateRevisionsToDomainModels,
+}

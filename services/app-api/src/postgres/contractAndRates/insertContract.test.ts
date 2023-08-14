@@ -6,19 +6,25 @@ import {
 } from '../../testHelpers'
 import { insertDraftContract } from './insertContract'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
-import { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 
 describe('insertContract', () => {
+    afterEach( () => {
+        jest.clearAllMocks()
+    })
+
+
     it('creates a new draft contract', async () => {
         const client = await sharedTestPrismaClient()
 
         // create a draft contract
-        const draftContractData = createInsertContractData({})
+        const draftContractData = createInsertContractData({contractType:'BASE'})
         const draftContract = must(
             await insertDraftContract(client, draftContractData)
         )
 
-        // Expect a single contract revision
+        // Expect a new draft contract to have a draftRevision no submitted revisions
+        expect(draftContract.draftRevision).toBeDefined()
         expect(draftContract.revisions).toHaveLength(0)
 
         // Expect draft contract to contain expected data.
@@ -72,6 +78,7 @@ describe('insertContract', () => {
         )
     })
     it('returns an error when invalid state code is provided', async () => {
+        jest.spyOn(console, 'error').mockImplementation()
         const client = await sharedTestPrismaClient()
 
         const draftContractData = createInsertContractData({
@@ -84,5 +91,6 @@ describe('insertContract', () => {
 
         // Expect a prisma error
         expect(draftContract).toBeInstanceOf(PrismaClientKnownRequestError)
+        expect(console.error).toHaveBeenCalled()
     })
 })

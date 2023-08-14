@@ -180,8 +180,8 @@ function contractWithHistoryToDomainModel(
         status: getContractStatus(contract.revisions),
         stateCode: contract.stateCode,
         stateNumber: contract.stateNumber,
-        draftRevision: draftRevision,
-        revisions: revisions,
+        draftRevision,
+        revisions
     }
 }
 

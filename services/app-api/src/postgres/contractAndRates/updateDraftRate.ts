@@ -1,21 +1,35 @@
-import type { PrismaClient } from '@prisma/client'
+import type {
+    ActuaryCommunication,
+    ActuaryContact,
+    PrismaClient,
+    RateCapitationType,
+    RateDocument,
+    RateSupportingDocument,
+    RateType as PrismaRateType
+} from '@prisma/client'
+import { findRateWithHistory } from './findRateWithHistory'
 import type { RateType } from '../../domain-models/contractAndRates'
-import type { RateFormEditable } from './insertRate'
-import {
-    contractFormDataToDomainModel,
-    includeUpdateInfo,
-    rateFormDataToDomainModel,
-} from './prismaSharedContractRateHelpers'
-
+import type { NotFoundError } from '../storeError'
 // Update the given draft
 // * can change the set of draftRates
 // * set the formData
 
-/*
-     8.14.23 Hana Note - this is now a temporary implementation as entire function. We intend to
-     - handle updateRate as a single query on the RateTable (not rate revision)
-     - use similar behavior to updateContract via a shared find with history helper
-*/
+type RateFormEditable = {
+    rateType?: PrismaRateType
+    rateCapitationType?: RateCapitationType
+    rateDocuments?: RateDocument[]
+    supportingDocuments?: RateSupportingDocument[]
+    rateDateStart?: Date
+    rateDateEnd?: Date
+    rateDateCertified?: Date
+    amendmentEffectiveDateStart?: Date
+    amendmentEffectiveDateEnd?: Date
+    rateProgramIDs?: string[]
+    rateCertificationName?: string
+    certifyingActuaryContacts?: ActuaryContact[]
+    addtlActuaryContacts?: ActuaryContact[]
+    actuaryCommunicationPreference?: ActuaryCommunication
+}
 
 type UpdateRateArgsType = {
     rateID: string
@@ -26,7 +40,7 @@ type UpdateRateArgsType = {
 async function updateDraftRate(
     client: PrismaClient,
     args: UpdateRateArgsType
-): Promise<RateType | Error> {
+): Promise<RateType | NotFoundError | Error> {
     const { rateID, formData, contractIDs } = args
     const {
         rateType,
@@ -111,68 +125,8 @@ async function updateDraftRate(
             },
         })
 
-        const updatedRate = await client.rateTable.findFirst({
-            where: {
-                id: rateID,
-            },
-            include: {
-                revisions: {
-                    include: {
-                        rateDocuments: true,
-                        supportingDocuments: true,
-                        certifyingActuaryContacts: true,
-                        addtlActuaryContacts: true,
-                        submitInfo: includeUpdateInfo,
-                        draftContracts: {
-                            include: {
-                                revisions: {
-                                    include: {
-                                        contractDocuments: true,
-                                        supportingDocuments: true,
-                                        stateContacts: true,
-                                        draftRates: true,
-                                    },
-                                    where: {
-                                        submitInfoID: { not: null },
-                                    },
-                                    take: 1,
-                                    orderBy: {
-                                        createdAt: 'desc',
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        })
 
-        if (!updatedRate) {
-            console.error('No updated rate!')
-            return new Error('No updated rate!')
-        }
-        const finalRate: RateType = {
-            id: updatedRate.id,
-            status: 'DRAFT',
-            stateCode: updatedRate.stateCode,
-            stateNumber: updatedRate.stateNumber,
-            revisions: updatedRate.revisions.map((rr) => ({
-                id: rr.id,
-                createdAt: rr.createdAt,
-                updatedAt: rr.updatedAt,
-                formData: rateFormDataToDomainModel(rr),
-
-                contractRevisions: rr.draftContracts.map((contract) => ({
-                    id: contract.id,
-                    createdAt: contract.createdAt,
-                    updatedAt: contract.updatedAt,
-                    formData: contractFormDataToDomainModel(
-                        contract.revisions[0]
-                    ),
-                })),
-            })),
-        }
-        return finalRate
+        return findRateWithHistory(client, rateID)
     } catch (err) {
         console.error('SUBMIT PRISMA ATe ERR', err)
         return err
@@ -180,3 +134,4 @@ async function updateDraftRate(
 }
 
 export { updateDraftRate }
+export type {RateFormEditable}

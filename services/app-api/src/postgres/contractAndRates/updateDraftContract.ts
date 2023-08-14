@@ -53,12 +53,6 @@ type UpdateContractArgsType = {
     formData: ContractFormEditable
     rateIDs: string[]
 }
-
-/*
-     8.14.23 Hana Note - this is now a  temporary implementation as types. We still intend to
-     - handle updateContract as a single query on the ContractTable (not contract revision)
-*/
-
 // Update the given draft
 // * can change the set of draftRates
 // * set the formData
