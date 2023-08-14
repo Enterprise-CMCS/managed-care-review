@@ -66,9 +66,9 @@ describe('findDraftContract', () => {
         )
         must(
             await updateDraftContract(
-                client,
-                contractA.id,
-                {
+                client,{
+                contractID: contractA.id,
+                formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'one contract',
                     contractType: 'BASE',
@@ -76,7 +76,7 @@ describe('findDraftContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                [rate1.id, rate2.id]
+                rateIDs: [rate1.id, rate2.id]}
             )
         )
 
@@ -174,8 +174,9 @@ describe('findDraftContract', () => {
         must(
             await updateDraftContract(
                 client,
-                contractA.id,
-                {
+               {
+                contractID: contractA.id,
+                formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'one contract',
                     contractType: 'BASE',
@@ -183,7 +184,7 @@ describe('findDraftContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                [rate1.id, rate2.id]
+                rateIDs: [rate1.id, rate2.id]}
             )
         )
 
@@ -234,8 +235,9 @@ describe('findDraftContract', () => {
         must(
             await updateDraftContract(
                 client,
-                contractA.id,
                 {
+                    contractID: contractA.id,
+                formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'first draft',
                     contractType: 'BASE',
@@ -243,7 +245,7 @@ describe('findDraftContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                []
+                rateIDs: []}
             )
         )
         must(
@@ -266,8 +268,9 @@ describe('findDraftContract', () => {
         must(
             await updateDraftContract(
                 client,
-                contractA.id,
                 {
+                    contractID: contractA.id,
+                formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'draft Edit',
                     contractType: 'BASE',
@@ -275,7 +278,7 @@ describe('findDraftContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                []
+                rateIDs: []}
             )
         )
 

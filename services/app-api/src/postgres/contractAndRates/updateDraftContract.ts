@@ -15,13 +15,13 @@ import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../storeError'
 
 type ContractFormEditable = {
-    submissionType: SubmissionType
-    submissionDescription: string
-    programIDs: string[]
-    populationCovered: PopulationCoverageType
-    riskBasedContract: boolean
+    submissionType?: SubmissionType
+    submissionDescription?: string
+    programIDs?: string[]
+    populationCovered?: PopulationCoverageType
+    riskBasedContract?: boolean
     stateContacts?: StateContact[]
-    supportingDocuments: ContractSupportingDocument[]
+    supportingDocuments?: ContractSupportingDocument[]
     contractType?: PrismaContractType
     contractExecutionStatus?: ContractExecutionStatus
     contractDocuments?: ContractDocument[]
@@ -184,3 +184,4 @@ async function updateDraftContract(
 }
 
 export { updateDraftContract }
+export type {ContractFormEditable}

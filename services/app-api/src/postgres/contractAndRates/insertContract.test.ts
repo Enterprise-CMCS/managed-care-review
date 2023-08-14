@@ -6,13 +6,14 @@ import {
 } from '../../testHelpers'
 import { insertDraftContract } from './insertContract'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+import { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 
 describe('insertContract', () => {
     it('creates a new draft contract', async () => {
         const client = await sharedTestPrismaClient()
 
         // create a draft contract
-        const draftContractData = createInsertContractData()
+        const draftContractData = createInsertContractData({})
         const draftContract = must(
             await insertDraftContract(client, draftContractData)
         )
@@ -75,7 +76,7 @@ describe('insertContract', () => {
         const client = await sharedTestPrismaClient()
 
         const draftContractData = createInsertContractData({
-            stateCode: 'CANADA',
+            stateCode: 'CANADA' as StateCodeType,
         })
         const draftContract = await insertDraftContract(
             client,
