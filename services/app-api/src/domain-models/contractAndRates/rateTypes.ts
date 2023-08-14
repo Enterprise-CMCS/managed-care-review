@@ -2,13 +2,66 @@ import { z } from 'zod'
 import {
     actuaryCommunicationTypeSchema,
     actuaryContactSchema,
+    contractExecutionStatusSchema,
+    contractTypeSchema,
+    federalAuthoritySchema,
+    populationCoveredSchema,
     rateCapitationTypeSchema,
     rateTypeSchema,
     sharedRateCertDisplay,
+    stateContactSchema,
     submissionDocumentSchema,
+    submissionTypeSchema,
 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
-import { contractRevisionSchema } from './contractTypes'
 import { updateInfoSchema } from './updateInfoType'
+
+// hacky workaround - importing from contract types is causing circular imports and this error
+// https://github.com/colinhacks/zod/issues/643#issuecomment-1015277287
+// we should resolve this issue to avoid duplicating efforts but hardcoding it for now to make progress
+
+const _contractFormDataSchema = z.object({
+    programIDs: z.array(z.string()),
+    populationCovered: populationCoveredSchema.optional(),
+    submissionType: submissionTypeSchema,
+    riskBasedContract: z.boolean().optional(),
+    submissionDescription: z.string(),
+    stateContacts: z.array(stateContactSchema),
+    supportingDocuments: z.array(submissionDocumentSchema),
+    contractType: contractTypeSchema,
+    contractExecutionStatus: contractExecutionStatusSchema.optional(),
+    contractDocuments: z.array(submissionDocumentSchema),
+    contractDateStart: z.date().optional(),
+    contractDateEnd: z.date().optional(),
+    managedCareEntities: z.array(z.string()),
+    federalAuthorities: z.array(federalAuthoritySchema),
+    inLieuServicesAndSettings: z.boolean().optional(),
+    modifiedBenefitsProvided: z.boolean().optional(),
+    modifiedGeoAreaServed: z.boolean().optional(),
+    modifiedMedicaidBeneficiaries: z.boolean().optional(),
+    modifiedRiskSharingStrategy: z.boolean().optional(),
+    modifiedIncentiveArrangements: z.boolean().optional(),
+    modifiedWitholdAgreements: z.boolean().optional(),
+    modifiedStateDirectedPayments: z.boolean().optional(),
+    modifiedPassThroughPayments: z.boolean().optional(),
+    modifiedPaymentsForMentalDiseaseInstitutions: z.boolean().optional(),
+    modifiedMedicalLossRatioStandards: z.boolean().optional(),
+    modifiedOtherFinancialPaymentIncentive: z.boolean().optional(),
+    modifiedEnrollmentProcess: z.boolean().optional(),
+    modifiedGrevienceAndAppeal: z.boolean().optional(),
+    modifiedNetworkAdequacyStandards: z.boolean().optional(),
+    modifiedLengthOfContract: z.boolean().optional(),
+    modifiedNonRiskPaymentArrangements: z.boolean().optional(),
+})
+// importing here bc of circular imports error
+const _contractRevisionSchema = z.object({
+    id: z.string().uuid(),
+    submitInfo: updateInfoSchema.optional(),
+    unlockInfo: updateInfoSchema.optional(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+    formData: _contractFormDataSchema,
+})
+//
 
 // The rate form data  is the form filled out by state users submitting rates for review
 const rateFormDataSchema = z.object({
@@ -43,7 +96,7 @@ const rateRevisionSchema = z.object({
 })
 
 const rateRevisionWithContractsSchema = rateRevisionSchema.extend({
-    contractRevisions: z.array(contractRevisionSchema),
+    contractRevisions: z.array(_contractRevisionSchema),
 })
 
 const rateSchema = z.object({
@@ -51,9 +104,9 @@ const rateSchema = z.object({
     status: z.union([z.literal('SUBMITTED'), z.literal('DRAFT')]),
     stateCode: z.string(),
     stateNumber: z.number().min(1),
-     // If this rate is in a DRAFT or UNLOCKED status, there will be a draftRevision
-     draftRevision: rateRevisionWithContractsSchema.optional(),
-     // All revisions are submitted and in reverse chronological order
+    // If this rate is in a DRAFT or UNLOCKED status, there will be a draftRevision
+    draftRevision: rateRevisionWithContractsSchema.optional(),
+    // All revisions are submitted and in reverse chronological order
     revisions: z.array(rateRevisionWithContractsSchema),
 })
 
@@ -68,10 +121,12 @@ type RateRevisionWithContractsType = z.infer<
 >
 type RateFormDataType = z.infer<typeof rateFormDataSchema>
 
-export {   rateRevisionSchema,
+export {
+    rateRevisionSchema,
     rateRevisionWithContractsSchema,
     draftRateSchema,
-    rateSchema}
+    rateSchema,
+}
 
 export type {
     RateType,
