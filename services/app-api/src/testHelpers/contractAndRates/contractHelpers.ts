@@ -7,19 +7,24 @@ import type {
     ContractRevisionTableWithRates,
     ContractTableFullPayload,
 } from '../../postgres/contractAndRates/prismaSubmittedContractHelpers'
+import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { ContractFormEditable } from '../../postgres/contractAndRates/updateDraftContract'
 
-const createInsertContractData = (
-    contractArgs?: Partial<InsertContractArgsType>
-): InsertContractArgsType => {
+const createInsertContractData = ({
+    stateCode,
+    ...formData
+}: {
+    stateCode?: StateCodeType
+} & Partial<ContractFormEditable>): InsertContractArgsType => {
     return {
-        stateCode: contractArgs?.stateCode ?? 'MN',
-        submissionType: contractArgs?.submissionType ?? 'CONTRACT_AND_RATES',
+        stateCode: stateCode ?? 'MN',
+        submissionType: formData?.submissionType ?? 'CONTRACT_AND_RATES',
         submissionDescription:
-            contractArgs?.submissionDescription ?? 'Contract 1.0',
-        contractType: contractArgs?.contractType ?? 'BASE',
-        programIDs: contractArgs?.programIDs ?? ['PMAP'],
-        populationCovered: contractArgs?.populationCovered ?? 'MEDICAID',
-        riskBasedContract: contractArgs?.riskBasedContract ?? false,
+            formData?.submissionDescription ?? 'Contract 1.0',
+        contractType: formData?.contractType ?? 'BASE',
+        programIDs: formData?.programIDs ?? ['PMAP'],
+        populationCovered: formData?.populationCovered ?? 'MEDICAID',
+        riskBasedContract: formData?.riskBasedContract ?? false,
     }
 }
 

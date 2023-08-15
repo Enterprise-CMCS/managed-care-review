@@ -60,9 +60,9 @@ describe('unlockContract', () => {
         // Connect draft contract to submitted rate
         must(
             await updateDraftContract(
-                client,
-                contract.id,
-                {
+                client,{
+                contractID: contract.id,
+                formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'Connecting rate',
                     contractType: 'BASE',
@@ -70,7 +70,7 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                [rate.id]
+                rateIDs: [rate.id]}
             )
         )
 
@@ -91,7 +91,13 @@ describe('unlockContract', () => {
 
         // Unlock the rate
         must(await unlockRate(client, rate.id, cmsUser.id, 'Unlocking rate'))
-        must(await updateDraftRate(client, rate.id, 'Rate 2.0', []))
+        must(
+            await updateDraftRate(client, {
+                rateID: rate.id,
+                formData: { rateCertificationName: 'Rate 2.0' },
+                contractIDs: [],
+            })
+        )
 
         const resubmittedRate = must(
             await submitRate(client, rate.id, stateUser.id, 'Updated things')
@@ -161,8 +167,8 @@ describe('unlockContract', () => {
         must(
             await updateDraftContract(
                 client,
-                contract.id,
-                {
+                {contractID: contract.id,
+                formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'Connecting rate',
                     contractType: 'BASE',
@@ -170,7 +176,7 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                [rate.id]
+                rateIDs: [rate.id]}
             )
         )
 
@@ -193,7 +199,13 @@ describe('unlockContract', () => {
 
         // Unlock the rate and resubmit rate
         must(await unlockRate(client, rate.id, cmsUser.id, 'Unlocking rate'))
-        must(await updateDraftRate(client, rate.id, 'Rate 2.0', [contract.id]))
+        must(
+            await updateDraftRate(client, {
+                rateID: rate.id,
+                formData: { rateCertificationName: 'Rate 2.0' },
+                contractIDs: [contract.id],
+            })
+        )
         const resubmittedRate = must(
             await submitRate(client, rate.id, stateUser.id, 'Rate resubmit')
         )
@@ -254,8 +266,9 @@ describe('unlockContract', () => {
         must(
             await updateDraftContract(
                 client,
-                contract.id,
                 {
+                contractID: contract.id,
+                formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'contract 1.0',
                     contractType: 'BASE',
@@ -263,7 +276,7 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                [rate.id]
+                rateIDs: [rate.id]}
             )
         )
 
@@ -299,8 +312,8 @@ describe('unlockContract', () => {
         must(
             await updateDraftContract(
                 client,
-                contract.id,
-                {
+                {contractID: contract.id,
+                formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'contract 2.0',
                     contractType: 'BASE',
@@ -308,7 +321,7 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                [rate.id]
+                rateIDs: [rate.id]}
             )
         )
         const resubmittedContract = must(
@@ -359,8 +372,9 @@ describe('unlockContract', () => {
         must(
             await updateDraftContract(
                 client,
-                contract.id,
-                {
+               {
+                contractID:  contract.id,
+                formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'contract 1.0',
                     contractType: 'BASE',
@@ -368,7 +382,7 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                [rate.id]
+                rateIDs: [rate.id]}
             )
         )
 

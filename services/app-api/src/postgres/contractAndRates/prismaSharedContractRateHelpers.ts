@@ -124,7 +124,7 @@ function rateFormDataToDomainModel(
     }
 }
 
-function rateReivisionToDomainModel(
+function rateRevisionToDomainModel(
     revision: RateRevisionTableWithFormData
 ): RateRevisionType {
     return {
@@ -141,7 +141,7 @@ function rateReivisionToDomainModel(
 function ratesRevisionsToDomainModel(
     rateRevisions: RateRevisionTableWithFormData[]
 ): RateRevisionType[] {
-    return rateRevisions.map((rrev) => rateReivisionToDomainModel(rrev))
+    return rateRevisions.map((rrev) => rateRevisionToDomainModel(rrev))
 }
 
 // ------
@@ -256,6 +256,6 @@ export {
     convertUpdateInfoToDomainModel,
     contractFormDataToDomainModel,
     rateFormDataToDomainModel,
-    rateReivisionToDomainModel,
+    rateRevisionToDomainModel,
     ratesRevisionsToDomainModel,
 }

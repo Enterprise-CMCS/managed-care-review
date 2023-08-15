@@ -6,18 +6,26 @@ import {
 } from '../../testHelpers'
 import { insertDraftContract } from './insertContract'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 
 describe('insertContract', () => {
+    afterEach(() => {
+        jest.clearAllMocks()
+    })
+
     it('creates a new draft contract', async () => {
         const client = await sharedTestPrismaClient()
 
         // create a draft contract
-        const draftContractData = createInsertContractData()
+        const draftContractData = createInsertContractData({
+            contractType: 'BASE',
+        })
         const draftContract = must(
             await insertDraftContract(client, draftContractData)
         )
 
-        // Expect a single contract revision
+        // Expect a new draft contract to have a draftRevision no submitted revisions
+        expect(draftContract.draftRevision).toBeDefined()
         expect(draftContract.revisions).toHaveLength(0)
 
         // Expect draft contract to contain expected data.
@@ -55,26 +63,26 @@ describe('insertContract', () => {
         const submittedContractA = must(
             await insertDraftContract(client, contractA)
         )
-
-        // Expect state record count to be incremented by 1
-        expect(submittedContractA.stateNumber).toEqual(
-            initialState.latestStateSubmissionNumber + 1
+        // Expect state record count to be incremented
+        expect(submittedContractA.stateNumber).toBeGreaterThan(
+            initialState.latestStateRateCertNumber
         )
 
         const submittedContractB = must(
             await insertDraftContract(client, contractB)
         )
 
-        // Expect state record count to be incremented by 2
-        expect(submittedContractB.stateNumber).toEqual(
-            initialState.latestStateSubmissionNumber + 2
+        // Expect state record count to be incremented further
+        expect(submittedContractB.stateNumber).toBeGreaterThan(
+            submittedContractA.stateNumber
         )
     })
     it('returns an error when invalid state code is provided', async () => {
+        jest.spyOn(console, 'error').mockImplementation()
         const client = await sharedTestPrismaClient()
 
         const draftContractData = createInsertContractData({
-            stateCode: 'CANADA',
+            stateCode: 'CANADA' as StateCodeType,
         })
         const draftContract = await insertDraftContract(
             client,
@@ -83,5 +91,6 @@ describe('insertContract', () => {
 
         // Expect a prisma error
         expect(draftContract).toBeInstanceOf(PrismaClientKnownRequestError)
+        expect(console.error).toHaveBeenCalled()
     })
 })

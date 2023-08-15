@@ -18,7 +18,7 @@ async function findContractWithHistory(
                 id: contractID,
             },
             include: includeFullContract,
-        })
+    })
 
         if (!contract) {
             const err = `PRISMA ERROR: Cannot find contract with id: ${contractID}`

@@ -4,6 +4,10 @@ import { NotFoundError } from '../storeError'
 import { includeFullRate } from './prismaSubmittedRateHelpers'
 import { parseRateWithHistory } from './parseRateWithHistory'
 
+// findRateWithHistory returns a RateType with a full set of
+// RateRevisions in reverse chronological order. Each revision is a change to this
+// Rate with submit and unlock info. Changes to the data of this rate, or changes
+// to the data or relations of associate revisions will all surface as new RateRevision
 async function findRateWithHistory(
     client: PrismaTransactionType,
     rateID: string

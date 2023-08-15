@@ -6,7 +6,7 @@ import type {
 import {
     contractFormDataToDomainModel,
     includeUpdateInfo,
-    rateReivisionToDomainModel,
+    rateRevisionToDomainModel,
 } from './prismaSharedContractRateHelpers'
 import type { ContractRevisionTableWithRates } from './prismaSubmittedContractHelpers'
 
@@ -34,7 +34,7 @@ type DraftRatesTable = Prisma.RateTableGetPayload<{
 function draftRatesToDomainModel(
     draftRates: DraftRatesTable[]
 ): RateRevisionType[] {
-    return draftRates.map((dr) => rateReivisionToDomainModel(dr.revisions[0]))
+    return draftRates.map((dr) => rateRevisionToDomainModel(dr.revisions[0]))
 }
 
 // -------------------
