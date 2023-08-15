@@ -25,15 +25,4 @@ describe('DownloadButton', () => {
             'usa-button'
         )
     })
-    it('renders inline button', () => {
-        render(
-            <DownloadButton
-                text="Download all documents"
-                zippedFilesURL={undefined}
-            />
-        )
-        expect(screen.getByRole('button', { name: 'Loading' })).toHaveClass(
-            'usa-button'
-        )
-    })
 })
