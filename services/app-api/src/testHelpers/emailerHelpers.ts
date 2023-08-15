@@ -16,18 +16,18 @@ import type { StateUserType } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 import { testSendSESEmail } from './awsSESHelpers'
 
-const testEmailConfig: EmailConfiguration = {
+const testEmailConfig = (): EmailConfiguration => ({
     stage: 'LOCAL',
     baseUrl: 'http://localhost',
     emailSource: 'emailSource@example.com',
     devReviewTeamEmails: ['devreview1@example.com', 'devreview2@example.com'],
     cmsReviewHelpEmailAddress: '"MCOG Example" <mcog@example.com>',
     cmsRateHelpEmailAddress: '"Rates Example" <rates@example.com>',
-    cmsDevTeamHelpEmailAddress: '"MC-Review Example" <mc-review@example.com>',
     oactEmails: ['ratesreview@example.com'],
     dmcpEmails: ['policyreview1@example.com'],
     dmcoEmails: ['overallreview@example.com'],
-}
+    helpDeskEmail: '"MC-Review Help Desk" <MC_Review_HelpDesk@example.com>',
+})
 
 const testDuplicateEmailConfig: EmailConfiguration = {
     stage: 'LOCAL',
@@ -40,10 +40,10 @@ const testDuplicateEmailConfig: EmailConfiguration = {
     ],
     cmsReviewHelpEmailAddress: 'duplicate@example.com',
     cmsRateHelpEmailAddress: 'duplicate@example.com',
-    cmsDevTeamHelpEmailAddress: 'duplicate@example.com',
     oactEmails: ['duplicate@example.com', 'duplicate@example.com'],
     dmcpEmails: ['duplicate@example.com', 'duplicate@example.com'],
     dmcoEmails: ['duplicate@example.com', 'duplicate@example.com'],
+    helpDeskEmail: 'duplicate@example.com',
 }
 
 const testStateAnalystsEmails: string[] = [
@@ -57,7 +57,7 @@ const testDuplicateStateAnalystsEmails: string[] = [
 ]
 
 function testEmailer(customConfig?: EmailConfiguration): Emailer {
-    const config = customConfig || testEmailConfig
+    const config = customConfig || testEmailConfig()
     return {
         config,
         sendEmail: jest.fn(
@@ -71,7 +71,6 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
                                 JSON.stringify(err)
                         )
                     }
-
                     return new Error('SES email send failed. Error: ' + err)
                 }
             }

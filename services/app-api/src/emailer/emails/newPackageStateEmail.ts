@@ -50,9 +50,7 @@ export const newPackageStateEmail = async (
         cmsRateHelpEmailAddress: formatEmailAddresses(
             config.cmsRateHelpEmailAddress
         ),
-        cmsDevTeamHelpEmailAddress: formatEmailAddresses(
-            config.cmsDevTeamHelpEmailAddress
-        ),
+        helpDeskEmail: formatEmailAddresses(config.helpDeskEmail),
         packageName,
         submissionType: SubmissionTypeRecord[formData.submissionType],
         submissionDescription: formData.submissionDescription,
@@ -98,6 +96,7 @@ export const newPackageStateEmail = async (
         return {
             toAddresses: receiverEmails,
             sourceEmail: config.emailSource,
+            replyToAddresses: [config.helpDeskEmail],
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
             }${packageName} was sent to CMS`,

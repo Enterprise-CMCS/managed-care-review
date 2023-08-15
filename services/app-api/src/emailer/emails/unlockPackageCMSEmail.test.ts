@@ -62,7 +62,7 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -82,7 +82,7 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -230,7 +230,7 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -306,7 +306,7 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -316,7 +316,7 @@ describe('unlockPackageCMSEmail', () => {
             return
         }
 
-        testEmailConfig.oactEmails.forEach((emailAddress) => {
+        testEmailConfig().oactEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
@@ -324,7 +324,7 @@ describe('unlockPackageCMSEmail', () => {
             )
         })
 
-        testEmailConfig.dmcpEmails.forEach((emailAddress) => {
+        testEmailConfig().dmcpEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
@@ -333,7 +333,7 @@ describe('unlockPackageCMSEmail', () => {
         })
 
         // do not include dmco group emails - rely on state analysts instead
-        testEmailConfig.dmcoEmails.forEach((emailAddress) => {
+        testEmailConfig().dmcoEmails.forEach((emailAddress) => {
             expect(template).not.toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
@@ -346,7 +346,7 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -359,7 +359,7 @@ describe('unlockPackageCMSEmail', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.not.arrayContaining([
-                    testEmailConfig.cmsRateHelpEmailAddress,
+                    testEmailConfig().cmsRateHelpEmailAddress,
                 ]),
             })
         )
@@ -367,7 +367,7 @@ describe('unlockPackageCMSEmail', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.not.arrayContaining([
-                    testEmailConfig.cmsReviewHelpEmailAddress,
+                    testEmailConfig().cmsReviewHelpEmailAddress,
                 ]),
             })
         )
@@ -377,7 +377,7 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -399,14 +399,14 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             defaultStatePrograms
         )
 
         const reviewerEmails = [
-            ...testEmailConfig.devReviewTeamEmails,
-            ...testEmailConfig.oactEmails,
+            ...testEmailConfig().devReviewTeamEmails,
+            ...testEmailConfig().oactEmails,
         ]
 
         if (template instanceof Error) {
@@ -425,14 +425,14 @@ describe('unlockPackageCMSEmail', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.not.arrayContaining([
-                    ...testEmailConfig.cmsRateHelpEmailAddress,
+                    ...testEmailConfig().cmsRateHelpEmailAddress,
                 ]),
             })
         )
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.not.arrayContaining([
-                    ...testEmailConfig.cmsReviewHelpEmailAddress,
+                    ...testEmailConfig().cmsReviewHelpEmailAddress,
                 ]),
             })
         )
@@ -442,7 +442,7 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -465,7 +465,7 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,
-            testEmailConfig,
+            testEmailConfig(),
             [],
             defaultStatePrograms
         )
@@ -475,7 +475,7 @@ describe('unlockPackageCMSEmail', () => {
             return
         }
 
-        const ratesReviewerEmails = [...testEmailConfig.oactEmails]
+        const ratesReviewerEmails = [...testEmailConfig().oactEmails]
         ratesReviewerEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
@@ -489,7 +489,7 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,
-            testEmailConfig,
+            testEmailConfig(),
             [],
             defaultStatePrograms
         )
@@ -516,7 +516,7 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             msStatePrograms
         )
@@ -543,11 +543,11 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,
-            testEmailConfig,
+            testEmailConfig(),
             [],
             msStatePrograms
         )
-        const excludedEmails = [...testEmailConfig.oactEmails]
+        const excludedEmails = [...testEmailConfig().oactEmails]
 
         if (template instanceof Error) {
             console.error(template)
@@ -606,7 +606,7 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,
-            testEmailConfig,
+            testEmailConfig(),
             testStateAnalystEmails,
             msStatePrograms
         )
@@ -661,11 +661,11 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,
-            testEmailConfig,
+            testEmailConfig(),
             [],
             msStatePrograms
         )
-        const excludedEmails = [...testEmailConfig.oactEmails]
+        const excludedEmails = [...testEmailConfig().oactEmails]
 
         if (template instanceof Error) {
             console.error(template)
@@ -692,7 +692,7 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,
-            testEmailConfig,
+            testEmailConfig(),
             [],
             defaultStatePrograms
         )
@@ -714,7 +714,7 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,
-            testEmailConfig,
+            testEmailConfig(),
             [],
             defaultStatePrograms
         )

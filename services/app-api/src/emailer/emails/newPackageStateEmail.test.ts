@@ -11,6 +11,7 @@ import {
     packageName,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { newPackageStateEmail } from './index'
+import { formatEmailAddresses } from '../formatters'
 
 const defaultSubmitters = ['submitter1@example.com', 'submitter2@example.com']
 
@@ -20,7 +21,7 @@ test('to addresses list includes submitter emails', async () => {
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms
     )
 
@@ -56,7 +57,7 @@ test('to addresses list includes all state contacts on submission', async () => 
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms
     )
 
@@ -94,7 +95,7 @@ test('to addresses list does not include duplicate state receiver emails on subm
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms
     )
 
@@ -106,7 +107,7 @@ test('to addresses list does not include duplicate state receiver emails on subm
     expect(template.toAddresses).toEqual([
         'test1@example.com',
         ...defaultSubmitters,
-        ...testEmailConfig.devReviewTeamEmails,
+        ...testEmailConfig().devReviewTeamEmails,
     ])
 })
 
@@ -118,7 +119,7 @@ test('subject line is correct and clearly states submission is complete', async 
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms
     )
 
@@ -145,7 +146,7 @@ test('includes mcog, rate, and team email addresses', async () => {
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms
     )
 
@@ -174,7 +175,9 @@ test('includes mcog, rate, and team email addresses', async () => {
         expect.objectContaining({
             subject: expect.stringContaining(`${name} was sent to CMS`),
             bodyText: expect.stringContaining(
-                `please reach out to mc-review@example.com`
+                `please reach out to ${formatEmailAddresses(
+                    testEmailConfig().helpDeskEmail
+                )}`
             ),
         })
     )
@@ -186,7 +189,7 @@ test('includes link to submission', async () => {
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms
     )
 
@@ -217,7 +220,7 @@ test('includes information about what is next', async () => {
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms
     )
 
@@ -274,7 +277,7 @@ test('includes expected data summary for a contract and rates submission State e
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms
     )
 
@@ -423,7 +426,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms
     )
 
@@ -531,7 +534,7 @@ test('includes expected data summary for a rate amendment submission State email
     const template = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
+        testEmailConfig(),
         statePrograms
     )
 
@@ -612,9 +615,10 @@ test('renders overall email for a new package with a rate amendment as expected'
     const result = await newPackageStateEmail(
         sub,
         defaultSubmitters,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms
     )
+
     if (result instanceof Error) {
         console.error(result)
         return

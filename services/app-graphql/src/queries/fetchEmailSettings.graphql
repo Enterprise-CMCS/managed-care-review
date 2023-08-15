@@ -10,7 +10,7 @@ query fetchEmailSettings {
             dmcoEmails
             cmsReviewHelpEmailAddress
             cmsRateHelpEmailAddress
-            cmsDevTeamHelpEmailAddress
+            helpDeskEmail
         }
         stateAnalysts {
             stateCode
