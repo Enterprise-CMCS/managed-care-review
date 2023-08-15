@@ -24,8 +24,8 @@ import { v4 as uuidv4 } from 'uuid'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
+import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../DocumentWarning'
-
 // Used for refreshed packages names keyed by their package id
 // package name includes (Draft) for draft packages.
 type PackageNameType = string
@@ -43,6 +43,7 @@ export type RateDetailsSummarySectionProps = {
     isCMSUser?: boolean
     submissionName: string
     statePrograms: Program[]
+    onDocumentError?: (error: true) => void
 }
 
 export const RateDetailsSummarySection = ({
@@ -52,6 +53,7 @@ export const RateDetailsSummarySection = ({
     isCMSUser,
     submissionName,
     statePrograms,
+    onDocumentError,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
     // feature flags state management
     const ldClient = useLDClient()
@@ -177,12 +179,12 @@ export const RateDetailsSummarySection = ({
         }
     }
 
-    useEffect(() => {
+    useDeepCompareEffect(() => {
+        // skip getting urls of this if this is a previous submission or draft
+        if (!isSubmitted || isPreviousSubmission) return
+
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
-            // skip getting urls of this if this is a previous submission
-            if (!isSubmitted || isPreviousSubmission) return
-
             const keysFromDocs = submission.rateInfos
                 .flatMap((rateInfo) =>
                     supportingDocsByRate
@@ -210,8 +212,13 @@ export const RateDetailsSummarySection = ({
                 'HEALTH_PLAN_DOCS'
             )
             if (zippedURL instanceof Error) {
-                const msg = `ERROR: getBulkDlURL failed to generate rate document URL. ID: ${submission.id} Error: ${zippedURL}`
+                const msg = `ERROR: getBulkDlURL failed to generate supporting document URL. ID: ${submission.id} Message: ${zippedURL}`
                 console.info(msg)
+
+                if (onDocumentError) {
+                    onDocumentError(true)
+                }
+
                 recordJSException(msg)
             }
 
@@ -229,24 +236,27 @@ export const RateDetailsSummarySection = ({
         isSubmitted,
         isPreviousSubmission,
     ])
+    const renderDownloadButton = () => {
+        if (zippedFilesURL instanceof Error) {
+            return (
+                <InlineDocumentWarning message="Rate document download is unavailable" />
+            )
+        }
+        return (
+            <DownloadButton
+                text="Download all rate documents"
+                zippedFilesURL={zippedFilesURL}
+            />
+        )
+    }
 
     return (
         <section id="rateDetails" className={styles.summarySection}>
             <dl>
                 <SectionHeader header="Rate details" navigateTo={navigateTo}>
-                    {zippedFilesURL &&
-                        // If error show error text
-                        (zippedFilesURL instanceof Error ? (
-                            <InlineDocumentWarning
-                                message="Rate document download is unavaiable"
-                                iconType={'Warning'}
-                            />
-                        ) : (
-                            <DownloadButton
-                                text="Download all rate documents"
-                                zippedFilesURL={zippedFilesURL}
-                            />
-                        ))}
+                    {isSubmitted &&
+                        !isPreviousSubmission &&
+                        renderDownloadButton()}
                 </SectionHeader>
                 {submission.rateInfos.length > 0 ? (
                     submission.rateInfos.map((rateInfo) => {

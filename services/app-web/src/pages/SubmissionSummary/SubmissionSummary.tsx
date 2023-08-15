@@ -18,6 +18,7 @@ import {
 import {
     SubmissionUnlockedBanner,
     SubmissionUpdatedBanner,
+    DocumentWarningBanner,
 } from '../../components'
 import { usePage } from '../../contexts/PageContext'
 import { UpdateInformation } from '../../gen/gqlClient'
@@ -54,6 +55,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     const { updateHeading } = usePage()
     const modalRef = useRef<ModalRef>(null)
     const [pkgName, setPkgName] = useState<string | undefined>(undefined)
+    const [documentError, setDocumentError] = useState(false)
 
     useEffect(() => {
         updateHeading({ customHeading: pkgName })
@@ -93,6 +95,9 @@ export const SubmissionSummary = (): React.ReactElement => {
     const isContractActionAndRateCertification =
         packageData.submissionType === 'CONTRACT_AND_RATES'
 
+    const handleDocumentDownloadError = (error: boolean) =>
+        setDocumentError(error)
+
     return (
         <div className={styles.background}>
             <GridContainer
@@ -121,6 +126,8 @@ export const SubmissionSummary = (): React.ReactElement => {
                         className={styles.banner}
                     />
                 )}
+
+                {documentError && <DocumentWarningBanner />}
 
                 {!showQuestionResponse && (
                     <Link
@@ -164,6 +171,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     submission={packageData}
                     isCMSUser={isCMSUser}
                     submissionName={packageName(packageData, statePrograms)}
+                    onDocumentError={handleDocumentDownloadError}
                 />
 
                 {isContractActionAndRateCertification && (
@@ -173,12 +181,16 @@ export const SubmissionSummary = (): React.ReactElement => {
                         submissionName={packageName(packageData, statePrograms)}
                         isCMSUser={isCMSUser}
                         statePrograms={statePrograms}
+                        onDocumentError={handleDocumentDownloadError}
                     />
                 )}
 
                 <ContactsSummarySection submission={packageData} />
 
-                <SupportingDocumentsSummarySection submission={packageData} />
+                <SupportingDocumentsSummarySection
+                    submission={packageData}
+                    onDocumentError={handleDocumentDownloadError}
+                />
 
                 <ChangeHistory submission={pkg} />
                 {

@@ -13,6 +13,8 @@ import {
     mockUnlockedHealthPlanPackageWithOldProtos,
     indexHealthPlanPackagesMockSuccess,
     mockValidUser,
+    mockStateSubmission,
+    mockSubmittedHealthPlanPackage,
 } from '../../testHelpers/apolloMocks'
 import {
     ldUseClientSpy,
@@ -21,6 +23,7 @@ import {
 import { SubmissionSummary } from './SubmissionSummary'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import React from 'react'
+import { testS3Client } from '../../testHelpers/s3Helpers'
 
 describe('SubmissionSummary', () => {
     beforeEach(() => {
@@ -200,6 +203,59 @@ describe('SubmissionSummary', () => {
             )
             expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
                 'Reason for unlock: Test unlock reason'
+            )
+        })
+    })
+
+    it('renders document download warning banner', async () => {
+        const s3Provider = {
+            ...testS3Client(),
+            getBulkDlURL: async (
+                keys: string[],
+                fileName: string
+            ): Promise<string | Error> => {
+                return new Error('Error: getBulkDlURL encountered an error')
+            },
+        }
+        const contractAndRate = mockSubmittedHealthPlanPackage(
+            mockStateSubmission()
+        )
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: '15',
+                            stateSubmission: contractAndRate,
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15',
+                },
+                s3Provider,
+            }
+        )
+
+        await waitFor(() => {
+            expect(screen.getByTestId('warning-alert')).toBeInTheDocument()
+            expect(screen.getByTestId('warning-alert')).toHaveClass(
+                'usa-alert--warning'
+            )
+            expect(screen.getByTestId('warning-alert')).toHaveTextContent(
+                'Document download unavailable'
             )
         })
     })
@@ -513,6 +569,7 @@ describe('SubmissionSummary', () => {
             ).toHaveTextContent('Reason for unlock: Test unlock reason')
         })
     })
+
     describe('Outdated submissions', () => {
         it('Jest timezone should already be UTC', () => {
             expect(new Date().getTimezoneOffset()).toBe(0)

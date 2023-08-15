@@ -54,6 +54,7 @@ export {
     SubmissionUpdatedBanner,
     GenericApiErrorBanner,
     QuestionResponseSubmitBanner,
+    DocumentWarningBanner,
 } from './Banner'
 
 export { Modal } from './Modal'

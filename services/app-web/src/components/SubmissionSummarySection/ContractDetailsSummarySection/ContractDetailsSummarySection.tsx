@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
@@ -31,6 +31,7 @@ import {
 } from '../../../common-code/healthPlanFormDataType'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 import { recordJSException } from '../../../otelHelpers'
+import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../DocumentWarning'
 
 export type ContractDetailsSummarySectionProps = {
@@ -39,6 +40,7 @@ export type ContractDetailsSummarySectionProps = {
     documentDateLookupTable: DocumentDateLookupTableType
     isCMSUser?: boolean
     submissionName: string
+    onDocumentError?: (error: true) => void
 }
 
 export const ContractDetailsSummarySection = ({
@@ -47,6 +49,7 @@ export const ContractDetailsSummarySection = ({
     documentDateLookupTable,
     isCMSUser,
     submissionName,
+    onDocumentError,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
     // Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
@@ -68,12 +71,12 @@ export const ContractDetailsSummarySection = ({
         sortModifiedProvisions(submission)
     const provisionsAreInvalid = isMissingProvisions(submission) && isEditing
 
-    useEffect(() => {
+    useDeepCompareEffect(() => {
+        // skip getting urls of this if this is a previous submission or draft
+        if (!isSubmitted(submission) || isPreviousSubmission) return
+
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
-            // skip getting urls of this if this is a previous submission
-            if (!isSubmitted(submission) || isPreviousSubmission) return
-
             const keysFromDocs = submission.contractDocuments
                 .concat(contractSupportingDocuments)
                 .map((doc) => {
@@ -90,8 +93,13 @@ export const ContractDetailsSummarySection = ({
                 'HEALTH_PLAN_DOCS'
             )
             if (zippedURL instanceof Error) {
-                const msg = `ERROR: getBulkDlURL failed to generate contract document URL. ID: ${submission.id} Error: ${zippedURL}`
+                const msg = `ERROR: getBulkDlURL failed to generate contract document URL. ID: ${submission.id} Message: ${zippedURL}`
                 console.info(msg)
+
+                if (onDocumentError) {
+                    onDocumentError(true)
+                }
+
                 recordJSException(msg)
             }
 
@@ -107,19 +115,27 @@ export const ContractDetailsSummarySection = ({
         submissionName,
         isPreviousSubmission,
     ])
+
+    const renderDownloadButton = () => {
+        if (zippedFilesURL instanceof Error) {
+            return (
+                <InlineDocumentWarning message="Contract document download is unavailable" />
+            )
+        }
+        return (
+            <DownloadButton
+                text="Download all contract documents"
+                zippedFilesURL={zippedFilesURL}
+            />
+        )
+    }
+
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>
             <SectionHeader header="Contract details" navigateTo={navigateTo}>
-                {zippedFilesURL &&
-                    // If error show error text
-                    (zippedFilesURL instanceof Error ? (
-                        <InlineDocumentWarning message="Contract document download is unavailable" />
-                    ) : (
-                        <DownloadButton
-                            text="Download all rate documents"
-                            zippedFilesURL={zippedFilesURL}
-                        />
-                    ))}
+                {isSubmitted(submission) &&
+                    !isPreviousSubmission &&
+                    renderDownloadButton()}
             </SectionHeader>
             <dl>
                 <DoubleColumnGrid>

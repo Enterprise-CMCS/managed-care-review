@@ -8,6 +8,9 @@ import {
     HealthPlanFormDataType,
     SubmissionDocument,
 } from '../../../common-code/healthPlanFormDataType'
+import { recordJSException } from '../../../otelHelpers'
+import useDeepCompareEffect from 'use-deep-compare-effect'
+import { InlineDocumentWarning } from '../../DocumentWarning'
 
 type DocumentWithLink = { url: string | null } & SubmissionDocument
 
@@ -15,6 +18,7 @@ export type SupportingDocumentsSummarySectionProps = {
     submission: HealthPlanFormDataType
     navigateTo?: string
     submissionName?: string
+    onDocumentError?: (error: true) => void
 }
 const getUncategorizedDocuments = (
     documents: SubmissionDocument[]
@@ -28,10 +32,13 @@ export const SupportingDocumentsSummarySection = ({
     submission,
     navigateTo,
     submissionName,
+    onDocumentError,
 }: SupportingDocumentsSummarySectionProps): React.ReactElement | null => {
     const { getURL, getKey, getBulkDlURL } = useS3()
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
-    const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
+    const [zippedFilesURL, setZippedFilesURL] = useState<
+        string | undefined | Error
+    >(undefined)
     const isSubmitted = submission.status === 'SUBMITTED'
     useEffect(() => {
         const refreshDocuments = async () => {
@@ -65,7 +72,10 @@ export const SupportingDocumentsSummarySection = ({
         void refreshDocuments()
     }, [submission, getKey, getURL])
 
-    useEffect(() => {
+    useDeepCompareEffect(() => {
+        // skip getting urls of this if this is a previous submission, draft or no uncategorized supporting documents
+        if (!isSubmitted || refreshedDocs.length === 0) return
+
         // get all the keys for the documents we want to zip
         const uncategorizedDocuments = getUncategorizedDocuments(
             submission.documents
@@ -86,16 +96,23 @@ export const SupportingDocumentsSummarySection = ({
                 submissionName + '-supporting-documents.zip',
                 'HEALTH_PLAN_DOCS'
             )
+
             if (zippedURL instanceof Error) {
-                console.info('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
-                return
+                const msg = `ERROR: getBulkDlURL failed to generate contract document URL. ID: ${submission.id} Message: ${zippedURL}`
+                console.info(msg)
+
+                if (onDocumentError) {
+                    onDocumentError(true)
+                }
+
+                recordJSException(msg)
             }
 
             setZippedFilesURL(zippedURL)
         }
 
         void fetchZipUrl()
-    }, [getKey, getBulkDlURL, submission, submissionName])
+    }, [getKey, getBulkDlURL, submission, submissionName, isSubmitted])
 
     const documentsSummary = `${refreshedDocs.length} ${
         refreshedDocs.length === 1 ? 'file' : 'files'
@@ -103,18 +120,27 @@ export const SupportingDocumentsSummarySection = ({
     // when there are no uncategorized supporting documents, remove this section entirely
     if (refreshedDocs.length === 0) return null
 
+    const renderDownloadButton = () => {
+        if (zippedFilesURL instanceof Error) {
+            return (
+                <InlineDocumentWarning message="Supporting document download is unavailable" />
+            )
+        }
+        return (
+            <DownloadButton
+                text="Download all supporting documents"
+                zippedFilesURL={zippedFilesURL}
+            />
+        )
+    }
+
     return (
         <section id="documents" className={styles.summarySection}>
             <SectionHeader
                 header="Supporting documents"
                 navigateTo={navigateTo}
             >
-                {isSubmitted && (
-                    <DownloadButton
-                        text="Download all supporting documents"
-                        zippedFilesURL={zippedFilesURL}
-                    />
-                )}
+                {isSubmitted && renderDownloadButton()}
             </SectionHeader>
             <span className="text-bold">{documentsSummary}</span>
             <ul>

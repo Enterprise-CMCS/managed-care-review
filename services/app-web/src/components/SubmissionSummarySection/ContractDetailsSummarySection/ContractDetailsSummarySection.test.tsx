@@ -7,6 +7,7 @@ import {
     mockStateSubmission,
 } from '../../../testHelpers/apolloMocks'
 import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import { testS3Client } from '../../../testHelpers/s3Helpers'
 
 describe('ContractDetailsSummarySection', () => {
     it('can render draft submission without errors (review and submit behavior)', async () => {
@@ -64,7 +65,7 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeNull()
     })
 
-    it('can render state submission on summary page without errors (submission summary behavior)', () => {
+    it('can render state submission on summary page without errors (submission summary behavior)', async () => {
         renderWithProviders(
             <ContractDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
@@ -83,11 +84,22 @@ describe('ContractDetailsSummarySection', () => {
             })
         ).toBeInTheDocument()
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+
+        //expects loading button on component load
         expect(
-            screen.getByRole('link', {
-                name: 'Download all contract documents',
+            screen.getByRole('button', {
+                name: 'Loading',
             })
         ).toBeInTheDocument()
+
+        // expects download all button after loading has completed
+        await waitFor(() => {
+            expect(
+                screen.getByRole('button', {
+                    name: 'Download all contract documents',
+                })
+            ).toBeInTheDocument()
+        })
     })
 
     it('can render all contract details fields', () => {
@@ -335,6 +347,36 @@ describe('ContractDetailsSummarySection', () => {
         expect(
             await screen.queryByText('1937 Benchmark Authority')
         ).not.toBeInTheDocument()
+    })
+    it('renders inline error when bulk URL is unavailable', async () => {
+        const s3Provider = {
+            ...testS3Client(),
+            getBulkDlURL: async (
+                keys: string[],
+                fileName: string
+            ): Promise<string | Error> => {
+                return new Error('Error: getBulkDlURL encountered an error')
+            },
+        }
+        renderWithProviders(
+            <ContractDetailsSummarySection
+                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
+                submission={{
+                    ...mockStateSubmission(),
+                    status: 'SUBMITTED',
+                }}
+                submissionName="MN-PMAP-0001"
+            />,
+            {
+                s3Provider,
+            }
+        )
+
+        await waitFor(() => {
+            expect(
+                screen.getByText('Contract document download is unavailable')
+            ).toBeInTheDocument()
+        })
     })
     describe('contract provisions', () => {
         it('renders provisions and MLR references for a medicaid amendment', () => {
