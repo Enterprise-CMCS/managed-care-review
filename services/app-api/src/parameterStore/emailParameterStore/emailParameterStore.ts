@@ -8,8 +8,6 @@ import {
     getCmsReviewHelpEmailLocal,
     getCmsRateHelpEmail,
     getCmsRateHelpEmailLocal,
-    getCmsDevTeamHelpEmail,
-    getCmsDevTeamHelpEmailLocal,
     getDMCPEmails,
     getDMCPEmailsLocal,
     getOACTEmails,
@@ -33,7 +31,6 @@ export type EmailParameterStore = {
     getDevReviewTeamEmails: () => Promise<string[] | Error>
     getCmsReviewHelpEmail: () => Promise<string | Error>
     getCmsRateHelpEmail: () => Promise<string | Error>
-    getCmsDevTeamHelpEmail: () => Promise<string | Error>
     getDMCPEmails: () => Promise<string[] | Error>
     getOACTEmails: () => Promise<string[] | Error>
     getDMCOEmails: () => Promise<string[] | Error>
@@ -48,7 +45,6 @@ function newLocalEmailParameterStore(): EmailParameterStore {
         getDevReviewTeamEmails: getDevReviewTeamEmailsLocal,
         getCmsReviewHelpEmail: getCmsReviewHelpEmailLocal,
         getCmsRateHelpEmail: getCmsRateHelpEmailLocal,
-        getCmsDevTeamHelpEmail: getCmsDevTeamHelpEmailLocal,
         getDMCPEmails: getDMCPEmailsLocal,
         getOACTEmails: getOACTEmailsLocal,
         getDMCOEmails: getDMCOEmailsLocal,
@@ -64,7 +60,6 @@ function newAWSEmailParameterStore(): EmailParameterStore {
         getDevReviewTeamEmails: getDevReviewTeamEmails,
         getCmsReviewHelpEmail: getCmsReviewHelpEmail,
         getCmsRateHelpEmail: getCmsRateHelpEmail,
-        getCmsDevTeamHelpEmail: getCmsDevTeamHelpEmail,
         getDMCOEmails: getDMCOEmails,
         getDMCPEmails: getDMCPEmails,
         getOACTEmails: getOACTEmails,

@@ -149,8 +149,8 @@ const EmailsSupportTable = ({ config }: { config: EmailConfiguration }) => {
                 </thead>
                 <tbody>
                     <tr>
-                        <td>{config?.cmsDevTeamHelpEmailAddress}</td>
-                        <td>Dev team help email</td>
+                        <td>{config?.helpDeskEmail}</td>
+                        <td>Help desk email</td>
                         <td>For general MC-Review application support</td>
                     </tr>
                     <tr>

@@ -113,7 +113,6 @@ const constructTestEmailer = (): Emailer => {
         devReviewTeamEmails: ['test@example.com'],
         cmsReviewHelpEmailAddress: 'mcog@example.com',
         cmsRateHelpEmailAddress: 'rates@example.com',
-        cmsDevTeamHelpEmailAddress: 'mc-review@example.com',
         oactEmails: ['testRate@example.com'],
         dmcpEmails: ['testPolicy@example.com'],
         dmcoEmails: ['testDmco@example.com'],

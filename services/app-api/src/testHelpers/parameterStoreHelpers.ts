@@ -20,9 +20,6 @@ function mockEmailParameterStoreError(error?: string): EmailParameterStore {
         getCmsRateHelpEmail: async (): Promise<Error> => {
             return new Error(message)
         },
-        getCmsDevTeamHelpEmail: async (): Promise<Error> => {
-            return new Error(message)
-        },
         getOACTEmails: async (): Promise<Error> => {
             return new Error(message)
         },
