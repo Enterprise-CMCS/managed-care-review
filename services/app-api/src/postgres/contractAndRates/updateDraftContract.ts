@@ -1,30 +1,29 @@
+import { findContractWithHistory } from './findContractWithHistory'
+import { NotFoundError } from '../storeError'
+import type { ContractType } from '../../domain-models/contractAndRates'
 import type {
-    ContractType as PrismaContractType,
-    PopulationCoverageType,
-    PrismaClient,
+    ContractType as DomainContractType,
+    PopulationCoveredType,
     SubmissionType,
     ContractExecutionStatus,
-    ContractDocument,
-    ContractSupportingDocument,
     StateContact,
     ManagedCareEntity,
     FederalAuthority,
-} from '@prisma/client'
-import type { ContractType } from '../../domain-models/contractAndRates'
-import { findContractWithHistory } from './findContractWithHistory'
-import { NotFoundError } from '../storeError'
+    SubmissionDocument,
+} from 'app-web/src/common-code/healthPlanFormDataType'
+import type { PrismaClient } from '@prisma/client'
 
 type ContractFormEditable = {
     submissionType?: SubmissionType
     submissionDescription?: string
     programIDs?: string[]
-    populationCovered?: PopulationCoverageType
+    populationCovered?: PopulationCoveredType
     riskBasedContract?: boolean
     stateContacts?: StateContact[]
-    supportingDocuments?: ContractSupportingDocument[]
-    contractType?: PrismaContractType
+    supportingDocuments?: SubmissionDocument[]
+    contractType?: DomainContractType
     contractExecutionStatus?: ContractExecutionStatus
-    contractDocuments?: ContractDocument[]
+    contractDocuments?: SubmissionDocument[]
     contractDateStart?: Date
     contractDateEnd?: Date
     managedCareEntities?: ManagedCareEntity[]

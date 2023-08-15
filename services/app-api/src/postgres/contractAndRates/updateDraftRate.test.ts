@@ -6,7 +6,7 @@ import { PrismaClientValidationError } from '@prisma/client/runtime/library'
 import type { RateType } from '@prisma/client'
 
 describe('updateDraftRate', () => {
-    afterEach( () => {
+    afterEach(() => {
         jest.clearAllMocks()
     })
 
@@ -37,9 +37,14 @@ describe('updateDraftRate', () => {
         )
     })
 
+    it.todo(
+        'updates linked document tables as expected (via upsert, not create)'
+    )
+    it.todo('updates linked contact table as expected (via upsert, not create)')
+
     it('returns an error when invalid form data for rate type provided', async () => {
         jest.spyOn(console, 'error').mockImplementation()
-          const client = await sharedTestPrismaClient()
+        const client = await sharedTestPrismaClient()
         const newRate = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',

@@ -207,14 +207,7 @@ describe('submitHealthPlanPackage', () => {
                     ],
                     supportingDocuments: [],
                     rateProgramIDs: ['3b8d8fa1-1fa6-4504-9c5b-ef522877fe1e'],
-                    actuaryContacts: [
-                        {
-                            name: 'test name',
-                            titleRole: 'test title',
-                            email: 'email@example.com',
-                            actuarialFirm: undefined,
-                        },
-                    ],
+                    actuaryContacts: [],
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
                     packagesWithSharedRateCerts: [],
                 },

@@ -1,4 +1,4 @@
-import {FederalAuthority} from 'FederalAuthority'
+import { FederalAuthority } from 'FederalAuthority'
 
 // Draft state submission is a health plan that a state user is still working on
 
@@ -53,7 +53,7 @@ type ActuaryContact = {
     name: string
     titleRole: string
     email: string
-    actuarialFirm?: ActuarialFirmType
+    actuarialFirm: ActuarialFirmType
     actuarialFirmOther?: string
 }
 
