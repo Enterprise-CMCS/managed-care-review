@@ -20,7 +20,7 @@ export const fetchEmailSettings =
                             devReviewTeamEmails: ['test@example.com'],
                             cmsReviewHelpEmailAddress: 'mcog@example.com',
                             cmsRateHelpEmailAddress: 'rates@example.com',
-                            helpDeskEmail: 'mc-review@example.com',
+                            helpDeskEmail: 'helpdesk@example.com',
                             oactEmails: ['testRate@example.com'],
                             dmcpEmails: ['testPolicy@example.com'],
                             dmcoEmails: ['testDmco@example.com'],
