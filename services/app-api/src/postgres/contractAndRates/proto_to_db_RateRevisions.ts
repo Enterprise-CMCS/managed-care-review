@@ -103,7 +103,6 @@ async function migrateRateInfo(
                     rateInfo.rateAmendmentInfo?.effectiveDateEnd ?? null,
                 actuaryCommunicationPreference:
                     rateInfo.actuaryCommunicationPreference ?? null,
-                name: 'Default Name',
                 rateType: rateInfo.rateType ?? null,
                 rateCapitationType: rateInfo.rateCapitationType ?? null,
                 rateDateStart: rateInfo.rateDateStart ?? null,

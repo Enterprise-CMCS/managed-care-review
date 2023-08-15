@@ -32,6 +32,7 @@ import { migrateDocuments } from '../postgres/contractAndRates/proto_to_db_Docum
 import { prepopulateUpdateInfo } from '../postgres/contractAndRates/proto_to_db_UpdateInfoTable'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import type { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
+
 export const getDatabaseConnection = async (): Promise<{
     store: Store
     client: PrismaClient
