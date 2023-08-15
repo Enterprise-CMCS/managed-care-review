@@ -4,8 +4,8 @@ import {
     getOACTEmails,
     getCmsReviewHelpEmail,
     getCmsRateHelpEmail,
-    getCmsDevTeamHelpEmail,
     getDevReviewTeamEmails,
+    getHelpDeskEmail,
 } from './'
 import { ParameterStore } from '../awsParameterStore'
 
@@ -177,20 +177,22 @@ describe('emailParameterStore', () => {
         })
     })
 
-    describe('getCmsDevTeamHelpEmail', () => {
-        it('returns dev team help email as string', async () => {
+    describe('getHelpDeskEmail', () => {
+        it('returns help desk email as string', async () => {
             const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue({
-                value: `"MC-Review Support" <mc-review@example.com>`,
+                value: `"MC-Review Help Desk" <MC_Review_HelpDesk@example.com>`,
                 type: 'String',
             })
-            const result = await getCmsDevTeamHelpEmail()
-            expect(result).toBe(`"MC-Review Support" <mc-review@example.com>`)
+            const result = await getHelpDeskEmail()
+            expect(result).toBe(
+                `"MC-Review Help Desk" <MC_Review_HelpDesk@example.com>`
+            )
         })
         it('returns error when fetching store value fails', async () => {
             const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue(new Error('No store found'))
-            const result = await getCmsDevTeamHelpEmail()
+            const result = await getHelpDeskEmail()
             expect(result).toBeInstanceOf(Error)
         })
         it('returns error when Type of parameter store value is incompatible', async () => {
@@ -199,10 +201,10 @@ describe('emailParameterStore', () => {
                 value: '"CMS Source Email" <local@example.com>',
                 type: 'StringList',
             })
-            const result = await getCmsDevTeamHelpEmail()
+            const result = await getHelpDeskEmail()
             expect(result).toEqual(
                 new Error(
-                    'Parameter store /configuration/email/devTeamHelpAddress value of Type StringList is not supported'
+                    'Parameter store /configuration/email/helpDeskAddress value of Type StringList is not supported'
                 )
             )
         })
