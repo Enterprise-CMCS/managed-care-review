@@ -5,7 +5,7 @@ import type {
     RateCapitationType,
     RateDocument,
     RateSupportingDocument,
-    RateType as PrismaRateType
+    RateType as PrismaRateType,
 } from '@prisma/client'
 import { findRateWithHistory } from './findRateWithHistory'
 import type { RateType } from '../../domain-models/contractAndRates'
@@ -105,26 +105,7 @@ async function updateDraftRate(
                     })),
                 },
             },
-            include: {
-                rateDocuments: true,
-                supportingDocuments: true,
-                certifyingActuaryContacts: true,
-                addtlActuaryContacts: true,
-                draftContracts: true,
-                contractRevisions: {
-                    include: {
-                        contractRevision: {
-                            include: {
-                                stateContacts: true,
-                                contractDocuments: true,
-                                supportingDocuments: true,
-                            },
-                        },
-                    },
-                },
-            },
         })
-
 
         return findRateWithHistory(client, rateID)
     } catch (err) {
@@ -134,4 +115,4 @@ async function updateDraftRate(
 }
 
 export { updateDraftRate }
-export type {RateFormEditable}
+export type { RateFormEditable }

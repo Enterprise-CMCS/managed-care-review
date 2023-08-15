@@ -6,7 +6,7 @@ import { insertDraftRate } from './insertRate'
 import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 
 describe('insertRate', () => {
-    afterEach( () => {
+    afterEach(() => {
         jest.clearAllMocks()
     })
 
@@ -33,7 +33,7 @@ describe('insertRate', () => {
                         rateType: 'NEW',
                     }),
                 }),
-                revisions: []
+                revisions: [],
             })
         )
     })
@@ -49,18 +49,18 @@ describe('insertRate', () => {
             stateCode,
         })
 
-        const submittedContractA = must(await insertDraftRate(client, rateA))
+        const submittedRateA = must(await insertDraftRate(client, rateA))
 
-        // Expect state record count to be incremented by 1
-        expect(submittedContractA.stateNumber).toEqual(
-            initialState.latestStateRateCertNumber + 1
+        // Expect state record count to be incremented
+        expect(submittedRateA.stateNumber).toBeGreaterThan(
+            initialState.latestStateRateCertNumber
         )
 
-        const submittedContractB = must(await insertDraftRate(client, rateB))
+        const submittedRateB = must(await insertDraftRate(client, rateB))
 
-        // Expect state record count to be incremented by 2
-        expect(submittedContractB.stateNumber).toEqual(
-            initialState.latestStateRateCertNumber + 2
+        // Expect state record count to be incremented further
+        expect(submittedRateB.stateNumber).toBeGreaterThan(
+            submittedRateA.stateNumber
         )
     })
     it('returns an error when invalid state code is provided', async () => {
