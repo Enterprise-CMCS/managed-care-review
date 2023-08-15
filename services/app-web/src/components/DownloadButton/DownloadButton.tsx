@@ -1,25 +1,28 @@
 import React from 'react'
-import { Link } from '@trussworks/react-uswds'
+import { ActionButton } from '../ActionButton'
 
 type DownloadButtonProps = {
     text: string
-    zippedFilesURL: string
+    zippedFilesURL: string | undefined
 }
 
 export const DownloadButton = ({
     text,
     zippedFilesURL,
 }: DownloadButtonProps): React.ReactElement => {
+    const handleClick = () => {
+        if (zippedFilesURL) {
+            window.open(zippedFilesURL)
+        }
+    }
+
     return (
-        <div>
-            <Link
-                className="usa-button usa-button--small"
-                variant="unstyled"
-                href={zippedFilesURL}
-                target="_blank"
-            >
-                {text}
-            </Link>
-        </div>
+        <ActionButton
+            onClick={handleClick}
+            loading={zippedFilesURL === undefined}
+            type="button"
+            children={text}
+            animationTimeout={0}
+        />
     )
 }
