@@ -1,161 +1,32 @@
-import type { UpdateInfoTable, User } from '@prisma/client'
 import type { PrismaTransactionType } from '../prismaTypes'
-import type {
-    RateRevisionWithContractsType,
-    RateType,
-} from '../../domain-models/contractAndRates'
-import type {
-    ContractRevisionTableWithFormData,
-    RateRevisionTableWithFormData,
-} from './prismaSharedContractRateHelpers'
-import {
-    contractFormDataToDomainModel,
-    convertUpdateInfoToDomainModel,
-    includeUpdateInfo,
-    rateFormDataToDomainModel,
-} from './prismaSharedContractRateHelpers'
+import type { RateType } from '../../domain-models/contractAndRates'
+import { NotFoundError } from '../storeError'
+import { includeFullRate } from './prismaSubmittedRateHelpers'
+import { parseRateWithHistory } from './parseRateWithHistory'
 
-// this is for the internal building of individual revisions
-// we convert them into RateRevisons to return them
-interface RateRevisionSet {
-    rateRev: RateRevisionTableWithFormData
-    submitInfo: UpdateInfoTable & { updatedBy: User }
-    unlockInfo: (UpdateInfoTable & { updatedBy: User }) | undefined
-    contractRevs: ContractRevisionTableWithFormData[]
-}
-
+// findRateWithHistory returns a RateType with a full set of
+// RateRevisions in reverse chronological order. Each revision is a change to this
+// Rate with submit and unlock info. Changes to the data of this rate, or changes
+// to the data or relations of associate revisions will all surface as new RateRevision
 async function findRateWithHistory(
     client: PrismaTransactionType,
     rateID: string
 ): Promise<RateType | Error> {
     try {
-        const rateRevisions = await client.rateRevisionTable.findMany({
+        const rate = await client.rateTable.findFirst({
             where: {
-                rateID: rateID,
+                id: rateID,
             },
-            orderBy: {
-                createdAt: 'asc',
-            },
-            include: {
-                submitInfo: includeUpdateInfo,
-                unlockInfo: includeUpdateInfo,
-                rateDocuments: true,
-                supportingDocuments: true,
-                certifyingActuaryContacts: true,
-                addtlActuaryContacts: true,
-                draftContracts: true,
-                contractRevisions: {
-                    include: {
-                        contractRevision: {
-                            include: {
-                                submitInfo: includeUpdateInfo,
-                                unlockInfo: includeUpdateInfo,
-                                stateContacts: true,
-                                contractDocuments: true,
-                                supportingDocuments: true,
-                            },
-                        },
-                    },
-                    orderBy: {
-                        validAfter: 'asc',
-                    },
-                },
-            },
+            include: includeFullRate,
         })
 
-        // so you get all the rate revisions. each one has a bunch of contracts
-        // each set of contracts gets its own "revision" in the return list
-        // further rateRevs naturally are their own "revision"
-
-        const allEntries: RateRevisionSet[] = []
-        for (const rateRev of rateRevisions) {
-            // no drafts allowed
-            if (!rateRev.submitInfo) {
-                continue
-            }
-
-            const initialEntry: RateRevisionSet = {
-                rateRev,
-                submitInfo: rateRev.submitInfo,
-                unlockInfo: rateRev.unlockInfo || undefined,
-                contractRevs: [],
-            }
-
-            allEntries.push(initialEntry)
-
-            let lastEntry = initialEntry
-            // go through every contract revision with this rate
-            for (const contractRev of rateRev.contractRevisions) {
-                if (!contractRev.contractRevision.submitInfo) {
-                    return new Error(
-                        'Programming Error: a rate is associated with an unsubmitted contract'
-                    )
-                }
-
-                // if it's from before this rate was submitted, it's there at the beginning.
-                if (contractRev.validAfter <= rateRev.submitInfo.updatedAt) {
-                    if (!contractRev.isRemoval) {
-                        initialEntry.contractRevs.push(
-                            contractRev.contractRevision
-                        )
-                    }
-                } else {
-                    // if after, then it's always a new entry in the list
-                    let lastContracts = [...lastEntry.contractRevs]
-
-                    // take out the previous contract revision this revision supersedes
-                    lastContracts = lastContracts.filter(
-                        (c) =>
-                            c.contractID !==
-                            contractRev.contractRevision.contractID
-                    )
-                    if (!contractRev.isRemoval) {
-                        lastContracts.push(contractRev.contractRevision)
-                    }
-
-                    const newRev: RateRevisionSet = {
-                        rateRev,
-                        submitInfo: contractRev.contractRevision.submitInfo,
-                        unlockInfo:
-                            contractRev.contractRevision.unlockInfo ||
-                            undefined,
-                        contractRevs: lastContracts,
-                    }
-
-                    lastEntry = newRev
-                    allEntries.push(newRev)
-                }
-            }
+        if (!rate) {
+            const err = `PRISMA ERROR: Cannot find rate with id: ${rateID}`
+            console.error(err)
+            return new NotFoundError(err)
         }
 
-        const allRevisions: RateRevisionWithContractsType[] = allEntries.map(
-            (entry) => ({
-                id: entry.rateRev.id,
-                createdAt: entry.rateRev.createdAt,
-                updatedAt: entry.rateRev.updatedAt,
-                submitInfo: convertUpdateInfoToDomainModel(entry.submitInfo),
-                unlockInfo:
-                    entry.unlockInfo &&
-                    convertUpdateInfoToDomainModel(entry.unlockInfo),
-                formData: rateFormDataToDomainModel(entry.rateRev),
-                contractRevisions: entry.contractRevs.map((crev) => ({
-                    id: crev.id,
-                    createdAt: crev.createdAt,
-                    updatedAt: crev.updatedAt,
-                    formData: contractFormDataToDomainModel(crev),
-                })),
-            })
-        )
-
-        const finalRate: RateType = {
-            id: rateID,
-            status: 'SUBMITTED',
-            stateCode: 'MN',
-            stateNumber: 4,
-            revisions: allRevisions.reverse(),
-        }
-
-        return finalRate
+        return parseRateWithHistory(rate)
     } catch (err) {
         console.error('PRISMA ERROR', err)
         return err

@@ -8,7 +8,7 @@ import {
     submissionDocumentSchema,
     submissionTypeSchema,
 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
-import { ratesRevisionSchema } from './rateTypes'
+import { rateRevisionSchema } from './rateTypes'
 import { updateInfoSchema } from './updateInfoType'
 
 const contractFormDataSchema = z.object({
@@ -59,7 +59,7 @@ const contractRevisionSchema = z.object({
 // if a revision was unlocked, it will have unlock info, otherwise it was an initial submission
 // The set of rateRevisions hold exactly what rate data was present at the time this contract was submitted.
 const contractRevisionWithRatesSchema = contractRevisionSchema.extend({
-    rateRevisions: z.array(ratesRevisionSchema),
+    rateRevisions: z.array(rateRevisionSchema),
 })
 
 // Contract represents the contract specific information in a submission package
@@ -70,6 +70,9 @@ const contractSchema = z.object({
     status: z.union([z.literal('SUBMITTED'), z.literal('DRAFT')]),
     stateCode: z.string(),
     stateNumber: z.number().min(1),
+    // If this contract is in a DRAFT or UNLOCKED status, there will be a draftRevision
+    draftRevision: contractRevisionWithRatesSchema.optional(),
+    // All revisions are submitted and in reverse chronological order
     revisions: z.array(contractRevisionWithRatesSchema),
 })
 

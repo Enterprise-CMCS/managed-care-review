@@ -1,29 +1,29 @@
 import type {
     ContractType,
     ContractRevisionWithRatesType,
+    ContractRevisionType,
 } from '../../domain-models/contractAndRates'
 import { contractSchema } from '../../domain-models/contractAndRates'
+import { draftContractRevToDomainModel } from './prismaDraftContractHelpers'
 import type {
     RateRevisionTableWithFormData,
+    ContractRevisionTableWithFormData,
     UpdateInfoTableWithUpdater,
 } from './prismaSharedContractRateHelpers'
 import {
     contractFormDataToDomainModel,
     convertUpdateInfoToDomainModel,
-    getContractStatus,
     ratesRevisionsToDomainModel,
+    getContractStatus,
 } from './prismaSharedContractRateHelpers'
-import type {
-    ContractRevisionTableWithRates,
-    ContractTableWithRelations,
-} from './prismaSubmittedContractHelpers'
+import type { ContractTableFullPayload } from './prismaSubmittedContractHelpers'
 
 // parseContractWithHistory returns a ContractType with a full set of
 // ContractRevisions in reverse chronological order. Each revision is a change to this
 // Contract with submit and unlock info. Changes to the data of this contract, or changes
 // to the data or relations of associate revisions will all surface as new ContractRevisions
 function parseContractWithHistory(
-    contract: ContractTableWithRelations
+    contract: ContractTableFullPayload
 ): ContractType | Error {
     const contractWithHistory = contractWithHistoryToDomainModel(contract)
 
@@ -48,43 +48,71 @@ function parseContractWithHistory(
 // ContractRevisionSet is for the internal building of individual revisions
 // we convert them into ContractRevisions to return them
 interface ContractRevisionSet {
-    contractRev: ContractRevisionTableWithRates
+    contractRev: ContractRevisionTableWithFormData
     submitInfo: UpdateInfoTableWithUpdater
     unlockInfo: UpdateInfoTableWithUpdater | undefined
     rateRevisions: RateRevisionTableWithFormData[]
 }
 
-function contractRevToDomainModel(
+function contractSetsToDomainModel(
     revisions: ContractRevisionSet[]
 ): ContractRevisionWithRatesType[] {
     const contractRevisions = revisions.map((entry) => ({
-        id: entry.contractRev.id,
-        submitInfo: convertUpdateInfoToDomainModel(entry.submitInfo),
-        unlockInfo: entry.unlockInfo
-            ? convertUpdateInfoToDomainModel(entry.unlockInfo)
-            : undefined,
-        createdAt: entry.contractRev.createdAt,
-        updatedAt: entry.contractRev.updatedAt,
-        formData: contractFormDataToDomainModel(entry.contractRev),
+        ...contractRevisionToDomainModel(entry.contractRev),
         rateRevisions: ratesRevisionsToDomainModel(entry.rateRevisions),
+
+        // override this contractRevisions's update infos with the one that caused this revision to be created.
+        submitInfo: convertUpdateInfoToDomainModel(entry.submitInfo),
+        unlockInfo: convertUpdateInfoToDomainModel(entry.unlockInfo),
     }))
 
     return contractRevisions
 }
 
+function contractRevisionToDomainModel(
+    revision: ContractRevisionTableWithFormData
+): ContractRevisionType {
+    return {
+        id: revision.id,
+        createdAt: revision.createdAt,
+        updatedAt: revision.updatedAt,
+        submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
+        unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
+
+        formData: contractFormDataToDomainModel(revision),
+    }
+}
+
+function contractRevisionsToDomainModels(
+    contractRevisions: ContractRevisionTableWithFormData[]
+): ContractRevisionType[] {
+    return contractRevisions.map((crev) => contractRevisionToDomainModel(crev))
+}
+
 // contractWithHistoryToDomainModel constructs a history for this particular contract including changes to all of its
 // revisions and all related rate revisions, including added and removed rates
 function contractWithHistoryToDomainModel(
-    contract: ContractTableWithRelations
+    contract: ContractTableFullPayload
 ): ContractType | Error {
     // We iterate through each contract revision in order, adding it as a revision in the history
     // then iterate through each of its rates, constructing a history of any rates that changed
     // between contract revision updates
     const allRevisionSets: ContractRevisionSet[] = []
     const contractRevisions = contract.revisions
+    let draftRevision: ContractRevisionWithRatesType | undefined = undefined
     for (const contractRev of contractRevisions) {
-        // We exclude the draft from this list, use findDraftContract to get the current draft
+        // We set the draft revision aside, all ordered revisions are submitted
         if (!contractRev.submitInfo) {
+            if (draftRevision) {
+                return new Error(
+                    'PROGRAMMING ERROR: a contract may not have multiple drafts simultaneously. ID: ' +
+                        contract.id
+                )
+            }
+
+            draftRevision = draftContractRevToDomainModel(contractRev)
+
+            // skip the rest of the processing
             continue
         }
 
@@ -145,15 +173,20 @@ function contractWithHistoryToDomainModel(
         }
     }
 
-    const revisions = contractRevToDomainModel(allRevisionSets).reverse()
+    const revisions = contractSetsToDomainModel(allRevisionSets).reverse()
 
     return {
         id: contract.id,
         status: getContractStatus(contract.revisions),
         stateCode: contract.stateCode,
         stateNumber: contract.stateNumber,
-        revisions: revisions,
+        draftRevision,
+        revisions
     }
 }
 
-export { parseContractWithHistory }
+export {
+    parseContractWithHistory,
+    contractRevisionToDomainModel,
+    contractRevisionsToDomainModels,
+}

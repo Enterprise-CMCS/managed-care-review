@@ -4,26 +4,27 @@ import { must } from '../errorHelpers'
 import type { PrismaClient } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
 import type {
-    DraftContractRevisionTableWithRelations,
-    DraftContractTableWithRelations,
-} from '../../postgres/contractAndRates/prismaDraftContractHelpers'
-import type {
     ContractRevisionTableWithRates,
-    ContractTableWithRelations,
+    ContractTableFullPayload,
 } from '../../postgres/contractAndRates/prismaSubmittedContractHelpers'
+import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { ContractFormEditable } from '../../postgres/contractAndRates/updateDraftContract'
 
-const createInsertContractData = (
-    contractArgs?: Partial<InsertContractArgsType>
-): InsertContractArgsType => {
+const createInsertContractData = ({
+    stateCode,
+    ...formData
+}: {
+    stateCode?: StateCodeType
+} & Partial<ContractFormEditable>): InsertContractArgsType => {
     return {
-        stateCode: contractArgs?.stateCode ?? 'MN',
-        submissionType: contractArgs?.submissionType ?? 'CONTRACT_AND_RATES',
+        stateCode: stateCode ?? 'MN',
+        submissionType: formData?.submissionType ?? 'CONTRACT_AND_RATES',
         submissionDescription:
-            contractArgs?.submissionDescription ?? 'Contract 1.0',
-        contractType: contractArgs?.contractType ?? 'BASE',
-        programIDs: contractArgs?.programIDs ?? ['PMAP'],
-        populationCovered: contractArgs?.populationCovered ?? 'MEDICAID',
-        riskBasedContract: contractArgs?.riskBasedContract ?? false,
+            formData?.submissionDescription ?? 'Contract 1.0',
+        contractType: formData?.contractType ?? 'BASE',
+        programIDs: formData?.programIDs ?? ['PMAP'],
+        populationCovered: formData?.populationCovered ?? 'MEDICAID',
+        riskBasedContract: formData?.riskBasedContract ?? false,
     }
 }
 
@@ -47,8 +48,8 @@ const getStateRecord = async (
 }
 
 const createDraftContractData = (
-    contract?: Partial<DraftContractTableWithRelations>
-): DraftContractTableWithRelations => ({
+    contract?: Partial<ContractTableFullPayload>
+): ContractTableFullPayload => ({
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -58,14 +59,14 @@ const createDraftContractData = (
         createContractRevision({
             rateRevisions: undefined,
             submitInfo: null,
-        }) as DraftContractRevisionTableWithRelations,
+        }) as ContractRevisionTableWithRates,
     ],
     ...contract,
 })
 
 const createContractData = (
-    contract?: Partial<ContractTableWithRelations>
-): ContractTableWithRelations => ({
+    contract?: Partial<ContractTableFullPayload>
+): ContractTableFullPayload => ({
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -80,12 +81,8 @@ const createContractData = (
 })
 
 const createContractRevision = (
-    revision?: Partial<
-        ContractRevisionTableWithRates | DraftContractRevisionTableWithRelations
-    >
-):
-    | ContractRevisionTableWithRates
-    | DraftContractRevisionTableWithRelations => ({
+    revision?: Partial<ContractRevisionTableWithRates>
+): ContractRevisionTableWithRates => ({
     id: uuidv4(),
     createdAt: new Date(),
     updatedAt: new Date(),

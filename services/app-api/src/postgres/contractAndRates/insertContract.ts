@@ -1,18 +1,18 @@
 import type {
     PrismaClient,
-    PopulationCoverageType,
     SubmissionType,
     ContractType as PrismaContractType,
 } from '@prisma/client'
 import type { ContractType } from '../../domain-models/contractAndRates'
-import { parseDraftContract } from './parseDraftContract'
-import { includeDraftContractRevisionsWithDraftRates } from './prismaDraftContractHelpers'
+import { parseContractWithHistory } from './parseContractWithHistory'
+import { includeFullContract } from './prismaSubmittedContractHelpers'
+import type { ContractFormEditable } from './updateDraftContract'
 
-type InsertContractArgsType = {
+
+type InsertContractArgsType = ContractFormEditable & {
+    // Certain fields are required on insert contract only
     stateCode: string
-    populationCovered?: PopulationCoverageType
     programIDs: string[]
-    riskBasedContract?: boolean
     submissionType: SubmissionType
     submissionDescription: string
     contractType: PrismaContractType
@@ -23,6 +23,39 @@ async function insertDraftContract(
     client: PrismaClient,
     args: InsertContractArgsType
 ): Promise<ContractType | Error> {
+    const {
+        submissionType,
+        submissionDescription,
+        programIDs,
+        populationCovered,
+        riskBasedContract,
+        stateContacts,
+        supportingDocuments,
+        contractType,
+        contractExecutionStatus,
+        contractDocuments,
+        contractDateStart,
+        contractDateEnd,
+        managedCareEntities,
+        federalAuthorities,
+        modifiedBenefitsProvided,
+        modifiedGeoAreaServed,
+        modifiedMedicaidBeneficiaries,
+        modifiedRiskSharingStrategy,
+        modifiedIncentiveArrangements,
+        modifiedWitholdAgreements,
+        modifiedStateDirectedPayments,
+        modifiedPassThroughPayments,
+        modifiedPaymentsForMentalDiseaseInstitutions,
+        modifiedMedicalLossRatioStandards,
+        modifiedOtherFinancialPaymentIncentive,
+        modifiedEnrollmentProcess,
+        modifiedGrevienceAndAppeal,
+        modifiedNetworkAdequacyStandards,
+        modifiedLengthOfContract,
+        modifiedNonRiskPaymentArrangements,
+        inLieuServicesAndSettings,
+    } = args
     try {
         return await client.$transaction(async (tx) => {
             const { latestStateSubmissionNumber } = await tx.state.update({
@@ -42,26 +75,53 @@ async function insertDraftContract(
                     stateNumber: latestStateSubmissionNumber,
                     revisions: {
                         create: {
-                            populationCovered: args.populationCovered,
-                            programIDs: args.programIDs,
-                            riskBasedContract: args.riskBasedContract,
-                            submissionType: args.submissionType,
-                            submissionDescription: args.submissionDescription,
-                            contractType: args.contractType,
+                            populationCovered: populationCovered,
+                            programIDs: programIDs,
+                            riskBasedContract: riskBasedContract,
+                            submissionType: submissionType,
+                            submissionDescription: submissionDescription,
+                            contractType: contractType,
+                            contractExecutionStatus,
+                            contractDocuments: {
+                                create: contractDocuments,
+                            },
+                            supportingDocuments: {
+                                create: supportingDocuments,
+                            },
+                            stateContacts: {
+                                create: stateContacts,
+                            },
+                            contractDateStart,
+                            contractDateEnd,
+                            managedCareEntities,
+                            federalAuthorities,
+                            modifiedBenefitsProvided,
+                            modifiedGeoAreaServed,
+                            modifiedMedicaidBeneficiaries,
+                            modifiedRiskSharingStrategy,
+                            modifiedIncentiveArrangements,
+                            modifiedWitholdAgreements,
+                            modifiedStateDirectedPayments,
+                            modifiedPassThroughPayments,
+                            modifiedPaymentsForMentalDiseaseInstitutions,
+                            modifiedMedicalLossRatioStandards,
+                            modifiedOtherFinancialPaymentIncentive,
+                            modifiedEnrollmentProcess,
+                            modifiedGrevienceAndAppeal,
+                            modifiedNetworkAdequacyStandards,
+                            modifiedLengthOfContract,
+                            modifiedNonRiskPaymentArrangements,
+                            inLieuServicesAndSettings,
                         },
                     },
                 },
-                include: {
-                    revisions: {
-                        include: includeDraftContractRevisionsWithDraftRates,
-                    },
-                },
+                include: includeFullContract,
             })
 
-            return parseDraftContract(contract)
+            return parseContractWithHistory(contract)
         })
     } catch (err) {
-        console.error('CONTRACT PRISMA ERR', err)
+        console.error('Prisma error inserting contract', err)
         return err
     }
 }

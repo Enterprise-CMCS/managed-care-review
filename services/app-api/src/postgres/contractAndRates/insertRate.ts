@@ -1,40 +1,18 @@
 import type {
-    ActuaryCommunication,
-    ActuaryContact,
-    PrismaClient,
-    RateCapitationType,
-    RateDocument,
-    RateSupportingDocument,
-} from '@prisma/client'
-import type {
     StateCodeType,
-    RateType as DomainRateType,
 } from 'app-web/src/common-code/healthPlanFormDataType'
 import type { RateType } from '../../domain-models/contractAndRates'
-import {
-    contractFormDataToDomainModel,
-    rateFormDataToDomainModel,
-} from './prismaSharedContractRateHelpers'
+import { parseRateWithHistory } from './parseRateWithHistory'
+import { includeFullRate } from './prismaSubmittedRateHelpers'
+import type { PrismaClient } from '@prisma/client'
+import type { RateFormEditable } from './updateDraftRate'
 
-type InsertRateArgsType = {
+
+type InsertRateArgsType = RateFormEditable & {
     stateCode: StateCodeType
-    rateType?: DomainRateType
-    rateCapitationType?: RateCapitationType
-    rateDocuments?: RateDocument[]
-    supportingDocuments?: RateSupportingDocument[]
-    rateDateStart?: Date
-    rateDateEnd?: Date
-    rateDateCertified?: Date
-    amendmentEffectiveDateStart?: Date
-    amendmentEffectiveDateEnd?: Date
-    rateProgramIDs?: string[]
-    rateCertificationName?: string
-    certifyingActuaryContacts?: ActuaryContact[]
-    addtlActuaryContacts?: ActuaryContact[]
-    actuaryCommunicationPreference?: ActuaryCommunication
 }
 
-// creates a new contract, with a new revision
+// creates a new rate, with a new revision
 async function insertDraftRate(
     client: PrismaClient,
     args: InsertRateArgsType
@@ -101,58 +79,16 @@ async function insertDraftRate(
                         },
                     },
                 },
-                include: {
-                    revisions: {
-                        include: {
-                            rateDocuments: true,
-                            supportingDocuments: true,
-                            certifyingActuaryContacts: true,
-                            addtlActuaryContacts: true,
-                            draftContracts: true,
-                            contractRevisions: {
-                                include: {
-                                    contractRevision: {
-                                        include: {
-                                            stateContacts: true,
-                                            contractDocuments: true,
-                                            supportingDocuments: true,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
+                include: includeFullRate,
             })
 
-            const finalRate: RateType = {
-                id: rate.id,
-                status: 'DRAFT',
-                stateCode: rate.stateCode,
-                stateNumber: rate.stateNumber,
-                revisions: rate.revisions.map((rr) => ({
-                    id: rr.id,
-                    createdAt: rr.createdAt,
-                    updatedAt: rr.updatedAt,
-                    formData: rateFormDataToDomainModel(rr),
-
-                    contractRevisions: rr.contractRevisions.map(
-                        ({ contractRevision }) => ({
-                            id: contractRevision.id,
-                            createdAt: contractRevision.createdAt,
-                            updatedAt: contractRevision.updatedAt,
-                            formData:
-                                contractFormDataToDomainModel(contractRevision),
-                        })
-                    ),
-                })),
-            }
-            return finalRate
+            return parseRateWithHistory(rate)
         })
     } catch (err) {
-        console.error('RATE PRISMA ERR', err)
+        console.error('Prisma error inserting rate', err)
         return err
     }
 }
 
 export { insertDraftRate }
+export type { RateFormEditable, InsertRateArgsType }

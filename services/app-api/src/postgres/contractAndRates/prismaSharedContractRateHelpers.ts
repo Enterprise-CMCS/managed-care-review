@@ -1,18 +1,4 @@
-import type {
-    ActuaryContact,
-    ContractDocument,
-    ContractRevisionTable,
-    ContractSupportingDocument,
-    FederalAuthority,
-    ManagedCareEntity,
-    RateDocument,
-    RateRevisionsOnContractRevisionsTable,
-    RateRevisionTable,
-    RateSupportingDocument,
-    StateContact,
-    UpdateInfoTable,
-    User,
-} from '@prisma/client'
+import type { Prisma, UpdateInfoTable } from '@prisma/client'
 import type { DocumentCategoryType } from 'app-web/src/common-code/healthPlanFormDataType'
 import type {
     ContractFormDataType,
@@ -22,13 +8,17 @@ import type {
     UpdateInfoType,
 } from '../../domain-models/contractAndRates'
 
+const subincludeUpdateInfo = {
+    updatedBy: true,
+} satisfies Prisma.UpdateInfoTableInclude
+
 const includeUpdateInfo = {
-    include: {
-        updatedBy: true,
-    },
+    include: subincludeUpdateInfo,
 }
 
-type UpdateInfoTableWithUpdater = UpdateInfoTable & { updatedBy: User }
+type UpdateInfoTableWithUpdater = Prisma.UpdateInfoTableGetPayload<{
+    include: typeof subincludeUpdateInfo
+}>
 
 function convertUpdateInfoToDomainModel(
     info?: UpdateInfoTableWithUpdater | null
@@ -47,10 +37,10 @@ function convertUpdateInfoToDomainModel(
 // -----
 
 function getContractStatus(
-    revision: Pick<
-        ContractRevisionTableWithFormData,
-        'createdAt' | 'submitInfo'
-    >[]
+    revision: {
+        createdAt: Date
+        submitInfo: UpdateInfoTable | null
+    }[]
 ): ContractStatusType {
     // need to order revisions from latest to earliest
     const latestToEarliestRev = revision.sort(
@@ -62,14 +52,19 @@ function getContractStatus(
 
 // ------
 
-type RateRevisionTableWithFormData = RateRevisionTable & {
-    submitInfo?: UpdateInfoTableWithUpdater | null
-    unlockInfo?: UpdateInfoTableWithUpdater | null
-    rateDocuments: RateDocument[]
-    supportingDocuments: RateSupportingDocument[]
-    certifyingActuaryContacts: ActuaryContact[]
-    addtlActuaryContacts: ActuaryContact[]
-}
+const includeRateFormData = {
+    submitInfo: includeUpdateInfo,
+    unlockInfo: includeUpdateInfo,
+
+    rateDocuments: true,
+    supportingDocuments: true,
+    certifyingActuaryContacts: true,
+    addtlActuaryContacts: true,
+} satisfies Prisma.RateRevisionTableInclude
+
+type RateRevisionTableWithFormData = Prisma.RateRevisionTableGetPayload<{
+    include: typeof includeRateFormData
+}>
 
 function rateFormDataToDomainModel(
     rateRevision: RateRevisionTableWithFormData
@@ -129,13 +124,16 @@ function rateFormDataToDomainModel(
     }
 }
 
-function rateReivisionToDomainModel(
+function rateRevisionToDomainModel(
     revision: RateRevisionTableWithFormData
 ): RateRevisionType {
     return {
         id: revision.id,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
+        unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
+        submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
+
         formData: rateFormDataToDomainModel(revision),
     }
 }
@@ -143,20 +141,24 @@ function rateReivisionToDomainModel(
 function ratesRevisionsToDomainModel(
     rateRevisions: RateRevisionTableWithFormData[]
 ): RateRevisionType[] {
-    return rateRevisions.map((rrev) => rateReivisionToDomainModel(rrev))
+    return rateRevisions.map((rrev) => rateRevisionToDomainModel(rrev))
 }
 
 // ------
 
-type ContractRevisionTableWithFormData = ContractRevisionTable & {
-    submitInfo?: UpdateInfoTableWithUpdater | null
-    unlockInfo?: UpdateInfoTableWithUpdater | null
-    stateContacts: StateContact[]
-    contractDocuments: ContractDocument[]
-    supportingDocuments: ContractSupportingDocument[]
-    managedCareEntities: ManagedCareEntity[]
-    federalAuthorities: FederalAuthority[]
-}
+const includeContractFormData = {
+    unlockInfo: includeUpdateInfo,
+    submitInfo: includeUpdateInfo,
+
+    stateContacts: true,
+    contractDocuments: true,
+    supportingDocuments: true,
+} satisfies Prisma.ContractRevisionTableInclude
+
+type ContractRevisionTableWithFormData =
+    Prisma.ContractRevisionTableGetPayload<{
+        include: typeof includeContractFormData
+    }>
 
 function contractFormDataToDomainModel(
     contractRevision: ContractRevisionTableWithFormData
@@ -238,27 +240,22 @@ function contractFormDataToDomainModel(
     }
 }
 
-// ------
-
-type RateOnContractHistory = RateRevisionsOnContractRevisionsTable & {
-    rateRevision: RateRevisionTableWithFormData
-}
-
 // -------
 
 export type {
     UpdateInfoTableWithUpdater,
     RateRevisionTableWithFormData,
     ContractRevisionTableWithFormData,
-    RateOnContractHistory,
 }
 
 export {
     includeUpdateInfo,
+    includeContractFormData,
+    includeRateFormData,
     getContractStatus,
     convertUpdateInfoToDomainModel,
     contractFormDataToDomainModel,
     rateFormDataToDomainModel,
-    rateReivisionToDomainModel,
+    rateRevisionToDomainModel,
     ratesRevisionsToDomainModel,
 }

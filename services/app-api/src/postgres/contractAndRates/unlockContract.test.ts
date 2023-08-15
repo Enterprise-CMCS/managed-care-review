@@ -5,7 +5,6 @@ import { insertDraftContract } from './insertContract'
 import { unlockContract } from './unlockContract'
 import { insertDraftRate } from './insertRate'
 import { unlockRate } from './unlockRate'
-import { findDraftContract } from './findDraftContract'
 import { submitRate } from './submitRate'
 import { updateDraftContract } from './updateDraftContract'
 import { updateDraftRate } from './updateDraftRate'
@@ -61,9 +60,9 @@ describe('unlockContract', () => {
         // Connect draft contract to submitted rate
         must(
             await updateDraftContract(
-                client,
-                contract.id,
-                {
+                client,{
+                contractID: contract.id,
+                formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'Connecting rate',
                     contractType: 'BASE',
@@ -71,11 +70,15 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                [rate.id]
+                rateIDs: [rate.id]}
             )
         )
 
-        const draftContract = must(await findDraftContract(client, contract.id))
+        const fullDraftContract = must(
+            await findContractWithHistory(client, contract.id)
+        )
+
+        const draftContract = fullDraftContract.draftRevision
 
         if (draftContract === undefined) {
             throw Error('Contract data was undefined')
@@ -88,15 +91,23 @@ describe('unlockContract', () => {
 
         // Unlock the rate
         must(await unlockRate(client, rate.id, cmsUser.id, 'Unlocking rate'))
-        must(await updateDraftRate(client, rate.id, 'Rate 2.0', []))
+        must(
+            await updateDraftRate(client, {
+                rateID: rate.id,
+                formData: { rateCertificationName: 'Rate 2.0' },
+                contractIDs: [],
+            })
+        )
 
         const resubmittedRate = must(
             await submitRate(client, rate.id, stateUser.id, 'Updated things')
         )
 
-        const draftContractTwo = must(
-            await findDraftContract(client, contract.id)
+        const fullDraftContractTwo = must(
+            await findContractWithHistory(client, contract.id)
         )
+
+        const draftContractTwo = fullDraftContractTwo.draftRevision
 
         if (draftContractTwo === undefined) {
             throw Error('Contract data was undefined')
@@ -156,8 +167,8 @@ describe('unlockContract', () => {
         must(
             await updateDraftContract(
                 client,
-                contract.id,
-                {
+                {contractID: contract.id,
+                formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'Connecting rate',
                     contractType: 'BASE',
@@ -165,7 +176,7 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                [rate.id]
+                rateIDs: [rate.id]}
             )
         )
 
@@ -188,7 +199,13 @@ describe('unlockContract', () => {
 
         // Unlock the rate and resubmit rate
         must(await unlockRate(client, rate.id, cmsUser.id, 'Unlocking rate'))
-        must(await updateDraftRate(client, rate.id, 'Rate 2.0', [contract.id]))
+        must(
+            await updateDraftRate(client, {
+                rateID: rate.id,
+                formData: { rateCertificationName: 'Rate 2.0' },
+                contractIDs: [contract.id],
+            })
+        )
         const resubmittedRate = must(
             await submitRate(client, rate.id, stateUser.id, 'Rate resubmit')
         )
@@ -245,12 +262,13 @@ describe('unlockContract', () => {
             })
         )
 
-        // Connect draft contract to submitted rate
+        // Connect draft contract to draft rate
         must(
             await updateDraftContract(
                 client,
-                contract.id,
                 {
+                contractID: contract.id,
+                formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'contract 1.0',
                     contractType: 'BASE',
@@ -258,7 +276,7 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                [rate.id]
+                rateIDs: [rate.id]}
             )
         )
 
@@ -294,8 +312,8 @@ describe('unlockContract', () => {
         must(
             await updateDraftContract(
                 client,
-                contract.id,
-                {
+                {contractID: contract.id,
+                formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'contract 2.0',
                     contractType: 'BASE',
@@ -303,7 +321,7 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                [rate.id]
+                rateIDs: [rate.id]}
             )
         )
         const resubmittedContract = must(
@@ -354,8 +372,9 @@ describe('unlockContract', () => {
         must(
             await updateDraftContract(
                 client,
-                contract.id,
-                {
+               {
+                contractID:  contract.id,
+                formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'contract 1.0',
                     contractType: 'BASE',
@@ -363,7 +382,7 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                [rate.id]
+                rateIDs: [rate.id]}
             )
         )
 
