@@ -11,6 +11,10 @@
       margin-left: .5rem
 }
 
+.buttonTextWithoutIcon {
+  vertical-align: middle;
+}
+
 .successButton {
     background: $theme-color-success;
     &:hover {
