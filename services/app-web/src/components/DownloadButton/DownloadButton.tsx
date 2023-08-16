@@ -1,7 +1,7 @@
 import React, { ComponentProps } from 'react'
 import { Link } from '@trussworks/react-uswds'
 import { Spinner } from '../Spinner'
-import styles from '../ActionButton/ActionButton.module.scss'
+import styles from './DownloadButton.module.scss'
 import classnames from 'classnames'
 
 type DownloadButtonProps = {
