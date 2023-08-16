@@ -178,10 +178,10 @@ model ActuaryContact {
   id                 String                 @id @default(uuid())
   createdAt          DateTime               @default(now())
   updatedAt          DateTime               @default(now()) @updatedAt
-  name               String
-  titleRole          String
-  email              String
-  actuarialFirm      ActuarialFirm
+  name               String?
+  titleRole          String?
+  email              String?
+  actuarialFirm      ActuarialFirm?
   actuarialFirmOther String?
   rateWithCertifyingActuaryID    String?
   rateWithAddtlActuaryID    String?
@@ -237,9 +237,9 @@ model StateContact {
   id                 String                @id @default(uuid())
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @default(now()) @updatedAt
-  name               String
-  titleRole          String
-  email              String
+  name               String?
+  titleRole          String?
+  email              String?
   contractRevisionID String
   contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
 }

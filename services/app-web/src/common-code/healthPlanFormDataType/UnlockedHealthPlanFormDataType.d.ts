@@ -1,4 +1,4 @@
-import {FederalAuthority} from 'FederalAuthority'
+import { FederalAuthority } from 'FederalAuthority'
 
 // Draft state submission is a health plan that a state user is still working on
 
@@ -44,15 +44,15 @@ type ActuarialFirmType =
 type ActuaryCommunicationType = 'OACT_TO_ACTUARY' | 'OACT_TO_STATE'
 
 type StateContact = {
-    name: string
-    titleRole: string
-    email: string
+    name?: string
+    titleRole?: string
+    email?: string
 }
 
 type ActuaryContact = {
-    name: string
-    titleRole: string
-    email: string
+    name?: string
+    titleRole?: string
+    email?: string
     actuarialFirm?: ActuarialFirmType
     actuarialFirmOther?: string
 }

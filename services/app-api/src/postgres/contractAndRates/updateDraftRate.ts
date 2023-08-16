@@ -1,24 +1,20 @@
-import type {
-    ActuaryCommunication,
-    ActuaryContact,
-    PrismaClient,
-    RateCapitationType,
-    RateDocument,
-    RateSupportingDocument,
-    RateType as PrismaRateType,
-} from '@prisma/client'
 import { findRateWithHistory } from './findRateWithHistory'
-import type { RateType } from '../../domain-models/contractAndRates'
 import type { NotFoundError } from '../storeError'
-// Update the given draft
-// * can change the set of draftRates
-// * set the formData
+import type {
+    RateCapitationType,
+    RateType as DomainRateType,
+    ActuaryCommunicationType,
+    ActuaryContact,
+    SubmissionDocument,
+} from 'app-web/src/common-code/healthPlanFormDataType'
+import type { RateType } from '../../domain-models/contractAndRates'
+import type { PrismaClient } from '@prisma/client'
 
 type RateFormEditable = {
-    rateType?: PrismaRateType
+    rateType?: DomainRateType
     rateCapitationType?: RateCapitationType
-    rateDocuments?: RateDocument[]
-    supportingDocuments?: RateSupportingDocument[]
+    rateDocuments?: SubmissionDocument[]
+    supportingDocuments?: SubmissionDocument[]
     rateDateStart?: Date
     rateDateEnd?: Date
     rateDateCertified?: Date
@@ -28,7 +24,7 @@ type RateFormEditable = {
     rateCertificationName?: string
     certifyingActuaryContacts?: ActuaryContact[]
     addtlActuaryContacts?: ActuaryContact[]
-    actuaryCommunicationPreference?: ActuaryCommunication
+    actuaryCommunicationPreference?: ActuaryCommunicationType
 }
 
 type UpdateRateArgsType = {
@@ -36,6 +32,9 @@ type UpdateRateArgsType = {
     formData: RateFormEditable
     contractIDs: string[]
 }
+// Update the given draft
+// * can change the set of draftRates
+// * set the formData
 
 async function updateDraftRate(
     client: PrismaClient,
