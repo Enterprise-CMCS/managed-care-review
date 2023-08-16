@@ -78,7 +78,7 @@ custom:
   scriptable:
     hooks:
       before:package:createDeploymentArtifacts: yarn build
-      after:deploy:finalize: node scripts/uploadScripts.js ${self:custom.stage}
+      before:deploy:finalize: node scripts/uploadScripts.js ${self:custom.stage}
 
 package:
   individually: true
@@ -102,8 +102,8 @@ resources:
     IsDevValProd: !Or
       - !Equals ['${sls:stage}', 'main']
       - !Equals ['${sls:stage}', 'val']
-      - !Equals ['${sls.stage}', 'prod']
-      - !Equals ['${sls.stage}', 'mtdbvm']
+      - !Equals ['${sls:stage}', 'prod']
+      - !Equals ['${sls:stage}', 'mtdbvm']
   Mappings:
     Logins:
       keys:
