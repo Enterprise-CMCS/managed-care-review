@@ -78,7 +78,7 @@ custom:
   scriptable:
     hooks:
       before:package:createDeploymentArtifacts: yarn build
-      before:deploy:finalize: node scripts/uploadScripts.js ${self:custom.stage}
+      after:deploy:finalize: node scripts/uploadScripts.js ${self:custom.stage}
 
 package:
   individually: true
