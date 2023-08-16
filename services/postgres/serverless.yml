@@ -250,6 +250,7 @@ resources:
 
     PgVMIAMRole:
       Type: AWS::IAM::Role
+      Condition: IsDevValProd
       Properties:
         Path: '/delegatedadmin/developer/'
         PermissionsBoundary: !Sub 'arn:aws:iam::${AWS::AccountId}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy'
@@ -275,6 +276,7 @@ resources:
 
     PgVMIAMInstanceProfile:
       Type: AWS::IAM::InstanceProfile
+      Condition: IsDevValProd
       Properties:
         Path: '/delegatedadmin/developer/'
         Roles:
@@ -282,6 +284,7 @@ resources:
 
     PostgresVmSg:
       Type: 'AWS::EC2::SecurityGroup'
+      Condition: IsDevValProd
       Properties:
         GroupDescription: Enable SSH access via port 22
         VpcId: !Sub ${self:custom.vpcId}
