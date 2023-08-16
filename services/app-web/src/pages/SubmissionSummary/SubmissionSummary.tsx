@@ -127,7 +127,9 @@ export const SubmissionSummary = (): React.ReactElement => {
                     />
                 )}
 
-                {documentError && <DocumentWarningBanner />}
+                {!documentError && (
+                    <DocumentWarningBanner className={styles.banner} />
+                )}
 
                 {!showQuestionResponse && (
                     <Link

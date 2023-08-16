@@ -1,10 +1,11 @@
 import React from 'react'
-import styles from '../Banner.module.scss'
 import { Alert } from '@trussworks/react-uswds'
 import { useStringConstants } from '../../../hooks/useStringConstants'
 import classnames from 'classnames'
 
-export const DocumentWarningBanner = (): React.ReactElement => {
+export const DocumentWarningBanner = ({
+    className,
+}: React.HTMLAttributes<HTMLDivElement>): React.ReactElement => {
     const stringConstants = useStringConstants()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     return (
@@ -14,7 +15,7 @@ export const DocumentWarningBanner = (): React.ReactElement => {
             heading={`Document download unavailable`}
             headingLevel="h4"
             data-testid="warning-alert"
-            className={classnames(styles.bannerBodyText, 'usa-alert__text')}
+            className={classnames(className, 'usa-alert__text')}
         >
             <span>
                 Some documents aren’t available right now. Refresh the page to
