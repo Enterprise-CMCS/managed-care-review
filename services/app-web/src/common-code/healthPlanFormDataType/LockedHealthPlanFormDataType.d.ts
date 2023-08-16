@@ -13,6 +13,7 @@ import type {
     PopulationCoveredType,
 } from './UnlockedHealthPlanFormDataType'
 
+// future refactor- locked health data could have its own version of StateContact and ActuaryContact with stricter types
 export type LockedHealthPlanFormDataType = {
     submittedAt: Date
     id: string

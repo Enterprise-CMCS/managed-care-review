@@ -18,9 +18,10 @@ export const newPackageStateEmail = async (
     config: EmailConfiguration,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
-    const stateContactEmails = formData.stateContacts.map(
-        (contact) => contact.email
-    )
+    const stateContactEmails: string[] = []
+    formData.stateContacts.forEach((contact) => {
+        if (contact.email) stateContactEmails.push(contact.email)
+    })
     const receiverEmails = pruneDuplicateEmails([
         ...stateContactEmails,
         ...submitterEmails,

@@ -19,10 +19,10 @@ export const resubmitPackageStateEmail = async (
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
     const isTestEnvironment = config.stage !== 'prod'
-
-    const stateContactEmails = formData.stateContacts.map(
-        (contact) => contact.email
-    )
+    const stateContactEmails: string[] = []
+    formData.stateContacts.forEach((contact) => {
+        if (contact.email) stateContactEmails.push(contact.email)
+    })
     const receiverEmails = pruneDuplicateEmails([
         ...stateContactEmails,
         ...submitterEmails,
