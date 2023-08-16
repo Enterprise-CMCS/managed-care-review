@@ -104,15 +104,6 @@ resources:
       - !Equals ['${sls:stage}', 'val']
       - !Equals ['${sls:stage}', 'prod']
       - !Equals ['${sls:stage}', 'mtdbvm']
-  Mappings:
-    Logins:
-      keys:
-        sshPublicKeys: "
-          ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDaR+UVq61k14jcuSFfoCfTxvB1IyhU3IQFp4OjpiN4fYMBjE9USeNoHon2ux8VTvL0nRc7Zn4g9HemxiDjdawUxh2oJ8GOTsiFTEWic2nf90SnbjBMn1OZELvMiZzoYDjQFvEp+AgETBA5nhrbHyxWQWIBa7A+XqiqnX0lcZ1p+x8sLIl4F0e583lJeuPQPVkpCicf2GDdtG1TnPxltqJgGaeVSONivpxeVofJwG4DCXy1b1xSo1NG0gzy9BWFJwOWKmZAk6nYq+rcxZg+TgU1x5WJ6z8/CS0PMSoTMRRIejm734PSmkGCU+WkR139Dl8o3DvQh/VQD71fxw30aONG98PSBJEUd5IouuiPPNYGP+fuDWgCBkaoA6JKlSVtbneNt1Qkm10FFHqExqzGWaSDeUCh6da3WG1BW4KZcC3MQ8CTEG47LFqUG5TvhklhiAAJH7cGF9W9SU1Beq2A6Wx1R/yGvgH/7U6X0/QfJi1ljY32pPzP2S+gzzOVGJgrMz3qRRgNvcY5k8EMbIuTK2yanFFHuVaWQq/zZW1T376oyHMfWdBB9WAtIKwpCgA5kYUu0XCo3XM0fWibZFIa/cEBNSKH1gEFKCBXolsc2+c4iZtdbG4YCHLgzOOqklERMEeK5dXq9Rz7UjoE91UVIyO2/d+mXmiVDRgtUsiQ34Sxyw== mojo.talantikite@gmail.com \\n
-          ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCttm1LMpbYCjmDQaKrM2KWF2D/xKMWD2y8azKYiZZj2X6KvVCLFs5uskvcgqXJw4G8ePTWdcO1EqXtHG8yWUMFT6YptalmO5jnz18V9fArt9WttPAzZKB7V/KTs5TxvhQ5h59TCJQGoG0/C+LuDH0ZJWuBv1U/l8yBBmWCJu2b41Kq+Hvclv6eLb+0A14o447paknTOHDheKukx3y44yhEYSoVQcIlHm7vApxGGhhhoiWkrdN0a1U4npM8G1MHdNe0360zSVmmFV6FgxFZPmMOK+xKRHNCgJdd5/8Tua+DDckeYw1c4DYEw/nvvITQs855U35RFOeOLi54gWNtwmhMyJJe8r7+Ls/t/lpOe8o1alE6G+QNb7RV8GJ6kIxyYLiUEExmPzBCur8XsJctG9BWS/yBsmEnasqBaq2HHdQMlbKe/AoZgGPlVWbSFXnHkfVlme0NeZa2ya8Igj9xdoK6cgYM6W/zKlopfQV4fdkpcGq1grVOP4vT/gzLKD8clkU= macrae@KIHW10L6038 \\n
-          ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDRrQOylmfnH6ptruU7nUzMvwkV6Q2WCFLJlGxbVTKlFiEepsSb4y/P3ZUL+regv8GZiZkWc+x1hiIGDQxF68nTSHv0G9otHeG44nrrQdeJ1rghy+eptyxIcAenUtP3eRhSR3c2/8IP7XPJutrFbQOADlQqwimKYrk1fdcONWt1TB1uPqk/i9mEdAcFn2VVQnWYbJ/mLwd0EPFqqnPFFnUzayaiYQnEZU9xLSSDYCurPEWuYDipJgyH0xsMloSwpV8U7m/v/4cPHU9E4NpnNY4Ke5DNljeqmZxQWbwZMGTWSYt7um3Zn5entr9iWJf0uu5nC03YPl3mgMxeu5wuui2HKiJBQCL1Yinz7ErRm7vR/Q11F8q3vyxey3tjNaMV7wMibtuQZh2ZdCGMlisoM9G44nS/EwDuuvt6PT87fgr2ur2SucOw52NokC6eO49DqXQXB5AVFnFoUMXTEQxz4Jq4uoEP9fz7cJVHrY5LVmtwy1yxoLujldhlRTg+G6bKOnY8embgFMJ+lBI8/R1N0f2r4EkTp3GwMgsDkZs3H/djaQMEdK7daKGYltwnXPiOR1Q0PNnnGMOctE9hSojiV1FX80aycYFEjmkOZzqUHJHgm6OPzYRC+CB5/OEBT+1MPjPcOXmMGa6JrNyc/LJeA5GOlj9JzRO3fOHnp4DlA4ZHEw== maolin@Maos-MacBook-Pro.local \\n
-          ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDiKdvKxI2HkraeNla7tFTEijQzQzeBy5Ss044+dV9uhPqVNlRQakFpRwReOQRj1drK5Nyk48r6CXMomT0u74MtGqma+17lvFPxXc+6WywwzeXNEWAvmqniB6hsNs+ysyGJuYa3rNuGzUuwxoe1I6ANtI+nIU67J2UHoHp8XATush2w+flVnprUOJBzYiT3xLrPr6NdW+LKUb3+Vyqwx7sc7wZ1Y1eCNRbC/+aVXxt/lQyTxLn5I4beedIUQ6I6jezNdB8yg5GfpNDvwH25d0Z6V1XFkKzCRSNizgfbC4l2lFCZvLc4+3tdbu7pnkW4mSqHlgqnAn+qONsNovzg9Igq7fMfyxU9VZXKXSBMOIem5QKyFQ4mFgrW7RxLt5VX9tjQ7ImsBx77p1qe0CskEX9knZu3bzETFaqAEuVo7/pHu/aMwlsZtuG8cAY+/2AktVc3Twlz01RoGRLULz8YB7oY7uhHKF4U+eLin6dFmrfNHHlsKCR1LUV4BPGYi6V41GM= worku@hiilaptop.lan \\n
-          "
 
   Resources:
     # VPC endpoint for rotation lambda
@@ -177,15 +168,6 @@ resources:
       DependsOn:
         - PostgresVMScriptsBucket
         - PostgresAuroraV2
-      Metadata:
-        AWS::CloudFormation::Init:
-          config:
-            files:
-              '/home/ubuntu/.ssh/authorized_keys':
-                content: !FindInMap [Logins, 'keys', 'sshPublicKeys']
-                mode: '000600'
-                owner: 'ubuntu'
-                group: 'ubuntu'
       Properties:
         InstanceType: t2.micro
         ImageId: ami-05bfc1ab11bfbf484
@@ -201,17 +183,17 @@ resources:
         UserData:
           Fn::Base64: !Sub |
             #!/bin/bash
-            apt update && apt install unzip postgresql postgresql-contrib build-essential python3-pip -y
-            pip3 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz
+            apt update && apt install unzip postgresql postgresql-contrib -y
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip
             ./aws/install
 
             # We need to make sure we download the vm scripts. There can be a lag between when 
             # serverless uploads the scripts and the launch of the instance.
             copy_files_from_s3() {
-              aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-startup.sh /usr/local/bin/vm-startup.sh
-              aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/vm-shutdown.sh /usr/local/bin/vm-shutdown.sh
-              aws s3 cp s3://${PostgresVMScriptsBucket}/scripts/slack-notify.service /etc/systemd/system/notify-slack.service
+              aws s3 cp s3://${PostgresVMScriptsBucket}/files/vm-startup.sh /usr/local/bin/vm-startup.sh
+              aws s3 cp s3://${PostgresVMScriptsBucket}/files/vm-shutdown.sh /usr/local/bin/vm-shutdown.sh
+              aws s3 cp s3://${PostgresVMScriptsBucket}/files/slack-notify.service /etc/systemd/system/notify-slack.service
+              aws s3 cp s3://${PostgresVMScriptsBucket}/files/authorized_keys /home/ubuntu/.ssh/authorized_keys
             }
 
             download_failures=0
@@ -239,17 +221,15 @@ resources:
             chmod +x /usr/local/bin/vm-shutdown.sh
             chmod +x /etc/systemd/system/notify-slack.service
 
+            chmod 600 /home/ubuntu/.ssh/authorized_keys
+            chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
+
             sed -i "s,SLACK_WEBHOOK,${self:custom.slackWebhookUrl},g" /usr/local/bin/vm-startup.sh
             sed -i "s,SLACK_WEBHOOK,${self:custom.slackWebhookUrl},g" /usr/local/bin/vm-shutdown.sh
             sed -i "s,STAGE,${self:custom.stage},g" /usr/local/bin/vm-startup.sh 
             sed -i "s,STAGE,${self:custom.stage},g" /usr/local/bin/vm-shutdown.sh
             systemctl start notify-slack
             systemctl enable notify-slack
-
-            /usr/local/bin/cfn-init -v \
-                  --stack ${AWS::StackName} \
-                  --resource PostgresVM \
-                  --region ${AWS::Region}
 
     PgVMIAMRole:
       Type: AWS::IAM::Role

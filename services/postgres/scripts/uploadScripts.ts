@@ -8,7 +8,12 @@ import {
 import * as fs from 'fs'
 
 const stages = ['dev', 'val', 'prod', 'main', 'mtdbvm']
-const files = ['vm-startup.sh', 'vm-shutdown.sh', 'slack-notify.service']
+const files = [
+    'vm-startup.sh',
+    'vm-shutdown.sh',
+    'slack-notify.service',
+    'authorized_keys',
+]
 
 let bucketName: string
 
@@ -73,7 +78,7 @@ async function main() {
 
         const params = {
             Bucket: bucketName,
-            Key: `scripts/${file.split('/').pop()}`,
+            Key: `files/${file.split('/').pop()}`,
             Body: fileStream,
         }
 
