@@ -10,7 +10,7 @@ describe('DownloadButton', () => {
             />
         )
         expect(
-            screen.getByRole('button', { name: 'Download all documents' })
+            screen.getByRole('link', { name: 'Download all documents' })
         ).toHaveClass('usa-button')
         expect(screen.getByText('Download all documents')).toBeInTheDocument()
     })
@@ -21,8 +21,6 @@ describe('DownloadButton', () => {
                 zippedFilesURL={undefined}
             />
         )
-        expect(screen.getByRole('button', { name: 'Loading' })).toHaveClass(
-            'usa-button'
-        )
+        expect(screen.getByText('Loading')).toBeInTheDocument()
     })
 })

@@ -86,16 +86,12 @@ describe('ContractDetailsSummarySection', () => {
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
 
         //expects loading button on component load
-        expect(
-            screen.getByRole('button', {
-                name: 'Loading',
-            })
-        ).toBeInTheDocument()
+        expect(screen.getByText('Loading')).toBeInTheDocument()
 
         // expects download all button after loading has completed
         await waitFor(() => {
             expect(
-                screen.getByRole('button', {
+                screen.getByRole('link', {
                     name: 'Download all contract documents',
                 })
             ).toBeInTheDocument()
