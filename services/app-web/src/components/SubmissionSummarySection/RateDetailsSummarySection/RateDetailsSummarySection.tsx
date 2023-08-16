@@ -46,6 +46,20 @@ export type RateDetailsSummarySectionProps = {
     onDocumentError?: (error: true) => void
 }
 
+function renderDownloadButton(zippedFilesURL: string | undefined | Error) {
+    if (zippedFilesURL instanceof Error) {
+        return (
+            <InlineDocumentWarning message="Rate document download is unavailable" />
+        )
+    }
+    return (
+        <DownloadButton
+            text="Download all rate documents"
+            zippedFilesURL={zippedFilesURL}
+        />
+    )
+}
+
 export const RateDetailsSummarySection = ({
     submission,
     navigateTo,
@@ -236,19 +250,6 @@ export const RateDetailsSummarySection = ({
         isSubmitted,
         isPreviousSubmission,
     ])
-    const renderDownloadButton = () => {
-        if (zippedFilesURL instanceof Error) {
-            return (
-                <InlineDocumentWarning message="Rate document download is unavailable" />
-            )
-        }
-        return (
-            <DownloadButton
-                text="Download all rate documents"
-                zippedFilesURL={zippedFilesURL}
-            />
-        )
-    }
 
     return (
         <section id="rateDetails" className={styles.summarySection}>
@@ -256,7 +257,7 @@ export const RateDetailsSummarySection = ({
                 <SectionHeader header="Rate details" navigateTo={navigateTo}>
                     {isSubmitted &&
                         !isPreviousSubmission &&
-                        renderDownloadButton()}
+                        renderDownloadButton(zippedFilesURL)}
                 </SectionHeader>
                 {submission.rateInfos.length > 0 ? (
                     submission.rateInfos.map((rateInfo) => {

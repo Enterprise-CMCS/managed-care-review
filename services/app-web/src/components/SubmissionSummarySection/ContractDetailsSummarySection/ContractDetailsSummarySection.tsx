@@ -43,6 +43,20 @@ export type ContractDetailsSummarySectionProps = {
     onDocumentError?: (error: true) => void
 }
 
+function renderDownloadButton(zippedFilesURL: string | undefined | Error) {
+    if (zippedFilesURL instanceof Error) {
+        return (
+            <InlineDocumentWarning message="Contract document download is unavailable" />
+        )
+    }
+    return (
+        <DownloadButton
+            text="Download all contract documents"
+            zippedFilesURL={zippedFilesURL}
+        />
+    )
+}
+
 export const ContractDetailsSummarySection = ({
     submission,
     navigateTo, // this is the edit link for the section. When this prop exists, summary section is loaded in edit mode
@@ -116,26 +130,12 @@ export const ContractDetailsSummarySection = ({
         isPreviousSubmission,
     ])
 
-    const renderDownloadButton = () => {
-        if (zippedFilesURL instanceof Error) {
-            return (
-                <InlineDocumentWarning message="Contract document download is unavailable" />
-            )
-        }
-        return (
-            <DownloadButton
-                text="Download all contract documents"
-                zippedFilesURL={zippedFilesURL}
-            />
-        )
-    }
-
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>
             <SectionHeader header="Contract details" navigateTo={navigateTo}>
                 {isSubmitted(submission) &&
                     !isPreviousSubmission &&
-                    renderDownloadButton()}
+                    renderDownloadButton(zippedFilesURL)}
             </SectionHeader>
             <dl>
                 <DoubleColumnGrid>

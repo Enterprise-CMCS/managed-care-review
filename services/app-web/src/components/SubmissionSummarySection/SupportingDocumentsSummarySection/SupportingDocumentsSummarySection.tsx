@@ -26,6 +26,21 @@ const getUncategorizedDocuments = (
     documents.filter(
         (doc) => !doc.documentCategories || doc.documentCategories.length === 0
     )
+
+function renderDownloadButton(zippedFilesURL: string | undefined | Error) {
+    if (zippedFilesURL instanceof Error) {
+        return (
+            <InlineDocumentWarning message="Supporting document download is unavailable" />
+        )
+    }
+    return (
+        <DownloadButton
+            text="Download all supporting documents"
+            zippedFilesURL={zippedFilesURL}
+        />
+    )
+}
+
 // This component is only used for supporting docs that are not categorized (not expected behavior but still possible)
 // since supporting documents are now displayed in the rate and contract sections
 export const SupportingDocumentsSummarySection = ({
@@ -120,27 +135,13 @@ export const SupportingDocumentsSummarySection = ({
     // when there are no uncategorized supporting documents, remove this section entirely
     if (refreshedDocs.length === 0) return null
 
-    const renderDownloadButton = () => {
-        if (zippedFilesURL instanceof Error) {
-            return (
-                <InlineDocumentWarning message="Supporting document download is unavailable" />
-            )
-        }
-        return (
-            <DownloadButton
-                text="Download all supporting documents"
-                zippedFilesURL={zippedFilesURL}
-            />
-        )
-    }
-
     return (
         <section id="documents" className={styles.summarySection}>
             <SectionHeader
                 header="Supporting documents"
                 navigateTo={navigateTo}
             >
-                {isSubmitted && renderDownloadButton()}
+                {isSubmitted && renderDownloadButton(zippedFilesURL)}
             </SectionHeader>
             <span className="text-bold">{documentsSummary}</span>
             <ul>
