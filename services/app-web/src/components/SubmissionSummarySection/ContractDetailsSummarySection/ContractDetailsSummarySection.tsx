@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
@@ -30,6 +30,9 @@ import {
     federalAuthorityKeysForCHIP,
 } from '../../../common-code/healthPlanFormDataType'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
+import { recordJSException } from '../../../otelHelpers'
+import useDeepCompareEffect from 'use-deep-compare-effect'
+import { InlineDocumentWarning } from '../../DocumentWarning'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -37,6 +40,21 @@ export type ContractDetailsSummarySectionProps = {
     documentDateLookupTable: DocumentDateLookupTableType
     isCMSUser?: boolean
     submissionName: string
+    onDocumentError?: (error: true) => void
+}
+
+function renderDownloadButton(zippedFilesURL: string | undefined | Error) {
+    if (zippedFilesURL instanceof Error) {
+        return (
+            <InlineDocumentWarning message="Contract document download is unavailable" />
+        )
+    }
+    return (
+        <DownloadButton
+            text="Download all contract documents"
+            zippedFilesURL={zippedFilesURL}
+        />
+    )
 }
 
 export const ContractDetailsSummarySection = ({
@@ -45,12 +63,15 @@ export const ContractDetailsSummarySection = ({
     documentDateLookupTable,
     isCMSUser,
     submissionName,
+    onDocumentError,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
     // Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
     // Get the zip file for the contract
     const { getKey, getBulkDlURL } = useS3()
-    const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
+    const [zippedFilesURL, setZippedFilesURL] = useState<
+        string | undefined | Error
+    >(undefined)
     const contractSupportingDocuments = submission.documents.filter((doc) =>
         doc.documentCategories.includes('CONTRACT_RELATED' as const)
     )
@@ -64,7 +85,10 @@ export const ContractDetailsSummarySection = ({
         sortModifiedProvisions(submission)
     const provisionsAreInvalid = isMissingProvisions(submission) && isEditing
 
-    useEffect(() => {
+    useDeepCompareEffect(() => {
+        // skip getting urls of this if this is a previous submission or draft
+        if (!isSubmitted(submission) || isPreviousSubmission) return
+
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
             const keysFromDocs = submission.contractDocuments
@@ -83,8 +107,14 @@ export const ContractDetailsSummarySection = ({
                 'HEALTH_PLAN_DOCS'
             )
             if (zippedURL instanceof Error) {
-                console.info('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
-                return
+                const msg = `ERROR: getBulkDlURL failed to generate contract document URL. ID: ${submission.id} Message: ${zippedURL}`
+                console.info(msg)
+
+                if (onDocumentError) {
+                    onDocumentError(true)
+                }
+
+                recordJSException(msg)
             }
 
             setZippedFilesURL(zippedURL)
@@ -97,16 +127,15 @@ export const ContractDetailsSummarySection = ({
         submission,
         contractSupportingDocuments,
         submissionName,
+        isPreviousSubmission,
     ])
+
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>
             <SectionHeader header="Contract details" navigateTo={navigateTo}>
-                {isSubmitted(submission) && !isPreviousSubmission && (
-                    <DownloadButton
-                        text="Download all contract documents"
-                        zippedFilesURL={zippedFilesURL}
-                    />
-                )}
+                {isSubmitted(submission) &&
+                    !isPreviousSubmission &&
+                    renderDownloadButton(zippedFilesURL)}
             </SectionHeader>
             <dl>
                 <DoubleColumnGrid>

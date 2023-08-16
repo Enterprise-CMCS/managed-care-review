@@ -8,6 +8,7 @@ import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import * as usePreviousSubmission from '../../../hooks/usePreviousSubmission'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
 import { RateInfoType } from '../../../common-code/healthPlanFormDataType'
+import { testS3Client } from '../../../testHelpers/s3Helpers'
 
 describe('RateDetailsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()
@@ -98,7 +99,7 @@ describe('RateDetailsSummarySection', () => {
         ).toHaveAttribute('href', '/rate-details')
     })
 
-    it('can render state submission without errors', () => {
+    it('can render state submission without errors', async () => {
         renderWithProviders(
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
@@ -116,6 +117,18 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
         // Is this the best way to check that the link is not present?
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+
+        //expects loading button on component load
+        expect(screen.getByText('Loading')).toBeInTheDocument()
+
+        // expects download all button after loading has completed
+        await waitFor(() => {
+            expect(
+                screen.getByRole('link', {
+                    name: 'Download all rate documents',
+                })
+            ).toBeInTheDocument()
+        })
     })
 
     it('can render all rate details fields for amendment to prior rate certification submission', () => {
@@ -789,5 +802,34 @@ describe('RateDetailsSummarySection', () => {
         expect(
             screen.queryByText(/You must provide this information/)
         ).toBeNull()
+    })
+
+    it('renders inline error when bulk URL is unavailable', async () => {
+        const s3Provider = {
+            ...testS3Client(),
+            getBulkDlURL: async (
+                keys: string[],
+                fileName: string
+            ): Promise<string | Error> => {
+                return new Error('Error: getBulkDlURL encountered an error')
+            },
+        }
+        renderWithProviders(
+            <RateDetailsSummarySection
+                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
+                submission={stateSubmission}
+                submissionName="MN-MSHO-0003"
+                statePrograms={statePrograms}
+            />,
+            {
+                s3Provider,
+            }
+        )
+
+        await waitFor(() => {
+            expect(
+                screen.getByText('Rate document download is unavailable')
+            ).toBeInTheDocument()
+        })
     })
 })

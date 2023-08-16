@@ -1,4 +1,4 @@
-import React, { useEffect, useState, ComponentProps } from 'react'
+import React, { useState, ComponentProps, useLayoutEffect } from 'react'
 import { Button as UswdsButton } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 
@@ -26,8 +26,10 @@ export const ActionButton = ({
     animationTimeout = 750,
     onClick,
     ...inheritedProps
-}: ActionButtonProps): React.ReactElement => {
-    const [showLoading, setShowLoading] = useState(false)
+}: ActionButtonProps): React.ReactElement | null => {
+    const [showLoading, setShowLoading] = useState<boolean | undefined>(
+        undefined
+    )
     const isDisabled = disabled || inheritedProps['aria-disabled']
     const isLinkStyled = variant === 'linkStyle'
     const isOutline = variant === 'outline'
@@ -39,14 +41,17 @@ export const ActionButton = ({
             'CODING ERROR: Incompatible props on ActionButton are being used. Button should not be both loading and disabled at the same time.'
         )
 
-    useEffect(() => {
-        if (loading) {
+    useLayoutEffect(() => {
+        // If there is no animationTimeout, do not use setTimeout else you get flickering UI.
+        if (animationTimeout > 0) {
             const timeout = setTimeout(() => {
-                setShowLoading(true)
+                setShowLoading(loading)
             }, animationTimeout)
             return function cleanup() {
                 clearTimeout(timeout)
             }
+        } else {
+            setShowLoading(loading)
         }
     }, [loading, animationTimeout])
 
@@ -87,7 +92,13 @@ export const ActionButton = ({
             className={classes}
         >
             {showLoading && <Spinner size="small" />}
-            <span className={showLoading ? styles.buttonTextWithIcon : ''}>
+            <span
+                className={
+                    showLoading
+                        ? styles.buttonTextWithIcon
+                        : styles.buttonTextWithoutIcon
+                }
+            >
                 {showLoading ? 'Loading' : children}
             </span>
         </UswdsButton>

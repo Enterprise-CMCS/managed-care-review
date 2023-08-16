@@ -9,9 +9,18 @@ describe('DownloadButton', () => {
                 zippedFilesURL="https://example.com"
             />
         )
-        expect(screen.getByRole('link', {name: 'Download all documents'})).toHaveClass(
-            'usa-button usa-button--small'
-        )
+        expect(
+            screen.getByRole('link', { name: 'Download all documents' })
+        ).toHaveClass('usa-button')
         expect(screen.getByText('Download all documents')).toBeInTheDocument()
+    })
+    it('renders loading button', () => {
+        render(
+            <DownloadButton
+                text="Download all documents"
+                zippedFilesURL={undefined}
+            />
+        )
+        expect(screen.getByText('Loading')).toBeInTheDocument()
     })
 })

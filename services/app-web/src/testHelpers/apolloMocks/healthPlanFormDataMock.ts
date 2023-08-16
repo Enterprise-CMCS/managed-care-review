@@ -232,7 +232,7 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
             {
                 s3URL: 's3://bucketname/key/supporting-documents',
                 name: 'supporting documents',
-                documentCategories: ['RATES_RELATED' as const],
+                documentCategories: ['CONTRACT_RELATED' as const],
             },
         ],
         contractType: 'BASE',
@@ -271,7 +271,13 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                supportingDocuments: [],
+                supportingDocuments: [
+                    {
+                        s3URL: 's3://bucketname/key/supporting-documents',
+                        name: 'supporting documents',
+                        documentCategories: ['RATES_RELATED' as const],
+                    },
+                ],
                 rateDateStart: new Date(),
                 rateDateEnd: new Date(),
                 rateDateCertified: new Date(),
@@ -425,7 +431,9 @@ function mockDraftHealthPlanPackage(
 }
 
 function mockSubmittedHealthPlanPackage(
-    submissionData?: Partial<UnlockedHealthPlanFormDataType>,
+    submissionData?: Partial<
+        UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
+    >,
     submitInfo?: Partial<UpdateInformation>
 ): HealthPlanPackage {
     // get a submitted DomainModel submission
