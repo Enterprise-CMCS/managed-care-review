@@ -7,6 +7,7 @@ plugins:
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   - serverless-iam-helper
+  - serverless-scriptable-plugin
 
 provider:
   name: aws
@@ -47,7 +48,9 @@ custom:
     - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/a/id, ssm:/configuration/default/vpc/subnets/private/a/id}
     - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
     - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
+  publicSubnetA: ${ssm:/configuration/${sls:stage}/vpc/subnets/public/a/id, ssm:/configuration/default/vpc/subnets/public/a/id}
   rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-rotator'
+  slackWebhookUrl: ${env:SLACK_WEBHOOK}
   serverless-offline-ssm:
     stages:
       - local
@@ -72,6 +75,10 @@ custom:
     other: 0.5
     val: 1
     prod: 1
+  scriptable:
+    hooks:
+      before:package:createDeploymentArtifacts: yarn build
+      before:deploy:finalize: node scripts/uploadScripts.js ${self:custom.stage}
 
 package:
   individually: true
@@ -91,6 +98,13 @@ functions:
       artifact: s3://secrets-manager-rotation-apps-c0de1e0412b469545054417cc38af3c3/SecretsManagerRDSPostgreSQLRotationSingleUser/SecretsManagerRDSPostgreSQLRotationSingleUser.zip
 
 resources:
+  Conditions:
+    IsDevValProd: !Or
+      - !Equals ['${sls:stage}', 'main']
+      - !Equals ['${sls:stage}', 'val']
+      - !Equals ['${sls:stage}', 'prod']
+      - !Equals ['${sls:stage}', 'mtdbvm']
+
   Resources:
     # VPC endpoint for rotation lambda
     SecretsManagerVPCEndpoint:
@@ -141,6 +155,127 @@ resources:
         DBClusterIdentifier: !Ref PostgresAuroraV2
         AutoMinorVersionUpgrade: true
 
+    PostgresVMScriptsBucket:
+      Type: 'AWS::S3::Bucket'
+      Condition: IsDevValProd
+      Properties:
+        BucketName: !Sub ${self:service}-${sls:stage}-postgres-infra-scripts
+        AccessControl: Private
+
+    PostgresVM:
+      Type: 'AWS::EC2::Instance'
+      Condition: IsDevValProd
+      DependsOn:
+        - PostgresVMScriptsBucket
+        - PostgresAuroraV2
+      Properties:
+        InstanceType: t2.micro
+        ImageId: ami-05bfc1ab11bfbf484
+        IamInstanceProfile: !Ref PgVMIAMInstanceProfile
+        NetworkInterfaces:
+          - AssociatePublicIpAddress: true
+            DeviceIndex: '0'
+            GroupSet:
+              - !Ref PostgresVmSg
+              - ${self:custom.sgId}
+            SubnetId: !Sub ${self:custom.publicSubnetA}
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            apt update && apt install unzip postgresql postgresql-contrib -y
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip
+            ./aws/install
+
+            # We need to make sure we download the vm scripts. There can be a lag between when 
+            # serverless uploads the scripts and the launch of the instance.
+            copy_files_from_s3() {
+              aws s3 cp s3://${PostgresVMScriptsBucket}/files/vm-startup.sh /usr/local/bin/vm-startup.sh
+              aws s3 cp s3://${PostgresVMScriptsBucket}/files/vm-shutdown.sh /usr/local/bin/vm-shutdown.sh
+              aws s3 cp s3://${PostgresVMScriptsBucket}/files/slack-notify.service /etc/systemd/system/notify-slack.service
+              aws s3 cp s3://${PostgresVMScriptsBucket}/files/authorized_keys /home/ubuntu/.ssh/authorized_keys
+            }
+
+            download_failures=0
+            while true; do
+              copy_files_from_s3
+              exit_code=$?
+
+              if [ $exit_code -eq 0 ]; then
+                echo "Downloaded vm scripts from s3 successfully"
+                break
+              else
+                echo "Failed to download vm scripts from s3. Retrying in 10 seconds..."
+                download_failures=$((download_failures+1))
+
+                if [ $download_failures -eq 60 ]; then
+                  echo "Maximum attempts of aws s3 cp reached. Exiting..."
+                  break
+                fi
+
+                sleep 10
+              fi
+            done
+
+            chmod +x /usr/local/bin/vm-startup.sh
+            chmod +x /usr/local/bin/vm-shutdown.sh
+            chmod +x /etc/systemd/system/notify-slack.service
+
+            chmod 600 /home/ubuntu/.ssh/authorized_keys
+            chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
+
+            sed -i "s,SLACK_WEBHOOK,${self:custom.slackWebhookUrl},g" /usr/local/bin/vm-startup.sh
+            sed -i "s,SLACK_WEBHOOK,${self:custom.slackWebhookUrl},g" /usr/local/bin/vm-shutdown.sh
+            sed -i "s,STAGE,${self:custom.stage},g" /usr/local/bin/vm-startup.sh 
+            sed -i "s,STAGE,${self:custom.stage},g" /usr/local/bin/vm-shutdown.sh
+            systemctl start notify-slack
+            systemctl enable notify-slack
+
+    PgVMIAMRole:
+      Type: AWS::IAM::Role
+      Condition: IsDevValProd
+      Properties:
+        Path: '/delegatedadmin/developer/'
+        PermissionsBoundary: !Sub 'arn:aws:iam::${AWS::AccountId}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy'
+        RoleName: !Sub 'postgresvm-${sls:stage}-ServiceRole'
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: ec2.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: 's3Access'
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: 'Allow'
+                  Action:
+                    - 's3:*'
+                  Resource:
+                    - !GetAtt PostgresVMScriptsBucket.Arn
+                    - !Join ['', [!GetAtt PostgresVMScriptsBucket.Arn, '/*']]
+
+    PgVMIAMInstanceProfile:
+      Type: AWS::IAM::InstanceProfile
+      Condition: IsDevValProd
+      Properties:
+        Path: '/delegatedadmin/developer/'
+        Roles:
+          - !Ref PgVMIAMRole
+
+    PostgresVmSg:
+      Type: 'AWS::EC2::SecurityGroup'
+      Condition: IsDevValProd
+      Properties:
+        GroupDescription: Enable SSH access via port 22
+        VpcId: !Sub ${self:custom.vpcId}
+        SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            CidrIp: 0.0.0.0/0
+
     PostgresSubnetGroup:
       Type: AWS::RDS::DBSubnetGroup
       Properties:
@@ -177,3 +312,6 @@ resources:
   Outputs:
     PostgresAuroraV2Arn:
       Value: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAuroraV2}'
+    PostgresVMScriptsBucket:
+      Condition: IsDevValProd
+      Value: !Ref PostgresVMScriptsBucket

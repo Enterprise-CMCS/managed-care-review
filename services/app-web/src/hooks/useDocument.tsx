@@ -11,12 +11,11 @@ type ParsedDocumentWithLinkType =
 
 const useDocument = () => {
     const { getKey, getURL } = useS3()
-    const getDocumentsWithS3KeyAndUrl= useCallback(
+    const getDocumentsWithS3KeyAndUrl = useCallback(
         async <T = Record<string, unknown>,>(
             documents: Array<T & UnionDocumentType>,
             bucket: BucketShortName
         ): Promise<Array<T & ParsedDocumentWithLinkType>> => {
-
             return await Promise.all(
                 documents.map(async (doc) => {
                     const key = getKey(doc.s3URL)
@@ -41,7 +40,6 @@ const useDocument = () => {
         },
         [getURL, getKey]
     )
-
 
     return { getDocumentsWithS3KeyAndUrl }
 }

@@ -61,4 +61,4 @@ function makeDocumentS3KeyLookup(
 }
 
 export { makeDocumentS3KeyLookup }
-export type {DocumentKeyLookupType}
+export type { DocumentKeyLookupType }
