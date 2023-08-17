@@ -260,7 +260,7 @@ jobs:
     secrets:
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
-      slack_webhook_url: ${{ secrets.SLACK_WEBHOOK}}
+      slack_webhook_url: ${{ secrets.SLACK_WEBHOOK }}
 
   deploy-app:
     needs:
