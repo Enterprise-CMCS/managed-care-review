@@ -7,7 +7,7 @@ import {
 
 import * as fs from 'fs'
 
-const stages = ['dev', 'val', 'prod', 'main', 'mtdbvm']
+const stages = ['dev', 'val', 'prod', 'main']
 const files = [
     'vm-startup.sh',
     'vm-shutdown.sh',
