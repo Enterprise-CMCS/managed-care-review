@@ -39,9 +39,11 @@ const useTealium = (): {
     // this effect should only fire on initial app load
     useEffect(() => {
         // Do not add tealium for local dev or review apps
+        /* temp disable
         if (process.env.REACT_APP_AUTH_MODE !== 'IDM') {
             return
         }
+        */
 
         const tealiumEnv = getTealiumEnv(
             process.env.REACT_APP_STAGE_NAME || 'main'
@@ -100,10 +102,12 @@ const useTealium = (): {
     // this effect should fire on each page view or if something changes about logged in user
     useEffect(() => {
         // Do not add tealium for local dev or review apps
+        /* temp diable
         if (process.env.REACT_APP_AUTH_MODE !== 'IDM') {
             // console.info(`mock tealium page view: ${tealiumPageName}`)
             return
         }
+        */
 
         // Guardrail - protect against trying to call utag before its loaded.
         if (!window.utag) {
