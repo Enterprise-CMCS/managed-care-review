@@ -251,7 +251,7 @@ jobs:
 
   deploy-infra:
     needs: [begin-deployment]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@mt-db-vm
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
@@ -260,7 +260,7 @@ jobs:
     secrets:
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
-      slack_webhook_url: ${{ secrets.SLACK_WEBHOOK}}
+      slack_webhook_url: ${{ secrets.SLACK_WEBHOOK }}
 
   deploy-app:
     needs:
