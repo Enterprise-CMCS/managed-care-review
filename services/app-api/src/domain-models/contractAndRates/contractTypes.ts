@@ -11,6 +11,13 @@ import {
 import { rateRevisionSchema } from './rateTypes'
 import { updateInfoSchema } from './updateInfoType'
 
+const managedCareEntitiesSchema = z.union([
+    z.literal('MCO'),
+    z.literal('PIHP'),
+    z.literal('PAHP'),
+    z.literal('PCCM'),
+])
+
 const contractFormDataSchema = z.object({
     programIDs: z.array(z.string()),
     populationCovered: populationCoveredSchema.optional(),
@@ -24,7 +31,7 @@ const contractFormDataSchema = z.object({
     contractDocuments: z.array(submissionDocumentSchema),
     contractDateStart: z.date().optional(),
     contractDateEnd: z.date().optional(),
-    managedCareEntities: z.array(z.string()),
+    managedCareEntities: z.array(managedCareEntitiesSchema),
     federalAuthorities: z.array(federalAuthoritySchema),
     inLieuServicesAndSettings: z.boolean().optional(),
     modifiedBenefitsProvided: z.boolean().optional(),

@@ -9,6 +9,7 @@ import {
     DocumentCategoryType,
     ActuarialFirmType,
     FederalAuthority,
+    ManagedCareEntity,
     isLockedHealthPlanFormData,
     RateInfoType,
     generateRateName,
@@ -353,7 +354,9 @@ function parseRateInfos(
                     rateInfo?.rateCapitationType
                 ),
                 rateDocuments: parseProtoDocuments(rateInfo?.rateDocuments),
-                supportingDocuments: parseProtoDocuments(rateInfo?.supportingDocuments),
+                supportingDocuments: parseProtoDocuments(
+                    rateInfo?.supportingDocuments
+                ),
                 rateDateStart: protoDateToDomain(rateInfo?.rateDateStart),
                 rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
                 rateDateCertified: protoDateToDomain(
@@ -467,7 +470,7 @@ const toDomain = (
         managedCareEntities: protoEnumArrayToDomain(
             mcreviewproto.ManagedCareEntity,
             formDataMessage?.contractInfo?.managedCareEntities
-        ),
+        ) as Partial<ManagedCareEntity[]>,
         federalAuthorities: protoEnumArrayToDomain(
             mcreviewproto.FederalAuthority,
             formDataMessage?.contractInfo?.federalAuthorities

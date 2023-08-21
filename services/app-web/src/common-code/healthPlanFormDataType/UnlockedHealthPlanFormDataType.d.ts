@@ -107,7 +107,7 @@ type UnlockedHealthPlanFormDataType = {
     contractDocuments: SubmissionDocument[]
     contractDateStart?: Date
     contractDateEnd?: Date
-    managedCareEntities: string[]
+    managedCareEntities: ManagedCareEntity[]
     federalAuthorities: FederalAuthority[]
     contractAmendmentInfo?: ContractAmendmentInfo
     rateInfos: RateInfoType[]
