@@ -167,4 +167,4 @@ async function updateDraftContract(
 }
 
 export { updateDraftContract }
-export type { ContractFormEditable }
+export type { ContractFormEditable, UpdateContractArgsType }
