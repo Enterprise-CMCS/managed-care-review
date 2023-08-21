@@ -33,6 +33,12 @@ async function main() {
         return
     }
 
+    // force just a cypress re-run
+    if (commitMessage.includes('cypress re-run')) {
+        core.setOutput('changed-services', [])
+        return
+    }
+
     // if we haven't had a run on this branch, we need to deploy everything
     if (allWorkflowRuns.data.total_count === 0) {
         core.setOutput('changed-services', deployAllServices)
