@@ -648,7 +648,7 @@ type EmailConfiguration {
     dmcoEmails: [String!]!
     cmsReviewHelpEmailAddress: String!
     cmsRateHelpEmailAddress: String!
-    cmsDevTeamHelpEmailAddress: String!
+    helpDeskEmail: String!
 }
 
 type StateAnalystsConfiguration {

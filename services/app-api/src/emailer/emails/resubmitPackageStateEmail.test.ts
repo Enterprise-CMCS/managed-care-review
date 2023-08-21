@@ -57,7 +57,7 @@ test('contains correct subject and clearly states successful resubmission', asyn
         submission,
         defaultSubmitters,
         resubmitData,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms
     )
 
@@ -83,7 +83,7 @@ test('includes expected data summary for a contract and rates resubmission State
         submission,
         defaultSubmitters,
         resubmitData,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms
     )
 
@@ -235,7 +235,7 @@ test('includes expected data summary for a multi-rate contract and rates resubmi
         sub,
         defaultSubmitters,
         resubmitData,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms
     )
 
@@ -303,7 +303,7 @@ test('renders overall email as expected', async () => {
         submission,
         defaultSubmitters,
         resubmitData,
-        testEmailConfig,
+        testEmailConfig(),
         defaultStatePrograms
     )
 

@@ -102,19 +102,19 @@ function rateFormDataToDomainModel(
         rateCertificationName: rateRevision.rateCertificationName ?? undefined,
         certifyingActuaryContacts: rateRevision.certifyingActuaryContacts
             ? rateRevision.certifyingActuaryContacts.map((actuary) => ({
-                  name: actuary.name,
-                  titleRole: actuary.titleRole,
-                  email: actuary.email,
-                  actuarialFirm: actuary.actuarialFirm,
+                  name: actuary.name ?? undefined,
+                  titleRole: actuary.titleRole ?? undefined,
+                  email: actuary.email ?? undefined,
+                  actuarialFirm: actuary.actuarialFirm ?? undefined,
                   actuarialFirmOther: actuary.actuarialFirmOther ?? undefined,
               }))
             : [],
         addtlActuaryContacts: rateRevision.addtlActuaryContacts
             ? rateRevision.addtlActuaryContacts.map((actuary) => ({
-                  name: actuary.name,
-                  titleRole: actuary.titleRole,
-                  email: actuary.email,
-                  actuarialFirm: actuary.actuarialFirm,
+                  name: actuary.name ?? undefined,
+                  titleRole: actuary.titleRole ?? undefined,
+                  email: actuary.email ?? undefined,
+                  actuarialFirm: actuary.actuarialFirm ?? undefined,
                   actuarialFirmOther: actuary.actuarialFirmOther ?? undefined,
               }))
             : [],
@@ -172,9 +172,9 @@ function contractFormDataToDomainModel(
         riskBasedContract: contractRevision.riskBasedContract ?? undefined,
         stateContacts: contractRevision.stateContacts
             ? contractRevision.stateContacts.map((contact) => ({
-                  name: contact.name,
-                  titleRole: contact.titleRole,
-                  email: contact.email,
+                  name: contact.name ?? undefined,
+                  titleRole: contact.titleRole ?? undefined,
+                  email: contact.email ?? undefined,
               }))
             : [],
         supportingDocuments: contractRevision.supportingDocuments

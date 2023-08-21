@@ -20,8 +20,9 @@ import { useNavigate } from 'react-router-dom'
 import styles from '../StateSubmissionForm.module.scss'
 
 import {
-    ActuarialFirmType,
     ActuaryCommunicationType,
+    ActuaryContact,
+    StateContact,
 } from '../../../common-code/healthPlanFormDataType'
 
 import {
@@ -36,23 +37,9 @@ import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { ActuaryContactFields } from './ActuaryContactFields'
 
 export interface ContactsFormValues {
-    stateContacts: stateContactValue[]
-    addtlActuaryContacts: actuaryContactValue[]
+    stateContacts: StateContact[]
+    addtlActuaryContacts: ActuaryContact[]
     actuaryCommunicationPreference: ActuaryCommunicationType | undefined
-}
-
-export interface stateContactValue {
-    name: string
-    titleRole: string
-    email: string
-}
-
-export interface actuaryContactValue {
-    name: string
-    titleRole: string
-    email: string
-    actuarialFirm?: ActuarialFirmType | undefined
-    actuarialFirmOther?: string | undefined
 }
 
 const yupValidation = (submissionType: string) => {

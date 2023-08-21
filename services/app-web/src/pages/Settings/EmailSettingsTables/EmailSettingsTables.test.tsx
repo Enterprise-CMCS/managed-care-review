@@ -164,7 +164,7 @@ describe('EmailSettings', () => {
 
         // Check the table cells
         expect(
-            within(table).getByText('mc-review@example.com')
+            within(table).getByText('helpdesk@example.com')
         ).toBeInTheDocument()
         expect(within(table).getByText('rates@example.com')).toBeInTheDocument()
         expect(within(table).getByText('mcog@example.com')).toBeInTheDocument()

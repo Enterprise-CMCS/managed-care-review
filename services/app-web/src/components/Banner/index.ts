@@ -4,3 +4,4 @@ export { SubmissionUpdatedBanner } from './SubmissionUpdatedBanner/SubmissionUpd
 export { GenericApiErrorBanner } from './GenericApiErrorBanner/GenericApiErrorBanner'
 export { QuestionResponseSubmitBanner } from './QuestionResponseSubmitBanner'
 export { UserAccountWarningBanner } from './UserAccountWarningBanner/UserAccountWarningBanner'
+export { DocumentWarningBanner } from './DocumentWarningBanner/DocumentWarningBanner'

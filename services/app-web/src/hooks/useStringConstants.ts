@@ -1,15 +1,7 @@
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../common-code/featureFlags'
-
 export const useStringConstants = () => {
-    const ldClient = useLDClient()
-    const useHelpdeskEmail = ldClient?.variation(
-        featureFlags.HELPDESK_EMAIL.flag,
-        featureFlags.HELPDESK_EMAIL.defaultValue
-    )
+    // Keep this hook around, incase we need to feature flag any other copy changes.
+
     return {
-        MAIL_TO_SUPPORT: useHelpdeskEmail
-            ? 'MC_Review_HelpDesk@cms.hhs.gov'
-            : 'mc-review@cms.hhs.gov',
+        MAIL_TO_SUPPORT: 'MC_Review_HelpDesk@cms.hhs.gov',
     }
 }

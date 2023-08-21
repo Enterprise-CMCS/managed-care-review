@@ -19,9 +19,10 @@ export const unlockPackageStateEmail = async (
     submitterEmails: string[]
 ): Promise<EmailData | Error> => {
     const isTestEnvironment = config.stage !== 'prod'
-    const stateContactEmails = formData.stateContacts.map(
-        (contact) => contact.email
-    )
+    const stateContactEmails: string[] = []
+    formData.stateContacts.forEach((contact) => {
+        if (contact.email) stateContactEmails.push(contact.email)
+    })
     const receiverEmails = pruneDuplicateEmails([
         ...stateContactEmails,
         ...submitterEmails,
@@ -66,6 +67,7 @@ export const unlockPackageStateEmail = async (
     } else {
         return {
             toAddresses: receiverEmails,
+            replyToAddresses: [config.helpDeskEmail],
             sourceEmail: config.emailSource,
             subject: `${
                 isTestEnvironment ? `[${config.stage}] ` : ''

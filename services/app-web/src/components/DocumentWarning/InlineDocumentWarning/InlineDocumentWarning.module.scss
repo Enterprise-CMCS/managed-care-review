@@ -1,0 +1,8 @@
+@import '../../../styles/uswdsImports.scss';
+@import '../../../styles/custom.scss';
+
+.missingInfo {
+  color: $theme-color-warning-darker;
+  font-weight: 700;
+  display: flex;
+}

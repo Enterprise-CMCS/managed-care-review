@@ -16,6 +16,8 @@ on:
         required: true
         type: string
     secrets:
+      slack_webhook_url:
+        required: true
       aws_account_id:
         required: true
       nr_license_key:
@@ -95,6 +97,8 @@ jobs:
 
       - name: deploy postgres
         id: deploy-postgres
+        env:
+          SLACK_WEBHOOK: ${{ secrets.slack_webhook_url }}
         run: |
           pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name }}
 

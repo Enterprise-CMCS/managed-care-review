@@ -199,9 +199,9 @@ We plan to move this to the DB down the road. Until then, know that if these val
 
 *[same in all env]* This is the application-wide email sender.
 
-#### `/configuration/email/devTeamHelpAddress`
+#### `/configuration/email/helpDeskAddress`
 
-*[same in prod/val]* This is the help address displayed in state emails for contacting the MC-Review dev team.
+*[same in prod/val]* This is the help address displayed in state emails for getting help for the MC-Review application.
 
 #### `/configuration/email/rateHelpAddress`
 

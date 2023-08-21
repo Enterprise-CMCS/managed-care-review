@@ -54,6 +54,7 @@ export {
     SubmissionUpdatedBanner,
     GenericApiErrorBanner,
     QuestionResponseSubmitBanner,
+    DocumentWarningBanner,
 } from './Banner'
 
 export { Modal } from './Modal'
@@ -82,3 +83,5 @@ export type { FilterAccordionPropType } from './FilterAccordion'
 
 export { ActionButton } from './ActionButton'
 export { Breadcrumbs } from './Breadcrumbs'
+
+export { InlineDocumentWarning } from './DocumentWarning'

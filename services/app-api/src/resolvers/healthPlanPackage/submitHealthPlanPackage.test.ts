@@ -207,14 +207,7 @@ describe('submitHealthPlanPackage', () => {
                     ],
                     supportingDocuments: [],
                     rateProgramIDs: ['3b8d8fa1-1fa6-4504-9c5b-ef522877fe1e'],
-                    actuaryContacts: [
-                        {
-                            name: 'test name',
-                            titleRole: 'test title',
-                            email: 'email@example.com',
-                            actuarialFirm: undefined,
-                        },
-                    ],
+                    actuaryContacts: [],
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
                     packagesWithSharedRateCerts: [],
                 },
@@ -466,7 +459,7 @@ describe('submitHealthPlanPackage', () => {
     })
 
     it('send CMS email to CMS if submission is valid', async () => {
-        const config = testEmailConfig
+        const config = testEmailConfig()
         const mockEmailer = testEmailer(config)
         //mock invoke email submit lambda
         const server = await constructTestPostgresServer({
@@ -514,7 +507,7 @@ describe('submitHealthPlanPackage', () => {
     })
 
     it('does send email when request for state analysts emails fails', async () => {
-        const config = testEmailConfig
+        const config = testEmailConfig()
         const mockEmailer = testEmailer(config)
         //mock invoke email submit lambda
         const mockEmailParameterStore = mockEmailParameterStoreError()
@@ -572,7 +565,7 @@ describe('submitHealthPlanPackage', () => {
     })
 
     it('send state email to logged in user if submission is valid', async () => {
-        const config = testEmailConfig
+        const config = testEmailConfig()
         const mockEmailer = testEmailer(config)
         const server = await constructTestPostgresServer({
             emailer: mockEmailer,
@@ -662,7 +655,7 @@ describe('submitHealthPlanPackage', () => {
     })
 
     it('send CMS email to CMS on valid resubmission', async () => {
-        const config = testEmailConfig
+        const config = testEmailConfig()
         const mockEmailer = testEmailer(config)
         //mock invoke email submit lambda
         const stateServer = await constructTestPostgresServer({
@@ -721,7 +714,7 @@ describe('submitHealthPlanPackage', () => {
     })
 
     it('send state email to state contacts and all submitters on valid resubmission', async () => {
-        const config = testEmailConfig
+        const config = testEmailConfig()
         const mockEmailer = testEmailer(config)
         //mock invoke email submit lambda
         const stateServer = await constructTestPostgresServer({

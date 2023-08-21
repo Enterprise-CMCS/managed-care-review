@@ -427,7 +427,7 @@ describe('unlockHealthPlanPackage', () => {
     })
 
     it('send email to CMS when unlocking submission succeeds', async () => {
-        const config = testEmailConfig
+        const config = testEmailConfig()
         const mockEmailer = testEmailer(config)
         //mock invoke email submit lambda
         const stateServer = await constructTestPostgresServer()
@@ -482,7 +482,7 @@ describe('unlockHealthPlanPackage', () => {
     })
 
     it('send state email to state contacts and all submitters when unlocking submission succeeds', async () => {
-        const config = testEmailConfig
+        const config = testEmailConfig()
         const mockEmailer = testEmailer(config)
         //mock invoke email submit lambda
         const stateServer = await constructTestPostgresServer()
@@ -562,7 +562,7 @@ describe('unlockHealthPlanPackage', () => {
     })
 
     it('does send unlock email when request for state analysts emails fails', async () => {
-        const config = testEmailConfig
+        const config = testEmailConfig()
         const mockEmailer = testEmailer(config)
         //mock invoke email submit lambda
         const mockEmailParameterStore = mockEmailParameterStoreError()

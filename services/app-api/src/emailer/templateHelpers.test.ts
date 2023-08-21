@@ -22,25 +22,25 @@ describe('templateHelpers', () => {
     }[] = [
         {
             submission: mockUnlockedContractOnlyFormData(),
-            emailConfig: testEmailConfig,
+            emailConfig: testEmailConfig(),
             stateAnalystsEmails: testStateAnalystsEmails,
             testDescription: 'Contract only submission',
             expectedResult: [
-                ...testEmailConfig.devReviewTeamEmails,
+                ...testEmailConfig().devReviewTeamEmails,
                 ...testStateAnalystsEmails,
-                ...testEmailConfig.dmcpEmails,
+                ...testEmailConfig().dmcpEmails,
             ],
         },
         {
             submission: mockUnlockedContractAndRatesFormData(),
-            emailConfig: testEmailConfig,
+            emailConfig: testEmailConfig(),
             stateAnalystsEmails: testStateAnalystsEmails,
             testDescription: 'Contract and rates submission',
             expectedResult: [
-                ...testEmailConfig.devReviewTeamEmails,
+                ...testEmailConfig().devReviewTeamEmails,
                 ...testStateAnalystsEmails,
-                ...testEmailConfig.dmcpEmails,
-                ...testEmailConfig.oactEmails,
+                ...testEmailConfig().dmcpEmails,
+                ...testEmailConfig().oactEmails,
             ],
         },
         {
@@ -48,7 +48,7 @@ describe('templateHelpers', () => {
                 stateCode: 'MS',
                 programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
             }),
-            emailConfig: testEmailConfig,
+            emailConfig: testEmailConfig(),
             stateAnalystsEmails: testStateAnalystsEmails,
             testDescription:
                 'Submission with CHIP program specified for contract certification',
@@ -93,7 +93,7 @@ describe('templateHelpers', () => {
                     },
                 ],
             }),
-            emailConfig: testEmailConfig,
+            emailConfig: testEmailConfig(),
             stateAnalystsEmails: testStateAnalystsEmails,
             testDescription:
                 'Submission with CHIP program specified for rate certification',
@@ -108,7 +108,7 @@ describe('templateHelpers', () => {
             submission: mockUnlockedContractAndRatesFormData({
                 stateCode: 'PR',
             }),
-            emailConfig: testEmailConfig,
+            emailConfig: testEmailConfig(),
             stateAnalystsEmails: testStateAnalystsEmails,
             testDescription: 'Puerto Rico submission',
             expectedResult: [
@@ -122,7 +122,7 @@ describe('templateHelpers', () => {
             submission: mockUnlockedContractAndRatesFormData({
                 submissionType: undefined,
             }),
-            emailConfig: testEmailConfig,
+            emailConfig: testEmailConfig(),
             stateAnalystsEmails: testStateAnalystsEmails,
             testDescription: 'Error result.',
             expectedResult: new Error(
@@ -187,10 +187,10 @@ describe('templateHelpers', () => {
         {
             reviewers: [
                 'foo@example.com',
-                testEmailConfig.oactEmails[0],
+                testEmailConfig().oactEmails[0],
                 'bar@example.com',
             ],
-            config: testEmailConfig,
+            config: testEmailConfig(),
             testDescription: 'removes oact emails',
             expectedResult: ['foo@example.com', 'bar@example.com'],
         },
@@ -198,9 +198,9 @@ describe('templateHelpers', () => {
             reviewers: [
                 'Bobloblaw@example.com',
                 'Lucille.Bluth@example.com',
-                testEmailConfig.dmcpEmails[0],
+                testEmailConfig().dmcpEmails[0],
             ],
-            config: testEmailConfig,
+            config: testEmailConfig(),
             testDescription: 'removes dmcp emails',
             expectedResult: [
                 'Bobloblaw@example.com',

@@ -1,0 +1,11 @@
+    [Unit]
+    Description=Notify Slack on Startup and Shutdown
+
+    [Service]
+    Type=oneshot
+    ExecStart=/usr/local/bin/vm-startup.sh
+    ExecStop=/usr/local/bin/vm-shutdown.sh
+    RemainAfterExit=yes
+
+    [Install]
+    WantedBy=multi-user.target

@@ -11,7 +11,7 @@ import { parseRateWithHistory } from './parseRateWithHistory'
 async function findRateWithHistory(
     client: PrismaTransactionType,
     rateID: string
-): Promise<RateType | Error> {
+): Promise<RateType | NotFoundError | Error> {
     try {
         const rate = await client.rateTable.findFirst({
             where: {

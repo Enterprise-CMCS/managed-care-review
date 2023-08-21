@@ -6,10 +6,9 @@ import { PrismaClientValidationError } from '@prisma/client/runtime/library'
 import type { ContractType } from '@prisma/client'
 
 describe('updateDraftContract', () => {
-    afterEach( () => {
+    afterEach(() => {
         jest.clearAllMocks()
     })
-
 
     it('updates drafts correctly', async () => {
         const client = await sharedTestPrismaClient()
@@ -41,8 +40,13 @@ describe('updateDraftContract', () => {
         )
     })
 
+    it.todo(
+        'updates linked document tables as expected (via upsert, not create)'
+    )
+    it.todo('updates linked contact table as expected (via upsert, not create)')
+
     it('returns an error when invalid form data for contract type provided', async () => {
-      jest.spyOn(console, 'error').mockImplementation()
+        jest.spyOn(console, 'error').mockImplementation()
 
         const client = await sharedTestPrismaClient()
         const draftContractInsert = createInsertContractData({})

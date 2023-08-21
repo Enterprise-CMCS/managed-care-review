@@ -38,7 +38,7 @@ type EmailConfiguration = {
     */
     cmsReviewHelpEmailAddress: string //  managed care review group help
     cmsRateHelpEmailAddress: string //  rates help
-    cmsDevTeamHelpEmailAddress: string //  all other help
+    helpDeskEmail: string // all other help
 }
 
 type StateAnalystsEmails = string[]

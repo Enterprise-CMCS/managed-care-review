@@ -8,8 +8,6 @@ import {
     getCmsReviewHelpEmailLocal,
     getCmsRateHelpEmail,
     getCmsRateHelpEmailLocal,
-    getCmsDevTeamHelpEmail,
-    getCmsDevTeamHelpEmailLocal,
     getDMCPEmails,
     getDMCPEmailsLocal,
     getOACTEmails,
@@ -20,6 +18,8 @@ import {
     getSourceEmail,
     getStateAnalystsSettings,
     getStateAnalystsSettingsLocal,
+    getHelpDeskEmail,
+    getHelpDeskEmailLocal,
 } from './'
 import type { StateAnalystsWithState } from './stateAnalystsEmails/getStateAnalystsSettings'
 
@@ -31,11 +31,11 @@ export type EmailParameterStore = {
     getDevReviewTeamEmails: () => Promise<string[] | Error>
     getCmsReviewHelpEmail: () => Promise<string | Error>
     getCmsRateHelpEmail: () => Promise<string | Error>
-    getCmsDevTeamHelpEmail: () => Promise<string | Error>
     getDMCPEmails: () => Promise<string[] | Error>
     getOACTEmails: () => Promise<string[] | Error>
     getDMCOEmails: () => Promise<string[] | Error>
     getSourceEmail: () => Promise<string | Error>
+    getHelpDeskEmail: () => Promise<string | Error>
 }
 
 function newLocalEmailParameterStore(): EmailParameterStore {
@@ -45,11 +45,11 @@ function newLocalEmailParameterStore(): EmailParameterStore {
         getDevReviewTeamEmails: getDevReviewTeamEmailsLocal,
         getCmsReviewHelpEmail: getCmsReviewHelpEmailLocal,
         getCmsRateHelpEmail: getCmsRateHelpEmailLocal,
-        getCmsDevTeamHelpEmail: getCmsDevTeamHelpEmailLocal,
         getDMCPEmails: getDMCPEmailsLocal,
         getOACTEmails: getOACTEmailsLocal,
         getDMCOEmails: getDMCOEmailsLocal,
         getSourceEmail: getSourceEmailLocal,
+        getHelpDeskEmail: getHelpDeskEmailLocal,
     }
 }
 
@@ -60,11 +60,11 @@ function newAWSEmailParameterStore(): EmailParameterStore {
         getDevReviewTeamEmails: getDevReviewTeamEmails,
         getCmsReviewHelpEmail: getCmsReviewHelpEmail,
         getCmsRateHelpEmail: getCmsRateHelpEmail,
-        getCmsDevTeamHelpEmail: getCmsDevTeamHelpEmail,
         getDMCOEmails: getDMCOEmails,
         getDMCPEmails: getDMCPEmails,
         getOACTEmails: getOACTEmails,
         getSourceEmail: getSourceEmail,
+        getHelpDeskEmail: getHelpDeskEmail,
     }
 }
 

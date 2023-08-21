@@ -234,12 +234,11 @@ async function initializeGQLHandler(): Promise<Handler> {
     const emailSource = await emailParameterStore.getSourceEmail()
     const devReviewTeamEmails =
         await emailParameterStore.getDevReviewTeamEmails()
+    const helpDeskEmail = await emailParameterStore.getHelpDeskEmail()
     const cmsReviewHelpEmailAddress =
         await emailParameterStore.getCmsReviewHelpEmail()
     const cmsRateHelpEmailAddress =
         await emailParameterStore.getCmsRateHelpEmail()
-    const cmsDevTeamHelpEmailAddress =
-        await emailParameterStore.getCmsDevTeamHelpEmail()
     const oactEmails = await emailParameterStore.getOACTEmails()
     const dmcpEmails = await emailParameterStore.getDMCPEmails()
     const dmcoEmails = await emailParameterStore.getDMCOEmails()
@@ -249,6 +248,9 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (devReviewTeamEmails instanceof Error)
         throw new Error(`Configuration Error: ${devReviewTeamEmails.message}`)
+
+    if (helpDeskEmail instanceof Error)
+        throw new Error(`Configuration Error: ${helpDeskEmail.message}`)
 
     if (cmsReviewHelpEmailAddress instanceof Error) {
         throw new Error(
@@ -262,11 +264,6 @@ async function initializeGQLHandler(): Promise<Handler> {
         )
     }
 
-    if (cmsDevTeamHelpEmailAddress instanceof Error) {
-        throw new Error(
-            `Configuration Error: ${cmsDevTeamHelpEmailAddress.message}`
-        )
-    }
     if (oactEmails instanceof Error)
         throw new Error(`Configuration Error: ${oactEmails.message}`)
 
@@ -326,10 +323,10 @@ async function initializeGQLHandler(): Promise<Handler> {
                   devReviewTeamEmails,
                   cmsReviewHelpEmailAddress,
                   cmsRateHelpEmailAddress,
-                  cmsDevTeamHelpEmailAddress,
                   oactEmails,
                   dmcpEmails,
                   dmcoEmails,
+                  helpDeskEmail,
               })
             : newSESEmailer({
                   emailSource,
@@ -338,10 +335,10 @@ async function initializeGQLHandler(): Promise<Handler> {
                   devReviewTeamEmails,
                   cmsReviewHelpEmailAddress,
                   cmsRateHelpEmailAddress,
-                  cmsDevTeamHelpEmailAddress,
                   oactEmails,
                   dmcpEmails,
                   dmcoEmails,
+                  helpDeskEmail,
               })
 
     // Resolvers are defined and tested in the resolvers package

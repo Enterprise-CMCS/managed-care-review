@@ -18,9 +18,10 @@ export const newPackageStateEmail = async (
     config: EmailConfiguration,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
-    const stateContactEmails = formData.stateContacts.map(
-        (contact) => contact.email
-    )
+    const stateContactEmails: string[] = []
+    formData.stateContacts.forEach((contact) => {
+        if (contact.email) stateContactEmails.push(contact.email)
+    })
     const receiverEmails = pruneDuplicateEmails([
         ...stateContactEmails,
         ...submitterEmails,
@@ -50,9 +51,7 @@ export const newPackageStateEmail = async (
         cmsRateHelpEmailAddress: formatEmailAddresses(
             config.cmsRateHelpEmailAddress
         ),
-        cmsDevTeamHelpEmailAddress: formatEmailAddresses(
-            config.cmsDevTeamHelpEmailAddress
-        ),
+        helpDeskEmail: formatEmailAddresses(config.helpDeskEmail),
         packageName,
         submissionType: SubmissionTypeRecord[formData.submissionType],
         submissionDescription: formData.submissionDescription,
@@ -98,6 +97,7 @@ export const newPackageStateEmail = async (
         return {
             toAddresses: receiverEmails,
             sourceEmail: config.emailSource,
+            replyToAddresses: [config.helpDeskEmail],
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
             }${packageName} was sent to CMS`,
