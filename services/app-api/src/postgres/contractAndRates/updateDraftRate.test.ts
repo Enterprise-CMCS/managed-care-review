@@ -1,8 +1,10 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { insertDraftRate } from './insertRate'
 import { must } from '../../testHelpers'
-import { updateDraftRate } from './updateDraftRate'
+import { updateDraftRate} from './updateDraftRate'
 import { PrismaClientValidationError } from '@prisma/client/runtime/library'
+
+import type  { RateFormEditable } from './updateDraftRate'
 import type { RateType } from '@prisma/client'
 
 describe('updateDraftRate', () => {
@@ -37,10 +39,251 @@ describe('updateDraftRate', () => {
         )
     })
 
-    it.todo(
-        'updates linked document tables as expected (via upsert, not create)'
-    )
-    it.todo('updates linked contact table as expected (via upsert, not create)')
+    it(
+        'updates linked documents as expected in multiple requests'
+    , async () => {
+        const client = await sharedTestPrismaClient()
+
+        const draftRateForm1: Partial<RateFormEditable> = {
+            rateCertificationName: 'draftData1',
+            rateDocuments: [
+                {
+                    s3URL: 's3://bucketname/key/rate1',
+                    name: 'Rate cert 1',
+                },
+            ],
+            supportingDocuments: [
+                {
+                    s3URL: 's3://bucketname/key/ratesupporting1-1',
+                    name: 'supporting documents 1-1',
+                },
+               ]
+        }
+        // documents all replaced, additional supporting docs added
+        const draftRateForm2: Partial<RateFormEditable> = { rateCertificationName: 'draftData2',
+        rateDocuments: [
+            {
+                s3URL: 's3://bucketname/key/rate2',
+                name: 'Rate cert 2',
+            },
+        ],
+        supportingDocuments: [
+            {
+                s3URL: 's3://bucketname/key/ratesupporting2-1',
+                name: 'supporting documents 2-1',
+            },
+            {
+                s3URL:  's3://bucketname/key/ratesupporting2-2',
+                name: 'supporting documents2-2',
+            }]
+         }
+
+         // documents unchanged
+         const draftRateForm3: Partial<RateFormEditable> = {
+            rateCertificationName: 'draftData3',
+            rateDocuments: draftRateForm2.rateDocuments,
+            supportingDocuments: draftRateForm1.supportingDocuments
+        }
+
+
+        const rate = must(
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+            })
+        )
+
+
+        const draft1 = must(
+            await updateDraftRate(client, {
+                rateID: rate.id,
+                formData: draftRateForm1,
+                contractIDs: [],
+            })
+        )
+
+
+        expect(draft1.draftRevision?.formData.rateDocuments).toHaveLength(1)
+        expect(draft1.draftRevision?.formData.rateDocuments).toHaveLength(1)
+
+
+        const draft2 = must(
+            await updateDraftRate(client, {
+                rateID: rate.id,
+                formData: draftRateForm2,
+                contractIDs: [],
+            })
+        )
+
+        expect(draft2.draftRevision?.formData.rateCertificationName).toBe(
+            'draftData2'
+        )
+
+        expect(draft2.draftRevision?.formData.rateDocuments).toHaveLength(1)
+        expect(draft2.draftRevision?.formData.supportingDocuments).toHaveLength(2)
+        expect(draft2.draftRevision?.formData.rateDocuments).toBe(expect.arrayContaining(expect.objectContaining({
+            s3URL: 's3://bucketname/key/rate2',
+            name: 'Rate cert 2',
+        })))
+        expect(draft2.draftRevision?.formData.supportingDocuments).toBe(expect.arrayContaining(expect.objectContaining({
+            s3URL: 's3://bucketname/key/ratesupporting2-1',
+            name: 'supporting documents 2-1',
+        })))
+
+        expect(draft2.draftRevision?.formData.supportingDocuments).toBe(expect.arrayContaining(expect.objectContaining({
+            s3URL: 's3://bucketname/key/ratesupporting2-2',
+            name: 'supporting documents 2-2',
+        })))
+
+        const draft3 = must(
+            await updateDraftRate(client, {
+                rateID: rate.id,
+                formData: draftRateForm3,
+                contractIDs: [],
+            })
+        )
+        expect(draft3.draftRevision?.formData.rateCertificationName).toBe(
+            'draftData3'
+        )
+        expect(draft3.draftRevision?.formData.rateDocuments).toHaveLength(1)
+        expect(draft3.draftRevision?.formData.supportingDocuments).toHaveLength(2)
+        expect(draft3.draftRevision?.formData.rateDocuments).toBe(expect.arrayContaining(expect.objectContaining({
+            s3URL: 's3://bucketname/key/rate2',
+            name: 'Rate cert 2',
+        })))
+        expect(draft3.draftRevision?.formData.supportingDocuments).toBe(expect.arrayContaining(expect.objectContaining({
+            s3URL: 's3://bucketname/key/ratesupporting2-1',
+            name: 'supporting documents 2-1',
+        })))
+
+        expect(draft3.draftRevision?.formData.supportingDocuments).toBe(expect.arrayContaining(expect.objectContaining({
+            s3URL: 's3://bucketname/key/ratesupporting2-2',
+            name: 'supporting documents 2-2',
+        })))
+    })
+
+    it('updates linked contact table as expected in multiple requests', async() => {
+        const client = await sharedTestPrismaClient()
+        const draftRateForm1: Partial<RateFormEditable> = {
+            rateCertificationName: 'draftData1',
+            certifyingActuaryContacts: [
+                {
+                    actuarialFirm: 'MERCER',
+                    name: 'Certifying Actuary 1',
+                    titleRole: 'Test Certifying Actuary 1',
+                    email: 'certifying1@example.com',
+                },
+            ],
+            addtlActuaryContacts: [
+                {
+                    actuarialFirm: 'MERCER',
+                    name: 'Certifying Actuary 1',
+                    titleRole: 'Test Certifying Actuary 1',
+                    email: 'certifying1@example.com',
+                },
+               ]
+        }
+        // documents all replaced, additional supporting docs added
+        const draftRateForm2: Partial<RateFormEditable> = { rateCertificationName: 'draftData2',
+        certifyingActuaryContacts: [
+            {
+                actuarialFirm: 'MERCER',
+                name: 'Certifying Actuary 2',
+                titleRole: 'Test Certifying Actuary 2',
+                email: 'certifying2@example.com',
+            },
+        ],
+        addtlActuaryContacts: [
+            {
+                actuarialFirm: 'MERCER',
+                name: 'Certifying Actuary 2',
+                titleRole: 'Test Certifying Actuary 2',
+                email: 'certifying2@example.com',
+            },
+           ]
+         }
+
+         // documents unchanged
+         const draftRateForm3: Partial<RateFormEditable> = {
+            rateCertificationName: 'draftData3',
+            certifyingActuaryContacts: draftRateForm2.certifyingActuaryContacts,
+            addtlActuaryContacts: draftRateForm1.addtlActuaryContacts
+        }
+
+
+        const rate = must(
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+            })
+        )
+
+
+        const draft1 = must(
+            await updateDraftRate(client, {
+                rateID: rate.id,
+                formData: draftRateForm1,
+                contractIDs: [],
+            })
+        )
+
+
+        expect(draft1.draftRevision?.formData.rateDocuments).toHaveLength(1)
+        expect(draft1.draftRevision?.formData.rateDocuments).toHaveLength(1)
+
+
+        const draft2 = must(
+            await updateDraftRate(client, {
+                rateID: rate.id,
+                formData: draftRateForm2,
+                contractIDs: [],
+            })
+        )
+
+        expect(draft2.draftRevision?.formData.rateCertificationName).toBe(
+            'draftData2'
+        )
+
+        expect(draft2.draftRevision?.formData.rateDocuments).toHaveLength(1)
+        expect(draft2.draftRevision?.formData.supportingDocuments).toHaveLength(2)
+        expect(draft2.draftRevision?.formData.rateDocuments).toBe(expect.arrayContaining(expect.objectContaining({
+            s3URL: 's3://bucketname/key/rate2',
+            name: 'Rate cert 2',
+        })))
+        expect(draft2.draftRevision?.formData.supportingDocuments).toBe(expect.arrayContaining(expect.objectContaining({
+            s3URL: 's3://bucketname/key/ratesupporting2-1',
+            name: 'supporting documents 2-1',
+        })))
+
+        expect(draft2.draftRevision?.formData.supportingDocuments).toBe(expect.arrayContaining(expect.objectContaining({
+            s3URL: 's3://bucketname/key/ratesupporting2-2',
+            name: 'supporting documents 2-2',
+        })))
+
+        const draft3 = must(
+            await updateDraftRate(client, {
+                rateID: rate.id,
+                formData: draftRateForm3,
+                contractIDs: [],
+            })
+        )
+        expect(draft3.draftRevision?.formData.rateCertificationName).toBe(
+            'draftData3'
+        )
+        expect(draft3.draftRevision?.formData.rateDocuments).toHaveLength(1)
+        expect(draft3.draftRevision?.formData.supportingDocuments).toHaveLength(2)
+        expect(draft3.draftRevision?.formData.rateDocuments).toBe(expect.arrayContaining(expect.objectContaining({
+            s3URL: 's3://bucketname/key/rate2',
+            name: 'Rate cert 2',
+        })))
+        expect(draft3.draftRevision?.formData.supportingDocuments).toBe(expect.arrayContaining(expect.objectContaining({
+            s3URL: 's3://bucketname/key/ratesupporting2-1',
+            name: 'supporting documents 2-1',
+        })))
+
+        expect(draft3.draftRevision?.formData.supportingDocuments).toBe(expect.arrayContaining(expect.objectContaining({
+            s3URL: 's3://bucketname/key/ratesupporting2-2',
+            name: 'supporting documents 2-2',
+        })))
+    })
 
     it('returns an error when invalid form data for rate type provided', async () => {
         jest.spyOn(console, 'error').mockImplementation()

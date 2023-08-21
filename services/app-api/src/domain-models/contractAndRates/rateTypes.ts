@@ -120,7 +120,6 @@ type RateRevisionWithContractsType = z.infer<
     typeof rateRevisionWithContractsSchema
 >
 type RateFormDataType = z.infer<typeof rateFormDataSchema>
-
 export {
     rateRevisionSchema,
     rateRevisionWithContractsSchema,

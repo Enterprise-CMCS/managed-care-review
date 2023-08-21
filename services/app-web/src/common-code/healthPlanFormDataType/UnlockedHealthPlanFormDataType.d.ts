@@ -13,10 +13,11 @@ type DocumentCategoryType =
     | 'RATES_RELATED'
 
 type SubmissionDocument = {
+    id?: string
     name: string
     s3URL: string
-    documentCategories: DocumentCategoryType[]
     sha256?: string
+    documentCategories: DocumentCategoryType[]
 }
 
 type ContractAmendmentInfo = {
@@ -50,6 +51,7 @@ type StateContact = {
 }
 
 type ActuaryContact = {
+    id?: string
     name?: string
     titleRole?: string
     email?: string

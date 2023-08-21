@@ -13,6 +13,7 @@ import type {
 } from 'app-web/src/common-code/healthPlanFormDataType'
 import type { PrismaClient } from '@prisma/client'
 
+// This type should use domain model types, omitting any api added fields
 type ContractFormEditable = {
     submissionType?: SubmissionType
     submissionDescription?: string
@@ -20,10 +21,10 @@ type ContractFormEditable = {
     populationCovered?: PopulationCoveredType
     riskBasedContract?: boolean
     stateContacts?: StateContact[]
-    supportingDocuments?: SubmissionDocument[]
+    supportingDocuments?:  Omit<SubmissionDocument,'documentCategories'>[]
     contractType?: DomainContractType
     contractExecutionStatus?: ContractExecutionStatus
-    contractDocuments?: SubmissionDocument[]
+    contractDocuments?:  Omit<SubmissionDocument,'documentCategories'>[]
     contractDateStart?: Date
     contractDateEnd?: Date
     managedCareEntities?: ManagedCareEntity[]

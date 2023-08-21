@@ -1,30 +1,14 @@
 import { findRateWithHistory } from './findRateWithHistory'
 import type { NotFoundError } from '../storeError'
-import type {
-    RateCapitationType,
-    RateType as DomainRateType,
-    ActuaryCommunicationType,
-    ActuaryContact,
-    SubmissionDocument,
-} from 'app-web/src/common-code/healthPlanFormDataType'
-import type { RateType } from '../../domain-models/contractAndRates'
+import type { RateFormDataType, RateType } from '../../domain-models/contractAndRates'
 import type { PrismaClient } from '@prisma/client'
+import type { SubmissionDocument } from 'app-web/src/common-code/healthPlanFormDataType'
 
-type RateFormEditable = {
-    rateType?: DomainRateType
-    rateCapitationType?: RateCapitationType
-    rateDocuments?: SubmissionDocument[]
-    supportingDocuments?: SubmissionDocument[]
-    rateDateStart?: Date
-    rateDateEnd?: Date
-    rateDateCertified?: Date
-    amendmentEffectiveDateStart?: Date
-    amendmentEffectiveDateEnd?: Date
-    rateProgramIDs?: string[]
-    rateCertificationName?: string
-    certifyingActuaryContacts?: ActuaryContact[]
-    addtlActuaryContacts?: ActuaryContact[]
-    actuaryCommunicationPreference?: ActuaryCommunicationType
+type GenericDocumentPrismaInput = Omit<SubmissionDocument, 'documentCategories'>
+
+type RateFormEditable = Partial<RateFormDataType> & {
+    rateDocuments?: GenericDocumentPrismaInput
+    supportingDocuments?: GenericDocumentPrismaInput
 }
 
 type UpdateRateArgsType = {
@@ -32,9 +16,37 @@ type UpdateRateArgsType = {
     formData: RateFormEditable
     contractIDs: string[]
 }
-// Update the given draft
-// * can change the set of draftRates
-// * set the formData
+
+// Create or update rateDocuments, supportingDocuments
+const upsertDocuments = async (client: PrismaClient, docs: GenericDocumentPrismaInput[], table: 'rate' | 'supporting', rateRevisionID: string) =>{
+    return client.$transaction(
+    docs.map((doc) => {
+        const upsertQuery = {
+            where: {id: doc.id},
+            create: {
+                name: doc.name,
+                sha256: doc.sha256,
+                s3URL: doc.s3URL,
+                rateRevision: {
+                    connect: {
+                        id: rateRevisionID
+                    }
+                }
+
+
+            },
+            update:{
+                name: doc.name,
+                sha256: doc.sha256,
+                s3URL: doc.s3URL,
+                id: doc.id
+            }
+        }
+
+        return table === 'rate'? client.rateDocument.upsert(upsertQuery) :  client.rateSupportingDocument.upsert(upsertQuery)
+    })
+)}
+
 
 async function updateDraftRate(
     client: PrismaClient,
@@ -57,6 +69,7 @@ async function updateDraftRate(
         addtlActuaryContacts,
         actuaryCommunicationPreference,
     } = formData
+
     try {
         // Given all the Rates associated with this draft, find the most recent submitted
         // rateRevision to update.
@@ -71,6 +84,12 @@ async function updateDraftRate(
             return new Error('cant find a draft rev to submit')
         }
 
+        await client.$transaction([
+            rateDocuments && upsertDocuments(client,  rateDocuments, 'rate',  currentRev.id),
+            upsertDocuments(client, supportingDocuments, 'additional', currentRev.id ),
+
+        ])
+
         await client.rateRevisionTable.update({
             where: {
                 id: currentRev.id,
@@ -78,12 +97,9 @@ async function updateDraftRate(
             data: {
                 rateType,
                 rateCapitationType,
-                rateDocuments: {
-                    create: rateDocuments,
-                },
-                supportingDocuments: {
-                    create: supportingDocuments,
-                },
+                // we have already created all the new things we need now we are just linking them or unsettings if values are empty
+                // rateDocuments: upsertDocuments(rateDocuments),
+                // supportingDocuments:
                 rateDateStart,
                 rateDateEnd,
                 rateDateCertified,
