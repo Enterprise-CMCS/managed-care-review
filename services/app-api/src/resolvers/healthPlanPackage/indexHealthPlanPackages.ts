@@ -12,6 +12,7 @@ import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
+import type { LDService } from '../../launchDarkly/launchDarkly'
 
 const validateAndReturnHealthPlanPackages = (
     results: HealthPlanPackageType[] | StoreError,
@@ -40,7 +41,8 @@ const validateAndReturnHealthPlanPackages = (
 }
 
 export function indexHealthPlanPackagesResolver(
-    store: Store
+    store: Store,
+    launchDarkly: LDService
 ): QueryResolvers['indexHealthPlanPackages'] {
     return async (_parent, _args, context) => {
         const { user, span } = context
