@@ -1,8 +1,8 @@
 import { findRateWithHistory } from './findRateWithHistory'
 import type { NotFoundError } from '../storeError'
 import type { RateFormDataType, RateType } from '../../domain-models/contractAndRates'
-import type { PrismaClient } from '@prisma/client'
-import type { SubmissionDocument } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { Prisma, PrismaClient } from '@prisma/client'
+import type { ActuaryContact, SubmissionDocument } from 'app-web/src/common-code/healthPlanFormDataType'
 
 type GenericDocumentPrismaInput = Omit<SubmissionDocument, 'documentCategories'>
 
@@ -17,12 +17,56 @@ type UpdateRateArgsType = {
     contractIDs: string[]
 }
 
-// Create or update rateDocuments, supportingDocuments
-const upsertDocuments = async (client: PrismaClient, docs: GenericDocumentPrismaInput[], table: 'rate' | 'supporting', rateRevisionID: string) =>{
-    return client.$transaction(
-    docs.map((doc) => {
+// Create or update certifyingActuaryContacts, addtlActuaryContacts
+const updateContacts = async (client: PrismaClient, table: 'certifying' | 'additional', rateRevisionID: string, contacts?: ActuaryContact[]) => {
+    if (!contacts || contacts.length === 0) {
+        return Promise.resolve()
+    }
+    const upsertPromises = contacts.map((contact) => {
         const upsertQuery = {
-            where: {id: doc.id},
+            where: { id: contact.id },
+            create: {
+                name: contact.name,
+                titleRole: contact.titleRole,
+                email: contact.email,
+                actuarialFirm: contact.actuarialFirm,
+                actuaryFirmOther: contact.actuarialFirmOther,
+                certifyingActuaryOnRateRevision: {
+                    connect: {
+                        id: rateRevisionID
+                    }
+                },
+                rateRevision: {
+                    connect: {
+                        id: rateRevisionID
+                    }
+                }
+
+
+            },
+            update: {
+                name: contact.name,
+                titleRole: contact.titleRole,
+                email: contact.email,
+                actuarialFirm: contact.actuarialFirm,
+                actuaryFirmOther: contact.actuarialFirmOther,
+                id: contact.id
+            }
+        }
+        return table === 'certifying' ? client.actuaryContact.upsert(upsertQuery) : client.rateSupportingDocument.upsert(upsertQuery)
+    })
+    return client.$transaction(upsertPromises)
+
+}
+
+// Create or update rateDocuments, supportingDocuments
+const updateDocuments = (client: PrismaClient, table: 'rate' | 'supporting', rateRevisionID: string, docs?: GenericDocumentPrismaInput[]) => {
+    if (!docs || docs.length === 0) {
+        return Promise.resolve()
+    }
+    const upsertPromises = docs.map((doc) => {
+        const upsertQuery = {
+            where: { id: doc.id },
             create: {
                 name: doc.name,
                 sha256: doc.sha256,
@@ -35,7 +79,7 @@ const upsertDocuments = async (client: PrismaClient, docs: GenericDocumentPrisma
 
 
             },
-            update:{
+            update: {
                 name: doc.name,
                 sha256: doc.sha256,
                 s3URL: doc.s3URL,
@@ -43,11 +87,19 @@ const upsertDocuments = async (client: PrismaClient, docs: GenericDocumentPrisma
             }
         }
 
-        return table === 'rate'? client.rateDocument.upsert(upsertQuery) :  client.rateSupportingDocument.upsert(upsertQuery)
+        return table === 'rate' ? client.rateDocument.upsert(upsertQuery) : client.rateSupportingDocument.upsert(upsertQuery)
     })
-)}
 
+    return tx.$transaction(upsertPromises)
+}
 
+/*
+MacRae feedback
+- starting and ending a seperate transaction for each helper is not what we want
+- instead of passing  `client` into these helpers, pass tx transaction
+- possible delete step - inside upsert go through and delete anything that doesn't match the new docs
+- delete and set
+*/
 async function updateDraftRate(
     client: PrismaClient,
     args: UpdateRateArgsType
@@ -56,8 +108,7 @@ async function updateDraftRate(
     const {
         rateType,
         rateCapitationType,
-        rateDocuments,
-        supportingDocuments,
+        supportingDocuments ,
         rateDateStart,
         rateDateEnd,
         rateDateCertified,
@@ -65,7 +116,7 @@ async function updateDraftRate(
         amendmentEffectiveDateEnd,
         rateProgramIDs,
         rateCertificationName,
-        certifyingActuaryContacts,
+        certifyingActuaryContacts ,
         addtlActuaryContacts,
         actuaryCommunicationPreference,
     } = formData
@@ -84,12 +135,15 @@ async function updateDraftRate(
             return new Error('cant find a draft rev to submit')
         }
 
-        await client.$transaction([
-            rateDocuments && upsertDocuments(client,  rateDocuments, 'rate',  currentRev.id),
-            upsertDocuments(client, supportingDocuments, 'additional', currentRev.id ),
-
+        await Promise.all([
+            updateDocuments(client, 'rate', currentRev.id, supportingDocuments),
+            updateDocuments(client, 'supporting', currentRev.id, supportingDocuments),
+            updateContacts(client, 'certifying', currentRev.id, certifyingActuaryContacts),
+            updateContacts(client, 'additional', currentRev.id, addtlActuaryContacts)
+            //deleteAbandoned
         ])
 
+        //
         await client.rateRevisionTable.update({
             where: {
                 id: currentRev.id,
@@ -97,9 +151,10 @@ async function updateDraftRate(
             data: {
                 rateType,
                 rateCapitationType,
-                // we have already created all the new things we need now we are just linking them or unsettings if values are empty
-                // rateDocuments: upsertDocuments(rateDocuments),
-                // supportingDocuments:
+                rateDocuments: {
+                    set: [] // look at deletions here
+                },
+                // supportingDocuments,
                 rateDateStart,
                 rateDateEnd,
                 rateDateCertified,
@@ -107,12 +162,8 @@ async function updateDraftRate(
                 amendmentEffectiveDateEnd,
                 rateProgramIDs,
                 rateCertificationName,
-                certifyingActuaryContacts: {
-                    create: certifyingActuaryContacts,
-                },
-                addtlActuaryContacts: {
-                    create: addtlActuaryContacts,
-                },
+                // certifyingActuaryContacts
+                // addtlActuaryContacts
                 actuaryCommunicationPreference,
                 draftContracts: {
                     set: contractIDs.map((rID) => ({
