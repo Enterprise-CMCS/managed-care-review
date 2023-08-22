@@ -2,18 +2,31 @@ import { z } from 'zod'
 import {
     actuaryCommunicationTypeSchema,
     actuaryContactSchema,
+    rateCapitationTypeSchema,
+    rateTypeSchema,
+    sharedRateCertDisplay,
+    submissionDocumentSchema,
     contractExecutionStatusSchema,
     contractTypeSchema,
     federalAuthoritySchema,
     populationCoveredSchema,
-    rateCapitationTypeSchema,
-    rateTypeSchema,
-    sharedRateCertDisplay,
     stateContactSchema,
-    submissionDocumentSchema,
     submissionTypeSchema,
 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
 import { updateInfoSchema } from './updateInfoType'
+
+const documentSchema = z.object({
+    name: z.string(),
+    s3URL: z.string(),
+    sha256: z.string().optional(),
+})
+
+const managedCareEntitiesSchema = z.union([
+    z.literal('MCO'),
+    z.literal('PIHP'),
+    z.literal('PAHP'),
+    z.literal('PCCM'),
+])
 
 // hacky workaround - importing from contract types is causing circular imports and this error
 // https://github.com/colinhacks/zod/issues/643#issuecomment-1015277287
@@ -26,13 +39,13 @@ const _contractFormDataSchema = z.object({
     riskBasedContract: z.boolean().optional(),
     submissionDescription: z.string(),
     stateContacts: z.array(stateContactSchema),
-    supportingDocuments: z.array(submissionDocumentSchema),
+    supportingDocuments: z.array(documentSchema),
     contractType: contractTypeSchema,
     contractExecutionStatus: contractExecutionStatusSchema.optional(),
-    contractDocuments: z.array(submissionDocumentSchema),
+    contractDocuments: z.array(documentSchema),
     contractDateStart: z.date().optional(),
     contractDateEnd: z.date().optional(),
-    managedCareEntities: z.array(z.string()),
+    managedCareEntities: z.array(managedCareEntitiesSchema),
     federalAuthorities: z.array(federalAuthoritySchema),
     inLieuServicesAndSettings: z.boolean().optional(),
     modifiedBenefitsProvided: z.boolean().optional(),
@@ -61,7 +74,6 @@ const _contractRevisionSchema = z.object({
     updatedAt: z.date(),
     formData: _contractFormDataSchema,
 })
-//
 
 // The rate form data  is the form filled out by state users submitting rates for review
 const rateFormDataSchema = z.object({

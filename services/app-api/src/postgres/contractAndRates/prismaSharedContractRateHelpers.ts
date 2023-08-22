@@ -182,9 +182,6 @@ function contractFormDataToDomainModel(
                   name: doc.name,
                   s3URL: doc.s3URL,
                   sha256: doc.sha256 ?? undefined,
-                  documentCategories: [
-                      'CONTRACT_RELATED',
-                  ] as DocumentCategoryType[],
               }))
             : [],
         contractExecutionStatus:
@@ -194,7 +191,6 @@ function contractFormDataToDomainModel(
                   name: doc.name,
                   s3URL: doc.s3URL,
                   sha256: doc.sha256 ?? undefined,
-                  documentCategories: ['CONTRACT'] as DocumentCategoryType[],
               }))
             : [],
         contractDateStart: contractRevision.contractDateStart ?? undefined,

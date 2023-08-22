@@ -1,15 +1,20 @@
 import { z } from 'zod'
+import { rateRevisionSchema } from './rateTypes'
+import { updateInfoSchema } from './updateInfoType'
 import {
     contractExecutionStatusSchema,
     contractTypeSchema,
     federalAuthoritySchema,
     populationCoveredSchema,
     stateContactSchema,
-    submissionDocumentSchema,
     submissionTypeSchema,
 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
-import { rateRevisionSchema } from './rateTypes'
-import { updateInfoSchema } from './updateInfoType'
+
+const documentSchema = z.object({
+    name: z.string(),
+    s3URL: z.string(),
+    sha256: z.string().optional(),
+})
 
 const managedCareEntitiesSchema = z.union([
     z.literal('MCO'),
@@ -25,10 +30,10 @@ const contractFormDataSchema = z.object({
     riskBasedContract: z.boolean().optional(),
     submissionDescription: z.string(),
     stateContacts: z.array(stateContactSchema),
-    supportingDocuments: z.array(submissionDocumentSchema),
+    supportingDocuments: z.array(documentSchema),
     contractType: contractTypeSchema,
     contractExecutionStatus: contractExecutionStatusSchema.optional(),
-    contractDocuments: z.array(submissionDocumentSchema),
+    contractDocuments: z.array(documentSchema),
     contractDateStart: z.date().optional(),
     contractDateEnd: z.date().optional(),
     managedCareEntities: z.array(managedCareEntitiesSchema),

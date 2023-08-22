@@ -1,10 +1,9 @@
 export {
-   rateSchema,
-   rateRevisionSchema,
-   rateRevisionWithContractsSchema,
+    rateSchema,
+    rateRevisionSchema,
+    rateRevisionWithContractsSchema,
     draftRateSchema,
 } from './rateTypes'
-
 
 export type {
     RateType,
