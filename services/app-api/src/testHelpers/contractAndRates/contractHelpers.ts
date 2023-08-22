@@ -8,14 +8,14 @@ import type {
     ContractTableFullPayload,
 } from '../../postgres/contractAndRates/prismaSubmittedContractHelpers'
 import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
-import type { ContractFormEditable } from '../../postgres/contractAndRates/updateDraftContract'
+import type { ContractFormDataType } from '../../domain-models/contractAndRates'
 
 const createInsertContractData = ({
     stateCode,
     ...formData
 }: {
     stateCode?: StateCodeType
-} & Partial<ContractFormEditable>): InsertContractArgsType => {
+} & Partial<ContractFormDataType>): InsertContractArgsType => {
     return {
         stateCode: stateCode ?? 'MN',
         submissionType: formData?.submissionType ?? 'CONTRACT_AND_RATES',
