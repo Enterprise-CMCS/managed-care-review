@@ -55,10 +55,45 @@ describe.each(flagValueTestParameters)(
 
             const createdDraft = await createTestHealthPlanPackage(server)
 
-            const formData = latestFormData(createdDraft)
-
             // update that draft.
-            formData.submissionDescription = 'UPDATED BY REVISION'
+            const formData = Object.assign(latestFormData(createdDraft), {
+                programIDs: [],
+                populationCovered: 'MEDICAID',
+                submissionType: 'CONTRACT_ONLY',
+                riskBasedContract: true,
+                submissionDescription: 'Updated submission',
+                stateContacts: [],
+                documents: [],
+                contractType: 'BASE',
+                contractExecutionStatus: 'EXECUTED',
+                contractDocuments: [],
+                contractDateStart: new Date(Date.UTC(2025, 5, 1)),
+                contractDateEnd: new Date(Date.UTC(2026, 5, 1)),
+                managedCareEntities: ['MCO'],
+                federalAuthorities: [],
+                contractAmendmentInfo: {
+                    modifiedProvisions: {
+                        inLieuServicesAndSettings: true,
+                        modifiedBenefitsProvided: true,
+                        modifiedGeoAreaServed: true,
+                        modifiedMedicaidBeneficiaries: true,
+                        modifiedRiskSharingStrategy: true,
+                        modifiedIncentiveArrangements: true,
+                        modifiedWitholdAgreements: true,
+                        modifiedStateDirectedPayments: true,
+                        modifiedPassThroughPayments: false,
+                        modifiedPaymentsForMentalDiseaseInstitutions: false,
+                        modifiedMedicalLossRatioStandards: false,
+                        modifiedOtherFinancialPaymentIncentive: false,
+                        modifiedEnrollmentProcess: false,
+                        modifiedGrevienceAndAppeal: false,
+                        modifiedNetworkAdequacyStandards: undefined,
+                        modifiedLengthOfContract: undefined,
+                        modifiedNonRiskPaymentArrangements: undefined,
+                    },
+                },
+                rateInfos: [],
+            })
 
             // convert to base64 proto
             const updatedB64 = domainToBase64(formData)
@@ -79,10 +114,17 @@ describe.each(flagValueTestParameters)(
                 updateResult.data?.updateHealthPlanFormData.pkg
 
             const updatedFormData = latestFormData(healthPlanPackage)
-            expect(updatedFormData.submissionDescription).toBe(
-                'UPDATED BY REVISION'
+            expect(updatedFormData).toEqual(
+                expect.objectContaining({
+                    ...formData,
+                    updatedAt: expect.any(Date),
+                })
             )
         })
+
+        it.todo(
+            'updates documents and state contacts. Complete after documents and state contacts have uuids in proto'
+        )
 
         it('errors if a CMS user calls it', async () => {
             const server = await constructTestPostgresServer({
@@ -241,7 +283,8 @@ describe.each(flagValueTestParameters)(
             })
             const createdDraft = await createTestHealthPlanPackage(server)
             const submitPackage = async () => {
-                // Manually submit package when flag is on
+                // Manually submit package when flag is on.
+                // TODO: remove the conditional after submit resolver has been modified.
                 if (flagValue) {
                     const client = await sharedTestPrismaClient()
                     const stateUser = await client.user.create({
