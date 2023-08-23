@@ -342,10 +342,6 @@ describe.each(flagValueTestParameters)(
         })
 
         it('errors if the id doesnt match the db', async () => {
-            // id is wrong
-            // createdAt is wrong? or just overwrite
-            //
-
             const server = await constructTestPostgresServer({
                 ldService: mockLDService,
             })
@@ -353,7 +349,7 @@ describe.each(flagValueTestParameters)(
 
             const formData = latestFormData(createdDraft)
 
-            formData.id = uuidv4()
+            formData.updatedAt = new Date(Date.UTC(2025, 5, 1))
 
             const b64 = domainToBase64(formData)
 
@@ -375,9 +371,12 @@ describe.each(flagValueTestParameters)(
             expect(updateResult.errors[0].extensions?.code).toBe(
                 'BAD_USER_INPUT'
             )
-            expect(updateResult.errors[0].message).toBe(
-                'Transient server error: attempted to modify un-modifiable field(s): id.  Please refresh the page to continue.'
-            )
+
+            const expectedErrorMsg = flagValue
+                ? 'Transient server error: Concurrent editing occurred. Please refresh the page to continue.'
+                : 'Transient server error: attempted to modify un-modifiable field(s): updatedAt.  Please refresh the page to continue.'
+
+            expect(updateResult.errors[0].message).toBe(expectedErrorMsg)
         })
 
         it('errors if the other payload values dont match the db', async () => {
@@ -413,9 +412,12 @@ describe.each(flagValueTestParameters)(
             expect(updateResult.errors[0].extensions?.code).toBe(
                 'BAD_USER_INPUT'
             )
-            expect(updateResult.errors[0].message).toBe(
-                'Transient server error: attempted to modify un-modifiable field(s): stateCode,stateNumber,createdAt,updatedAt.  Please refresh the page to continue.'
-            )
+
+            const expectedErrorMsg = flagValue
+                ? 'Transient server error: Concurrent editing occurred. Please refresh the page to continue.'
+                : 'Transient server error: attempted to modify un-modifiable field(s): stateCode,stateNumber,createdAt,updatedAt.  Please refresh the page to continue.'
+
+            expect(updateResult.errors[0].message).toBe(expectedErrorMsg)
         })
 
         it('errors if the update call to the db fails', async () => {

@@ -185,8 +185,8 @@ export function updateHealthPlanFormDataResolver(
 
             // If updatedAt does not match concurrent editing occurred.
             if (
-                contractWithHistory.draftRevision.updatedAt !==
-                unlockedFormData.updatedAt
+                contractWithHistory.draftRevision.updatedAt.getTime() !==
+                unlockedFormData.updatedAt.getTime()
             ) {
                 const errMessage = `Transient server error: Concurrent editing occurred. Please refresh the page to continue.`
                 logError('updateHealthPlanFormData', errMessage)
