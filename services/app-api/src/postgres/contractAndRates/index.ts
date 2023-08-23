@@ -2,13 +2,13 @@ import type { InsertContractArgsType } from './insertContract'
 import { insertDraftContract } from './insertContract'
 import { findContractWithHistory } from './findContractWithHistory'
 import { findAllContractsWithHistoryByState } from './findAllContractsWithHistoryByState'
-import { findAllContractsWithHistoryBySubmittedAt } from './findAllContractsWithHistoryBySubmittedAt'
+import { findAllContractsWithHistoryBySubmitInfo } from './findAllContractsWithHistoryBySubmitInfo'
 
 export {
     insertDraftContract,
     findContractWithHistory,
     findAllContractsWithHistoryByState,
-    findAllContractsWithHistoryBySubmittedAt,
+    findAllContractsWithHistoryBySubmitInfo,
 }
 
 export type { InsertContractArgsType }

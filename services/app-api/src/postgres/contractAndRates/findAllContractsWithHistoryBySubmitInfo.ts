@@ -4,7 +4,7 @@ import { NotFoundError } from '../storeError'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaSubmittedContractHelpers'
 
-async function findAllContractsWithHistoryBySubmittedAt(
+async function findAllContractsWithHistoryBySubmitInfo(
     client: PrismaTransactionType,
     stateCode: string
 ): Promise<Array<ContractType | Error> | NotFoundError | Error> {
@@ -13,8 +13,8 @@ async function findAllContractsWithHistoryBySubmittedAt(
             where: {
                 revisions: {
                     some: {
-                        submitInfoID: {
-                            not: null,
+                        submitInfo: {
+                            isNot: null,
                         },
                     },
                 },
@@ -42,4 +42,4 @@ async function findAllContractsWithHistoryBySubmittedAt(
     }
 }
 
-export { findAllContractsWithHistoryBySubmittedAt }
+export { findAllContractsWithHistoryBySubmitInfo }
