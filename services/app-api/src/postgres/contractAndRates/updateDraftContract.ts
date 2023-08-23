@@ -1,55 +1,12 @@
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../storeError'
 import type { ContractType } from '../../domain-models/contractAndRates'
-import type {
-    ContractType as DomainContractType,
-    PopulationCoveredType,
-    SubmissionType,
-    ContractExecutionStatus,
-    StateContact,
-    ManagedCareEntity,
-    FederalAuthority,
-    SubmissionDocument,
-} from 'app-web/src/common-code/healthPlanFormDataType'
 import type { PrismaClient } from '@prisma/client'
-
-type ContractFormEditable = {
-    submissionType?: SubmissionType
-    submissionDescription?: string
-    programIDs?: string[]
-    populationCovered?: PopulationCoveredType
-    riskBasedContract?: boolean
-    stateContacts?: StateContact[]
-    supportingDocuments?: SubmissionDocument[]
-    contractType?: DomainContractType
-    contractExecutionStatus?: ContractExecutionStatus
-    contractDocuments?: SubmissionDocument[]
-    contractDateStart?: Date
-    contractDateEnd?: Date
-    managedCareEntities?: ManagedCareEntity[]
-    federalAuthorities?: FederalAuthority[]
-    modifiedBenefitsProvided?: boolean
-    modifiedGeoAreaServed?: boolean
-    modifiedMedicaidBeneficiaries?: boolean
-    modifiedRiskSharingStrategy?: boolean
-    modifiedIncentiveArrangements?: boolean
-    modifiedWitholdAgreements?: boolean
-    modifiedStateDirectedPayments?: boolean
-    modifiedPassThroughPayments?: boolean
-    modifiedPaymentsForMentalDiseaseInstitutions?: boolean
-    modifiedMedicalLossRatioStandards?: boolean
-    modifiedOtherFinancialPaymentIncentive?: boolean
-    modifiedEnrollmentProcess?: boolean
-    modifiedGrevienceAndAppeal?: boolean
-    modifiedNetworkAdequacyStandards?: boolean
-    modifiedLengthOfContract?: boolean
-    modifiedNonRiskPaymentArrangements?: boolean
-    inLieuServicesAndSettings?: boolean
-}
+import type { ContractFormDataType } from '../../domain-models/contractAndRates'
 
 type UpdateContractArgsType = {
     contractID: string
-    formData: ContractFormEditable
+    formData: Partial<ContractFormDataType>
     rateIDs: string[]
 }
 // Update the given draft
@@ -167,4 +124,4 @@ async function updateDraftContract(
 }
 
 export { updateDraftContract }
-export type { ContractFormEditable }
+export type { UpdateContractArgsType }
