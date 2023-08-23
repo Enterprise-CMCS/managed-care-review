@@ -10,14 +10,13 @@ import {
     rateTypeSchema,
     sharedRateCertDisplay,
     stateContactSchema,
-    submissionDocumentSchema,
     submissionTypeSchema,
 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
 
 const documentSchema = z.object({
     name: z.string(),
     s3URL: z.string(),
-    sha256: z.string().optional(),
+    sha256: z.string(),
 })
 
 const managedCareEntitiesSchema = z.union([
@@ -65,8 +64,8 @@ const rateFormDataSchema = z.object({
     id: z.string().optional(),
     rateType: rateTypeSchema.optional(),
     rateCapitationType: rateCapitationTypeSchema.optional(),
-    rateDocuments: z.array(submissionDocumentSchema).optional(),
-    supportingDocuments: z.array(submissionDocumentSchema).optional(),
+    rateDocuments: z.array(documentSchema).optional(),
+    supportingDocuments: z.array(documentSchema).optional(),
     rateDateStart: z.date().optional(),
     rateDateEnd: z.date().optional(),
     rateDateCertified: z.date().optional(),
