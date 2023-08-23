@@ -5,17 +5,17 @@ async function prepopulateUpdateInfo(
     client: PrismaClient,
     revision: HealthPlanRevisionTable,
     formData: HealthPlanFormDataType
-): Promise<string | null> {
+): Promise<string | Error> {
     try {
         const user = await client.user.findFirst({
             where: { email: { equals: revision.submittedBy ?? undefined } },
         })
 
         if (!user) {
-            console.warn(
+            const error = new Error(
                 `User with email ${revision.submittedBy} does not exist. Skipping UpdateInfoTable creation.`
             )
-            return null
+            return error
         }
 
         const updateInfo = await client.updateInfoTable.create({
@@ -27,11 +27,11 @@ async function prepopulateUpdateInfo(
         })
 
         return updateInfo.id
-    } catch (error) {
-        console.error(
-            `Error pre-populating UpdateInfoTable: ${JSON.stringify(error)}`
+    } catch (err) {
+        const error = new Error(
+            `Error pre-populating UpdateInfoTable: ${JSON.stringify(err)}`
         )
-        return null
+        return error
     }
 }
 

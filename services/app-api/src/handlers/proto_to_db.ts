@@ -97,7 +97,10 @@ export async function migrateRevision(
     /* Creating an entry in either ContractRevisionTable or RateRevisionTable
         requires a valid 'submitInfoID' (or 'unlockInfoID') 
         that points to a record in the UpdateInfoTable */
-    await prepopulateUpdateInfo(client, revision, formData)
+    const updateInfo = await prepopulateUpdateInfo(client, revision, formData)
+    if (updateInfo instanceof Error) {
+        return updateInfo
+    }
 
     /* The field 'contractId' in the ContractRevisionTable matches the field 'id' in the ContractTable
         so the ContractTable has to be populated before the revisions can be inserted
@@ -194,6 +197,7 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // go through the list of revisons and migrate
     for (const revision of revisions) {
         const migrateResult = await migrateRevision(client, revision)
+        // TODO not sure what we want to do with errors just yet
         if (migrateResult instanceof Error) {
             console.error(migrateResult)
         }
