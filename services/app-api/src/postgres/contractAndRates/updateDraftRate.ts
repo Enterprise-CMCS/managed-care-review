@@ -1,8 +1,8 @@
 import { findRateWithHistory } from './findRateWithHistory'
 import type { NotFoundError } from '../storeError'
 import type { RateFormDataType, RateType } from '../../domain-models/contractAndRates'
-import type { Prisma, PrismaClient } from '@prisma/client'
-import type { ActuaryContact, SubmissionDocument } from 'app-web/src/common-code/healthPlanFormDataType'
+import type  { PrismaClient, } from '@prisma/client'
+import type {  SubmissionDocument } from 'app-web/src/common-code/healthPlanFormDataType'
 
 type GenericDocumentPrismaInput = Omit<SubmissionDocument, 'documentCategories'>
 
@@ -17,89 +17,18 @@ type UpdateRateArgsType = {
     contractIDs: string[]
 }
 
-// Create or update certifyingActuaryContacts, addtlActuaryContacts
-const updateContacts = async (client: PrismaClient, table: 'certifying' | 'additional', rateRevisionID: string, contacts?: ActuaryContact[]) => {
-    if (!contacts || contacts.length === 0) {
-        return Promise.resolve()
-    }
-    const upsertPromises = contacts.map((contact) => {
-        const upsertQuery = {
-            where: { id: contact.id },
-            create: {
-                name: contact.name,
-                titleRole: contact.titleRole,
-                email: contact.email,
-                actuarialFirm: contact.actuarialFirm,
-                actuaryFirmOther: contact.actuarialFirmOther,
-                certifyingActuaryOnRateRevision: {
-                    connect: {
-                        id: rateRevisionID
-                    }
-                },
-                rateRevision: {
-                    connect: {
-                        id: rateRevisionID
-                    }
-                }
-
-
-            },
-            update: {
-                name: contact.name,
-                titleRole: contact.titleRole,
-                email: contact.email,
-                actuarialFirm: contact.actuarialFirm,
-                actuaryFirmOther: contact.actuarialFirmOther,
-                id: contact.id
-            }
-        }
-        return table === 'certifying' ? client.actuaryContact.upsert(upsertQuery) : client.rateSupportingDocument.upsert(upsertQuery)
-    })
-    return client.$transaction(upsertPromises)
-
-}
-
-// Create or update rateDocuments, supportingDocuments
-const updateDocuments = (client: PrismaClient, table: 'rate' | 'supporting', rateRevisionID: string, docs?: GenericDocumentPrismaInput[]) => {
-    if (!docs || docs.length === 0) {
-        return Promise.resolve()
-    }
-    const upsertPromises = docs.map((doc) => {
-        const upsertQuery = {
-            where: { id: doc.id },
-            create: {
-                name: doc.name,
-                sha256: doc.sha256,
-                s3URL: doc.s3URL,
-                rateRevision: {
-                    connect: {
-                        id: rateRevisionID
-                    }
-                }
-
-
-            },
-            update: {
-                name: doc.name,
-                sha256: doc.sha256,
-                s3URL: doc.s3URL,
-                id: doc.id
-            }
-        }
-
-        return table === 'rate' ? client.rateDocument.upsert(upsertQuery) : client.rateSupportingDocument.upsert(upsertQuery)
-    })
-
-    return tx.$transaction(upsertPromises)
-}
-
 /*
-MacRae feedback
-- starting and ending a seperate transaction for each helper is not what we want
-- instead of passing  `client` into these helpers, pass tx transaction
-- possible delete step - inside upsert go through and delete anything that doesn't match the new docs
-- delete and set
+   updateDraftRate
+
+    This function calls two sequential rate revision updates in a transaciton
+    The first deletes related resources from the revision entirely.
+    The second updates the Rate and re-creates/links for related resources (things like contacts and documents)
+
+    This approach was used for following reasons at the time  of writing:
+    - Prisma has no native upsertMany functionality. Looping through each related resource to upsert using prisma native functions felt burdensome
+    - MCR application had no need for version history with drafts (thus updatedAt and createdAt dates on documents and contacts are no used)
 */
+
 async function updateDraftRate(
     client: PrismaClient,
     args: UpdateRateArgsType
@@ -108,6 +37,7 @@ async function updateDraftRate(
     const {
         rateType,
         rateCapitationType,
+        rateDocuments,
         supportingDocuments ,
         rateDateStart,
         rateDateEnd,
@@ -122,8 +52,7 @@ async function updateDraftRate(
     } = formData
 
     try {
-        // Given all the Rates associated with this draft, find the most recent submitted
-        // rateRevision to update.
+        // Given all the Rates associated with this draft, find the most recent submitted to update.
         const currentRev = await client.rateRevisionTable.findFirst({
             where: {
                 rateID: rateID,
@@ -135,47 +64,68 @@ async function updateDraftRate(
             return new Error('cant find a draft rev to submit')
         }
 
-        await Promise.all([
-            updateDocuments(client, 'rate', currentRev.id, supportingDocuments),
-            updateDocuments(client, 'supporting', currentRev.id, supportingDocuments),
-            updateContacts(client, 'certifying', currentRev.id, certifyingActuaryContacts),
-            updateContacts(client, 'additional', currentRev.id, addtlActuaryContacts)
-            //deleteAbandoned
-        ])
+        await client.$transaction([
+         //  Clear all related resources on the revision
+            client.rateRevisionTable.update({
+                where: {
+                    id: currentRev.id,
+                },
+                data: {
+                    certifyingActuaryContacts: {
+                        deleteMany: {}
+                    },
+                    addtlActuaryContacts: {
+                        deleteMany: {}
+                    },
+                    rateDocuments: {
+                        deleteMany: {}
+                    },
+                    supportingDocuments: {
+                        deleteMany: {}
+                    },
+                }
+                }),
+            // Then update resource, adjusting all simple fields and creating new linked resources for fields holding relationships to other day
+            client.rateRevisionTable.update({
+                where: {
+                       id: currentRev.id,
+                },
+                data: {
+                    rateType,
+                    rateCapitationType,
 
-        //
-        await client.rateRevisionTable.update({
-            where: {
-                id: currentRev.id,
-            },
-            data: {
-                rateType,
-                rateCapitationType,
-                rateDocuments: {
-                    set: [] // look at deletions here
+                    rateDocuments: {
+                        create: rateDocuments
+                    },
+                    supportingDocuments: {
+                        create: supportingDocuments
+                    },
+                    certifyingActuaryContacts: {
+                        create: certifyingActuaryContacts
+                    },
+                    addtlActuaryContacts: {
+                        create: addtlActuaryContacts
+                    },
+                    rateDateStart,
+                    rateDateEnd,
+                    rateDateCertified,
+                    amendmentEffectiveDateStart,
+                    amendmentEffectiveDateEnd,
+                    rateProgramIDs,
+                    rateCertificationName,
+                    actuaryCommunicationPreference,
+                    draftContracts: {
+                        set: contractIDs.map((rID) => ({
+                            id: rID,
+                        })),
+                    },
                 },
-                // supportingDocuments,
-                rateDateStart,
-                rateDateEnd,
-                rateDateCertified,
-                amendmentEffectiveDateStart,
-                amendmentEffectiveDateEnd,
-                rateProgramIDs,
-                rateCertificationName,
-                // certifyingActuaryContacts
-                // addtlActuaryContacts
-                actuaryCommunicationPreference,
-                draftContracts: {
-                    set: contractIDs.map((rID) => ({
-                        id: rID,
-                    })),
-                },
-            },
         })
+    ])
 
         return findRateWithHistory(client, rateID)
     } catch (err) {
-        console.error('SUBMIT PRISMA ATe ERR', err)
+        console.error('Prisma error updateing rate', err)
         return err
     }
 }

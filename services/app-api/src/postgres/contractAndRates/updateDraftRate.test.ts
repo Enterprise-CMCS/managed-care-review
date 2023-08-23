@@ -44,7 +44,7 @@ describe('updateDraftRate', () => {
     , async () => {
         const client = await sharedTestPrismaClient()
 
-        const draftRateForm1: Partial<RateFormEditable> = {
+        const draftRateForm1: RateFormEditable = {
             rateCertificationName: 'draftData1',
             rateDocuments: [
                 {
@@ -60,7 +60,7 @@ describe('updateDraftRate', () => {
                ]
         }
         // documents all replaced, additional supporting docs added
-        const draftRateForm2: Partial<RateFormEditable> = { rateCertificationName: 'draftData2',
+        const draftRateForm2: RateFormEditable = { rateCertificationName: 'draftData2',
         rateDocuments: [
             {
                 s3URL: 's3://bucketname/key/rate2',
@@ -79,7 +79,7 @@ describe('updateDraftRate', () => {
          }
 
          // documents unchanged
-         const draftRateForm3: Partial<RateFormEditable> = {
+         const draftRateForm3: RateFormEditable = {
             rateCertificationName: 'draftData3',
             rateDocuments: draftRateForm2.rateDocuments,
             supportingDocuments: draftRateForm1.supportingDocuments
@@ -163,7 +163,7 @@ describe('updateDraftRate', () => {
 
     it('updates linked contact table as expected in multiple requests', async() => {
         const client = await sharedTestPrismaClient()
-        const draftRateForm1: Partial<RateFormEditable> = {
+        const draftRateForm1: RateFormEditable = {
             rateCertificationName: 'draftData1',
             certifyingActuaryContacts: [
                 {
@@ -183,7 +183,7 @@ describe('updateDraftRate', () => {
                ]
         }
         // documents all replaced, additional supporting docs added
-        const draftRateForm2: Partial<RateFormEditable> = { rateCertificationName: 'draftData2',
+        const draftRateForm2: RateFormEditable = { rateCertificationName: 'draftData2',
         certifyingActuaryContacts: [
             {
                 actuarialFirm: 'MERCER',
@@ -203,7 +203,7 @@ describe('updateDraftRate', () => {
          }
 
          // documents unchanged
-         const draftRateForm3: Partial<RateFormEditable> = {
+         const draftRateForm3: RateFormEditable = {
             rateCertificationName: 'draftData3',
             certifyingActuaryContacts: draftRateForm2.certifyingActuaryContacts,
             addtlActuaryContacts: draftRateForm1.addtlActuaryContacts
