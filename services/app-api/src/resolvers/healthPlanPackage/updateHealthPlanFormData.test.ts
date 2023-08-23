@@ -373,7 +373,7 @@ describe.each(flagValueTestParameters)(
             )
 
             const expectedErrorMsg = flagValue
-                ? 'Transient server error: Concurrent editing occurred. Please refresh the page to continue.'
+                ? 'Concurrent update error: The data you are trying to modify has changed since you last retrieved it. Please refresh the page to continue.'
                 : 'Transient server error: attempted to modify un-modifiable field(s): updatedAt.  Please refresh the page to continue.'
 
             expect(updateResult.errors[0].message).toBe(expectedErrorMsg)
@@ -414,7 +414,7 @@ describe.each(flagValueTestParameters)(
             )
 
             const expectedErrorMsg = flagValue
-                ? 'Transient server error: Concurrent editing occurred. Please refresh the page to continue.'
+                ? 'Concurrent update error: The data you are trying to modify has changed since you last retrieved it. Please refresh the page to continue.'
                 : 'Transient server error: attempted to modify un-modifiable field(s): stateCode,stateNumber,createdAt,updatedAt.  Please refresh the page to continue.'
 
             expect(updateResult.errors[0].message).toBe(expectedErrorMsg)

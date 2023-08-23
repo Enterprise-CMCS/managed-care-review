@@ -161,7 +161,7 @@ export function updateHealthPlanFormDataResolver(
             }
 
             // Can't update a submission that is locked or resubmitted
-            if (!['DRAFT', 'UNLOCKED'].includes(contractWithHistory.status)) {
+            if (!contractWithHistory.draftRevision) {
                 const errMessage = `Package is not in editable state: ${input.pkgID} status: ${contractWithHistory.status}`
                 logError('updateHealthPlanFormData', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
@@ -170,25 +170,12 @@ export function updateHealthPlanFormDataResolver(
                 })
             }
 
-            // If contract is draft and draft revision does not exist, then possibly:
-            // - contract was mislabeled labelled DRAFT in the parsing functions.
-            // - something happened in the converter functions to not add draft revision.
-            // - there were no revisions without submitted info.
-            if (!contractWithHistory.draftRevision) {
-                const errMessage = `Issue finding a draft revision for contract id ${input.pkgID}. Message: Draft revision not found}`
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                    },
-                })
-            }
-
             // If updatedAt does not match concurrent editing occurred.
             if (
                 contractWithHistory.draftRevision.updatedAt.getTime() !==
                 unlockedFormData.updatedAt.getTime()
             ) {
-                const errMessage = `Transient server error: Concurrent editing occurred. Please refresh the page to continue.`
+                const errMessage = `Concurrent update error: The data you are trying to modify has changed since you last retrieved it. Please refresh the page to continue.`
                 logError('updateHealthPlanFormData', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new UserInputError(errMessage)
