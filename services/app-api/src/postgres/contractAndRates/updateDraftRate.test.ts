@@ -147,7 +147,7 @@ describe('updateDraftRate', () => {
         )
     })
 
-    it('updates linked contact table as expected in multiple requests', async () => {
+    it('updates linked contacts as expected in multiple requests', async () => {
         const client = await sharedTestPrismaClient()
         const draftRateForm1: RateFormEditable = {
             rateCertificationName: 'draftData1',

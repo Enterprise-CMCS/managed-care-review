@@ -189,12 +189,9 @@ export function updateHealthPlanFormDataResolver(
                     ...unlockedFormData.contractAmendmentInfo
                         ?.modifiedProvisions,
                     managedCareEntities: unlockedFormData.managedCareEntities,
-                    // Store function is not ready for updating documents and state. We can complete this after these
-                    // three fields in the proto include a UUID and we can reliably CRUD records. Make sure to complete
-                    // the todo test after this is implemented.
-                    stateContacts: [],
-                    supportingDocuments: [],
-                    contractDocuments: [],
+                    stateContacts: unlockedFormData.stateContacts,
+                    supportingDocuments: unlockedFormData.documents,
+                    contractDocuments: unlockedFormData.contractDocuments,
                 },
                 rateIDs: [],
             })

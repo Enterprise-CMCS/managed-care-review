@@ -48,7 +48,7 @@ describe.each(flagValueTestParameters)(
         const cmsUser = testCMSUser()
         const mockLDService = testLDService({ [flagName]: flagValue })
 
-        it('updates valid fields in the formData', async () => {
+        it('updates valid scalar fields in the formData', async () => {
             const server = await constructTestPostgresServer({
                 ldService: mockLDService,
             })
@@ -122,9 +122,76 @@ describe.each(flagValueTestParameters)(
             )
         })
 
-        it.todo(
-            'updates documents and state contacts. Complete after documents and state contacts have uuids in proto'
-        )
+        it('updates relational fields such as documents and contacts', async () => {
+            const server = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
+
+            const createdDraft = await createTestHealthPlanPackage(server)
+
+            // update that draft.
+            const formData = Object.assign(latestFormData(createdDraft), {
+                programIDs: [],
+                populationCovered: 'MEDICAID',
+                submissionType: 'CONTRACT_ONLY',
+                riskBasedContract: true,
+                submissionDescription: 'Updated submission',
+                stateContacts: [
+                    {
+                        name: 'statecontact',
+                        titleRole: 'thestatestofcontacts',
+                        email: 'statemcstate@examepl.com',
+                    },
+                ],
+                documents: [
+                    {
+                        name: 'supportingDocument11.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_SUPPPORTING' as const],
+                        sha256: 'needs-to-be-there',
+                    },
+                ],
+                contractDocuments: [
+                    {
+                        name: 'contractDocument11.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT' as const],
+                        sha256: 'needs-to-be-there',
+                    },
+                ],
+                rateInfos: [],
+            })
+
+            // convert to base64 proto
+            const updatedB64 = domainToBase64(formData)
+
+            const updateResult = await server.executeOperation({
+                query: UPDATE_HEALTH_PLAN_FORM_DATA,
+                variables: {
+                    input: {
+                        pkgID: createdDraft.id,
+                        healthPlanFormData: updatedB64,
+                    },
+                },
+            })
+
+            expect(updateResult.errors).toBeUndefined()
+
+            const healthPlanPackage =
+                updateResult.data?.updateHealthPlanFormData.pkg
+
+            const updatedFormData = latestFormData(healthPlanPackage)
+            expect(updatedFormData.documents).toEqual(
+                expect.arrayContaining(formData.documents)
+            )
+            expect(updatedFormData.contractDocuments).toEqual(
+                expect.arrayContaining(formData.contractDocuments)
+            )
+
+            expect(updatedFormData.stateContacts).toEqual(
+                expect.arrayContaining(formData.stateContacts)
+            )
+        })
 
         it('errors if a CMS user calls it', async () => {
             const server = await constructTestPostgresServer({

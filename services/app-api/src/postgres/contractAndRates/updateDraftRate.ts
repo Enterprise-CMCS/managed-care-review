@@ -121,7 +121,7 @@ async function updateDraftRate(
 
         return findRateWithHistory(client, rateID)
     } catch (err) {
-        console.error('Prisma error updateing rate', err)
+        console.error('Prisma error updating rate', err)
         return err
     }
 }
