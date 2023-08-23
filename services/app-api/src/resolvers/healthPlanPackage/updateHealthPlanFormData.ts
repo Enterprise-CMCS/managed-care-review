@@ -170,49 +170,28 @@ export function updateHealthPlanFormDataResolver(
                 })
             }
 
-            // Check if draft revision exist, if not then return error
+            // If contract is draft and draft revision does not exist, then possibly:
+            // - contract was mislabeled labelled DRAFT in the parsing functions.
+            // - something happened in the converter functions to not add draft revision.
+            // - there were no revisions without submitted info.
             if (!contractWithHistory.draftRevision) {
                 const errMessage = `Issue finding a draft revision for contract id ${input.pkgID}. Message: Draft revision not found}`
                 throw new GraphQLError(errMessage, {
                     extensions: {
-                        code: 'NOT_FOUND',
-                        cause: 'DB_ERROR',
+                        code: 'INTERNAL_SERVER_ERROR',
                     },
                 })
             }
 
-            //check for fields
-            // Validate that none of these protected fields have been modified.
-            // These fields should only be modified by the server, never by an update.
-            const previousFormData = {
-                id: contractWithHistory.draftRevision.id,
-                stateCode: contractWithHistory.stateCode,
-                stateNumber: contractWithHistory.stateNumber,
-                // Matches the format of the created at date that comes out of the proto.
-                createdAt: new Date(
-                    Date.UTC(
-                        contractWithHistory.draftRevision.updatedAt.getUTCFullYear(),
-                        contractWithHistory.draftRevision.updatedAt.getUTCMonth(),
-                        contractWithHistory.draftRevision.updatedAt.getUTCDate()
-                    )
-                ),
-                updatedAt: contractWithHistory.draftRevision.updatedAt,
-            }
-
-            const unfixedFields = validateProtectedFields(
-                previousFormData,
-                unlockedFormData
-            )
-
-            if (unfixedFields.length !== 0) {
-                const errMessage = `Transient server error: attempted to modify un-modifiable field(s): ${unfixedFields.join(
-                    ','
-                )}.  Please refresh the page to continue.`
+            // If updatedAt does not match concurrent editing occurred.
+            if (
+                contractWithHistory.draftRevision.updatedAt !==
+                unlockedFormData.updatedAt
+            ) {
+                const errMessage = `Transient server error: Concurrent editing occurred. Please refresh the page to continue.`
                 logError('updateHealthPlanFormData', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new UserInputError(errMessage, {
-                    argumentName: unfixedFields.join(','),
-                })
+                throw new UserInputError(errMessage)
             }
 
             // Update contract draft revision
