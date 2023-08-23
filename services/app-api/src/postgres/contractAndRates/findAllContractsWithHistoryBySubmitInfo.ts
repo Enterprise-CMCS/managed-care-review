@@ -5,8 +5,7 @@ import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaSubmittedContractHelpers'
 
 async function findAllContractsWithHistoryBySubmitInfo(
-    client: PrismaTransactionType,
-    stateCode: string
+    client: PrismaTransactionType
 ): Promise<Array<ContractType | Error> | NotFoundError | Error> {
     try {
         const contracts = await client.contractTable.findMany({
@@ -26,7 +25,7 @@ async function findAllContractsWithHistoryBySubmitInfo(
         })
 
         if (!contracts) {
-            const err = `PRISMA ERROR: Cannot find contracts with state code: ${stateCode}`
+            const err = `PRISMA ERROR: Cannot find all contracts by submit info`
             console.error(err)
             return new NotFoundError(err)
         }
