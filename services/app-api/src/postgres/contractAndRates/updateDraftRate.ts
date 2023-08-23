@@ -1,15 +1,12 @@
 import { findRateWithHistory } from './findRateWithHistory'
 import type { NotFoundError } from '../storeError'
-import type { RateFormDataType, RateType } from '../../domain-models/contractAndRates'
-import type  { PrismaClient, } from '@prisma/client'
-import type {  SubmissionDocument } from 'app-web/src/common-code/healthPlanFormDataType'
+import type {
+    RateFormDataType,
+    RateType,
+} from '../../domain-models/contractAndRates'
+import type { PrismaClient } from '@prisma/client'
 
-type GenericDocumentPrismaInput = Omit<SubmissionDocument, 'documentCategories'>
-
-type RateFormEditable = Partial<RateFormDataType> & {
-    rateDocuments?: GenericDocumentPrismaInput
-    supportingDocuments?: GenericDocumentPrismaInput
-}
+type RateFormEditable = Partial<RateFormDataType>
 
 type UpdateRateArgsType = {
     rateID: string
@@ -21,14 +18,13 @@ type UpdateRateArgsType = {
    updateDraftRate
 
     This function calls two sequential rate revision updates in a transaciton
-    The first deletes related resources from the revision entirely.
+    The first deletes related resources from the revision entirely
     The second updates the Rate and re-creates/links for related resources (things like contacts and documents)
 
     This approach was used for following reasons at the time  of writing:
-    - Prisma has no native upsertMany functionality. Looping through each related resource to upsert using prisma native functions felt burdensome
-    - MCR application had no need for version history with drafts (thus updatedAt and createdAt dates on documents and contacts are no used)
+    - Prisma has no native upsertMany functionality. Looping through each related resource to upsert felt overkill
+    - No need for version history, preserving dates on related resources in draft form
 */
-
 async function updateDraftRate(
     client: PrismaClient,
     args: UpdateRateArgsType
@@ -38,7 +34,7 @@ async function updateDraftRate(
         rateType,
         rateCapitationType,
         rateDocuments,
-        supportingDocuments ,
+        supportingDocuments,
         rateDateStart,
         rateDateEnd,
         rateDateCertified,
@@ -46,7 +42,7 @@ async function updateDraftRate(
         amendmentEffectiveDateEnd,
         rateProgramIDs,
         rateCertificationName,
-        certifyingActuaryContacts ,
+        certifyingActuaryContacts,
         addtlActuaryContacts,
         actuaryCommunicationPreference,
     } = formData
@@ -65,46 +61,46 @@ async function updateDraftRate(
         }
 
         await client.$transaction([
-         //  Clear all related resources on the revision
+            //  Clear all related resources on the revision
             client.rateRevisionTable.update({
                 where: {
                     id: currentRev.id,
                 },
                 data: {
                     certifyingActuaryContacts: {
-                        deleteMany: {}
+                        deleteMany: {},
                     },
                     addtlActuaryContacts: {
-                        deleteMany: {}
+                        deleteMany: {},
                     },
                     rateDocuments: {
-                        deleteMany: {}
+                        deleteMany: {},
                     },
                     supportingDocuments: {
-                        deleteMany: {}
+                        deleteMany: {},
                     },
-                }
-                }),
+                },
+            }),
             // Then update resource, adjusting all simple fields and creating new linked resources for fields holding relationships to other day
             client.rateRevisionTable.update({
                 where: {
-                       id: currentRev.id,
+                    id: currentRev.id,
                 },
                 data: {
                     rateType,
                     rateCapitationType,
 
                     rateDocuments: {
-                        create: rateDocuments
+                        create: rateDocuments,
                     },
                     supportingDocuments: {
-                        create: supportingDocuments
+                        create: supportingDocuments,
                     },
                     certifyingActuaryContacts: {
-                        create: certifyingActuaryContacts
+                        create: certifyingActuaryContacts,
                     },
                     addtlActuaryContacts: {
-                        create: addtlActuaryContacts
+                        create: addtlActuaryContacts,
                     },
                     rateDateStart,
                     rateDateEnd,
@@ -120,8 +116,8 @@ async function updateDraftRate(
                         })),
                     },
                 },
-        })
-    ])
+            }),
+        ])
 
         return findRateWithHistory(client, rateID)
     } catch (err) {
