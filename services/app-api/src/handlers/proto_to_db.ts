@@ -16,7 +16,7 @@ steps will be transmitted elsewhere.
 */
 
 import type { Handler, APIGatewayProxyResultV2 } from 'aws-lambda'
-import { initTracer, initMeter } from '../../../uploads/src/lib/otel'
+import { initTracer } from '../../../uploads/src/lib/otel'
 import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import type { Store } from '../postgres'
@@ -78,10 +78,105 @@ export const getRevisions = async (
     return result
 }
 
-export const main: Handler = async (
-    event,
-    context
-): Promise<APIGatewayProxyResultV2> => {
+export async function migrateRevision(
+    client: PrismaClient,
+    revision: HealthPlanRevisionTable
+): Promise<undefined | Error> {
+    /* The order in which we call the helpers in this file matters */
+
+    // decode the proto
+    const decodedFormDataProto = toDomain(revision.formDataProto)
+    if (decodedFormDataProto instanceof Error) {
+        const error = new Error(
+            'toDomain: Could not unpack the revision form data proto'
+        )
+        return error
+    }
+    const formData = decodedFormDataProto as HealthPlanFormDataType
+
+    /* Creating an entry in either ContractRevisionTable or RateRevisionTable
+        requires a valid 'submitInfoID' (or 'unlockInfoID') 
+        that points to a record in the UpdateInfoTable */
+    await prepopulateUpdateInfo(client, revision, formData)
+
+    /* The field 'contractId' in the ContractRevisionTable matches the field 'id' in the ContractTable
+        so the ContractTable has to be populated before the revisions can be inserted
+        Note two things:
+        1. This value is originally the pkgID in the HealthPlanRevisionTable
+        2. So it's really acting as a foreign key that ties many of these tables together
+        3. I think this is working as I expected, but if something goes very wrong
+        somewhere along the line, look here first.  */
+    try {
+        await insertContractId(client, revision, formData)
+    } catch (err) {
+        if (err.code === 'P2002') {
+            console.info(
+                `Contract ID ${revision.id} already exists, skipping insert`
+            )
+        } else {
+            const error = new Error(
+                `Error creating contract for ${revision.id}: ${err.message}`
+            )
+            return error
+        }
+    }
+
+    try {
+        const result = await migrateContractRevision(client, revision, formData)
+        if (result instanceof Error) {
+            const error = new Error(
+                `Error inside new block ${revision.id}: ${result.message}`
+            )
+            return error
+        }
+    } catch (err) {
+        const error = new Error(
+            `caught error in new block ${revision.id}: ${err.message}`
+        )
+        return error
+    }
+
+    /* Just as with the Contract and ContractRevision tables noted above, we take the
+        original HealthPlanRevision 'pkgID' and tie the RateTable ('id') to the RateRevisionTable ('rateID') 
+        (the contract stuff happens in two files; the rate stuff happens in one file; you'll probably want to change this) */
+    const rateMigrationResults = await migrateRateInfo(
+        client,
+        revision,
+        formData
+    )
+    for (const rateResult of rateMigrationResults) {
+        if (rateResult instanceof Error) {
+            const error = new Error(
+                `Error migrating rate info for revision ${revision.id}: ${rateResult.message}`
+            )
+            return error
+        }
+    }
+
+    /* My confidence in the join table and document strategies is lower than for the other tables.
+        I think these are worth reviewing carefully as a team */
+    await migrateAssociations(client)
+
+    /* The ContractRevisionID and the RateRevisionID in the document tables
+        are foreign keys to the id fields in their respective revision tables. 
+        I'm not 100% sure that this is the correct approach.  */
+    const documentMigrationResults = await migrateDocuments(
+        client,
+        revision,
+        formData
+    )
+    for (const documentResult of documentMigrationResults) {
+        if (documentResult instanceof Error) {
+            const error = new Error(
+                `Error migrating documents for revision ${revision.id}: ${documentResult.message}`
+            )
+            return error
+        }
+    }
+}
+
+export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
+    // setup otel tracing
     const stageName = process.env.stage ?? 'stageNotSet'
     const serviceName = `proto_to_db_lambda-${stageName}`
     const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
@@ -93,101 +188,18 @@ export const main: Handler = async (
         )
     }
 
-    initMeter(serviceName)
     const { store, client } = await getDatabaseConnection()
-
     const revisions = await getRevisions(store)
 
+    // go through the list of revisons and migrate
     for (const revision of revisions) {
-        const decodedFormDataProto = toDomain(revision.formDataProto)
-        if (decodedFormDataProto instanceof Error) throw decodedFormDataProto
-        const formData = decodedFormDataProto as HealthPlanFormDataType
-
-        /* The order in which we call the helpers in this file matters */
-
-        /* Creating an entry in either ContractRevisionTable or RateRevisionTable
-        requires a valid 'submitInfoID' (or 'unlockInfoID') 
-        that points to a record in the UpdateInfoTable */
-        await prepopulateUpdateInfo(client, revision, formData)
-
-        /* The field 'contractId' in the ContractRevisionTable matches the field 'id' in the ContractTable
-        so the ContractTable has to be populated before the revisions can be inserted
-        Note two things:
-        1. This value is originally the pkgID in the HealthPlanRevisionTable
-        2. So it's really acting as a foreign key that ties many of these tables together
-        3. I think this is working as I expected, but if something goes very wrong
-        somewhere along the line, look here first.  */
-        try {
-            await insertContractId(client, revision, formData)
-        } catch (err) {
-            if (err.code === 'P2002') {
-                console.info(
-                    `Contract ID ${revision.id} already exists, skipping insert`
-                )
-            } else {
-                console.error(
-                    `Error creating contract for ${revision.id}: ${err.message}`
-                )
-                continue
-            }
-        }
-
-        try {
-            const result = await migrateContractRevision(
-                client,
-                revision,
-                formData
-            )
-            if (result instanceof Error) {
-                console.error(
-                    `Error inside new block ${revision.id}: ${result.message}`
-                )
-                continue
-            }
-        } catch (error) {
-            console.error(
-                `caught error in new block ${revision.id}: ${error.message}`
-            )
-            continue
-        }
-
-        /* Just as with the Contract and ContractRevision tables noted above, we take the
-        original HealthPlanRevision 'pkgID' and tie the RateTable ('id') to the RateRevisionTable ('rateID') 
-        (the contract stuff happens in two files; the rate stuff happens in one file; you'll probably want to change this) */
-        const rateMigrationResults = await migrateRateInfo(
-            client,
-            revision,
-            formData
-        )
-        for (const rateResult of rateMigrationResults) {
-            if (rateResult instanceof Error) {
-                console.error(
-                    `Error migrating rate info for revision ${revision.id}: ${rateResult.message}`
-                )
-            }
-        }
-
-        /* My confidence in the join table and document strategies is lower than for the other tables.
-        I think these are worth reviewing carefully as a team */
-        await migrateAssociations(client)
-
-        /* The ContractRevisionID and the RateRevisionID in the document tables
-        are foreign keys to the id fields in their respective revision tables. 
-        I'm not 100% sure that this is the correct approach.  */
-        const documentMigrationResults = await migrateDocuments(
-            client,
-            revision,
-            formData
-        )
-        for (const documentResult of documentMigrationResults) {
-            if (documentResult instanceof Error) {
-                console.error(
-                    `Error migrating documents for revision ${revision.id}: ${documentResult.message}`
-                )
-            }
+        const migrateResult = await migrateRevision(client, revision)
+        if (migrateResult instanceof Error) {
+            console.error(migrateResult)
         }
     }
 
+    // notes after maz: not sure why this is here and not before we try to migrate?
     const pkgID = revisions[0].pkgID
     if (!pkgID) {
         console.error('Package ID is missing in the revisions')
