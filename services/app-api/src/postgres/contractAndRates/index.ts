@@ -1,7 +1,5 @@
-import type { InsertContractArgsType } from './insertContract'
-import { insertDraftContract } from './insertContract'
-import { findContractWithHistory } from './findContractWithHistory'
-
-export { insertDraftContract, findContractWithHistory }
-
-export type { InsertContractArgsType }
+export type { InsertContractArgsType } from './insertContract'
+export type { UpdateContractArgsType } from './updateDraftContract'
+export { insertDraftContract } from './insertContract'
+export { findContractWithHistory } from './findContractWithHistory'
+export { updateDraftContract } from './updateDraftContract'

@@ -107,6 +107,12 @@ function mockStoreThatErrors(): Store {
                 'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
             )
         },
+
+        updateDraftContract: async (_ID) => {
+            return new Error(
+                'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
+            )
+        },
     }
 }
 
