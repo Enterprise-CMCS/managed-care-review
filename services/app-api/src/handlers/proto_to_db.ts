@@ -97,9 +97,16 @@ export async function migrateRevision(
     /* Creating an entry in either ContractRevisionTable or RateRevisionTable
         requires a valid 'submitInfoID' (or 'unlockInfoID') 
         that points to a record in the UpdateInfoTable */
-    const updateInfo = await prepopulateUpdateInfo(client, revision, formData)
-    if (updateInfo instanceof Error) {
-        return updateInfo
+    const updateInfoResult = await prepopulateUpdateInfo(
+        client,
+        revision,
+        formData
+    )
+    if (updateInfoResult instanceof Error) {
+        const error = new Error(
+            `Error pre-populating UpdateInfoTable for ${revision.id}: ${updateInfoResult}`
+        )
+        return error
     }
 
     /* The field 'contractId' in the ContractRevisionTable matches the field 'id' in the ContractTable
@@ -109,19 +116,16 @@ export async function migrateRevision(
         2. So it's really acting as a foreign key that ties many of these tables together
         3. I think this is working as I expected, but if something goes very wrong
         somewhere along the line, look here first.  */
-    try {
-        await insertContractId(client, revision, formData)
-    } catch (err) {
-        if (err.code === 'P2002') {
-            console.info(
-                `Contract ID ${revision.id} already exists, skipping insert`
-            )
-        } else {
-            const error = new Error(
-                `Error creating contract for ${revision.id}: ${err.message}`
-            )
-            return error
-        }
+    const insertContractResult = await insertContractId(
+        client,
+        revision,
+        formData
+    )
+    if (insertContractResult instanceof Error) {
+        const error = new Error(
+            `Error creating contract for ${revision.id}: ${insertContractResult}`
+        )
+        return error
     }
 
     try {

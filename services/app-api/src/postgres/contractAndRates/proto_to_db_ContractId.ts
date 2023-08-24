@@ -19,7 +19,8 @@ async function insertContractId(
         })
 
         if (!state) {
-            throw new Error(`State with code ${stateCode} not found`)
+            const error = new Error(`State with code ${stateCode} not found`)
+            return error
         }
 
         const contract = await client.contractTable.upsert({
@@ -41,9 +42,11 @@ async function insertContractId(
         })
 
         return contract
-    } catch (error) {
-        console.error(`Error creating contract ${JSON.stringify(error)}`)
-        return new Error('Error creating contract')
+    } catch (err) {
+        const error = new Error(
+            `Error creating contract ${JSON.stringify(err)}`
+        )
+        return error
     }
 }
 
