@@ -54,40 +54,21 @@ async function updateDraftContract(
     } = formData
 
     try {
-        // Given all the Contracts associated with this draft, find the most recent submitted
-        // rateRevision to update.
-        const currentRev = await client.contractRevisionTable.findFirst({
-            where: {
-                contractID: contractID,
-                submitInfoID: null,
-            },
-        })
-        if (!currentRev) {
-            const err = `PRISMA ERROR: Cannot find the current rev to update with contract id: ${contractID}`
-            console.error(err)
-            return new NotFoundError(err)
-        }
-
-        await client.$transaction([
-            //  Clear all related resources on the revision
-            client.contractRevisionTable.update({
+        return await client.$transaction(async (tx) => {
+            // Given all the Contracts associated with this draft, find the most recent submitted
+            const currentRev = await client.contractRevisionTable.findFirst({
                 where: {
-                    id: currentRev.id,
+                    contractID: contractID,
+                    submitInfoID: null,
                 },
-                data: {
-                    contractDocuments: {
-                        deleteMany: {},
-                    },
-                    supportingDocuments: {
-                        deleteMany: {},
-                    },
-                    stateContacts: {
-                        deleteMany: {},
-                    },
-                },
-            }),
+            })
+            if (!currentRev) {
+                const err = `PRISMA ERROR: Cannot find the current rev to update with contract id: ${contractID}`
+                console.error(err)
+                return new NotFoundError(err)
+            }
             // Then update resource, adjusting all simple fields and creating new linked resources for fields holding relationships to other day,
-            client.contractRevisionTable.update({
+            await tx.contractRevisionTable.update({
                 where: {
                     id: currentRev.id,
                 },
@@ -100,12 +81,15 @@ async function updateDraftContract(
                     contractType: contractType,
                     contractExecutionStatus,
                     contractDocuments: {
+                        deleteMany: {},
                         create: contractDocuments,
                     },
                     supportingDocuments: {
+                        deleteMany: {},
                         create: supportingDocuments,
                     },
                     stateContacts: {
+                        deleteMany: {},
                         create: stateContacts,
                     },
                     contractDateStart,
@@ -135,10 +119,10 @@ async function updateDraftContract(
                         })),
                     },
                 },
-            }),
-        ])
+            })
 
-        return findContractWithHistory(client, contractID)
+            return findContractWithHistory(tx, contractID)
+        })
     } catch (err) {
         console.error('Prisma error updating contract', err)
         return err

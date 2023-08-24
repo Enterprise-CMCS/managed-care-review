@@ -24,6 +24,7 @@ import type {
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { must } from '../../testHelpers'
 import { submitContract } from '../../postgres/contractAndRates/submitContract'
+import type { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 
 const flagValueTestParameters: {
     flagName: FeatureFlagLDConstant
@@ -56,44 +57,47 @@ describe.each(flagValueTestParameters)(
             const createdDraft = await createTestHealthPlanPackage(server)
 
             // update that draft.
-            const formData = Object.assign(latestFormData(createdDraft), {
-                programIDs: [],
-                populationCovered: 'MEDICAID',
-                submissionType: 'CONTRACT_ONLY',
-                riskBasedContract: true,
-                submissionDescription: 'Updated submission',
-                stateContacts: [],
-                documents: [],
-                contractType: 'BASE',
-                contractExecutionStatus: 'EXECUTED',
-                contractDocuments: [],
-                contractDateStart: new Date(Date.UTC(2025, 5, 1)),
-                contractDateEnd: new Date(Date.UTC(2026, 5, 1)),
-                managedCareEntities: ['MCO'],
-                federalAuthorities: [],
-                contractAmendmentInfo: {
-                    modifiedProvisions: {
-                        inLieuServicesAndSettings: true,
-                        modifiedBenefitsProvided: true,
-                        modifiedGeoAreaServed: true,
-                        modifiedMedicaidBeneficiaries: true,
-                        modifiedRiskSharingStrategy: true,
-                        modifiedIncentiveArrangements: true,
-                        modifiedWitholdAgreements: true,
-                        modifiedStateDirectedPayments: true,
-                        modifiedPassThroughPayments: false,
-                        modifiedPaymentsForMentalDiseaseInstitutions: false,
-                        modifiedMedicalLossRatioStandards: false,
-                        modifiedOtherFinancialPaymentIncentive: false,
-                        modifiedEnrollmentProcess: false,
-                        modifiedGrevienceAndAppeal: false,
-                        modifiedNetworkAdequacyStandards: undefined,
-                        modifiedLengthOfContract: undefined,
-                        modifiedNonRiskPaymentArrangements: undefined,
+            const formData: HealthPlanFormDataType = Object.assign(
+                latestFormData(createdDraft),
+                {
+                    programIDs: [],
+                    populationCovered: 'MEDICAID',
+                    submissionType: 'CONTRACT_ONLY',
+                    riskBasedContract: true,
+                    submissionDescription: 'Updated submission',
+                    stateContacts: [],
+                    documents: [],
+                    contractType: 'BASE',
+                    contractExecutionStatus: 'EXECUTED',
+                    contractDocuments: [],
+                    contractDateStart: new Date(Date.UTC(2025, 5, 1)),
+                    contractDateEnd: new Date(Date.UTC(2026, 5, 1)),
+                    managedCareEntities: ['MCO'],
+                    federalAuthorities: [],
+                    contractAmendmentInfo: {
+                        modifiedProvisions: {
+                            inLieuServicesAndSettings: true,
+                            modifiedBenefitsProvided: true,
+                            modifiedGeoAreaServed: true,
+                            modifiedMedicaidBeneficiaries: true,
+                            modifiedRiskSharingStrategy: true,
+                            modifiedIncentiveArrangements: true,
+                            modifiedWitholdAgreements: true,
+                            modifiedStateDirectedPayments: true,
+                            modifiedPassThroughPayments: false,
+                            modifiedPaymentsForMentalDiseaseInstitutions: false,
+                            modifiedMedicalLossRatioStandards: false,
+                            modifiedOtherFinancialPaymentIncentive: false,
+                            modifiedEnrollmentProcess: false,
+                            modifiedGrevienceAndAppeal: false,
+                            modifiedNetworkAdequacyStandards: undefined,
+                            modifiedLengthOfContract: undefined,
+                            modifiedNonRiskPaymentArrangements: undefined,
+                        },
                     },
-                },
-                rateInfos: [],
-            })
+                    rateInfos: [],
+                }
+            )
 
             // convert to base64 proto
             const updatedB64 = domainToBase64(formData)
@@ -130,37 +134,33 @@ describe.each(flagValueTestParameters)(
             const createdDraft = await createTestHealthPlanPackage(server)
 
             // update that draft.
-            const formData = Object.assign(latestFormData(createdDraft), {
-                programIDs: [],
-                populationCovered: 'MEDICAID',
-                submissionType: 'CONTRACT_ONLY',
-                riskBasedContract: true,
-                submissionDescription: 'Updated submission',
-                stateContacts: [
-                    {
-                        name: 'statecontact',
-                        titleRole: 'thestatestofcontacts',
-                        email: 'statemcstate@examepl.com',
-                    },
-                ],
-                documents: [
-                    {
-                        name: 'supportingDocument11.pdf',
-                        s3URL: 'fakeS3URL',
-                        documentCategories: ['CONTRACT_SUPPPORTING' as const],
-                        sha256: 'needs-to-be-there',
-                    },
-                ],
-                contractDocuments: [
-                    {
-                        name: 'contractDocument11.pdf',
-                        s3URL: 'fakeS3URL',
-                        documentCategories: ['CONTRACT' as const],
-                        sha256: 'needs-to-be-there',
-                    },
-                ],
-                rateInfos: [],
-            })
+            const formData: HealthPlanFormDataType = Object.assign(
+                latestFormData(createdDraft),
+                {
+                    programIDs: [],
+                    populationCovered: 'MEDICAID',
+                    submissionType: 'CONTRACT_ONLY',
+                    riskBasedContract: true,
+                    submissionDescription: 'Updated submission',
+                    stateContacts: [
+                        {
+                            name: 'statecontact',
+                            titleRole: 'thestatestofcontacts',
+                            email: 'statemcstate@examepl.com',
+                        },
+                    ],
+                    documents: [
+                        {
+                            name: 'supportingDocument11.pdf',
+                            s3URL: 'fakeS3URL',
+                            documentCategories: ['CONTRACT_RELATED' as const],
+                            sha256: 'needs-to-be-there',
+                        },
+                    ],
+                    adsfdas: 'sdfsdf',
+                    rateInfos: [],
+                }
+            )
 
             // convert to base64 proto
             const updatedB64 = domainToBase64(formData)

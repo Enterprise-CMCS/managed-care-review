@@ -48,41 +48,21 @@ async function updateDraftRate(
     } = formData
 
     try {
-        // Given all the Rates associated with this draft, find the most recent submitted to update.
-        const currentRev = await client.rateRevisionTable.findFirst({
-            where: {
-                rateID: rateID,
-                submitInfoID: null,
-            },
-        })
-        if (!currentRev) {
-            console.error('No Draft Rev!')
-            return new Error('cant find a draft rev to submit')
-        }
-
-        await client.$transaction([
-            //  Clear all related resources on the revision
-            client.rateRevisionTable.update({
+        return await client.$transaction(async (tx) => {
+            // Given all the Rates associated with this draft, find the most recent submitted to update.
+            const currentRev = await tx.rateRevisionTable.findFirst({
                 where: {
-                    id: currentRev.id,
+                    rateID: rateID,
+                    submitInfoID: null,
                 },
-                data: {
-                    certifyingActuaryContacts: {
-                        deleteMany: {},
-                    },
-                    addtlActuaryContacts: {
-                        deleteMany: {},
-                    },
-                    rateDocuments: {
-                        deleteMany: {},
-                    },
-                    supportingDocuments: {
-                        deleteMany: {},
-                    },
-                },
-            }),
+            })
+            if (!currentRev) {
+                console.error('No Draft Rev!')
+                return new Error('cant find a draft rev to submit')
+            }
+            // Clear all related resources on the revision
             // Then update resource, adjusting all simple fields and creating new linked resources for fields holding relationships to other day
-            client.rateRevisionTable.update({
+            await tx.rateRevisionTable.update({
                 where: {
                     id: currentRev.id,
                 },
@@ -91,15 +71,19 @@ async function updateDraftRate(
                     rateCapitationType,
 
                     rateDocuments: {
+                        deleteMany: {},
                         create: rateDocuments,
                     },
                     supportingDocuments: {
+                        deleteMany: {},
                         create: supportingDocuments,
                     },
                     certifyingActuaryContacts: {
+                        deleteMany: {},
                         create: certifyingActuaryContacts,
                     },
                     addtlActuaryContacts: {
+                        deleteMany: {},
                         create: addtlActuaryContacts,
                     },
                     rateDateStart,
@@ -116,10 +100,9 @@ async function updateDraftRate(
                         })),
                     },
                 },
-            }),
-        ])
-
-        return findRateWithHistory(client, rateID)
+            })
+            return findRateWithHistory(tx, rateID)
+        })
     } catch (err) {
         console.error('Prisma error updating rate', err)
         return err

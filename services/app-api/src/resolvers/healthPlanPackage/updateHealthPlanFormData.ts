@@ -190,8 +190,27 @@ export function updateHealthPlanFormDataResolver(
                         ?.modifiedProvisions,
                     managedCareEntities: unlockedFormData.managedCareEntities,
                     stateContacts: unlockedFormData.stateContacts,
-                    supportingDocuments: unlockedFormData.documents,
-                    contractDocuments: unlockedFormData.contractDocuments,
+                    supportingDocuments: unlockedFormData.documents.map(
+                        (doc) => {
+                            return {
+                                name: doc.name,
+                                s3URL: doc.s3URL,
+                                sha256: doc.sha256,
+                                id: doc.id,
+                            }
+                        }
+                    ),
+                    contractDocuments: unlockedFormData.contractDocuments.map(
+                        (doc) => {
+                            return {
+                                name: doc.name,
+                                s3URL: doc.s3URL,
+                                sha256: doc.sha256,
+                                id: doc.id,
+                            }
+                        }
+                    ),
+                    // TODO - can add rate fields here when updateHPP handles rates as well
                 },
                 rateIDs: [],
             })

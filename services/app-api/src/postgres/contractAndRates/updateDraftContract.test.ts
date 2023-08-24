@@ -44,7 +44,7 @@ describe('updateDraftContract', () => {
     it('updates linked documents as expected in multiple requests', async () => {
         const client = await sharedTestPrismaClient()
 
-        const draftRateForm1: ContractFormEditable = {
+        const draftContractForm1: ContractFormEditable = {
             submissionDescription: 'draftData1',
             contractDocuments: [
                 {
@@ -62,7 +62,7 @@ describe('updateDraftContract', () => {
             ],
         }
         // documents all replaced, additional supporting docs added
-        const draftRateForm2: ContractFormEditable = {
+        const draftContractForm2: ContractFormEditable = {
             submissionDescription: 'draftData2',
             contractDocuments: [
                 {
@@ -86,10 +86,10 @@ describe('updateDraftContract', () => {
         }
 
         // documents unchanged
-        const draftRateForm3: ContractFormEditable = {
+        const draftContractForm3: ContractFormEditable = {
             submissionDescription: 'draftData3',
-            contractDocuments: draftRateForm2.contractDocuments,
-            supportingDocuments: draftRateForm1.supportingDocuments,
+            contractDocuments: draftContractForm2.contractDocuments,
+            supportingDocuments: draftContractForm1.supportingDocuments,
         }
 
         const contract = must(
@@ -99,7 +99,7 @@ describe('updateDraftContract', () => {
         const draft1 = must(
             await updateDraftContract(client, {
                 contractID: contract.id,
-                formData: draftRateForm1,
+                formData: draftContractForm1,
                 rateIDs: [],
             })
         )
@@ -110,7 +110,7 @@ describe('updateDraftContract', () => {
         const draft2 = must(
             await updateDraftContract(client, {
                 contractID: contract.id,
-                formData: draftRateForm2,
+                formData: draftContractForm2,
                 rateIDs: [],
             })
         )
@@ -120,16 +120,16 @@ describe('updateDraftContract', () => {
         )
 
         expect(draft2.draftRevision?.formData.contractDocuments).toEqual(
-            draftRateForm2.contractDocuments
+            draftContractForm2.contractDocuments
         )
         expect(draft2.draftRevision?.formData.supportingDocuments).toEqual(
-            draftRateForm2.supportingDocuments
+            draftContractForm2.supportingDocuments
         )
 
         const draft3 = must(
             await updateDraftContract(client, {
                 contractID: contract.id,
-                formData: draftRateForm3,
+                formData: draftContractForm3,
                 rateIDs: [],
             })
         )
@@ -140,16 +140,16 @@ describe('updateDraftContract', () => {
             1
         )
         expect(draft3.draftRevision?.formData.contractDocuments).toEqual(
-            draftRateForm3.contractDocuments
+            draftContractForm3.contractDocuments
         )
         expect(draft3.draftRevision?.formData.supportingDocuments).toEqual(
-            draftRateForm3.supportingDocuments
+            draftContractForm3.supportingDocuments
         )
     })
 
     it('updates linked contacts as expected in multiple requests', async () => {
         const client = await sharedTestPrismaClient()
-        const draftRateForm1: ContractFormEditable = {
+        const draftContractForm1: ContractFormEditable = {
             submissionDescription: 'draftData1',
             stateContacts: [
                 {
@@ -160,7 +160,7 @@ describe('updateDraftContract', () => {
             ],
         }
         // all contacts replaced
-        const draftRateForm2: ContractFormEditable = {
+        const draftContractForm2: ContractFormEditable = {
             submissionDescription: 'draftData2',
             stateContacts: [
                 {
@@ -172,9 +172,9 @@ describe('updateDraftContract', () => {
         }
 
         // contacts values unchanged
-        const draftRateForm3: ContractFormEditable = {
+        const draftContractForm3: ContractFormEditable = {
             submissionDescription: 'draftData3',
-            stateContacts: draftRateForm2.stateContacts,
+            stateContacts: draftContractForm2.stateContacts,
         }
 
         const contract = must(
@@ -184,7 +184,7 @@ describe('updateDraftContract', () => {
         const draft1 = must(
             await updateDraftContract(client, {
                 contractID: contract.id,
-                formData: draftRateForm1,
+                formData: draftContractForm1,
                 rateIDs: [],
             })
         )
@@ -194,7 +194,7 @@ describe('updateDraftContract', () => {
         const draft2 = must(
             await updateDraftContract(client, {
                 contractID: contract.id,
-                formData: draftRateForm2,
+                formData: draftContractForm2,
                 rateIDs: [],
             })
         )
@@ -203,13 +203,13 @@ describe('updateDraftContract', () => {
             'draftData2'
         )
         expect(draft2.draftRevision?.formData.stateContacts).toEqual(
-            draftRateForm2.stateContacts
+            draftContractForm2.stateContacts
         )
 
         const draft3 = must(
             await updateDraftContract(client, {
                 contractID: contract.id,
-                formData: draftRateForm3,
+                formData: draftContractForm3,
                 rateIDs: [],
             })
         )
@@ -217,7 +217,7 @@ describe('updateDraftContract', () => {
             'draftData3'
         )
         expect(draft3.draftRevision?.formData.stateContacts).toEqual(
-            draftRateForm3.stateContacts
+            draftContractForm3.stateContacts
         )
     })
 
