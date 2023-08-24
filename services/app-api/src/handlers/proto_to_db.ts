@@ -88,7 +88,7 @@ export async function migrateRevision(
     const decodedFormDataProto = toDomain(revision.formDataProto)
     if (decodedFormDataProto instanceof Error) {
         const error = new Error(
-            'toDomain: Could not unpack the revision form data proto'
+            `Error in toDomain for ${revision.id}: ${decodedFormDataProto.message}`
         )
         return error
     }
@@ -104,7 +104,7 @@ export async function migrateRevision(
     )
     if (updateInfoResult instanceof Error) {
         const error = new Error(
-            `Error pre-populating UpdateInfoTable for ${revision.id}: ${updateInfoResult}`
+            `Error pre-populating UpdateInfoTable for ${revision.id}: ${updateInfoResult.message}`
         )
         return error
     }
@@ -123,7 +123,7 @@ export async function migrateRevision(
     )
     if (insertContractResult instanceof Error) {
         const error = new Error(
-            `Error creating contract for ${revision.id}: ${insertContractResult}`
+            `Error creating contract for ${revision.id}: ${insertContractResult.message}`
         )
         return error
     }
@@ -135,7 +135,7 @@ export async function migrateRevision(
     )
     if (migrateContractResult instanceof Error) {
         const error = new Error(
-            `Error in migrateContractRevision for ${revision.id}: ${migrateContractResult}`
+            `Error in migrateContractRevision for ${revision.id}: ${migrateContractResult.message}`
         )
         return error
     }
