@@ -128,17 +128,14 @@ export async function migrateRevision(
         return error
     }
 
-    try {
-        const result = await migrateContractRevision(client, revision, formData)
-        if (result instanceof Error) {
-            const error = new Error(
-                `Error inside new block ${revision.id}: ${result.message}`
-            )
-            return error
-        }
-    } catch (err) {
+    const migrateContractResult = await migrateContractRevision(
+        client,
+        revision,
+        formData
+    )
+    if (migrateContractResult instanceof Error) {
         const error = new Error(
-            `caught error in new block ${revision.id}: ${err.message}`
+            `Error in migrateContractRevision for ${revision.id}: ${migrateContractResult}`
         )
         return error
     }
