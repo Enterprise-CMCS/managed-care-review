@@ -1,4 +1,5 @@
 import type { InsertContractArgsType } from './insertContract'
+import type { ContractOrErrorArrayType } from './findAllContractsWithHistoryByState'
 import { insertDraftContract } from './insertContract'
 import { findContractWithHistory } from './findContractWithHistory'
 import { findAllContractsWithHistoryByState } from './findAllContractsWithHistoryByState'
@@ -11,4 +12,4 @@ export {
     findAllContractsWithHistoryBySubmitInfo,
 }
 
-export type { InsertContractArgsType }
+export type { InsertContractArgsType, ContractOrErrorArrayType }

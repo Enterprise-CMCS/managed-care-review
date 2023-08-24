@@ -1,12 +1,12 @@
 import type { PrismaTransactionType } from '../prismaTypes'
-import type { ContractType } from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../storeError'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaSubmittedContractHelpers'
+import type { ContractOrErrorArrayType } from './findAllContractsWithHistoryByState'
 
 async function findAllContractsWithHistoryBySubmitInfo(
     client: PrismaTransactionType
-): Promise<Array<ContractType | Error> | NotFoundError | Error> {
+): Promise<ContractOrErrorArrayType | NotFoundError | Error> {
     try {
         const contracts = await client.contractTable.findMany({
             where: {
@@ -30,8 +30,11 @@ async function findAllContractsWithHistoryBySubmitInfo(
             return new NotFoundError(err)
         }
 
-        const parsedContracts: Array<ContractType | Error> = contracts.map(
-            (contract) => parseContractWithHistory(contract)
+        const parsedContracts: ContractOrErrorArrayType = contracts.map(
+            (contract) => ({
+                contractID: contract.id,
+                contract: parseContractWithHistory(contract),
+            })
         )
 
         return parsedContracts

@@ -4,10 +4,17 @@ import { NotFoundError } from '../storeError'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaSubmittedContractHelpers'
 
+type ContractOrErrorType = {
+    contractID: string
+    contract: ContractType | Error
+}
+
+type ContractOrErrorArrayType = ContractOrErrorType[]
+
 async function findAllContractsWithHistoryByState(
     client: PrismaTransactionType,
     stateCode: string
-): Promise<Array<ContractType | Error> | NotFoundError | Error> {
+): Promise<ContractOrErrorArrayType | NotFoundError | Error> {
     try {
         const contracts = await client.contractTable.findMany({
             where: {
@@ -24,11 +31,14 @@ async function findAllContractsWithHistoryByState(
             return new NotFoundError(err)
         }
 
-        const parsedContracts: Array<ContractType | Error> = contracts.map(
-            (contract) => parseContractWithHistory(contract)
+        const parsedContractsOrErrors: ContractOrErrorArrayType = contracts.map(
+            (contract) => ({
+                contractID: contract.id,
+                contract: parseContractWithHistory(contract),
+            })
         )
 
-        return parsedContracts
+        return parsedContractsOrErrors
     } catch (err) {
         console.error('PRISMA ERROR', err)
         return err
@@ -36,3 +46,4 @@ async function findAllContractsWithHistoryByState(
 }
 
 export { findAllContractsWithHistoryByState }
+export type { ContractOrErrorArrayType }
