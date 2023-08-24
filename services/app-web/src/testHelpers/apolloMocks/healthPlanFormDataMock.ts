@@ -258,7 +258,7 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
                 modifiedNonRiskPaymentArrangements: true,
             },
         },
-        managedCareEntities: ['ENROLLMENT_PROCESS'],
+        managedCareEntities: ['PAHP'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [
             {
@@ -360,7 +360,7 @@ function mockStateSubmissionContractAmendment(): LockedHealthPlanFormDataType {
                 modifiedNonRiskPaymentArrangements: true,
             },
         },
-        managedCareEntities: ['ENROLLMENT_PROCESS'],
+        managedCareEntities: ['PCCM'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [
             {

@@ -59,7 +59,10 @@ export function configureResolvers(
                 store,
                 launchDarkly
             ),
-            updateHealthPlanFormData: updateHealthPlanFormDataResolver(store),
+            updateHealthPlanFormData: updateHealthPlanFormDataResolver(
+                store,
+                launchDarkly
+            ),
             submitHealthPlanPackage: submitHealthPlanPackageResolver(
                 store,
                 emailer,

@@ -287,7 +287,7 @@ const mockContractAndRatesFormData = (
         ],
         contractDateStart: new Date('01/01/2021'),
         contractDateEnd: new Date('01/01/2022'),
-        managedCareEntities: ['ENROLLMENT_PROCESS'],
+        managedCareEntities: ['PCCM'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [
             {
@@ -369,7 +369,7 @@ const mockUnlockedContractAndRatesFormData = (
         ],
         contractDateStart: new Date('01/01/2021'),
         contractDateEnd: new Date('01/01/2022'),
-        managedCareEntities: ['ENROLLMENT_PROCESS'],
+        managedCareEntities: ['PCCM'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [
             {
@@ -451,7 +451,7 @@ const mockUnlockedContractOnlyFormData = (
         ],
         contractDateStart: new Date('01/01/2021'),
         contractDateEnd: new Date('01/01/2022'),
-        managedCareEntities: ['ENROLLMENT_PROCESS'],
+        managedCareEntities: ['PCCM'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [],
         stateContacts: [
@@ -499,7 +499,7 @@ const mockContractOnlyFormData = (
         ],
         contractDateStart: new Date('01/01/2021'),
         contractDateEnd: new Date('01/01/2022'),
-        managedCareEntities: ['ENROLLMENT_PROCESS'],
+        managedCareEntities: ['PCCM'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [],
         stateContacts: [
@@ -547,7 +547,7 @@ const mockContractAmendmentFormData = (
         ],
         contractDateStart: new Date('01/01/2021'),
         contractDateEnd: new Date('01/01/2022'),
-        managedCareEntities: ['ENROLLMENT_PROCESS'],
+        managedCareEntities: ['PCCM'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [
             {

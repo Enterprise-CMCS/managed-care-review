@@ -121,9 +121,7 @@ function convertContractRevisionToHealthPlanRevision(
             addtlActuaryContacts: [],
             documents: contractRev.formData.supportingDocuments.map((doc) => ({
                 ...doc,
-                documentCategories: doc.documentCategories.filter(
-                    (category) => category !== undefined
-                ),
+                documentCategories: ['CONTRACT_RELATED'],
             })) as SubmissionDocument[],
             contractType: contractRev.formData.contractType,
             contractExecutionStatus:
@@ -131,9 +129,7 @@ function convertContractRevisionToHealthPlanRevision(
             contractDocuments: contractRev.formData.contractDocuments.map(
                 (doc) => ({
                     ...doc,
-                    documentCategories: doc.documentCategories.filter(
-                        (category) => category !== undefined
-                    ),
+                    documentCategories: ['CONTRACT'],
                 })
             ) as SubmissionDocument[],
             contractDateStart: contractRev.formData.contractDateStart,
