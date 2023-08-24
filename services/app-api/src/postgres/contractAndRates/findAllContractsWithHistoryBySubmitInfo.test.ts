@@ -96,10 +96,10 @@ describe('findAllContractsWithHistoryBySubmittedAt', () => {
         expect(contracts).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({
-                    id: submittedContractOne.id,
+                    contractID: submittedContractOne.id,
                 }),
                 expect.objectContaining({
-                    id: submittedContractTwo.id,
+                    contractID: submittedContractTwo.id,
                 }),
             ])
         )
@@ -108,7 +108,7 @@ describe('findAllContractsWithHistoryBySubmittedAt', () => {
         expect(contracts).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({
-                    id: unlockedContract.id,
+                    contractID: unlockedContract.id,
                 }),
             ])
         )
@@ -117,10 +117,10 @@ describe('findAllContractsWithHistoryBySubmittedAt', () => {
         expect(contracts).not.toEqual(
             expect.arrayContaining([
                 expect.objectContaining({
-                    id: draftContractOne.id,
+                    contractID: draftContractOne.id,
                 }),
                 expect.objectContaining({
-                    id: draftContractTwo.id,
+                    contractID: draftContractTwo.id,
                 }),
             ])
         )
