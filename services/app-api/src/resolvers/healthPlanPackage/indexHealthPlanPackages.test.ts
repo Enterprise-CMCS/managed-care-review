@@ -17,6 +17,9 @@ import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 
 describe('indexHealthPlanPackages', () => {
+    it.todo(
+        'run all tests with rates-db-refactor on after submit and unlock resolvers have been migrated'
+    )
     const cmsUser = testCMSUser()
     describe('isStateUser', () => {
         it('returns a list of submissions that includes newly created entries', async () => {
