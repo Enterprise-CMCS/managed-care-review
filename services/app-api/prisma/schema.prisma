@@ -195,7 +195,7 @@ model ContractDocument {
   updatedAt          DateTime              @default(now()) @updatedAt
   name               String
   s3URL              String
-  sha256             String?
+  sha256             String
   contractRevisionID String
   contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
 }
@@ -206,7 +206,7 @@ model ContractSupportingDocument {
   updatedAt          DateTime              @default(now()) @updatedAt
   name               String
   s3URL              String
-  sha256             String?
+  sha256             String
   contractRevisionID String
   contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
 }
@@ -217,7 +217,7 @@ model RateDocument {
   updatedAt      DateTime          @default(now()) @updatedAt
   name           String
   s3URL          String
-  sha256         String?
+  sha256         String
   rateRevisionID String
   rateRevision   RateRevisionTable @relation(fields: [rateRevisionID], references: [id])
 }
@@ -228,7 +228,7 @@ model RateSupportingDocument {
   updatedAt      DateTime          @default(now()) @updatedAt
   name           String
   s3URL          String
-  sha256         String?
+  sha256         String
   rateRevisionID String
   rateRevision   RateRevisionTable @relation(fields: [rateRevisionID], references: [id])
 }

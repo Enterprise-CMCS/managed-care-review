@@ -38,6 +38,7 @@ const submissionDocumentSchema = z.object({
             .optional()
     ),
     sha256: z.string().optional(),
+    id: z.string().optional() // doesn't exist for newly created
 })
 
 const contractAmendmentInfoSchema = z.object({

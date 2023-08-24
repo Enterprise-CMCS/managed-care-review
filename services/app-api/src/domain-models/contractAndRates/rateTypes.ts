@@ -20,7 +20,6 @@ const draftRateSchema = rateSchema.extend({
     revisions: z.array(rateRevisionWithContractsSchema).min(1),
 })
 type RateType = z.infer<typeof rateSchema>
-
 export {
     rateRevisionSchema,
     rateRevisionWithContractsSchema,
