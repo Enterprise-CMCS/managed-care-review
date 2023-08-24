@@ -28,8 +28,16 @@ async function main() {
     // get the latest commit in the branch to see if we are forcing a run
     const latestCommit = await getLatestCommitSHA()
     const commitMessage = await getLatestCommitMessage(latestCommit)
+
+    // force a complete CI run
     if (commitMessage.includes('ci-force-run')) {
         core.setOutput('changed-services', deployAllServices)
+        return
+    }
+
+    // force just a cypress re-run
+    if (commitMessage.includes('cypress re-run')) {
+        core.setOutput('changed-services', [])
         return
     }
 
