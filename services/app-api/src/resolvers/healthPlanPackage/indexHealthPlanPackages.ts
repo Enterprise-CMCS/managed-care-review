@@ -49,13 +49,13 @@ const validateAndReturnHealthPlanPackages = (
 }
 
 const validateContractsAndConvert = (
-    parsedContractsOrErrors: ContractOrErrorArrayType,
+    contractsWithHistory: ContractOrErrorArrayType,
     span?: Span
 ): HealthPlanPackageType[] => {
     // separate valid contracts and errors
     const parsedContracts: ContractType[] = []
     const errorParseContracts: string[] = []
-    parsedContractsOrErrors.forEach((parsed) => {
+    contractsWithHistory.forEach((parsed) => {
         if (parsed.contract instanceof Error) {
             errorParseContracts.push(parsed.contractID)
         } else {
@@ -72,10 +72,9 @@ const validateContractsAndConvert = (
         setErrorAttributesOnActiveSpan(errMessage, span)
     }
 
-    // convert contract type to health plan package type
+    // convert contract type to health plan package type and filter out failures
     const convertedContracts: HealthPlanPackageType[] = []
     const errorConvertContracts: string[] = []
-    // convert all valid contracts to HPP type
     parsedContracts.forEach((contract) => {
         const parsedContract =
             convertContractToUnlockedHealthPlanPackage(contract)
@@ -120,7 +119,7 @@ export function indexHealthPlanPackagesResolver(
                     )
 
                 if (contractsWithHistory instanceof Error) {
-                    const errMessage = `Issue finding a contract with history by stateCode: ${user.stateCode}. Message: ${contractsWithHistory.message}`
+                    const errMessage = `Issue finding contracts with history by stateCode: ${user.stateCode}. Message: ${contractsWithHistory.message}`
                     logError('fetchHealthPlanPackage', errMessage)
                     setErrorAttributesOnActiveSpan(errMessage, span)
 
@@ -154,7 +153,37 @@ export function indexHealthPlanPackagesResolver(
             isAdminUser(user) ||
             isHelpdeskUser(user)
         ) {
-            const results = await store.findAllHealthPlanPackagesBySubmittedAt()
+            let results: StoreError | HealthPlanPackageType[] = []
+            if (ratesDatabaseRefactor) {
+                const contractsWithHistory =
+                    await store.findAllContractsWithHistoryBySubmitInfo()
+
+                if (contractsWithHistory instanceof Error) {
+                    const errMessage = `Issue finding contracts with history by submit info. Message: ${contractsWithHistory.message}`
+                    logError('fetchHealthPlanPackage', errMessage)
+                    setErrorAttributesOnActiveSpan(errMessage, span)
+
+                    if (contractsWithHistory instanceof NotFoundError) {
+                        throw new GraphQLError(errMessage, {
+                            extensions: {
+                                code: 'NOT_FOUND',
+                                cause: 'DB_ERROR',
+                            },
+                        })
+                    }
+
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
+                }
+
+                results = validateContractsAndConvert(contractsWithHistory)
+            } else {
+                results = await store.findAllHealthPlanPackagesBySubmittedAt()
+            }
 
             return validateAndReturnHealthPlanPackages(results, span)
         } else {
