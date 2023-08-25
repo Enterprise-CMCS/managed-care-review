@@ -116,7 +116,8 @@ const createContractRevision = (
     supportingDocuments: [
         {
             id: uuidv4(),
-            contractRevisionID: 'contractRevisionID',
+            contractDocumentRevisionID: 'contractDocRevisionID',
+            supportingDocumentRevisionID: 'contractSupportingRevisionID',
             createdAt: new Date(),
             updatedAt: new Date(),
             name: 'contract supporting doc',
@@ -125,7 +126,8 @@ const createContractRevision = (
         },
         {
             id: uuidv4(),
-            contractRevisionID: 'contractRevisionID',
+            contractDocumentRevisionID: 'contractDocRevisionID',
+            supportingDocumentRevisionID: 'contractSupportingRevisionID',
             createdAt: new Date(),
             updatedAt: new Date(),
             name: 'contract supporting doc 2',
@@ -138,7 +140,8 @@ const createContractRevision = (
     contractDocuments: [
         {
             id: uuidv4(),
-            contractRevisionID: 'contractRevisionID',
+            contractDocumentRevisionID: 'contractDocRevisionID',
+            supportingDocumentRevisionID: 'contractSupportingRevisionID',
             createdAt: new Date(),
             updatedAt: new Date(),
             name: 'contract doc',

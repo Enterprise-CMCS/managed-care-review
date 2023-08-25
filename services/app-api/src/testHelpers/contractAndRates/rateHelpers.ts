@@ -1,15 +1,17 @@
-
 import { must } from '../errorHelpers'
 import { v4 as uuidv4 } from 'uuid'
-import type { PrismaClient,State } from '@prisma/client'
+import type { PrismaClient, State } from '@prisma/client'
 import type { InsertRateArgsType } from '../../postgres/contractAndRates/insertRate'
-import type { RateTableFullPayload, RateRevisionTableWithContracts } from '../../postgres/contractAndRates/prismaSubmittedRateHelpers'
+import type {
+    RateTableFullPayload,
+    RateRevisionTableWithContracts,
+} from '../../postgres/contractAndRates/prismaSubmittedRateHelpers'
 const createInsertRateData = (
     rateArgs?: Partial<InsertRateArgsType>
 ): InsertRateArgsType => {
     return {
         stateCode: rateArgs?.stateCode ?? 'MN',
-        ...rateArgs
+        ...rateArgs,
     }
 }
 
@@ -34,7 +36,7 @@ const getStateRecord = async (
 
 const createDraftRateData = (
     rate?: Partial<RateTableFullPayload>
-): RateTableFullPayload=> ({
+): RateTableFullPayload => ({
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -66,11 +68,8 @@ const createRateData = (
 })
 
 const createRateRevision = (
-    revision?: Partial<
-    RateRevisionTableWithContracts
-    >
-):
-    RateRevisionTableWithContracts => ({
+    revision?: Partial<RateRevisionTableWithContracts>
+): RateRevisionTableWithContracts => ({
     id: uuidv4(),
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -95,7 +94,7 @@ const createRateRevision = (
     submitInfoID: null,
     unlockInfoID: null,
     rateType: 'NEW',
-    rateID:  'rateID',
+    rateID: 'rateID',
     rateCertificationName: 'testState-123',
     rateProgramIDs: ['Program'],
     rateCapitationType: 'RATE_CELL',
@@ -110,7 +109,8 @@ const createRateRevision = (
     supportingDocuments: [
         {
             id: uuidv4(),
-            rateRevisionID: 'rateRevisionID',
+            rateDocumentRevisionID: 'rateDocRevisionID',
+            supportingDocumentRevisionID: 'rateSupportingRevisionID',
             createdAt: new Date(),
             updatedAt: new Date(),
             name: 'rate supporting doc',
@@ -119,7 +119,8 @@ const createRateRevision = (
         },
         {
             id: uuidv4(),
-            rateRevisionID: 'rateRevisionID',
+            rateDocumentRevisionID: 'rateDocRevisionID',
+            supportingDocumentRevisionID: 'rateSupportingRevisionID',
             createdAt: new Date(),
             updatedAt: new Date(),
             name: 'rate supporting doc 2',
@@ -130,7 +131,8 @@ const createRateRevision = (
     rateDocuments: [
         {
             id: uuidv4(),
-            rateRevisionID: 'rateRevisionID',
+            rateDocumentRevisionID: 'rateDocRevisionID',
+            supportingDocumentRevisionID: 'rateSupportingRevisionID',
             createdAt: new Date(),
             updatedAt: new Date(),
             name: 'contract doc',
