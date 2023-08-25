@@ -116,6 +116,7 @@ const createRateRevision = (
             name: 'rate supporting doc',
             s3URL: 'fakeS3URL',
             sha256: '2342fwlkdmwvw',
+            display_seq: null,
         },
         {
             id: uuidv4(),
@@ -126,6 +127,7 @@ const createRateRevision = (
             name: 'rate supporting doc 2',
             s3URL: 'fakeS3URL',
             sha256: '45662342fwlkdmwvw',
+            display_seq: null,
         },
     ],
     rateDocuments: [
@@ -138,6 +140,7 @@ const createRateRevision = (
             name: 'contract doc',
             s3URL: 'fakeS3URL',
             sha256: '8984234fwlkdmwvw',
+            display_seq: null,
         },
     ],
     contractRevisions: [],

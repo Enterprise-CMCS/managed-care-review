@@ -123,6 +123,7 @@ const createContractRevision = (
             name: 'contract supporting doc',
             s3URL: 'fakeS3URL',
             sha256: '2342fwlkdmwvw',
+            display_seq: null,
         },
         {
             id: uuidv4(),
@@ -133,6 +134,7 @@ const createContractRevision = (
             name: 'contract supporting doc 2',
             s3URL: 'fakeS3URL',
             sha256: '45662342fwlkdmwvw',
+            display_seq: null,
         },
     ],
     contractType: 'BASE',
@@ -147,6 +149,7 @@ const createContractRevision = (
             name: 'contract doc',
             s3URL: 'fakeS3URL',
             sha256: '8984234fwlkdmwvw',
+            display_seq: null,
         },
     ],
     contractDateStart: new Date(Date.UTC(2025, 5, 1)),
