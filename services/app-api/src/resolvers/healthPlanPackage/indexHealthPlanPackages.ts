@@ -57,7 +57,9 @@ const validateContractsAndConvert = (
     const errorParseContracts: string[] = []
     contractsWithHistory.forEach((parsed) => {
         if (parsed.contract instanceof Error) {
-            errorParseContracts.push(parsed.contractID)
+            errorParseContracts.push(
+                `${parsed.contractID}: ${parsed.contract.message}`
+            )
         } else {
             parsedContracts.push(parsed.contract)
         }
@@ -79,7 +81,9 @@ const validateContractsAndConvert = (
         const parsedContract =
             convertContractToUnlockedHealthPlanPackage(contract)
         if (parsedContract instanceof Error) {
-            errorConvertContracts.push(contract.id)
+            errorConvertContracts.push(
+                `${contract.id}: ${parsedContract.message}`
+            )
         } else {
             convertedContracts.push(parsedContract)
         }
