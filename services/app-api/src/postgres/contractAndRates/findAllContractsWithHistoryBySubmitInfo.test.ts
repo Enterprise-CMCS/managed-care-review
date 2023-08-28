@@ -6,7 +6,7 @@ import { insertDraftContract } from './insertContract'
 import { submitContract } from './submitContract'
 import { unlockContract } from './unlockContract'
 
-describe('findAllContractsWithHistoryBySubmittedAt', () => {
+describe('findAllContractsWithHistoryBySubmittedInfo', () => {
     it('returns only contracts that have been submitted or unlocked', async () => {
         const client = await sharedTestPrismaClient()
         const stateUser = await client.user.create({
