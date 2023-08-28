@@ -137,7 +137,13 @@ export async function migrateRevision(
 
     /* My confidence in the join table and document strategies is lower than for the other tables.
         I think these are worth reviewing carefully as a team */
-    await migrateAssociations(client)
+    const migrateAssociationsResult = await migrateAssociations(client)
+    if (migrateAssociationsResult instanceof Error) {
+        const error = new Error(
+            `Error creating associations for revision ${revision.id}: ${migrateAssociationsResult.message}`
+        )
+        return error
+    }
 
     /* The ContractRevisionID and the RateRevisionID in the document tables
         are foreign keys to the id fields in their respective revision tables. 
