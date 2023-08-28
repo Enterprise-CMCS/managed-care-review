@@ -383,7 +383,7 @@ describe('indexHealthPlanPackages test rates-db-refactor flag on only', () => {
         jest.restoreAllMocks()
     })
 
-    it('correctly filters and log contracts that failed parsing', async () => {
+    it('correctly filters and log contracts that failed parsing or converting', async () => {
         const mockFeatureFlag = testLDService({ 'rates-db-refactor': true })
         const client = await sharedTestPrismaClient()
         const errors = jest.spyOn(global.console, 'error').mockImplementation()
