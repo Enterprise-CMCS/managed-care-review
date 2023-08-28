@@ -22,6 +22,7 @@ import { NewPostgresStore } from '../postgres/postgresStore'
 import type { Store } from '../postgres'
 import type { HealthPlanRevisionTable } from '@prisma/client'
 import { PrismaClient } from '@prisma/client'
+import type { ContractTable, ContractRevisionTable } from '@prisma/client'
 import type { StoreError } from '../postgres/storeError'
 import { isStoreError } from '../postgres/storeError'
 import { migrateContractRevision } from '../postgres/contractAndRates/proto_to_db_ContractRevisions'
@@ -33,10 +34,7 @@ import { prepopulateUpdateInfo } from '../postgres/contractAndRates/proto_to_db_
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import type { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 
-export const getDatabaseConnection = async (): Promise<{
-    store: Store
-    client: PrismaClient
-}> => {
+export const getDatabaseConnection = async (): Promise<Store> => {
     const dbURL = process.env.DATABASE_URL
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
 
@@ -58,9 +56,9 @@ export const getDatabaseConnection = async (): Promise<{
         console.info('Postgres configured in data exporter')
     }
     const store = NewPostgresStore(pgResult)
-    const client = new PrismaClient()
+    //const client = new PrismaClient()
 
-    return { store, client }
+    return store
 }
 
 export const getRevisions = async (
@@ -83,6 +81,7 @@ export async function migrateRevision(
     revision: HealthPlanRevisionTable
 ): Promise<undefined | Error> {
     /* The order in which we call the helpers in this file matters */
+    console.info(`Migration of revision ${revision.id} started...`)
 
     // decode the proto
     const decodedFormDataProto = toDomain(revision.formDataProto)
@@ -109,35 +108,14 @@ export async function migrateRevision(
         return error
     }
 
-    /* The field 'contractId' in the ContractRevisionTable matches the field 'id' in the ContractTable
-        so the ContractTable has to be populated before the revisions can be inserted
-        Note two things:
-        1. This value is originally the pkgID in the HealthPlanRevisionTable
-        2. So it's really acting as a foreign key that ties many of these tables together
-        3. I think this is working as I expected, but if something goes very wrong
-        somewhere along the line, look here first.  */
-    const insertContractResult = await insertContractId(
-        client,
-        revision,
-        formData
-    )
-    if (insertContractResult instanceof Error) {
-        const error = new Error(
-            `Error creating contract for ${revision.id}: ${insertContractResult.message}`
-        )
-        return error
-    }
-
-    const migrateContractResult = await migrateContractRevision(
+    // migrate the contract part
+    const migrateContractResult = await migrateContract(
         client,
         revision,
         formData
     )
     if (migrateContractResult instanceof Error) {
-        const error = new Error(
-            `Error in migrateContractRevision for ${revision.id}: ${migrateContractResult.message}`
-        )
-        return error
+        return migrateContractResult
     }
 
     /* Just as with the Contract and ContractRevision tables noted above, we take the
@@ -179,6 +157,55 @@ export async function migrateRevision(
     }
 }
 
+type ContractMigrationResult =
+    | {
+          contract: ContractTable
+          contractRevision: ContractRevisionTable
+      }
+    | Error
+
+async function migrateContract(
+    client: PrismaClient,
+    revision: HealthPlanRevisionTable,
+    formData: HealthPlanFormDataType
+): Promise<ContractMigrationResult> {
+    /* The field 'contractId' in the ContractRevisionTable matches the field 'id' in the ContractTable
+        so the ContractTable has to be populated before the revisions can be inserted
+        Note two things:
+        1. This value is originally the pkgID in the HealthPlanRevisionTable
+        2. So it's really acting as a foreign key that ties many of these tables together
+        3. I think this is working as I expected, but if something goes very wrong
+        somewhere along the line, look here first.  */
+    const insertContractResult = await insertContractId(
+        client,
+        revision,
+        formData
+    )
+    if (insertContractResult instanceof Error) {
+        const error = new Error(
+            `Error creating contract for ${revision.id}: ${insertContractResult.message}`
+        )
+        return error
+    }
+
+    const migrateContractResult = await migrateContractRevision(
+        client,
+        revision,
+        formData
+    )
+    if (migrateContractResult instanceof Error) {
+        const error = new Error(
+            `Error in migrateContractRevision for ${revision.id}: ${migrateContractResult.message}`
+        )
+        return error
+    }
+
+    return {
+        contract: insertContractResult,
+        contractRevision: migrateContractResult,
+    }
+}
+
 export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // setup otel tracing
     const stageName = process.env.stage ?? 'stageNotSet'
@@ -192,7 +219,9 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
         )
     }
 
-    const { store, client } = await getDatabaseConnection()
+    // setup db connections and get revisions
+    const store = await getDatabaseConnection()
+    const client = new PrismaClient()
     const revisions = await getRevisions(store)
 
     // go through the list of revisons and migrate
