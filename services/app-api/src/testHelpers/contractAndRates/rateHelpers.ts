@@ -1,50 +1,37 @@
-
-import { must } from '../errorHelpers'
 import { v4 as uuidv4 } from 'uuid'
-import type { PrismaClient,State } from '@prisma/client'
 import type { InsertRateArgsType } from '../../postgres/contractAndRates/insertRate'
-import type { RateTableFullPayload, RateRevisionTableWithContracts } from '../../postgres/contractAndRates/prismaSubmittedRateHelpers'
+import type {
+    RateTableFullPayload,
+    RateRevisionTableWithContracts,
+} from '../../postgres/contractAndRates/prismaSubmittedRateHelpers'
+import { getProgramsFromState } from './contractHelpers'
+import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+
 const createInsertRateData = (
     rateArgs?: Partial<InsertRateArgsType>
 ): InsertRateArgsType => {
     return {
         stateCode: rateArgs?.stateCode ?? 'MN',
-        ...rateArgs
+        ...rateArgs,
     }
-}
-
-const getStateRecord = async (
-    client: PrismaClient,
-    stateCode: string
-): Promise<State> => {
-    const state = must(
-        await client.state.findFirst({
-            where: {
-                stateCode,
-            },
-        })
-    )
-
-    if (!state) {
-        throw new Error('Unexpected prisma error: state record not found')
-    }
-
-    return state
 }
 
 const createDraftRateData = (
     rate?: Partial<RateTableFullPayload>
-): RateTableFullPayload=> ({
+): RateTableFullPayload => ({
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
     createdAt: new Date(),
     updatedAt: new Date(),
-    stateCode: 'FL',
+    stateCode: 'MN',
     stateNumber: 111,
     revisions: rate?.revisions ?? [
-        createRateRevision({
-            contractRevisions: undefined,
-            submitInfo: null,
-        }) as RateRevisionTableWithContracts,
+        createRateRevision(
+            {
+                contractRevisions: undefined,
+                submitInfo: null,
+            },
+            rate?.stateCode as StateCodeType
+        ) as RateRevisionTableWithContracts,
     ],
     ...rate,
 })
@@ -55,22 +42,23 @@ const createRateData = (
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
     createdAt: new Date(),
     updatedAt: new Date(),
-    stateCode: 'FL',
+    stateCode: 'MN',
     stateNumber: 111,
     revisions: rate?.revisions ?? [
-        createRateRevision({
-            draftContracts: undefined,
-        }) as RateRevisionTableWithContracts,
+        createRateRevision(
+            {
+                draftContracts: undefined,
+            },
+            rate?.stateCode as StateCodeType
+        ) as RateRevisionTableWithContracts,
     ],
     ...rate,
 })
 
 const createRateRevision = (
-    revision?: Partial<
-    RateRevisionTableWithContracts
-    >
-):
-    RateRevisionTableWithContracts => ({
+    revision?: Partial<RateRevisionTableWithContracts>,
+    stateCode: StateCodeType = 'MN'
+): RateRevisionTableWithContracts => ({
     id: uuidv4(),
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -88,16 +76,16 @@ const createRateRevision = (
             email: 'boblaw@example.com',
             role: 'STATE_USER',
             divisionAssignment: null,
-            stateCode: 'OH',
+            stateCode: stateCode,
         },
     },
     unlockInfo: null,
     submitInfoID: null,
     unlockInfoID: null,
     rateType: 'NEW',
-    rateID:  'rateID',
+    rateID: 'rateID',
     rateCertificationName: 'testState-123',
-    rateProgramIDs: ['Program'],
+    rateProgramIDs: [getProgramsFromState(stateCode)[0].id],
     rateCapitationType: 'RATE_CELL',
     rateDateStart: new Date(),
     rateDateEnd: new Date(),
@@ -145,7 +133,6 @@ const createRateRevision = (
 
 export {
     createInsertRateData,
-    getStateRecord,
     createRateRevision,
     createRateData,
     createDraftRateData,

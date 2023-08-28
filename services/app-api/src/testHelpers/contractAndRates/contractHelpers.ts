@@ -9,20 +9,30 @@ import type {
 } from '../../postgres/contractAndRates/prismaSubmittedContractHelpers'
 import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 import type { ContractFormDataType } from '../../domain-models/contractAndRates'
+import type { ProgramType } from '../../domain-models'
+import statePrograms from 'app-web/src/common-code/data/statePrograms.json'
+
+function getProgramsFromState(stateCode: StateCodeType): ProgramType[] {
+    const state = statePrograms.states.find((st) => st.code === stateCode)
+
+    return state?.programs || []
+}
 
 const createInsertContractData = ({
-    stateCode,
+    stateCode = 'MN',
     ...formData
 }: {
     stateCode?: StateCodeType
 } & Partial<ContractFormDataType>): InsertContractArgsType => {
     return {
-        stateCode: stateCode ?? 'MN',
+        stateCode: stateCode,
         submissionType: formData?.submissionType ?? 'CONTRACT_AND_RATES',
         submissionDescription:
             formData?.submissionDescription ?? 'Contract 1.0',
         contractType: formData?.contractType ?? 'BASE',
-        programIDs: formData?.programIDs ?? ['PMAP'],
+        programIDs: formData?.programIDs ?? [
+            getProgramsFromState(stateCode ?? 'MN')[0].id,
+        ],
         populationCovered: formData?.populationCovered ?? 'MEDICAID',
         riskBasedContract: formData?.riskBasedContract ?? false,
     }
@@ -53,13 +63,16 @@ const createDraftContractData = (
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
     createdAt: new Date(),
     updatedAt: new Date(),
-    stateCode: 'FL',
+    stateCode: 'MN',
     stateNumber: 111,
     revisions: contract?.revisions ?? [
-        createContractRevision({
-            rateRevisions: undefined,
-            submitInfo: null,
-        }) as ContractRevisionTableWithRates,
+        createContractRevision(
+            {
+                rateRevisions: undefined,
+                submitInfo: null,
+            },
+            contract?.stateCode as StateCodeType
+        ) as ContractRevisionTableWithRates,
     ],
     ...contract,
 })
@@ -70,18 +83,22 @@ const createContractData = (
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
     createdAt: new Date(),
     updatedAt: new Date(),
-    stateCode: 'FL',
+    stateCode: 'MN',
     stateNumber: 111,
     revisions: contract?.revisions ?? [
-        createContractRevision({
-            draftRates: undefined,
-        }) as ContractRevisionTableWithRates,
+        createContractRevision(
+            {
+                draftRates: undefined,
+            },
+            contract?.stateCode as StateCodeType
+        ) as ContractRevisionTableWithRates,
     ],
     ...contract,
 })
 
 const createContractRevision = (
-    revision?: Partial<ContractRevisionTableWithRates>
+    revision?: Partial<ContractRevisionTableWithRates>,
+    stateCode: StateCodeType = 'MN'
 ): ContractRevisionTableWithRates => ({
     id: uuidv4(),
     createdAt: new Date(),
@@ -100,14 +117,14 @@ const createContractRevision = (
             email: 'boblaw@example.com',
             role: 'STATE_USER',
             divisionAssignment: null,
-            stateCode: 'OH',
+            stateCode: stateCode,
         },
     },
     unlockInfo: null,
     contractID: 'contractID',
     submitInfoID: null,
     unlockInfoID: null,
-    programIDs: ['Program'],
+    programIDs: [getProgramsFromState(stateCode)[0].id],
     populationCovered: 'MEDICAID' as const,
     submissionType: 'CONTRACT_ONLY' as const,
     riskBasedContract: false,
@@ -178,4 +195,5 @@ export {
     createContractRevision,
     createContractData,
     createDraftContractData,
+    getProgramsFromState,
 }
