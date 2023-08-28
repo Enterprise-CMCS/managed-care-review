@@ -45,12 +45,11 @@ describe('findContract', () => {
             await insertDraftContract(client, draftContractData)
         )
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'initial submit'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'initial submit',
+            })
         )
 
         // Add 3 rates 1, 2, 3 pointing to contract A
@@ -166,12 +165,11 @@ describe('findContract', () => {
             )
         )
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'Submitting A.1'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Submitting A.1',
+            })
         )
 
         // Now, find that contract and assert the history is what we expected
@@ -193,8 +191,7 @@ describe('findContract', () => {
             )
         )
         must(
-            await updateDraftContract(
-                client,{
+            await updateDraftContract(client, {
                 contractID: contractA.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -204,16 +201,15 @@ describe('findContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate3.id]}
-            )
+                rateIDs: [rate3.id],
+            })
         )
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'Submitting A.2'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Submitting A.2',
+            })
         )
 
         // Now, find that contract and assert the history is what we expected
@@ -351,12 +347,11 @@ describe('findContract', () => {
             await insertDraftContract(client, draftContractData)
         )
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'initial submit'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'initial submit',
+            })
         )
 
         // Add 3 rates 1, 2, 3 pointing to contract A
@@ -448,12 +443,11 @@ describe('findContract', () => {
             )
         )
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'Submitting A.1'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Submitting A.1',
+            })
         )
 
         // Make a new Contract Revision, changing the connections should show up as a single new rev.
@@ -466,8 +460,7 @@ describe('findContract', () => {
             )
         )
         must(
-            await updateDraftContract(
-                client,{
+            await updateDraftContract(client, {
                 contractID: contractA.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -477,16 +470,15 @@ describe('findContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate3.id]}
-            )
+                rateIDs: [rate3.id],
+            })
         )
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'Submitting A.2'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Submitting A.2',
+            })
         )
 
         // Now, find that contract and assert the history is what we expected
@@ -613,10 +605,8 @@ describe('findContract', () => {
             await insertDraftContract(client, draftContractData)
         )
         must(
-            await updateDraftContract(
-                client,
-                {
-                    contractID: contractA.id,
+            await updateDraftContract(client, {
+                contractID: contractA.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'one contract',
@@ -625,16 +615,15 @@ describe('findContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate1.id, rate2.id]
-            }
-        ))
+                rateIDs: [rate1.id, rate2.id],
+            })
+        )
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'initial submit'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'initial submit',
+            })
         )
 
         // Unlock contract A, but don't resubmit it yet.
@@ -695,21 +684,19 @@ describe('findContract', () => {
 
         // submit contract A1, now, should show up as a single new rev and have the latest rates
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'third submit'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'third submit',
+            })
         )
 
         // attempt a second submission, should result in an error.
-        const contractA_1_Error = await submitContract(
-            client,
-            contractA.id,
-            stateUser.id,
-            'third submit'
-        )
+        const contractA_1_Error = await submitContract(client, {
+            contractID: contractA.id,
+            submittedByUserID: stateUser.id,
+            submitReason: 'third submit',
+        })
         if (!(contractA_1_Error instanceof Error)) {
             throw new Error('Should be impossible to submit twice in a row.')
         }

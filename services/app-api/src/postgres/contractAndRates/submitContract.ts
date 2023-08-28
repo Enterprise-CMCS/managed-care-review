@@ -2,22 +2,28 @@ import type { PrismaClient } from '@prisma/client'
 import type { ContractType } from '../../domain-models/contractAndRates'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../storeError'
+import type { UpdateInfoType } from '../../domain-models'
+import { includeFirstSubmittedRateRev } from './prismaSubmittedRateHelpers'
 
+type SubmitContractArgsType = {
+    contractID: string
+    submittedByUserID: UpdateInfoType['updatedBy']
+    submitReason: UpdateInfoType['updatedReason']
+}
 // Update the given revision
-// * invalidate relationships of previous revision
-// * set the ActionInfo
+// * invalidate relationships of previous revision by marking as outdated
+// * set the UpdateInfo
 async function submitContract(
     client: PrismaClient,
-    contractID: string,
-    submittedByUserID: string,
-    submitReason: string
+    args: SubmitContractArgsType
 ): Promise<ContractType | NotFoundError | Error> {
-    const groupTime = new Date()
+    const { contractID, submittedByUserID, submitReason } = args
+    const currentDateTime = new Date()
 
     try {
+        // Find current contract revision with associated rates
+        // query only the submitted revisions on the associated rates
         return await client.$transaction(async (tx) => {
-            // Given all the Rates associated with this draft, find the most recent submitted
-            // rateRevision to attach to this contract on submit.
             const currentRev = await tx.contractRevisionTable.findFirst({
                 where: {
                     contractID: contractID,
@@ -25,17 +31,7 @@ async function submitContract(
                 },
                 include: {
                     draftRates: {
-                        include: {
-                            revisions: {
-                                where: {
-                                    submitInfoID: { not: null },
-                                },
-                                take: 1,
-                                orderBy: {
-                                    createdAt: 'desc',
-                                },
-                            },
-                        },
+                        include: includeFirstSubmittedRateRev,
                     },
                 },
             })
@@ -46,17 +42,19 @@ async function submitContract(
                 return new NotFoundError(err)
             }
 
-            const submittedRateRevisions = currentRev.draftRates.map(
-                (c) => c.revisions[0]
+            // Given associated rates, confirm rates valid by submitted by checking for revisions
+            // If rates have no revisions, we know it is invalid and can throw error
+            const associatedRateRevisionIDs = currentRev.draftRates.map(
+                (c) => c.revisions[0]?.id
             )
-
-            if (submittedRateRevisions.some((rev) => rev === undefined)) {
-                console.error(
-                    'Attempted to submit a contract related to a rate that has not been submitted'
-                )
-                return new Error(
-                    'Attempted to submit a contract related to a rate that has not been submitted'
-                )
+            const invalidRateRevisions = associatedRateRevisionIDs.find(
+                (rev) => rev === undefined
+            )
+            if (invalidRateRevisions) {
+                const message =
+                    'Attempted to submit a contract related to a rate that has not been submitted.'
+                console.error(message)
+                return new Error(message)
             }
 
             const updated = await tx.contractRevisionTable.update({
@@ -66,16 +64,16 @@ async function submitContract(
                 data: {
                     submitInfo: {
                         create: {
-                            updatedAt: groupTime,
+                            updatedAt: currentDateTime,
                             updatedByID: submittedByUserID,
                             updatedReason: submitReason,
                         },
                     },
                     rateRevisions: {
                         createMany: {
-                            data: submittedRateRevisions.map((rev) => ({
-                                rateRevisionID: rev.id,
-                                validAfter: groupTime,
+                            data: associatedRateRevisionIDs.map((id) => ({
+                                rateRevisionID: id,
+                                validAfter: currentDateTime,
                             })),
                         },
                     },
@@ -90,7 +88,7 @@ async function submitContract(
             })
 
             // oldRev is the previously submitted revision of this contract (the one just superseded by the update)
-            // get the previous revision, to invalidate all relationships and add any removed entries to the join table.
+            // on an initial submission, there won't be an oldRev
             const oldRev = await tx.contractRevisionTable.findFirst({
                 where: {
                     contractID: updated.contractID,
@@ -110,11 +108,10 @@ async function submitContract(
                 },
             })
 
-            // on an initial submission, there won't be an oldRev
-            // validUntil: null means it's current.  we invalidate the joins on the old revision by giving it a validUntil value
+            // Take oldRev, invalidate all relationships and add any removed entries to the join table.
             if (oldRev) {
-                // if any of the old rev's Rates aren't in the new Rates, add an entry
-                // entry is for a previous rate to this new contractRev.
+                // If any of the old rev's Rates aren't in the new Rates, add an entry in revisions join table
+                // isRemoval field shows that this is a previous rate associated with this contract that is now removed
                 const oldRateRevs = oldRev.rateRevisions
                     .filter((rrevjoin) => !rrevjoin.validUntil)
                     .map((rrevjoin) => rrevjoin.rateRevision)
@@ -130,21 +127,22 @@ async function submitContract(
                         data: removedRateRevs.map((rrev) => ({
                             contractRevisionID: updated.id,
                             rateRevisionID: rrev.id,
-                            validAfter: groupTime,
-                            validUntil: groupTime,
+                            validAfter: currentDateTime,
+                            validUntil: currentDateTime,
                             isRemoval: true,
                         })),
                     })
                 }
 
-                // invalidate all revisions associated with the previous rev
+                // Invalidate all revisions associated with the previous rev by updating validUntil
+                // these revisions are considered outdated going forward
                 await tx.rateRevisionsOnContractRevisionsTable.updateMany({
                     where: {
                         contractRevisionID: oldRev.id,
                         validUntil: null,
                     },
                     data: {
-                        validUntil: groupTime,
+                        validUntil: currentDateTime,
                     },
                 })
             }
@@ -152,7 +150,7 @@ async function submitContract(
             return await findContractWithHistory(tx, contractID)
         })
     } catch (err) {
-        console.error('SUBMIT PRISMA CONTRACT ERR', err)
+        console.error('Prisma error submitting contract', err)
         return err
     }
 }

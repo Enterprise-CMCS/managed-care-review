@@ -24,12 +24,11 @@ describe('submitContract', () => {
         })
 
         // submitting before there's a draft should be an error
-        const submitError = await submitContract(
-            client,
-            '1111',
-            '1111',
-            'failed submit'
-        )
+        const submitError = await submitContract(client, {
+            contractID: '1111',
+            submittedByUserID: '1111',
+            submitReason: 'failed submit',
+        })
         expect(submitError).toBeInstanceOf(NotFoundError)
 
         // create a draft contract
@@ -41,12 +40,11 @@ describe('submitContract', () => {
         )
         // submit the draft contract
         const result = must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'initial submit'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'initial submit',
+            })
         )
         expect(result.revisions[0].submitInfo?.updatedReason).toBe(
             'initial submit'
@@ -66,12 +64,11 @@ describe('submitContract', () => {
             })
         )
 
-        const resubmitStoreError = await submitContract(
-            client,
-            contractA.id,
-            stateUser.id,
-            'initial submit'
-        )
+        const resubmitStoreError = await submitContract(client, {
+            contractID: contractA.id,
+            submittedByUserID: stateUser.id,
+            submitReason: 'initial submit',
+        })
 
         // resubmitting should be a store error
         expect(resubmitStoreError).toBeInstanceOf(NotFoundError)
@@ -111,12 +108,11 @@ describe('submitContract', () => {
 
         // submit the first draft contract
         const submittedContractA = must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'initial submit'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'initial submit',
+            })
         )
 
         // submit the first draft rate
@@ -163,12 +159,11 @@ describe('submitContract', () => {
 
         // submit the second draft contract
         must(
-            await submitContract(
-                client,
-                contractASecondRevision.id,
-                stateUser.id,
-                'second submit'
-            )
+            await submitContract(client, {
+                contractID: contractASecondRevision.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'second submit',
+            })
         )
 
         /* now that the second contract revision has been submitted, the first contract revision should be invalidated.

@@ -365,12 +365,11 @@ describe.each(flagValueTestParameters)(
                         },
                     })
                     return must(
-                        await submitContract(
-                            client,
-                            createdDraft.id,
-                            stateUser.id,
-                            'Submission'
-                        )
+                        await submitContract(client, {
+                            contractID: createdDraft.id,
+                            submittedByUserID: stateUser.id,
+                            submitReason: 'Submission',
+                        })
                     )
                 } else {
                     return await createAndSubmitTestHealthPlanPackage(server)

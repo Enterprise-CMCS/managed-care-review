@@ -5,6 +5,18 @@ import {
     includeRateFormData,
 } from './prismaSharedContractRateHelpers'
 
+const includeFirstSubmittedRateRev = {
+    revisions: {
+        where: {
+            submitInfoID: { not: null },
+        },
+        take: 1,
+        orderBy: {
+            createdAt: 'desc',
+        },
+    },
+} satisfies Prisma.RateTableInclude
+
 // includeFullRate is the prisma includes block for a complete Rate
 const includeFullRate = {
     revisions: {
@@ -42,6 +54,6 @@ type RateTableFullPayload = Prisma.RateTableGetPayload<{
 
 type RateRevisionTableWithContracts = RateTableFullPayload['revisions'][0]
 
-export { includeFullRate }
+export { includeFullRate, includeFirstSubmittedRateRev }
 
 export type { RateTableFullPayload, RateRevisionTableWithContracts }

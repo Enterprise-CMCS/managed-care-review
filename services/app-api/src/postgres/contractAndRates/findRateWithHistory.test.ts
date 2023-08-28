@@ -70,12 +70,11 @@ describe('findRate', () => {
             })
         )
         must(
-            await submitContract(
-                client,
-                contract1.id,
-                stateUser.id,
-                'Contract Submit'
-            )
+            await submitContract(client, {
+                contractID: contract1.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Contract Submit',
+            })
         )
 
         const contract2 = must(
@@ -95,12 +94,11 @@ describe('findRate', () => {
             })
         )
         must(
-            await submitContract(
-                client,
-                contract2.id,
-                stateUser.id,
-                'ContractSubmit 2'
-            )
+            await submitContract(client, {
+                contractID: contract2.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'ContractSubmit 2',
+            })
         )
 
         const contract3 = must(
@@ -120,12 +118,11 @@ describe('findRate', () => {
             })
         )
         must(
-            await submitContract(
-                client,
-                contract3.id,
-                stateUser.id,
-                '3.0 create'
-            )
+            await submitContract(client, {
+                contractID: contract3.id,
+                submittedByUserID: stateUser.id,
+                submitReason: '3.0 create',
+            })
         )
 
         // Now, find that rate and assert the history is what we expected
@@ -152,12 +149,11 @@ describe('findRate', () => {
             })
         )
         must(
-            await submitContract(
-                client,
-                contract2.id,
-                stateUser.id,
-                '2.1 remove'
-            )
+            await submitContract(client, {
+                contractID: contract2.id,
+                submittedByUserID: stateUser.id,
+                submitReason: '2.1 remove',
+            })
         )
 
         // Now, find that contract and assert the history is what we expected
@@ -185,12 +181,11 @@ describe('findRate', () => {
             })
         )
         must(
-            await submitContract(
-                client,
-                contract1.id,
-                stateUser.id,
-                '1.1 new name'
-            )
+            await submitContract(client, {
+                contractID: contract1.id,
+                submittedByUserID: stateUser.id,
+                submitReason: '1.1 new name',
+            })
         )
 
         // Now, find that contract and assert the history is what we expected
@@ -360,12 +355,11 @@ describe('findRate', () => {
             await insertDraftContract(client, draftContractData)
         )
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'initial submit'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'initial submit',
+            })
         )
 
         // Add 3 rates 1, 2, 3 pointing to contract A
@@ -467,12 +461,11 @@ describe('findRate', () => {
             })
         )
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'Submitting A.1'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Submitting A.1',
+            })
         )
 
         // Make a new Contract Revision, changing the connections should show up as a single new rev.
@@ -499,12 +492,11 @@ describe('findRate', () => {
             })
         )
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'Submitting A.2'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Submitting A.2',
+            })
         )
 
         // Now, find that contract and assert the history is what we expected

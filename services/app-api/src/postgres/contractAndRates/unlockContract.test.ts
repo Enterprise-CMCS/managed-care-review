@@ -59,8 +59,7 @@ describe('unlockContract', () => {
 
         // Connect draft contract to submitted rate
         must(
-            await updateDraftContract(
-                client,{
+            await updateDraftContract(client, {
                 contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -70,8 +69,8 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate.id]}
-            )
+                rateIDs: [rate.id],
+            })
         )
 
         const fullDraftContract = must(
@@ -165,9 +164,8 @@ describe('unlockContract', () => {
 
         // Connect draft contract to submitted rate
         must(
-            await updateDraftContract(
-                client,
-                {contractID: contract.id,
+            await updateDraftContract(client, {
+                contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'Connecting rate',
@@ -176,18 +174,17 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate.id]}
-            )
+                rateIDs: [rate.id],
+            })
         )
 
         // Submit contract
         const submittedContract = must(
-            await submitContract(
-                client,
-                contract.id,
-                stateUser.id,
-                'Initial Submit'
-            )
+            await submitContract(client, {
+                contractID: contract.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Initial Submit',
+            })
         )
         // Latest revision is the last index
         const latestContractRev = submittedContract.revisions[0]
@@ -264,9 +261,7 @@ describe('unlockContract', () => {
 
         // Connect draft contract to draft rate
         must(
-            await updateDraftContract(
-                client,
-                {
+            await updateDraftContract(client, {
                 contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -276,8 +271,8 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate.id]}
-            )
+                rateIDs: [rate.id],
+            })
         )
 
         // Submit rate
@@ -287,12 +282,11 @@ describe('unlockContract', () => {
 
         // Submit contract
         const submittedContract = must(
-            await submitContract(
-                client,
-                contract.id,
-                stateUser.id,
-                'Submit contract 1.0'
-            )
+            await submitContract(client, {
+                contractID: contract.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Submit contract 1.0',
+            })
         )
         const latestContractRev = submittedContract.revisions[0]
 
@@ -310,9 +304,8 @@ describe('unlockContract', () => {
             )
         )
         must(
-            await updateDraftContract(
-                client,
-                {contractID: contract.id,
+            await updateDraftContract(client, {
+                contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'contract 2.0',
@@ -321,16 +314,15 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate.id]}
-            )
+                rateIDs: [rate.id],
+            })
         )
         const resubmittedContract = must(
-            await submitContract(
-                client,
-                contract.id,
-                stateUser.id,
-                'Submit contract 2.0'
-            )
+            await submitContract(client, {
+                contractID: contract.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Submit contract 2.0',
+            })
         )
         const latestResubmittedRev = resubmittedContract.revisions[0]
 
@@ -370,10 +362,8 @@ describe('unlockContract', () => {
 
         // Connect draft contract to submitted rate
         must(
-            await updateDraftContract(
-                client,
-               {
-                contractID:  contract.id,
+            await updateDraftContract(client, {
+                contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'contract 1.0',
@@ -382,17 +372,16 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate.id]}
-            )
+                rateIDs: [rate.id],
+            })
         )
 
         // Submit contract
-        const submittedContract = await submitContract(
-            client,
-            contract.id,
-            stateUser.id,
-            'Submit contract 1.0'
-        )
+        const submittedContract = await submitContract(client, {
+            contractID: contract.id,
+            submittedByUserID: stateUser.id,
+            submitReason: 'Submit contract 1.0',
+        })
         expect(submittedContract).toBeInstanceOf(Error)
     })
     it('errors when unlocking a draft contract or rate', async () => {
