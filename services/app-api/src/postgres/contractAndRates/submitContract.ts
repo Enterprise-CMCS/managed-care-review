@@ -21,8 +21,8 @@ async function submitContract(
     const currentDateTime = new Date()
 
     try {
-        // Find current contract revision with associated rates
-        // query only the submitted revisions on the associated rates
+        // Find current contract revision with related rates
+        // query only the submitted revisions on the related rates
         return await client.$transaction(async (tx) => {
             const currentRev = await tx.contractRevisionTable.findFirst({
                 where: {
@@ -42,15 +42,15 @@ async function submitContract(
                 return new NotFoundError(err)
             }
 
-            // Given associated rates, confirm rates valid by submitted by checking for revisions
+            // Given related rates, confirm rates valid by submitted by checking for revisions
             // If rates have no revisions, we know it is invalid and can throw error
-            const associatedRateRevisionIDs = currentRev.draftRates.map(
-                (c) => c.revisions[0]?.id
+            const relatedRateRevs = currentRev.draftRates.map(
+                (c) => c.revisions[0]
             )
-            const invalidRateRevisions = associatedRateRevisionIDs.find(
-                (rev) => rev === undefined
+            const everyRelatedRateIsSubmitted = relatedRateRevs.every(
+                (rev) => rev !== undefined
             )
-            if (invalidRateRevisions) {
+            if (!everyRelatedRateIsSubmitted) {
                 const message =
                     'Attempted to submit a contract related to a rate that has not been submitted.'
                 console.error(message)
@@ -71,8 +71,8 @@ async function submitContract(
                     },
                     rateRevisions: {
                         createMany: {
-                            data: associatedRateRevisionIDs.map((id) => ({
-                                rateRevisionID: id,
+                            data: relatedRateRevs.map((rev) => ({
+                                rateRevisionID: rev.id,
                                 validAfter: currentDateTime,
                             })),
                         },
@@ -111,7 +111,7 @@ async function submitContract(
             // Take oldRev, invalidate all relationships and add any removed entries to the join table.
             if (oldRev) {
                 // If any of the old rev's Rates aren't in the new Rates, add an entry in revisions join table
-                // isRemoval field shows that this is a previous rate associated with this contract that is now removed
+                // isRemoval field shows that this is a previous rate related with this contract that is now removed
                 const oldRateRevs = oldRev.rateRevisions
                     .filter((rrevjoin) => !rrevjoin.validUntil)
                     .map((rrevjoin) => rrevjoin.rateRevision)
@@ -134,8 +134,8 @@ async function submitContract(
                     })
                 }
 
-                // Invalidate all revisions associated with the previous rev by updating validUntil
-                // these revisions are considered outdated going forward
+                // Invalidate old revision join table links by updating validUntil
+                // these links are considered outdated going forward
                 await tx.rateRevisionsOnContractRevisionsTable.updateMany({
                     where: {
                         contractRevisionID: oldRev.id,

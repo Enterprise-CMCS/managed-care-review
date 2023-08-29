@@ -54,7 +54,11 @@ describe('unlockContract', () => {
 
         // Submit Rate A
         const submittedRate = must(
-            await submitRate(client, rate.id, stateUser.id, 'Rate A 1.0 submit')
+            await submitRate(client, {
+                rateID: rate.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Rate A 1.0 submit',
+            })
         )
 
         // Connect draft contract to submitted rate
@@ -99,7 +103,11 @@ describe('unlockContract', () => {
         )
 
         const resubmittedRate = must(
-            await submitRate(client, rate.id, stateUser.id, 'Updated things')
+            await submitRate(client, {
+                rateID: rate.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Updated things',
+            })
         )
 
         const fullDraftContractTwo = must(
@@ -159,7 +167,11 @@ describe('unlockContract', () => {
 
         // Submit Rate A
         const submittedRate = must(
-            await submitRate(client, rate.id, stateUser.id, 'Rate 1.0 submit')
+            await submitRate(client, {
+                rateID: rate.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Rate 1.0 submit',
+            })
         )
 
         // Connect draft contract to submitted rate
@@ -204,7 +216,11 @@ describe('unlockContract', () => {
             })
         )
         const resubmittedRate = must(
-            await submitRate(client, rate.id, stateUser.id, 'Rate resubmit')
+            await submitRate(client, {
+                rateID: rate.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Rate resubmit',
+            })
         )
 
         // Expect rate to still be connected to submitted contract
@@ -277,7 +293,11 @@ describe('unlockContract', () => {
 
         // Submit rate
         const submittedRate = must(
-            await submitRate(client, rate.id, stateUser.id, 'Submit rate 1.0')
+            await submitRate(client, {
+                rateID: rate.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Submit rate 1.0',
+            })
         )
 
         // Submit contract
