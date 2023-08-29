@@ -1,12 +1,7 @@
 import type { Span } from '@opentelemetry/api'
 import { ForbiddenError } from 'apollo-server-lambda'
 import type { HealthPlanPackageType } from '../../domain-models'
-import {
-    isStateUser,
-    isCMSUser,
-    isAdminUser,
-    convertContractToUnlockedHealthPlanPackage,
-} from '../../domain-models'
+import { isStateUser, isCMSUser, isAdminUser } from '../../domain-models'
 import { isHelpdeskUser } from '../../domain-models/user'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
@@ -18,9 +13,8 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import type { LDService } from '../../launchDarkly/launchDarkly'
-import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates'
-import type { ContractType } from '../../domain-models/contractAndRates'
 import { GraphQLError } from 'graphql/index'
+import { validateContractsAndConvert } from './contractAndRates/resolverHelpers'
 
 const validateAndReturnHealthPlanPackages = (
     results: HealthPlanPackageType[] | StoreError,
@@ -46,59 +40,6 @@ const validateAndReturnHealthPlanPackages = (
     logSuccess('indexHealthPlanPackages')
     setSuccessAttributesOnActiveSpan(span)
     return { totalCount: edges.length, edges }
-}
-
-const validateContractsAndConvert = (
-    contractsWithHistory: ContractOrErrorArrayType,
-    span?: Span
-): HealthPlanPackageType[] => {
-    // separate valid contracts and errors
-    const parsedContracts: ContractType[] = []
-    const errorParseContracts: string[] = []
-    contractsWithHistory.forEach((parsed) => {
-        if (parsed.contract instanceof Error) {
-            errorParseContracts.push(
-                `${parsed.contractID}: ${parsed.contract.message}`
-            )
-        } else {
-            parsedContracts.push(parsed.contract)
-        }
-    })
-
-    // log all contracts that failed parsing to otel.
-    if (errorParseContracts.length > 0) {
-        const errMessage = `Failed to parse the following contracts:\n${errorParseContracts.join(
-            '\n'
-        )}`
-        logError('indexHealthPlanPackagesResolver', errMessage)
-        setErrorAttributesOnActiveSpan(errMessage, span)
-    }
-
-    // convert contract type to health plan package type and filter out failures
-    const convertedContracts: HealthPlanPackageType[] = []
-    const errorConvertContracts: string[] = []
-    parsedContracts.forEach((contract) => {
-        const parsedContract =
-            convertContractToUnlockedHealthPlanPackage(contract)
-        if (parsedContract instanceof Error) {
-            errorConvertContracts.push(
-                `${contract.id}: ${parsedContract.message}`
-            )
-        } else {
-            convertedContracts.push(parsedContract)
-        }
-    })
-
-    // log all contracts that failed converting
-    if (errorConvertContracts.length > 0) {
-        const errMessage = `Failed to covert the following contracts to health plan packages:\n${errorConvertContracts.join(
-            '\n'
-        )}`
-        logError('indexHealthPlanPackagesResolver', errMessage)
-        setErrorAttributesOnActiveSpan(errMessage, span)
-    }
-
-    return convertedContracts
 }
 
 export function indexHealthPlanPackagesResolver(
