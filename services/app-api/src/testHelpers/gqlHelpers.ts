@@ -36,11 +36,11 @@ import { sharedTestPrismaClient } from './storeHelpers'
 import { domainToBase64 } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
 import type { EmailParameterStore } from '../parameterStore'
 import { newLocalEmailParameterStore } from '../parameterStore'
-import statePrograms from 'app-web/src/common-code/data/statePrograms.json'
 import { testLDService } from './launchDarklyHelpers'
 import type { LDService } from '../launchDarkly/launchDarkly'
 import { insertUserToLocalAurora } from '../authn'
 import { testStateUser } from './userHelpers'
+import { getProgramsFromState } from './stateHelpers'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -58,12 +58,6 @@ function defaultFloridaRateProgram(): ProgramType {
         fullName: 'Long-term Care Program',
         name: 'LTC',
     }
-}
-
-function getProgramsFromState(stateCode: StateCodeType): ProgramType[] {
-    const state = statePrograms.states.find((st) => st.code === stateCode)
-
-    return state?.programs || []
 }
 
 const defaultContext = (): Context => {

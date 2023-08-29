@@ -38,6 +38,10 @@ function mockStoreThatErrors(): Store {
         message: 'this error came from the generic store with errors mock',
     }
 
+    const genericError: Error = new Error(
+        'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
+    )
+
     return {
         findAllHealthPlanPackagesByState: async (_stateCode) => {
             return genericStoreError
@@ -98,20 +102,20 @@ function mockStoreThatErrors(): Store {
             return genericStoreError
         },
         insertDraftContract: async (_ID) => {
-            return new Error(
-                'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
-            )
+            return genericError
         },
         findContractWithHistory: async (_ID) => {
-            return new Error(
-                'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
-            )
+            return genericError
         },
 
         updateDraftContract: async (_ID) => {
-            return new Error(
-                'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
-            )
+            return genericError
+        },
+        findAllContractsWithHistoryByState: async (_ID) => {
+            return genericError
+        },
+        findAllContractsWithHistoryBySubmitInfo: async () => {
+            return genericError
         },
     }
 }

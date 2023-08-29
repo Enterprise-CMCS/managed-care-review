@@ -1,7 +1,4 @@
 import type { InsertContractArgsType } from '../../postgres/contractAndRates/insertContract'
-import type { State } from '@prisma/client'
-import { must } from '../errorHelpers'
-import type { PrismaClient } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
 import type {
     ContractRevisionTableWithRates,
@@ -9,42 +6,26 @@ import type {
 } from '../../postgres/contractAndRates/prismaSubmittedContractHelpers'
 import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 import type { ContractFormDataType } from '../../domain-models/contractAndRates'
+import { getProgramsFromState } from '../stateHelpers'
 
 const createInsertContractData = ({
-    stateCode,
+    stateCode = 'MN',
     ...formData
 }: {
     stateCode?: StateCodeType
 } & Partial<ContractFormDataType>): InsertContractArgsType => {
     return {
-        stateCode: stateCode ?? 'MN',
+        stateCode: stateCode,
         submissionType: formData?.submissionType ?? 'CONTRACT_AND_RATES',
         submissionDescription:
             formData?.submissionDescription ?? 'Contract 1.0',
         contractType: formData?.contractType ?? 'BASE',
-        programIDs: formData?.programIDs ?? ['PMAP'],
+        programIDs: formData?.programIDs ?? [
+            getProgramsFromState(stateCode ?? 'MN')[0].id,
+        ],
         populationCovered: formData?.populationCovered ?? 'MEDICAID',
         riskBasedContract: formData?.riskBasedContract ?? false,
     }
-}
-
-const getStateRecord = async (
-    client: PrismaClient,
-    stateCode: string
-): Promise<State> => {
-    const state = must(
-        await client.state.findFirst({
-            where: {
-                stateCode,
-            },
-        })
-    )
-
-    if (!state) {
-        throw new Error('Unexpected prisma error: state record not found')
-    }
-
-    return state
 }
 
 const createDraftContractData = (
@@ -53,13 +34,16 @@ const createDraftContractData = (
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
     createdAt: new Date(),
     updatedAt: new Date(),
-    stateCode: 'FL',
+    stateCode: 'MN',
     stateNumber: 111,
     revisions: contract?.revisions ?? [
-        createContractRevision({
-            rateRevisions: undefined,
-            submitInfo: null,
-        }) as ContractRevisionTableWithRates,
+        createContractRevision(
+            {
+                rateRevisions: undefined,
+                submitInfo: null,
+            },
+            contract?.stateCode as StateCodeType
+        ) as ContractRevisionTableWithRates,
     ],
     ...contract,
 })
@@ -70,18 +54,22 @@ const createContractData = (
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
     createdAt: new Date(),
     updatedAt: new Date(),
-    stateCode: 'FL',
+    stateCode: 'MN',
     stateNumber: 111,
     revisions: contract?.revisions ?? [
-        createContractRevision({
-            draftRates: undefined,
-        }) as ContractRevisionTableWithRates,
+        createContractRevision(
+            {
+                draftRates: undefined,
+            },
+            contract?.stateCode as StateCodeType
+        ) as ContractRevisionTableWithRates,
     ],
     ...contract,
 })
 
 const createContractRevision = (
-    revision?: Partial<ContractRevisionTableWithRates>
+    revision?: Partial<ContractRevisionTableWithRates>,
+    stateCode: StateCodeType = 'MN'
 ): ContractRevisionTableWithRates => ({
     id: uuidv4(),
     createdAt: new Date(),
@@ -100,14 +88,14 @@ const createContractRevision = (
             email: 'boblaw@example.com',
             role: 'STATE_USER',
             divisionAssignment: null,
-            stateCode: 'OH',
+            stateCode: stateCode,
         },
     },
     unlockInfo: null,
     contractID: 'contractID',
     submitInfoID: null,
     unlockInfoID: null,
-    programIDs: ['Program'],
+    programIDs: [getProgramsFromState(stateCode)[0].id],
     populationCovered: 'MEDICAID' as const,
     submissionType: 'CONTRACT_ONLY' as const,
     riskBasedContract: false,
@@ -174,7 +162,6 @@ const createContractRevision = (
 
 export {
     createInsertContractData,
-    getStateRecord,
     createContractRevision,
     createContractData,
     createDraftContractData,

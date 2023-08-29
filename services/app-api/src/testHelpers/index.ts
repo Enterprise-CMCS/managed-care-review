@@ -8,8 +8,9 @@ export { must } from './errorHelpers'
 
 export {
     createInsertContractData,
-    getStateRecord,
     createContractData,
     createContractRevision,
     createDraftContractData,
 } from './contractAndRates/contractHelpers'
+
+export { getProgramsFromState, getStateRecord } from './stateHelpers'

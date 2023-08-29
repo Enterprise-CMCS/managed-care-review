@@ -72,8 +72,6 @@ function packageSubmitters(pkg: HealthPlanPackageType): string[] {
 function convertContractToUnlockedHealthPlanPackage(
     contract: ContractType
 ): HealthPlanPackageType | Error {
-    console.info('Attempting to convert contract to health plan package')
-
     // Since drafts come in separate on the Contract type, we push it onto the revisions before converting below
     if (contract.draftRevision) {
         contract.revisions.unshift(contract.draftRevision)
