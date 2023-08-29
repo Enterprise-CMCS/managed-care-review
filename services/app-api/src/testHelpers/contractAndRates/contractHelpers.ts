@@ -1,7 +1,4 @@
 import type { InsertContractArgsType } from '../../postgres/contractAndRates/insertContract'
-import type { State } from '@prisma/client'
-import { must } from '../errorHelpers'
-import type { PrismaClient } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
 import type {
     ContractRevisionTableWithRates,
@@ -9,14 +6,7 @@ import type {
 } from '../../postgres/contractAndRates/prismaSubmittedContractHelpers'
 import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 import type { ContractFormDataType } from '../../domain-models/contractAndRates'
-import type { ProgramType } from '../../domain-models'
-import statePrograms from 'app-web/src/common-code/data/statePrograms.json'
-
-function getProgramsFromState(stateCode: StateCodeType): ProgramType[] {
-    const state = statePrograms.states.find((st) => st.code === stateCode)
-
-    return state?.programs || []
-}
+import { getProgramsFromState } from '../stateHelpers'
 
 const createInsertContractData = ({
     stateCode = 'MN',
@@ -36,25 +26,6 @@ const createInsertContractData = ({
         populationCovered: formData?.populationCovered ?? 'MEDICAID',
         riskBasedContract: formData?.riskBasedContract ?? false,
     }
-}
-
-const getStateRecord = async (
-    client: PrismaClient,
-    stateCode: string
-): Promise<State> => {
-    const state = must(
-        await client.state.findFirst({
-            where: {
-                stateCode,
-            },
-        })
-    )
-
-    if (!state) {
-        throw new Error('Unexpected prisma error: state record not found')
-    }
-
-    return state
 }
 
 const createDraftContractData = (
@@ -191,9 +162,7 @@ const createContractRevision = (
 
 export {
     createInsertContractData,
-    getStateRecord,
     createContractRevision,
     createContractData,
     createDraftContractData,
-    getProgramsFromState,
 }

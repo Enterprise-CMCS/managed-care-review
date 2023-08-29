@@ -4,7 +4,7 @@ import type {
     RateTableFullPayload,
     RateRevisionTableWithContracts,
 } from '../../postgres/contractAndRates/prismaSubmittedRateHelpers'
-import { getProgramsFromState } from './contractHelpers'
+import { getProgramsFromState } from '../stateHelpers'
 import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 
 const createInsertRateData = (
