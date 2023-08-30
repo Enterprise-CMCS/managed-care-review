@@ -20,7 +20,11 @@ import { initTracer } from '../../../uploads/src/lib/otel'
 import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import type { Store } from '../postgres'
-import type { HealthPlanRevisionTable } from '@prisma/client'
+import type {
+    HealthPlanRevisionTable,
+    RateRevisionTable,
+    RateTable,
+} from '@prisma/client'
 import { PrismaClient } from '@prisma/client'
 import type { ContractTable, ContractRevisionTable } from '@prisma/client'
 import type { StoreError } from '../postgres/storeError'
@@ -76,10 +80,17 @@ export const getRevisions = async (
     return result
 }
 
+export type MigrateRevisionResult = {
+    contract: ContractTable
+    contractRevision: ContractRevisionTable
+    rate: RateTable
+    rateRevisions: RateRevisionTable[]
+}
+
 export async function migrateRevision(
     client: PrismaClient,
     revision: HealthPlanRevisionTable
-): Promise<undefined | Error> {
+): Promise<MigrateRevisionResult | Error> {
     /* The order in which we call the helpers in this file matters */
     console.info(`Migration of revision ${revision.id} started...`)
 
@@ -121,18 +132,16 @@ export async function migrateRevision(
     /* Just as with the Contract and ContractRevision tables noted above, we take the
         original HealthPlanRevision 'pkgID' and tie the RateTable ('id') to the RateRevisionTable ('rateID') 
         (the contract stuff happens in two files; the rate stuff happens in one file; you'll probably want to change this) */
-    const rateMigrationResults = await migrateRateInfo(
+    const rateMigrationResult = await migrateRateInfo(
         client,
         revision,
         formData
     )
-    for (const rateResult of rateMigrationResults) {
-        if (rateResult instanceof Error) {
-            const error = new Error(
-                `Error migrating rate info for revision ${revision.id}: ${rateResult.message}`
-            )
-            return error
-        }
+    if (rateMigrationResult instanceof Error) {
+        const error = new Error(
+            `Error migrating rate info for revision ${revision.id}: ${rateMigrationResult.message}`
+        )
+        return error
     }
 
     /* My confidence in the join table and document strategies is lower than for the other tables.
@@ -161,6 +170,13 @@ export async function migrateRevision(
             return error
         }
     }
+
+    return {
+        contract: migrateContractResult.contract,
+        contractRevision: migrateContractResult.contractRevision,
+        rate: rateMigrationResult.rate,
+        rateRevisions: rateMigrationResult.rateRevisions,
+    }
 }
 
 type ContractMigrationResult =
@@ -170,7 +186,7 @@ type ContractMigrationResult =
       }
     | Error
 
-async function migrateContract(
+export async function migrateContract(
     client: PrismaClient,
     revision: HealthPlanRevisionTable,
     formData: HealthPlanFormDataType

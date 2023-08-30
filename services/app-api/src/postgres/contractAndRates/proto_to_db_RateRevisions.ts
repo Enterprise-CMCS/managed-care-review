@@ -7,12 +7,21 @@ import type {
 import { v4 as uuid } from 'uuid'
 import type { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 
+type MigrateRateInfoResult = {
+    rate: RateTable
+    rateRevisions: RateRevisionTable[]
+}
+
 async function migrateRateInfo(
     client: PrismaClient,
     revision: HealthPlanRevisionTable,
     formData: HealthPlanFormDataType
-): Promise<(RateTable | RateRevisionTable | Error)[]> {
-    const results: (RateTable | RateRevisionTable | Error)[] = []
+): Promise<MigrateRateInfoResult | Error> {
+    //const results: (RateTable | RateRevisionTable | Error)[] = []
+    const results: MigrateRateInfoResult = {
+        rate: {} as RateTable,
+        rateRevisions: [],
+    }
 
     try {
         let submitInfoID: string | null = null
@@ -63,7 +72,7 @@ async function migrateRateInfo(
                         stateNumber: formData.stateNumber,
                     },
                 })
-                results.push(createdRate)
+                results.rate = createdRate
             } else {
                 createdRate = existingRate
                 console.warn(
@@ -117,16 +126,18 @@ async function migrateRateInfo(
                     await client.rateRevisionTable.create({
                         data: rateRevision,
                     })
-                results.push(createdRateRevision)
+                results.rateRevisions.push(createdRateRevision)
             } catch (error) {
                 console.error(`Error creating rate revision: ${error.message}`)
             }
         }
 
         return results
-    } catch (error) {
-        console.error(`Error migrating rate info ${JSON.stringify(error)}`)
-        return [new Error('Error migrating rate info')]
+    } catch (err) {
+        const error = new Error(
+            `Error migrating rate info: ${JSON.stringify(err)}`
+        )
+        return error
     }
 }
 
