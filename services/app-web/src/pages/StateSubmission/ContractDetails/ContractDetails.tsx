@@ -548,8 +548,7 @@ export const ContractDetails = ({
                                             </span>
                                             <span className="padding-top-1">
                                                 This input only accepts PDF,
-                                                CSV, DOC, DOCX, XLS, XLSX, XLSM
-                                                files.
+                                                CSV, DOC, DOCX, XLS, XLSX files.
                                             </span>
                                         </span>
                                     }

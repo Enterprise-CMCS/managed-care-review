@@ -299,7 +299,7 @@ export const Documents = ({
                     <FileUpload
                         id="documents"
                         name="documents"
-                        label="Upload any additional supporting documents"
+                        label="Upload contract-supporting documents"
                         renderMode={supportingDocsByRate ? 'list' : 'table'}
                         hint={
                             <>
@@ -311,9 +311,13 @@ export const Documents = ({
                                 >
                                     Document definitions and requirements
                                 </Link>
-                                <span>
+                                <span className="padding-top-05">
+                                    Upload any supporting documents related to
+                                    the contract.
+                                </span>
+                                <span className="padding-top-1">
                                     This input only accepts PDF, CSV, DOC, DOCX,
-                                    XLS, XLSX, XLSM files.
+                                    XLS, XLSX files.
                                 </span>
                             </>
                         }
