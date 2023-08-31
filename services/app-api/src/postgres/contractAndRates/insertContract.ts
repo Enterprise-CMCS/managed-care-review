@@ -3,13 +3,14 @@ import type {
     SubmissionType,
     ContractType as PrismaContractType,
 } from '@prisma/client'
-import type { ContractType } from '../../domain-models/contractAndRates'
+import type {
+    ContractType,
+    ContractFormDataType,
+} from '../../domain-models/contractAndRates'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaSubmittedContractHelpers'
-import type { ContractFormEditable } from './updateDraftContract'
 
-
-type InsertContractArgsType = ContractFormEditable & {
+type InsertContractArgsType = Partial<ContractFormDataType> & {
     // Certain fields are required on insert contract only
     stateCode: string
     programIDs: string[]

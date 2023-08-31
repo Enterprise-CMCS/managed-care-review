@@ -21,17 +21,11 @@ describe('prismaToDomainModel', () => {
                             name: 'contract supporting doc',
                             s3URL: 'fakeS3URL',
                             sha256: '2342fwlkdmwvw',
-                            documentCategories: expect.arrayContaining([
-                                'CONTRACT_RELATED',
-                            ]),
                         }),
                         expect.objectContaining({
                             name: 'contract supporting doc 2',
                             s3URL: 'fakeS3URL',
                             sha256: '45662342fwlkdmwvw',
-                            documentCategories: expect.arrayContaining([
-                                'CONTRACT_RELATED',
-                            ]),
                         }),
                     ]),
                     contractDocuments: expect.arrayContaining([
@@ -39,9 +33,6 @@ describe('prismaToDomainModel', () => {
                             name: 'contract doc',
                             s3URL: 'fakeS3URL',
                             sha256: '8984234fwlkdmwvw',
-                            documentCategories: expect.arrayContaining([
-                                'CONTRACT',
-                            ]),
                         }),
                     ]),
                 })

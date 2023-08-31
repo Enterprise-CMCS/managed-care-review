@@ -405,10 +405,6 @@ jobs:
           echo $endpoint
           echo "storybook-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
 
-      - name: Generate unique ID for Cypress
-        id: uuid
-        run: echo "value=sha-$GITHUB_SHA-time-$(date +"%s")" >> "$GITHUB_OUTPUT"
-
   end-deployment:
     needs: [begin-deployment, deploy-app, finishing-prep]
     if: always() && needs.begin-deployment.result == 'success'
@@ -484,14 +480,14 @@ jobs:
 
       - name: Cypress -- Chrome
         id: cypress
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           config: baseUrl=${{ needs.finishing-prep.outputs.application-endpoint }}
           record: true
           parallel: true
           browser: chrome
           group: 'Chrome'
-          ci-build-id: ${{ needs.finishing-prep.outputs.cypress-uuid }}
+          ci-build-id: ${{ github.run_id }}-${{ github.run_attempt }}
           # Point to the cypress config file from root
           config-file: services/cypress/cypress.config.ts
         env:

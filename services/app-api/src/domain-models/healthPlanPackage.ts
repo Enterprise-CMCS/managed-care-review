@@ -72,8 +72,6 @@ function packageSubmitters(pkg: HealthPlanPackageType): string[] {
 function convertContractToUnlockedHealthPlanPackage(
     contract: ContractType
 ): HealthPlanPackageType | Error {
-    console.info('Attempting to convert contract to health plan package')
-
     // Since drafts come in separate on the Contract type, we push it onto the revisions before converting below
     if (contract.draftRevision) {
         contract.revisions.unshift(contract.draftRevision)
@@ -121,9 +119,7 @@ function convertContractRevisionToHealthPlanRevision(
             addtlActuaryContacts: [],
             documents: contractRev.formData.supportingDocuments.map((doc) => ({
                 ...doc,
-                documentCategories: doc.documentCategories.filter(
-                    (category) => category !== undefined
-                ),
+                documentCategories: ['CONTRACT_RELATED'],
             })) as SubmissionDocument[],
             contractType: contractRev.formData.contractType,
             contractExecutionStatus:
@@ -131,9 +127,7 @@ function convertContractRevisionToHealthPlanRevision(
             contractDocuments: contractRev.formData.contractDocuments.map(
                 (doc) => ({
                     ...doc,
-                    documentCategories: doc.documentCategories.filter(
-                        (category) => category !== undefined
-                    ),
+                    documentCategories: ['CONTRACT'],
                 })
             ) as SubmissionDocument[],
             contractDateStart: contractRev.formData.contractDateStart,

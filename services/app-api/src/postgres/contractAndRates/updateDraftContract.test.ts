@@ -1,6 +1,7 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { insertDraftContract } from './insertContract'
 import { createInsertContractData, must } from '../../testHelpers'
+import type { ContractFormEditable } from './updateDraftContract'
 import { updateDraftContract } from './updateDraftContract'
 import { PrismaClientValidationError } from '@prisma/client/runtime/library'
 import type { ContractType } from '@prisma/client'
@@ -40,10 +41,185 @@ describe('updateDraftContract', () => {
         )
     })
 
-    it.todo(
-        'updates linked document tables as expected (via upsert, not create)'
-    )
-    it.todo('updates linked contact table as expected (via upsert, not create)')
+    it('updates linked documents as expected in multiple requests', async () => {
+        const client = await sharedTestPrismaClient()
+
+        const draftContractForm1: ContractFormEditable = {
+            submissionDescription: 'draftData1',
+            contractDocuments: [
+                {
+                    s3URL: 's3://bucketname/key/contract1',
+                    name: 'Rate cert 1',
+                    sha256: 'shaS56',
+                },
+            ],
+            supportingDocuments: [
+                {
+                    s3URL: 's3://bucketname/key/contractsupporting1-1',
+                    name: 'supporting documents 1-1',
+                    sha256: 'shaS56',
+                },
+            ],
+        }
+        // documents all replaced, additional supporting docs added
+        const draftContractForm2: ContractFormEditable = {
+            submissionDescription: 'draftData2',
+            contractDocuments: [
+                {
+                    s3URL: 's3://bucketname/key/contract2',
+                    name: 'Rate cert 2',
+                    sha256: 'shaS56',
+                },
+            ],
+            supportingDocuments: [
+                {
+                    s3URL: 's3://bucketname/key/contractsupporting2-1',
+                    name: 'supporting documents 2-1',
+                    sha256: 'shaS56',
+                },
+                {
+                    s3URL: 's3://bucketname/key/contractsupporting2-2',
+                    name: 'supporting documents2-2',
+                    sha256: 'shaS56',
+                },
+            ],
+        }
+
+        // documents unchanged
+        const draftContractForm3: ContractFormEditable = {
+            submissionDescription: 'draftData3',
+            contractDocuments: draftContractForm2.contractDocuments,
+            supportingDocuments: draftContractForm1.supportingDocuments,
+        }
+
+        const contract = must(
+            await insertDraftContract(client, createInsertContractData({}))
+        )
+
+        const draft1 = must(
+            await updateDraftContract(client, {
+                contractID: contract.id,
+                formData: draftContractForm1,
+                rateIDs: [],
+            })
+        )
+
+        expect(draft1.draftRevision?.formData.contractDocuments).toHaveLength(1)
+        expect(draft1.draftRevision?.formData.contractDocuments).toHaveLength(1)
+
+        const draft2 = must(
+            await updateDraftContract(client, {
+                contractID: contract.id,
+                formData: draftContractForm2,
+                rateIDs: [],
+            })
+        )
+
+        expect(draft2.draftRevision?.formData.submissionDescription).toBe(
+            'draftData2'
+        )
+
+        expect(draft2.draftRevision?.formData.contractDocuments).toEqual(
+            draftContractForm2.contractDocuments
+        )
+        expect(draft2.draftRevision?.formData.supportingDocuments).toEqual(
+            draftContractForm2.supportingDocuments
+        )
+
+        const draft3 = must(
+            await updateDraftContract(client, {
+                contractID: contract.id,
+                formData: draftContractForm3,
+                rateIDs: [],
+            })
+        )
+        expect(draft3.draftRevision?.formData.submissionDescription).toBe(
+            'draftData3'
+        )
+        expect(draft3.draftRevision?.formData.supportingDocuments).toHaveLength(
+            1
+        )
+        expect(draft3.draftRevision?.formData.contractDocuments).toEqual(
+            draftContractForm3.contractDocuments
+        )
+        expect(draft3.draftRevision?.formData.supportingDocuments).toEqual(
+            draftContractForm3.supportingDocuments
+        )
+    })
+
+    it('updates linked contacts as expected in multiple requests', async () => {
+        const client = await sharedTestPrismaClient()
+        const draftContractForm1: ContractFormEditable = {
+            submissionDescription: 'draftData1',
+            stateContacts: [
+                {
+                    name: 'Certifying Actuary 1',
+                    titleRole: 'Test Certifying Actuary 1',
+                    email: 'certifying1@example.com',
+                },
+            ],
+        }
+        // all contacts replaced
+        const draftContractForm2: ContractFormEditable = {
+            submissionDescription: 'draftData2',
+            stateContacts: [
+                {
+                    name: 'Certifying Actuary 2',
+                    titleRole: 'Test Certifying Actuary 2',
+                    email: 'certifying2@example.com',
+                },
+            ],
+        }
+
+        // contacts values unchanged
+        const draftContractForm3: ContractFormEditable = {
+            submissionDescription: 'draftData3',
+            stateContacts: draftContractForm2.stateContacts,
+        }
+
+        const contract = must(
+            await insertDraftContract(client, createInsertContractData({}))
+        )
+
+        const draft1 = must(
+            await updateDraftContract(client, {
+                contractID: contract.id,
+                formData: draftContractForm1,
+                rateIDs: [],
+            })
+        )
+
+        expect(draft1.draftRevision?.formData.stateContacts).toHaveLength(1)
+
+        const draft2 = must(
+            await updateDraftContract(client, {
+                contractID: contract.id,
+                formData: draftContractForm2,
+                rateIDs: [],
+            })
+        )
+
+        expect(draft2.draftRevision?.formData.submissionDescription).toBe(
+            'draftData2'
+        )
+        expect(draft2.draftRevision?.formData.stateContacts).toEqual(
+            draftContractForm2.stateContacts
+        )
+
+        const draft3 = must(
+            await updateDraftContract(client, {
+                contractID: contract.id,
+                formData: draftContractForm3,
+                rateIDs: [],
+            })
+        )
+        expect(draft3.draftRevision?.formData.submissionDescription).toBe(
+            'draftData3'
+        )
+        expect(draft3.draftRevision?.formData.stateContacts).toEqual(
+            draftContractForm3.stateContacts
+        )
+    })
 
     it('returns an error when invalid form data for contract type provided', async () => {
         jest.spyOn(console, 'error').mockImplementation()

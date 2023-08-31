@@ -154,7 +154,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
             const updateResult = await updateFormData({
                 variables: {
                     input: {
-                        pkgID: input.id,
+                        pkgID: pkg.id,
                         healthPlanFormData: base64Draft,
                     },
                 },

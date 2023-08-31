@@ -51,8 +51,15 @@ import type { ContractType } from '../domain-models/contractAndRates'
 import {
     insertDraftContract,
     findContractWithHistory,
+    updateDraftContract,
+    findAllContractsWithHistoryByState,
+    findAllContractsWithHistoryBySubmitInfo,
 } from './contractAndRates'
-import type { InsertContractArgsType } from './contractAndRates'
+import type {
+    InsertContractArgsType,
+    UpdateContractArgsType,
+    ContractOrErrorArrayType,
+} from './contractAndRates'
 
 type Store = {
     findPrograms: (
@@ -137,6 +144,18 @@ type Store = {
     findContractWithHistory: (
         contractID: string
     ) => Promise<ContractType | Error>
+
+    updateDraftContract: (
+        args: UpdateContractArgsType
+    ) => Promise<ContractType | Error>
+
+    findAllContractsWithHistoryByState: (
+        stateCode: string
+    ) => Promise<ContractOrErrorArrayType | Error>
+
+    findAllContractsWithHistoryBySubmitInfo: () => Promise<
+        ContractOrErrorArrayType | Error
+    >
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -197,6 +216,11 @@ function NewPostgresStore(client: PrismaClient): Store {
         insertDraftContract: (args) => insertDraftContract(client, args),
         findContractWithHistory: (args) =>
             findContractWithHistory(client, args),
+        updateDraftContract: (args) => updateDraftContract(client, args),
+        findAllContractsWithHistoryByState: (args) =>
+            findAllContractsWithHistoryByState(client, args),
+        findAllContractsWithHistoryBySubmitInfo: () =>
+            findAllContractsWithHistoryBySubmitInfo(client),
     }
 }
 

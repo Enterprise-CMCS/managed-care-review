@@ -227,6 +227,10 @@ describe('unlockHealthPlanPackage', () => {
         ).toContain('Z')
     }, 20000)
 
+    it.todo(
+        'returns package where previously linked documents and contacts can be deleted without breaking old revisions'
+    ) // this can be completed after unlock - want to create, submit, unlock, then re-edit
+
     it('returns errors if a state user tries to unlock', async () => {
         const stateServer = await constructTestPostgresServer()
 
