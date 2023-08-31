@@ -1,26 +1,19 @@
-import type {
-    HealthPlanFormDataType,
-    StateCodeType,
-} from 'app-web/src/common-code/healthPlanFormDataType'
+import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { createMockRevision } from '../../testHelpers/protoMigratorHelpers'
-import { toDomain } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
 import { insertContractId } from './proto_to_db_ContractId'
+import { decodeFormDataProto } from '../../handlers/proto_to_db'
 
 describe('proto_to_db_ContractId', () => {
     it('inserts the contract and returns a ContractTable from the revision', async () => {
         const client = await sharedTestPrismaClient()
         const mockRevision = createMockRevision()
-        // decode the proto
-        const decodedFormDataProto = toDomain(mockRevision.formDataProto)
-        if (decodedFormDataProto instanceof Error) {
-            const error = new Error(
-                `Error in toDomain for ${mockRevision.id}: ${decodedFormDataProto.message}`
-            )
-            return error
+
+        const formData = decodeFormDataProto(mockRevision)
+        if (formData instanceof Error) {
+            return formData
         }
-        const formData = decodedFormDataProto as HealthPlanFormDataType
 
         const contractData = await insertContractId(
             client,
@@ -42,15 +35,12 @@ describe('proto_to_db_ContractId', () => {
     it('returns an error when an invalid state code is provided', async () => {
         const client = await sharedTestPrismaClient()
         const mockRevision = createMockRevision()
-        // decode the proto
-        const decodedFormDataProto = toDomain(mockRevision.formDataProto)
-        if (decodedFormDataProto instanceof Error) {
-            const error = new Error(
-                `Error in toDomain for ${mockRevision.id}: ${decodedFormDataProto.message}`
-            )
-            return error
+
+        const formData = decodeFormDataProto(mockRevision)
+        if (formData instanceof Error) {
+            return formData
         }
-        const formData = decodedFormDataProto as HealthPlanFormDataType
+
         formData.stateCode = 'MEXICO' as StateCodeType
 
         const contractData = await insertContractId(

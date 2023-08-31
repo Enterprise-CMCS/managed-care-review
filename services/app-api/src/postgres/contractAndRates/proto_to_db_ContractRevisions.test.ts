@@ -1,24 +1,19 @@
-import { toDomain } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
 import { createMockRevision } from '../../testHelpers/protoMigratorHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import type { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 import { migrateContractRevision } from './proto_to_db_ContractRevisions'
 import type { ManagedCareEntity } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
+import { decodeFormDataProto } from '../../handlers/proto_to_db'
 
 describe('proto_to_db_ContractRevisions', () => {
     it('migrates a contract revision', async () => {
         const client = await sharedTestPrismaClient()
         const mockRevision = createMockRevision(uuidv4())
-        // decode the proto
-        const decodedFormDataProto = toDomain(mockRevision.formDataProto)
-        if (decodedFormDataProto instanceof Error) {
-            const error = new Error(
-                `Error in toDomain for ${mockRevision.id}: ${decodedFormDataProto.message}`
-            )
-            return error
+
+        const formData = decodeFormDataProto(mockRevision)
+        if (formData instanceof Error) {
+            return formData
         }
-        const formData = decodedFormDataProto as HealthPlanFormDataType
 
         const submitInfoID: string | null = null
         const migratedContract = await migrateContractRevision(

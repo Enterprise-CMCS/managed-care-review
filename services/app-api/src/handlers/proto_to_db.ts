@@ -80,6 +80,20 @@ export const getRevisions = async (
     return result
 }
 
+export function decodeFormDataProto(
+    revision: HealthPlanRevisionTable
+): HealthPlanFormDataType | Error {
+    // decode the proto
+    const decodedFormDataProto = toDomain(revision.formDataProto)
+    if (decodedFormDataProto instanceof Error) {
+        const error = new Error(
+            `Error in toDomain for ${revision.id}: ${decodedFormDataProto.message}`
+        )
+        return error
+    }
+    return decodedFormDataProto as HealthPlanFormDataType
+}
+
 export type MigrateRevisionResult = {
     contract: ContractTable
     contractRevision: ContractRevisionTable
@@ -94,15 +108,10 @@ export async function migrateRevision(
     /* The order in which we call the helpers in this file matters */
     console.info(`Migration of revision ${revision.id} started...`)
 
-    // decode the proto
-    const decodedFormDataProto = toDomain(revision.formDataProto)
-    if (decodedFormDataProto instanceof Error) {
-        const error = new Error(
-            `Error in toDomain for ${revision.id}: ${decodedFormDataProto.message}`
-        )
-        return error
+    const formData = decodeFormDataProto(revision)
+    if (formData instanceof Error) {
+        return formData
     }
-    const formData = decodedFormDataProto as HealthPlanFormDataType
 
     /* Creating an entry in either ContractRevisionTable or RateRevisionTable
         requires a valid 'submitInfoID' (or 'unlockInfoID') 
