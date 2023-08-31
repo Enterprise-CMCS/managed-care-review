@@ -78,7 +78,7 @@ describe('RateDetails', () => {
                 screen.getByText('Rate certification type')
             ).toBeInTheDocument()
             expect(
-                screen.getByText('Upload rate certification')
+                screen.getByText('Upload one rate certification document')
             ).toBeInTheDocument()
             expect(
                 screen.getByRole('button', { name: 'Continue' })
@@ -275,7 +275,9 @@ describe('RateDetails', () => {
                     'Certification of capitation rates specific to each rate cell'
                 )
                 .click()
-            const input = screen.getByLabelText('Upload rate certification')
+            const input = screen.getByLabelText(
+                'Upload one rate certification document'
+            )
             await userEvent.upload(input, [TEST_XLS_FILE])
             const hasSharedRateFieldset = screen
                 .getByText(
@@ -452,7 +454,9 @@ describe('RateDetails', () => {
                 }
             )
 
-            const input = screen.getByLabelText('Upload rate certification')
+            const input = screen.getByLabelText(
+                'Upload one rate certification document'
+            )
             expect(input).toBeInTheDocument()
             await userEvent.upload(input, [TEST_DOC_FILE])
 
@@ -475,7 +479,9 @@ describe('RateDetails', () => {
                 }
             )
 
-            const input = screen.getByLabelText('Upload rate certification')
+            const input = screen.getByLabelText(
+                'Upload one rate certification document'
+            )
             expect(input).toBeInTheDocument()
             expect(input).toHaveAttribute(
                 'accept',
@@ -580,7 +586,7 @@ describe('RateDetails', () => {
             const newRateCert = lastRateCertificationFromList(screen)
             expect(newRateCert).toBeDefined()
             const newRateInput = within(newRateCert!).getByLabelText(
-                'Upload rate certification'
+                'Upload one rate certification document'
             )
             expect(newRateInput).toBeInTheDocument()
 
@@ -1184,7 +1190,9 @@ describe('RateDetails', () => {
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
-            const input = screen.getByLabelText('Upload rate certification')
+            const input = screen.getByLabelText(
+                'Upload one rate certification document'
+            )
 
             await userEvent.upload(input, [TEST_DOC_FILE])
 
@@ -1210,7 +1218,9 @@ describe('RateDetails', () => {
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
-            const input = screen.getByLabelText('Upload rate certification')
+            const input = screen.getByLabelText(
+                'Upload one rate certification document'
+            )
             const targetEl = screen.getByTestId('file-input-droptarget')
 
             await userEvent.upload(input, [TEST_DOC_FILE])
@@ -1268,7 +1278,9 @@ describe('RateDetails', () => {
                 }
             )
 
-            const input = screen.getByLabelText('Upload rate certification')
+            const input = screen.getByLabelText(
+                'Upload one rate certification document'
+            )
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
@@ -1396,7 +1408,9 @@ describe('RateDetails', () => {
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
             })
-            const input = screen.getByLabelText('Upload rate certification')
+            const input = screen.getByLabelText(
+                'Upload one rate certification document'
+            )
 
             await userEvent.upload(input, [TEST_DOC_FILE])
 
@@ -1423,7 +1437,9 @@ describe('RateDetails', () => {
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
             })
-            const input = screen.getByLabelText('Upload rate certification')
+            const input = screen.getByLabelText(
+                'Upload one rate certification document'
+            )
             const targetEl = screen.getByTestId('file-input-droptarget')
 
             await userEvent.upload(input, [TEST_DOC_FILE])
@@ -1517,7 +1533,9 @@ describe('RateDetails', () => {
                     },
                 }
             )
-            const input = screen.getByLabelText('Upload rate certification')
+            const input = screen.getByLabelText(
+                'Upload one rate certification document'
+            )
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
             })
@@ -1561,7 +1579,9 @@ describe('RateDetails', () => {
             const backButton = screen.getByRole('button', {
                 name: 'Back',
             })
-            const input = screen.getByLabelText('Upload rate certification')
+            const input = screen.getByLabelText(
+                'Upload one rate certification document'
+            )
 
             await userEvent.upload(input, [TEST_DOC_FILE])
 
@@ -1587,7 +1607,9 @@ describe('RateDetails', () => {
             const backButton = screen.getByRole('button', {
                 name: 'Back',
             })
-            const input = screen.getByLabelText('Upload rate certification')
+            const input = screen.getByLabelText(
+                'Upload one rate certification document'
+            )
             const targetEl = screen.getByTestId('file-input-droptarget')
 
             await userEvent.upload(input, [TEST_DOC_FILE])
@@ -1649,7 +1671,7 @@ describe('RateDetails', () => {
             )
 
             const rateCertInput = screen.getByLabelText(
-                'Upload rate certification'
+                'Upload one rate certification document'
             )
             const supportingDocsInput = screen.getByLabelText(
                 'Upload supporting documents (optional)'
@@ -1726,7 +1748,7 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
 
     // assert proper initial fields are present
     expect(
-        withinTargetRateCert.getByText('Upload rate certification')
+        withinTargetRateCert.getByText('Upload one rate certification document')
     ).toBeInTheDocument()
     expect(
         withinTargetRateCert.getByText(
@@ -1754,7 +1776,7 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
 
     // add 1 doc
     const input = withinTargetRateCert.getByLabelText(
-        'Upload rate certification'
+        'Upload one rate certification document'
     )
     await userEvent.upload(input, [TEST_DOC_FILE])
 
