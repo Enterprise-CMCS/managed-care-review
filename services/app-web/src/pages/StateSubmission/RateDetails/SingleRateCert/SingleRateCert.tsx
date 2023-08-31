@@ -157,7 +157,7 @@ export const SingleRateCert = ({
                 <FileUpload
                     id={`${fieldNamePrefix}.rateDocuments`}
                     name={`${fieldNamePrefix}.rateDocuments`}
-                    label="Upload rate certification"
+                    label="Upload one rate certification document"
                     renderMode="list"
                     aria-required
                     error={showFieldErrors('rateDocuments')}
@@ -172,17 +172,16 @@ export const SingleRateCert = ({
                                 Document definitions and requirements
                             </Link>
                             <span className="padding-top-1">
-                                Upload one rate certification only.
-                            </span>
-                            <span>
-                                {supportingDocsByRate
-                                    ? 'Additional rates can be added later.'
-                                    : 'Additional rates and supporting documents can be added later.'}
+                                {`Upload only one rate certification document. ${
+                                    supportingDocsByRate
+                                        ? 'Additional rates can be added later.'
+                                        : 'Additional rates and supporting documents can be added later.'
+                                }`}
                             </span>
 
                             <span className="padding-top-1">
-                                This input only accepts PDF, CSV, DOC, DOCX,
-                                XLS, XLSX, XLSM files.
+                                This input only accepts one file in PDF, DOC, or
+                                DOCX format.
                             </span>
                         </span>
                     }
