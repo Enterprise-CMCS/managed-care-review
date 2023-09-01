@@ -50,6 +50,7 @@ type SubmissionError = {
     message: string
 }
 
+
 export function isSubmissionError(err: unknown): err is SubmissionError {
     if (err && typeof err == 'object') {
         if ('code' in err && 'message' in err) {
@@ -253,7 +254,7 @@ export function submitHealthPlanPackageResolver(
             )
         }
 
-            validateStatusAndUpdateInfo(getContractRateStatus(contractWithHistory),updateInfo, span, submittedReason || undefined)
+            validateStatusAndUpdateInfo(getContractRateStatus(contractWithHistory.revisions),updateInfo, span, submittedReason || undefined)
 
             // reassign variable set up before rates feature flag
             currentFormData = convertContractWithRatesToFormData(contractWithHistory.revisions[0], contractWithHistory.stateCode, contractWithHistory.stateNumber)
@@ -312,13 +313,21 @@ export function submitHealthPlanPackageResolver(
                 'user not authorized to fetch data from a different state'
             )
         }
+            const status = packageStatus(initialPackage)
+            if (status instanceof Error) {
+                throw  new GraphQLError(status.message, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'INVALID_PACKAGE_STATUS',
+                }
+                })
+            }
 
-            validateStatusAndUpdateInfo(packageStatus(initialPackage),updateInfo, span, submittedReason || undefined)
+            validateStatusAndUpdateInfo(status,updateInfo, span, submittedReason || undefined)
             // reassign variable set up before rates feature flag
             currentFormData = maybeFormData
 
         }
-
 
 
         /*

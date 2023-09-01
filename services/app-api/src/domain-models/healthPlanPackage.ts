@@ -4,15 +4,6 @@ import type {
     HealthPlanPackageType,
 } from './HealthPlanPackageType'
 import { pruneDuplicateEmails } from '../emailer/formatters'
-import type { ContractType } from './contractAndRates'
-import type {
-    SubmissionDocument,
-    UnlockedHealthPlanFormDataType,
-} from '../../../app-web/src/common-code/healthPlanFormDataType'
-import {
-    toProtoBuffer,
-    toDomain,
-} from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 
 // submissionStatus computes the current status of the submission based on
 // the submit/unlock info on its revisions.

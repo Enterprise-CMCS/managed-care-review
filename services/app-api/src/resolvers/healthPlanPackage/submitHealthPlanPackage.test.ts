@@ -24,8 +24,28 @@ import {
 } from '../../testHelpers/parameterStoreHelpers'
 import * as awsSESHelpers from '../../testHelpers/awsSESHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import type{ FeatureFlagLDConstant, FlagValue } from 'app-web/src/common-code/featureFlags'
 
-describe('submitHealthPlanPackage', () => {
+const flagValueTestParameters: {
+    flagName: FeatureFlagLDConstant
+    flagValue: FlagValue
+    testName: string
+}[] = [
+    {
+        flagName: 'rates-db-refactor',
+        flagValue: false,
+        testName: 'submitHealthPlanPackage with all feature flags off',
+    },
+    {
+        flagName: 'rates-db-refactor',
+        flagValue: true,
+        testName: 'submitHealthPlanPackage with rates-db-refactor on',
+    },
+]
+
+describe.each(flagValueTestParameters)(
+    `Tests $testName`,
+    ({ flagName, flagValue }) => {
     const cmsUser = testCMSUser()
     it('returns a StateSubmission if complete', async () => {
         const server = await constructTestPostgresServer()
