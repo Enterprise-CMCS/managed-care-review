@@ -121,10 +121,11 @@ export const SingleRateCert = ({
         featureFlags.PACKAGES_WITH_SHARED_RATES.flag,
         featureFlags.PACKAGES_WITH_SHARED_RATES.defaultValue
     )
-    const supportingDocsByRate = ldClient?.variation(
-        featureFlags.SUPPORTING_DOCS_BY_RATE.flag,
-        featureFlags.SUPPORTING_DOCS_BY_RATE.defaultValue
-    )
+    // const supportingDocsByRate = ldClient?.variation(
+    //     featureFlags.SUPPORTING_DOCS_BY_RATE.flag,
+    //     featureFlags.SUPPORTING_DOCS_BY_RATE.defaultValue
+    // )
+    const supportingDocsByRate = true
 
     // page level setup
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
