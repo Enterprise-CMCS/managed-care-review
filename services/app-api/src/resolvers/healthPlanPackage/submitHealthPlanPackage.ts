@@ -38,7 +38,6 @@ import type {
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import { convertContractWithRatesToFormData, convertContractWithRatesToUnlockedHPP } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
-import { getContractRateStatus } from '../../postgres/contractAndRates/prismaSharedContractRateHelpers'
 import type { Span } from '@opentelemetry/api'
 import type { PackageStatusType } from '../../domain-models/contractAndRates'
 
@@ -254,7 +253,7 @@ export function submitHealthPlanPackageResolver(
             )
         }
 
-            validateStatusAndUpdateInfo(getContractRateStatus(contractWithHistory.revisions),updateInfo, span, submittedReason || undefined)
+            validateStatusAndUpdateInfo(contractWithHistory.status,updateInfo, span, submittedReason || undefined)
 
             // reassign variable set up before rates feature flag
             currentFormData = convertContractWithRatesToFormData(contractWithHistory.revisions[0], contractWithHistory.stateCode, contractWithHistory.stateNumber)
@@ -264,7 +263,7 @@ export function submitHealthPlanPackageResolver(
                 input.pkgID
             )
 
-            if (isStoreError(initialPackage) || !initialPackage) {
+                if (isStoreError(initialPackage) || !initialPackage) {
                 if (!initialPackage) {
                     throw new GraphQLError('Issue finding package.', {
                         extensions: {

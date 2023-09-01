@@ -2,7 +2,6 @@ import type { Prisma } from '@prisma/client'
 import type { DocumentCategoryType } from 'app-web/src/common-code/healthPlanFormDataType'
 import type {
     ContractFormDataType,
-    ContractType,
     RateFormDataType,
     RateRevisionType,
     PackageStatusType,
@@ -36,10 +35,10 @@ function convertUpdateInfoToDomainModel(
 }
 
 // -----
-function getContractRateStatus(contractWithRates: ContractType): PackageStatusType {
+function getContractRateStatus(revisions: ContractRevisionTableWithFormData[]| RateRevisionTableWithFormData[]): PackageStatusType {
 
     // need to order revisions from latest to earliest
-    const revs = contractWithRates.revisions.sort(
+    const revs = revisions.sort(
         (revA, revB) => revB.createdAt.getTime() - revA.createdAt.getTime()
     )
     const latestRevision = revs[0]

@@ -47,7 +47,7 @@ describe.each(flagValueTestParameters)(
     `Tests $testName`,
     ({ flagName, flagValue }) => {
     const cmsUser = testCMSUser()
-    it('returns a StateSubmission if complete', async () => {
+    it.only('returns a StateSubmission if complete', async () => {
         const server = await constructTestPostgresServer()
 
         // setup

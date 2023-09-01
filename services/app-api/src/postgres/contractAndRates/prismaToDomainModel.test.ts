@@ -40,7 +40,7 @@ describe('prismaToDomainModel', () => {
         })
     })
 
-    describe.skip('getContractRateStatus', () => {
+    describe('getContractRateStatus', () => {
         // Using type coercion in these tests rather than creating revisions
         // we just care about unit testing different variations of submitInfo, updateInfo, and createdAt
         const contractWithUnorderedRevs: {
