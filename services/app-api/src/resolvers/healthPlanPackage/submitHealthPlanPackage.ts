@@ -14,7 +14,6 @@ import {
 } from '../../../../app-web/src/common-code/healthPlanFormDataType/healthPlanFormData'
 import type { UpdateInfoType, HealthPlanPackageType } from '../../domain-models'
 import {
-    convertContractToUnlockedHealthPlanPackage,
     isStateUser,
     packageStatus,
     packageSubmitters,
@@ -38,6 +37,10 @@ import type {
     LockedHealthPlanFormDataType,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type { LDService } from '../../launchDarkly/launchDarkly'
+import { convertContractWithRatesToFormData, convertContractWithRatesToUnlockedHPP } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
+import { getContractRateStatus } from '../../postgres/contractAndRates/prismaSharedContractRateHelpers'
+import type { Span } from '@opentelemetry/api'
+import type { PackageStatusType } from '../../domain-models/contractAndRates'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = (typeof SubmissionErrorCodes)[number] // iterable union type
@@ -64,6 +67,30 @@ export function isSubmissionError(err: unknown): err is SubmissionError {
         }
     }
     return false
+}
+
+// Throw error if resubmitted without reason or already submitted.
+const validateStatusAndUpdateInfo = (status: PackageStatusType, updateInfo: UpdateInfoType, span?: Span, submittedReason?: string) => {
+    if (status === 'UNLOCKED' && submittedReason) {
+        updateInfo.updatedReason = submittedReason // ! destrcutive - edit the actual update info that will be attached to submission
+    } else if (status === 'UNLOCKED' && !submittedReason) {
+        const errMessage = 'Resubmission requires a reason'
+        logError('submitHealthPlanPackage', errMessage)
+        setErrorAttributesOnActiveSpan(errMessage, span)
+        throw new UserInputError(errMessage)
+    } else if (
+        status === 'RESUBMITTED' ||
+        status === 'SUBMITTED'
+    ) {
+        const errMessage = `Attempted to submit an already submitted package.`
+        logError('submitHealthPlanPackage', errMessage)
+        throw new GraphQLError(errMessage, {
+            extensions: {
+                code: 'INTERNAL_SERVER_ERROR',
+                cause: 'INVALID_PACKAGE_STATUS',
+            },
+        })
+    }
 }
 
 // This is a state machine transition to turn an Unlocked to Locked Form Data
@@ -143,7 +170,7 @@ export function submitHealthPlanPackageResolver(
         setResolverDetailsOnActiveSpan('submitHealthPlanPackage', user, span)
         span?.setAttribute('mcreview.package_id', pkgID)
 
-        let initialPackage: HealthPlanPackageType // before submit
+        let currentFormData: HealthPlanFormDataType // data from revision that is being submitted
         let updatedPackage: HealthPlanPackageType // after submit
 
         //Set updateInfo default to initial submission
@@ -168,7 +195,8 @@ export function submitHealthPlanPackageResolver(
         const stateFromCurrentUser: State['code'] = user.stateCode
 
         if (ratesDatabaseRefactor) {
-            // fetch from package and convert to HealthPlanPackage to match pattern for flag off
+            // fetch contract and related reates - convert to HealthPlanPackage and proto-ize to match the pattern for flag off\
+            // this could be replaced with parsing to locked versus unlocked contracts and rates when types are available
             const contractWithHistory = await store.findContractWithHistory(
                 input.pkgID
             )
@@ -194,23 +222,49 @@ export function submitHealthPlanPackageResolver(
                     },
                 })
             }
-            const maybeHealthPlanPackage =
-                convertContractToUnlockedHealthPlanPackage(contractWithHistory)
 
-            if (maybeHealthPlanPackage instanceof Error) {
-                const message = 'TODO CONVERT ERROR'
-                console.error(message)
-                throw new Error(message)
-            }
-            initialPackage = maybeHealthPlanPackage
+            const maybeHealthPlanPackage =
+                convertContractWithRatesToUnlockedHPP(contractWithHistory)
+
+                if (maybeHealthPlanPackage instanceof Error) {
+                    const errMessage = `Error convert to contractWithHistory health plan package. Message: ${maybeHealthPlanPackage.message}`
+                    logError('submitHealthPlanPackage', errMessage)
+                    setErrorAttributesOnActiveSpan(errMessage, span)
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'PROTO_DECODE_ERROR',
+                        },
+                    })
+                }
+
+               // Validate user authorized to fetch state
+        if (contractWithHistory.stateCode !== stateFromCurrentUser) {
+            logError(
+                'submitHealthPlanPackage',
+                'user not authorized to fetch data from a different state'
+            )
+            setErrorAttributesOnActiveSpan(
+                'user not authorized to fetch data from a different state',
+                span
+            )
+            throw new ForbiddenError(
+                'user not authorized to fetch data from a different state'
+            )
+        }
+
+            validateStatusAndUpdateInfo(getContractRateStatus(contractWithHistory),updateInfo, span, submittedReason || undefined)
+
+            // reassign variable set up before rates feature flag
+            currentFormData = convertContractWithRatesToFormData(contractWithHistory.revisions[0], contractWithHistory.stateCode, contractWithHistory.stateNumber)
         } else {
             //  fetch from package flag off - returns HealthPlanPackage
-            const originalPackage = await store.findHealthPlanPackage(
+            const initialPackage = await store.findHealthPlanPackage(
                 input.pkgID
             )
 
-            if (isStoreError(originalPackage) || !originalPackage) {
-                if (!originalPackage) {
+            if (isStoreError(initialPackage) || !initialPackage) {
+                if (!initialPackage) {
                     throw new GraphQLError('Issue finding package.', {
                         extensions: {
                             code: 'NOT_FOUND',
@@ -218,7 +272,7 @@ export function submitHealthPlanPackageResolver(
                         },
                     })
                 }
-                const errMessage = `Issue finding a package of type ${originalPackage.code}. Message: ${originalPackage.message}`
+                const errMessage = `Issue finding a package of type ${initialPackage.code}. Message: ${initialPackage.message}`
                 logError('submitHealthPlanPackage', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new GraphQLError(errMessage, {
@@ -229,10 +283,22 @@ export function submitHealthPlanPackageResolver(
                 })
             }
 
-            initialPackage = originalPackage
-        }
+            // unwrap HealthPlanPackage again to make further edits to data
+            const maybeFormData = toDomain(
+                initialPackage.revisions[0].formDataProto
+            )
+            if (maybeFormData instanceof Error) {
+                const errMessage = `Failed to decode draft proto ${maybeFormData}.`
+                logError('submitHealthPlanPackage', errMessage)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'PROTO_DECODE_ERROR',
+                    },
+                })
+            }
 
-        // Validate user authorized to fetch state
+               // Validate user authorized to fetch state
         if (initialPackage.stateCode !== stateFromCurrentUser) {
             logError(
                 'submitHealthPlanPackage',
@@ -247,51 +313,13 @@ export function submitHealthPlanPackageResolver(
             )
         }
 
-        /*
-                Validate package is in right status to be submitted
-                - if currently UNLOCKED, also update submitInfo
-            */
-        const initialPackageStatus = packageStatus(initialPackage)
-        if (initialPackageStatus === 'UNLOCKED' && submittedReason) {
-            updateInfo.updatedReason = submittedReason
-            // Throw error if resubmitted without reason. We want to require an input reason for resubmission, but not for
-            // initial submission
-        } else if (initialPackageStatus === 'UNLOCKED' && !submittedReason) {
-            const errMessage = 'Resubmission requires a reason'
-            logError('submitHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage)
-        } else if (
-            initialPackageStatus === 'RESUBMITTED' ||
-            initialPackageStatus === 'SUBMITTED'
-        ) {
-            const errMessage = `Attempted to submit an already submitted package.`
-            logError('submitHealthPlanPackage', errMessage)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'INVALID_PACKAGE_STATUS',
-                },
-            })
+            validateStatusAndUpdateInfo(packageStatus(initialPackage),updateInfo, span, submittedReason || undefined)
+            // reassign variable set up before rates feature flag
+            currentFormData = maybeFormData
+
         }
 
-        /*
-                Unwrap HealthPlanPackage again to make further edits to data
-            */
-        const currentRevision = initialPackage.revisions[0]
-        const currentFormData = toDomain(
-            initialPackage.revisions[0].formDataProto
-        )
-        if (currentFormData instanceof Error) {
-            const errMessage = `Failed to decode draft proto ${currentFormData}.`
-            logError('submitHealthPlanPackage', errMessage)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'PROTO_DECODE_ERROR',
-                },
-            })
-        }
+
 
         /*
              Clean form data and remove fields from edits on irrelevant logic branches
@@ -304,19 +332,18 @@ export function submitHealthPlanPackageResolver(
             isContractOnly(currentFormData) &&
             hasAnyValidRateData(currentFormData)
         ) {
-            Object.assign(initialPackage, removeRatesData(currentFormData))
+            Object.assign(currentFormData, removeRatesData(currentFormData))
         }
         if (isCHIPOnly(currentFormData)) {
             Object.assign(
-                initialPackage,
+                currentFormData,
                 removeInvalidProvisionsAndAuthorities(currentFormData)
             )
         }
 
         /*
-                Final check of data before submit
-                - Parse to state submission
-            */
+        Final check of data before submit - Parse to state submission
+        */
         const submissionResult = submit(currentFormData)
 
         if (isSubmissionError(submissionResult)) {
@@ -333,8 +360,8 @@ export function submitHealthPlanPackageResolver(
         if (ratesDatabaseRefactor) {
             // Save the submitted package
             const updateResult = await store.updateHealthPlanRevision(
-                initialPackage.id,
-                currentRevision.id,
+                input.pkgID,
+                currentFormData.id,
                 lockedFormData,
                 updateInfo
             )
@@ -354,8 +381,8 @@ export function submitHealthPlanPackageResolver(
         } else {
             // Save the package!
             const updateResult = await store.updateHealthPlanRevision(
-                initialPackage.id,
-                currentRevision.id,
+                input.pkgID,
+                currentFormData.id,
                 lockedFormData,
                 updateInfo
             )

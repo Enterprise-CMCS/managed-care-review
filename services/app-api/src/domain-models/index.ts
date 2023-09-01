@@ -23,8 +23,12 @@ export {
     packageStatus,
     packageSubmittedAt,
     packageSubmitters,
-    convertContractToUnlockedHealthPlanPackage,
 } from './healthPlanPackage'
+
+export  {
+    convertContractWithRatesRevtoHPPRev,
+    convertContractWithRatesToUnlockedHPP,
+} from './contractAndRates'
 
 export type {
     HealthPlanRevisionType,

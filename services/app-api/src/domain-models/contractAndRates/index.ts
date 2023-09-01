@@ -13,9 +13,16 @@ export {
     rateRevisionSchema,
 } from './revisionTypes'
 
+export {
+    convertContractWithRatesRevtoHPPRev,
+    convertContractWithRatesToUnlockedHPP,
+    convertContractWithRatesToFormData
+} from './convertContractWithRatesToHPP'
+
+
 export type { ContractType } from './contractTypes'
 
-export type { ContractStatusType, UpdateInfoType } from './updateInfoType'
+export type {  PackageStatusType , UpdateInfoType } from './updateInfoType'
 
 export type { ContractFormDataType, RateFormDataType } from './formDataTypes'
 
