@@ -14,7 +14,7 @@ import {
     contractFormDataToDomainModel,
     convertUpdateInfoToDomainModel,
     ratesRevisionsToDomainModel,
-    getContractStatus,
+    getContractRateStatus,
 } from './prismaSharedContractRateHelpers'
 import type { ContractTableFullPayload } from './prismaSubmittedContractHelpers'
 
@@ -177,11 +177,11 @@ function contractWithHistoryToDomainModel(
 
     return {
         id: contract.id,
-        status: getContractStatus(contract.revisions),
+        status: getContractRateStatus(contract.revisions),
         stateCode: contract.stateCode,
         stateNumber: contract.stateNumber,
         draftRevision,
-        revisions
+        revisions,
     }
 }
 

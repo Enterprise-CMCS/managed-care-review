@@ -1,4 +1,4 @@
-import type { Prisma, UpdateInfoTable } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 import type { DocumentCategoryType } from 'app-web/src/common-code/healthPlanFormDataType'
 import type {
     ContractFormDataType,
@@ -35,19 +35,28 @@ function convertUpdateInfoToDomainModel(
 }
 
 // -----
-
-function getContractStatus(
-    revision: {
-        createdAt: Date
-        submitInfo: UpdateInfoTable | null
-    }[]
+function getContractRateStatus(
+    revisions:
+        | ContractRevisionTableWithFormData[]
+        | RateRevisionTableWithFormData[]
 ): ContractStatusType {
     // need to order revisions from latest to earliest
-    const latestToEarliestRev = revision.sort(
+    const revs = revisions.sort(
         (revA, revB) => revB.createdAt.getTime() - revA.createdAt.getTime()
     )
-    const latestRevision = latestToEarliestRev[0]
-    return latestRevision?.submitInfo ? 'SUBMITTED' : 'DRAFT'
+    const latestRevision = revs[0]
+    // submitted - one revision with submission status
+    if (revs.length === 1 && latestRevision.submitInfo) {
+        return 'SUBMITTED'
+    } else if (revs.length > 1) {
+        // unlocked - multiple revs, latest revision has unlocked status and no submitted status
+        // resubmitted - multiple revs, latest revision has submitted status
+        if (latestRevision.submitInfo) {
+            return 'RESUBMITTED'
+        }
+        return 'UNLOCKED'
+    }
+    return 'DRAFT'
 }
 
 // ------
@@ -248,7 +257,7 @@ export {
     includeUpdateInfo,
     includeContractFormData,
     includeRateFormData,
-    getContractStatus,
+    getContractRateStatus,
     convertUpdateInfoToDomainModel,
     contractFormDataToDomainModel,
     rateFormDataToDomainModel,
