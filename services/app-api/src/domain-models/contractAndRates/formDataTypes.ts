@@ -62,6 +62,7 @@ const contractFormDataSchema = z.object({
 
 const rateFormDataSchema = z.object({
     id: z.string().optional(),
+    rateID: z.string().optional(),
     rateType: rateTypeSchema.optional(),
     rateCapitationType: rateCapitationTypeSchema.optional(),
     rateDocuments: z.array(documentSchema).optional(),
