@@ -1,12 +1,9 @@
-import type {
-    StateCodeType,
-} from 'app-web/src/common-code/healthPlanFormDataType'
+import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 import type { RateType } from '../../domain-models/contractAndRates'
 import { parseRateWithHistory } from './parseRateWithHistory'
 import { includeFullRate } from './prismaSubmittedRateHelpers'
 import type { PrismaClient } from '@prisma/client'
 import type { RateFormEditable } from './updateDraftRate'
-
 
 type InsertRateArgsType = RateFormEditable & {
     stateCode: StateCodeType
@@ -91,4 +88,4 @@ async function insertDraftRate(
 }
 
 export { insertDraftRate }
-export type { RateFormEditable, InsertRateArgsType }
+export type { InsertRateArgsType }
