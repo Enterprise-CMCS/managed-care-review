@@ -12,7 +12,6 @@
         }
         .detailsSteps {
             padding: units(4);
-            margin: units(2) 0;
             border: 1px solid $theme-color-base-lighter;
             @include u-radius('lg');
             h2 {
