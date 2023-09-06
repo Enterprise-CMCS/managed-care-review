@@ -279,7 +279,7 @@ describe('RateDetails', () => {
             const input = screen.getByLabelText(
                 'Upload one rate certification document'
             )
-            await userEvent.upload(input, [TEST_XLS_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
             const hasSharedRateFieldset = screen
                 .getByText(
                     /Was this rate certification uploaded to any other submissions/
