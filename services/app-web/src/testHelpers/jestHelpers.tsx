@@ -195,6 +195,10 @@ const TEST_DOC_FILE = new File(['Test doc File'], 'testFile.doc', {
     type: 'application/msword',
 })
 
+const TEST_DOCX_FILE = new File(['Test doc File'], 'testFile.doc', {
+    type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+})
+
 const TEST_XLS_FILE = new File(['Test xls File'], 'testFile.xls', {
     type: 'application/vnd.ms-excel',
 })
@@ -218,6 +222,7 @@ export {
     ldUseClientSpy,
     selectYesNoRadio,
     TEST_DOC_FILE,
+    TEST_DOCX_FILE,
     TEST_PDF_FILE,
     TEST_PNG_FILE,
     TEST_TEXT_FILE,

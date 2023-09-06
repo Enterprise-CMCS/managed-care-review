@@ -20,6 +20,7 @@ import {
 import {
     renderWithProviders,
     TEST_DOC_FILE,
+    TEST_DOCX_FILE,
     TEST_PDF_FILE,
     TEST_XLS_FILE,
     TEST_PNG_FILE,
@@ -490,12 +491,14 @@ describe('RateDetails', () => {
             await userEvent.upload(input, [
                 TEST_DOC_FILE,
                 TEST_PDF_FILE,
-                TEST_XLS_FILE,
+                TEST_DOCX_FILE,
             ])
             await waitFor(() => {
                 expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
                 expect(screen.getByText(TEST_PDF_FILE.name)).toBeInTheDocument()
-                expect(screen.getByText(TEST_XLS_FILE.name)).toBeInTheDocument()
+                expect(
+                    screen.getByText(TEST_DOCX_FILE.name)
+                ).toBeInTheDocument()
             })
         })
     })
