@@ -9,7 +9,6 @@ type ContractFormEditable = Partial<ContractFormDataType>
 type UpdateContractArgsType = {
     contractID: string
     formData: ContractFormEditable
-    rateIDs: string[]
 }
 // Update the given draft
 // * can change the set of draftRates
@@ -18,7 +17,7 @@ async function updateDraftContract(
     client: PrismaClient,
     args: UpdateContractArgsType
 ): Promise<ContractType | NotFoundError | Error> {
-    const { contractID, formData, rateIDs } = args
+    const { contractID, formData } = args
     const {
         submissionType,
         submissionDescription,
@@ -113,11 +112,6 @@ async function updateDraftContract(
                     modifiedLengthOfContract,
                     modifiedNonRiskPaymentArrangements,
                     inLieuServicesAndSettings,
-                    draftRates: {
-                        set: rateIDs.map((rID) => ({
-                            id: rID,
-                        })),
-                    },
                 },
             })
 

@@ -31,7 +31,6 @@ describe('updateDraftContract', () => {
             await updateDraftContract(client, {
                 contractID: contract.id,
                 formData: draftContractForm2,
-                rateIDs: [],
             })
         )
 
@@ -100,7 +99,6 @@ describe('updateDraftContract', () => {
             await updateDraftContract(client, {
                 contractID: contract.id,
                 formData: draftContractForm1,
-                rateIDs: [],
             })
         )
 
@@ -111,7 +109,6 @@ describe('updateDraftContract', () => {
             await updateDraftContract(client, {
                 contractID: contract.id,
                 formData: draftContractForm2,
-                rateIDs: [],
             })
         )
 
@@ -130,7 +127,6 @@ describe('updateDraftContract', () => {
             await updateDraftContract(client, {
                 contractID: contract.id,
                 formData: draftContractForm3,
-                rateIDs: [],
             })
         )
         expect(draft3.draftRevision?.formData.submissionDescription).toBe(
@@ -185,7 +181,6 @@ describe('updateDraftContract', () => {
             await updateDraftContract(client, {
                 contractID: contract.id,
                 formData: draftContractForm1,
-                rateIDs: [],
             })
         )
 
@@ -195,7 +190,6 @@ describe('updateDraftContract', () => {
             await updateDraftContract(client, {
                 contractID: contract.id,
                 formData: draftContractForm2,
-                rateIDs: [],
             })
         )
 
@@ -210,7 +204,6 @@ describe('updateDraftContract', () => {
             await updateDraftContract(client, {
                 contractID: contract.id,
                 formData: draftContractForm3,
-                rateIDs: [],
             })
         )
         expect(draft3.draftRevision?.formData.submissionDescription).toBe(
@@ -236,7 +229,6 @@ describe('updateDraftContract', () => {
                 submissionDescription: 'a new contract',
                 contractType: 'NOT_REAL' as ContractType,
             },
-            rateIDs: [],
         })
 
         // Expect a prisma error
@@ -254,7 +246,6 @@ describe('updateDraftContract', () => {
                 submissionDescription: 'a new contract',
                 contractType: 'AMENDMENT',
             },
-            rateIDs: [],
         })
 
         // Expect a prisma error

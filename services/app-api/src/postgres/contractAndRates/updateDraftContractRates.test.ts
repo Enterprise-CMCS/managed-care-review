@@ -4,6 +4,7 @@ import { insertDraftContract } from './insertContract'
 import type { InsertRateArgsType } from './insertRate'
 import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHelpers'
 import { updateDraftContractRates } from './updateDraftContractRates'
+import type { InsertOrConnectRateArgsType } from './updateDraftContractRates'
 import type { RateFormEditable } from './updateDraftRate'
 import { submitRate } from './submitRate'
 import { v4 as uuidv4 } from 'uuid'
@@ -24,7 +25,7 @@ describe('updateDraftContractRates', () => {
         }
 
         // Array of new rates to create
-        const newRates: InsertRateArgsType[] = [
+        const newRates: InsertOrConnectRateArgsType[] = [
             createInsertRateData({
                 rateType: 'NEW',
             }),
@@ -44,9 +45,7 @@ describe('updateDraftContractRates', () => {
                     ...draftContract,
                     draftRevision: draftContract.draftRevision,
                 },
-                createRates: newRates,
-                updateRateRevisions: [],
-                disconnectRates: [],
+                connectOrCreate: newRates,
             })
         )
 
@@ -135,7 +134,7 @@ describe('updateDraftContractRates', () => {
                     ...draftContract,
                     draftRevision: draftContract.draftRevision,
                 },
-                createRates: [],
+                connectOrCreate: [],
                 updateRateRevisions: updateRateRevisionData,
                 disconnectRates: [],
             })
@@ -204,7 +203,7 @@ describe('updateDraftContractRates', () => {
                     ...draftContract,
                     draftRevision: draftContract.draftRevision,
                 },
-                createRates: [],
+                connectOrCreate: [],
                 updateRateRevisions: [],
                 disconnectRates: disconnectRates,
             })
@@ -223,7 +222,7 @@ describe('updateDraftContractRates', () => {
                     draftRevision: draftContract.draftRevision,
                 },
                 // create two new rates
-                createRates: [
+                connectOrCreate: [
                     createInsertRateData({
                         rateType: 'NEW',
                         certifyingActuaryContacts: [
@@ -275,6 +274,14 @@ describe('updateDraftContractRates', () => {
 
         const rateRevisionsAfterManyCrud =
             contractAfterManyCrud.draftRevision?.rateRevisions
+
+        must(
+            await client.rateTable.findFirst({
+                where: {
+                    id: rateRevisionsAfterManyCrud[0].formData.rateID,
+                },
+            })
+        )
 
         // should expect 3 rates
         expect(rateRevisionsAfterManyCrud).toHaveLength(3)
@@ -369,7 +376,7 @@ describe('updateDraftContractRates', () => {
                     ...draftContract,
                     draftRevision: draftContract.draftRevision,
                 },
-                createRates: [newRate],
+                connectOrCreate: [newRate],
                 updateRateRevisions: [],
                 disconnectRates: [],
             })
@@ -412,7 +419,7 @@ describe('updateDraftContractRates', () => {
                     ...draftContract,
                     draftRevision: draftContract.draftRevision,
                 },
-                createRates: [],
+                connectOrCreate: [],
                 updateRateRevisions: [
                     {
                         ...newlyCreatedRates[0].formData,

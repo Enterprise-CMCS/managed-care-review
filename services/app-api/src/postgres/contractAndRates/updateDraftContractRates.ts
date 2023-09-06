@@ -2,153 +2,205 @@ import type {
     ContractType,
     ContractRevisionWithRatesType,
 } from '../../domain-models/contractAndRates'
-import type { NotFoundError } from '../storeError'
+import { NotFoundError } from '../storeError'
 import type { InsertRateArgsType } from './insertRate'
 import type { PrismaClient } from '@prisma/client'
 import { findContractWithHistory } from './findContractWithHistory'
-import { includeFullRate } from './prismaSubmittedRateHelpers'
 import type { RateFormEditable } from './updateDraftRate'
+
+type InsertOrConnectRateArgsType = InsertRateArgsType & { id?: string }
 
 type UpdateDraftContractRatesType = {
     // Must be a draft contract.
     draftContract: ContractType & {
         draftRevision: ContractRevisionWithRatesType
     }
-    createRates: InsertRateArgsType[]
-    updateRateRevisions: RateFormEditable[]
-    disconnectRates: string[]
+    connectOrCreate?: InsertOrConnectRateArgsType[]
+    updateRateRevisions?: RateFormEditable[]
+    disconnectRates?: string[]
 }
+
+const VALID_UNFINDABLE_UUID = '00000000-0000-0000-0000-000000000000'
 
 async function updateDraftContractRates(
     client: PrismaClient,
     args: UpdateDraftContractRatesType
 ): Promise<ContractType | NotFoundError | Error> {
-    const { draftContract, createRates, disconnectRates, updateRateRevisions } =
-        args
+    const {
+        draftContract,
+        connectOrCreate,
+        disconnectRates,
+        updateRateRevisions,
+    } = args
 
     try {
         return await client.$transaction(async (tx) => {
             // Create new rates
-            for (const rate of createRates) {
-                const { latestStateRateCertNumber } = await tx.state.update({
-                    data: {
-                        latestStateRateCertNumber: {
-                            increment: 1,
-                        },
-                    },
+            if (connectOrCreate) {
+                const result = await tx.state.findFirst({
                     where: {
-                        stateCode: rate.stateCode,
+                        stateCode: draftContract.stateCode,
                     },
                 })
 
-                await tx.rateTable.create({
-                    data: {
-                        stateCode: rate.stateCode,
-                        stateNumber: latestStateRateCertNumber,
-                        revisions: {
-                            create: {
-                                rateType: rate.rateType,
-                                rateCapitationType: rate.rateCapitationType,
-                                rateDocuments: {
-                                    create: rate.rateDocuments,
-                                },
-                                supportingDocuments: {
-                                    create: rate.supportingDocuments,
-                                },
-                                rateDateStart: rate.rateDateStart,
-                                rateDateEnd: rate.rateDateEnd,
-                                rateDateCertified: rate.rateDateCertified,
-                                amendmentEffectiveDateStart:
-                                    rate.amendmentEffectiveDateStart,
-                                amendmentEffectiveDateEnd:
-                                    rate.amendmentEffectiveDateEnd,
-                                rateProgramIDs: rate.rateProgramIDs,
-                                rateCertificationName:
-                                    rate.rateCertificationName,
-                                certifyingActuaryContacts: {
-                                    create: rate.certifyingActuaryContacts,
-                                },
-                                addtlActuaryContacts: {
-                                    create: rate.addtlActuaryContacts,
-                                },
-                                actuaryCommunicationPreference:
-                                    rate.actuaryCommunicationPreference,
-                            },
-                        },
-                        draftContractRevisions: {
-                            connect: {
-                                id: draftContract.draftRevision.id,
-                            },
-                        },
-                    },
-                    include: includeFullRate,
-                })
-            }
-
-            // Update rate revisions
-            for (const rateRevision of updateRateRevisions) {
-                // Make sure the rate revision is a draft revision
-                //
-                const currentRateRev = await tx.rateRevisionTable.findFirst({
-                    where: {
-                        id: rateRevision.id,
-                        submitInfoID: null,
-                    },
-                })
-
-                if (!currentRateRev) {
-                    console.error('No Draft Rev!')
-                    return new Error('cant find a draft rev to submit')
+                if (!result) {
+                    const err = `PRISMA ERROR: Cannot find state with stateCode: ${draftContract.stateCode}`
+                    console.error(err)
+                    return new NotFoundError(err)
                 }
 
-                await tx.rateRevisionTable.update({
-                    where: {
-                        id: rateRevision.id,
-                    },
-                    data: {
-                        rateType: rateRevision.rateType,
-                        rateCapitationType: rateRevision.rateCapitationType,
+                // Current state rate cert number
+                let latestStateRateCertNumber = result.latestStateRateCertNumber
 
-                        rateDocuments: {
-                            deleteMany: {},
-                            create: rateRevision.rateDocuments,
+                for (const rateRevision of connectOrCreate) {
+                    await tx.rateTable.upsert({
+                        where: {
+                            id: rateRevision.rateID ?? VALID_UNFINDABLE_UUID,
                         },
-                        supportingDocuments: {
-                            deleteMany: {},
-                            create: rateRevision.supportingDocuments,
+                        update: {
+                            draftContractRevisions: {
+                                connect: {
+                                    id: draftContract.draftRevision.id,
+                                },
+                            },
                         },
-                        certifyingActuaryContacts: {
-                            deleteMany: {},
-                            create: rateRevision.certifyingActuaryContacts,
+                        create: {
+                            stateCode: rateRevision.stateCode,
+                            stateNumber: latestStateRateCertNumber,
+                            revisions: {
+                                create: {
+                                    rateType: rateRevision.rateType,
+                                    rateCapitationType:
+                                        rateRevision.rateCapitationType,
+                                    rateDocuments: {
+                                        create: rateRevision.rateDocuments,
+                                    },
+                                    supportingDocuments: {
+                                        create: rateRevision.supportingDocuments,
+                                    },
+                                    rateDateStart: rateRevision.rateDateStart,
+                                    rateDateEnd: rateRevision.rateDateEnd,
+                                    rateDateCertified:
+                                        rateRevision.rateDateCertified,
+                                    amendmentEffectiveDateStart:
+                                        rateRevision.amendmentEffectiveDateStart,
+                                    amendmentEffectiveDateEnd:
+                                        rateRevision.amendmentEffectiveDateEnd,
+                                    rateProgramIDs: rateRevision.rateProgramIDs,
+                                    rateCertificationName:
+                                        rateRevision.rateCertificationName,
+                                    certifyingActuaryContacts: {
+                                        create: rateRevision.certifyingActuaryContacts,
+                                    },
+                                    addtlActuaryContacts: {
+                                        create: rateRevision.addtlActuaryContacts,
+                                    },
+                                    actuaryCommunicationPreference:
+                                        rateRevision.actuaryCommunicationPreference,
+                                },
+                            },
+                            draftContractRevisions: {
+                                connect: {
+                                    id: draftContract.draftRevision.id,
+                                },
+                            },
                         },
-                        addtlActuaryContacts: {
-                            deleteMany: {},
-                            create: rateRevision.addtlActuaryContacts,
+                    })
+
+                    // If operation succeeds and passed in rateRevision data did not contain a id, then it was a create
+                    // operation, and we need to increment latestStateRateCertNumber
+                    if (!rateRevision.id) {
+                        latestStateRateCertNumber++
+                    }
+                }
+
+                // This is the number of rates we have created
+                const createdCount =
+                    latestStateRateCertNumber - result.latestStateRateCertNumber
+
+                // If we at least created one rate, we increment the count
+                if (createdCount >= 1) {
+                    await tx.state.update({
+                        data: {
+                            latestStateRateCertNumber: {
+                                increment: createdCount,
+                            },
                         },
-                        rateDateStart: rateRevision.rateDateStart,
-                        rateDateEnd: rateRevision.rateDateEnd,
-                        rateDateCertified: rateRevision.rateDateCertified,
-                        amendmentEffectiveDateStart:
-                            rateRevision.amendmentEffectiveDateStart,
-                        amendmentEffectiveDateEnd:
-                            rateRevision.amendmentEffectiveDateEnd,
-                        rateProgramIDs: rateRevision.rateProgramIDs,
-                        rateCertificationName:
-                            rateRevision.rateCertificationName,
-                        actuaryCommunicationPreference:
-                            rateRevision.actuaryCommunicationPreference,
-                    },
-                })
+                        where: {
+                            stateCode: draftContract.stateCode,
+                        },
+                    })
+                }
             }
 
-            // Disconnect rates from draft contract revision
+            if (updateRateRevisions) {
+                for (const rateRevision of updateRateRevisions) {
+                    // Make sure the rate revision is a draft revision
+                    //
+                    const currentRateRev = await tx.rateRevisionTable.findFirst(
+                        {
+                            where: {
+                                id: rateRevision.id,
+                                submitInfoID: null,
+                            },
+                        }
+                    )
+
+                    if (!currentRateRev) {
+                        console.error('No Draft Rev!')
+                        return new Error('cant find a draft rev to submit')
+                    }
+
+                    await tx.rateRevisionTable.update({
+                        where: {
+                            id: rateRevision.id,
+                        },
+                        data: {
+                            rateType: rateRevision.rateType,
+                            rateCapitationType: rateRevision.rateCapitationType,
+
+                            rateDocuments: {
+                                deleteMany: {},
+                                create: rateRevision.rateDocuments,
+                            },
+                            supportingDocuments: {
+                                deleteMany: {},
+                                create: rateRevision.supportingDocuments,
+                            },
+                            certifyingActuaryContacts: {
+                                deleteMany: {},
+                                create: rateRevision.certifyingActuaryContacts,
+                            },
+                            addtlActuaryContacts: {
+                                deleteMany: {},
+                                create: rateRevision.addtlActuaryContacts,
+                            },
+                            rateDateStart: rateRevision.rateDateStart,
+                            rateDateEnd: rateRevision.rateDateEnd,
+                            rateDateCertified: rateRevision.rateDateCertified,
+                            amendmentEffectiveDateStart:
+                                rateRevision.amendmentEffectiveDateStart,
+                            amendmentEffectiveDateEnd:
+                                rateRevision.amendmentEffectiveDateEnd,
+                            rateProgramIDs: rateRevision.rateProgramIDs,
+                            rateCertificationName:
+                                rateRevision.rateCertificationName,
+                            actuaryCommunicationPreference:
+                                rateRevision.actuaryCommunicationPreference,
+                        },
+                    })
+                }
+            }
+
             await tx.contractRevisionTable.update({
                 where: {
                     id: draftContract.draftRevision.id,
                 },
                 data: {
                     draftRates: {
-                        disconnect: disconnectRates.map((id) => ({ id })),
+                        disconnect: disconnectRates
+                            ? disconnectRates.map((id) => ({ id }))
+                            : [],
                     },
                 },
             })
@@ -162,5 +214,5 @@ async function updateDraftContractRates(
     }
 }
 
-export type { UpdateDraftContractRatesType }
+export type { UpdateDraftContractRatesType, InsertOrConnectRateArgsType }
 export { updateDraftContractRates }

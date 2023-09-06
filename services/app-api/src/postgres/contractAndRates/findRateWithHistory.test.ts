@@ -12,6 +12,8 @@ import { findRateWithHistory } from './findRateWithHistory'
 import { must, createInsertContractData } from '../../testHelpers'
 import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHelpers'
 import { findContractWithHistory } from './findContractWithHistory'
+import { updateDraftContractRates } from './updateDraftContractRates'
+import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 
 describe('findRate', () => {
     it('finds a stripped down rate with history', async () => {
@@ -43,7 +45,8 @@ describe('findRate', () => {
             rateCertificationName: 'one contract',
         })
         const rateA = must(await insertDraftRate(client, draftRateData))
-        must(
+
+        const submittedRateA = must(
             await submitRate(
                 client,
                 rateA.id,
@@ -53,20 +56,34 @@ describe('findRate', () => {
         )
 
         // Add 3 contracts 1, 2, 3 pointing to rate A
+
+        // create, update, submit contract1
         const contract1 = must(
             await insertDraftContract(client, {
                 stateCode: 'MN',
-                submissionDescription: 'someurle.en',
+                submissionDescription: 'onepointo',
                 programIDs: ['13221'],
                 submissionType: 'CONTRACT_ONLY',
                 contractType: 'BASE',
             })
         )
+        if (!contract1.draftRevision) {
+            throw new Error(
+                'Unexpected error: draftRevision does not exist in contract'
+            )
+        }
         must(
-            await updateDraftContract(client, {
-                contractID: contract1.id,
-                formData: { submissionDescription: 'someurle.en' },
-                rateIDs: [rateA.id],
+            await updateDraftContractRates(client, {
+                draftContract: {
+                    ...contract1,
+                    draftRevision: contract1.draftRevision,
+                },
+                connectOrCreate: [
+                    {
+                        ...submittedRateA.revisions[0].formData,
+                        stateCode: stateUser.stateCode as StateCodeType,
+                    },
+                ],
             })
         )
         must(
@@ -78,6 +95,7 @@ describe('findRate', () => {
             )
         )
 
+        // create, update, submit contract2
         const contract2 = must(
             await insertDraftContract(client, {
                 stateCode: 'MN',
@@ -87,11 +105,23 @@ describe('findRate', () => {
                 contractType: 'BASE',
             })
         )
+        if (!contract2.draftRevision) {
+            throw new Error(
+                'Unexpected error: draftRevision does not exist in contract'
+            )
+        }
         must(
-            await updateDraftContract(client, {
-                contractID: contract2.id,
-                formData: { submissionDescription: 'twopointo' },
-                rateIDs: [rateA.id],
+            await updateDraftContractRates(client, {
+                draftContract: {
+                    ...contract2,
+                    draftRevision: contract2.draftRevision,
+                },
+                connectOrCreate: [
+                    {
+                        ...submittedRateA.revisions[0].formData,
+                        stateCode: stateUser.stateCode as StateCodeType,
+                    },
+                ],
             })
         )
         must(
@@ -103,6 +133,7 @@ describe('findRate', () => {
             )
         )
 
+        // create, update, submit contract3
         const contract3 = must(
             await insertDraftContract(client, {
                 stateCode: 'MN',
@@ -112,11 +143,23 @@ describe('findRate', () => {
                 contractType: 'BASE',
             })
         )
+        if (!contract3.draftRevision) {
+            throw new Error(
+                'Unexpected error: draftRevision does not exist in contract'
+            )
+        }
         must(
-            await updateDraftContract(client, {
-                contractID: contract3.id,
-                formData: { submissionDescription: 'threepointo' },
-                rateIDs: [rateA.id],
+            await updateDraftContractRates(client, {
+                draftContract: {
+                    ...contract3,
+                    draftRevision: contract3.draftRevision,
+                },
+                connectOrCreate: [
+                    {
+                        ...submittedRateA.revisions[0].formData,
+                        stateCode: stateUser.stateCode as StateCodeType,
+                    },
+                ],
             })
         )
         must(
@@ -129,14 +172,16 @@ describe('findRate', () => {
         )
 
         // Now, find that rate and assert the history is what we expected
-        const threeRate = must(await findRateWithHistory(client, rateA.id))
+        const threeRate = must(
+            await findRateWithHistory(client, submittedRateA.id)
+        )
         if (threeRate instanceof Error) {
             throw threeRate
         }
         expect(threeRate.revisions).toHaveLength(4)
 
         // remove the connection from contract 2
-        must(
+        const unlockedContract2 = must(
             await unlockContract(
                 client,
                 contract2.id,
@@ -144,11 +189,18 @@ describe('findRate', () => {
                 'unlock for 2.1 remove'
             )
         )
+        if (!unlockedContract2.draftRevision) {
+            throw new Error(
+                'Unexpected error: draftRevision does not exist in contract'
+            )
+        }
         must(
-            await updateDraftContract(client, {
-                contractID: contract2.id,
-                formData: { submissionDescription: 'twopointone' },
-                rateIDs: [],
+            await updateDraftContractRates(client, {
+                draftContract: {
+                    ...unlockedContract2,
+                    draftRevision: unlockedContract2.draftRevision,
+                },
+                disconnectRates: [submittedRateA.id],
             })
         )
         must(
@@ -161,7 +213,9 @@ describe('findRate', () => {
         )
 
         // Now, find that contract and assert the history is what we expected
-        const twoRate = must(await findRateWithHistory(client, rateA.id))
+        const twoRate = must(
+            await findRateWithHistory(client, submittedRateA.id)
+        )
         if (twoRate instanceof Error) {
             throw twoRate
         }
@@ -181,7 +235,20 @@ describe('findRate', () => {
             await updateDraftContract(client, {
                 contractID: contract1.id,
                 formData: { submissionDescription: 'onepointone' },
-                rateIDs: [rateA.id],
+            })
+        )
+        must(
+            await updateDraftContractRates(client, {
+                draftContract: {
+                    ...contract1,
+                    draftRevision: contract1.draftRevision,
+                },
+                connectOrCreate: [
+                    {
+                        ...submittedRateA.revisions[0].formData,
+                        stateCode: stateUser.stateCode as StateCodeType,
+                    },
+                ],
             })
         )
         must(
@@ -194,45 +261,81 @@ describe('findRate', () => {
         )
 
         // Now, find that contract and assert the history is what we expected
-        const backAgainRate = must(await findRateWithHistory(client, rateA.id))
+        const backAgainRate = must(
+            await findRateWithHistory(client, submittedRateA.id)
+        )
         if (backAgainRate instanceof Error) {
             throw backAgainRate
         }
         expect(backAgainRate.revisions).toHaveLength(6)
 
         // Make a new Contract Revision, should show up as a single new rev with all the old info
-        must(await unlockRate(client, rateA.id, cmsUser.id, 'unlocking A.0'))
-        must(await submitRate(client, rateA.id, stateUser.id, 'Submitting A.1'))
+        const unlockedRateA = must(
+            await unlockRate(
+                client,
+                submittedRateA.id,
+                cmsUser.id,
+                'unlocking A.0'
+            )
+        )
+        const resubmittedRateA = must(
+            await submitRate(
+                client,
+                unlockedRateA.id,
+                stateUser.id,
+                'Submitting A.1'
+            )
+        )
 
         // Now, find that contract and assert the history is what we expected
-        let testingRate = must(await findRateWithHistory(client, rateA.id))
+        let testingRate = must(
+            await findRateWithHistory(client, resubmittedRateA.id)
+        )
         if (testingRate instanceof Error) {
             throw testingRate
         }
         expect(testingRate.revisions).toHaveLength(7)
 
         // Make a new Rate Revision, changing the connections should show up as a single new rev.
-        must(await unlockRate(client, rateA.id, cmsUser.id, 'unlocking A.1'))
+        const secondUnlockRateA = must(
+            await unlockRate(
+                client,
+                resubmittedRateA.id,
+                cmsUser.id,
+                'unlocking A.1'
+            )
+        )
         must(
             await updateDraftRate(client, {
-                rateID: rateA.id,
+                rateID: secondUnlockRateA.id,
                 formData: {
                     rateType: 'AMENDMENT',
                 },
                 contractIDs: [contract3.id],
             })
         )
-        must(await submitRate(client, rateA.id, stateUser.id, 'Submitting A.2'))
+        const secondResubmitRateA = must(
+            await submitRate(
+                client,
+                secondUnlockRateA.id,
+                stateUser.id,
+                'Submitting A.2'
+            )
+        )
 
         // Now, find that contract and assert the history is what we expected
-        testingRate = must(await findRateWithHistory(client, rateA.id))
+        testingRate = must(
+            await findRateWithHistory(client, secondResubmitRateA.id)
+        )
         if (testingRate instanceof Error) {
             throw testingRate
         }
         expect(testingRate.revisions).toHaveLength(8)
 
         // Now, find that contract and assert the history is what we expected
-        const resultingRate = must(await findRateWithHistory(client, rateA.id))
+        const resultingRate = must(
+            await findRateWithHistory(client, secondResubmitRateA.id)
+        )
         if (resultingRate instanceof Error) {
             throw resultingRate
         }
@@ -463,7 +566,6 @@ describe('findRate', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate1.id, rate3.id],
             })
         )
         must(
@@ -484,7 +586,7 @@ describe('findRate', () => {
                 'unlocking A.1'
             )
         )
-        must(
+        const updatedDraftContract = must(
             await updateDraftContract(client, {
                 contractID: contractA.id,
                 formData: {
@@ -495,7 +597,21 @@ describe('findRate', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate3.id],
+            })
+        )
+        if (!updatedDraftContract.draftRevision) {
+            throw new Error(
+                'Unexpected error: draftRevision does not exist in contract'
+            )
+        }
+        // Remove rate1 from contract
+        must(
+            await updateDraftContractRates(client, {
+                draftContract: {
+                    ...updatedDraftContract,
+                    draftRevision: updatedDraftContract.draftRevision,
+                },
+                disconnectRates: [rate1.id],
             })
         )
         must(

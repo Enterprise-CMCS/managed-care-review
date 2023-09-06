@@ -11,6 +11,8 @@ import { updateDraftRate } from './updateDraftRate'
 import { submitContract } from './submitContract'
 import { findContractWithHistory } from './findContractWithHistory'
 import { must, createInsertContractData } from '../../testHelpers'
+import { updateDraftContractRates } from './updateDraftContractRates'
+import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 
 describe('unlockContract', () => {
     it('Unlocks a rate without breaking connected draft contract', async () => {
@@ -58,9 +60,8 @@ describe('unlockContract', () => {
         )
 
         // Connect draft contract to submitted rate
-        must(
-            await updateDraftContract(
-                client,{
+        const updatedDraftContract = must(
+            await updateDraftContract(client, {
                 contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -70,8 +71,31 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate.id]}
+            })
+        )
+
+        if (!updatedDraftContract.draftRevision) {
+            throw new Error(
+                'Unexpected error: draftRevision does not exist in contract'
             )
+        }
+
+        // connect the rate
+        must(
+            await updateDraftContractRates(client, {
+                draftContract: {
+                    ...updatedDraftContract,
+                    draftRevision: updatedDraftContract.draftRevision,
+                },
+                connectOrCreate: [
+                    {
+                        ...submittedRate.revisions[0].formData,
+                        stateCode: submittedRate.stateCode as StateCodeType,
+                    },
+                ],
+                updateRateRevisions: [],
+                disconnectRates: [],
+            })
         )
 
         const fullDraftContract = must(
@@ -164,10 +188,9 @@ describe('unlockContract', () => {
         )
 
         // Connect draft contract to submitted rate
-        must(
-            await updateDraftContract(
-                client,
-                {contractID: contract.id,
+        const updatedDraftContract = must(
+            await updateDraftContract(client, {
+                contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'Connecting rate',
@@ -176,8 +199,31 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate.id]}
+            })
+        )
+
+        if (!updatedDraftContract.draftRevision) {
+            throw new Error(
+                'Unexpected error: draftRevision does not exist in contract'
             )
+        }
+
+        // connect the rate
+        must(
+            await updateDraftContractRates(client, {
+                draftContract: {
+                    ...updatedDraftContract,
+                    draftRevision: updatedDraftContract.draftRevision,
+                },
+                connectOrCreate: [
+                    {
+                        ...submittedRate.revisions[0].formData,
+                        stateCode: submittedRate.stateCode as StateCodeType,
+                    },
+                ],
+                updateRateRevisions: [],
+                disconnectRates: [],
+            })
         )
 
         // Submit contract
@@ -263,10 +309,8 @@ describe('unlockContract', () => {
         )
 
         // Connect draft contract to draft rate
-        must(
-            await updateDraftContract(
-                client,
-                {
+        const updatedDraftContract = must(
+            await updateDraftContract(client, {
                 contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -276,8 +320,31 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate.id]}
+            })
+        )
+
+        if (!updatedDraftContract.draftRevision) {
+            throw new Error(
+                'Unexpected error: draftRevision does not exist in contract'
             )
+        }
+
+        // connect the rate
+        must(
+            await updateDraftContractRates(client, {
+                draftContract: {
+                    ...updatedDraftContract,
+                    draftRevision: updatedDraftContract.draftRevision,
+                },
+                connectOrCreate: [
+                    {
+                        ...rate.draftRevision?.formData,
+                        stateCode: rate.stateCode as StateCodeType,
+                    },
+                ],
+                updateRateRevisions: [],
+                disconnectRates: [],
+            })
         )
 
         // Submit rate
@@ -309,10 +376,9 @@ describe('unlockContract', () => {
                 'First unlock'
             )
         )
-        must(
-            await updateDraftContract(
-                client,
-                {contractID: contract.id,
+        const updatedUnlockedContract = must(
+            await updateDraftContract(client, {
+                contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'contract 2.0',
@@ -321,9 +387,33 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate.id]}
-            )
+            })
         )
+
+        if (!updatedUnlockedContract.draftRevision) {
+            throw new Error(
+                'Unexpected error: draftRevision does not exist in contract'
+            )
+        }
+
+        // connect the rate
+        must(
+            await updateDraftContractRates(client, {
+                draftContract: {
+                    ...updatedUnlockedContract,
+                    draftRevision: updatedUnlockedContract.draftRevision,
+                },
+                connectOrCreate: [
+                    {
+                        ...rate.draftRevision?.formData,
+                        stateCode: rate.stateCode as StateCodeType,
+                    },
+                ],
+                updateRateRevisions: [],
+                disconnectRates: [],
+            })
+        )
+
         const resubmittedContract = must(
             await submitContract(
                 client,
@@ -369,11 +459,9 @@ describe('unlockContract', () => {
         )
 
         // Connect draft contract to submitted rate
-        must(
-            await updateDraftContract(
-                client,
-               {
-                contractID:  contract.id,
+        const updatedDraftContract = must(
+            await updateDraftContract(client, {
+                contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'contract 1.0',
@@ -382,8 +470,31 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate.id]}
+            })
+        )
+
+        if (!updatedDraftContract.draftRevision) {
+            throw new Error(
+                'Unexpected error: draftRevision does not exist in contract'
             )
+        }
+
+        // connect the rate
+        must(
+            await updateDraftContractRates(client, {
+                draftContract: {
+                    ...updatedDraftContract,
+                    draftRevision: updatedDraftContract.draftRevision,
+                },
+                connectOrCreate: [
+                    {
+                        ...rate.draftRevision?.formData,
+                        stateCode: rate.stateCode as StateCodeType,
+                    },
+                ],
+                updateRateRevisions: [],
+                disconnectRates: [],
+            })
         )
 
         // Submit contract
