@@ -1,5 +1,5 @@
 import React from 'react'
-import { GridContainer, Grid } from '@trussworks/react-uswds'
+import { GridContainer, Grid, Link } from '@trussworks/react-uswds'
 import styles from './Landing.module.scss'
 import { featureFlags } from '../../common-code/featureFlags'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
@@ -93,8 +93,13 @@ export const Landing = (): React.ReactElement => {
                                 </li>
                                 <li>Rate certifications and rate amendments</li>
                                 <li>
-                                    Required supporting documents related to the
-                                    above
+                                    <Link
+                                        aria-label="Document definitions and requirements"
+                                        href={'/help#key-documents'}
+                                    >
+                                        Required supporting documents
+                                    </Link>{' '}
+                                    related to the above
                                 </li>
                             </ul>
 
