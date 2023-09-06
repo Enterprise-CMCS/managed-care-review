@@ -23,7 +23,10 @@ import {
 
 import styles from '../../StateSubmissionForm.module.scss'
 import { formatUserInputDate, isDateRangeEmpty } from '../../../../formHelpers'
-import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../../components/FileUpload'
+import {
+    ACCEPTED_SUBMISSION_FILE_TYPES,
+    ACCEPTED_RATE_CERTIFICATION_FILE_TYPES,
+} from '../../../../components/FileUpload'
 import { useS3 } from '../../../../contexts/S3Context'
 
 import { FormikErrors, getIn, useFormikContext } from 'formik'
@@ -185,7 +188,7 @@ export const SingleRateCert = ({
                             </span>
                         </span>
                     }
-                    accept={ACCEPTED_SUBMISSION_FILE_TYPES}
+                    accept={ACCEPTED_RATE_CERTIFICATION_FILE_TYPES}
                     initialItems={rateInfo.rateDocuments}
                     uploadFile={(file) =>
                         handleUploadFile(file, 'HEALTH_PLAN_DOCS')

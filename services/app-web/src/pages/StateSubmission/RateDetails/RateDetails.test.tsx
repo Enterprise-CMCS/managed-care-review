@@ -28,7 +28,7 @@ import {
     ldUseClientSpy,
 } from '../../../testHelpers'
 import { RateDetails } from './RateDetails'
-import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
+import { ACCEPTED_RATE_CERTIFICATION_FILE_TYPES } from '../../../components/FileUpload'
 import selectEvent from 'react-select-event'
 import * as useStatePrograms from '../../../hooks/useStatePrograms'
 import { unlockedWithALittleBitOfEverything } from '../../../common-code/healthPlanFormDataMocks'
@@ -485,7 +485,7 @@ describe('RateDetails', () => {
             expect(input).toBeInTheDocument()
             expect(input).toHaveAttribute(
                 'accept',
-                ACCEPTED_SUBMISSION_FILE_TYPES
+                ACCEPTED_RATE_CERTIFICATION_FILE_TYPES
             )
             await userEvent.upload(input, [
                 TEST_DOC_FILE,
