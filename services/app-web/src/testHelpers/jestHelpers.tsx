@@ -195,7 +195,7 @@ const TEST_DOC_FILE = new File(['Test doc File'], 'testFile.doc', {
     type: 'application/msword',
 })
 
-const TEST_DOCX_FILE = new File(['Test doc File'], 'testFile.docx', {
+const TEST_DOCX_FILE = new File(['Test docx File'], 'testFile.docx', {
     type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 })
 
