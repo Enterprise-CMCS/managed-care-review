@@ -10,6 +10,7 @@ import { submitRate } from './submitRate'
 import { v4 as uuidv4 } from 'uuid'
 import { insertDraftRate } from './insertRate'
 import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { DraftContractType } from '../../domain-models/contractAndRates'
 
 describe('updateDraftContractRates', () => {
     it('create, update, and disconnects many rates', async () => {
@@ -18,13 +19,7 @@ describe('updateDraftContractRates', () => {
         const draftContractFormData = createInsertContractData({})
         const draftContract = must(
             await insertDraftContract(client, draftContractFormData)
-        )
-
-        if (!draftContract.draftRevision) {
-            throw new Error(
-                'Unexpected error: draftRevision does not exist in contract'
-            )
-        }
+        ) as DraftContractType
 
         // Array of new rates to create
         const newRates: InsertOrConnectRateArgsType[] = [
@@ -43,19 +38,10 @@ describe('updateDraftContractRates', () => {
         // Update contract with new rates
         const updatedContractWithNewRates = must(
             await updateDraftContractRates(client, {
-                draftContract: {
-                    ...draftContract,
-                    draftRevision: draftContract.draftRevision,
-                },
+                draftContract: draftContract,
                 connectOrCreate: newRates,
             })
-        )
-
-        if (!updatedContractWithNewRates.draftRevision) {
-            throw new Error(
-                'Unexpected error: draftRevision does not exist in contract'
-            )
-        }
+        ) as DraftContractType
 
         const newlyCreatedRates =
             updatedContractWithNewRates.draftRevision.rateRevisions
@@ -132,21 +118,10 @@ describe('updateDraftContractRates', () => {
         // Update many rates in the contract
         const updatedContractRates = must(
             await updateDraftContractRates(client, {
-                draftContract: {
-                    ...draftContract,
-                    draftRevision: draftContract.draftRevision,
-                },
-                connectOrCreate: [],
+                draftContract: updatedContractWithNewRates,
                 updateRateRevisions: updateRateRevisionData,
-                disconnectRates: [],
             })
-        )
-
-        if (!updatedContractRates.draftRevision) {
-            throw new Error(
-                'Unexpected error: draftRevision does not exist in contract'
-            )
-        }
+        ) as DraftContractType
 
         const updatedRateRevisions =
             updatedContractRates.draftRevision.rateRevisions
@@ -201,15 +176,10 @@ describe('updateDraftContractRates', () => {
         // disconnect the rates
         const contractAfterRateDisconnection = must(
             await updateDraftContractRates(client, {
-                draftContract: {
-                    ...draftContract,
-                    draftRevision: draftContract.draftRevision,
-                },
-                connectOrCreate: [],
-                updateRateRevisions: [],
+                draftContract: updatedContractRates,
                 disconnectRates: disconnectRates,
             })
-        )
+        ) as DraftContractType
 
         // expect two rate revisions
         expect(
@@ -219,10 +189,7 @@ describe('updateDraftContractRates', () => {
         // Create, Update and Disconnect many contracts
         const contractAfterManyCrud = must(
             await updateDraftContractRates(client, {
-                draftContract: {
-                    ...draftContract,
-                    draftRevision: draftContract.draftRevision,
-                },
+                draftContract: contractAfterRateDisconnection,
                 // create two new rates
                 connectOrCreate: [
                     createInsertRateData({
@@ -266,24 +233,10 @@ describe('updateDraftContractRates', () => {
                 // disconnect existing second rate
                 disconnectRates: [updatedRateRevisions[1].formData.rateID],
             })
-        )
-
-        if (!contractAfterManyCrud.draftRevision) {
-            throw new Error(
-                'Unexpected error: draftRevision does not exist in contract'
-            )
-        }
+        ) as DraftContractType
 
         const rateRevisionsAfterManyCrud =
             contractAfterManyCrud.draftRevision?.rateRevisions
-
-        must(
-            await client.rateTable.findFirst({
-                where: {
-                    id: rateRevisionsAfterManyCrud[0].formData.rateID,
-                },
-            })
-        )
 
         // should expect 3 rates
         expect(rateRevisionsAfterManyCrud).toHaveLength(3)
@@ -358,13 +311,7 @@ describe('updateDraftContractRates', () => {
         const draftContractFormData = createInsertContractData({})
         const draftContract = must(
             await insertDraftContract(client, draftContractFormData)
-        )
-
-        if (!draftContract.draftRevision) {
-            throw new Error(
-                'Unexpected error: draftRevision does not exist in contract'
-            )
-        }
+        ) as DraftContractType
 
         // new rate
         const draftRate = must(
@@ -398,10 +345,7 @@ describe('updateDraftContractRates', () => {
         // update draft contract with rates
         const updatedDraftContract = must(
             await updateDraftContractRates(client, {
-                draftContract: {
-                    ...draftContract,
-                    draftRevision: draftContract.draftRevision,
-                },
+                draftContract: draftContract,
                 connectOrCreate: [
                     {
                         ...draftRate.draftRevision?.formData,
@@ -413,12 +357,10 @@ describe('updateDraftContractRates', () => {
                     },
                 ],
             })
-        )
+        ) as DraftContractType
 
         // expect two rates connected to contract
-        expect(updatedDraftContract.draftRevision?.rateRevisions).toHaveLength(
-            2
-        )
+        expect(updatedDraftContract.draftRevision.rateRevisions).toHaveLength(2)
 
         // get state data again and compare to previous data
         const currentStateData = must(
@@ -457,13 +399,7 @@ describe('updateDraftContractRates', () => {
         const draftContractFormData = createInsertContractData({})
         const draftContract = must(
             await insertDraftContract(client, draftContractFormData)
-        )
-
-        if (!draftContract.draftRevision) {
-            throw new Error(
-                'Unexpected error: draftRevision does not exist in contract'
-            )
-        }
+        ) as DraftContractType
 
         // new rate
         const newRate: InsertRateArgsType = createInsertRateData({
@@ -473,21 +409,10 @@ describe('updateDraftContractRates', () => {
         // Update contract with new rates
         const updatedContractWithNewRates = must(
             await updateDraftContractRates(client, {
-                draftContract: {
-                    ...draftContract,
-                    draftRevision: draftContract.draftRevision,
-                },
+                draftContract: draftContract,
                 connectOrCreate: [newRate],
-                updateRateRevisions: [],
-                disconnectRates: [],
             })
-        )
-
-        if (!updatedContractWithNewRates.draftRevision) {
-            throw new Error(
-                'Unexpected error: draftRevision does not exist in contract'
-            )
-        }
+        ) as DraftContractType
 
         const newlyCreatedRates =
             updatedContractWithNewRates.draftRevision.rateRevisions
@@ -512,22 +437,17 @@ describe('updateDraftContractRates', () => {
             )
         )
 
-        // Update contract with new rates
+        // Update contract with submitted rate
         const attemptToUpdateSubmittedRate = await updateDraftContractRates(
             client,
             {
-                draftContract: {
-                    ...draftContract,
-                    draftRevision: draftContract.draftRevision,
-                },
-                connectOrCreate: [],
+                draftContract: updatedContractWithNewRates,
                 updateRateRevisions: [
                     {
                         ...newlyCreatedRates[0].formData,
                         rateType: 'AMENDMENT',
                     },
                 ],
-                disconnectRates: [],
             }
         )
 

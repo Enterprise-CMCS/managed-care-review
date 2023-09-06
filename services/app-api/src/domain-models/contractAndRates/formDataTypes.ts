@@ -82,7 +82,8 @@ const rateFormDataSchema = z.object({
 
 type ContractFormDataType = z.infer<typeof contractFormDataSchema>
 type RateFormDataType = z.infer<typeof rateFormDataSchema>
+type DocumentType = z.infer<typeof documentSchema>
 
 export { contractFormDataSchema, rateFormDataSchema }
 
-export type { ContractFormDataType, RateFormDataType }
+export type { ContractFormDataType, RateFormDataType, DocumentType }

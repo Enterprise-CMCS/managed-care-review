@@ -1,6 +1,6 @@
 import type {
     ContractType,
-    ContractRevisionWithRatesType,
+    DraftContractType,
 } from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../storeError'
 import type { InsertRateArgsType } from './insertRate'
@@ -12,9 +12,7 @@ type InsertOrConnectRateArgsType = InsertRateArgsType & { id?: string }
 
 type UpdateDraftContractRatesType = {
     // Must be a draft contract.
-    draftContract: ContractType & {
-        draftRevision: ContractRevisionWithRatesType
-    }
+    draftContract: DraftContractType
     connectOrCreate?: InsertOrConnectRateArgsType[]
     updateRateRevisions?: RateFormEditable[]
     disconnectRates?: string[]

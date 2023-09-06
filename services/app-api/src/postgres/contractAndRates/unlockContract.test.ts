@@ -12,7 +12,8 @@ import { submitContract } from './submitContract'
 import { findContractWithHistory } from './findContractWithHistory'
 import { must, createInsertContractData } from '../../testHelpers'
 import { updateDraftContractRates } from './updateDraftContractRates'
-import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import type { DraftContractType } from '../../domain-models/contractAndRates'
 
 describe('unlockContract', () => {
     it('Unlocks a rate without breaking connected draft contract', async () => {
@@ -72,29 +73,18 @@ describe('unlockContract', () => {
                     riskBasedContract: false,
                 },
             })
-        )
-
-        if (!updatedDraftContract.draftRevision) {
-            throw new Error(
-                'Unexpected error: draftRevision does not exist in contract'
-            )
-        }
+        ) as DraftContractType
 
         // connect the rate
         must(
             await updateDraftContractRates(client, {
-                draftContract: {
-                    ...updatedDraftContract,
-                    draftRevision: updatedDraftContract.draftRevision,
-                },
+                draftContract: updatedDraftContract,
                 connectOrCreate: [
                     {
                         ...submittedRate.revisions[0].formData,
                         stateCode: submittedRate.stateCode as StateCodeType,
                     },
                 ],
-                updateRateRevisions: [],
-                disconnectRates: [],
             })
         )
 
@@ -200,29 +190,18 @@ describe('unlockContract', () => {
                     riskBasedContract: false,
                 },
             })
-        )
-
-        if (!updatedDraftContract.draftRevision) {
-            throw new Error(
-                'Unexpected error: draftRevision does not exist in contract'
-            )
-        }
+        ) as DraftContractType
 
         // connect the rate
         must(
             await updateDraftContractRates(client, {
-                draftContract: {
-                    ...updatedDraftContract,
-                    draftRevision: updatedDraftContract.draftRevision,
-                },
+                draftContract: updatedDraftContract,
                 connectOrCreate: [
                     {
                         ...submittedRate.revisions[0].formData,
                         stateCode: submittedRate.stateCode as StateCodeType,
                     },
                 ],
-                updateRateRevisions: [],
-                disconnectRates: [],
             })
         )
 
@@ -321,29 +300,18 @@ describe('unlockContract', () => {
                     riskBasedContract: false,
                 },
             })
-        )
-
-        if (!updatedDraftContract.draftRevision) {
-            throw new Error(
-                'Unexpected error: draftRevision does not exist in contract'
-            )
-        }
+        ) as DraftContractType
 
         // connect the rate
         must(
             await updateDraftContractRates(client, {
-                draftContract: {
-                    ...updatedDraftContract,
-                    draftRevision: updatedDraftContract.draftRevision,
-                },
+                draftContract: updatedDraftContract,
                 connectOrCreate: [
                     {
                         ...rate.draftRevision?.formData,
                         stateCode: rate.stateCode as StateCodeType,
                     },
                 ],
-                updateRateRevisions: [],
-                disconnectRates: [],
             })
         )
 
@@ -388,29 +356,18 @@ describe('unlockContract', () => {
                     riskBasedContract: false,
                 },
             })
-        )
-
-        if (!updatedUnlockedContract.draftRevision) {
-            throw new Error(
-                'Unexpected error: draftRevision does not exist in contract'
-            )
-        }
+        ) as DraftContractType
 
         // connect the rate
         must(
             await updateDraftContractRates(client, {
-                draftContract: {
-                    ...updatedUnlockedContract,
-                    draftRevision: updatedUnlockedContract.draftRevision,
-                },
+                draftContract: updatedUnlockedContract,
                 connectOrCreate: [
                     {
                         ...rate.draftRevision?.formData,
                         stateCode: rate.stateCode as StateCodeType,
                     },
                 ],
-                updateRateRevisions: [],
-                disconnectRates: [],
             })
         )
 
@@ -471,29 +428,18 @@ describe('unlockContract', () => {
                     riskBasedContract: false,
                 },
             })
-        )
-
-        if (!updatedDraftContract.draftRevision) {
-            throw new Error(
-                'Unexpected error: draftRevision does not exist in contract'
-            )
-        }
+        ) as DraftContractType
 
         // connect the rate
         must(
             await updateDraftContractRates(client, {
-                draftContract: {
-                    ...updatedDraftContract,
-                    draftRevision: updatedDraftContract.draftRevision,
-                },
+                draftContract: updatedDraftContract,
                 connectOrCreate: [
                     {
                         ...rate.draftRevision?.formData,
                         stateCode: rate.stateCode as StateCodeType,
                     },
                 ],
-                updateRateRevisions: [],
-                disconnectRates: [],
             })
         )
 

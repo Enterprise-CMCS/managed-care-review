@@ -14,6 +14,7 @@ import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHel
 import { findContractWithHistory } from './findContractWithHistory'
 import { updateDraftContractRates } from './updateDraftContractRates'
 import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { DraftContractType } from '../../domain-models/contractAndRates'
 
 describe('findRate', () => {
     it('finds a stripped down rate with history', async () => {
@@ -66,18 +67,10 @@ describe('findRate', () => {
                 submissionType: 'CONTRACT_ONLY',
                 contractType: 'BASE',
             })
-        )
-        if (!contract1.draftRevision) {
-            throw new Error(
-                'Unexpected error: draftRevision does not exist in contract'
-            )
-        }
+        ) as DraftContractType
         must(
             await updateDraftContractRates(client, {
-                draftContract: {
-                    ...contract1,
-                    draftRevision: contract1.draftRevision,
-                },
+                draftContract: contract1,
                 connectOrCreate: [
                     {
                         ...submittedRateA.revisions[0].formData,
@@ -104,18 +97,10 @@ describe('findRate', () => {
                 submissionType: 'CONTRACT_ONLY',
                 contractType: 'BASE',
             })
-        )
-        if (!contract2.draftRevision) {
-            throw new Error(
-                'Unexpected error: draftRevision does not exist in contract'
-            )
-        }
+        ) as DraftContractType
         must(
             await updateDraftContractRates(client, {
-                draftContract: {
-                    ...contract2,
-                    draftRevision: contract2.draftRevision,
-                },
+                draftContract: contract2,
                 connectOrCreate: [
                     {
                         ...submittedRateA.revisions[0].formData,
@@ -142,18 +127,10 @@ describe('findRate', () => {
                 submissionType: 'CONTRACT_ONLY',
                 contractType: 'BASE',
             })
-        )
-        if (!contract3.draftRevision) {
-            throw new Error(
-                'Unexpected error: draftRevision does not exist in contract'
-            )
-        }
+        ) as DraftContractType
         must(
             await updateDraftContractRates(client, {
-                draftContract: {
-                    ...contract3,
-                    draftRevision: contract3.draftRevision,
-                },
+                draftContract: contract3,
                 connectOrCreate: [
                     {
                         ...submittedRateA.revisions[0].formData,
@@ -188,18 +165,10 @@ describe('findRate', () => {
                 cmsUser.id,
                 'unlock for 2.1 remove'
             )
-        )
-        if (!unlockedContract2.draftRevision) {
-            throw new Error(
-                'Unexpected error: draftRevision does not exist in contract'
-            )
-        }
+        ) as DraftContractType
         must(
             await updateDraftContractRates(client, {
-                draftContract: {
-                    ...unlockedContract2,
-                    draftRevision: unlockedContract2.draftRevision,
-                },
+                draftContract: unlockedContract2,
                 disconnectRates: [submittedRateA.id],
             })
         )
@@ -223,26 +192,23 @@ describe('findRate', () => {
         expect(twoRate.revisions[0].contractRevisions).toHaveLength(2)
 
         // update rate 1 to have a new version, should make one new rev.
-        must(
+        const unlockedContract1 = must(
             await unlockContract(
                 client,
                 contract1.id,
                 cmsUser.id,
                 'unlock for 1.1'
             )
-        )
+        ) as DraftContractType
         must(
             await updateDraftContract(client, {
-                contractID: contract1.id,
+                contractID: unlockedContract1.id,
                 formData: { submissionDescription: 'onepointone' },
             })
         )
         must(
             await updateDraftContractRates(client, {
-                draftContract: {
-                    ...contract1,
-                    draftRevision: contract1.draftRevision,
-                },
+                draftContract: unlockedContract1,
                 connectOrCreate: [
                     {
                         ...submittedRateA.revisions[0].formData,
@@ -254,7 +220,7 @@ describe('findRate', () => {
         must(
             await submitContract(
                 client,
-                contract1.id,
+                unlockedContract1.id,
                 stateUser.id,
                 '1.1 new name'
             )
@@ -461,7 +427,7 @@ describe('findRate', () => {
         })
         const contractA = must(
             await insertDraftContract(client, draftContractData)
-        )
+        ) as DraftContractType
         must(
             await submitContract(
                 client,
@@ -598,19 +564,11 @@ describe('findRate', () => {
                     riskBasedContract: false,
                 },
             })
-        )
-        if (!updatedDraftContract.draftRevision) {
-            throw new Error(
-                'Unexpected error: draftRevision does not exist in contract'
-            )
-        }
+        ) as DraftContractType
         // Remove rate1 from contract
         must(
             await updateDraftContractRates(client, {
-                draftContract: {
-                    ...updatedDraftContract,
-                    draftRevision: updatedDraftContract.draftRevision,
-                },
+                draftContract: updatedDraftContract,
                 disconnectRates: [rate1.id],
             })
         )

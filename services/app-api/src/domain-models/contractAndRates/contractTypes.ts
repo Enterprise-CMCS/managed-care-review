@@ -17,11 +17,13 @@ const contractSchema = z.object({
 
 const draftContractSchema = contractSchema.extend({
     status: z.literal('DRAFT'),
+    draftRevision: contractRevisionWithRatesSchema,
     revisions: z.array(contractRevisionWithRatesSchema).min(1),
 })
 
 type ContractType = z.infer<typeof contractSchema>
+type DraftContractType = z.infer<typeof draftContractSchema>
 
 export { contractRevisionWithRatesSchema, draftContractSchema, contractSchema }
 
-export type { ContractType }
+export type { ContractType, DraftContractType }

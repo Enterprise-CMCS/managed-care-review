@@ -212,7 +212,6 @@ export function updateHealthPlanFormDataResolver(
                     ),
                     // TODO - can add rate fields here when updateHPP handles rates as well
                 },
-                rateIDs: [],
             })
 
             if (updateResult instanceof Error) {
