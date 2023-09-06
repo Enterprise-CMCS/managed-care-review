@@ -157,7 +157,7 @@ describe('App Body and routes', () => {
             })
             expect(
                 screen.getByRole('heading', {
-                    name: /You can use MC-Review to submit:/i,
+                    name: /You can use MC-Review to submit Medicaid and CHIP managed care health plan contracts and rates to CMS. This portal accepts:/i,
                     level: 2,
                 })
             ).toBeInTheDocument()
