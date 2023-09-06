@@ -136,7 +136,6 @@ async function updateDraftContractRates(
             if (updateRateRevisions) {
                 for (const rateRevision of updateRateRevisions) {
                     // Make sure the rate revision is a draft revision
-                    //
                     const currentRateRev = await tx.rateRevisionTable.findFirst(
                         {
                             where: {
@@ -192,18 +191,18 @@ async function updateDraftContractRates(
                 }
             }
 
-            await tx.contractRevisionTable.update({
-                where: {
-                    id: draftContract.draftRevision.id,
-                },
-                data: {
-                    draftRates: {
-                        disconnect: disconnectRates
-                            ? disconnectRates.map((id) => ({ id }))
-                            : [],
+            if (disconnectRates) {
+                await tx.contractRevisionTable.update({
+                    where: {
+                        id: draftContract.draftRevision.id,
                     },
-                },
-            })
+                    data: {
+                        draftRates: {
+                            disconnect: disconnectRates.map((id) => ({ id })),
+                        },
+                    },
+                })
+            }
 
             // Find and return the latest contract data
             return findContractWithHistory(tx, draftContract.id)
