@@ -1781,7 +1781,7 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
     const input = withinTargetRateCert.getByLabelText(
         'Upload one rate certification document'
     )
-    await userEvent.upload(input, [TEST_DOC_FILE])
+    await userEvent.upload(input, [TEST_PDF_FILE])
 
     // add programs
     const combobox = await withinTargetRateCert.findByRole('combobox')
