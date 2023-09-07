@@ -6,6 +6,10 @@ import { v4 as uuidv4 } from 'uuid'
 import { decodeFormDataProto } from '../../handlers/proto_to_db'
 
 describe('proto_to_db_ContractRevisions', () => {
+    afterEach(() => {
+        jest.clearAllMocks()
+    })
+
     it('migrates a contract revision', async () => {
         const client = await sharedTestPrismaClient()
         const mockRevision = createMockRevision(uuidv4())
