@@ -19,6 +19,7 @@ export type {
     SubmissionType,
     RateInfoType,
     PopulationCoveredType,
+    SharedRateCertDisplay,
 } from './UnlockedHealthPlanFormDataType'
 
 export type {
