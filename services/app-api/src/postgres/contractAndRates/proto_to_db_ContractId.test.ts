@@ -20,7 +20,6 @@ describe('proto_to_db_ContractId', () => {
             mockRevision,
             formData
         )
-        expect(contractData).toHaveProperty('id')
         expect(contractData).toEqual(
             expect.objectContaining({
                 id: expect.any(String),
