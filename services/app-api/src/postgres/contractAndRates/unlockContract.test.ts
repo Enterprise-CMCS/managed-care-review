@@ -12,7 +12,6 @@ import { submitContract } from './submitContract'
 import { findContractWithHistory } from './findContractWithHistory'
 import { must, createInsertContractData } from '../../testHelpers'
 import { updateDraftContractRates } from './updateDraftContractRates'
-import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type { DraftContractType } from '../../domain-models/contractAndRates'
 
 describe('unlockContract', () => {
@@ -82,7 +81,6 @@ describe('unlockContract', () => {
                 connectOrCreate: [
                     {
                         ...submittedRate.revisions[0].formData,
-                        stateCode: submittedRate.stateCode as StateCodeType,
                     },
                 ],
             })
@@ -199,7 +197,6 @@ describe('unlockContract', () => {
                 connectOrCreate: [
                     {
                         ...submittedRate.revisions[0].formData,
-                        stateCode: submittedRate.stateCode as StateCodeType,
                     },
                 ],
             })
@@ -309,7 +306,6 @@ describe('unlockContract', () => {
                 connectOrCreate: [
                     {
                         ...rate.draftRevision?.formData,
-                        stateCode: rate.stateCode as StateCodeType,
                     },
                 ],
             })
@@ -365,7 +361,6 @@ describe('unlockContract', () => {
                 connectOrCreate: [
                     {
                         ...rate.draftRevision?.formData,
-                        stateCode: rate.stateCode as StateCodeType,
                     },
                 ],
             })
@@ -437,7 +432,6 @@ describe('unlockContract', () => {
                 connectOrCreate: [
                     {
                         ...rate.draftRevision?.formData,
-                        stateCode: rate.stateCode as StateCodeType,
                     },
                 ],
             })

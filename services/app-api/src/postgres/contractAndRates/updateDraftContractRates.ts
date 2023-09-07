@@ -3,12 +3,11 @@ import type {
     DraftContractType,
 } from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../storeError'
-import type { InsertRateArgsType } from './insertRate'
 import type { PrismaClient } from '@prisma/client'
 import { findContractWithHistory } from './findContractWithHistory'
 import type { RateFormEditable } from './updateDraftRate'
 
-type InsertOrConnectRateArgsType = InsertRateArgsType & { id?: string }
+type InsertOrConnectRateArgsType = RateFormEditable & { id?: string }
 
 type UpdateDraftContractRatesType = {
     // Must be a draft contract.
@@ -63,7 +62,7 @@ async function updateDraftContractRates(
                             },
                         },
                         create: {
-                            stateCode: rateRevision.stateCode,
+                            stateCode: draftContract.stateCode,
                             stateNumber: latestStateRateCertNumber,
                             revisions: {
                                 create: {

@@ -13,7 +13,6 @@ import { must, createInsertContractData } from '../../testHelpers'
 import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHelpers'
 import { findContractWithHistory } from './findContractWithHistory'
 import { updateDraftContractRates } from './updateDraftContractRates'
-import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 import type { DraftContractType } from '../../domain-models/contractAndRates'
 
 describe('findRate', () => {
@@ -74,7 +73,6 @@ describe('findRate', () => {
                 connectOrCreate: [
                     {
                         ...submittedRateA.revisions[0].formData,
-                        stateCode: stateUser.stateCode as StateCodeType,
                     },
                 ],
             })
@@ -104,7 +102,6 @@ describe('findRate', () => {
                 connectOrCreate: [
                     {
                         ...submittedRateA.revisions[0].formData,
-                        stateCode: stateUser.stateCode as StateCodeType,
                     },
                 ],
             })
@@ -134,7 +131,6 @@ describe('findRate', () => {
                 connectOrCreate: [
                     {
                         ...submittedRateA.revisions[0].formData,
-                        stateCode: stateUser.stateCode as StateCodeType,
                     },
                 ],
             })
@@ -212,7 +208,6 @@ describe('findRate', () => {
                 connectOrCreate: [
                     {
                         ...submittedRateA.revisions[0].formData,
-                        stateCode: stateUser.stateCode as StateCodeType,
                     },
                 ],
             })

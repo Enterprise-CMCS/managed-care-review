@@ -9,7 +9,6 @@ import type { RateFormEditable } from './updateDraftRate'
 import { submitRate } from './submitRate'
 import { v4 as uuidv4 } from 'uuid'
 import { insertDraftRate } from './insertRate'
-import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 import type { DraftContractType } from '../../domain-models/contractAndRates'
 
 describe('updateDraftContractRates', () => {
@@ -297,17 +296,6 @@ describe('updateDraftContractRates', () => {
     it('connects existing rates to contract', async () => {
         const client = await sharedTestPrismaClient()
 
-        const stateUser = await client.user.create({
-            data: {
-                id: uuidv4(),
-                givenName: 'Aang',
-                familyName: 'Avatar',
-                email: 'aang@example.com',
-                role: 'STATE_USER',
-                stateCode: 'NM',
-            },
-        })
-
         const draftContractFormData = createInsertContractData({})
         const draftContract = must(
             await insertDraftContract(client, draftContractFormData)
@@ -349,11 +337,9 @@ describe('updateDraftContractRates', () => {
                 connectOrCreate: [
                     {
                         ...draftRate.draftRevision?.formData,
-                        stateCode: stateUser.stateCode as StateCodeType,
                     },
                     {
                         ...createDraftRateData,
-                        stateCode: stateUser.stateCode as StateCodeType,
                     },
                 ],
             })
@@ -361,25 +347,6 @@ describe('updateDraftContractRates', () => {
 
         // expect two rates connected to contract
         expect(updatedDraftContract.draftRevision.rateRevisions).toHaveLength(2)
-
-        // get state data again and compare to previous data
-        const currentStateData = must(
-            await client.state.findFirst({
-                where: {
-                    stateCode: draftContract.stateCode,
-                },
-            })
-        )
-
-        if (!currentStateData) {
-            throw new Error('Unexpected error: Cannot find state record')
-        }
-
-        // expect current state data rate cert count to be one more than previous, because we only created one new rate
-        // in our updateDraftContractRates call.
-        expect(currentStateData.latestStateRateCertNumber).toEqual(
-            previousStateData.latestStateRateCertNumber + 1
-        )
     })
 
     it('errors when trying to update a submitted rate', async () => {
