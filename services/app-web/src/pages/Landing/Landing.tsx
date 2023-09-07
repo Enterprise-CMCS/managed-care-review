@@ -77,7 +77,7 @@ export const Landing = (): React.ReactElement => {
                             </div>
                         </Grid>
                         <Grid tablet={{ col: 6 }}>
-                            <h2>
+                            <h2 className="margin-top-0">
                                 Submit your managed care health plans to CMS for
                                 review
                             </h2>
