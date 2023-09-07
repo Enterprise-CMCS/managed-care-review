@@ -195,7 +195,6 @@ export async function migrateRevision(
         )
         return error
     }
-    console.info(`Migrated HealthPlanRevision ${revision} successfully...`)
 
     return migratedContract
 }
@@ -268,12 +267,17 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     const revisions = await getRevisions(store)
 
     // go through the list of revisons and migrate
+    console.info(`Found ${revisions.length} revisions to migrate...`)
     for (const revision of revisions) {
         const migrateResult = await migrateRevision(client, revision)
         if (migrateResult instanceof Error) {
             recordException(migrateResult, serviceName, 'migrateRevision')
             console.error(migrateResult)
         }
+
+        console.info(
+            `Migrated HealthPlanRevision ${revision.pkgID} successfully...`
+        )
     }
 
     return {

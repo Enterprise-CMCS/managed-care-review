@@ -22,7 +22,6 @@ describe('proto_to_db_ContractRevisions', () => {
             formData
         )
 
-        expect(migratedContract).toHaveProperty('id')
         expect(migratedContract).toEqual(
             expect.objectContaining({
                 id: mockRevision.id,
