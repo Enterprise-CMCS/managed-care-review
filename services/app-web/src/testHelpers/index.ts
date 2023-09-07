@@ -13,6 +13,7 @@ export {
     userClickSignIn,
     ldUseClientSpy,
     TEST_DOC_FILE,
+    TEST_DOCX_FILE,
     TEST_PDF_FILE,
     TEST_PNG_FILE,
     TEST_TEXT_FILE,

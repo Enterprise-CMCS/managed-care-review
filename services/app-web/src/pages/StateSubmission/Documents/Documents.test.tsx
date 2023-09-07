@@ -65,7 +65,7 @@ describe('Documents', () => {
         )
 
         const input = screen.getByLabelText(
-            'Upload any additional supporting documents'
+            'Upload contract-supporting documents'
         )
         expect(input).toBeInTheDocument()
         await userEvent.upload(input, [TEST_DOC_FILE])
@@ -89,7 +89,7 @@ describe('Documents', () => {
         )
 
         const input = screen.getByLabelText(
-            'Upload any additional supporting documents'
+            'Upload contract-supporting documents'
         )
         expect(input).toBeInTheDocument()
         expect(input).toHaveAttribute('accept', ACCEPTED_SUBMISSION_FILE_TYPES)
@@ -195,7 +195,7 @@ describe('Documents', () => {
                 }
             )
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
             await userEvent.upload(input, [TEST_DOC_FILE])
             await userEvent.upload(input, [TEST_PDF_FILE])
@@ -231,7 +231,7 @@ describe('Documents', () => {
                 }
             )
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
 
             await userEvent.upload(input, [TEST_XLS_FILE])
@@ -281,7 +281,7 @@ describe('Documents', () => {
                 }
             )
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
             await userEvent.upload(input, [TEST_DOC_FILE])
             await userEvent.upload(input, [TEST_PDF_FILE])
@@ -328,7 +328,7 @@ describe('Documents', () => {
             )
 
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
             await userEvent.upload(input, [TEST_PDF_FILE])
             await userEvent.upload(input, [TEST_DOC_FILE])
@@ -393,7 +393,7 @@ describe('Documents', () => {
             )
 
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
 
             await userEvent.upload(input, [TEST_DOC_FILE])
@@ -449,7 +449,7 @@ describe('Documents', () => {
                 name: 'Continue',
             })
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
 
             await userEvent.upload(input, [TEST_DOC_FILE])
@@ -481,7 +481,7 @@ describe('Documents', () => {
                 name: 'Continue',
             })
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
             const targetEl = screen.getByTestId('file-input-droptarget')
 
@@ -514,7 +514,7 @@ describe('Documents', () => {
                 }
             )
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -597,7 +597,7 @@ describe('Documents', () => {
             })
 
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
             const targetEl = screen.getByTestId('file-input-droptarget')
 
@@ -687,7 +687,7 @@ describe('Documents', () => {
                 name: 'Save as draft',
             })
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
 
             await userEvent.upload(input, [TEST_DOC_FILE])
@@ -719,7 +719,7 @@ describe('Documents', () => {
                 name: 'Save as draft',
             })
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
             const targetEl = screen.getByTestId('file-input-droptarget')
 
@@ -778,7 +778,7 @@ describe('Documents', () => {
                 }
             )
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -831,7 +831,7 @@ describe('Documents', () => {
                 name: 'Back',
             })
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
 
             await userEvent.upload(input, [TEST_DOC_FILE])
@@ -863,7 +863,7 @@ describe('Documents', () => {
                 name: 'Back',
             })
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
             const targetEl = screen.getByTestId('file-input-droptarget')
 
@@ -923,7 +923,7 @@ describe('Documents', () => {
                 }
             )
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
             const backButton = screen.getByRole('button', {
                 name: 'Back',
@@ -1005,7 +1005,7 @@ describe('Documents', () => {
             )
 
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
 
             await userEvent.upload(input, [TEST_DOC_FILE])
@@ -1057,7 +1057,7 @@ describe('Documents', () => {
             )
 
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
 
             await userEvent.upload(input, [TEST_DOC_FILE])
@@ -1175,7 +1175,7 @@ describe('Documents', () => {
                 name: 'Continue',
             })
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
 
             expect(input).toBeInTheDocument()
@@ -1238,7 +1238,7 @@ describe('Documents', () => {
                 name: 'Continue',
             })
             const input = screen.getByLabelText(
-                'Upload any additional supporting documents'
+                'Upload contract-supporting documents'
             )
             expect(input).toBeInTheDocument()
             await userEvent.upload(input, [TEST_DOC_FILE])
