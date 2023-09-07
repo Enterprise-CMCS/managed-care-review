@@ -16,7 +16,7 @@ steps will be transmitted elsewhere.
 */
 
 import type { Handler, APIGatewayProxyResultV2 } from 'aws-lambda'
-import { initTracer } from '../../../uploads/src/lib/otel'
+import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import type { Store } from '../postgres'
@@ -195,9 +195,7 @@ export async function migrateRevision(
         )
         return error
     }
-    console.info(
-        `Migrated HealthPlanRevision ${revision.pkgID} successfully...`
-    )
+    console.info(`Migrated HealthPlanRevision ${revision} successfully...`)
 
     return migratedContract
 }
@@ -272,8 +270,8 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // go through the list of revisons and migrate
     for (const revision of revisions) {
         const migrateResult = await migrateRevision(client, revision)
-        // TODO not sure what we want to do with errors just yet
         if (migrateResult instanceof Error) {
+            recordException(migrateResult, serviceName, 'migrateRevision')
             console.error(migrateResult)
         }
     }
@@ -282,7 +280,6 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
         statusCode: 200,
         body: JSON.stringify({
             message: 'Lambda function executed successfully',
-            packageId: pkgID,
         }),
     } as APIGatewayProxyResultV2
 }
