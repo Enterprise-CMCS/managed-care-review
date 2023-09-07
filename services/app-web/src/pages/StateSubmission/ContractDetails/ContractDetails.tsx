@@ -530,13 +530,6 @@ export const ContractDetails = ({
                                         <span
                                             className={styles.guidanceTextBlock}
                                         >
-                                            <span className="text-ink">
-                                                Upload one contract only.
-                                            </span>
-                                            <span className="text-ink">
-                                                Supporting documents can be
-                                                added later.
-                                            </span>
                                             <Link
                                                 aria-label="Document definitions and requirements (opens in new window)"
                                                 href={'/help#key-documents'}
@@ -546,10 +539,16 @@ export const ContractDetails = ({
                                                 Document definitions and
                                                 requirements
                                             </Link>
+                                            <span className="padding-top-05">
+                                                Supporting documents can be
+                                                added later. If you have
+                                                additional contract actions, you
+                                                must submit them in a separate
+                                                submission.
+                                            </span>
                                             <span className="padding-top-1">
                                                 This input only accepts PDF,
-                                                CSV, DOC, DOCX, XLS, XLSX, XLSM
-                                                files.
+                                                CSV, DOC, DOCX, XLS, XLSX files.
                                             </span>
                                         </span>
                                     }

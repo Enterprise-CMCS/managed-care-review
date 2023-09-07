@@ -15,8 +15,19 @@ import type {
 } from '../../gen/gqlServer'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import { NewPostgresStore } from '../../postgres'
+import type { NotFoundError, Store } from '../../postgres'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import type { PrismaTransactionType } from '../../postgres/prismaTypes'
+import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates'
+import { createContractData, createDraftContractData } from '../../testHelpers'
+import { parseContractWithHistory } from '../../postgres/contractAndRates/parseContractWithHistory'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 describe('indexHealthPlanPackages', () => {
+    it.todo(
+        'run all tests with rates-db-refactor on after submit and unlock resolvers have been migrated'
+    )
     const cmsUser = testCMSUser()
     describe('isStateUser', () => {
         it('returns a list of submissions that includes newly created entries', async () => {
@@ -365,5 +376,113 @@ describe('indexHealthPlanPackages', () => {
             expect(defaultStatePackages).toHaveLength(2)
             expect(otherStatePackages).toHaveLength(1)
         })
+    })
+})
+describe('indexHealthPlanPackages test rates-db-refactor flag on only', () => {
+    afterEach(() => {
+        jest.restoreAllMocks()
+    })
+
+    it('correctly filters and log contracts that failed parsing or converting', async () => {
+        const mockFeatureFlag = testLDService({ 'rates-db-refactor': true })
+        const client = await sharedTestPrismaClient()
+        const errors = jest.spyOn(global.console, 'error').mockImplementation()
+
+        const stateUser = testStateUser()
+
+        // Valid draft contract
+        const validParsedDraftContract = parseContractWithHistory(
+            createDraftContractData({
+                stateCode: stateUser.stateCode,
+            })
+        )
+
+        if (validParsedDraftContract instanceof Error) {
+            throw new Error('Unexpected error in parsing contract in test')
+        }
+
+        // Valid submitted contract that will error because we cannot convert submitted contract yet, after we implement
+        // the function to convert submitted contracts we need to figure out how to get this to error, or remove testing
+        // conversion errors.
+        const validParsedSubmittedContract = parseContractWithHistory(
+            createContractData({
+                stateCode: stateUser.stateCode,
+            })
+        )
+
+        if (validParsedSubmittedContract instanceof Error) {
+            throw new Error('Unexpected error in parsing contract in test')
+        }
+
+        // create find all that returns parsed contracts and errors
+        const findAllContractsWithHistoryByState = (
+            client: PrismaTransactionType,
+            stateCode: string
+        ): Promise<ContractOrErrorArrayType | NotFoundError | Error> => {
+            const contracts: ContractOrErrorArrayType = [
+                {
+                    contractID: validParsedDraftContract.id,
+                    contract: validParsedDraftContract,
+                },
+                {
+                    contractID: validParsedSubmittedContract.id,
+                    contract: validParsedSubmittedContract,
+                },
+                {
+                    contractID: 'errorParsingContract',
+                    contract: new Error('Parsing Error'),
+                },
+            ]
+            return new Promise((resolve) => resolve(contracts))
+        }
+
+        const defaultStore = await NewPostgresStore(client)
+        const mockStore: Store = {
+            ...defaultStore,
+            findAllContractsWithHistoryByState: (args) =>
+                findAllContractsWithHistoryByState(client, stateUser.stateCode),
+        }
+
+        const server = await constructTestPostgresServer({
+            store: mockStore,
+            ldService: mockFeatureFlag,
+            context: {
+                user: stateUser,
+            },
+        })
+
+        // get all submissions by state
+        const result = await server.executeOperation({
+            query: INDEX_HEALTH_PLAN_PACKAGES,
+        })
+
+        const contracts = result.data?.indexHealthPlanPackages.edges
+
+        // expect console.error to log contract that failed parsing
+        expect(errors).toHaveBeenCalledWith(
+            expect.objectContaining({
+                message: 'indexHealthPlanPackagesResolver failed',
+                error: expect.stringContaining('errorParsingContract'),
+            })
+        )
+
+        // expect console.error to log contract that failed coverting
+        expect(errors).toHaveBeenCalledWith(
+            expect.objectContaining({
+                message: 'indexHealthPlanPackagesResolver failed',
+                error: expect.stringContaining(validParsedSubmittedContract.id),
+            })
+        )
+
+        // Expect our contract that passed checks
+        expect(contracts).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    node: expect.objectContaining({
+                        id: validParsedDraftContract.id,
+                    }),
+                }),
+            ])
+        )
     })
 })

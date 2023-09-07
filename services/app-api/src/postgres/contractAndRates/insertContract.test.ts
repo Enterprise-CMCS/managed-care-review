@@ -40,7 +40,7 @@ describe('insertContract', () => {
                         submissionType: 'CONTRACT_AND_RATES',
                         submissionDescription: 'Contract 1.0',
                         contractType: 'BASE',
-                        programIDs: ['PMAP'],
+                        programIDs: draftContractData.programIDs,
                         populationCovered: 'MEDICAID',
                         riskBasedContract: false,
                     }),
@@ -83,6 +83,7 @@ describe('insertContract', () => {
 
         const draftContractData = createInsertContractData({
             stateCode: 'CANADA' as StateCodeType,
+            programIDs: [],
         })
         const draftContract = await insertDraftContract(
             client,
