@@ -23,7 +23,10 @@ import {
 
 import styles from '../../StateSubmissionForm.module.scss'
 import { formatUserInputDate, isDateRangeEmpty } from '../../../../formHelpers'
-import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../../components/FileUpload'
+import {
+    ACCEPTED_SUBMISSION_FILE_TYPES,
+    ACCEPTED_RATE_CERTIFICATION_FILE_TYPES,
+} from '../../../../components/FileUpload'
 import { useS3 } from '../../../../contexts/S3Context'
 
 import { FormikErrors, getIn, useFormikContext } from 'formik'
@@ -146,18 +149,18 @@ export const SingleRateCert = ({
             data-testid={`rate-certification-form`}
             key={key}
             id={`${fieldNamePrefix}.container.${rateInfo.id}`}
+            className={styles.rateCertContainer}
             legend={
                 displayAsStandaloneRate
                     ? `Rate certification`
                     : `Rate certification ${rateCertNumber}`
             }
-            className={styles.rateCertContainer}
         >
             <FormGroup error={Boolean(showFieldErrors('rateDocuments'))}>
                 <FileUpload
                     id={`${fieldNamePrefix}.rateDocuments`}
                     name={`${fieldNamePrefix}.rateDocuments`}
-                    label="Upload rate certification"
+                    label="Upload one rate certification document"
                     renderMode="list"
                     aria-required
                     error={showFieldErrors('rateDocuments')}
@@ -171,22 +174,21 @@ export const SingleRateCert = ({
                             >
                                 Document definitions and requirements
                             </Link>
-                            <span className="padding-top-1">
-                                Upload one rate certification only.
-                            </span>
-                            <span>
-                                {supportingDocsByRate
-                                    ? 'Additional rates can be added later.'
-                                    : 'Additional rates and supporting documents can be added later.'}
+                            <span className="padding-top-2">
+                                {`Upload only one rate certification document. ${
+                                    supportingDocsByRate
+                                        ? 'Additional rates can be added later.'
+                                        : 'Additional rates and supporting documents can be added later.'
+                                }`}
                             </span>
 
                             <span className="padding-top-1">
-                                This input only accepts PDF, CSV, DOC, DOCX,
-                                XLS, XLSX, XLSM files.
+                                This input only accepts one file in PDF, DOC, or
+                                DOCX format.
                             </span>
                         </span>
                     }
-                    accept={ACCEPTED_SUBMISSION_FILE_TYPES}
+                    accept={ACCEPTED_RATE_CERTIFICATION_FILE_TYPES}
                     initialItems={rateInfo.rateDocuments}
                     uploadFile={(file) =>
                         handleUploadFile(file, 'HEALTH_PLAN_DOCS')
