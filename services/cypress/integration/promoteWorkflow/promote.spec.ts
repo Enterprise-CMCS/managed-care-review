@@ -12,4 +12,4 @@ describe('promote', () => {
             name: /Submit your managed care health plans to CMS for review/i,
         })
     })
-})
+}) 
