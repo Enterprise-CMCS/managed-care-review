@@ -9,26 +9,26 @@ import type {
 import { v4 as uuid } from 'uuid'
 import type { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 
+type documentResults =
+    | {
+          contractDocuments: ContractDocument[]
+          contractSupportingDocuments: ContractSupportingDocument[]
+          rateDocuments: RateDocument[]
+          rateSupportingDocuments: RateSupportingDocument[]
+      }
+    | Error
+
 async function migrateDocuments(
     client: PrismaClient,
     revision: HealthPlanRevisionTable,
     formData: HealthPlanFormDataType
-): Promise<
-    (
-        | Error
-        | ContractDocument
-        | ContractSupportingDocument
-        | RateDocument
-        | RateSupportingDocument
-    )[]
-> {
-    const results: (
-        | Error
-        | ContractDocument
-        | ContractSupportingDocument
-        | RateDocument
-        | RateSupportingDocument
-    )[] = []
+): Promise<documentResults> {
+    const results: documentResults = {
+        contractDocuments: [],
+        contractSupportingDocuments: [],
+        rateDocuments: [],
+        rateSupportingDocuments: [],
+    }
 
     try {
         // Handle Contract Documents
@@ -36,7 +36,7 @@ async function migrateDocuments(
             const existingContractDoc = await client.contractDocument.findFirst(
                 {
                     where: {
-                        sha256: doc.sha256 ?? null,
+                        sha256: doc.sha256 ?? undefined,
                         contractRevisionID: revision.id,
                     },
                 }
@@ -49,7 +49,7 @@ async function migrateDocuments(
                     updatedAt: new Date(),
                     name: doc.name,
                     s3URL: doc.s3URL,
-                    sha256: doc.sha256 ?? null,
+                    sha256: doc.sha256 ?? '',
                     contractRevisionID: revision.id,
                 }
 
@@ -59,7 +59,7 @@ async function migrateDocuments(
                     }
                 )
 
-                results.push(createdContractDoc)
+                results.contractDocuments.push(createdContractDoc)
             }
         }
 
@@ -68,7 +68,7 @@ async function migrateDocuments(
             const existingContractSupportDoc =
                 await client.contractSupportingDocument.findFirst({
                     where: {
-                        sha256: supportDoc.sha256 ?? null,
+                        sha256: supportDoc.sha256 ?? '',
                         contractRevisionID: revision.id,
                     },
                 })
@@ -80,7 +80,7 @@ async function migrateDocuments(
                     updatedAt: new Date(),
                     name: supportDoc.name,
                     s3URL: supportDoc.s3URL,
-                    sha256: supportDoc.sha256 ?? null,
+                    sha256: supportDoc.sha256 ?? '',
                     contractRevisionID: revision.id,
                 }
 
@@ -89,7 +89,9 @@ async function migrateDocuments(
                         data: contractSupportDoc,
                     })
 
-                results.push(createdContractSupportDoc)
+                results.contractSupportingDocuments.push(
+                    createdContractSupportDoc
+                )
             }
         }
 
@@ -110,7 +112,7 @@ async function migrateDocuments(
                     const existingRateDoc = await client.rateDocument.findFirst(
                         {
                             where: {
-                                sha256: rateDoc.sha256 ?? null,
+                                sha256: rateDoc.sha256 ?? '',
                                 rateRevisionID: rateRevision.id,
                             },
                         }
@@ -123,7 +125,7 @@ async function migrateDocuments(
                             updatedAt: new Date(),
                             name: rateDoc.name,
                             s3URL: rateDoc.s3URL,
-                            sha256: rateDoc.sha256 ?? null,
+                            sha256: rateDoc.sha256 ?? '',
                             rateRevisionID: rateRevision.id,
                         }
 
@@ -133,7 +135,7 @@ async function migrateDocuments(
                             }
                         )
 
-                        results.push(createdRateDoc)
+                        results.rateDocuments.push(createdRateDoc)
                     }
                 }
 
@@ -141,7 +143,7 @@ async function migrateDocuments(
                     const existingRateSupportDoc =
                         await client.rateSupportingDocument.findFirst({
                             where: {
-                                sha256: supportRateDoc.sha256 ?? null,
+                                sha256: supportRateDoc.sha256 ?? '',
                                 rateRevisionID: rateRevision.id,
                             },
                         })
@@ -153,7 +155,7 @@ async function migrateDocuments(
                             updatedAt: new Date(),
                             name: supportRateDoc.name,
                             s3URL: supportRateDoc.s3URL,
-                            sha256: supportRateDoc.sha256 ?? null,
+                            sha256: supportRateDoc.sha256 ?? '',
                             rateRevisionID: rateRevision.id,
                         }
 
@@ -162,7 +164,9 @@ async function migrateDocuments(
                                 data: rateSupportDocument,
                             })
 
-                        results.push(createdRateSupportDoc)
+                        results.rateSupportingDocuments.push(
+                            createdRateSupportDoc
+                        )
                     }
                 }
             }
@@ -170,8 +174,10 @@ async function migrateDocuments(
 
         return results
     } catch (error) {
-        console.error(`Error migrating documents: ${JSON.stringify(error)}`)
-        return [new Error('Error migrating documents')]
+        const err = new Error(
+            `Error migrating documents: ${JSON.stringify(error)}`
+        )
+        return err
     }
 }
 

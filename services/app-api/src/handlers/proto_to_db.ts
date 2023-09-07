@@ -25,10 +25,11 @@ import type {
     RateRevisionTable,
     RateTable,
 } from '@prisma/client'
+import type { ContractType } from '../domain-models/contractAndRates'
 import { PrismaClient } from '@prisma/client'
 import type { ContractTable, ContractRevisionTable } from '@prisma/client'
 import type { StoreError } from '../postgres/storeError'
-import { isStoreError } from '../postgres/storeError'
+import { NotFoundError, isStoreError } from '../postgres/storeError'
 import { migrateContractRevision } from '../postgres/contractAndRates/proto_to_db_ContractRevisions'
 import { migrateRateInfo } from '../postgres/contractAndRates/proto_to_db_RateRevisions'
 import { insertContractId } from '../postgres/contractAndRates/proto_to_db_ContractId'
@@ -37,6 +38,7 @@ import { migrateDocuments } from '../postgres/contractAndRates/proto_to_db_Docum
 import { prepopulateUpdateInfo } from '../postgres/contractAndRates/proto_to_db_UpdateInfoTable'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import type { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
+import { findContractWithHistory } from '../postgres/contractAndRates'
 
 export const getDatabaseConnection = async (): Promise<Store> => {
     const dbURL = process.env.DATABASE_URL
@@ -104,7 +106,7 @@ export type MigrateRevisionResult = {
 export async function migrateRevision(
     client: PrismaClient,
     revision: HealthPlanRevisionTable
-): Promise<MigrateRevisionResult | Error> {
+): Promise<ContractType | Error> {
     /* The order in which we call the helpers in this file matters */
     console.info(`Migration of revision ${revision.id} started...`)
 
@@ -171,21 +173,33 @@ export async function migrateRevision(
         revision,
         formData
     )
-    for (const documentResult of documentMigrationResults) {
-        if (documentResult instanceof Error) {
-            const error = new Error(
-                `Error migrating documents for revision ${revision.id}: ${documentResult.message}`
-            )
-            return error
-        }
+    if (documentMigrationResults instanceof Error) {
+        const error = new Error(
+            `Error migrating documents for revision ${revision.id}: ${documentMigrationResults.message}`
+        )
+        return error
     }
 
-    return {
-        contract: migrateContractResult.contract,
-        contractRevision: migrateContractResult.contractRevision,
-        rate: rateMigrationResult.rate,
-        rateRevisions: rateMigrationResult.rateRevisions,
+    // let's check that we did things right
+    const migratedContract = await findContractWithHistory(
+        client,
+        migrateContractResult.contract.id
+    )
+
+    if (
+        migratedContract instanceof Error ||
+        migratedContract instanceof NotFoundError
+    ) {
+        const error = new Error(
+            `Did not successfully migrate revision ${revision}: ${migratedContract}`
+        )
+        return error
     }
+    console.info(
+        `Migrated HealthPlanRevision ${revision.pkgID} successfully...`
+    )
+
+    return migratedContract
 }
 
 type ContractMigrationResult =
@@ -263,14 +277,6 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
             console.error(migrateResult)
         }
     }
-
-    // notes after maz: not sure why this is here and not before we try to migrate?
-    const pkgID = revisions[0].pkgID
-    if (!pkgID) {
-        console.error('Package ID is missing in the revisions')
-        throw new Error('Package ID is required')
-    }
-    console.info(`Package ID: ${pkgID}`)
 
     return {
         statusCode: 200,
