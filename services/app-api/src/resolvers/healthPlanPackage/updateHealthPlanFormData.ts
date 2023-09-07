@@ -21,6 +21,11 @@ import {
 } from '../attributeHelper'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql/index'
+import { convertSortToDomainRate } from './contractAndRates/resolverHelpers'
+import type {
+    ContractType,
+    DraftContractType,
+} from '../../domain-models/contractAndRates'
 
 type ProtectedFieldType = Pick<
     UnlockedHealthPlanFormDataType,
@@ -181,38 +186,69 @@ export function updateHealthPlanFormDataResolver(
                 throw new UserInputError(errMessage)
             }
 
-            // Update contract draft revision
-            const updateResult = await store.updateDraftContract({
-                contractID: input.pkgID,
-                formData: {
-                    ...unlockedFormData,
-                    ...unlockedFormData.contractAmendmentInfo
-                        ?.modifiedProvisions,
-                    managedCareEntities: unlockedFormData.managedCareEntities,
-                    stateContacts: unlockedFormData.stateContacts,
-                    supportingDocuments: unlockedFormData.documents.map(
-                        (doc) => {
-                            return {
-                                name: doc.name,
-                                s3URL: doc.s3URL,
-                                sha256: doc.sha256,
-                                id: doc.id,
+            // Check for any rate updates
+            const updateDraftContractRates = await convertSortToDomainRate(
+                contractWithHistory as DraftContractType,
+                unlockedFormData
+            )
+
+            if (updateDraftContractRates instanceof Error) {
+                const errMessage = `Error converting rate. Message: ${updateDraftContractRates.message}`
+                logError('updateHealthPlanFormData', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                    },
+                })
+            }
+
+            const shouldUpdateRates =
+                updateDraftContractRates.updateRateRevisions?.length ||
+                updateDraftContractRates.connectOrCreate?.length ||
+                updateDraftContractRates.disconnectRates?.length
+
+            let updateResult: ContractType | Error
+
+            // Update if there are rates to update else update contract only
+            // No way of updating rates and contract data at the same time currently
+            if (shouldUpdateRates) {
+                updateResult = await store.updateDraftContractRates(
+                    updateDraftContractRates
+                )
+            } else {
+                // Update contract draft revision
+                updateResult = await store.updateDraftContract({
+                    contractID: input.pkgID,
+                    formData: {
+                        ...unlockedFormData,
+                        ...unlockedFormData.contractAmendmentInfo
+                            ?.modifiedProvisions,
+                        managedCareEntities:
+                            unlockedFormData.managedCareEntities,
+                        stateContacts: unlockedFormData.stateContacts,
+                        supportingDocuments: unlockedFormData.documents.map(
+                            (doc) => {
+                                return {
+                                    name: doc.name,
+                                    s3URL: doc.s3URL,
+                                    sha256: doc.sha256,
+                                    id: doc.id,
+                                }
                             }
-                        }
-                    ),
-                    contractDocuments: unlockedFormData.contractDocuments.map(
-                        (doc) => {
-                            return {
-                                name: doc.name,
-                                s3URL: doc.s3URL,
-                                sha256: doc.sha256,
-                                id: doc.id,
-                            }
-                        }
-                    ),
-                    // TODO - can add rate fields here when updateHPP handles rates as well
-                },
-            })
+                        ),
+                        contractDocuments:
+                            unlockedFormData.contractDocuments.map((doc) => {
+                                return {
+                                    name: doc.name,
+                                    s3URL: doc.s3URL,
+                                    sha256: doc.sha256,
+                                    id: doc.id,
+                                }
+                            }),
+                    },
+                })
+            }
 
             if (updateResult instanceof Error) {
                 const errMessage = `Error updating form data: ${input.pkgID}:: ${updateResult.message}`
