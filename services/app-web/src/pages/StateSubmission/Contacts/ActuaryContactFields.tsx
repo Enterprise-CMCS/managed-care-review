@@ -13,6 +13,7 @@ type FormError =
 type ActuaryFormPropType = {
     actuaryContact: ActuaryContact
     errors: FormikErrors<FormikValues>
+    isRequired: boolean
     shouldValidate: boolean
     fieldNamePrefix: string
     fieldSetLegend?: string
@@ -24,6 +25,7 @@ export const ActuaryContactFields = ({
     errors,
     shouldValidate,
     fieldNamePrefix,
+    isRequired,
     fieldSetLegend = 'Actuary Contact',
     inputRef,
 }: ActuaryFormPropType) => {
@@ -36,12 +38,14 @@ export const ActuaryContactFields = ({
 
     return (
         <Fieldset legend={fieldSetLegend}>
-            <span className={styles.requiredOptionalText}>Required</span>
+            <span className={styles.requiredOptionalText}>
+                {isRequired ? 'Required' : 'Optional'}
+            </span>
             <FieldTextInput
                 name={`${fieldNamePrefix}.name`}
                 id={`${fieldNamePrefix}.name`}
                 label="Name"
-                aria-required
+                aria-required={isRequired}
                 showError={Boolean(
                     showFieldErrors(getIn(errors, `${fieldNamePrefix}.name`))
                 )}
@@ -54,7 +58,7 @@ export const ActuaryContactFields = ({
                 name={`${fieldNamePrefix}.titleRole`}
                 id={`${fieldNamePrefix}.titleRole`}
                 label="Title/Role"
-                aria-required
+                aria-required={isRequired}
                 showError={Boolean(
                     showFieldErrors(
                         getIn(errors, `${fieldNamePrefix}.titleRole`)
@@ -68,7 +72,7 @@ export const ActuaryContactFields = ({
                 name={`${fieldNamePrefix}.email`}
                 id={`${fieldNamePrefix}.email`}
                 label="Email"
-                aria-required
+                aria-required={isRequired}
                 showError={Boolean(
                     showFieldErrors(getIn(errors, `${fieldNamePrefix}.email`))
                 )}

@@ -425,9 +425,9 @@ export const FileUpload = ({
             <Label className={isLabelVisible ? '' : 'srOnly'} htmlFor={id}>
                 {label}
             </Label>
-            {isRequired && (
-                <span className={styles.requiredOptionalText}>Required</span>
-            )}
+            <span className={styles.requiredOptionalText}>
+                {isRequired ? 'Required' : 'Optional'}
+            </span>
 
             <PoliteErrorMessage id={`${id}-error`}>{error}</PoliteErrorMessage>
             {hint && (

@@ -548,6 +548,7 @@ export const SingleRateCert = ({
                 <ActuaryContactFields
                     actuaryContact={rateInfo.actuaryContacts[0]}
                     errors={errors}
+                    isRequired
                     shouldValidate={shouldValidate}
                     fieldNamePrefix={`${fieldNamePrefix}.actuaryContacts.0`}
                     fieldSetLegend="Certifying Actuary"
