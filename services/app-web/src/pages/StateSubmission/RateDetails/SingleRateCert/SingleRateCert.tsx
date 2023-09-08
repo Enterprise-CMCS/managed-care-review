@@ -514,6 +514,9 @@ export const SingleRateCert = ({
                                 ? 'Date certified for rate amendment'
                                 : 'Date certified'}
                         </Label>
+                        <span className={styles.requiredOptionalText}>
+                            Required
+                        </span>
                         <div
                             className="usa-hint"
                             id={`rateDateCertifiedHint.${index}`}
