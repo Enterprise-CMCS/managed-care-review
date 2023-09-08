@@ -477,6 +477,9 @@ export const Contacts = ({
                                                                     shouldValidate={
                                                                         shouldValidate
                                                                     }
+                                                                    isRequired={
+                                                                        true
+                                                                    }
                                                                     fieldNamePrefix={`addtlActuaryContacts.${index}`}
                                                                     fieldSetLegend={handleContactLegend(
                                                                         index,
