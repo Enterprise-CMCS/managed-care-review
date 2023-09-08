@@ -68,7 +68,6 @@ const StateUserRoutes = ({
                     path={RoutesRecord.DASHBOARD}
                     element={<StateDashboard />}
                 />
-                <Route path={RoutesRecord.HELP} element={<Help />} />
 
                 <Route
                     path={RoutesRecord.SUBMISSIONS}
@@ -186,6 +185,7 @@ const UnauthenticatedRoutes = ({
     return (
         <Routes>
             <Route path={RoutesRecord.ROOT} element={<Landing />} />
+            <Route path={RoutesRecord.HELP} element={<Help />} />
             {/* no /auth page for IDM auth, we just have the login redirect link */}
             {authComponent && (
                 <Route path={RoutesRecord.AUTH} element={authComponent} />
@@ -256,6 +256,7 @@ export const AppRoutes = ({
         const dontRedirectToAuthRoutes: (RouteT | 'UNKNOWN_ROUTE')[] = [
             'ROOT' as const,
             'AUTH' as const,
+            'HELP' as const,
             'UNKNOWN_ROUTE' as const,
         ]
         if (!loggedInUser) {

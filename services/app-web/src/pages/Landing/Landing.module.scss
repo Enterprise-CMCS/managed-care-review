@@ -4,6 +4,7 @@
 .detailsSection {
     background-color: $cms-color-background;
     flex: 1;
+    color: $theme-color-base;
     padding: units(4) 0;
     .detailsSectionContent {
         max-width: 65rem;
@@ -12,7 +13,6 @@
         }
         .detailsSteps {
             padding: units(4);
-            margin: units(2) 0;
             border: 1px solid $theme-color-base-lighter;
             @include u-radius('lg');
             h2 {
