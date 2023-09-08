@@ -157,7 +157,7 @@ describe('App Body and routes', () => {
             })
             expect(
                 screen.getByRole('heading', {
-                    name: /You can use MC-Review to submit:/i,
+                    name: /Submit your managed care health plans to CMS for review/i,
                     level: 2,
                 })
             ).toBeInTheDocument()
