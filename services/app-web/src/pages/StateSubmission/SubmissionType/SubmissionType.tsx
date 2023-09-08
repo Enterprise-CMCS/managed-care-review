@@ -509,6 +509,7 @@ export const SubmissionType = ({
                                     id="riskBasedContract"
                                     name="riskBasedContract"
                                     label="Is this a risk-based contract?"
+                                    aria-required
                                     hint="See 42 CFR § 438.2"
                                     showError={showFieldErrors(
                                         errors.riskBasedContract
