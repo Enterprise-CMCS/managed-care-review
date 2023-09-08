@@ -69,6 +69,8 @@ const StateUserRoutes = ({
                     element={<StateDashboard />}
                 />
 
+                <Route path={RoutesRecord.HELP} element={<Help />} />
+
                 <Route
                     path={RoutesRecord.SUBMISSIONS}
                     element={<StateDashboard />}
