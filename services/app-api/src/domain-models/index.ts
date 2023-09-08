@@ -25,9 +25,21 @@ export {
     packageSubmitters,
 } from './healthPlanPackage'
 
-export  {
+export {
     convertContractWithRatesRevtoHPPRev,
     convertContractWithRatesToUnlockedHPP,
+} from './contractAndRates'
+
+export type {
+    ContractType,
+    ContractRevisionType,
+    ContractRevisionWithRatesType,
+    ContractFormDataType,
+    RateType,
+    RateRevisionType,
+    RateRevisionWithContractsType,
+    RateFormDataType,
+    PackageStatusType,
 } from './contractAndRates'
 
 export type {

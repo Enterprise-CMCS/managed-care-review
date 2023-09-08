@@ -47,19 +47,6 @@ async function submitRate(
                 (c) => c.revisions[0]
             )
 
-            const everyRelatedContractIsSubmitted = relatedContractRevs.every(
-                (rev) => rev !== undefined
-            )
-
-            if (!everyRelatedContractIsSubmitted) {
-                const message =
-                    'Attempted to submit a rate related to a contract that has not been submitted'
-
-                console.error(message)
-
-                return new Error(message)
-            }
-
             const updated = await tx.rateRevisionTable.update({
                 where: {
                     id: currentRev.id,
@@ -158,3 +145,4 @@ async function submitRate(
 }
 
 export { submitRate }
+export type { SubmitRateArgsType }

@@ -37,7 +37,10 @@ import type {
     LockedHealthPlanFormDataType,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type { LDService } from '../../launchDarkly/launchDarkly'
-import { convertContractWithRatesToFormData, convertContractWithRatesToUnlockedHPP } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
+import {
+    convertContractWithRatesToFormData,
+    convertContractWithRatesToUnlockedHPP,
+} from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
 import type { Span } from '@opentelemetry/api'
 import type { PackageStatusType } from '../../domain-models/contractAndRates'
 
@@ -48,7 +51,6 @@ type SubmissionError = {
     code: SubmissionErrorCode
     message: string
 }
-
 
 export function isSubmissionError(err: unknown): err is SubmissionError {
     if (err && typeof err == 'object') {
@@ -70,18 +72,20 @@ export function isSubmissionError(err: unknown): err is SubmissionError {
 }
 
 // Throw error if resubmitted without reason or already submitted.
-const validateStatusAndUpdateInfo = (status: PackageStatusType, updateInfo: UpdateInfoType, span?: Span, submittedReason?: string) => {
+const validateStatusAndUpdateInfo = (
+    status: PackageStatusType,
+    updateInfo: UpdateInfoType,
+    span?: Span,
+    submittedReason?: string
+) => {
     if (status === 'UNLOCKED' && submittedReason) {
-        updateInfo.updatedReason = submittedReason // ! destrcutive - edit the actual update info that will be attached to submission
+        updateInfo.updatedReason = submittedReason // !destructive - edits the actual update info attached to submission
     } else if (status === 'UNLOCKED' && !submittedReason) {
         const errMessage = 'Resubmission requires a reason'
         logError('submitHealthPlanPackage', errMessage)
         setErrorAttributesOnActiveSpan(errMessage, span)
         throw new UserInputError(errMessage)
-    } else if (
-        status === 'RESUBMITTED' ||
-        status === 'SUBMITTED'
-    ) {
+    } else if (status === 'RESUBMITTED' || status === 'SUBMITTED') {
         const errMessage = `Attempted to submit an already submitted package.`
         logError('submitHealthPlanPackage', errMessage)
         throw new GraphQLError(errMessage, {
@@ -171,7 +175,8 @@ export function submitHealthPlanPackageResolver(
         span?.setAttribute('mcreview.package_id', pkgID)
 
         let currentFormData: HealthPlanFormDataType // data from revision that is being submitted
-        let updatedPackage: HealthPlanPackageType // after submit
+        let contractRevisionID: string // id for latest contract revision  - this will be passed to submit
+        let updatedPackage: HealthPlanPackageType // updated data from revision after submit
 
         //Set updateInfo default to initial submission
         const updateInfo: UpdateInfoType = {
@@ -226,44 +231,54 @@ export function submitHealthPlanPackageResolver(
             const maybeHealthPlanPackage =
                 convertContractWithRatesToUnlockedHPP(contractWithHistory)
 
-                if (maybeHealthPlanPackage instanceof Error) {
-                    const errMessage = `Error convert to contractWithHistory health plan package. Message: ${maybeHealthPlanPackage.message}`
-                    logError('submitHealthPlanPackage', errMessage)
-                    setErrorAttributesOnActiveSpan(errMessage, span)
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'PROTO_DECODE_ERROR',
-                        },
-                    })
-                }
+            if (maybeHealthPlanPackage instanceof Error) {
+                const errMessage = `Error convert to contractWithHistory health plan package. Message: ${maybeHealthPlanPackage.message}`
+                logError('submitHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'PROTO_DECODE_ERROR',
+                    },
+                })
+            }
 
-               // Validate user authorized to fetch state
-        if (contractWithHistory.stateCode !== stateFromCurrentUser) {
-            logError(
-                'submitHealthPlanPackage',
-                'user not authorized to fetch data from a different state'
-            )
-            setErrorAttributesOnActiveSpan(
-                'user not authorized to fetch data from a different state',
-                span
-            )
-            throw new ForbiddenError(
-                'user not authorized to fetch data from a different state'
-            )
-        }
+            // Validate user authorized to fetch state
+            if (contractWithHistory.stateCode !== stateFromCurrentUser) {
+                logError(
+                    'submitHealthPlanPackage',
+                    'user not authorized to fetch data from a different state'
+                )
+                setErrorAttributesOnActiveSpan(
+                    'user not authorized to fetch data from a different state',
+                    span
+                )
+                throw new ForbiddenError(
+                    'user not authorized to fetch data from a different state'
+                )
+            }
 
-            validateStatusAndUpdateInfo(contractWithHistory.status,updateInfo, span, submittedReason || undefined)
+            validateStatusAndUpdateInfo(
+                contractWithHistory.status,
+                updateInfo,
+                span,
+                submittedReason || undefined
+            )
 
             // reassign variable set up before rates feature flag
-            currentFormData = convertContractWithRatesToFormData(contractWithHistory.revisions[0], contractWithHistory.stateCode, contractWithHistory.stateNumber)
+            currentFormData = convertContractWithRatesToFormData(
+                contractWithHistory.revisions[0],
+                contractWithHistory.stateCode,
+                contractWithHistory.stateNumber
+            )
+            contractRevisionID = contractWithHistory.revisions[0].id
         } else {
             //  fetch from package flag off - returns HealthPlanPackage
             const initialPackage = await store.findHealthPlanPackage(
                 input.pkgID
             )
 
-                if (isStoreError(initialPackage) || !initialPackage) {
+            if (isStoreError(initialPackage) || !initialPackage) {
                 if (!initialPackage) {
                     throw new GraphQLError('Issue finding package.', {
                         extensions: {
@@ -298,36 +313,40 @@ export function submitHealthPlanPackageResolver(
                 })
             }
 
-               // Validate user authorized to fetch state
-        if (initialPackage.stateCode !== stateFromCurrentUser) {
-            logError(
-                'submitHealthPlanPackage',
-                'user not authorized to fetch data from a different state'
-            )
-            setErrorAttributesOnActiveSpan(
-                'user not authorized to fetch data from a different state',
-                span
-            )
-            throw new ForbiddenError(
-                'user not authorized to fetch data from a different state'
-            )
-        }
+            // Validate user authorized to fetch state
+            if (initialPackage.stateCode !== stateFromCurrentUser) {
+                logError(
+                    'submitHealthPlanPackage',
+                    'user not authorized to fetch data from a different state'
+                )
+                setErrorAttributesOnActiveSpan(
+                    'user not authorized to fetch data from a different state',
+                    span
+                )
+                throw new ForbiddenError(
+                    'user not authorized to fetch data from a different state'
+                )
+            }
             const status = packageStatus(initialPackage)
             if (status instanceof Error) {
-                throw  new GraphQLError(status.message, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'INVALID_PACKAGE_STATUS',
-                }
+                throw new GraphQLError(status.message, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'INVALID_PACKAGE_STATUS',
+                    },
                 })
             }
 
-            validateStatusAndUpdateInfo(status,updateInfo, span, submittedReason || undefined)
+            validateStatusAndUpdateInfo(
+                status,
+                updateInfo,
+                span,
+                submittedReason || undefined
+            )
             // reassign variable set up before rates feature flag
             currentFormData = maybeFormData
-
+            contractRevisionID = initialPackage.revisions[0].id
         }
-
 
         /*
              Clean form data and remove fields from edits on irrelevant logic branches
@@ -366,15 +385,14 @@ export function submitHealthPlanPackageResolver(
         const lockedFormData = submissionResult
 
         if (ratesDatabaseRefactor) {
-            // Save the submitted package
-            const updateResult = await store.updateHealthPlanRevision(
-                input.pkgID,
-                currentFormData.id,
-                lockedFormData,
-                updateInfo
-            )
-            if (isStoreError(updateResult)) {
-                const errMessage = `Issue updating a package of type ${updateResult.code}. Message: ${updateResult.message}`
+            // Save the contract!
+            const submitResult = await store.submitContract({
+                contractID: contractRevisionID,
+                submittedByUserID: user.id,
+                submitReason: updateInfo.updatedReason,
+            })
+            if (isStoreError(submitResult)) {
+                const errMessage = `Issue updating a package of type ${submitResult.code}. Message: ${submitResult.message}`
                 logError('submitHealthPlanPackage', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new GraphQLError(errMessage, {
@@ -383,14 +401,30 @@ export function submitHealthPlanPackageResolver(
                         cause: 'DB_ERROR',
                     },
                 })
+            } else if (submitResult instanceof Error) {
+                throw new Error('Still to do - figuring out error handling')
+            }
+            const maybeSubmittedPkg =
+                convertContractWithRatesToUnlockedHPP(submitResult)
+
+            if (maybeSubmittedPkg instanceof Error) {
+                const errMessage = `Error converting draft contract. Message: ${maybeSubmittedPkg.message}`
+                logError('createHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'PROTO_DECODE_ERROR',
+                    },
+                })
             }
 
-            updatedPackage = updateResult
+            updatedPackage = maybeSubmittedPkg
         } else {
             // Save the package!
             const updateResult = await store.updateHealthPlanRevision(
                 input.pkgID,
-                currentFormData.id,
+                contractRevisionID,
                 lockedFormData,
                 updateInfo
             )

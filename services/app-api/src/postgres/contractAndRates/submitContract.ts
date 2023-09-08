@@ -6,7 +6,7 @@ import type { UpdateInfoType } from '../../domain-models'
 import { includeFirstSubmittedRateRev } from './prismaSubmittedRateHelpers'
 
 type SubmitContractArgsType = {
-    contractID: string
+    contractID: string // revision ID
     submittedByUserID: UpdateInfoType['updatedBy']
     submitReason: UpdateInfoType['updatedReason']
 }
@@ -156,3 +156,4 @@ async function submitContract(
 }
 
 export { submitContract }
+export type { SubmitContractArgsType }

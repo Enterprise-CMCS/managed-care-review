@@ -7,7 +7,7 @@ import type { ContractFormDataType } from '../../domain-models/contractAndRates'
 type ContractFormEditable = Partial<ContractFormDataType>
 
 type UpdateContractArgsType = {
-    contractID: string
+    contractID: string //revision ID
     formData: ContractFormEditable
     rateIDs: string[]
 }
