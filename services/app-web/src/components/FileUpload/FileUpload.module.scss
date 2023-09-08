@@ -32,6 +32,11 @@
     margin-bottom: 0.5rem;
 }
 
+.requiredOptionalText {
+    display: block;
+    color: $theme-color-hint;
+}
+
 .fileSummary {
     font-weight: normal;
     @include u-font('sans', 'sm');

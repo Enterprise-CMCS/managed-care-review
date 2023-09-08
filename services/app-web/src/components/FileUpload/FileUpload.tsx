@@ -61,6 +61,7 @@ export const FileUpload = ({
     uploadFile,
     scanFile,
     deleteFile,
+    // ariaRequired,
     onFileItemsUpdate,
     isContractOnly,
     shouldDisplayMissingCategoriesError = false,
@@ -71,8 +72,8 @@ export const FileUpload = ({
     const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
     const summaryRef = useRef<HTMLHeadingElement>(null) // reference to the heading that we will focus
     const previousFileItems = usePrevious(fileItems)
+    const isRequired = inputProps['aria-required']
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-
     const handleCheckboxClick = (
         event: React.ChangeEvent<HTMLInputElement>
     ) => {
@@ -424,6 +425,9 @@ export const FileUpload = ({
             <Label className={isLabelVisible ? '' : 'srOnly'} htmlFor={id}>
                 {label}
             </Label>
+            {isRequired && (
+                <span className={styles.requiredOptionalText}>Required</span>
+            )}
 
             <PoliteErrorMessage id={`${id}-error`}>{error}</PoliteErrorMessage>
             {hint && (
