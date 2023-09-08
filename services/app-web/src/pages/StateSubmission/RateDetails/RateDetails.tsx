@@ -320,9 +320,6 @@ export const RateDetails = ({
                         >
                             <fieldset className="usa-fieldset">
                                 <legend className="srOnly">Rate Details</legend>
-                                <span id="form-guidance">
-                                    All fields are required
-                                </span>
 
                                 {shouldValidate && (
                                     <ErrorSummary

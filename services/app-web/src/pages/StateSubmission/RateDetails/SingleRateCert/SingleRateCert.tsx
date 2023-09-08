@@ -303,6 +303,7 @@ export const SingleRateCert = ({
                     legend="Rate certification type"
                     role="radiogroup"
                     aria-required
+                    aria-label="Required"
                 >
                     <PoliteErrorMessage>
                         {showFieldErrors('rateType')}
@@ -316,6 +317,9 @@ export const SingleRateCert = ({
                     >
                         Rate certification type definitions
                     </Link>
+                    <span className={styles.requiredOptionalText}>
+                        Required
+                    </span>
                     <FieldRadio
                         id={`newRate-${index}`}
                         name={`${fieldNamePrefix}.rateType`}
