@@ -286,6 +286,7 @@ export const SingleRateCert = ({
                 <Label htmlFor={`${fieldNamePrefix}.rateProgramIDs`}>
                     Programs this rate certification covers
                 </Label>
+                <span className={styles.requiredOptionalText}>Required</span>
                 <PoliteErrorMessage>
                     {showFieldErrors('rateProgramIDs')}
                 </PoliteErrorMessage>
@@ -305,6 +306,9 @@ export const SingleRateCert = ({
                     aria-required
                     aria-label="Required"
                 >
+                    <span className={styles.requiredOptionalText}>
+                        Required
+                    </span>
                     <PoliteErrorMessage>
                         {showFieldErrors('rateType')}
                     </PoliteErrorMessage>
@@ -317,9 +321,6 @@ export const SingleRateCert = ({
                     >
                         Rate certification type definitions
                     </Link>
-                    <span className={styles.requiredOptionalText}>
-                        Required
-                    </span>
                     <FieldRadio
                         id={`newRate-${index}`}
                         name={`${fieldNamePrefix}.rateType`}
@@ -344,6 +345,9 @@ export const SingleRateCert = ({
                                 Does the actuary certify capitation rates
                                 specific to each rate cell or a rate range?
                             </p>
+                            <span className={styles.legendSubHeader}>
+                                Required
+                            </span>
                             <p className={styles.legendSubHeader}>
                                 See 42 CFR §§ 438.4(b) and 438.4(c)
                             </p>
@@ -386,6 +390,9 @@ export const SingleRateCert = ({
                                     : 'Rating period'
                             }
                         >
+                            <span className={styles.requiredOptionalText}>
+                                Required
+                            </span>
                             <RateDatesErrorMessage
                                 startDate={rateInfo.rateDateStart}
                                 endDate={rateInfo.rateDateEnd}
@@ -442,6 +449,11 @@ export const SingleRateCert = ({
                                     aria-required
                                     legend="Effective dates of rate amendment"
                                 >
+                                    <span
+                                        className={styles.requiredOptionalText}
+                                    >
+                                        Required
+                                    </span>
                                     <RateDatesErrorMessage
                                         startDate={rateInfo.effectiveDateStart}
                                         endDate={rateInfo.effectiveDateEnd}

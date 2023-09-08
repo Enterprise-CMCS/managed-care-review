@@ -499,9 +499,6 @@ export const ContractDetails = ({
                     >
                         <fieldset className="usa-fieldset">
                             <legend className="srOnly">Contract Details</legend>
-                            <span id="form-guidance">
-                                All fields are required
-                            </span>
 
                             {shouldValidate && (
                                 <ErrorSummary
@@ -578,6 +575,11 @@ export const ContractDetails = ({
                                             {errors.contractExecutionStatus}
                                         </PoliteErrorMessage>
                                     )}
+                                    <span
+                                        className={styles.requiredOptionalText}
+                                    >
+                                        Required
+                                    </span>
                                     <FieldRadio
                                         id="executedContract"
                                         name="contractExecutionStatus"
@@ -616,6 +618,13 @@ export const ContractDetails = ({
                                                     : 'Contract effective dates'
                                             }
                                         >
+                                            <span
+                                                className={
+                                                    styles.requiredOptionalText
+                                                }
+                                            >
+                                                Required
+                                            </span>
                                             {showFieldErrors(
                                                 errors.contractDateStart ||
                                                     errors.contractDateEnd
@@ -697,6 +706,13 @@ export const ContractDetails = ({
                                             aria-required
                                             legend="Managed Care entities"
                                         >
+                                            <span
+                                                className={
+                                                    styles.requiredOptionalText
+                                                }
+                                            >
+                                                Required
+                                            </span>
                                             <Link
                                                 variant="external"
                                                 href={
@@ -762,6 +778,13 @@ export const ContractDetails = ({
                                             aria-required
                                             legend="Active federal operating authority"
                                         >
+                                            <span
+                                                className={
+                                                    styles.requiredOptionalText
+                                                }
+                                            >
+                                                Required
+                                            </span>
                                             <Link
                                                 variant="external"
                                                 href={
@@ -815,6 +838,13 @@ export const ContractDetails = ({
                                                         : 'Does this contract action include new or modified provisions related to any of the following'
                                                 }
                                             >
+                                                <span
+                                                    className={
+                                                        styles.requiredOptionalText
+                                                    }
+                                                >
+                                                    Required
+                                                </span>
                                                 {applicableProvisions.map(
                                                     (modifiedProvisionName) => (
                                                         <FieldYesNo
