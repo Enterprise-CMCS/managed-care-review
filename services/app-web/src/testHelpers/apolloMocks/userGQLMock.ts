@@ -54,7 +54,7 @@ type fetchCurrentUserMockProps = {
     statusCode: 200 | 403 | 500
 }
 const fetchCurrentUserMock = ({
-    user = mockValidUser(),
+    user = mockValidUser(), // defaults to logged in state user, we can override though from test
     statusCode,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
 fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
