@@ -57,6 +57,9 @@ export const FieldYesNo = ({
             className={classes}
             data-testid="yes-no-radio-fieldset"
         >
+            {isRequired && (
+                <span className={styles.requiredOptionalText}>Required</span>
+            )}
             {showError && <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>}
             {hint && (
                 <div
