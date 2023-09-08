@@ -218,9 +218,9 @@ export const SingleRateCert = ({
                     <FileUpload
                         id={`${fieldNamePrefix}.supportingDocuments`}
                         name={`${fieldNamePrefix}.supportingDocuments`}
-                        label="Upload supporting documents (optional)"
+                        label="Upload supporting documents"
                         renderMode="list"
-                        aria-required
+                        aria-required={false}
                         error={showFieldErrors('supportingDocuments')}
                         hint={
                             <span className={styles.guidanceTextBlockNoPadding}>
