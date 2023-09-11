@@ -272,10 +272,12 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
 
     // go through the list of revisons and migrate
     console.info(`Found ${revisions.length} revisions to migrate...`)
+    const revisionsWithErrors = []
     for (const revision of revisions) {
         const migrateResult = await migrateRevision(client, revision)
         if (migrateResult instanceof Error) {
             recordException(migrateResult, serviceName, 'migrateRevision')
+            revisionsWithErrors.push(revision.id)
             console.error(migrateResult)
         }
 
@@ -283,6 +285,12 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
             `Migrated HealthPlanRevision ${revision.pkgID} successfully...`
         )
     }
+
+    console.info(
+        `Migrations that could not be processed: ${JSON.stringify(
+            revisionsWithErrors
+        )}`
+    )
 
     return {
         statusCode: 200,
