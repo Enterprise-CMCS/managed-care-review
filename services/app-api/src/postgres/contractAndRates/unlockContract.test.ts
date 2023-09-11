@@ -11,8 +11,6 @@ import { updateDraftRate } from './updateDraftRate'
 import { submitContract } from './submitContract'
 import { findContractWithHistory } from './findContractWithHistory'
 import { must, createInsertContractData } from '../../testHelpers'
-import { updateDraftContractRates } from './updateDraftContractRates'
-import type { DraftContractType } from '../../domain-models/contractAndRates'
 
 describe('unlockContract', () => {
     it('Unlocks a rate without breaking connected draft contract', async () => {
@@ -60,7 +58,7 @@ describe('unlockContract', () => {
         )
 
         // Connect draft contract to submitted rate
-        const updatedDraftContract = must(
+        must(
             await updateDraftContract(client, {
                 contractID: contract.id,
                 formData: {
@@ -71,18 +69,7 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-            })
-        ) as DraftContractType
-
-        // connect the rate
-        must(
-            await updateDraftContractRates(client, {
-                draftContract: updatedDraftContract,
-                connectOrCreate: [
-                    {
-                        ...submittedRate.revisions[0].formData,
-                    },
-                ],
+                rateFormDatas: [submittedRate.revisions[0].formData],
             })
         )
 
@@ -93,7 +80,7 @@ describe('unlockContract', () => {
         const draftContract = fullDraftContract.draftRevision
 
         if (draftContract === undefined) {
-            throw Error('Contract data was undefined')
+            throw Error('Unexpect error: draft contract missing draft revision')
         }
 
         // Rate revision should be connected to contract
@@ -122,7 +109,7 @@ describe('unlockContract', () => {
         const draftContractTwo = fullDraftContractTwo.draftRevision
 
         if (draftContractTwo === undefined) {
-            throw Error('Contract data was undefined')
+            throw Error('Unexpect error: draft contract missing draft revision')
         }
 
         // Contract should now have the latest rate revision
@@ -176,7 +163,7 @@ describe('unlockContract', () => {
         )
 
         // Connect draft contract to submitted rate
-        const updatedDraftContract = must(
+        must(
             await updateDraftContract(client, {
                 contractID: contract.id,
                 formData: {
@@ -187,18 +174,7 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-            })
-        ) as DraftContractType
-
-        // connect the rate
-        must(
-            await updateDraftContractRates(client, {
-                draftContract: updatedDraftContract,
-                connectOrCreate: [
-                    {
-                        ...submittedRate.revisions[0].formData,
-                    },
-                ],
+                rateFormDatas: [submittedRate.revisions[0].formData],
             })
         )
 
@@ -284,8 +260,14 @@ describe('unlockContract', () => {
             })
         )
 
+        if (!rate.draftRevision) {
+            throw new Error(
+                'Unexpected error: draft rate is missing a draftRevision.'
+            )
+        }
+
         // Connect draft contract to draft rate
-        const updatedDraftContract = must(
+        must(
             await updateDraftContract(client, {
                 contractID: contract.id,
                 formData: {
@@ -296,18 +278,7 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-            })
-        ) as DraftContractType
-
-        // connect the rate
-        must(
-            await updateDraftContractRates(client, {
-                draftContract: updatedDraftContract,
-                connectOrCreate: [
-                    {
-                        ...rate.draftRevision?.formData,
-                    },
-                ],
+                rateFormDatas: [rate.draftRevision?.formData],
             })
         )
 
@@ -340,7 +311,7 @@ describe('unlockContract', () => {
                 'First unlock'
             )
         )
-        const updatedUnlockedContract = must(
+        must(
             await updateDraftContract(client, {
                 contractID: contract.id,
                 formData: {
@@ -351,18 +322,7 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-            })
-        ) as DraftContractType
-
-        // connect the rate
-        must(
-            await updateDraftContractRates(client, {
-                draftContract: updatedUnlockedContract,
-                connectOrCreate: [
-                    {
-                        ...rate.draftRevision?.formData,
-                    },
-                ],
+                rateFormDatas: [rate.draftRevision?.formData],
             })
         )
 
@@ -410,8 +370,14 @@ describe('unlockContract', () => {
             })
         )
 
+        if (!rate.draftRevision) {
+            throw new Error(
+                'Unexpected error: draft rate is missing a draftRevision.'
+            )
+        }
+
         // Connect draft contract to submitted rate
-        const updatedDraftContract = must(
+        must(
             await updateDraftContract(client, {
                 contractID: contract.id,
                 formData: {
@@ -422,18 +388,7 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-            })
-        ) as DraftContractType
-
-        // connect the rate
-        must(
-            await updateDraftContractRates(client, {
-                draftContract: updatedDraftContract,
-                connectOrCreate: [
-                    {
-                        ...rate.draftRevision?.formData,
-                    },
-                ],
+                rateFormDatas: [rate.draftRevision?.formData],
             })
         )
 

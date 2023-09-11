@@ -12,7 +12,6 @@ import { findRateWithHistory } from './findRateWithHistory'
 import { must, createInsertContractData } from '../../testHelpers'
 import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHelpers'
 import { findContractWithHistory } from './findContractWithHistory'
-import { updateDraftContractRates } from './updateDraftContractRates'
 import type { DraftContractType } from '../../domain-models/contractAndRates'
 
 describe('findRate', () => {
@@ -46,6 +45,65 @@ describe('findRate', () => {
         })
         const rateA = must(await insertDraftRate(client, draftRateData))
 
+        if (!rateA.draftRevision) {
+            throw new Error(
+                'Unexpected error: draft rate is missing a draftRevision.'
+            )
+        }
+
+        // Add 3 contracts 1, 2, 3 pointing to rate A
+        const contract1 = must(
+            await insertDraftContract(client, {
+                stateCode: 'MN',
+                submissionDescription: 'someurle.en',
+                programIDs: ['13221'],
+                submissionType: 'CONTRACT_ONLY',
+                contractType: 'BASE',
+            })
+        )
+        must(
+            await updateDraftContract(client, {
+                contractID: contract1.id,
+                formData: { submissionDescription: 'someurle.en' },
+                rateFormDatas: [rateA.draftRevision.formData],
+            })
+        )
+
+        const contract2 = must(
+            await insertDraftContract(client, {
+                stateCode: 'MN',
+                submissionDescription: 'twopointo',
+                programIDs: ['13221'],
+                submissionType: 'CONTRACT_ONLY',
+                contractType: 'BASE',
+            })
+        )
+        must(
+            await updateDraftContract(client, {
+                contractID: contract2.id,
+                formData: { submissionDescription: 'twopointo' },
+                rateFormDatas: [rateA.draftRevision.formData],
+            })
+        )
+
+        const contract3 = must(
+            await insertDraftContract(client, {
+                stateCode: 'MN',
+                submissionDescription: 'threepointo',
+                programIDs: ['13221'],
+                submissionType: 'CONTRACT_ONLY',
+                contractType: 'BASE',
+            })
+        )
+        must(
+            await updateDraftContract(client, {
+                contractID: contract3.id,
+                formData: { submissionDescription: 'threepointo' },
+                rateFormDatas: [rateA.draftRevision.formData],
+            })
+        )
+
+        // Submit rateA
         const submittedRateA = must(
             await submitRate(
                 client,
@@ -55,28 +113,7 @@ describe('findRate', () => {
             )
         )
 
-        // Add 3 contracts 1, 2, 3 pointing to rate A
-
-        // create, update, submit contract1
-        const contract1 = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionDescription: 'onepointo',
-                programIDs: ['13221'],
-                submissionType: 'CONTRACT_ONLY',
-                contractType: 'BASE',
-            })
-        ) as DraftContractType
-        must(
-            await updateDraftContractRates(client, {
-                draftContract: contract1,
-                connectOrCreate: [
-                    {
-                        ...submittedRateA.revisions[0].formData,
-                    },
-                ],
-            })
-        )
+        // Submit Contract 1, 2, and 3
         must(
             await submitContract(
                 client,
@@ -85,27 +122,6 @@ describe('findRate', () => {
                 'Contract Submit'
             )
         )
-
-        // create, update, submit contract2
-        const contract2 = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionDescription: 'twopointo',
-                programIDs: ['13221'],
-                submissionType: 'CONTRACT_ONLY',
-                contractType: 'BASE',
-            })
-        ) as DraftContractType
-        must(
-            await updateDraftContractRates(client, {
-                draftContract: contract2,
-                connectOrCreate: [
-                    {
-                        ...submittedRateA.revisions[0].formData,
-                    },
-                ],
-            })
-        )
         must(
             await submitContract(
                 client,
@@ -113,27 +129,6 @@ describe('findRate', () => {
                 stateUser.id,
                 'ContractSubmit 2'
             )
-        )
-
-        // create, update, submit contract3
-        const contract3 = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionDescription: 'threepointo',
-                programIDs: ['13221'],
-                submissionType: 'CONTRACT_ONLY',
-                contractType: 'BASE',
-            })
-        ) as DraftContractType
-        must(
-            await updateDraftContractRates(client, {
-                draftContract: contract3,
-                connectOrCreate: [
-                    {
-                        ...submittedRateA.revisions[0].formData,
-                    },
-                ],
-            })
         )
         must(
             await submitContract(
@@ -145,9 +140,7 @@ describe('findRate', () => {
         )
 
         // Now, find that rate and assert the history is what we expected
-        const threeRate = must(
-            await findRateWithHistory(client, submittedRateA.id)
-        )
+        const threeRate = must(await findRateWithHistory(client, rateA.id))
         if (threeRate instanceof Error) {
             throw threeRate
         }
@@ -161,11 +154,21 @@ describe('findRate', () => {
                 cmsUser.id,
                 'unlock for 2.1 remove'
             )
-        ) as DraftContractType
+        )
         must(
-            await updateDraftContractRates(client, {
-                draftContract: unlockedContract2,
-                disconnectRates: [submittedRateA.id],
+            await updateDraftContract(client, {
+                contractID: unlockedContract2.id,
+                formData: {
+                    submissionType: 'CONTRACT_AND_RATES',
+                    submissionDescription: 'a.2 body',
+                    contractType: 'BASE',
+                    populationCovered: 'MEDICAID',
+                    riskBasedContract: false,
+                },
+                rateFormDatas:
+                    unlockedContract2.draftRevision?.rateRevisions.filter(
+                        (rate) => rate.formData.rateID !== submittedRateA.id
+                    ),
             })
         )
         must(
@@ -200,16 +203,7 @@ describe('findRate', () => {
             await updateDraftContract(client, {
                 contractID: unlockedContract1.id,
                 formData: { submissionDescription: 'onepointone' },
-            })
-        )
-        must(
-            await updateDraftContractRates(client, {
-                draftContract: unlockedContract1,
-                connectOrCreate: [
-                    {
-                        ...submittedRateA.revisions[0].formData,
-                    },
-                ],
+                rateFormDatas: [rateA.draftRevision.formData],
             })
         )
         must(
@@ -422,7 +416,7 @@ describe('findRate', () => {
         })
         const contractA = must(
             await insertDraftContract(client, draftContractData)
-        ) as DraftContractType
+        )
         must(
             await submitContract(
                 client,
@@ -516,6 +510,7 @@ describe('findRate', () => {
                 'unlocking A.0'
             )
         )
+
         must(
             await updateDraftContract(client, {
                 contractID: contractA.id,
@@ -547,7 +542,7 @@ describe('findRate', () => {
                 'unlocking A.1'
             )
         )
-        const updatedDraftContract = must(
+        const updatedDraftContractA = must(
             await updateDraftContract(client, {
                 contractID: contractA.id,
                 formData: {
@@ -559,12 +554,17 @@ describe('findRate', () => {
                     riskBasedContract: false,
                 },
             })
-        ) as DraftContractType
+        )
         // Remove rate1 from contract
         must(
-            await updateDraftContractRates(client, {
-                draftContract: updatedDraftContract,
-                disconnectRates: [rate1.id],
+            await updateDraftContract(client, {
+                contractID: updatedDraftContractA.id,
+                formData: {},
+                rateFormDatas:
+                    updatedDraftContractA.draftRevision?.rateRevisions.filter(
+                        (rateRevision) =>
+                            rateRevision.formData.rateID !== rate1.id
+                    ),
             })
         )
         must(

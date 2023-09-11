@@ -21,7 +21,6 @@ import type {
     InsertQuestionResponseArgs,
     StateType,
 } from '../domain-models'
-import type { NotFoundError } from '../postgres'
 import { findPrograms, findStatePrograms } from '../postgres'
 import type { StoreError } from './storeError'
 import type { InsertHealthPlanPackageArgsType } from './healthPlanPackage'
@@ -55,13 +54,11 @@ import {
     updateDraftContract,
     findAllContractsWithHistoryByState,
     findAllContractsWithHistoryBySubmitInfo,
-    updateDraftContractRates,
 } from './contractAndRates'
 import type {
     InsertContractArgsType,
     UpdateContractArgsType,
     ContractOrErrorArrayType,
-    UpdateDraftContractRatesType,
 } from './contractAndRates'
 
 type Store = {
@@ -159,10 +156,6 @@ type Store = {
     findAllContractsWithHistoryBySubmitInfo: () => Promise<
         ContractOrErrorArrayType | Error
     >
-
-    updateDraftContractRates: (
-        args: UpdateDraftContractRatesType
-    ) => Promise<ContractType | NotFoundError | Error>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -228,8 +221,6 @@ function NewPostgresStore(client: PrismaClient): Store {
             findAllContractsWithHistoryByState(client, args),
         findAllContractsWithHistoryBySubmitInfo: () =>
             findAllContractsWithHistoryBySubmitInfo(client),
-        updateDraftContractRates: (args) =>
-            updateDraftContractRates(client, args),
     }
 }
 

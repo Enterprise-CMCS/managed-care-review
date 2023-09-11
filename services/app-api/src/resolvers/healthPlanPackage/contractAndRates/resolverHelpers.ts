@@ -1,15 +1,10 @@
-import type {
-    ContractOrErrorArrayType,
-    UpdateDraftContractRatesType,
-} from '../../../postgres/contractAndRates'
+import type { ContractOrErrorArrayType } from '../../../postgres/contractAndRates'
 import type { Span } from '@opentelemetry/api'
 import type { HealthPlanPackageType } from '../../../domain-models'
 import type {
     ContractType,
     RateFormDataType,
     DocumentType,
-    DraftContractType,
-    RateRevisionType,
 } from '../../../domain-models/contractAndRates'
 import { convertContractToUnlockedHealthPlanPackage } from '../../../domain-models'
 import { logError } from '../../../logger'
@@ -75,15 +70,6 @@ const validateContractsAndConvert = (
     return convertedContracts
 }
 
-function isEqualData(target: object, source: object): boolean {
-    try {
-        assert.deepStrictEqual(target, source, 'Rate data not equal')
-        return true
-    } catch (e) {
-        return false
-    }
-}
-
 const convertHealthPlanPackageRateToDomain = async (
     unlockedFormData: UnlockedHealthPlanFormDataType
 ): Promise<RateFormDataType[] | Error> => {
@@ -106,30 +92,30 @@ const convertHealthPlanPackageRateToDomain = async (
             })
         )
 
-    for (const hppRate of unlockedFormData.rateInfos) {
+    for (const hppRateFormData of unlockedFormData.rateInfos) {
         const rateDocuments = await convertHPPDocsToDomain(
-            hppRate.rateDocuments
+            hppRateFormData.rateDocuments
         )
         const supportingDocuments = await convertHPPDocsToDomain(
-            hppRate.supportingDocuments
+            hppRateFormData.supportingDocuments
         )
 
         const rate: RateFormDataType = {
-            id: hppRate.id,
-            rateType: hppRate.rateType,
-            rateCapitationType: hppRate.rateCapitationType,
+            id: hppRateFormData.id,
+            rateType: hppRateFormData.rateType,
+            rateCapitationType: hppRateFormData.rateCapitationType,
             rateDocuments: rateDocuments,
             supportingDocuments: supportingDocuments,
-            rateDateStart: hppRate.rateDateStart,
-            rateDateEnd: hppRate.rateDateEnd,
-            rateDateCertified: hppRate.rateDateCertified,
+            rateDateStart: hppRateFormData.rateDateStart,
+            rateDateEnd: hppRateFormData.rateDateEnd,
+            rateDateCertified: hppRateFormData.rateDateCertified,
             amendmentEffectiveDateStart:
-                hppRate.rateAmendmentInfo?.effectiveDateStart,
+                hppRateFormData.rateAmendmentInfo?.effectiveDateStart,
             amendmentEffectiveDateEnd:
-                hppRate.rateAmendmentInfo?.effectiveDateEnd,
-            rateProgramIDs: hppRate.rateProgramIDs,
-            rateCertificationName: hppRate.rateCertificationName,
-            certifyingActuaryContacts: hppRate.actuaryContacts,
+                hppRateFormData.rateAmendmentInfo?.effectiveDateEnd,
+            rateProgramIDs: hppRateFormData.rateProgramIDs,
+            rateCertificationName: hppRateFormData.rateCertificationName,
+            certifyingActuaryContacts: hppRateFormData.actuaryContacts,
             // TODO: The next two fields are not accounted for on the frontend UI. The frontend still thinks both these
             //  fields are on the contract level. For now all rates will get their value from the contract level.
             addtlActuaryContacts: unlockedFormData.addtlActuaryContacts,
@@ -137,8 +123,8 @@ const convertHealthPlanPackageRateToDomain = async (
                 unlockedFormData.addtlActuaryCommunicationPreference,
             // TODO: This field is set to empty array because we still need to figure out shared rates. This is MR-3568
             packagesWithSharedRateCerts: [],
-            // packagesWithSharedRateCerts: hppRate.packagesWithSharedRateCerts &&
-            //     hppRate.packagesWithSharedRateCerts.filter(rate => (rate.packageId && rate.packageName)) as RateFormDataType['packagesWithSharedRateCerts']
+            // packagesWithSharedRateCerts: hppRateFormData.packagesWithSharedRateCerts &&
+            //     hppRateFormData.packagesWithSharedRateCerts.filter(rate => (rate.packageId && rate.packageName)) as RateFormDataType['packagesWithSharedRateCerts']
         }
 
         const parsedDomainData = rateFormDataSchema.safeParse(rate)
@@ -153,94 +139,17 @@ const convertHealthPlanPackageRateToDomain = async (
     return rates
 }
 
-const convertSortToDomainRate = async (
-    contractWithHistory: DraftContractType,
-    unlockedFormData: UnlockedHealthPlanFormDataType
-): Promise<UpdateDraftContractRatesType | Error> => {
-    // convert all the HPP rates data to new domain rates data. This is RateRevisionType.formData
-    const convertedRatesData = await convertHealthPlanPackageRateToDomain(
-        unlockedFormData
-    )
-    // All rates in the draft revision
-    const draftRatesFromDB: RateRevisionType[] =
-        contractWithHistory.draftRevision.rateRevisions
-
-    // return error if any of the rates failed converting.
-    if (convertedRatesData instanceof Error) {
-        return convertedRatesData
-    }
-
-    // now we filter
-    const connectOrCreate: UpdateDraftContractRatesType['connectOrCreate'] = []
-    const updateRateRevisions: UpdateDraftContractRatesType['updateRateRevisions'] =
-        []
-    const disconnectRates: UpdateDraftContractRatesType['disconnectRates'] = []
-
-    // Find rates to create, connect or update
-    convertedRatesData.forEach((rateData) => {
-        // If convertedRate has no revision ID, it gets pushed to connectOrCreate. In the data the ID is the revisionID.
-        if (!rateData.id) {
-            connectOrCreate.push(rateData)
-            return
-        }
-
-        // Find a matching rate revision id in the draftRates array. We want to do this after the undefined id check for
-        // any edge case where id from db is also undefined.
-        const matchingDBRate = draftRatesFromDB.find(
-            (dbRate) => dbRate.id === rateData.id
-        )
-
-        // If there are no matching rates we push into connectOrCreate. This usually means there is a revision ID, but
-        // the rates from the contract in the DB does not have it. This could be a connection, although the handler will
-        // figure out if we need to create or connect.
-        if (!matchingDBRate) {
-            connectOrCreate.push(rateData)
-            return
-        }
-
-        // If a match is found then we deep compare to figure out if we need to update.
-        const isRateDataEqual = isEqualData(matchingDBRate.formData, rateData)
-
-        // If rates are not equal we then make the update
-        if (!isRateDataEqual) {
-            updateRateRevisions.push(rateData)
-        }
-    })
-
-    // Find rates to disconnect
-    draftRatesFromDB.forEach((dbRate) => {
-        const dbRateData = dbRate.formData
-
-        // make sure this draftRate revision formData from the DB has revision.id and rateID
-        if (!dbRateData.id || !dbRateData.rateID) {
-            // skip because this has no required IDs
-            return
-        }
-
-        //Find a matching rate revision id in the convertedRatesData
-        const matchingHPPRate = convertedRatesData.map(
-            (convertedRate) => convertedRate.id === dbRateData.id
-        )
-
-        // If convertedRateData does not contain the rate from DB, we push this revisions rateID in disconnectRates
-        if (!matchingHPPRate) {
-            disconnectRates.push(dbRateData.rateID)
-        }
-    })
-
-    // return UpdateDraftContractRatesType
-
-    return {
-        draftContract: contractWithHistory,
-        connectOrCreate,
-        updateRateRevisions,
-        disconnectRates,
+function isEqualData(target: object, source: object): boolean {
+    try {
+        assert.deepStrictEqual(target, source, 'Rate data not equal')
+        return true
+    } catch (e) {
+        return false
     }
 }
 
 export {
     validateContractsAndConvert,
-    convertSortToDomainRate,
-    isEqualData,
     convertHealthPlanPackageRateToDomain,
+    isEqualData,
 }
