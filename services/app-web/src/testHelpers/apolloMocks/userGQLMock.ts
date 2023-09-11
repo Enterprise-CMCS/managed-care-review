@@ -1,4 +1,5 @@
 import { MockedResponse } from '@apollo/client/testing'
+import { ServerError } from '@apollo/client'
 import {
     CmsUser,
     FetchCurrentUserDocument,
@@ -58,6 +59,12 @@ const fetchCurrentUserMock = ({
     statusCode,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
 fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
+    const mockError = (message: string, statusCode?: number) => {
+        const error = new Error(message) as ServerError
+        error.statusCode = statusCode || 400
+        error.name = 'ServerError'
+        return error
+    }
     switch (statusCode) {
         case 200:
             return {
@@ -71,12 +78,12 @@ fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
         case 403:
             return {
                 request: { query: FetchCurrentUserDocument },
-                error: new Error('You are not logged in'),
+                error: mockError('You are not logged in', 403),
             }
         default:
             return {
                 request: { query: FetchCurrentUserDocument },
-                error: new Error('A network error occurred'),
+                error: mockError('A network error occurred', 500),
             }
     }
 }
