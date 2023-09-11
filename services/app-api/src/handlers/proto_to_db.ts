@@ -46,10 +46,15 @@ export const getDatabaseConnection = async (): Promise<Store> => {
 
     if (!dbURL) {
         console.error('DATABASE_URL not set')
-        throw new Error('Init Error: DATABASE_URL is required to run app-api')
+        throw new Error(
+            'Init Error: DATABASE_URL is required to run migrations'
+        )
     }
     if (!secretsManagerSecret) {
         console.error('SECRETS_MANAGER_SECRET not set')
+        throw new Error(
+            'Init Error: SECRETS_MANAGER_SECRET is required to run migrations'
+        )
     }
 
     const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
@@ -62,7 +67,6 @@ export const getDatabaseConnection = async (): Promise<Store> => {
         console.info('Postgres configured in data exporter')
     }
     const store = NewPostgresStore(pgResult)
-    //const client = new PrismaClient()
 
     return store
 }
@@ -125,7 +129,7 @@ export async function migrateRevision(
     )
     if (updateInfoResult instanceof Error) {
         const error = new Error(
-            `Error pre-populating UpdateInfoTable for ${revision.id}: ${updateInfoResult.message}`
+            `Error migrating ${revision.id}: ${updateInfoResult.message}`
         )
         return error
     }
@@ -150,7 +154,7 @@ export async function migrateRevision(
     )
     if (rateMigrationResult instanceof Error) {
         const error = new Error(
-            `Error migrating rate info for revision ${revision.id}: ${rateMigrationResult.message}`
+            `Error migrating ${revision.id} rates: ${rateMigrationResult.message}`
         )
         return error
     }
@@ -160,7 +164,7 @@ export async function migrateRevision(
     const migrateAssociationsResult = await migrateAssociations(client)
     if (migrateAssociationsResult instanceof Error) {
         const error = new Error(
-            `Error creating associations for revision ${revision.id}: ${migrateAssociationsResult.message}`
+            `Error migrating ${revision.id} associations: ${migrateAssociationsResult.message}`
         )
         return error
     }
@@ -175,7 +179,7 @@ export async function migrateRevision(
     )
     if (documentMigrationResults instanceof Error) {
         const error = new Error(
-            `Error migrating documents for revision ${revision.id}: ${documentMigrationResults.message}`
+            `Error migrating ${revision.id} documents: ${documentMigrationResults.message}`
         )
         return error
     }
