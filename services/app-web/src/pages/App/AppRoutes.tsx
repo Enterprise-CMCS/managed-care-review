@@ -68,9 +68,6 @@ const StateUserRoutes = ({
                     path={RoutesRecord.DASHBOARD}
                     element={<StateDashboard />}
                 />
-
-                <Route path={RoutesRecord.HELP} element={<Help />} />
-
                 <Route
                     path={RoutesRecord.SUBMISSIONS}
                     element={<StateDashboard />}
@@ -107,6 +104,7 @@ const StateUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_FORM}
                     element={<StateSubmissionForm />}
                 />
+                <Route path={RoutesRecord.HELP} element={<Help />} />
                 {stageName !== 'prod' && (
                     <Route
                         path={RoutesRecord.GRAPHQL_EXPLORER}
@@ -171,6 +169,7 @@ const CMSUserRoutes = ({
                 )}
                 <Route path={RoutesRecord.REPORTS} element={<Reports />} />
                 <Route path={RoutesRecord.SETTINGS} element={<Settings />} />
+                <Route path={RoutesRecord.HELP} element={<Help />} />
                 <Route path="*" element={<Error404 />} />
             </Routes>
         </AuthenticatedRouteWrapper>

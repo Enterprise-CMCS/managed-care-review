@@ -10,7 +10,6 @@ import {
     mockValidCMSUser,
     indexHealthPlanPackagesMockSuccess,
 } from '../../testHelpers/apolloMocks'
-import { AppBody } from './AppBody'
 
 // Routing and routes configuration
 describe('AppRoutes', () => {
@@ -22,7 +21,7 @@ describe('AppRoutes', () => {
         jest.clearAllMocks()
     })
     describe('/[root]', () => {
-        it('dashboard when state user logged in', async () => {
+        it('state dashboard when state user logged in', async () => {
             ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
@@ -34,7 +33,9 @@ describe('AppRoutes', () => {
             })
 
             await waitFor(() => {
-                expect(screen.getByTestId('dashboard-page')).toBeInTheDocument()
+                expect(
+                    screen.getByTestId('state-dashboard-page')
+                ).toBeInTheDocument()
                 expect(
                     screen.queryByRole('heading', {
                         level: 2,
@@ -44,9 +45,44 @@ describe('AppRoutes', () => {
             })
         })
 
-        it('landing page when logged out', async () => {
+        it('cms dashboard when cms user logged in', async () => {
             ldUseClientSpy({ 'session-expiring-modal': false })
-            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />)
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                        indexHealthPlanPackagesMockSuccess(),
+                    ],
+                },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByTestId('cms-dashboard-page')
+                ).toBeInTheDocument()
+                expect(
+                    screen.queryByRole('heading', {
+                        level: 2,
+                        name: /Submissions/,
+                    })
+                ).toBeInTheDocument()
+            })
+        })
+
+        it('landing page when no user', async () => {
+            ldUseClientSpy({ 'session-expiring-modal': false })
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 403,
+                        }),
+                    ],
+                },
+            })
             await waitFor(() => {
                 expect(
                     screen.getByRole('heading', {
@@ -69,6 +105,13 @@ describe('AppRoutes', () => {
             ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/auth' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
             })
 
             await waitFor(() => {
@@ -97,6 +140,7 @@ describe('AppRoutes', () => {
                 },
             })
 
+            await screen.findByTestId('help-authenticated')
             await waitFor(() => {
                 expect(
                     screen.getByRole('heading', {
@@ -108,7 +152,7 @@ describe('AppRoutes', () => {
         })
 
         it('can be accessed by CMS user', async () => {
-            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/help' },
                 apolloProvider: {
                     mocks: [
@@ -119,7 +163,7 @@ describe('AppRoutes', () => {
                     ],
                 },
             })
-
+            await screen.findByTestId('help-authenticated')
             await waitFor(() => {
                 expect(
                     screen.getByRole('heading', {
@@ -133,8 +177,16 @@ describe('AppRoutes', () => {
         it('can be accessed by unauthenticated users', async () => {
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/help' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 403,
+                        }),
+                    ],
+                },
             })
 
+            await screen.findByTestId('help-unauthenticated')
             await waitFor(() => {
                 expect(
                     screen.getByRole('heading', {
@@ -147,11 +199,19 @@ describe('AppRoutes', () => {
     })
 
     describe('invalid routes', () => {
-        it('redirect to landing page when logged out', async () => {
+        it('redirect to landing page when no user', async () => {
             ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/not-a-real-place' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 403,
+                        }),
+                    ],
+                },
             })
+
             await waitFor(() => {
                 expect(
                     screen.getByRole('heading', {
@@ -162,7 +222,7 @@ describe('AppRoutes', () => {
             })
         })
 
-        it('redirects to 404 error page when logged in', async () => {
+        it('redirect to 404 error page when user is logged in', async () => {
             ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {

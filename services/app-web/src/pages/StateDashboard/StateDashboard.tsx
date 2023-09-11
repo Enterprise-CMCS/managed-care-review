@@ -23,6 +23,7 @@ import { getCurrentRevisionFromHealthPlanPackage } from '../../gqlHelpers'
  * We only pull a subset of data out of the submission and revisions for display in Dashboard
  */
 
+const DASHBOARD_ATTRIBUTE = 'state-dashboard-page'
 export const StateDashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
     const location = useLocation()
@@ -32,7 +33,7 @@ export const StateDashboard = (): React.ReactElement => {
     if (error) {
         handleApolloError(error, true)
         return (
-            <div id="dashboard-page" className={styles.wrapper}>
+            <div id={DASHBOARD_ATTRIBUTE} className={styles.wrapper}>
                 <GridContainer className={styles.container}>
                     {isLikelyUserAuthError(error, true) ? (
                         <ErrorAlertSignIn />
@@ -50,8 +51,8 @@ export const StateDashboard = (): React.ReactElement => {
 
     if (loggedInUser.__typename !== 'StateUser') {
         return (
-            <div id="dashboard-page" className={styles.wrapper}>
-                <div>CMS Users not supported yet.</div>{' '}
+            <div id={DASHBOARD_ATTRIBUTE} className={styles.wrapper}>
+                <div>State dashboard only visible for state users.</div>{' '}
             </div>
         )
     }
@@ -88,11 +89,8 @@ export const StateDashboard = (): React.ReactElement => {
 
     return (
         <>
-            <div id="dashboard-page" className={styles.wrapper}>
-                <GridContainer
-                    className={styles.container}
-                    data-testid="dashboard-page"
-                >
+            <div data-testid={DASHBOARD_ATTRIBUTE} className={styles.wrapper}>
+                <GridContainer className={styles.container}>
                     {programs.length ? (
                         <section className={styles.panel}>
                             {justSubmittedSubmissionName && (
