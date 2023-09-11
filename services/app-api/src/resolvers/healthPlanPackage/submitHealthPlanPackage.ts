@@ -42,7 +42,10 @@ import {
     convertContractWithRatesToUnlockedHPP,
 } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
 import type { Span } from '@opentelemetry/api'
-import type { PackageStatusType } from '../../domain-models/contractAndRates'
+import type {
+    PackageStatusType,
+    RateType,
+} from '../../domain-models/contractAndRates'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = (typeof SubmissionErrorCodes)[number] // iterable union type
@@ -101,9 +104,20 @@ const validateStatusAndUpdateInfo = (
 // It will return an error if there are any missing fields that are required to submit
 // This strategy (returning a different type from validation) is taken from the
 // "parse, don't validate" article: https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
-function submit(
+function parseAndSubmit(
     draft: HealthPlanFormDataType
 ): LockedHealthPlanFormDataType | SubmissionError {
+    // Remove fields from edits on irrelevant logic branches
+    //  - CONTRACT_ONLY submission type should not contain any CONTRACT_AND_RATE rates data.
+    // - CHIP_ONLY population covered should not contain any provision or authority relevant to other population.
+    // - We delete at submission instead of update to preserve rates data in case user did not intend or would like to revert the submission type before submitting.
+    if (isContractOnly(draft) && hasAnyValidRateData(draft)) {
+        Object.assign(draft, removeRatesData(draft))
+    }
+    if (isCHIPOnly(draft)) {
+        Object.assign(draft, removeInvalidProvisionsAndAuthorities(draft))
+    }
+
     const maybeStateSubmission: Record<string, unknown> = {
         ...draft,
         status: 'SUBMITTED',
@@ -174,9 +188,11 @@ export function submitHealthPlanPackageResolver(
         setResolverDetailsOnActiveSpan('submitHealthPlanPackage', user, span)
         span?.setAttribute('mcreview.package_id', pkgID)
 
-        let currentFormData: HealthPlanFormDataType // data from revision that is being submitted
-        let contractRevisionID: string // id for latest contract revision  - this will be passed to submit
-        let updatedPackage: HealthPlanPackageType // updated data from revision after submit
+        // Set up variables that are used across the feature flag boundary
+        let initialFormData: HealthPlanFormDataType // data from revision sent to resolver
+        let contractRevisionID: string // id for latest contract revision to reference later
+        let lockedFormData: LockedHealthPlanFormDataType // updated data (parsed and cleaned) passed to submit
+        let updatedPackage: HealthPlanPackageType // updated package returned from submit
 
         //Set updateInfo default to initial submission
         const updateInfo: UpdateInfoType = {
@@ -266,12 +282,96 @@ export function submitHealthPlanPackageResolver(
             )
 
             // reassign variable set up before rates feature flag
-            currentFormData = convertContractWithRatesToFormData(
+            initialFormData = convertContractWithRatesToFormData(
                 contractWithHistory.revisions[0],
                 contractWithHistory.stateCode,
                 contractWithHistory.stateNumber
             )
             contractRevisionID = contractWithHistory.revisions[0].id
+
+            // Final clean + check of data before submit - parse to state submission
+            const maybeLocked = parseAndSubmit(initialFormData)
+
+            if (isSubmissionError(maybeLocked)) {
+                const errMessage = maybeLocked.message
+                logError('submitHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new UserInputError(errMessage, {
+                    message: maybeLocked.message,
+                })
+            }
+            // If there are rates, submit those first
+            if (initialFormData.rateInfos.length > 0) {
+                const ratePromises: Promise<Error | RateType>[] = []
+                contractWithHistory.revisions[0].rateRevisions.forEach(
+                    (rateRev) => {
+                        ratePromises.push(
+                            store.submitRate({
+                                rateID: rateRev.id,
+                                submittedByUserID: user.id,
+                                submitReason: updateInfo.updatedReason,
+                            })
+                        )
+                    }
+                )
+
+                const submitRatesResult = await Promise.all(ratePromises)
+                if (isStoreError(submitRatesResult)) {
+                    const errMessage = `Issue updating a package of type ${submitRatesResult.code}. Message: ${submitRatesResult.message}`
+                    logError('submitHealthPlanPackage', errMessage)
+                    setErrorAttributesOnActiveSpan(errMessage, span)
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
+                } else if (submitRatesResult instanceof Error) {
+                    throw new Error(
+                        'Still to do - figuring out error handling and if this path is possible'
+                    )
+                }
+            }
+
+            // then submit the contract!
+            const submitContractResult = await store.submitContract({
+                contractID: contractRevisionID,
+                submittedByUserID: user.id,
+                submitReason: updateInfo.updatedReason,
+            })
+            if (isStoreError(submitContractResult)) {
+                const errMessage = `Issue updating a package of type ${submitContractResult.code}. Message: ${submitContractResult.message}`
+                logError('submitHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
+            } else if (submitContractResult instanceof Error) {
+                throw new Error(
+                    'Still to do - figuring out error handling and if this path is possible'
+                )
+            }
+            const maybeSubmittedPkg =
+                convertContractWithRatesToUnlockedHPP(submitContractResult)
+
+            if (maybeSubmittedPkg instanceof Error) {
+                const errMessage = `Error converting draft contract. Message: ${maybeSubmittedPkg.message}`
+                logError('createHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'PROTO_DECODE_ERROR',
+                    },
+                })
+            }
+
+            // set variables used across feature flag boundary
+            lockedFormData = maybeLocked
+            updatedPackage = maybeSubmittedPkg
         } else {
             //  fetch from package flag off - returns HealthPlanPackage
             const initialPackage = await store.findHealthPlanPackage(
@@ -343,89 +443,27 @@ export function submitHealthPlanPackageResolver(
                 span,
                 submittedReason || undefined
             )
-            // reassign variable set up before rates feature flag
-            currentFormData = maybeFormData
+            // reassign variable set up before rates feature flagx
+            initialFormData = maybeFormData
             contractRevisionID = initialPackage.revisions[0].id
-        }
 
-        /*
-             Clean form data and remove fields from edits on irrelevant logic branches
-                - CONTRACT_ONLY submission type should not contain any CONTRACT_AND_RATE rates data.
-                - CHIP_ONLY population covered should not contain any provision or authority relevant to other population.
-                - We delete at submission instead of update to preserve rates data in case user did not intend or would like to revert the submission type before submitting.
-           */
+            // Final clean + check of data before submit - parse to state submission
+            const maybeLocked = parseAndSubmit(initialFormData)
 
-        if (
-            isContractOnly(currentFormData) &&
-            hasAnyValidRateData(currentFormData)
-        ) {
-            Object.assign(currentFormData, removeRatesData(currentFormData))
-        }
-        if (isCHIPOnly(currentFormData)) {
-            Object.assign(
-                currentFormData,
-                removeInvalidProvisionsAndAuthorities(currentFormData)
-            )
-        }
-
-        /*
-        Final check of data before submit - Parse to state submission
-        */
-        const submissionResult = submit(currentFormData)
-
-        if (isSubmissionError(submissionResult)) {
-            const errMessage = submissionResult.message
-            logError('submitHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                message: submissionResult.message,
-            })
-        }
-
-        const lockedFormData = submissionResult
-
-        if (ratesDatabaseRefactor) {
-            // Save the contract!
-            const submitResult = await store.submitContract({
-                contractID: contractRevisionID,
-                submittedByUserID: user.id,
-                submitReason: updateInfo.updatedReason,
-            })
-            if (isStoreError(submitResult)) {
-                const errMessage = `Issue updating a package of type ${submitResult.code}. Message: ${submitResult.message}`
+            if (isSubmissionError(maybeLocked)) {
+                const errMessage = maybeLocked.message
                 logError('submitHealthPlanPackage', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'DB_ERROR',
-                    },
-                })
-            } else if (submitResult instanceof Error) {
-                throw new Error('Still to do - figuring out error handling')
-            }
-            const maybeSubmittedPkg =
-                convertContractWithRatesToUnlockedHPP(submitResult)
-
-            if (maybeSubmittedPkg instanceof Error) {
-                const errMessage = `Error converting draft contract. Message: ${maybeSubmittedPkg.message}`
-                logError('createHealthPlanPackage', errMessage)
-                setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'PROTO_DECODE_ERROR',
-                    },
+                throw new UserInputError(errMessage, {
+                    message: maybeLocked.message,
                 })
             }
 
-            updatedPackage = maybeSubmittedPkg
-        } else {
             // Save the package!
             const updateResult = await store.updateHealthPlanRevision(
                 input.pkgID,
                 contractRevisionID,
-                lockedFormData,
+                maybeLocked,
                 updateInfo
             )
             if (isStoreError(updateResult)) {
@@ -440,6 +478,8 @@ export function submitHealthPlanPackageResolver(
                 })
             }
 
+            // set variables used across feature flag boundary
+            lockedFormData = maybeLocked
             updatedPackage = updateResult
         }
 
