@@ -141,7 +141,7 @@ const convertHealthPlanPackageRateToDomain = async (
 
 function isEqualData(target: object, source: object): boolean {
     try {
-        assert.deepStrictEqual(target, source, 'Rate data not equal')
+        assert.deepStrictEqual(target, source, 'data not equal')
         return true
     } catch (e) {
         return false
