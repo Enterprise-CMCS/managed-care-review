@@ -38,13 +38,18 @@ describe('Page Heading Row', () => {
         role: 'State User',
         email: 'bob@dmas.mn.gov',
     }
-    it('renders without errors', () => {
-        renderWithProviders(<PageHeadingRow />)
+    it('renders without errors and with the managed care header on the landing page', () => {
+        renderWithProviders(<PageHeadingRow route="ROOT" />)
         expect(screen.getByRole('heading')).toBeInTheDocument()
     })
 
+    it('renders without errors and without the managed care header on the help page page', () => {
+        renderWithProviders(<PageHeadingRow route="ROOT" />)
+        expect(screen.getByRole('heading')).not.toBeInTheDocument()
+    })
+
     it('does not display heading text when isLoading', async () => {
-        renderWithProviders(<PageHeadingRow isLoading />)
+        renderWithProviders(<PageHeadingRow isLoading route="ROOT" />)
 
         expect(screen.getByRole('heading')).toBeInTheDocument()
         expect(screen.getByRole('heading')).not.toHaveTextContent(
