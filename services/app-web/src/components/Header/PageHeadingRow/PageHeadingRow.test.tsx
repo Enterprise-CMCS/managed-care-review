@@ -45,7 +45,7 @@ describe('Page Heading Row', () => {
 
     it('renders without errors and without the managed care header on the help page page', () => {
         renderWithProviders(<PageHeadingRow route="HELP" />)
-        expect(screen.getByRole('heading')).not.toBeInTheDocument()
+        expect(screen.queryByRole('heading')).not.toBeInTheDocument()
     })
 
     it('does not display heading text when isLoading', async () => {
