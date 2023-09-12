@@ -81,7 +81,7 @@ export const Landing = (): React.ReactElement => {
                                 Submit your managed care health plans to CMS for
                                 review
                             </h2>
-                            <p>
+                            <p className="line-height-sans-4 measure-6">
                                 You can use MC-Review to submit Medicaid and
                                 CHIP managed care health plan contracts and
                                 rates to CMS. This portal accepts:
@@ -118,8 +118,6 @@ export const Landing = (): React.ReactElement => {
                                     Eligible Special Needs Plans (D-SNP),
                                     Programs of All-Inclusive Care for the
                                     Elderly (PACE), dual demonstration contracts
-                                    Non health plan submissions (EBRK, EQRO,
-                                    dual demonstration contracts)
                                 </li>
                             </ul>
                         </Grid>

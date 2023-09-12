@@ -100,15 +100,21 @@ type PageHeadingProps = {
     isLoading?: boolean
     loggedInUser?: User
     heading?: string
+    route?: string
 }
 
 export const PageHeadingRow = ({
     isLoading = false,
     heading,
+    route,
     loggedInUser,
 }: PageHeadingProps): React.ReactElement | null => {
     if (!loggedInUser) {
-        return <LandingRow isLoading={isLoading} />
+        if (route === 'ROOT') {
+            return <LandingRow isLoading={isLoading} />
+        } else {
+            return null
+        }
     }
 
     if (
