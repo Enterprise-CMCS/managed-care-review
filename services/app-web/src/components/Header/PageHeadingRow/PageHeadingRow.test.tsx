@@ -61,7 +61,9 @@ describe('Page Heading Row', () => {
     })
 
     it('displays Medicaid and CHIP Managed Care Reporting heading when logged out', () => {
-        renderWithProviders(<PageHeadingRow heading="Custom page heading" />)
+        renderWithProviders(
+            <PageHeadingRow heading="Custom page heading" route="ROOT" />
+        )
         expect(screen.getByRole('heading')).toHaveTextContent(
             'Medicaid and CHIP Managed Care Reporting and Review System'
         )
@@ -72,6 +74,7 @@ describe('Page Heading Row', () => {
             <PageHeadingRow
                 heading="Custom page heading"
                 loggedInUser={loggedInUser}
+                route="ROOT"
             />
         )
         expect(screen.getByRole('heading')).not.toHaveTextContent(
