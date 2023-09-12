@@ -70,27 +70,27 @@ const validateContractsAndConvert = (
     return convertedContracts
 }
 
-const convertHealthPlanPackageRateToDomain = async (
+const convertHPPDocsToDomain = async (docs: SubmissionDocument[]) =>
+    await Promise.all(
+        docs.map(async ({ name, s3URL, sha256 }): Promise<DocumentType> => {
+            let sha = sha256
+
+            if (!sha) {
+                sha = await calculateSHA256(s3URL)
+            }
+
+            return {
+                name,
+                s3URL,
+                sha256: sha,
+            }
+        })
+    )
+
+const convertHealthPlanPackageRatesToDomain = async (
     unlockedFormData: UnlockedHealthPlanFormDataType
 ): Promise<RateFormDataType[] | Error> => {
     const rates: RateFormDataType[] = []
-
-    const convertHPPDocsToDomain = async (docs: SubmissionDocument[]) =>
-        await Promise.all(
-            docs.map(async ({ name, s3URL, sha256 }): Promise<DocumentType> => {
-                let sha = sha256
-
-                if (!sha) {
-                    sha = await calculateSHA256(s3URL)
-                }
-
-                return {
-                    name,
-                    s3URL,
-                    sha256: sha,
-                }
-            })
-        )
 
     for (const hppRateFormData of unlockedFormData.rateInfos) {
         const rateDocuments = await convertHPPDocsToDomain(
@@ -150,6 +150,6 @@ function isEqualData(target: object, source: object): boolean {
 
 export {
     validateContractsAndConvert,
-    convertHealthPlanPackageRateToDomain,
+    convertHealthPlanPackageRatesToDomain,
     isEqualData,
 }

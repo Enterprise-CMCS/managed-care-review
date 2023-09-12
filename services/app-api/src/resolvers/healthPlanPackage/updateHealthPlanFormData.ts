@@ -21,7 +21,7 @@ import {
 } from '../attributeHelper'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql/index'
-import { convertHealthPlanPackageRateToDomain } from './contractAndRates/resolverHelpers'
+import { convertHealthPlanPackageRatesToDomain } from './contractAndRates/resolverHelpers'
 
 type ProtectedFieldType = Pick<
     UnlockedHealthPlanFormDataType,
@@ -184,7 +184,7 @@ export function updateHealthPlanFormDataResolver(
 
             // Check for any rate updates
             const updateRateFormDatas =
-                await convertHealthPlanPackageRateToDomain(unlockedFormData)
+                await convertHealthPlanPackageRatesToDomain(unlockedFormData)
 
             if (updateRateFormDatas instanceof Error) {
                 const errMessage = `Error converting rate. Message: ${updateRateFormDatas.message}`

@@ -1,7 +1,7 @@
 import { createInsertRateData } from '../../../testHelpers/contractAndRates/rateHelpers'
 import {
     isEqualData,
-    convertHealthPlanPackageRateToDomain,
+    convertHealthPlanPackageRatesToDomain,
 } from './resolverHelpers'
 import * as add_sha from '../../../handlers/add_sha'
 import type { UnlockedHealthPlanFormDataType } from '../../../../../app-web/src/common-code/healthPlanFormDataType'
@@ -119,7 +119,7 @@ describe('isEqualRateData', () => {
     )
 })
 
-describe('convertHealthPlanPackageRateToDomain', () => {
+describe('convertHealthPlanPackageRatesToDomain', () => {
     beforeEach(() => {
         jest.resetAllMocks()
         jest.spyOn(add_sha, 'calculateSHA256').mockImplementation(() => {
@@ -302,7 +302,7 @@ describe('convertHealthPlanPackageRateToDomain', () => {
 
         // convert it to a domain
         const convertedRates = must(
-            await convertHealthPlanPackageRateToDomain(unlockedHPP)
+            await convertHealthPlanPackageRatesToDomain(unlockedHPP)
         )
 
         // expect convertedRates to match expected data
