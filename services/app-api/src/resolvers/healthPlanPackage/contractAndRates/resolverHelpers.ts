@@ -116,12 +116,12 @@ const convertHealthPlanPackageRateToDomain = async (
             rateProgramIDs: hppRateFormData.rateProgramIDs,
             rateCertificationName: hppRateFormData.rateCertificationName,
             certifyingActuaryContacts: hppRateFormData.actuaryContacts,
-            // TODO: The next two fields are not accounted for on the frontend UI. The frontend still thinks both these
+            // The next two fields are not accounted for on the frontend UI. The frontend still thinks both these
             //  fields are on the contract level. For now all rates will get their value from the contract level.
             addtlActuaryContacts: unlockedFormData.addtlActuaryContacts,
             actuaryCommunicationPreference:
                 unlockedFormData.addtlActuaryCommunicationPreference,
-            // TODO: This field is set to empty array because we still need to figure out shared rates. This is MR-3568
+            // This field is set to empty array because we still need to figure out shared rates. This is MR-3568
             packagesWithSharedRateCerts: [],
             // packagesWithSharedRateCerts: hppRateFormData.packagesWithSharedRateCerts &&
             //     hppRateFormData.packagesWithSharedRateCerts.filter(rate => (rate.packageId && rate.packageName)) as RateFormDataType['packagesWithSharedRateCerts']
