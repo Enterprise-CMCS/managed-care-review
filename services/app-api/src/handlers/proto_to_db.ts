@@ -291,6 +291,9 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
             revisionsWithErrors
         )}`
     )
+    console.info(
+        `Could not migrate ${revisionsWithErrors.length} of ${revisions.length} revisions`
+    )
 
     return {
         statusCode: 200,
