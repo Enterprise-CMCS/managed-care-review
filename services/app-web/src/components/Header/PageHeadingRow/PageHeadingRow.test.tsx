@@ -45,7 +45,10 @@ describe('Page Heading Row', () => {
 
     it('renders without errors and without the managed care header on the help page page', () => {
         renderWithProviders(<PageHeadingRow route="ROOT" />)
-        expect(screen.getByRole('heading')).not.toBeInTheDocument()
+        expect(screen.getByRole('heading')).toBeInTheDocument()
+        expect(screen.getByRole('heading')).not.toHaveTextContent(
+            'Medicaid and CHIP Managed Care Reporting and Review System'
+        )
     })
 
     it('does not display heading text when isLoading', async () => {
