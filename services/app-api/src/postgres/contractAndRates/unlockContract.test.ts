@@ -6,7 +6,7 @@ import { unlockContract } from './unlockContract'
 import { insertDraftRate } from './insertRate'
 import { unlockRate } from './unlockRate'
 import { submitRate } from './submitRate'
-import { updateDraftContract } from './updateDraftContract'
+import { updateDraftContractWithRates } from './updateDraftContractWithRates'
 import { updateDraftRate } from './updateDraftRate'
 import { submitContract } from './submitContract'
 import { findContractWithHistory } from './findContractWithHistory'
@@ -59,7 +59,7 @@ describe('unlockContract', () => {
 
         // Connect draft contract to submitted rate
         must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -164,7 +164,7 @@ describe('unlockContract', () => {
 
         // Connect draft contract to submitted rate
         must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -268,7 +268,7 @@ describe('unlockContract', () => {
 
         // Connect draft contract to draft rate
         must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -312,7 +312,7 @@ describe('unlockContract', () => {
             )
         )
         must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -378,7 +378,7 @@ describe('unlockContract', () => {
 
         // Connect draft contract to submitted rate
         must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',

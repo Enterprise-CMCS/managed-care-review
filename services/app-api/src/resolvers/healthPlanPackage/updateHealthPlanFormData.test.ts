@@ -707,12 +707,13 @@ describe.each(flagValueTestParameters)(
             const postgresStore = NewPostgresStore(prismaClient)
             const failStore = mockStoreThatErrors()
 
-            // set our store to error on the updateFormData call, only
+            // set store error for flag off
             postgresStore.updateHealthPlanRevision =
                 failStore.updateHealthPlanRevision
 
             // set store error for flag on.
-            postgresStore.updateDraftContract = failStore.updateDraftContract
+            postgresStore.updateDraftContractWithRates =
+                failStore.updateDraftContractWithRates
 
             const server = await constructTestPostgresServer({
                 store: postgresStore,

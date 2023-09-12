@@ -12,7 +12,6 @@ import { includeDraftRates } from './prismaDraftContractHelpers'
 import { rateRevisionToDomainModel } from './prismaSharedContractRateHelpers'
 import type { RateFormEditable } from './updateDraftRate'
 import { isEqualData } from '../../resolvers/healthPlanPackage/contractAndRates/resolverHelpers'
-import {includeFullRate} from './prismaSubmittedRateHelpers';
 
 type ContractFormEditable = Partial<ContractFormDataType>
 
@@ -83,7 +82,7 @@ const sortRatesForUpdate = (
 // Update the given draft
 // * can change the set of draftRates
 // * set the formData
-async function updateDraftContract(
+async function updateDraftContractWithRates(
     client: PrismaClient,
     args: UpdateContractArgsType
 ): Promise<ContractType | NotFoundError | Error> {
@@ -160,23 +159,23 @@ async function updateDraftContract(
                     // Find the rate of the revision with only one draft revision
                     const currentRate = rateRevision.id
                         ? await tx.rateTable.findFirst({
-                            where: {
-                                revisions: {
-                                    some: {
-                                        id: rateRevision.id
-                                    }
-                                }
-                            },
-                            include: {
-                                // include the single most recent revision that is not submitted
-                                revisions: {
-                                    where: {
-                                        submitInfoID: null
-                                    },
-                                    take: 1
-                                }
-                            },
-                        })
+                              where: {
+                                  revisions: {
+                                      some: {
+                                          id: rateRevision.id,
+                                      },
+                                  },
+                              },
+                              include: {
+                                  // include the single most recent revision that is not submitted
+                                  revisions: {
+                                      where: {
+                                          submitInfoID: null,
+                                      },
+                                      take: 1,
+                                  },
+                              },
+                          })
                         : undefined
 
                     // If rate does not exist, we need to create a new rate.
@@ -250,50 +249,53 @@ async function updateDraftContract(
                             data: {
                                 // if rate is not submitted, we update the revision data, otherwise we only make the
                                 //  connection to the draft contract revision.
-                                revisions: !isSubmitted ? {
-                                    update: {
-                                        where: {
-                                            id: rateRevision.id,
-                                        },
-                                        data: {
-                                            rateType: rateRevision.rateType,
-                                            rateCapitationType:
-                                                rateRevision.rateCapitationType,
-                                            rateDateStart:
-                                                rateRevision.rateDateStart,
-                                            rateDateEnd:
-                                                rateRevision.rateDateEnd,
-                                            rateDateCertified:
-                                                rateRevision.rateDateCertified,
-                                            amendmentEffectiveDateStart:
-                                                rateRevision.amendmentEffectiveDateStart,
-                                            amendmentEffectiveDateEnd:
-                                                rateRevision.amendmentEffectiveDateEnd,
-                                            rateProgramIDs:
-                                                rateRevision.rateProgramIDs,
-                                            rateCertificationName:
-                                                rateRevision.rateCertificationName,
-                                            rateDocuments: {
-                                                deleteMany: {},
-                                                create: rateRevision.rateDocuments,
-                                            },
-                                            supportingDocuments: {
-                                                deleteMany: {},
-                                                create: rateRevision.supportingDocuments,
-                                            },
-                                            certifyingActuaryContacts: {
-                                                deleteMany: {},
-                                                create: rateRevision.certifyingActuaryContacts,
-                                            },
-                                            addtlActuaryContacts: {
-                                                deleteMany: {},
-                                                create: rateRevision.addtlActuaryContacts,
-                                            },
-                                            actuaryCommunicationPreference:
-                                                rateRevision.actuaryCommunicationPreference,
-                                        },
-                                    },
-                                } : undefined,
+                                revisions: !isSubmitted
+                                    ? {
+                                          update: {
+                                              where: {
+                                                  id: rateRevision.id,
+                                              },
+                                              data: {
+                                                  rateType:
+                                                      rateRevision.rateType,
+                                                  rateCapitationType:
+                                                      rateRevision.rateCapitationType,
+                                                  rateDateStart:
+                                                      rateRevision.rateDateStart,
+                                                  rateDateEnd:
+                                                      rateRevision.rateDateEnd,
+                                                  rateDateCertified:
+                                                      rateRevision.rateDateCertified,
+                                                  amendmentEffectiveDateStart:
+                                                      rateRevision.amendmentEffectiveDateStart,
+                                                  amendmentEffectiveDateEnd:
+                                                      rateRevision.amendmentEffectiveDateEnd,
+                                                  rateProgramIDs:
+                                                      rateRevision.rateProgramIDs,
+                                                  rateCertificationName:
+                                                      rateRevision.rateCertificationName,
+                                                  rateDocuments: {
+                                                      deleteMany: {},
+                                                      create: rateRevision.rateDocuments,
+                                                  },
+                                                  supportingDocuments: {
+                                                      deleteMany: {},
+                                                      create: rateRevision.supportingDocuments,
+                                                  },
+                                                  certifyingActuaryContacts: {
+                                                      deleteMany: {},
+                                                      create: rateRevision.certifyingActuaryContacts,
+                                                  },
+                                                  addtlActuaryContacts: {
+                                                      deleteMany: {},
+                                                      create: rateRevision.addtlActuaryContacts,
+                                                  },
+                                                  actuaryCommunicationPreference:
+                                                      rateRevision.actuaryCommunicationPreference,
+                                              },
+                                          },
+                                      }
+                                    : undefined,
                                 draftContractRevisions: {
                                     connect: {
                                         id: currentRev.id,
@@ -369,5 +371,5 @@ async function updateDraftContract(
     }
 }
 
-export { updateDraftContract }
+export { updateDraftContractWithRates }
 export type { UpdateContractArgsType, ContractFormEditable }

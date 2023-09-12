@@ -5,7 +5,7 @@ import { submitContract } from './submitContract'
 import { submitRate } from './submitRate'
 import { insertDraftContract } from './insertContract'
 import { unlockContract } from './unlockContract'
-import { updateDraftContract } from './updateDraftContract'
+import { updateDraftContractWithRates } from './updateDraftContractWithRates'
 import { insertDraftRate } from './insertRate'
 import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
@@ -194,7 +194,7 @@ describe('findContract', () => {
             )
         )
         must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contractA.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -472,7 +472,7 @@ describe('findContract', () => {
         )
         // Remove rate 1 and rate 2 from contract
         must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contractA.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -605,7 +605,7 @@ describe('findContract', () => {
             await insertDraftContract(client, draftContractData)
         )
         const updatedDraftContractWithRates = must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contractA.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',

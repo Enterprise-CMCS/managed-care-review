@@ -198,7 +198,7 @@ export function updateHealthPlanFormDataResolver(
             }
 
             // Update contract draft revision
-            const updateResult = await store.updateDraftContract({
+            const updateResult = await store.updateDraftContractWithRates({
                 contractID: input.pkgID,
                 formData: {
                     ...unlockedFormData,

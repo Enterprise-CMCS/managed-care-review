@@ -1,8 +1,8 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { insertDraftContract } from './insertContract'
 import { createInsertContractData, must } from '../../testHelpers'
-import type { ContractFormEditable } from './updateDraftContract'
-import { updateDraftContract } from './updateDraftContract'
+import type { ContractFormEditable } from './updateDraftContractWithRates'
+import { updateDraftContractWithRates } from './updateDraftContractWithRates'
 import { PrismaClientValidationError } from '@prisma/client/runtime/library'
 import type { ContractType } from '@prisma/client'
 import type { RateFormDataType } from '../../domain-models/contractAndRates'
@@ -10,8 +10,7 @@ import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHel
 import { v4 as uuidv4 } from 'uuid'
 import type { RateFormEditable } from './updateDraftRate'
 import { insertDraftRate } from './insertRate'
-import { submitRate } from './submitRate';
-import {unlockRate} from './unlockRate';
+import { submitRate } from './submitRate'
 
 describe('updateDraftContract', () => {
     afterEach(() => {
@@ -35,7 +34,7 @@ describe('updateDraftContract', () => {
             submissionDescription: 'something else',
         }
         const draft = must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contract.id,
                 formData: draftContractForm2,
             })
@@ -103,7 +102,7 @@ describe('updateDraftContract', () => {
         )
 
         const draft1 = must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contract.id,
                 formData: draftContractForm1,
             })
@@ -113,7 +112,7 @@ describe('updateDraftContract', () => {
         expect(draft1.draftRevision?.formData.contractDocuments).toHaveLength(1)
 
         const draft2 = must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contract.id,
                 formData: draftContractForm2,
             })
@@ -131,7 +130,7 @@ describe('updateDraftContract', () => {
         )
 
         const draft3 = must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contract.id,
                 formData: draftContractForm3,
             })
@@ -185,7 +184,7 @@ describe('updateDraftContract', () => {
         )
 
         const draft1 = must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contract.id,
                 formData: draftContractForm1,
             })
@@ -194,7 +193,7 @@ describe('updateDraftContract', () => {
         expect(draft1.draftRevision?.formData.stateContacts).toHaveLength(1)
 
         const draft2 = must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contract.id,
                 formData: draftContractForm2,
             })
@@ -208,7 +207,7 @@ describe('updateDraftContract', () => {
         )
 
         const draft3 = must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contract.id,
                 formData: draftContractForm3,
             })
@@ -230,7 +229,7 @@ describe('updateDraftContract', () => {
             await insertDraftContract(client, draftContractInsert)
         )
         // use type coercion to pass in bad data
-        const updatedRate = await updateDraftContract(client, {
+        const updatedRate = await updateDraftContractWithRates(client, {
             contractID: newRate.id,
             formData: {
                 submissionDescription: 'a new contract',
@@ -247,7 +246,7 @@ describe('updateDraftContract', () => {
 
         const client = await sharedTestPrismaClient()
 
-        const draftContract = await updateDraftContract(client, {
+        const draftContract = await updateDraftContractWithRates(client, {
             contractID: 'not-real-id',
             formData: {
                 submissionDescription: 'a new contract',
@@ -286,7 +285,7 @@ describe('updateDraftContract', () => {
 
         // Update contract with new rates
         const updatedContractWithNewRates = must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: draftContract.id,
                 formData: {},
                 rateFormDatas: newRates,
@@ -371,7 +370,7 @@ describe('updateDraftContract', () => {
 
         // Update many rates in the contract
         const updatedContractRates = must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: updatedContractWithNewRates.id,
                 formData: {},
                 rateFormDatas: updateRateRevisionData,
@@ -431,7 +430,7 @@ describe('updateDraftContract', () => {
 
         // disconnect rate 3
         const contractAfterRateDisconnection = must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: updatedContractRates.id,
                 formData: {},
                 rateFormDatas: [
@@ -448,7 +447,7 @@ describe('updateDraftContract', () => {
 
         // Create, Update and Disconnect many contracts
         const contractAfterManyCrud = must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contractAfterRateDisconnection.id,
                 formData: {},
                 // create two new rates
@@ -603,7 +602,7 @@ describe('updateDraftContract', () => {
 
         // update draft contract with rates
         const updatedDraftContract = must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: draftContract.id,
                 formData: {},
                 rateFormDatas: [
@@ -619,7 +618,7 @@ describe('updateDraftContract', () => {
         )
     })
 
-    it('errors when trying to update a submitted rate', async () => {
+    it('connects submitted rate to draft contract revision without updating rate', async () => {
         const client = await sharedTestPrismaClient()
 
         const stateUser = await client.user.create({
@@ -646,7 +645,7 @@ describe('updateDraftContract', () => {
 
         // Update contract with new rates
         const updatedContractWithNewRates = must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: draftContract.id,
                 formData: {},
                 rateFormDatas: [newRate],
@@ -669,7 +668,7 @@ describe('updateDraftContract', () => {
             )
         }
 
-        // expect 1 rates
+        // expect 1 rate
         expect(newlyCreatedRates).toHaveLength(1)
 
         // submit rate
@@ -682,27 +681,54 @@ describe('updateDraftContract', () => {
             )
         )
 
-        if (!submittedExistingRate.revisions[0].formData) {
+        // Create and submit a new rate that is type 'AMENDMENT'
+        const newDraftRate = must(
+            await insertDraftRate(
+                client,
+                createInsertRateData({
+                    id: uuidv4(),
+                    rateType: 'AMENDMENT',
+                })
+            )
+        )
+
+        const newSubmittedRate = must(
+            await submitRate(
+                client,
+                newDraftRate.id,
+                stateUser.id,
+                'Rate 2 submit'
+            )
+        )
+
+        if (
+            !submittedExistingRate.revisions[0] ||
+            !newSubmittedRate.revisions[0]
+        ) {
             throw new Error(
-                'Unexpected error. Rate revisions did not contain rate IDs'
+                'Unexpected error. Submitted rates did not contain revisions'
             )
         }
 
         // Update contract with submitted rate and try to update the submitted rate revision
-        const attemptToUpdateSubmittedRate = must(await updateDraftContract(
-            client,
-            {
+        const attemptToUpdateSubmittedRate = must(
+            await updateDraftContractWithRates(client, {
                 contractID: updatedContractWithNewRates.id,
                 formData: {},
                 rateFormDatas: [
-                    // attempt to update the revision data of a submitted rate.
+                    // attempt to update the revision data of a submitted rate 1.
                     {
                         ...submittedExistingRate.revisions[0].formData,
                         rateType: 'AMENDMENT',
                     },
+                    // Connect submitted rate 2 and try to update the rate data
+                    {
+                        ...newSubmittedRate.revisions[0].formData,
+                        rateType: 'NEW',
+                    },
                 ],
-            }
-        ))
+            })
+        )
 
         if (!attemptToUpdateSubmittedRate.draftRevision) {
             throw new Error(
@@ -710,10 +736,18 @@ describe('updateDraftContract', () => {
             )
         }
 
-        // We still expect 1 connected rate
-        expect(attemptToUpdateSubmittedRate.draftRevision.rateRevisions).toHaveLength(1)
+        // Expect 2 connected rates
+        expect(
+            attemptToUpdateSubmittedRate.draftRevision.rateRevisions
+        ).toHaveLength(2)
 
-        // We expect the rate type to not be changed to 'AMENDMENT'
-        expect(attemptToUpdateSubmittedRate.draftRevision.rateRevisions[0].formData.rateType).toBe('NEW')
+        // Expect the first rates data not to have changed
+        expect(
+            attemptToUpdateSubmittedRate.draftRevision.rateRevisions[0].formData
+        ).toEqual(submittedExistingRate.revisions[0].formData)
+        // Expect the second rate to be connected and data not to be changed
+        expect(
+            attemptToUpdateSubmittedRate.draftRevision.rateRevisions[1].formData
+        ).toEqual(newSubmittedRate.revisions[0].formData)
     })
 })
