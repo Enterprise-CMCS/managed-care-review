@@ -125,11 +125,7 @@ function convertContractRateRevisionToHealthPlanRevision(
         rateAmendmentInfo: rateAmendmentInfo,
         rateProgramIDs: formData.rateProgramIDs,
         rateCertificationName: formData.rateCertificationName,
-        actuaryContacts: formData.certifyingActuaryContacts?.length
-            ? formData.certifyingActuaryContacts.concat(
-                  formData.addtlActuaryContacts ?? []
-              )
-            : [],
+        actuaryContacts: formData.certifyingActuaryContacts ?? [],
         // From the TODO in convertContractRevisionToHealthPlanRevision, these can just be set as whatever is in the
         // database. The frontend does not read this values.
         actuaryCommunicationPreference: formData.actuaryCommunicationPreference,
@@ -148,18 +144,17 @@ function convertContractRevisionToHealthPlanRevision(
 
     let healthPlanRevisions: HealthPlanRevisionType[] | Error = []
 
-    // TODO: The frontend UI still thinks both these fields are on the contract level, but in the DB they are at
-    //  the rate revision level. Since at update contract we are setting both fields in each rate using what the values
-    //  on the contract level, when we pull data out from our new DB model, we need to do the inverse by using, the
-    //  the first rates values.
-    const addtlActuaryCommunicationPreference =
-        contract.draftRevision?.rateRevisions[0]?.formData
-            ?.actuaryCommunicationPreference
-    const addtlActuaryContacts =
-        contract.draftRevision?.rateRevisions[0]?.formData
-            ?.addtlActuaryContacts ?? []
-
     for (const contractRev of contract.revisions) {
+        // TODO: The frontend UI still thinks both these fields are on the contract level, but in the DB they are at
+        //  the rate revision level. Since at update contract we are setting both fields in each rate using what the values
+        //  on the contract level, when we pull data out from our new DB model, we need to do the inverse by using, the
+        //  the first rates values.
+        const addtlActuaryCommunicationPreference =
+            contractRev.rateRevisions[0]?.formData
+                .actuaryCommunicationPreference
+        const addtlActuaryContacts =
+            contractRev.rateRevisions[0]?.formData.addtlActuaryContacts ?? []
+
         const unlockedHealthPlanFormData: UnlockedHealthPlanFormDataType = {
             id: contractRev.id,
             createdAt: contractRev.createdAt,

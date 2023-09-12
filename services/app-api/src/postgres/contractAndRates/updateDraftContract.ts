@@ -211,6 +211,8 @@ async function updateDraftContract(
                                         addtlActuaryContacts: {
                                             create: rateRevision.addtlActuaryContacts,
                                         },
+                                        actuaryCommunicationPreference:
+                                            rateRevision.actuaryCommunicationPreference,
                                     },
                                 },
                                 draftContractRevisions: {
@@ -265,6 +267,8 @@ async function updateDraftContract(
                                                 deleteMany: {},
                                                 create: rateRevision.addtlActuaryContacts,
                                             },
+                                            actuaryCommunicationPreference:
+                                                rateRevision.actuaryCommunicationPreference,
                                         },
                                     },
                                 },
