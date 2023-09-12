@@ -10,6 +10,8 @@ import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHel
 import { v4 as uuidv4 } from 'uuid'
 import type { RateFormEditable } from './updateDraftRate'
 import { insertDraftRate } from './insertRate'
+import { submitRate } from './submitRate';
+import {unlockRate} from './unlockRate';
 
 describe('updateDraftContract', () => {
     afterEach(() => {
@@ -615,5 +617,103 @@ describe('updateDraftContract', () => {
         expect(updatedDraftContract.draftRevision?.rateRevisions).toHaveLength(
             2
         )
+    })
+
+    it('errors when trying to update a submitted rate', async () => {
+        const client = await sharedTestPrismaClient()
+
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                stateCode: 'NM',
+            },
+        })
+
+        const draftContractFormData = createInsertContractData({})
+        const draftContract = must(
+            await insertDraftContract(client, draftContractFormData)
+        )
+
+        // new rate
+        const newRate = createInsertRateData({
+            id: uuidv4(),
+            rateType: 'NEW',
+        })
+
+        // Update contract with new rates
+        const updatedContractWithNewRates = must(
+            await updateDraftContract(client, {
+                contractID: draftContract.id,
+                formData: {},
+                rateFormDatas: [newRate],
+            })
+        )
+
+        if (!updatedContractWithNewRates.draftRevision) {
+            throw new Error(
+                'Unexpected error: draft rate is missing a draftRevision.'
+            )
+        }
+
+        const newlyCreatedRates =
+            updatedContractWithNewRates.draftRevision.rateRevisions
+
+        // lets make sure we have rate ids
+        if (!newlyCreatedRates[0].formData.rateID) {
+            throw new Error(
+                'Unexpected error. Rate revisions did not contain rate IDs'
+            )
+        }
+
+        // expect 1 rates
+        expect(newlyCreatedRates).toHaveLength(1)
+
+        // submit rate
+        const submittedExistingRate = must(
+            await submitRate(
+                client,
+                newlyCreatedRates[0].formData.rateID,
+                stateUser.id,
+                'Rate submit'
+            )
+        )
+
+        if (!submittedExistingRate.revisions[0].formData) {
+            throw new Error(
+                'Unexpected error. Rate revisions did not contain rate IDs'
+            )
+        }
+
+        // Update contract with submitted rate and try to update the submitted rate revision
+        const attemptToUpdateSubmittedRate = must(await updateDraftContract(
+            client,
+            {
+                contractID: updatedContractWithNewRates.id,
+                formData: {},
+                rateFormDatas: [
+                    // attempt to update the revision data of a submitted rate.
+                    {
+                        ...submittedExistingRate.revisions[0].formData,
+                        rateType: 'AMENDMENT',
+                    },
+                ],
+            }
+        ))
+
+        if (!attemptToUpdateSubmittedRate.draftRevision) {
+            throw new Error(
+                'Unexpected error: draft rate is missing a draftRevision.'
+            )
+        }
+
+        // We still expect 1 connected rate
+        expect(attemptToUpdateSubmittedRate.draftRevision.rateRevisions).toHaveLength(1)
+
+        // We expect the rate type to not be changed to 'AMENDMENT'
+        expect(attemptToUpdateSubmittedRate.draftRevision.rateRevisions[0].formData.rateType).toBe('NEW')
     })
 })

@@ -12,6 +12,7 @@ import { includeDraftRates } from './prismaDraftContractHelpers'
 import { rateRevisionToDomainModel } from './prismaSharedContractRateHelpers'
 import type { RateFormEditable } from './updateDraftRate'
 import { isEqualData } from '../../resolvers/healthPlanPackage/contractAndRates/resolverHelpers'
+import {includeFullRate} from './prismaSubmittedRateHelpers';
 
 type ContractFormEditable = Partial<ContractFormDataType>
 
@@ -151,20 +152,35 @@ async function updateDraftContract(
 
             if (updateRates) {
                 for (const rateRevision of updateRates.upsertRates) {
-                    // Check if the rate revision exists
-                    // - We don't know if the rate exists in the DB we just know it's not connected to the contract.
-                    // - toProtoBuffer gives every rate revision a UUID if there isn't one, so we cannot rely on revision
-                    //  id to know if it exists in the DB.
-                    const currentRateRev = rateRevision.id
-                        ? await tx.rateRevisionTable.findFirst({
-                              where: {
-                                  id: rateRevision.id,
-                              },
-                          })
+                    // Check if the rate exists
+                    // - We don't know if the rate revision exists in the DB we just know it's not connected to the contract.
+                    // - toProtoBuffer gives every rate revision a UUID if there isn't one, so we cannot rely on revision id.
+                    // - We can use this revision id to check if a rate and revision exists.
+
+                    // Find the rate of the revision with only one draft revision
+                    const currentRate = rateRevision.id
+                        ? await tx.rateTable.findFirst({
+                            where: {
+                                revisions: {
+                                    some: {
+                                        id: rateRevision.id
+                                    }
+                                }
+                            },
+                            include: {
+                                // include the single most recent revision that is not submitted
+                                revisions: {
+                                    where: {
+                                        submitInfoID: null
+                                    },
+                                    take: 1
+                                }
+                            },
+                        })
                         : undefined
 
-                    // If rate revision does not exist, we need to create a new rate.
-                    if (!currentRateRev) {
+                    // If rate does not exist, we need to create a new rate.
+                    if (!currentRate) {
                         const { latestStateRateCertNumber } =
                             await client.state.update({
                                 data: {
@@ -223,15 +239,21 @@ async function updateDraftContract(
                             },
                         })
                     } else {
+                        // If the current rate has no draft revisions, based form our find with revision with no submitInfoID
+                        // then this is a submitted rate
+                        const isSubmitted = currentRate.revisions.length === 0
+
                         await tx.rateTable.update({
                             where: {
-                                id: currentRateRev.rateID,
+                                id: currentRate.id,
                             },
                             data: {
-                                revisions: {
+                                // if rate is not submitted, we update the revision data, otherwise we only make the
+                                //  connection to the draft contract revision.
+                                revisions: !isSubmitted ? {
                                     update: {
                                         where: {
-                                            id: currentRateRev.id,
+                                            id: rateRevision.id,
                                         },
                                         data: {
                                             rateType: rateRevision.rateType,
@@ -271,7 +293,7 @@ async function updateDraftContract(
                                                 rateRevision.actuaryCommunicationPreference,
                                         },
                                     },
-                                },
+                                } : undefined,
                                 draftContractRevisions: {
                                     connect: {
                                         id: currentRev.id,
