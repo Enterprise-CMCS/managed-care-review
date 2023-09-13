@@ -8,6 +8,7 @@ import {
     Label,
     Link,
 } from '@trussworks/react-uswds'
+import classnames from 'classnames'
 import {
     ActuaryContact,
     RateCapitationType,
@@ -341,14 +342,24 @@ export const SingleRateCert = ({
                     className={styles.radioGroup}
                     legend={
                         <div className={styles.capitationLegend}>
-                            <p>
+                            <p className="margin-bottom-0">
                                 Does the actuary certify capitation rates
                                 specific to each rate cell or a rate range?
                             </p>
-                            <span className={styles.legendSubHeader}>
+                            <span
+                                className={classnames(
+                                    styles.legendSubHeader,
+                                    styles.requiredOptionalText
+                                )}
+                            >
                                 Required
                             </span>
-                            <p className={styles.legendSubHeader}>
+                            <p
+                                className={classnames(
+                                    'margin-bottom-0',
+                                    styles.legendSubHeader
+                                )}
+                            >
                                 See 42 CFR §§ 438.4(b) and 438.4(c)
                             </p>
                         </div>

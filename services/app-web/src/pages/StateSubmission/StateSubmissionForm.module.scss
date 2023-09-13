@@ -133,6 +133,10 @@
 
 .legendSubHeader {
     font-weight: normal;
+    &.requiredOptionalText {
+        margin-bottom: units(2);
+    }
+
 }
 
 .guidanceTextBlock{
