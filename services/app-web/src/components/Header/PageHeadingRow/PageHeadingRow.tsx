@@ -110,10 +110,10 @@ export const PageHeadingRow = ({
     loggedInUser,
 }: PageHeadingProps): React.ReactElement | null => {
     if (!loggedInUser) {
-        if (route === 'ROOT' || route === 'AUTH') {
-            return <LandingRow isLoading={isLoading} />
-        } else {
+        if (route === 'HELP') {
             return null
+        } else {
+            return <LandingRow isLoading={isLoading} />
         }
     }
 
