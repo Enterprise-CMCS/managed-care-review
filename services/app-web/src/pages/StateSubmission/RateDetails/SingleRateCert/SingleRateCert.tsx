@@ -25,7 +25,7 @@ import {
 import styles from '../../StateSubmissionForm.module.scss'
 import { formatUserInputDate, isDateRangeEmpty } from '../../../../formHelpers'
 import {
-    ACCEPTED_SUBMISSION_FILE_TYPES,
+    ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES,
     ACCEPTED_RATE_CERTIFICATION_FILE_TYPES,
 } from '../../../../components/FileUpload'
 import { useS3 } from '../../../../contexts/S3Context'
@@ -125,10 +125,11 @@ export const SingleRateCert = ({
         featureFlags.PACKAGES_WITH_SHARED_RATES.flag,
         featureFlags.PACKAGES_WITH_SHARED_RATES.defaultValue
     )
-    const supportingDocsByRate = ldClient?.variation(
-        featureFlags.SUPPORTING_DOCS_BY_RATE.flag,
-        featureFlags.SUPPORTING_DOCS_BY_RATE.defaultValue
-    )
+    const supportingDocsByRate = true
+    // const supportingDocsByRate = ldClient?.variation(
+    //     featureFlags.SUPPORTING_DOCS_BY_RATE.flag,
+    //     featureFlags.SUPPORTING_DOCS_BY_RATE.defaultValue
+    // )
 
     // page level setup
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
@@ -244,11 +245,11 @@ export const SingleRateCert = ({
 
                                 <span className="padding-top-1">
                                     This input only accepts PDF, CSV, DOC, DOCX,
-                                    XLS, XLSX, XLSM files.
+                                    XLS, XLSX files.
                                 </span>
                             </span>
                         }
-                        accept={ACCEPTED_SUBMISSION_FILE_TYPES}
+                        accept={ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES}
                         initialItems={rateInfo.supportingDocuments}
                         uploadFile={(file) =>
                             handleUploadFile(file, 'HEALTH_PLAN_DOCS')
