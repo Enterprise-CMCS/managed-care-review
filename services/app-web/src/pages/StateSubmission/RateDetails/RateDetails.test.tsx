@@ -87,6 +87,8 @@ describe('RateDetails', () => {
         })
 
         it('displays correct form guidance', async () => {
+            ldUseClientSpy({ 'supporting-docs-by-rate': true })
+
             renderWithProviders(
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft()}
@@ -100,8 +102,12 @@ describe('RateDetails', () => {
                 }
             )
             expect(
-                screen.getByText(/All fields are required/)
-            ).toBeInTheDocument()
+                screen.queryByText(/All fields are required/)
+            ).not.toBeInTheDocument()
+            const requiredLabels = await screen.findAllByText('Required')
+            expect(requiredLabels).toHaveLength(6)
+            const optionalLabels = await screen.queryAllByText('Optional')
+            expect(optionalLabels).toHaveLength(1)
         })
 
         it('loads with empty rate type and document upload fields visible', async () => {
@@ -1677,7 +1683,7 @@ describe('RateDetails', () => {
                 'Upload one rate certification document'
             )
             const supportingDocsInput = screen.getByLabelText(
-                'Upload supporting documents (optional)'
+                'Upload supporting documents'
             )
             const backButton = screen.getByRole('button', {
                 name: 'Back',

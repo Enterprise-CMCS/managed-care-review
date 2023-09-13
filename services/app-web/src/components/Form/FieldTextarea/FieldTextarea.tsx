@@ -21,6 +21,7 @@ export type TextAreaProps = {
     hint?: React.ReactNode
     error?: string
     showError: boolean
+    showRequiredOptionalLabel?: boolean
     name: string
 } & JSX.IntrinsicElements['textarea']
 
@@ -32,6 +33,7 @@ export const FieldTextarea = ({
     showError,
     name,
     onBlur,
+    showRequiredOptionalLabel = false,
     ...inputProps
 }: TextAreaProps): React.ReactElement => {
     const [field, meta] = useField({ name })
@@ -47,13 +49,21 @@ export const FieldTextarea = ({
         if (onBlur) onBlur(e)
     }
 
+    let isRequiredLabel
+    if (showRequiredOptionalLabel) {
+        if (isRequired) {
+            isRequiredLabel = 'Required'
+        } else {
+            isRequiredLabel = 'Optional'
+        }
+    }
     return (
         <FormGroup error={showError}>
             <Label htmlFor={id} error={showError}>
                 {label}
             </Label>
             <span className={styles.requiredOptionalText}>
-                {isRequired ? 'Required' : 'Optional'}
+                {isRequiredLabel}
             </span>
             {showError && <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>}
             {hint && (
