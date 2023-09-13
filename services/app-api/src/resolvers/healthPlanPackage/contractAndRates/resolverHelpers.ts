@@ -116,11 +116,13 @@ const convertHealthPlanPackageRatesToDomain = async (
             rateProgramIDs: hppRateFormData.rateProgramIDs,
             rateCertificationName: hppRateFormData.rateCertificationName,
             certifyingActuaryContacts: hppRateFormData.actuaryContacts,
-            // The next two fields are not accounted for on the frontend UI. The frontend still thinks both these
-            //  fields are on the contract level. For now all rates will get their value from the contract level.
+            // Frontend UI saves both these two values ar the contract level of the HPP type. Our new Contract type does
+            // not have these two fields, they are at the rate revision level. So, when converting we need to get the
+            // values from the HPP contract and set them into our rate.
             addtlActuaryContacts: unlockedFormData.addtlActuaryContacts,
+            //  toProtobuffer already does this, so we can directly set the value from the rate data.
             actuaryCommunicationPreference:
-                unlockedFormData.addtlActuaryCommunicationPreference,
+                hppRateFormData.actuaryCommunicationPreference,
             // This field is set to empty array because we still need to figure out shared rates. This is MR-3568
             packagesWithSharedRateCerts: [],
             // packagesWithSharedRateCerts: hppRateFormData.packagesWithSharedRateCerts &&

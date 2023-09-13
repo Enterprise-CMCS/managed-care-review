@@ -127,7 +127,7 @@ function convertContractRateRevisionToHealthPlanRevision(
         rateCertificationName: formData.rateCertificationName,
         actuaryContacts: formData.certifyingActuaryContacts ?? [],
         // From the TODO in convertContractRevisionToHealthPlanRevision, these can just be set as whatever is in the
-        // database. The frontend does not read this values.
+        // database. See MR-3699 for more detailed explanation.
         actuaryCommunicationPreference: formData.actuaryCommunicationPreference,
         packagesWithSharedRateCerts: formData.packagesWithSharedRateCerts ?? [],
     }
