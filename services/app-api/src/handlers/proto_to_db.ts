@@ -279,6 +279,7 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
             recordException(migrateResult, serviceName, 'migrateRevision')
             revisionsWithErrors.push(revision.id)
             console.error(migrateResult)
+            continue
         }
 
         console.info(
