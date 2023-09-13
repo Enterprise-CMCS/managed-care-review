@@ -18,21 +18,21 @@ type ContractFormEditable = Partial<ContractFormDataType>
 type UpdateContractArgsType = {
     contractID: string
     formData: ContractFormEditable
-    rateFormDatas?: RateFormDataType[]
+    rateFormDatas?: RateFormEditable[]
 }
 
 const sortRatesForUpdate = (
     ratesFromDB: RateRevisionType[],
-    ratesFormClient: RateFormDataType[]
+    ratesFromClient: RateFormDataType[]
 ): {
     upsertRates: RateFormEditable[]
-    disconnectRates: string[]
+    disconnectRateIDs: string[]
 } => {
     const upsertRates = []
-    const disconnectRates = []
+    const disconnectRateIDs = []
 
     // Find rates to create or update
-    for (const rateData of ratesFormClient) {
+    for (const rateData of ratesFromClient) {
         // Find a matching rate revision id in the draftRatesFromDB array.
         const matchingDBRate = ratesFromDB.find(
             (dbRate) => dbRate.id === rateData.id
@@ -62,20 +62,20 @@ const sortRatesForUpdate = (
 
     // Find rates to disconnect
     for (const dbRate of ratesFromDB) {
-        //Find a matching rate revision id in the ratesFormClient
-        const matchingHPPRate = ratesFormClient.find(
+        //Find a matching rate revision id in the ratesFromClient
+        const matchingHPPRate = ratesFromClient.find(
             (convertedRate) => convertedRate.id === dbRate.id
         )
 
-        // If convertedRateData does not contain the rate revision id from DB, we push these revisions rateID in disconnectRates
+        // If convertedRateData does not contain the rate revision id from DB, we push these revisions rateID in disconnectRateIDs
         if (!matchingHPPRate && dbRate.formData.rateID) {
-            disconnectRates.push(dbRate.formData.rateID)
+            disconnectRateIDs.push(dbRate.formData.rateID)
         }
     }
 
     return {
         upsertRates,
-        disconnectRates,
+        disconnectRateIDs,
     }
 }
 
@@ -124,7 +124,7 @@ async function updateDraftContractWithRates(
     try {
         return await client.$transaction(async (tx) => {
             // Given all the Contracts associated with this draft, find the most recent submitted
-            const currentRev = await client.contractRevisionTable.findFirst({
+            const currentRev = await tx.contractRevisionTable.findFirst({
                 where: {
                     contractID: contractID,
                     submitInfoID: null,
@@ -181,7 +181,7 @@ async function updateDraftContractWithRates(
                     // If rate does not exist, we need to create a new rate.
                     if (!currentRate) {
                         const { latestStateRateCertNumber } =
-                            await client.state.update({
+                            await tx.state.update({
                                 data: {
                                     latestStateRateCertNumber: {
                                         increment: 1,
@@ -192,7 +192,7 @@ async function updateDraftContractWithRates(
                                 },
                             })
 
-                        await client.rateTable.create({
+                        await tx.rateTable.create({
                             data: {
                                 stateCode: stateCode,
                                 stateNumber: latestStateRateCertNumber,
@@ -354,8 +354,8 @@ async function updateDraftContractWithRates(
                     modifiedNonRiskPaymentArrangements,
                     inLieuServicesAndSettings,
                     draftRates: {
-                        disconnect: updateRates?.disconnectRates
-                            ? updateRates.disconnectRates.map((rateID) => ({
+                        disconnect: updateRates?.disconnectRateIDs
+                            ? updateRates.disconnectRateIDs.map((rateID) => ({
                                   id: rateID,
                               }))
                             : [],
