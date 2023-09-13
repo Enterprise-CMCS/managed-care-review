@@ -71,6 +71,7 @@ function rateFormDataToDomainModel(
 ): RateFormDataType {
     return {
         id: rateRevision.id,
+        rateID: rateRevision.rateID,
         rateType: rateRevision.rateType ?? undefined,
         rateCapitationType: rateRevision.rateCapitationType ?? undefined,
         rateDocuments: rateRevision.rateDocuments
