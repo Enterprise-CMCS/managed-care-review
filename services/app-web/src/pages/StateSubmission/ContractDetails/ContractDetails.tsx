@@ -522,6 +522,7 @@ export const ContractDetails = ({
                                     label="Upload contract"
                                     renderMode="list"
                                     aria-required
+                                    showRequiredOptionalLabel={true}
                                     error={documentsErrorMessage}
                                     hint={
                                         <span

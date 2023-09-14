@@ -164,6 +164,7 @@ export const SingleRateCert = ({
                     label="Upload one rate certification document"
                     renderMode="list"
                     aria-required
+                    showRequiredOptionalLabel={true}
                     error={showFieldErrors('rateDocuments')}
                     hint={
                         <span className={styles.guidanceTextBlockNoPadding}>
@@ -222,6 +223,7 @@ export const SingleRateCert = ({
                         label="Upload supporting documents"
                         renderMode="list"
                         aria-required={false}
+                        showRequiredOptionalLabel={true}
                         error={showFieldErrors('supportingDocuments')}
                         hint={
                             <span className={styles.guidanceTextBlockNoPadding}>
