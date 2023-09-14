@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 
 import {
     ldUseClientSpy,
@@ -16,7 +16,8 @@ jest.mock('../../hooks/useTealium', () => ({
     useTealium: jest.fn().mockReturnValue([]),
 }))
 
-describe('App Body and routes', () => {
+// Looking for routing tests? Check AppRoutes.test.tsx
+describe('AppBody', () => {
     afterEach(() => {
         jest.resetAllMocks()
     })
@@ -29,6 +30,48 @@ describe('App Body and routes', () => {
         renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
         const mainElement = screen.getByRole('main')
         expect(mainElement).toBeInTheDocument()
+    })
+
+    describe('Sign In buttton click', () => {
+        it('displays local login heading when expected', async () => {
+            ldUseClientSpy({})
+            renderWithProviders(<AppBody authMode={'LOCAL'} />)
+
+            await userClickSignIn(screen)
+
+            expect(
+                screen.getByRole('heading', {
+                    name: /Local Login/i,
+                    level: 3,
+                })
+            ).toBeInTheDocument()
+        })
+
+        it('displays Cognito login page when expected', async () => {
+            ldUseClientSpy({ 'session-expiring-modal': false })
+            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
+            await userClickSignIn(screen)
+
+            expect(
+                screen.getByRole('heading', { name: /Auth Page/i, level: 2 })
+            ).toBeInTheDocument()
+        })
+
+        it('displays Cognito signup page when expected', async () => {
+            ldUseClientSpy({ 'session-expiring-modal': false })
+            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
+            await userClickSignIn(screen)
+
+            expect(
+                screen.getByRole('textbox', { name: 'First Name' })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('textbox', { name: 'Last Name' })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('form', { name: 'Signup Form' })
+            ).toBeInTheDocument()
+        })
     })
 
     describe('Environment specific banner', () => {
@@ -76,51 +119,31 @@ describe('App Body and routes', () => {
         })
     })
 
-    it('displays maintenance banner when flag is on', async () => {
-        ldUseClientSpy({
-            'site-under-maintenance-banner': 'UNSCHEDULED',
-            'session-expiring-modal': false,
+    describe('Site under maintenance banner', () => {
+        it('displays maintenance banner when feature flag is on', async () => {
+            ldUseClientSpy({
+                'site-under-maintenance-banner': 'UNSCHEDULED',
+                'session-expiring-modal': false,
+            })
+            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        indexHealthPlanPackagesMockSuccess(),
+                    ],
+                },
+            })
+            expect(
+                await screen.findByRole('heading', { name: 'Site unavailable' })
+            ).toBeInTheDocument()
+            expect(
+                await screen.findByText(
+                    /MC-Review is currently unavailable due to technical issues/
+                )
+            ).toBeInTheDocument()
         })
-        renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({ statusCode: 200 }),
-                    indexHealthPlanPackagesMockSuccess(),
-                ],
-            },
-        })
-        expect(
-            await screen.findByRole('heading', { name: 'Site unavailable' })
-        ).toBeInTheDocument()
-        expect(
-            await screen.findByText(
-                /MC-Review is currently unavailable due to technical issues/
-            )
-        ).toBeInTheDocument()
-    })
 
-    it('does not display maintenance banner when flag is off', async () => {
-        ldUseClientSpy({ 'session-expiring-modal': false })
-        renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({ statusCode: 200 }),
-                    indexHealthPlanPackagesMockSuccess(),
-                ],
-            },
-        })
-        expect(
-            screen.queryByRole('heading', { name: 'Site Unavailable' })
-        ).toBeNull()
-        expect(
-            screen.queryByText(
-                /MC-Review is currently unavailable due to technical issues/
-            )
-        ).toBeNull()
-    })
-
-    describe('/', () => {
-        it('display dashboard when logged in', async () => {
+        it('does not display maintenance banner when flag is off', async () => {
             ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
@@ -130,146 +153,23 @@ describe('App Body and routes', () => {
                     ],
                 },
             })
-
             expect(
-                screen.queryByRole('heading', { level: 1 })
-            ).toBeInTheDocument()
-            await waitFor(() => {
-                expect(screen.getByTestId('dashboard-page')).toBeInTheDocument()
-                expect(
-                    screen.queryByRole('heading', {
-                        name: /Page not found/i,
-                    })
-                ).toBeNull()
-            })
-        })
-
-        it('display landing page when logged out', async () => {
-            ldUseClientSpy({ 'session-expiring-modal': false })
-            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
-            await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /How it works/i,
-                        level: 2,
-                    })
-                ).toBeInTheDocument()
-            })
+                screen.queryByRole('heading', { name: 'Site Unavailable' })
+            ).toBeNull()
             expect(
-                screen.getByRole('heading', {
-                    name: /Submit your managed care health plans to CMS for review/i,
-                    level: 2,
-                })
-            ).toBeInTheDocument()
-        })
-    })
-
-    describe('/auth', () => {
-        it('when app loads at /auth route, Auth header is displayed', async () => {
-            ldUseClientSpy({ 'session-expiring-modal': false })
-            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
-                routerProvider: { route: '/auth' },
-            })
-
-            await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /Auth Page/i,
-                        level: 2,
-                    })
-                ).toBeInTheDocument()
-            })
-            expect(
-                screen.queryByRole('heading', {
-                    name: /How it works/i,
-                    level: 2,
-                })
+                screen.queryByText(
+                    /MC-Review is currently unavailable due to technical issues/
+                )
             ).toBeNull()
         })
-
-        it('when user clicks Sign In link, redirects to /auth', async () => {
-            ldUseClientSpy({ 'session-expiring-modal': false })
-            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
-            await userClickSignIn(screen)
-
-            expect(
-                screen.getByRole('heading', { name: /Auth Page/i, level: 2 })
-            ).toBeInTheDocument()
-        })
-
-        it('display local login page when expected', async () => {
-            ldUseClientSpy({})
-            renderWithProviders(<AppBody authMode={'LOCAL'} />)
-
-            await userClickSignIn(screen)
-
-            expect(
-                screen.getByRole('heading', {
-                    name: /Local Login/i,
-                    level: 3,
-                })
-            ).toBeInTheDocument()
-        })
-
-        it('display cognito signup page when expected', async () => {
-            ldUseClientSpy({ 'session-expiring-modal': false })
-            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
-            await userClickSignIn(screen)
-
-            expect(
-                screen.getByRole('textbox', { name: 'First Name' })
-            ).toBeInTheDocument()
-            expect(
-                screen.getByRole('textbox', { name: 'Last Name' })
-            ).toBeInTheDocument()
-            expect(
-                screen.getByRole('form', { name: 'Signup Form' })
-            ).toBeInTheDocument()
-        })
     })
 
-    describe('page scrolling', () => {
+    describe('Page scrolling', () => {
         it('scroll top on page load', async () => {
             ldUseClientSpy({})
             renderWithProviders(<AppBody authMode={'LOCAL'} />)
             await userClickSignIn(screen)
             expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
-        })
-    })
-
-    describe('invalid routes', () => {
-        it('redirect to landing page when logged out', async () => {
-            ldUseClientSpy({ 'session-expiring-modal': false })
-            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
-                routerProvider: { route: '/not-a-real-place' },
-            })
-            await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /How it works/i,
-                        level: 2,
-                    })
-                ).toBeInTheDocument()
-            })
-        })
-
-        it('redirects to 404 error page when logged in', async () => {
-            ldUseClientSpy({ 'session-expiring-modal': false })
-            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-                routerProvider: { route: '/not-a-real-place' },
-            })
-
-            await waitFor(() =>
-                expect(
-                    screen.getByRole('heading', {
-                        name: /Page not found/i,
-                        level: 1,
-                    })
-                ).toBeInTheDocument()
-            )
         })
     })
 })

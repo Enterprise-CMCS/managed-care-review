@@ -1,6 +1,6 @@
 Cypress.Commands.add('startNewContractOnlySubmissionWithBaseContract', () => {
     // Must be on '/submissions/new'
-    cy.findByTestId('dashboard-page').should('exist')
+    cy.findByTestId('state-dashboard-page').should('exist')
     cy.findByRole('link', { name: 'Start new submission' }).click()
     cy.findByRole('heading', { level: 1, name: /New submission/ })
 
@@ -12,7 +12,7 @@ Cypress.Commands.add('startNewContractOnlySubmissionWithBaseContract', () => {
 
 Cypress.Commands.add('startNewContractOnlySubmissionWithAmendment', () => {
     // Must be on '/submissions/new'
-    cy.findByTestId('dashboard-page').should('exist')
+    cy.findByTestId('state-dashboard-page').should('exist')
     cy.findByRole('link', { name: 'Start new submission' , timeout: 5000}).click()
     cy.findByRole('heading', { level: 1, name: /New submission/ })
 
@@ -24,7 +24,7 @@ Cypress.Commands.add('startNewContractOnlySubmissionWithAmendment', () => {
 
 Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
     // Must be on '/submissions/new'
-    cy.findByTestId('dashboard-page').should('exist')
+    cy.findByTestId('state-dashboard-page').should('exist')
     cy.findByRole('link', { name: 'Start new submission', timeout: 5000 }).click()
     cy.findByRole('heading', { level: 1, name: /New submission/ })
 
@@ -504,7 +504,7 @@ Cypress.Commands.add(
             })
         cy.wait('@submitHealthPlanPackageMutation', { timeout: 50_000 })
         if (success) {
-            cy.findByTestId('dashboard-page').should('exist')
+            cy.findByTestId('state-dashboard-page').should('exist')
             cy.findByRole('heading',{name:'Submissions'}).should('exist')
         }
 

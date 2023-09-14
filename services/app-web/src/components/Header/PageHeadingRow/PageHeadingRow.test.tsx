@@ -38,13 +38,18 @@ describe('Page Heading Row', () => {
         role: 'State User',
         email: 'bob@dmas.mn.gov',
     }
-    it('renders without errors', () => {
-        renderWithProviders(<PageHeadingRow />)
+    it('renders without errors and with the managed care header on the landing page', () => {
+        renderWithProviders(<PageHeadingRow route="ROOT" />)
         expect(screen.getByRole('heading')).toBeInTheDocument()
     })
 
+    it('renders without errors and without the managed care header on the help page page', () => {
+        renderWithProviders(<PageHeadingRow route="HELP" />)
+        expect(screen.queryByRole('heading')).not.toBeInTheDocument()
+    })
+
     it('does not display heading text when isLoading', async () => {
-        renderWithProviders(<PageHeadingRow isLoading />)
+        renderWithProviders(<PageHeadingRow isLoading route="ROOT" />)
 
         expect(screen.getByRole('heading')).toBeInTheDocument()
         expect(screen.getByRole('heading')).not.toHaveTextContent(
@@ -53,7 +58,9 @@ describe('Page Heading Row', () => {
     })
 
     it('displays Medicaid and CHIP Managed Care Reporting heading when logged out', () => {
-        renderWithProviders(<PageHeadingRow heading="Custom page heading" />)
+        renderWithProviders(
+            <PageHeadingRow heading="Custom page heading" route="ROOT" />
+        )
         expect(screen.getByRole('heading')).toHaveTextContent(
             'Medicaid and CHIP Managed Care Reporting and Review System'
         )
@@ -64,6 +71,7 @@ describe('Page Heading Row', () => {
             <PageHeadingRow
                 heading="Custom page heading"
                 loggedInUser={loggedInUser}
+                route="ROOT"
             />
         )
         expect(screen.getByRole('heading')).not.toHaveTextContent(

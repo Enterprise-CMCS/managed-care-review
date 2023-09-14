@@ -135,7 +135,9 @@ describe('StateDashboard', () => {
         })
 
         await waitFor(() => {
-            expect(screen.queryByTestId('dashboard-page')).toBeInTheDocument()
+            expect(
+                screen.queryByTestId('state-dashboard-page')
+            ).toBeInTheDocument()
             expect(screen.queryByTestId('accordion')).not.toBeInTheDocument()
         })
     })

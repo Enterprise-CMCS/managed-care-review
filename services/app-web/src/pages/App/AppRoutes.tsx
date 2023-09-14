@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router'
 import { Route, Routes } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
@@ -49,6 +49,14 @@ function componentForAuthMode(
     }
 }
 
+// Routes that are agnostic to user login and authentication
+// Should be available on all defined routes lists
+const UniversalRoutes = (
+    <Fragment>
+        <Route path={RoutesRecord.HELP} element={<Help />} />
+    </Fragment>
+)
+
 const StateUserRoutes = ({
     authMode,
     setAlert,
@@ -68,7 +76,6 @@ const StateUserRoutes = ({
                     path={RoutesRecord.DASHBOARD}
                     element={<StateDashboard />}
                 />
-
                 <Route
                     path={RoutesRecord.SUBMISSIONS}
                     element={<StateDashboard />}
@@ -105,6 +112,7 @@ const StateUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_FORM}
                     element={<StateSubmissionForm />}
                 />
+                {UniversalRoutes}
                 {stageName !== 'prod' && (
                     <Route
                         path={RoutesRecord.GRAPHQL_EXPLORER}
@@ -169,6 +177,7 @@ const CMSUserRoutes = ({
                 )}
                 <Route path={RoutesRecord.REPORTS} element={<Reports />} />
                 <Route path={RoutesRecord.SETTINGS} element={<Settings />} />
+                {UniversalRoutes}
                 <Route path="*" element={<Error404 />} />
             </Routes>
         </AuthenticatedRouteWrapper>
@@ -185,7 +194,7 @@ const UnauthenticatedRoutes = ({
     return (
         <Routes>
             <Route path={RoutesRecord.ROOT} element={<Landing />} />
-            <Route path={RoutesRecord.HELP} element={<Help />} />
+            {UniversalRoutes}
             {/* no /auth page for IDM auth, we just have the login redirect link */}
             {authComponent && (
                 <Route path={RoutesRecord.AUTH} element={authComponent} />
