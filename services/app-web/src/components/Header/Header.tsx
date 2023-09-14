@@ -70,6 +70,7 @@ export const Header = ({
             </div>
             <PageHeadingRow
                 heading={route !== 'UNKNOWN_ROUTE' ? heading : undefined}
+                route={route}
                 isLoading={loginStatus === 'LOADING'}
                 loggedInUser={loggedInUser}
             />

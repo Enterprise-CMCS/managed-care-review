@@ -81,10 +81,10 @@
         "cypress": "^12.16.0",
         "cypress-pipe": "^2.0.0",
         "danger": "^11.2.6",
-        "esbuild": "^0.17.19",
+        "esbuild": "^0.19.2",
         "husky": "^8.0.1",
         "lerna": "^7.0.0",
-        "lint-staged": "^13.0.1",
+        "lint-staged": "^14.0.1",
         "prettier": "^2.4.1"
     },
     "dependencies": {

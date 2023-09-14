@@ -62,6 +62,7 @@ const contractFormDataSchema = z.object({
 
 const rateFormDataSchema = z.object({
     id: z.string().optional(),
+    rateID: z.string().optional(),
     rateType: rateTypeSchema.optional(),
     rateCapitationType: rateCapitationTypeSchema.optional(),
     rateDocuments: z.array(documentSchema).optional(),
@@ -81,7 +82,8 @@ const rateFormDataSchema = z.object({
 
 type ContractFormDataType = z.infer<typeof contractFormDataSchema>
 type RateFormDataType = z.infer<typeof rateFormDataSchema>
+type DocumentType = z.infer<typeof documentSchema>
 
 export { contractFormDataSchema, rateFormDataSchema }
 
-export type { ContractFormDataType, RateFormDataType }
+export type { ContractFormDataType, RateFormDataType, DocumentType }

@@ -28,7 +28,7 @@ Cypress.Commands.add(
             if(waitForLoad) {
                 cy.wait('@updateHealthPlanFormDataMutation', { timeout: 50_000})
              }
-            cy.findByTestId('dashboard-page').should('exist')
+            cy.findByTestId('state-dashboard-page').should('exist')
             cy.findByRole('heading',{name:'Submissions'}).should('exist')
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
             if (waitForLoad) {

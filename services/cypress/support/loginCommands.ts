@@ -27,7 +27,7 @@ Cypress.Commands.add('logInAsStateUser', () => {
     cy.wait(['@fetchCurrentUserQuery', '@indexHealthPlanPackagesQuery'], {
         timeout: 80_000,
     })
-    cy.findByTestId('dashboard-page', {timeout: 10_000 }).should('exist')
+    cy.findByTestId('state-dashboard-page', {timeout: 10_000 }).should('exist')
     cy.findByText('Start new submission').should('exist')
 })
 
