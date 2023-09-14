@@ -30,7 +30,10 @@ describe('SubmissionType', () => {
             },
         })
 
-        expect(screen.getByText(/All fields are required/)).toBeInTheDocument()
+        const requiredLabels = await screen.findAllByText('Required')
+        expect(requiredLabels).toHaveLength(6)
+        const optionalLabels = await screen.queryAllByText('Optional')
+        expect(optionalLabels).toHaveLength(0)
     })
 
     it('displays submission type form when expected', async () => {
