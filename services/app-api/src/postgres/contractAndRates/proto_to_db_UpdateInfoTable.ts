@@ -18,8 +18,6 @@ async function prepopulateUpdateInfo(
             return error
         }
 
-        console.info(`DEBUG: ${JSON.stringify(user)}`)
-        console.info(`DEBUG: ${JSON.stringify(formData.updatedAt)}`)
         const updateInfo = await client.updateInfoTable.create({
             data: {
                 updatedAt: formData.updatedAt,
