@@ -98,9 +98,9 @@ async function migrateContractRevision(
             })
 
         return createdContractRevision
-    } catch (error) {
+    } catch (err) {
         return new Error(
-            `Error creating contract revision for ID ${revision.id}: ${error.message}`
+            `Error creating contract revision for ID ${revision.id}: ${err.message}`
         )
     }
 }

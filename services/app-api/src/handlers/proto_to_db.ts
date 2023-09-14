@@ -26,7 +26,7 @@ import type {
     RateTable,
 } from '@prisma/client'
 import type { ContractType } from '../domain-models/contractAndRates'
-import { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
 import type { ContractTable, ContractRevisionTable } from '@prisma/client'
 import type { StoreError } from '../postgres/storeError'
 import { NotFoundError, isStoreError } from '../postgres/storeError'
@@ -40,7 +40,10 @@ import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormD
 import type { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { findContractWithHistory } from '../postgres/contractAndRates'
 
-export const getDatabaseConnection = async (): Promise<Store> => {
+export const getDatabaseConnection = async (): Promise<{
+    store: Store
+    prismaClient: PrismaClient
+}> => {
     const dbURL = process.env.DATABASE_URL
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
 
@@ -68,7 +71,7 @@ export const getDatabaseConnection = async (): Promise<Store> => {
     }
     const store = NewPostgresStore(pgResult)
 
-    return store
+    return { store, prismaClient: pgResult }
 }
 
 export const getRevisions = async (
@@ -266,15 +269,14 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     }
 
     // setup db connections and get revisions
-    const store = await getDatabaseConnection()
-    const client = new PrismaClient()
+    const { store, prismaClient } = await getDatabaseConnection()
     const revisions = await getRevisions(store)
 
     // go through the list of revisons and migrate
     console.info(`Found ${revisions.length} revisions to migrate...`)
     const revisionsWithErrors = []
     for (const revision of revisions) {
-        const migrateResult = await migrateRevision(client, revision)
+        const migrateResult = await migrateRevision(prismaClient, revision)
         if (migrateResult instanceof Error) {
             recordException(migrateResult, serviceName, 'migrateRevision')
             revisionsWithErrors.push(revision.id)

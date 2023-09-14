@@ -173,11 +173,11 @@ async function migrateDocuments(
         }
 
         return results
-    } catch (error) {
-        const err = new Error(
-            `Error migrating documents: ${JSON.stringify(error)}`
+    } catch (err) {
+        const error = new Error(
+            `Error migrating documents: ${JSON.stringify(err)}`
         )
-        return err
+        return error
     }
 }
 

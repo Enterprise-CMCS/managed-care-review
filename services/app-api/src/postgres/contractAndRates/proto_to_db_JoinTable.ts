@@ -46,8 +46,7 @@ async function migrateAssociations(
                 }
             }
         }
-    } catch (error) {
-        console.error(`Error migrating associations: ${JSON.stringify(error)}`)
+    } catch (err) {
         return new Error('Error migrating associations')
     }
 }

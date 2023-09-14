@@ -8,7 +8,7 @@ async function prepopulateUpdateInfo(
 ): Promise<string | Error> {
     try {
         const user = await client.user.findFirst({
-            where: { email: { equals: revision.submittedBy ?? '' } },
+            where: { email: { equals: revision.submittedBy ?? undefined } },
         })
 
         if (!user) {
