@@ -6,7 +6,7 @@ import { unlockContract } from './unlockContract'
 import { insertDraftRate } from './insertRate'
 import { unlockRate } from './unlockRate'
 import { submitRate } from './submitRate'
-import { updateDraftContract } from './updateDraftContract'
+import { updateDraftContractWithRates } from './updateDraftContractWithRates'
 import { updateDraftRate } from './updateDraftRate'
 import { submitContract } from './submitContract'
 import { findContractWithHistory } from './findContractWithHistory'
@@ -59,8 +59,7 @@ describe('unlockContract', () => {
 
         // Connect draft contract to submitted rate
         must(
-            await updateDraftContract(
-                client,{
+            await updateDraftContractWithRates(client, {
                 contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -70,8 +69,8 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate.id]}
-            )
+                rateFormDatas: [submittedRate.revisions[0].formData],
+            })
         )
 
         const fullDraftContract = must(
@@ -81,7 +80,7 @@ describe('unlockContract', () => {
         const draftContract = fullDraftContract.draftRevision
 
         if (draftContract === undefined) {
-            throw Error('Contract data was undefined')
+            throw Error('Unexpect error: draft contract missing draft revision')
         }
 
         // Rate revision should be connected to contract
@@ -110,7 +109,7 @@ describe('unlockContract', () => {
         const draftContractTwo = fullDraftContractTwo.draftRevision
 
         if (draftContractTwo === undefined) {
-            throw Error('Contract data was undefined')
+            throw Error('Unexpect error: draft contract missing draft revision')
         }
 
         // Contract should now have the latest rate revision
@@ -165,9 +164,8 @@ describe('unlockContract', () => {
 
         // Connect draft contract to submitted rate
         must(
-            await updateDraftContract(
-                client,
-                {contractID: contract.id,
+            await updateDraftContractWithRates(client, {
+                contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'Connecting rate',
@@ -176,8 +174,8 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate.id]}
-            )
+                rateFormDatas: [submittedRate.revisions[0].formData],
+            })
         )
 
         // Submit contract
@@ -262,11 +260,15 @@ describe('unlockContract', () => {
             })
         )
 
+        if (!rate.draftRevision) {
+            throw new Error(
+                'Unexpected error: draft rate is missing a draftRevision.'
+            )
+        }
+
         // Connect draft contract to draft rate
         must(
-            await updateDraftContract(
-                client,
-                {
+            await updateDraftContractWithRates(client, {
                 contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -276,8 +278,8 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate.id]}
-            )
+                rateFormDatas: [rate.draftRevision?.formData],
+            })
         )
 
         // Submit rate
@@ -310,9 +312,8 @@ describe('unlockContract', () => {
             )
         )
         must(
-            await updateDraftContract(
-                client,
-                {contractID: contract.id,
+            await updateDraftContractWithRates(client, {
+                contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'contract 2.0',
@@ -321,9 +322,10 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate.id]}
-            )
+                rateFormDatas: [rate.draftRevision?.formData],
+            })
         )
+
         const resubmittedContract = must(
             await submitContract(
                 client,
@@ -368,12 +370,16 @@ describe('unlockContract', () => {
             })
         )
 
+        if (!rate.draftRevision) {
+            throw new Error(
+                'Unexpected error: draft rate is missing a draftRevision.'
+            )
+        }
+
         // Connect draft contract to submitted rate
         must(
-            await updateDraftContract(
-                client,
-               {
-                contractID:  contract.id,
+            await updateDraftContractWithRates(client, {
+                contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'contract 1.0',
@@ -382,8 +388,8 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate.id]}
-            )
+                rateFormDatas: [rate.draftRevision?.formData],
+            })
         )
 
         // Submit contract

@@ -21,6 +21,7 @@ import {
 } from '../attributeHelper'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql/index'
+import { convertHealthPlanPackageRatesToDomain } from './contractAndRates/resolverHelpers'
 
 type ProtectedFieldType = Pick<
     UnlockedHealthPlanFormDataType,
@@ -181,8 +182,23 @@ export function updateHealthPlanFormDataResolver(
                 throw new UserInputError(errMessage)
             }
 
+            // Check for any rate updates
+            const updateRateFormDatas =
+                await convertHealthPlanPackageRatesToDomain(unlockedFormData)
+
+            if (updateRateFormDatas instanceof Error) {
+                const errMessage = `Error converting rate. Message: ${updateRateFormDatas.message}`
+                logError('updateHealthPlanFormData', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                    },
+                })
+            }
+
             // Update contract draft revision
-            const updateResult = await store.updateDraftContract({
+            const updateResult = await store.updateDraftContractWithRates({
                 contractID: input.pkgID,
                 formData: {
                     ...unlockedFormData,
@@ -210,9 +226,8 @@ export function updateHealthPlanFormDataResolver(
                             }
                         }
                     ),
-                    // TODO - can add rate fields here when updateHPP handles rates as well
                 },
-                rateIDs: [],
+                rateFormDatas: updateRateFormDatas,
             })
 
             if (updateResult instanceof Error) {

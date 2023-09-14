@@ -2,9 +2,11 @@ import React, { useEffect } from 'react'
 import { useLocation } from 'react-router'
 import { GridContainer, Table } from '@trussworks/react-uswds'
 import styles from './Help.module.scss'
+import { useAuth } from '../../contexts/AuthContext'
 
 export const Help = (): React.ReactElement => {
     const location = useLocation()
+    const { loggedInUser } = useAuth()
 
     useEffect(() => {
         if (location.hash) {
@@ -15,7 +17,11 @@ export const Help = (): React.ReactElement => {
     }, [location])
 
     return (
-        <GridContainer>
+        <GridContainer
+            data-testid={
+                loggedInUser ? 'help-authenticated' : 'help-unauthenticated'
+            }
+        >
             <h2>Help documentation</h2>
             <section className={styles.helpSection}>
                 <h3 id="submission-description">

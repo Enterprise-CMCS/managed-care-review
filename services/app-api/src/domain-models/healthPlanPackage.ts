@@ -4,8 +4,9 @@ import type {
     HealthPlanPackageType,
 } from './HealthPlanPackageType'
 import { pruneDuplicateEmails } from '../emailer/formatters'
-import type { ContractType } from './contractAndRates'
+import type { ContractType, RateRevisionType } from './contractAndRates'
 import type {
+    RateInfoType,
     SubmissionDocument,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
@@ -91,6 +92,47 @@ function convertContractToUnlockedHealthPlanPackage(
     }
 }
 
+function convertContractRateRevisionToHealthPlanRevision(
+    rateRevision: RateRevisionType
+): RateInfoType {
+    const { formData } = rateRevision
+
+    const rateAmendmentInfo = (formData.amendmentEffectiveDateStart ||
+        formData.amendmentEffectiveDateEnd) && {
+        effectiveDateStart: formData.amendmentEffectiveDateStart,
+        effectiveDateEnd: formData.amendmentEffectiveDateEnd,
+    }
+
+    return {
+        id: rateRevision.id,
+        rateType: formData.rateType,
+        rateCapitationType: formData.rateCapitationType,
+        rateDocuments: formData.rateDocuments?.length
+            ? (formData.rateDocuments.map((doc) => ({
+                  ...doc,
+                  documentCategories: ['RATES'],
+              })) as SubmissionDocument[])
+            : [],
+        supportingDocuments: formData.supportingDocuments?.length
+            ? (formData.supportingDocuments.map((doc) => ({
+                  ...doc,
+                  documentCategories: ['RATES_RELATED'],
+              })) as SubmissionDocument[])
+            : [],
+        rateDateStart: formData.rateDateStart,
+        rateDateEnd: formData.rateDateEnd,
+        rateDateCertified: formData.rateDateCertified,
+        rateAmendmentInfo: rateAmendmentInfo,
+        rateProgramIDs: formData.rateProgramIDs,
+        rateCertificationName: formData.rateCertificationName,
+        actuaryContacts: formData.certifyingActuaryContacts ?? [],
+        // From the TODO in convertContractRevisionToHealthPlanRevision, these can just be set as whatever is in the
+        // database. See MR-3699 for more detailed explanation.
+        actuaryCommunicationPreference: formData.actuaryCommunicationPreference,
+        packagesWithSharedRateCerts: formData.packagesWithSharedRateCerts ?? [],
+    }
+}
+
 function convertContractRevisionToHealthPlanRevision(
     contract: ContractType
 ): HealthPlanRevisionType[] | Error {
@@ -101,7 +143,18 @@ function convertContractRevisionToHealthPlanRevision(
     }
 
     let healthPlanRevisions: HealthPlanRevisionType[] | Error = []
+
     for (const contractRev of contract.revisions) {
+        // TODO: The frontend UI still thinks both these fields are on the contract level, but in the DB they are at
+        //  the rate revision level. Since at update contract we are setting both fields in each rate using what the values
+        //  on the contract level, when we pull data out from our new DB model, we need to do the inverse by using, the
+        //  the first rates values.
+        const addtlActuaryCommunicationPreference =
+            contractRev.rateRevisions[0]?.formData
+                .actuaryCommunicationPreference
+        const addtlActuaryContacts =
+            contractRev.rateRevisions[0]?.formData.addtlActuaryContacts ?? []
+
         const unlockedHealthPlanFormData: UnlockedHealthPlanFormDataType = {
             id: contractRev.id,
             createdAt: contractRev.createdAt,
@@ -115,8 +168,8 @@ function convertContractRevisionToHealthPlanRevision(
             riskBasedContract: contractRev.formData.riskBasedContract,
             submissionDescription: contractRev.formData.submissionDescription,
             stateContacts: contractRev.formData.stateContacts,
-            addtlActuaryCommunicationPreference: undefined,
-            addtlActuaryContacts: [],
+            addtlActuaryCommunicationPreference,
+            addtlActuaryContacts,
             documents: contractRev.formData.supportingDocuments.map((doc) => ({
                 ...doc,
                 documentCategories: ['CONTRACT_RELATED'],
@@ -174,7 +227,9 @@ function convertContractRevisionToHealthPlanRevision(
                         contractRev.formData.modifiedNonRiskPaymentArrangements,
                 },
             },
-            rateInfos: [],
+            rateInfos: contractRev.rateRevisions.map((rateRevision) =>
+                convertContractRateRevisionToHealthPlanRevision(rateRevision)
+            ),
         }
 
         const formDataProto = toProtoBuffer(unlockedHealthPlanFormData)

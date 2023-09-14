@@ -110,4 +110,4 @@ async function updateDraftRate(
 }
 
 export { updateDraftRate }
-export type { RateFormEditable }
+export type { RateFormEditable, UpdateRateArgsType }

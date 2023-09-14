@@ -20,11 +20,16 @@ import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import type {
     FeatureFlagLDConstant,
     FlagValue,
-} from 'app-web/src/common-code/featureFlags'
+} from '../../../../app-web/src/common-code/featureFlags'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
-import { must } from '../../testHelpers'
+import { getProgramsFromState, must } from '../../testHelpers'
 import { submitContract } from '../../postgres/contractAndRates/submitContract'
-import type { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type {
+    HealthPlanFormDataType,
+    RateInfoType,
+    StateCodeType,
+} from 'app-web/src/common-code/healthPlanFormDataType'
+import * as add_sha from '../../handlers/add_sha'
 
 const flagValueTestParameters: {
     flagName: FeatureFlagLDConstant
@@ -48,6 +53,13 @@ describe.each(flagValueTestParameters)(
     ({ flagName, flagValue }) => {
         const cmsUser = testCMSUser()
         const mockLDService = testLDService({ [flagName]: flagValue })
+
+        beforeEach(() => {
+            jest.resetAllMocks()
+            jest.spyOn(add_sha, 'calculateSHA256').mockImplementation(() => {
+                return Promise.resolve('mockSHA256')
+            })
+        })
 
         it('updates valid scalar fields in the formData', async () => {
             const server = await constructTestPostgresServer({
@@ -122,6 +134,209 @@ describe.each(flagValueTestParameters)(
                 expect.objectContaining({
                     ...formData,
                     updatedAt: expect.any(Date),
+                })
+            )
+        })
+
+        it('creates, updates, and deletes rates in the contract', async () => {
+            const server = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
+            const createdDraft = await createTestHealthPlanPackage(server)
+            const ratePrograms = getProgramsFromState(
+                createdDraft.stateCode as StateCodeType
+            )
+
+            // Create 2 rate data for insertion
+            const rate1: RateInfoType = {
+                rateType: 'NEW' as const,
+                rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+                rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+                rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+                rateDocuments: [
+                    {
+                        name: 'rateDocument.pdf',
+                        s3URL: 's3://bucketname/key/supporting-documents',
+                        documentCategories: ['RATES' as const],
+                        sha256: 'rate1-sha',
+                    },
+                ],
+                rateAmendmentInfo: undefined,
+                rateCapitationType: undefined,
+                rateCertificationName: undefined,
+                supportingDocuments: [],
+                //We only want one rate ID and use last program in list to differentiate from programID if possible.
+                rateProgramIDs: [ratePrograms.reverse()[0].id],
+                actuaryContacts: [
+                    {
+                        name: 'test name',
+                        titleRole: 'test title',
+                        email: 'email@example.com',
+                        actuarialFirm: 'MERCER' as const,
+                        actuarialFirmOther: '',
+                    },
+                ],
+                packagesWithSharedRateCerts: [],
+            }
+
+            const rate2 = {
+                rateType: 'NEW' as const,
+                rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+                rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+                rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+                rateDocuments: [
+                    {
+                        name: 'rateDocument.pdf',
+                        s3URL: 's3://bucketname/key/supporting-documents',
+                        documentCategories: ['RATES' as const],
+                        sha256: 'rate2-sha',
+                    },
+                ],
+                rateAmendmentInfo: undefined,
+                rateCapitationType: undefined,
+                rateCertificationName: undefined,
+                supportingDocuments: [],
+                //We only want one rate ID and use last program in list to differentiate from programID if possible.
+                rateProgramIDs: [ratePrograms.reverse()[0].id],
+                actuaryContacts: [
+                    {
+                        name: 'test name',
+                        titleRole: 'test title',
+                        email: 'email@example.com',
+                        actuarialFirm: 'MERCER' as const,
+                        actuarialFirmOther: '',
+                    },
+                ],
+                packagesWithSharedRateCerts: [],
+            }
+
+            // update that draft form data.
+            const formData: HealthPlanFormDataType = Object.assign(
+                latestFormData(createdDraft),
+                {
+                    rateInfos: [rate1, rate2],
+                }
+            )
+
+            // convert to base64 proto
+            const updatedB64 = domainToBase64(formData)
+
+            // update the DB contract
+            const updateResult = await server.executeOperation({
+                query: UPDATE_HEALTH_PLAN_FORM_DATA,
+                variables: {
+                    input: {
+                        pkgID: createdDraft.id,
+                        healthPlanFormData: updatedB64,
+                    },
+                },
+            })
+
+            expect(updateResult.errors).toBeUndefined()
+
+            const updatedHealthPlanPackage =
+                updateResult.data?.updateHealthPlanFormData.pkg
+
+            const updatedFormData = latestFormData(updatedHealthPlanPackage)
+
+            // Expect our rates to be in the contract from our database
+            expect(updatedFormData).toEqual(
+                expect.objectContaining({
+                    ...formData,
+                    updatedAt: expect.any(Date),
+                    rateInfos: expect.arrayContaining([
+                        expect.objectContaining({
+                            ...rate1,
+                            id: expect.any(String),
+                            rateCertificationName: expect.any(String),
+                        }),
+                        expect.objectContaining({
+                            ...rate2,
+                            id: expect.any(String),
+                            rateCertificationName: expect.any(String),
+                        }),
+                    ]),
+                })
+            )
+
+            const rate3 = {
+                rateType: 'AMENDMENT' as const,
+                rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+                rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+                rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+                rateDocuments: [],
+                rateAmendmentInfo: undefined,
+                rateCapitationType: undefined,
+                rateCertificationName: undefined,
+                supportingDocuments: [],
+                //We only want one rate ID and use last program in list to differentiate from programID if possible.
+                rateProgramIDs: [ratePrograms.reverse()[0].id],
+                actuaryContacts: [],
+                packagesWithSharedRateCerts: [],
+            }
+
+            // Update first rate and remove second from contract and add a new rate.
+            const formData2: HealthPlanFormDataType = Object.assign(
+                latestFormData(updatedHealthPlanPackage),
+                {
+                    rateInfos: [
+                        // updating the actuary on the first rate
+                        {
+                            ...updatedFormData.rateInfos[0],
+                            actuaryContacts: [
+                                {
+                                    name: 'New actuary',
+                                    titleRole: 'Better title',
+                                    email: 'actuary@example.com',
+                                    actuarialFirm: 'OPTUMAS' as const,
+                                    actuarialFirmOther: '',
+                                },
+                            ],
+                        },
+                        {
+                            ...rate3,
+                        },
+                    ],
+                }
+            )
+
+            const secondUpdatedB64 = domainToBase64(formData2)
+
+            // update the DB contract again
+            const updateResult2 = await server.executeOperation({
+                query: UPDATE_HEALTH_PLAN_FORM_DATA,
+                variables: {
+                    input: {
+                        pkgID: createdDraft.id,
+                        healthPlanFormData: secondUpdatedB64,
+                    },
+                },
+            })
+
+            expect(updateResult2.errors).toBeUndefined()
+
+            const updatedHealthPlanPackage2 =
+                updateResult2.data?.updateHealthPlanFormData.pkg
+
+            const updatedFormData2 = latestFormData(updatedHealthPlanPackage2)
+
+            // Expect our rates to be updated
+            expect(updatedFormData2).toEqual(
+                expect.objectContaining({
+                    ...formData2,
+                    updatedAt: expect.any(Date),
+                    rateInfos: expect.arrayContaining([
+                        expect.objectContaining({
+                            ...formData2.rateInfos[0],
+                            id: expect.any(String),
+                            rateCertificationName: expect.any(String),
+                        }),
+                        expect.objectContaining({
+                            ...formData2.rateInfos[1],
+                            id: expect.any(String),
+                            rateCertificationName: expect.any(String),
+                        }),
+                    ]),
                 })
             )
         })
@@ -492,12 +707,13 @@ describe.each(flagValueTestParameters)(
             const postgresStore = NewPostgresStore(prismaClient)
             const failStore = mockStoreThatErrors()
 
-            // set our store to error on the updateFormData call, only
+            // set store error for flag off
             postgresStore.updateHealthPlanRevision =
                 failStore.updateHealthPlanRevision
 
             // set store error for flag on.
-            postgresStore.updateDraftContract = failStore.updateDraftContract
+            postgresStore.updateDraftContractWithRates =
+                failStore.updateDraftContractWithRates
 
             const server = await constructTestPostgresServer({
                 store: postgresStore,

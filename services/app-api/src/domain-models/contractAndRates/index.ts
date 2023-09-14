@@ -13,11 +13,15 @@ export {
     rateRevisionSchema,
 } from './revisionTypes'
 
-export type { ContractType } from './contractTypes'
+export type { ContractType, DraftContractType } from './contractTypes'
 
 export type { ContractStatusType, UpdateInfoType } from './updateInfoType'
 
-export type { ContractFormDataType, RateFormDataType } from './formDataTypes'
+export type {
+    ContractFormDataType,
+    RateFormDataType,
+    DocumentType,
+} from './formDataTypes'
 
 export type {
     ContractRevisionType,

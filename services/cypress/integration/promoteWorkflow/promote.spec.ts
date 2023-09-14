@@ -9,7 +9,7 @@ describe('promote', () => {
         cy.findByRole('heading', { level: 2, name: /How it works/ })
         cy.findByRole('heading', {
             level: 2,
-            name: /You can use MC-Review to submit:/,
+            name: /Submit your managed care health plans to CMS for review/i,
         })
     })
 })

@@ -108,7 +108,7 @@ function mockStoreThatErrors(): Store {
             return genericError
         },
 
-        updateDraftContract: async (_ID) => {
+        updateDraftContractWithRates: async (_ID) => {
             return genericError
         },
         findAllContractsWithHistoryByState: async (_ID) => {
