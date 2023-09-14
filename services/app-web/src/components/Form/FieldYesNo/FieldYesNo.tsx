@@ -22,7 +22,6 @@ export type FieldYesNoProps = {
     label: string
     hint?: React.ReactNode
     showError?: boolean
-    showRequiredOptionalLabel?: boolean
     id: string
     variant?: 'TOPLEVEL' | 'SUBHEAD' // subhead variant used for nested fields yes/no fields under an overarching heading
 } & React.JSX.IntrinsicElements['input']
@@ -32,7 +31,6 @@ export const FieldYesNo = ({
     label,
     hint,
     showError = false,
-    showRequiredOptionalLabel = false,
     variant = 'TOPLEVEL',
     id,
     className,
@@ -49,14 +47,7 @@ export const FieldYesNo = ({
 
     const isRequired =
         inputProps['aria-required'] !== false && inputProps.required !== false // consumer must explicitly say this field is not required, otherwise we assume aria-required
-    let isRequiredLabel
-    if (showRequiredOptionalLabel) {
-        if (isRequired) {
-            isRequiredLabel = 'Required'
-        } else {
-            isRequiredLabel = 'Optional'
-        }
-    }
+
     return (
         <Fieldset
             role="radiogroup"
@@ -67,7 +58,7 @@ export const FieldYesNo = ({
             data-testid="yes-no-radio-fieldset"
         >
             <span className={styles.requiredOptionalText}>
-                {isRequiredLabel}
+                {isRequired ? 'Required' : 'Optional'}
             </span>
             {showError && <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>}
             {hint && (

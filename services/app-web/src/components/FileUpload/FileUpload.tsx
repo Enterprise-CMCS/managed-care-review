@@ -33,7 +33,6 @@ export type FileUploadProps = {
     hint?: React.ReactNode
     initialItems?: FileItemT[]
     isLabelVisible?: boolean
-    showRequiredOptionalLabel?: boolean
     uploadFile: (file: File) => Promise<S3FileData>
     scanFile?: (key: string) => Promise<void | Error> // optional function to be called after uploading (used for scanning)
     deleteFile: (key: string) => Promise<void>
@@ -64,7 +63,6 @@ export const FileUpload = ({
     deleteFile,
     onFileItemsUpdate,
     isContractOnly,
-    showRequiredOptionalLabel = false,
     shouldDisplayMissingCategoriesError = false,
     innerInputRef,
     ...inputProps
@@ -421,22 +419,13 @@ export const FileUpload = ({
         fileItems.length
     )} added `
 
-    let isRequiredLabel
-    if (showRequiredOptionalLabel) {
-        if (isRequired) {
-            isRequiredLabel = 'Required'
-        } else {
-            isRequiredLabel = 'Optional'
-        }
-    }
-
     return (
         <FormGroup className="margin-top-0">
             <Label className={isLabelVisible ? '' : 'srOnly'} htmlFor={id}>
                 {label}
             </Label>
             <span className={styles.requiredOptionalText}>
-                {isRequiredLabel}
+                {isRequired ? 'Required' : 'Optional'}
             </span>
 
             <PoliteErrorMessage id={`${id}-error`}>{error}</PoliteErrorMessage>
