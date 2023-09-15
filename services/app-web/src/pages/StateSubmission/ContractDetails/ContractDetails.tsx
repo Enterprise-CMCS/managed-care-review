@@ -568,6 +568,11 @@ export const ContractDetails = ({
                                     className={styles.radioGroup}
                                     legend="Contract status"
                                 >
+                                    <span
+                                        className={styles.requiredOptionalText}
+                                    >
+                                        Required
+                                    </span>
                                     {showFieldErrors(
                                         errors.contractExecutionStatus
                                     ) && (
@@ -575,11 +580,6 @@ export const ContractDetails = ({
                                             {errors.contractExecutionStatus}
                                         </PoliteErrorMessage>
                                     )}
-                                    <span
-                                        className={styles.requiredOptionalText}
-                                    >
-                                        Required
-                                    </span>
                                     <FieldRadio
                                         id="executedContract"
                                         name="contractExecutionStatus"
