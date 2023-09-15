@@ -120,6 +120,7 @@ export const PackagesWithSharedRates = ({
                 name={`${fieldNamePrefix}.hasSharedRateCert`}
                 label="Was this rate certification uploaded to any other submissions?"
                 showError={Boolean(showFieldErrors('hasSharedRateCert'))}
+                aria-required
             />
 
             {getIn(values, `${fieldNamePrefix}.hasSharedRateCert`) ===
@@ -131,6 +132,9 @@ export const PackagesWithSharedRates = ({
                         Please select the submissions that also contain this
                         rate certification.
                     </Label>
+                    <span className={styles.requiredOptionalText}>
+                        Required
+                    </span>
                     <Link
                         aria-label="View all submissions (opens in new window)"
                         href={'/dashboard'}
