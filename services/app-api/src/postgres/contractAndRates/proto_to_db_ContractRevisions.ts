@@ -73,23 +73,57 @@ async function migrateContractRevision(
             managedCareEntities:
                 formData.managedCareEntities as ManagedCareEntity[],
             federalAuthorities: formData.federalAuthorities,
-            modifiedBenefitsProvided: null,
-            modifiedGeoAreaServed: null,
-            modifiedMedicaidBeneficiaries: null,
-            modifiedRiskSharingStrategy: null,
-            modifiedIncentiveArrangements: null,
-            modifiedWitholdAgreements: null,
-            modifiedStateDirectedPayments: null,
-            modifiedPassThroughPayments: null,
-            modifiedPaymentsForMentalDiseaseInstitutions: null,
-            modifiedMedicalLossRatioStandards: null,
-            modifiedOtherFinancialPaymentIncentive: null,
-            modifiedEnrollmentProcess: null,
-            modifiedGrevienceAndAppeal: null,
-            modifiedNetworkAdequacyStandards: null,
-            modifiedLengthOfContract: null,
-            modifiedNonRiskPaymentArrangements: null,
-            inLieuServicesAndSettings: null,
+            modifiedBenefitsProvided:
+                formData.contractAmendmentInfo?.modifiedProvisions
+                    ?.modifiedBenefitsProvided ?? null,
+            modifiedGeoAreaServed:
+                formData.contractAmendmentInfo?.modifiedProvisions
+                    ?.modifiedGeoAreaServed ?? null,
+            modifiedMedicaidBeneficiaries:
+                formData.contractAmendmentInfo?.modifiedProvisions
+                    ?.modifiedMedicaidBeneficiaries ?? null,
+            modifiedRiskSharingStrategy:
+                formData.contractAmendmentInfo?.modifiedProvisions
+                    ?.modifiedRiskSharingStrategy ?? null,
+            modifiedIncentiveArrangements:
+                formData.contractAmendmentInfo?.modifiedProvisions
+                    ?.modifiedIncentiveArrangements ?? null,
+            modifiedWitholdAgreements:
+                formData.contractAmendmentInfo?.modifiedProvisions
+                    ?.modifiedWitholdAgreements ?? null,
+            modifiedStateDirectedPayments:
+                formData.contractAmendmentInfo?.modifiedProvisions
+                    ?.modifiedStateDirectedPayments ?? null,
+            modifiedPassThroughPayments:
+                formData.contractAmendmentInfo?.modifiedProvisions
+                    ?.modifiedPassThroughPayments ?? null,
+            modifiedPaymentsForMentalDiseaseInstitutions:
+                formData.contractAmendmentInfo?.modifiedProvisions
+                    ?.modifiedPaymentsForMentalDiseaseInstitutions ?? null,
+            modifiedMedicalLossRatioStandards:
+                formData.contractAmendmentInfo?.modifiedProvisions
+                    ?.modifiedMedicalLossRatioStandards ?? null,
+            modifiedOtherFinancialPaymentIncentive:
+                formData.contractAmendmentInfo?.modifiedProvisions
+                    ?.modifiedOtherFinancialPaymentIncentive ?? null,
+            modifiedEnrollmentProcess:
+                formData.contractAmendmentInfo?.modifiedProvisions
+                    ?.modifiedEnrollmentProcess ?? null,
+            modifiedGrevienceAndAppeal:
+                formData.contractAmendmentInfo?.modifiedProvisions
+                    ?.modifiedGrevienceAndAppeal ?? null,
+            modifiedNetworkAdequacyStandards:
+                formData.contractAmendmentInfo?.modifiedProvisions
+                    ?.modifiedNetworkAdequacyStandards ?? null,
+            modifiedLengthOfContract:
+                formData.contractAmendmentInfo?.modifiedProvisions
+                    ?.modifiedLengthOfContract ?? null,
+            modifiedNonRiskPaymentArrangements:
+                formData.contractAmendmentInfo?.modifiedProvisions
+                    ?.modifiedNonRiskPaymentArrangements ?? null,
+            inLieuServicesAndSettings:
+                formData.contractAmendmentInfo?.modifiedProvisions
+                    ?.inLieuServicesAndSettings ?? null,
         }
 
         const createdContractRevision =
