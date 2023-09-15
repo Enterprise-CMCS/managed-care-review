@@ -22,6 +22,7 @@ import {
 } from '../attributeHelper'
 import type { EmailParameterStore } from '../../parameterStore'
 import { GraphQLError } from 'graphql'
+import type { LDService } from '../../launchDarkly/launchDarkly'
 
 // unlock is a state machine transforming a LockedFormData and turning it into UnlockedFormData
 // Since Unlocked is a strict subset of Locked, this can't error today.
@@ -42,9 +43,15 @@ function unlock(
 export function unlockHealthPlanPackageResolver(
     store: Store,
     emailer: Emailer,
-    emailParameterStore: EmailParameterStore
+    emailParameterStore: EmailParameterStore,
+    launchDarkly: LDService
 ): MutationResolvers['unlockHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
+        const ratesDatabaseRefactor = await launchDarkly.getFeatureFlag(
+            context,
+            'rates-db-refactor'
+        )
+
         const { user, span } = context
         const { unlockedReason, pkgID } = input
         setResolverDetailsOnActiveSpan('unlockHealthPlanPackage', user, span)
@@ -63,174 +70,186 @@ export function unlockHealthPlanPackageResolver(
             throw new ForbiddenError('user not authorized to unlock package')
         }
 
-        // fetch from the store
-        const result = await store.findHealthPlanPackage(pkgID)
+        if (ratesDatabaseRefactor) {
+            throw new Error('Not Implemented')
+        } else {
+            // pre-rates refactor code path
 
-        if (isStoreError(result)) {
-            const errMessage = `Issue finding a package of type ${result.code}. Message: ${result.message}`
-            logError('unlockHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
+            // fetch from the store
+            const result = await store.findHealthPlanPackage(pkgID)
 
-        if (result === undefined) {
-            const errMessage = `A package must exist to be unlocked: ${pkgID}`
-            logError('unlockHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'pkgID',
-            })
-        }
+            if (isStoreError(result)) {
+                const errMessage = `Issue finding a package of type ${result.code}. Message: ${result.message}`
+                logError('unlockHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
+            }
 
-        const pkg: HealthPlanPackageType = result
-        const pkgStatus = packageStatus(pkg)
-        const currentRevision = pkg.revisions[0]
+            if (result === undefined) {
+                const errMessage = `A package must exist to be unlocked: ${pkgID}`
+                logError('unlockHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new UserInputError(errMessage, {
+                    argumentName: 'pkgID',
+                })
+            }
 
-        // Check that the package is in an unlockable state
-        if (pkgStatus === 'UNLOCKED' || pkgStatus === 'DRAFT') {
-            const errMessage = 'Attempted to unlock package with wrong status'
-            logError('unlockHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'INVALID_PACKAGE_STATUS',
-                },
-            })
-        }
+            const pkg: HealthPlanPackageType = result
+            const pkgStatus = packageStatus(pkg)
+            const currentRevision = pkg.revisions[0]
 
-        // pull the current revision out to unlock it.
-        const formDataResult = toDomain(currentRevision.formDataProto)
-        if (formDataResult instanceof Error) {
-            const errMessage = `Failed to decode proto ${formDataResult}.`
-            logError('unlockHealthPlanPackage', errMessage)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'PROTO_DECODE_ERROR',
-                },
-            })
-        }
+            // Check that the package is in an unlockable state
+            if (pkgStatus === 'UNLOCKED' || pkgStatus === 'DRAFT') {
+                const errMessage =
+                    'Attempted to unlock package with wrong status'
+                logError('unlockHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'INVALID_PACKAGE_STATUS',
+                    },
+                })
+            }
 
-        if (formDataResult.status !== 'SUBMITTED') {
-            const errMessage = `A locked package had unlocked formData.`
-            logError('unlockHealthPlanPackage', errMessage)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'INVALID_PACKAGE_STATUS',
-                },
-            })
-        }
+            // pull the current revision out to unlock it.
+            const formDataResult = toDomain(currentRevision.formDataProto)
+            if (formDataResult instanceof Error) {
+                const errMessage = `Failed to decode proto ${formDataResult}.`
+                logError('unlockHealthPlanPackage', errMessage)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'PROTO_DECODE_ERROR',
+                    },
+                })
+            }
 
-        const draftformData: UnlockedHealthPlanFormDataType =
-            unlock(formDataResult)
+            if (formDataResult.status !== 'SUBMITTED') {
+                const errMessage = `A locked package had unlocked formData.`
+                logError('unlockHealthPlanPackage', errMessage)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'INVALID_PACKAGE_STATUS',
+                    },
+                })
+            }
 
-        // Create a new revision with this draft in it
-        const updateInfo: UpdateInfoType = {
-            updatedAt: new Date(),
-            updatedBy: context.user.email,
-            updatedReason: unlockedReason,
-        }
+            const draftformData: UnlockedHealthPlanFormDataType =
+                unlock(formDataResult)
 
-        const unlockedPackage = await store.insertHealthPlanRevision(
-            pkgID,
-            updateInfo,
-            draftformData
-        )
+            // Create a new revision with this draft in it
+            const updateInfo: UpdateInfoType = {
+                updatedAt: new Date(),
+                updatedBy: context.user.email,
+                updatedReason: unlockedReason,
+            }
 
-        if (isStoreError(unlockedPackage)) {
-            const errMessage = `Issue unlocking a package of type ${unlockedPackage.code}. Message: ${unlockedPackage.message}`
-            logError('unlockHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
+            const unlockedPackage = await store.insertHealthPlanRevision(
+                pkgID,
+                updateInfo,
+                draftformData
+            )
 
-        // Send emails!
+            if (isStoreError(unlockedPackage)) {
+                const errMessage = `Issue unlocking a package of type ${unlockedPackage.code}. Message: ${unlockedPackage.message}`
+                logError('unlockHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
+            }
 
-        // Get state analysts emails from parameter store
-        let stateAnalystsEmails =
-            await emailParameterStore.getStateAnalystsEmails(
+            // Send emails!
+
+            // Get state analysts emails from parameter store
+            let stateAnalystsEmails =
+                await emailParameterStore.getStateAnalystsEmails(
+                    draftformData.stateCode
+                )
+            //If error, log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
+            if (stateAnalystsEmails instanceof Error) {
+                logError('getStateAnalystsEmails', stateAnalystsEmails.message)
+                setErrorAttributesOnActiveSpan(
+                    stateAnalystsEmails.message,
+                    span
+                )
+                stateAnalystsEmails = []
+            }
+
+            // Get submitter email from every pkg submitted revision.
+            const submitterEmails = packageSubmitters(unlockedPackage)
+
+            const statePrograms = store.findStatePrograms(
                 draftformData.stateCode
             )
-        //If error, log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
-        if (stateAnalystsEmails instanceof Error) {
-            logError('getStateAnalystsEmails', stateAnalystsEmails.message)
-            setErrorAttributesOnActiveSpan(stateAnalystsEmails.message, span)
-            stateAnalystsEmails = []
-        }
 
-        // Get submitter email from every pkg submitted revision.
-        const submitterEmails = packageSubmitters(unlockedPackage)
-
-        const statePrograms = store.findStatePrograms(draftformData.stateCode)
-
-        if (statePrograms instanceof Error) {
-            logError('findStatePrograms', statePrograms.message)
-            setErrorAttributesOnActiveSpan(statePrograms.message, span)
-            throw new GraphQLError(statePrograms.message, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
-
-        const unlockPackageCMSEmailResult =
-            await emailer.sendUnlockPackageCMSEmail(
-                draftformData,
-                updateInfo,
-                stateAnalystsEmails,
-                statePrograms
-            )
-
-        const unlockPackageStateEmailResult =
-            await emailer.sendUnlockPackageStateEmail(
-                draftformData,
-                updateInfo,
-                statePrograms,
-                submitterEmails
-            )
-
-        if (
-            unlockPackageCMSEmailResult instanceof Error ||
-            unlockPackageStateEmailResult instanceof Error
-        ) {
-            if (unlockPackageCMSEmailResult instanceof Error) {
-                logError(
-                    'unlockPackageCMSEmail - CMS email failed',
-                    unlockPackageCMSEmailResult
-                )
-                setErrorAttributesOnActiveSpan('CMS email failed', span)
+            if (statePrograms instanceof Error) {
+                logError('findStatePrograms', statePrograms.message)
+                setErrorAttributesOnActiveSpan(statePrograms.message, span)
+                throw new GraphQLError(statePrograms.message, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
             }
-            if (unlockPackageStateEmailResult instanceof Error) {
-                logError(
-                    'unlockPackageStateEmail - state email failed',
-                    unlockPackageStateEmailResult
+
+            const unlockPackageCMSEmailResult =
+                await emailer.sendUnlockPackageCMSEmail(
+                    draftformData,
+                    updateInfo,
+                    stateAnalystsEmails,
+                    statePrograms
                 )
-                setErrorAttributesOnActiveSpan('state email failed', span)
+
+            const unlockPackageStateEmailResult =
+                await emailer.sendUnlockPackageStateEmail(
+                    draftformData,
+                    updateInfo,
+                    statePrograms,
+                    submitterEmails
+                )
+
+            if (
+                unlockPackageCMSEmailResult instanceof Error ||
+                unlockPackageStateEmailResult instanceof Error
+            ) {
+                if (unlockPackageCMSEmailResult instanceof Error) {
+                    logError(
+                        'unlockPackageCMSEmail - CMS email failed',
+                        unlockPackageCMSEmailResult
+                    )
+                    setErrorAttributesOnActiveSpan('CMS email failed', span)
+                }
+                if (unlockPackageStateEmailResult instanceof Error) {
+                    logError(
+                        'unlockPackageStateEmail - state email failed',
+                        unlockPackageStateEmailResult
+                    )
+                    setErrorAttributesOnActiveSpan('state email failed', span)
+                }
+                throw new GraphQLError('Email failed.', {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'EMAIL_ERROR',
+                    },
+                })
             }
-            throw new GraphQLError('Email failed.', {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'EMAIL_ERROR',
-                },
-            })
+
+            logSuccess('unlockHealthPlanPackage')
+            setSuccessAttributesOnActiveSpan(span)
+
+            return { pkg: unlockedPackage }
         }
-
-        logSuccess('unlockHealthPlanPackage')
-        setSuccessAttributesOnActiveSpan(span)
-
-        return { pkg: unlockedPackage }
     }
 }

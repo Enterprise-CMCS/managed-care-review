@@ -316,8 +316,9 @@ export function submitHealthPlanPackageResolver(
                 )
 
                 const submitRatesResult = await Promise.all(ratePromises)
-                if (isStoreError(submitRatesResult)) {
-                    const errMessage = `Issue updating a package of type ${submitRatesResult.code}. Message: ${submitRatesResult.message}`
+                // if any of the promises reject, which shouldn't happen b/c we don't throw...
+                if (submitRatesResult instanceof Error) {
+                    const errMessage = `Failed to submit contract revision's rates with ID: ${contractRevisionID}; ${submitRatesResult.message}`
                     logError('submitHealthPlanPackage', errMessage)
                     setErrorAttributesOnActiveSpan(errMessage, span)
                     throw new GraphQLError(errMessage, {
@@ -326,10 +327,23 @@ export function submitHealthPlanPackageResolver(
                             cause: 'DB_ERROR',
                         },
                     })
-                } else if (submitRatesResult instanceof Error) {
-                    throw new Error(
-                        'Still to do - figuring out error handling and if this path is possible'
-                    )
+                }
+                const submitRateErrors: Error[] = submitRatesResult.filter(
+                    (res) => res instanceof Error
+                ) as Error[]
+                if (submitRateErrors.length > 0) {
+                    console.error('Errors submitting Rates: ', submitRateErrors)
+                    const errMessage = `Failed to submit contract revision's rates with ID: ${contractRevisionID}; ${submitRateErrors.map(
+                        (err) => err.message
+                    )}`
+                    logError('submitHealthPlanPackage', errMessage)
+                    setErrorAttributesOnActiveSpan(errMessage, span)
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
                 }
             }
 
@@ -339,8 +353,8 @@ export function submitHealthPlanPackageResolver(
                 submittedByUserID: user.id,
                 submitReason: updateInfo.updatedReason,
             })
-            if (isStoreError(submitContractResult)) {
-                const errMessage = `Issue updating a package of type ${submitContractResult.code}. Message: ${submitContractResult.message}`
+            if (submitContractResult instanceof Error) {
+                const errMessage = `Failed to submit contract revision with ID: ${contractRevisionID}; ${submitContractResult.message}`
                 logError('submitHealthPlanPackage', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new GraphQLError(errMessage, {
@@ -349,10 +363,6 @@ export function submitHealthPlanPackageResolver(
                         cause: 'DB_ERROR',
                     },
                 })
-            } else if (submitContractResult instanceof Error) {
-                throw new Error(
-                    'Still to do - figuring out error handling and if this path is possible'
-                )
             }
             const maybeSubmittedPkg =
                 convertContractWithRatesToUnlockedHPP(submitContractResult)

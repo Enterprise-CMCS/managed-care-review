@@ -28,6 +28,7 @@ import type {
     FeatureFlagLDConstant,
     FlagValue,
 } from 'app-web/src/common-code/featureFlags'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 const flagValueTestParameters: {
     flagName: FeatureFlagLDConstant
@@ -50,8 +51,12 @@ describe.each(flagValueTestParameters)(
     `Tests $testName`,
     ({ flagName, flagValue }) => {
         const cmsUser = testCMSUser()
+        const mockLDService = testLDService({ [flagName]: flagValue })
+
         it('returns a StateSubmission if complete', async () => {
-            const server = await constructTestPostgresServer()
+            const server = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
 
             // setup
             const initialPkg = await createAndUpdateTestHealthPlanPackage(
@@ -130,7 +135,9 @@ describe.each(flagValueTestParameters)(
         }, 20000)
 
         it('returns an error if there are no contract documents attached', async () => {
-            const server = await constructTestPostgresServer()
+            const server = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
 
             const draft = await createAndUpdateTestHealthPlanPackage(server, {
                 documents: [],
@@ -158,7 +165,9 @@ describe.each(flagValueTestParameters)(
         })
 
         it('returns an error if the package is already SUBMITTED', async () => {
-            const server = await constructTestPostgresServer()
+            const server = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
 
             const draft = await createAndSubmitTestHealthPlanPackage(server)
             const draftID = draft.id
@@ -193,7 +202,9 @@ describe.each(flagValueTestParameters)(
         })
 
         it('returns an error if there are no contract details fields', async () => {
-            const server = await constructTestPostgresServer()
+            const server = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
 
             const draft = await createAndUpdateTestHealthPlanPackage(server, {
                 contractType: undefined,
@@ -223,7 +234,9 @@ describe.each(flagValueTestParameters)(
         })
 
         it('returns an error if there are missing rate details fields for submission type', async () => {
-            const server = await constructTestPostgresServer()
+            const server = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
 
             const draft = await createAndUpdateTestHealthPlanPackage(server, {
                 submissionType: 'CONTRACT_AND_RATES',
@@ -273,7 +286,9 @@ describe.each(flagValueTestParameters)(
         })
 
         it('does not remove any rate data from CONTRACT_AND_RATES submissionType and submits successfully', async () => {
-            const server = await constructTestPostgresServer()
+            const server = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
 
             //Create and update a contract and rate submission to contract only with rate data
             const draft = await createAndUpdateTestHealthPlanPackage(server, {
@@ -338,7 +353,9 @@ describe.each(flagValueTestParameters)(
         })
 
         it('removes any rate data from CONTRACT_ONLY submissionType and submits successfully', async () => {
-            const server = await constructTestPostgresServer()
+            const server = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
 
             //Create and update a contract and rate submission to contract only with rate data
             const draft = await createAndUpdateTestHealthPlanPackage(server, {
@@ -393,7 +410,9 @@ describe.each(flagValueTestParameters)(
         })
 
         it('removes any invalid modified provisions from CHIP submission and submits successfully', async () => {
-            const server = await constructTestPostgresServer()
+            const server = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
 
             //Create and update a submission as if the user edited and changed population covered after filling out yes/nos
             const draft = await createAndUpdateTestHealthPlanPackage(server, {
@@ -454,7 +473,9 @@ describe.each(flagValueTestParameters)(
         })
 
         it('removes any invalid federal authorities from CHIP submission and submits successfully', async () => {
-            const server = await constructTestPostgresServer()
+            const server = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
 
             //Create and update a submission as if the user edited and changed population covered after filling out yes/nos
             const draft = await createAndUpdateTestHealthPlanPackage(server, {
@@ -907,6 +928,8 @@ describe.each(flagValueTestParameters)(
             // expect sendEmail to have been called, so we know it did not error earlier
             expect(mockEmailer.sendEmail).toHaveBeenCalled()
 
+            jest.resetAllMocks()
+
             // expect correct graphql error.
             expect(submitResult.errors?.[0]).toEqual(
                 expect.objectContaining({
@@ -924,7 +947,9 @@ describe.each(flagValueTestParameters)(
         })
 
         it('errors when risk based question is undefined', async () => {
-            const server = await constructTestPostgresServer()
+            const server = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
 
             // setup
             const initialPkg = await createAndUpdateTestHealthPlanPackage(

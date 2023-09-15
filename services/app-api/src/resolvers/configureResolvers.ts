@@ -69,7 +69,8 @@ export function configureResolvers(
             unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
                 store,
                 emailer,
-                emailParameterStore
+                emailParameterStore,
+                launchDarkly
             ),
             updateCMSUser: updateCMSUserResolver(store),
             createQuestion: createQuestionResolver(store),
