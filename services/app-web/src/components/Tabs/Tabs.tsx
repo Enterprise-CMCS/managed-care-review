@@ -42,7 +42,7 @@ export const Tabs = ({
                                 // aria-selected={activeTab === tab.name}
                                 aria-controls={tab.id}
                                 onClick={() => {
-                                    navigate(tab.route)
+                                    if (tab.route) navigate(tab.route)
                                     setActiveTab(tab.name)
                                 }}
                             >
