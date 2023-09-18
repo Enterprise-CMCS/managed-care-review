@@ -23,6 +23,7 @@ async function migrateContractRevision(
             return existingRevision
         }
 
+        // find the user if it has been submitted
         let submitInfoID: string | null = null
         if (formData.status === 'SUBMITTED' && revision.submittedBy) {
             const user = await client.user.findFirst({
@@ -53,11 +54,45 @@ async function migrateContractRevision(
                 )
             }
         }
+        // find the user if it has been unlocked
+        let unlockInfoID: string | null = null
+        if (formData.status === 'SUBMITTED' && revision.unlockedBy) {
+            const user = await client.user.findFirst({
+                where: { email: revision.unlockedBy },
+            })
+
+            if (user) {
+                const existingUnlockInfo =
+                    await client.updateInfoTable.findFirst({
+                        where: { updatedByID: user.id },
+                    })
+
+                if (existingUnlockInfo) {
+                    unlockInfoID = existingUnlockInfo.id
+                } else {
+                    const newUnlockInfo = await client.updateInfoTable.create({
+                        data: {
+                            updatedAt:
+                                revision.unlockedAt ?? formData.updatedAt, //TODO: not sure what we want to fall back to here
+                            updatedByID: user.id,
+                            updatedReason:
+                                revision.unlockedReason ??
+                                'Migrated from previous system',
+                        },
+                    })
+                    unlockInfoID = newUnlockInfo.id
+                }
+            } else {
+                console.warn(
+                    `User with email ${revision.unlockedBy} does not exist. Skipping unlockInfo creation.`
+                )
+            }
+        }
 
         const contractRevision: ContractRevisionTable = {
             id: revision.id,
             contractID: revision.pkgID,
-            unlockInfoID: null,
+            unlockInfoID: unlockInfoID,
             submitInfoID: submitInfoID,
             createdAt: formData.createdAt,
             updatedAt: formData.updatedAt,
