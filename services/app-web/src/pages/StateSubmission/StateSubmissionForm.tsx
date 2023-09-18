@@ -51,7 +51,7 @@ import {
 
 const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
     getRelativePath({
-        basePath: RoutesRecord.SUBMISSIONS_FORM,
+        basePath: RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL,
         targetPath: RoutesRecord[formRouteType],
     })
 
@@ -116,6 +116,7 @@ export type HealthPlanFormPageProps = {
     ) => Promise<HealthPlanPackage | Error>
 }
 export const StateSubmissionForm = (): React.ReactElement => {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     const { id } = useParams<{ id: string }>()
     // IF not id throw new error
     if (!id) {

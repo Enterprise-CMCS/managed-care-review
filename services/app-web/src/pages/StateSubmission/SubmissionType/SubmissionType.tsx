@@ -44,6 +44,7 @@ import {
     yesNoFormValueAsBoolean,
 } from '../../../components/Form/FieldYesNo/FieldYesNo'
 import { SubmissionTypeFormSchema } from './SubmissionTypeSchema'
+import { RoutesRecord } from '../../../constants'
 
 export interface SubmissionTypeFormValues {
     populationCovered?: PopulationCoveredType
@@ -539,7 +540,9 @@ export const SubmissionType = ({
                             pageVariant={
                                 isNewSubmission ? 'FIRST' : 'EDIT_FIRST'
                             }
-                            backOnClick={() => navigate('/dashboard')}
+                            backOnClick={() =>
+                                navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
+                            }
                             continueOnClick={() => {
                                 setShouldValidate(true)
                                 setFocusErrorSummaryHeading(true)
@@ -548,7 +551,7 @@ export const SubmissionType = ({
                                 await handleFormSubmit(
                                     values,
                                     { setSubmitting },
-                                    '/dashboard'
+                                    RoutesRecord.DASHBOARD_SUBMISSIONS
                                 )
                             }}
                             actionInProgress={isSubmitting}
