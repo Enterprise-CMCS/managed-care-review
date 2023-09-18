@@ -2,10 +2,11 @@ import React, { useState } from 'react'
 import classnames from 'classnames'
 
 import styles from './Tabs.module.scss'
+import { useNavigate } from 'react-router-dom'
 
 type TabsProps = {
     defaultActiveTab?: string
-    children: React.ReactElement[]
+    children: React.ReactElement[] // TabPanels
 } & JSX.IntrinsicElements['div']
 
 export const Tabs = ({
@@ -13,9 +14,12 @@ export const Tabs = ({
     children,
     ...tabProps
 }: TabsProps): React.ReactElement => {
+    const navigate = useNavigate()
+
     const tabs = children.map((child) => ({
         id: child.props.id,
         name: child.props.tabName,
+        route: child.props.nestedRoute,
     }))
     const [activeTab, setActiveTab] = useState(defaultActiveTab || tabs[0].name)
 
@@ -37,7 +41,10 @@ export const Tabs = ({
                                 className={styles['easi-tabs__tab-btn']}
                                 // aria-selected={activeTab === tab.name}
                                 aria-controls={tab.id}
-                                onClick={() => setActiveTab(tab.name)}
+                                onClick={() => {
+                                    navigate(tab.route)
+                                    setActiveTab(tab.name)
+                                }}
                             >
                                 <span className={styles['easi-tabs__tab-text']}>
                                     {tab.name}
