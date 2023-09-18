@@ -55,6 +55,41 @@ async function migrateRateInfo(
             }
         }
 
+        // find the user if it has been unlocked
+        let unlockInfoID: string | null = null
+        if (formData.status === 'SUBMITTED' && revision.unlockedBy) {
+            const user = await client.user.findFirst({
+                where: { email: revision.unlockedBy },
+            })
+
+            if (user) {
+                const existingUnlockInfo =
+                    await client.updateInfoTable.findFirst({
+                        where: { updatedByID: user.id },
+                    })
+
+                if (existingUnlockInfo) {
+                    unlockInfoID = existingUnlockInfo.id
+                } else {
+                    const newUnlockInfo = await client.updateInfoTable.create({
+                        data: {
+                            updatedAt:
+                                revision.unlockedAt ?? formData.updatedAt, //TODO: not sure what we want to fall back to here
+                            updatedByID: user.id,
+                            updatedReason:
+                                revision.unlockedReason ??
+                                'Migrated from previous system',
+                        },
+                    })
+                    unlockInfoID = newUnlockInfo.id
+                }
+            } else {
+                console.warn(
+                    `User with email ${revision.unlockedBy} does not exist. Skipping unlockInfo creation.`
+                )
+            }
+        }
+
         for (const rateInfo of formData.rateInfos) {
             const rateID = revision.pkgID
 
@@ -104,7 +139,7 @@ async function migrateRateInfo(
                 rateID: createdRate.id,
                 createdAt: new Date(),
                 updatedAt: new Date(),
-                unlockInfoID: null,
+                unlockInfoID: unlockInfoID,
                 submitInfoID: submitInfoID,
                 amendmentEffectiveDateStart:
                     rateInfo.rateAmendmentInfo?.effectiveDateStart ?? null,
