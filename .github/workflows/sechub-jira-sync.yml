@@ -31,7 +31,7 @@ jobs:
           jira-username: ${{ secrets.JIRA_USERNAME }}
           jira-host: qmacbis.atlassian.net
           jira-project-key: MR # add issues to the 'MC-Review' project
-          jira-epic-key: MR-3092 # add issues to the '[Tech Maintenance] Security Hub' epic
+          jira-epic-key: MCR-2480 # add issues to the '[Tech Maintenance] Security Hub' epic
           jira-custom-fields: '{ "customfield_10006": 925 }' # add issues to the 'Tech Maintenance' sprint
           jira-ignore-statuses: Done
           aws-region: us-east-1
