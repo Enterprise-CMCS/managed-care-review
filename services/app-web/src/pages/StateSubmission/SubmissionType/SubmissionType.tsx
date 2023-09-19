@@ -313,9 +313,6 @@ export const SubmissionType = ({
                         <fieldset className="usa-fieldset">
                             <legend className="srOnly">Submission type</legend>
                             {showFormAlert && <GenericApiErrorBanner />}
-                            <span id="form-guidance">
-                                All fields are required
-                            </span>
 
                             {shouldValidate && (
                                 <ErrorSummary
@@ -334,6 +331,11 @@ export const SubmissionType = ({
                                     aria-required
                                     legend="Which populations does this contract action cover?"
                                 >
+                                    <span
+                                        className={styles.requiredOptionalText}
+                                    >
+                                        Required
+                                    </span>
                                     {showFieldErrors(
                                         errors.populationCovered
                                     ) && (
@@ -395,6 +397,9 @@ export const SubmissionType = ({
                                 <Label htmlFor="programIDs">
                                     Programs this contract action covers
                                 </Label>
+                                <span className={styles.requiredOptionalText}>
+                                    Required
+                                </span>
                                 {showFieldErrors(errors.programIDs) && (
                                     <PoliteErrorMessage>
                                         {errors.programIDs}
@@ -417,6 +422,11 @@ export const SubmissionType = ({
                                     legend="Choose a submission type"
                                     id="submissionType"
                                 >
+                                    <span
+                                        className={styles.requiredOptionalText}
+                                    >
+                                        Required
+                                    </span>
                                     {showFieldErrors(errors.submissionType) && (
                                         <PoliteErrorMessage>
                                             {errors.submissionType}
@@ -467,6 +477,11 @@ export const SubmissionType = ({
                                     legend="Contract action type"
                                     id="contractType"
                                 >
+                                    <span
+                                        className={styles.requiredOptionalText}
+                                    >
+                                        Required
+                                    </span>
                                     {showFieldErrors(errors.contractType) && (
                                         <PoliteErrorMessage>
                                             {errors.contractType}
@@ -497,6 +512,7 @@ export const SubmissionType = ({
                                     id="riskBasedContract"
                                     name="riskBasedContract"
                                     label="Is this a risk-based contract?"
+                                    aria-required
                                     hint="See 42 CFR § 438.2"
                                     showError={showFieldErrors(
                                         errors.riskBasedContract

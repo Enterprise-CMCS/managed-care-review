@@ -6,6 +6,7 @@ export { FileUpload } from './FileUpload'
 export {
     ACCEPTED_SUBMISSION_FILE_TYPES,
     ACCEPTED_RATE_CERTIFICATION_FILE_TYPES,
+    ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES,
 } from './constants'
 export {
     hasNoLoadingFiles,

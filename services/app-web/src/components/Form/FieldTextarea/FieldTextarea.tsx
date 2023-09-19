@@ -2,6 +2,7 @@ import React from 'react'
 import { useField } from 'formik'
 import { Label, Textarea, FormGroup } from '@trussworks/react-uswds'
 import { PoliteErrorMessage } from '../..'
+import styles from './FieldTextarea.module.scss'
 
 /**
  * This component renders a ReactUSWDS TextArea component inside of a FormGroup,
@@ -34,6 +35,7 @@ export const FieldTextarea = ({
     ...inputProps
 }: TextAreaProps): React.ReactElement => {
     const [field, meta] = useField({ name })
+    const isRequired = inputProps['aria-required']
 
     // Latch into onBlur to do any input cleaning
     // Initial use case is to trim away trailing whitespace in email addresses
@@ -50,6 +52,9 @@ export const FieldTextarea = ({
             <Label htmlFor={id} error={showError}>
                 {label}
             </Label>
+            <span className={styles.requiredOptionalText}>
+                {isRequired ? 'Required' : 'Optional'}
+            </span>
             {showError && <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>}
             {hint && (
                 <div

@@ -133,12 +133,20 @@
 
 .legendSubHeader {
     font-weight: normal;
-} 
+    &.requiredOptionalText {
+        margin-bottom: units(2);
+    }
+}
 
 .guidanceTextBlock{
     padding-top: 0;
     display: flex;
     flex-direction: column;
+}
+
+.requiredOptionalText {
+    display: block;
+    color: $theme-color-hint;
 }
 
 .guidanceTextBlockNoPadding{

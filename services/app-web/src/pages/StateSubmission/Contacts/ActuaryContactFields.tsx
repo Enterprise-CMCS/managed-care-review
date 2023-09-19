@@ -5,6 +5,7 @@ import { Fieldset, FormGroup } from '@trussworks/react-uswds'
 import { FieldRadio, FieldTextInput } from '../../../components/Form'
 import { PoliteErrorMessage } from '../../../components/PoliteErrorMessage'
 import { RateCertFormType } from '../RateDetails/SingleRateCert/SingleRateCert'
+import styles from '../StateSubmissionForm.module.scss'
 
 type FormError =
     FormikErrors<RateCertFormType>[keyof FormikErrors<RateCertFormType>]
@@ -35,11 +36,11 @@ export const ActuaryContactFields = ({
 
     return (
         <Fieldset legend={fieldSetLegend}>
+            <span className={styles.requiredOptionalText}>Required</span>
             <FieldTextInput
                 name={`${fieldNamePrefix}.name`}
                 id={`${fieldNamePrefix}.name`}
                 label="Name"
-                aria-required={false}
                 showError={Boolean(
                     showFieldErrors(getIn(errors, `${fieldNamePrefix}.name`))
                 )}
@@ -52,7 +53,6 @@ export const ActuaryContactFields = ({
                 name={`${fieldNamePrefix}.titleRole`}
                 id={`${fieldNamePrefix}.titleRole`}
                 label="Title/Role"
-                aria-required={false}
                 showError={Boolean(
                     showFieldErrors(
                         getIn(errors, `${fieldNamePrefix}.titleRole`)
@@ -66,7 +66,6 @@ export const ActuaryContactFields = ({
                 name={`${fieldNamePrefix}.email`}
                 id={`${fieldNamePrefix}.email`}
                 label="Email"
-                aria-required={false}
                 showError={Boolean(
                     showFieldErrors(getIn(errors, `${fieldNamePrefix}.email`))
                 )}
@@ -82,6 +81,7 @@ export const ActuaryContactFields = ({
                 <label htmlFor={`${fieldNamePrefix}.actuarialFirm`}>
                     Actuarial firm
                 </label>
+                <span className={styles.requiredOptionalText}>Required</span>
                 {showFieldErrors(
                     getIn(errors, `${fieldNamePrefix}.actuarialFirm`)
                 ) && (
