@@ -16,10 +16,11 @@ import {
     TabPanel,
 } from '../../components'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { ErrorFailedRequestPage } from '../Errors/ErrorFailedRequestPage'
 import { RoutesRecord } from '../../constants'
 import { featureFlags } from '../../common-code/featureFlags'
+import { getRouteName } from '../../routeHelpers'
 
 /**
  * We only pull a subset of data out of the submission and revisions for display in Dashboard
@@ -27,11 +28,18 @@ import { featureFlags } from '../../common-code/featureFlags'
  */
 const DASHBOARD_ATTRIBUTE = 'cms-dashboard-page'
 const CMSDashboard = (): React.ReactElement => {
+    const { pathname } = useLocation()
+    const loadOnRateReviews =
+        getRouteName(pathname) === RoutesRecord.DASHBOARD_RATES
     const ldClient = useLDClient()
     const showRateReviews = ldClient?.variation(
         featureFlags.RATE_REVIEWS_DASHBOARD.flag,
         featureFlags.RATE_REVIEWS_DASHBOARD.defaultValue
     )
+    const TAB_NAMES = {
+        RATES: 'Rate reviews',
+        SUBMISSIONS: 'Submissions',
+    }
     return (
         <div data-testid={DASHBOARD_ATTRIBUTE} className={styles.wrapper}>
             <GridContainer className={styles.container}>
@@ -43,11 +51,18 @@ const CMSDashboard = (): React.ReactElement => {
                 </div>
 
                 {showRateReviews ? (
-                    <Tabs className={styles.tabs}>
+                    <Tabs
+                        defaultActiveTab={
+                            loadOnRateReviews
+                                ? TAB_NAMES.RATES
+                                : TAB_NAMES.SUBMISSIONS
+                        }
+                        className={styles.tabs}
+                    >
                         <TabPanel
                             id="submissions"
                             nestedRoute={RoutesRecord.DASHBOARD_SUBMISSIONS}
-                            tabName="Submissions"
+                            tabName={TAB_NAMES.SUBMISSIONS}
                         >
                             <Outlet />
                         </TabPanel>
@@ -55,7 +70,7 @@ const CMSDashboard = (): React.ReactElement => {
                         <TabPanel
                             id="rate-reviews"
                             nestedRoute={RoutesRecord.DASHBOARD_RATES}
-                            tabName="Rate Reviews"
+                            tabName={TAB_NAMES.RATES}
                         >
                             <Outlet />
                         </TabPanel>
@@ -193,7 +208,22 @@ const SubmissionsDashboard = (): React.ReactElement => {
     )
 }
 const RateReviewsDashboard = (): React.ReactElement => {
-    return <div> RATE REVIEWS DASHBOARD</div>
+    const { loggedInUser } = useAuth()
+    if (!loggedInUser) {
+        return <Loading />
+    } else {
+        return (
+            <section className={styles.panel}>
+                <div className="srOnly"> RATE REVIEWS DASHBOARD</div>
+                <HealthPlanPackageTable
+                    tableVariant="RATES"
+                    tableData={[]}
+                    user={loggedInUser}
+                    showFilters
+                />
+            </section>
+        )
+    }
 }
 
 export { CMSDashboard, RateReviewsDashboard, SubmissionsDashboard }

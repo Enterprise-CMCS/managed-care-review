@@ -50,6 +50,7 @@ export type PackageInDashboardType = {
 export type PackageTableProps = {
     tableData: PackageInDashboardType[]
     user: User
+    tableVariant?: 'RATES' | 'SUBMISSIONS'
     showFilters?: boolean
     caption?: string
 }
@@ -139,6 +140,7 @@ const columnHash = atomWithHash('filters', [] as ColumnFiltersState, {
 export const HealthPlanPackageTable = ({
     caption,
     tableData,
+    tableVariant = 'SUBMISSIONS',
     user,
     showFilters = false,
 }: PackageTableProps): React.ReactElement => {
@@ -146,9 +148,9 @@ export const HealthPlanPackageTable = ({
     const [columnFilters, setColumnFilters] = useAtom(columnHash)
 
     /* we store the last clicked element in a ref so that when the url is updated and the page rerenders
-        we can focus that element.  this useEffect (with no dependency array) will run once on each render. 
-        Note that the React-y way to do this is to use forwardRef, but the clearFilters button is deeply nested 
-        and we'd wind up passing down the ref through several layers to achieve what we can do here in a few lines 
+        we can focus that element.  this useEffect (with no dependency array) will run once on each render.
+        Note that the React-y way to do this is to use forwardRef, but the clearFilters button is deeply nested
+        and we'd wind up passing down the ref through several layers to achieve what we can do here in a few lines
         with DOM methods */
     useEffect(() => {
         const currentValue = lastClickedElement?.current
@@ -483,7 +485,13 @@ export const HealthPlanPackageTable = ({
                     data-testid="dashboard-table"
                     className={styles.panelEmptyNoSubmissionsYet}
                 >
-                    <h3>You have no submissions yet</h3>
+                    <h3>
+                        You have no{' '}
+                        {tableVariant === 'SUBMISSIONS'
+                            ? 'submissions'
+                            : 'rate reviews'}{' '}
+                        yet
+                    </h3>
                 </div>
             )}
         </>

@@ -45,7 +45,7 @@ describe('CMSDashboard', () => {
     afterAll(() => {
         jest.clearAllMocks()
     })
-    it('rate reviews feature flag - should show rate reviews and tabs when expected', () => {
+    it('rate reviews feature flag - should show rate review tab when expected', () => {
         ldUseClientSpy({ 'rate-reviews-dashboard': true })
         const screen = renderWithProviders(<CMSDashboardNestedRoutes />, {
             apolloProvider: {
@@ -62,16 +62,15 @@ describe('CMSDashboard', () => {
 
         expect(screen.getByTestId('tabs')).toBeInTheDocument()
         expect(
-            screen.getByRole('heading', { name: 'Rate Reviews' })
+            screen.getByRole('heading', { name: 'Rate reviews' })
         ).toBeInTheDocument()
         expect(
             screen.getByRole('heading', { name: 'Submissions' })
         ).toBeInTheDocument()
-        expect(screen.getByText('RATE REVIEWS DASHBOARD')).toBeInTheDocument() // this can be replaced when actual rate reviews table when shipped
     })
 
     // delete this test when flag is removed
-    it('rate reviews feature flag - should hide tabs and rate reviews when expected', () => {
+    it('rate reviews feature flag - should hide rate review tab when expected', () => {
         ldUseClientSpy({ 'rate-reviews-dashboard': false })
         const screen = renderWithProviders(<CMSDashboardNestedRoutes />, {
             apolloProvider: {
@@ -88,7 +87,7 @@ describe('CMSDashboard', () => {
 
         expect(screen.queryByTestId('tabs')).toBeNull()
         expect(
-            screen.queryByRole('heading', { name: 'Rate Reviews' })
+            screen.queryByRole('heading', { name: 'Rate reviews' })
         ).toBeNull()
     })
 

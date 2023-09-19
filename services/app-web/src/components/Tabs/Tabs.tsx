@@ -24,7 +24,7 @@ export const Tabs = ({
         route: child.props.nestedRoute,
     }))
     const [activeTab, setActiveTab] = useState(defaultActiveTab || tabs[0].name)
-
+    const adjustContentWithRoutes = tabs[0].route
     return (
         <div className={styles['easi-tabs']} data-testid="tabs" {...tabProps}>
             <div className={styles['easi-tabs__navigation']}>
@@ -72,7 +72,9 @@ export const Tabs = ({
                         isActive: true,
                     })
                 }
-                return null
+                // if we are displaying traditional HTML tabs, everything is on page with initial render
+                // if we are adjusting tab content based on route, only the active tab should have content
+                return adjustContentWithRoutes ? null : child
             })}
         </div>
     )
