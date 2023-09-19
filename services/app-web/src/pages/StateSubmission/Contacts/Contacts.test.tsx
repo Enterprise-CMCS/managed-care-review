@@ -41,6 +41,7 @@ describe('Contacts', () => {
 
         await waitFor(() => {
             expect(screen.getByTestId('state-contacts')).toBeInTheDocument()
+            expect(screen.getByText('State contacts 1')).toBeInTheDocument()
             expect(screen.getByLabelText('Name')).toBeInTheDocument()
             expect(screen.getByLabelText('Title/Role')).toBeInTheDocument()
             expect(screen.getByLabelText('Email')).toBeInTheDocument()
@@ -57,9 +58,10 @@ describe('Contacts', () => {
             }
         )
 
-        expect(
-            screen.getByText(/A state contact is required/)
-        ).toBeInTheDocument()
+        const requiredLabels = await screen.findAllByText('Required')
+        expect(requiredLabels).toHaveLength(1)
+        const optionalLabels = await screen.queryAllByText('Optional')
+        expect(optionalLabels).toHaveLength(0)
     })
 
     it('displays correct form guidance for contract and rates submission', async () => {
@@ -75,9 +77,10 @@ describe('Contacts', () => {
             }
         )
 
-        expect(
-            screen.getByText('A state contact is required')
-        ).toBeInTheDocument()
+        const requiredLabels = await screen.findAllByText('Required')
+        expect(requiredLabels).toHaveLength(2)
+        const optionalLabels = await screen.queryAllByText('Optional')
+        expect(optionalLabels).toHaveLength(0)
         expect(
             screen.getByText('Additional Actuary Contacts')
         ).toBeInTheDocument()

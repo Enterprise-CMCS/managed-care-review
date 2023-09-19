@@ -47,7 +47,6 @@ export const FieldYesNo = ({
 
     const isRequired =
         inputProps['aria-required'] !== false && inputProps.required !== false // consumer must explicitly say this field is not required, otherwise we assume aria-required
-
     return (
         <Fieldset
             role="radiogroup"
@@ -57,6 +56,11 @@ export const FieldYesNo = ({
             className={classes}
             data-testid="yes-no-radio-fieldset"
         >
+            {inputProps['aria-required'] !== undefined && (
+                <span className={styles.requiredOptionalText}>
+                    {isRequired ? 'Required' : 'Optional'}
+                </span>
+            )}
             {showError && <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>}
             {hint && (
                 <div
