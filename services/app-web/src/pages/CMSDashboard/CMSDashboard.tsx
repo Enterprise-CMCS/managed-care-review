@@ -32,31 +32,39 @@ const CMSDashboard = (): React.ReactElement => {
         featureFlags.RATE_REVIEWS_DASHBOARD.flag,
         featureFlags.RATE_REVIEWS_DASHBOARD.defaultValue
     )
-
     return (
-        <>
-            {showRateReviews ? (
-                <Tabs className={styles.tabs}>
-                    <TabPanel
-                        id="submissions"
-                        nestedRoute={RoutesRecord.DASHBOARD_SUBMISSIONS}
-                        tabName="Submissions"
-                    >
-                        <Outlet />
-                    </TabPanel>
+        <div data-testid={DASHBOARD_ATTRIBUTE} className={styles.wrapper}>
+            <GridContainer className={styles.container}>
+                <div className={styles.panelHeader}>
+                    <h2>
+                        Submissions
+                        {showRateReviews && <span> and rate reviews</span>}
+                    </h2>
+                </div>
 
-                    <TabPanel
-                        id="rate-reviews"
-                        nestedRoute={RoutesRecord.DASHBOARD_RATES}
-                        tabName="Rate Reviews"
-                    >
-                        <Outlet />
-                    </TabPanel>
-                </Tabs>
-            ) : (
-                <Outlet />
-            )}
-        </>
+                {showRateReviews ? (
+                    <Tabs className={styles.tabs}>
+                        <TabPanel
+                            id="submissions"
+                            nestedRoute={RoutesRecord.DASHBOARD_SUBMISSIONS}
+                            tabName="Submissions"
+                        >
+                            <Outlet />
+                        </TabPanel>
+
+                        <TabPanel
+                            id="rate-reviews"
+                            nestedRoute={RoutesRecord.DASHBOARD_RATES}
+                            tabName="Rate Reviews"
+                        >
+                            <Outlet />
+                        </TabPanel>
+                    </Tabs>
+                ) : (
+                    <Outlet />
+                )}
+            </GridContainer>
+        </div>
     )
 }
 
@@ -175,22 +183,13 @@ const SubmissionsDashboard = (): React.ReactElement => {
         })
 
     return (
-        <>
-            <div data-testid={DASHBOARD_ATTRIBUTE} className={styles.wrapper}>
-                <GridContainer className={styles.container}>
-                    <section className={styles.panel}>
-                        <div className={styles.panelHeader}>
-                            <h2>Submissions</h2>
-                        </div>
-                        <HealthPlanPackageTable
-                            tableData={submissionRows}
-                            user={loggedInUser}
-                            showFilters
-                        />
-                    </section>
-                </GridContainer>
-            </div>
-        </>
+        <section className={styles.panel}>
+            <HealthPlanPackageTable
+                tableData={submissionRows}
+                user={loggedInUser}
+                showFilters
+            />
+        </section>
     )
 }
 const RateReviewsDashboard = (): React.ReactElement => {
