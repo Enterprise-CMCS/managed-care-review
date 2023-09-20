@@ -75,11 +75,23 @@ const StateUserRoutes = ({
     return (
         <AuthenticatedRouteWrapper setAlert={setAlert} authMode={authMode}>
             <Routes>
-                <Route path={RoutesRecord.ROOT} element={<StateDashboard />} />
+                <Route
+                    path={RoutesRecord.ROOT}
+                    element={
+                        <Navigate to={RoutesRecord.DASHBOARD_SUBMISSIONS} />
+                    }
+                />
                 <Route
                     path={RoutesRecord.DASHBOARD}
+                    element={
+                        <Navigate to={RoutesRecord.DASHBOARD_SUBMISSIONS} />
+                    }
+                />
+                <Route
+                    path={RoutesRecord.DASHBOARD_SUBMISSIONS}
                     element={<StateDashboard />}
                 />
+
                 <Route
                     path={RoutesRecord.SUBMISSIONS}
                     element={<StateDashboard />}
