@@ -6,10 +6,10 @@ describe('login', () => {
     it('can log in and log out as expected', () => {
         cy.logInAsStateUser()
 
-        cy.url().should('eq', Cypress.config().baseUrl + '/')
+        cy.url().should('eq', Cypress.config().baseUrl + '/submissions/dashboard')
         cy.findByRole('button', { name: /Sign out/i }).safeClick()
 
-        cy.location('pathname').should('eq', '/submissions/dashboard')
+        cy.location('pathname').should('eq', '/')
         cy.findByRole('link', { name: /Sign In/i }).should('exist')
     })
 
