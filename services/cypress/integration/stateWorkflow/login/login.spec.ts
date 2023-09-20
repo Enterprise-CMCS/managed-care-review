@@ -9,7 +9,7 @@ describe('login', () => {
         cy.url().should('eq', Cypress.config().baseUrl + '/')
         cy.findByRole('button', { name: /Sign out/i }).safeClick()
 
-        cy.location('pathname').should('eq', '/')
+        cy.location('pathname').should('eq', '/submissions/dashboard')
         cy.findByRole('link', { name: /Sign In/i }).should('exist')
     })
 
