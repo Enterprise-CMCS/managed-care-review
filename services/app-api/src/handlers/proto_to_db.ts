@@ -21,6 +21,7 @@ import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import type { Store } from '../postgres'
 import type {
+    HealthPlanPackageTable,
     HealthPlanRevisionTable,
     RateRevisionTable,
     RateTable,
@@ -39,6 +40,8 @@ import { prepopulateUpdateInfo } from '../postgres/contractAndRates/proto_to_db_
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import type { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { findContractWithHistory } from '../postgres/contractAndRates'
+import { HealthPlanPackage } from '../gen/gqlServer'
+import { HealthPlanPackageWithRevisionsTable } from '../postgres/healthPlanPackage/healthPlanPackageHelpers'
 
 export const getDatabaseConnection = async (): Promise<{
     store: Store
@@ -125,6 +128,8 @@ export async function migrateRevision(
     /* Creating an entry in either ContractRevisionTable or RateRevisionTable
         requires a valid 'submitInfoID' (or 'unlockInfoID') 
         that points to a record in the UpdateInfoTable */
+
+    /* test skipping this for now
     const updateInfoResult = await prepopulateUpdateInfo(
         client,
         revision,
@@ -136,6 +141,7 @@ export async function migrateRevision(
         )
         return error
     }
+    */
 
     // migrate the contract part
     const migrateContractResult = await migrateContract(
@@ -240,7 +246,8 @@ export async function migrateContract(
     const migrateContractResult = await migrateContractRevision(
         client,
         revision,
-        formData
+        formData,
+        insertContractResult
     )
     if (migrateContractResult instanceof Error) {
         const error = new Error(
