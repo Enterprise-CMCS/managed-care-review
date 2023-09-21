@@ -324,6 +324,7 @@ export const SubmissionType = ({
                                 error={showFieldErrors(
                                     errors.populationCovered
                                 )}
+                                className="margin-top-0"
                             >
                                 <Fieldset
                                     className={styles.radioGroup}
