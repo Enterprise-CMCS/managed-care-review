@@ -11,6 +11,8 @@ import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 import { testLDService } from '../testHelpers/launchDarklyHelpers'
 import { testCMSUser } from '../testHelpers/userHelpers'
 import UNLOCK_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
+import { migrateRevision } from './proto_to_db'
+import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
 
 describe('test that we migrate things', () => {
     const mockPreRefactorLDService = testLDService({
@@ -181,6 +183,24 @@ describe('test that we migrate things', () => {
             (r) => r.rateDocuments[0].name
         )
         expect(finalRateDocs).toEqual(['fake doc', 'fake doc number two'])
+
+        const prismaClient = await sharedTestPrismaClient()
+        const migratedRevision = await migrateRevision(
+            prismaClient,
+            finallySubmittedPKG.revisions[0]
+        )
+
+        const stateServerPost = await constructTestPostgresServer({
+            ldService: mockPostRefactorLDService,
+        })
+
+        const fetchedHPP = await fetchTestHealthPlanPackageById(
+            stateServerPost,
+            finallySubmittedPKG.id
+        )
+
+        console.info(JSON.stringify(migratedRevision, null, '  '))
+        console.info(JSON.stringify(fetchedHPP, null, '  '))
 
         throw new Error('Not done with this test yet')
     }, 20000)
