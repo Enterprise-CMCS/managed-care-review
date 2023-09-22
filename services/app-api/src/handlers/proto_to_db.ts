@@ -21,7 +21,6 @@ import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import type { Store } from '../postgres'
 import type {
-    HealthPlanPackageTable,
     HealthPlanRevisionTable,
     RateRevisionTable,
     RateTable,
@@ -36,12 +35,9 @@ import { migrateRateInfo } from '../postgres/contractAndRates/proto_to_db_RateRe
 import { insertContractId } from '../postgres/contractAndRates/proto_to_db_ContractId'
 import { migrateAssociations } from '../postgres/contractAndRates/proto_to_db_JoinTable'
 import { migrateDocuments } from '../postgres/contractAndRates/proto_to_db_Documents'
-import { prepopulateUpdateInfo } from '../postgres/contractAndRates/proto_to_db_UpdateInfoTable'
-import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import { base64ToDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import type { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { findContractWithHistory } from '../postgres/contractAndRates'
-import { HealthPlanPackage } from '../gen/gqlServer'
-import { HealthPlanPackageWithRevisionsTable } from '../postgres/healthPlanPackage/healthPlanPackageHelpers'
 
 export const getDatabaseConnection = async (): Promise<{
     store: Store
@@ -96,7 +92,9 @@ export function decodeFormDataProto(
     revision: HealthPlanRevisionTable
 ): HealthPlanFormDataType | Error {
     // decode the proto
-    const decodedFormDataProto = toDomain(revision.formDataProto)
+    const decodedFormDataProto = base64ToDomain(
+        revision.formDataProto.toString()
+    )
     if (decodedFormDataProto instanceof Error) {
         const error = new Error(
             `Error in toDomain for ${revision.id}: ${decodedFormDataProto.message}`
@@ -124,12 +122,13 @@ export async function migrateRevision(
     if (formData instanceof Error) {
         return formData
     }
+    console.info(`form data: ${JSON.stringify(formData, null, '  ')}`)
 
     /* Creating an entry in either ContractRevisionTable or RateRevisionTable
         requires a valid 'submitInfoID' (or 'unlockInfoID') 
         that points to a record in the UpdateInfoTable */
 
-    /* test skipping this for now
+    /*
     const updateInfoResult = await prepopulateUpdateInfo(
         client,
         revision,
@@ -150,6 +149,7 @@ export async function migrateRevision(
         formData
     )
     if (migrateContractResult instanceof Error) {
+        console.error(migrateContractResult)
         return migrateContractResult
     }
 
@@ -165,6 +165,7 @@ export async function migrateRevision(
         const error = new Error(
             `Error migrating ${revision.id} rates: ${rateMigrationResult.message}`
         )
+        console.error(error)
         return error
     }
 
@@ -175,6 +176,7 @@ export async function migrateRevision(
         const error = new Error(
             `Error migrating ${revision.id} associations: ${migrateAssociationsResult.message}`
         )
+        console.error(error)
         return error
     }
 
@@ -190,6 +192,7 @@ export async function migrateRevision(
         const error = new Error(
             `Error migrating ${revision.id} documents: ${documentMigrationResults.message}`
         )
+        console.error(error)
         return error
     }
 
@@ -198,6 +201,7 @@ export async function migrateRevision(
         client,
         migrateContractResult.contract.id
     )
+    console.info(`migrated contract result ${JSON.stringify(migrateContract)}`)
 
     if (
         migratedContract instanceof Error ||

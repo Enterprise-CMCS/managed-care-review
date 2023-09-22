@@ -1,28 +1,135 @@
 import type {
     PrismaClient,
-    RateTable,
-    RateRevisionTable,
     HealthPlanRevisionTable,
+    Prisma,
+    RateTable,
 } from '@prisma/client'
-import { v4 as uuid } from 'uuid'
 import type { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
-
-type MigrateRateInfoResult = {
-    rate: RateTable
-    rateRevisions: RateRevisionTable[]
-}
+import { includeFullRate } from './prismaSubmittedRateHelpers'
 
 async function migrateRateInfo(
     client: PrismaClient,
     revision: HealthPlanRevisionTable,
     formData: HealthPlanFormDataType
-): Promise<MigrateRateInfoResult | Error> {
-    //const results: (RateTable | RateRevisionTable | Error)[] = []
-    const results: MigrateRateInfoResult = {
-        rate: {} as RateTable,
-        rateRevisions: [],
+): Promise<RateTable | Error> {
+    // get the state info
+    const stateCode = formData.stateCode
+    const stateNumber = formData.stateNumber
+
+    const state = await client.state.findUnique({
+        where: { stateCode: stateCode },
+    })
+
+    if (!state) {
+        const error = new Error(`State with code ${stateCode} not found`)
+        return error
     }
 
+    const rateRevisionData: Prisma.RateRevisionTableCreateWithoutRateInput[] =
+        []
+    for (const rateInfo of formData.rateInfos) {
+        const dataToCopy: Prisma.RateRevisionTableCreateWithoutRateInput = {
+            createdAt: revision.createdAt,
+            amendmentEffectiveDateStart:
+                rateInfo.rateAmendmentInfo?.effectiveDateStart ?? null,
+            amendmentEffectiveDateEnd:
+                rateInfo.rateAmendmentInfo?.effectiveDateEnd ?? null,
+            actuaryCommunicationPreference:
+                rateInfo.actuaryCommunicationPreference ?? null,
+            rateType: rateInfo.rateType ?? null,
+            rateCapitationType: rateInfo.rateCapitationType ?? null,
+            rateDateStart: rateInfo.rateDateStart ?? null,
+            rateDateEnd: rateInfo.rateDateEnd ?? null,
+            rateDateCertified: rateInfo.rateDateCertified ?? null,
+            rateProgramIDs: rateInfo.rateProgramIDs ?? [],
+            rateCertificationName: rateInfo.rateCertificationName ?? null,
+        }
+
+        // Add the unlocked info to the table if it exists
+        if (formData.status === 'SUBMITTED' && revision.unlockedBy) {
+            const user = await client.user.findFirst({
+                where: { email: revision.unlockedBy },
+            })
+            if (user) {
+                dataToCopy.unlockInfo = {
+                    create: {
+                        updatedAt: revision.unlockedAt ?? formData.updatedAt, //TODO: not sure what we want to fall back to here
+                        updatedByID: user.id,
+                        updatedReason:
+                            revision.unlockedReason ??
+                            'Migrated from previous system',
+                    },
+                }
+            } else {
+                console.warn(
+                    `User with email ${revision.unlockedBy} does not exist. Skipping unlockInfo creation.`
+                )
+            }
+        }
+
+        // add the submit info to the table if it exists
+        if (formData.status === 'SUBMITTED' && revision.submittedBy) {
+            const user = await client.user.findFirst({
+                where: { email: revision.submittedBy },
+            })
+            if (user) {
+                dataToCopy.submitInfo = {
+                    create: {
+                        updatedAt: formData.updatedAt,
+                        updatedByID: user.id,
+                        updatedReason:
+                            revision.submittedReason ??
+                            'Migrated from previous system',
+                    },
+                }
+            } else {
+                console.warn(
+                    `User with email ${revision.submittedBy} does not exist. Skipping submitInfo creation.`
+                )
+            }
+        }
+
+        // add the actuary contacts
+        if (rateInfo.actuaryContacts) {
+            dataToCopy.certifyingActuaryContacts = {
+                create: rateInfo.actuaryContacts,
+            }
+        }
+
+        if (formData.addtlActuaryContacts) {
+            dataToCopy.addtlActuaryContacts = {
+                create: formData.addtlActuaryContacts,
+            }
+        }
+
+        rateRevisionData.push(dataToCopy)
+    }
+
+    const insertRateData: Prisma.RateTableCreateInput = {
+        state: {
+            connect: {
+                stateCode: stateCode,
+            },
+        },
+        stateNumber: stateNumber,
+        revisions: {
+            create: rateRevisionData,
+        },
+    }
+
+    try {
+        const migratedRateTable = await client.rateTable.create({
+            data: insertRateData,
+            include: includeFullRate,
+        })
+
+        return migratedRateTable
+    } catch (err) {
+        return err
+    }
+}
+
+/*
     try {
         let submitInfoID: string | null = null
         if (formData.status === 'SUBMITTED' && revision.submittedBy) {
@@ -91,7 +198,7 @@ async function migrateRateInfo(
         }
 
         for (const rateInfo of formData.rateInfos) {
-            const rateID = revision.pkgID
+            const rateID = revision.pkgID // TODO: new IDs here
 
             const existingRate = await client.rateTable.findFirst({
                 where: { id: rateID },
@@ -137,7 +244,7 @@ async function migrateRateInfo(
             const rateRevision: RateRevisionTable = {
                 id: rateRevisionId,
                 rateID: createdRate.id,
-                createdAt: new Date(),
+                createdAt: new Date(), // TODO: get this from the HP revision table
                 updatedAt: new Date(),
                 unlockInfoID: unlockInfoID,
                 submitInfoID: submitInfoID,
@@ -175,5 +282,6 @@ async function migrateRateInfo(
         return error
     }
 }
+*/
 
 export { migrateRateInfo }

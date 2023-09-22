@@ -24,9 +24,9 @@ async function insertContractId(
         }
 
         const contract = await client.contractTable.upsert({
-            where: { id: revision.pkgID },
+            where: { id: formData.id },
             create: {
-                id: revision.pkgID,
+                id: formData.id,
                 state: {
                     connect: {
                         stateCode: stateCode,

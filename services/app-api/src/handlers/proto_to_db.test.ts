@@ -184,12 +184,25 @@ describe('test that we migrate things', () => {
         )
         expect(finalRateDocs).toEqual(['fake doc', 'fake doc number two'])
 
-        const prismaClient = await sharedTestPrismaClient()
-        const migratedRevision = await migrateRevision(
-            prismaClient,
-            finallySubmittedPKG.revisions[0]
+        console.info(
+            `finally submitted package: ${JSON.stringify(
+                finallySubmittedPKG,
+                null,
+                '  '
+            )}`
         )
 
+        const prismaClient = await sharedTestPrismaClient()
+        const migratedRevisions = []
+        for (const revision of finallySubmittedPKG.revisions) {
+            const migratedRevision = await migrateRevision(
+                prismaClient,
+                revision.node
+            )
+            migratedRevisions.push(migratedRevision)
+        }
+
+        /*
         const stateServerPost = await constructTestPostgresServer({
             ldService: mockPostRefactorLDService,
         })
@@ -198,9 +211,16 @@ describe('test that we migrate things', () => {
             stateServerPost,
             finallySubmittedPKG.id
         )
+        */
 
-        console.info(JSON.stringify(migratedRevision, null, '  '))
-        console.info(JSON.stringify(fetchedHPP, null, '  '))
+        console.info(
+            `Migrated revisions: ${JSON.stringify(
+                migratedRevisions,
+                null,
+                '  '
+            )}`
+        )
+        //console.info(JSON.stringify(fetchedHPP, null, '  '))
 
         throw new Error('Not done with this test yet')
     }, 20000)
