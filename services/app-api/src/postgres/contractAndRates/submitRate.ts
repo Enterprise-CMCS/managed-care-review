@@ -6,7 +6,8 @@ import { includeFirstSubmittedContractRev } from './prismaSubmittedContractHelpe
 import { NotFoundError } from '../storeError'
 
 type SubmitRateArgsType = {
-    rateID: string
+    rateID?: string
+    rateRevisionID?: string
     submittedByUserID: UpdateInfoType['updatedBy']
     submitReason: UpdateInfoType['updatedReason']
 }
@@ -21,14 +22,31 @@ async function submitRate(
 
     try {
         return await client.$transaction(async (tx) => {
-            const { rateID, submittedByUserID, submitReason } = args
+            const { rateID, rateRevisionID, submittedByUserID, submitReason } =
+                args
+
+            // this is a hack that should not outlive protobuf. Protobufs only have
+            // rate revision IDs in them, so we allow submitting by rate revisionID from our submitHPP resolver
+            if (!rateID && !rateRevisionID) {
+                return new Error(
+                    'Either rateID or rateRevisionID must be supplied. both are blank'
+                )
+            }
+
+            const findWhere = rateRevisionID
+                ? {
+                      id: rateRevisionID,
+                      submitInfoID: null,
+                  }
+                : {
+                      rateID,
+                      submitInfoID: null,
+                  }
+
             // Find current rate revision with related contract
             // query only the submitted revisions on the associated contracts
             const currentRev = await tx.rateRevisionTable.findFirst({
-                where: {
-                    rateID,
-                    submitInfoID: null,
-                },
+                where: findWhere,
                 include: {
                     draftContracts: {
                         include: includeFirstSubmittedContractRev,
@@ -46,6 +64,15 @@ async function submitRate(
             const relatedContractRevs = currentRev.draftContracts.map(
                 (c) => c.revisions[0]
             )
+            const everyRelatedContractIsSubmitted = relatedContractRevs.every(
+                (rev) => rev !== undefined
+            )
+            if (!everyRelatedContractIsSubmitted) {
+                const message =
+                    'Attempted to submit a rate related to a contract that has not been submitted'
+                console.error(message)
+                return new Error(message)
+            }
 
             const updated = await tx.rateRevisionTable.update({
                 where: {
@@ -136,7 +163,7 @@ async function submitRate(
                 })
             }
 
-            return findRateWithHistory(tx, rateID)
+            return findRateWithHistory(tx, updated.rateID)
         })
     } catch (err) {
         console.error('Prisma error submitting rate', err)

@@ -16,7 +16,7 @@ type SubmissionDocument = {
     id?: string
     name: string
     s3URL: string
-    sha256?: string
+    sha256: string
     documentCategories: DocumentCategoryType[]
 }
 

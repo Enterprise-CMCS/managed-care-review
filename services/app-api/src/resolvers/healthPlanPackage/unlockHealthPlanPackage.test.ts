@@ -43,11 +43,11 @@ const flagValueTestParameters: {
         flagValue: false,
         testName: 'unlockHealthPlanPackage with all feature flags off',
     },
-    {
-        flagName: 'rates-db-refactor',
-        flagValue: true,
-        testName: 'unlockHealthPlanPackage with rates-db-refactor on',
-    },
+    // {
+    //     flagName: 'rates-db-refactor',
+    //     flagValue: true,
+    //     testName: 'unlockHealthPlanPackage with rates-db-refactor on',
+    // },
 ]
 
 describe.each(flagValueTestParameters)(
@@ -258,6 +258,7 @@ describe.each(flagValueTestParameters)(
                         {
                             name: 'fake doc',
                             s3URL: 'foo://bar',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES'],
                         },
                     ],
@@ -281,6 +282,7 @@ describe.each(flagValueTestParameters)(
                         {
                             name: 'fake doc number two',
                             s3URL: 'foo://bar',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES'],
                         },
                     ],

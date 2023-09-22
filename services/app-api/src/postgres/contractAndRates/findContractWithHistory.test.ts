@@ -5,12 +5,13 @@ import { submitContract } from './submitContract'
 import { submitRate } from './submitRate'
 import { insertDraftContract } from './insertContract'
 import { unlockContract } from './unlockContract'
-import { updateDraftContract } from './updateDraftContract'
+import { updateDraftContractWithRates } from './updateDraftContractWithRates'
 import { insertDraftRate } from './insertRate'
 import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
 import { must, createInsertContractData } from '../../testHelpers'
+import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHelpers'
 
 describe('findContract', () => {
     it('finds a stripped down contract with history', async () => {
@@ -212,7 +213,7 @@ describe('findContract', () => {
         expect(testingContract.revisions).toHaveLength(7)
 
         // Make a new Contract Revision, changing the connections should show up as a single new rev.
-        must(
+        const unlockedContractA = must(
             await unlockContract(
                 client,
                 contractA.id,
@@ -221,7 +222,7 @@ describe('findContract', () => {
             )
         )
         must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contractA.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -231,7 +232,12 @@ describe('findContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate3.id],
+                rateFormDatas:
+                    unlockedContractA.draftRevision?.rateRevisions.filter(
+                        (rateRevision) =>
+                            rateRevision.formData.rateID !== rate1.id &&
+                            rateRevision.formData.rateID !== rate2.id
+                    ),
             })
         )
         must(
@@ -511,7 +517,7 @@ describe('findContract', () => {
         )
 
         // Make a new Contract Revision, changing the connections should show up as a single new rev.
-        must(
+        const unlockedContractA = must(
             await unlockContract(
                 client,
                 contractA.id,
@@ -519,8 +525,9 @@ describe('findContract', () => {
                 'unlocking A.1'
             )
         )
+        // Remove rate 1 and rate 2 from contract
         must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contractA.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -530,9 +537,15 @@ describe('findContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate3.id],
+                rateFormDatas:
+                    unlockedContractA.draftRevision?.rateRevisions.filter(
+                        (rateRevision) =>
+                            rateRevision.formData.rateID !== rate1.id &&
+                            rateRevision.formData.rateID !== rate2.id
+                    ),
             })
         )
+
         must(
             await submitContract(client, {
                 contractID: contractA.id,
@@ -626,48 +639,17 @@ describe('findContract', () => {
             },
         })
 
-        // Add 2 rates 1, 2
-        const rate1 = must(
-            await insertDraftRate(client, {
-                stateCode: 'MN',
-                rateCertificationName: 'onepoint0',
-            })
-        )
-        must(
-            await updateDraftRate(client, {
-                rateID: rate1.id,
-                formData: { rateCertificationName: 'onepoint0' },
-                contractIDs: [],
-            })
-        )
-        must(
-            await submitRate(client, {
-                rateID: rate1.id,
-                submittedByUserID: stateUser.id,
-                submitReason: 'Rate Submit',
-            })
-        )
+        const rate1 = createInsertRateData({
+            id: uuidv4(),
+            stateCode: 'MN',
+            rateCertificationName: 'onepoint0',
+        })
 
-        const rate2 = must(
-            await insertDraftRate(client, {
-                stateCode: 'MN',
-                rateCertificationName: 'twopoint0',
-            })
-        )
-        must(
-            await updateDraftRate(client, {
-                rateID: rate2.id,
-                formData: { rateCertificationName: 'twopointo' },
-                contractIDs: [],
-            })
-        )
-        must(
-            await submitRate(client, {
-                rateID: rate2.id,
-                submittedByUserID: stateUser.id,
-                submitReason: 'Rate Submit 2',
-            })
-        )
+        const rate2 = createInsertRateData({
+            id: uuidv4(),
+            stateCode: 'MN',
+            rateCertificationName: 'twopoint0',
+        })
 
         // add a contract that has both of them.
         const draftContractData = createInsertContractData({
@@ -676,8 +658,8 @@ describe('findContract', () => {
         const contractA = must(
             await insertDraftContract(client, draftContractData)
         )
-        must(
-            await updateDraftContract(client, {
+        const updatedDraftContractWithRates = must(
+            await updateDraftContractWithRates(client, {
                 contractID: contractA.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -687,9 +669,45 @@ describe('findContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateIDs: [rate1.id, rate2.id],
+                rateFormDatas: [rate1, rate2],
             })
         )
+
+        if (!updatedDraftContractWithRates.draftRevision) {
+            throw new Error(
+                'Unexpected error: draftRevision does not exist in contract'
+            )
+        }
+
+        const draftRateRevisionData1 =
+            updatedDraftContractWithRates.draftRevision.rateRevisions[0]
+                .formData
+        const draftRateRevisionData2 =
+            updatedDraftContractWithRates.draftRevision.rateRevisions[1]
+                .formData
+
+        if (!draftRateRevisionData1.rateID || !draftRateRevisionData2.rateID) {
+            throw new Error('Unexpected error: rate revision is missing rateID')
+        }
+
+        // submit both rates
+        must(
+            await submitRate(client, {
+                rateID: draftRateRevisionData1.rateID,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Rate Submit',
+            })
+        )
+
+        const submittedRate2 = must(
+            await submitRate(client, {
+                rateID: draftRateRevisionData2.rateID,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Rate Submit 2',
+            })
+        )
+
+        // submit contract
         must(
             await submitContract(client, {
                 contractID: contractA.id,
@@ -717,13 +735,20 @@ describe('findContract', () => {
             draftPreRateUnlock.draftRevision?.rateRevisions.map(
                 (rr) => rr.formData.rateCertificationName
             )
-        ).toEqual(['onepoint0', 'twopointo'])
+        ).toEqual(['onepoint0', 'twopoint0'])
 
         // unlock and submit second rate rev
-        must(await unlockRate(client, rate2.id, cmsUser.id, 'unlock for 2.1'))
+        must(
+            await unlockRate(
+                client,
+                submittedRate2.id,
+                cmsUser.id,
+                'unlock for 2.1'
+            )
+        )
         must(
             await updateDraftRate(client, {
-                rateID: rate2.id,
+                rateID: submittedRate2.id,
                 formData: { rateCertificationName: 'twopointone' },
                 contractIDs: [contractA.id],
             })
@@ -743,7 +768,7 @@ describe('findContract', () => {
         // Submit Rate 2.1
         must(
             await submitRate(client, {
-                rateID: rate2.id,
+                rateID: submittedRate2.id,
                 submittedByUserID: stateUser.id,
                 submitReason: '2.1 update',
             })

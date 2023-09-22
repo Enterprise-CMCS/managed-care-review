@@ -71,7 +71,9 @@ describe('ContractDetails', () => {
             )
 
             // check hint text
-            await screen.findByText('Supporting documents can be added later.')
+            await screen.findByText(
+                'Supporting documents can be added later. If you have additional contract actions, you must submit them in a separate submission.'
+            )
             await screen.findByRole('link', { name: /Document definitions/ })
 
             // check file input presences

@@ -52,16 +52,19 @@ import type { ContractType } from '../domain-models/contractAndRates'
 import {
     insertDraftContract,
     findContractWithHistory,
-    updateDraftContract,
-    submitRate,
+    updateDraftContractWithRates,
+    findAllContractsWithHistoryByState,
+    findAllContractsWithHistoryBySubmitInfo,
     submitContract,
+    submitRate,
 } from './contractAndRates'
 import type {
-    InsertContractArgsType,
-    UpdateContractArgsType,
     SubmitContractArgsType,
     SubmitRateArgsType,
+    InsertContractArgsType,
+    UpdateContractArgsType,
 } from './contractAndRates'
+import type { ContractOrErrorArrayType } from './contractAndRates/findAllContractsWithHistoryByState'
 
 type Store = {
     findPrograms: (
@@ -147,9 +150,17 @@ type Store = {
         contractID: string
     ) => Promise<ContractType | Error>
 
-    updateDraftContract: (
+    updateDraftContractWithRates: (
         args: UpdateContractArgsType
     ) => Promise<ContractType | Error>
+
+    findAllContractsWithHistoryByState: (
+        stateCode: string
+    ) => Promise<ContractOrErrorArrayType | Error>
+
+    findAllContractsWithHistoryBySubmitInfo: () => Promise<
+        ContractOrErrorArrayType | Error
+    >
 
     submitContract: (
         args: SubmitContractArgsType
@@ -216,7 +227,12 @@ function NewPostgresStore(client: PrismaClient): Store {
         insertDraftContract: (args) => insertDraftContract(client, args),
         findContractWithHistory: (args) =>
             findContractWithHistory(client, args),
-        updateDraftContract: (args) => updateDraftContract(client, args),
+        updateDraftContractWithRates: (args) =>
+            updateDraftContractWithRates(client, args),
+        findAllContractsWithHistoryByState: (args) =>
+            findAllContractsWithHistoryByState(client, args),
+        findAllContractsWithHistoryBySubmitInfo: () =>
+            findAllContractsWithHistoryBySubmitInfo(client),
         submitContract: (args) => submitContract(client, args),
         submitRate: (args) => submitRate(client, args),
     }

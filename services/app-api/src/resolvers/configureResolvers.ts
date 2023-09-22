@@ -42,7 +42,10 @@ export function configureResolvers(
                 store,
                 launchDarkly
             ),
-            indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
+            indexHealthPlanPackages: indexHealthPlanPackagesResolver(
+                store,
+                launchDarkly
+            ),
             indexUsers: indexUsersResolver(store),
             indexQuestions: indexQuestionsResolver(store),
             fetchEmailSettings: fetchEmailSettingsResolver(

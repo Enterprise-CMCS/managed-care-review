@@ -250,6 +250,7 @@ describe.each(flagValueTestParameters)(
                             {
                                 name: 'rateDocument.pdf',
                                 s3URL: 'fakeS3URL',
+                                sha256: 'fakesha',
                                 documentCategories: ['RATES' as const],
                             },
                         ],
@@ -257,7 +258,7 @@ describe.each(flagValueTestParameters)(
                         rateProgramIDs: [
                             '3b8d8fa1-1fa6-4504-9c5b-ef522877fe1e',
                         ],
-                        actuaryContacts: [],
+                        actuaryContacts: [], // This is supposed to have at least one contact.
                         actuaryCommunicationPreference:
                             'OACT_TO_ACTUARY' as const,
                         packagesWithSharedRateCerts: [],
@@ -297,15 +298,14 @@ describe.each(flagValueTestParameters)(
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                         s3URL: 'fakeS3URL',
-                        documentCategories: [
-                            'CONTRACT_RELATED' as const,
-                            'RATES_RELATED' as const,
-                        ],
+                        sha256: 'fakesha',
+                        documentCategories: ['CONTRACT_RELATED' as const],
                     },
                     {
                         name: 'rate_only_supporting_doc.pdf',
                         s3URL: 'fakeS3URL',
-                        documentCategories: ['RATES_RELATED' as const],
+                        sha256: 'fakesha',
+                        documentCategories: ['CONTRACT_RELATED' as const],
                     },
                 ],
             })
@@ -337,15 +337,14 @@ describe.each(flagValueTestParameters)(
                         {
                             name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                             s3URL: 'fakeS3URL',
-                            documentCategories: [
-                                'CONTRACT_RELATED' as const,
-                                'RATES_RELATED' as const,
-                            ],
+                            sha256: 'fakesha',
+                            documentCategories: ['CONTRACT_RELATED' as const],
                         },
                         {
                             name: 'rate_only_supporting_doc.pdf',
                             s3URL: 'fakeS3URL',
-                            documentCategories: ['RATES_RELATED' as const],
+                            sha256: 'fakesha',
+                            documentCategories: ['CONTRACT_RELATED' as const],
                         },
                     ],
                 })
@@ -364,15 +363,14 @@ describe.each(flagValueTestParameters)(
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                         s3URL: 'fakeS3URL',
-                        documentCategories: [
-                            'CONTRACT_RELATED' as const,
-                            'RATES_RELATED' as const,
-                        ],
+                        sha256: 'fakesha',
+                        documentCategories: ['CONTRACT_RELATED' as const],
                     },
                     {
                         name: 'rate_only_supporting_doc.pdf',
                         s3URL: 'fakeS3URL',
-                        documentCategories: ['RATES_RELATED' as const],
+                        sha256: 'fakesha',
+                        documentCategories: ['CONTRACT_RELATED' as const],
                     },
                 ],
             })
@@ -391,17 +389,19 @@ describe.each(flagValueTestParameters)(
 
             expect(packageData).toEqual(
                 expect.objectContaining({
-                    rateInfos: expect.arrayContaining([]),
-                    addtlActuaryContacts: expect.arrayContaining([]),
+                    rateInfos: [],
+                    addtlActuaryContacts: [],
                     documents: [
                         {
                             name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                             s3URL: 'fakeS3URL',
+                            sha256: 'fakesha',
                             documentCategories: ['CONTRACT_RELATED'],
                         },
                         {
                             name: 'rate_only_supporting_doc.pdf',
                             s3URL: 'fakeS3URL',
+                            sha256: 'fakesha',
                             documentCategories: ['CONTRACT_RELATED'],
                         },
                     ],

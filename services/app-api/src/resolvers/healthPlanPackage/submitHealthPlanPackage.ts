@@ -104,7 +104,7 @@ const validateStatusAndUpdateInfo = (
 // It will return an error if there are any missing fields that are required to submit
 // This strategy (returning a different type from validation) is taken from the
 // "parse, don't validate" article: https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
-function parseAndSubmit(
+export function parseAndSubmit(
     draft: HealthPlanFormDataType
 ): LockedHealthPlanFormDataType | SubmissionError {
     // Remove fields from edits on irrelevant logic branches
@@ -281,14 +281,50 @@ export function submitHealthPlanPackageResolver(
                 submittedReason || undefined
             )
 
+            if (!contractWithHistory.draftRevision) {
+                throw new Error(
+                    'PROGRAMMING ERROR: Status should not be submittable without a draft revision'
+                )
+            }
+
             // reassign variable set up before rates feature flag
-            initialFormData = convertContractWithRatesToFormData(
+            const conversionResult = convertContractWithRatesToFormData(
                 contractWithHistory.revisions[0],
+                contractWithHistory.id,
                 contractWithHistory.stateCode,
                 contractWithHistory.stateNumber
             )
+
+            if (conversionResult instanceof Error) {
+                const errMessage = conversionResult.message
+                logError('submitHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new Error(errMessage)
+            }
+
+            initialFormData = conversionResult
             contractRevisionID = contractWithHistory.revisions[0].id
 
+            // If we are submitting a CONTRACT ONLY but it still has rates associated with it, we need to remove those draftRates now
+            if (
+                initialFormData.submissionType === 'CONTRACT_ONLY' &&
+                initialFormData.rateInfos.length > 0
+            ) {
+                const rateRemovalResult =
+                    await store.updateDraftContractWithRates({
+                        contractID: contractWithHistory.id,
+                        formData: contractWithHistory.draftRevision.formData,
+                        rateFormDatas: [],
+                    })
+                if (rateRemovalResult instanceof Error) {
+                    const errMessage =
+                        'Failed to remove draft rates from a CONTRACT ONLY submission: ' +
+                        rateRemovalResult.message
+                    logError('submitHealthPlanPackage', errMessage)
+                    setErrorAttributesOnActiveSpan(errMessage, span)
+                    throw new Error(errMessage)
+                }
+            }
             // Final clean + check of data before submit - parse to state submission
             const maybeLocked = parseAndSubmit(initialFormData)
 
@@ -307,7 +343,7 @@ export function submitHealthPlanPackageResolver(
                     (rateRev) => {
                         ratePromises.push(
                             store.submitRate({
-                                rateID: rateRev.id,
+                                rateRevisionID: rateRev.id,
                                 submittedByUserID: user.id,
                                 submitReason: updateInfo.updatedReason,
                             })
@@ -349,7 +385,7 @@ export function submitHealthPlanPackageResolver(
 
             // then submit the contract!
             const submitContractResult = await store.submitContract({
-                contractID: contractRevisionID,
+                contractID: contractWithHistory.id,
                 submittedByUserID: user.id,
                 submitReason: updateInfo.updatedReason,
             })
@@ -369,7 +405,7 @@ export function submitHealthPlanPackageResolver(
 
             if (maybeSubmittedPkg instanceof Error) {
                 const errMessage = `Error converting draft contract. Message: ${maybeSubmittedPkg.message}`
-                logError('createHealthPlanPackage', errMessage)
+                logError('submitHealthPlanPackage', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new GraphQLError(errMessage, {
                     extensions: {

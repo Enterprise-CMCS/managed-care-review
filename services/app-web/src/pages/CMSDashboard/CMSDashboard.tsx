@@ -24,7 +24,7 @@ import {
  * We only pull a subset of data out of the submission and revisions for display in Dashboard
  * Depending on submission status, CMS users look at data from current or previous revision
  */
-
+const DASHBOARD_ATTRIBUTE = 'cms-dashboard-page'
 export const CMSDashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
     const { loading, data, error } = useIndexHealthPlanPackagesQuery({
@@ -36,22 +36,22 @@ export const CMSDashboard = (): React.ReactElement => {
         handleApolloError(error, isAuthenticated)
         if (isLikelyUserAuthError(error, isAuthenticated)) {
             return (
-                <div id="cms-dashboard-page" className={styles.wrapper}>
-                    <GridContainer
-                        data-testid="cms-dashboard-page"
-                        className={styles.container}
-                    >
+                <div
+                    data-testid={DASHBOARD_ATTRIBUTE}
+                    className={styles.wrapper}
+                >
+                    <GridContainer className={styles.container}>
                         <ErrorAlertSignIn />
                     </GridContainer>
                 </div>
             )
         } else {
             return (
-                <div id="cms-dashboard-page" className={styles.wrapper}>
-                    <GridContainer
-                        data-testid="cms-dashboard-page"
-                        className={styles.container}
-                    >
+                <div
+                    data-testid={DASHBOARD_ATTRIBUTE}
+                    className={styles.wrapper}
+                >
+                    <GridContainer className={styles.container}>
                         <ErrorAlertFailedRequest />
                     </GridContainer>
                 </div>
@@ -161,11 +161,8 @@ export const CMSDashboard = (): React.ReactElement => {
 
     return (
         <>
-            <div id="cms-dashboard-page" className={styles.wrapper}>
-                <GridContainer
-                    className={styles.container}
-                    data-testid="cms-dashboard-page"
-                >
+            <div data-testid={DASHBOARD_ATTRIBUTE} className={styles.wrapper}>
+                <GridContainer className={styles.container}>
                     <section className={styles.panel}>
                         <div className={styles.panelHeader}>
                             <h2>Submissions</h2>

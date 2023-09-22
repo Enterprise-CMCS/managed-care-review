@@ -1,8 +1,9 @@
 import type {
+    ActuaryCommunicationType,
     ActuaryContact,
+    HealthPlanFormDataType,
     RateInfoType,
     SubmissionDocument,
-    UnlockedHealthPlanFormDataType,
 } from 'app-web/src/common-code/healthPlanFormDataType'
 import type {
     HealthPlanPackageType,
@@ -14,6 +15,10 @@ import {
     toProtoBuffer,
 } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
 import type { ContractRevisionWithRatesType } from './revisionTypes'
+import {
+    isSubmissionError,
+    parseAndSubmit,
+} from '../../resolvers/healthPlanPackage/submitHealthPlanPackage'
 
 function convertContractWithRatesToUnlockedHPP(
     contract: ContractType
@@ -25,8 +30,7 @@ function convertContractWithRatesToUnlockedHPP(
         contract.revisions.unshift(contract.draftRevision)
     }
 
-    const healthPlanRevisions =
-        convertContractWithRatesRevtoHPPRev(contract)
+    const healthPlanRevisions = convertContractWithRatesRevtoHPPRev(contract)
 
     if (healthPlanRevisions instanceof Error) {
         return healthPlanRevisions
@@ -42,15 +46,18 @@ function convertContractWithRatesToUnlockedHPP(
 function convertContractWithRatesRevtoHPPRev(
     contract: ContractType
 ): HealthPlanRevisionType[] | Error {
-    if (contract.status !== 'DRAFT') {
-        return new Error(
-            `Contract with ID: ${contract.id} status is not "DRAFT". Cannot convert to unlocked health plan package`
-        )
-    }
-
     let healthPlanRevisions: HealthPlanRevisionType[] | Error = []
     for (const contractRev of contract.revisions) {
-        const unlockedHealthPlanFormData = convertContractWithRatesToFormData(contractRev, contract.stateCode, contract.stateNumber)
+        const unlockedHealthPlanFormData = convertContractWithRatesToFormData(
+            contractRev,
+            contract.id,
+            contract.stateCode,
+            contract.stateNumber
+        )
+
+        if (unlockedHealthPlanFormData instanceof Error) {
+            return unlockedHealthPlanFormData
+        }
 
         const formDataProto = toProtoBuffer(unlockedHealthPlanFormData)
 
@@ -80,44 +87,81 @@ function convertContractWithRatesRevtoHPPRev(
 }
 
 // TODO: Clean up parameters into args and improve types to make things more strict
-const convertContractWithRatesToFormData = (contractRev: ContractRevisionWithRatesType, stateCode: string, stateNumber: number): UnlockedHealthPlanFormDataType => {
-    const rateInfos: RateInfoType[] = contractRev.rateRevisions.map((rateRev) => {
-        const { rateType, rateCapitationType, rateCertificationName, rateDateCertified, rateDateEnd, rateDateStart, rateDocuments = [], supportingDocuments = [], rateProgramIDs, packagesWithSharedRateCerts, certifyingActuaryContacts = [], addtlActuaryContacts = [], amendmentEffectiveDateEnd, amendmentEffectiveDateStart, actuaryCommunicationPreference } = rateRev.formData
-        return {
-            id: rateRev.id, // form data ids are always revision ID
-            rateType,
-            rateCapitationType,
-            rateDocuments: rateDocuments.map(
-                (doc) => ({
+function convertContractWithRatesToFormData(
+    contractRev: ContractRevisionWithRatesType,
+    contractID: string,
+    stateCode: string,
+    stateNumber: number
+): HealthPlanFormDataType | Error {
+    // additional certifying actuaries are on every rate post refactor but on the package pre-refactor
+    const pkgAdditionalCertifyingActuaries: Set<ActuaryContact> = new Set()
+    let pkgActuaryCommsPref: ActuaryCommunicationType | undefined = undefined
+
+    const rateInfos: RateInfoType[] = contractRev.rateRevisions.map(
+        (rateRev) => {
+            const {
+                rateType,
+                rateCapitationType,
+                rateCertificationName,
+                rateDateCertified,
+                rateDateEnd,
+                rateDateStart,
+                rateDocuments = [],
+                supportingDocuments = [],
+                rateProgramIDs,
+                packagesWithSharedRateCerts,
+                certifyingActuaryContacts = [],
+                addtlActuaryContacts = [],
+                amendmentEffectiveDateEnd,
+                amendmentEffectiveDateStart,
+                actuaryCommunicationPreference,
+            } = rateRev.formData
+
+            for (const additionalActuary of addtlActuaryContacts) {
+                pkgAdditionalCertifyingActuaries.add(additionalActuary)
+            }
+
+            // The first time we find a rate that has an actuary comms pref, we use that to set the package's prefs
+            if (actuaryCommunicationPreference && !pkgActuaryCommsPref) {
+                pkgActuaryCommsPref = actuaryCommunicationPreference
+            }
+
+            const rateAmendmentInfo = (amendmentEffectiveDateStart ||
+                amendmentEffectiveDateEnd) && {
+                effectiveDateStart: amendmentEffectiveDateStart,
+                effectiveDateEnd: amendmentEffectiveDateEnd,
+            }
+            return {
+                id: rateRev.id, // rate form data id is the revision ID
+                rateType,
+                rateCapitationType,
+                rateDocuments: rateDocuments.map((doc) => ({
                     ...doc,
                     documentCategories: ['RATES'],
-                })
-            ) as SubmissionDocument[],
-            supportingDocuments: supportingDocuments.map(
-                (doc) => ({
+                })) as SubmissionDocument[],
+                supportingDocuments: supportingDocuments.map((doc) => ({
                     ...doc,
                     documentCategories: ['RATES_RELATED'],
-                })
-            ) as SubmissionDocument[],
-            rateAmendmentInfo: {
-                effectiveDateEnd: amendmentEffectiveDateEnd,
-                effectiveDateStart: amendmentEffectiveDateStart
-            },
-            rateDateStart,
-            rateDateEnd,
-            rateDateCertified,
-            rateProgramIDs,
-            rateCertificationName,
-            actuaryContacts: [...certifyingActuaryContacts, addtlActuaryContacts] as ActuaryContact[],
-            actuaryCommunicationPreference,
-            packagesWithSharedRateCerts
+                })) as SubmissionDocument[],
+                rateAmendmentInfo: rateAmendmentInfo,
+                rateDateStart,
+                rateDateEnd,
+                rateDateCertified,
+                rateProgramIDs,
+                rateCertificationName,
+                actuaryContacts: certifyingActuaryContacts ?? [],
+                actuaryCommunicationPreference,
+                packagesWithSharedRateCerts,
+            }
         }
-    })
-    const unlockedHealthPlanFormData: UnlockedHealthPlanFormDataType = {
-        id: contractRev.id,
+    )
+
+    // since this data is coming out from the DB without validation, we start by making a draft.
+    const healthPlanFormData: HealthPlanFormDataType = {
+        id: contractID, // contract form data id is the contract ID.
+        status: 'DRAFT',
         createdAt: contractRev.createdAt,
         updatedAt: contractRev.updatedAt,
-        status: 'DRAFT',
         stateCode: stateCode,
         stateNumber: stateNumber,
         programIDs: contractRev.formData.programIDs,
@@ -126,15 +170,14 @@ const convertContractWithRatesToFormData = (contractRev: ContractRevisionWithRat
         riskBasedContract: contractRev.formData.riskBasedContract,
         submissionDescription: contractRev.formData.submissionDescription,
         stateContacts: contractRev.formData.stateContacts,
-        addtlActuaryCommunicationPreference: undefined,
-        addtlActuaryContacts: [],
+        addtlActuaryCommunicationPreference: pkgActuaryCommsPref,
+        addtlActuaryContacts: [...pkgAdditionalCertifyingActuaries],
         documents: contractRev.formData.supportingDocuments.map((doc) => ({
             ...doc,
             documentCategories: ['CONTRACT_RELATED'],
         })) as SubmissionDocument[],
         contractType: contractRev.formData.contractType,
-        contractExecutionStatus:
-            contractRev.formData.contractExecutionStatus,
+        contractExecutionStatus: contractRev.formData.contractExecutionStatus,
         contractDocuments: contractRev.formData.contractDocuments.map(
             (doc) => ({
                 ...doc,
@@ -171,8 +214,7 @@ const convertContractWithRatesToFormData = (contractRev: ContractRevisionWithRat
                 modifiedMedicalLossRatioStandards:
                     contractRev.formData.modifiedMedicalLossRatioStandards,
                 modifiedOtherFinancialPaymentIncentive:
-                    contractRev.formData
-                        .modifiedOtherFinancialPaymentIncentive,
+                    contractRev.formData.modifiedOtherFinancialPaymentIncentive,
                 modifiedEnrollmentProcess:
                     contractRev.formData.modifiedEnrollmentProcess,
                 modifiedGrevienceAndAppeal:
@@ -185,14 +227,29 @@ const convertContractWithRatesToFormData = (contractRev: ContractRevisionWithRat
                     contractRev.formData.modifiedNonRiskPaymentArrangements,
             },
         },
-        rateInfos
+        rateInfos,
     }
 
-    return unlockedHealthPlanFormData
+    if (contractRev.submitInfo) {
+        const result = parseAndSubmit(healthPlanFormData)
+        if (isSubmissionError(result)) {
+            console.error(
+                'Failed to parse contract data into submitted HPFD',
+                result
+            )
+            return new Error(
+                'The data did not parse correctly as a submitted health plan'
+            )
+        }
+
+        return result
+    }
+
+    return healthPlanFormData
 }
 
 export {
     convertContractWithRatesRevtoHPPRev,
     convertContractWithRatesToUnlockedHPP,
-    convertContractWithRatesToFormData
+    convertContractWithRatesToFormData,
 }

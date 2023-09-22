@@ -22,7 +22,11 @@ export type { RateType } from './rateTypes'
 
 export type { PackageStatusType, UpdateInfoType } from './updateInfoType'
 
-export type { ContractFormDataType, RateFormDataType } from './formDataTypes'
+export type {
+    ContractFormDataType,
+    RateFormDataType,
+    DocumentType,
+} from './formDataTypes'
 
 export type {
     ContractRevisionType,

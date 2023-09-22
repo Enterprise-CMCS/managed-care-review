@@ -7,7 +7,7 @@ import { createInsertContractData, must } from '../../testHelpers'
 import { insertDraftRate } from './insertRate'
 import { submitContract } from './submitContract'
 import { insertDraftContract } from './insertContract'
-import { updateDraftContract } from './updateDraftContract'
+import { updateDraftContractWithRates } from './updateDraftContractWithRates'
 
 describe('submitRate', () => {
     it('creates a standalone rate submission from a draft', async () => {
@@ -198,10 +198,10 @@ describe('submitRate', () => {
             })
         )
         must(
-            await updateDraftContract(client, {
+            await updateDraftContractWithRates(client, {
                 contractID: contract1.id,
                 formData: { submissionDescription: 'onepoint0' },
-                rateIDs: [rateA.id],
+                rateFormDatas: [rateA],
             })
         )
 

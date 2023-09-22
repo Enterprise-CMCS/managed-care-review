@@ -35,8 +35,11 @@ function convertUpdateInfoToDomainModel(
 }
 
 // -----
-function getContractRateStatus(revisions: ContractRevisionTableWithFormData[]| RateRevisionTableWithFormData[]): PackageStatusType {
-
+function getContractRateStatus(
+    revisions:
+        | ContractRevisionTableWithFormData[]
+        | RateRevisionTableWithFormData[]
+): PackageStatusType {
     // need to order revisions from latest to earliest
     const revs = revisions.sort(
         (revA, revB) => revB.createdAt.getTime() - revA.createdAt.getTime()
@@ -77,6 +80,7 @@ function rateFormDataToDomainModel(
 ): RateFormDataType {
     return {
         id: rateRevision.id,
+        rateID: rateRevision.rateID,
         rateType: rateRevision.rateType ?? undefined,
         rateCapitationType: rateRevision.rateCapitationType ?? undefined,
         rateDocuments: rateRevision.rateDocuments
@@ -175,7 +179,10 @@ function contractFormDataToDomainModel(
         contractType: contractRevision.contractType,
         programIDs: contractRevision.programIDs ?? [],
         populationCovered: contractRevision.populationCovered ?? undefined,
-        riskBasedContract: contractRevision.riskBasedContract ?? undefined,
+        riskBasedContract:
+            contractRevision.riskBasedContract !== null
+                ? contractRevision.riskBasedContract
+                : undefined,
         stateContacts: contractRevision.stateContacts
             ? contractRevision.stateContacts.map((contact) => ({
                   name: contact.name ?? undefined,
