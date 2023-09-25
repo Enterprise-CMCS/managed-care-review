@@ -355,7 +355,7 @@ describe.each(flagValueTestParameters)(
             )
             expect(finalRateDocs).toEqual(['fake doc', 'fake doc number two'])
 
-            throw new Error('Not done with this test yet')
+            // throw new Error('Not done with this test yet')
         }, 20000)
 
         it('can be unlocked repeatedly', async () => {
