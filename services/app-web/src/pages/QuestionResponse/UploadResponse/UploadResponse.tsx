@@ -27,12 +27,16 @@ import { usePage } from '../../../contexts/PageContext'
 import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
 import { createResponseWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
+import { RoutesRecord } from '../../../constants'
 
 export const UploadResponse = () => {
     // router context
     const { division, id, questionID } = useParams<{
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         division: string
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         id: string
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         questionID: string
     }>()
     const navigate = useNavigate()
@@ -105,7 +109,10 @@ export const UploadResponse = () => {
         <GridContainer>
             <Breadcrumbs
                 items={[
-                    { link: `/dashboard`, text: 'Dashboard' },
+                    {
+                        link: RoutesRecord.DASHBOARD_SUBMISSIONS,
+                        text: 'Dashboard',
+                    },
                     { link: `/submissions/${id}`, text: packageName },
                     { text: 'Add response' },
                 ]}

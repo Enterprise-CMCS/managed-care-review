@@ -5,6 +5,7 @@ import styles from './Errors.module.scss'
 
 import { PageHeading } from '../../components/PageHeading'
 import { GridContainer } from '@trussworks/react-uswds'
+import { RoutesRecord } from '../../constants'
 
 export const Error404 = (): React.ReactElement => {
     return (
@@ -14,7 +15,10 @@ export const Error404 = (): React.ReactElement => {
                 <p>You might want to double-check your link and try again.</p>
                 <p>
                     <span>Or return to your </span>
-                    <NavLink to="/dashboard">Dashboard</NavLink>.
+                    <NavLink to={RoutesRecord.DASHBOARD_SUBMISSIONS}>
+                        Dashboard
+                    </NavLink>
+                    .
                 </p>
             </GridContainer>
         </section>

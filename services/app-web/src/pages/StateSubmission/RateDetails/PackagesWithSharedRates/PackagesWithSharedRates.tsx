@@ -17,6 +17,7 @@ import {
 } from '../SingleRateCert/SingleRateCert'
 
 import styles from '../../StateSubmissionForm.module.scss'
+import { RoutesRecord } from '../../../../constants'
 
 export type PackagesWithSharedRatesProps = {
     index: number
@@ -137,7 +138,7 @@ export const PackagesWithSharedRates = ({
                     </span>
                     <Link
                         aria-label="View all submissions (opens in new window)"
-                        href={'/dashboard'}
+                        href={RoutesRecord.DASHBOARD_SUBMISSIONS}
                         variant="external"
                         target="_blank"
                     >

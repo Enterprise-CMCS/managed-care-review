@@ -32,13 +32,15 @@ const CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     ROOT: 'root',
     AUTH: 'login',
     DASHBOARD: 'table',
+    DASHBOARD_SUBMISSIONS: 'table',
+    DASHBOARD_RATES: 'table',
     HELP: 'glossary',
     GRAPHQL_EXPLORER: 'dev',
     REPORTS: 'table',
     SETTINGS: 'table',
     SUBMISSIONS: 'form',
     SUBMISSIONS_NEW: 'form',
-    SUBMISSIONS_FORM: 'form',
+    SUBMISSIONS_EDIT_TOP_LEVEL: 'form',
     SUBMISSIONS_TYPE: 'form',
     SUBMISSIONS_CONTRACT_DETAILS: 'form',
     SUBMISSIONS_RATE_DETAILS: 'form',
@@ -111,7 +113,7 @@ const getTealiumPageName = ({
                 })
             }
             return formatPageName({ heading, title: PageTitlesRecord[route] })
-        case 'DASHBOARD':
+        case 'DASHBOARD_SUBMISSIONS' || 'DASHBOARD_RATES':
             if (user && user.__typename === 'CMSUser') {
                 return formatPageName({ title: 'CMS Dashboard' })
             } else if (user && user.__typename === 'StateUser') {

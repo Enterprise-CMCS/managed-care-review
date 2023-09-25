@@ -5,7 +5,7 @@ describe('smoke test', () => {
     })
     it('can log in as a state user', () => {
         cy.logInAsStateUser()
-        cy.location('pathname', { timeout: 10_000 }).should('eq', '/')
+        cy.location('pathname', { timeout: 10_000 }).should('eq', '/dashboard/submissions')
         cy.findByRole('heading', { level: 1, name: /Dashboard/ })
     })
 
@@ -17,5 +17,5 @@ describe('smoke test', () => {
     it('can contact the API and connect to the database', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmissionWithBaseContract()
-    }) 
+    })
 })

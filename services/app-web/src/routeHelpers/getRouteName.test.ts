@@ -1,10 +1,13 @@
 import { getRouteName } from './'
-import { RouteT } from '../constants/routes'
+import { RouteT, RoutesRecord } from '../constants/routes'
 
 describe('getRouteName', () => {
     describe('calculates valid routes properly', () => {
         const testCases: [string, RouteT][] = [
-            ['/dashboard', 'DASHBOARD' as const],
+            [
+                RoutesRecord.DASHBOARD_SUBMISSIONS,
+                'DASHBOARD_SUBMISSIONS' as const,
+            ],
             ['/submissions/new', 'SUBMISSIONS_NEW' as const],
             ['/submissions/23324234', 'SUBMISSIONS_SUMMARY' as const],
             ['/submissions/123213/edit/type', 'SUBMISSIONS_TYPE' as const],

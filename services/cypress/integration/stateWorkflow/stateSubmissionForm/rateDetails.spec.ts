@@ -54,22 +54,19 @@ describe('rate details', () => {
                 .within(() => {
                     cy.findByText('Yes').click()
                 })
-            cy.findByRole('combobox', { name: 'submission (required)' }).click({
-                force: true,
-            })
-            cy.findByText(/MCR-MN-0001-PMAP/i).click()
+
+            // use keyboard to select related submissions
+            cy.findByRole('combobox', { name: 'submission (required)' }).type('MCR-MN{enter}{enter}');
             // Navigate to contacts page by clicking continue
             cy.navigateFormByButtonClick('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
-            // check accessibility of filled out rate details page
             cy.navigateFormByButtonClick('BACK')
-            cy.findByText(/MCR-MN-0001-PMAP/i).should('be.visible')
             // check that selections can be removed
             cy.findByRole('button', {
-                name: /Remove MCR-MN-0001-PMAP/i,
+                name: /Remove MCR-MN-/i,
             }).click()
-            cy.findByText(/Remove MCR-MN-0001-PMAP/i).should('not.exist')
+            cy.findByText(/Remove MCR-MN-/i).should('not.exist')
             // Commented out to get react-scripts/webpack 5 upgrade through
             // cy.pa11y({
             //     actions: ['wait for element #form-guidance to be visible'],

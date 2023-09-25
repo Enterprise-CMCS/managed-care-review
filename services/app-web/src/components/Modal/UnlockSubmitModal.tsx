@@ -169,7 +169,9 @@ export const UnlockSubmitModal = ({
                         }
                     }
                 )
-                navigate(`/dashboard?justSubmitted=${submissionName}`)
+                navigate(
+                    `/dashboard/submissions?justSubmitted=${submissionName}`
+                )
             } else {
                 // Updating the cache here with unlockInfo before manually re-fetching query.
                 // This will prevent the loading animation to happen and have up-to-date unlock banner.
@@ -222,7 +224,9 @@ export const UnlockSubmitModal = ({
         } else {
             modalRef.current?.toggleModal(undefined, false)
             if (modalType !== 'UNLOCK' && submissionName) {
-                navigate(`/dashboard?justSubmitted=${submissionName}`)
+                navigate(
+                    `/dashboard/submissions?justSubmitted=${submissionName}`
+                )
             }
         }
     }

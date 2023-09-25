@@ -84,7 +84,7 @@ describe('UnlockSubmitModal', () => {
             await userEvent.click(screen.getByTestId('submit-modal-submit'))
 
             await waitFor(() =>
-                expect(testLocation.pathname).toBe(`/dashboard`)
+                expect(testLocation.pathname).toBe(`/dashboard/submissions`)
             )
             await waitFor(() =>
                 expect(testLocation.search).toBe(
@@ -133,7 +133,7 @@ describe('UnlockSubmitModal', () => {
             await userEvent.click(screen.getByTestId('submit-modal-submit'))
 
             await waitFor(() =>
-                expect(testLocation.pathname).toBe(`/dashboard`)
+                expect(testLocation.pathname).toBe(`/dashboard/submissions`)
             )
             await waitFor(() =>
                 expect(testLocation.search).toBe(
@@ -597,7 +597,7 @@ describe('UnlockSubmitModal', () => {
                 expect(mockSetIsSubmitting).toHaveBeenCalledTimes(2)
             )
             await waitFor(() =>
-                expect(testLocation.pathname).toBe(`/dashboard`)
+                expect(testLocation.pathname).toBe(`/dashboard/submissions`)
             )
             await waitFor(() =>
                 expect(testLocation.search).toBe(

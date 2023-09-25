@@ -1,10 +1,10 @@
-import { render } from '@testing-library/react'
 import { Tabs } from './Tabs'
 import { TabPanel } from './TabPanel'
+import { renderWithProviders } from '../../testHelpers'
 
 describe('Tabs', () => {
     it('renders without errors', async () => {
-        const { getByTestId } = render(
+        const { getByTestId } = renderWithProviders(
             <Tabs>
                 <TabPanel id="Test-Pepperoni" tabName="Pepperoni">
                     <h1>Pepperoni</h1>

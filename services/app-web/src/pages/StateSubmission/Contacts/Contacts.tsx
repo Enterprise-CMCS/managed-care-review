@@ -35,6 +35,7 @@ import { useFocus } from '../../../hooks/useFocus'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { ActuaryContactFields } from './ActuaryContactFields'
+import { RoutesRecord } from '../../../constants'
 
 export interface ContactsFormValues {
     stateContacts: StateContact[]
@@ -260,7 +261,7 @@ export const Contacts = ({
                 )
             } else if (updatedSubmission) {
                 if (redirectToDashboard.current) {
-                    navigate(`/dashboard`)
+                    navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
                 } else {
                     navigate(`../documents`)
                 }
@@ -583,7 +584,7 @@ export const Contacts = ({
                         <PageActions
                             saveAsDraftOnClick={() => {
                                 if (!dirty) {
-                                    navigate(`/dashboard`)
+                                    navigate(`/dashboard/submissions`)
                                 } else {
                                     setShouldValidate(true)
                                     setFocusErrorSummaryHeading(true)

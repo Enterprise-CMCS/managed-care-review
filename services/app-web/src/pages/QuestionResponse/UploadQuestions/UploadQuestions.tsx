@@ -26,9 +26,11 @@ import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSide
 import { usePage } from '../../../contexts/PageContext'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
 import { createQuestionWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
+import { RoutesRecord } from '../../../constants'
 
 export const UploadQuestions = () => {
     // router context
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     const { division, id } = useParams<{ division: string; id: string }>()
     const navigate = useNavigate()
     const { packageName } = useOutletContext<SideNavOutletContextType>()
@@ -96,7 +98,7 @@ export const UploadQuestions = () => {
             <Breadcrumbs
                 items={[
                     {
-                        link: `/dashboard`,
+                        link: RoutesRecord.DASHBOARD_SUBMISSIONS,
                         text: 'Dashboard',
                     },
                     { link: `/submissions/${id}`, text: packageName },
