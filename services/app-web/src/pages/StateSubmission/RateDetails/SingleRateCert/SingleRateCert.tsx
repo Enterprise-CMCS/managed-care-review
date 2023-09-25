@@ -164,6 +164,7 @@ export const SingleRateCert = ({
                     label="Upload one rate certification document"
                     renderMode="list"
                     aria-required
+                    allowMultipleUploads={false}
                     error={showFieldErrors('rateDocuments')}
                     hint={
                         <span className={styles.guidanceTextBlockNoPadding}>
