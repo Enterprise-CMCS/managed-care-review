@@ -58,7 +58,12 @@ const defaultStatePrograms = mockMNState().programs
 
 describe('unlockPackageCMSEmail', () => {
     test('subject line is correct and clearly states submission is unlocked', async () => {
-        const name = packageName(sub, defaultStatePrograms)
+        const name = packageName(
+            sub.stateCode,
+            sub.stateNumber,
+            sub.programIDs,
+            defaultStatePrograms
+        )
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,

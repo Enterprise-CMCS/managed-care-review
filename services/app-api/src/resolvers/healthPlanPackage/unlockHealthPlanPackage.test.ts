@@ -464,7 +464,12 @@ describe('unlockHealthPlanPackage', () => {
 
         const programs = [defaultFloridaProgram()]
         const ratePrograms = [defaultFloridaRateProgram()]
-        const name = packageName(sub, programs)
+        const name = packageName(
+            sub.stateCode,
+            sub.stateNumber,
+            sub.programIDs,
+            programs
+        )
         const rateName = generateRateName(sub, sub.rateInfos[0], ratePrograms)
         const stateAnalystsEmails = getTestStateAnalystsEmails(sub.stateCode)
 
@@ -540,7 +545,12 @@ describe('unlockHealthPlanPackage', () => {
 
         const programs = [defaultFloridaProgram()]
         const ratePrograms = [defaultFloridaRateProgram()]
-        const name = packageName(sub, programs)
+        const name = packageName(
+            sub.stateCode,
+            sub.stateNumber,
+            sub.programIDs,
+            programs
+        )
         const rateName = generateRateName(sub, sub.rateInfos[0], ratePrograms)
 
         const stateReceiverEmails = [

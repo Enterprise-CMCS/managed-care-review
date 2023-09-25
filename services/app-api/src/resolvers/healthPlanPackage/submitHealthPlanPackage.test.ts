@@ -486,7 +486,12 @@ describe('submitHealthPlanPackage', () => {
         }
 
         const programs = [defaultFloridaProgram()]
-        const name = packageName(sub, programs)
+        const name = packageName(
+            sub.stateCode,
+            sub.stateNumber,
+            sub.programIDs,
+            programs
+        )
         const stateAnalystsEmails = getTestStateAnalystsEmails(sub.stateCode)
 
         const cmsEmails = [
@@ -596,7 +601,12 @@ describe('submitHealthPlanPackage', () => {
 
         const programs = [defaultFloridaProgram()]
         const ratePrograms = [defaultFloridaRateProgram()]
-        const name = packageName(sub, programs)
+        const name = packageName(
+            sub.stateCode,
+            sub.stateNumber,
+            sub.programIDs,
+            programs
+        )
         const rateName = generateRateName(sub, sub.rateInfos[0], ratePrograms)
 
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
@@ -642,7 +652,12 @@ describe('submitHealthPlanPackage', () => {
         }
 
         const programs = [defaultFloridaProgram()]
-        const name = packageName(sub, programs)
+        const name = packageName(
+            sub.stateCode,
+            sub.stateNumber,
+            sub.programIDs,
+            programs
+        )
 
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -696,7 +711,12 @@ describe('submitHealthPlanPackage', () => {
         }
 
         const programs = [defaultFloridaProgram()]
-        const name = packageName(sub, programs)
+        const name = packageName(
+            sub.stateCode,
+            sub.stateNumber,
+            sub.programIDs,
+            programs
+        )
 
         // email subject line is correct for CMS email and contains correct email body text
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
@@ -764,7 +784,12 @@ describe('submitHealthPlanPackage', () => {
         }
 
         const programs = [defaultFloridaProgram()]
-        const name = packageName(sub, programs)
+        const name = packageName(
+            sub.stateCode,
+            sub.stateNumber,
+            sub.programIDs,
+            programs
+        )
 
         // email subject line is correct for CMS email and contains correct email body text
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(

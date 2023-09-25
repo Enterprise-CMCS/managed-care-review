@@ -55,7 +55,12 @@ const defaultStatePrograms = mockMNState().programs
 const defaultSubmitters = ['test1@example.com', 'test2@example.com']
 
 test('subject line is correct and clearly states submission is unlocked', async () => {
-    const name = packageName(sub, defaultStatePrograms)
+    const name = packageName(
+        sub.stateCode,
+        sub.stateNumber,
+        sub.programIDs,
+        defaultStatePrograms
+    )
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,

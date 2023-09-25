@@ -52,7 +52,12 @@ const defaultStatePrograms = mockMNState().programs
 const defaultSubmitters = ['test1@example.com', 'test2@example.com']
 
 test('contains correct subject and clearly states successful resubmission', async () => {
-    const name = packageName(submission, defaultStatePrograms)
+    const name = packageName(
+        submission.stateCode,
+        submission.stateNumber,
+        submission.programIDs,
+        defaultStatePrograms
+    )
     const template = await resubmitPackageStateEmail(
         submission,
         defaultSubmitters,

@@ -86,7 +86,9 @@ export const PackagesWithSharedRates = ({
                         packagesWithUpdatedAt.push({
                             updatedAt: currentSubmissionData.updatedAt,
                             label: `${packageName(
-                                currentSubmissionData,
+                                currentSubmissionData.stateCode,
+                                currentSubmissionData.stateNumber,
+                                currentSubmissionData.programIDs,
                                 statePrograms
                             )}${submittedAt}`,
                             value: currentSubmissionData.id,
