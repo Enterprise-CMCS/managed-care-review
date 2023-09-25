@@ -19,6 +19,16 @@ const includeDraftRates = {
             addtlActuaryContacts: true,
             submitInfo: includeUpdateInfo,
             unlockInfo: includeUpdateInfo,
+            contractsWithSharedRateRevision: {
+                include: {
+                    revisions: {
+                        take: 1,
+                        orderBy: {
+                            createdAt: 'desc',
+                        },
+                    },
+                },
+            },
         },
         take: 1,
         orderBy: {

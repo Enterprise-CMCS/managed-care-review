@@ -185,6 +185,7 @@ describe('parseDomainData', () => {
                                         rateProgramIDs: [],
                                         rateCertificationName: null,
                                         actuaryCommunicationPreference: null,
+                                        contractsWithSharedRateRevision: [],
                                     },
                                 },
                             ],

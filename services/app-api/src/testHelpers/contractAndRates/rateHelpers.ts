@@ -128,6 +128,7 @@ const createRateRevision = (
     ],
     contractRevisions: [],
     draftContracts: [],
+    contractsWithSharedRateRevision: [],
     ...revision,
 })
 

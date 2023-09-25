@@ -60,6 +60,16 @@ const includeRateFormData = {
     supportingDocuments: true,
     certifyingActuaryContacts: true,
     addtlActuaryContacts: true,
+    contractsWithSharedRateRevision: {
+        include: {
+            revisions: {
+                take: 1,
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            },
+        },
+    },
 } satisfies Prisma.RateRevisionTableInclude
 
 type RateRevisionTableWithFormData = Prisma.RateRevisionTableGetPayload<{
