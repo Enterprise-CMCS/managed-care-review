@@ -36,11 +36,11 @@ const flagValueTestParameters: {
     flagValue: FlagValue
     testName: string
 }[] = [
-    // {
-    //     flagName: 'rates-db-refactor',
-    //     flagValue: false,
-    //     testName: 'updateHealthPlanFormData with all feature flags off',
-    // },
+    {
+        flagName: 'rates-db-refactor',
+        flagValue: false,
+        testName: 'updateHealthPlanFormData with all feature flags off',
+    },
     {
         flagName: 'rates-db-refactor',
         flagValue: true,

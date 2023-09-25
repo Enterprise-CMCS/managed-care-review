@@ -43,11 +43,11 @@ const flagValueTestParameters: {
         flagValue: false,
         testName: 'unlockHealthPlanPackage with all feature flags off',
     },
-    // {
-    //     flagName: 'rates-db-refactor',
-    //     flagValue: true,
-    //     testName: 'unlockHealthPlanPackage with rates-db-refactor on',
-    // },
+    {
+        flagName: 'rates-db-refactor',
+        flagValue: true,
+        testName: 'unlockHealthPlanPackage with rates-db-refactor on',
+    },
 ]
 
 describe.each(flagValueTestParameters)(
@@ -197,8 +197,9 @@ describe.each(flagValueTestParameters)(
         }, 20000)
 
         it('allows for multiple edits, editing the set of revisions correctly', async () => {
-            const stateServer = await constructTestPostgresServer()
-
+            const stateServer = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
             // First, create a new submitted submission
             const stateDraft = await createAndSubmitTestHealthPlanPackage(
                 stateServer
@@ -209,6 +210,7 @@ describe.each(flagValueTestParameters)(
                 context: {
                     user: cmsUser,
                 },
+                ldService: mockLDService,
             })
 
             // Unlock
