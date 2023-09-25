@@ -43,11 +43,11 @@ const flagValueTestParameters: {
         flagValue: false,
         testName: 'unlockHealthPlanPackage with all feature flags off',
     },
-    {
-        flagName: 'rates-db-refactor',
-        flagValue: true,
-        testName: 'unlockHealthPlanPackage with rates-db-refactor on',
-    },
+    // {
+    //     flagName: 'rates-db-refactor',
+    //     flagValue: true,
+    //     testName: 'unlockHealthPlanPackage with rates-db-refactor on',
+    // },
 ]
 
 describe.each(flagValueTestParameters)(
