@@ -54,10 +54,10 @@ describe('rate details', () => {
                 .within(() => {
                     cy.findByText('Yes').click()
                 })
-            cy.findByRole('combobox', { name: 'submission (required)' }).click({
-                force: true,
-            })
-            cy.findAllByText(/MCR-MN-0001-PMAP/i).first().click()
+
+            // use keyboard to select related submissions
+            cy.findByRole('combobox', { name: 'submission (required)' }).type('MCR-MN-0001-PMAP{enter}{enter}');
+
             // Navigate to contacts page by clicking continue
             cy.navigateFormByButtonClick('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
