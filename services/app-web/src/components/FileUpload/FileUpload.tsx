@@ -358,6 +358,15 @@ export const FileUpload = ({
 
     const addFilesAndUpdateList = (files: File[]) => {
         const items = generateFileItems(files) // UI data objects -  used to track file upload state in a list below the input
+        fileItems.forEach((fileItem) => {
+            if (fileItem.key !== undefined)
+                deleteFile(fileItem.key).catch(() =>
+                    console.info('Error deleting from s3')
+                )
+            setFileItems((prevItems) => {
+                return refreshItems(prevItems, fileItem)
+            })
+        })
 
         setFileItems((array) => [...array, ...items])
         asyncS3Upload(files)
@@ -445,7 +454,8 @@ export const FileUpload = ({
                 name={`${name}${inputRequired ? ' (required)' : ''}`}
                 className={styles.fileInput}
                 aria-describedby={`${id}-error ${id}-hint`}
-                multiple
+                // TODO pass this as a prop
+                multiple={false}
                 onChange={handleOnChange}
                 onDrop={handleOnDrop}
                 accept={inputProps.accept}
