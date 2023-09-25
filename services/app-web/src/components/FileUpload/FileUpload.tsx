@@ -33,6 +33,7 @@ export type FileUploadProps = {
     hint?: React.ReactNode
     initialItems?: FileItemT[]
     isLabelVisible?: boolean
+    allowMultipleUploads?: boolean
     uploadFile: (file: File) => Promise<S3FileData>
     scanFile?: (key: string) => Promise<void | Error> // optional function to be called after uploading (used for scanning)
     deleteFile: (key: string) => Promise<void>
@@ -64,6 +65,7 @@ export const FileUpload = ({
     onFileItemsUpdate,
     isContractOnly,
     shouldDisplayMissingCategoriesError = false,
+    allowMultipleUploads = true,
     innerInputRef,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
@@ -358,16 +360,16 @@ export const FileUpload = ({
 
     const addFilesAndUpdateList = (files: File[]) => {
         const items = generateFileItems(files) // UI data objects -  used to track file upload state in a list below the input
-        fileItems.forEach((fileItem) => {
-            if (fileItem.key !== undefined)
-                deleteFile(fileItem.key).catch(() =>
-                    console.info('Error deleting from s3')
-                )
-            setFileItems((prevItems) => {
-                return refreshItems(prevItems, fileItem)
+        !allowMultipleUploads &&
+            fileItems.forEach((fileItem) => {
+                if (fileItem.key !== undefined)
+                    deleteFile(fileItem.key).catch(() =>
+                        console.info('Error deleting from s3')
+                    )
+                setFileItems((prevItems) => {
+                    return refreshItems(prevItems, fileItem)
+                })
             })
-        })
-
         setFileItems((array) => [...array, ...items])
         asyncS3Upload(files)
 
@@ -454,8 +456,7 @@ export const FileUpload = ({
                 name={`${name}${inputRequired ? ' (required)' : ''}`}
                 className={styles.fileInput}
                 aria-describedby={`${id}-error ${id}-hint`}
-                // TODO pass this as a prop
-                multiple={false}
+                multiple={allowMultipleUploads}
                 onChange={handleOnChange}
                 onDrop={handleOnDrop}
                 accept={inputProps.accept}
