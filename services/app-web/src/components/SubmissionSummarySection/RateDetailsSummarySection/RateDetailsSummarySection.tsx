@@ -368,6 +368,7 @@ export const RateDetailsSummarySection = ({
                                         documentDateLookupTable={
                                             documentDateLookupTable
                                         }
+                                        multipleDocumentsAllowed={false}
                                         caption="Rate certification"
                                         documentCategory="Rate certification"
                                         isEditing={isEditing}

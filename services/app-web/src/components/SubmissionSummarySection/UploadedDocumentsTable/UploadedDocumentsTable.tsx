@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from '@trussworks/react-uswds'
+import { Icon } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
@@ -18,6 +19,7 @@ export type UploadedDocumentsTableProps = {
     packagesWithSharedRateCerts?: SharedRateCertDisplay[]
     documentDateLookupTable: DocumentDateLookupTableType
     isSupportingDocuments?: boolean
+    multipleDocumentsAllowed?: boolean
     documentCategory?: string // if this prop is not included, do not show category column
     isEditing?: boolean // by default assume we are on summary page, if true, assume review and submit page
 }
@@ -28,6 +30,7 @@ export const UploadedDocumentsTable = ({
     documentCategory,
     packagesWithSharedRateCerts,
     isSupportingDocuments = false,
+    multipleDocumentsAllowed = true,
     documentDateLookupTable,
     isEditing = false,
 }: UploadedDocumentsTableProps): React.ReactElement => {
@@ -136,6 +139,21 @@ export const UploadedDocumentsTable = ({
                     <div className={styles.captionContainer}>
                         {tableCaptionJSX}
                     </div>
+                    {!multipleDocumentsAllowed && documents.length > 1 && (
+                        <span className={styles.error}>
+                            <span>
+                                <Icon.Error
+                                    aria-label="An error icon"
+                                    size={3}
+                                />
+                            </span>
+                            <span>
+                                Only one document is allowed for a rate
+                                certification. You must remove documents before
+                                continuing.
+                            </span>
+                        </span>
+                    )}
                 </caption>
                 <thead>
                     <tr>
