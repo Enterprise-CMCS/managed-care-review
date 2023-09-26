@@ -4,6 +4,8 @@ import { compileGraphQLTypesWatchOnce } from './graphql.js'
 import { installPrismaDeps } from './postgres.js'
 
 export async function installAPIDeps(runner: LabeledProcessRunner) {
+    await runner.runCommandAndOutput('api deps', ['yarn', 'install'], '')
+
     // prisma requires that prisma generate is run after any yarn install
     return installPrismaDeps(runner)
 }
