@@ -47,12 +47,14 @@ export const ActuaryContactFields = ({
                 type="text"
                 inputRef={inputRef}
                 variant="SUBHEAD"
+                aria-required
             />
 
             <FieldTextInput
                 name={`${fieldNamePrefix}.titleRole`}
                 id={`${fieldNamePrefix}.titleRole`}
                 label="Title/Role"
+                aria-required
                 showError={Boolean(
                     showFieldErrors(
                         getIn(errors, `${fieldNamePrefix}.titleRole`)
@@ -66,6 +68,7 @@ export const ActuaryContactFields = ({
                 name={`${fieldNamePrefix}.email`}
                 id={`${fieldNamePrefix}.email`}
                 label="Email"
+                aria-required
                 showError={Boolean(
                     showFieldErrors(getIn(errors, `${fieldNamePrefix}.email`))
                 )}

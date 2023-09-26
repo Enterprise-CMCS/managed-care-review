@@ -516,7 +516,10 @@ export const ContractDetails = ({
                                 />
                             )}
 
-                            <FormGroup error={showFileUploadError}>
+                            <FormGroup
+                                error={showFileUploadError}
+                                className="margin-top-0"
+                            >
                                 <FileUpload
                                     id="documents"
                                     name="documents"

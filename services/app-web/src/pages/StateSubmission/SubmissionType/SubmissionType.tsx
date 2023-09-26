@@ -325,6 +325,7 @@ export const SubmissionType = ({
                                 error={showFieldErrors(
                                     errors.populationCovered
                                 )}
+                                className="margin-top-0"
                             >
                                 <Fieldset
                                     className={styles.radioGroup}
@@ -531,7 +532,10 @@ export const SubmissionType = ({
                                 )}
                                 hint={
                                     <>
-                                        <p id="submissionDescriptionHelp">
+                                        <p
+                                            id="submissionDescriptionHelp"
+                                            role="note"
+                                        >
                                             Provide a 1-2 paragraph summary of
                                             your submission that highlights any
                                             important changes CMS reviewers will

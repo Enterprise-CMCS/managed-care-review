@@ -305,7 +305,6 @@ export const SingleRateCert = ({
                     legend="Rate certification type"
                     role="radiogroup"
                     aria-required
-                    aria-label="Required"
                 >
                     <span className={styles.requiredOptionalText}>
                         Required
