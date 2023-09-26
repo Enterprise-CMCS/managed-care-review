@@ -56,15 +56,26 @@ interface ContractRevisionSet {
 
 function contractSetsToDomainModel(
     revisions: ContractRevisionSet[]
-): ContractRevisionWithRatesType[] {
-    const contractRevisions = revisions.map((entry) => ({
-        ...contractRevisionToDomainModel(entry.contractRev),
-        rateRevisions: ratesRevisionsToDomainModel(entry.rateRevisions),
+): ContractRevisionWithRatesType[] | Error {
+    const contractRevisions = []
 
-        // override this contractRevisions's update infos with the one that caused this revision to be created.
-        submitInfo: convertUpdateInfoToDomainModel(entry.submitInfo),
-        unlockInfo: convertUpdateInfoToDomainModel(entry.unlockInfo),
-    }))
+    for (const revision of revisions) {
+        const rateRevisions = ratesRevisionsToDomainModel(
+            revision.rateRevisions
+        )
+
+        if (rateRevisions instanceof Error) {
+            return rateRevisions
+        }
+
+        contractRevisions.push({
+            ...contractRevisionToDomainModel(revision.contractRev),
+            rateRevisions,
+            // override this contractRevisions's update infos with the one that caused this revision to be created.
+            submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
+            unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
+        })
+    }
 
     return contractRevisions
 }
@@ -99,7 +110,8 @@ function contractWithHistoryToDomainModel(
     // between contract revision updates
     const allRevisionSets: ContractRevisionSet[] = []
     const contractRevisions = contract.revisions
-    let draftRevision: ContractRevisionWithRatesType | undefined = undefined
+    let draftRevision: ContractRevisionWithRatesType | Error | undefined =
+        undefined
     for (const contractRev of contractRevisions) {
         // We set the draft revision aside, all ordered revisions are submitted
         if (!contractRev.submitInfo) {
@@ -111,6 +123,12 @@ function contractWithHistoryToDomainModel(
             }
 
             draftRevision = draftContractRevToDomainModel(contractRev)
+
+            if (draftRevision instanceof Error) {
+                return new Error(
+                    `error converting draft contract revision with id ${contractRev.id} to domain model: ${draftRevision}`
+                )
+            }
 
             // skip the rest of the processing
             continue
@@ -173,7 +191,13 @@ function contractWithHistoryToDomainModel(
         }
     }
 
-    const revisions = contractSetsToDomainModel(allRevisionSets).reverse()
+    const revisions = contractSetsToDomainModel(allRevisionSets)
+
+    if (revisions instanceof Error) {
+        return new Error(
+            `error converting contract with id ${contract.id} to domain models: ${draftRevision}`
+        )
+    }
 
     return {
         id: contract.id,
@@ -181,7 +205,7 @@ function contractWithHistoryToDomainModel(
         stateCode: contract.stateCode,
         stateNumber: contract.stateNumber,
         draftRevision,
-        revisions
+        revisions: revisions.reverse(),
     }
 }
 

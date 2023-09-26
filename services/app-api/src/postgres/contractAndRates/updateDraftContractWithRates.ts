@@ -143,9 +143,23 @@ async function updateDraftContractWithRates(
             }
 
             const stateCode = currentRev.contract.stateCode as StateCodeType
-            const ratesFromDB = currentRev.draftRates.map((rate) =>
-                rateRevisionToDomainModel(rate.revisions[0])
-            )
+            const ratesFromDB: RateRevisionType[] = []
+
+            // Convert all rates from DB to domain model
+            for (const rate of currentRev.draftRates) {
+                const domainRateRevision = rateRevisionToDomainModel(
+                    rate.revisions[0]
+                )
+
+                if (domainRateRevision instanceof Error) {
+                    return new Error(
+                        `Error updating contract with rates: ${domainRateRevision.message}`
+                    )
+                }
+
+                ratesFromDB.push(domainRateRevision)
+            }
+
             const updateRates =
                 rateFormDatas && sortRatesForUpdate(ratesFromDB, rateFormDatas)
 

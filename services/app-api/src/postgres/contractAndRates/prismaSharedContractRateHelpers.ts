@@ -7,6 +7,9 @@ import type {
     ContractStatusType,
     UpdateInfoType,
 } from '../../domain-models/contractAndRates'
+import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
+import { findStatePrograms } from '../state'
+import type { ProgramType } from '../../domain-models'
 
 const subincludeUpdateInfo = {
     updatedBy: true,
@@ -78,7 +81,34 @@ type RateRevisionTableWithFormData = Prisma.RateRevisionTableGetPayload<{
 
 function rateFormDataToDomainModel(
     rateRevision: RateRevisionTableWithFormData
-): RateFormDataType {
+): RateFormDataType | Error {
+    const packagesWithSharedRateCerts = []
+    let statePrograms: Error | ProgramType[] | undefined = []
+
+    for (const contract of rateRevision.contractsWithSharedRateRevision) {
+        const contractPrograms = contract.revisions[0].programIDs
+
+        if (!statePrograms) {
+            statePrograms = findStatePrograms(contract.stateCode)
+        }
+
+        if (statePrograms instanceof Error) {
+            return new Error(
+                `Cannot find ${contract.stateCode} programs for packagesWithSharedRateCerts with rate revision ${rateRevision.rateID} and contract ${contract.id}`
+            )
+        }
+
+        packagesWithSharedRateCerts.push({
+            packageId: contract.id,
+            packageName: packageName(
+                contract.stateCode,
+                contract.stateNumber,
+                contractPrograms,
+                statePrograms
+            ),
+        })
+    }
+
     return {
         id: rateRevision.id,
         rateID: rateRevision.rateID,
@@ -131,28 +161,45 @@ function rateFormDataToDomainModel(
             : [],
         actuaryCommunicationPreference:
             rateRevision.actuaryCommunicationPreference ?? undefined,
-        packagesWithSharedRateCerts: [], // intentionally not handling packagesWithSharedRates yet - this is MR-3568
+        packagesWithSharedRateCerts,
     }
 }
 
 function rateRevisionToDomainModel(
     revision: RateRevisionTableWithFormData
-): RateRevisionType {
+): RateRevisionType | Error {
+    const formData = rateFormDataToDomainModel(revision)
+
+    if (formData instanceof Error) {
+        return formData
+    }
+
     return {
         id: revision.id,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
         unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
         submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
-
-        formData: rateFormDataToDomainModel(revision),
+        formData,
     }
 }
 
 function ratesRevisionsToDomainModel(
     rateRevisions: RateRevisionTableWithFormData[]
-): RateRevisionType[] {
-    return rateRevisions.map((rrev) => rateRevisionToDomainModel(rrev))
+): RateRevisionType[] | Error {
+    const domainRateRevisions: RateRevisionType[] = []
+
+    for (const rateRevision of rateRevisions) {
+        const domainRateRevision = rateRevisionToDomainModel(rateRevision)
+
+        if (domainRateRevision instanceof Error) {
+            return domainRateRevision
+        }
+
+        domainRateRevisions.push(domainRateRevision)
+    }
+
+    return domainRateRevisions
 }
 
 // ------
