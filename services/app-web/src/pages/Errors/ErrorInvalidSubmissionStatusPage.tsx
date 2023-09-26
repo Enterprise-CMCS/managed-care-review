@@ -5,6 +5,7 @@ import styles from './Errors.module.scss'
 
 import { PageHeading } from '../../components/PageHeading'
 import { GridContainer } from '@trussworks/react-uswds'
+import { RoutesRecord } from '../../constants'
 
 export const ErrorInvalidSubmissionStatus = (): React.ReactElement => {
     return (
@@ -13,7 +14,10 @@ export const ErrorInvalidSubmissionStatus = (): React.ReactElement => {
                 <PageHeading>This submission was sent to CMS</PageHeading>
                 <p>
                     <span>It cannot be edited. Return to your </span>
-                    <NavLink to="/dashboard">Dashboard</NavLink>.
+                    <NavLink to={RoutesRecord.DASHBOARD_SUBMISSIONS}>
+                        Dashboard
+                    </NavLink>
+                    .
                 </p>
             </GridContainer>
         </section>

@@ -198,7 +198,7 @@ describe('SubmissionSideNav', () => {
             screen.getByRole('link', { name: /Back to dashboard/ })
         )
         await waitFor(() => {
-            expect(testLocation.pathname).toBe(`/dashboard`)
+            expect(testLocation.pathname).toBe(`/dashboard/submissions`)
         })
     })
 

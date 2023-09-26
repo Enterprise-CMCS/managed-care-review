@@ -8,6 +8,7 @@ import {
     Label,
     Link,
 } from '@trussworks/react-uswds'
+import classnames from 'classnames'
 import {
     ActuaryContact,
     RateCapitationType,
@@ -24,7 +25,7 @@ import {
 import styles from '../../StateSubmissionForm.module.scss'
 import { formatUserInputDate, isDateRangeEmpty } from '../../../../formHelpers'
 import {
-    ACCEPTED_SUBMISSION_FILE_TYPES,
+    ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES,
     ACCEPTED_RATE_CERTIFICATION_FILE_TYPES,
 } from '../../../../components/FileUpload'
 import { useS3 } from '../../../../contexts/S3Context'
@@ -218,9 +219,9 @@ export const SingleRateCert = ({
                     <FileUpload
                         id={`${fieldNamePrefix}.supportingDocuments`}
                         name={`${fieldNamePrefix}.supportingDocuments`}
-                        label="Upload supporting documents (optional)"
+                        label="Upload supporting documents"
                         renderMode="list"
-                        aria-required
+                        aria-required={false}
                         error={showFieldErrors('supportingDocuments')}
                         hint={
                             <span className={styles.guidanceTextBlockNoPadding}>
@@ -243,11 +244,11 @@ export const SingleRateCert = ({
 
                                 <span className="padding-top-1">
                                     This input only accepts PDF, CSV, DOC, DOCX,
-                                    XLS, XLSX, XLSM files.
+                                    XLS, XLSX files.
                                 </span>
                             </span>
                         }
-                        accept={ACCEPTED_SUBMISSION_FILE_TYPES}
+                        accept={ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES}
                         initialItems={rateInfo.supportingDocuments}
                         uploadFile={(file) =>
                             handleUploadFile(file, 'HEALTH_PLAN_DOCS')
@@ -286,6 +287,7 @@ export const SingleRateCert = ({
                 <Label htmlFor={`${fieldNamePrefix}.rateProgramIDs`}>
                     Programs this rate certification covers
                 </Label>
+                <span className={styles.requiredOptionalText}>Required</span>
                 <PoliteErrorMessage>
                     {showFieldErrors('rateProgramIDs')}
                 </PoliteErrorMessage>
@@ -304,6 +306,9 @@ export const SingleRateCert = ({
                     role="radiogroup"
                     aria-required
                 >
+                    <span className={styles.requiredOptionalText}>
+                        Required
+                    </span>
                     <PoliteErrorMessage>
                         {showFieldErrors('rateType')}
                     </PoliteErrorMessage>
@@ -336,11 +341,24 @@ export const SingleRateCert = ({
                     className={styles.radioGroup}
                     legend={
                         <div className={styles.capitationLegend}>
-                            <p>
+                            <p className="margin-bottom-0">
                                 Does the actuary certify capitation rates
                                 specific to each rate cell or a rate range?
                             </p>
-                            <p className={styles.legendSubHeader}>
+                            <span
+                                className={classnames(
+                                    styles.legendSubHeader,
+                                    styles.requiredOptionalText
+                                )}
+                            >
+                                Required
+                            </span>
+                            <p
+                                className={classnames(
+                                    'margin-bottom-0',
+                                    styles.legendSubHeader
+                                )}
+                            >
                                 See 42 CFR §§ 438.4(b) and 438.4(c)
                             </p>
                         </div>
@@ -382,6 +400,9 @@ export const SingleRateCert = ({
                                     : 'Rating period'
                             }
                         >
+                            <span className={styles.requiredOptionalText}>
+                                Required
+                            </span>
                             <RateDatesErrorMessage
                                 startDate={rateInfo.rateDateStart}
                                 endDate={rateInfo.rateDateEnd}
@@ -438,6 +459,11 @@ export const SingleRateCert = ({
                                     aria-required
                                     legend="Effective dates of rate amendment"
                                 >
+                                    <span
+                                        className={styles.requiredOptionalText}
+                                    >
+                                        Required
+                                    </span>
                                     <RateDatesErrorMessage
                                         startDate={rateInfo.effectiveDateStart}
                                         endDate={rateInfo.effectiveDateEnd}
@@ -498,6 +524,9 @@ export const SingleRateCert = ({
                                 ? 'Date certified for rate amendment'
                                 : 'Date certified'}
                         </Label>
+                        <span className={styles.requiredOptionalText}>
+                            Required
+                        </span>
                         <div
                             className="usa-hint"
                             id={`rateDateCertifiedHint.${index}`}

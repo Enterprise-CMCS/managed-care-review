@@ -8,6 +8,7 @@ import sprite from 'uswds/src/img/sprite.svg'
 import {
     QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES,
     RouteT,
+    RoutesRecord,
 } from '../../constants/routes'
 import { getRouteName } from '../../routeHelpers'
 import { useFetchHealthPlanPackageWithQuestionsWrapper } from '../../gqlHelpers'
@@ -43,6 +44,7 @@ export type SideNavOutletContextType = {
 }
 
 export const SubmissionSideNav = () => {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     const { id } = useParams<{ id: string }>()
     if (!id) {
         throw new Error(
@@ -157,7 +159,8 @@ export const SubmissionSideNav = () => {
                             <Link
                                 asCustom={NavLink}
                                 to={{
-                                    pathname: '/dashboard',
+                                    pathname:
+                                        RoutesRecord.DASHBOARD_SUBMISSIONS,
                                 }}
                             >
                                 <svg

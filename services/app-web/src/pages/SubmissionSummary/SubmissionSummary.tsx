@@ -28,6 +28,7 @@ import { UnlockSubmitModal } from '../../components/Modal/UnlockSubmitModal'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
 import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
+import { RoutesRecord } from '../../constants'
 
 function UnlockModalButton({
     disabled,
@@ -135,7 +136,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     <Link
                         asCustom={NavLink}
                         to={{
-                            pathname: '/dashboard',
+                            pathname: RoutesRecord.DASHBOARD_SUBMISSIONS,
                         }}
                     >
                         <svg

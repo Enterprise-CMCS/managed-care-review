@@ -2,8 +2,8 @@ import { ServerError } from '@apollo/client'
 import { ApolloError, GraphQLErrors, NetworkError } from '@apollo/client/errors'
 import { recordJSException } from '../otelHelpers'
 
-/* 
-Adds OTEL logging for graphql api errors 
+/*
+Adds OTEL logging for graphql api errors
 - Reminder, we handle graphql requests via apollo client in our web app.
 */
 

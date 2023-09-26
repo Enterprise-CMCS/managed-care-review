@@ -35,6 +35,7 @@ import { useFocus } from '../../../hooks/useFocus'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { ActuaryContactFields } from './ActuaryContactFields'
+import { RoutesRecord } from '../../../constants'
 
 export interface ContactsFormValues {
     stateContacts: StateContact[]
@@ -228,10 +229,9 @@ export const Contacts = ({
     // Also handles the difference between State Contacts and Actuary Contacts
     const handleContactLegend = (index: number, contactText: string) => {
         const count = index + 1
-        const required = index ? '' : ' (required)'
 
         if (contactText === 'State') {
-            return `State contacts ${count} ${required}`
+            return `State contacts ${count}`
         }
 
         if (contactText === 'Actuary') {
@@ -261,7 +261,7 @@ export const Contacts = ({
                 )
             } else if (updatedSubmission) {
                 if (redirectToDashboard.current) {
-                    navigate(`/dashboard`)
+                    navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
                 } else {
                     navigate(`../documents`)
                 }
@@ -297,9 +297,6 @@ export const Contacts = ({
                                 communication about this submission.
                             </p>
                             <legend className="srOnly">State contacts</legend>
-                            <span id="form-guidance">
-                                A state contact is required
-                            </span>
 
                             {shouldValidate && (
                                 <ErrorSummary
@@ -329,6 +326,13 @@ export const Contacts = ({
                                                                 'State'
                                                             )}
                                                         >
+                                                            <span
+                                                                className={
+                                                                    styles.requiredOptionalText
+                                                                }
+                                                            >
+                                                                Required
+                                                            </span>
                                                             <FieldTextInput
                                                                 id={`stateContacts.${index}.name`}
                                                                 label="Name"
@@ -543,6 +547,13 @@ export const Contacts = ({
                                             className={styles.radioGroup}
                                             legend="Communication preference between CMS Office of the Actuary (OACT) and all state’s actuaries (i.e. certifying actuaries and additional actuary contacts)"
                                         >
+                                            <span
+                                                className={
+                                                    styles.requiredOptionalText
+                                                }
+                                            >
+                                                Required
+                                            </span>
                                             {showFieldErrors(`True`) && (
                                                 <ErrorMessage
                                                     name={`actuaryCommunicationPreference`}
@@ -573,7 +584,7 @@ export const Contacts = ({
                         <PageActions
                             saveAsDraftOnClick={() => {
                                 if (!dirty) {
-                                    navigate(`/dashboard`)
+                                    navigate(`/dashboard/submissions`)
                                 } else {
                                     setShouldValidate(true)
                                     setFocusErrorSummaryHeading(true)

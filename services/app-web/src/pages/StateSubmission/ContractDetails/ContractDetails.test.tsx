@@ -51,8 +51,13 @@ describe('ContractDetails', () => {
                 },
             }
         )
-
-        expect(screen.getByText(/All fields are required/)).toBeInTheDocument()
+        expect(
+            screen.queryByText(/All fields are required/)
+        ).not.toBeInTheDocument()
+        const requiredLabels = await screen.findAllByText('Required')
+        expect(requiredLabels).toHaveLength(6)
+        const optionalLabels = await screen.queryAllByText('Optional')
+        expect(optionalLabels).toHaveLength(0)
     })
 
     describe('Contract documents file upload', () => {

@@ -19,6 +19,7 @@ import { ActionButton } from '../../../components/ActionButton'
 import { UnlockSubmitModal } from '../../../components/Modal/UnlockSubmitModal'
 import { useStatePrograms } from '../../../hooks/useStatePrograms'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
+import { RoutesRecord } from '../../../constants'
 
 export const ReviewSubmit = ({
     draftSubmission,
@@ -82,7 +83,9 @@ export const ReviewSubmit = ({
                     <ActionButton
                         type="button"
                         variant="linkStyle"
-                        onClick={() => navigate('/dashboard')}
+                        onClick={() =>
+                            navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
+                        }
                         disabled={isSubmitting}
                     >
                         Save as draft

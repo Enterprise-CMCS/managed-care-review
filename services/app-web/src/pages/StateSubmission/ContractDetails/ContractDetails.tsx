@@ -61,6 +61,7 @@ import {
     isContractAmendment,
     isContractWithProvisions,
 } from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
+import { RoutesRecord } from '../../../constants'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -499,9 +500,6 @@ export const ContractDetails = ({
                     >
                         <fieldset className="usa-fieldset">
                             <legend className="srOnly">Contract Details</legend>
-                            <span id="form-guidance">
-                                All fields are required
-                            </span>
 
                             {shouldValidate && (
                                 <ErrorSummary
@@ -518,7 +516,10 @@ export const ContractDetails = ({
                                 />
                             )}
 
-                            <FormGroup error={showFileUploadError}>
+                            <FormGroup
+                                error={showFileUploadError}
+                                className="margin-top-0"
+                            >
                                 <FileUpload
                                     id="documents"
                                     name="documents"
@@ -571,6 +572,11 @@ export const ContractDetails = ({
                                     className={styles.radioGroup}
                                     legend="Contract status"
                                 >
+                                    <span
+                                        className={styles.requiredOptionalText}
+                                    >
+                                        Required
+                                    </span>
                                     {showFieldErrors(
                                         errors.contractExecutionStatus
                                     ) && (
@@ -616,6 +622,13 @@ export const ContractDetails = ({
                                                     : 'Contract effective dates'
                                             }
                                         >
+                                            <span
+                                                className={
+                                                    styles.requiredOptionalText
+                                                }
+                                            >
+                                                Required
+                                            </span>
                                             {showFieldErrors(
                                                 errors.contractDateStart ||
                                                     errors.contractDateEnd
@@ -697,6 +710,13 @@ export const ContractDetails = ({
                                             aria-required
                                             legend="Managed Care entities"
                                         >
+                                            <span
+                                                className={
+                                                    styles.requiredOptionalText
+                                                }
+                                            >
+                                                Required
+                                            </span>
                                             <Link
                                                 variant="external"
                                                 href={
@@ -762,6 +782,13 @@ export const ContractDetails = ({
                                             aria-required
                                             legend="Active federal operating authority"
                                         >
+                                            <span
+                                                className={
+                                                    styles.requiredOptionalText
+                                                }
+                                            >
+                                                Required
+                                            </span>
                                             <Link
                                                 variant="external"
                                                 href={
@@ -815,6 +842,13 @@ export const ContractDetails = ({
                                                         : 'Does this contract action include new or modified provisions related to any of the following'
                                                 }
                                             >
+                                                <span
+                                                    className={
+                                                        styles.requiredOptionalText
+                                                    }
+                                                >
+                                                    Required
+                                                </span>
                                                 {applicableProvisions.map(
                                                     (modifiedProvisionName) => (
                                                         <FieldYesNo
@@ -856,7 +890,8 @@ export const ContractDetails = ({
                                         setSubmitting,
                                         {
                                             shouldValidateDocuments: false,
-                                            redirectPath: '/dashboard',
+                                            redirectPath:
+                                                RoutesRecord.DASHBOARD_SUBMISSIONS,
                                         }
                                     )
                                 } else {
@@ -865,7 +900,8 @@ export const ContractDetails = ({
                                         setSubmitting,
                                         {
                                             shouldValidateDocuments: true,
-                                            redirectPath: '/dashboard',
+                                            redirectPath:
+                                                RoutesRecord.DASHBOARD_SUBMISSIONS,
                                         }
                                     )
                                 }

@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react'
-import { useNavigate, useLocation } from 'react-router'
+import { useNavigate, useLocation, Navigate } from 'react-router'
 import { Route, Routes } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { extendSession, idmRedirectURL } from '../../pages/Auth/cognitoAuth'
@@ -11,7 +11,11 @@ import { usePage } from '../../contexts/PageContext'
 import { useTitle } from '../../hooks/useTitle'
 import { LocalLogin } from '../../localAuth'
 import { CognitoLogin } from '../Auth/CognitoLogin'
-import { CMSDashboard } from '../CMSDashboard/CMSDashboard'
+import {
+    CMSDashboard,
+    SubmissionsDashboard,
+    RateReviewsDashboard,
+} from '../CMSDashboard/CMSDashboard'
 import { StateDashboard } from '../StateDashboard/StateDashboard'
 import { Settings } from '../Settings/Settings'
 import { AuthenticatedRouteWrapper } from '../Wrapper/AuthenticatedRouteWrapper'
@@ -71,11 +75,23 @@ const StateUserRoutes = ({
     return (
         <AuthenticatedRouteWrapper setAlert={setAlert} authMode={authMode}>
             <Routes>
-                <Route path={RoutesRecord.ROOT} element={<StateDashboard />} />
+                <Route
+                    path={RoutesRecord.ROOT}
+                    element={
+                        <Navigate to={RoutesRecord.DASHBOARD_SUBMISSIONS} />
+                    }
+                />
                 <Route
                     path={RoutesRecord.DASHBOARD}
+                    element={
+                        <Navigate to={RoutesRecord.DASHBOARD_SUBMISSIONS} />
+                    }
+                />
+                <Route
+                    path={RoutesRecord.DASHBOARD_SUBMISSIONS}
                     element={<StateDashboard />}
                 />
+
                 <Route
                     path={RoutesRecord.SUBMISSIONS}
                     element={<StateDashboard />}
@@ -109,7 +125,7 @@ const StateUserRoutes = ({
                     element={<SubmissionRevisionSummary />}
                 />
                 <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                     element={<StateSubmissionForm />}
                 />
                 {UniversalRoutes}
@@ -136,14 +152,39 @@ const CMSUserRoutes = ({
     showQuestionResponse: boolean
     stageName?: string
 }): React.ReactElement => {
+    const ldClient = useLDClient()
+    const showRateReviews = ldClient?.variation(
+        featureFlags.RATE_REVIEWS_DASHBOARD.flag,
+        featureFlags.RATE_REVIEWS_DASHBOARD.defaultValue
+    )
     return (
         <AuthenticatedRouteWrapper authMode={authMode} setAlert={setAlert}>
             <Routes>
-                <Route path={RoutesRecord.ROOT} element={<CMSDashboard />} />
                 <Route
-                    path={RoutesRecord.DASHBOARD}
-                    element={<CMSDashboard />}
+                    path={RoutesRecord.ROOT}
+                    element={
+                        <Navigate to={RoutesRecord.DASHBOARD_SUBMISSIONS} />
+                    }
                 />
+                <Route path={RoutesRecord.DASHBOARD} element={<CMSDashboard />}>
+                    <Route
+                        index
+                        element={
+                            <Navigate to={RoutesRecord.DASHBOARD_SUBMISSIONS} />
+                        }
+                    />
+                    <Route
+                        path={`submissions`}
+                        element={<SubmissionsDashboard />}
+                    />
+                    {showRateReviews && (
+                        <Route
+                            path={'rate-reviews'}
+                            element={<RateReviewsDashboard />}
+                        />
+                    )}
+                </Route>
+
                 <Route element={<SubmissionSideNav />}>
                     {showQuestionResponse && (
                         <>
@@ -310,7 +351,7 @@ export const AppRoutes = ({
     */
     const title =
         route === 'ROOT' && loggedInUser
-            ? PageTitlesRecord['DASHBOARD']
+            ? PageTitlesRecord['DASHBOARD_SUBMISSIONS']
             : PageTitlesRecord[route]
 
     useTitle(title)
