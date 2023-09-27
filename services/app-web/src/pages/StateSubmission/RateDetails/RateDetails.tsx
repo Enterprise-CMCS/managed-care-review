@@ -30,6 +30,7 @@ import {
 import { useS3 } from '../../../contexts/S3Context'
 import { S3ClientT } from '../../../s3'
 import { isLoadingOrHasFileErrors } from '../../../components/FileUpload'
+import { RoutesRecord } from '../../../constants'
 
 // This function is used to get initial form values as well return empty form values when we add a new rate or delete a rate
 // We need to include the getKey function in params because there are no guarantees currently file is in s3 even if when we load data from API
@@ -402,7 +403,8 @@ export const RateDetails = ({
                                         setSubmitting,
                                         {
                                             shouldValidateDocuments: true,
-                                            redirectPath: '/dashboard',
+                                            redirectPath:
+                                                RoutesRecord.DASHBOARD_SUBMISSIONS,
                                         }
                                     )
                                 }}

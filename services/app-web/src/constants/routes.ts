@@ -1,11 +1,13 @@
 /*
     Every application route is named here.
-    These types ensure we use valid routes throughout the application.. 
+    These types ensure we use valid routes throughout the application..
 */
 const ROUTES = [
     'ROOT',
     'AUTH',
     'DASHBOARD',
+    'DASHBOARD_SUBMISSIONS',
+    'DASHBOARD_RATES',
     'GRAPHQL_EXPLORER',
     'HELP',
     'REPORTS',
@@ -13,7 +15,7 @@ const ROUTES = [
     'SUBMISSIONS',
     'SUBMISSIONS_NEW',
     'SUBMISSIONS_TYPE',
-    'SUBMISSIONS_FORM',
+    'SUBMISSIONS_EDIT_TOP_LEVEL',
     'SUBMISSIONS_CONTRACT_DETAILS',
     'SUBMISSIONS_RATE_DETAILS',
     'SUBMISSIONS_CONTACTS',
@@ -25,24 +27,28 @@ const ROUTES = [
     'SUBMISSIONS_UPLOAD_QUESTION',
     'SUBMISSIONS_UPLOAD_RESPONSE',
 ] as const // iterable union type
-type RouteT = typeof ROUTES[number]
+type RouteT = (typeof ROUTES)[number]
 type RouteTWithUnknown = RouteT | 'UNKNOWN_ROUTE'
 /*
     Every application url (excluding query parameters) is found in the RoutesRecord.
     These types ensure we use valid route throughout the application
+
+    The suffix "_TOP_LEVEL" mean this route contains an global asterike has several descendant routes it covers
 
 */
 const RoutesRecord: Record<RouteT, string> = {
     ROOT: '/',
     AUTH: '/auth',
     DASHBOARD: '/dashboard',
+    DASHBOARD_SUBMISSIONS: '/dashboard/submissions',
+    DASHBOARD_RATES: '/dashboard/rate-reviews',
     GRAPHQL_EXPLORER: '/dev/graphql-explorer',
     HELP: '/help',
     REPORTS: '/reports',
     SETTINGS: '/settings',
     SUBMISSIONS: '/submissions',
     SUBMISSIONS_NEW: '/submissions/new',
-    SUBMISSIONS_FORM: '/submissions/:id/edit/*',
+    SUBMISSIONS_EDIT_TOP_LEVEL: '/submissions/:id/edit/*',
     SUBMISSIONS_TYPE: '/submissions/:id/edit/type',
     SUBMISSIONS_CONTRACT_DETAILS: '/submissions/:id/edit/contract-details',
     SUBMISSIONS_RATE_DETAILS: '/submissions/:id/edit/rate-details',
@@ -57,6 +63,12 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_UPLOAD_RESPONSE:
         '/submissions/:id/question-and-answers/:division/:questionID/upload-response',
 }
+
+// Constants for releated descendant routes
+const DASHBOARD_ROUTES: RouteTWithUnknown[] = [
+    'DASHBOARD_RATES',
+    'DASHBOARD_SUBMISSIONS',
+]
 
 const STATE_SUBMISSION_FORM_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_TYPE',
@@ -80,22 +92,22 @@ const QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
 /*
     Page headings used in the <header> when user logged in.
     Dynamic headings, when necessary, are set in page specific parent component.
-    Every route does not need a page heading in the record. 
+    Every route does not need a page heading in the record.
     It is a design choice what goes here. For example, we do not any headings when logged in user is on the help page.
     For a quick way to check page headings, look for the h1 of the application in the DOM tree. It is the dark blue row of the header.
 
 */
 const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
     ROOT: 'Dashboard',
-    DASHBOARD: 'Dashboard',
+    DASHBOARD_SUBMISSIONS: 'Dashboard',
     SUBMISSIONS_NEW: 'New submission',
     UNKNOWN_ROUTE: '404',
 }
 
-/* 
+/*
     Static page titles used in <title>.
     Every route must have a page title in the record for accessibility reasons. Dynamic page titles, when necessary, are set in AppRoutes
-    For a quick way to check page titles, look at the tab text in your browser. 
+    For a quick way to check page titles, look at the tab text in your browser.
 */
 const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     ROOT: 'Home',
@@ -105,9 +117,11 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     REPORTS: 'Reports',
     SETTINGS: 'Settings',
     DASHBOARD: 'Dashboard',
+    DASHBOARD_RATES: 'Rate Review Dashboard',
+    DASHBOARD_SUBMISSIONS: 'Dashboard',
     SUBMISSIONS: 'Submissions',
     SUBMISSIONS_NEW: 'New submission',
-    SUBMISSIONS_FORM: 'Submissions',
+    SUBMISSIONS_EDIT_TOP_LEVEL: 'Submissions',
     SUBMISSIONS_TYPE: 'Submission type',
     SUBMISSIONS_CONTRACT_DETAILS: 'Contract details',
     SUBMISSIONS_RATE_DETAILS: 'Rate details',
@@ -130,6 +144,7 @@ export {
     STATE_SUBMISSION_FORM_ROUTES,
     STATE_SUBMISSION_SUMMARY_ROUTES,
     QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES,
+    DASHBOARD_ROUTES,
 }
 
 export type { RouteT, RouteTWithUnknown }

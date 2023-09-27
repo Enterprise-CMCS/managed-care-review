@@ -19,6 +19,7 @@ import { ErrorSummary } from '../../../components/Form'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
+import { RoutesRecord } from '../../../constants'
 
 export const Documents = ({
     draftSubmission,
@@ -340,7 +341,7 @@ export const Documents = ({
                     saveAsDraftOnClick={async (e) => {
                         await handleFormSubmit({
                             shouldValidateDocuments: true,
-                            redirectPath: '/dashboard',
+                            redirectPath: RoutesRecord.DASHBOARD_SUBMISSIONS,
                         })(e)
                     }}
                     backOnClick={async (e) => {
