@@ -7,11 +7,11 @@ import {
     mockMSState,
 } from '../../testHelpers/emailerHelpers'
 import { unlockPackageCMSEmail } from './index'
-import type { UnlockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { UnlockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     generateRateName,
     packageName,
-} from 'app-web/src/common-code/healthPlanFormDataType'
+} from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 const unlockData = {
     updatedBy: 'leslie@example.com',

@@ -1,5 +1,5 @@
 import type { Prisma, UpdateInfoTable } from '@prisma/client'
-import type { DocumentCategoryType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { DocumentCategoryType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type {
     ContractFormDataType,
     RateFormDataType,
@@ -7,7 +7,7 @@ import type {
     ContractStatusType,
     UpdateInfoType,
 } from '../../domain-models/contractAndRates'
-import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
+import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { findStatePrograms } from '../state'
 import type { ProgramType } from '../../domain-models'
 
@@ -83,7 +83,7 @@ function rateFormDataToDomainModel(
     rateRevision: RateRevisionTableWithFormData
 ): RateFormDataType | Error {
     const packagesWithSharedRateCerts = []
-    let statePrograms: Error | ProgramType[] | undefined = []
+    let statePrograms: ProgramType[] | Error | undefined = undefined
 
     for (const contract of rateRevision.contractsWithSharedRateRevision) {
         const contractPrograms = contract.revisions[0].programIDs
