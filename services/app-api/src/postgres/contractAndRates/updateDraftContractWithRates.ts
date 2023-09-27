@@ -242,16 +242,44 @@ async function updateDraftContractWithRates(
                                         rateCertificationName:
                                             rateRevision.rateCertificationName,
                                         rateDocuments: {
-                                            create: rateRevision.rateDocuments,
+                                            create:
+                                                rateRevision.rateDocuments &&
+                                                rateRevision.rateDocuments.map(
+                                                    (d, idx) => ({
+                                                        position: idx,
+                                                        ...d,
+                                                    })
+                                                ),
                                         },
                                         supportingDocuments: {
-                                            create: rateRevision.supportingDocuments,
+                                            create:
+                                                rateRevision.supportingDocuments &&
+                                                rateRevision.supportingDocuments.map(
+                                                    (d, idx) => ({
+                                                        position: idx,
+                                                        ...d,
+                                                    })
+                                                ),
                                         },
                                         certifyingActuaryContacts: {
-                                            create: rateRevision.certifyingActuaryContacts,
+                                            create:
+                                                rateRevision.certifyingActuaryContacts &&
+                                                rateRevision.certifyingActuaryContacts.map(
+                                                    (c, idx) => ({
+                                                        position: idx,
+                                                        ...c,
+                                                    })
+                                                ),
                                         },
                                         addtlActuaryContacts: {
-                                            create: rateRevision.addtlActuaryContacts,
+                                            create:
+                                                rateRevision.addtlActuaryContacts &&
+                                                rateRevision.addtlActuaryContacts.map(
+                                                    (c, idx) => ({
+                                                        position: idx,
+                                                        ...c,
+                                                    })
+                                                ),
                                         },
                                         actuaryCommunicationPreference:
                                             rateRevision.actuaryCommunicationPreference,
@@ -315,19 +343,47 @@ async function updateDraftContractWithRates(
                                                       ),
                                                   rateDocuments: {
                                                       deleteMany: {},
-                                                      create: rateRevision.rateDocuments,
+                                                      create:
+                                                          rateRevision.rateDocuments &&
+                                                          rateRevision.rateDocuments.map(
+                                                              (d, idx) => ({
+                                                                  position: idx,
+                                                                  ...d,
+                                                              })
+                                                          ),
                                                   },
                                                   supportingDocuments: {
                                                       deleteMany: {},
-                                                      create: rateRevision.supportingDocuments,
+                                                      create:
+                                                          rateRevision.supportingDocuments &&
+                                                          rateRevision.supportingDocuments.map(
+                                                              (d, idx) => ({
+                                                                  position: idx,
+                                                                  ...d,
+                                                              })
+                                                          ),
                                                   },
                                                   certifyingActuaryContacts: {
                                                       deleteMany: {},
-                                                      create: rateRevision.certifyingActuaryContacts,
+                                                      create:
+                                                          rateRevision.certifyingActuaryContacts &&
+                                                          rateRevision.certifyingActuaryContacts.map(
+                                                              (c, idx) => ({
+                                                                  position: idx,
+                                                                  ...c,
+                                                              })
+                                                          ),
                                                   },
                                                   addtlActuaryContacts: {
                                                       deleteMany: {},
-                                                      create: rateRevision.addtlActuaryContacts,
+                                                      create:
+                                                          rateRevision.addtlActuaryContacts &&
+                                                          rateRevision.addtlActuaryContacts.map(
+                                                              (c, idx) => ({
+                                                                  position: idx,
+                                                                  ...c,
+                                                              })
+                                                          ),
                                                   },
                                                   actuaryCommunicationPreference:
                                                       nullify(
@@ -363,15 +419,30 @@ async function updateDraftContractWithRates(
                     contractExecutionStatus: nullify(contractExecutionStatus),
                     contractDocuments: {
                         deleteMany: {},
-                        create: contractDocuments,
+                        create:
+                            contractDocuments &&
+                            contractDocuments.map((d, idx) => ({
+                                position: idx,
+                                ...d,
+                            })),
                     },
                     supportingDocuments: {
                         deleteMany: {},
-                        create: supportingDocuments,
+                        create:
+                            supportingDocuments &&
+                            supportingDocuments.map((d, idx) => ({
+                                position: idx,
+                                ...d,
+                            })),
                     },
                     stateContacts: {
                         deleteMany: {},
-                        create: stateContacts,
+                        create:
+                            stateContacts &&
+                            stateContacts.map((c, idx) => ({
+                                position: idx,
+                                ...c,
+                            })),
                     },
                     contractDateStart: nullify(contractDateStart),
                     contractDateEnd: nullify(contractDateEnd),

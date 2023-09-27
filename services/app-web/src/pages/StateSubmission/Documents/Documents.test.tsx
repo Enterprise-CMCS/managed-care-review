@@ -301,9 +301,7 @@ describe('Documents', () => {
 
             // Remove duplicate document and remove error
             await userEvent.click(screen.queryAllByText(/Remove/)[0])
-            expect(
-                await screen.queryAllByText(TEST_DOC_FILE.name)
-            ).toHaveLength(1)
+            expect(screen.queryAllByText(TEST_DOC_FILE.name)).toHaveLength(1)
             expect(
                 screen.queryByText('Duplicate file, please remove')
             ).toBeNull()
@@ -956,6 +954,7 @@ describe('Documents', () => {
                             {
                                 s3URL: 's3://bucketname/key/supporting-documents',
                                 name: 'supporting documents',
+                                sha256: 'fakesha',
                                 documentCategories: ['RATES_RELATED' as const],
                             },
                         ],
@@ -990,6 +989,7 @@ describe('Documents', () => {
                             {
                                 s3URL: 's3://bucketname/key/supporting-documents',
                                 name: 'supporting documents',
+                                sha256: 'fakesha',
                                 documentCategories: ['RATES_RELATED' as const],
                             },
                         ],
@@ -1120,7 +1120,7 @@ describe('Documents', () => {
                     {
                         s3URL: 's3://bucketname/key/supporting-documents',
                         name: 'supporting documents',
-                        sha256: undefined,
+                        sha256: 'fakesha',
                         documentCategories: ['RATES_RELATED' as const],
                     },
                 ],
@@ -1145,8 +1145,8 @@ describe('Documents', () => {
                 ).toBeInTheDocument()
             })
 
-            expect(await screen.queryByText('Contract-supporting')).toBeNull()
-            expect(await screen.queryByText('Rate-supporting')).toBeNull()
+            expect(screen.queryByText('Contract-supporting')).toBeNull()
+            expect(screen.queryByText('Rate-supporting')).toBeNull()
 
             jest.clearAllMocks()
         })
@@ -1219,7 +1219,7 @@ describe('Documents', () => {
                             {
                                 s3URL: 's3://bucketname/key/supporting-documents',
                                 name: 'supporting documents',
-                                sha256: undefined,
+                                sha256: 'fakesha',
                                 documentCategories: ['RATES_RELATED' as const],
                             },
                         ],

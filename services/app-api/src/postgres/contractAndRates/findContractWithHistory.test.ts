@@ -128,12 +128,11 @@ describe('findContract', () => {
 
         // remove the connection from rate 2
         must(
-            await unlockRate(
-                client,
-                rate2.id,
-                cmsUser.id,
-                'unlock for 2.1 remove'
-            )
+            await unlockRate(client, {
+                rateID: rate2.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock for 2.1 remove',
+            })
         )
         must(
             await updateDraftRate(client, {
@@ -161,7 +160,13 @@ describe('findContract', () => {
         expect(twoContract.revisions[0].rateRevisions).toHaveLength(2)
 
         // update rate 1 to have a new version, should make one new rev.
-        must(await unlockRate(client, rate1.id, cmsUser.id, 'unlock for 1.1'))
+        must(
+            await unlockRate(client, {
+                rateID: rate1.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock for 1.1',
+            })
+        )
         must(
             await updateDraftRate(client, {
                 rateID: rate1.id,
@@ -188,12 +193,11 @@ describe('findContract', () => {
 
         // Make a new Contract Revision, should show up as a single new rev with all the old info
         must(
-            await unlockContract(
-                client,
-                contractA.id,
-                cmsUser.id,
-                'unlocking A.0'
-            )
+            await unlockContract(client, {
+                contractID: contractA.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlocking A.0',
+            })
         )
         must(
             await submitContract(client, {
@@ -214,12 +218,11 @@ describe('findContract', () => {
 
         // Make a new Contract Revision, changing the connections should show up as a single new rev.
         const unlockedContractA = must(
-            await unlockContract(
-                client,
-                contractA.id,
-                cmsUser.id,
-                'unlocking A.1'
-            )
+            await unlockContract(client, {
+                contractID: contractA.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlocking A.1',
+            })
         )
         must(
             await updateDraftContractWithRates(client, {
@@ -460,12 +463,11 @@ describe('findContract', () => {
 
         // remove the connection from rate 2
         must(
-            await unlockRate(
-                client,
-                rate2.id,
-                cmsUser.id,
-                'unlock for 2.1 remove'
-            )
+            await unlockRate(client, {
+                rateID: rate2.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock for 2.1 remove',
+            })
         )
         must(
             await updateDraftRate(client, {
@@ -483,7 +485,13 @@ describe('findContract', () => {
         )
 
         // update rate 1 to have a new version, should make one new rev.
-        must(await unlockRate(client, rate1.id, cmsUser.id, 'unlock for 1.1'))
+        must(
+            await unlockRate(client, {
+                rateID: rate1.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock for 1.1',
+            })
+        )
         must(
             await updateDraftRate(client, {
                 rateID: rate1.id,
@@ -501,13 +509,13 @@ describe('findContract', () => {
 
         // Make a new Contract Revision, should show up as a single new rev with all the old info
         must(
-            await unlockContract(
-                client,
-                contractA.id,
-                cmsUser.id,
-                'unlocking A.0'
-            )
+            await unlockContract(client, {
+                contractID: contractA.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlocking A.0',
+            })
         )
+
         must(
             await submitContract(client, {
                 contractID: contractA.id,
@@ -518,12 +526,11 @@ describe('findContract', () => {
 
         // Make a new Contract Revision, changing the connections should show up as a single new rev.
         const unlockedContractA = must(
-            await unlockContract(
-                client,
-                contractA.id,
-                cmsUser.id,
-                'unlocking A.1'
-            )
+            await unlockContract(client, {
+                contractID: contractA.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlocking A.1',
+            })
         )
         // Remove rate 1 and rate 2 from contract
         must(
@@ -718,12 +725,11 @@ describe('findContract', () => {
 
         // Unlock contract A, but don't resubmit it yet.
         must(
-            await unlockContract(
-                client,
-                contractA.id,
-                cmsUser.id,
-                'unlock A Open'
-            )
+            await unlockContract(client, {
+                contractID: contractA.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock A Open',
+            })
         )
 
         // Draft should pull revision 2.0 out
@@ -739,12 +745,11 @@ describe('findContract', () => {
 
         // unlock and submit second rate rev
         must(
-            await unlockRate(
-                client,
-                submittedRate2.id,
-                cmsUser.id,
-                'unlock for 2.1'
-            )
+            await unlockRate(client, {
+                rateID: submittedRate2.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock for 2.1',
+            })
         )
         must(
             await updateDraftRate(client, {

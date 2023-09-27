@@ -65,10 +65,26 @@ const includeRateFormData = {
     submitInfo: includeUpdateInfo,
     unlockInfo: includeUpdateInfo,
 
-    rateDocuments: true,
-    supportingDocuments: true,
-    certifyingActuaryContacts: true,
-    addtlActuaryContacts: true,
+    rateDocuments: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
+    supportingDocuments: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
+    certifyingActuaryContacts: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
+    addtlActuaryContacts: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
 } satisfies Prisma.RateRevisionTableInclude
 
 type RateRevisionTableWithFormData = Prisma.RateRevisionTableGetPayload<{
@@ -151,7 +167,13 @@ function rateRevisionToDomainModel(
 function ratesRevisionsToDomainModel(
     rateRevisions: RateRevisionTableWithFormData[]
 ): RateRevisionType[] {
-    return rateRevisions.map((rrev) => rateRevisionToDomainModel(rrev))
+    const domainRevisions = rateRevisions.map((rrev) =>
+        rateRevisionToDomainModel(rrev)
+    )
+    domainRevisions.sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+    )
+    return domainRevisions
 }
 
 // ------
@@ -160,9 +182,21 @@ const includeContractFormData = {
     unlockInfo: includeUpdateInfo,
     submitInfo: includeUpdateInfo,
 
-    stateContacts: true,
-    contractDocuments: true,
-    supportingDocuments: true,
+    stateContacts: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
+    contractDocuments: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
+    supportingDocuments: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
 } satisfies Prisma.ContractRevisionTableInclude
 
 type ContractRevisionTableWithFormData =

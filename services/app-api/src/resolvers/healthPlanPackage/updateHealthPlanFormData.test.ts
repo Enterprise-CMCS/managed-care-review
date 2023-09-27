@@ -28,7 +28,7 @@ import type {
     HealthPlanFormDataType,
     RateInfoType,
     StateCodeType,
-} from 'app-web/src/common-code/healthPlanFormDataType'
+} from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import * as add_sha from '../../handlers/add_sha'
 
 const flagValueTestParameters: {
