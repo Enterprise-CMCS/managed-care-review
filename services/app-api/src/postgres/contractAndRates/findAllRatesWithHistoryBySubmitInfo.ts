@@ -1,5 +1,5 @@
 import type { PrismaTransactionType } from '../prismaTypes'
-import type { RateType } from '../../domain-models/rateAndRates'
+import type { RateType } from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../storeError'
 import { parseRateWithHistory } from './parseRateWithHistory'
 import { includeFullRate } from './prismaSubmittedRateHelpers'
@@ -11,17 +11,11 @@ type RateOrErrorType = {
 
 type RateOrErrorArrayType = RateOrErrorType[]
 
-async function findAllRatesWithHistoryByState(
+async function findAllRatesWithHistoryBySubmitInfo(
     client: PrismaTransactionType,
-    stateCode: string
 ): Promise<RateOrErrorArrayType | NotFoundError | Error> {
     try {
-        const ratess = await client.rateTable.findMany({
-            where: {
-                stateCode: {
-                    equals: stateCode,
-                },
-            },
+        const rates = await client.rateTable.findMany({
             include: includeFullRate,
         })
 
@@ -45,5 +39,5 @@ async function findAllRatesWithHistoryByState(
     }
 }
 
-export { findAllRatesWithHistoryByState }
+export { findAllRatesWithHistoryBySubmitInfo}
 export type { RateOrErrorArrayType }

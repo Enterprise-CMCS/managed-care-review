@@ -54,11 +54,13 @@ import {
     updateDraftContractWithRates,
     findAllContractsWithHistoryByState,
     findAllContractsWithHistoryBySubmitInfo,
+    findAllRatesWithHistoryBySubmitInfo
 } from './contractAndRates'
 import type {
     InsertContractArgsType,
     UpdateContractArgsType,
     ContractOrErrorArrayType,
+    RateOrErrorArrayType
 } from './contractAndRates'
 
 type Store = {
@@ -156,6 +158,9 @@ type Store = {
     findAllContractsWithHistoryBySubmitInfo: () => Promise<
         ContractOrErrorArrayType | Error
     >
+    findAllRatesWithHistoryBySubmitInfo: () => Promise<
+    RateOrErrorArrayType | Error
+>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -222,6 +227,8 @@ function NewPostgresStore(client: PrismaClient): Store {
             findAllContractsWithHistoryByState(client, args),
         findAllContractsWithHistoryBySubmitInfo: () =>
             findAllContractsWithHistoryBySubmitInfo(client),
+        findAllRatesWithHistoryBySubmitInfo: () =>
+        findAllRatesWithHistoryBySubmitInfo(client)
     }
 }
 

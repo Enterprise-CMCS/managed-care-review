@@ -4,7 +4,7 @@ import type {
     HealthPlanPackageType,
 } from './HealthPlanPackageType'
 import { pruneDuplicateEmails } from '../emailer/formatters'
-import type { ContractType, RateRevisionType } from './contractAndRates'
+import type { ContractRevisionType, ContractType, RateRevisionType, RateType } from './contractAndRates'
 import type {
     RateInfoType,
     SubmissionDocument,
@@ -19,7 +19,7 @@ import {
 // the submit/unlock info on its revisions.
 // These methods ASSUME that revisions are returned most-recent-first.
 function packageStatus(
-    pkg: HealthPlanPackageType
+    pkg: HealthPlanPackageType | RateType
 ): HealthPlanPackageStatusType | Error {
     // Compute the current status of this submission based on the number of revisions.
     const currentRev = packageCurrentRevision(pkg)
@@ -46,7 +46,7 @@ function packageStatus(
 // submissionSubmittedAt returns the INITIAL submission date. Even if the
 // submission has been unlocked and resubmitted the submission date is always the original submit date
 // This method relies on revisions always being presented in most-recent-first order
-function packageSubmittedAt(pkg: HealthPlanPackageType): Date | undefined {
+function packageSubmittedAt(pkg: HealthPlanPackageType| RateType): Date | undefined {
     const lastSubmittedRev = pkg.revisions[pkg.revisions.length - 1]
     return lastSubmittedRev?.submitInfo?.updatedAt
 }
@@ -54,8 +54,8 @@ function packageSubmittedAt(pkg: HealthPlanPackageType): Date | undefined {
 // submissionCurrentRevision returns the most recent revision
 // This method (and others here!) rely on revisions always being returned in most-recent-first order
 function packageCurrentRevision(
-    pkg: HealthPlanPackageType
-): HealthPlanRevisionType {
+    pkg: HealthPlanPackageType | RateType | ContractType
+): HealthPlanRevisionType | RateRevisionType |ContractRevisionType {
     return pkg.revisions[0]
 }
 

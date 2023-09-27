@@ -1,0 +1,83 @@
+query indexRates {
+    indexRates {
+        totalCount
+        edges {
+            node {
+                id
+                stateCode
+                state {
+                    code
+                    name
+                    programs {
+                        id
+                        name
+                        fullName
+                    }
+                }
+                status
+                initiallySubmittedAt
+                revisions {
+                    node {
+                        id
+                        createdAt
+                        updatedAt
+                        unlockInfo {
+                            updatedAt
+                            updatedBy
+                            updatedReason
+                        }
+                        submitInfo {
+                            updatedAt
+                            updatedBy
+                            updatedReason
+                        }
+                        rateType,
+                        rateCapitationType,
+                        rateDocuments {
+                            createdAt
+                            updatedAt
+                            name
+                            s3URL
+                            sha256
+                        },
+                        supportingDocuments {
+                            createdAt
+                            updatedAt
+                            name
+                            s3URL
+                            sha256
+                        },
+                        rateDateStart,
+                        rateDateEnd,
+                        rateDateCertified,
+                        amendmentEffectiveDateStart,
+                        amendmentEffectiveDateEnd,
+                        rateProgramIDs,
+                        rateCertificationName,
+                        certifyingActuaryContacts {
+                            id
+                            createdAt
+                            updatedAt
+                            name
+                            titleRole
+                            email
+                            actuarialFirm
+                            actuarialFirmOther
+                        },
+                        addtlActuaryContacts {
+                            id
+                            createdAt
+                            updatedAt
+                            name
+                            titleRole
+                            email
+                            actuarialFirm
+                            actuarialFirmOther
+                        },
+                        actuaryCommunicationPreference
+                    }
+                }
+            }
+        }
+    }
+}
