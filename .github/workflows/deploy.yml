@@ -24,7 +24,7 @@ jobs:
       changed-services: ${{ steps.changed-services-action.outputs.changed-services }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 40
 
@@ -90,7 +90,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -156,7 +156,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -209,7 +209,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - uses: actions/setup-node@v3
         with:
@@ -310,7 +310,7 @@ jobs:
       cognito-user-pool-web-client-id: ${{ steps.save-cognito-user-pool-web-client-id.outputs.value }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -413,7 +413,7 @@ jobs:
     permissions:
       deployments: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Update deployment status (failure)
         if: failure() && needs.begin-deployment.result == 'success'
@@ -456,7 +456,7 @@ jobs:
         # run copies of the current job in parallel
         containers: [1, 2, 3, 4, 5, 6, 7, 8]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: actions/download-artifact@v3
         with:
@@ -551,7 +551,7 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Collate test coverage reports
         run: |
           ls
@@ -559,7 +559,7 @@ jobs:
           cd ./services/app-web
           echo $(pwd)
           ls
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v3
 
       - name: Create combined test coverage report
