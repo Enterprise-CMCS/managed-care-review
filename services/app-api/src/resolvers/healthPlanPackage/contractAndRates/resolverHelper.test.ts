@@ -209,7 +209,20 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                         },
                     ],
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                    packagesWithSharedRateCerts: [],
+                    packagesWithSharedRateCerts: [
+                        {
+                            packageName: 'testABC1',
+                            packageId: 'test-abc-1',
+                        },
+                        {
+                            packageName: undefined,
+                            packageId: 'test-abc-2',
+                        },
+                        {
+                            packageName: 'testABC3',
+                            packageId: undefined,
+                        },
+                    ],
                 },
             ],
             stateContacts: [],
@@ -288,7 +301,16 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
+                packagesWithSharedRateCerts: [
+                    {
+                        packageId: 'test-abc-1',
+                        packageName: 'testABC1',
+                    },
+                    {
+                        packageId: 'test-abc-2',
+                        packageName: '',
+                    },
+                ],
                 addtlActuaryContacts: [
                     {
                         actuarialFirm: 'DELOITTE',
