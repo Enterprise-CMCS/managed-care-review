@@ -14,6 +14,7 @@ import {
     indexHealthPlanPackagesMockSuccess,
     mockUnlockedHealthPlanPackage,
     mockSubmittedHealthPlanPackage,
+    mockContractAndRatesDraftWithDocuments,
     mockMNState,
 } from '../../../testHelpers/apolloMocks'
 
@@ -1314,6 +1315,38 @@ describe('RateDetails', () => {
             await waitFor(() => {
                 expect(
                     screen.getAllByText('You must upload at least one document')
+                ).toHaveLength(2)
+
+                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
+            })
+        })
+
+        it('disabled with alert if previously submitted with more than one rate cert file', async () => {
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={mockContractAndRatesDraftWithDocuments()}
+                    updateDraft={jest.fn()}
+                    previousDocuments={['testFile.docx', 'testFile.pdf']}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            expect(continueButton).not.toHaveAttribute('aria-disabled')
+
+            continueButton.click()
+
+            await waitFor(() => {
+                expect(
+                    screen.getAllByText(
+                        'Only one document is allowed for a rate certification. You must remove documents before continuing.'
+                    )
                 ).toHaveLength(2)
 
                 expect(continueButton).toHaveAttribute('aria-disabled', 'true')

@@ -307,6 +307,118 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
     }
 }
 
+function mockContractAndRatesDraftWithDocuments(
+    partial?: Partial<UnlockedHealthPlanFormDataType>
+): UnlockedHealthPlanFormDataType {
+    const docs: SubmissionDocument[] = [
+        {
+            s3URL: 's3://bucketname/one-one/one-one.png',
+            name: 'one one',
+            documentCategories: ['CONTRACT_RELATED'],
+        },
+        {
+            s3URL: 's3://bucketname/one-two/one-two.png',
+            name: 'one two',
+            documentCategories: ['CONTRACT_RELATED'],
+        },
+        {
+            s3URL: 's3://bucketname/one-three/one-three.png',
+            name: 'one three',
+            documentCategories: ['CONTRACT_RELATED'],
+        },
+    ]
+    return {
+        status: 'DRAFT',
+        stateNumber: 5,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        id: 'test-abc-123',
+        stateCode: 'MN',
+        programIDs: ['pmap'],
+        populationCovered: 'MEDICAID',
+        submissionType: 'CONTRACT_AND_RATES',
+        riskBasedContract: true,
+        submissionDescription: 'A real submission',
+        documents: docs,
+        contractType: 'AMENDMENT',
+        contractExecutionStatus: 'EXECUTED',
+        contractDocuments: [],
+        contractDateStart: new Date(),
+        contractDateEnd: new Date(),
+        contractAmendmentInfo: {
+            modifiedProvisions: {
+                inLieuServicesAndSettings: true,
+                modifiedBenefitsProvided: true,
+                modifiedGeoAreaServed: false,
+                modifiedMedicaidBeneficiaries: true,
+                modifiedRiskSharingStrategy: true,
+                modifiedIncentiveArrangements: false,
+                modifiedWitholdAgreements: false,
+                modifiedStateDirectedPayments: true,
+                modifiedPassThroughPayments: true,
+                modifiedPaymentsForMentalDiseaseInstitutions: false,
+                modifiedMedicalLossRatioStandards: true,
+                modifiedOtherFinancialPaymentIncentive: false,
+                modifiedEnrollmentProcess: true,
+                modifiedGrevienceAndAppeal: false,
+                modifiedNetworkAdequacyStandards: true,
+                modifiedLengthOfContract: false,
+                modifiedNonRiskPaymentArrangements: true,
+            },
+        },
+        managedCareEntities: ['MCO'],
+        federalAuthorities: ['STATE_PLAN'],
+        rateInfos: [
+            {
+                rateType: 'AMENDMENT',
+                rateCapitationType: 'RATE_CELL',
+                rateDocuments: docs,
+                supportingDocuments: [],
+                rateDateStart: new Date(),
+                rateDateEnd: new Date(),
+                rateDateCertified: new Date(),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date(),
+                    effectiveDateEnd: new Date(),
+                },
+                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@test.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
+            },
+        ],
+        stateContacts: [
+            {
+                name: 'State Contact 1',
+                titleRole: 'Test State Contact 1',
+                email: 'statecontact1@test.com',
+            },
+            {
+                name: 'State Contact 2',
+                titleRole: 'Test State Contact 2',
+                email: 'statecontact2@test.com',
+            },
+        ],
+        addtlActuaryContacts: [
+            {
+                actuarialFirm: 'DELOITTE',
+                name: 'Additional Actuary Contact',
+                titleRole: 'Test Actuary Contact',
+                email: 'additionalactuarycontact1@test.com',
+            },
+        ],
+        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        ...partial,
+    }
+}
+
 function mockStateSubmissionContractAmendment(): LockedHealthPlanFormDataType {
     return {
         status: 'SUBMITTED',
@@ -744,6 +856,7 @@ export {
     mockStateSubmissionContractAmendment,
     mockDraftHealthPlanPackage,
     mockSubmittedHealthPlanPackage,
+    mockContractAndRatesDraftWithDocuments,
     mockUnlockedHealthPlanPackageWithDocuments,
     mockUnlockedHealthPlanPackageWithOldProtos,
     mockSubmittedHealthPlanPackageWithRevisions,

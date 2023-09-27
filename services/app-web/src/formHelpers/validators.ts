@@ -6,6 +6,7 @@ import {
     hasAtLeastOneFile,
     hasNoFileErrors,
     hasNoLoadingFiles,
+    hasNoMoreThanOneFile,
 } from '../components/FileUpload'
 
 /*
@@ -65,6 +66,11 @@ const validateFileItemsList = ({ required }: { required: boolean }) => {
             'is-error-free',
             'You must remove all documents with error messages before continuing',
             (value) => hasNoFileErrors(value)
+        )
+        .test(
+            'is-not-more-than-one',
+            'Only one document is allowed for a rate certification. You must remove documents before continuing.',
+            (value) => hasNoMoreThanOneFile(value)
         )
 }
 
