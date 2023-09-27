@@ -7,7 +7,7 @@ import type {
     RateFormDataType,
     RateRevisionType,
 } from '../../domain-models/contractAndRates'
-import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { includeDraftRates } from './prismaDraftContractHelpers'
 import { rateRevisionToDomainModel } from './prismaSharedContractRateHelpers'
 import type { RateFormEditable } from './updateDraftRate'
@@ -192,6 +192,13 @@ async function updateDraftContractWithRates(
                           })
                         : undefined
 
+                    const contractsWithSharedRates =
+                        rateRevision.packagesWithSharedRateCerts?.map(
+                            (pkg) => ({
+                                id: pkg.packageId,
+                            })
+                        ) ?? []
+
                     // If rate does not exist, we need to create a new rate.
                     if (!currentRate) {
                         const { latestStateRateCertNumber } =
@@ -242,6 +249,9 @@ async function updateDraftContractWithRates(
                                         },
                                         actuaryCommunicationPreference:
                                             rateRevision.actuaryCommunicationPreference,
+                                        contractsWithSharedRateRevision: {
+                                            connect: contractsWithSharedRates,
+                                        },
                                     },
                                 },
                                 draftContractRevisions: {
@@ -306,6 +316,10 @@ async function updateDraftContractWithRates(
                                                   },
                                                   actuaryCommunicationPreference:
                                                       rateRevision.actuaryCommunicationPreference,
+                                                  contractsWithSharedRateRevision:
+                                                      {
+                                                          set: contractsWithSharedRates,
+                                                      },
                                               },
                                           },
                                       }
