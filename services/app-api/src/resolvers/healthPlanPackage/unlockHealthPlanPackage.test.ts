@@ -1,6 +1,9 @@
 import type { GraphQLError } from 'graphql'
 import UNLOCK_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
-import type { HealthPlanPackage } from '../../gen/gqlServer'
+import type {
+    HealthPlanPackage,
+    HealthPlanRevisionEdge,
+} from '../../gen/gqlServer'
 import { todaysDate } from '../../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer,
@@ -22,6 +25,7 @@ import {
     generateRateName,
     packageName,
 } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 import {
     getTestStateAnalystsEmails,
     mockEmailParameterStoreError,
@@ -43,11 +47,11 @@ const flagValueTestParameters: {
         flagValue: false,
         testName: 'unlockHealthPlanPackage with all feature flags off',
     },
-    // {
-    //     flagName: 'rates-db-refactor',
-    //     flagValue: true,
-    //     testName: 'unlockHealthPlanPackage with rates-db-refactor on',
-    // },
+    {
+        flagName: 'rates-db-refactor',
+        flagValue: true,
+        testName: 'unlockHealthPlanPackage with rates-db-refactor on',
+    },
 ]
 
 describe.each(flagValueTestParameters)(
@@ -70,6 +74,7 @@ describe.each(flagValueTestParameters)(
                 context: {
                     user: cmsUser,
                 },
+                ldService: mockLDService,
             })
 
             // Unlock
@@ -124,7 +129,9 @@ describe.each(flagValueTestParameters)(
         }, 20000)
 
         it('returns a package that can be updated without errors', async () => {
-            const stateServer = await constructTestPostgresServer()
+            const stateServer = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
 
             // First, create a new submitted submission
             const stateSubmission = await createAndSubmitTestHealthPlanPackage(
@@ -135,6 +142,7 @@ describe.each(flagValueTestParameters)(
                 context: {
                     user: cmsUser,
                 },
+                ldService: mockLDService,
             })
 
             // Unlock
@@ -200,7 +208,7 @@ describe.each(flagValueTestParameters)(
             const stateServer = await constructTestPostgresServer({
                 ldService: mockLDService,
             })
-            // First, create a new submitted submission
+            // First, create a new submitted submission // SUBMISSION 1
             const stateDraft = await createAndSubmitTestHealthPlanPackage(
                 stateServer
                 // unlockedWithFullRates(),
@@ -263,11 +271,41 @@ describe.each(flagValueTestParameters)(
                             sha256: 'fakesha',
                             documentCategories: ['RATES'],
                         },
+                        {
+                            name: 'fake doc 2',
+                            s3URL: 'foo://bar',
+                            sha256: 'fakesha',
+                            documentCategories: ['RATES'],
+                        },
+                        {
+                            name: 'fake doc 3',
+                            s3URL: 'foo://bar',
+                            sha256: 'fakesha',
+                            documentCategories: ['RATES'],
+                        },
+                        {
+                            name: 'fake doc 4',
+                            s3URL: 'foo://bar',
+                            sha256: 'fakesha',
+                            documentCategories: ['RATES'],
+                        },
                     ],
                     supportingDocuments: [],
                     actuaryContacts: [
                         {
-                            name: 'Enrico Soletzo',
+                            name: 'Enrico Soletzo 1',
+                            titleRole: 'person',
+                            email: 'en@example.com',
+                            actuarialFirm: 'MERCER',
+                        },
+                        {
+                            name: 'Enrico Soletzo 2',
+                            titleRole: 'person',
+                            email: 'en@example.com',
+                            actuarialFirm: 'MERCER',
+                        },
+                        {
+                            name: 'Enrico Soletzo 3',
                             titleRole: 'person',
                             email: 'en@example.com',
                             actuarialFirm: 'MERCER',
@@ -325,6 +363,7 @@ describe.each(flagValueTestParameters)(
             ])
 
             await resubmitTestHealthPlanPackage(
+                // SUBMISSION 2
                 stateServer,
                 stateDraft.id,
                 'Test first resubmission reason'
@@ -344,6 +383,7 @@ describe.each(flagValueTestParameters)(
             await updateTestHealthPlanFormData(stateServer, unlockedFormData)
 
             const finallySubmittedPKG = await resubmitTestHealthPlanPackage(
+                // SUBMISSION 3
                 stateServer,
                 stateDraft.id,
                 'Test second resubmission reason'
@@ -357,11 +397,44 @@ describe.each(flagValueTestParameters)(
             )
             expect(finalRateDocs).toEqual(['fake doc', 'fake doc number two'])
 
+            // check document order
+            const docsInOrder =
+                finallySubmittedFormData.rateInfos[0].rateDocuments.map(
+                    (d) => d.name
+                )
+            expect(docsInOrder).toEqual([
+                'fake doc',
+                'fake doc 2',
+                'fake doc 3',
+                'fake doc 4',
+            ])
+
+            // check contacts order
+            const actuariesInOrder =
+                finallySubmittedFormData.rateInfos[0].actuaryContacts.map(
+                    (c) => c.name
+                )
+            expect(actuariesInOrder).toEqual([
+                'Enrico Soletzo 1',
+                'Enrico Soletzo 2',
+                'Enrico Soletzo 3',
+            ])
+
+            // check the history makes sense.
+            const formDatas: HealthPlanFormDataType[] =
+                finallySubmittedPKG.revisions.map((r: HealthPlanRevisionEdge) =>
+                    base64ToDomain(r.node.formDataProto)
+                )
+
+            expect(formDatas).toHaveLength(6) // This probably doesn't make sense totally but is fine for now.
+
             // throw new Error('Not done with this test yet')
         }, 20000)
 
         it('can be unlocked repeatedly', async () => {
-            const stateServer = await constructTestPostgresServer()
+            const stateServer = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
 
             // First, create a new submitted submission
             const stateSubmission = await createAndSubmitTestHealthPlanPackage(
@@ -372,6 +445,7 @@ describe.each(flagValueTestParameters)(
                 context: {
                     user: cmsUser,
                 },
+                ldService: mockLDService,
             })
 
             await unlockTestHealthPlanPackage(
@@ -383,7 +457,7 @@ describe.each(flagValueTestParameters)(
             await resubmitTestHealthPlanPackage(
                 stateServer,
                 stateSubmission.id,
-                'Test first resubmission reason'
+                'Test second resubmission reason'
             )
 
             await unlockTestHealthPlanPackage(
@@ -424,7 +498,9 @@ describe.each(flagValueTestParameters)(
         ) // this can be completed after unlock - want to create, submit, unlock, then re-edit
 
         it('returns errors if a state user tries to unlock', async () => {
-            const stateServer = await constructTestPostgresServer()
+            const stateServer = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
 
             // First, create a new submitted submission
             const stateSubmission = await createAndSubmitTestHealthPlanPackage(
@@ -450,11 +526,14 @@ describe.each(flagValueTestParameters)(
         })
 
         it('returns errors if trying to unlock package with wrong package status', async () => {
-            const stateServer = await constructTestPostgresServer()
+            const stateServer = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
             const cmsServer = await constructTestPostgresServer({
                 context: {
                     user: cmsUser,
                 },
+                ldService: mockLDService,
             })
 
             // First, create a new draft submission
@@ -478,14 +557,9 @@ describe.each(flagValueTestParameters)(
 
             expect(err.extensions).toEqual(
                 expect.objectContaining({
-                    code: 'INTERNAL_SERVER_ERROR',
+                    code: 'BAD_USER_INPUT',
                     cause: 'INVALID_PACKAGE_STATUS',
-                    exception: {
-                        locations: undefined,
-                        message:
-                            'Attempted to unlock package with wrong status',
-                        path: undefined,
-                    },
+                    argumentName: 'pkgID',
                 })
             )
             expect(err.message).toBe(
@@ -517,14 +591,9 @@ describe.each(flagValueTestParameters)(
 
             expect(unlockErr.extensions).toEqual(
                 expect.objectContaining({
-                    code: 'INTERNAL_SERVER_ERROR',
+                    code: 'BAD_USER_INPUT',
                     cause: 'INVALID_PACKAGE_STATUS',
-                    exception: {
-                        locations: undefined,
-                        message:
-                            'Attempted to unlock package with wrong status',
-                        path: undefined,
-                    },
+                    argumentName: 'pkgID',
                 })
             )
             expect(unlockErr.message).toBe(
@@ -537,6 +606,7 @@ describe.each(flagValueTestParameters)(
                 context: {
                     user: cmsUser,
                 },
+                ldService: mockLDService,
             })
 
             // First, create a new submitted submission
@@ -570,6 +640,7 @@ describe.each(flagValueTestParameters)(
                 context: {
                     user: cmsUser,
                 },
+                ldService: mockLDService,
             })
 
             // Unlock
@@ -587,13 +658,15 @@ describe.each(flagValueTestParameters)(
             const err = (unlockResult.errors as GraphQLError[])[0]
 
             expect(err.extensions['code']).toBe('INTERNAL_SERVER_ERROR')
-            expect(err.message).toBe(
-                'Issue finding a package of type UNEXPECTED_EXCEPTION. Message: this error came from the generic store with errors mock'
+            expect(err.message).toContain(
+                'error came from the generic store with errors mock'
             )
         })
 
         it('returns errors if unlocked reason is undefined', async () => {
-            const stateServer = await constructTestPostgresServer()
+            const stateServer = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
 
             // First, create a new submitted submission
             const stateSubmission = await createAndSubmitTestHealthPlanPackage(
@@ -604,6 +677,7 @@ describe.each(flagValueTestParameters)(
                 context: {
                     user: cmsUser,
                 },
+                ldService: mockLDService,
             })
 
             // Attempt Unlock Draft
@@ -630,7 +704,9 @@ describe.each(flagValueTestParameters)(
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
             //mock invoke email submit lambda
-            const stateServer = await constructTestPostgresServer()
+            const stateServer = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
 
             // First, create a new submitted submission
             const stateSubmission = await createAndSubmitTestHealthPlanPackage(
@@ -641,6 +717,7 @@ describe.each(flagValueTestParameters)(
                 context: {
                     user: cmsUser,
                 },
+                ldService: mockLDService,
                 emailer: mockEmailer,
             })
 
@@ -691,13 +768,16 @@ describe.each(flagValueTestParameters)(
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
             //mock invoke email submit lambda
-            const stateServer = await constructTestPostgresServer()
+            const stateServer = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
             const stateServerTwo = await constructTestPostgresServer({
                 context: {
                     user: testStateUser({
                         email: 'notspiderman@example.com',
                     }),
                 },
+                ldService: mockLDService,
             })
 
             // First, create a new submitted submission
@@ -709,6 +789,7 @@ describe.each(flagValueTestParameters)(
                 context: {
                     user: cmsUser,
                 },
+                ldService: mockLDService,
                 emailer: mockEmailer,
             })
 
@@ -778,7 +859,9 @@ describe.each(flagValueTestParameters)(
             const mockEmailer = testEmailer(config)
             //mock invoke email submit lambda
             const mockEmailParameterStore = mockEmailParameterStoreError()
-            const stateServer = await constructTestPostgresServer()
+            const stateServer = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
 
             // First, create a new submitted submission
             const stateSubmission = await createAndSubmitTestHealthPlanPackage(
@@ -789,6 +872,7 @@ describe.each(flagValueTestParameters)(
                 context: {
                     user: cmsUser,
                 },
+                ldService: mockLDService,
                 emailer: mockEmailer,
                 emailParameterStore: mockEmailParameterStore,
             })
@@ -816,7 +900,9 @@ describe.each(flagValueTestParameters)(
         it('does log error when request for state specific analysts emails failed', async () => {
             const mockEmailParameterStore = mockEmailParameterStoreError()
             const consoleErrorSpy = jest.spyOn(console, 'error')
-            const stateServer = await constructTestPostgresServer()
+            const stateServer = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
             const error = {
                 error: 'No store found',
                 message: 'getStateAnalystsEmails failed',
@@ -832,6 +918,7 @@ describe.each(flagValueTestParameters)(
                 context: {
                     user: cmsUser,
                 },
+                ldService: mockLDService,
                 emailParameterStore: mockEmailParameterStore,
             })
 

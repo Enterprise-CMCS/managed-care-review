@@ -15,7 +15,10 @@ import { formatRateNameDate } from '../../common-code/dateHelpers'
 import type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import type { HealthPlanFormDataType } from './HealthPlanFormDataType'
 import type { ProgramArgType } from '.'
-import { federalAuthorityKeysForCHIP } from './FederalAuthorities'
+import {
+    CHIPFederalAuthority,
+    federalAuthorityKeysForCHIP,
+} from './FederalAuthorities'
 
 // TODO: Refactor into multiple files and add unit tests to these functions
 
@@ -358,7 +361,9 @@ const removeInvalidProvisionsAndAuthorities = (
     // remove invalid authorities if CHIP
     if (isCHIPOnly(pkg)) {
         pkg.federalAuthorities = pkg.federalAuthorities.filter((authority) =>
-            federalAuthorityKeysForCHIP.includes(authority)
+            federalAuthorityKeysForCHIP.includes(
+                authority as CHIPFederalAuthority
+            )
         )
     }
 

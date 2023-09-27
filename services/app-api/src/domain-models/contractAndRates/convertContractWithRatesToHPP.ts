@@ -4,7 +4,7 @@ import type {
     HealthPlanFormDataType,
     RateInfoType,
     SubmissionDocument,
-} from 'app-web/src/common-code/healthPlanFormDataType'
+} from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type {
     HealthPlanPackageType,
     HealthPlanRevisionType,
@@ -13,7 +13,7 @@ import type { ContractType } from './contractTypes'
 import {
     toDomain,
     toProtoBuffer,
-} from 'app-web/src/common-code/proto/healthPlanFormDataProto'
+} from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import type { ContractRevisionWithRatesType } from './revisionTypes'
 import {
     isSubmissionError,

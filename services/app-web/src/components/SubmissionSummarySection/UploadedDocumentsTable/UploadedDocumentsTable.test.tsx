@@ -17,6 +17,7 @@ describe('UploadedDocumentsTable', () => {
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
         ]
@@ -51,11 +52,13 @@ describe('UploadedDocumentsTable', () => {
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
+                sha256: 'fakesha',
                 documentCategories: [
                     'CONTRACT_RELATED' as const,
                     'RATES_RELATED' as const,
@@ -101,16 +104,19 @@ describe('UploadedDocumentsTable', () => {
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
+                sha256: 'fakesha',
                 documentCategories: ['RATES_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
+                sha256: 'fakesha',
                 documentCategories: [
                     'CONTRACT_RELATED' as const,
                     'RATES_RELATED' as const,
@@ -159,16 +165,19 @@ describe('UploadedDocumentsTable', () => {
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
+                sha256: 'fakesha',
                 documentCategories: ['RATES_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
+                sha256: 'fakesha',
                 documentCategories: [
                     'CONTRACT_RELATED' as const,
                     'RATES_RELATED' as const,
@@ -219,16 +228,19 @@ describe('UploadedDocumentsTable', () => {
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
+                sha256: 'fakesha',
                 documentCategories: ['RATES_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
+                sha256: 'fakesha',
                 documentCategories: [
                     'CONTRACT_RELATED' as const,
                     'RATES_RELATED' as const,
@@ -279,16 +291,19 @@ describe('UploadedDocumentsTable', () => {
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
+                sha256: 'fakesha',
                 documentCategories: ['RATES_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
+                sha256: 'fakesha',
                 documentCategories: [
                     'CONTRACT_RELATED' as const,
                     'RATES_RELATED' as const,
@@ -339,16 +354,19 @@ describe('UploadedDocumentsTable', () => {
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
+                sha256: 'fakesha',
                 documentCategories: ['RATES_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
+                sha256: 'fakesha',
                 documentCategories: [
                     'CONTRACT_RELATED' as const,
                     'RATES_RELATED' as const,
@@ -393,16 +411,19 @@ describe('UploadedDocumentsTable', () => {
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
+                sha256: 'fakesha',
                 documentCategories: ['RATES_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
+                sha256: 'fakesha',
                 documentCategories: [
                     'CONTRACT_RELATED' as const,
                     'RATES_RELATED' as const,

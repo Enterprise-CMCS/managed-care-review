@@ -93,7 +93,13 @@ describe('unlockContract', () => {
         )
 
         // Unlock the rate
-        must(await unlockRate(client, rate.id, cmsUser.id, 'Unlocking rate'))
+        must(
+            await unlockRate(client, {
+                rateID: rate.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'Unlocking rate',
+            })
+        )
         must(
             await updateDraftRate(client, {
                 rateID: rate.id,
@@ -207,7 +213,13 @@ describe('unlockContract', () => {
         )
 
         // Unlock the rate and resubmit rate
-        must(await unlockRate(client, rate.id, cmsUser.id, 'Unlocking rate'))
+        must(
+            await unlockRate(client, {
+                rateID: rate.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'Unlocking rate',
+            })
+        )
         must(
             await updateDraftRate(client, {
                 rateID: rate.id,
@@ -322,12 +334,11 @@ describe('unlockContract', () => {
 
         // Unlock and resubmit contract
         must(
-            await unlockContract(
-                client,
-                contract.id,
-                cmsUser.id,
-                'First unlock'
-            )
+            await unlockContract(client, {
+                contractID: contract.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'First unlock',
+            })
         )
         must(
             await updateDraftContractWithRates(client, {
@@ -447,20 +458,18 @@ describe('unlockContract', () => {
 
         //Unlocking it results in error
         expect(
-            await unlockContract(
-                client,
-                contractA.id,
-                cmsUser.id,
-                'unlocking contact A 1.1'
-            )
+            await unlockContract(client, {
+                contractID: contractA.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlocking contact A 1.1',
+            })
         ).toBeInstanceOf(Error)
         expect(
-            await unlockRate(
-                client,
-                rateA.id,
-                cmsUser.id,
-                'unlocking rate A 1.1'
-            )
+            await unlockRate(client, {
+                rateID: rateA.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlocking rate A 1.1',
+            })
         ).toBeInstanceOf(Error)
     })
 })

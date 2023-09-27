@@ -76,12 +76,11 @@ describe('findAllContractsWithHistoryBySubmittedInfo', () => {
             })
         )
         const unlockedContract = must(
-            await unlockContract(
-                client,
-                contractThree.id,
-                cmsUser.id,
-                'unlock unlockContractOne'
-            )
+            await unlockContract(client, {
+                contractID: contractThree.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock unlockContractOne',
+            })
         )
 
         // call the find by submit info function
