@@ -61,6 +61,7 @@ import {
     isContractAmendment,
     isContractWithProvisions,
 } from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
+import { RoutesRecord } from '../../../constants'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -515,7 +516,10 @@ export const ContractDetails = ({
                                 />
                             )}
 
-                            <FormGroup error={showFileUploadError}>
+                            <FormGroup
+                                error={showFileUploadError}
+                                className="margin-top-0"
+                            >
                                 <FileUpload
                                     id="documents"
                                     name="documents"
@@ -886,7 +890,8 @@ export const ContractDetails = ({
                                         setSubmitting,
                                         {
                                             shouldValidateDocuments: false,
-                                            redirectPath: '/dashboard',
+                                            redirectPath:
+                                                RoutesRecord.DASHBOARD_SUBMISSIONS,
                                         }
                                     )
                                 } else {
@@ -895,7 +900,8 @@ export const ContractDetails = ({
                                         setSubmitting,
                                         {
                                             shouldValidateDocuments: true,
-                                            redirectPath: '/dashboard',
+                                            redirectPath:
+                                                RoutesRecord.DASHBOARD_SUBMISSIONS,
                                         }
                                     )
                                 }

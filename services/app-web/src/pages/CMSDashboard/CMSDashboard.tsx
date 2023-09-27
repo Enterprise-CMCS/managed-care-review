@@ -9,59 +9,97 @@ import { mostRecentDate } from '../../common-code/dateHelpers'
 import styles from '../StateDashboard/StateDashboard.module.scss'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
 import {
-    handleApolloError,
-    isLikelyUserAuthError,
-} from '../../gqlHelpers/apolloErrors'
-import {
-    ErrorAlertFailedRequest,
-    ErrorAlertSignIn,
     Loading,
     HealthPlanPackageTable,
     PackageInDashboardType,
+    Tabs,
+    TabPanel,
 } from '../../components'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { Outlet, useLocation } from 'react-router-dom'
+import { ErrorFailedRequestPage } from '../Errors/ErrorFailedRequestPage'
+import { RoutesRecord } from '../../constants'
+import { featureFlags } from '../../common-code/featureFlags'
+import { getRouteName } from '../../routeHelpers'
 
 /**
  * We only pull a subset of data out of the submission and revisions for display in Dashboard
  * Depending on submission status, CMS users look at data from current or previous revision
  */
 const DASHBOARD_ATTRIBUTE = 'cms-dashboard-page'
-export const CMSDashboard = (): React.ReactElement => {
-    const { loginStatus, loggedInUser } = useAuth()
+const CMSDashboard = (): React.ReactElement => {
+    const { pathname } = useLocation()
+    const loadOnRateReviews =
+        getRouteName(pathname) === RoutesRecord.DASHBOARD_RATES
+    const ldClient = useLDClient()
+    const showRateReviews = ldClient?.variation(
+        featureFlags.RATE_REVIEWS_DASHBOARD.flag,
+        featureFlags.RATE_REVIEWS_DASHBOARD.defaultValue
+    )
+    const TAB_NAMES = {
+        RATES: 'Rate reviews',
+        SUBMISSIONS: 'Submissions',
+    }
+    return (
+        <div data-testid={DASHBOARD_ATTRIBUTE} className={styles.wrapper}>
+            <GridContainer className={styles.container}>
+                <div className={styles.panelHeader}>
+                    <h2>
+                        Submissions
+                        {showRateReviews && <span> and rate reviews</span>}
+                    </h2>
+                </div>
+
+                {showRateReviews ? (
+                    <Tabs
+                        defaultActiveTab={
+                            loadOnRateReviews
+                                ? TAB_NAMES.RATES
+                                : TAB_NAMES.SUBMISSIONS
+                        }
+                        className={styles.tabs}
+                    >
+                        <TabPanel
+                            id="submissions"
+                            nestedRoute={RoutesRecord.DASHBOARD_SUBMISSIONS}
+                            tabName={TAB_NAMES.SUBMISSIONS}
+                        >
+                            <Outlet />
+                        </TabPanel>
+
+                        <TabPanel
+                            id="rate-reviews"
+                            nestedRoute={RoutesRecord.DASHBOARD_RATES}
+                            tabName={TAB_NAMES.RATES}
+                        >
+                            <Outlet />
+                        </TabPanel>
+                    </Tabs>
+                ) : (
+                    <Outlet />
+                )}
+            </GridContainer>
+        </div>
+    )
+}
+
+const SubmissionsDashboard = (): React.ReactElement => {
+    const { loggedInUser } = useAuth()
     const { loading, data, error } = useIndexHealthPlanPackagesQuery({
         fetchPolicy: 'network-only',
     })
-    const isAuthenticated = loginStatus === 'LOGGED_IN'
 
-    if (error) {
-        handleApolloError(error, isAuthenticated)
-        if (isLikelyUserAuthError(error, isAuthenticated)) {
-            return (
-                <div
-                    data-testid={DASHBOARD_ATTRIBUTE}
-                    className={styles.wrapper}
-                >
-                    <GridContainer className={styles.container}>
-                        <ErrorAlertSignIn />
-                    </GridContainer>
-                </div>
-            )
-        } else {
-            return (
-                <div
-                    data-testid={DASHBOARD_ATTRIBUTE}
-                    className={styles.wrapper}
-                >
-                    <GridContainer className={styles.container}>
-                        <ErrorAlertFailedRequest />
-                    </GridContainer>
-                </div>
-            )
-        }
-    }
-
-    if (loginStatus === 'LOADING' || !loggedInUser || loading || !data) {
+    if (loading || !loggedInUser) {
         return <Loading />
+    } else if (error) {
+        return (
+            <ErrorFailedRequestPage
+                error={error}
+                testID={DASHBOARD_ATTRIBUTE}
+            />
+        )
     }
+
     const submissionRows: PackageInDashboardType[] = []
     data?.indexHealthPlanPackages.edges
         .map((edge) => edge.node)
@@ -165,21 +203,32 @@ export const CMSDashboard = (): React.ReactElement => {
         })
 
     return (
-        <>
-            <div data-testid={DASHBOARD_ATTRIBUTE} className={styles.wrapper}>
-                <GridContainer className={styles.container}>
-                    <section className={styles.panel}>
-                        <div className={styles.panelHeader}>
-                            <h2>Submissions</h2>
-                        </div>
-                        <HealthPlanPackageTable
-                            tableData={submissionRows}
-                            user={loggedInUser}
-                            showFilters
-                        />
-                    </section>
-                </GridContainer>
-            </div>
-        </>
+        <section className={styles.panel}>
+            <HealthPlanPackageTable
+                tableData={submissionRows}
+                user={loggedInUser}
+                showFilters
+            />
+        </section>
     )
 }
+const RateReviewsDashboard = (): React.ReactElement => {
+    const { loggedInUser } = useAuth()
+    if (!loggedInUser) {
+        return <Loading />
+    } else {
+        return (
+            <section className={styles.panel}>
+                <div className="srOnly"> RATE REVIEWS DASHBOARD</div>
+                <HealthPlanPackageTable
+                    tableVariant="RATES"
+                    tableData={[]}
+                    user={loggedInUser}
+                    showFilters
+                />
+            </section>
+        )
+    }
+}
+
+export { CMSDashboard, RateReviewsDashboard, SubmissionsDashboard }

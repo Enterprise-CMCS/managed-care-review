@@ -6,32 +6,32 @@ describe('getRelativePath', () => {
         const validCombinations: [string, string, string][] = [
             [
                 RoutesRecord.SUBMISSIONS_TYPE,
-                RoutesRecord.SUBMISSIONS_FORM,
+                RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL,
                 '/type',
             ],
             [
                 RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
-                RoutesRecord.SUBMISSIONS_FORM,
+                RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL,
                 '/contract-details',
             ],
             [
                 RoutesRecord.SUBMISSIONS_RATE_DETAILS,
-                RoutesRecord.SUBMISSIONS_FORM,
+                RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL,
                 '/rate-details',
             ],
             [
                 RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
-                RoutesRecord.SUBMISSIONS_FORM,
+                RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL,
                 '/contract-details',
             ],
             [
                 RoutesRecord.SUBMISSIONS_CONTACTS,
-                RoutesRecord.SUBMISSIONS_FORM,
+                RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL,
                 '/contacts',
             ],
             [
                 RoutesRecord.SUBMISSIONS_DOCUMENTS,
-                RoutesRecord.SUBMISSIONS_FORM,
+                RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL,
                 '/documents',
             ],
         ]

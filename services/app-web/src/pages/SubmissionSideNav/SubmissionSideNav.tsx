@@ -8,6 +8,7 @@ import sprite from 'uswds/src/img/sprite.svg'
 import {
     QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES,
     RouteT,
+    RoutesRecord,
 } from '../../constants/routes'
 import { getRouteName } from '../../routeHelpers'
 import { useFetchHealthPlanPackageWithQuestionsWrapper } from '../../gqlHelpers'
@@ -166,7 +167,8 @@ export const SubmissionSideNav = () => {
                             <Link
                                 asCustom={NavLink}
                                 to={{
-                                    pathname: '/dashboard',
+                                    pathname:
+                                        RoutesRecord.DASHBOARD_SUBMISSIONS,
                                 }}
                             >
                                 <svg

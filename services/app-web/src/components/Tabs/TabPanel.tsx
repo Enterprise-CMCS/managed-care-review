@@ -7,6 +7,7 @@ type TabPanelProps = {
     id: string
     tabName: string
     children: React.ReactNode
+    nestedRoute?: string //relevant if we are dynamically changing URL on click
     isActive?: boolean
 }
 

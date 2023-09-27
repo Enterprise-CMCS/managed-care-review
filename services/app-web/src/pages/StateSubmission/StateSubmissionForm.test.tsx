@@ -34,7 +34,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Routes>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
                     />
                 </Routes>,
@@ -67,7 +67,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Routes>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
                     />
                 </Routes>,
@@ -129,7 +129,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Routes>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
                     />
                 </Routes>,
@@ -167,7 +167,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Routes>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
                     />
                 </Routes>,
@@ -200,7 +200,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Routes>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
                     />
                 </Routes>,
@@ -254,7 +254,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Routes>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
                     />
                 </Routes>,
@@ -322,7 +322,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Routes>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
                     />
                 </Routes>,
@@ -370,7 +370,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Routes>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
                     />
                 </Routes>,
@@ -393,7 +393,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Routes>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
                     />
                 </Routes>,
@@ -418,7 +418,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Routes>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
                     />
                 </Routes>,
@@ -446,7 +446,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Routes>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
                     />
                 </Routes>,
@@ -490,7 +490,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Routes>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
                     />
                 </Routes>,
@@ -525,7 +525,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Routes>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
                     />
                 </Routes>,

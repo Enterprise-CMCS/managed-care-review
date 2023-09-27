@@ -44,6 +44,7 @@ import {
     yesNoFormValueAsBoolean,
 } from '../../../components/Form/FieldYesNo/FieldYesNo'
 import { SubmissionTypeFormSchema } from './SubmissionTypeSchema'
+import { RoutesRecord } from '../../../constants'
 
 export interface SubmissionTypeFormValues {
     populationCovered?: PopulationCoveredType
@@ -324,6 +325,7 @@ export const SubmissionType = ({
                                 error={showFieldErrors(
                                     errors.populationCovered
                                 )}
+                                className="margin-top-0"
                             >
                                 <Fieldset
                                     className={styles.radioGroup}
@@ -530,7 +532,10 @@ export const SubmissionType = ({
                                 )}
                                 hint={
                                     <>
-                                        <p id="submissionDescriptionHelp">
+                                        <p
+                                            id="submissionDescriptionHelp"
+                                            role="note"
+                                        >
                                             Provide a 1-2 paragraph summary of
                                             your submission that highlights any
                                             important changes CMS reviewers will
@@ -555,7 +560,9 @@ export const SubmissionType = ({
                             pageVariant={
                                 isNewSubmission ? 'FIRST' : 'EDIT_FIRST'
                             }
-                            backOnClick={() => navigate('/dashboard')}
+                            backOnClick={() =>
+                                navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
+                            }
                             continueOnClick={() => {
                                 setShouldValidate(true)
                                 setFocusErrorSummaryHeading(true)
@@ -564,7 +571,7 @@ export const SubmissionType = ({
                                 await handleFormSubmit(
                                     values,
                                     { setSubmitting },
-                                    '/dashboard'
+                                    RoutesRecord.DASHBOARD_SUBMISSIONS
                                 )
                             }}
                             actionInProgress={isSubmitting}

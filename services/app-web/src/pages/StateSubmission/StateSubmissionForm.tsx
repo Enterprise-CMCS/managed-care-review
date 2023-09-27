@@ -51,7 +51,7 @@ import {
 
 const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
     getRelativePath({
-        basePath: RoutesRecord.SUBMISSIONS_FORM,
+        basePath: RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL,
         targetPath: RoutesRecord[formRouteType],
     })
 

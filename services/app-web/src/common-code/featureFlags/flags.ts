@@ -70,6 +70,13 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
+     * Controls the rates review dashboard UI. This flag should not be turned on without rates-db-refactor also on.
+     */
+    RATE_REVIEWS_DASHBOARD: {
+        flag: 'rate-reviews-dashboard',
+        defaultValue: false,
+    },
+    /**
      * Used in testing to simulate errors in fetching flag value.
      * This flag does not exist in LaunchDarkly dashboard so fetching this will return the defaultValue.
      */
@@ -77,8 +84,8 @@ const featureFlags = {
         flag: 'test-error-fetching-flag',
         defaultValue: undefined,
     },
-    /* 
-    Temporary flag for the cutover to a new support email address 
+    /*
+    Temporary flag for the cutover to a new support email address
     */
     HELPDESK_EMAIL: {
         flag: 'helpdesk-email',
