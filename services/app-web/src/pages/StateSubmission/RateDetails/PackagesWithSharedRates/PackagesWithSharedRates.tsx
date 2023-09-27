@@ -56,12 +56,12 @@ export const PackagesWithSharedRates = ({
             > = []
             data?.indexHealthPlanPackages.edges
                 .map((edge) => edge.node)
-                .forEach((sub) => {
+                .forEach((pkg) => {
                     const currentRevisionPackageOrError =
-                        getCurrentRevisionFromHealthPlanPackage(sub)
+                        getCurrentRevisionFromHealthPlanPackage(pkg)
                     if (currentRevisionPackageOrError instanceof Error) {
                         recordJSException(
-                            `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${sub.id}`
+                            `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${pkg.id}`
                         )
                         return null // TODO make an error state for PackageSelect, right now we just remove from page if this request fails
                     }
@@ -91,7 +91,7 @@ export const PackagesWithSharedRates = ({
                                 currentSubmissionData.programIDs,
                                 statePrograms
                             )}${submittedAt}`,
-                            value: currentSubmissionData.id,
+                            value: pkg.id,
                         })
                     }
                 })
