@@ -67,6 +67,27 @@ const validateFileItemsList = ({ required }: { required: boolean }) => {
             'You must remove all documents with error messages before continuing',
             (value) => hasNoFileErrors(value)
         )
+}
+
+const validateFileItemsListSingleUpload = ({
+    required,
+}: {
+    required: boolean
+}) => {
+    return Yup.mixed()
+        .test('is-not-empty', 'You must upload a rate certification', (value) =>
+            required ? hasNoMoreThanOneFile(value) : true
+        )
+        .test(
+            'is-not-loading',
+            'You must wait for all documents to finish uploading before continuing',
+            (value) => hasNoLoadingFiles(value)
+        )
+        .test(
+            'is-error-free',
+            'You must remove all documents with error messages before continuing',
+            (value) => hasNoFileErrors(value)
+        )
         .test(
             'is-not-more-than-one',
             'Only one document is allowed for a rate certification. You must remove documents before continuing.',
@@ -79,4 +100,5 @@ export {
     validateDateFormat,
     validateDateRange12Months,
     validateFileItemsList,
+    validateFileItemsListSingleUpload,
 }

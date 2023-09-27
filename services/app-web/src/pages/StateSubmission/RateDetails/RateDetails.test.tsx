@@ -244,7 +244,7 @@ describe('RateDetails', () => {
             continueButton.click()
             await waitFor(() => {
                 expect(
-                    screen.getAllByText('You must upload at least one document')
+                    screen.getAllByText('You must upload a rate certification')
                 ).toHaveLength(2)
                 expect(continueButton).toHaveAttribute('aria-disabled', 'true')
             })
@@ -723,7 +723,7 @@ describe('RateDetails', () => {
             continueButton.click()
             await waitFor(() => {
                 expect(
-                    screen.getAllByText('You must upload at least one document')
+                    screen.getAllByText('You must upload a rate certification')
                 ).toHaveLength(2)
                 expect(continueButton).toHaveAttribute('aria-disabled', 'true')
             })
@@ -1314,7 +1314,7 @@ describe('RateDetails', () => {
 
             await waitFor(() => {
                 expect(
-                    screen.getAllByText('You must upload at least one document')
+                    screen.getAllByText('You must upload a rate certification')
                 ).toHaveLength(2)
 
                 expect(continueButton).toHaveAttribute('aria-disabled', 'true')
@@ -1344,9 +1344,7 @@ describe('RateDetails', () => {
 
             await waitFor(() => {
                 expect(
-                    screen.getAllByText(
-                        'Only one document is allowed for a rate certification. You must remove documents before continuing.'
-                    )
+                    screen.getAllByText('You must upload a rate certification')
                 ).toHaveLength(2)
 
                 expect(continueButton).toHaveAttribute('aria-disabled', 'true')
@@ -1421,7 +1419,7 @@ describe('RateDetails', () => {
 
             expect(
                 await screen.findAllByText(
-                    'You must upload at least one document'
+                    'You must upload a rate certification'
                 )
             ).toHaveLength(2)
 
@@ -1564,7 +1562,7 @@ describe('RateDetails', () => {
             await userEvent.click(saveAsDraftButton)
             expect(mockUpdateDraftFn).toHaveBeenCalled()
             expect(
-                screen.queryByText('You must upload at least one document')
+                screen.queryByText('You must upload a rate certification')
             ).toBeNull()
         })
 
@@ -1606,7 +1604,7 @@ describe('RateDetails', () => {
             await userEvent.click(saveAsDraftButton)
             expect(mockUpdateDraftFn).toHaveBeenCalled()
             expect(
-                screen.queryByText('You must upload at least one document')
+                screen.queryByText('You must upload a rate certification')
             ).toBeNull()
         })
 
@@ -1733,7 +1731,7 @@ describe('RateDetails', () => {
 
             await userEvent.click(backButton)
             expect(
-                screen.queryByText('You must upload at least one document')
+                screen.queryByText('You must upload a rate certification')
             ).toBeNull()
             expect(mockUpdateDraftFn).not.toHaveBeenCalled()
         })

@@ -2,13 +2,16 @@ import * as Yup from 'yup'
 import { dayjs } from '../../../common-code/dateHelpers'
 import { FeatureFlagSettings } from '../../../common-code/featureFlags'
 import { validateDateFormat } from '../../../formHelpers'
-import { validateFileItemsList } from '../../../formHelpers/validators'
+import {
+    validateFileItemsList,
+    validateFileItemsListSingleUpload,
+} from '../../../formHelpers/validators'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 const SingleRateCertSchema = (activeFeatureFlags: FeatureFlagSettings) =>
     Yup.object().shape({
-        rateDocuments: validateFileItemsList({ required: true }),
+        rateDocuments: validateFileItemsListSingleUpload({ required: true }),
         supportingDocuments: activeFeatureFlags['supporting-docs-by-rate']
             ? validateFileItemsList({ required: false })
             : Yup.mixed(),
