@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from '@trussworks/react-uswds'
-import { Icon } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
@@ -12,6 +11,7 @@ import { useDocument } from '../../../hooks/useDocument'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 import { getDocumentKey } from '../../../documentHelpers'
 import { useAuth } from '../../../contexts/AuthContext'
+import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 
 export type UploadedDocumentsTableProps = {
     documents: SubmissionDocument[]
@@ -140,19 +140,12 @@ export const UploadedDocumentsTable = ({
                         {tableCaptionJSX}
                     </div>
                     {!multipleDocumentsAllowed && documents.length > 1 && (
-                        <span className={styles.error}>
-                            <span>
-                                <Icon.Error
-                                    aria-label="An error icon"
-                                    size={3}
-                                />
-                            </span>
-                            <span>
-                                Only one document is allowed for a rate
-                                certification. You must remove documents before
-                                continuing.
-                            </span>
-                        </span>
+                        <DataDetailMissingField
+                            classname={styles.missingInfo}
+                            requiredText="Only one document is allowed for a rate
+                        certification. You must remove documents before
+                        continuing."
+                        />
                     )}
                 </caption>
                 <thead>
