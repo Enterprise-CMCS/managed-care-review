@@ -76,7 +76,7 @@ const validateFileItemsListSingleUpload = ({
 }) => {
     return Yup.mixed()
         .test('is-not-empty', 'You must upload a rate certification', (value) =>
-            required ? hasNoMoreThanOneFile(value) : true
+            required ? hasAtLeastOneFile(value) : true
         )
         .test(
             'is-not-loading',
