@@ -9,7 +9,6 @@ export {
     mockUnlockedHealthPlanPackageWithDocuments,
     mockUnlockedHealthPlanPackageWithOldProtos,
     mockSubmittedHealthPlanPackageWithRevisions,
-    mockContractAndRatesDraftWithDocuments,
     mockUnlockedHealthPlanPackage,
 } from './healthPlanFormDataMock'
 

@@ -10,13 +10,14 @@ import userEvent from '@testing-library/user-event'
 
 import {
     mockDraft,
+    mockContractAndRatesDraft,
     fetchCurrentUserMock,
     indexHealthPlanPackagesMockSuccess,
     mockUnlockedHealthPlanPackage,
     mockSubmittedHealthPlanPackage,
-    mockContractAndRatesDraftWithDocuments,
     mockMNState,
 } from '../../../testHelpers/apolloMocks'
+import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
 
 import {
     renderWithProviders,
@@ -1322,9 +1323,41 @@ describe('RateDetails', () => {
         })
 
         it('disabled with alert if previously submitted with more than one rate cert file', async () => {
+            const docs: SubmissionDocument[] = [
+                {
+                    s3URL: 's3://bucketname/one-one/one-one.png',
+                    name: 'one one',
+                    documentCategories: ['CONTRACT_RELATED'],
+                },
+                {
+                    s3URL: 's3://bucketname/one-two/one-two.png',
+                    name: 'one two',
+                    documentCategories: ['CONTRACT_RELATED'],
+                },
+                {
+                    s3URL: 's3://bucketname/one-three/one-three.png',
+                    name: 'one three',
+                    documentCategories: ['CONTRACT_RELATED'],
+                },
+            ]
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={mockContractAndRatesDraftWithDocuments()}
+                    draftSubmission={mockContractAndRatesDraft({
+                        rateInfos: [
+                            {
+                                supportingDocuments: [],
+                                rateDocuments: docs,
+                                actuaryContacts: [
+                                    {
+                                        actuarialFirm: 'DELOITTE',
+                                        name: 'Actuary Contact 1',
+                                        titleRole: 'Test Actuary Contact 1',
+                                        email: 'actuarycontact1@test.com',
+                                    },
+                                ],
+                            },
+                        ],
+                    })}
                     updateDraft={jest.fn()}
                     previousDocuments={['testFile.docx', 'testFile.pdf']}
                 />,

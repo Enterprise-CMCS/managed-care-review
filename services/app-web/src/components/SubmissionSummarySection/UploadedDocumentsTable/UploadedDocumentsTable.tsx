@@ -2,10 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
-import {
-    SubmissionDocument,
-    isSubmitted,
-} from '../../../common-code/healthPlanFormDataType'
+import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
 import styles from './UploadedDocumentsTable.module.scss'
 import { usePreviousSubmission } from '../../../hooks'
 import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
@@ -25,6 +22,7 @@ export type UploadedDocumentsTableProps = {
     multipleDocumentsAllowed?: boolean
     documentCategory?: string // if this prop is not included, do not show category column
     isEditing?: boolean // by default assume we are on summary page, if true, assume review and submit page
+    isSubmitted?: boolean // by default assume we are on summary page, if true, assume review and submit page
 }
 
 export const UploadedDocumentsTable = ({
@@ -36,6 +34,7 @@ export const UploadedDocumentsTable = ({
     multipleDocumentsAllowed = true,
     documentDateLookupTable,
     isEditing = false,
+    isSubmitted = true,
 }: UploadedDocumentsTableProps): React.ReactElement => {
     const initialDocState = documents.map((doc) => ({
         ...doc,

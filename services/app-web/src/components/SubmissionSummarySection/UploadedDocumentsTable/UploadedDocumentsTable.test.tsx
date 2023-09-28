@@ -415,6 +415,7 @@ describe('UploadedDocumentsTable', () => {
                 caption="Contract"
                 documentCategory="Contract"
                 multipleDocumentsAllowed={false}
+                isSubmitted={false}
             />,
             {
                 apolloProvider: {

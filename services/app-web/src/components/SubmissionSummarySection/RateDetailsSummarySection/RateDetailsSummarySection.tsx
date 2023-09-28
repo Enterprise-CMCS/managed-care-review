@@ -372,6 +372,7 @@ export const RateDetailsSummarySection = ({
                                         caption="Rate certification"
                                         documentCategory="Rate certification"
                                         isEditing={isEditing}
+                                        isSubmitted={isSubmitted}
                                     />
                                 ) : (
                                     <span className="srOnly">'LOADING...'</span>
