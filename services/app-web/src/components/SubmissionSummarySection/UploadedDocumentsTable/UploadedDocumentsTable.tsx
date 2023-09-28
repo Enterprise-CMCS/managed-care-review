@@ -2,7 +2,10 @@ import React, { useEffect, useState } from 'react'
 import { Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
-import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
+import {
+    SubmissionDocument,
+    isSubmitted,
+} from '../../../common-code/healthPlanFormDataType'
 import styles from './UploadedDocumentsTable.module.scss'
 import { usePreviousSubmission } from '../../../hooks'
 import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
@@ -139,14 +142,16 @@ export const UploadedDocumentsTable = ({
                     <div className={styles.captionContainer}>
                         {tableCaptionJSX}
                     </div>
-                    {!multipleDocumentsAllowed && documents.length > 1 && (
-                        <DataDetailMissingField
-                            classname={styles.missingInfo}
-                            requiredText="Only one document is allowed for a rate
+                    {!multipleDocumentsAllowed &&
+                        documents.length > 1 &&
+                        !isSubmitted && (
+                            <DataDetailMissingField
+                                classname={styles.missingInfo}
+                                requiredText="Only one document is allowed for a rate
                         certification. You must remove documents before
                         continuing."
-                        />
-                    )}
+                            />
+                        )}
                 </caption>
                 <thead>
                     <tr>
