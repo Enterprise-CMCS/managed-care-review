@@ -1344,7 +1344,9 @@ describe('RateDetails', () => {
 
             await waitFor(() => {
                 expect(
-                    screen.getAllByText('You must upload a rate certification')
+                    screen.getAllByText(
+                        'Only one document is allowed for a rate certification. You must remove documents before continuing.'
+                    )
                 ).toHaveLength(2)
 
                 expect(continueButton).toHaveAttribute('aria-disabled', 'true')
