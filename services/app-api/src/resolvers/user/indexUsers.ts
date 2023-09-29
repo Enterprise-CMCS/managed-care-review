@@ -1,6 +1,6 @@
 import { ForbiddenError } from 'apollo-server-lambda'
 import type { UserType } from '../../domain-models'
-import { isAdminUser } from '../../domain-models'
+import { isAdminUser, isBusinessOwnerUser } from '../../domain-models'
 import { isHelpdeskUser } from '../../domain-models/user'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { logError } from '../../logger'
@@ -16,7 +16,13 @@ export function indexUsersResolver(store: Store): QueryResolvers['indexUsers'] {
         const { user: currentUser, span } = context
         setResolverDetailsOnActiveSpan('indexUsers', currentUser, span)
 
-        if (!(isAdminUser(currentUser) || isHelpdeskUser(currentUser))) {
+        if (
+            !(
+                isAdminUser(currentUser) ||
+                isHelpdeskUser(currentUser) ||
+                !isBusinessOwnerUser(currentUser)
+            )
+        ) {
             const errMsg = 'user not authorized to fetch users'
             logError('indexUsers', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)

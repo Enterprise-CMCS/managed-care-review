@@ -417,7 +417,7 @@ scalar Date
 "DateTime is a moment in time with date and time information"
 scalar DateTime
 
-union User = StateUser | CMSUser | AdminUser | HelpdeskUser
+union User = StateUser | CMSUser | AdminUser | HelpdeskUser | BusinessOwnerUser
 
 "StateUser is a user that works for a state, submitting packages to be reviewed by CMSUsers"
 type StateUser {
@@ -456,6 +456,16 @@ type AdminUser {
 type HelpdeskUser {
     id: ID!
     "will always be 'HELPDESK_USER'"
+    role: String!
+    email: String!
+    givenName: String!
+    familyName: String!
+}
+
+"BusinessOwnerUser is a user that ..."
+type BusinessOwnerUser {
+    id: ID!
+    "will always be 'BUSINESSOWNER_USER'"
     role: String!
     email: String!
     givenName: String!

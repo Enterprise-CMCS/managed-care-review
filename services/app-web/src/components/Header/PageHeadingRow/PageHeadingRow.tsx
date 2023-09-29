@@ -11,13 +11,13 @@ import {
     CmsUser,
     AdminUser,
     HelpdeskUser,
+    BusinessOwnerUser,
 } from '../../../gen/gqlClient'
 
 const CMSUserRow = ({
-    user,
     heading,
 }: {
-    user: CmsUser | AdminUser | HelpdeskUser
+    user: CmsUser | AdminUser | HelpdeskUser | BusinessOwnerUser
     heading?: string
 }) => {
     return (
@@ -120,7 +120,8 @@ export const PageHeadingRow = ({
     if (
         loggedInUser.__typename === 'CMSUser' ||
         loggedInUser.__typename === 'AdminUser' ||
-        loggedInUser.__typename === 'HelpdeskUser'
+        loggedInUser.__typename === 'HelpdeskUser' ||
+        loggedInUser.__typename === 'BusinessOwnerUser'
     ) {
         return <CMSUserRow user={loggedInUser} heading={heading} />
     } else if (loggedInUser.__typename === 'StateUser') {

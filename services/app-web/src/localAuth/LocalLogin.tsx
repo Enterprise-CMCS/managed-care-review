@@ -13,6 +13,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { RoutesRecord } from '../constants/routes'
 import { loginLocalUser } from '.'
+import styles from './LocalLogin.module.scss'
 
 import aangAvatar from '../assets/images/aang.png'
 import appaAvatar from '../assets/images/appa.png'
@@ -21,6 +22,7 @@ import zukoAvatar from '../assets/images/zuko.png'
 import irohAvatar from '../assets/images/iroh.png'
 import rokuAvatar from '../assets/images/roku.png'
 import izumiAvatar from '../assets/images/izumi.jpg'
+import shiAvatar from '../assets/images/shi-tong.png'
 
 import { useAuth } from '../contexts/AuthContext'
 import { LocalUserType } from './LocalUserType'
@@ -80,6 +82,13 @@ const localUsers: LocalUserType[] = [
         familyName: 'Sky Bison',
         role: 'HELPDESK_USER',
     },
+    {
+        id: 'user8',
+        email: 'shi-tong@example.com',
+        givenName: 'Shi Tong',
+        familyName: 'Wan',
+        role: 'BUSINESSOWNER_USER',
+    },
 ]
 
 const userAvatars: { [key: string]: string } = {
@@ -90,6 +99,7 @@ const userAvatars: { [key: string]: string } = {
     'roku@example.com': rokuAvatar,
     'izumi@example.com': izumiAvatar,
     'appa@example.com': appaAvatar,
+    'shi-tong@example.com': shiAvatar,
 }
 
 export function LocalLogin(): React.ReactElement {
@@ -124,6 +134,8 @@ export function LocalLogin(): React.ReactElement {
                     const fromString =
                         user.role === 'ADMIN_USER'
                             ? 'CMS (Admin)'
+                            : user.role === 'BUSINESSOWNER_USER'
+                            ? 'CMS (Business Owner)'
                             : user.role === 'HELPDESK_USER'
                             ? 'CMS (Helpdesk)'
                             : user.role === 'CMS_USER'
@@ -131,7 +143,7 @@ export function LocalLogin(): React.ReactElement {
                             : user.stateCode
 
                     return (
-                        <Card key={user.email}>
+                        <Card key={user.email} className={styles.userCard}>
                             <CardMedia>
                                 <img
                                     src={userAvatars[user.email]}

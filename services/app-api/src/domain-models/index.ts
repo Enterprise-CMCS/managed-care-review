@@ -16,6 +16,8 @@ export {
     isStateUser,
     isAdminUser,
     toDomainUser,
+    isBusinessOwnerUser,
+    isHelpdeskUser,
 } from './user'
 
 export {
