@@ -53,4 +53,11 @@
     margin-right: 5px !important;
 }
 
+.missingInfo {
+    margin-top: 1rem;
+
+    :first-child {
+        margin-right: 5px;
+    }
+}
 
