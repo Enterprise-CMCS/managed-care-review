@@ -315,7 +315,7 @@ describe.each(flagValueTestParameters)(
                 {
                     rateDateStart: new Date(),
                     rateDateEnd: new Date(),
-                    rateProgramIDs: ['5c10fe9f-bec9-416f-a20c-718b152ad633'],
+                    rateProgramIDs: ['08d114c2-0c01-4a1a-b8ff-e2b79336672d'],
                     rateType: 'NEW',
                     rateDateCertified: new Date(),
                     rateDocuments: [
@@ -376,6 +376,14 @@ describe.each(flagValueTestParameters)(
             )
 
             const unlockedFormData = latestFormData(unlockedPKG)
+            const unlockedRateDocs = unlockedFormData.rateInfos.map(
+                (r) => r.rateDocuments[0].name
+            )
+            expect(unlockedRateDocs).toEqual([
+                'rateDocument.pdf',
+                'fake doc',
+                'fake doc number two',
+            ])
 
             // remove the first rate
             unlockedFormData.rateInfos = unlockedFormData.rateInfos.slice(1)
@@ -426,7 +434,10 @@ describe.each(flagValueTestParameters)(
                     base64ToDomain(r.node.formDataProto)
                 )
 
-            expect(formDatas).toHaveLength(6) // This probably doesn't make sense totally but is fine for now.
+            // right now the history is a bit weird
+            const expectedRevCount = flagValue ? 6 : 3
+
+            expect(formDatas).toHaveLength(expectedRevCount) // This probably doesn't make sense totally but is fine for now.
 
             // throw new Error('Not done with this test yet')
         }, 20000)

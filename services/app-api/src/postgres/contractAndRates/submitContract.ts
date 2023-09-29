@@ -71,9 +71,15 @@ async function submitContract(
                     },
                     rateRevisions: {
                         createMany: {
-                            data: relatedRateRevs.map((rev) => ({
+                            data: relatedRateRevs.map((rev, idx) => ({
                                 rateRevisionID: rev.id,
-                                validAfter: currentDateTime,
+                                // Since rates come out the other side ordered by validAfter, we need to order things on the way in that way.
+                                validAfter: new Date(
+                                    currentDateTime.getTime() -
+                                        relatedRateRevs.length +
+                                        idx +
+                                        1
+                                ),
                             })),
                         },
                     },
