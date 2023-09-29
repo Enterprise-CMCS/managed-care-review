@@ -33,8 +33,7 @@ import { NotFoundError, isStoreError } from '../postgres/storeError'
 import { migrateContractRevision } from '../postgres/contractAndRates/proto_to_db_ContractRevisions'
 import { migrateRateInfo } from '../postgres/contractAndRates/proto_to_db_RateRevisions'
 import { insertContractId } from '../postgres/contractAndRates/proto_to_db_ContractId'
-import { migrateAssociations } from '../postgres/contractAndRates/proto_to_db_JoinTable'
-import { migrateDocuments } from '../postgres/contractAndRates/proto_to_db_Documents'
+import { cleanupLastMigration } from '../postgres/contractAndRates/proto_to_db_CleanupLastMigration'
 import { base64ToDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import type { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { findContractWithHistory } from '../postgres/contractAndRates'
@@ -122,25 +121,6 @@ export async function migrateRevision(
     if (formData instanceof Error) {
         return formData
     }
-    console.info(`form data: ${JSON.stringify(formData, null, '  ')}`)
-
-    /* Creating an entry in either ContractRevisionTable or RateRevisionTable
-        requires a valid 'submitInfoID' (or 'unlockInfoID') 
-        that points to a record in the UpdateInfoTable */
-
-    /*
-    const updateInfoResult = await prepopulateUpdateInfo(
-        client,
-        revision,
-        formData
-    )
-    if (updateInfoResult instanceof Error) {
-        const error = new Error(
-            `Error migrating ${revision.id}: ${updateInfoResult.message}`
-        )
-        return error
-    }
-    */
 
     // migrate the contract part
     const migrateContractResult = await migrateContract(
@@ -171,6 +151,7 @@ export async function migrateRevision(
 
     /* My confidence in the join table and document strategies is lower than for the other tables.
         I think these are worth reviewing carefully as a team */
+    /*
     const migrateAssociationsResult = await migrateAssociations(client)
     if (migrateAssociationsResult instanceof Error) {
         const error = new Error(
@@ -179,10 +160,12 @@ export async function migrateRevision(
         console.error(error)
         return error
     }
+    */
 
     /* The ContractRevisionID and the RateRevisionID in the document tables
         are foreign keys to the id fields in their respective revision tables. 
         I'm not 100% sure that this is the correct approach.  */
+    /*
     const documentMigrationResults = await migrateDocuments(
         client,
         revision,
@@ -195,20 +178,19 @@ export async function migrateRevision(
         console.error(error)
         return error
     }
+    */
 
     // let's check that we did things right
     const migratedContract = await findContractWithHistory(
         client,
         migrateContractResult.contract.id
     )
-    console.info(`migrated contract result ${JSON.stringify(migrateContract)}`)
-
     if (
         migratedContract instanceof Error ||
         migratedContract instanceof NotFoundError
     ) {
         const error = new Error(
-            `Did not successfully migrate revision ${revision}: ${migratedContract}`
+            `Did not successfully migrate revision ${revision.id}: ${migratedContract}`
         )
         return error
     }
@@ -266,6 +248,18 @@ export async function migrateContract(
     }
 }
 
+// cleanupPreviousProtoMigrate resets us back to the state prior to running this migration
+export async function cleanupPreviousProtoMigrate(
+    client: PrismaClient
+): Promise<void | Error> {
+    const cleanResult = await cleanupLastMigration(client)
+    if (cleanResult instanceof Error) {
+        console.error(cleanResult)
+        return cleanResult
+    }
+    return
+}
+
 export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // setup otel tracing
     const stageName = process.env.stage ?? 'stageNotSet'
@@ -279,8 +273,19 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
         )
     }
 
-    // setup db connections and get revisions
+    // setup db connections, clean last migration run, and get revisions
     const { store, prismaClient } = await getDatabaseConnection()
+    const cleanResult = await cleanupPreviousProtoMigrate(prismaClient)
+    if (cleanResult instanceof Error) {
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                message:
+                    'Could not cleanup after previous migrations. Aborting.',
+            }),
+        } as APIGatewayProxyResultV2
+    }
+
     const revisions = await getRevisions(store)
 
     // go through the list of revisons and migrate

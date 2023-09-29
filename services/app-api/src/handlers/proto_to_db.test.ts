@@ -11,7 +11,11 @@ import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 import { testLDService } from '../testHelpers/launchDarklyHelpers'
 import { testCMSUser } from '../testHelpers/userHelpers'
 import UNLOCK_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
-import { migrateRevision } from './proto_to_db'
+import {
+    cleanupPreviousProtoMigrate,
+    getRevisions,
+    migrateRevision,
+} from './proto_to_db'
 import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
 
 describe('test that we migrate things', () => {
@@ -192,7 +196,18 @@ describe('test that we migrate things', () => {
             )}`
         )
 
+        // Now that we have a fully submitted package, we run the proto migrator on it
         const prismaClient = await sharedTestPrismaClient()
+
+        // first reset us to the pre-proto migration state
+        const cleanResult = await cleanupPreviousProtoMigrate(prismaClient)
+        if (cleanResult instanceof Error) {
+            const error = new Error(
+                `Could not reset the DB: ${cleanResult.message}`
+            )
+            throw error
+        }
+
         const migratedRevisions = []
         for (const revision of finallySubmittedPKG.revisions) {
             const migratedRevision = await migrateRevision(
