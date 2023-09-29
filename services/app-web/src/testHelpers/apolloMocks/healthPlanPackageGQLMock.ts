@@ -154,7 +154,7 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
             },
             {
                 s3URL: 's3://bucketname/1648490162641-lifeofgalileo.pdf/lifeofgalileo.pdf',
-                sha256: 'fakesha',
+                sha256: 'fakesha1',
                 name: 'lifeofgalileo.pdf',
                 documentCategories: ['CONTRACT'],
             },
@@ -164,13 +164,13 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                 rateDocuments: [
                     {
                         s3URL: 's3://bucketname/1648242665634-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf',
-                        sha256: 'fakesha',
+                        sha256: 'fakesha2',
                         name: 'Amerigroup Texas, Inc.pdf',
                         documentCategories: ['RATES'],
                     },
                     {
                         s3URL: 's3://bucketname/1648242711421-Amerigroup Texas Inc copy.pdf/Amerigroup Texas Inc copy.pdf',
-                        sha256: 'fakesha',
+                        sha256: 'fakesha3',
                         name: 'Amerigroup Texas Inc copy.pdf',
                         documentCategories: ['RATES'],
                     },
@@ -178,7 +178,7 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                 supportingDocuments: [
                     {
                         s3URL: 's3://bucketname/1648242873229-covid-ifc-2-flu-rsv-codes 5-5-2021.pdf/covid-ifc-2-flu-rsv-codes 5-5-2021.pdf',
-                        sha256: 'fakesha',
+                        sha256: 'fakesha5',
                         name: 'covid-ifc-2-flu-rsv-codes 5-5-2021.pdf',
                         documentCategories: ['RATES_RELATED'],
                     },
@@ -190,7 +190,7 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
         documents: [
             {
                 s3URL: 's3://bucketname/1648242711421-529-10-0020-00003_Superior_Health Plan, Inc.pdf/529-10-0020-00003_Superior_Health Plan, Inc.pdf',
-                sha256: 'fakesha',
+                sha256: 'fakesha3',
                 name: '529-10-0020-00003_Superior_Health Plan, Inc.pdf',
                 documentCategories: ['CONTRACT_RELATED'],
             },
@@ -206,13 +206,13 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
             },
             {
                 s3URL: 's3://bucketname/1648242665634-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf',
-                sha256: 'fakesha',
+                sha256: 'fakesha2',
                 name: 'Amerigroup Texas, Inc.pdf',
                 documentCategories: ['CONTRACT'],
             },
             {
                 s3URL: 's3://bucketname/1648242711421-Amerigroup Texas Inc copy.pdf/Amerigroup Texas Inc copy.pdf',
-                sha256: 'fakesha',
+                sha256: 'fakesha4',
                 name: 'Amerigroup Texas Inc copy.pdf',
                 documentCategories: ['CONTRACT'],
             },
@@ -222,13 +222,13 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                 rateDocuments: [
                     {
                         s3URL: 's3://bucketname/1648242711421-529-10-0020-00003_Superior_Health Plan, Inc.pdf/529-10-0020-00003_Superior_Health Plan, Inc.pdf',
-                        sha256: 'fakesha',
+                        sha256: 'fakesha3',
                         name: '529-10-0020-00003_Superior_Health Plan, Inc.pdf',
                         documentCategories: ['RATES'],
                     },
                     {
                         s3URL: 's3://bucketname/1648242873229-covid-ifc-2-flu-rsv-codes 5-5-2021.pdf/covid-ifc-2-flu-rsv-codes 5-5-2021.pdf',
-                        sha256: 'fakesha',
+                        sha256: 'fakesha5',
                         name: 'covid-ifc-2-flu-rsv-codes 5-5-2021.pdf',
                         documentCategories: ['RATES'],
                     },
@@ -242,7 +242,7 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                 supportingDocuments: [
                     {
                         s3URL: 's3://bucketname/1648242711421-529-10-0020-00003_Superior_Health Plan, Inc.pdf/529-10-0020-00003_Superior_Health Plan, Inc.pdf',
-                        sha256: 'fakesha',
+                        sha256: 'fakesha3',
                         name: '529-10-0020-00003_Superior_Health Plan, Inc.pdf',
                         documentCategories: ['RATES_RELATED'],
                     },
@@ -254,13 +254,13 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
         documents: [
             {
                 s3URL: 's3://bucketname/1648242665634-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf',
-                sha256: 'fakesha',
+                sha256: 'fakesha2',
                 name: 'Amerigroup Texas, Inc.pdf',
                 documentCategories: ['CONTRACT_RELATED'],
             },
             {
                 s3URL: 's3://bucketname/1648242711421-Amerigroup Texas Inc copy.pdf/Amerigroup Texas Inc copy.pdf',
-                sha256: 'fakesha',
+                sha256: 'fakesha4',
                 name: 'Amerigroup Texas Inc copy.pdf',
                 documentCategories: ['CONTRACT_RELATED'],
             },
