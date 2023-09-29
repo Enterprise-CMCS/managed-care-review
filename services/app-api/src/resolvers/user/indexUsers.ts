@@ -20,7 +20,7 @@ export function indexUsersResolver(store: Store): QueryResolvers['indexUsers'] {
             !(
                 isAdminUser(currentUser) ||
                 isHelpdeskUser(currentUser) ||
-                !isBusinessOwnerUser(currentUser)
+                isBusinessOwnerUser(currentUser)
             )
         ) {
             const errMsg = 'user not authorized to fetch users'
