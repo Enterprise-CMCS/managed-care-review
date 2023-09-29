@@ -34,7 +34,7 @@ import { migrateContractRevision } from '../postgres/contractAndRates/proto_to_d
 import { migrateRateInfo } from '../postgres/contractAndRates/proto_to_db_RateRevisions'
 import { insertContractId } from '../postgres/contractAndRates/proto_to_db_ContractId'
 import { cleanupLastMigration } from '../postgres/contractAndRates/proto_to_db_CleanupLastMigration'
-import { base64ToDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import type { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { findContractWithHistory } from '../postgres/contractAndRates'
 
@@ -91,9 +91,7 @@ export function decodeFormDataProto(
     revision: HealthPlanRevisionTable
 ): HealthPlanFormDataType | Error {
     // decode the proto
-    const decodedFormDataProto = base64ToDomain(
-        revision.formDataProto.toString()
-    )
+    const decodedFormDataProto = toDomain(revision.formDataProto)
     if (decodedFormDataProto instanceof Error) {
         const error = new Error(
             `Error in toDomain for ${revision.id}: ${decodedFormDataProto.message}`

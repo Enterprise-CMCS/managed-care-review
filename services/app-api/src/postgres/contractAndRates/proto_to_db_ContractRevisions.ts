@@ -4,13 +4,13 @@ import type {
     ManagedCareEntity,
     ContractTable,
     Prisma,
+    HealthPlanRevisionTable,
 } from '@prisma/client'
 import type { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
-import type { HealthPlanRevisionType } from '../../domain-models'
 
 async function migrateContractRevision(
     client: PrismaClient,
-    revision: HealthPlanRevisionType,
+    revision: HealthPlanRevisionTable,
     formData: HealthPlanFormDataType,
     contract: ContractTable
 ): Promise<ContractRevisionTable | Error> {
@@ -102,35 +102,32 @@ async function migrateContractRevision(
         }
 
         // Add the unlocked info to the table if it exists
-        console.info(
-            `check the revision info: ${(JSON.stringify(revision), null, '  ')}`
-        )
-        if (formData.status === 'SUBMITTED' && revision.unlockInfo) {
+        if (formData.status === 'SUBMITTED' && revision.unlockedBy) {
             const user = await client.user.findFirst({
-                where: { email: revision.unlockInfo.updatedBy },
+                where: { email: revision.unlockedBy },
             })
-            console.info(JSON.stringify(user))
+
             if (user) {
                 createDataObject.unlockInfo = {
                     create: {
-                        updatedAt: revision.unlockInfo.updatedAt,
+                        updatedAt: revision.unlockedAt ?? new Date(),
                         updatedByID: user.id,
                         updatedReason:
-                            revision.unlockInfo.updatedReason ??
+                            revision.unlockedReason ??
                             'Migrated from previous system',
                     },
                 }
             } else {
                 console.warn(
-                    `User with email ${revision.unlockInfo.updatedBy} does not exist. Skipping unlockInfo creation.`
+                    `User with email ${revision.unlockedBy} does not exist. Skipping unlockInfo creation.`
                 )
             }
         }
 
         // add the submit info to the table if it exists
-        if (formData.status === 'SUBMITTED' && revision.submitInfo) {
+        if (formData.status === 'SUBMITTED' && revision.submittedBy) {
             const user = await client.user.findFirst({
-                where: { email: revision.submitInfo.updatedBy },
+                where: { email: revision.submittedBy },
             })
             if (user) {
                 createDataObject.submitInfo = {
@@ -138,13 +135,13 @@ async function migrateContractRevision(
                         updatedAt: formData.updatedAt,
                         updatedByID: user.id,
                         updatedReason:
-                            revision.submitInfo.updatedReason ??
+                            revision.submittedReason ??
                             'Migrated from previous system',
                     },
                 }
             } else {
                 console.warn(
-                    `User with email ${revision.submitInfo.updatedBy} does not exist. Skipping submitInfo creation.`
+                    `User with email ${revision.submittedBy} does not exist. Skipping submitInfo creation.`
                 )
             }
         }

@@ -16,6 +16,7 @@ export async function cleanupLastMigration(
             client.contractSupportingDocument.deleteMany(),
             client.rateSupportingDocument.deleteMany(),
             client.rateRevisionsOnContractRevisionsTable.deleteMany(),
+            client.updateInfoTable.deleteMany(),
 
             // must be last due to foreign keys
             client.rateTable.deleteMany(),

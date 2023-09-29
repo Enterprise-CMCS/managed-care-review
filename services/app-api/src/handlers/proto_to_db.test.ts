@@ -13,10 +13,12 @@ import { testCMSUser } from '../testHelpers/userHelpers'
 import UNLOCK_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
 import {
     cleanupPreviousProtoMigrate,
-    getRevisions,
+    decodeFormDataProto,
     migrateRevision,
 } from './proto_to_db'
 import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
+import { findAllRevisions } from '../postgres/healthPlanPackage'
+import { isStoreError } from '../postgres'
 
 describe('test that we migrate things', () => {
     const mockPreRefactorLDService = testLDService({
@@ -199,7 +201,7 @@ describe('test that we migrate things', () => {
         // Now that we have a fully submitted package, we run the proto migrator on it
         const prismaClient = await sharedTestPrismaClient()
 
-        // first reset us to the pre-proto migration state
+        // first reset us to the pre-proto migration tables state
         const cleanResult = await cleanupPreviousProtoMigrate(prismaClient)
         if (cleanResult instanceof Error) {
             const error = new Error(
@@ -208,16 +210,41 @@ describe('test that we migrate things', () => {
             throw error
         }
 
+        // look up the HPP using prisma methods. The migrator relies on finding all the
+        // revisions in the DB and uses the Prisma type.
+        const allRevisions = await findAllRevisions(prismaClient)
+        if (isStoreError(allRevisions)) {
+            const error = new Error(
+                `Could not fetch revisions from DB: ${allRevisions.message}`
+            )
+            throw error
+        }
+
+        // for our test we just want the test data we made above to make expects on, not
+        // absolutely everything in the local DB
+        const revisionsToMigrate = []
+        for (const revision of allRevisions) {
+            const formData = decodeFormDataProto(revision)
+            if (formData instanceof Error) {
+                const error = new Error(
+                    `Could not decode form data from revision in test: ${formData.message}`
+                )
+                throw error
+            }
+            if (formData.id === finallySubmittedPKG.id) {
+                revisionsToMigrate.push(revision)
+            }
+        }
+
         const migratedRevisions = []
-        for (const revision of finallySubmittedPKG.revisions) {
+        for (const revision of revisionsToMigrate) {
             const migratedRevision = await migrateRevision(
                 prismaClient,
-                revision.node
+                revision
             )
             migratedRevisions.push(migratedRevision)
         }
 
-        /*
         const stateServerPost = await constructTestPostgresServer({
             ldService: mockPostRefactorLDService,
         })
@@ -226,16 +253,8 @@ describe('test that we migrate things', () => {
             stateServerPost,
             finallySubmittedPKG.id
         )
-        */
 
-        console.info(
-            `Migrated revisions: ${JSON.stringify(
-                migratedRevisions,
-                null,
-                '  '
-            )}`
-        )
-        //console.info(JSON.stringify(fetchedHPP, null, '  '))
+        console.info(`Migrated HPP: ${JSON.stringify(fetchedHPP, null, '  ')}`)
 
         throw new Error('Not done with this test yet')
     }, 20000)
