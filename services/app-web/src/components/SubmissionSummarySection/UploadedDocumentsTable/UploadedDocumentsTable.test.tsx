@@ -43,6 +43,11 @@ describe('UploadedDocumentsTable', () => {
             expect(screen.getAllByRole('row').length - 1).toEqual(
                 testDocuments.length
             )
+            expect(
+                screen.queryByText(
+                    'Only one document is allowed for a rate certification. You must remove documents before continuing'
+                )
+            ).not.toBeInTheDocument()
         })
     })
 
@@ -388,6 +393,48 @@ describe('UploadedDocumentsTable', () => {
             expect(screen.getByTestId('tag')).toHaveTextContent('NEW')
         })
     })
+
+    it('renders error when multiple documents supplied when not allowed', async () => {
+        const testDocuments = [
+            {
+                s3URL: 's3://foo/bar/test-1',
+                name: 'supporting docs test 1',
+                documentCategories: ['CONTRACT_RELATED' as const],
+            },
+            {
+                s3URL: 's3://foo/bar/test-2',
+                name: 'supporting docs test 2',
+                documentCategories: ['RATES_RELATED' as const],
+            },
+        ]
+
+        renderWithProviders(
+            <UploadedDocumentsTable
+                documentDateLookupTable={emptyDocumentsTable()}
+                documents={testDocuments}
+                caption="Contract"
+                documentCategory="Contract"
+                multipleDocumentsAllowed={false}
+                isSubmitted={false}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        await waitFor(() => {
+            expect(screen.getAllByRole('row').length - 1).toEqual(
+                testDocuments.length
+            )
+            expect(
+                screen.getByText(
+                    /Only one document is allowed for a rate certification. You must remove documents before continuing/
+                )
+            ).toBeInTheDocument()
+        })
+    })
+
     it('does not show the NEW tag if the user is not a CMS user', async () => {
         const testDocuments = [
             {

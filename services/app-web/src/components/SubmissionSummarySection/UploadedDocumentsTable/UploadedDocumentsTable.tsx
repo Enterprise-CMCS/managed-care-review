@@ -11,6 +11,7 @@ import { useDocument } from '../../../hooks/useDocument'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 import { getDocumentKey } from '../../../documentHelpers'
 import { useAuth } from '../../../contexts/AuthContext'
+import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 
 export type UploadedDocumentsTableProps = {
     documents: SubmissionDocument[]
@@ -18,8 +19,10 @@ export type UploadedDocumentsTableProps = {
     packagesWithSharedRateCerts?: SharedRateCertDisplay[]
     documentDateLookupTable: DocumentDateLookupTableType
     isSupportingDocuments?: boolean
+    multipleDocumentsAllowed?: boolean
     documentCategory?: string // if this prop is not included, do not show category column
     isEditing?: boolean // by default assume we are on summary page, if true, assume review and submit page
+    isSubmitted?: boolean // by default assume we are on summary page, if true, assume review and submit page
 }
 
 export const UploadedDocumentsTable = ({
@@ -28,8 +31,10 @@ export const UploadedDocumentsTable = ({
     documentCategory,
     packagesWithSharedRateCerts,
     isSupportingDocuments = false,
+    multipleDocumentsAllowed = true,
     documentDateLookupTable,
     isEditing = false,
+    isSubmitted = true,
 }: UploadedDocumentsTableProps): React.ReactElement => {
     const initialDocState = documents.map((doc) => ({
         ...doc,
@@ -136,6 +141,16 @@ export const UploadedDocumentsTable = ({
                     <div className={styles.captionContainer}>
                         {tableCaptionJSX}
                     </div>
+                    {!multipleDocumentsAllowed &&
+                        documents.length > 1 &&
+                        !isSubmitted && (
+                            <DataDetailMissingField
+                                classname={styles.missingInfo}
+                                requiredText="Only one document is allowed for a rate
+                        certification. You must remove documents before
+                        continuing."
+                            />
+                        )}
                 </caption>
                 <thead>
                     <tr>
