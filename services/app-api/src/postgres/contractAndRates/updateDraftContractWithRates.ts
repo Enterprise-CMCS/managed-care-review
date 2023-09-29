@@ -142,14 +142,6 @@ async function updateDraftContractWithRates(
 
     try {
         return await client.$transaction(async (tx) => {
-            const foundBeforeContract = await findContractWithHistory(
-                tx,
-                contractID
-            )
-
-            if (foundBeforeContract instanceof Error) {
-                return foundBeforeContract
-            }
             // Given all the Contracts associated with this draft, find the most recent submitted
             const currentRev = await tx.contractRevisionTable.findFirst({
                 where: {

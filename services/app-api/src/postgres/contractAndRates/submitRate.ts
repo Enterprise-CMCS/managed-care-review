@@ -2,7 +2,7 @@ import { findRateWithHistory } from './findRateWithHistory'
 import type { UpdateInfoType } from '../../domain-models'
 import type { PrismaClient } from '@prisma/client'
 import type { RateType } from '../../domain-models/contractAndRates'
-import { includeFirstSubmittedContractRev } from './prismaSubmittedContractHelpers'
+import { includeLatestSubmittedRateRev } from './prismaSubmittedContractHelpers'
 import { NotFoundError } from '../storeError'
 
 type SubmitRateArgsType = {
@@ -49,7 +49,7 @@ async function submitRate(
                 where: findWhere,
                 include: {
                     draftContracts: {
-                        include: includeFirstSubmittedContractRev,
+                        include: includeLatestSubmittedRateRev,
                     },
                 },
             })

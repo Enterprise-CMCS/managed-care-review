@@ -3,7 +3,7 @@ import type { ContractType } from '../../domain-models/contractAndRates'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../storeError'
 import type { UpdateInfoType } from '../../domain-models'
-import { includeFirstSubmittedRateRev } from './prismaSubmittedRateHelpers'
+import { includeLatestSubmittedRateRev } from './prismaSubmittedRateHelpers'
 
 type SubmitContractArgsType = {
     contractID: string // revision ID
@@ -31,7 +31,7 @@ async function submitContract(
                 },
                 include: {
                     draftRates: {
-                        include: includeFirstSubmittedRateRev,
+                        include: includeLatestSubmittedRateRev,
                     },
                 },
             })
