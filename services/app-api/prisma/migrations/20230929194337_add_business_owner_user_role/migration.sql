@@ -1,0 +1,7 @@
+BEGIN;
+-- AlterEnum
+ALTER TYPE "Role" ADD VALUE 'BUSINESSOWNER_USER';
+
+-- AlterTable
+ALTER TABLE "UserAudit" ALTER COLUMN "updatedAt" DROP DEFAULT;
+COMMIT;

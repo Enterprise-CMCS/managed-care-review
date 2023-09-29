@@ -341,6 +341,7 @@ enum Role {
   STATE_USER
   ADMIN_USER
   HELPDESK_USER
+  BUSINESSOWNER_USER
 }
 
 enum AuditAction {
