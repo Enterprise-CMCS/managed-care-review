@@ -12,7 +12,7 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql/index'
 import type { LDService } from '../../launchDarkly/launchDarkly'
-import { convertContractToUnlockedHealthPlanPackage } from '../../domain-models'
+import { convertContractWithRatesToUnlockedHPP } from '../../domain-models'
 
 export function createHealthPlanPackageResolver(
     store: Store,
@@ -93,7 +93,7 @@ export function createHealthPlanPackageResolver(
 
             // Now we do the conversions
             const pkg =
-                convertContractToUnlockedHealthPlanPackage(contractResult)
+                convertContractWithRatesToUnlockedHPP(contractResult)
 
             if (pkg instanceof Error) {
                 const errMessage = `Error converting draft contract. Message: ${pkg.message}`

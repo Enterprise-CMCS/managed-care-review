@@ -17,11 +17,13 @@ describe('ContractDetailsSummarySection', () => {
                 {
                     s3URL: 's3://bucketname/key/test1',
                     name: 'supporting docs test 1',
+                    sha256: 'fakesha',
                     documentCategories: ['CONTRACT_RELATED' as const],
                 },
                 {
                     s3URL: 's3://bucketname/key/test3',
                     name: 'supporting docs test 3',
+                    sha256: 'fakesha',
                     documentCategories: [
                         'CONTRACT_RELATED' as const,
                         'RATES_RELATED' as const,
@@ -166,6 +168,7 @@ describe('ContractDetailsSummarySection', () => {
                 {
                     s3URL: 's3://foo/bar/contract',
                     name: 'contract test 1',
+                    sha256: 'fakesha',
                     documentCategories: ['CONTRACT' as const],
                 },
             ],
@@ -173,16 +176,19 @@ describe('ContractDetailsSummarySection', () => {
                 {
                     s3URL: 's3://bucketname/key/test1',
                     name: 'supporting docs test 1',
+                    sha256: 'fakesha',
                     documentCategories: ['CONTRACT_RELATED' as const],
                 },
                 {
                     s3URL: 's3://bucketname/key/test2',
                     name: 'supporting docs test 2',
+                    sha256: 'fakesha',
                     documentCategories: ['RATES_RELATED' as const],
                 },
                 {
                     s3URL: 's3://bucketname/key/test3',
                     name: 'supporting docs test 3',
+                    sha256: 'fakesha',
                     documentCategories: [
                         'CONTRACT_RELATED' as const,
                         'RATES_RELATED' as const,
@@ -338,18 +344,18 @@ describe('ContractDetailsSummarySection', () => {
             await screen.findByText('1115 Waiver Authority')
         ).toBeInTheDocument()
         expect(
-            await screen.queryByText('1932(a) State Plan Authority')
+            screen.queryByText('1932(a) State Plan Authority')
         ).not.toBeInTheDocument()
         expect(
-            await screen.queryByText('1937 Benchmark Authority')
+            screen.queryByText('1937 Benchmark Authority')
         ).not.toBeInTheDocument()
     })
     it('renders inline error when bulk URL is unavailable', async () => {
         const s3Provider = {
             ...testS3Client(),
             getBulkDlURL: async (
-                keys: string[],
-                fileName: string
+                _keys: string[],
+                _fileName: string
             ): Promise<string | Error> => {
                 return new Error('Error: getBulkDlURL encountered an error')
             },
@@ -601,9 +607,7 @@ describe('ContractDetailsSummarySection', () => {
             const contractWithUnansweredProvisions: UnlockedHealthPlanFormDataType =
                 {
                     ...mockContractAndRatesDraft(),
-                    contractAmendmentInfo: {
-                        modifiedProvisions: undefined,
-                    },
+                    contractAmendmentInfo: undefined,
                 }
             renderWithProviders(
                 <ContractDetailsSummarySection

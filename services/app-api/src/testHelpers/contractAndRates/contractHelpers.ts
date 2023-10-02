@@ -4,7 +4,7 @@ import type {
     ContractRevisionTableWithRates,
     ContractTableFullPayload,
 } from '../../postgres/contractAndRates/prismaSubmittedContractHelpers'
-import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type { ContractFormDataType } from '../../domain-models/contractAndRates'
 import { getProgramsFromState } from '../stateHelpers'
 
@@ -104,6 +104,7 @@ const createContractRevision = (
     supportingDocuments: [
         {
             id: uuidv4(),
+            position: 0,
             contractRevisionID: 'contractRevisionID',
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -113,6 +114,7 @@ const createContractRevision = (
         },
         {
             id: uuidv4(),
+            position: 1,
             contractRevisionID: 'contractRevisionID',
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -126,6 +128,7 @@ const createContractRevision = (
     contractDocuments: [
         {
             id: uuidv4(),
+            position: 0,
             contractRevisionID: 'contractRevisionID',
             createdAt: new Date(),
             updatedAt: new Date(),

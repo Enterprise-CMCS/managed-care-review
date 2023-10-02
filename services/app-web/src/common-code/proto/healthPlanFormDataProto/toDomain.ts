@@ -13,6 +13,7 @@ import {
     isLockedHealthPlanFormData,
     RateInfoType,
     generateRateName,
+    HealthPlanFormDataType,
 } from '../../healthPlanFormDataType'
 import { toLatestProtoVersion } from './toLatestVersion'
 import { findStatePrograms } from '../../healthPlanFormDataType/findStatePrograms'
@@ -190,7 +191,7 @@ function parseProtoDocuments(
             mcreviewproto.DocumentCategory,
             doc.documentCategories
         ) as DocumentCategoryType[],
-        sha256: doc.sha256 || undefined,
+        sha256: doc.sha256 || 'sha_undefined_in_proto',
     }))
 }
 
@@ -387,6 +388,62 @@ function parseRateInfos(
 
 // End Parsers
 
+type PartialHealthPlanFormData =
+    RecursivePartial<UnlockedHealthPlanFormDataType> &
+        RecursivePartial<LockedHealthPlanFormDataType>
+
+function parsePartialHPFD(
+    status: string | undefined | null,
+    maybeUnlockedFormData: PartialHealthPlanFormData
+): HealthPlanFormDataType | Error {
+    if (status === 'DRAFT') {
+        // cast so we can set status
+        const maybeDraft =
+            maybeUnlockedFormData as RecursivePartial<UnlockedHealthPlanFormDataType>
+        maybeDraft.status = 'DRAFT'
+        // This parse returns an actual UnlockedHealthPlanFormDataType, so all our partial & casting is put to rest
+        const parseResult =
+            unlockedHealthPlanFormDataZodSchema.safeParse(maybeDraft)
+        if (parseResult.success === false) {
+            return parseResult.error
+        }
+        /* We need a one-off modification here because some older submissions don't have a populated
+        rateCertificationName field.  If it's missing, we'll generate it and add it to the form data.
+        We do it for locked or unlocked submissions. */
+        return updateRateCertificationNames(
+            parseResult.data as UnlockedHealthPlanFormDataType
+        )
+    } else if (status === 'SUBMITTED') {
+        const maybeLockedFormData =
+            maybeUnlockedFormData as RecursivePartial<LockedHealthPlanFormDataType>
+        maybeLockedFormData.status = 'SUBMITTED'
+
+        const parseResult =
+            lockedHealthPlanFormDataZodSchema.safeParse(maybeLockedFormData)
+        if (parseResult.success === false) {
+            console.warn(
+                'ERROR: attempting to parse state submission proto failed.'
+            )
+            return new Error(
+                'ERROR: attempting to parse state submission proto failed'
+            )
+        }
+        if (isLockedHealthPlanFormData(maybeLockedFormData)) {
+            /* We need a one-off modification here because some older submissions don't have a populated
+        rateCertificationName field.  If it's missing, we'll generate it and add it to the form data.
+        We do it for locked or unlocked submissions. */
+            return updateRateCertificationNames(maybeLockedFormData)
+        } else {
+            return new Error(
+                'ERROR: attempting to parse state submission proto failed'
+            )
+        }
+    }
+
+    // unknown or missing status means we've got a parse error.
+    return new Error('Unknown or missing status on this proto. Cannot decode.')
+}
+
 const toDomain = (
     buff: Uint8Array
 ): UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType | Error => {
@@ -427,8 +484,7 @@ const toDomain = (
 
     // Since everything in proto-land is optional, we construct a RecursivePartial version of our domain models
     // and
-    const maybeUnlockedFormData: RecursivePartial<UnlockedHealthPlanFormDataType> &
-        RecursivePartial<LockedHealthPlanFormDataType> = {
+    const maybeUnlockedFormData: PartialHealthPlanFormData = {
         id: id ?? undefined,
         createdAt: protoDateToDomain(createdAt),
         updatedAt: protoTimestampToDomain(updatedAt),
@@ -491,57 +547,17 @@ const toDomain = (
 
     // Now that we've gotten things into our combined draft & state domain format.
     // we confirm that all the required fields are present to turn this into an UnlockedHealthPlanFormDataType or a LockedHealthPlanFormDataType
-    if (status === 'DRAFT') {
-        // cast so we can set status
-        const maybeDraft =
-            maybeUnlockedFormData as RecursivePartial<UnlockedHealthPlanFormDataType>
-        maybeDraft.status = 'DRAFT'
-        // This parse returns an actual UnlockedHealthPlanFormDataType, so all our partial & casting is put to rest
-        const parseResult =
-            unlockedHealthPlanFormDataZodSchema.safeParse(maybeDraft)
-        if (parseResult.success === false) {
-            return parseResult.error
-        }
-        /* We need a one-off modification here because some older submissions don't have a populated
-        rateCertificationName field.  If it's missing, we'll generate it and add it to the form data.
-        We do it for locked or unlocked submissions. */
-        return updateRateCertificationNames(
-            parseResult.data as UnlockedHealthPlanFormDataType
-        )
-    } else if (status === 'SUBMITTED') {
-        const maybeLockedFormData =
-            maybeUnlockedFormData as RecursivePartial<LockedHealthPlanFormDataType>
-        maybeLockedFormData.status = 'SUBMITTED'
 
-        const parseResult =
-            lockedHealthPlanFormDataZodSchema.safeParse(maybeLockedFormData)
-        if (parseResult.success === false) {
-            console.warn(
-                'ERROR: attempting to parse state submission proto failed.'
-            )
-            return new Error(
-                'ERROR: attempting to parse state submission proto failed'
-            )
-        }
-        if (isLockedHealthPlanFormData(maybeLockedFormData)) {
-            /* We need a one-off modification here because some older submissions don't have a populated
-        rateCertificationName field.  If it's missing, we'll generate it and add it to the form data.
-        We do it for locked or unlocked submissions. */
-            return updateRateCertificationNames(maybeLockedFormData)
-        } else {
-            console.warn(
-                'ERROR: attempting to parse state submission proto failed.',
-                id
-            )
-            return new Error(
-                'ERROR: attempting to parse state submission proto failed'
-            )
-        }
+    const formDataResult = parsePartialHPFD(status, maybeUnlockedFormData)
+    if (formDataResult instanceof Error) {
+        console.warn(
+            'ERROR: attempting to parse state submission proto failed.',
+            id
+        )
     }
 
-    // unknown or missing status means we've got a parse error.
-    console.warn('ERROR: Unknown or missing status on this proto.', id, status)
-    return new Error('Unknown or missing status on this proto. Cannot decode.')
+    return formDataResult
 }
 
-export { toDomain, decodeOrError }
+export { toDomain, decodeOrError, parsePartialHPFD }
+export type { PartialHealthPlanFormData }

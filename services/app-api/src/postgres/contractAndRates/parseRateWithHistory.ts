@@ -1,7 +1,7 @@
 import type {
     RateRevisionWithContractsType,
     RateType,
-    RateRevisionType
+    RateRevisionType,
 } from '../../domain-models/contractAndRates'
 import { rateSchema } from '../../domain-models/contractAndRates'
 import { contractRevisionsToDomainModels } from './parseContractWithHistory'
@@ -13,7 +13,7 @@ import type {
 } from './prismaSharedContractRateHelpers'
 import {
     convertUpdateInfoToDomainModel,
-    getContractStatus,
+    getContractRateStatus,
     rateFormDataToDomainModel,
 } from './prismaSharedContractRateHelpers'
 import type { RateTableFullPayload } from './prismaSubmittedRateHelpers'
@@ -88,7 +88,7 @@ function rateRevisionsToDomainModels(
 function rateWithHistoryToDomainModel(
     rate: RateTableFullPayload
 ): RateType | Error {
-      // so you get all the rate revisions. each one has a bunch of contracts
+    // so you get all the rate revisions. each one has a bunch of contracts
     // each set of contracts gets its own "revision" in the return list
     // further rateRevs naturally are their own "revision"
 
@@ -168,11 +168,11 @@ function rateWithHistoryToDomainModel(
 
     return {
         id: rate.id,
-        status: getContractStatus(rate.revisions),
+        status: getContractRateStatus(rateRevisions),
         stateCode: rate.stateCode,
         stateNumber: rate.stateNumber,
         draftRevision,
-        revisions
+        revisions,
     }
 }
 export {

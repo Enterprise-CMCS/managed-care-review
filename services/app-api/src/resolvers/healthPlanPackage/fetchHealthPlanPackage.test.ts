@@ -63,6 +63,7 @@ describe('fetchHealthPlanPackage', () => {
             {
                 name: 'contractDocument.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT'],
             },
         ])
@@ -428,7 +429,7 @@ describe('fetchHealthPlanPackage rates-db-refactor flag on tests', () => {
         }
 
         // Expect the created revision and the fetchHPP revision are the same.
-        expect(subData.id).toEqual(stateSubmission.revisions[0].node.id)
+        expect(subData.id).toEqual(stateSubmission.id)
 
         expect(subData.programIDs).toEqual([
             '5c10fe9f-bec9-416f-a20c-718b152ad633',

@@ -17,6 +17,7 @@ describe('UploadedDocumentsTable', () => {
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
         ]
@@ -56,11 +57,13 @@ describe('UploadedDocumentsTable', () => {
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
+                sha256: 'fakesha',
                 documentCategories: [
                     'CONTRACT_RELATED' as const,
                     'RATES_RELATED' as const,
@@ -106,16 +109,19 @@ describe('UploadedDocumentsTable', () => {
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
+                sha256: 'fakesha',
                 documentCategories: ['RATES_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
+                sha256: 'fakesha',
                 documentCategories: [
                     'CONTRACT_RELATED' as const,
                     'RATES_RELATED' as const,
@@ -164,16 +170,19 @@ describe('UploadedDocumentsTable', () => {
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
+                sha256: 'fakesha1',
                 documentCategories: ['RATES_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
+                sha256: 'fakesha2',
                 documentCategories: [
                     'CONTRACT_RELATED' as const,
                     'RATES_RELATED' as const,
@@ -181,11 +190,11 @@ describe('UploadedDocumentsTable', () => {
             },
         ]
         const dateLookupTable: DocumentDateLookupTableType = {
-            's3://foo/bar/test-1':
+            fakesha:
                 'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            's3://foo/bar/test-2':
+            fakesha1:
                 'Sat Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            's3://foo/bar/test-3':
+            fakesha2:
                 'Sun Mar 27 2022 16:13:20 GMT-0500 (Central Daylight Time)',
             previousSubmissionDate:
                 'Sun Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
@@ -224,16 +233,19 @@ describe('UploadedDocumentsTable', () => {
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
+                sha256: 'fakesha1',
                 documentCategories: ['RATES_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
+                sha256: 'fakesha2',
                 documentCategories: [
                     'CONTRACT_RELATED' as const,
                     'RATES_RELATED' as const,
@@ -241,11 +253,11 @@ describe('UploadedDocumentsTable', () => {
             },
         ]
         const dateLookupTable: DocumentDateLookupTableType = {
-            's3://foo/bar/test-1':
+            fakesha:
                 'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            's3://foo/bar/test-2':
+            fakesha1:
                 'Sat Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            's3://foo/bar/test-3':
+            fakesha2:
                 'Sun Mar 27 2022 16:13:20 GMT-0500 (Central Daylight Time)',
             previousSubmissionDate:
                 'Sun Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
@@ -284,16 +296,19 @@ describe('UploadedDocumentsTable', () => {
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
+                sha256: 'fakesha1',
                 documentCategories: ['RATES_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
+                sha256: 'fakesha2',
                 documentCategories: [
                     'CONTRACT_RELATED' as const,
                     'RATES_RELATED' as const,
@@ -344,16 +359,19 @@ describe('UploadedDocumentsTable', () => {
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
+                sha256: 'fakesha1',
                 documentCategories: ['RATES_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
+                sha256: 'fakesha2',
                 documentCategories: [
                     'CONTRACT_RELATED' as const,
                     'RATES_RELATED' as const,
@@ -361,11 +379,11 @@ describe('UploadedDocumentsTable', () => {
             },
         ]
         const dateLookupTable: DocumentDateLookupTableType = {
-            's3://foo/bar/test-1':
+            fakesha:
                 'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            's3://foo/bar/test-2':
+            fakesha1:
                 'Sat Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            's3://foo/bar/test-3':
+            fakesha2:
                 'Sun Mar 27 2022 16:13:20 GMT-0500 (Central Daylight Time)',
             previousSubmissionDate:
                 'Sun Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
@@ -440,16 +458,19 @@ describe('UploadedDocumentsTable', () => {
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
+                sha256: 'fakesha1',
                 documentCategories: ['RATES_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
+                sha256: 'fakesha2',
                 documentCategories: [
                     'CONTRACT_RELATED' as const,
                     'RATES_RELATED' as const,
@@ -457,11 +478,11 @@ describe('UploadedDocumentsTable', () => {
             },
         ]
         const dateLookupTable = {
-            'supporting docs test 1':
+            fakesha:
                 'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            'supporting docs test 2':
+            fakesha1:
                 'Sat Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            'supporting docs test 3':
+            fakesha2:
                 'Sun Mar 27 2022 16:13:20 GMT-0500 (Central Daylight Time)',
             previousSubmissionDate:
                 'Sun Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
