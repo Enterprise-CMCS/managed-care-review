@@ -184,7 +184,12 @@ const SubmissionsDashboard = (): React.ReactElement => {
 
             submissionRows.push({
                 id: sub.id,
-                name: packageName(packageDataToDisplay, programs),
+                name: packageName(
+                    packageDataToDisplay.stateCode,
+                    packageDataToDisplay.stateNumber,
+                    packageDataToDisplay.programIDs,
+                    programs
+                ),
                 programs: programs.filter((program) =>
                     packageDataToDisplay.programIDs.includes(program.id)
                 ),

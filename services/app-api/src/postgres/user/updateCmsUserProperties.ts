@@ -1,6 +1,6 @@
 import type { StoreError } from '../storeError'
 import { convertPrismaErrorToStoreError, isStoreError } from '../storeError'
-import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type { Division, PrismaClient } from '@prisma/client'
 import { AuditAction } from '@prisma/client'
 import type { CMSUserType } from '../../domain-models'

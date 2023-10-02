@@ -20,11 +20,11 @@ import {
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { mockStoreThatErrors } from '../../testHelpers/storeHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { base64ToDomain } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
+import { base64ToDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import {
     generateRateName,
     packageName,
-} from 'app-web/src/common-code/healthPlanFormDataType'
+} from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 import {
     getTestStateAnalystsEmails,
@@ -748,7 +748,12 @@ describe.each(flagValueTestParameters)(
 
             const programs = [defaultFloridaProgram()]
             const ratePrograms = [defaultFloridaRateProgram()]
-            const name = packageName(sub, programs)
+            const name = packageName(
+                sub.stateCode,
+                sub.stateNumber,
+                sub.programIDs,
+                programs
+            )
             const rateName = generateRateName(
                 sub,
                 sub.rateInfos[0],
@@ -834,7 +839,12 @@ describe.each(flagValueTestParameters)(
 
             const programs = [defaultFloridaProgram()]
             const ratePrograms = [defaultFloridaRateProgram()]
-            const name = packageName(sub, programs)
+            const name = packageName(
+                sub.stateCode,
+                sub.stateNumber,
+                sub.programIDs,
+                programs
+            )
             const rateName = generateRateName(
                 sub,
                 sub.rateInfos[0],

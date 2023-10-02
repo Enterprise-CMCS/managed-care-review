@@ -7,11 +7,11 @@ import {
     mockMSState,
 } from '../../testHelpers/emailerHelpers'
 import { unlockPackageCMSEmail } from './index'
-import type { UnlockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { UnlockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     generateRateName,
     packageName,
-} from 'app-web/src/common-code/healthPlanFormDataType'
+} from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 const unlockData = {
     updatedBy: 'leslie@example.com',
@@ -59,7 +59,12 @@ const defaultStatePrograms = mockMNState().programs
 
 describe('unlockPackageCMSEmail', () => {
     test('subject line is correct and clearly states submission is unlocked', async () => {
-        const name = packageName(sub, defaultStatePrograms)
+        const name = packageName(
+            sub.stateCode,
+            sub.stateNumber,
+            sub.programIDs,
+            defaultStatePrograms
+        )
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,

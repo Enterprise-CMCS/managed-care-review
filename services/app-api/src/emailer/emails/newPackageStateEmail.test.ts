@@ -114,7 +114,12 @@ test('to addresses list does not include duplicate state receiver emails on subm
 test('subject line is correct and clearly states submission is complete', async () => {
     const sub = mockContractOnlyFormData()
     const defaultStatePrograms = mockMNState().programs
-    const name = packageName(sub, defaultStatePrograms)
+    const name = packageName(
+        sub.stateCode,
+        sub.stateNumber,
+        sub.programIDs,
+        defaultStatePrograms
+    )
 
     const template = await newPackageStateEmail(
         sub,
@@ -141,7 +146,12 @@ test('subject line is correct and clearly states submission is complete', async 
 test('includes mcog, rate, and team email addresses', async () => {
     const sub = mockContractOnlyFormData()
     const defaultStatePrograms = mockMNState().programs
-    const name = packageName(sub, defaultStatePrograms)
+    const name = packageName(
+        sub.stateCode,
+        sub.stateNumber,
+        sub.programIDs,
+        defaultStatePrograms
+    )
 
     const template = await newPackageStateEmail(
         sub,

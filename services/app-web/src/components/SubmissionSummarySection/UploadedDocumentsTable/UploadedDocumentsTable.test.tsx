@@ -418,11 +418,13 @@ describe('UploadedDocumentsTable', () => {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 documentCategories: ['CONTRACT_RELATED' as const],
+                sha256: 'fakeSha1',
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
                 documentCategories: ['RATES_RELATED' as const],
+                sha256: 'fakeSha2',
             },
         ]
 

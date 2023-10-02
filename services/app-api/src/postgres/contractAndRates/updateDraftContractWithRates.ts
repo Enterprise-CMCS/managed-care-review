@@ -7,7 +7,7 @@ import type {
     RateRevisionType,
     ContractType,
 } from '../../domain-models/contractAndRates'
-import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { includeDraftRates } from './prismaDraftContractHelpers'
 import { rateRevisionToDomainModel } from './prismaSharedContractRateHelpers'
 import type { RateFormEditable } from './updateDraftRate'
@@ -144,9 +144,23 @@ async function updateDraftContractWithRates(
             }
 
             const stateCode = currentRev.contract.stateCode as StateCodeType
-            const ratesFromDB = currentRev.draftRates.map((rate) =>
-                rateRevisionToDomainModel(rate.revisions[0])
-            )
+            const ratesFromDB: RateRevisionType[] = []
+
+            // Convert all rates from DB to domain model
+            for (const rate of currentRev.draftRates) {
+                const domainRateRevision = rateRevisionToDomainModel(
+                    rate.revisions[0]
+                )
+
+                if (domainRateRevision instanceof Error) {
+                    return new Error(
+                        `Error updating contract with rates: ${domainRateRevision.message}`
+                    )
+                }
+
+                ratesFromDB.push(domainRateRevision)
+            }
+
             const updateRates =
                 rateFormDatas && sortRatesForUpdate(ratesFromDB, rateFormDatas)
 
@@ -178,6 +192,13 @@ async function updateDraftContractWithRates(
                               },
                           })
                         : undefined
+
+                    const contractsWithSharedRates =
+                        rateRevision.packagesWithSharedRateCerts?.map(
+                            (pkg) => ({
+                                id: pkg.packageId,
+                            })
+                        ) ?? []
 
                     // If rate does not exist, we need to create a new rate.
                     if (!currentRate) {
@@ -257,6 +278,9 @@ async function updateDraftContractWithRates(
                                         },
                                         actuaryCommunicationPreference:
                                             rateRevision.actuaryCommunicationPreference,
+                                        contractsWithSharedRateRevision: {
+                                            connect: contractsWithSharedRates,
+                                        },
                                     },
                                 },
                                 draftContractRevisions: {
@@ -363,6 +387,10 @@ async function updateDraftContractWithRates(
                                                       nullify(
                                                           rateRevision.actuaryCommunicationPreference
                                                       ),
+                                                  contractsWithSharedRateRevision:
+                                                      {
+                                                          set: contractsWithSharedRates,
+                                                      },
                                               },
                                           },
                                       }
