@@ -165,7 +165,12 @@ test('to addresses list does not include duplicate review email addresses', asyn
 test('subject line is correct', async () => {
     const sub = mockContractOnlyFormData()
     const statePrograms = mockMNState().programs
-    const name = packageName(sub, statePrograms)
+    const name = packageName(
+        sub.stateCode,
+        sub.stateNumber,
+        sub.programIDs,
+        statePrograms
+    )
 
     const template = await newPackageCMSEmail(
         sub,

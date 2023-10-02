@@ -50,37 +50,65 @@ interface RateRevisionSet {
 
 function rateSetsToDomainModel(
     entries: RateRevisionSet[]
-): RateRevisionWithContractsType[] {
-    const revisions = entries.map((entry) => ({
-        ...rateRevisionToDomainModel(entry.rateRev),
+): RateRevisionWithContractsType[] | Error {
+    const revisions: RateRevisionWithContractsType[] = []
 
-        contractRevisions: contractRevisionsToDomainModels(entry.contractRevs),
+    for (const entry of entries) {
+        const domainRateRevision = rateRevisionToDomainModel(entry.rateRev)
 
-        // override this contractRevisions's update infos with the one that caused this revision to be created.
-        submitInfo: convertUpdateInfoToDomainModel(entry.submitInfo),
-        unlockInfo: convertUpdateInfoToDomainModel(entry.unlockInfo),
-    }))
+        if (domainRateRevision instanceof Error) {
+            return domainRateRevision
+        }
+
+        revisions.push({
+            ...domainRateRevision,
+            contractRevisions: contractRevisionsToDomainModels(
+                entry.contractRevs
+            ),
+
+            // override this contractRevisions's update infos with the one that caused this revision to be created.
+            submitInfo: convertUpdateInfoToDomainModel(entry.submitInfo),
+            unlockInfo: convertUpdateInfoToDomainModel(entry.unlockInfo),
+        })
+    }
 
     return revisions
 }
 function rateRevisionToDomainModel(
     revision: RateRevisionTableWithFormData
-): RateRevisionType {
+): RateRevisionType | Error {
+    const formData = rateFormDataToDomainModel(revision)
+
+    if (formData instanceof Error) {
+        return formData
+    }
+
     return {
         id: revision.id,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
         submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
         unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
-
-        formData: rateFormDataToDomainModel(revision),
+        formData,
     }
 }
 
 function rateRevisionsToDomainModels(
     rateRevisions: RateRevisionTableWithFormData[]
-): RateRevisionType[] {
-    return rateRevisions.map((crev) => rateRevisionToDomainModel(crev))
+): RateRevisionType[] | Error {
+    const domainRateRevisions: RateRevisionType[] = []
+
+    for (const rateRevision of rateRevisions) {
+        const domainRateRevision = rateRevisionToDomainModel(rateRevision)
+
+        if (domainRateRevision instanceof Error) {
+            return domainRateRevision
+        }
+
+        domainRateRevisions.push(domainRateRevision)
+    }
+
+    return domainRateRevisions
 }
 
 // rateWithHistoryToDomainModel constructs a history for this particular contract including changes to all of its
@@ -94,7 +122,8 @@ function rateWithHistoryToDomainModel(
 
     const allEntries: RateRevisionSet[] = []
     const rateRevisions = rate.revisions
-    let draftRevision: RateRevisionWithContractsType | undefined = undefined
+    let draftRevision: RateRevisionWithContractsType | Error | undefined =
+        undefined
     for (const rateRev of rateRevisions) {
         // We have already set the draft revision aside, all ordered revisions here should be submitted
         if (!rateRev.submitInfo) {
@@ -106,6 +135,12 @@ function rateWithHistoryToDomainModel(
             }
 
             draftRevision = draftRateRevToDomainModel(rateRev)
+
+            if (draftRevision instanceof Error) {
+                return new Error(
+                    `error converting draft rate revision with id ${rateRev.id} to domain model: ${draftRevision}`
+                )
+            }
 
             // skip the rest of the processing
             continue
@@ -164,7 +199,13 @@ function rateWithHistoryToDomainModel(
         }
     }
 
-    const revisions = rateSetsToDomainModel(allEntries).reverse()
+    const revisions = rateSetsToDomainModel(allEntries)
+
+    if (revisions instanceof Error) {
+        return new Error(
+            `error converting rate with id ${rate.id} to domain models: ${draftRevision}`
+        )
+    }
 
     return {
         id: rate.id,
@@ -172,7 +213,7 @@ function rateWithHistoryToDomainModel(
         stateCode: rate.stateCode,
         stateNumber: rate.stateNumber,
         draftRevision,
-        revisions,
+        revisions: revisions.reverse(),
     }
 }
 export {

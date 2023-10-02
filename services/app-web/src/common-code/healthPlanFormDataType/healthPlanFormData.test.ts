@@ -541,7 +541,14 @@ describe('submission type assertions', () => {
         const sub = basicHealthPlanFormData()
         sub.programIDs = programIDs
 
-        expect(packageName(sub, programs)).toBe(expectedName)
+        expect(
+            packageName(
+                sub.stateCode,
+                sub.stateNumber,
+                sub.programIDs,
+                programs
+            )
+        ).toBe(expectedName)
     })
 
     const mockContractAndRateSub = mockContractAndRatesDraft()

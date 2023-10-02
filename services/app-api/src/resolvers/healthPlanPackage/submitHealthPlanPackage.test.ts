@@ -560,7 +560,12 @@ describe.each(flagValueTestParameters)(
             }
 
             const programs = [defaultFloridaProgram()]
-            const name = packageName(sub, programs)
+            const name = packageName(
+                sub.stateCode,
+                sub.stateNumber,
+                sub.programIDs,
+                programs
+            )
             const stateAnalystsEmails = getTestStateAnalystsEmails(
                 sub.stateCode
             )
@@ -673,7 +678,12 @@ describe.each(flagValueTestParameters)(
 
             const programs = [defaultFloridaProgram()]
             const ratePrograms = [defaultFloridaRateProgram()]
-            const name = packageName(sub, programs)
+            const name = packageName(
+                sub.stateCode,
+                sub.stateNumber,
+                sub.programIDs,
+                programs
+            )
             const rateName = generateRateName(
                 sub,
                 sub.rateInfos[0],
@@ -724,7 +734,12 @@ describe.each(flagValueTestParameters)(
             }
 
             const programs = [defaultFloridaProgram()]
-            const name = packageName(sub, programs)
+            const name = packageName(
+                sub.stateCode,
+                sub.stateNumber,
+                sub.programIDs,
+                programs
+            )
 
             expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -779,7 +794,12 @@ describe.each(flagValueTestParameters)(
             }
 
             const programs = [defaultFloridaProgram()]
-            const name = packageName(sub, programs)
+            const name = packageName(
+                sub.stateCode,
+                sub.stateNumber,
+                sub.programIDs,
+                programs
+            )
 
             // email subject line is correct for CMS email and contains correct email body text
             expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
@@ -847,7 +867,12 @@ describe.each(flagValueTestParameters)(
             }
 
             const programs = [defaultFloridaProgram()]
-            const name = packageName(sub, programs)
+            const name = packageName(
+                sub.stateCode,
+                sub.stateNumber,
+                sub.programIDs,
+                programs
+            )
 
             // email subject line is correct for CMS email and contains correct email body text
             expect(mockEmailer.sendEmail).toHaveBeenCalledWith(

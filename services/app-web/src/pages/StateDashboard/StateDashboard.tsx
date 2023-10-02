@@ -73,7 +73,12 @@ export const StateDashboard = (): React.ReactElement => {
 
             submissionRows.push({
                 id: sub.id,
-                name: packageName(currentSubmissionData, programs),
+                name: packageName(
+                    currentSubmissionData.stateCode,
+                    currentSubmissionData.stateNumber,
+                    currentSubmissionData.programIDs,
+                    programs
+                ),
                 programs: programs.filter((program) =>
                     currentSubmissionData.programIDs.includes(program.id)
                 ),

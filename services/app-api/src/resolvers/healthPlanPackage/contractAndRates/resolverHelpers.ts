@@ -99,6 +99,30 @@ const convertHealthPlanPackageRatesToDomain = async (
             hppRateFormData.supportingDocuments
         )
 
+        // We only care about the contract ID. PackageName is not in our DB, instead when converting DB data to domain
+        //  data we are generating the package name.
+        const packagesWithSharedRateCerts =
+            hppRateFormData.packagesWithSharedRateCerts?.reduce(
+                (
+                    accumulator: RateFormDataType['packagesWithSharedRateCerts'] = [],
+                    currentValue
+                ) => {
+                    // Skipping over any shared rate contract that has no ID.
+                    if (currentValue.packageId) {
+                        const shared: {
+                            packageName: string
+                            packageId: string
+                        } = {
+                            packageName: currentValue.packageName ?? '',
+                            packageId: currentValue.packageId,
+                        }
+                        accumulator.push(shared)
+                    }
+                    return accumulator
+                },
+                []
+            )
+
         const rate: RateFormDataType = {
             id: hppRateFormData.id,
             rateType: hppRateFormData.rateType,
@@ -122,10 +146,7 @@ const convertHealthPlanPackageRatesToDomain = async (
             //  toProtobuffer already does this, so we can directly set the value from the rate data.
             actuaryCommunicationPreference:
                 hppRateFormData.actuaryCommunicationPreference,
-            // This field is set to empty array because we still need to figure out shared rates. This is MR-3568
-            packagesWithSharedRateCerts: [],
-            // packagesWithSharedRateCerts: hppRateFormData.packagesWithSharedRateCerts &&
-            //     hppRateFormData.packagesWithSharedRateCerts.filter(rate => (rate.packageId && rate.packageName)) as RateFormDataType['packagesWithSharedRateCerts']
+            packagesWithSharedRateCerts,
         }
 
         const parsedDomainData = rateFormDataSchema.safeParse(rate)
