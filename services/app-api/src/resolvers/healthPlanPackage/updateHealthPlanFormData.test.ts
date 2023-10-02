@@ -28,7 +28,7 @@ import type {
     HealthPlanFormDataType,
     RateInfoType,
     StateCodeType,
-} from 'app-web/src/common-code/healthPlanFormDataType'
+} from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import * as add_sha from '../../handlers/add_sha'
 
 const flagValueTestParameters: {
@@ -580,12 +580,11 @@ describe.each(flagValueTestParameters)(
                         },
                     })
                     return must(
-                        await submitContract(
-                            client,
-                            createdDraft.id,
-                            stateUser.id,
-                            'Submission'
-                        )
+                        await submitContract(client, {
+                            contractID: createdDraft.id,
+                            submittedByUserID: stateUser.id,
+                            submitReason: 'Submission',
+                        })
                     )
                 } else {
                     return await createAndSubmitTestHealthPlanPackage(server)

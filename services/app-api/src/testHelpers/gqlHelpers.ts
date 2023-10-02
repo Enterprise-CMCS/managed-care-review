@@ -207,6 +207,7 @@ const createAndUpdateTestHealthPlanPackage = async (
                 {
                     name: 'rateDocument.pdf',
                     s3URL: 'fakeS3URL',
+                    sha256: 'fakesha',
                     documentCategories: ['RATES' as const],
                 },
             ],
@@ -245,6 +246,7 @@ const createAndUpdateTestHealthPlanPackage = async (
             name: 'contractDocument.pdf',
             s3URL: 'fakeS3URL',
             documentCategories: ['CONTRACT' as const],
+            sha256: 'fakesha',
         },
     ]
     draft.managedCareEntities = ['MCO']

@@ -268,11 +268,13 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
             {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'contract doc',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED'],
             },
             {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'rates and contract addendum doc',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED', 'RATES_RELATED'],
             },
         ],
@@ -284,6 +286,7 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
             {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'contract doc',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT'],
             },
         ],
@@ -306,6 +309,7 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
                     {
                         s3URL: 's3://bucketname/key/foo.png',
                         name: 'Rates certification',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES'],
                     },
                 ],
@@ -379,11 +383,13 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
             {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'contract doc',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED'],
             },
             {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'rates and contract addendum doc',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED', 'RATES_RELATED'],
             },
         ],
@@ -413,6 +419,7 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
                     {
                         s3URL: 's3://bucketname/key/foo.png',
                         name: 'Rates certification',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES'],
                     },
                 ],
@@ -484,11 +491,13 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
             {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'contract doc',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED'],
             },
             {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'rates and contract addendum doc',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED', 'RATES_RELATED'],
             },
         ],
@@ -500,6 +509,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
             {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'contract doc',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT'],
             },
         ],
@@ -545,6 +555,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
                     {
                         s3URL: 's3://bucketname/key/foo.png',
                         name: 'Rates certification',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES'],
                     },
                 ],
@@ -620,6 +631,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
             {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'contract doc',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED'],
             },
         ],
@@ -631,6 +643,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
             {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'contract doc',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT'],
             },
         ],
@@ -666,11 +679,13 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
                     {
                         s3URL: 's3://bucketname/key/foo.png',
                         name: 'rates cert 1',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES_RELATED'],
                     },
                     {
                         s3URL: 's3://bucketname/key/foo.png',
                         name: 'rates cert 2',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES_RELATED'],
                     },
                 ],
@@ -758,6 +773,7 @@ function basicLockedHealthPlanFormData(): LockedHealthPlanFormDataType {
             {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'contract doc',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT'],
             },
         ],

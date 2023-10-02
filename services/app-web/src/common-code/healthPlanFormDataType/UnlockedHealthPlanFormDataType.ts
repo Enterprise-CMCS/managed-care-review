@@ -1,4 +1,5 @@
-import { FederalAuthority } from 'FederalAuthority'
+import { FederalAuthority } from './FederalAuthorities'
+import { GeneralizedModifiedProvisions } from './ModifiedProvisions'
 
 // Draft state submission is a health plan that a state user is still working on
 
@@ -16,12 +17,16 @@ type SubmissionDocument = {
     id?: string
     name: string
     s3URL: string
-    sha256?: string
+    sha256: string
     documentCategories: DocumentCategoryType[]
 }
 
 type ContractAmendmentInfo = {
     modifiedProvisions: GeneralizedModifiedProvisions
+}
+
+type UnlockedContractAmendmentInfo = {
+    modifiedProvisions: Partial<GeneralizedModifiedProvisions>
 }
 
 type RateAmendmentInfo = {
@@ -111,7 +116,7 @@ type UnlockedHealthPlanFormDataType = {
     contractDateEnd?: Date
     managedCareEntities: ManagedCareEntity[]
     federalAuthorities: FederalAuthority[]
-    contractAmendmentInfo?: ContractAmendmentInfo
+    contractAmendmentInfo?: UnlockedContractAmendmentInfo
     rateInfos: RateInfoType[]
 }
 

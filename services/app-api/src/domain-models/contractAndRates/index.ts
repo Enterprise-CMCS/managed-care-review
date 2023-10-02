@@ -1,7 +1,5 @@
 export { rateSchema, draftRateSchema } from './rateTypes'
 
-export type { RateType } from './rateTypes'
-
 export { contractSchema, draftContractSchema } from './contractTypes'
 
 export { contractFormDataSchema, rateFormDataSchema } from './formDataTypes'
@@ -13,9 +11,16 @@ export {
     rateRevisionSchema,
 } from './revisionTypes'
 
-export type { ContractType, DraftContractType } from './contractTypes'
+export {
+    convertContractWithRatesRevtoHPPRev,
+    convertContractWithRatesToUnlockedHPP,
+    convertContractWithRatesToFormData,
+} from './convertContractWithRatesToHPP'
 
-export type { ContractStatusType, UpdateInfoType } from './updateInfoType'
+export type { ContractType } from './contractTypes'
+export type { RateType } from './rateTypes'
+
+export type { PackageStatusType, UpdateInfoType } from './updateInfoType'
 
 export type {
     ContractFormDataType,

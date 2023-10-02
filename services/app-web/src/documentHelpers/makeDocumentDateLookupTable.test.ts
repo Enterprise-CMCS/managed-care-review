@@ -28,18 +28,12 @@ describe('makeDocumentDateTable', () => {
         }
         const lookupTable = makeDocumentDateTable(revisionsLookup)
         expect(lookupTable).toEqual({
-            's3://bucketname/1648242632157-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf':
-                new Date('2022-03-25T21:13:20.420Z'),
-            's3://bucketname/1648490162641-lifeofgalileo.pdf/lifeofgalileo.pdf':
-                new Date('2022-03-28T17:56:32.953Z'),
-            's3://bucketname/1648242665634-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf':
-                new Date('2022-03-25T21:13:20.420Z'),
-            's3://bucketname/1648242711421-Amerigroup Texas Inc copy.pdf/Amerigroup Texas Inc copy.pdf':
-                new Date('2022-03-25T21:13:20.420Z'),
-            's3://bucketname/1648242711421-529-10-0020-00003_Superior_Health Plan, Inc.pdf/529-10-0020-00003_Superior_Health Plan, Inc.pdf':
-                new Date('2022-03-25T21:13:20.420Z'),
-            's3://bucketname/1648242873229-covid-ifc-2-flu-rsv-codes 5-5-2021.pdf/covid-ifc-2-flu-rsv-codes 5-5-2021.pdf':
-                new Date('2022-03-25T21:13:20.420Z'),
+            fakesha: new Date('2022-03-25T21:13:20.420Z'),
+            fakesha1: new Date('2022-03-28T17:56:32.953Z'),
+            fakesha2: new Date('2022-03-25T21:13:20.420Z'),
+            fakesha3: new Date('2022-03-25T21:13:20.420Z'),
+            fakesha4: new Date('2022-03-25T21:13:20.420Z'),
+            fakesha5: new Date('2022-03-25T21:13:20.420Z'),
             previousSubmissionDate: new Date('2022-03-25T21:14:43.057Z'),
         })
     })
@@ -63,6 +57,7 @@ describe('makeDocumentDateTable', () => {
                 {
                     s3URL: 's3://bucketname/testDateDoc/testDateDoc.pdf',
                     name: 'Test Date Doc',
+                    sha256: 'fakesha',
                     documentCategories: ['CONTRACT_RELATED'],
                 },
             ],
@@ -70,6 +65,7 @@ describe('makeDocumentDateTable', () => {
                 {
                     s3URL: 's3://bucketname/key/replaced-contract.pdf',
                     name: 'replaced contract',
+                    sha256: 'fakesha1',
                     documentCategories: ['CONTRACT'],
                 },
             ],
@@ -101,6 +97,7 @@ describe('makeDocumentDateTable', () => {
                     {
                         s3URL: 's3://bucketname/key/original-contract.pdf',
                         name: 'original contract',
+                        sha256: 'fakesha2',
                         documentCategories: ['CONTRACT'],
                     },
                 ],
@@ -117,15 +114,9 @@ describe('makeDocumentDateTable', () => {
         const lookupTable = makeDocumentDateTable(revisionsLookup)
 
         expect(lookupTable).toEqual({
-            's3://bucketname/key/original-contract.pdf': new Date(
-                '2022-01-10T00:00:00.000Z'
-            ),
-            's3://bucketname/key/replaced-contract.pdf': new Date(
-                '2022-02-10T00:00:00.000Z'
-            ),
-            's3://bucketname/testDateDoc/testDateDoc.pdf': new Date(
-                '2022-01-10T00:00:00.00'
-            ),
+            fakesha: new Date('2022-01-10T00:00:00.000Z'),
+            fakesha1: new Date('2022-02-10T00:00:00.000Z'),
+            fakesha2: new Date('2022-01-10T00:00:00.00'),
             previousSubmissionDate: new Date('2022-02-10T00:00:00.000Z'),
         })
     })

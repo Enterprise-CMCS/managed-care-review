@@ -15,7 +15,10 @@ import { formatRateNameDate } from '../../common-code/dateHelpers'
 import type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import type { HealthPlanFormDataType } from './HealthPlanFormDataType'
 import type { ProgramArgType } from '.'
-import { federalAuthorityKeysForCHIP } from './FederalAuthorities'
+import {
+    CHIPFederalAuthority,
+    federalAuthorityKeysForCHIP,
+} from './FederalAuthorities'
 
 // TODO: Refactor into multiple files and add unit tests to these functions
 
@@ -329,8 +332,8 @@ const convertRateSupportingDocs = (
 }
 
 const removeRatesData = (
-    pkg: UnlockedHealthPlanFormDataType
-): UnlockedHealthPlanFormDataType => {
+    pkg: HealthPlanFormDataType
+): HealthPlanFormDataType => {
     pkg.rateInfos = []
     pkg.addtlActuaryContacts = []
     pkg.addtlActuaryCommunicationPreference = undefined
@@ -342,8 +345,8 @@ const removeRatesData = (
 // Remove any provisions and federal authorities that aren't valid for population type (e.g. CHIP)
 // since user can change theses submission type fields on unlock and not necesarily update the contract details
 const removeInvalidProvisionsAndAuthorities = (
-    pkg: UnlockedHealthPlanFormDataType
-): UnlockedHealthPlanFormDataType => {
+    pkg: HealthPlanFormDataType
+): HealthPlanFormDataType => {
     // remove invalid provisions
     if (isContractWithProvisions(pkg) && pkg.contractAmendmentInfo) {
         const validProvisionsKeys = generateApplicableProvisionsList(pkg)
@@ -358,7 +361,9 @@ const removeInvalidProvisionsAndAuthorities = (
     // remove invalid authorities if CHIP
     if (isCHIPOnly(pkg)) {
         pkg.federalAuthorities = pkg.federalAuthorities.filter((authority) =>
-            federalAuthorityKeysForCHIP.includes(authority)
+            federalAuthorityKeysForCHIP.includes(
+                authority as CHIPFederalAuthority
+            )
         )
     }
 

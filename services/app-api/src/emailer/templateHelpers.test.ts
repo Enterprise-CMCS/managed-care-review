@@ -69,6 +69,7 @@ describe('templateHelpers', () => {
                             {
                                 s3URL: 'bar',
                                 name: 'foo',
+                                sha256: 'fakesha',
                                 documentCategories: ['RATES' as const],
                             },
                         ],
