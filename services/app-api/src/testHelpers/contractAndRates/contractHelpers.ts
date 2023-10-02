@@ -95,6 +95,7 @@ const createContractRevision = (
     contractID: 'contractID',
     submitInfoID: null,
     unlockInfoID: null,
+    mccrsID: null,
     programIDs: [getProgramsFromState(stateCode)[0].id],
     populationCovered: 'MEDICAID' as const,
     submissionType: 'CONTRACT_ONLY' as const,
