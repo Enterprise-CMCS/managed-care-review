@@ -12,7 +12,7 @@ import type {
     HealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
     StateCodeType,
-} from 'app-web/src/common-code/healthPlanFormDataType'
+} from '../../../app-web/src/common-code/healthPlanFormDataType'
 import type {
     CreateQuestionInput,
     InsertQuestionResponseArgs,
@@ -33,14 +33,15 @@ import { NewPostgresStore } from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { latestFormData } from './healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from './storeHelpers'
-import { domainToBase64 } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
+import { domainToBase64 } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import type { EmailParameterStore } from '../parameterStore'
 import { newLocalEmailParameterStore } from '../parameterStore'
 import { testLDService } from './launchDarklyHelpers'
 import type { LDService } from '../launchDarkly/launchDarkly'
 import { insertUserToLocalAurora } from '../authn'
 import { testStateUser } from './userHelpers'
-import { getProgramsFromState } from './stateHelpers'
+import { findStatePrograms } from '../postgres'
+import { must } from './errorHelpers'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -120,7 +121,7 @@ const createTestHealthPlanPackage = async (
     stateCode?: StateCodeType
 ): Promise<HealthPlanPackage> => {
     const programs = stateCode
-        ? getProgramsFromState(stateCode)
+        ? [must(findStatePrograms(stateCode))[0]]
         : [defaultFloridaProgram()]
 
     const programIDs = programs.map((program) => program.id)
@@ -185,7 +186,7 @@ const createAndUpdateTestHealthPlanPackage = async (
     const draft = latestFormData(pkg)
 
     const ratePrograms = stateCode
-        ? getProgramsFromState(stateCode)
+        ? [must(findStatePrograms(stateCode))[0]]
         : [defaultFloridaRateProgram()]
 
     ;(draft.submissionType = 'CONTRACT_AND_RATES' as const),
@@ -207,6 +208,7 @@ const createAndUpdateTestHealthPlanPackage = async (
                 {
                     name: 'rateDocument.pdf',
                     s3URL: 'fakeS3URL',
+                    sha256: 'fakesha',
                     documentCategories: ['RATES' as const],
                 },
             ],
@@ -245,6 +247,7 @@ const createAndUpdateTestHealthPlanPackage = async (
             name: 'contractDocument.pdf',
             s3URL: 'fakeS3URL',
             documentCategories: ['CONTRACT' as const],
+            sha256: 'fakesha',
         },
     ]
     draft.managedCareEntities = ['MCO']

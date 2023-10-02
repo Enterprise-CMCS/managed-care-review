@@ -6,7 +6,7 @@ import {
 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import type { HealthPlanPackageType } from '../../domain-models'
 import {
-    convertContractToUnlockedHealthPlanPackage,
+    convertContractWithRatesToUnlockedHPP,
     isStateUser,
     packageStatus,
 } from '../../domain-models'
@@ -243,7 +243,7 @@ export function updateHealthPlanFormDataResolver(
             }
 
             // Convert back to health plan package
-            const pkg = convertContractToUnlockedHealthPlanPackage(updateResult)
+            const pkg = convertContractWithRatesToUnlockedHPP(updateResult)
 
             if (pkg instanceof Error) {
                 const errMessage = `Error converting draft contract. Message: ${pkg.message}`

@@ -8,8 +8,8 @@ const updateInfoSchema = z.object({
 })
 
 type UpdateInfoType = z.infer<typeof updateInfoSchema>
-type ContractStatusType = z.infer<typeof contractSchema.shape.status>
+type PackageStatusType = z.infer<typeof contractSchema.shape.status>
 
-export type { ContractStatusType, UpdateInfoType }
+export type { PackageStatusType, UpdateInfoType }
 
 export { updateInfoSchema }

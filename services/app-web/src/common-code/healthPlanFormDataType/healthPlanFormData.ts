@@ -15,7 +15,10 @@ import { formatRateNameDate } from '../../common-code/dateHelpers'
 import type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import type { HealthPlanFormDataType } from './HealthPlanFormDataType'
 import type { ProgramArgType } from '.'
-import { federalAuthorityKeysForCHIP } from './FederalAuthorities'
+import {
+    CHIPFederalAuthority,
+    federalAuthorityKeysForCHIP,
+} from './FederalAuthorities'
 
 // TODO: Refactor into multiple files and add unit tests to these functions
 
@@ -237,17 +240,13 @@ function programNames(
 }
 
 function packageName(
-    pkg: HealthPlanFormDataType,
-    statePrograms: ProgramArgType[],
-    programIDs?: string[]
+    stateCode: string,
+    stateNumber: number,
+    programIDs: string[],
+    statePrograms: ProgramArgType[]
 ): string {
-    const padNumber = pkg.stateNumber.toString().padStart(4, '0')
-    const pNames =
-        // This ternary is needed because programIDs passed in could be undefined or an empty string, in that case
-        // we want to default to using programIDs from submission
-        programIDs && programIDs.length > 0
-            ? programNames(statePrograms, programIDs)
-            : programNames(statePrograms, pkg.programIDs)
+    const padNumber = stateNumber.toString().padStart(4, '0')
+    const pNames = programNames(statePrograms, programIDs)
     const formattedProgramNames = pNames
         .sort(naturalSort)
         .map((n) =>
@@ -257,7 +256,7 @@ function packageName(
                 .toUpperCase()
         )
         .join('-')
-    return `MCR-${pkg.stateCode.toUpperCase()}-${padNumber}-${formattedProgramNames}`
+    return `MCR-${stateCode.toUpperCase()}-${padNumber}-${formattedProgramNames}`
 }
 
 const generateRateName = (
@@ -271,10 +270,19 @@ const generateRateName = (
         rateDateCertified,
         rateDateEnd,
         rateDateStart,
-        rateProgramIDs,
     } = rateInfo
 
-    let rateName = `${packageName(pkg, statePrograms, rateProgramIDs)}-RATE`
+    // Default to package programs if rate programs do not exist
+    const rateProgramIDs = rateInfo.rateProgramIDs?.length
+        ? rateInfo.rateProgramIDs
+        : pkg.programIDs
+
+    let rateName = `${packageName(
+        pkg.stateCode,
+        pkg.stateNumber,
+        rateProgramIDs,
+        statePrograms
+    )}-RATE`
 
     if (rateType === 'AMENDMENT' && rateAmendmentInfo?.effectiveDateStart) {
         rateName = rateName.concat(
@@ -329,8 +337,8 @@ const convertRateSupportingDocs = (
 }
 
 const removeRatesData = (
-    pkg: UnlockedHealthPlanFormDataType
-): UnlockedHealthPlanFormDataType => {
+    pkg: HealthPlanFormDataType
+): HealthPlanFormDataType => {
     pkg.rateInfos = []
     pkg.addtlActuaryContacts = []
     pkg.addtlActuaryCommunicationPreference = undefined
@@ -342,8 +350,8 @@ const removeRatesData = (
 // Remove any provisions and federal authorities that aren't valid for population type (e.g. CHIP)
 // since user can change theses submission type fields on unlock and not necesarily update the contract details
 const removeInvalidProvisionsAndAuthorities = (
-    pkg: UnlockedHealthPlanFormDataType
-): UnlockedHealthPlanFormDataType => {
+    pkg: HealthPlanFormDataType
+): HealthPlanFormDataType => {
     // remove invalid provisions
     if (isContractWithProvisions(pkg) && pkg.contractAmendmentInfo) {
         const validProvisionsKeys = generateApplicableProvisionsList(pkg)
@@ -358,7 +366,9 @@ const removeInvalidProvisionsAndAuthorities = (
     // remove invalid authorities if CHIP
     if (isCHIPOnly(pkg)) {
         pkg.federalAuthorities = pkg.federalAuthorities.filter((authority) =>
-            federalAuthorityKeysForCHIP.includes(authority)
+            federalAuthorityKeysForCHIP.includes(
+                authority as CHIPFederalAuthority
+            )
         )
     }
 

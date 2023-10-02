@@ -20,6 +20,7 @@ import type {
     QuestionResponseType,
     InsertQuestionResponseArgs,
     StateType,
+    RateType,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
 import type { StoreError } from './storeError'
@@ -54,14 +55,22 @@ import {
     updateDraftContractWithRates,
     findAllContractsWithHistoryByState,
     findAllContractsWithHistoryBySubmitInfo,
-    findAllRatesWithHistoryBySubmitInfo
+    findAllRatesWithHistoryBySubmitInfo,
+    submitContract,
+    submitRate,
 } from './contractAndRates'
 import type {
+    SubmitContractArgsType,
+    SubmitRateArgsType,
     InsertContractArgsType,
     UpdateContractArgsType,
     ContractOrErrorArrayType,
-    RateOrErrorArrayType
+    RateOrErrorArrayType,
 } from './contractAndRates'
+import { unlockContract } from './contractAndRates/unlockContract'
+import type { UnlockContractArgsType } from './contractAndRates/unlockContract'
+import { unlockRate } from './contractAndRates/unlockRate'
+import type { UnlockRateArgsType } from './contractAndRates/unlockRate'
 
 type Store = {
     findPrograms: (
@@ -159,8 +168,20 @@ type Store = {
         ContractOrErrorArrayType | Error
     >
     findAllRatesWithHistoryBySubmitInfo: () => Promise<
-    RateOrErrorArrayType | Error
->
+        RateOrErrorArrayType | Error
+    >
+
+    submitContract: (
+        args: SubmitContractArgsType
+    ) => Promise<ContractType | Error>
+
+    submitRate: (args: SubmitRateArgsType) => Promise<RateType | Error>
+
+    unlockContract: (
+        args: UnlockContractArgsType
+    ) => Promise<ContractType | Error>
+
+    unlockRate: (args: UnlockRateArgsType) => Promise<RateType | Error>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -228,7 +249,11 @@ function NewPostgresStore(client: PrismaClient): Store {
         findAllContractsWithHistoryBySubmitInfo: () =>
             findAllContractsWithHistoryBySubmitInfo(client),
         findAllRatesWithHistoryBySubmitInfo: () =>
-        findAllRatesWithHistoryBySubmitInfo(client)
+            findAllRatesWithHistoryBySubmitInfo(client),
+        submitContract: (args) => submitContract(client, args),
+        submitRate: (args) => submitRate(client, args),
+        unlockContract: (args) => unlockContract(client, args),
+        unlockRate: (args) => unlockRate(client, args),
     }
 }
 

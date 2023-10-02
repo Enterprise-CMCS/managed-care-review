@@ -12,6 +12,7 @@ module.exports = defineConfig({
         fixturesFolder: 'fixtures',
         specPattern: 'integration/**/*.spec.ts',
         screenshotsFolder: 'screenshots',
+        downloadsFolder: 'downloads',
         videosFolder: 'videos',
         viewportHeight: 1080,
         viewportWidth: 1440,

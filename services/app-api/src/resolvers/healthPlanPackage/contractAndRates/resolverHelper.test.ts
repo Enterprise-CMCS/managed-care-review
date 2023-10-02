@@ -3,7 +3,6 @@ import {
     isEqualData,
     convertHealthPlanPackageRatesToDomain,
 } from './resolverHelpers'
-import * as add_sha from '../../../handlers/add_sha'
 import type { UnlockedHealthPlanFormDataType } from '../../../../../app-web/src/common-code/healthPlanFormDataType'
 import { must } from '../../../testHelpers'
 import type { RateFormDataType } from '../../../domain-models/contractAndRates'
@@ -120,12 +119,6 @@ describe('isEqualRateData', () => {
 })
 
 describe('convertHealthPlanPackageRatesToDomain', () => {
-    beforeEach(() => {
-        jest.resetAllMocks()
-        jest.spyOn(add_sha, 'calculateSHA256').mockImplementation(() => {
-            return Promise.resolve('mockSHA256')
-        })
-    })
     test('it converts a HHP rate to domain rate without errors', async () => {
         // create a contract with rate
         const unlockedHPP: UnlockedHealthPlanFormDataType = {
@@ -156,8 +149,8 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                         {
                             s3URL: 's3://bucketname/key/rate',
                             name: 'rate',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES' as const],
-                            //no sha on this one
                         },
                     ],
                     supportingDocuments: [],
@@ -209,7 +202,20 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                         },
                     ],
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                    packagesWithSharedRateCerts: [],
+                    packagesWithSharedRateCerts: [
+                        {
+                            packageName: 'testABC1',
+                            packageId: 'test-abc-1',
+                        },
+                        {
+                            packageName: undefined,
+                            packageId: 'test-abc-2',
+                        },
+                        {
+                            packageName: 'testABC3',
+                            packageId: undefined,
+                        },
+                    ],
                 },
             ],
             stateContacts: [],
@@ -232,7 +238,7 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                     {
                         s3URL: 's3://bucketname/key/rate',
                         name: 'rate',
-                        sha256: 'mockSHA256', // This rate should now have a newly generated sha
+                        sha256: 'fakesha',
                     },
                 ],
                 supportingDocuments: [],
@@ -288,7 +294,16 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
+                packagesWithSharedRateCerts: [
+                    {
+                        packageId: 'test-abc-1',
+                        packageName: 'testABC1',
+                    },
+                    {
+                        packageId: 'test-abc-2',
+                        packageName: '',
+                    },
+                ],
                 addtlActuaryContacts: [
                     {
                         actuarialFirm: 'DELOITTE',

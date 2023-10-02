@@ -5,6 +5,7 @@ import type {
 } from '../../domain-models/contractAndRates'
 import {
     contractFormDataToDomainModel,
+    convertUpdateInfoToDomainModel,
     includeUpdateInfo,
     rateRevisionToDomainModel,
 } from './prismaSharedContractRateHelpers'
@@ -13,12 +14,38 @@ import type { ContractRevisionTableWithRates } from './prismaSubmittedContractHe
 const includeDraftRates = {
     revisions: {
         include: {
-            rateDocuments: true,
-            supportingDocuments: true,
-            certifyingActuaryContacts: true,
-            addtlActuaryContacts: true,
+            rateDocuments: {
+                orderBy: {
+                    position: 'asc',
+                },
+            },
+            supportingDocuments: {
+                orderBy: {
+                    position: 'asc',
+                },
+            },
+            certifyingActuaryContacts: {
+                orderBy: {
+                    position: 'asc',
+                },
+            },
+            addtlActuaryContacts: {
+                orderBy: {
+                    position: 'asc',
+                },
+            },
             submitInfo: includeUpdateInfo,
             unlockInfo: includeUpdateInfo,
+            contractsWithSharedRateRevision: {
+                include: {
+                    revisions: {
+                        take: 1,
+                        orderBy: {
+                            createdAt: 'desc',
+                        },
+                    },
+                },
+            },
         },
         take: 1,
         orderBy: {
@@ -33,21 +60,40 @@ type DraftRatesTable = Prisma.RateTableGetPayload<{
 
 function draftRatesToDomainModel(
     draftRates: DraftRatesTable[]
-): RateRevisionType[] {
-    return draftRates.map((dr) => rateRevisionToDomainModel(dr.revisions[0]))
+): RateRevisionType[] | Error {
+    const domainRates: RateRevisionType[] = []
+
+    for (const rate of draftRates) {
+        const domainRate = rateRevisionToDomainModel(rate.revisions[0])
+
+        if (domainRate instanceof Error) {
+            return domainRate
+        }
+
+        domainRates.push(domainRate)
+    }
+
+    return domainRates
 }
 
 // -------------------
 
 function draftContractRevToDomainModel(
     revision: ContractRevisionTableWithRates
-): ContractRevisionWithRatesType {
+): ContractRevisionWithRatesType | Error {
+    const rateRevisions = draftRatesToDomainModel(revision.draftRates)
+
+    if (rateRevisions instanceof Error) {
+        return rateRevisions
+    }
+
     return {
         id: revision.id,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
+        unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
         formData: contractFormDataToDomainModel(revision),
-        rateRevisions: draftRatesToDomainModel(revision.draftRates),
+        rateRevisions,
     }
 }
 

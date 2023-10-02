@@ -9,4 +9,5 @@ export {
     validateDateFormat,
     validateDateRange12Months,
     validateFileItemsList,
+    validateFileItemsListSingleUpload,
 } from './validators'

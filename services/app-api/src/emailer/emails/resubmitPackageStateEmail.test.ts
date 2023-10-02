@@ -4,11 +4,11 @@ import {
     mockMNState,
 } from '../../testHelpers/emailerHelpers'
 import { resubmitPackageStateEmail } from './index'
-import type { LockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { LockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     generateRateName,
     packageName,
-} from 'app-web/src/common-code/healthPlanFormDataType'
+} from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 const resubmitData = {
     updatedBy: 'bob@example.com',
@@ -26,6 +26,7 @@ const submission: LockedHealthPlanFormDataType = {
                 {
                     s3URL: 'bar',
                     name: 'foo',
+                    sha256: 'fakesha',
                     documentCategories: ['RATES' as const],
                 },
             ],
@@ -52,7 +53,12 @@ const defaultStatePrograms = mockMNState().programs
 const defaultSubmitters = ['test1@example.com', 'test2@example.com']
 
 test('contains correct subject and clearly states successful resubmission', async () => {
-    const name = packageName(submission, defaultStatePrograms)
+    const name = packageName(
+        submission.stateCode,
+        submission.stateNumber,
+        submission.programIDs,
+        defaultStatePrograms
+    )
     const template = await resubmitPackageStateEmail(
         submission,
         defaultSubmitters,
@@ -145,6 +151,7 @@ test('includes expected data summary for a multi-rate contract and rates resubmi
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -173,6 +180,7 @@ test('includes expected data summary for a multi-rate contract and rates resubmi
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -201,6 +209,7 @@ test('includes expected data summary for a multi-rate contract and rates resubmi
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],

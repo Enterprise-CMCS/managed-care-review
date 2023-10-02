@@ -5,7 +5,10 @@ import type { ContractFormEditable } from './updateDraftContractWithRates'
 import { updateDraftContractWithRates } from './updateDraftContractWithRates'
 import { PrismaClientValidationError } from '@prisma/client/runtime/library'
 import type { ContractType } from '@prisma/client'
-import type { RateFormDataType } from '../../domain-models/contractAndRates'
+import type {
+    ContractFormDataType,
+    RateFormDataType,
+} from '../../domain-models/contractAndRates'
 import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import type { RateFormEditable } from './updateDraftRate'
@@ -44,6 +47,170 @@ describe('updateDraftContract', () => {
         expect(draft.draftRevision?.formData.submissionDescription).toBe(
             'something else'
         )
+    })
+
+    function completeTestContract(): ContractFormDataType {
+        return {
+            programIDs: ['5904a736-4422-4b78-abef-f3df3d0ae21d'],
+            populationCovered: 'MEDICAID' as const,
+            submissionType: 'CONTRACT_ONLY' as const,
+            riskBasedContract: false,
+            submissionDescription: 'Test',
+            stateContacts: [
+                {
+                    name: 'Foo Person',
+                    email: 'foo@example.com',
+                    titleRole: 'Foo Role',
+                },
+            ],
+            supportingDocuments: [
+                {
+                    name: 'contract supporting doc',
+                    s3URL: 'fakeS3URL',
+                    sha256: '2342fwlkdmwvw',
+                },
+                {
+                    name: 'contract supporting doc 2',
+                    s3URL: 'fakeS3URL',
+                    sha256: '45662342fwlkdmwvw',
+                },
+            ],
+            contractType: 'BASE',
+            contractExecutionStatus: 'EXECUTED',
+            contractDocuments: [
+                {
+                    name: 'contract doc',
+                    s3URL: 'fakeS3URL',
+                    sha256: '8984234fwlkdmwvw',
+                },
+            ],
+            contractDateStart: new Date(Date.UTC(2025, 5, 1)),
+            contractDateEnd: new Date(Date.UTC(2026, 4, 30)),
+            managedCareEntities: ['MCO'],
+            federalAuthorities: ['STATE_PLAN' as const],
+            modifiedBenefitsProvided: false,
+            modifiedGeoAreaServed: false,
+            modifiedMedicaidBeneficiaries: false,
+            modifiedRiskSharingStrategy: false,
+            modifiedIncentiveArrangements: false,
+            modifiedWitholdAgreements: false,
+            modifiedStateDirectedPayments: false,
+            modifiedPassThroughPayments: false,
+            modifiedPaymentsForMentalDiseaseInstitutions: false,
+            modifiedMedicalLossRatioStandards: false,
+            modifiedOtherFinancialPaymentIncentive: false,
+            modifiedEnrollmentProcess: false,
+            modifiedGrevienceAndAppeal: false,
+            modifiedNetworkAdequacyStandards: true,
+            modifiedLengthOfContract: true,
+            modifiedNonRiskPaymentArrangements: true,
+            inLieuServicesAndSettings: true,
+        }
+    }
+
+    function emptyTestContract(): Partial<ContractFormDataType> {
+        return {
+            programIDs: ['5904a736-4422-4b78-abef-f3df3d0ae21d'],
+            populationCovered: 'MEDICAID' as const,
+            submissionType: 'CONTRACT_ONLY' as const,
+            riskBasedContract: false,
+            submissionDescription: 'Test',
+        }
+    }
+
+    function completeTestRate(): RateFormDataType {
+        return {
+            rateType: 'AMENDMENT',
+            rateCapitationType: 'RATE_CELL',
+            rateDocuments: [
+                {
+                    name: 'rate doc',
+                    s3URL: 'fakeS3URL',
+                    sha256: '8984234fwlkdmwvw',
+                },
+            ],
+            supportingDocuments: [
+                {
+                    name: 'rate sup doc',
+                    s3URL: 'fakeS3URL',
+                    sha256: '8984234fwlkdmwvw',
+                },
+            ],
+            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+            rateDateEnd: new Date(Date.UTC(2026, 5, 1)),
+            rateDateCertified: new Date(Date.UTC(2025, 5, 1)),
+            amendmentEffectiveDateStart: new Date(Date.UTC(2025, 5, 1)),
+            amendmentEffectiveDateEnd: new Date(Date.UTC(2025, 5, 1)),
+            rateProgramIDs: ['5904a736-4422-4b78-abef-f3df3d0ae21d'],
+            rateCertificationName: 'fake name',
+            certifyingActuaryContacts: [
+                {
+                    name: 'Foo Person',
+                    email: 'foo@example.com',
+                    titleRole: 'Foo Role',
+                },
+            ],
+            addtlActuaryContacts: [
+                {
+                    name: 'Foo Person',
+                    email: 'foo@example.com',
+                    titleRole: 'Foo Role',
+                },
+            ],
+            actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+            // packagesWithSharedRateCerts: ['something'],
+        }
+    }
+
+    it('allows for removing all fields', async () => {
+        const client = await sharedTestPrismaClient()
+
+        const draftContractForm1 = createInsertContractData({})
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const contract = must(
+            await insertDraftContract(client, {
+                ...draftContractForm1,
+            })
+        )
+
+        const fullContract = completeTestContract()
+        const draft = must(
+            await updateDraftContractWithRates(client, {
+                contractID: contract.id,
+                formData: fullContract,
+                rateFormDatas: [completeTestRate()],
+            })
+        )
+
+        expect(draft.draftRevision).toBeDefined()
+        expect(draft.draftRevision?.formData.submissionDescription).toBe('Test')
+
+        const rateID = draft.draftRevision?.rateRevisions[0].id
+
+        const emptyContract = emptyTestContract()
+
+        const emptyDraft = must(
+            await updateDraftContractWithRates(client, {
+                contractID: contract.id,
+                formData: emptyContract,
+                rateFormDatas: [{ id: rateID }],
+            })
+        )
+
+        expect(emptyDraft.draftRevision).toBeDefined()
+        expect(
+            emptyDraft.draftRevision?.formData.modifiedBenefitsProvided
+        ).toBeUndefined()
+        expect(emptyDraft.draftRevision?.formData.federalAuthorities).toEqual(
+            []
+        )
+
+        expect(
+            emptyDraft.draftRevision?.rateRevisions[0].formData.rateDateStart
+        ).toBeUndefined()
+        expect(
+            emptyDraft.draftRevision?.rateRevisions[0].formData.rateProgramIDs
+        ).toEqual([])
     })
 
     it('updates linked documents as expected in multiple requests', async () => {
@@ -673,12 +840,11 @@ describe('updateDraftContract', () => {
 
         // submit rate
         const submittedExistingRate = must(
-            await submitRate(
-                client,
-                newlyCreatedRates[0].formData.rateID,
-                stateUser.id,
-                'Rate submit'
-            )
+            await submitRate(client, {
+                rateID: newlyCreatedRates[0].formData.rateID,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Rate submit',
+            })
         )
 
         // Create and submit a new rate that is type 'AMENDMENT'
@@ -693,12 +859,11 @@ describe('updateDraftContract', () => {
         )
 
         const newSubmittedRate = must(
-            await submitRate(
-                client,
-                newDraftRate.id,
-                stateUser.id,
-                'Rate 2 submit'
-            )
+            await submitRate(client, {
+                rateID: newDraftRate.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Rate 2 submit',
+            })
         )
 
         if (

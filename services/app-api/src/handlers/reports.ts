@@ -156,8 +156,12 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
             )
         } else {
             // add the package name to the revision
+            const { stateCode, stateNumber, programIDs } =
+                revision.formDataProto
             revision.packageName = packageName(
-                revision.formDataProto,
+                stateCode,
+                stateNumber,
+                programIDs,
                 programList
             )
             // add the rateInfo fields to the revision

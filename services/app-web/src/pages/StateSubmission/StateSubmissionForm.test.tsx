@@ -122,6 +122,7 @@ describe('StateSubmissionForm', () => {
                         modifiedNetworkAdequacyStandards: false,
                         modifiedLengthOfContract: false,
                         modifiedNonRiskPaymentArrangements: false,
+                        inLieuServicesAndSettings: false,
                     },
                 },
             })
@@ -301,6 +302,7 @@ describe('StateSubmissionForm', () => {
                 {
                     name: 'somedoc.pdf',
                     s3URL: 's3://bucketName/key/somedoc.pdf',
+                    sha256: 'fakesha',
                     documentCategories: ['CONTRACT_RELATED'],
                 },
             ]

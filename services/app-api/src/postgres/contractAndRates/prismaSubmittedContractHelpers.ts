@@ -7,6 +7,18 @@ import {
 
 // Generated Types
 
+const includeLatestSubmittedRateRev = {
+    revisions: {
+        where: {
+            submitInfoID: { not: null },
+        },
+        take: 1,
+        orderBy: {
+            createdAt: 'desc',
+        },
+    },
+} satisfies Prisma.ContractTableInclude
+
 // The include parameters for everything in a Contract.
 const includeFullContract = {
     revisions: {
@@ -44,6 +56,6 @@ type ContractTableFullPayload = Prisma.ContractTableGetPayload<{
 
 type ContractRevisionTableWithRates = ContractTableFullPayload['revisions'][0]
 
-export { includeFullContract }
+export { includeFullContract, includeLatestSubmittedRateRev }
 
 export type { ContractRevisionTableWithRates, ContractTableFullPayload }

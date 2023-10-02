@@ -3,7 +3,7 @@ import {
     generateCMSReviewerEmails,
     handleAsCHIPSubmission,
 } from './templateHelpers'
-import type { UnlockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { UnlockedHealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     mockUnlockedContractAndRatesFormData,
     mockUnlockedContractOnlyFormData,
@@ -69,6 +69,7 @@ describe('templateHelpers', () => {
                             {
                                 s3URL: 'bar',
                                 name: 'foo',
+                                sha256: 'fakesha',
                                 documentCategories: ['RATES' as const],
                             },
                         ],

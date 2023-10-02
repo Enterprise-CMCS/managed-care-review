@@ -12,5 +12,6 @@ export {
     hasNoLoadingFiles,
     hasNoFileErrors,
     hasAtLeastOneFile,
+    hasNoMoreThanOneFile,
     isLoadingOrHasFileErrors,
 } from './helpers'

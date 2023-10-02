@@ -4,11 +4,11 @@ import {
     mockMNState,
 } from '../../testHelpers/emailerHelpers'
 import { unlockPackageStateEmail } from './index'
-import type { UnlockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { UnlockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     generateRateName,
     packageName,
-} from 'app-web/src/common-code/healthPlanFormDataType'
+} from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 const unlockData = {
     updatedBy: 'josh@example.com',
@@ -26,6 +26,7 @@ const sub: UnlockedHealthPlanFormDataType = {
                 {
                     s3URL: 'bar',
                     name: 'foo',
+                    sha256: 'fakesha',
                     documentCategories: ['RATES' as const],
                 },
             ],
@@ -55,7 +56,12 @@ const defaultStatePrograms = mockMNState().programs
 const defaultSubmitters = ['test1@example.com', 'test2@example.com']
 
 test('subject line is correct and clearly states submission is unlocked', async () => {
-    const name = packageName(sub, defaultStatePrograms)
+    const name = packageName(
+        sub.stateCode,
+        sub.stateNumber,
+        sub.programIDs,
+        defaultStatePrograms
+    )
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
@@ -143,6 +149,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -171,6 +178,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -199,6 +207,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -333,6 +342,7 @@ test('renders overall email as expected', async () => {
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -361,6 +371,7 @@ test('renders overall email as expected', async () => {
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],

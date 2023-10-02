@@ -1,35 +1,31 @@
+import { v4 as uuidv4 } from 'uuid'
+import { findStatePrograms, NewPostgresStore } from '../../postgres'
+import * as add_sha from '../../handlers/add_sha'
+import { submitContract } from '../../postgres/contractAndRates/submitContract'
+import UPDATE_HEALTH_PLAN_FORM_DATA from '../../../../app-graphql/src/mutations/updateHealthPlanFormData.graphql'
+import { domainToBase64 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import {
+    basicLockedHealthPlanFormData,
+    basicHealthPlanFormData,
+} from '../../../../app-web/src/common-code/healthPlanFormDataMocks'
+import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
+import {
+    mockStoreThatErrors,
+    sharedTestPrismaClient,
+} from '../../testHelpers/storeHelpers'
 import {
     constructTestPostgresServer,
     createAndSubmitTestHealthPlanPackage,
     createTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
-import UPDATE_HEALTH_PLAN_FORM_DATA from '../../../../app-graphql/src/mutations/updateHealthPlanFormData.graphql'
-import { domainToBase64 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
-import {
-    basicLockedHealthPlanFormData,
-    basicHealthPlanFormData,
-} from '../../../../app-web/src/common-code/healthPlanFormDataMocks'
-import { v4 as uuidv4 } from 'uuid'
-import {
-    mockStoreThatErrors,
-    sharedTestPrismaClient,
-} from '../../testHelpers/storeHelpers'
-import { NewPostgresStore } from '../../postgres'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import { must } from '../../testHelpers'
 import type {
     FeatureFlagLDConstant,
     FlagValue,
 } from '../../../../app-web/src/common-code/featureFlags'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
-import { getProgramsFromState, must } from '../../testHelpers'
-import { submitContract } from '../../postgres/contractAndRates/submitContract'
-import type {
-    HealthPlanFormDataType,
-    RateInfoType,
-    StateCodeType,
-} from 'app-web/src/common-code/healthPlanFormDataType'
-import * as add_sha from '../../handlers/add_sha'
 
 const flagValueTestParameters: {
     flagName: FeatureFlagLDConstant
@@ -69,47 +65,44 @@ describe.each(flagValueTestParameters)(
             const createdDraft = await createTestHealthPlanPackage(server)
 
             // update that draft.
-            const formData: HealthPlanFormDataType = Object.assign(
-                latestFormData(createdDraft),
-                {
-                    programIDs: [],
-                    populationCovered: 'MEDICAID',
-                    submissionType: 'CONTRACT_ONLY',
-                    riskBasedContract: true,
-                    submissionDescription: 'Updated submission',
-                    stateContacts: [],
-                    documents: [],
-                    contractType: 'BASE',
-                    contractExecutionStatus: 'EXECUTED',
-                    contractDocuments: [],
-                    contractDateStart: new Date(Date.UTC(2025, 5, 1)),
-                    contractDateEnd: new Date(Date.UTC(2026, 5, 1)),
-                    managedCareEntities: ['MCO'],
-                    federalAuthorities: [],
-                    contractAmendmentInfo: {
-                        modifiedProvisions: {
-                            inLieuServicesAndSettings: true,
-                            modifiedBenefitsProvided: true,
-                            modifiedGeoAreaServed: true,
-                            modifiedMedicaidBeneficiaries: true,
-                            modifiedRiskSharingStrategy: true,
-                            modifiedIncentiveArrangements: true,
-                            modifiedWitholdAgreements: true,
-                            modifiedStateDirectedPayments: true,
-                            modifiedPassThroughPayments: false,
-                            modifiedPaymentsForMentalDiseaseInstitutions: false,
-                            modifiedMedicalLossRatioStandards: false,
-                            modifiedOtherFinancialPaymentIncentive: false,
-                            modifiedEnrollmentProcess: false,
-                            modifiedGrevienceAndAppeal: false,
-                            modifiedNetworkAdequacyStandards: undefined,
-                            modifiedLengthOfContract: undefined,
-                            modifiedNonRiskPaymentArrangements: undefined,
-                        },
+            const formData = Object.assign(latestFormData(createdDraft), {
+                programIDs: [],
+                populationCovered: 'MEDICAID',
+                submissionType: 'CONTRACT_ONLY',
+                riskBasedContract: true,
+                submissionDescription: 'Updated submission',
+                stateContacts: [],
+                documents: [],
+                contractType: 'BASE',
+                contractExecutionStatus: 'EXECUTED',
+                contractDocuments: [],
+                contractDateStart: new Date(Date.UTC(2025, 5, 1)),
+                contractDateEnd: new Date(Date.UTC(2026, 5, 1)),
+                managedCareEntities: ['MCO'],
+                federalAuthorities: [],
+                contractAmendmentInfo: {
+                    modifiedProvisions: {
+                        inLieuServicesAndSettings: true,
+                        modifiedBenefitsProvided: true,
+                        modifiedGeoAreaServed: true,
+                        modifiedMedicaidBeneficiaries: true,
+                        modifiedRiskSharingStrategy: true,
+                        modifiedIncentiveArrangements: true,
+                        modifiedWitholdAgreements: true,
+                        modifiedStateDirectedPayments: true,
+                        modifiedPassThroughPayments: false,
+                        modifiedPaymentsForMentalDiseaseInstitutions: false,
+                        modifiedMedicalLossRatioStandards: false,
+                        modifiedOtherFinancialPaymentIncentive: false,
+                        modifiedEnrollmentProcess: false,
+                        modifiedGrevienceAndAppeal: false,
+                        modifiedNetworkAdequacyStandards: undefined,
+                        modifiedLengthOfContract: undefined,
+                        modifiedNonRiskPaymentArrangements: undefined,
                     },
-                    rateInfos: [],
-                }
-            )
+                },
+                rateInfos: [],
+            })
 
             // convert to base64 proto
             const updatedB64 = domainToBase64(formData)
@@ -139,16 +132,65 @@ describe.each(flagValueTestParameters)(
         })
 
         it('creates, updates, and deletes rates in the contract', async () => {
+            const stateUser = {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER' as const,
+                stateCode: 'MN',
+            }
             const server = await constructTestPostgresServer({
                 ldService: mockLDService,
+                context: {
+                    user: stateUser,
+                },
             })
-            const createdDraft = await createTestHealthPlanPackage(server)
-            const ratePrograms = getProgramsFromState(
-                createdDraft.stateCode as StateCodeType
+
+            const stateCode = 'MN'
+            const createdDraft = await createTestHealthPlanPackage(
+                server,
+                stateCode
+            )
+            const statePrograms = must(
+                findStatePrograms(createdDraft.stateCode)
             )
 
+            // Create 2 valid contracts to attached to packagesWithSharedRateCerts
+            const createdDraftTwo = await createTestHealthPlanPackage(
+                server,
+                stateCode
+            )
+            const createdDraftThree = await createTestHealthPlanPackage(
+                server,
+                stateCode
+            )
+
+            const createdDraftTwoFormData = latestFormData(createdDraftTwo)
+            const createdDraftThreeFormData = latestFormData(createdDraftThree)
+
+            const packageWithSharedRate1 = {
+                packageId: createdDraftTwo.id,
+                packageName: packageName(
+                    createdDraftTwo.stateCode,
+                    createdDraftTwoFormData.stateNumber,
+                    createdDraftTwoFormData.programIDs,
+                    statePrograms
+                ),
+            } as const
+
+            const packageWithSharedRate2 = {
+                packageId: createdDraftThree.id,
+                packageName: packageName(
+                    createdDraftThree.stateCode,
+                    createdDraftThreeFormData.stateNumber,
+                    createdDraftThreeFormData.programIDs,
+                    statePrograms
+                ),
+            } as const
+
             // Create 2 rate data for insertion
-            const rate1: RateInfoType = {
+            const rate1 = {
                 rateType: 'NEW' as const,
                 rateDateStart: new Date(Date.UTC(2025, 5, 1)),
                 rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
@@ -166,7 +208,7 @@ describe.each(flagValueTestParameters)(
                 rateCertificationName: undefined,
                 supportingDocuments: [],
                 //We only want one rate ID and use last program in list to differentiate from programID if possible.
-                rateProgramIDs: [ratePrograms.reverse()[0].id],
+                rateProgramIDs: [statePrograms.reverse()[0].id],
                 actuaryContacts: [
                     {
                         name: 'test name',
@@ -176,7 +218,10 @@ describe.each(flagValueTestParameters)(
                         actuarialFirmOther: '',
                     },
                 ],
-                packagesWithSharedRateCerts: [],
+                packagesWithSharedRateCerts: [
+                    packageWithSharedRate1,
+                    packageWithSharedRate2,
+                ],
             }
 
             const rate2 = {
@@ -197,7 +242,7 @@ describe.each(flagValueTestParameters)(
                 rateCertificationName: undefined,
                 supportingDocuments: [],
                 //We only want one rate ID and use last program in list to differentiate from programID if possible.
-                rateProgramIDs: [ratePrograms.reverse()[0].id],
+                rateProgramIDs: [statePrograms.reverse()[0].id],
                 actuaryContacts: [
                     {
                         name: 'test name',
@@ -211,12 +256,9 @@ describe.each(flagValueTestParameters)(
             }
 
             // update that draft form data.
-            const formData: HealthPlanFormDataType = Object.assign(
-                latestFormData(createdDraft),
-                {
-                    rateInfos: [rate1, rate2],
-                }
-            )
+            const formData = Object.assign(latestFormData(createdDraft), {
+                rateInfos: [rate1, rate2],
+            })
 
             // convert to base64 proto
             const updatedB64 = domainToBase64(formData)
@@ -249,6 +291,22 @@ describe.each(flagValueTestParameters)(
                             ...rate1,
                             id: expect.any(String),
                             rateCertificationName: expect.any(String),
+                            packagesWithSharedRateCerts: expect.arrayContaining(
+                                [
+                                    expect.objectContaining({
+                                        packageId:
+                                            packageWithSharedRate1.packageId,
+                                        packageName:
+                                            packageWithSharedRate1.packageName,
+                                    }),
+                                    expect.objectContaining({
+                                        packageId:
+                                            packageWithSharedRate2.packageId,
+                                        packageName:
+                                            packageWithSharedRate2.packageName,
+                                    }),
+                                ]
+                            ),
                         }),
                         expect.objectContaining({
                             ...rate2,
@@ -270,19 +328,19 @@ describe.each(flagValueTestParameters)(
                 rateCertificationName: undefined,
                 supportingDocuments: [],
                 //We only want one rate ID and use last program in list to differentiate from programID if possible.
-                rateProgramIDs: [ratePrograms.reverse()[0].id],
+                rateProgramIDs: [statePrograms.reverse()[0].id],
                 actuaryContacts: [],
                 packagesWithSharedRateCerts: [],
             }
 
             // Update first rate and remove second from contract and add a new rate.
-            const formData2: HealthPlanFormDataType = Object.assign(
+            const formData2 = Object.assign(
                 latestFormData(updatedHealthPlanPackage),
                 {
                     rateInfos: [
-                        // updating the actuary on the first rate
                         {
                             ...updatedFormData.rateInfos[0],
+                            // updating the actuary on the first rate
                             actuaryContacts: [
                                 {
                                     name: 'New actuary',
@@ -292,6 +350,8 @@ describe.each(flagValueTestParameters)(
                                     actuarialFirmOther: '',
                                 },
                             ],
+                            // remove second package with shared rate, by only passing in the first
+                            packagesWithSharedRateCerts: [],
                         },
                         {
                             ...rate3,
@@ -330,6 +390,7 @@ describe.each(flagValueTestParameters)(
                             ...formData2.rateInfos[0],
                             id: expect.any(String),
                             rateCertificationName: expect.any(String),
+                            packagesWithSharedRateCerts: [],
                         }),
                         expect.objectContaining({
                             ...formData2.rateInfos[1],
@@ -349,33 +410,30 @@ describe.each(flagValueTestParameters)(
             const createdDraft = await createTestHealthPlanPackage(server)
 
             // update that draft.
-            const formData: HealthPlanFormDataType = Object.assign(
-                latestFormData(createdDraft),
-                {
-                    programIDs: [],
-                    populationCovered: 'MEDICAID',
-                    submissionType: 'CONTRACT_ONLY',
-                    riskBasedContract: true,
-                    submissionDescription: 'Updated submission',
-                    stateContacts: [
-                        {
-                            name: 'statecontact',
-                            titleRole: 'thestatestofcontacts',
-                            email: 'statemcstate@examepl.com',
-                        },
-                    ],
-                    documents: [
-                        {
-                            name: 'supportingDocument11.pdf',
-                            s3URL: 'fakeS3URL',
-                            documentCategories: ['CONTRACT_RELATED' as const],
-                            sha256: 'needs-to-be-there',
-                        },
-                    ],
-                    adsfdas: 'sdfsdf',
-                    rateInfos: [],
-                }
-            )
+            const formData = Object.assign(latestFormData(createdDraft), {
+                programIDs: [],
+                populationCovered: 'MEDICAID',
+                submissionType: 'CONTRACT_ONLY',
+                riskBasedContract: true,
+                submissionDescription: 'Updated submission',
+                stateContacts: [
+                    {
+                        name: 'statecontact',
+                        titleRole: 'thestatestofcontacts',
+                        email: 'statemcstate@examepl.com',
+                    },
+                ],
+                documents: [
+                    {
+                        name: 'supportingDocument11.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED' as const],
+                        sha256: 'needs-to-be-there',
+                    },
+                ],
+                adsfdas: 'sdfsdf',
+                rateInfos: [],
+            })
 
             // convert to base64 proto
             const updatedB64 = domainToBase64(formData)
@@ -580,12 +638,11 @@ describe.each(flagValueTestParameters)(
                         },
                     })
                     return must(
-                        await submitContract(
-                            client,
-                            createdDraft.id,
-                            stateUser.id,
-                            'Submission'
-                        )
+                        await submitContract(client, {
+                            contractID: createdDraft.id,
+                            submittedByUserID: stateUser.id,
+                            submitReason: 'Submission',
+                        })
                     )
                 } else {
                     return await createAndSubmitTestHealthPlanPackage(server)

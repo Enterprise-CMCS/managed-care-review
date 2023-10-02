@@ -56,10 +56,7 @@ export function configureResolvers(
                 emailParameterStore
             ),
             // Rates refactor
-            indexRates: indexRatesResolver(
-                store,
-                launchDarkly
-            ),
+            indexRates: indexRatesResolver(store, launchDarkly),
         },
         Mutation: {
             createHealthPlanPackage: createHealthPlanPackageResolver(
@@ -73,12 +70,14 @@ export function configureResolvers(
             submitHealthPlanPackage: submitHealthPlanPackageResolver(
                 store,
                 emailer,
-                emailParameterStore
+                emailParameterStore,
+                launchDarkly
             ),
             unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
                 store,
                 emailer,
-                emailParameterStore
+                emailParameterStore,
+                launchDarkly
             ),
             updateCMSUser: updateCMSUserResolver(store),
             createQuestion: createQuestionResolver(store),

@@ -43,9 +43,12 @@ export type SideNavOutletContextType = {
     user: User
 }
 
+type RouteParams = {
+    id: string
+}
+
 export const SubmissionSideNav = () => {
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    const { id } = useParams<{ id: string }>()
+    const { id } = useParams<keyof RouteParams>()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'
@@ -135,7 +138,12 @@ export const SubmissionSideNav = () => {
     }
     const currentRevision = edge.node
     const packageData = revisionsLookup[currentRevision.id].formData
-    const pkgName = packageName(packageData, pkg.state.programs)
+    const pkgName = packageName(
+        packageData.stateCode,
+        packageData.stateNumber,
+        packageData.programIDs,
+        pkg.state.programs
+    )
     const documentDates = makeDocumentDateTable(revisionsLookup)
     const outletContext: SideNavOutletContextType = {
         pkg,

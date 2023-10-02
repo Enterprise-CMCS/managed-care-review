@@ -4,7 +4,10 @@ import { packageName } from '../../common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { SubmissionTypeRecord } from '../../constants/healthPlanPackages'
 import { useAuth } from '../../contexts/AuthContext'
-import { useIndexHealthPlanPackagesQuery, useIndexRatesQuery } from '../../gen/gqlClient'
+import {
+    useIndexHealthPlanPackagesQuery,
+    useIndexRatesQuery,
+} from '../../gen/gqlClient'
 import { mostRecentDate } from '../../common-code/dateHelpers'
 import styles from '../StateDashboard/StateDashboard.module.scss'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
@@ -184,7 +187,12 @@ const SubmissionsDashboard = (): React.ReactElement => {
 
             submissionRows.push({
                 id: sub.id,
-                name: packageName(packageDataToDisplay, programs),
+                name: packageName(
+                    packageDataToDisplay.stateCode,
+                    packageDataToDisplay.stateNumber,
+                    packageDataToDisplay.programIDs,
+                    programs
+                ),
                 programs: programs.filter((program) =>
                     packageDataToDisplay.programIDs.includes(program.id)
                 ),
@@ -208,7 +216,6 @@ const SubmissionsDashboard = (): React.ReactElement => {
     )
 }
 const RateReviewsDashboard = (): React.ReactElement => {
-
     const { loggedInUser } = useAuth()
     const { loading, data, error } = useIndexRatesQuery({
         fetchPolicy: 'network-only',

@@ -120,6 +120,18 @@ function mockStoreThatErrors(): Store {
         findAllRatesWithHistoryBySubmitInfo: async () => {
             return genericError
         },
+        submitContract: async (_ID) => {
+            return genericError
+        },
+        unlockContract: async (_ID) => {
+            return genericError
+        },
+        submitRate: async (_ID) => {
+            return genericError
+        },
+        unlockRate: async (_ID) => {
+            return genericError
+        },
     }
 }
 

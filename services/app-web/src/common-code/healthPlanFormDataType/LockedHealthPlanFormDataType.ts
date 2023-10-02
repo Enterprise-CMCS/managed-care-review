@@ -1,8 +1,9 @@
+import type { FederalAuthority } from './FederalAuthorities'
+
 // StateSubmission is a health plan that has been submitted to CMS.
 import type {
     StateContact,
     ActuaryContact,
-    FederalAuthority,
     SubmissionDocument,
     ContractAmendmentInfo,
     ActuaryCommunicationType,
@@ -27,7 +28,7 @@ export type LockedHealthPlanFormDataType = {
     populationCovered?: PopulationCoveredType
     submissionType: SubmissionType
     createdAt: Date
-    updatedAt: DateTime
+    updatedAt: Date
     documents: SubmissionDocument[]
     contractType: ContractType
     contractExecutionStatus: ContractExecutionStatus
