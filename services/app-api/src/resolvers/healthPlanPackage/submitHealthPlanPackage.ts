@@ -46,6 +46,7 @@ import type {
     PackageStatusType,
     RateType,
 } from '../../domain-models/contractAndRates'
+import type { RateFormEditable } from '../../postgres/contractAndRates/updateDraftRate'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = (typeof SubmissionErrorCodes)[number] // iterable union type
@@ -305,26 +306,6 @@ export function submitHealthPlanPackageResolver(
             initialFormData = conversionResult
             contractRevisionID = contractWithHistory.revisions[0].id
 
-            // If we are submitting a CONTRACT ONLY but it still has rates associated with it, we need to remove those draftRates now
-            if (
-                initialFormData.submissionType === 'CONTRACT_ONLY' &&
-                initialFormData.rateInfos.length > 0
-            ) {
-                const rateRemovalResult =
-                    await store.updateDraftContractWithRates({
-                        contractID: contractWithHistory.id,
-                        formData: contractWithHistory.draftRevision.formData,
-                        rateFormDatas: [],
-                    })
-                if (rateRemovalResult instanceof Error) {
-                    const errMessage =
-                        'Failed to remove draft rates from a CONTRACT ONLY submission: ' +
-                        rateRemovalResult.message
-                    logError('submitHealthPlanPackage', errMessage)
-                    setErrorAttributesOnActiveSpan(errMessage, span)
-                    throw new Error(errMessage)
-                }
-            }
             // Final clean + check of data before submit - parse to state submission
             const maybeLocked = parseAndSubmit(initialFormData)
 
@@ -338,6 +319,13 @@ export function submitHealthPlanPackageResolver(
             }
 
             // Since submit can change the form data, we have to save it again.
+            // if the rates were removed, we remove them.
+            let removeRateInfos: RateFormEditable[] | undefined = undefined
+            if (maybeLocked.rateInfos.length === 0) {
+                // undefined means ignore rates in updaterDraftContractWithRates, empty array means empty them.
+                removeRateInfos = []
+            }
+
             const updateResult = await store.updateDraftContractWithRates({
                 contractID: input.pkgID,
                 formData: {
@@ -364,6 +352,7 @@ export function submitHealthPlanPackageResolver(
                         }
                     ),
                 },
+                rateFormDatas: removeRateInfos,
             })
             if (updateResult instanceof Error) {
                 const errMessage = `Failed to update submitted contract info with ID: ${contractRevisionID}; ${updateResult.message}`
@@ -378,7 +367,7 @@ export function submitHealthPlanPackageResolver(
             }
 
             // If there are rates, submit those first
-            if (initialFormData.rateInfos.length > 0) {
+            if (contractWithHistory.revisions[0].rateRevisions.length > 0) {
                 const ratePromises: Promise<Error | RateType>[] = []
                 contractWithHistory.revisions[0].rateRevisions.forEach(
                     (rateRev) => {

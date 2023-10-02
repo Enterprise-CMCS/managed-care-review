@@ -12,25 +12,7 @@ import { includeDraftRates } from './prismaDraftContractHelpers'
 import { rateRevisionToDomainModel } from './prismaSharedContractRateHelpers'
 import type { RateFormEditable } from './updateDraftRate'
 import { isEqualData } from '../../resolvers/healthPlanPackage/contractAndRates/resolverHelpers'
-
-// since prisma needs nulls to indicate "remove this field" instead of "ignore this field"
-// this function translates undefineds into nulls
-function nullify<T>(field: T | undefined): T | null {
-    if (field === undefined) {
-        return null
-    }
-
-    return field
-}
-
-// since prisma needs nulls to indicate "remove this field" instead of "ignore this field"
-// this function translates undefineds into empty arrays
-function emptify<T>(field: T[] | undefined): T[] {
-    if (field === undefined) {
-        return []
-    }
-    return field
-}
+import { emptify, nullify } from '../prismaDomainAdaptors'
 
 type ContractFormEditable = Partial<ContractFormDataType>
 

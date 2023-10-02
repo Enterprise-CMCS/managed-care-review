@@ -80,13 +80,28 @@ async function insertDraftContract(
                             contractType: contractType,
                             contractExecutionStatus,
                             contractDocuments: {
-                                create: contractDocuments,
+                                create:
+                                    contractDocuments &&
+                                    contractDocuments.map((d, idx) => ({
+                                        position: idx,
+                                        ...d,
+                                    })),
                             },
                             supportingDocuments: {
-                                create: supportingDocuments,
+                                create:
+                                    supportingDocuments &&
+                                    supportingDocuments.map((d, idx) => ({
+                                        position: idx,
+                                        ...d,
+                                    })),
                             },
                             stateContacts: {
-                                create: stateContacts,
+                                create:
+                                    stateContacts &&
+                                    stateContacts.map((c, idx) => ({
+                                        position: idx,
+                                        ...c,
+                                    })),
                             },
                             contractDateStart,
                             contractDateEnd,
