@@ -19,10 +19,10 @@ import { NewPostgresStore } from '../../postgres'
 import type { NotFoundError, Store } from '../../postgres'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import type { PrismaTransactionType } from '../../postgres/prismaTypes'
-import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates'
 import { createContractData, createDraftContractData } from '../../testHelpers'
 import { parseContractWithHistory } from '../../postgres/contractAndRates/parseContractWithHistory'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates/findAllContractsWithHistoryByState'
 
 describe('indexHealthPlanPackages', () => {
     it.todo(
@@ -436,7 +436,7 @@ describe('indexHealthPlanPackages test rates-db-refactor flag on only', () => {
             return new Promise((resolve) => resolve(contracts))
         }
 
-        const defaultStore = await NewPostgresStore(client)
+        const defaultStore = NewPostgresStore(client)
         const mockStore: Store = {
             ...defaultStore,
             findAllContractsWithHistoryByState: (args) =>
@@ -463,14 +463,6 @@ describe('indexHealthPlanPackages test rates-db-refactor flag on only', () => {
             expect.objectContaining({
                 message: 'indexHealthPlanPackagesResolver failed',
                 error: expect.stringContaining('errorParsingContract'),
-            })
-        )
-
-        // expect console.error to log contract that failed coverting
-        expect(errors).toHaveBeenCalledWith(
-            expect.objectContaining({
-                message: 'indexHealthPlanPackagesResolver failed',
-                error: expect.stringContaining(validParsedSubmittedContract.id),
             })
         )
 

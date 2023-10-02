@@ -178,6 +178,7 @@ model ActuaryContact {
   id                 String                 @id @default(uuid())
   createdAt          DateTime               @default(now())
   updatedAt          DateTime               @default(now()) @updatedAt
+  position            Int                              @default(-1)
   name               String?
   titleRole          String?
   email              String?
@@ -193,6 +194,7 @@ model ContractDocument {
   id                 String                @id @default(uuid())
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @default(now()) @updatedAt
+  position            Int                              @default(-1)
   name               String
   s3URL              String
   sha256             String
@@ -204,6 +206,7 @@ model ContractSupportingDocument {
   id                 String                @id @default(uuid())
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @default(now()) @updatedAt
+  position            Int                              @default(-1)
   name               String
   s3URL              String
   sha256             String
@@ -215,6 +218,7 @@ model RateDocument {
   id             String            @id @default(uuid())
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @default(now()) @updatedAt
+  position            Int                              @default(-1)
   name           String
   s3URL          String
   sha256         String
@@ -226,6 +230,7 @@ model RateSupportingDocument {
   id             String            @id @default(uuid())
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @default(now()) @updatedAt
+  position            Int                              @default(-1)
   name           String
   s3URL          String
   sha256         String
@@ -237,6 +242,7 @@ model StateContact {
   id                 String                @id @default(uuid())
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @default(now()) @updatedAt
+  position            Int                              @default(-1)
   name               String?
   titleRole          String?
   email              String?

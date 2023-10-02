@@ -32,7 +32,7 @@ describe('SubmissionType', () => {
 
         const requiredLabels = await screen.findAllByText('Required')
         expect(requiredLabels).toHaveLength(6)
-        const optionalLabels = await screen.queryAllByText('Optional')
+        const optionalLabels = screen.queryAllByText('Optional')
         expect(optionalLabels).toHaveLength(0)
     })
 

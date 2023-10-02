@@ -48,6 +48,7 @@ describe('migrate_rate_documents', () => {
                 {
                     s3URL: 's3://bucketname/key/foo.png',
                     name: 'rates cert 1',
+                    sha256: 'fakesha',
                     documentCategories: [
                         'RATES_RELATED',
                     ] as DocumentCategoryType[],
@@ -55,6 +56,7 @@ describe('migrate_rate_documents', () => {
                 {
                     s3URL: 's3://bucketname/key/foo.png',
                     name: 'rates cert 2',
+                    sha256: 'fakesha',
                     documentCategories: [
                         'RATES_RELATED',
                     ] as DocumentCategoryType[],
@@ -98,6 +100,7 @@ describe('migrate_rate_documents', () => {
                 {
                     s3URL: 's3://bucketname/key/foo1.png',
                     name: 'rates cert 1',
+                    sha256: 'fakesha',
                     documentCategories: [
                         'RATES_RELATED',
                     ] as DocumentCategoryType[],
@@ -105,6 +108,7 @@ describe('migrate_rate_documents', () => {
                 {
                     s3URL: 's3://bucketname/key/foo2.png',
                     name: 'rates cert 2',
+                    sha256: 'fakesha',
                     documentCategories: [
                         'RATES_RELATED',
                     ] as DocumentCategoryType[],
@@ -211,6 +215,7 @@ describe('migrate_rate_documents', () => {
             {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'contract doc',
+                sha256: 'fakesha',
                 documentCategories: ['RATES_RELATED'],
             },
         ])
@@ -259,6 +264,7 @@ describe('migrate_rate_documents', () => {
             {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'contract doc',
+                sha256: 'fakesha',
                 documentCategories: ['RATES_RELATED'],
             },
         ])
@@ -346,16 +352,19 @@ describe('migrate_rate_documents', () => {
                 {
                     s3URL: 's3://bucketname/key/foo.png',
                     name: 'Report12 - SFY 2022 Preliminary MississippiCAN Capitation Rates - Exhibits.xlsx',
+                    sha256: 'fakesha',
                     documentCategories: ['RATES_RELATED'],
                 },
                 {
                     s3URL: 's3://bucketname/key/bar.png',
                     name: 'Report13 - SFY 2023 Preliminary MississippiCAN Capitation Rates - Exhibits.xlsx',
+                    sha256: 'fakesha',
                     documentCategories: ['RATES_RELATED'],
                 },
                 {
                     s3URL: 's3://bucketname/key/baz.png',
                     name: 'unrelated doc',
+                    sha256: 'fakesha',
                     documentCategories: ['CONTRACT'],
                 },
             ],

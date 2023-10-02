@@ -273,6 +273,7 @@ const mockContractAndRatesFormData = (
             {
                 s3URL: 'bar',
                 name: 'foo',
+                sha256: 'fakesha',
                 documentCategories: ['RATES_RELATED' as const],
             },
         ],
@@ -282,6 +283,7 @@ const mockContractAndRatesFormData = (
             {
                 s3URL: 'bar',
                 name: 'foo',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT' as const],
             },
         ],
@@ -296,6 +298,7 @@ const mockContractAndRatesFormData = (
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -355,6 +358,7 @@ const mockUnlockedContractAndRatesFormData = (
             {
                 s3URL: 'bar',
                 name: 'foo',
+                sha256: 'fakesha',
                 documentCategories: ['RATES_RELATED' as const],
             },
         ],
@@ -364,6 +368,7 @@ const mockUnlockedContractAndRatesFormData = (
             {
                 s3URL: 'bar',
                 name: 'foo',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT' as const],
             },
         ],
@@ -378,6 +383,7 @@ const mockUnlockedContractAndRatesFormData = (
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -437,6 +443,7 @@ const mockUnlockedContractOnlyFormData = (
             {
                 s3URL: 'bar',
                 name: 'foo',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
         ],
@@ -446,6 +453,7 @@ const mockUnlockedContractOnlyFormData = (
             {
                 s3URL: 'bar',
                 name: 'foo',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT' as const],
             },
         ],
@@ -485,6 +493,7 @@ const mockContractOnlyFormData = (
             {
                 s3URL: 'bar',
                 name: 'foo',
+                sha256: 'fakesha',
                 documentCategories: ['RATES_RELATED' as const],
             },
         ],
@@ -494,6 +503,7 @@ const mockContractOnlyFormData = (
             {
                 s3URL: 'bar',
                 name: 'foo',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT' as const],
             },
         ],
@@ -533,6 +543,7 @@ const mockContractAmendmentFormData = (
             {
                 s3URL: 'bar',
                 name: 'foo',
+                sha256: 'fakesha',
                 documentCategories: ['RATES_RELATED' as const],
             },
         ],
@@ -542,6 +553,7 @@ const mockContractAmendmentFormData = (
             {
                 s3URL: 'bar',
                 name: 'foo',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT' as const],
             },
         ],
@@ -556,6 +568,7 @@ const mockContractAmendmentFormData = (
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],

@@ -26,6 +26,7 @@ const submission: LockedHealthPlanFormDataType = {
                 {
                     s3URL: 'bar',
                     name: 'foo',
+                    sha256: 'fakesha',
                     documentCategories: ['RATES' as const],
                 },
             ],
@@ -145,6 +146,7 @@ test('includes expected data summary for a multi-rate contract and rates resubmi
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -173,6 +175,7 @@ test('includes expected data summary for a multi-rate contract and rates resubmi
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -201,6 +204,7 @@ test('includes expected data summary for a multi-rate contract and rates resubmi
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
