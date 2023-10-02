@@ -462,7 +462,7 @@ type HelpdeskUser {
     familyName: String!
 }
 
-"BusinessOwnerUser is a user that ..."
+"The Business Owner is the root of our role hierarchy with the power to approve new admin accounts"
 type BusinessOwnerUser {
     id: ID!
     "will always be 'BUSINESSOWNER_USER'"
