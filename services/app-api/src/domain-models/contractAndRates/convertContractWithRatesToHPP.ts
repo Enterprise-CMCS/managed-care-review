@@ -15,10 +15,8 @@ import {
     toProtoBuffer,
 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import type { ContractRevisionWithRatesType } from './revisionTypes'
-import {
-    isSubmissionError,
-    parseAndSubmit,
-} from '../../resolvers/healthPlanPackage/submitHealthPlanPackage'
+import { parsePartialHPFD } from 'app-web/src/common-code/proto/healthPlanFormDataProto/toDomain'
+import type { PartialHealthPlanFormData } from 'app-web/src/common-code/proto/healthPlanFormDataProto/toDomain'
 
 function convertContractWithRatesToUnlockedHPP(
     contract: ContractType
@@ -86,7 +84,6 @@ function convertContractWithRatesRevtoHPPRev(
     return healthPlanRevisions
 }
 
-// TODO: Clean up parameters into args and improve types to make things more strict
 function convertContractWithRatesToFormData(
     contractRev: ContractRevisionWithRatesType,
     contractID: string,
@@ -157,9 +154,8 @@ function convertContractWithRatesToFormData(
     )
 
     // since this data is coming out from the DB without validation, we start by making a draft.
-    const healthPlanFormData: HealthPlanFormDataType = {
+    const healthPlanFormData: PartialHealthPlanFormData = {
         id: contractID, // contract form data id is the contract ID.
-        status: 'DRAFT',
         createdAt: contractRev.createdAt,
         updatedAt: contractRev.updatedAt,
         stateCode: stateCode,
@@ -230,22 +226,18 @@ function convertContractWithRatesToFormData(
         rateInfos,
     }
 
+    const status = contractRev.submitInfo ? 'SUBMITTED' : 'DRAFT'
     if (contractRev.submitInfo) {
-        const result = parseAndSubmit(healthPlanFormData)
-        if (isSubmissionError(result)) {
-            console.error(
-                'Failed to parse contract data into submitted HPFD',
-                result
-            )
-            return new Error(
-                'The data did not parse correctly as a submitted health plan'
-            )
-        }
-
-        return result
+        healthPlanFormData.submittedAt = contractRev.submitInfo.updatedAt
     }
 
-    return healthPlanFormData
+    const formDataResult = parsePartialHPFD(status, healthPlanFormData)
+
+    if (formDataResult instanceof Error) {
+        console.error('couldnt parse into valid form data', formDataResult)
+    }
+
+    return formDataResult
 }
 
 export {

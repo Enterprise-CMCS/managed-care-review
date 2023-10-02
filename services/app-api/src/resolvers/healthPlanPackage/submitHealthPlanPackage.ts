@@ -336,6 +336,47 @@ export function submitHealthPlanPackageResolver(
                     message: maybeLocked.message,
                 })
             }
+
+            // Since submit can change the form data, we have to save it again.
+            const updateResult = await store.updateDraftContractWithRates({
+                contractID: input.pkgID,
+                formData: {
+                    ...maybeLocked,
+                    ...maybeLocked.contractAmendmentInfo?.modifiedProvisions,
+                    managedCareEntities: maybeLocked.managedCareEntities,
+                    stateContacts: maybeLocked.stateContacts,
+                    supportingDocuments: maybeLocked.documents.map((doc) => {
+                        return {
+                            name: doc.name,
+                            s3URL: doc.s3URL,
+                            sha256: doc.sha256,
+                            id: doc.id,
+                        }
+                    }),
+                    contractDocuments: maybeLocked.contractDocuments.map(
+                        (doc) => {
+                            return {
+                                name: doc.name,
+                                s3URL: doc.s3URL,
+                                sha256: doc.sha256,
+                                id: doc.id,
+                            }
+                        }
+                    ),
+                },
+            })
+            if (updateResult instanceof Error) {
+                const errMessage = `Failed to update submitted contract info with ID: ${contractRevisionID}; ${updateResult.message}`
+                logError('submitHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
+            }
+
             // If there are rates, submit those first
             if (initialFormData.rateInfos.length > 0) {
                 const ratePromises: Promise<Error | RateType>[] = []

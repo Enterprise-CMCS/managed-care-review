@@ -466,14 +466,6 @@ describe('indexHealthPlanPackages test rates-db-refactor flag on only', () => {
             })
         )
 
-        // expect console.error to log contract that failed coverting
-        expect(errors).toHaveBeenCalledWith(
-            expect.objectContaining({
-                message: 'indexHealthPlanPackagesResolver failed',
-                error: expect.stringContaining(validParsedSubmittedContract.id),
-            })
-        )
-
         // Expect our contract that passed checks
         expect(contracts).toEqual(
             expect.arrayContaining([
