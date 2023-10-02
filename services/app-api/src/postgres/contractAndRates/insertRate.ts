@@ -54,10 +54,20 @@ async function insertDraftRate(
                             rateType,
                             rateCapitationType: rateCapitationType,
                             rateDocuments: {
-                                create: rateDocuments,
+                                create:
+                                    rateDocuments &&
+                                    rateDocuments.map((d, idx) => ({
+                                        position: idx,
+                                        ...d,
+                                    })),
                             },
                             supportingDocuments: {
-                                create: supportingDocuments,
+                                create:
+                                    supportingDocuments &&
+                                    supportingDocuments.map((d, idx) => ({
+                                        position: idx,
+                                        ...d,
+                                    })),
                             },
                             rateDateStart,
                             rateDateEnd,
@@ -67,10 +77,20 @@ async function insertDraftRate(
                             rateProgramIDs,
                             rateCertificationName,
                             certifyingActuaryContacts: {
-                                create: certifyingActuaryContacts,
+                                create:
+                                    certifyingActuaryContacts &&
+                                    certifyingActuaryContacts.map((c, idx) => ({
+                                        position: idx,
+                                        ...c,
+                                    })),
                             },
                             addtlActuaryContacts: {
-                                create: addtlActuaryContacts,
+                                create:
+                                    addtlActuaryContacts &&
+                                    addtlActuaryContacts.map((c, idx) => ({
+                                        position: idx,
+                                        ...c,
+                                    })),
                             },
                             actuaryCommunicationPreference,
                         },

@@ -64,6 +64,7 @@ describe('with rates', () => {
                         {
                             s3URL: 'bar',
                             name: 'foo',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES' as const],
                         },
                     ],
@@ -164,6 +165,7 @@ describe('with rates', () => {
                         {
                             s3URL: 'bar',
                             name: 'foo',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES' as const],
                         },
                     ],
@@ -192,6 +194,7 @@ describe('with rates', () => {
                         {
                             s3URL: 'bar',
                             name: 'foo',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES' as const],
                         },
                     ],
@@ -220,6 +223,7 @@ describe('with rates', () => {
                         {
                             s3URL: 'bar',
                             name: 'foo',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES' as const],
                         },
                     ],
@@ -421,6 +425,7 @@ describe('with rates', () => {
                         {
                             s3URL: 'bar',
                             name: 'foo',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES' as const],
                         },
                     ],
@@ -476,6 +481,7 @@ describe('with rates', () => {
                         {
                             s3URL: 'bar',
                             name: 'foo',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES' as const],
                         },
                     ],
@@ -714,6 +720,7 @@ test('renders overall email as expected', async () => {
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -742,6 +749,7 @@ test('renders overall email as expected', async () => {
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],

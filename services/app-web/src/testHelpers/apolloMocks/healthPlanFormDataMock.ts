@@ -15,6 +15,7 @@ import {
 } from '../../common-code/healthPlanFormDataMocks'
 
 import {
+    HealthPlanFormDataType,
     LockedHealthPlanFormDataType,
     SubmissionDocument,
     UnlockedHealthPlanFormDataType,
@@ -231,6 +232,7 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
         documents: [
             {
                 s3URL: 's3://bucketname/key/supporting-documents',
+                sha256: 'fakesha',
                 name: 'supporting documents',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
@@ -240,6 +242,7 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
         contractDocuments: [
             {
                 s3URL: 's3://bucketname/key/contract',
+                sha256: 'fakesha',
                 name: 'contract',
                 documentCategories: ['CONTRACT' as const],
             },
@@ -256,6 +259,15 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
                 modifiedPassThroughPayments: false,
                 modifiedPaymentsForMentalDiseaseInstitutions: false,
                 modifiedNonRiskPaymentArrangements: true,
+                modifiedBenefitsProvided: true,
+                modifiedEnrollmentProcess: true,
+                modifiedMedicaidBeneficiaries: true,
+                modifiedGeoAreaServed: true,
+                modifiedGrevienceAndAppeal: true,
+                modifiedLengthOfContract: true,
+                modifiedNetworkAdequacyStandards: true,
+                modifiedMedicalLossRatioStandards: true,
+                modifiedOtherFinancialPaymentIncentive: true,
             },
         },
         managedCareEntities: ['PAHP'],
@@ -267,6 +279,7 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
                 rateDocuments: [
                     {
                         s3URL: 's3://bucketname/key/rate',
+                        sha256: 'fakesha',
                         name: 'rate',
                         documentCategories: ['RATES' as const],
                     },
@@ -274,6 +287,7 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
                 supportingDocuments: [
                     {
                         s3URL: 's3://bucketname/key/supporting-documents',
+                        sha256: 'fakesha',
                         name: 'supporting documents',
                         documentCategories: ['RATES_RELATED' as const],
                     },
@@ -324,6 +338,7 @@ function mockStateSubmissionContractAmendment(): LockedHealthPlanFormDataType {
         documents: [
             {
                 s3URL: 's3://bucketname/key/supporting-documents',
+                sha256: 'fakesha',
                 name: 'supporting documents',
                 documentCategories: ['RATES_RELATED' as const],
             },
@@ -333,6 +348,7 @@ function mockStateSubmissionContractAmendment(): LockedHealthPlanFormDataType {
         contractDocuments: [
             {
                 s3URL: 's3://bucketname/key/contract',
+                sha256: 'fakesha',
                 name: 'contract',
                 documentCategories: ['CONTRACT' as const],
             },
@@ -369,6 +385,7 @@ function mockStateSubmissionContractAmendment(): LockedHealthPlanFormDataType {
                 rateDocuments: [
                     {
                         s3URL: 's3://bucketname/key/rate',
+                        sha256: 'fakesha',
                         name: 'rate',
                         documentCategories: ['RATES' as const],
                     },
@@ -438,7 +455,10 @@ function mockSubmittedHealthPlanPackage(
 ): HealthPlanPackage {
     // get a submitted DomainModel submission
     // turn it into proto
-    const submission = { ...basicLockedHealthPlanFormData(), ...submissionData }
+    const submission = {
+        ...basicLockedHealthPlanFormData(),
+        ...submissionData,
+    } as HealthPlanFormDataType
     const b64 = domainToBase64(submission)
 
     return {
@@ -667,16 +687,19 @@ function mockUnlockedHealthPlanPackageWithDocuments(): HealthPlanPackage {
     const docs1: SubmissionDocument[] = [
         {
             s3URL: 's3://bucketname/one-one/one-one.png',
+            sha256: 'fakesha',
             name: 'one one',
             documentCategories: ['CONTRACT_RELATED'],
         },
         {
             s3URL: 's3://bucketname/one-two/one-two.png',
+            sha256: 'fakesha',
             name: 'one two',
             documentCategories: ['CONTRACT_RELATED'],
         },
         {
             s3URL: 's3://bucketname/one-three/one-three.png',
+            sha256: 'fakesha',
             name: 'one three',
             documentCategories: ['CONTRACT_RELATED'],
         },
@@ -684,16 +707,19 @@ function mockUnlockedHealthPlanPackageWithDocuments(): HealthPlanPackage {
     const docs2: SubmissionDocument[] = [
         {
             s3URL: 's3://bucketname/one-two/one-two.png',
+            sha256: 'fakesha',
             name: 'one two',
             documentCategories: ['CONTRACT_RELATED'],
         },
         {
             s3URL: 's3://bucketname/one-three/one-three.png',
+            sha256: 'fakesha',
             name: 'one three',
             documentCategories: ['CONTRACT_RELATED'],
         },
         {
             s3URL: 's3://bucketname/two-one/two-one.png',
+            sha256: 'fakesha',
             name: 'two one',
             documentCategories: ['CONTRACT_RELATED'],
         },
@@ -701,16 +727,19 @@ function mockUnlockedHealthPlanPackageWithDocuments(): HealthPlanPackage {
     const docs3: SubmissionDocument[] = [
         {
             s3URL: 's3://bucketname/one-two/one-two.png',
+            sha256: 'fakesha',
             name: 'one two',
             documentCategories: ['CONTRACT_RELATED'],
         },
         {
             s3URL: 's3://bucketname/two-one/two-one.png',
+            sha256: 'fakesha',
             name: 'two one',
             documentCategories: ['CONTRACT_RELATED'],
         },
         {
             s3URL: 's3://bucketname/three-one/three-one.png',
+            sha256: 'fakesha',
             name: 'three one',
             documentCategories: ['CONTRACT_RELATED'],
         },

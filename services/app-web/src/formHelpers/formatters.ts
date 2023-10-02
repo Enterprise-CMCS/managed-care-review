@@ -88,11 +88,15 @@ const formatDocumentsForDomain = (
             console.info(
                 'Attempting to save files that are duplicate names, discarding duplicate'
             )
-        } else if (!fileItem.s3URL)
+        } else if (!fileItem.s3URL) {
             console.info(
                 'Attempting to save a seemingly valid file item is not yet uploaded to S3, this should not happen on form submit. Discarding file.'
             )
-        else {
+        } else if (!fileItem.sha256) {
+            console.info(
+                'Attempting to save a seemingly valid file item does not have a sha256 yet. this should not happen on form submit. Discarding file.'
+            )
+        } else {
             cleanedFileItems.push({
                 name: fileItem.name,
                 s3URL: fileItem.s3URL,

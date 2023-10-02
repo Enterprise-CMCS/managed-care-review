@@ -810,6 +810,7 @@ describe('submission type assertions', () => {
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: [
                             'CONTRACT_RELATED' as const,
                             'RATES_RELATED' as const,
@@ -818,6 +819,7 @@ describe('submission type assertions', () => {
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also_2.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: [
                             'RATES_RELATED' as const,
                             'CONTRACT_RELATED' as const,
@@ -826,6 +828,7 @@ describe('submission type assertions', () => {
                     {
                         name: 'rate_only_supporting_doc.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES_RELATED' as const],
                     },
                 ],
@@ -837,16 +840,19 @@ describe('submission type assertions', () => {
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: ['CONTRACT_RELATED'],
                     },
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also_2.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: ['CONTRACT_RELATED'],
                     },
                     {
                         name: 'rate_only_supporting_doc.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: ['CONTRACT_RELATED'],
                     },
                 ],
@@ -860,6 +866,7 @@ describe('submission type assertions', () => {
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: [
                             'RATES_RELATED' as const,
                             'CONTRACT_RELATED' as const,
@@ -868,6 +875,7 @@ describe('submission type assertions', () => {
                     {
                         name: 'rate_only_supporting_doc.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES_RELATED' as const],
                     },
                 ],
@@ -879,11 +887,13 @@ describe('submission type assertions', () => {
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: ['CONTRACT_RELATED' as const],
                     },
                     {
                         name: 'rate_only_supporting_doc.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: ['CONTRACT_RELATED' as const],
                     },
                 ],
@@ -897,6 +907,7 @@ describe('submission type assertions', () => {
                     {
                         name: 'rate_only_supporting_doc.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES_RELATED' as const],
                     },
                 ],
@@ -908,6 +919,7 @@ describe('submission type assertions', () => {
                     {
                         name: 'rate_only_supporting_doc.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: ['CONTRACT_RELATED'],
                     },
                 ],
@@ -929,6 +941,7 @@ describe('submission type assertions', () => {
             {
                 name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: [
                     'CONTRACT_RELATED' as const,
                     'RATES_RELATED' as const,
@@ -937,6 +950,7 @@ describe('submission type assertions', () => {
             {
                 name: 'contract_supporting_that_applies_to_a_rate_also_2.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: [
                     'RATES_RELATED' as const,
                     'CONTRACT_RELATED' as const,
@@ -945,11 +959,13 @@ describe('submission type assertions', () => {
             {
                 name: 'contract_supporting_that_applies_to_a_rate_also_3.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 name: 'rate_only_supporting_doc.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: ['RATES_RELATED' as const],
             },
         ]
@@ -958,21 +974,25 @@ describe('submission type assertions', () => {
             {
                 name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED'],
             },
             {
                 name: 'contract_supporting_that_applies_to_a_rate_also_2.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED'],
             },
             {
                 name: 'contract_supporting_that_applies_to_a_rate_also_3.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED'],
             },
             {
                 name: 'rate_only_supporting_doc.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED'],
             },
         ])
@@ -983,6 +1003,7 @@ describe('submission type assertions', () => {
             {
                 name: 'contract_certification.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT' as const],
             },
         ]
@@ -991,6 +1012,7 @@ describe('submission type assertions', () => {
             {
                 name: 'rates_certification.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: ['RATES' as const],
             },
         ]
@@ -999,6 +1021,7 @@ describe('submission type assertions', () => {
             {
                 name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: [
                     'CONTRACT_RELATED' as const,
                     'RATES_RELATED' as const,
@@ -1007,6 +1030,7 @@ describe('submission type assertions', () => {
             {
                 name: 'rates_certification.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: [
                     'RATES' as const,
                     'RATES_RELATED' as const,
@@ -1015,6 +1039,7 @@ describe('submission type assertions', () => {
             {
                 name: 'contract_certification.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: [
                     'CONTRACT' as const,
                     'CONTRACT_RELATED' as const,

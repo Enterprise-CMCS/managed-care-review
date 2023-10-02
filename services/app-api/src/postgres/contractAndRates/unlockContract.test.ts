@@ -54,7 +54,11 @@ describe('unlockContract', () => {
 
         // Submit Rate A
         const submittedRate = must(
-            await submitRate(client, rate.id, stateUser.id, 'Rate A 1.0 submit')
+            await submitRate(client, {
+                rateID: rate.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Rate A 1.0 submit',
+            })
         )
 
         // Connect draft contract to submitted rate
@@ -89,7 +93,13 @@ describe('unlockContract', () => {
         )
 
         // Unlock the rate
-        must(await unlockRate(client, rate.id, cmsUser.id, 'Unlocking rate'))
+        must(
+            await unlockRate(client, {
+                rateID: rate.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'Unlocking rate',
+            })
+        )
         must(
             await updateDraftRate(client, {
                 rateID: rate.id,
@@ -99,7 +109,11 @@ describe('unlockContract', () => {
         )
 
         const resubmittedRate = must(
-            await submitRate(client, rate.id, stateUser.id, 'Updated things')
+            await submitRate(client, {
+                rateID: rate.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Updated things',
+            })
         )
 
         const fullDraftContractTwo = must(
@@ -159,7 +173,11 @@ describe('unlockContract', () => {
 
         // Submit Rate A
         const submittedRate = must(
-            await submitRate(client, rate.id, stateUser.id, 'Rate 1.0 submit')
+            await submitRate(client, {
+                rateID: rate.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Rate 1.0 submit',
+            })
         )
 
         // Connect draft contract to submitted rate
@@ -180,12 +198,11 @@ describe('unlockContract', () => {
 
         // Submit contract
         const submittedContract = must(
-            await submitContract(
-                client,
-                contract.id,
-                stateUser.id,
-                'Initial Submit'
-            )
+            await submitContract(client, {
+                contractID: contract.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Initial Submit',
+            })
         )
         // Latest revision is the last index
         const latestContractRev = submittedContract.revisions[0]
@@ -196,7 +213,13 @@ describe('unlockContract', () => {
         )
 
         // Unlock the rate and resubmit rate
-        must(await unlockRate(client, rate.id, cmsUser.id, 'Unlocking rate'))
+        must(
+            await unlockRate(client, {
+                rateID: rate.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'Unlocking rate',
+            })
+        )
         must(
             await updateDraftRate(client, {
                 rateID: rate.id,
@@ -205,7 +228,11 @@ describe('unlockContract', () => {
             })
         )
         const resubmittedRate = must(
-            await submitRate(client, rate.id, stateUser.id, 'Rate resubmit')
+            await submitRate(client, {
+                rateID: rate.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Rate resubmit',
+            })
         )
 
         // Expect rate to still be connected to submitted contract
@@ -284,17 +311,20 @@ describe('unlockContract', () => {
 
         // Submit rate
         const submittedRate = must(
-            await submitRate(client, rate.id, stateUser.id, 'Submit rate 1.0')
+            await submitRate(client, {
+                rateID: rate.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Submit rate 1.0',
+            })
         )
 
         // Submit contract
         const submittedContract = must(
-            await submitContract(
-                client,
-                contract.id,
-                stateUser.id,
-                'Submit contract 1.0'
-            )
+            await submitContract(client, {
+                contractID: contract.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Submit contract 1.0',
+            })
         )
         const latestContractRev = submittedContract.revisions[0]
 
@@ -304,12 +334,11 @@ describe('unlockContract', () => {
 
         // Unlock and resubmit contract
         must(
-            await unlockContract(
-                client,
-                contract.id,
-                cmsUser.id,
-                'First unlock'
-            )
+            await unlockContract(client, {
+                contractID: contract.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'First unlock',
+            })
         )
         must(
             await updateDraftContractWithRates(client, {
@@ -327,12 +356,11 @@ describe('unlockContract', () => {
         )
 
         const resubmittedContract = must(
-            await submitContract(
-                client,
-                contract.id,
-                stateUser.id,
-                'Submit contract 2.0'
-            )
+            await submitContract(client, {
+                contractID: contract.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Submit contract 2.0',
+            })
         )
         const latestResubmittedRev = resubmittedContract.revisions[0]
 
@@ -393,12 +421,11 @@ describe('unlockContract', () => {
         )
 
         // Submit contract
-        const submittedContract = await submitContract(
-            client,
-            contract.id,
-            stateUser.id,
-            'Submit contract 1.0'
-        )
+        const submittedContract = await submitContract(client, {
+            contractID: contract.id,
+            submittedByUserID: stateUser.id,
+            submitReason: 'Submit contract 1.0',
+        })
         expect(submittedContract).toBeInstanceOf(Error)
     })
     it('errors when unlocking a draft contract or rate', async () => {
@@ -431,20 +458,18 @@ describe('unlockContract', () => {
 
         //Unlocking it results in error
         expect(
-            await unlockContract(
-                client,
-                contractA.id,
-                cmsUser.id,
-                'unlocking contact A 1.1'
-            )
+            await unlockContract(client, {
+                contractID: contractA.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlocking contact A 1.1',
+            })
         ).toBeInstanceOf(Error)
         expect(
-            await unlockRate(
-                client,
-                rateA.id,
-                cmsUser.id,
-                'unlocking rate A 1.1'
-            )
+            await unlockRate(client, {
+                rateID: rateA.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlocking rate A 1.1',
+            })
         ).toBeInstanceOf(Error)
     })
 })

@@ -1,12 +1,11 @@
-import type { ContractOrErrorArrayType } from '../../../postgres/contractAndRates'
 import type { Span } from '@opentelemetry/api'
 import type { HealthPlanPackageType } from '../../../domain-models'
+import { convertContractWithRatesToUnlockedHPP } from '../../../domain-models/contractAndRates'
 import type {
     ContractType,
     RateFormDataType,
     DocumentType,
 } from '../../../domain-models/contractAndRates'
-import { convertContractToUnlockedHealthPlanPackage } from '../../../domain-models'
 import { logError } from '../../../logger'
 import { setErrorAttributesOnActiveSpan } from '../../attributeHelper'
 import type {
@@ -16,6 +15,7 @@ import type {
 import { calculateSHA256 } from '../../../handlers/add_sha'
 import { rateFormDataSchema } from '../../../domain-models/contractAndRates'
 import assert from 'assert'
+import type { ContractOrErrorArrayType } from '../../../postgres/contractAndRates/findAllContractsWithHistoryByState'
 
 const validateContractsAndConvert = (
     contractsWithHistory: ContractOrErrorArrayType,
@@ -47,8 +47,7 @@ const validateContractsAndConvert = (
     const convertedContracts: HealthPlanPackageType[] = []
     const errorConvertContracts: string[] = []
     parsedContracts.forEach((contract) => {
-        const parsedContract =
-            convertContractToUnlockedHealthPlanPackage(contract)
+        const parsedContract = convertContractWithRatesToUnlockedHPP(contract)
         if (parsedContract instanceof Error) {
             errorConvertContracts.push(
                 `${contract.id}: ${parsedContract.message}`

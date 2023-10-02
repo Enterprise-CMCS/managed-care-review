@@ -246,6 +246,7 @@ test('includes expected data summary for a contract and rates submission CMS ema
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -333,6 +334,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -361,6 +363,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -389,6 +392,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -512,6 +516,7 @@ test('includes expected data summary for a contract amendment submission', async
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -593,6 +598,7 @@ test('includes expected data summary for a rate amendment submission CMS email',
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -857,6 +863,7 @@ test('CHIP contract and rate submission does include state specific analysts ema
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -942,6 +949,7 @@ test('CHIP contract and rate submission does not include oactEmails', async () =
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -1021,6 +1029,7 @@ test('renders overall email as expected', async () => {
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -1049,6 +1058,7 @@ test('renders overall email as expected', async () => {
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],

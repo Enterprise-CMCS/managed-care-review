@@ -1,10 +1,10 @@
 import { v4 as uuidv4 } from 'uuid'
 import { createContractRevision } from '../../testHelpers'
 import {
+    getContractRateStatus,
     contractFormDataToDomainModel,
-    getContractStatus,
 } from './prismaSharedContractRateHelpers'
-import type { ContractRevisionTableWithRates } from './prismaSubmittedContractHelpers'
+import type { ContractRevisionTableWithFormData } from './prismaSharedContractRateHelpers'
 
 describe('prismaToDomainModel', () => {
     describe('contractFormDataToDomainModel', () => {
@@ -40,21 +40,16 @@ describe('prismaToDomainModel', () => {
         })
     })
 
-    describe('getContractStatus', () => {
+    describe('getContractRateStatus', () => {
+        // Using type coercion in these tests rather than creating revisions
+        // we just care about unit testing different variations of submitInfo, updateInfo, and createdAt
         const contractWithUnorderedRevs: {
-            revision: Pick<
-                ContractRevisionTableWithRates,
-                'createdAt' | 'submitInfo'
-            >[]
+            revision: ContractRevisionTableWithFormData[]
             testDescription: string
-            expectedResult: 'SUBMITTED' | 'DRAFT'
+            expectedResult: 'SUBMITTED' | 'DRAFT' | 'UNLOCKED' | 'RESUBMITTED'
         }[] = [
             {
                 revision: [
-                    {
-                        createdAt: new Date(21, 2, 1),
-                        submitInfo: null,
-                    },
                     {
                         createdAt: new Date(21, 3, 1),
                         submitInfo: {
@@ -74,19 +69,28 @@ describe('prismaToDomainModel', () => {
                                 stateCode: 'OH',
                             },
                         },
-                    },
-                    {
-                        createdAt: new Date(21, 1, 1),
-                        submitInfo: null,
-                    },
+                    } as ContractRevisionTableWithFormData,
                 ],
-                testDescription: 'latest revision has been submitted',
+                testDescription: 'only one revision exists with a submit info',
                 expectedResult: 'SUBMITTED',
             },
             {
                 revision: [
                     {
-                        createdAt: new Date(21, 2, 1),
+                        createdAt: new Date(21, 3, 1),
+                    } as ContractRevisionTableWithFormData,
+                ],
+                testDescription:
+                    'only one revision exists with not submit info',
+                expectedResult: 'DRAFT',
+            },
+            {
+                revision: [
+                    {
+                        createdAt: new Date(21, 4, 1),
+                    } as ContractRevisionTableWithFormData,
+                    {
+                        createdAt: new Date(21, 3, 1),
                         submitInfo: {
                             id: uuidv4(),
                             updatedAt: new Date(),
@@ -104,11 +108,7 @@ describe('prismaToDomainModel', () => {
                                 stateCode: 'OH',
                             },
                         },
-                    },
-                    {
-                        createdAt: new Date(21, 3, 1),
-                        submitInfo: null,
-                    },
+                    } as ContractRevisionTableWithFormData,
                     {
                         createdAt: new Date(21, 1, 1),
                         submitInfo: {
@@ -128,16 +128,84 @@ describe('prismaToDomainModel', () => {
                                 stateCode: 'OH',
                             },
                         },
-                    },
+                    } as ContractRevisionTableWithFormData,
                 ],
-                testDescription: 'latest revisions has not been submitted',
-                expectedResult: 'DRAFT',
+                testDescription:
+                    'multiple reivsions and latest revision has not been submitted',
+                expectedResult: 'UNLOCKED',
+            },
+            {
+                revision: [
+                    {
+                        createdAt: new Date(21, 2, 1),
+                        submitInfo: {
+                            id: uuidv4(),
+                            updatedAt: new Date(),
+                            updatedByID: 'someone',
+                            updatedReason: 'submit',
+                            updatedBy: {
+                                id: 'someone',
+                                createdAt: new Date(),
+                                updatedAt: new Date(),
+                                givenName: 'Bob',
+                                familyName: 'Law',
+                                email: 'boblaw@example.com',
+                                role: 'STATE_USER',
+                                divisionAssignment: null,
+                                stateCode: 'OH',
+                            },
+                        },
+                    } as ContractRevisionTableWithFormData,
+                    {
+                        createdAt: new Date(21, 3, 1),
+                        submitInfo: {
+                            id: uuidv4(),
+                            updatedAt: new Date(),
+                            updatedByID: 'someone',
+                            updatedReason: 'submit',
+                            updatedBy: {
+                                id: 'someone',
+                                createdAt: new Date(),
+                                updatedAt: new Date(),
+                                givenName: 'Bob',
+                                familyName: 'Law',
+                                email: 'boblaw@example.com',
+                                role: 'STATE_USER',
+                                divisionAssignment: null,
+                                stateCode: 'OH',
+                            },
+                        },
+                    } as ContractRevisionTableWithFormData,
+                    {
+                        createdAt: new Date(21, 1, 1),
+                        submitInfo: {
+                            id: uuidv4(),
+                            updatedAt: new Date(),
+                            updatedByID: 'someone',
+                            updatedReason: 'submit',
+                            updatedBy: {
+                                id: 'someone',
+                                createdAt: new Date(),
+                                updatedAt: new Date(),
+                                givenName: 'Bob',
+                                familyName: 'Law',
+                                email: 'boblaw@example.com',
+                                role: 'STATE_USER',
+                                divisionAssignment: null,
+                                stateCode: 'OH',
+                            },
+                        },
+                    } as ContractRevisionTableWithFormData,
+                ],
+                testDescription:
+                    'multiple revisions and latest revision has been submitted',
+                expectedResult: 'RESUBMITTED',
             },
         ]
         test.each(contractWithUnorderedRevs)(
             'correctly gets contract status from unordered revisions: $testDescription',
             ({ revision, expectedResult }) => {
-                expect(getContractStatus(revision)).toEqual(expectedResult)
+                expect(getContractRateStatus(revision)).toEqual(expectedResult)
             }
         )
     })

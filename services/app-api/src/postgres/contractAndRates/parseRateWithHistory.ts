@@ -13,7 +13,7 @@ import type {
 } from './prismaSharedContractRateHelpers'
 import {
     convertUpdateInfoToDomainModel,
-    getContractStatus,
+    getContractRateStatus,
     rateFormDataToDomainModel,
 } from './prismaSharedContractRateHelpers'
 import type { RateTableFullPayload } from './prismaSubmittedRateHelpers'
@@ -209,7 +209,7 @@ function rateWithHistoryToDomainModel(
 
     return {
         id: rate.id,
-        status: getContractStatus(rate.revisions),
+        status: getContractRateStatus(rateRevisions),
         stateCode: rate.stateCode,
         stateNumber: rate.stateNumber,
         draftRevision,

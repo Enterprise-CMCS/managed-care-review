@@ -42,20 +42,18 @@ describe('findAllContractsWithHistoryBySubmittedInfo', () => {
             await insertDraftContract(client, draftContractData)
         )
         const submittedContractOne = must(
-            await submitContract(
-                client,
-                contractOne.id,
-                stateUser.id,
-                'contractOne submit'
-            )
+            await submitContract(client, {
+                contractID: contractOne.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'contractOne submit',
+            })
         )
         const submittedContractTwo = must(
-            await submitContract(
-                client,
-                contractTwo.id,
-                stateUser.id,
-                'contractTwo submit'
-            )
+            await submitContract(client, {
+                contractID: contractTwo.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'contractTwo submit',
+            })
         )
 
         // make two draft contracts
@@ -71,20 +69,18 @@ describe('findAllContractsWithHistoryBySubmittedInfo', () => {
             await insertDraftContract(client, draftContractData)
         )
         must(
-            await submitContract(
-                client,
-                contractThree.id,
-                stateUser.id,
-                'unlockContractOne submit'
-            )
+            await submitContract(client, {
+                contractID: contractThree.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'unlockContractOne submit',
+            })
         )
         const unlockedContract = must(
-            await unlockContract(
-                client,
-                contractThree.id,
-                cmsUser.id,
-                'unlock unlockContractOne'
-            )
+            await unlockContract(client, {
+                contractID: contractThree.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock unlockContractOne',
+            })
         )
 
         // call the find by submit info function

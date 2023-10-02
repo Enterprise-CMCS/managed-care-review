@@ -5,7 +5,7 @@ import {
     isStateUser,
     isAdminUser,
     packageStatus,
-    convertContractToUnlockedHealthPlanPackage,
+    convertContractWithRatesToUnlockedHPP,
 } from '../../domain-models'
 import { isHelpdeskUser } from '../../domain-models/user'
 import type { QueryResolvers, State } from '../../gen/gqlServer'
@@ -66,7 +66,7 @@ export function fetchHealthPlanPackageResolver(
             }
 
             const convertedPkg =
-                convertContractToUnlockedHealthPlanPackage(contractWithHistory)
+                convertContractWithRatesToUnlockedHPP(contractWithHistory)
 
             if (convertedPkg instanceof Error) {
                 const errMessage = `Issue converting contract. Message: ${convertedPkg.message}`

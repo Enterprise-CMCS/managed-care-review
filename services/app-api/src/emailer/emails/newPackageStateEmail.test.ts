@@ -258,6 +258,7 @@ test('includes expected data summary for a contract and rates submission State e
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -345,6 +346,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -373,6 +375,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -401,6 +404,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -512,6 +516,7 @@ test('includes expected data summary for a rate amendment submission State email
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -594,6 +599,7 @@ test('renders overall email for a new package with a rate amendment as expected'
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],

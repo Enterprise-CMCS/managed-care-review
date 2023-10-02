@@ -102,6 +102,7 @@ const createRateRevision = (
         supportingDocuments: [
             {
                 id: uuidv4(),
+                position: 0,
                 rateRevisionID: 'rateRevisionID',
                 createdAt: new Date(),
                 updatedAt: new Date(),
@@ -111,6 +112,7 @@ const createRateRevision = (
             },
             {
                 id: uuidv4(),
+                position: 1,
                 rateRevisionID: 'rateRevisionID',
                 createdAt: new Date(),
                 updatedAt: new Date(),
@@ -122,6 +124,7 @@ const createRateRevision = (
         rateDocuments: [
             {
                 id: uuidv4(),
+                position: 0,
                 rateRevisionID: 'rateRevisionID',
                 createdAt: new Date(),
                 updatedAt: new Date(),

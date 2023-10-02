@@ -57,45 +57,6 @@ describe('add_sha', () => {
         ]
     }
 
-    it('should add a sha256 property to documents when it is missing', async () => {
-        // Create a revision with a missing sha256 property in the document
-        const revisions: HealthPlanRevisionTable[] = createRevisions([
-            {
-                s3URL: 's3://bucketname/key/foo.png',
-                name: 'contract doc',
-                documentCategories: ['CONTRACT_RELATED'],
-                // Omit the sha256 property
-            },
-        ])
-
-        const storeFindAllRevisionsSpy = jest.spyOn(
-            mockStore,
-            'findAllRevisions'
-        )
-        storeFindAllRevisionsSpy.mockResolvedValue(revisions)
-
-        const updateHealthPlanRevisionSpy = jest.spyOn(
-            mockStore,
-            'updateHealthPlanRevision'
-        )
-
-        await main({} as Event, {} as Context, () => {
-            /*empty callback*/
-        })
-
-        // the sha should be set to the mock value defined above
-        expect(updateHealthPlanRevisionSpy).toHaveBeenCalledWith(
-            'mockPkgID',
-            'mockId',
-            expect.objectContaining({
-                documents: expect.arrayContaining([
-                    expect.objectContaining({
-                        sha256: 'mockSHA256',
-                    }),
-                ]),
-            })
-        )
-    })
     it('should not overwrite a sha256 property when it already exists', async () => {
         // Create a revision with an existing sha256 property in the document
         const revisions: HealthPlanRevisionTable[] = createRevisions([

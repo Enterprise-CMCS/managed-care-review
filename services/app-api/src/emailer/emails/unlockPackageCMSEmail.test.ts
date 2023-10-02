@@ -29,6 +29,7 @@ const sub: UnlockedHealthPlanFormDataType = {
                 {
                     s3URL: 'bar',
                     name: 'foo',
+                    sha256: 'fakesha',
                     documentCategories: ['RATES' as const],
                 },
             ],
@@ -146,6 +147,7 @@ describe('unlockPackageCMSEmail', () => {
                         {
                             s3URL: 'bar',
                             name: 'foo',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES' as const],
                         },
                     ],
@@ -174,6 +176,7 @@ describe('unlockPackageCMSEmail', () => {
                         {
                             s3URL: 'bar',
                             name: 'foo',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES' as const],
                         },
                     ],
@@ -202,6 +205,7 @@ describe('unlockPackageCMSEmail', () => {
                         {
                             s3URL: 'bar',
                             name: 'foo',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES' as const],
                         },
                     ],
@@ -585,6 +589,7 @@ describe('unlockPackageCMSEmail', () => {
                         {
                             s3URL: 'bar',
                             name: 'foo',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES' as const],
                         },
                     ],
@@ -640,6 +645,7 @@ describe('unlockPackageCMSEmail', () => {
                         {
                             s3URL: 'bar',
                             name: 'foo',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES' as const],
                         },
                     ],

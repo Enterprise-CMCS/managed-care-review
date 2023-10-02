@@ -46,12 +46,11 @@ describe('findContract', () => {
             await insertDraftContract(client, draftContractData)
         )
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'initial submit'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'initial submit',
+            })
         )
 
         // Add 3 rates 1, 2, 3 pointing to contract A
@@ -68,7 +67,13 @@ describe('findContract', () => {
                 contractIDs: [contractA.id],
             })
         )
-        must(await submitRate(client, rate1.id, stateUser.id, 'Rate Submit'))
+        must(
+            await submitRate(client, {
+                rateID: rate1.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Rate Submit',
+            })
+        )
 
         const rate2 = must(
             await insertDraftRate(client, {
@@ -83,7 +88,13 @@ describe('findContract', () => {
                 contractIDs: [contractA.id],
             })
         )
-        must(await submitRate(client, rate2.id, stateUser.id, 'RateSubmit 2'))
+        must(
+            await submitRate(client, {
+                rateID: rate2.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'RateSubmit 2',
+            })
+        )
 
         const rate3 = must(
             await insertDraftRate(client, {
@@ -98,7 +109,13 @@ describe('findContract', () => {
                 contractIDs: [contractA.id],
             })
         )
-        must(await submitRate(client, rate3.id, stateUser.id, '3.0 create'))
+        must(
+            await submitRate(client, {
+                rateID: rate3.id,
+                submittedByUserID: stateUser.id,
+                submitReason: '3.0 create',
+            })
+        )
 
         // Now, find that contract and assert the history is what we expected
         const threeContract = must(
@@ -111,12 +128,11 @@ describe('findContract', () => {
 
         // remove the connection from rate 2
         must(
-            await unlockRate(
-                client,
-                rate2.id,
-                cmsUser.id,
-                'unlock for 2.1 remove'
-            )
+            await unlockRate(client, {
+                rateID: rate2.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock for 2.1 remove',
+            })
         )
         must(
             await updateDraftRate(client, {
@@ -125,7 +141,13 @@ describe('findContract', () => {
                 contractIDs: [],
             })
         )
-        must(await submitRate(client, rate2.id, stateUser.id, '2.1 remove'))
+        must(
+            await submitRate(client, {
+                rateID: rate2.id,
+                submittedByUserID: stateUser.id,
+                submitReason: '2.1 remove',
+            })
+        )
 
         // Now, find that contract and assert the history is what we expected
         const twoContract = must(
@@ -138,7 +160,13 @@ describe('findContract', () => {
         expect(twoContract.revisions[0].rateRevisions).toHaveLength(2)
 
         // update rate 1 to have a new version, should make one new rev.
-        must(await unlockRate(client, rate1.id, cmsUser.id, 'unlock for 1.1'))
+        must(
+            await unlockRate(client, {
+                rateID: rate1.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock for 1.1',
+            })
+        )
         must(
             await updateDraftRate(client, {
                 rateID: rate1.id,
@@ -146,7 +174,13 @@ describe('findContract', () => {
                 contractIDs: [contractA.id],
             })
         )
-        must(await submitRate(client, rate1.id, stateUser.id, '1.1 new name'))
+        must(
+            await submitRate(client, {
+                rateID: rate1.id,
+                submittedByUserID: stateUser.id,
+                submitReason: '1.1 new name',
+            })
+        )
 
         // Now, find that contract and assert the history is what we expected
         const backAgainContract = must(
@@ -159,20 +193,18 @@ describe('findContract', () => {
 
         // Make a new Contract Revision, should show up as a single new rev with all the old info
         must(
-            await unlockContract(
-                client,
-                contractA.id,
-                cmsUser.id,
-                'unlocking A.0'
-            )
+            await unlockContract(client, {
+                contractID: contractA.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlocking A.0',
+            })
         )
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'Submitting A.1'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Submitting A.1',
+            })
         )
 
         // Now, find that contract and assert the history is what we expected
@@ -186,12 +218,11 @@ describe('findContract', () => {
 
         // Make a new Contract Revision, changing the connections should show up as a single new rev.
         const unlockedContractA = must(
-            await unlockContract(
-                client,
-                contractA.id,
-                cmsUser.id,
-                'unlocking A.1'
-            )
+            await unlockContract(client, {
+                contractID: contractA.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlocking A.1',
+            })
         )
         must(
             await updateDraftContractWithRates(client, {
@@ -213,12 +244,11 @@ describe('findContract', () => {
             })
         )
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'Submitting A.2'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Submitting A.2',
+            })
         )
 
         // Now, find that contract and assert the history is what we expected
@@ -356,12 +386,11 @@ describe('findContract', () => {
             await insertDraftContract(client, draftContractData)
         )
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'initial submit'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'initial submit',
+            })
         )
 
         // Add 3 rates 1, 2, 3 pointing to contract A
@@ -382,7 +411,13 @@ describe('findContract', () => {
                 }
             )
         )
-        must(await submitRate(client, rate1.id, stateUser.id, 'Rate Submit'))
+        must(
+            await submitRate(client, {
+                rateID: rate1.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Rate Submit',
+            })
+        )
 
         const rate2 = must(
             await insertDraftRate(client, {
@@ -397,7 +432,13 @@ describe('findContract', () => {
                 contractIDs: [contractA.id],
             })
         )
-        must(await submitRate(client, rate2.id, stateUser.id, 'RateSubmit 2'))
+        must(
+            await submitRate(client, {
+                rateID: rate2.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'RateSubmit 2',
+            })
+        )
 
         const rate3 = must(
             await insertDraftRate(client, {
@@ -412,16 +453,21 @@ describe('findContract', () => {
                 contractIDs: [contractA.id],
             })
         )
-        must(await submitRate(client, rate3.id, stateUser.id, '3.0 create'))
+        must(
+            await submitRate(client, {
+                rateID: rate3.id,
+                submittedByUserID: stateUser.id,
+                submitReason: '3.0 create',
+            })
+        )
 
         // remove the connection from rate 2
         must(
-            await unlockRate(
-                client,
-                rate2.id,
-                cmsUser.id,
-                'unlock for 2.1 remove'
-            )
+            await unlockRate(client, {
+                rateID: rate2.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock for 2.1 remove',
+            })
         )
         must(
             await updateDraftRate(client, {
@@ -430,10 +476,22 @@ describe('findContract', () => {
                 contractIDs: [],
             })
         )
-        must(await submitRate(client, rate2.id, stateUser.id, '2.1 remove'))
+        must(
+            await submitRate(client, {
+                rateID: rate2.id,
+                submittedByUserID: stateUser.id,
+                submitReason: '2.1 remove',
+            })
+        )
 
         // update rate 1 to have a new version, should make one new rev.
-        must(await unlockRate(client, rate1.id, cmsUser.id, 'unlock for 1.1'))
+        must(
+            await unlockRate(client, {
+                rateID: rate1.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock for 1.1',
+            })
+        )
         must(
             await updateDraftRate(client, {
                 rateID: rate1.id,
@@ -441,34 +499,38 @@ describe('findContract', () => {
                 contractIDs: [contractA.id],
             })
         )
-        must(await submitRate(client, rate1.id, stateUser.id, '1.1 new name'))
+        must(
+            await submitRate(client, {
+                rateID: rate1.id,
+                submittedByUserID: stateUser.id,
+                submitReason: '1.1 new name',
+            })
+        )
 
         // Make a new Contract Revision, should show up as a single new rev with all the old info
         must(
-            await unlockContract(
-                client,
-                contractA.id,
-                cmsUser.id,
-                'unlocking A.0'
-            )
+            await unlockContract(client, {
+                contractID: contractA.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlocking A.0',
+            })
         )
+
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'Submitting A.1'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Submitting A.1',
+            })
         )
 
         // Make a new Contract Revision, changing the connections should show up as a single new rev.
         const unlockedContractA = must(
-            await unlockContract(
-                client,
-                contractA.id,
-                cmsUser.id,
-                'unlocking A.1'
-            )
+            await unlockContract(client, {
+                contractID: contractA.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlocking A.1',
+            })
         )
         // Remove rate 1 and rate 2 from contract
         must(
@@ -492,12 +554,11 @@ describe('findContract', () => {
         )
 
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'Submitting A.2'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Submitting A.2',
+            })
         )
 
         // Now, find that contract and assert the history is what we expected
@@ -638,40 +699,37 @@ describe('findContract', () => {
 
         // submit both rates
         must(
-            await submitRate(
-                client,
-                draftRateRevisionData1.rateID,
-                stateUser.id,
-                'Rate Submit'
-            )
+            await submitRate(client, {
+                rateID: draftRateRevisionData1.rateID,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Rate Submit',
+            })
         )
+
         const submittedRate2 = must(
-            await submitRate(
-                client,
-                draftRateRevisionData2.rateID,
-                stateUser.id,
-                'Rate Submit 2'
-            )
+            await submitRate(client, {
+                rateID: draftRateRevisionData2.rateID,
+                submittedByUserID: stateUser.id,
+                submitReason: 'Rate Submit 2',
+            })
         )
 
         // submit contract
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'initial submit'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'initial submit',
+            })
         )
 
         // Unlock contract A, but don't resubmit it yet.
         must(
-            await unlockContract(
-                client,
-                contractA.id,
-                cmsUser.id,
-                'unlock A Open'
-            )
+            await unlockContract(client, {
+                contractID: contractA.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock A Open',
+            })
         )
 
         // Draft should pull revision 2.0 out
@@ -687,12 +745,11 @@ describe('findContract', () => {
 
         // unlock and submit second rate rev
         must(
-            await unlockRate(
-                client,
-                submittedRate2.id,
-                cmsUser.id,
-                'unlock for 2.1'
-            )
+            await unlockRate(client, {
+                rateID: submittedRate2.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock for 2.1',
+            })
         )
         must(
             await updateDraftRate(client, {
@@ -715,12 +772,11 @@ describe('findContract', () => {
 
         // Submit Rate 2.1
         must(
-            await submitRate(
-                client,
-                submittedRate2.id,
-                stateUser.id,
-                '2.1 update'
-            )
+            await submitRate(client, {
+                rateID: submittedRate2.id,
+                submittedByUserID: stateUser.id,
+                submitReason: '2.1 update',
+            })
         )
 
         // raft should still pull revision 2.1 out
@@ -736,21 +792,19 @@ describe('findContract', () => {
 
         // submit contract A1, now, should show up as a single new rev and have the latest rates
         must(
-            await submitContract(
-                client,
-                contractA.id,
-                stateUser.id,
-                'third submit'
-            )
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'third submit',
+            })
         )
 
         // attempt a second submission, should result in an error.
-        const contractA_1_Error = await submitContract(
-            client,
-            contractA.id,
-            stateUser.id,
-            'third submit'
-        )
+        const contractA_1_Error = await submitContract(client, {
+            contractID: contractA.id,
+            submittedByUserID: stateUser.id,
+            submitReason: 'third submit',
+        })
         if (!(contractA_1_Error instanceof Error)) {
             throw new Error('Should be impossible to submit twice in a row.')
         }

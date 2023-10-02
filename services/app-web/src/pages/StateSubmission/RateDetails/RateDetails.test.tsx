@@ -10,12 +10,14 @@ import userEvent from '@testing-library/user-event'
 
 import {
     mockDraft,
+    mockContractAndRatesDraft,
     fetchCurrentUserMock,
     indexHealthPlanPackagesMockSuccess,
     mockUnlockedHealthPlanPackage,
     mockSubmittedHealthPlanPackage,
     mockMNState,
 } from '../../../testHelpers/apolloMocks'
+import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
 
 import {
     renderWithProviders,
@@ -29,7 +31,10 @@ import {
     ldUseClientSpy,
 } from '../../../testHelpers'
 import { RateDetails } from './RateDetails'
-import { ACCEPTED_RATE_CERTIFICATION_FILE_TYPES } from '../../../components/FileUpload'
+import {
+    ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES,
+    ACCEPTED_RATE_CERTIFICATION_FILE_TYPES,
+} from '../../../components/FileUpload'
 import selectEvent from 'react-select-event'
 import * as useStatePrograms from '../../../hooks/useStatePrograms'
 import { unlockedWithALittleBitOfEverything } from '../../../common-code/healthPlanFormDataMocks'
@@ -240,7 +245,7 @@ describe('RateDetails', () => {
             continueButton.click()
             await waitFor(() => {
                 expect(
-                    screen.getAllByText('You must upload at least one document')
+                    screen.getAllByText('You must upload a rate certification')
                 ).toHaveLength(2)
                 expect(continueButton).toHaveAttribute('aria-disabled', 'true')
             })
@@ -472,7 +477,9 @@ describe('RateDetails', () => {
             ).toBeInTheDocument()
         })
 
-        it('accepts multiple pdf, word, excel documents', async () => {
+        it('accepts a single file for rate cert', async () => {
+            // const mockUpdateDraftFn = jest.fn()
+
             renderWithProviders(
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft()}
@@ -489,10 +496,52 @@ describe('RateDetails', () => {
             const input = screen.getByLabelText(
                 'Upload one rate certification document'
             )
+
             expect(input).toBeInTheDocument()
             expect(input).toHaveAttribute(
                 'accept',
                 ACCEPTED_RATE_CERTIFICATION_FILE_TYPES
+            )
+            await userEvent.upload(input, [
+                TEST_DOC_FILE,
+                TEST_PDF_FILE,
+                TEST_DOCX_FILE,
+            ])
+
+            await waitFor(() => {
+                expect(screen.getByText(/1 file added/)).toBeInTheDocument()
+                expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
+                expect(
+                    screen.queryByText(TEST_PDF_FILE.name)
+                ).not.toBeInTheDocument()
+                expect(
+                    screen.queryByText(TEST_DOCX_FILE.name)
+                ).not.toBeInTheDocument()
+            })
+        })
+
+        it('accepts multiple pdf, word, excel documents for supporting documents', async () => {
+            ldUseClientSpy({ 'supporting-docs-by-rate': true })
+
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft()}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const input = screen.getByLabelText('Upload supporting documents')
+
+            expect(input).toBeInTheDocument()
+            expect(input).toHaveAttribute(
+                'accept',
+                ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES
             )
             await userEvent.upload(input, [
                 TEST_DOC_FILE,
@@ -675,7 +724,7 @@ describe('RateDetails', () => {
             continueButton.click()
             await waitFor(() => {
                 expect(
-                    screen.getAllByText('You must upload at least one document')
+                    screen.getAllByText('You must upload a rate certification')
                 ).toHaveLength(2)
                 expect(continueButton).toHaveAttribute('aria-disabled', 'true')
             })
@@ -1266,7 +1315,71 @@ describe('RateDetails', () => {
 
             await waitFor(() => {
                 expect(
-                    screen.getAllByText('You must upload at least one document')
+                    screen.getAllByText('You must upload a rate certification')
+                ).toHaveLength(2)
+
+                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
+            })
+        })
+
+        it('disabled with alert if previously submitted with more than one rate cert file', async () => {
+            const docs: SubmissionDocument[] = [
+                {
+                    s3URL: 's3://bucketname/one-one/one-one.png',
+                    name: 'one one',
+                    documentCategories: ['CONTRACT_RELATED'],
+                },
+                {
+                    s3URL: 's3://bucketname/one-two/one-two.png',
+                    name: 'one two',
+                    documentCategories: ['CONTRACT_RELATED'],
+                },
+                {
+                    s3URL: 's3://bucketname/one-three/one-three.png',
+                    name: 'one three',
+                    documentCategories: ['CONTRACT_RELATED'],
+                },
+            ]
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={mockContractAndRatesDraft({
+                        rateInfos: [
+                            {
+                                supportingDocuments: [],
+                                rateDocuments: docs,
+                                actuaryContacts: [
+                                    {
+                                        actuarialFirm: 'DELOITTE',
+                                        name: 'Actuary Contact 1',
+                                        titleRole: 'Test Actuary Contact 1',
+                                        email: 'actuarycontact1@test.com',
+                                    },
+                                ],
+                            },
+                        ],
+                    })}
+                    updateDraft={jest.fn()}
+                    previousDocuments={['testFile.docx', 'testFile.pdf']}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            expect(continueButton).not.toHaveAttribute('aria-disabled')
+
+            continueButton.click()
+
+            await waitFor(() => {
+                expect(
+                    screen.getAllByText(
+                        'Only one document is allowed for a rate certification. You must remove documents before continuing.'
+                    )
                 ).toHaveLength(2)
 
                 expect(continueButton).toHaveAttribute('aria-disabled', 'true')
@@ -1341,7 +1454,7 @@ describe('RateDetails', () => {
 
             expect(
                 await screen.findAllByText(
-                    'You must upload at least one document'
+                    'You must upload a rate certification'
                 )
             ).toHaveLength(2)
 
@@ -1349,6 +1462,8 @@ describe('RateDetails', () => {
         })
         // eslint-disable-next-line jest/no-disabled-tests
         it('disabled with alert when trying to continue while a file is still uploading', async () => {
+            ldUseClientSpy({ 'supporting-docs-by-rate': true })
+
             renderWithProviders(
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft()}
@@ -1370,7 +1485,7 @@ describe('RateDetails', () => {
             )
 
             // upload one file
-            dragAndDrop(targetEl[0], [TEST_PDF_FILE])
+            dragAndDrop(targetEl[1], [TEST_PDF_FILE])
             const imageElFile = await screen.findByTestId(
                 'file-input-preview-image'
             )
@@ -1379,7 +1494,7 @@ describe('RateDetails', () => {
             )
 
             // upload second file
-            dragAndDrop(targetEl[0], [TEST_DOC_FILE])
+            dragAndDrop(targetEl[1], [TEST_DOC_FILE])
             const imageElFiles = await screen.findAllByTestId(
                 'file-input-preview-image'
             )
@@ -1482,7 +1597,7 @@ describe('RateDetails', () => {
             await userEvent.click(saveAsDraftButton)
             expect(mockUpdateDraftFn).toHaveBeenCalled()
             expect(
-                screen.queryByText('You must upload at least one document')
+                screen.queryByText('You must upload a rate certification')
             ).toBeNull()
         })
 
@@ -1524,11 +1639,12 @@ describe('RateDetails', () => {
             await userEvent.click(saveAsDraftButton)
             expect(mockUpdateDraftFn).toHaveBeenCalled()
             expect(
-                screen.queryByText('You must upload at least one document')
+                screen.queryByText('You must upload a rate certification')
             ).toBeNull()
         })
 
         it('when duplicate files present, triggers error alert on click', async () => {
+            ldUseClientSpy({ 'supporting-docs-by-rate': true })
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
@@ -1542,9 +1658,8 @@ describe('RateDetails', () => {
                     },
                 }
             )
-            const input = screen.getByLabelText(
-                'Upload one rate certification document'
-            )
+
+            const input = screen.getByLabelText('Upload supporting documents')
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
             })
@@ -1651,7 +1766,7 @@ describe('RateDetails', () => {
 
             await userEvent.click(backButton)
             expect(
-                screen.queryByText('You must upload at least one document')
+                screen.queryByText('You must upload a rate certification')
             ).toBeNull()
             expect(mockUpdateDraftFn).not.toHaveBeenCalled()
         })
@@ -1690,8 +1805,6 @@ describe('RateDetails', () => {
             })
 
             await userEvent.upload(rateCertInput, [TEST_DOC_FILE])
-            await userEvent.upload(rateCertInput, [TEST_PDF_FILE])
-            await userEvent.upload(rateCertInput, [TEST_DOC_FILE])
 
             await userEvent.upload(supportingDocsInput, [TEST_XLS_FILE])
             await userEvent.upload(supportingDocsInput, [TEST_DOC_FILE])
@@ -1700,7 +1813,7 @@ describe('RateDetails', () => {
                 expect(backButton).not.toHaveAttribute('aria-disabled')
                 expect(
                     screen.queryAllByText('Duplicate file, please remove')
-                ).toHaveLength(2)
+                ).toHaveLength(1)
             })
             await userEvent.click(backButton)
 
@@ -1717,12 +1830,6 @@ describe('RateDetails', () => {
                     s3URL: expect.any(String),
                     documentCategories: ['RATES'],
                     sha256: 'da7d22ce886b5ab262cd7ab28901212a027630a5edf8e88c8488087b03ffd833', // pragma: allowlist secret
-                },
-                {
-                    name: 'testFile.pdf',
-                    s3URL: expect.any(String),
-                    documentCategories: ['RATES'],
-                    sha256: '6d50607f29187d5b185ffd9d46bc5ef75ce7abb53318690c73e55b6623e25ad5', // pragma: allowlist secret
                 },
             ])
 

@@ -1,15 +1,12 @@
-import type { Prisma, UpdateInfoTable } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 import type { DocumentCategoryType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type {
     ContractFormDataType,
     RateFormDataType,
     RateRevisionType,
-    ContractStatusType,
+    PackageStatusType,
     UpdateInfoType,
 } from '../../domain-models/contractAndRates'
-import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { findStatePrograms } from '../state'
-import type { ProgramType } from '../../domain-models'
 
 const subincludeUpdateInfo = {
     updatedBy: true,
@@ -38,19 +35,28 @@ function convertUpdateInfoToDomainModel(
 }
 
 // -----
-
-function getContractStatus(
-    revision: {
-        createdAt: Date
-        submitInfo: UpdateInfoTable | null
-    }[]
-): ContractStatusType {
+function getContractRateStatus(
+    revisions:
+        | ContractRevisionTableWithFormData[]
+        | RateRevisionTableWithFormData[]
+): PackageStatusType {
     // need to order revisions from latest to earliest
-    const latestToEarliestRev = revision.sort(
+    const revs = revisions.sort(
         (revA, revB) => revB.createdAt.getTime() - revA.createdAt.getTime()
     )
-    const latestRevision = latestToEarliestRev[0]
-    return latestRevision?.submitInfo ? 'SUBMITTED' : 'DRAFT'
+    const latestRevision = revs[0]
+    // submitted - one revision with submission status
+    if (revs.length === 1 && latestRevision.submitInfo) {
+        return 'SUBMITTED'
+    } else if (revs.length > 1) {
+        // unlocked - multiple revs, latest revision has unlocked status and no submitted status
+        // resubmitted - multiple revs, latest revision has submitted status
+        if (latestRevision.submitInfo) {
+            return 'RESUBMITTED'
+        }
+        return 'UNLOCKED'
+    }
+    return 'DRAFT'
 }
 
 // ------
@@ -59,10 +65,26 @@ const includeRateFormData = {
     submitInfo: includeUpdateInfo,
     unlockInfo: includeUpdateInfo,
 
-    rateDocuments: true,
-    supportingDocuments: true,
-    certifyingActuaryContacts: true,
-    addtlActuaryContacts: true,
+    rateDocuments: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
+    supportingDocuments: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
+    certifyingActuaryContacts: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
+    addtlActuaryContacts: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
     contractsWithSharedRateRevision: {
         include: {
             revisions: {
@@ -187,19 +209,23 @@ function rateRevisionToDomainModel(
 function ratesRevisionsToDomainModel(
     rateRevisions: RateRevisionTableWithFormData[]
 ): RateRevisionType[] | Error {
-    const domainRateRevisions: RateRevisionType[] = []
+    const domainRevisions: RateRevisionType[] = []
 
-    for (const rateRevision of rateRevisions) {
-        const domainRateRevision = rateRevisionToDomainModel(rateRevision)
+    for (const revision of rateRevisions) {
+        const domainRevision = rateRevisionToDomainModel(revision)
 
-        if (domainRateRevision instanceof Error) {
-            return domainRateRevision
+        if (domainRevision instanceof Error) {
+            return domainRevision
         }
 
-        domainRateRevisions.push(domainRateRevision)
+        domainRevisions.push(domainRevision)
     }
 
-    return domainRateRevisions
+    domainRevisions.sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+    )
+
+    return domainRevisions
 }
 
 // ------
@@ -208,9 +234,21 @@ const includeContractFormData = {
     unlockInfo: includeUpdateInfo,
     submitInfo: includeUpdateInfo,
 
-    stateContacts: true,
-    contractDocuments: true,
-    supportingDocuments: true,
+    stateContacts: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
+    contractDocuments: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
+    supportingDocuments: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
 } satisfies Prisma.ContractRevisionTableInclude
 
 type ContractRevisionTableWithFormData =
@@ -227,7 +265,10 @@ function contractFormDataToDomainModel(
         contractType: contractRevision.contractType,
         programIDs: contractRevision.programIDs ?? [],
         populationCovered: contractRevision.populationCovered ?? undefined,
-        riskBasedContract: contractRevision.riskBasedContract ?? undefined,
+        riskBasedContract:
+            contractRevision.riskBasedContract !== null
+                ? contractRevision.riskBasedContract
+                : undefined,
         stateContacts: contractRevision.stateContacts
             ? contractRevision.stateContacts.map((contact) => ({
                   name: contact.name ?? undefined,
@@ -306,7 +347,7 @@ export {
     includeUpdateInfo,
     includeContractFormData,
     includeRateFormData,
-    getContractStatus,
+    getContractRateStatus,
     convertUpdateInfoToDomainModel,
     contractFormDataToDomainModel,
     rateFormDataToDomainModel,
