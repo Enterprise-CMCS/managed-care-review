@@ -15,8 +15,8 @@ import {
     toProtoBuffer,
 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import type { ContractRevisionWithRatesType } from './revisionTypes'
-import { parsePartialHPFD } from 'app-web/src/common-code/proto/healthPlanFormDataProto/toDomain'
-import type { PartialHealthPlanFormData } from 'app-web/src/common-code/proto/healthPlanFormDataProto/toDomain'
+import { parsePartialHPFD } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/toDomain'
+import type { PartialHealthPlanFormData } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/toDomain'
 
 function convertContractWithRatesToUnlockedHPP(
     contract: ContractType
