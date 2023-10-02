@@ -18,6 +18,7 @@ export {
     toDomainUser,
     isBusinessOwnerUser,
     isHelpdeskUser,
+    hasAdminPermissions,
 } from './user'
 
 export {

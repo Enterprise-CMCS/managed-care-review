@@ -69,6 +69,16 @@ function toDomainUser(user: PrismaUser): UserType {
     }
 }
 
+function hasAdminPermissions(user: UserType): boolean {
+    const authorizedAdmins = [
+        'ADMIN_USER',
+        'HELPDESK_USER',
+        'BUSINESSOWNER_USER',
+    ]
+
+    return authorizedAdmins.includes(user.role)
+}
+
 export {
     isUser,
     isCMSUser,
@@ -77,4 +87,5 @@ export {
     toDomainUser,
     isHelpdeskUser,
     isBusinessOwnerUser,
+    hasAdminPermissions,
 }
