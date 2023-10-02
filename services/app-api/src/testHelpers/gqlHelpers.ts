@@ -270,7 +270,9 @@ const createAndUpdateTestHealthPlanPackage = async (
     return updatedDraft
 }
 
-const createAndSubmitTestHealthPlanPackage = async (server: ApolloServer) => {
+const createAndSubmitTestHealthPlanPackage = async (
+    server: ApolloServer
+): Promise<HealthPlanPackage> => {
     const pkg = await createAndUpdateTestHealthPlanPackage(server)
     return await submitTestHealthPlanPackage(server, pkg.id)
 }
