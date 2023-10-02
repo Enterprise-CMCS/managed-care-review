@@ -124,7 +124,7 @@
         "@aws-sdk/s3-request-presigner": "^3.352.0",
         "@storybook/addon-a11y": "^6.5.15",
         "@storybook/addon-essentials": "^6.5.15",
-        "@storybook/addon-links": "^6.5.15",
+        "@storybook/addon-links": "^7.4.5",
         "@storybook/builder-webpack5": "^6.5.4",
         "@storybook/manager-webpack5": "^6.5.15",
         "@storybook/preset-create-react-app": "7.3.2",
