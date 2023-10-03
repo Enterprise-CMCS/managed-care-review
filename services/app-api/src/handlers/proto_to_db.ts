@@ -160,24 +160,6 @@ export async function migrateRevision(
     }
     */
 
-    /* The ContractRevisionID and the RateRevisionID in the document tables
-        are foreign keys to the id fields in their respective revision tables. 
-        I'm not 100% sure that this is the correct approach.  */
-    /*
-    const documentMigrationResults = await migrateDocuments(
-        client,
-        revision,
-        formData
-    )
-    if (documentMigrationResults instanceof Error) {
-        const error = new Error(
-            `Error migrating ${revision.id} documents: ${documentMigrationResults.message}`
-        )
-        console.error(error)
-        return error
-    }
-    */
-
     // let's check that we did things right
     const migratedContract = await findContractWithHistory(
         client,
