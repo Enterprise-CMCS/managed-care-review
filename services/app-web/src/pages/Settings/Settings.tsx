@@ -12,13 +12,15 @@ export const Settings = (): React.ReactElement => {
     const isAuthenticated = loginStatus === 'LOGGED_IN'
     const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const isHelpdeskUser = loggedInUser?.role === 'HELPDESK_USER'
+    const isBusinessOwnerUser = loggedInUser?.role === 'BUSINESSOWNER_USER'
 
     const loading = loginStatus === 'LOADING' || !loggedInUser
     return (
         <GridContainer className={styles.pageContainer}>
             {loading ? (
                 <Loading />
-            ) : !isAuthenticated || !(isAdminUser || isHelpdeskUser) ? (
+            ) : !isAuthenticated ||
+              !(isAdminUser || isHelpdeskUser || isBusinessOwnerUser) ? (
                 <SettingsErrorAlert
                     isAuthenticated={isAuthenticated}
                     isAdmin={isAdminUser || isHelpdeskUser}

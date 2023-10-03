@@ -196,10 +196,16 @@ describe('Auth', () => {
             ).toBeInTheDocument()
 
             expect(
+                screen.getByRole('img', {
+                    name: /Shi Tong/i,
+                })
+            ).toBeInTheDocument()
+
+            expect(
                 screen.getAllByRole('button', {
                     name: /Login/i,
                 })
-            ).toHaveLength(7)
+            ).toHaveLength(8)
         })
 
         it('when login is successful, redirect to dashboard', async () => {

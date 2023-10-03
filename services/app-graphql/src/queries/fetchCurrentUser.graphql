@@ -47,5 +47,12 @@ query fetchCurrentUser {
             familyName
             givenName
         }
+        ... on BusinessOwnerUser {
+            id
+            email
+            role
+            familyName
+            givenName
+        }
     }
 }
