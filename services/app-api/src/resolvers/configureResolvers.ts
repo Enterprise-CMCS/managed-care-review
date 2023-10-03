@@ -67,12 +67,14 @@ export function configureResolvers(
             submitHealthPlanPackage: submitHealthPlanPackageResolver(
                 store,
                 emailer,
-                emailParameterStore
+                emailParameterStore,
+                launchDarkly
             ),
             unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
                 store,
                 emailer,
-                emailParameterStore
+                emailParameterStore,
+                launchDarkly
             ),
             updateContract: updateContractResolver(store, launchDarkly),
             updateCMSUser: updateCMSUserResolver(store),
@@ -90,6 +92,8 @@ export function configureResolvers(
                     return 'AdminUser'
                 } else if (obj.role === 'HELPDESK_USER') {
                     return 'HelpdeskUser'
+                } else if (obj.role === 'BUSINESSOWNER_USER') {
+                    return 'BusinessOwnerUser'
                 } else {
                     return 'StateUser'
                 }

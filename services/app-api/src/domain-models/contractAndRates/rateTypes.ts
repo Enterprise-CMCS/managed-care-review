@@ -6,7 +6,12 @@ import {
 
 const rateSchema = z.object({
     id: z.string().uuid(),
-    status: z.union([z.literal('SUBMITTED'), z.literal('DRAFT')]),
+    status: z.union([
+        z.literal('SUBMITTED'),
+        z.literal('DRAFT'),
+        z.literal('UNLOCKED'),
+        z.literal('RESUBMITTED'),
+    ]),
     stateCode: z.string(),
     stateNumber: z.number().min(1),
     // If this rate is in a DRAFT or UNLOCKED status, there will be a draftRevision

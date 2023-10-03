@@ -16,6 +16,9 @@ export {
     isStateUser,
     isAdminUser,
     toDomainUser,
+    isBusinessOwnerUser,
+    isHelpdeskUser,
+    hasAdminPermissions,
 } from './user'
 
 export {
@@ -23,8 +26,24 @@ export {
     packageStatus,
     packageSubmittedAt,
     packageSubmitters,
-    convertContractToUnlockedHealthPlanPackage,
 } from './healthPlanPackage'
+
+export {
+    convertContractWithRatesRevtoHPPRev,
+    convertContractWithRatesToUnlockedHPP,
+} from './contractAndRates'
+
+export type {
+    ContractType,
+    ContractRevisionType,
+    ContractRevisionWithRatesType,
+    ContractFormDataType,
+    RateType,
+    RateRevisionType,
+    RateRevisionWithContractsType,
+    RateFormDataType,
+    PackageStatusType,
+} from './contractAndRates'
 
 export type {
     HealthPlanRevisionType,

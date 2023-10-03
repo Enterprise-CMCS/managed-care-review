@@ -21,12 +21,14 @@ import { useFetchHealthPlanPackageWrapper } from '../../gqlHelpers'
 import { ApolloError } from '@apollo/client'
 import { handleApolloError } from '../../gqlHelpers/apolloErrors'
 
+type RouteParams = {
+    id: string
+    revisionVersion: string
+}
+
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
-    const { id, revisionVersion } = useParams<{
-        id: string
-        revisionVersion: string
-    }>()
+    const { id, revisionVersion } = useParams<keyof RouteParams>()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'
@@ -79,7 +81,12 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
     const packageData = revisionsLookup[revision.id].formData
 
     const statePrograms = pkg.state.programs
-    const name = packageName(packageData, statePrograms)
+    const name = packageName(
+        packageData.stateCode,
+        packageData.stateNumber,
+        packageData.programIDs,
+        statePrograms
+    )
     if (pkgName !== name) {
         setPkgName(name)
     }
@@ -100,7 +107,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 <SubmissionTypeSummarySection
                     submission={packageData}
                     statePrograms={statePrograms}
-                    submissionName={packageName(packageData, statePrograms)}
+                    submissionName={name}
                     headerChildComponent={
                         submitInfo && (
                             <p
@@ -119,14 +126,14 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 <ContractDetailsSummarySection
                     submission={packageData}
                     documentDateLookupTable={documentDates}
-                    submissionName={packageName(packageData, statePrograms)}
+                    submissionName={name}
                 />
 
                 {isContractActionAndRateCertification && (
                     <RateDetailsSummarySection
                         submission={packageData}
                         documentDateLookupTable={documentDates}
-                        submissionName={packageName(packageData, statePrograms)}
+                        submissionName={name}
                         statePrograms={statePrograms}
                     />
                 )}

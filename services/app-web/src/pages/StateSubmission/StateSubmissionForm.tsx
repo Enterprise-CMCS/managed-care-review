@@ -115,9 +115,13 @@ export type HealthPlanFormPageProps = {
         input: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackage | Error>
 }
+
+type RouteParams = {
+    id: string
+}
+
 export const StateSubmissionForm = (): React.ReactElement => {
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    const { id } = useParams<{ id: string }>()
+    const { id } = useParams<keyof RouteParams>()
     // IF not id throw new error
     if (!id) {
         throw new Error(
@@ -221,7 +225,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
 
     const computedSubmissionName = packageName(
-        formDataFromLatestRevision,
+        formDataFromLatestRevision.stateCode,
+        formDataFromLatestRevision.stateNumber,
+        formDataFromLatestRevision.programIDs,
         statePrograms
     )
     if (pkgNameForHeading !== computedSubmissionName) {

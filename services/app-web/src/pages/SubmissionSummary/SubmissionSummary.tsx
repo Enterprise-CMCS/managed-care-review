@@ -76,7 +76,12 @@ export const SubmissionSummary = (): React.ReactElement => {
     const statePrograms = pkg.state.programs
 
     // set the page heading
-    const name = packageName(packageData, statePrograms)
+    const name = packageName(
+        packageData.stateCode,
+        packageData.stateNumber,
+        packageData.programIDs,
+        statePrograms
+    )
     if (pkgName !== name) {
         setPkgName(name)
     }
@@ -157,7 +162,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 <SubmissionTypeSummarySection
                     submission={packageData}
-                    submissionName={packageName(packageData, statePrograms)}
+                    submissionName={name}
                     headerChildComponent={
                         isCMSUser ? (
                             <>
@@ -176,7 +181,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     documentDateLookupTable={documentDates}
                     submission={packageData}
                     isCMSUser={isCMSUser}
-                    submissionName={packageName(packageData, statePrograms)}
+                    submissionName={name}
                     onDocumentError={handleDocumentDownloadError}
                 />
 
@@ -184,7 +189,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     <RateDetailsSummarySection
                         documentDateLookupTable={documentDates}
                         submission={packageData}
-                        submissionName={packageName(packageData, statePrograms)}
+                        submissionName={name}
                         isCMSUser={isCMSUser}
                         statePrograms={statePrograms}
                         onDocumentError={handleDocumentDownloadError}

@@ -45,6 +45,8 @@ model ContractTable {
 
   revisions          ContractRevisionTable[]
   draftRateRevisions RateRevisionTable[]
+
+  sharedRateRevisions RateRevisionTable[] @relation(name: "SharedRateRevisions")
 }
 
 model RateTable {
@@ -66,7 +68,6 @@ model ContractRevisionTable {
   contract                                     ContractTable                           @relation(fields: [contractID], references: [id])
 
   rateRevisions                                RateRevisionsOnContractRevisionsTable[]
-  sharedRateRevisions                          SharedRateCertifications[]
   draftRates                                   RateTable[]
 
   unlockInfoID                                 String?
@@ -138,7 +139,7 @@ model RateRevisionTable {
   certifyingActuaryContacts      ActuaryContact[] @relation(name: "CertifyingActuaryOnRateRevision")
   addtlActuaryContacts           ActuaryContact[] @relation(name: "AddtlActuaryOnRateRevision")
   actuaryCommunicationPreference ActuaryCommunication?
-  packagesWithSharedRateCerts    SharedRateCertifications[]
+  contractsWithSharedRateRevision ContractTable[] @relation(name: "SharedRateRevisions")
 }
 
 model RateRevisionsOnContractRevisionsTable {
@@ -166,18 +167,11 @@ model UpdateInfoTable {
   submittedRates    RateRevisionTable[]     @relation("submitRateInfo")
 }
 
-model SharedRateCertifications {
-  id           String                  @id @default(uuid())
-  createdAt    DateTime                @default(now())
-  updatedAt    DateTime                @default(now()) @updatedAt
-  contract     ContractRevisionTable[]
-  rateRevision RateRevisionTable[]
-}
-
 model ActuaryContact {
   id                 String                 @id @default(uuid())
   createdAt          DateTime               @default(now())
   updatedAt          DateTime               @default(now()) @updatedAt
+  position            Int                              @default(-1)
   name               String?
   titleRole          String?
   email              String?
@@ -193,6 +187,7 @@ model ContractDocument {
   id                 String                @id @default(uuid())
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @default(now()) @updatedAt
+  position            Int                              @default(-1)
   name               String
   s3URL              String
   sha256             String
@@ -204,6 +199,7 @@ model ContractSupportingDocument {
   id                 String                @id @default(uuid())
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @default(now()) @updatedAt
+  position            Int                              @default(-1)
   name               String
   s3URL              String
   sha256             String
@@ -215,6 +211,7 @@ model RateDocument {
   id             String            @id @default(uuid())
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @default(now()) @updatedAt
+  position            Int                              @default(-1)
   name           String
   s3URL          String
   sha256         String
@@ -226,6 +223,7 @@ model RateSupportingDocument {
   id             String            @id @default(uuid())
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @default(now()) @updatedAt
+  position            Int                              @default(-1)
   name           String
   s3URL          String
   sha256         String
@@ -237,6 +235,7 @@ model StateContact {
   id                 String                @id @default(uuid())
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @default(now()) @updatedAt
+  position            Int                              @default(-1)
   name               String?
   titleRole          String?
   email              String?
@@ -341,6 +340,7 @@ enum Role {
   STATE_USER
   ADMIN_USER
   HELPDESK_USER
+  BUSINESSOWNER_USER
 }
 
 enum AuditAction {

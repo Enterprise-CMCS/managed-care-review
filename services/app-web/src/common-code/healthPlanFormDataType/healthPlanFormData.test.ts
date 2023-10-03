@@ -204,11 +204,11 @@ describe('submission type assertions', () => {
                 rateInfos: [
                     {
                         rateDocuments: [],
-                          supportingDocuments: [],
+                        supportingDocuments: [],
                     },
                 ],
                 rateDocuments: [],
-                  supportingDocuments: [],
+                supportingDocuments: [],
             },
             false,
         ],
@@ -541,7 +541,14 @@ describe('submission type assertions', () => {
         const sub = basicHealthPlanFormData()
         sub.programIDs = programIDs
 
-        expect(packageName(sub, programs)).toBe(expectedName)
+        expect(
+            packageName(
+                sub.stateCode,
+                sub.stateNumber,
+                sub.programIDs,
+                programs
+            )
+        ).toBe(expectedName)
     })
 
     const mockContractAndRateSub = mockContractAndRatesDraft()
@@ -565,7 +572,7 @@ describe('submission type assertions', () => {
                             effectiveDateEnd: new Date('2022/09/21'),
                         },
                         rateDocuments: [],
-                          supportingDocuments: [],
+                        supportingDocuments: [],
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
@@ -588,7 +595,7 @@ describe('submission type assertions', () => {
                         rateDateEnd: new Date('2022/03/29'),
                         rateDateCertified: new Date('2021/04/22'),
                         rateDocuments: [],
-                          supportingDocuments: [],
+                        supportingDocuments: [],
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
@@ -618,7 +625,7 @@ describe('submission type assertions', () => {
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
                         rateDocuments: [],
-                          supportingDocuments: [],
+                        supportingDocuments: [],
                         actuaryContacts: [],
                         packagesWithSharedRateCerts: [],
                     },
@@ -645,7 +652,7 @@ describe('submission type assertions', () => {
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
                         rateDocuments: [],
-                          supportingDocuments: [],
+                        supportingDocuments: [],
                         actuaryContacts: [],
                         packagesWithSharedRateCerts: [],
                     },
@@ -665,7 +672,7 @@ describe('submission type assertions', () => {
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
                         rateDocuments: [],
-                          supportingDocuments: [],
+                        supportingDocuments: [],
                         actuaryContacts: [],
                         packagesWithSharedRateCerts: [],
                     },
@@ -691,7 +698,7 @@ describe('submission type assertions', () => {
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
                         rateDocuments: [],
-                          supportingDocuments: [],
+                        supportingDocuments: [],
                         actuaryContacts: [],
                         packagesWithSharedRateCerts: [],
                     },
@@ -712,7 +719,7 @@ describe('submission type assertions', () => {
                             effectiveDateStart: new Date('2022/05/21'),
                         },
                         rateDocuments: [],
-                          supportingDocuments: [],
+                        supportingDocuments: [],
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
@@ -738,7 +745,7 @@ describe('submission type assertions', () => {
                             effectiveDateEnd: new Date('2022/09/21'),
                         },
                         rateDocuments: [],
-                          supportingDocuments: [],
+                        supportingDocuments: [],
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
@@ -768,7 +775,7 @@ describe('submission type assertions', () => {
                             effectiveDateEnd: new Date('2022/09/21'),
                         },
                         rateDocuments: [],
-                          supportingDocuments: [],
+                        supportingDocuments: [],
                         rateProgramIDs: [],
                         actuaryContacts: [],
                         packagesWithSharedRateCerts: [],
@@ -803,6 +810,7 @@ describe('submission type assertions', () => {
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: [
                             'CONTRACT_RELATED' as const,
                             'RATES_RELATED' as const,
@@ -811,6 +819,7 @@ describe('submission type assertions', () => {
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also_2.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: [
                             'RATES_RELATED' as const,
                             'CONTRACT_RELATED' as const,
@@ -819,6 +828,7 @@ describe('submission type assertions', () => {
                     {
                         name: 'rate_only_supporting_doc.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES_RELATED' as const],
                     },
                 ],
@@ -830,16 +840,19 @@ describe('submission type assertions', () => {
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: ['CONTRACT_RELATED'],
                     },
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also_2.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: ['CONTRACT_RELATED'],
                     },
                     {
                         name: 'rate_only_supporting_doc.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: ['CONTRACT_RELATED'],
                     },
                 ],
@@ -853,6 +866,7 @@ describe('submission type assertions', () => {
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: [
                             'RATES_RELATED' as const,
                             'CONTRACT_RELATED' as const,
@@ -861,6 +875,7 @@ describe('submission type assertions', () => {
                     {
                         name: 'rate_only_supporting_doc.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES_RELATED' as const],
                     },
                 ],
@@ -872,11 +887,13 @@ describe('submission type assertions', () => {
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: ['CONTRACT_RELATED' as const],
                     },
                     {
                         name: 'rate_only_supporting_doc.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: ['CONTRACT_RELATED' as const],
                     },
                 ],
@@ -890,6 +907,7 @@ describe('submission type assertions', () => {
                     {
                         name: 'rate_only_supporting_doc.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES_RELATED' as const],
                     },
                 ],
@@ -901,6 +919,7 @@ describe('submission type assertions', () => {
                     {
                         name: 'rate_only_supporting_doc.pdf',
                         s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
                         documentCategories: ['CONTRACT_RELATED'],
                     },
                 ],
@@ -922,6 +941,7 @@ describe('submission type assertions', () => {
             {
                 name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: [
                     'CONTRACT_RELATED' as const,
                     'RATES_RELATED' as const,
@@ -930,6 +950,7 @@ describe('submission type assertions', () => {
             {
                 name: 'contract_supporting_that_applies_to_a_rate_also_2.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: [
                     'RATES_RELATED' as const,
                     'CONTRACT_RELATED' as const,
@@ -938,11 +959,13 @@ describe('submission type assertions', () => {
             {
                 name: 'contract_supporting_that_applies_to_a_rate_also_3.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 name: 'rate_only_supporting_doc.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: ['RATES_RELATED' as const],
             },
         ]
@@ -951,21 +974,25 @@ describe('submission type assertions', () => {
             {
                 name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED'],
             },
             {
                 name: 'contract_supporting_that_applies_to_a_rate_also_2.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED'],
             },
             {
                 name: 'contract_supporting_that_applies_to_a_rate_also_3.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED'],
             },
             {
                 name: 'rate_only_supporting_doc.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT_RELATED'],
             },
         ])
@@ -976,6 +1003,7 @@ describe('submission type assertions', () => {
             {
                 name: 'contract_certification.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: ['CONTRACT' as const],
             },
         ]
@@ -984,6 +1012,7 @@ describe('submission type assertions', () => {
             {
                 name: 'rates_certification.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: ['RATES' as const],
             },
         ]
@@ -992,6 +1021,7 @@ describe('submission type assertions', () => {
             {
                 name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: [
                     'CONTRACT_RELATED' as const,
                     'RATES_RELATED' as const,
@@ -1000,6 +1030,7 @@ describe('submission type assertions', () => {
             {
                 name: 'rates_certification.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: [
                     'RATES' as const,
                     'RATES_RELATED' as const,
@@ -1008,6 +1039,7 @@ describe('submission type assertions', () => {
             {
                 name: 'contract_certification.pdf',
                 s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
                 documentCategories: [
                     'CONTRACT' as const,
                     'CONTRACT_RELATED' as const,

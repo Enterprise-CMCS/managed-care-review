@@ -24,7 +24,12 @@ describe('with rates', () => {
     const defaultStatePrograms = mockMNState().programs
 
     it('contains correct subject and clearly states submission edits are completed', async () => {
-        const name = packageName(submission, defaultStatePrograms)
+        const name = packageName(
+            submission.stateCode,
+            submission.stateNumber,
+            submission.programIDs,
+            defaultStatePrograms
+        )
         const template = await resubmitPackageCMSEmail(
             submission,
             resubmitData,
@@ -59,6 +64,7 @@ describe('with rates', () => {
                         {
                             s3URL: 'bar',
                             name: 'foo',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES' as const],
                         },
                     ],
@@ -159,6 +165,7 @@ describe('with rates', () => {
                         {
                             s3URL: 'bar',
                             name: 'foo',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES' as const],
                         },
                     ],
@@ -187,6 +194,7 @@ describe('with rates', () => {
                         {
                             s3URL: 'bar',
                             name: 'foo',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES' as const],
                         },
                     ],
@@ -215,6 +223,7 @@ describe('with rates', () => {
                         {
                             s3URL: 'bar',
                             name: 'foo',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES' as const],
                         },
                     ],
@@ -416,6 +425,7 @@ describe('with rates', () => {
                         {
                             s3URL: 'bar',
                             name: 'foo',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES' as const],
                         },
                     ],
@@ -471,6 +481,7 @@ describe('with rates', () => {
                         {
                             s3URL: 'bar',
                             name: 'foo',
+                            sha256: 'fakesha',
                             documentCategories: ['RATES' as const],
                         },
                     ],
@@ -709,6 +720,7 @@ test('renders overall email as expected', async () => {
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -737,6 +749,7 @@ test('renders overall email as expected', async () => {
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],

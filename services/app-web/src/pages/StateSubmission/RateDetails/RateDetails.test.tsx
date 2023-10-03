@@ -1328,16 +1328,19 @@ describe('RateDetails', () => {
                     s3URL: 's3://bucketname/one-one/one-one.png',
                     name: 'one one',
                     documentCategories: ['CONTRACT_RELATED'],
+                    sha256: 'fakeSha1',
                 },
                 {
                     s3URL: 's3://bucketname/one-two/one-two.png',
                     name: 'one two',
                     documentCategories: ['CONTRACT_RELATED'],
+                    sha256: 'fakeSha2',
                 },
                 {
                     s3URL: 's3://bucketname/one-three/one-three.png',
                     name: 'one three',
                     documentCategories: ['CONTRACT_RELATED'],
+                    sha256: 'fakeSha3',
                 },
             ]
             renderWithProviders(

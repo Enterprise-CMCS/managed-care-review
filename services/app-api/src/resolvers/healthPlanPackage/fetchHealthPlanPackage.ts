@@ -5,7 +5,8 @@ import {
     isStateUser,
     isAdminUser,
     packageStatus,
-    convertContractToUnlockedHealthPlanPackage,
+    convertContractWithRatesToUnlockedHPP,
+    isBusinessOwnerUser,
 } from '../../domain-models'
 import { isHelpdeskUser } from '../../domain-models/user'
 import type { QueryResolvers, State } from '../../gen/gqlServer'
@@ -66,7 +67,7 @@ export function fetchHealthPlanPackageResolver(
             }
 
             const convertedPkg =
-                convertContractToUnlockedHealthPlanPackage(contractWithHistory)
+                convertContractWithRatesToUnlockedHPP(contractWithHistory)
 
             if (convertedPkg instanceof Error) {
                 const errMessage = `Issue converting contract. Message: ${convertedPkg.message}`
@@ -107,8 +108,8 @@ export function fetchHealthPlanPackageResolver(
         }
 
         // Authorization CMS users can view, state users can only view if the state matches
-        if (isStateUser(context.user)) {
-            const stateFromCurrentUser: State['code'] = context.user.stateCode
+        if (isStateUser(user)) {
+            const stateFromCurrentUser: State['code'] = user.stateCode
             if (pkg.stateCode !== stateFromCurrentUser) {
                 logError(
                     'fetchHealthPlanPackage',
@@ -123,9 +124,10 @@ export function fetchHealthPlanPackageResolver(
                 )
             }
         } else if (
-            isCMSUser(context.user) ||
-            isAdminUser(context.user) ||
-            isHelpdeskUser(context.user)
+            isCMSUser(user) ||
+            isAdminUser(user) ||
+            isHelpdeskUser(user) ||
+            isBusinessOwnerUser(user)
         ) {
             if (packageStatus(pkg) === 'DRAFT') {
                 logError(

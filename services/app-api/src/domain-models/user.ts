@@ -4,6 +4,7 @@ import type {
     UserType,
     AdminUserType,
     HelpdeskUserType,
+    BusinessOwnerUserType,
 } from './UserType'
 import type { User as PrismaUser } from '@prisma/client'
 
@@ -41,12 +42,18 @@ function isHelpdeskUser(user: UserType): user is HelpdeskUserType {
     return user.role === 'HELPDESK_USER'
 }
 
+function isBusinessOwnerUser(user: UserType): user is BusinessOwnerUserType {
+    return user.role === 'BUSINESSOWNER_USER'
+}
+
 function toDomainUser(user: PrismaUser): UserType {
     switch (user.role) {
         case 'ADMIN_USER':
             return user as AdminUserType
         case 'HELPDESK_USER':
             return user as HelpdeskUserType
+        case 'BUSINESSOWNER_USER':
+            return user as BusinessOwnerUserType
         case 'CMS_USER':
             return {
                 id: user.id,
@@ -62,6 +69,16 @@ function toDomainUser(user: PrismaUser): UserType {
     }
 }
 
+function hasAdminPermissions(user: UserType): boolean {
+    const authorizedAdmins = [
+        'ADMIN_USER',
+        'HELPDESK_USER',
+        'BUSINESSOWNER_USER',
+    ]
+
+    return authorizedAdmins.includes(user.role)
+}
+
 export {
     isUser,
     isCMSUser,
@@ -69,4 +86,6 @@ export {
     isAdminUser,
     toDomainUser,
     isHelpdeskUser,
+    isBusinessOwnerUser,
+    hasAdminPermissions,
 }

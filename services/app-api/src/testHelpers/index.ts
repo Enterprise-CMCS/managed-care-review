@@ -13,4 +13,4 @@ export {
     createDraftContractData,
 } from './contractAndRates/contractHelpers'
 
-export { getProgramsFromState, getStateRecord } from './stateHelpers'
+export { getStateRecord } from './stateHelpers'

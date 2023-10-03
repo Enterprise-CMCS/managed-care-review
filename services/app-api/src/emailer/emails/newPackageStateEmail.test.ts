@@ -114,7 +114,12 @@ test('to addresses list does not include duplicate state receiver emails on subm
 test('subject line is correct and clearly states submission is complete', async () => {
     const sub = mockContractOnlyFormData()
     const defaultStatePrograms = mockMNState().programs
-    const name = packageName(sub, defaultStatePrograms)
+    const name = packageName(
+        sub.stateCode,
+        sub.stateNumber,
+        sub.programIDs,
+        defaultStatePrograms
+    )
 
     const template = await newPackageStateEmail(
         sub,
@@ -141,7 +146,12 @@ test('subject line is correct and clearly states submission is complete', async 
 test('includes mcog, rate, and team email addresses', async () => {
     const sub = mockContractOnlyFormData()
     const defaultStatePrograms = mockMNState().programs
-    const name = packageName(sub, defaultStatePrograms)
+    const name = packageName(
+        sub.stateCode,
+        sub.stateNumber,
+        sub.programIDs,
+        defaultStatePrograms
+    )
 
     const template = await newPackageStateEmail(
         sub,
@@ -248,6 +258,7 @@ test('includes expected data summary for a contract and rates submission State e
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -335,6 +346,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -363,6 +375,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -391,6 +404,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -502,6 +516,7 @@ test('includes expected data summary for a rate amendment submission State email
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],
@@ -584,6 +599,7 @@ test('renders overall email for a new package with a rate amendment as expected'
                     {
                         s3URL: 'bar',
                         name: 'foo',
+                        sha256: 'fakesha',
                         documentCategories: ['RATES' as const],
                     },
                 ],

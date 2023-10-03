@@ -28,6 +28,7 @@ import {
 import {
     HealthPlanFormDataType,
     federalAuthorityKeysForCHIP,
+    CHIPFederalAuthority,
 } from '../../../common-code/healthPlanFormDataType'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 import { recordJSException } from '../../../otelHelpers'
@@ -61,7 +62,6 @@ export const ContractDetailsSummarySection = ({
     submission,
     navigateTo, // this is the edit link for the section. When this prop exists, summary section is loaded in edit mode
     documentDateLookupTable,
-    isCMSUser,
     submissionName,
     onDocumentError,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
@@ -78,7 +78,9 @@ export const ContractDetailsSummarySection = ({
     const isEditing = !isSubmitted(submission) && navigateTo !== undefined
     const applicableFederalAuthorities = isCHIPOnly(submission)
         ? submission.federalAuthorities.filter((authority) =>
-              federalAuthorityKeysForCHIP.includes(authority)
+              federalAuthorityKeysForCHIP.includes(
+                  authority as CHIPFederalAuthority
+              )
           )
         : submission.federalAuthorities
     const [modifiedProvisions, unmodifiedProvisions] =

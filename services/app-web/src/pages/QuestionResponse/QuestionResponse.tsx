@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { GridContainer, Link } from '@trussworks/react-uswds'
 import styles from './QuestionResponse.module.scss'
 
@@ -12,7 +12,6 @@ import {
 } from '../../components/Banner'
 import { QATable, QuestionData, Division } from './QATable/QATable'
 import { CmsUser, QuestionEdge, StateUser } from '../../gen/gqlClient'
-import { CMSUserType } from 'app-api/src/domain-models'
 import { useStringConstants } from '../../hooks/useStringConstants'
 
 type divisionQuestionDataType = {
@@ -34,8 +33,12 @@ const extractQuestions = (edges?: QuestionEdge[]): QuestionData[] => {
     }))
 }
 
-const getUserDivision = (user: CMSUserType): Division | undefined =>
-    user.divisionAssignment
+const getUserDivision = (user: CmsUser): Division | undefined => {
+    if (user.divisionAssignment) {
+        return user.divisionAssignment
+    }
+    return undefined
+}
 
 const getDivisionOrder = (division?: Division): Division[] =>
     ['DMCO', 'DMCP', 'OACT'].sort((a, b) => {
@@ -76,7 +79,7 @@ export const QuestionResponse = () => {
     const isCMSUser = user?.role === 'CMS_USER'
 
     if (isCMSUser) {
-        division = getUserDivision(user as CMSUserType)
+        division = getUserDivision(user as CmsUser)
     }
 
     const divisionOrder = getDivisionOrder(division)

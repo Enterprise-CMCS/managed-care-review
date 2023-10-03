@@ -1,8 +1,4 @@
-import type {
-    PrismaClient,
-    SubmissionType,
-    ContractType as PrismaContractType,
-} from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
 import type {
     ContractType,
     ContractFormDataType,
@@ -13,10 +9,10 @@ import { includeFullContract } from './prismaSubmittedContractHelpers'
 type InsertContractArgsType = Partial<ContractFormDataType> & {
     // Certain fields are required on insert contract only
     stateCode: string
-    programIDs: string[]
-    submissionType: SubmissionType
-    submissionDescription: string
-    contractType: PrismaContractType
+    programIDs: ContractFormDataType['programIDs']
+    submissionType: ContractFormDataType['submissionType']
+    submissionDescription: ContractFormDataType['submissionDescription']
+    contractType: ContractFormDataType['contractType']
 }
 
 // creates a new contract, with a new revision
@@ -84,13 +80,28 @@ async function insertDraftContract(
                             contractType: contractType,
                             contractExecutionStatus,
                             contractDocuments: {
-                                create: contractDocuments,
+                                create:
+                                    contractDocuments &&
+                                    contractDocuments.map((d, idx) => ({
+                                        position: idx,
+                                        ...d,
+                                    })),
                             },
                             supportingDocuments: {
-                                create: supportingDocuments,
+                                create:
+                                    supportingDocuments &&
+                                    supportingDocuments.map((d, idx) => ({
+                                        position: idx,
+                                        ...d,
+                                    })),
                             },
                             stateContacts: {
-                                create: stateContacts,
+                                create:
+                                    stateContacts &&
+                                    stateContacts.map((c, idx) => ({
+                                        position: idx,
+                                        ...c,
+                                    })),
                             },
                             contractDateStart,
                             contractDateEnd,

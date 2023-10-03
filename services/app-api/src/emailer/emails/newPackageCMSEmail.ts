@@ -37,7 +37,12 @@ export const newPackageCMSEmail = async (
         return packagePrograms
     }
 
-    const packageName = generatePackageName(pkg, packagePrograms)
+    const packageName = generatePackageName(
+        pkg.stateCode,
+        pkg.stateNumber,
+        pkg.programIDs,
+        packagePrograms
+    )
 
     const packageURL = submissionSummaryURL(pkg.id, config.baseUrl)
 
