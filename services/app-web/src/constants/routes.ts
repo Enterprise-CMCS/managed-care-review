@@ -23,6 +23,7 @@ const ROUTES = [
     'SUBMISSIONS_REVIEW_SUBMIT',
     'SUBMISSIONS_REVISION',
     'SUBMISSIONS_SUMMARY',
+    'SUBMISSIONS_MCCRSID',
     'SUBMISSIONS_QUESTIONS_AND_ANSWERS',
     'SUBMISSIONS_UPLOAD_QUESTION',
     'SUBMISSIONS_UPLOAD_RESPONSE',
@@ -56,6 +57,7 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_DOCUMENTS: '/submissions/:id/edit/documents',
     SUBMISSIONS_REVIEW_SUBMIT: '/submissions/:id/edit/review-and-submit',
     SUBMISSIONS_SUMMARY: '/submissions/:id',
+    SUBMISSIONS_MCCRSID: '/submissions/:id/MCCRS-record-number',
     SUBMISSIONS_REVISION: '/submissions/:id/revisions/:revisionVersion',
     SUBMISSIONS_QUESTIONS_AND_ANSWERS: '/submissions/:id/question-and-answers',
     SUBMISSIONS_UPLOAD_QUESTION:
@@ -130,6 +132,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_REVIEW_SUBMIT: 'Review and submit',
     SUBMISSIONS_REVISION: 'Submission revision',
     SUBMISSIONS_SUMMARY: 'Submission summary',
+    SUBMISSIONS_MCCRSID: 'Add MC-CRS record number',
     SUBMISSIONS_QUESTIONS_AND_ANSWERS: 'Q&A',
     SUBMISSIONS_UPLOAD_QUESTION: 'Add questions',
     SUBMISSIONS_UPLOAD_RESPONSE: 'Add response',

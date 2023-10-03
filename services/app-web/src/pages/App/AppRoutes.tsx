@@ -22,6 +22,7 @@ import { AuthenticatedRouteWrapper } from '../Wrapper/AuthenticatedRouteWrapper'
 import { Error404 } from '../Errors/Error404Page'
 import { Help } from '../Help/Help'
 import { Landing } from '../Landing/Landing'
+import { MCCRSID } from '../MCCRSID/MCCRSID'
 import { NewStateSubmissionForm, StateSubmissionForm } from '../StateSubmission'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
@@ -184,6 +185,10 @@ const CMSUserRoutes = ({
                         />
                     )}
                 </Route>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_MCCRSID}
+                    element={<MCCRSID />}
+                />
 
                 <Route element={<SubmissionSideNav />}>
                     {showQuestionResponse && (
