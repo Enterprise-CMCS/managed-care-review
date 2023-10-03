@@ -118,7 +118,13 @@ describe('test that we migrate things', () => {
                 rateDocuments: [
                     {
                         name: 'fake doc number two',
-                        s3URL: 'foo://bar',
+                        s3URL: 'foo://bar/two',
+                        documentCategories: ['RATES'],
+                        sha256: 'fakesha',
+                    },
+                    {
+                        name: 'fake doc number three',
+                        s3URL: 'foo://bar/three',
                         documentCategories: ['RATES'],
                         sha256: 'fakesha',
                     },
