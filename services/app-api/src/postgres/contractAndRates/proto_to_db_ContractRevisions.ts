@@ -6,6 +6,7 @@ import type {
     Prisma,
     HealthPlanRevisionTable,
 } from '@prisma/client'
+
 import type { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 
 async function migrateContractRevision(
@@ -144,6 +145,47 @@ async function migrateContractRevision(
                     `User with email ${revision.submittedBy} does not exist. Skipping submitInfo creation.`
                 )
             }
+        }
+
+        // add the contract documents
+        let contractDocPos = 0
+        const contractDocumentsArray = []
+        for (const doc of formData.documents) {
+            const contractDoc: Prisma.ContractDocumentCreateWithoutContractRevisionInput =
+                {
+                    createdAt: revision.createdAt,
+                    updatedAt: new Date(),
+                    name: doc.name,
+                    s3URL: doc.s3URL,
+                    sha256: doc.sha256,
+                    position: contractDocPos,
+                }
+            contractDocumentsArray.push(contractDoc)
+            contractDocPos = contractDocPos + 1
+        }
+
+        createDataObject.contractDocuments = {
+            create: contractDocumentsArray,
+        }
+
+        // add the contract supporting documents
+        let supportingDocPos = 0
+        const supportingDocumentsArray = []
+        for (const supportDoc of formData.contractDocuments) {
+            const contractSupportDoc: Prisma.ContractSupportingDocumentCreateWithoutContractRevisionInput =
+                {
+                    createdAt: revision.createdAt,
+                    updatedAt: new Date(),
+                    name: supportDoc.name,
+                    s3URL: supportDoc.s3URL,
+                    sha256: supportDoc.sha256,
+                    position: supportingDocPos,
+                }
+            supportingDocumentsArray.push(contractSupportDoc)
+            supportingDocPos++
+        }
+        createDataObject.supportingDocuments = {
+            create: supportingDocumentsArray,
         }
 
         return await client.contractRevisionTable.create({

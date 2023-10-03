@@ -9,12 +9,12 @@ export async function cleanupLastMigration(
 ): Promise<void | Error> {
     try {
         const deleteManyResult = await client.$transaction([
-            client.contractRevisionTable.deleteMany(),
-            client.rateRevisionTable.deleteMany(),
             client.contractDocument.deleteMany(),
             client.rateDocument.deleteMany(),
             client.contractSupportingDocument.deleteMany(),
             client.rateSupportingDocument.deleteMany(),
+            client.contractRevisionTable.deleteMany(),
+            client.rateRevisionTable.deleteMany(),
             client.rateRevisionsOnContractRevisionsTable.deleteMany(),
             client.updateInfoTable.deleteMany(),
 
