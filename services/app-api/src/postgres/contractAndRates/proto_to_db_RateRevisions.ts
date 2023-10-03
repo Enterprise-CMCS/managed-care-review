@@ -3,6 +3,7 @@ import type {
     HealthPlanRevisionTable,
     Prisma,
     RateTable,
+    ContractRevisionTable,
 } from '@prisma/client'
 import type { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 import { includeFullRate } from './prismaSubmittedRateHelpers'
@@ -10,7 +11,8 @@ import { includeFullRate } from './prismaSubmittedRateHelpers'
 async function migrateRateInfo(
     client: PrismaClient,
     revision: HealthPlanRevisionTable,
-    formData: HealthPlanFormDataType
+    formData: HealthPlanFormDataType,
+    contractRevision: ContractRevisionTable
 ): Promise<RateTable | Error> {
     // get the state info
     const stateCode = formData.stateCode
@@ -140,6 +142,15 @@ async function migrateRateInfo(
         dataToCopy.supportingDocuments = {
             create: rateRevDocsArray,
         }
+
+        // rate revisions on contract revisions join table
+        dataToCopy.contractRevisions = {
+            create: {
+                contractRevisionID: contractRevision.id,
+                validAfter: new Date(),
+            },
+        }
+
         rateRevisionData.push(dataToCopy)
     }
 

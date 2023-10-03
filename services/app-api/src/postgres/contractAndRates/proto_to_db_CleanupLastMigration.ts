@@ -13,6 +13,7 @@ export async function cleanupLastMigration(
             client.rateDocument.deleteMany(),
             client.contractSupportingDocument.deleteMany(),
             client.rateSupportingDocument.deleteMany(),
+            client.rateRevisionsOnContractRevisionsTable.deleteMany(),
             client.contractRevisionTable.deleteMany(),
             client.rateRevisionTable.deleteMany(),
             client.rateRevisionsOnContractRevisionsTable.deleteMany(),

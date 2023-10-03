@@ -137,7 +137,8 @@ export async function migrateRevision(
     const rateMigrationResult = await migrateRateInfo(
         client,
         revision,
-        formData
+        formData,
+        migrateContractResult.contractRevision
     )
     if (rateMigrationResult instanceof Error) {
         const error = new Error(
@@ -146,19 +147,6 @@ export async function migrateRevision(
         console.error(error)
         return error
     }
-
-    /* My confidence in the join table and document strategies is lower than for the other tables.
-        I think these are worth reviewing carefully as a team */
-    /*
-    const migrateAssociationsResult = await migrateAssociations(client)
-    if (migrateAssociationsResult instanceof Error) {
-        const error = new Error(
-            `Error migrating ${revision.id} associations: ${migrateAssociationsResult.message}`
-        )
-        console.error(error)
-        return error
-    }
-    */
 
     // let's check that we did things right
     const migratedContract = await findContractWithHistory(
