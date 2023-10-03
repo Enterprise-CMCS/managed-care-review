@@ -111,6 +111,14 @@ type Mutation {
     ): UpdateHealthPlanFormDataPayload!
 
     """
+    updateContract can be used to update fields on the contract 
+    as oppossed to an individual revision
+    """
+    updateContract(
+        input: UpdateContractInput!
+    ): UpdateContractPayload!
+
+    """
     submitHealthPlanPackage submits the given package for review by CMS.
 
     This can only be called by a StateUser from the state the package is for.
@@ -410,6 +418,15 @@ input UpdateCMSUserInput {
 
 type UpdateCMSUserPayload {
     user: CMSUser!
+}
+
+input UpdateContractInput {
+    id: ID!
+    mccrsID: String
+}
+
+type UpdateContractPayload {
+    pkg: HealthPlanPackage!
 }
 
 "Date is a CalendarDate representing a day without time information"

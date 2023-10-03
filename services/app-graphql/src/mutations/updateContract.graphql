@@ -1,0 +1,36 @@
+mutation updateContract($input: UpdateContractInput!) {
+    updateContract(input: $input) {
+        pkg {
+            id
+            stateCode
+            state {
+                code
+                name
+                programs {
+                    id
+                    name
+                    fullName
+                }
+            }
+            status
+            initiallySubmittedAt
+            revisions {
+                node {
+                    id
+                    unlockInfo {
+                        updatedAt
+                        updatedBy
+                        updatedReason
+                    }
+                    submitInfo {
+                        updatedAt
+                        updatedBy
+                        updatedReason
+                    }
+                    createdAt
+                    formDataProto
+                }
+            }
+        }
+    }
+}

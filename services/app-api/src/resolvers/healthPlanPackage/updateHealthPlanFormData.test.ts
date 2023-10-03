@@ -138,6 +138,43 @@ describe.each(flagValueTestParameters)(
             )
         })
 
+        // it('updates mc-crs id', async () => {
+        //     const server = await constructTestPostgresServer({
+        //         ldService: mockLDService,
+        //     })
+
+        //     const createdDraft = await createTestHealthPlanPackage(server)
+
+        //     // update that draft.
+        //     const formData: HealthPlanFormDataType = Object.assign(
+        //         latestFormData(createdDraft),
+        //         {
+        //             mccrsID: '1234'
+        //         }
+        //     )
+
+        //     // convert to base64 proto
+        //     const updatedB64 = domainToBase64(formData)
+
+        //     const updateResult = await server.executeOperation({
+        //         query: UPDATE_HEALTH_PLAN_FORM_DATA,
+        //         variables: {
+        //             input: {
+        //                 pkgID: createdDraft.id,
+        //                 healthPlanFormData: updatedB64,
+        //             },
+        //         },
+        //     })
+
+        //     expect(updateResult.errors).toBeUndefined()
+
+        //     const healthPlanPackage =
+        //         updateResult.data?.updateHealthPlanFormData.pkg
+
+        //     const updatedFormData = latestFormData(healthPlanPackage)
+        //     expect(updatedFormData.mccrsID).toEqual('1234')
+        // })
+
         it('creates, updates, and deletes rates in the contract', async () => {
             const server = await constructTestPostgresServer({
                 ldService: mockLDService,

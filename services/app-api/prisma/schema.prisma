@@ -69,7 +69,6 @@ model ContractRevisionTable {
   sharedRateRevisions                          SharedRateCertifications[]
   draftRates                                   RateTable[]
 
-  mccrsID                                      String?
   unlockInfoID                                 String?
   unlockInfo                                   UpdateInfoTable?                        @relation("unlockContractInfo", fields: [unlockInfoID], references: [id])
   submitInfoID                                 String?
