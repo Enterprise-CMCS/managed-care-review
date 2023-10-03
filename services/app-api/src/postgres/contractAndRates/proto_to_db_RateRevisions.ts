@@ -101,7 +101,45 @@ async function migrateRateInfo(
                 create: formData.addtlActuaryContacts,
             }
         }
+        // handle rate documents
+        let rateDocPos = 0
+        const rateDocsArray = []
+        for (const rateDoc of rateInfo.rateDocuments) {
+            const rateDocument: Prisma.RateDocumentCreateWithoutRateRevisionInput =
+                {
+                    createdAt: revision.createdAt,
+                    updatedAt: new Date(),
+                    name: rateDoc.name,
+                    s3URL: rateDoc.s3URL,
+                    sha256: rateDoc.sha256,
+                    position: rateDocPos,
+                }
+            rateDocsArray.push(rateDocument)
+            rateDocPos++
+        }
+        dataToCopy.rateDocuments = {
+            create: rateDocsArray,
+        }
 
+        // handle rate revision documents
+        let rateRevDocPos = 0
+        const rateRevDocsArray = []
+        for (const supportRateDoc of rateInfo.supportingDocuments) {
+            const rateSupportDocument: Prisma.RateSupportingDocumentCreateWithoutRateRevisionInput =
+                {
+                    createdAt: revision.createdAt,
+                    updatedAt: new Date(),
+                    name: supportRateDoc.name,
+                    s3URL: supportRateDoc.s3URL,
+                    sha256: supportRateDoc.sha256,
+                    position: rateRevDocPos,
+                }
+            rateRevDocsArray.push(rateSupportDocument)
+            rateRevDocPos++
+        }
+        dataToCopy.supportingDocuments = {
+            create: rateRevDocsArray,
+        }
         rateRevisionData.push(dataToCopy)
     }
 
