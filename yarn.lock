@@ -15377,9 +15377,9 @@
   integrity sha512-Abq9fBviLV93OiXMu+f6r0elxCzRwc0RC5f99cU892uBITL44pTvgvEqlRlPRi8EGcO1z7Cp8A4d0s/p3J/+Nw==
 
 "@types/node@^16.18.39":
-  version "16.18.54"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.54.tgz#4a63bdcea5b714f546aa27406a1c60621236a132"
-  integrity sha512-oTmGy68gxZZ21FhTJVVvZBYpQHEBZxHKTsGshobMqm9qWpbqdZsA5jvsuPZcHu0KwpmLrOHWPdEfg7XDpNT9UA==
+  version "16.18.57"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.57.tgz#1ba31c0e5c403aab90a3b7826576e6782ded779b"
+  integrity sha512-piPoDozdPaX1hNWFJQzzgWqE40gh986VvVx/QO9RU4qYRE55ld7iepDVgZ3ccGUw0R4wge0Oy1dd+3xOQNkkUQ==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
@@ -15469,9 +15469,9 @@
     "@types/react" "*"
 
 "@types/react-test-renderer@^18.0.0":
-  version "18.0.0"
-  resolved "https://registry.yarnpkg.com/@types/react-test-renderer/-/react-test-renderer-18.0.0.tgz#7b7f69ca98821ea5501b21ba24ea7b6139da2243"
-  integrity sha512-C7/5FBJ3g3sqUahguGi03O79b8afNeSD6T8/GU50oQrJCU0bVCCGQHaGKUbg2Ce8VQEEqTw8/HiS6lXHHdgkdQ==
+  version "18.0.3"
+  resolved "https://registry.yarnpkg.com/@types/react-test-renderer/-/react-test-renderer-18.0.3.tgz#67922bf5e5f0096581b1efd67dcdeabdd400cfea"
+  integrity sha512-4wcNLnY6nIT+L6g94CpzL4CXX2P18JvKPU9CDlaHr3DnbP3GiaQLhDotJqjWlVqOcE4UhLRjp0MtxqwuNKONnA==
   dependencies:
     "@types/react" "*"
 
