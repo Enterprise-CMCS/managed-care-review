@@ -38,10 +38,18 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
         const rateOne = must(await insertDraftRate(client, draftRateData))
         const rateTwo = must(await insertDraftRate(client, draftRateData))
         const submittedRateOne = must(
-            await submitRate(client, rateOne.id, stateUser.id, 'rateOne submit')
+            await submitRate(client, {
+                rateID: rateOne.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'rateOne submit',
+            })
         )
         const submittedRateTwo = must(
-            await submitRate(client, rateTwo.id, stateUser.id, 'rateTwo submit')
+            await submitRate(client, {
+                rateID: rateTwo.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'rateTwo submit',
+            })
         )
 
         // make two draft rates
@@ -51,20 +59,18 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
         // make one unlocked rate
         const rateThree = must(await insertDraftRate(client, draftRateData))
         must(
-            await submitRate(
-                client,
-                rateThree.id,
-                stateUser.id,
-                'unlockRateOne submit'
-            )
+            await submitRate(client, {
+                rateID: rateThree.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'unlockRateOne submit',
+            })
         )
         const unlockedRate = must(
-            await unlockRate(
-                client,
-                rateThree.id,
-                cmsUser.id,
-                'unlock unlockRateOne'
-            )
+            await unlockRate(client, {
+                rateID: rateThree.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock unlockRateOne',
+            })
         )
 
         // call the find by submit info function
@@ -99,6 +105,49 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
                 }),
                 expect.objectContaining({
                     rateID: draftRateTwo.id,
+                }),
+            ])
+        )
+    })
+
+    it('does not return rates from production test state (American Samoa)', async () => {
+        const client = await sharedTestPrismaClient()
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                stateCode: 'NM',
+            },
+        })
+
+        const rateDataForAS = must(
+            await insertDraftRate(
+                client,
+                createInsertRateData({
+                    stateCode: 'AS',
+                    rateCertificationName: 'one rate',
+                })
+            )
+        )
+        const submittedRateAmericanSamoa = must(
+            await submitRate(client, {
+                rateID: rateDataForAS.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'rateOne submit',
+            })
+        )
+
+        // call the find by submit info function
+        const rates = must(await findAllRatesWithHistoryBySubmitInfo(client))
+
+        // expect our AS rate to not be in the results
+        expect(rates).not.toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    rateID: submittedRateAmericanSamoa.id,
                 }),
             ])
         )

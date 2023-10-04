@@ -24,7 +24,6 @@ const validateAndReturnRates = (
     // separate valid rates and errors
     const parsedRates: RateType[] = []
     const errorParseRates: string[] = []
-
     results.forEach((parsed) => {
         if (parsed.rate instanceof Error) {
             errorParseRates.push(`${parsed.rateID}: ${parsed.rate.message}`)
@@ -41,7 +40,6 @@ const validateAndReturnRates = (
         logError('indexRatesResolver', errMessage)
         setErrorAttributesOnActiveSpan(errMessage, span)
     }
-
     return parsedRates
 }
 
@@ -87,7 +85,10 @@ export function indexRatesResolver(
                     },
                 })
             }
-            const rates: RateType[] = validateAndReturnRates(ratesWithHistory, span)
+            const rates: RateType[] = validateAndReturnRates(
+                ratesWithHistory,
+                span
+            )
             const edges = rates.map((rate) => {
                 return {
                     node: {

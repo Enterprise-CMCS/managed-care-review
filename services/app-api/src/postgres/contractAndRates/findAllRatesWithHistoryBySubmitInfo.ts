@@ -15,10 +15,22 @@ async function findAllRatesWithHistoryBySubmitInfo(
 ): Promise<RateOrErrorArrayType | Error> {
     try {
         const rates = await client.rateTable.findMany({
+            where: {
+                revisions: {
+                    some: {
+                        submitInfo: {
+                            isNot: null,
+                        },
+                    },
+                },
+                stateCode: {
+                    not: 'AS', // exclude test state as per ADR 019
+                },
+            },
             include: {
                 ...includeFullRate,
-                state: true
-            }
+                state: true,
+            },
         })
 
         const parsedRatesOrErrors: RateOrErrorArrayType = rates.map((rate) => ({

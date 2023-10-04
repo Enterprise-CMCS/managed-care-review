@@ -7,7 +7,7 @@ import { NotFoundError } from '../storeError'
 
 type SubmitRateArgsType = {
     rateID?: string
-    rateRevisionID?: string
+    rateRevisionID?: string // this is a hack that should not outlive protobuf. Protobufs only have rate revision IDs
     submittedByUserID: UpdateInfoType['updatedBy']
     submitReason: UpdateInfoType['updatedReason']
 }

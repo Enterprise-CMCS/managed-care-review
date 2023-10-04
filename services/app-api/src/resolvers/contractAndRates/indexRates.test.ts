@@ -2,67 +2,71 @@ import INDEX_RATES from '../../../../app-graphql/src/queries/indexRates.graphql'
 import {
     constructTestPostgresServer,
     createAndSubmitTestHealthPlanPackage,
+    createAndUpdateTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
-import type {
-    RateEdge,
-    Rate,
-} from '../../gen/gqlServer'
+import type { RateEdge, Rate } from '../../gen/gqlServer'
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
-
+import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 
 describe('indexRates', () => {
-    const mockFeatureFlags = () => testLDService({ 'rates-db-refactor': true })
-
-    beforeEach( () => {
-        mockFeatureFlags()
-    })
-
+    const mockLDService = testLDService({ 'rates-db-refactor': true })
 
     it('returns rate reviews list for cms user', async () => {
         const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            ldService: mockLDService,
+        })
         const cmsServer = await constructTestPostgresServer({
+            ldService: mockLDService,
             context: {
                 user: cmsUser,
-        },
+            },
         })
         // first, submit new packages that include rates
-        const draft1 = await createAndSubmitTestHealthPlanPackage(stateServer)
-        const draft2 = await  createAndSubmitTestHealthPlanPackage(stateServer)
+        const submit1 = await createAndSubmitTestHealthPlanPackage(stateServer)
+        const submit2 = await createAndSubmitTestHealthPlanPackage(stateServer)
+        const update1 = await createAndUpdateTestHealthPlanPackage(stateServer)
+        await new Promise((resolve) => setTimeout(resolve, 2000))
 
         // index rates
         const result = await cmsServer.executeOperation({
             query: INDEX_RATES,
         })
+
+        expect(result.data).toBeDefined()
         const ratesIndex = result.data?.indexRates
+        const testRateIDs = [
+            latestFormData(submit1).rateInfos[0].id,
+            latestFormData(submit2).rateInfos[0].id,
+            latestFormData(update1).rateInfos[0].id,
+        ]
 
-        // pull out rates the way they are handled on dashboard
-        const testRateIDs = [draft1.id, draft2.id]
-        const testRates: Rate[] = ratesIndex.edges
+        const matchedTestRates: Rate[] = ratesIndex.edges
             .map((edge: RateEdge) => edge.node)
-            .filter((test: RateEdge) =>
-                testRateIDs.includes(test.node.id)
-            )
+            .filter((test: Rate) => {
+                return testRateIDs.includes(test.id)
+            })
 
-        expect(testRates).toHaveLength(0)
+        expect(matchedTestRates).toHaveLength(2) // check that we do not include the draft
     })
 
-    it('returns ForbiddenError for state user', async() =>{
-        const stateServer = await constructTestPostgresServer()
+    it('returns ForbiddenError for state user', async () => {
+        const stateServer = await constructTestPostgresServer({
+            ldService: mockLDService,
+        })
 
         // submit packages that include rates
         await createAndSubmitTestHealthPlanPackage(stateServer)
-         await  createAndSubmitTestHealthPlanPackage(stateServer)
+        await createAndSubmitTestHealthPlanPackage(stateServer)
 
         // index rates
         const result = await stateServer.executeOperation({
             query: INDEX_RATES,
         })
         expect(result.errors).toBeDefined()
-
-
     })
-    it.todo('returns an empty list if only draft packages exist')
-    it.todo('synthesizes the right statuses as a rate is submitted, unlocked, resubmitted')
+    it.todo(
+        'synthesizes the right statuses as a rate is submitted, unlocked, resubmitted'
+    )
 })

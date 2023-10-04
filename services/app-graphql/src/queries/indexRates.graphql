@@ -17,20 +17,20 @@ query indexRates {
                 status
                 initiallySubmittedAt
                 revisions {
-                    node {
-                        id
-                        createdAt
+                    id
+                    createdAt
+                    updatedAt
+                    unlockInfo {
                         updatedAt
-                        unlockInfo {
-                            updatedAt
-                            updatedBy
-                            updatedReason
-                        }
-                        submitInfo {
-                            updatedAt
-                            updatedBy
-                            updatedReason
-                        }
+                        updatedBy
+                        updatedReason
+                    }
+                    submitInfo {
+                        updatedAt
+                        updatedBy
+                        updatedReason
+                    }
+                    formData {
                         rateType,
                         rateCapitationType,
                         rateDocuments {
@@ -75,6 +75,11 @@ query indexRates {
                             actuarialFirmOther
                         },
                         actuaryCommunicationPreference
+                        packagesWithSharedRateCerts {
+                            packageName
+                            packageID
+                        }
+
                     }
                 }
             }
