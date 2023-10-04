@@ -1,37 +1,19 @@
-import type { GraphQLError } from 'graphql'
 import UPDATE_CONTRACT_MUTATION from '../../../../app-graphql/src/mutations/updateContract.graphql'
-import type { HealthPlanPackage } from '../../gen/gqlServer'
-import { todaysDate } from '../../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer,
-    createAndUpdateTestHealthPlanPackage,
     createAndSubmitTestHealthPlanPackage,
-    defaultFloridaProgram,
-    fetchTestHealthPlanPackageById,
-    submitTestHealthPlanPackage,
-    unlockTestHealthPlanPackage,
-    updateTestHealthPlanFormData,
-    resubmitTestHealthPlanPackage,
-    defaultFloridaRateProgram,
 } from '../../testHelpers/gqlHelpers'
-import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
-import { mockStoreThatErrors } from '../../testHelpers/storeHelpers'
-import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { base64ToDomain } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
-import {
-    generateRateName,
-    packageName,
-} from 'app-web/src/common-code/healthPlanFormDataType'
-import {
-    getTestStateAnalystsEmails,
-    mockEmailParameterStoreError,
-} from '../../testHelpers/parameterStoreHelpers'
-import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import { testCMSUser } from '../../testHelpers/userHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 describe('updateContract', () => {
     const cmsUser = testCMSUser()
+    const mockLDService = testLDService({ ['rates-db-refactor']: true })
+
     it('updates the contract', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            ldService: mockLDService,
+        })
 
         // First, create a new submitted submission
         const stateSubmission = await createAndSubmitTestHealthPlanPackage(
@@ -39,6 +21,7 @@ describe('updateContract', () => {
         )
 
         const cmsServer = await constructTestPostgresServer({
+            ldService: mockLDService,
             context: {
                 user: cmsUser,
             },
