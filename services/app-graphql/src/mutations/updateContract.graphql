@@ -3,6 +3,7 @@ mutation updateContract($input: UpdateContractInput!) {
         pkg {
             id
             stateCode
+            mccrsID
             state {
                 code
                 name

@@ -554,6 +554,8 @@ type HealthPlanPackage {
     stateCode: String!
     "Fuller state data for the submitting state"
     state: State!
+    "MC-CRS record number provided by CMS user (e.g. 1234)"
+    mccrsID: String
     """
     Array of revisions for this package. Each revision represents a single submission
     for the package and contains the full data from when it was submitted
