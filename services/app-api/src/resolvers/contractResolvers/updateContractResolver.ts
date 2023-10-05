@@ -25,7 +25,7 @@ export function updateContractResolver(
         //     'rates-db-refactor'
         // )
 
-        // This resolver is only callable by state users
+        // This resolver is only callable by CMS users
         if (!isCMSUser(user)) {
             logError('updateContract', 'user not authorized to update contract')
             setErrorAttributesOnActiveSpan(
@@ -34,7 +34,11 @@ export function updateContractResolver(
             )
             throw new ForbiddenError('user not authorized to update contract')
         }
-        const contract = await store.findContractWithHistory(input.id)
+        const contract = await store.updateMCCRSID({
+            contractID: input.id,
+            mccrsID: input.mccrsID || undefined,
+        })
+
         if (contract instanceof Error) {
             throw contract
         }
