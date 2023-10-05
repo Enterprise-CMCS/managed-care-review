@@ -34,15 +34,11 @@ query indexRates {
                         rateType,
                         rateCapitationType,
                         rateDocuments {
-                            createdAt
-                            updatedAt
                             name
                             s3URL
                             sha256
                         },
                         supportingDocuments {
-                            createdAt
-                            updatedAt
                             name
                             s3URL
                             sha256
@@ -55,9 +51,6 @@ query indexRates {
                         rateProgramIDs,
                         rateCertificationName,
                         certifyingActuaryContacts {
-                            id
-                            createdAt
-                            updatedAt
                             name
                             titleRole
                             email
@@ -65,9 +58,6 @@ query indexRates {
                             actuarialFirmOther
                         },
                         addtlActuaryContacts {
-                            id
-                            createdAt
-                            updatedAt
                             name
                             titleRole
                             email

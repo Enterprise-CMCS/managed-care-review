@@ -687,8 +687,6 @@ Documents
 This can be used everywhere we pass documents through GraphQL regardless of domain
 """
 type GenericDocument {
-    createdAt: DateTime!
-    updatedAt: DateTime!
     "The user created name of the document"
     name: String!
     "The S3 URL of the document, generated on the FE currently in the FileUpload component"
@@ -728,9 +726,6 @@ enum ActuarialFirm {
 }
 
 type ActuaryContact  {
-  id: String!
-  createdAt:  DateTime!
-  updatedAt: DateTime!
   name: String!
   titleRole: String!
   email: String!

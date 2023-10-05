@@ -32,7 +32,7 @@ describe('indexRates', () => {
         expect(result.errors).toBeDefined()
     })
 
-    it('returns rate reviews list for cms user', async () => {
+    it('returns rate reviews list for cms user with no errors', async () => {
         const cmsUser = testCMSUser()
         const stateServer = await constructTestPostgresServer({
             ldService: mockLDService,
@@ -62,6 +62,7 @@ describe('indexRates', () => {
             latestFormData(update1).rateInfos[0].id,
         ]
 
+        expect(result.errors).toBeUndefined()
         const matchedTestRates: Rate[] = ratesIndex.edges
             .map((edge: RateEdge) => edge.node)
             .filter((test: Rate) => {

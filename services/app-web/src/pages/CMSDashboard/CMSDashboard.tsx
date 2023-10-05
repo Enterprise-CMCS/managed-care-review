@@ -23,7 +23,6 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { ErrorFailedRequestPage } from '../Errors/ErrorFailedRequestPage'
 import { RoutesRecord } from '../../constants'
 import { featureFlags } from '../../common-code/featureFlags'
-import { getRouteName } from '../../routeHelpers'
 
 /**
  * We only pull a subset of data out of the submission and revisions for display in Dashboard
@@ -32,8 +31,7 @@ import { getRouteName } from '../../routeHelpers'
 const DASHBOARD_ATTRIBUTE = 'cms-dashboard-page'
 const CMSDashboard = (): React.ReactElement => {
     const { pathname } = useLocation()
-    const loadOnRateReviews =
-        getRouteName(pathname) === RoutesRecord.DASHBOARD_RATES
+    const loadOnRateReviews = pathname === RoutesRecord.DASHBOARD_RATES
     const ldClient = useLDClient()
     const showRateReviews = ldClient?.variation(
         featureFlags.RATE_REVIEWS_DASHBOARD.flag,
