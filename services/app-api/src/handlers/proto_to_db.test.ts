@@ -288,7 +288,6 @@ describe('test that we migrate things', () => {
                 `could not get back migrated contract after migrate: ${fetchedMigratedContract.message}`
             )
         }
-        console.info(`Original HPP: ${JSON.stringify(fetchedHPP)}`)
 
         // check that we have the same number of revisions
         expect(fetchedMigratedContract.revisions).toHaveLength(
@@ -348,11 +347,26 @@ describe('test that we migrate things', () => {
                 migratedContractToCompare.formDataProto
             )
 
+            if (
+                decodedFormDataProtoHppRev instanceof Error ||
+                decodedFormDataProtoContractRev instanceof Error
+            ) {
+                throw new Error(`Could not decode the protobufs`)
+            }
+
             console.info(
-                `${JSON.stringify(decodedFormDataProtoHppRev, null, '  ')}`
+                `HPP rev form data: \n ${JSON.stringify(
+                    decodedFormDataProtoHppRev,
+                    null,
+                    '  '
+                )}`
             )
             console.info(
-                `${JSON.stringify(decodedFormDataProtoContractRev, null, '  ')}`
+                `migrated contract rev form data: \n ${JSON.stringify(
+                    decodedFormDataProtoContractRev,
+                    null,
+                    '  '
+                )}`
             )
 
             const diff = getObjectDiff(
