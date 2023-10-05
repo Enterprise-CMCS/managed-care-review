@@ -230,7 +230,8 @@ _**Run `yarn prisma generate`**_
 
 or from the root run `.dev local --postgres --api` which includes prisma code generation
 
-This command will create
+This command will create `node_modules/.prisma/client/index.d.ts`
+
 ### Generating graphql types
 _**On the command line, navigate to `/services/app-graphql`**_
 _**Run `yarn gqlgen`**_
