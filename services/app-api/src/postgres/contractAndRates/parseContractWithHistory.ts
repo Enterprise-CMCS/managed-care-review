@@ -144,51 +144,74 @@ function contractWithHistoryToDomainModel(
             rateRevisions: [],
         }
 
-        allRevisionSets.push(initialEntry)
-
-        let lastEntry = initialEntry
-        // Now we construct a revision history for each change in rate revisions.
-        // go through every rate revision in the join table in time order and construct a revisionSet
-        // with (or without) the new rate revision in it.
-        for (const rateRev of contractRev.rateRevisions) {
-            if (!rateRev.rateRevision.submitInfo) {
+        // The loop below gets rid of old submitted rate revisions and only includes the latest.
+        for (const rateOnContract of contractRev.rateRevisions) {
+            if (!rateOnContract.rateRevision.submitInfo) {
                 return new Error(
                     'Programming Error: a contract is associated with an unsubmitted rate'
                 )
             }
 
-            // if it's from before this contract was submitted, it's there at the beginning.
             if (
-                rateRev.rateRevision.submitInfo.updatedAt <=
+                rateOnContract.rateRevision.submitInfo.updatedAt <=
                 contractRev.submitInfo.updatedAt
             ) {
-                if (!rateRev.isRemoval) {
-                    initialEntry.rateRevisions.push(rateRev.rateRevision)
+                if (!rateOnContract.isRemoval) {
+                    initialEntry.rateRevisions.push(rateOnContract.rateRevision)
                 }
-            } else {
-                // if after, then it's always a new entry in the list
-                let lastRates = [...lastEntry.rateRevisions]
-
-                // take out the previous rate revision this revision supersedes
-                lastRates = lastRates.filter(
-                    (r) => r.rateID !== rateRev.rateRevision.rateID
-                )
-                // an isRemoval entry indicates that this rate was removed from this contract.
-                if (!rateRev.isRemoval) {
-                    lastRates.push(rateRev.rateRevision)
-                }
-
-                const newRev: ContractRevisionSet = {
-                    contractRev,
-                    submitInfo: rateRev.rateRevision.submitInfo,
-                    unlockInfo: rateRev.rateRevision.unlockInfo || undefined,
-                    rateRevisions: lastRates,
-                }
-
-                lastEntry = newRev
-                allRevisionSets.push(newRev)
             }
         }
+
+        allRevisionSets.push(initialEntry)
+
+        // This code below was used to construct rate change history and add into our contract revision history by pushing
+        //  new contract revisions into the array. This however caused issues with the frontend apollo cache because we
+        //  used duplicate contract revision ids to create new revisions for rate changes.
+        // For now, we are commenting out the code until we are ready for this feature.
+
+        // let lastEntry = initialEntry
+        // // Now we construct a revision history for each change in rate revisions.
+        // // go through every rate revision in the join table in time order and construct a revisionSet
+        // // with (or without) the new rate revision in it.
+        // for (const rateRev of contractRev.rateRevisions) {
+        //     if (!rateRev.rateRevision.submitInfo) {
+        //         return new Error(
+        //             'Programming Error: a contract is associated with an unsubmitted rate'
+        //         )
+        //     }
+        //
+        //     // if it's from before this contract was submitted, it's there at the beginning.
+        //     if (
+        //         rateRev.rateRevision.submitInfo.updatedAt <=
+        //         contractRev.submitInfo.updatedAt
+        //     ) {
+        //         if (!rateRev.isRemoval) {
+        //             initialEntry.rateRevisions.push(rateRev.rateRevision)
+        //         }
+        //     } else {
+        //         // if after, then it's always a new entry in the list
+        //         let lastRates = [...lastEntry.rateRevisions]
+        //
+        //         // take out the previous rate revision this revision supersedes
+        //         lastRates = lastRates.filter(
+        //             (r) => r.rateID !== rateRev.rateRevision.rateID
+        //         )
+        //         // an isRemoval entry indicates that this rate was removed from this contract.
+        //         if (!rateRev.isRemoval) {
+        //             lastRates.push(rateRev.rateRevision)
+        //         }
+        //
+        //         const newRev: ContractRevisionSet = {
+        //             contractRev,
+        //             submitInfo: rateRev.rateRevision.submitInfo,
+        //             unlockInfo: rateRev.rateRevision.unlockInfo || undefined,
+        //             rateRevisions: lastRates,
+        //         }
+        //
+        //         lastEntry = newRev
+        //         allRevisionSets.push(newRev)
+        //     }
+        // }
     }
 
     const revisions = contractSetsToDomainModel(allRevisionSets)
