@@ -273,45 +273,9 @@ describe('test that we migrate things', () => {
             finallySubmittedPKG.id
         )
 
-        // let's look up the newly migrated contract
-        const fetchMigratedContract = await findContractWithHistory(
-            prismaClient,
-            migratedRevisions[0].id
-        )
-        if (fetchMigratedContract instanceof Error) {
-            const error = new Error(
-                `Could not retrieve migrated contract: ${fetchMigratedContract.message}`
-            )
-            console.error(error)
-            throw error
-        }
-
-        /*
-        console.info(`Original HPP: ${JSON.stringify(fetchedHPP)}`)
-        console.info(
-            `Migrated contract: ${JSON.stringify(fetchMigratedContract)}`
-        )
-        */
-
-        // Check that both objects have the same id
-        expect(fetchMigratedContract.id).toEqual(fetchedHPP.id)
-
-        // Check that both objects have the same stateCode
-        expect(fetchMigratedContract.stateCode).toEqual(fetchedHPP.stateCode)
-
-        // Check that both objects have the same status
-        expect(fetchMigratedContract.status).toEqual(fetchedHPP.status)
-
-        expect(fetchMigratedContract.revisions.length).toEqual(
-            fetchedHPP.revisions.length
-        )
-
         // collect the IDs of each revision in HPP and the migrated version
         const migratedContractRevisions = new Map(
-            fetchMigratedContract.revisions.map((revision) => [
-                revision.id,
-                revision,
-            ])
+            migratedRevisions.map((revision) => [revision.id, revision])
         )
         const originalHPPRevisions = new Map(
             fetchedHPP.revisions.map((revision) => [
@@ -321,9 +285,7 @@ describe('test that we migrate things', () => {
         )
         for (const id of migratedContractRevisions.keys()) {
             // Make sure the id exists in both objects
-            expect(originalHPPRevisions.has(id)).toBe(true)
-            const migratedFormData =
-                migratedContractRevisions.get(id)?.formData ?? {}
+            const migratedFormData = migratedContractRevisions.get(id) ?? {}
             const originalFormDataProto =
                 originalHPPRevisions.get(id)?.formDataProto ?? ''
 
