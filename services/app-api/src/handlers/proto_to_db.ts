@@ -163,7 +163,7 @@ export async function migrateRevision(
         return error
     }
 
-    return migratedContract
+    return migratedContract as ContractType
 }
 
 type ContractMigrationResult =

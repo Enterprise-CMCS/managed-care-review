@@ -19,6 +19,9 @@ import {
 import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
 import { findAllRevisions } from '../postgres/healthPlanPackage'
 import { isStoreError } from '../postgres'
+import { findContractWithHistory } from '../postgres/contractAndRates'
+import { isEqualData } from '../resolvers/healthPlanPackage/contractAndRates/resolverHelpers'
+import { base64ToDomain } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
 
 describe('test that we migrate things', () => {
     const mockPreRefactorLDService = testLDService({
@@ -250,6 +253,13 @@ describe('test that we migrate things', () => {
                 prismaClient,
                 revision
             )
+            if (migratedRevision instanceof Error) {
+                const error = new Error(
+                    `Could not get a migrated revision back: ${migratedRevision}`
+                )
+                console.error(error)
+                throw error
+            }
             migratedRevisions.push(migratedRevision)
         }
 
@@ -257,13 +267,80 @@ describe('test that we migrate things', () => {
             ldService: mockPostRefactorLDService,
         })
 
+        // let's get the original HPP
         const fetchedHPP = await fetchTestHealthPlanPackageById(
             stateServerPost,
             finallySubmittedPKG.id
         )
 
-        console.info(`Migrated HPP: ${JSON.stringify(fetchedHPP, null, '  ')}`)
+        // let's look up the newly migrated contract
+        const fetchMigratedContract = await findContractWithHistory(
+            prismaClient,
+            migratedRevisions[0].id
+        )
+        if (fetchMigratedContract instanceof Error) {
+            const error = new Error(
+                `Could not retrieve migrated contract: ${fetchMigratedContract.message}`
+            )
+            console.error(error)
+            throw error
+        }
 
-        throw new Error('Not done with this test yet')
+        /*
+        console.info(`Original HPP: ${JSON.stringify(fetchedHPP)}`)
+        console.info(
+            `Migrated contract: ${JSON.stringify(fetchMigratedContract)}`
+        )
+        */
+
+        // Check that both objects have the same id
+        expect(fetchMigratedContract.id).toEqual(fetchedHPP.id)
+
+        // Check that both objects have the same stateCode
+        expect(fetchMigratedContract.stateCode).toEqual(fetchedHPP.stateCode)
+
+        // Check that both objects have the same status
+        expect(fetchMigratedContract.status).toEqual(fetchedHPP.status)
+
+        // eslint-disable-next-line jest/prefer-to-have-length
+        expect(fetchMigratedContract.revisions.length).toEqual(
+            fetchedHPP.revisions.length
+        )
+
+        // collect the IDs of each revision in HPP and the migrated version
+        const migratedContractRevisions = new Map(
+            fetchMigratedContract.revisions.map((revision) => [
+                revision.id,
+                revision,
+            ])
+        )
+        const originalHPPRevisions = new Map(
+            fetchedHPP.revisions.map((revision) => [
+                revision.node.id,
+                revision.node,
+            ])
+        )
+        for (const id of migratedContractRevisions.keys()) {
+            // Make sure the id exists in both objects
+            expect(originalHPPRevisions.has(id)).toBe(true)
+            const migratedFormData =
+                migratedContractRevisions.get(id)?.formData ?? {}
+            const originalFormDataProto =
+                originalHPPRevisions.get(id)?.formDataProto ?? ''
+
+            // decode the HPP form data so we can compare the objects
+            const decodedFormDataProto = base64ToDomain(originalFormDataProto)
+            if (decodedFormDataProto instanceof Error) {
+                const error = new Error(
+                    `Error in base64ToDomain for ${id}: ${decodedFormDataProto.message}`
+                )
+                return error
+            }
+
+            // compare the two form data
+            expect(
+                isEqualData(migratedFormData, decodeFormDataProto)
+            ).toBeTruthy()
+        }
     }, 20000)
 })
