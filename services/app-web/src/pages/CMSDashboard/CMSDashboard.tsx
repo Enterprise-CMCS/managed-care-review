@@ -217,7 +217,7 @@ const SubmissionsDashboard = (): React.ReactElement => {
 }
 const RateReviewsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
-    const { loading, data, error } = useIndexRatesQuery({
+    const { loading, error } = useIndexRatesQuery({
         fetchPolicy: 'network-only',
     })
     if (loading || !loggedInUser) {
@@ -230,7 +230,6 @@ const RateReviewsDashboard = (): React.ReactElement => {
             />
         )
     } else {
-        console.warn(data?.indexRates.edges) // temporary
         return (
             <section className={styles.panel}>
                 <div className="srOnly"> RATE REVIEWS DASHBOARD</div>

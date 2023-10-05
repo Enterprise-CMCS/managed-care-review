@@ -1,2 +1,2 @@
-export {rateResolver} from './rateResolver'
-export {indexRatesResolver} from './indexRates'
+export { rateResolver } from './rateResolver'
+export { indexRatesResolver } from './indexRates'

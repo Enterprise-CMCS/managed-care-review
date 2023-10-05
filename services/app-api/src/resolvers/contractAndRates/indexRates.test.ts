@@ -86,7 +86,6 @@ describe('indexRates', () => {
         const draft1 = await createTestHealthPlanPackage(stateServer)
         const draft2 = await createTestHealthPlanPackage(stateServer)
 
-        // index submissions api request
         // index rates
         const result = await cmsServer.executeOperation({
             query: INDEX_RATES,
@@ -94,7 +93,7 @@ describe('indexRates', () => {
 
         const ratesIndex = result.data?.indexRates
 
-        // pull out test related submissions and order them
+        // pull out test related rates and order them
         const testRateIDs = [draft1.id, draft2.id]
         const testRates: Rate[] = ratesIndex.edges
             .map((edge: RateEdge) => edge.node)
@@ -104,7 +103,7 @@ describe('indexRates', () => {
         expect(testRates).toHaveLength(0)
     })
 
-    it('synthesizes the right statuses as a submission is submitted/unlocked/etc', async () => {
+    it('synthesizes the right statuses as a rate is submitted/unlocked/etc', async () => {
         const cmsUser = testCMSUser()
         const server = await constructTestPostgresServer({
             ldService: mockLDService,
@@ -147,7 +146,6 @@ describe('indexRates', () => {
             'Test first resubmission'
         )
 
-        // index submissions api request
         // index rates
         const result = await cmsServer.executeOperation({
             query: INDEX_RATES,
@@ -180,7 +178,7 @@ describe('indexRates', () => {
         })
     })
 
-    it('return a list of submitted packages from multiple states', async () => {
+    it('return a list of submitted rates from multiple states', async () => {
         const cmsUser = testCMSUser()
         const stateServer = await constructTestPostgresServer({
             ldService: mockLDService,
