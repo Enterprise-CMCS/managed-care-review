@@ -1,4 +1,5 @@
 import { todaysDate } from '../testHelpers/dateHelpers'
+import _ from 'lodash'
 import {
     constructTestPostgresServer,
     createAndSubmitTestHealthPlanPackage,
@@ -21,7 +22,11 @@ import { findAllRevisions } from '../postgres/healthPlanPackage'
 import { isStoreError } from '../postgres'
 import { findContractWithHistory } from '../postgres/contractAndRates'
 import { isEqualData } from '../resolvers/healthPlanPackage/contractAndRates/resolverHelpers'
-import { base64ToDomain } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
+import {
+    base64ToDomain,
+    toDomain,
+} from 'app-web/src/common-code/proto/healthPlanFormDataProto'
+import { convertContractWithRatesToUnlockedHPP } from '../domain-models'
 
 describe('test that we migrate things', () => {
     const mockPreRefactorLDService = testLDService({
@@ -247,7 +252,7 @@ describe('test that we migrate things', () => {
             }
         }
 
-        const migratedRevisions = []
+        const migratedContracts = []
         for (const revision of revisionsToMigrate) {
             const migratedRevision = await migrateRevision(
                 prismaClient,
@@ -260,7 +265,7 @@ describe('test that we migrate things', () => {
                 console.error(error)
                 throw error
             }
-            migratedRevisions.push(migratedRevision)
+            migratedContracts.push(migratedRevision)
         }
 
         const stateServerPost = await constructTestPostgresServer({
@@ -273,116 +278,97 @@ describe('test that we migrate things', () => {
             finallySubmittedPKG.id
         )
 
-        console.info(`Original HPP: ${JSON.stringify(fetchedHPP.revisions)}`)
-        /*
-        console.info(
-            `Migrated contract: ${JSON.stringify(fetchMigratedContract)}`
+        // get the migrated contract with history
+        const fetchedMigratedContract = await findContractWithHistory(
+            prismaClient,
+            finallySubmittedPKG.id
         )
-        // Check that both objects have the same status
-        expect(migratedRevisionForCompare.status).toEqual(fetchedHPP.status)
+        if (fetchedMigratedContract instanceof Error) {
+            throw new Error(
+                `could not get back migrated contract after migrate: ${fetchedMigratedContract.message}`
+            )
+        }
+        console.info(`Original HPP: ${JSON.stringify(fetchedHPP)}`)
 
-        // Check that both objects have the same stateCode
-        expect(migratedRevisionForCompare.stateCode).toEqual(
-            fetchedHPP.stateCode
-        )
-
-        // Check that they have the same amount of revisions
-        expect(migratedRevisionForCompare.revisions.length).toEqual(
+        // check that we have the same number of revisions
+        expect(fetchedMigratedContract.revisions).toHaveLength(
             fetchedHPP.revisions.length
         )
-        */
 
-        // collect the IDs of each revision in HPP and the migrated version
-        const migratedContractRevisions = new Map(
-            migratedRevisions.flatMap((revisionObj) =>
-                revisionObj.revisions.map((revision) => [revision.id, revision])
-            )
+        // check that the IDs line up
+        expect(fetchedMigratedContract.id).toBe(fetchedHPP.id)
+
+        // convert to HPP
+        const migratedConvertedContract = convertContractWithRatesToUnlockedHPP(
+            fetchedMigratedContract
         )
+        if (migratedConvertedContract instanceof Error) {
+            throw new Error(
+                `could not convert contract to unlocked hpp ${migratedConvertedContract.message}`
+            )
+        }
 
-        const originalHPPRevisions = new Map(
+        // look at each of the revisions
+        const fetchedHPPRevisionsById = new Map(
             fetchedHPP.revisions.map((revision) => {
-                console.info(`revision: ${JSON.stringify(revision)}`)
                 return [revision.node.id, revision.node]
             })
         )
 
-        for (const id of migratedContractRevisions.keys()) {
+        const fetchedConvertedContractRevisionsById = new Map(
+            migratedConvertedContract.revisions.map((revision) => [
+                revision.id,
+                revision,
+            ])
+        )
+        for (const id of fetchedConvertedContractRevisionsById.keys()) {
             console.info(`comparing ${id}`)
-            const migratedRevisionForCompare = migratedContractRevisions.get(id)
-            if (migratedRevisionForCompare === undefined) {
+            const migratedContractToCompare =
+                fetchedConvertedContractRevisionsById.get(id)
+            if (migratedContractToCompare === undefined) {
                 throw new Error(
-                    `Could not find the migrated revision with id ${id}`
+                    `could not find the migrated contract id in map`
                 )
             }
-            console.info(
-                `migrated for compare: ${JSON.stringify(
-                    migratedRevisionForCompare
-                )}`
-            )
-            const originalHPPForCompare = originalHPPRevisions.get(id)
-            if (originalHPPForCompare === undefined) {
+
+            const hppRevisionToCompare = fetchedHPPRevisionsById.get(id)
+            if (hppRevisionToCompare === undefined) {
                 throw new Error(
-                    `Could not find the original HPP revision with id: ${id}`
+                    `migrated contract revision of id ${id} not found in HPP revisions`
                 )
             }
+
+            // decode the form data on the hpp
+            const decodedFormDataProtoHppRev = base64ToDomain(
+                hppRevisionToCompare.formDataProto
+            )
+
+            // decode the form data on the migrated contract
+            const decodedFormDataProtoContractRev = toDomain(
+                migratedContractToCompare.formDataProto
+            )
+
             console.info(
-                `original for compare: ${JSON.stringify(originalHPPForCompare)}`
+                `${JSON.stringify(decodedFormDataProtoHppRev, null, '  ')}`
             )
-
-            // Check that both objects have the same id
-            expect(migratedRevisionForCompare.id).toEqual(
-                originalHPPForCompare.id
-            )
-
             console.info(
-                `original: ${JSON.stringify(originalHPPRevisions.get(id))}`
+                `${JSON.stringify(decodedFormDataProtoContractRev, null, '  ')}`
             )
 
-            const originalFormDataProto =
-                originalHPPRevisions.get(id)?.formDataProto ?? ''
-            console.info(
-                `originalformdataproto: ${JSON.stringify(
-                    originalFormDataProto
-                )}`
-            )
-
-            // decode the HPP form data so we can compare the objects
-            const decodedFormDataProto = base64ToDomain(originalFormDataProto)
-            if (decodedFormDataProto instanceof Error) {
-                const error = new Error(
-                    `Error in base64ToDomain for ${id}: ${decodedFormDataProto.message}`
-                )
-                return error
-            }
-
-            // compare the two form data
             const diff = getObjectDiff(
-                migratedRevisionForCompare,
-                decodedFormDataProto
+                decodedFormDataProtoContractRev,
+                decodedFormDataProtoHppRev
             )
             console.info(`${diff.length} keys differ: ${diff}`)
-            console.info(
-                `decoded form data: ${JSON.stringify(
-                    decodedFormDataProto,
-                    null,
-                    '  '
-                )}`
-            )
-            console.info(
-                `migrated form data: ${JSON.stringify(
-                    migratedRevisionForCompare,
-                    null,
-                    '  '
-                )}`
-            )
             expect(
-                isEqualData(decodedFormDataProto, migratedRevisionForCompare)
+                isEqualData(
+                    decodedFormDataProtoContractRev,
+                    decodedFormDataProtoHppRev
+                )
             ).toBeTruthy()
         }
     }, 20000)
 })
-
-import _ from 'lodash'
 
 const getObjectDiff = (
     obj1: Record<string, any>,
