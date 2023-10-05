@@ -56,6 +56,7 @@
         "graphql": "^16.2.0",
         "graphql-scalars": "^1.11.1",
         "json2csv": "^5.0.7",
+        "lodash": "^4.17.21",
         "neverthrow": "^6.0.0",
         "path-to-regexp": "^6.2.1",
         "protobufjs": "^6.11.2",

@@ -302,7 +302,6 @@ describe('test that we migrate things', () => {
         // Check that both objects have the same status
         expect(fetchMigratedContract.status).toEqual(fetchedHPP.status)
 
-        // eslint-disable-next-line jest/prefer-to-have-length
         expect(fetchMigratedContract.revisions.length).toEqual(
             fetchedHPP.revisions.length
         )
@@ -338,9 +337,54 @@ describe('test that we migrate things', () => {
             }
 
             // compare the two form data
+            const diff = getObjectDiff(migratedFormData, decodedFormDataProto)
+            console.info(`${diff.length} keys differ: ${diff}`)
+            console.info(
+                `decoded form data: ${JSON.stringify(
+                    decodedFormDataProto,
+                    null,
+                    '  '
+                )}`
+            )
+            console.info(
+                `migrated form data: ${JSON.stringify(
+                    migratedFormData,
+                    null,
+                    '  '
+                )}`
+            )
             expect(
-                isEqualData(migratedFormData, decodeFormDataProto)
+                isEqualData(decodedFormDataProto, migratedFormData)
             ).toBeTruthy()
         }
     }, 20000)
 })
+
+import _ from 'lodash'
+
+const getObjectDiff = (
+    obj1: Record<string, any>,
+    obj2: Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
+    compareRef: boolean = false
+): string[] => {
+    if (typeof obj1 !== 'object' || typeof obj2 !== 'object') {
+        throw new Error('Both inputs must be objects.')
+    }
+
+    return Object.keys(obj1).reduce((result, key) => {
+        // eslint-disable-next-line no-prototype-builtins
+        if (!obj2.hasOwnProperty(key)) {
+            result.push(key)
+        } else if (_.isEqual(obj1[key], obj2[key])) {
+            const resultKeyIndex = result.indexOf(key)
+
+            if (compareRef && obj1[key] !== obj2[key]) {
+                result[resultKeyIndex] = `${key} (ref)`
+            } else {
+                result.splice(resultKeyIndex, 1)
+            }
+        }
+        return result
+    }, Object.keys(obj2))
+}
