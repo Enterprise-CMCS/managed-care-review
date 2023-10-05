@@ -17,7 +17,7 @@ describe('updateContract', () => {
 
         // First, create a new submitted submission
         const stateSubmission = await createAndSubmitTestHealthPlanPackage(
-            stateServer
+            stateServer 
         )
 
         const cmsServer = await constructTestPostgresServer({
@@ -27,8 +27,8 @@ describe('updateContract', () => {
             },
         })
 
-        // Unlock
-        const unlockResult = await cmsServer.executeOperation({
+        // Update
+        const updateResult = await cmsServer.executeOperation({
             query: UPDATE_CONTRACT_MUTATION,
             variables: {
                 input: {
@@ -38,6 +38,9 @@ describe('updateContract', () => {
             },
         })
 
-        expect(unlockResult.errors).toBeUndefined()
+        expect(updateResult.errors).toBeUndefined()
+        const updatedSub = updateResult?.data?.updateContract.pkg
+        expect(updatedSub.mccrsID).toBe('1234')
+
     })
 })

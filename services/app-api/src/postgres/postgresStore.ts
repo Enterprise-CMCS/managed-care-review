@@ -154,6 +154,10 @@ type Store = {
         contractID: string
     ) => Promise<ContractType | Error>
 
+    updateMCCRSID: (
+        args: UpdateMCCRSIDArgsType
+    ) => Promise<ContractType | Error>
+
     updateDraftContractWithRates: (
         args: UpdateContractArgsType
     ) => Promise<ContractType | Error>
@@ -239,6 +243,8 @@ function NewPostgresStore(client: PrismaClient): Store {
             findContractWithHistory(client, args),
         updateDraftContractWithRates: (args) =>
             updateDraftContractWithRates(client, args),
+        updateMCCRSID: (args) =>
+            updateMCCRSID(client, args),
         findAllContractsWithHistoryByState: (args) =>
             findAllContractsWithHistoryByState(client, args),
         findAllContractsWithHistoryBySubmitInfo: () =>
