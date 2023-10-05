@@ -1,8 +1,11 @@
 import { ForbiddenError } from 'apollo-server-lambda'
 import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type { StateType } from '../../domain-models'
-import { isAdminUser } from '../../domain-models'
-import { isHelpdeskUser } from '../../domain-models/user'
+import {
+    isAdminUser,
+    isBusinessOwnerUser,
+    isHelpdeskUser,
+} from '../../domain-models'
 import type { Emailer } from '../../emailer'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
@@ -22,7 +25,13 @@ export function fetchEmailSettingsResolver(
 ): QueryResolvers['fetchEmailSettings'] {
     return async (_parent, __, context) => {
         const { user, span } = context
-        if (!(isAdminUser(user) || isHelpdeskUser(user))) {
+        if (
+            !(
+                isAdminUser(user) ||
+                isHelpdeskUser(user) ||
+                isBusinessOwnerUser(user)
+            )
+        ) {
             const errMessage = 'Non-admin user not authorized to fetch settings'
             logError('fetchEmailSettings', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)

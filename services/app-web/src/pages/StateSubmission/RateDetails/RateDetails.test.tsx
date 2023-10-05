@@ -1340,7 +1340,7 @@ describe('RateDetails', () => {
                     s3URL: 's3://bucketname/one-three/one-three.png',
                     name: 'one three',
                     documentCategories: ['CONTRACT_RELATED'],
-                    sha256: 'fakeSha2',
+                    sha256: 'fakeSha3',
                 },
             ]
             renderWithProviders(

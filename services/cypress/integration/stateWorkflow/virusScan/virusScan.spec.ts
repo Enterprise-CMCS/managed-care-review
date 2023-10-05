@@ -19,10 +19,9 @@ describe.only('documents', () => {
                     filePath: 'documents/eicar_com.pdf',
                     encoding: 'binary',
                 })
-                cy.findAllByTestId('upload-finished-indicator', {
+                cy.findByText('Failed security scan, please remove', {
                     timeout: 200_000,
-                })
-                cy.findByText('Failed security scan, please remove').should(
+                }).should(
                     'exist'
                 )
             })

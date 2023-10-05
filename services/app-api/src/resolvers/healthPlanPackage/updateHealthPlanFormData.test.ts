@@ -257,6 +257,22 @@ describe.each(flagValueTestParameters)(
 
             // update that draft form data.
             const formData = Object.assign(latestFormData(createdDraft), {
+                addtlActuaryContacts: [
+                    {
+                        name: 'additional actuary 1',
+                        titleRole: 'additional actuary title 1',
+                        email: 'additionalactuary1@example.com',
+                        actuarialFirm: 'MERCER' as const,
+                        actuarialFirmOther: '',
+                    },
+                    {
+                        name: 'additional actuary 2',
+                        titleRole: 'additional actuary title 2',
+                        email: 'additionalactuary1@example.com',
+                        actuarialFirm: 'MERCER' as const,
+                        actuarialFirmOther: '',
+                    },
+                ],
                 rateInfos: [rate1, rate2],
             })
 
