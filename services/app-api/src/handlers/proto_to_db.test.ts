@@ -273,52 +273,78 @@ describe('test that we migrate things', () => {
             finallySubmittedPKG.id
         )
 
+        console.info(`Original HPP: ${JSON.stringify(fetchedHPP.revisions)}`)
         /*
-        console.info(`Original HPP: ${JSON.stringify(fetchedHPP)}`)
         console.info(
             `Migrated contract: ${JSON.stringify(fetchMigratedContract)}`
+        )
+        // Check that both objects have the same status
+        expect(migratedRevisionForCompare.status).toEqual(fetchedHPP.status)
+
+        // Check that both objects have the same stateCode
+        expect(migratedRevisionForCompare.stateCode).toEqual(
+            fetchedHPP.stateCode
+        )
+
+        // Check that they have the same amount of revisions
+        expect(migratedRevisionForCompare.revisions.length).toEqual(
+            fetchedHPP.revisions.length
         )
         */
 
         // collect the IDs of each revision in HPP and the migrated version
         const migratedContractRevisions = new Map(
-            migratedRevisions.map((revision) => [revision.id, revision])
+            migratedRevisions.flatMap((revisionObj) =>
+                revisionObj.revisions.map((revision) => [revision.id, revision])
+            )
         )
+
         const originalHPPRevisions = new Map(
-            fetchedHPP.revisions.map((revision) => [
-                revision.node.id,
-                revision.node,
-            ])
+            fetchedHPP.revisions.map((revision) => {
+                console.info(`revision: ${JSON.stringify(revision)}`)
+                return [revision.node.id, revision.node]
+            })
         )
+
         for (const id of migratedContractRevisions.keys()) {
             console.info(`comparing ${id}`)
             const migratedRevisionForCompare = migratedContractRevisions.get(id)
             if (migratedRevisionForCompare === undefined) {
-                throw new Error('Could not find the migrated revision[')
+                throw new Error(
+                    `Could not find the migrated revision with id ${id}`
+                )
             }
             console.info(
                 `migrated for compare: ${JSON.stringify(
                     migratedRevisionForCompare
                 )}`
             )
-
-            // Check that both objects have the same id
-            expect(migratedRevisionForCompare.id).toEqual(fetchedHPP.id)
-            // Check that both objects have the same status
-            expect(migratedRevisionForCompare.status).toEqual(fetchedHPP.status)
-
-            // Check that both objects have the same stateCode
-            expect(migratedRevisionForCompare.stateCode).toEqual(
-                fetchedHPP.stateCode
+            const originalHPPForCompare = originalHPPRevisions.get(id)
+            if (originalHPPForCompare === undefined) {
+                throw new Error(
+                    `Could not find the original HPP revision with id: ${id}`
+                )
+            }
+            console.info(
+                `original for compare: ${JSON.stringify(originalHPPForCompare)}`
             )
 
-            // Check that they have the same amount of revisions
-            expect(migratedRevisionForCompare.revisions.length).toEqual(
-                fetchedHPP.revisions.length
+            // Check that both objects have the same id
+            expect(migratedRevisionForCompare.id).toEqual(
+                originalHPPForCompare.id
+            )
+
+            console.info(
+                `original: ${JSON.stringify(originalHPPRevisions.get(id))}`
             )
 
             const originalFormDataProto =
                 originalHPPRevisions.get(id)?.formDataProto ?? ''
+            console.info(
+                `originalformdataproto: ${JSON.stringify(
+                    originalFormDataProto
+                )}`
+            )
 
             // decode the HPP form data so we can compare the objects
             const decodedFormDataProto = base64ToDomain(originalFormDataProto)
