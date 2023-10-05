@@ -273,6 +273,13 @@ describe('test that we migrate things', () => {
             finallySubmittedPKG.id
         )
 
+        /*
+        console.info(`Original HPP: ${JSON.stringify(fetchedHPP)}`)
+        console.info(
+            `Migrated contract: ${JSON.stringify(fetchMigratedContract)}`
+        )
+        */
+
         // collect the IDs of each revision in HPP and the migrated version
         const migratedContractRevisions = new Map(
             migratedRevisions.map((revision) => [revision.id, revision])
@@ -284,8 +291,32 @@ describe('test that we migrate things', () => {
             ])
         )
         for (const id of migratedContractRevisions.keys()) {
-            // Make sure the id exists in both objects
-            const migratedFormData = migratedContractRevisions.get(id) ?? {}
+            console.info(`comparing ${id}`)
+            const migratedRevisionForCompare = migratedContractRevisions.get(id)
+            if (migratedRevisionForCompare === undefined) {
+                throw new Error('Could not find the migrated revision[')
+            }
+            console.info(
+                `migrated for compare: ${JSON.stringify(
+                    migratedRevisionForCompare
+                )}`
+            )
+
+            // Check that both objects have the same id
+            expect(migratedRevisionForCompare.id).toEqual(fetchedHPP.id)
+            // Check that both objects have the same status
+            expect(migratedRevisionForCompare.status).toEqual(fetchedHPP.status)
+
+            // Check that both objects have the same stateCode
+            expect(migratedRevisionForCompare.stateCode).toEqual(
+                fetchedHPP.stateCode
+            )
+
+            // Check that they have the same amount of revisions
+            expect(migratedRevisionForCompare.revisions.length).toEqual(
+                fetchedHPP.revisions.length
+            )
+
             const originalFormDataProto =
                 originalHPPRevisions.get(id)?.formDataProto ?? ''
 
@@ -299,7 +330,10 @@ describe('test that we migrate things', () => {
             }
 
             // compare the two form data
-            const diff = getObjectDiff(migratedFormData, decodedFormDataProto)
+            const diff = getObjectDiff(
+                migratedRevisionForCompare,
+                decodedFormDataProto
+            )
             console.info(`${diff.length} keys differ: ${diff}`)
             console.info(
                 `decoded form data: ${JSON.stringify(
@@ -310,13 +344,13 @@ describe('test that we migrate things', () => {
             )
             console.info(
                 `migrated form data: ${JSON.stringify(
-                    migratedFormData,
+                    migratedRevisionForCompare,
                     null,
                     '  '
                 )}`
             )
             expect(
-                isEqualData(decodedFormDataProto, migratedFormData)
+                isEqualData(decodedFormDataProto, migratedRevisionForCompare)
             ).toBeTruthy()
         }
     }, 20000)
