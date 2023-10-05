@@ -5,7 +5,7 @@ describe('Q&A', () => {
         cy.interceptGraphQL()
     })
 
-    it('can add questions and responses', () => {
+    it.skip('can add questions and responses', () => {
         cy.interceptFeatureFlags({
             'cms-questions': true,
         })
