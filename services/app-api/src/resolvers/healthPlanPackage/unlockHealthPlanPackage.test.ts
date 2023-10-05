@@ -204,14 +204,14 @@ describe.each(flagValueTestParameters)(
             )
         }, 20000)
 
+        // this test is currently failing for valid reasons
         it('allows for multiple edits, editing the set of revisions correctly', async () => {
             const stateServer = await constructTestPostgresServer({
                 ldService: mockLDService,
             })
             // First, create a new submitted submission // SUBMISSION 1
-            const stateDraft = await createAndSubmitTestHealthPlanPackage(
+            const submittedOnce = await createAndSubmitTestHealthPlanPackage(
                 stateServer
-                // unlockedWithFullRates(),
             )
 
             const cmsServer = await constructTestPostgresServer({
@@ -222,18 +222,18 @@ describe.each(flagValueTestParameters)(
             })
 
             // Unlock
-            const unlockResult = await cmsServer.executeOperation({
+            const unlockedOnce = await cmsServer.executeOperation({
                 query: UNLOCK_HEALTH_PLAN_PACKAGE,
                 variables: {
                     input: {
-                        pkgID: stateDraft.id,
+                        pkgID: submittedOnce.id,
                         unlockedReason: 'Super duper good reason.',
                     },
                 },
             })
 
-            expect(unlockResult.errors).toBeUndefined()
-            const unlockedSub = unlockResult?.data?.unlockHealthPlanPackage.pkg
+            expect(unlockedOnce.errors).toBeUndefined()
+            const unlockedSub = unlockedOnce?.data?.unlockHealthPlanPackage.pkg
 
             // After unlock, we should get a draft submission back
             expect(unlockedSub.status).toBe('UNLOCKED')
@@ -342,7 +342,7 @@ describe.each(flagValueTestParameters)(
 
             const refetched = await fetchTestHealthPlanPackageById(
                 stateServer,
-                stateDraft.id
+                submittedOnce.id
             )
 
             const refetchedFormData = latestFormData(refetched)
@@ -365,17 +365,17 @@ describe.each(flagValueTestParameters)(
             await resubmitTestHealthPlanPackage(
                 // SUBMISSION 2
                 stateServer,
-                stateDraft.id,
+                submittedOnce.id,
                 'Test first resubmission reason'
             )
 
-            const unlockedPKG = await unlockTestHealthPlanPackage(
+            const unlockedTwice = await unlockTestHealthPlanPackage(
                 cmsServer,
-                stateDraft.id,
+                submittedOnce.id,
                 'unlock to remove rate'
             )
 
-            const unlockedFormData = latestFormData(unlockedPKG)
+            const unlockedFormData = latestFormData(unlockedTwice)
             const unlockedRateDocs = unlockedFormData.rateInfos.map(
                 (r) => r.rateDocuments[0].name
             )
@@ -390,14 +390,14 @@ describe.each(flagValueTestParameters)(
 
             await updateTestHealthPlanFormData(stateServer, unlockedFormData)
 
-            const finallySubmittedPKG = await resubmitTestHealthPlanPackage(
+            const submittedThrice = await resubmitTestHealthPlanPackage(
                 // SUBMISSION 3
                 stateServer,
-                stateDraft.id,
+                submittedOnce.id,
                 'Test second resubmission reason'
             )
 
-            const finallySubmittedFormData = latestFormData(finallySubmittedPKG)
+            const finallySubmittedFormData = latestFormData(submittedThrice)
 
             expect(finallySubmittedFormData.rateInfos).toHaveLength(2)
             const finalRateDocs = finallySubmittedFormData.rateInfos.map(
@@ -428,18 +428,21 @@ describe.each(flagValueTestParameters)(
                 'Enrico Soletzo 3',
             ])
 
-            // check the history makes sense.
+            const returnedRevisionIDs = submittedThrice.revisions.map(
+                (r: HealthPlanRevisionEdge) => r.node.id
+            )
+
+            expect(returnedRevisionIDs).toHaveLength(3)
+
             const formDatas: HealthPlanFormDataType[] =
-                finallySubmittedPKG.revisions.map((r: HealthPlanRevisionEdge) =>
+                submittedThrice.revisions.map((r: HealthPlanRevisionEdge) =>
                     base64ToDomain(r.node.formDataProto)
                 )
 
-            // right now the history is a bit weird
-            const expectedRevCount = flagValue ? 6 : 3
-
-            expect(formDatas).toHaveLength(expectedRevCount) // This probably doesn't make sense totally but is fine for now.
-
-            // throw new Error('Not done with this test yet')
+            // check some content in the second revision
+            expect(formDatas[1].submissionDescription).toBe(
+                'UPDATED_AFTER_UNLOCK'
+            )
         }, 20000)
 
         it('can be unlocked repeatedly', async () => {
