@@ -88,16 +88,50 @@ export async function migrateRateInfo(
 
         // add the actuary contacts
         if (rateInfo.actuaryContacts) {
+            let actuaryContactsPos = 0
+            const actuaryContactsArray = []
+            for (const actuaryContact of rateInfo.actuaryContacts) {
+                const newActuaryContact: Prisma.ActuaryContactCreateInput = {
+                    id: actuaryContact.id,
+                    name: actuaryContact.name,
+                    titleRole: actuaryContact.titleRole,
+                    email: actuaryContact.email,
+                    actuarialFirm: actuaryContact.actuarialFirm,
+                    actuarialFirmOther: actuaryContact.actuarialFirmOther,
+                    position: actuaryContactsPos,
+                }
+                actuaryContactsArray.push(newActuaryContact)
+                actuaryContactsPos++
+            }
             dataToCopy.certifyingActuaryContacts = {
-                create: rateInfo.actuaryContacts,
+                create: actuaryContactsArray,
             }
         }
 
         if (formData.addtlActuaryContacts) {
+            let addtlActuaryContactsPos = 0
+            const addtlActuaryContactsArray = []
+            for (const addtlActuaryContact of formData.addtlActuaryContacts) {
+                const newAddtlActuaryContact: Prisma.ActuaryContactCreateInput =
+                    {
+                        id: addtlActuaryContact.id,
+                        name: addtlActuaryContact.name,
+                        titleRole: addtlActuaryContact.titleRole,
+                        email: addtlActuaryContact.email,
+                        actuarialFirm: addtlActuaryContact.actuarialFirm,
+                        actuarialFirmOther:
+                            addtlActuaryContact.actuarialFirmOther,
+                        position: addtlActuaryContactsPos,
+                    }
+                addtlActuaryContactsArray.push(newAddtlActuaryContact)
+                addtlActuaryContactsPos++
+            }
+
             dataToCopy.addtlActuaryContacts = {
-                create: formData.addtlActuaryContacts,
+                create: addtlActuaryContactsArray,
             }
         }
+
         // handle rate documents
         let rateDocPos = 0
         const rateDocsArray = []

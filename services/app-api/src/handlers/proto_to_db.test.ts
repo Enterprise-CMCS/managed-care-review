@@ -202,14 +202,6 @@ describe('test that we migrate things', () => {
         )
         expect(finalRateDocs).toEqual(['fake doc', 'fake doc number two'])
 
-        console.info(
-            `finally submitted package: ${JSON.stringify(
-                finallySubmittedPKG,
-                null,
-                '  '
-            )}`
-        )
-
         // Now that we have a fully submitted package, we run the proto migrator on it
         const prismaClient = await sharedTestPrismaClient()
 
