@@ -4,7 +4,7 @@ import type {
     Prisma,
     ContractRevisionTable,
 } from '@prisma/client'
-import type { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { HealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 export async function migrateRateInfo(
     client: PrismaClient,

@@ -19,8 +19,9 @@ import {
 import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
 import { findAllRevisions } from '../postgres/healthPlanPackage'
 import { isStoreError } from '../postgres'
-import { base64ToDomain } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
+import { base64ToDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import assert from 'assert'
+import type { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 
 describe('test that we migrate things', () => {
     const mockPreRefactorLDService = testLDService({
@@ -182,6 +183,7 @@ describe('test that we migrate things', () => {
         const unlockedFormData = latestFormData(unlockedPKG)
 
         // remove the first rate
+        unlockedFormData.submissionDescription = 'FINAL_DESCRIPTION'
         unlockedFormData.rateInfos = unlockedFormData.rateInfos.slice(1)
 
         await updateTestHealthPlanFormData(stateServer, unlockedFormData)
@@ -279,6 +281,8 @@ describe('test that we migrate things', () => {
             fetchedHPP.revisions.length
         )
 
+        const preFDS: HealthPlanFormDataType[] = []
+        const postFDS: HealthPlanFormDataType[] = []
         for (let i = 0; i < finallySubmittedPKG.revisions.length; i++) {
             const preRev = finallySubmittedPKG.revisions[i].node
             const postRev = fetchedHPP.revisions[i].node
@@ -289,6 +293,20 @@ describe('test that we migrate things', () => {
             if (preFD instanceof Error || postFD instanceof Error) {
                 throw new Error('Got an error decoding')
             }
+
+            preFDS.push(preFD)
+            postFDS.push(postFD)
+        }
+
+        console.info(
+            'COMPARE ORDER',
+            preFDS.map((fd) => [fd.submissionDescription, fd.createdAt]),
+            postFDS.map((fd) => [fd.submissionDescription, fd.createdAt])
+        )
+
+        for (let i = 0; i < finallySubmittedPKG.revisions.length; i++) {
+            const preFD = preFDS[i]
+            const postFD = postFDS[i]
 
             // deepStrictEqual args: actual comes first then expected
             assert.deepStrictEqual(postFD, preFD, 'form data not equal')

@@ -7,7 +7,7 @@ import type {
     HealthPlanRevisionTable,
 } from '@prisma/client'
 
-import type { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { HealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 async function migrateContractRevision(
     client: PrismaClient,
@@ -35,8 +35,11 @@ async function migrateContractRevision(
                 },
             },
             id: revision.id,
-            createdAt: formData.createdAt,
-            updatedAt: formData.updatedAt,
+            createdAt: revision.createdAt,
+            updatedAt:
+                formData.updatedAt > revision.createdAt
+                    ? formData.updatedAt
+                    : revision.createdAt,
             submissionType: formData.submissionType,
             submissionDescription: formData.submissionDescription,
             programIDs: formData.programIDs,

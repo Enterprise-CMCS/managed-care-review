@@ -1,4 +1,4 @@
-import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { createMockRevision } from '../../testHelpers/protoMigratorHelpers'

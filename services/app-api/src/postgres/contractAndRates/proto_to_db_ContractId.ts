@@ -3,7 +3,7 @@ import type {
     ContractTable,
     HealthPlanRevisionTable,
 } from '@prisma/client'
-import type { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { HealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 async function insertContractId(
     client: PrismaClient,
