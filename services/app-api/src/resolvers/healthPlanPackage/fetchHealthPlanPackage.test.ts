@@ -23,12 +23,12 @@ const flagValueTestParameters: {
     {
         flagName: 'rates-db-refactor',
         flagValue: false,
-        testName: 'createHealthPlanPackage with all feature flags off',
+        testName: 'fetchHealthPlanPackage with all feature flags off',
     },
     {
         flagName: 'rates-db-refactor',
         flagValue: true,
-        testName: 'createHealthPlanPackage with rates-db-refactor on',
+        testName: 'fetchHealthPlanPackage with rates-db-refactor on',
     },
 ]
 
