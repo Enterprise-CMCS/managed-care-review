@@ -1,4 +1,4 @@
-import { ForbiddenError } from 'apollo-server-lambda'
+import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
     isCMSUser,
     convertContractWithRatesToUnlockedHPP,
@@ -34,16 +34,36 @@ export function updateContractResolver(
             )
             throw new ForbiddenError('user not authorized to update contract')
         }
-        const contract = await store.updateMCCRSID({
-            contractID: input.id,
-            mccrsID: input.mccrsID || undefined,
-        })
 
+        const contract = await store.findContractWithHistory(input.id)
         if (contract instanceof Error) {
             throw contract
         }
 
-        const convertedPkg = convertContractWithRatesToUnlockedHPP(contract)
+        const hasSubmitInfo =
+            contract.revisions.filter((rev) => rev.submitInfo).length > 0
+
+        if (!hasSubmitInfo) {
+            const errMessage = `Can not update a contract has not been submitted. Fails for contract with ID: ${contract.id}`
+            logError('updateContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new UserInputError(errMessage, {
+                argumentName: 'contractID',
+                cause: 'CONTRACT_NOT_SUBMITTED',
+            })
+        }
+
+        const updatedContract = await store.updateMCCRSID({
+            contractID: input.id,
+            mccrsID: input.mccrsID || undefined,
+        })
+
+        if (updatedContract instanceof Error) {
+            throw updatedContract
+        }
+
+        const convertedPkg =
+            convertContractWithRatesToUnlockedHPP(updatedContract)
 
         if (convertedPkg instanceof Error) {
             const errMessage = `Issue converting contract. Message: ${convertedPkg.message}`
