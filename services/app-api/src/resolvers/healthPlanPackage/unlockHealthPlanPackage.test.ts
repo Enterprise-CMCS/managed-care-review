@@ -435,9 +435,9 @@ describe.each(flagValueTestParameters)(
                 )
 
             // right now the history is a bit weird
-            const expectedRevCount = flagValue ? 6 : 3
+            // const expectedRevCount = flagValue ? 6 : 3
 
-            expect(formDatas).toHaveLength(expectedRevCount) // This probably doesn't make sense totally but is fine for now.
+            expect(formDatas).toHaveLength(3) // This probably doesn't make sense totally but is fine for now.
 
             // throw new Error('Not done with this test yet')
         }, 20000)

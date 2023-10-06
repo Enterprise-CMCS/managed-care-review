@@ -35,13 +35,13 @@ model HealthPlanRevisionTable {
 }
 
 model ContractTable {
-  id                 String                  @id @default(uuid())
-  createdAt          DateTime                @default(now())
-  updatedAt          DateTime                @default(now()) @updatedAt
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
-  stateCode          String
-  state              State                   @relation(fields: [stateCode], references: [stateCode])
-  stateNumber        Int
+  stateCode   String
+  state       State  @relation(fields: [stateCode], references: [stateCode])
+  stateNumber Int
 
   revisions          ContractRevisionTable[]
   draftRateRevisions RateRevisionTable[]
@@ -50,33 +50,33 @@ model ContractTable {
 }
 
 model RateTable {
-  id                     String                  @id @default(uuid())
-  createdAt              DateTime                @default(now())
-  updatedAt              DateTime                @default(now()) @updatedAt
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
-  stateCode              String
-  state                  State                   @relation(fields: [stateCode], references: [stateCode])
-  stateNumber            Int
+  stateCode   String
+  state       State  @relation(fields: [stateCode], references: [stateCode])
+  stateNumber Int
 
   revisions              RateRevisionTable[]
   draftContractRevisions ContractRevisionTable[]
 }
 
 model ContractRevisionTable {
-  id                                           String                                  @id @default(uuid())
-  contractID                                   String
-  contract                                     ContractTable                           @relation(fields: [contractID], references: [id])
+  id         String        @id @default(uuid())
+  contractID String
+  contract   ContractTable @relation(fields: [contractID], references: [id])
 
   rateRevisions                                RateRevisionsOnContractRevisionsTable[]
   draftRates                                   RateTable[]
 
-  unlockInfoID                                 String?
-  unlockInfo                                   UpdateInfoTable?                        @relation("unlockContractInfo", fields: [unlockInfoID], references: [id])
-  submitInfoID                                 String?
-  submitInfo                                   UpdateInfoTable?                        @relation("submitContractInfo", fields: [submitInfoID], references: [id])
+  unlockInfoID String?
+  unlockInfo   UpdateInfoTable? @relation("unlockContractInfo", fields: [unlockInfoID], references: [id])
+  submitInfoID String?
+  submitInfo   UpdateInfoTable? @relation("submitContractInfo", fields: [submitInfoID], references: [id])
 
-  createdAt                                    DateTime                                @default(now())
-  updatedAt                                    DateTime                                @default(now()) @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   submissionType                               SubmissionType
   submissionDescription                        String
@@ -88,8 +88,8 @@ model ContractRevisionTable {
   contractType                                 ContractType
   contractExecutionStatus                      ContractExecutionStatus?
   contractDocuments                            ContractDocument[]
-  contractDateStart                            DateTime?                               @db.Date
-  contractDateEnd                              DateTime?                               @db.Date
+  contractDateStart                            DateTime?                    @db.Date
+  contractDateEnd                              DateTime?                    @db.Date
   managedCareEntities                          ManagedCareEntity[]
   federalAuthorities                           FederalAuthority[]
   modifiedBenefitsProvided                     Boolean?
@@ -112,32 +112,32 @@ model ContractRevisionTable {
 }
 
 model RateRevisionTable {
-  id                             String                                  @id @default(uuid())
-  rateID                         String
-  rate                           RateTable                               @relation(fields: [rateID], references: [id])
-  contractRevisions              RateRevisionsOnContractRevisionsTable[]
-  draftContracts                 ContractTable[]
+  id                String                                  @id @default(uuid())
+  rateID            String
+  rate              RateTable                               @relation(fields: [rateID], references: [id])
+  contractRevisions RateRevisionsOnContractRevisionsTable[]
+  draftContracts    ContractTable[]
 
-  createdAt                      DateTime                                @default(now())
-  updatedAt                      DateTime                                @default(now()) @updatedAt
-  unlockInfoID                   String?
-  unlockInfo                     UpdateInfoTable?                        @relation("unlockRateInfo", fields: [unlockInfoID], references: [id])
-  submitInfoID                   String?
-  submitInfo                     UpdateInfoTable?                        @relation("submitRateInfo", fields: [submitInfoID], references: [id])
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @default(now()) @updatedAt
+  unlockInfoID String?
+  unlockInfo   UpdateInfoTable? @relation("unlockRateInfo", fields: [unlockInfoID], references: [id])
+  submitInfoID String?
+  submitInfo   UpdateInfoTable? @relation("submitRateInfo", fields: [submitInfoID], references: [id])
 
   rateType                       RateType?
   rateCapitationType             RateCapitationType?
   rateDocuments                  RateDocument[]
   supportingDocuments            RateSupportingDocument[]
-  rateDateStart                  DateTime?                               @db.Date
-  rateDateEnd                    DateTime?                               @db.Date
-  rateDateCertified              DateTime?                               @db.Date
-  amendmentEffectiveDateStart    DateTime?                               @db.Date
-  amendmentEffectiveDateEnd      DateTime?                               @db.Date
+  rateDateStart                  DateTime?                  @db.Date
+  rateDateEnd                    DateTime?                  @db.Date
+  rateDateCertified              DateTime?                  @db.Date
+  amendmentEffectiveDateStart    DateTime?                  @db.Date
+  amendmentEffectiveDateEnd      DateTime?                  @db.Date
   rateProgramIDs                 String[]
   rateCertificationName          String?
-  certifyingActuaryContacts      ActuaryContact[] @relation(name: "CertifyingActuaryOnRateRevision")
-  addtlActuaryContacts           ActuaryContact[] @relation(name: "AddtlActuaryOnRateRevision")
+  certifyingActuaryContacts      ActuaryContact[]           @relation(name: "CertifyingActuaryOnRateRevision")
+  addtlActuaryContacts           ActuaryContact[]           @relation(name: "AddtlActuaryOnRateRevision")
   actuaryCommunicationPreference ActuaryCommunication?
   contractsWithSharedRateRevision ContractTable[] @relation(name: "SharedRateRevisions")
 }
@@ -156,38 +156,38 @@ model RateRevisionsOnContractRevisionsTable {
 }
 
 model UpdateInfoTable {
-  id                String                  @id @default(uuid())
-  updatedAt         DateTime
-  updatedByID       String
-  updatedBy         User                    @relation(fields: [updatedByID], references: [id])
-  updatedReason     String
-  unlockedContracts ContractRevisionTable[] @relation("unlockContractInfo")
+  id                 String                  @id @default(uuid())
+  updatedAt          DateTime
+  updatedByID        String
+  updatedBy          User                    @relation(fields: [updatedByID], references: [id])
+  updatedReason      String
+  unlockedContracts  ContractRevisionTable[] @relation("unlockContractInfo")
   submittedContracts ContractRevisionTable[] @relation("submitContractInfo")
-  unlockedRates     RateRevisionTable[]     @relation("unlockRateInfo")
-  submittedRates    RateRevisionTable[]     @relation("submitRateInfo")
+  unlockedRates      RateRevisionTable[]     @relation("unlockRateInfo")
+  submittedRates     RateRevisionTable[]     @relation("submitRateInfo")
 }
 
 model ActuaryContact {
-  id                 String                 @id @default(uuid())
-  createdAt          DateTime               @default(now())
-  updatedAt          DateTime               @default(now()) @updatedAt
-  position            Int                              @default(-1)
-  name               String?
-  titleRole          String?
-  email              String?
-  actuarialFirm      ActuarialFirm?
-  actuarialFirmOther String?
-  rateWithCertifyingActuaryID    String?
-  rateWithAddtlActuaryID    String?
-  rateActuaryCertifying  RateRevisionTable?  @relation(name: "CertifyingActuaryOnRateRevision", fields: [  rateWithCertifyingActuaryID ], references: [id])
-  rateActuaryAddtl   RateRevisionTable?   @relation(name: "AddtlActuaryOnRateRevision", fields: [   rateWithAddtlActuaryID ], references: [id])
+  id                          String             @id @default(uuid())
+  createdAt                   DateTime           @default(now())
+  updatedAt                   DateTime           @default(now()) @updatedAt
+  position                    Int                @default(-1)
+  name                        String?
+  titleRole                   String?
+  email                       String?
+  actuarialFirm               ActuarialFirm?
+  actuarialFirmOther          String?
+  rateWithCertifyingActuaryID String?
+  rateWithAddtlActuaryID      String?
+  rateActuaryCertifying       RateRevisionTable? @relation(name: "CertifyingActuaryOnRateRevision", fields: [rateWithCertifyingActuaryID], references: [id])
+  rateActuaryAddtl            RateRevisionTable? @relation(name: "AddtlActuaryOnRateRevision", fields: [rateWithAddtlActuaryID], references: [id])
 }
 
 model ContractDocument {
   id                 String                @id @default(uuid())
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @default(now()) @updatedAt
-  position            Int                              @default(-1)
+  position           Int                   @default(-1)
   name               String
   s3URL              String
   sha256             String
@@ -199,7 +199,7 @@ model ContractSupportingDocument {
   id                 String                @id @default(uuid())
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @default(now()) @updatedAt
-  position            Int                              @default(-1)
+  position           Int                   @default(-1)
   name               String
   s3URL              String
   sha256             String
@@ -211,7 +211,7 @@ model RateDocument {
   id             String            @id @default(uuid())
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @default(now()) @updatedAt
-  position            Int                              @default(-1)
+  position       Int               @default(-1)
   name           String
   s3URL          String
   sha256         String
@@ -223,7 +223,7 @@ model RateSupportingDocument {
   id             String            @id @default(uuid())
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @default(now()) @updatedAt
-  position            Int                              @default(-1)
+  position       Int               @default(-1)
   name           String
   s3URL          String
   sha256         String
@@ -235,7 +235,7 @@ model StateContact {
   id                 String                @id @default(uuid())
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @default(now()) @updatedAt
-  position            Int                              @default(-1)
+  position           Int                   @default(-1)
   name               String?
   titleRole          String?
   email              String?
