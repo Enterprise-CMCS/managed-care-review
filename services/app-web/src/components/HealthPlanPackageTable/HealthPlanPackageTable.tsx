@@ -36,6 +36,18 @@ declare module '@tanstack/table-core' {
     }
 }
 
+export type RateInDashboardType = {
+    id: string
+    name: string
+    submittedAt?: string
+    updatedAt: Date
+    status: HealthPlanPackageStatus
+    programs: Program[]
+    rateType?: string
+    ratePeriodStart:Date
+    ratePeriodEnd:Date
+    stateName?: string
+}
 export type PackageInDashboardType = {
     id: string
     name: string
@@ -137,6 +149,43 @@ const columnHash = atomWithHash('filters', [] as ColumnFiltersState, {
     deserialize: fromReadableUrlToColumnFilters,
 })
 
+
+/* transform react-table's ColumnFilterState (stringified, formatted, and stored in the URL) to react-select's FilterOptionType
+    and return only the items matching the FilterSelect component that's calling the function*/
+    const getSelectedFiltersFromUrl = (columnFilters: ColumnFiltersState, id: string) => {
+        type TempRecord = { value: string; label: string; id: string }
+        const valuesFromUrl = [] as TempRecord[]
+        columnFilters.forEach((filter) => {
+            if (Array.isArray(filter.value)) {
+                filter.value.forEach((value) => {
+                    valuesFromUrl.push({
+                        value: value,
+                        label: value,
+                        id: filter.id,
+                    })
+                })
+            }
+        })
+        const filterValues = valuesFromUrl
+            .filter((item) => item.id === id)
+            .map((item) => ({ value: item.value, label: item.value }))
+        return filterValues as FilterOptionType[]
+    }
+
+
+type TableVariantConfig = {
+    tableName: string
+    rowIDName: string
+}
+const contractSubmissionsConfig: TableVariantConfig = {
+    tableName: 'Submissions',
+    rowIDName: 'submission'
+
+}
+const rateReviewsConfig: TableVariantConfig = {
+    tableName: 'Rate Reviews',
+    rowIDName: 'rate'
+}
 export const HealthPlanPackageTable = ({
     caption,
     tableData,
@@ -144,6 +193,7 @@ export const HealthPlanPackageTable = ({
     user,
     showFilters = false,
 }: PackageTableProps): React.ReactElement => {
+    const tableConfig = tableVariant === 'SUBMISSIONS'? contractSubmissionsConfig : rateReviewsConfig
     const lastClickedElement = useRef<string | null>(null)
     const [columnFilters, setColumnFilters] = useAtom(columnHash)
 
@@ -177,28 +227,6 @@ export const HealthPlanPackageTable = ({
         lastClickedElement.current = null
     })
 
-    /* transform react-table's ColumnFilterState (stringified, formatted, and stored in the URL) to react-select's FilterOptionType
-        and return only the items matching the FilterSelect component that's calling the function*/
-    const getSelectedFiltersFromUrl = (id: string) => {
-        type TempRecord = { value: string; label: string; id: string }
-        const valuesFromUrl = [] as TempRecord[]
-        columnFilters.forEach((filter) => {
-            if (Array.isArray(filter.value)) {
-                filter.value.forEach((value) => {
-                    valuesFromUrl.push({
-                        value: value,
-                        label: value,
-                        id: filter.id,
-                    })
-                })
-            }
-        })
-        const filterValues = valuesFromUrl
-            .filter((item) => item.id === id)
-            .map((item) => ({ value: item.value, label: item.value }))
-        return filterValues as FilterOptionType[]
-    }
-
     const [tableCaption, setTableCaption] = useState<React.ReactNode | null>()
 
     const isCMSOrAdminUser =
@@ -209,7 +237,7 @@ export const HealthPlanPackageTable = ({
                 header: 'ID',
                 cell: (info) => (
                     <Link
-                        key={`submission-id-${info.getValue().id}`}
+                        key={`${tableConfig.rowIDName}-id-${info.getValue().id}`}
                         asCustom={NavLink}
                         to={submissionURL(
                             info.getValue().id,
@@ -221,7 +249,7 @@ export const HealthPlanPackageTable = ({
                     </Link>
                 ),
                 meta: {
-                    dataTestID: 'submission-id',
+                    dataTestID: `${tableConfig.rowIDName}-id`,
                 },
             }),
             columnHelper.accessor('stateName', {
@@ -229,7 +257,7 @@ export const HealthPlanPackageTable = ({
                 header: 'State',
                 cell: (info) => <span>{info.getValue()}</span>,
                 meta: {
-                    dataTestID: 'submission-stateName',
+                    dataTestID: `${tableConfig.rowIDName}-stateName`,
                 },
                 filterFn: `arrIncludesSome`,
             }),
@@ -257,7 +285,7 @@ export const HealthPlanPackageTable = ({
                         )
                     }),
                 meta: {
-                    dataTestID: 'submission-programs',
+                    dataTestID: `${tableConfig.rowIDName}-programs`,
                 },
             }),
             columnHelper.accessor('submittedAt', {
@@ -267,7 +295,7 @@ export const HealthPlanPackageTable = ({
                         ? dayjs(info.getValue()).format('MM/DD/YYYY')
                         : '',
                 meta: {
-                    dataTestID: 'submission-date',
+                    dataTestID: `${tableConfig.rowIDName}-date`,
                 },
             }),
             columnHelper.accessor('updatedAt', {
@@ -277,18 +305,18 @@ export const HealthPlanPackageTable = ({
                         ? dayjs(info.getValue()).format('MM/DD/YYYY')
                         : '',
                 meta: {
-                    dataTestID: 'submission-last-updated',
+                    dataTestID: `${tableConfig.rowIDName}-last-updated`,
                 },
             }),
             columnHelper.accessor('status', {
                 header: 'Status',
                 cell: (info) => <StatusTag status={info.getValue()} />,
                 meta: {
-                    dataTestID: 'submission-status',
+                    dataTestID: `${tableConfig.rowIDName}-status`,
                 },
             }),
         ],
-        [isCMSOrAdminUser]
+        [isCMSOrAdminUser, tableConfig.rowIDName]
     )
 
     const reactTable = useReactTable({
@@ -364,7 +392,7 @@ export const HealthPlanPackageTable = ({
     useEffect(() => {
         setTableCaption(
             <caption className={caption ? '' : styles.srOnly}>
-                {caption ?? 'Submissions'}
+                {caption ?? tableConfig.tableName}
                 {showFilters && (
                     <span
                         className={styles.srOnly}
@@ -373,7 +401,7 @@ export const HealthPlanPackageTable = ({
                 <span className={styles.srOnly}>{`, ${submissionCount}.`}</span>
             </caption>
         )
-    }, [filtersApplied, submissionCount, caption, showFilters])
+    }, [filtersApplied, submissionCount, caption, showFilters, tableConfig.tableName])
 
     return (
         <>
@@ -385,7 +413,7 @@ export const HealthPlanPackageTable = ({
                             filterTitle="Filters"
                         >
                             <FilterSelect
-                                value={getSelectedFiltersFromUrl('stateName')}
+                                value={getSelectedFiltersFromUrl(columnFilters, 'stateName')}
                                 name="state"
                                 label="State"
                                 filterOptions={stateFilterOptions}
@@ -398,7 +426,7 @@ export const HealthPlanPackageTable = ({
                                 }
                             />
                             <FilterSelect
-                                value={getSelectedFiltersFromUrl(
+                                value={getSelectedFiltersFromUrl(columnFilters,
                                     'submissionType'
                                 )}
                                 name="submissionType"
@@ -487,9 +515,7 @@ export const HealthPlanPackageTable = ({
                 >
                     <h3>
                         You have no{' '}
-                        {tableVariant === 'SUBMISSIONS'
-                            ? 'submissions'
-                            : 'rate reviews'}{' '}
+                        {tableConfig.tableName.toLowerCase()}{' '}
                         yet
                     </h3>
                 </div>
