@@ -13,6 +13,7 @@ const contractSchema = z.object({
         z.literal('RESUBMITTED'),
     ]),
     stateCode: z.string(),
+    mccrsID: z.string().optional(),
     stateNumber: z.number().min(1),
     // If this contract is in a DRAFT or UNLOCKED status, there will be a draftRevision
     draftRevision: contractRevisionWithRatesSchema.optional(),

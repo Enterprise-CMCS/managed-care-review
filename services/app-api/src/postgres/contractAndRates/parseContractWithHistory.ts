@@ -26,7 +26,6 @@ function parseContractWithHistory(
     contract: ContractTableFullPayload
 ): ContractType | Error {
     const contractWithHistory = contractWithHistoryToDomainModel(contract)
-
     if (contractWithHistory instanceof Error) {
         console.warn(
             `ERROR: attempting to parse prisma contract with history failed: ${contractWithHistory.message}`
@@ -35,7 +34,6 @@ function parseContractWithHistory(
     }
 
     const parseContract = contractSchema.safeParse(contractWithHistory)
-
     if (!parseContract.success) {
         const error = `ERROR: attempting to parse prisma contract with history failed: ${parseContract.error}`
         console.warn(error)
@@ -201,6 +199,7 @@ function contractWithHistoryToDomainModel(
 
     return {
         id: contract.id,
+        mccrsID: contract.mccrsID || undefined,
         status: getContractRateStatus(contract.revisions),
         stateCode: contract.stateCode,
         stateNumber: contract.stateNumber,
