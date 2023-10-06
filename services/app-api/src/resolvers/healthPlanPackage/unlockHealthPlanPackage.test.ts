@@ -434,10 +434,9 @@ describe.each(flagValueTestParameters)(
                     base64ToDomain(r.node.formDataProto)
                 )
 
-            // right now the history is a bit weird
-            const expectedRevCount = flagValue ? 6 : 3
+            const expectedRevCount = 3
 
-            expect(formDatas).toHaveLength(expectedRevCount) // This probably doesn't make sense totally but is fine for now.
+            expect(formDatas).toHaveLength(expectedRevCount)
 
             // throw new Error('Not done with this test yet')
         }, 20000)

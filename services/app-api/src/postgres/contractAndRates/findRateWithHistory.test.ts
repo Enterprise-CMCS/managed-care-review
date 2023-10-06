@@ -9,7 +9,11 @@ import { insertDraftRate } from './insertRate'
 import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
-import { must, createInsertContractData } from '../../testHelpers'
+import {
+    must,
+    createInsertContractData,
+    consoleLogFullData,
+} from '../../testHelpers'
 import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHelpers'
 import { findContractWithHistory } from './findContractWithHistory'
 import type { DraftContractType } from '../../domain-models/contractAndRates/contractTypes'
@@ -368,10 +372,14 @@ describe('findRate', () => {
             throw contract1fetched
         }
 
-        expect(contract1fetched.revisions).toHaveLength(4)
-        expect(contract1fetched.revisions[0].submitInfo?.updatedReason).toBe(
-            'Submitting A.2'
-        )
+        consoleLogFullData(contract1fetched.revisions)
+        expect(contract1fetched.revisions).toHaveLength(2)
+
+        // Latest revision should have no rates now
+        expect(contract1fetched.revisions[0].rateRevisions).toHaveLength(0)
+
+        // Initial submit should have 1 rate
+        expect(contract1fetched.revisions[1].rateRevisions).toHaveLength(1)
     })
 
     it('finds a full rate', async () => {
