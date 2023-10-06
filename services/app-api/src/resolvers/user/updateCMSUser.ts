@@ -1,6 +1,6 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { GraphQLError } from 'graphql'
-import { isAdminUser, isValidCmsDivison } from '../../domain-models'
+import { isValidCmsDivison, hasAdminPermissions } from '../../domain-models'
 import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { isValidStateCode } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type { MutationResolvers } from '../../gen/gqlServer'
@@ -11,7 +11,6 @@ import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
 } from '../attributeHelper'
-import { isHelpdeskUser } from '../../domain-models/user'
 
 export function updateCMSUserResolver(
     store: Store
@@ -21,7 +20,7 @@ export function updateCMSUserResolver(
         setResolverDetailsOnActiveSpan('updateCmsUser', currentUser, span)
 
         // This resolver is only callable by admin users
-        if (!(isAdminUser(currentUser) || isHelpdeskUser(currentUser))) {
+        if (!hasAdminPermissions(currentUser)) {
             logError(
                 'updateHealthPlanFormData',
                 'user not authorized to modify assignments'

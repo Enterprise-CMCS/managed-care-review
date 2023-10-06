@@ -342,8 +342,9 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     cy.findAllByLabelText('Email').eq(0).type('actuarycontact@example.com')
     cy.findAllByLabelText('Mercer').eq(0).safeClick()
 
-    cy.findByTestId('file-input-input').attachFile(
-        'documents/trussel-guide.pdf'
+    // Upload a rate certification and rate supporting document
+    cy.findAllByTestId('file-input-input').each(fileInput =>
+        cy.wrap(fileInput).attachFile('documents/trussel-guide.pdf')
     )
 
     cy.verifyDocumentsHaveNoErrors()
@@ -390,8 +391,9 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
     cy.findAllByLabelText('Email').eq(0).type('actuarycontact@example.com')
     cy.findAllByLabelText('Mercer').eq(0).safeClick()
 
-    cy.findByTestId('file-input-input').attachFile(
-        'documents/trussel-guide.pdf'
+    // Upload a rate certification and rate supporting document
+    cy.findAllByTestId('file-input-input').each(fileInput =>
+        cy.wrap(fileInput).attachFile('documents/trussel-guide.pdf')
     )
 
     cy.verifyDocumentsHaveNoErrors()
@@ -441,22 +443,10 @@ Cypress.Commands.add('fillOutSupportingDocuments', () => {
 
     cy.verifyDocumentsHaveNoErrors()
 
-    cy.findAllByRole('checkbox', {
-        name: 'contract-supporting',
-    })
-        .eq(1)
-        .click({ force: true })
-
-    cy.findAllByRole('checkbox', {
-        name: 'rate-supporting',
-    })
-        .eq(0)
-        .click({ force: true })
-
     // twice because there could be validation errors with checkbox
     cy.verifyDocumentsHaveNoErrors()
 
-    cy.waitForDocumentsToLoad({tableView: true})
+    cy.waitForDocumentsToLoad()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
@@ -483,7 +473,7 @@ Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
 
 Cypress.Commands.add(
     'submitStateSubmissionForm',
-    ({success, resubmission}=  {success: true, resubmission: false}) => {
+    ({success, resubmission, summary} = { success: true, resubmission: false }) => {
         cy.findByRole('heading', { level: 2, name: /Review and submit/ })
         cy.findByRole('button', {
             name: 'Submit',
@@ -495,7 +485,7 @@ Cypress.Commands.add(
             .within(() => {
                 if (resubmission) {
                     cy.get('#unlockSubmitModalInput').type(
-                        'Resubmission summary'
+                        summary || 'Resubmission summary'
                     )
                     cy.findByTestId('resubmit-modal-submit').click()
                 } else {

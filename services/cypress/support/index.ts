@@ -14,6 +14,7 @@ import './commands'
 import '@cypress/code-coverage/support'
 import './loginCommands'
 import './stateSubmissionFormCommands'
+import './submissionReviewCommands'
 import './dashboardCommands'
 import './navigateCommands'
 import './questionResponseCommands'
@@ -64,7 +65,10 @@ declare global {
             fillOutSupportingDocuments(): void
             waitForDocumentsToLoad( args?: {tableView?: boolean}): void
             verifyDocumentsHaveNoErrors(): void
-            submitStateSubmissionForm( args?: {success?: boolean, resubmission?: boolean}): void
+            submitStateSubmissionForm( args?: {success?: boolean, resubmission?: boolean, summary?: string}): void
+
+            // submission review commands
+            unlockSubmission(unlockReason?: string): void
 
             // navigate commands
             navigateFormByButtonClick(

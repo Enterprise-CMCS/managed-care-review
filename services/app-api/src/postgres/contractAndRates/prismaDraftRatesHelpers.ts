@@ -41,12 +41,18 @@ function draftContractsToDomainModel(
 
 function draftRateRevToDomainModel(
     revision: RateRevisionTableWithContracts
-): RateRevisionWithContractsType {
+): RateRevisionWithContractsType | Error {
+    const formData = rateFormDataToDomainModel(revision)
+
+    if (formData instanceof Error) {
+        return formData
+    }
+
     return {
         id: revision.id,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
-        formData: rateFormDataToDomainModel(revision),
+        formData,
         contractRevisions: draftContractsToDomainModel(revision.draftContracts),
     }
 }

@@ -137,7 +137,12 @@ export const RateDetailsSummarySection = ({
             const [_, currentSubmissionData] = currentRevisionPackageOrError
 
             acc[pkg.id] = {
-                packageName: packageName(currentSubmissionData, statePrograms),
+                packageName: packageName(
+                    currentSubmissionData.stateCode,
+                    currentSubmissionData.stateNumber,
+                    currentSubmissionData.programIDs,
+                    statePrograms
+                ),
                 status: pkg.status,
             }
 

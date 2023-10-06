@@ -60,6 +60,14 @@ function domainUserFromPrismaUser(
                 familyName: prismaUser.familyName,
                 email: prismaUser.email,
             }
+        case 'BUSINESSOWNER_USER':
+            return {
+                id: prismaUser.id,
+                role: 'BUSINESSOWNER_USER',
+                givenName: prismaUser.givenName,
+                familyName: prismaUser.familyName,
+                email: prismaUser.email,
+            }
     }
 }
 

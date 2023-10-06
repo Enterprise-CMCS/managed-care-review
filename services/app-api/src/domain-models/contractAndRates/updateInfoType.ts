@@ -10,6 +10,6 @@ const updateInfoSchema = z.object({
 type UpdateInfoType = z.infer<typeof updateInfoSchema>
 type PackageStatusType = z.infer<typeof contractSchema.shape.status>
 
-export type {  PackageStatusType , UpdateInfoType }
+export type { PackageStatusType, UpdateInfoType }
 
 export { updateInfoSchema }

@@ -92,8 +92,7 @@ export function createHealthPlanPackageResolver(
             }
 
             // Now we do the conversions
-            const pkg =
-                convertContractWithRatesToUnlockedHPP(contractResult)
+            const pkg = convertContractWithRatesToUnlockedHPP(contractResult)
 
             if (pkg instanceof Error) {
                 const errMessage = `Error converting draft contract. Message: ${pkg.message}`

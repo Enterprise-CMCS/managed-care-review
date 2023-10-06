@@ -1,5 +1,6 @@
 import type { Prisma } from '@prisma/client'
-import type { DocumentCategoryType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { DocumentCategoryType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import type { ProgramType } from '../../domain-models'
 import type {
     ContractFormDataType,
     RateFormDataType,
@@ -7,6 +8,8 @@ import type {
     PackageStatusType,
     UpdateInfoType,
 } from '../../domain-models/contractAndRates'
+import { findStatePrograms } from '../state'
+import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 const subincludeUpdateInfo = {
     updatedBy: true,
@@ -85,6 +88,16 @@ const includeRateFormData = {
             position: 'asc',
         },
     },
+    contractsWithSharedRateRevision: {
+        include: {
+            revisions: {
+                take: 1,
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            },
+        },
+    },
 } satisfies Prisma.RateRevisionTableInclude
 
 type RateRevisionTableWithFormData = Prisma.RateRevisionTableGetPayload<{
@@ -93,7 +106,34 @@ type RateRevisionTableWithFormData = Prisma.RateRevisionTableGetPayload<{
 
 function rateFormDataToDomainModel(
     rateRevision: RateRevisionTableWithFormData
-): RateFormDataType {
+): RateFormDataType | Error {
+    const packagesWithSharedRateCerts = []
+    let statePrograms: ProgramType[] | Error | undefined = undefined
+
+    for (const contract of rateRevision.contractsWithSharedRateRevision) {
+        const contractPrograms = contract.revisions[0].programIDs
+
+        if (!statePrograms) {
+            statePrograms = findStatePrograms(contract.stateCode)
+        }
+
+        if (statePrograms instanceof Error) {
+            return new Error(
+                `Cannot find ${contract.stateCode} programs for packagesWithSharedRateCerts with rate revision ${rateRevision.rateID} and contract ${contract.id}`
+            )
+        }
+
+        packagesWithSharedRateCerts.push({
+            packageId: contract.id,
+            packageName: packageName(
+                contract.stateCode,
+                contract.stateNumber,
+                contractPrograms,
+                statePrograms
+            ),
+        })
+    }
+
     return {
         id: rateRevision.id,
         rateID: rateRevision.rateID,
@@ -146,33 +186,48 @@ function rateFormDataToDomainModel(
             : [],
         actuaryCommunicationPreference:
             rateRevision.actuaryCommunicationPreference ?? undefined,
-        packagesWithSharedRateCerts: [], // intentionally not handling packagesWithSharedRates yet - this is MR-3568
+        packagesWithSharedRateCerts,
     }
 }
 
 function rateRevisionToDomainModel(
     revision: RateRevisionTableWithFormData
-): RateRevisionType {
+): RateRevisionType | Error {
+    const formData = rateFormDataToDomainModel(revision)
+
+    if (formData instanceof Error) {
+        return formData
+    }
+
     return {
         id: revision.id,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
         unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
         submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
-
-        formData: rateFormDataToDomainModel(revision),
+        formData,
     }
 }
 
 function ratesRevisionsToDomainModel(
     rateRevisions: RateRevisionTableWithFormData[]
-): RateRevisionType[] {
-    const domainRevisions = rateRevisions.map((rrev) =>
-        rateRevisionToDomainModel(rrev)
-    )
+): RateRevisionType[] | Error {
+    const domainRevisions: RateRevisionType[] = []
+
+    for (const revision of rateRevisions) {
+        const domainRevision = rateRevisionToDomainModel(revision)
+
+        if (domainRevision instanceof Error) {
+            return domainRevision
+        }
+
+        domainRevisions.push(domainRevision)
+    }
+
     domainRevisions.sort(
         (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
     )
+
     return domainRevisions
 }
 

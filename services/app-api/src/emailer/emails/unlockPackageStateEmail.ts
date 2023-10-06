@@ -36,7 +36,12 @@ export const unlockPackageStateEmail = async (
         return packagePrograms
     }
 
-    const packageName = generatePackageName(formData, packagePrograms)
+    const packageName = generatePackageName(
+        formData.stateCode,
+        formData.stateNumber,
+        formData.programIDs,
+        packagePrograms
+    )
 
     const isContractAndRates =
         formData.submissionType === 'CONTRACT_AND_RATES' &&

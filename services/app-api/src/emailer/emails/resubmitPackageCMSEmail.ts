@@ -37,7 +37,12 @@ export const resubmitPackageCMSEmail = async (
         return packagePrograms
     }
 
-    const packageName = generatePackageName(pkg, packagePrograms)
+    const packageName = generatePackageName(
+        pkg.stateCode,
+        pkg.stateNumber,
+        pkg.programIDs,
+        packagePrograms
+    )
 
     const isContractAndRates =
         pkg.submissionType === 'CONTRACT_AND_RATES' &&

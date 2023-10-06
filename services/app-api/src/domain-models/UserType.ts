@@ -1,7 +1,12 @@
 import type { StateType } from './StateType'
 import type { DivisionType } from './DivisionType'
 
-type UserType = StateUserType | CMSUserType | AdminUserType | HelpdeskUserType
+type UserType =
+    | StateUserType
+    | CMSUserType
+    | AdminUserType
+    | HelpdeskUserType
+    | BusinessOwnerUserType
 
 type StateUserType = {
     id: string
@@ -38,10 +43,19 @@ type HelpdeskUserType = {
     familyName: string
 }
 
+type BusinessOwnerUserType = {
+    id: string
+    role: 'BUSINESSOWNER_USER'
+    email: string
+    givenName: string
+    familyName: string
+}
+
 export type {
     CMSUserType,
     StateUserType,
     AdminUserType,
     HelpdeskUserType,
+    BusinessOwnerUserType,
     UserType,
 }

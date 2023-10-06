@@ -25,14 +25,8 @@ describe('documents', () => {
             cy.findByTestId('file-input-input').attachFile(
                 'documents/trussel-guide.pdf'
             )
-            // click the checkbox so the row won't be in an error state
-            cy.findAllByRole('checkbox', {
-                name: 'rate-supporting',
-            })
-                .eq(0)
-                .click({ force: true })
             cy.findByText(/0 complete, 1 error, 1 pending/).should('exist')
-            cy.waitForDocumentsToLoad({tableView: true})
+            cy.waitForDocumentsToLoad()
             cy.findByText(/1 complete, 1 error, 0 pending/).should('exist')
             cy.findByText('Duplicate file, please remove').should('exist')
             cy.navigateFormByDirectLink(
@@ -49,25 +43,21 @@ describe('documents', () => {
                 'documents/trussel-guide.pdf'
             )
             cy.findByText('Duplicate file, please remove').should('exist')
-            cy.findAllByRole('row').should('have.length', 4)
+
+            cy.findByTestId('file-input-preview-list').within(() => {
+                cy.findAllByRole('listitem').should('have.length', 3)
+            })
 
             cy.findByText(/3 files added/).should('exist')
-            // click the second column in the second row to make sure multiple rows are handled correctly
-            cy.findAllByRole('checkbox', {
-                name: 'rate-supporting',
-            })
-                .eq(0)
-                .click({ force: true })
-            cy.findAllByRole('checkbox', {
-                name: 'rate-supporting',
-            })
-                .eq(1)
-                .click({ force: true })
             cy.findByText(/0 complete, 1 error, 2 pending/).should('exist')
 
-            cy.waitForDocumentsToLoad({tableView: true})
+            cy.waitForDocumentsToLoad()
             cy.findByText('Duplicate file, please remove').should('exist')
-            cy.findAllByRole('row').should('have.length', 4)
+
+            cy.findByTestId('file-input-preview-list').within(() => {
+                cy.findAllByRole('listitem').should('have.length', 3)
+            })
+
             cy.findByText(/2 complete, 1 error, 0 pending/)
             cy.navigateFormByButtonClick('BACK')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
@@ -76,12 +66,11 @@ describe('documents', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionID}/edit/documents`
             )
-            cy.findAllByRole('row').should('have.length', 3)
-            cy.findAllByRole('checkbox', {
-                name: 'rate-supporting',
+
+            cy.findByTestId('file-input-preview-list').within(() => {
+                cy.findAllByRole('listitem').should('have.length', 2)
             })
-                .eq(1)
-                .should('be.checked')
+
             cy.verifyDocumentsHaveNoErrors()
 
             //  Save as draft
@@ -124,15 +113,19 @@ describe('documents', () => {
                 .attachFile(
                     [
                         'documents/how-to-open-source.pdf',
-                        'documents/testing.docx',
+                        'documents/trussel-guide.pdf',
                     ],
                     {
                         subjectType: 'drag-n-drop',
                         force: true,
                     }
                 )
-            cy.findAllByRole('row').should('have.length', 3)
-            cy.waitForDocumentsToLoad({tableView: true})
+
+            cy.findByTestId('file-input-preview-list').within(() => {
+                cy.findAllByRole('listitem').should('have.length', 2)
+            })
+
+            cy.waitForDocumentsToLoad()
             cy.verifyDocumentsHaveNoErrors()
 
             cy.navigateFormByButtonClick('CONTINUE')

@@ -3,7 +3,7 @@ import { must, getStateRecord } from '../../testHelpers'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHelpers'
 import { insertDraftRate } from './insertRate'
-import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 describe('insertRate', () => {
     afterEach(() => {
