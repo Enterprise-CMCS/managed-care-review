@@ -136,7 +136,7 @@ function convertContractWithRatesToFormData(
                 effectiveDateEnd: amendmentEffectiveDateEnd,
             }
             return {
-                id: rateRev.id, // rate form data id is the revision ID
+                id: rateRev.formData.rateID, // rate form data id is the RATE ID, not the revision ID.
                 rateType,
                 rateCapitationType,
                 rateDocuments: rateDocuments.map((doc) => ({
