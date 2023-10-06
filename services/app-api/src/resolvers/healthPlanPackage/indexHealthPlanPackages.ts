@@ -1,7 +1,12 @@
 import type { Span } from '@opentelemetry/api'
 import { ForbiddenError } from 'apollo-server-lambda'
 import type { HealthPlanPackageType } from '../../domain-models'
-import { isStateUser, isCMSUser, isAdminUser } from '../../domain-models'
+import {
+    isStateUser,
+    isCMSUser,
+    isAdminUser,
+    isBusinessOwnerUser,
+} from '../../domain-models'
 import { isHelpdeskUser } from '../../domain-models/user'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
@@ -96,7 +101,8 @@ export function indexHealthPlanPackagesResolver(
         } else if (
             isCMSUser(user) ||
             isAdminUser(user) ||
-            isHelpdeskUser(user)
+            isHelpdeskUser(user) ||
+            isBusinessOwnerUser(user)
         ) {
             let results: StoreError | HealthPlanPackageType[] = []
             if (ratesDatabaseRefactor) {

@@ -90,6 +90,8 @@ export function configureResolvers(
                     return 'AdminUser'
                 } else if (obj.role === 'HELPDESK_USER') {
                     return 'HelpdeskUser'
+                } else if (obj.role === 'BUSINESSOWNER_USER') {
+                    return 'BusinessOwnerUser'
                 } else {
                     return 'StateUser'
                 }
