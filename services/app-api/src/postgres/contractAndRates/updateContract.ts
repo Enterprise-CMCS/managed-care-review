@@ -2,6 +2,7 @@ import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../storeError'
 import type { PrismaClient } from '@prisma/client'
 import type { ContractType } from '../../domain-models/contractAndRates'
+import { includeFullContract } from './prismaSubmittedContractHelpers'
 
 type UpdateContractNoFormArgsType = {
     contractID: string
@@ -22,7 +23,9 @@ async function updateContract(
                 where: {
                     id: contractID,
                 },
+                include: includeFullContract,
             })
+
             if (!currentContract) {
                 const err = `PRISMA ERROR: Cannot find the current contract to update with contract id: ${contractID}`
                 console.error(err)
