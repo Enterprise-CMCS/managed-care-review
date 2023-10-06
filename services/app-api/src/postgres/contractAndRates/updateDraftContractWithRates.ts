@@ -36,7 +36,7 @@ const sortRatesForUpdate = (
     for (const rateData of ratesFromClient) {
         // Find a matching rate revision id in the draftRatesFromDB array.
         const matchingDBRate = ratesFromDB.find(
-            (dbRate) => dbRate.id === rateData.id
+            (dbRate) => dbRate.formData.rateID === rateData.id
         )
 
         // If there are no matching rates we push into createRates
@@ -65,7 +65,7 @@ const sortRatesForUpdate = (
     for (const dbRate of ratesFromDB) {
         //Find a matching rate revision id in the ratesFromClient
         const matchingHPPRate = ratesFromClient.find(
-            (convertedRate) => convertedRate.id === dbRate.id
+            (convertedRate) => convertedRate.id === dbRate.formData.rateID
         )
 
         // If convertedRateData does not contain the rate revision id from DB, we push these revisions rateID in disconnectRateIDs
@@ -175,11 +175,7 @@ async function updateDraftContractWithRates(
                     const currentRate = rateRevision.id
                         ? await tx.rateTable.findFirst({
                               where: {
-                                  revisions: {
-                                      some: {
-                                          id: rateRevision.id,
-                                      },
-                                  },
+                                id: rateRevision.id,
                               },
                               include: {
                                   // include the single most recent revision that is not submitted
@@ -216,6 +212,7 @@ async function updateDraftContractWithRates(
 
                         await tx.rateTable.create({
                             data: {
+                                id: rateRevision.id,
                                 stateCode: stateCode,
                                 stateNumber: latestStateRateCertNumber,
                                 revisions: {
@@ -306,7 +303,7 @@ async function updateDraftContractWithRates(
                                     ? {
                                           update: {
                                               where: {
-                                                  id: rateRevision.id,
+                                                  id: currentRate.revisions[0].id,
                                               },
                                               data: {
                                                   rateType: nullify(
@@ -505,7 +502,7 @@ async function updateDraftContractWithRates(
                 },
             })
 
-            return findContractWithHistory(tx, contractID)
+            return findContractWithHistory(client, contractID)
         })
     } catch (err) {
         console.error('Prisma error updating contract', err)
