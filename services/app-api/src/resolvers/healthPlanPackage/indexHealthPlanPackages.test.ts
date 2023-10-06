@@ -41,7 +41,7 @@ const flagValueTestParameters: {
     {
         flagName: 'rates-db-refactor',
         flagValue: true,
-        testName: 'createHealthPlanPackage with rates-db-refactor on',
+        testName: 'indexHealthPlanPackages with rates-db-refactor on',
     },
 ]
 
