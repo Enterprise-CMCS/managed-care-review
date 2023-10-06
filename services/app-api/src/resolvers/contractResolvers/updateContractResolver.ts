@@ -20,64 +20,91 @@ export function updateContractResolver(
     return async (_parent, { input }, context) => {
         const { user, span } = context
         setResolverDetailsOnActiveSpan('updateContract', user, span)
-        // const ratesDatabaseRefactor = await launchDarkly.getFeatureFlag(
-        //     context,
-        //     'rates-db-refactor'
-        // )
+        const ratesDatabaseRefactor = await launchDarkly.getFeatureFlag(
+            context,
+            'rates-db-refactor'
+        )
 
-        // This resolver is only callable by CMS users
-        if (!isCMSUser(user)) {
-            logError('updateContract', 'user not authorized to update contract')
-            setErrorAttributesOnActiveSpan(
-                'user not authorized to update contract',
-                span
-            )
-            throw new ForbiddenError('user not authorized to update contract')
-        }
+        if (ratesDatabaseRefactor) {
+            // This resolver is only callable by CMS users
+            if (!isCMSUser(user)) {
+                logError(
+                    'updateContract',
+                    'user not authorized to update contract'
+                )
+                setErrorAttributesOnActiveSpan(
+                    'user not authorized to update contract',
+                    span
+                )
+                throw new ForbiddenError(
+                    'user not authorized to update contract'
+                )
+            }
 
-        const contract = await store.findContractWithHistory(input.id)
-        if (contract instanceof Error) {
-            throw contract
-        }
+            const contract = await store.findContractWithHistory(input.id)
+            if (contract instanceof Error) {
+                throw contract
+            }
 
-        const hasSubmitInfo =
-            contract.revisions.filter((rev) => rev.submitInfo).length > 0
+            const hasSubmitInfo =
+                contract.revisions.filter((rev) => rev.submitInfo).length > 0
 
-        if (!hasSubmitInfo) {
-            const errMessage = `Can not update a contract has not been submitted. Fails for contract with ID: ${contract.id}`
-            logError('updateContract', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'contractID',
-                cause: 'CONTRACT_NOT_SUBMITTED',
+            if (!hasSubmitInfo) {
+                const errMessage = `Can not update a contract has not been submitted. Fails for contract with ID: ${contract.id}`
+                logError('updateContract', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new UserInputError(errMessage, {
+                    argumentName: 'contractID',
+                    cause: 'CONTRACT_NOT_SUBMITTED',
+                })
+            }
+
+            const updatedContract = await store.updateMCCRSID({
+                contractID: input.id,
+                mccrsID: input.mccrsID || undefined,
             })
-        }
 
-        const updatedContract = await store.updateMCCRSID({
-            contractID: input.id,
-            mccrsID: input.mccrsID || undefined,
-        })
+            if (updatedContract instanceof Error) {
+                throw updatedContract
+            }
 
-        if (updatedContract instanceof Error) {
-            throw updatedContract
-        }
+            const convertedPkg =
+                convertContractWithRatesToUnlockedHPP(updatedContract)
 
-        const convertedPkg =
-            convertContractWithRatesToUnlockedHPP(updatedContract)
-
-        if (convertedPkg instanceof Error) {
-            const errMessage = `Issue converting contract. Message: ${convertedPkg.message}`
-            logError('fetchHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'PROTO_DECODE_ERROR',
-                },
-            })
-        }
-        return {
-            pkg: convertedPkg,
+            if (convertedPkg instanceof Error) {
+                const errMessage = `Issue converting contract. Message: ${convertedPkg.message}`
+                logError('fetchHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'PROTO_DECODE_ERROR',
+                    },
+                })
+            }
+            return {
+                pkg: convertedPkg,
+            }
+        } else {
+            const contract = await store.findContractWithHistory(input.id)
+            if (contract instanceof Error) {
+                throw contract
+            }
+            const convertedPkg = convertContractWithRatesToUnlockedHPP(contract)
+            if (convertedPkg instanceof Error) {
+                const errMessage = `Issue converting contract. Message: ${convertedPkg.message}`
+                logError('fetchHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'PROTO_DECODE_ERROR',
+                    },
+                })
+            }
+            return {
+                pkg: convertedPkg,
+            }
         }
     }
 }
