@@ -11,6 +11,8 @@ export async function cleanupLastMigration(
         const deleteManyResult = await client.$transaction([
             client.contractDocument.deleteMany(),
             client.rateDocument.deleteMany(),
+            client.stateContact.deleteMany(),
+            client.actuaryContact.deleteMany(),
             client.contractSupportingDocument.deleteMany(),
             client.rateSupportingDocument.deleteMany(),
             client.rateRevisionsOnContractRevisionsTable.deleteMany(),

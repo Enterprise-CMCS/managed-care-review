@@ -150,7 +150,7 @@ async function migrateContractRevision(
         // add the contract documents
         let contractDocPos = 0
         const contractDocumentsArray = []
-        for (const doc of formData.documents) {
+        for (const doc of formData.contractDocuments) {
             const contractDoc: Prisma.ContractDocumentCreateWithoutContractRevisionInput =
                 {
                     createdAt: revision.createdAt,
@@ -171,7 +171,7 @@ async function migrateContractRevision(
         // add the contract supporting documents
         let supportingDocPos = 0
         const supportingDocumentsArray = []
-        for (const supportDoc of formData.contractDocuments) {
+        for (const supportDoc of formData.documents) {
             const contractSupportDoc: Prisma.ContractSupportingDocumentCreateWithoutContractRevisionInput =
                 {
                     createdAt: revision.createdAt,
@@ -186,6 +186,26 @@ async function migrateContractRevision(
         }
         createDataObject.supportingDocuments = {
             create: supportingDocumentsArray,
+        }
+
+        // add the state contacts
+        let stateContactsPos = 0
+        const stateContactsArray = []
+        for (const stateContact of formData.stateContacts) {
+            const newStateContact: Prisma.StateContactCreateWithoutContractRevisionInput =
+                {
+                    createdAt: revision.createdAt,
+                    updatedAt: new Date(),
+                    name: stateContact.name,
+                    email: stateContact.email,
+                    titleRole: stateContact.titleRole,
+                    position: stateContactsPos,
+                }
+            stateContactsArray.push(newStateContact)
+            stateContactsPos++
+        }
+        createDataObject.stateContacts = {
+            create: stateContactsArray,
         }
 
         return await client.contractRevisionTable.create({

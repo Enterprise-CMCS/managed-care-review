@@ -1,5 +1,4 @@
 import { todaysDate } from '../testHelpers/dateHelpers'
-import _ from 'lodash'
 import {
     constructTestPostgresServer,
     createAndSubmitTestHealthPlanPackage,
@@ -20,13 +19,8 @@ import {
 import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
 import { findAllRevisions } from '../postgres/healthPlanPackage'
 import { isStoreError } from '../postgres'
-import { findContractWithHistory } from '../postgres/contractAndRates'
-import { isEqualData } from '../resolvers/healthPlanPackage/contractAndRates/resolverHelpers'
-import {
-    base64ToDomain,
-    toDomain,
-} from 'app-web/src/common-code/proto/healthPlanFormDataProto'
-import { convertContractWithRatesToUnlockedHPP } from '../domain-models'
+import { base64ToDomain } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
+import assert from 'assert'
 
 describe('test that we migrate things', () => {
     const mockPreRefactorLDService = testLDService({
@@ -272,141 +266,32 @@ describe('test that we migrate things', () => {
             ldService: mockPostRefactorLDService,
         })
 
-        // let's get the original HPP
+        // let's fetch the HPP from the new contract and revision tables
         const fetchedHPP = await fetchTestHealthPlanPackageById(
             stateServerPost,
             finallySubmittedPKG.id
         )
 
-        // get the migrated contract with history
-        const fetchedMigratedContract = await findContractWithHistory(
-            prismaClient,
-            finallySubmittedPKG.id
-        )
-        if (fetchedMigratedContract instanceof Error) {
-            throw new Error(
-                `could not get back migrated contract after migrate: ${fetchedMigratedContract.message}`
-            )
-        }
-
-        // check that we have the same number of revisions
-        expect(fetchedMigratedContract.revisions).toHaveLength(
+        // check HPP post refactor to HPP pre refactor
+        // finallySubmittedPKG is what came back from the last submission
+        // fetchedHPP is what came back from fetchHPP with the rate refactor flag on
+        expect(finallySubmittedPKG.revisions).toHaveLength(
             fetchedHPP.revisions.length
         )
 
-        // check that the IDs line up
-        expect(fetchedMigratedContract.id).toBe(fetchedHPP.id)
+        for (let i = 0; i < finallySubmittedPKG.revisions.length; i++) {
+            const preRev = finallySubmittedPKG.revisions[i].node
+            const postRev = fetchedHPP.revisions[i].node
 
-        // convert to HPP
-        const migratedConvertedContract = convertContractWithRatesToUnlockedHPP(
-            fetchedMigratedContract
-        )
-        if (migratedConvertedContract instanceof Error) {
-            throw new Error(
-                `could not convert contract to unlocked hpp ${migratedConvertedContract.message}`
-            )
-        }
+            const preFD = base64ToDomain(preRev.formDataProto)
+            const postFD = base64ToDomain(postRev.formDataProto)
 
-        // look at each of the revisions
-        const fetchedHPPRevisionsById = new Map(
-            fetchedHPP.revisions.map((revision) => {
-                return [revision.node.id, revision.node]
-            })
-        )
-
-        const fetchedConvertedContractRevisionsById = new Map(
-            migratedConvertedContract.revisions.map((revision) => [
-                revision.id,
-                revision,
-            ])
-        )
-        for (const id of fetchedConvertedContractRevisionsById.keys()) {
-            console.info(`comparing ${id}`)
-            const migratedContractToCompare =
-                fetchedConvertedContractRevisionsById.get(id)
-            if (migratedContractToCompare === undefined) {
-                throw new Error(
-                    `could not find the migrated contract id in map`
-                )
+            if (preFD instanceof Error || postFD instanceof Error) {
+                throw new Error('Got an error decoding')
             }
 
-            const hppRevisionToCompare = fetchedHPPRevisionsById.get(id)
-            if (hppRevisionToCompare === undefined) {
-                throw new Error(
-                    `migrated contract revision of id ${id} not found in HPP revisions`
-                )
-            }
-
-            // decode the form data on the hpp
-            const decodedFormDataProtoHppRev = base64ToDomain(
-                hppRevisionToCompare.formDataProto
-            )
-
-            // decode the form data on the migrated contract
-            const decodedFormDataProtoContractRev = toDomain(
-                migratedContractToCompare.formDataProto
-            )
-
-            if (
-                decodedFormDataProtoHppRev instanceof Error ||
-                decodedFormDataProtoContractRev instanceof Error
-            ) {
-                throw new Error(`Could not decode the protobufs`)
-            }
-
-            console.info(
-                `HPP rev form data: \n ${JSON.stringify(
-                    decodedFormDataProtoHppRev,
-                    null,
-                    '  '
-                )}`
-            )
-            console.info(
-                `migrated contract rev form data: \n ${JSON.stringify(
-                    decodedFormDataProtoContractRev,
-                    null,
-                    '  '
-                )}`
-            )
-
-            const diff = getObjectDiff(
-                decodedFormDataProtoContractRev,
-                decodedFormDataProtoHppRev
-            )
-            console.info(`${diff.length} keys differ: ${diff}`)
-            expect(
-                isEqualData(
-                    decodedFormDataProtoContractRev,
-                    decodedFormDataProtoHppRev
-                )
-            ).toBeTruthy()
+            // deepStrictEqual args: actual comes first then expected
+            assert.deepStrictEqual(postFD, preFD, 'form data not equal')
         }
     }, 20000)
 })
-
-const getObjectDiff = (
-    obj1: Record<string, any>,
-    obj2: Record<string, any>,
-    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-    compareRef: boolean = false
-): string[] => {
-    if (typeof obj1 !== 'object' || typeof obj2 !== 'object') {
-        throw new Error('Both inputs must be objects.')
-    }
-
-    return Object.keys(obj1).reduce((result, key) => {
-        // eslint-disable-next-line no-prototype-builtins
-        if (!obj2.hasOwnProperty(key)) {
-            result.push(key)
-        } else if (_.isEqual(obj1[key], obj2[key])) {
-            const resultKeyIndex = result.indexOf(key)
-
-            if (compareRef && obj1[key] !== obj2[key]) {
-                result[resultKeyIndex] = `${key} (ref)`
-            } else {
-                result.splice(resultKeyIndex, 1)
-            }
-        }
-        return result
-    }, Object.keys(obj2))
-}

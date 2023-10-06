@@ -2,21 +2,18 @@ import type {
     PrismaClient,
     HealthPlanRevisionTable,
     Prisma,
-    RateTable,
     ContractRevisionTable,
 } from '@prisma/client'
 import type { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
-import { includeFullRate } from './prismaSubmittedRateHelpers'
 
 export async function migrateRateInfo(
     client: PrismaClient,
     revision: HealthPlanRevisionTable,
     formData: HealthPlanFormDataType,
     contractRevision: ContractRevisionTable
-): Promise<RateTable | Error> {
+): Promise<undefined | Error> {
     // get the state info
     const stateCode = formData.stateCode
-    const stateNumber = formData.stateNumber
 
     const state = await client.state.findUnique({
         where: { stateCode: stateCode },
@@ -27,8 +24,6 @@ export async function migrateRateInfo(
         return error
     }
 
-    const rateRevisionData: Prisma.RateRevisionTableCreateWithoutRateInput[] =
-        []
     for (const rateInfo of formData.rateInfos) {
         const dataToCopy: Prisma.RateRevisionTableCreateWithoutRateInput = {
             createdAt: revision.createdAt,
@@ -151,29 +146,74 @@ export async function migrateRateInfo(
             },
         }
 
-        rateRevisionData.push(dataToCopy)
-    }
+        // each rate revision data here belongs to a different Rate, so we need
+        // to upsert that rate.
+        // Critically, the ID in the HPFormData is the ID we want to use for that rate
+        // since it should be stable across revisions.
 
-    const insertRateData: Prisma.RateTableCreateInput = {
-        state: {
-            connect: {
-                stateCode: stateCode,
-            },
-        },
-        stateNumber: stateNumber,
-        revisions: {
-            create: rateRevisionData,
-        },
-    }
+        await client.$transaction(async (tx) => {
+            try {
+                // check if this rate exists
+                const findRateResult = await tx.rateTable.findFirst({
+                    where: {
+                        id: rateInfo.id,
+                    },
+                })
 
-    try {
-        const migratedRateTable = await client.rateTable.create({
-            data: insertRateData,
-            include: includeFullRate,
+                if (findRateResult === undefined || findRateResult === null) {
+                    // we have to create this rate now.
+
+                    // get the current state number:
+                    const state = await tx.state.findUnique({
+                        where: { stateCode: stateCode },
+                    })
+
+                    if (!state) {
+                        const error = new Error(
+                            `State with code ${stateCode} not found`
+                        )
+                        return error
+                    }
+
+                    const newRateCertNumber =
+                        state.latestStateRateCertNumber + 1
+
+                    await tx.state.update({
+                        where: { stateCode: stateCode },
+                        data: {
+                            latestStateRateCertNumber: newRateCertNumber,
+                        },
+                    })
+
+                    await tx.rateTable.create({
+                        data: {
+                            id: rateInfo.id,
+                            state: {
+                                connect: {
+                                    stateCode: stateCode,
+                                },
+                            },
+                            stateNumber: newRateCertNumber,
+                            revisions: {
+                                create: dataToCopy,
+                            },
+                        },
+                    })
+                } else {
+                    // the rate already exists, add a new revision
+                    await tx.rateTable.update({
+                        where: { id: rateInfo.id },
+                        data: {
+                            revisions: {
+                                create: dataToCopy,
+                            },
+                        },
+                    })
+                }
+            } catch (e) {
+                console.error('Failed to upsert Rate', e)
+                return e
+            }
         })
-
-        return migratedRateTable
-    } catch (err) {
-        return err
     }
 }
