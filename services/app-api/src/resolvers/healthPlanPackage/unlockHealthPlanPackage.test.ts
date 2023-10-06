@@ -434,7 +434,7 @@ describe.each(flagValueTestParameters)(
                     base64ToDomain(r.node.formDataProto)
                 )
 
-            const expectedRevCount = 3
+            const expectedRevCount = flagValue ? 6 : 3
 
             expect(formDatas).toHaveLength(expectedRevCount)
 
