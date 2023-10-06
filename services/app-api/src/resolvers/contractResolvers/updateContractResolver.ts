@@ -59,7 +59,7 @@ export function updateContractResolver(
                 })
             }
 
-            const updatedContract = await store.updateMCCRSID({
+            const updatedContract = await store.updateContract({
                 contractID: input.id,
                 mccrsID: input.mccrsID || undefined,
             })

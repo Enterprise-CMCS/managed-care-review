@@ -3,15 +3,15 @@ import { NotFoundError } from '../storeError'
 import type { PrismaClient } from '@prisma/client'
 import type { ContractType } from '../../domain-models/contractAndRates'
 
-type UpdateMCCRSIDArgsType = {
+type UpdateContractNoFormArgsType = {
     contractID: string
     mccrsID?: string
 }
 
 // Update the MCCRS record number
-async function updateMCCRSID(
+async function updateContract(
     client: PrismaClient,
-    args: UpdateMCCRSIDArgsType
+    args: UpdateContractNoFormArgsType
 ): Promise<ContractType | NotFoundError | Error> {
     const { contractID, mccrsID } = args
 
@@ -46,5 +46,5 @@ async function updateMCCRSID(
     }
 }
 
-export { updateMCCRSID }
-export type { UpdateMCCRSIDArgsType }
+export { updateContract }
+export type { UpdateContractNoFormArgsType }
