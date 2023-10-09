@@ -35,7 +35,8 @@ export const ChangeHistory = ({
             if (r.node.submitInfo) {
                 const newSubmit: flatRevisions = {} as flatRevisions
 
-                //Only set revisionVersion if not the latest revision.
+                // Only set revisionVersion if not the latest revision and if not unlocked. This is not the same
+                // as the order of change history. The version correlates with each submitted revision.
                 const revisionVersion =
                     index !== reversedRevisions.length - 1
                         ? String(index + 1) //Offset version, we want to start at 1
@@ -55,72 +56,74 @@ export const ChangeHistory = ({
 
     const revisionHistory = flattenedRevisions()
 
-    const revisedItems: AccordionItemProps[] = revisionHistory.map((r) => {
-        const isInitialSubmission = r.updatedReason === 'Initial submission'
-        const isSubsequentSubmission = r.kind === 'submit'
-        // We want to know if this package has multiple submissions. To have multiple submissions, there must be minimum
-        // 3 revisions in revisionHistory the initial submission revision, unlock revision and resubmission revision.
-        const hasSubsequentSubmissions = revisionHistory.length >= 3
-        return {
-            title: (
-                <div>
-                    {dayjs
-                        .utc(r.updatedAt)
-                        .tz('America/New_York')
-                        .format('MM/DD/YY h:mma')}{' '}
-                    ET - {isSubsequentSubmission ? 'Submission' : 'Unlock'}
-                </div>
-            ),
-            // Display this code if this is the initial submission. We only want to display the link of the initial submission
-            // only if there has been subsequent submissions. We do not want to display a link if the package initial
-            // submission was unlocked, but has not been resubmitted yet.
-            headingLevel: 'h4',
-            content: isInitialSubmission ? (
-                <>
-                    <span className={styles.tag}>Submitted by:</span>
-                    <span> {r.updatedBy}</span>
-                    <br />
-                    {r.revisionVersion && hasSubsequentSubmissions && (
-                        <Link
-                            href={`/submissions/${submission.id}/revisions/${r.revisionVersion}`}
-                            data-testid={`revision-link-${r.revisionVersion}`}
-                        >
-                            View past submission version
-                        </Link>
-                    )}
-                </>
-            ) : (
-                <>
+    const revisedItems: AccordionItemProps[] = revisionHistory.map(
+        (r, index) => {
+            const isInitialSubmission = r.updatedReason === 'Initial submission'
+            const isSubsequentSubmission = r.kind === 'submit'
+            // We want to know if this package has multiple submissions. To have multiple submissions, there must be minimum
+            // 3 revisions in revisionHistory the initial submission revision, unlock revision and resubmission revision.
+            const hasSubsequentSubmissions = revisionHistory.length >= 3
+            return {
+                title: (
                     <div>
-                        <span className={styles.tag}>
-                            {isSubsequentSubmission
-                                ? 'Submitted by: '
-                                : 'Unlocked by: '}{' '}
-                        </span>
-                        <span>{r.updatedBy}</span>
+                        {dayjs
+                            .utc(r.updatedAt)
+                            .tz('America/New_York')
+                            .format('MM/DD/YY h:mma')}{' '}
+                        ET - {isSubsequentSubmission ? 'Submission' : 'Unlock'}
                     </div>
-                    <div>
-                        <span className={styles.tag}>
-                            {isSubsequentSubmission
-                                ? 'Changes made: '
-                                : 'Reason for unlock: '}
-                        </span>
-                        <span>{r.updatedReason}</span>
+                ),
+                // Display this code if this is the initial submission. We only want to display the link of the initial submission
+                // only if there has been subsequent submissions. We do not want to display a link if the package initial
+                // submission was unlocked, but has not been resubmitted yet.
+                headingLevel: 'h4',
+                content: isInitialSubmission ? (
+                    <div data-testid={`change-history-record`}>
+                        <span className={styles.tag}>Submitted by:</span>
+                        <span> {r.updatedBy}</span>
+                        <br />
+                        {r.revisionVersion && hasSubsequentSubmissions && (
+                            <Link
+                                href={`/submissions/${submission.id}/revisions/${r.revisionVersion}`}
+                                data-testid={`revision-link-${r.revisionVersion}`}
+                            >
+                                View past submission version
+                            </Link>
+                        )}
                     </div>
-                    {isSubsequentSubmission && r.revisionVersion && (
-                        <Link
-                            href={`/submissions/${submission.id}/revisions/${r.revisionVersion}`}
-                            data-testid={`revision-link-${r.revisionVersion}`}
-                        >
-                            View past submission version
-                        </Link>
-                    )}
-                </>
-            ),
-            expanded: false,
-            id: r.updatedAt.toString(),
+                ) : (
+                    <div data-testid={`change-history-record`}>
+                        <div>
+                            <span className={styles.tag}>
+                                {isSubsequentSubmission
+                                    ? 'Submitted by: '
+                                    : 'Unlocked by: '}{' '}
+                            </span>
+                            <span>{r.updatedBy}</span>
+                        </div>
+                        <div>
+                            <span className={styles.tag}>
+                                {isSubsequentSubmission
+                                    ? 'Changes made: '
+                                    : 'Reason for unlock: '}
+                            </span>
+                            <span>{r.updatedReason}</span>
+                        </div>
+                        {isSubsequentSubmission && r.revisionVersion && (
+                            <Link
+                                href={`/submissions/${submission.id}/revisions/${r.revisionVersion}`}
+                                data-testid={`revision-link-${r.revisionVersion}`}
+                            >
+                                View past submission version
+                            </Link>
+                        )}
+                    </div>
+                ),
+                expanded: false,
+                id: r.updatedAt.toString(),
+            }
         }
-    })
+    )
     return (
         <section id="changeHistory" className={styles.summarySection}>
             <SectionHeader header="Change history" hideBorder />

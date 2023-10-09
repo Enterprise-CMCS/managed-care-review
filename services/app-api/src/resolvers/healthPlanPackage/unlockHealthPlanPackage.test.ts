@@ -434,11 +434,49 @@ describe.each(flagValueTestParameters)(
                     base64ToDomain(r.node.formDataProto)
                 )
 
-            // right now the history is a bit weird
-            // const expectedRevCount = flagValue ? 6 : 3
+            expect(formDatas).toHaveLength(3)
 
-            expect(formDatas).toHaveLength(3) // This probably doesn't make sense totally but is fine for now.
+            // expect(formDatas[0].rateInfos).toHaveLength(2)
+            // expect(formDatas[1].rateInfos).toHaveLength(3)
+            // expect(formDatas[2].rateInfos).toHaveLength(1)
 
+            // TODO: The below section tests rate revision history, enable this when that feature is reimplemented
+            // if (flagValue) {
+            //     // POST REFACTOR. also assert that the correct Rate table entries have been created.
+            //     const prismaClient = await sharedTestPrismaClient()
+            //
+            //     const rates = []
+            //     const rateIDs = new Set<string>()
+            //     for (const formData of formDatas) {
+            //         for (const rateInfo of formData.rateInfos) {
+            //             rateIDs.add(rateInfo.id!)
+            //         }
+            //     }
+            //
+            //     expect(formDatas).toHaveLength(6)
+            //
+            //     expect(rateIDs.size).toBe(3)
+            //
+            //     for (const rateID of rateIDs.values()) {
+            //
+            //         const rateTable = await prismaClient.rateTable.findFirstOrThrow({
+            //             where: {
+            //                 id: rateID
+            //             },
+            //             include: {
+            //                 revisions: true,
+            //             },
+            //         })
+            //         rates.push(rateTable)
+            //     }
+            //
+            //     rates.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+            //
+            //     expect(rates[0].revisions).toHaveLength(3) // this first rate was unlocked twice so should have 3 revisions even though only 2 of them end up associated with our contract.
+            //     expect(rates[1].revisions).toHaveLength(2)
+            //     expect(rates[2].revisions).toHaveLength(2)
+            //
+            // }
             // throw new Error('Not done with this test yet')
         }, 20000)
 
