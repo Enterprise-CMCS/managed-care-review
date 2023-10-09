@@ -2,6 +2,7 @@ import { todaysDate } from '../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer,
     createAndSubmitTestHealthPlanPackage,
+    createTestHealthPlanPackage,
     fetchTestHealthPlanPackageById,
     resubmitTestHealthPlanPackage,
     unlockTestHealthPlanPackage,
@@ -299,6 +300,133 @@ describe('test that we migrate things', () => {
         for (let i = 0; i < finallySubmittedPKG.revisions.length; i++) {
             const preFD = preFDS[i]
             const postFD = postFDS[i]
+
+            // deepStrictEqual args: actual comes first then expected
+            assert.deepStrictEqual(postFD, preFD, 'form data not equal')
+        }
+    }, 20000)
+
+    it('preserves unset draft fields as unset', async () => {
+        const stateServer = await constructTestPostgresServer({
+            ldService: mockPreRefactorLDService,
+        })
+
+        // first, create an unsubmitted submission
+        const testHPP = await createTestHealthPlanPackage(stateServer)
+
+        // mark inLieu as undefined for draft
+        const fd = latestFormData(testHPP)
+        fd.contractAmendmentInfo = {
+            modifiedProvisions: { inLieuServicesAndSettings: undefined },
+        }
+
+        const stateDraft = await updateTestHealthPlanFormData(stateServer, fd)
+
+        const prismaClient = await sharedTestPrismaClient()
+
+        // first reset us to the pre-proto migration tables state
+        const cleanResult = await cleanupPreviousProtoMigrate(prismaClient)
+        if (cleanResult instanceof Error) {
+            const error = new Error(
+                `Could not reset the DB: ${cleanResult.message}`
+            )
+            throw error
+        }
+
+        // look up the HPP using prisma methods. The migrator relies on finding all the
+        // revisions in the DB and uses the Prisma type.
+        const allRevisions = await findAllRevisions(prismaClient)
+        if (isStoreError(allRevisions)) {
+            const error = new Error(
+                `Could not fetch revisions from DB: ${allRevisions.message}`
+            )
+            throw error
+        }
+
+        // for our test we just want the test data we made above to make expects on, not
+        // absolutely everything in the local DB
+        const revisionsToMigrate = []
+        for (const revision of allRevisions) {
+            const formData = decodeFormDataProto(revision)
+            if (formData instanceof Error) {
+                const error = new Error(
+                    `Could not decode form data from revision in test: ${formData.message}`
+                )
+                throw error
+            }
+            if (formData.id === stateDraft.id) {
+                revisionsToMigrate.push(revision)
+            }
+        }
+
+        const migratedContracts = []
+        for (const revision of revisionsToMigrate) {
+            const migratedRevision = await migrateRevision(
+                prismaClient,
+                revision
+            )
+            if (migratedRevision instanceof Error) {
+                const error = new Error(
+                    `Could not get a migrated revision back: ${migratedRevision}`
+                )
+                console.error(error)
+                throw error
+            }
+            migratedContracts.push(migratedRevision)
+        }
+
+        // Now compare new to old.
+        const oldHPP = await fetchTestHealthPlanPackageById(
+            stateServer,
+            stateDraft.id
+        )
+
+        const stateServerPost = await constructTestPostgresServer({
+            ldService: mockPostRefactorLDService,
+        })
+
+        // let's fetch the HPP from the new contract and revision tables
+        const fetchedHPP = await fetchTestHealthPlanPackageById(
+            stateServerPost,
+            stateDraft.id
+        )
+
+        // make sure we're still DRAFT
+        expect(fetchedHPP.status).toEqual(oldHPP.status)
+
+        console.info(`old hpp: \n ${JSON.stringify(fetchedHPP, null, '  ')}`)
+        const preFDS: HealthPlanFormDataType[] = []
+        const postFDS: HealthPlanFormDataType[] = []
+        for (let i = 0; i < oldHPP.revisions.length; i++) {
+            const preRev = oldHPP.revisions[i].node
+            const postRev = fetchedHPP.revisions[i].node
+
+            const preFD = base64ToDomain(preRev.formDataProto)
+            const postFD = base64ToDomain(postRev.formDataProto)
+
+            if (preFD instanceof Error || postFD instanceof Error) {
+                throw new Error('Got an error decoding')
+            }
+
+            preFDS.push(preFD)
+            postFDS.push(postFD)
+        }
+
+        console.info(
+            'COMPARE ORDER',
+            preFDS.map((fd) => [fd.submissionDescription, fd.createdAt]),
+            postFDS.map((fd) => [fd.submissionDescription, fd.createdAt])
+        )
+
+        for (let i = 0; i < oldHPP.revisions.length; i++) {
+            const preFD = preFDS[i]
+            const postFD = postFDS[i]
+
+            // look specifically at the inLieuServicesAndSettings
+            expect(
+                postFD.contractAmendmentInfo?.modifiedProvisions
+                    .inLieuServicesAndSettings
+            ).toBeUndefined()
 
             // deepStrictEqual args: actual comes first then expected
             assert.deepStrictEqual(postFD, preFD, 'form data not equal')
