@@ -2,8 +2,11 @@ import { todaysDate } from '../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer,
     createAndSubmitTestHealthPlanPackage,
+    createAndUpdateTestHealthPlanPackage,
+    defaultFloridaProgram,
     fetchTestHealthPlanPackageById,
     resubmitTestHealthPlanPackage,
+    submitTestHealthPlanPackage,
     unlockTestHealthPlanPackage,
     updateTestHealthPlanFormData,
 } from '../testHelpers/gqlHelpers'
@@ -24,6 +27,7 @@ import {
     toProtoBuffer,
 } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import assert from 'assert'
+import { packageName } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import type {
     HealthPlanFormDataType,
     LockedHealthPlanFormDataType,
@@ -594,5 +598,145 @@ describe('test that we migrate things', () => {
             // deepStrictEqual args: actual comes first then expected
             assert.deepStrictEqual(postFD, preFD, 'form data not equal')
         }
+    }, 20000)
+
+    it('deals with related rates correctly.', async () => {
+        const stateServer = await constructTestPostgresServer({
+            ldService: mockPreRefactorLDService,
+        })
+
+        // First, create a new submitted submission
+        const stateDraft = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
+
+        const stateFD = latestFormData(stateDraft)
+
+        const draftWithRelatedRate = await createAndUpdateTestHealthPlanPackage(
+            stateServer
+        )
+
+        const draftRate = latestFormData(draftWithRelatedRate)
+        draftRate.submissionDescription = 'This has a Related Rate'
+        draftRate.rateInfos[0].packagesWithSharedRateCerts = [
+            {
+                packageId: stateDraft.id,
+                packageName: packageName(
+                    stateDraft.stateCode,
+                    stateFD.stateNumber,
+                    stateFD.programIDs,
+                    [defaultFloridaProgram()]
+                ),
+            },
+        ]
+
+        await updateTestHealthPlanFormData(stateServer, draftRate)
+
+        await submitTestHealthPlanPackage(stateServer, draftWithRelatedRate.id)
+
+        const prismaClient = await sharedTestPrismaClient()
+        // Now, run the migrator
+        // first reset us to the pre-proto migration tables state
+        const cleanResult = await cleanupPreviousProtoMigrate(prismaClient)
+        if (cleanResult instanceof Error) {
+            const error = new Error(
+                `Could not reset the DB: ${cleanResult.message}`
+            )
+            throw error
+        }
+
+        // look up the HPP using prisma methods. The migrator relies on finding all the
+        // revisions in the DB and uses the Prisma type.
+        const allRevisions = await findAllRevisions(prismaClient)
+        if (isStoreError(allRevisions)) {
+            const error = new Error(
+                `Could not fetch revisions from DB: ${allRevisions.message}`
+            )
+            throw error
+        }
+
+        // for our test we just want the test data we made above to make expects on, not
+        // absolutely everything in the local DB
+        const revisionsToMigrate = []
+        for (const revision of allRevisions) {
+            const formData = decodeFormDataProto(revision)
+            if (formData instanceof Error) {
+                const error = new Error(
+                    `Could not decode form data from revision in test: ${formData.message}`
+                )
+                throw error
+            }
+            if (
+                formData.id === stateDraft.id ||
+                formData.id === draftWithRelatedRate.id
+            ) {
+                revisionsToMigrate.push(revision)
+            }
+        }
+
+        const migratedContracts = []
+        for (const revisionToMig of revisionsToMigrate) {
+            const migratedRevision = await migrateRevision(
+                prismaClient,
+                revisionToMig
+            )
+            if (migratedRevision instanceof Error) {
+                const error = new Error(
+                    `Could not get a migrated revision back: ${migratedRevision}`
+                )
+                console.error(error)
+                throw error
+            }
+            migratedContracts.push(migratedRevision)
+        }
+
+        // Now compare new to old.
+        const oldHPP = await fetchTestHealthPlanPackageById(
+            stateServer,
+            draftWithRelatedRate.id
+        )
+
+        const stateServerPost = await constructTestPostgresServer({
+            ldService: mockPostRefactorLDService,
+        })
+
+        // let's fetch the HPP from the new contract and revision tables
+        const fetchedHPP = await fetchTestHealthPlanPackageById(
+            stateServerPost,
+            draftWithRelatedRate.id
+        )
+
+        // check HPP post refactor to HPP pre refactor
+        // finallySubmittedPKG is what came back from the last submission
+        // fetchedHPP is what came back from fetchHPP with the rate refactor flag on
+        expect(fetchedHPP.revisions).toHaveLength(2)
+
+        const preFDS: HealthPlanFormDataType[] = []
+        const postFDS: HealthPlanFormDataType[] = []
+        for (let i = 0; i < oldHPP.revisions.length; i++) {
+            const preRev = oldHPP.revisions[i].node
+            const postRev = fetchedHPP.revisions[i].node
+
+            const preFD = base64ToDomain(preRev.formDataProto)
+            const postFD = base64ToDomain(postRev.formDataProto)
+
+            if (preFD instanceof Error || postFD instanceof Error) {
+                throw new Error('Got an error decoding')
+            }
+
+            preFDS.push(preFD)
+            postFDS.push(postFD)
+        }
+
+        // in this case, because we're submitting a rate, we're getting back fake revisions
+        const preFD = preFDS[0] as LockedHealthPlanFormDataType
+        const postFD = postFDS[0] as LockedHealthPlanFormDataType
+
+        // ignore submittedAt and updatedAt
+        postFD.updatedAt = preFD.updatedAt
+        postFD.submittedAt = preFD.submittedAt
+
+        // deepStrictEqual args: actual comes first then expected
+        assert.deepStrictEqual(postFD, preFD, 'form data not equal')
     }, 20000)
 })

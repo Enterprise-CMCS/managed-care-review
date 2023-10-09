@@ -172,6 +172,16 @@ export async function migrateRateInfo(
             create: rateRevDocsArray,
         }
 
+        // Connect to shared contracts
+        if (rateInfo.packagesWithSharedRateCerts) {
+            const sharedContractIDs = rateInfo.packagesWithSharedRateCerts.map(
+                (pkg) => pkg.packageId
+            )
+            dataToCopy.contractsWithSharedRateRevision = {
+                connect: sharedContractIDs.map((cid) => ({ id: cid })),
+            }
+        }
+
         // if this package is unlocked, so are the rates and contracts
         // the only connection should be draftRates/draftContracts
         if (!revision.submittedAt) {
