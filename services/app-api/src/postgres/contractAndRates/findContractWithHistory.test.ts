@@ -241,7 +241,7 @@ describe.skip('findContract', () => {
                         (rateRevision) =>
                             rateRevision.formData.rateID !== rate1.id &&
                             rateRevision.formData.rateID !== rate2.id
-                    ),
+                    ).map(rate => rate.formData),
             })
         )
         must(
@@ -550,7 +550,7 @@ describe.skip('findContract', () => {
                         (rateRevision) =>
                             rateRevision.formData.rateID !== rate1.id &&
                             rateRevision.formData.rateID !== rate2.id
-                    ),
+                    ).map(rate => rate.formData),
             })
         )
 

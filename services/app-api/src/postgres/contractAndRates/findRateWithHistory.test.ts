@@ -562,6 +562,7 @@ describe('findRate', () => {
                 unlockReason: 'unlocking A.1',
             })
         )
+        // Save update to get latest rate data
         const updatedDraftContractA = must(
             await updateDraftContractWithRates(client, {
                 contractID: contractA.id,
@@ -584,12 +585,12 @@ describe('findRate', () => {
                     updatedDraftContractA.draftRevision?.rateRevisions.filter(
                         (rateRevision) =>
                             rateRevision.formData.rateID !== rate1.id
-                    ),
+                    ).map(rate => rate.formData),
             })
         )
         must(
             await submitContract(client, {
-                contractID: contractA.id,
+                contractID: updatedDraftContractA.id,
                 submittedByUserID: stateUser.id,
                 submitReason: 'Submitting A.2',
             })
