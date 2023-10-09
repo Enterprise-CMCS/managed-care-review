@@ -535,6 +535,9 @@ export function submitHealthPlanPackageResolver(
                 })
             }
 
+            // We're getting weird tests b/c of the difference between updateInfo and submittedAt
+            maybeLocked.submittedAt = updateInfo.updatedAt
+
             // Save the package!
             const updateResult = await store.updateHealthPlanRevision(
                 input.pkgID,

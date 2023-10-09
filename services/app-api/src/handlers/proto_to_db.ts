@@ -269,7 +269,7 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
         }
 
         console.info(
-            `Migrated HealthPlanRevision ${revision.pkgID} successfully...`
+            `Migrated HealthPlanRevision ${revision.id} successfully...`
         )
     }
 
