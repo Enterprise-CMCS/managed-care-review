@@ -742,19 +742,28 @@ type PackageWithSameRate  {
 type RateFormData {
     rateType: RateType
     rateCapitationType: RateCapitationType
-    rateDocuments: [GenericDocument]!
-    supportingDocuments: [GenericDocument]!
+    rateDocuments: [GenericDocument!]!
+    supportingDocuments: [GenericDocument!]!
     rateDateStart: DateTime
     rateDateEnd:DateTime
     rateDateCertified: DateTime
     amendmentEffectiveDateStart: DateTime
     amendmentEffectiveDateEnd:  DateTime
-    rateProgramIDs: [String]!
+    rateProgramIDs: [String!]!
     rateCertificationName: String
-    certifyingActuaryContacts: [ActuaryContact]!
-    addtlActuaryContacts: [ActuaryContact]!
+    certifyingActuaryContacts: [ActuaryContact!]!
+    addtlActuaryContacts: [ActuaryContact!]!
     actuaryCommunicationPreference: ActuaryCommunication
-    packagesWithSharedRateCerts: [PackageWithSameRate]!
+    packagesWithSharedRateCerts: [PackageWithSameRate!]!
+}
+
+type RelatedContractRevisions {
+    id: String
+    # contractID: String  # this would be needed in order to link to submission summary
+    submitInfo: UpdateInformation
+    unlockInfo: UpdateInformation
+    createdAt: DateTime
+    updatedAt: DateTime
 }
 
 type RateRevision {
@@ -765,10 +774,11 @@ type RateRevision {
     Information about who, when, and why this revision was unlocked.
     Will be blank on the initial revision.
     """
-    unlockInfo: UpdateInformation
+  unlockInfo: UpdateInformation
     "Information on who, when, and why this revision was submitted."
   submitInfo: UpdateInformation
   formData: RateFormData
+  contractRevisions: [RelatedContractRevisions!]!
 }
 
 type Rate {
@@ -792,6 +802,7 @@ type Rate {
     for the rate and contains the full data from when the rate cert was submitted
     """
     revisions: [RateRevision!]!
+    contractRevisions:[RelatedContractRevisions!]!
 }
 
 type RateEdge {

@@ -5,6 +5,7 @@ query indexRates {
             node {
                 id
                 stateCode
+                stateNumber
                 state {
                     code
                     name
@@ -70,6 +71,21 @@ query indexRates {
                             packageID
                         }
 
+                    }
+                    contractRevisions {
+                        id
+                        createdAt
+                        updatedAt
+                        submitInfo {
+                            updatedAt
+                            updatedBy
+                            updatedReason
+                        }
+                        unlockInfo{
+                            updatedAt
+                            updatedBy
+                            updatedReason
+                        }
                     }
                 }
             }
