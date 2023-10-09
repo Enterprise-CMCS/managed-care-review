@@ -709,7 +709,7 @@ describe('test that we migrate things', () => {
         // check HPP post refactor to HPP pre refactor
         // finallySubmittedPKG is what came back from the last submission
         // fetchedHPP is what came back from fetchHPP with the rate refactor flag on
-        expect(fetchedHPP.revisions).toHaveLength(2)
+        expect(oldHPP.revisions).toHaveLength(fetchedHPP.revisions.length)
 
         const preFDS: HealthPlanFormDataType[] = []
         const postFDS: HealthPlanFormDataType[] = []
