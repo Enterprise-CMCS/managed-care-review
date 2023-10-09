@@ -172,12 +172,23 @@ export async function migrateRateInfo(
             create: rateRevDocsArray,
         }
 
-        // rate revisions on contract revisions join table
-        dataToCopy.contractRevisions = {
-            create: {
-                contractRevisionID: contractRevision.id,
-                validAfter: new Date(),
-            },
+        // if this package is unlocked, so are the rates and contracts
+        // the only connection should be draftRates/draftContracts
+        if (!revision.submittedAt) {
+            dataToCopy.draftContracts = {
+                connect: {
+                    id: contractRevision.contractID,
+                },
+            }
+        } else {
+            // if this package has been submitted, then we set the revision join table.
+            // rate revisions on contract revisions join table
+            dataToCopy.contractRevisions = {
+                create: {
+                    contractRevisionID: contractRevision.id,
+                    validAfter: new Date(),
+                },
+            }
         }
 
         // each rate revision data here belongs to a different Rate, so we need
@@ -248,6 +259,26 @@ export async function migrateRateInfo(
                 console.error('Failed to upsert Rate', e)
                 return e
             }
+        })
+    }
+
+    // and finally, if this is an unlocked contract, set the draftRates.
+    if (!revision.submittedAt) {
+        const rateIDs = formData.rateInfos.map((r) => r.id)
+
+        await client.contractRevisionTable.update({
+            where: { id: contractRevision.id },
+            data: {
+                updatedAt:
+                    formData.updatedAt > revision.createdAt
+                        ? formData.updatedAt
+                        : revision.createdAt,
+                draftRates: {
+                    connect: rateIDs.map((rid) => ({
+                        id: rid,
+                    })),
+                },
+            },
         })
     }
 }

@@ -106,7 +106,11 @@ async function migrateContractRevision(
         }
 
         // Add the unlocked info to the table if it exists
-        if (formData.status === 'SUBMITTED' && revision.unlockedBy) {
+        if (
+            revision.unlockedAt &&
+            revision.unlockedBy &&
+            revision.unlockedReason
+        ) {
             const user = await client.user.findFirst({
                 where: { email: revision.unlockedBy },
             })
@@ -114,11 +118,9 @@ async function migrateContractRevision(
             if (user) {
                 createDataObject.unlockInfo = {
                     create: {
-                        updatedAt: revision.unlockedAt ?? new Date(),
+                        updatedAt: revision.unlockedAt,
                         updatedByID: user.id,
-                        updatedReason:
-                            revision.unlockedReason ??
-                            'Migrated from previous system',
+                        updatedReason: revision.unlockedReason,
                     },
                 }
             } else {
@@ -129,14 +131,14 @@ async function migrateContractRevision(
         }
 
         // add the submit info to the table if it exists
-        if (formData.status === 'SUBMITTED' && revision.submittedBy) {
+        if (revision.submittedAt && revision.submittedBy) {
             const user = await client.user.findFirst({
                 where: { email: revision.submittedBy },
             })
             if (user) {
                 createDataObject.submitInfo = {
                     create: {
-                        updatedAt: formData.updatedAt,
+                        updatedAt: revision.submittedAt,
                         updatedByID: user.id,
                         updatedReason:
                             revision.submittedReason ??
