@@ -135,7 +135,7 @@ function rateFormDataToDomainModel(
     }
 
     return {
-        id: rateRevision.id,
+        id: rateRevision.rateID,
         rateID: rateRevision.rateID,
         rateType: rateRevision.rateType ?? undefined,
         rateCapitationType: rateRevision.rateCapitationType ?? undefined,
