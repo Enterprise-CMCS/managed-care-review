@@ -3,6 +3,7 @@ mutation createHealthPlanPackage($input: CreateHealthPlanPackageInput!) {
         pkg {
             id
             stateCode
+            mccrsID
             state {
                 code
                 name
