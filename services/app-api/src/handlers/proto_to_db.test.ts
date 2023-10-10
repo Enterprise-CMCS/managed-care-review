@@ -17,7 +17,7 @@ import UNLOCK_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/unlockHealthPl
 import {
     cleanupPreviousProtoMigrate,
     decodeFormDataProto,
-    migrateRevision,
+    migrateHealthPlanRevisions,
 } from './proto_to_db'
 import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
 import { findAllRevisions } from '../postgres/healthPlanPackage'
@@ -250,20 +250,16 @@ describe('test that we migrate things', () => {
             }
         }
 
-        const migratedContracts = []
-        for (const revision of revisionsToMigrate) {
-            const migratedRevision = await migrateRevision(
-                prismaClient,
-                revision
+        const migrateErrors = await migrateHealthPlanRevisions(
+            prismaClient,
+            revisionsToMigrate
+        )
+        if (migrateErrors.length > 0) {
+            const error = new Error(
+                `Could not get a migrated revision back: ${migrateErrors}`
             )
-            if (migratedRevision instanceof Error) {
-                const error = new Error(
-                    `Could not get a migrated revision back: ${migratedRevision}`
-                )
-                console.error(error)
-                throw error
-            }
-            migratedContracts.push(migratedRevision)
+            console.error(error)
+            throw error
         }
 
         const stateServerPost = await constructTestPostgresServer({
@@ -381,20 +377,16 @@ describe('test that we migrate things', () => {
             }
         }
 
-        const migratedContracts = []
-        for (const revision of revisionsToMigrate) {
-            const migratedRevision = await migrateRevision(
-                prismaClient,
-                revision
+        const migrateErrors = await migrateHealthPlanRevisions(
+            prismaClient,
+            revisionsToMigrate
+        )
+        if (migrateErrors.length > 0) {
+            const error = new Error(
+                `Could not get a migrated revision back: ${migrateErrors}`
             )
-            if (migratedRevision instanceof Error) {
-                const error = new Error(
-                    `Could not get a migrated revision back: ${migratedRevision}`
-                )
-                console.error(error)
-                throw error
-            }
-            migratedContracts.push(migratedRevision)
+            console.error(error)
+            throw error
         }
 
         // Now compare new to old.
@@ -520,20 +512,16 @@ describe('test that we migrate things', () => {
             }
         }
 
-        const migratedContracts = []
-        for (const revision of revisionsToMigrate) {
-            const migratedRevision = await migrateRevision(
-                prismaClient,
-                revision
+        const migrateErrors = await migrateHealthPlanRevisions(
+            prismaClient,
+            revisionsToMigrate
+        )
+        if (migrateErrors.length > 0) {
+            const error = new Error(
+                `Could not get a migrated revision back: ${migrateErrors}`
             )
-            if (migratedRevision instanceof Error) {
-                const error = new Error(
-                    `Could not get a migrated revision back: ${migratedRevision}`
-                )
-                console.error(error)
-                throw error
-            }
-            migratedContracts.push(migratedRevision)
+            console.error(error)
+            throw error
         }
 
         // Now compare new to old.
@@ -674,20 +662,16 @@ describe('test that we migrate things', () => {
             }
         }
 
-        const migratedContracts = []
-        for (const revisionToMig of revisionsToMigrate) {
-            const migratedRevision = await migrateRevision(
-                prismaClient,
-                revisionToMig
+        const migrateErrors = await migrateHealthPlanRevisions(
+            prismaClient,
+            revisionsToMigrate
+        )
+        if (migrateErrors.length > 0) {
+            const error = new Error(
+                `Could not get a migrated revision back: ${migrateErrors}`
             )
-            if (migratedRevision instanceof Error) {
-                const error = new Error(
-                    `Could not get a migrated revision back: ${migratedRevision}`
-                )
-                console.error(error)
-                throw error
-            }
-            migratedContracts.push(migratedRevision)
+            console.error(error)
+            throw error
         }
 
         // Now compare new to old.
