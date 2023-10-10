@@ -12,6 +12,7 @@ import {
 } from '../attributeHelper'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql'
+import { NotFoundError } from '../../postgres'
 
 export function updateContractResolver(
     store: Store,
@@ -41,21 +42,44 @@ export function updateContractResolver(
                 )
             }
 
-            const contract = await store.findContractWithHistory(input.id)
-            if (contract instanceof Error) {
-                throw contract
+            const contractWithHistory = await store.findContractWithHistory(
+                input.id
+            )
+            if (contractWithHistory instanceof Error) {
+                throw contractWithHistory
             }
 
-            const hasSubmitInfo =
-                contract.revisions.filter((rev) => rev.submitInfo).length > 0
+            if (contractWithHistory instanceof Error) {
+                const errMessage = `Issue finding a contract with history with id ${input.id}. Message: ${contractWithHistory.message}`
+                logError('updateContract', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
 
-            if (!hasSubmitInfo) {
-                const errMessage = `Can not update a contract has not been submitted. Fails for contract with ID: ${contract.id}`
+                if (contractWithHistory instanceof NotFoundError) {
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'NOT_FOUND',
+                            cause: 'DB_ERROR',
+                        },
+                    })
+                }
+
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
+            }
+
+            const isSubmitted = contractWithHistory.status === 'SUBMITTED'
+
+            if (!isSubmitted) {
+                const errMessage = `Can not update a contract has not been submitted. Fails for contract with ID: ${contractWithHistory.id}`
                 logError('updateContract', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new UserInputError(errMessage, {
                     argumentName: 'contractID',
-                    cause: 'CONTRACT_NOT_SUBMITTED',
+                    cause: 'INVALID_PACKAGE_STATUS',
                 })
             }
 
@@ -65,7 +89,15 @@ export function updateContractResolver(
             })
 
             if (updatedContract instanceof Error) {
-                throw updatedContract
+                const errMessage = `Failed to update contract with ID: ${input.id}. Message: ${updatedContract.message}`
+                logError('updateContract', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
             }
 
             const convertedPkg =
@@ -73,7 +105,7 @@ export function updateContractResolver(
 
             if (convertedPkg instanceof Error) {
                 const errMessage = `Issue converting contract. Message: ${convertedPkg.message}`
-                logError('fetchHealthPlanPackage', errMessage)
+                logError('updateContract', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new GraphQLError(errMessage, {
                     extensions: {
@@ -86,25 +118,9 @@ export function updateContractResolver(
                 pkg: convertedPkg,
             }
         } else {
-            const contract = await store.findContractWithHistory(input.id)
-            if (contract instanceof Error) {
-                throw contract
-            }
-            const convertedPkg = convertContractWithRatesToUnlockedHPP(contract)
-            if (convertedPkg instanceof Error) {
-                const errMessage = `Issue converting contract. Message: ${convertedPkg.message}`
-                logError('fetchHealthPlanPackage', errMessage)
-                setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'PROTO_DECODE_ERROR',
-                    },
-                })
-            }
-            return {
-                pkg: convertedPkg,
-            }
+            throw new ForbiddenError(
+                'updateContract must be used with rates database refactor flag'
+            )
         }
     }
 }
