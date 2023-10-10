@@ -14,29 +14,22 @@ but there's a lot of work left on the ticket
 5. Tests.  I've been testing this by running it locally and checking the database. Those
 steps will be transmitted elsewhere.
 */
-
 import type { Handler, APIGatewayProxyResultV2 } from 'aws-lambda'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import type { Store } from '../postgres'
-import type {
-    HealthPlanRevisionTable,
-    RateRevisionTable,
-    RateTable,
-} from '@prisma/client'
-import type { ContractType } from '../domain-models/contractAndRates'
+import type { HealthPlanRevisionTable } from '@prisma/client'
 import type { PrismaClient } from '@prisma/client'
 import type { ContractTable, ContractRevisionTable } from '@prisma/client'
 import type { StoreError } from '../postgres/storeError'
-import { NotFoundError, isStoreError } from '../postgres/storeError'
+import { isStoreError } from '../postgres/storeError'
 import { migrateContractRevision } from '../postgres/contractAndRates/proto_to_db_ContractRevisions'
 import { migrateRateInfo } from '../postgres/contractAndRates/proto_to_db_RateRevisions'
 import { insertContractId } from '../postgres/contractAndRates/proto_to_db_ContractId'
 import { cleanupLastMigration } from '../postgres/contractAndRates/proto_to_db_CleanupLastMigration'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import type { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { findContractWithHistory } from '../postgres/contractAndRates'
 
 export const getDatabaseConnection = async (): Promise<{
     store: Store
@@ -103,18 +96,20 @@ export function decodeFormDataProto(
 
 export type MigrateRevisionResult = {
     contract: ContractTable
-    contractRevision: ContractRevisionTable
-    rate: RateTable
-    rateRevisions: RateRevisionTable[]
+    rateInvocation: MigrateRatesInvocation
 }
 
-export async function migrateRevision(
+interface MigrateRatesInvocation {
+    revision: HealthPlanRevisionTable
+    formData: HealthPlanFormDataType
+    contractRevision: ContractRevisionTable
+}
+
+async function migrateRevision(
     client: PrismaClient,
     revision: HealthPlanRevisionTable
-): Promise<ContractType | Error> {
+): Promise<MigrateRevisionResult | Error> {
     /* The order in which we call the helpers in this file matters */
-    console.info(`Migration of revision ${revision.id} started...`)
-
     const formData = decodeFormDataProto(revision)
     if (formData instanceof Error) {
         return formData
@@ -131,39 +126,16 @@ export async function migrateRevision(
         return migrateContractResult
     }
 
-    /* Just as with the Contract and ContractRevision tables noted above, we take the
-        original HealthPlanRevision 'pkgID' and tie the RateTable ('id') to the RateRevisionTable ('rateID') 
-        (the contract stuff happens in two files; the rate stuff happens in one file; you'll probably want to change this) */
-    const rateMigrationResult = await migrateRateInfo(
-        client,
+    const rateInvocation: MigrateRatesInvocation = {
         revision,
         formData,
-        migrateContractResult.contractRevision
-    )
-    if (rateMigrationResult instanceof Error) {
-        const error = new Error(
-            `Error migrating ${revision.id} rates: ${rateMigrationResult.message}`
-        )
-        console.error(error)
-        return error
+        contractRevision: migrateContractResult.contractRevision,
     }
 
-    // let's check that we did things right
-    const migratedContract = await findContractWithHistory(
-        client,
-        migrateContractResult.contract.id
-    )
-    if (
-        migratedContract instanceof Error ||
-        migratedContract instanceof NotFoundError
-    ) {
-        const error = new Error(
-            `Did not successfully migrate revision ${revision.id}: ${migratedContract}`
-        )
-        return error
+    return {
+        contract: migrateContractResult.contract,
+        rateInvocation,
     }
-
-    return migratedContract as ContractType
 }
 
 type ContractMigrationResult =
@@ -228,6 +200,62 @@ export async function cleanupPreviousProtoMigrate(
     return
 }
 
+// We must migrate the contracts over and then the rates.
+export async function migrateHealthPlanRevisions(
+    client: PrismaClient,
+    revisions: HealthPlanRevisionTable[]
+): Promise<Error[]> {
+    const revisionsErrors: Error[] = []
+
+    const rateInvocations: MigrateRatesInvocation[] = []
+
+    // We have to migrate the rates after the contracts b/c of the links
+    for (const revision of revisions) {
+        console.info(`Migrating Contract HealthPlanRevision ${revision.id}`)
+        const migrateResult = await migrateRevision(client, revision)
+        if (migrateResult instanceof Error) {
+            revisionsErrors.push(migrateResult)
+            console.error(migrateResult)
+            continue
+        }
+
+        rateInvocations.push(migrateResult.rateInvocation)
+
+        console.info(
+            `Migrated Contract HealthPlanRevision ${revision.id} successfully...`
+        )
+    }
+
+    for (const rateInvocation of rateInvocations) {
+        /* Just as with the Contract and ContractRevision tables noted above, we take the
+        original HealthPlanRevision 'pkgID' and tie the RateTable ('id') to the RateRevisionTable ('rateID') 
+        (the contract stuff happens in two files; the rate stuff happens in one file; you'll probably want to change this) */
+        console.info(
+            `Migrating Rates HealthPlanRevision ${rateInvocation.revision.id}`
+        )
+        const ratesResult = await migrateRateInfo(
+            client,
+            rateInvocation.revision,
+            rateInvocation.formData,
+            rateInvocation.contractRevision
+        )
+        if (ratesResult instanceof Error) {
+            revisionsErrors.push(ratesResult)
+            const error = new Error(
+                `Error migrating ${rateInvocation.revision.id} rates: ${ratesResult.message}`
+            )
+            console.error(error)
+            continue
+        }
+
+        console.info(
+            `Migrated Rates HealthPlanRevision ${rateInvocation.revision.id} successfully...`
+        )
+    }
+
+    return revisionsErrors
+}
+
 export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // setup otel tracing
     const stageName = process.env.stage ?? 'stageNotSet'
@@ -251,41 +279,38 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
                 message:
                     'Could not cleanup after previous migrations. Aborting.',
             }),
-        } as APIGatewayProxyResultV2
+        }
     }
 
     const revisions = await getRevisions(store)
 
-    // go through the list of revisons and migrate
+    // go through the list of revisions and migrate
     console.info(`Found ${revisions.length} revisions to migrate...`)
-    const revisionsWithErrors = []
-    for (const revision of revisions) {
-        const migrateResult = await migrateRevision(prismaClient, revision)
-        if (migrateResult instanceof Error) {
-            recordException(migrateResult, serviceName, 'migrateRevision')
-            revisionsWithErrors.push(revision.id)
-            console.error(migrateResult)
-            continue
+
+    const migrationErrors = await migrateHealthPlanRevisions(
+        prismaClient,
+        revisions
+    )
+
+    if (migrationErrors.length > 0) {
+        console.error(`Encountered ${migrationErrors.length} Errors Migrating`)
+        for (const migrationError of migrationErrors) {
+            recordException(migrationError, serviceName, 'migrateRevision')
         }
 
-        console.info(
-            `Migrated HealthPlanRevision ${revision.id} successfully...`
-        )
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                message: 'Migration complete, Errored.',
+            }),
+        }
     }
-
-    console.info(
-        `Migrations that could not be processed: ${JSON.stringify(
-            revisionsWithErrors
-        )}`
-    )
-    console.info(
-        `Could not migrate ${revisionsWithErrors.length} of ${revisions.length} revisions`
-    )
+    console.info('Successfully migrated rates and contracts.')
 
     return {
         statusCode: 200,
         body: JSON.stringify({
             message: 'Lambda function executed successfully',
         }),
-    } as APIGatewayProxyResultV2
+    }
 }
