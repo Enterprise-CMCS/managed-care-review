@@ -514,6 +514,7 @@ describe.each(flagValueTestParameters)(
             //mock invoke email submit lambda
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
+                ldService: mockLDService,
             })
             const draft = await createAndUpdateTestHealthPlanPackage(server, {})
             const draftID = draft.id
@@ -537,6 +538,7 @@ describe.each(flagValueTestParameters)(
             //mock invoke email submit lambda
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
+                ldService: mockLDService,
             })
             const draft = await createAndUpdateTestHealthPlanPackage(server, {})
             const draftID = draft.id
@@ -595,6 +597,7 @@ describe.each(flagValueTestParameters)(
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
                 emailParameterStore: mockEmailParameterStore,
+                ldService: mockLDService,
             })
             const draft = await createAndUpdateTestHealthPlanPackage(server, {})
             const draftID = draft.id
@@ -629,6 +632,7 @@ describe.each(flagValueTestParameters)(
 
             const server = await constructTestPostgresServer({
                 emailParameterStore: mockEmailParameterStore,
+                ldService: mockLDService,
             })
             const draft = await createAndUpdateTestHealthPlanPackage(server, {})
             const draftID = draft.id
@@ -650,6 +654,7 @@ describe.each(flagValueTestParameters)(
             const mockEmailer = testEmailer(config)
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
+                ldService: mockLDService,
             })
 
             const currentUser = defaultContext().user // need this to reach into gql tests and understand who current user is
@@ -709,6 +714,7 @@ describe.each(flagValueTestParameters)(
                         email: 'notspiderman@example.com',
                     }),
                 },
+                ldService: mockLDService,
             })
             const draft = await createAndUpdateTestHealthPlanPackage(server, {})
             const draftID = draft.id
@@ -757,6 +763,7 @@ describe.each(flagValueTestParameters)(
             //mock invoke email submit lambda
             const stateServer = await constructTestPostgresServer({
                 emailer: mockEmailer,
+                ldService: mockLDService,
             })
 
             const stateSubmission = await createAndSubmitTestHealthPlanPackage(
@@ -766,6 +773,7 @@ describe.each(flagValueTestParameters)(
                 context: {
                     user: cmsUser,
                 },
+                ldService: mockLDService,
             })
 
             await unlockTestHealthPlanPackage(
@@ -826,6 +834,7 @@ describe.each(flagValueTestParameters)(
                         email: 'alsonotspiderman@example.com',
                     }),
                 },
+                ldService: mockLDService,
             })
 
             const stateServerTwo = await constructTestPostgresServer({
@@ -835,6 +844,7 @@ describe.each(flagValueTestParameters)(
                         email: 'notspiderman@example.com',
                     }),
                 },
+                ldService: mockLDService,
             })
 
             const stateSubmission = await createAndSubmitTestHealthPlanPackage(
@@ -845,6 +855,7 @@ describe.each(flagValueTestParameters)(
                 context: {
                     user: cmsUser,
                 },
+                ldService: mockLDService,
             })
 
             await unlockTestHealthPlanPackage(
@@ -892,6 +903,7 @@ describe.each(flagValueTestParameters)(
             const mockEmailer = testEmailer()
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
+                ldService: mockLDService,
             })
             const draft = await createAndUpdateTestHealthPlanPackage(server, {
                 submissionType: 'CONTRACT_AND_RATES',
@@ -934,6 +946,7 @@ describe.each(flagValueTestParameters)(
             //mock invoke email submit lambda
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
+                ldService: mockLDService,
             })
             const draft = await createAndUpdateTestHealthPlanPackage(server, {})
             const draftID = draft.id
@@ -1003,35 +1016,40 @@ describe.each(flagValueTestParameters)(
                 'formData is missing required contract fields'
             )
         }, 20000)
+
+        describe('Feature flagged population coverage question test', () => {
+            it('errors when population coverage question is undefined', async () => {
+                const server = await constructTestPostgresServer({
+                    ldService: mockLDService,
+                })
+
+                // setup
+                const initialPkg = await createAndUpdateTestHealthPlanPackage(
+                    server,
+                    {
+                        populationCovered: undefined,
+                    }
+                )
+                const draft = latestFormData(initialPkg)
+                const draftID = draft.id
+
+                await new Promise((resolve) => setTimeout(resolve, 2000))
+
+                // submit
+                const submitResult = await server.executeOperation({
+                    query: SUBMIT_HEALTH_PLAN_PACKAGE,
+                    variables: {
+                        input: {
+                            pkgID: draftID,
+                        },
+                    },
+                })
+
+                expect(submitResult.errors).toBeDefined()
+                expect(submitResult.errors?.[0].extensions?.message).toBe(
+                    'formData is missing required contract fields'
+                )
+            }, 20000)
+        })
     }
 )
-
-describe('Feature flagged population coverage question test', () => {
-    it('errors when population coverage question is undefined', async () => {
-        const server = await constructTestPostgresServer()
-
-        // setup
-        const initialPkg = await createAndUpdateTestHealthPlanPackage(server, {
-            populationCovered: undefined,
-        })
-        const draft = latestFormData(initialPkg)
-        const draftID = draft.id
-
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-
-        // submit
-        const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
-            variables: {
-                input: {
-                    pkgID: draftID,
-                },
-            },
-        })
-
-        expect(submitResult.errors).toBeDefined()
-        expect(submitResult.errors?.[0].extensions?.message).toBe(
-            'formData is missing required contract fields'
-        )
-    }, 20000)
-})

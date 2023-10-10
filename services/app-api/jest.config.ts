@@ -2,7 +2,7 @@ module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'node',
     transform: {
-        "\\.(gql|graphql)$": "@graphql-tools/jest-transform",
+        '\\.(gql|graphql)$': '@graphql-tools/jest-transform',
     },
     coverageReporters: [
         [

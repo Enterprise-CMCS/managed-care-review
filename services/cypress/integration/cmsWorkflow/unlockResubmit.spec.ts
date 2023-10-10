@@ -176,6 +176,49 @@ describe('CMS user', () => {
                     'not.exist'
                 )
                 cy.findByTestId('revision-version').should('not.exist')
+
+                // Unlock again and resubmit to test change history
+                cy.unlockSubmission('Second Unlock')
+
+                // Resubmit again
+                cy.logOut()
+                cy.logInAsStateUser()
+                cy.navigateFormByDirectLink(reviewURL)
+                cy.findByTestId('unlockedBanner').should('exist')
+                cy.submitStateSubmissionForm({
+                        success: true,
+                        resubmission: true,
+                        summary: 'Second resubmit'
+                    }
+                )
+
+                // Visit the submission url and check the history
+                cy.navigateFormByDirectLink(submissionURL)
+                cy.findByTestId('updatedSubmissionBanner').should('exist')
+
+                // Should have change history records
+                cy.findAllByTestId('change-history-record').should('have.length', 5)
+
+                cy.findAllByTestId('change-history-record').then(records => {
+                    // We put all the text of each record into an array
+                    const recordText = records.map((index, record) => Cypress.$(record).text())
+
+                    // Records are in reverse
+                    // Second set of unlock and resubmit
+                    expect(recordText[0]).to.contain('Changes made: Second resubmit')
+                    expect(recordText[1]).to.contain('Reason for unlock: Second Unlock')
+
+                    // First set of unlock and resubmit
+                    expect(recordText[2]).to.contain('Changes made: Resubmission summary')
+                    expect(recordText[3]).to.contain('Reason for unlock: Unlock submission reason.')
+
+                    // Test for initial submission
+                    expect(recordText[4]).to.contain('Submitted by: aang@example.com')
+                    expect(recordText[4]).to.contain('View past submission version')
+                    expect(recordText[4]).to.not.contain('Changes made:')
+                    expect(recordText[4]).to.not.contain('Reason for unlock:')
+                    console.log(recordText)
+                })
             })
         })
     })

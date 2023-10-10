@@ -5,7 +5,6 @@
         "lib": ["es2021", "DOM"],
         "target": "es2021",
         "moduleResolution": "node",
-
         "baseUrl": "/",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
@@ -15,5 +14,5 @@
         "esModuleInterop": true,
         "resolveJsonModule": true
     },
-    "include": ["src"]
+    "include": ["src", "jest.config.ts"]
 }

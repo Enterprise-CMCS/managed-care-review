@@ -13,6 +13,7 @@ const buttonsWithLabels: FormButtons = {
     BACK: 'Back',
 }
 
+const isSubmissionEditUrl = /submissions\/([0-9a-fA-F-]+)\/edit/
 
 Cypress.Commands.add(
     'navigateFormByButtonClick',
@@ -52,7 +53,12 @@ Cypress.Commands.add(
     'navigateFormByDirectLink',
     (url: string, waitForLoad = true) => {
         cy.visit(url)
-        if (waitForLoad)
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50_000 })
+        if (waitForLoad) {
+            if(isSubmissionEditUrl.test(url)) {
+                cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50_000 })
+            } else {
+                cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 50_000 })
+            }
+        }
     }
 )

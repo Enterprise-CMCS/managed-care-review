@@ -1,5 +1,3 @@
-import { aliasQuery } from '../utils/graphql-test-utils'
-
 Cypress.Commands.add(
     'clickSubmissionLink',
     (testId: string) => {

@@ -33,30 +33,33 @@ const sortRatesForUpdate = (
     const disconnectRateIDs = []
 
     // Find rates to create or update
-    for (const rateData of ratesFromClient) {
+    for (const clientRateData of ratesFromClient) {
         // Find a matching rate revision id in the draftRatesFromDB array.
         const matchingDBRate = ratesFromDB.find(
-            (dbRate) => dbRate.id === rateData.id
+            (dbRate) => dbRate.formData.rateID === clientRateData.id
         )
 
         // If there are no matching rates we push into createRates
         if (!matchingDBRate) {
             upsertRates.push({
-                id: rateData.id,
-                ...rateData,
+                id: clientRateData.id,
+                ...clientRateData,
             })
             continue
         }
 
         // If a match is found then we deep compare to figure out if we need to update.
-        const isRateDataEqual = isEqualData(matchingDBRate.formData, rateData)
+        const isRateDataEqual = isEqualData(
+            matchingDBRate.formData,
+            clientRateData
+        )
 
         // If rates are not equal we then make the update
         if (!isRateDataEqual) {
             upsertRates.push({
-                id: rateData.id,
+                id: clientRateData.id,
                 rateID: matchingDBRate.id,
-                ...rateData,
+                ...clientRateData,
             })
         }
     }
@@ -65,7 +68,7 @@ const sortRatesForUpdate = (
     for (const dbRate of ratesFromDB) {
         //Find a matching rate revision id in the ratesFromClient
         const matchingHPPRate = ratesFromClient.find(
-            (convertedRate) => convertedRate.id === dbRate.id
+            (clientRateData) => clientRateData.id === dbRate.formData.rateID
         )
 
         // If convertedRateData does not contain the rate revision id from DB, we push these revisions rateID in disconnectRateIDs
@@ -125,29 +128,32 @@ async function updateDraftContractWithRates(
     try {
         return await client.$transaction(async (tx) => {
             // Given all the Contracts associated with this draft, find the most recent submitted
-            const currentRev = await tx.contractRevisionTable.findFirst({
-                where: {
-                    contractID: contractID,
-                    submitInfoID: null,
-                },
-                include: {
-                    contract: true,
-                    draftRates: {
-                        include: includeDraftRates,
+            const currentContractRev = await tx.contractRevisionTable.findFirst(
+                {
+                    where: {
+                        contractID: contractID,
+                        submitInfoID: null,
                     },
-                },
-            })
-            if (!currentRev) {
+                    include: {
+                        contract: true,
+                        draftRates: {
+                            include: includeDraftRates,
+                        },
+                    },
+                }
+            )
+            if (!currentContractRev) {
                 const err = `PRISMA ERROR: Cannot find the current rev to update with contract id: ${contractID}`
                 console.error(err)
                 return new NotFoundError(err)
             }
 
-            const stateCode = currentRev.contract.stateCode as StateCodeType
+            const stateCode = currentContractRev.contract
+                .stateCode as StateCodeType
             const ratesFromDB: RateRevisionType[] = []
 
             // Convert all rates from DB to domain model
-            for (const rate of currentRev.draftRates) {
+            for (const rate of currentContractRev.draftRates) {
                 const domainRateRevision = rateRevisionToDomainModel(
                     rate.revisions[0]
                 )
@@ -165,36 +171,30 @@ async function updateDraftContractWithRates(
                 rateFormDatas && sortRatesForUpdate(ratesFromDB, rateFormDatas)
 
             if (updateRates) {
-                for (const rateRevision of updateRates.upsertRates) {
+                for (const rateFormData of updateRates.upsertRates) {
                     // Check if the rate exists
                     // - We don't know if the rate revision exists in the DB we just know it's not connected to the contract.
                     // - toProtoBuffer gives every rate revision a UUID if there isn't one, so we cannot rely on revision id.
                     // - We can use this revision id to check if a rate and revision exists.
 
                     // Find the rate of the revision with only one draft revision
-                    const currentRate = rateRevision.id
-                        ? await tx.rateTable.findFirst({
-                              where: {
-                                  revisions: {
-                                      some: {
-                                          id: rateRevision.id,
-                                      },
-                                  },
-                              },
-                              include: {
-                                  // include the single most recent revision that is not submitted
-                                  revisions: {
-                                      where: {
-                                          submitInfoID: null,
-                                      },
-                                      take: 1,
-                                  },
-                              },
-                          })
-                        : undefined
+                    const currentRate = await tx.rateTable.findFirst({
+                        where: {
+                            id: rateFormData.id,
+                        },
+                        include: {
+                            // include the single most recent revision that is not submitted
+                            revisions: {
+                                where: {
+                                    submitInfoID: null,
+                                },
+                                take: 1,
+                            },
+                        },
+                    })
 
                     const contractsWithSharedRates =
-                        rateRevision.packagesWithSharedRateCerts?.map(
+                        rateFormData.packagesWithSharedRateCerts?.map(
                             (pkg) => ({
                                 id: pkg.packageId,
                             })
@@ -216,30 +216,31 @@ async function updateDraftContractWithRates(
 
                         await tx.rateTable.create({
                             data: {
+                                id: rateFormData.id,
                                 stateCode: stateCode,
                                 stateNumber: latestStateRateCertNumber,
                                 revisions: {
                                     create: {
-                                        rateType: rateRevision.rateType,
+                                        rateType: rateFormData.rateType,
                                         rateCapitationType:
-                                            rateRevision.rateCapitationType,
+                                            rateFormData.rateCapitationType,
                                         rateDateStart:
-                                            rateRevision.rateDateStart,
-                                        rateDateEnd: rateRevision.rateDateEnd,
+                                            rateFormData.rateDateStart,
+                                        rateDateEnd: rateFormData.rateDateEnd,
                                         rateDateCertified:
-                                            rateRevision.rateDateCertified,
+                                            rateFormData.rateDateCertified,
                                         amendmentEffectiveDateStart:
-                                            rateRevision.amendmentEffectiveDateStart,
+                                            rateFormData.amendmentEffectiveDateStart,
                                         amendmentEffectiveDateEnd:
-                                            rateRevision.amendmentEffectiveDateEnd,
+                                            rateFormData.amendmentEffectiveDateEnd,
                                         rateProgramIDs:
-                                            rateRevision.rateProgramIDs,
+                                            rateFormData.rateProgramIDs,
                                         rateCertificationName:
-                                            rateRevision.rateCertificationName,
+                                            rateFormData.rateCertificationName,
                                         rateDocuments: {
                                             create:
-                                                rateRevision.rateDocuments &&
-                                                rateRevision.rateDocuments.map(
+                                                rateFormData.rateDocuments &&
+                                                rateFormData.rateDocuments.map(
                                                     (d, idx) => ({
                                                         position: idx,
                                                         ...d,
@@ -248,8 +249,8 @@ async function updateDraftContractWithRates(
                                         },
                                         supportingDocuments: {
                                             create:
-                                                rateRevision.supportingDocuments &&
-                                                rateRevision.supportingDocuments.map(
+                                                rateFormData.supportingDocuments &&
+                                                rateFormData.supportingDocuments.map(
                                                     (d, idx) => ({
                                                         position: idx,
                                                         ...d,
@@ -258,8 +259,8 @@ async function updateDraftContractWithRates(
                                         },
                                         certifyingActuaryContacts: {
                                             create:
-                                                rateRevision.certifyingActuaryContacts &&
-                                                rateRevision.certifyingActuaryContacts.map(
+                                                rateFormData.certifyingActuaryContacts &&
+                                                rateFormData.certifyingActuaryContacts.map(
                                                     (c, idx) => ({
                                                         position: idx,
                                                         ...c,
@@ -268,8 +269,8 @@ async function updateDraftContractWithRates(
                                         },
                                         addtlActuaryContacts: {
                                             create:
-                                                rateRevision.addtlActuaryContacts &&
-                                                rateRevision.addtlActuaryContacts.map(
+                                                rateFormData.addtlActuaryContacts &&
+                                                rateFormData.addtlActuaryContacts.map(
                                                     (c, idx) => ({
                                                         position: idx,
                                                         ...c,
@@ -277,7 +278,7 @@ async function updateDraftContractWithRates(
                                                 ),
                                         },
                                         actuaryCommunicationPreference:
-                                            rateRevision.actuaryCommunicationPreference,
+                                            rateFormData.actuaryCommunicationPreference,
                                         contractsWithSharedRateRevision: {
                                             connect: contractsWithSharedRates,
                                         },
@@ -285,7 +286,7 @@ async function updateDraftContractWithRates(
                                 },
                                 draftContractRevisions: {
                                     connect: {
-                                        id: currentRev.id,
+                                        id: currentContractRev.id,
                                     },
                                 },
                             },
@@ -306,44 +307,45 @@ async function updateDraftContractWithRates(
                                     ? {
                                           update: {
                                               where: {
-                                                  id: rateRevision.id,
+                                                  id: currentRate.revisions[0]
+                                                      .id,
                                               },
                                               data: {
                                                   rateType: nullify(
-                                                      rateRevision.rateType
+                                                      rateFormData.rateType
                                                   ),
                                                   rateCapitationType: nullify(
-                                                      rateRevision.rateCapitationType
+                                                      rateFormData.rateCapitationType
                                                   ),
                                                   rateDateStart: nullify(
-                                                      rateRevision.rateDateStart
+                                                      rateFormData.rateDateStart
                                                   ),
                                                   rateDateEnd: nullify(
-                                                      rateRevision.rateDateEnd
+                                                      rateFormData.rateDateEnd
                                                   ),
                                                   rateDateCertified: nullify(
-                                                      rateRevision.rateDateCertified
+                                                      rateFormData.rateDateCertified
                                                   ),
                                                   amendmentEffectiveDateStart:
                                                       nullify(
-                                                          rateRevision.amendmentEffectiveDateStart
+                                                          rateFormData.amendmentEffectiveDateStart
                                                       ),
                                                   amendmentEffectiveDateEnd:
                                                       nullify(
-                                                          rateRevision.amendmentEffectiveDateEnd
+                                                          rateFormData.amendmentEffectiveDateEnd
                                                       ),
                                                   rateProgramIDs: emptify(
-                                                      rateRevision.rateProgramIDs
+                                                      rateFormData.rateProgramIDs
                                                   ),
                                                   rateCertificationName:
                                                       nullify(
-                                                          rateRevision.rateCertificationName
+                                                          rateFormData.rateCertificationName
                                                       ),
                                                   rateDocuments: {
                                                       deleteMany: {},
                                                       create:
-                                                          rateRevision.rateDocuments &&
-                                                          rateRevision.rateDocuments.map(
+                                                          rateFormData.rateDocuments &&
+                                                          rateFormData.rateDocuments.map(
                                                               (d, idx) => ({
                                                                   position: idx,
                                                                   ...d,
@@ -353,8 +355,8 @@ async function updateDraftContractWithRates(
                                                   supportingDocuments: {
                                                       deleteMany: {},
                                                       create:
-                                                          rateRevision.supportingDocuments &&
-                                                          rateRevision.supportingDocuments.map(
+                                                          rateFormData.supportingDocuments &&
+                                                          rateFormData.supportingDocuments.map(
                                                               (d, idx) => ({
                                                                   position: idx,
                                                                   ...d,
@@ -364,8 +366,8 @@ async function updateDraftContractWithRates(
                                                   certifyingActuaryContacts: {
                                                       deleteMany: {},
                                                       create:
-                                                          rateRevision.certifyingActuaryContacts &&
-                                                          rateRevision.certifyingActuaryContacts.map(
+                                                          rateFormData.certifyingActuaryContacts &&
+                                                          rateFormData.certifyingActuaryContacts.map(
                                                               (c, idx) => ({
                                                                   position: idx,
                                                                   ...c,
@@ -375,8 +377,8 @@ async function updateDraftContractWithRates(
                                                   addtlActuaryContacts: {
                                                       deleteMany: {},
                                                       create:
-                                                          rateRevision.addtlActuaryContacts &&
-                                                          rateRevision.addtlActuaryContacts.map(
+                                                          rateFormData.addtlActuaryContacts &&
+                                                          rateFormData.addtlActuaryContacts.map(
                                                               (c, idx) => ({
                                                                   position: idx,
                                                                   ...c,
@@ -385,7 +387,7 @@ async function updateDraftContractWithRates(
                                                   },
                                                   actuaryCommunicationPreference:
                                                       nullify(
-                                                          rateRevision.actuaryCommunicationPreference
+                                                          rateFormData.actuaryCommunicationPreference
                                                       ),
                                                   contractsWithSharedRateRevision:
                                                       {
@@ -397,7 +399,7 @@ async function updateDraftContractWithRates(
                                     : undefined,
                                 draftContractRevisions: {
                                     connect: {
-                                        id: currentRev.id,
+                                        id: currentContractRev.id,
                                     },
                                 },
                             },
@@ -409,7 +411,7 @@ async function updateDraftContractWithRates(
             // Then update resource, adjusting all simple fields and creating new linked resources for fields holding relationships to other day,
             await tx.contractRevisionTable.update({
                 where: {
-                    id: currentRev.id,
+                    id: currentContractRev.id,
                 },
                 data: {
                     populationCovered: nullify(populationCovered),
