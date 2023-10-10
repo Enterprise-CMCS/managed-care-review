@@ -42,6 +42,22 @@ describe('updateContract', () => {
         expect(updateResult.errors).toBeUndefined()
         const updatedSub = updateResult?.data?.updateContract.pkg
         expect(updatedSub.mccrsID).toBe('1234')
+
+        // Remove MCCRSID number
+        const updateResultWithNoMCCRSID = await cmsServer.executeOperation({
+            query: UPDATE_CONTRACT_MUTATION,
+            variables: {
+                input: {
+                    id: stateSubmission.id,
+                },
+            },
+        })
+
+        expect(updateResult.errors).toBeUndefined()
+        const updatedSubWithNoMCCRSID =
+            updateResultWithNoMCCRSID?.data?.updateContract.pkg
+
+        expect(updatedSubWithNoMCCRSID.mccrsID).toBeNull()
     })
 
     it('errors if the contract is not submitted', async () => {
@@ -79,7 +95,7 @@ describe('updateContract', () => {
         )
     })
 
-    it('errors if a CMS user calls it', async () => {
+    it('errors if a State user calls it', async () => {
         const stateServer = await constructTestPostgresServer({
             ldService: mockLDService,
         })

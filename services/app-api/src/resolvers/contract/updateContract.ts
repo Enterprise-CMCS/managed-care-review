@@ -14,7 +14,7 @@ import type { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql'
 import { NotFoundError } from '../../postgres'
 
-export function updateContractResolver(
+export function updateContract(
     store: Store,
     launchDarkly: LDService
 ): MutationResolvers['updateContract'] {
