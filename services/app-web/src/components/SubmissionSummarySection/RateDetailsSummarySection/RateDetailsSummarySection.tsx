@@ -46,7 +46,9 @@ export type RateDetailsSummarySectionProps = {
     onDocumentError?: (error: true) => void
 }
 
-function renderDownloadButton(zippedFilesURL: string | undefined | Error) {
+export function renderDownloadButton(
+    zippedFilesURL: string | undefined | Error
+) {
     if (zippedFilesURL instanceof Error) {
         return (
             <InlineDocumentWarning message="Rate document download is unavailable" />
@@ -296,12 +298,6 @@ export const RateDetailsSummarySection = ({
                                         )}
                                     />
                                     <DataDetail
-                                        id="rateCapitationType"
-                                        label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
-                                        explainMissingData={!isSubmitted}
-                                        children={rateCapitationType(rateInfo)}
-                                    />
-                                    <DataDetail
                                         id="ratingPeriod"
                                         label={
                                             rateInfo.rateType === 'AMENDMENT'
@@ -363,6 +359,12 @@ export const RateDetailsSummarySection = ({
                                             }
                                         />
                                     )}
+                                    <DataDetail
+                                        id="rateCapitationType"
+                                        label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
+                                        explainMissingData={!isSubmitted}
+                                        children={rateCapitationType(rateInfo)}
+                                    />
                                 </DoubleColumnGrid>
                                 {!loading ? (
                                     <UploadedDocumentsTable

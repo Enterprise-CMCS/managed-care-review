@@ -12,6 +12,7 @@ const ROUTES = [
     'HELP',
     'REPORTS',
     'SETTINGS',
+    'RATES_SUMMARY',
     'SUBMISSIONS',
     'SUBMISSIONS_NEW',
     'SUBMISSIONS_TYPE',
@@ -46,6 +47,7 @@ const RoutesRecord: Record<RouteT, string> = {
     HELP: '/help',
     REPORTS: '/reports',
     SETTINGS: '/settings',
+    RATES_SUMMARY: 'rates/:id',
     SUBMISSIONS: '/submissions',
     SUBMISSIONS_NEW: '/submissions/new',
     SUBMISSIONS_EDIT_TOP_LEVEL: '/submissions/:id/edit/*',
@@ -100,6 +102,7 @@ const QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
 const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
     ROOT: 'Dashboard',
     DASHBOARD_SUBMISSIONS: 'Dashboard',
+    DASHBOARD_RATES: 'Dashboard',
     SUBMISSIONS_NEW: 'New submission',
     UNKNOWN_ROUTE: '404',
 }
@@ -119,6 +122,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     DASHBOARD: 'Dashboard',
     DASHBOARD_RATES: 'Rate Review Dashboard',
     DASHBOARD_SUBMISSIONS: 'Dashboard',
+    RATES_SUMMARY: 'Rate summary',
     SUBMISSIONS: 'Submissions',
     SUBMISSIONS_NEW: 'New submission',
     SUBMISSIONS_EDIT_TOP_LEVEL: 'Submissions',

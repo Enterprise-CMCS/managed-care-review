@@ -3,7 +3,6 @@ import {
     RevisionsLookupType,
 } from '../gqlHelpers/fetchHealthPlanPackageWrapper'
 import { getAllDocuments } from './getAllDocuments'
-import { getDocumentKey } from './getDocumentKey'
 
 // DocumentDateLookupTableType -  { document lookup key string : date string for "date added" }
 type DocumentDateLookupTableType = {
@@ -40,7 +39,7 @@ function makeDocumentDateTable(
 
             const allDocuments = getAllDocuments(revision.formData)
             allDocuments.forEach((doc) => {
-                const documentKey = getDocumentKey(doc)
+                const documentKey = doc.sha256 ? doc.sha256 : doc.s3URL
                 const dateAdded = getDateAdded(revision)
                 if (dateAdded) lookupTable[documentKey] = dateAdded
             })

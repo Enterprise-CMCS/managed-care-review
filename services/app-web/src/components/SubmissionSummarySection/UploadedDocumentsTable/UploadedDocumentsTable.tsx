@@ -9,18 +9,18 @@ import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataTy
 import { DocumentTag } from './DocumentTag'
 import { useDocument } from '../../../hooks/useDocument'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
-import { getDocumentKey } from '../../../documentHelpers'
 import { useAuth } from '../../../contexts/AuthContext'
 import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
+import { GenericDocument } from '../../../gen/gqlClient'
 
 export type UploadedDocumentsTableProps = {
-    documents: SubmissionDocument[]
+    documents: SubmissionDocument[] | GenericDocument[]
     caption: string | null
-    packagesWithSharedRateCerts?: SharedRateCertDisplay[]
+    packagesWithSharedRateCerts?: SharedRateCertDisplay[] // revisit field after rates refactor
     documentDateLookupTable: DocumentDateLookupTableType
-    isSupportingDocuments?: boolean
+    isSupportingDocuments?: boolean // delete after rates refactor
     multipleDocumentsAllowed?: boolean
-    documentCategory?: string // if this prop is not included, do not show category column
+    documentCategory?: string // if this prop is not included, do not show category column - delete after rates refactor
     isEditing?: boolean // by default assume we are on summary page, if true, assume review and submit page
     isSubmitted?: boolean // by default assume we are on summary page, if true, assume review and submit page
 }
@@ -47,18 +47,16 @@ export const UploadedDocumentsTable = ({
     const [refreshedDocs, setRefreshedDocs] =
         useState<DocumentWithS3Data[]>(initialDocState)
     const shouldShowEditButton = isEditing && isSupportingDocuments
-    const shouldShowAsteriskExplainer = refreshedDocs.some((doc) =>
-        isBothContractAndRateSupporting(doc)
-    )
+
     // canDisplayDateAddedForDocument -  guards against passing in null or undefined to dayjs
     // dates will be undefined in lookup table we are dealing with a new initial submission
     const canDisplayDateAddedForDocument = (doc: DocumentWithS3Data) => {
-        const documentLookupKey = getDocumentKey(doc)
+        const documentLookupKey = doc.sha256
         return documentLookupKey && documentDateLookupTable[documentLookupKey]
     }
 
     const shouldHaveNewTag = (doc: DocumentWithS3Data) => {
-        const documentLookupKey = getDocumentKey(doc)
+        const documentLookupKey = doc.sha256
         if (!isCMSUser) {
             return false // design requirement, don't show new tag to state users  on review submit
         }
@@ -132,6 +130,7 @@ export const UploadedDocumentsTable = ({
             </div>
         )
     }
+
     return (
         <>
             <table
@@ -179,10 +178,7 @@ export const UploadedDocumentsTable = ({
                                         href={doc.url}
                                         target="_blank"
                                     >
-                                        {isSupportingDocuments &&
-                                        isBothContractAndRateSupporting(doc)
-                                            ? `*${doc.name}`
-                                            : doc.name}
+                                        {doc.name}
                                     </Link>
                                 </td>
                             ) : (
@@ -196,9 +192,7 @@ export const UploadedDocumentsTable = ({
                             <td>
                                 {canDisplayDateAddedForDocument(doc) ? (
                                     dayjs(
-                                        documentDateLookupTable[
-                                            getDocumentKey(doc)
-                                        ]
+                                        documentDateLookupTable[doc.sha256]
                                     ).format('M/D/YY')
                                 ) : (
                                     <span className="srOnly">N/A</span>
@@ -220,11 +214,6 @@ export const UploadedDocumentsTable = ({
                     ))}
                 </tbody>
             </table>
-            {shouldShowAsteriskExplainer && (
-                <span>
-                    * Listed as both a contract and rate supporting document
-                </span>
-            )}
         </>
     )
 }
@@ -233,11 +222,7 @@ export const UploadedDocumentsTable = ({
 type DocumentWithS3Data = {
     url: string | null
     s3Key: string | null
-} & SubmissionDocument
-
-const isBothContractAndRateSupporting = (doc: SubmissionDocument) =>
-    doc.documentCategories.includes('CONTRACT_RELATED') &&
-    doc.documentCategories.includes('RATES_RELATED')
+} & (SubmissionDocument | GenericDocument)
 
 type LinkedPackagesListProps = {
     unlinkDrafts: boolean

@@ -85,7 +85,7 @@ export const QATable = ({
     useDeepCompareEffect(() => {
         const refreshDocuments = async () => {
             const newDocuments = await getDocumentsWithS3KeyAndUrl(
-                tableDocuments,
+                tableDocuments as TableData[],
                 'QUESTION_ANSWER_DOCS'
             )
             if (newDocuments.length) {

@@ -69,6 +69,18 @@ type Query {
     - ForbiddenError: This API is not available due to feature flags.
     """
     indexRates: IndexRatesPayload!
+    """
+    fetchRate returns an array of rates with their revisions and related contracts
+
+    It can be called by CMS or State users
+
+    Errors:
+    - ForbiddenError: This API is not available due to feature flags.
+    """
+    fetchRate(
+        input: FetchRateInput!
+    ): FetchRatePayload!
+
 }
 
 type Mutation {
@@ -320,7 +332,7 @@ input CreateQuestionInput {
     "The ID of the package for which to create a question"
     pkgID: ID!
     "A list of documents to attach to the question"
-    documents: [DocumentInput!]!
+    documents: [DocumentInput!]! # should be Generic Document with sha256
     "A note to attach to the question"
     noteText: String
     "The date the answer to the question is due"
@@ -350,7 +362,7 @@ input CreateQuestionResponseInput {
     "The ID of the question for which to create a response"
     questionID: ID!
     "A list of documents to attach to the response"
-    documents: [DocumentInput!]!
+    documents: [DocumentInput!]!  # should be Generic Document with sha256
     "A note to attach to the response"
     noteText: String
 }
@@ -682,9 +694,9 @@ type FetchEmailSettingsPayload {
 }
 
 """
-Documents
+GenericDocument
 
-This can be used everywhere we pass documents through GraphQL regardless of domain
+This document type should be used (or extended) everywhere we pass documents through GraphQL regardless of domain
 """
 type GenericDocument {
     "The user created name of the document"
@@ -745,7 +757,7 @@ type RateFormData {
     rateDocuments: [GenericDocument!]!
     supportingDocuments: [GenericDocument!]!
     rateDateStart: DateTime
-    rateDateEnd:DateTime
+    rateDateEnd: DateTime
     rateDateCertified: DateTime
     amendmentEffectiveDateStart: DateTime
     amendmentEffectiveDateEnd:  DateTime
@@ -777,7 +789,7 @@ type RateRevision {
   unlockInfo: UpdateInformation
     "Information on who, when, and why this revision was submitted."
   submitInfo: UpdateInformation
-  formData: RateFormData
+  formData: RateFormData!
   contractRevisions: [RelatedContractRevisions!]!
 }
 
@@ -812,4 +824,12 @@ type RateEdge {
 type IndexRatesPayload {
     totalCount: Int
     edges: [RateEdge!]!
+}
+
+type FetchRatePayload {
+    rate: Rate!
+}
+
+input FetchRateInput{
+    rateID: ID!
 }

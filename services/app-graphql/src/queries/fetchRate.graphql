@@ -1,0 +1,93 @@
+query fetchRate($input: FetchRateInput!) {
+    fetchRate(input: $input) {
+        rate {
+        id
+        createdAt
+        updatedAt
+        stateCode
+        stateNumber
+        state {
+            code
+            name
+            programs {
+                id
+                name
+                fullName
+            }
+        }
+        status
+        initiallySubmittedAt
+        revisions {
+            id
+            createdAt
+            updatedAt
+            unlockInfo {
+                updatedAt
+                updatedBy
+                updatedReason
+            }
+            submitInfo {
+                updatedAt
+                updatedBy
+                updatedReason
+            }
+            formData {
+                rateType,
+                rateCapitationType,
+                rateDocuments {
+                    name
+                    s3URL
+                    sha256
+                },
+                supportingDocuments {
+                    name
+                    s3URL
+                    sha256
+                },
+                rateDateStart,
+                rateDateEnd,
+                rateDateCertified,
+                amendmentEffectiveDateStart,
+                amendmentEffectiveDateEnd,
+                rateProgramIDs,
+                rateCertificationName,
+                certifyingActuaryContacts {
+                    name
+                    titleRole
+                    email
+                    actuarialFirm
+                    actuarialFirmOther
+                },
+                addtlActuaryContacts {
+                    name
+                    titleRole
+                    email
+                    actuarialFirm
+                    actuarialFirmOther
+                },
+                actuaryCommunicationPreference
+                packagesWithSharedRateCerts {
+                    packageName
+                    packageID
+                }
+            }
+             contractRevisions {
+                    id
+                    createdAt
+                    updatedAt
+                    submitInfo {
+                        updatedAt
+                        updatedBy
+                        updatedReason
+                    }
+                    unlockInfo{
+                        updatedAt
+                        updatedBy
+                        updatedReason
+                    }
+            }
+        }
+
+        }
+    }
+}

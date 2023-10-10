@@ -28,6 +28,7 @@ import type { LDService } from '../launchDarkly/launchDarkly'
 import { fetchEmailSettingsResolver } from './email/fetchEmailSettings'
 import { indexRatesResolver } from './contractAndRates/indexRates'
 import { rateResolver } from './contractAndRates/rateResolver'
+import { fetchRateResolver } from './contractAndRates/fetchRate'
 
 export function configureResolvers(
     store: Store,
@@ -57,6 +58,7 @@ export function configureResolvers(
             ),
             // Rates refactor
             indexRates: indexRatesResolver(store, launchDarkly),
+            fetchRate: fetchRateResolver(store, launchDarkly),
         },
         Mutation: {
             createHealthPlanPackage: createHealthPlanPackageResolver(

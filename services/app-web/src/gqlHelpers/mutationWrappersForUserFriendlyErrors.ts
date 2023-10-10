@@ -3,7 +3,6 @@ import {
     HealthPlanPackage,
     SubmitHealthPlanPackageMutationFn,
     UnlockHealthPlanPackageMutationFn,
-    Document,
     FetchHealthPlanPackageWithQuestionsQuery,
     FetchHealthPlanPackageWithQuestionsDocument,
     IndexQuestionsPayload,
@@ -12,6 +11,8 @@ import {
     CreateQuestionResponseMutation,
     Question,
     Division,
+    CreateQuestionInput,
+    CreateQuestionResponseInput,
 } from '../gen/gqlClient'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
@@ -153,10 +154,7 @@ export const submitMutationWrapper = async (
 
 export const createQuestionWrapper = async (
     createQuestion: CreateQuestionMutationFn,
-    input: {
-        pkgID: string
-        documents: Document[]
-    }
+    input: CreateQuestionInput
 ): Promise<CreateQuestionMutation | GraphQLErrors | Error> => {
     try {
         const result = await createQuestion({
@@ -240,10 +238,7 @@ export const createQuestionWrapper = async (
 export const createResponseWrapper = async (
     createResponse: CreateQuestionResponseMutationFn,
     pkgID: string,
-    input: {
-        questionID: string
-        documents: Document[]
-    },
+    input: CreateQuestionResponseInput,
     division: Division
 ): Promise<CreateQuestionResponseMutation | GraphQLErrors | Error> => {
     try {

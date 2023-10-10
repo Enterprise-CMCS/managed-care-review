@@ -1,13 +1,11 @@
 import { ForbiddenError } from 'apollo-server-core'
 import type { Span } from '@opentelemetry/api'
-
-import { isAdminUser, isCMSUser } from '../../domain-models'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import { isHelpdeskUser } from '../../domain-models/user'
+import { hasAdminPermissions, isCMSUser } from '../../domain-models/user'
 import { NotFoundError } from '../../postgres'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { LDService } from '../../launchDarkly/launchDarkly'
@@ -60,13 +58,11 @@ export function indexRatesResolver(
                 'indexRates must be used with rates database refactor flag'
             )
         }
-
-        if (isCMSUser(user) || isAdminUser(user) || isHelpdeskUser(user)) {
+        if (hasAdminPermissions(user) || isCMSUser(user)) {
             const ratesWithHistory =
                 await store.findAllRatesWithHistoryBySubmitInfo()
             if (ratesWithHistory instanceof Error) {
                 const errMessage = `Issue finding rates with history Message: ${ratesWithHistory.message}`
-                logError('fetchHealthPlanPackage', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
 
                 if (ratesWithHistory instanceof NotFoundError) {
