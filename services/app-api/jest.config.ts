@@ -27,4 +27,7 @@ module.exports = {
         'emailer.ts',
         'postgresStore.ts',
     ],
+    moduleNameMapper: {
+        '^uuid$': require.resolve('uuid'),
+    }
 }
