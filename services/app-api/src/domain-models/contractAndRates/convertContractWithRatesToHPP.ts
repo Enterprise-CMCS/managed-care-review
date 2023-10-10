@@ -17,6 +17,7 @@ import {
 import type { ContractRevisionWithRatesType } from './revisionTypes'
 import { parsePartialHPFD } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/toDomain'
 import type { PartialHealthPlanFormData } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/toDomain'
+import { isEqualData } from '../../resolvers/healthPlanPackage/contractAndRates/resolverHelpers'
 
 function convertContractWithRatesToUnlockedHPP(
     contract: ContractType
@@ -92,7 +93,7 @@ function convertContractWithRatesToFormData(
     stateNumber: number
 ): HealthPlanFormDataType | Error {
     // additional certifying actuaries are on every rate post refactor but on the package pre-refactor
-    const pkgAdditionalCertifyingActuaries: Set<ActuaryContact> = new Set()
+    const pkgAdditionalCertifyingActuaries: ActuaryContact[] = []
     let pkgActuaryCommsPref: ActuaryCommunicationType | undefined = undefined
 
     const rateInfos: RateInfoType[] = contractRev.rateRevisions.map(
@@ -116,7 +117,13 @@ function convertContractWithRatesToFormData(
             } = rateRev.formData
 
             for (const additionalActuary of addtlActuaryContacts) {
-                pkgAdditionalCertifyingActuaries.add(additionalActuary)
+                if (
+                    !pkgAdditionalCertifyingActuaries.find((actuary) =>
+                        isEqualData(actuary, additionalActuary)
+                    )
+                ) {
+                    pkgAdditionalCertifyingActuaries.push(additionalActuary)
+                }
             }
 
             // The first time we find a rate that has an actuary comms pref, we use that to set the package's prefs
