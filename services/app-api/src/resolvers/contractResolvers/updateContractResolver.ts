@@ -119,7 +119,7 @@ export function updateContractResolver(
             }
         } else {
             throw new ForbiddenError(
-                'updateContract must be used with rates database refactor flag'
+                'updateMCCRSID must be used with rates database refactor flag'
             )
         }
     }
