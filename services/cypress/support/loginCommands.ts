@@ -63,7 +63,7 @@ Cypress.Commands.add(
         )
         cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
         if (initialURL?.includes('submissions')) {
-            cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20_000 }) // for cases where CMs user goes to specific submission on login, likly from email link
+            cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20_000 }) // for cases where CMs user goes to specific submission on login, likely from email link
         } else {
             // Default behavior on login is to go to CMS dashboard
             cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })

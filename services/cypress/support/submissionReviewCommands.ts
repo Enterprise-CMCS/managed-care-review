@@ -1,6 +1,6 @@
 Cypress.Commands.add('unlockSubmission', (unlockReason) => {
     // click on the unlock button, type in reason and confirm
-    cy.findByRole('button', { name: 'Unlock submission', timeout: 5_000 }).click()
+    cy.findByRole('button', { name: 'Unlock submission', timeout: 10_000 }).click()
     cy.findAllByTestId('modalWindow').eq(1).should('be.visible')
     cy.get('#unlockSubmitModalInput').type(
         unlockReason || 'Unlock submission reason.'

@@ -21,3 +21,5 @@ export {
 } from './contractAndRates/rateHelpers'
 
 export { getStateRecord } from './stateHelpers'
+
+export { consoleLogFullData } from './debugHelpers'

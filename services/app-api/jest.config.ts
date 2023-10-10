@@ -2,7 +2,7 @@ module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'node',
     transform: {
-        "\\.(gql|graphql)$": "@graphql-tools/jest-transform",
+        '\\.(gql|graphql)$': '@graphql-tools/jest-transform',
     },
     coverageReporters: [
         [
@@ -27,4 +27,7 @@ module.exports = {
         'emailer.ts',
         'postgresStore.ts',
     ],
+    moduleNameMapper: {
+        '^uuid$': require.resolve('uuid'),
+    },
 }
