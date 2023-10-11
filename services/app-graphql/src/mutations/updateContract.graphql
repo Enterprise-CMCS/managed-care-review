@@ -1,8 +1,9 @@
-query fetchHealthPlanPackage($input: FetchHealthPlanPackageInput!) {
-    fetchHealthPlanPackage(input: $input) {
+mutation updateContract($input: UpdateContractInput!) {
+    updateContract(input: $input) {
         pkg {
             id
             stateCode
+            mccrsID
             state {
                 code
                 name
@@ -14,11 +15,9 @@ query fetchHealthPlanPackage($input: FetchHealthPlanPackageInput!) {
             }
             status
             initiallySubmittedAt
-            mccrsID
             revisions {
                 node {
                     id
-                    createdAt
                     unlockInfo {
                         updatedAt
                         updatedBy
@@ -29,6 +28,7 @@ query fetchHealthPlanPackage($input: FetchHealthPlanPackageInput!) {
                         updatedBy
                         updatedReason
                     }
+                    createdAt
                     formDataProto
                 }
             }

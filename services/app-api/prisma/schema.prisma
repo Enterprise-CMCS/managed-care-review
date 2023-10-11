@@ -39,6 +39,7 @@ model ContractTable {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  mccrsID     String?
   stateCode   String
   state       State  @relation(fields: [stateCode], references: [stateCode])
   stateNumber Int

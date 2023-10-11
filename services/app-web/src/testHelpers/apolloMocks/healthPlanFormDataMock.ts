@@ -466,6 +466,7 @@ function mockSubmittedHealthPlanPackage(
         status: 'SUBMITTED',
         initiallySubmittedAt: '2022-01-02',
         stateCode: 'MN',
+        mccrsID: null,
         state: mockMNState(),
         revisions: [
             {
@@ -569,6 +570,7 @@ function mockUnlockedHealthPlanPackage(
         status: 'UNLOCKED',
         initiallySubmittedAt: '2020-01-01',
         stateCode: 'MN',
+        mccrsID: null,
         state: mockMNState(),
         revisions: [
             {

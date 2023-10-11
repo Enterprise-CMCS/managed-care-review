@@ -29,6 +29,7 @@ import { fetchEmailSettingsResolver } from './email/fetchEmailSettings'
 import { indexRatesResolver } from './contractAndRates/indexRates'
 import { rateResolver } from './contractAndRates/rateResolver'
 import { fetchRateResolver } from './contractAndRates/fetchRate'
+import { updateContract } from './contract/updateContract'
 
 export function configureResolvers(
     store: Store,
@@ -81,6 +82,7 @@ export function configureResolvers(
                 emailParameterStore,
                 launchDarkly
             ),
+            updateContract: updateContract(store, launchDarkly),
             updateCMSUser: updateCMSUserResolver(store),
             createQuestion: createQuestionResolver(store),
             createQuestionResponse: createQuestionResponseResolver(store),
