@@ -71,7 +71,9 @@ export function updateContract(
                 })
             }
 
-            const isSubmitted = contractWithHistory.status === 'SUBMITTED'
+            const isSubmitted =
+                contractWithHistory.status === 'SUBMITTED' ||
+                contractWithHistory.status === 'RESUBMITTED'
 
             if (!isSubmitted) {
                 const errMessage = `Can not update a contract has not been submitted. Fails for contract with ID: ${contractWithHistory.id}`
