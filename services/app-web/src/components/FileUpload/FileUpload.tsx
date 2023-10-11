@@ -462,6 +462,7 @@ export const FileUpload = ({
                 accept={inputProps.accept}
                 ref={fileInputRef}
                 aria-required={inputRequired}
+                crossOrigin="anonymous"
             />
             <h5 tabIndex={-1} ref={summaryRef} className={styles.fileSummary}>
                 {`${summary} ${summaryDetailText}`}
