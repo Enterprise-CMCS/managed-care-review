@@ -68,7 +68,7 @@ query fetchRate($input: FetchRateInput!) {
                 actuaryCommunicationPreference
                 packagesWithSharedRateCerts {
                     packageName
-                    packageID
+                    packageId
                 }
             }
              contractRevisions {

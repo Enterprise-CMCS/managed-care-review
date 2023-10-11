@@ -68,7 +68,7 @@ query indexRates {
                         actuaryCommunicationPreference
                         packagesWithSharedRateCerts {
                             packageName
-                            packageID
+                            packageId
                         }
 
                     }
