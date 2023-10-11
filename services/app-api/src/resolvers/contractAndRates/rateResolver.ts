@@ -1,4 +1,4 @@
-import statePrograms from 'app-web/src/common-code/data/statePrograms.json'
+import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
 import type { Resolvers } from '../../gen/gqlServer'
 import { GraphQLError } from 'graphql'
 import type { RateType } from '../../domain-models'
