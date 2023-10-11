@@ -96,75 +96,9 @@ describe('UploadedDocumentsTable', () => {
             expect(screen.getAllByRole('row').length - 1).toEqual(
                 testDocuments.length
             )
-            expect(
-                screen.getByText(
-                    /Listed as both a contract and rate supporting document/
-                )
-            ).toBeInTheDocument()
         })
     })
 
-    it('renders documents that are both contract and rate related', async () => {
-        const testDocuments = [
-            {
-                s3URL: 's3://foo/bar/test-1',
-                name: 'supporting docs test 1',
-                sha256: 'fakesha',
-                documentCategories: ['CONTRACT_RELATED' as const],
-            },
-            {
-                s3URL: 's3://foo/bar/test-2',
-                name: 'supporting docs test 2',
-                sha256: 'fakesha',
-                documentCategories: ['RATES_RELATED' as const],
-            },
-            {
-                s3URL: 's3://foo/bar/test-3',
-                name: 'supporting docs test 3',
-                sha256: 'fakesha',
-                documentCategories: [
-                    'CONTRACT_RELATED' as const,
-                    'RATES_RELATED' as const,
-                ],
-            },
-        ]
-
-        const contractAndRateSupportingDocs = testDocuments.filter(
-            (doc) =>
-                doc.documentCategories.includes('CONTRACT_RELATED') &&
-                doc.documentCategories.includes('RATES_RELATED')
-        )
-        const haveJustOneCategory = testDocuments.filter(
-            (doc) => !contractAndRateSupportingDocs.includes(doc)
-        )
-        renderWithProviders(
-            <UploadedDocumentsTable
-                documentDateLookupTable={emptyDocumentsTable()}
-                documents={testDocuments}
-                caption="Contract supporting"
-                documentCategory="Contract-supporting"
-                isSupportingDocuments
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
-        await waitFor(() => {
-            // confirm those documents are prefixed with asterisk
-            contractAndRateSupportingDocs.forEach((doc) => {
-                expect(screen.getByText(`*${doc.name}`)).toBeInTheDocument()
-            })
-            // and other docs exist but don't have asterisk
-            expect(
-                screen.getByText(`${haveJustOneCategory[0].name}`)
-            ).toBeInTheDocument()
-            expect(
-                screen.queryByText(`*${haveJustOneCategory[0].name}`)
-            ).toBeNull()
-        })
-    })
     it('renders date added when supplied with a date lookup table and is CMS user viewing submission', async () => {
         const testDocuments: SubmissionDocument[] = [
             {

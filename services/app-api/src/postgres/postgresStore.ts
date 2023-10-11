@@ -56,6 +56,7 @@ import {
     updateMCCRSID,
     findAllContractsWithHistoryByState,
     findAllContractsWithHistoryBySubmitInfo,
+    findAllRatesWithHistoryBySubmitInfo,
     submitContract,
     submitRate,
 } from './contractAndRates'
@@ -64,13 +65,15 @@ import type {
     SubmitRateArgsType,
     InsertContractArgsType,
     UpdateContractArgsType,
+    ContractOrErrorArrayType,
+    RateOrErrorArrayType,
     UpdateMCCRSIDFormArgsType,
 } from './contractAndRates'
-import type { ContractOrErrorArrayType } from './contractAndRates/findAllContractsWithHistoryByState'
 import { unlockContract } from './contractAndRates/unlockContract'
 import type { UnlockContractArgsType } from './contractAndRates/unlockContract'
 import { unlockRate } from './contractAndRates/unlockRate'
 import type { UnlockRateArgsType } from './contractAndRates/unlockRate'
+import { findRateWithHistory } from './contractAndRates/findRateWithHistory'
 
 type Store = {
     findPrograms: (
@@ -156,6 +159,7 @@ type Store = {
         contractID: string
     ) => Promise<ContractType | Error>
 
+    findRateWithHistory: (rateID: string) => Promise<RateType | Error>
     updateContract: (
         args: UpdateMCCRSIDFormArgsType
     ) => Promise<ContractType | Error>
@@ -170,6 +174,9 @@ type Store = {
 
     findAllContractsWithHistoryBySubmitInfo: () => Promise<
         ContractOrErrorArrayType | Error
+    >
+    findAllRatesWithHistoryBySubmitInfo: () => Promise<
+        RateOrErrorArrayType | Error
     >
 
     submitContract: (
@@ -243,6 +250,7 @@ function NewPostgresStore(client: PrismaClient): Store {
         insertDraftContract: (args) => insertDraftContract(client, args),
         findContractWithHistory: (args) =>
             findContractWithHistory(client, args),
+        findRateWithHistory: (args) => findRateWithHistory(client, args),
         updateDraftContractWithRates: (args) =>
             updateDraftContractWithRates(client, args),
         updateContract: (args) => updateMCCRSID(client, args),
@@ -250,6 +258,8 @@ function NewPostgresStore(client: PrismaClient): Store {
             findAllContractsWithHistoryByState(client, args),
         findAllContractsWithHistoryBySubmitInfo: () =>
             findAllContractsWithHistoryBySubmitInfo(client),
+        findAllRatesWithHistoryBySubmitInfo: () =>
+            findAllRatesWithHistoryBySubmitInfo(client),
         submitContract: (args) => submitContract(client, args),
         submitRate: (args) => submitRate(client, args),
         unlockContract: (args) => unlockContract(client, args),

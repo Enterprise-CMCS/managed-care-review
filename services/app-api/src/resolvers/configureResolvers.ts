@@ -26,6 +26,9 @@ import {
 import type { EmailParameterStore } from '../parameterStore'
 import type { LDService } from '../launchDarkly/launchDarkly'
 import { fetchEmailSettingsResolver } from './email/fetchEmailSettings'
+import { indexRatesResolver } from './contractAndRates/indexRates'
+import { rateResolver } from './contractAndRates/rateResolver'
+import { fetchRateResolver } from './contractAndRates/fetchRate'
 import { updateContract } from './contract/updateContract'
 
 export function configureResolvers(
@@ -54,6 +57,9 @@ export function configureResolvers(
                 emailer,
                 emailParameterStore
             ),
+            // Rates refactor
+            indexRates: indexRatesResolver(store, launchDarkly),
+            fetchRate: fetchRateResolver(store, launchDarkly),
         },
         Mutation: {
             createHealthPlanPackage: createHealthPlanPackageResolver(
@@ -102,6 +108,7 @@ export function configureResolvers(
         StateUser: stateUserResolver,
         CMSUser: cmsUserResolver,
         HealthPlanPackage: healthPlanPackageResolver(store),
+        Rate: rateResolver,
     }
 
     return resolvers

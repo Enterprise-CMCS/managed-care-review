@@ -227,7 +227,7 @@ describe('ContractDetailsSummarySection', () => {
                 within(supportingDocsTable).getByText('supporting docs test 1')
             ).toBeInTheDocument()
             expect(
-                within(supportingDocsTable).getByText('*supporting docs test 3')
+                within(supportingDocsTable).getByText('supporting docs test 3')
             ).toBeInTheDocument()
 
             // check correct category on supporting docs

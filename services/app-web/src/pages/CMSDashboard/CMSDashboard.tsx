@@ -4,7 +4,10 @@ import { packageName } from '../../common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { SubmissionTypeRecord } from '../../constants/healthPlanPackages'
 import { useAuth } from '../../contexts/AuthContext'
-import { useIndexHealthPlanPackagesQuery } from '../../gen/gqlClient'
+import {
+    useIndexHealthPlanPackagesQuery,
+    useIndexRatesQuery,
+} from '../../gen/gqlClient'
 import { mostRecentDate } from '../../common-code/dateHelpers'
 import styles from '../StateDashboard/StateDashboard.module.scss'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
@@ -20,7 +23,8 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { ErrorFailedRequestPage } from '../Errors/ErrorFailedRequestPage'
 import { RoutesRecord } from '../../constants'
 import { featureFlags } from '../../common-code/featureFlags'
-import { getRouteName } from '../../routeHelpers'
+import { RateInDashboardType, RateReviewsTable } from './RateReviewsTable'
+import { GenericErrorPage } from '../Errors/GenericErrorPage'
 
 /**
  * We only pull a subset of data out of the submission and revisions for display in Dashboard
@@ -29,8 +33,7 @@ import { getRouteName } from '../../routeHelpers'
 const DASHBOARD_ATTRIBUTE = 'cms-dashboard-page'
 const CMSDashboard = (): React.ReactElement => {
     const { pathname } = useLocation()
-    const loadOnRateReviews =
-        getRouteName(pathname) === RoutesRecord.DASHBOARD_RATES
+    const loadOnRateReviews = pathname === RoutesRecord.DASHBOARD_RATES
     const ldClient = useLDClient()
     const showRateReviews = ldClient?.variation(
         featureFlags.RATE_REVIEWS_DASHBOARD.flag,
@@ -134,7 +137,7 @@ const SubmissionsDashboard = (): React.ReactElement => {
             }
 
             // Set package display data
-            let packageDataToDisplay = currentFormData
+            let displayRateFormData = currentFormData
             let lastUpdated = mostRecentDate([
                 currentRevision?.node?.submitInfo?.updatedAt,
                 currentRevision?.node?.unlockInfo?.updatedAt,
@@ -165,7 +168,7 @@ const SubmissionsDashboard = (): React.ReactElement => {
                 }
 
                 // reset package display data since unlock submissions rely on previous revision data
-                packageDataToDisplay = previousFormData
+                displayRateFormData = previousFormData
                 lastUpdated = mostRecentDate([
                     currentRevision?.node?.submitInfo?.updatedAt,
                     currentRevision?.node?.unlockInfo?.updatedAt,
@@ -185,19 +188,19 @@ const SubmissionsDashboard = (): React.ReactElement => {
             submissionRows.push({
                 id: sub.id,
                 name: packageName(
-                    packageDataToDisplay.stateCode,
-                    packageDataToDisplay.stateNumber,
-                    packageDataToDisplay.programIDs,
+                    displayRateFormData.stateCode,
+                    displayRateFormData.stateNumber,
+                    displayRateFormData.programIDs,
                     programs
                 ),
                 programs: programs.filter((program) =>
-                    packageDataToDisplay.programIDs.includes(program.id)
+                    displayRateFormData.programIDs.includes(program.id)
                 ),
                 submittedAt: sub.initiallySubmittedAt,
                 status: sub.status,
                 updatedAt: lastUpdated,
                 submissionType:
-                    SubmissionTypeRecord[packageDataToDisplay.submissionType],
+                    SubmissionTypeRecord[displayRateFormData.submissionType],
                 stateName: sub.state.name,
             })
         })
@@ -214,18 +217,96 @@ const SubmissionsDashboard = (): React.ReactElement => {
 }
 const RateReviewsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
-    if (!loggedInUser) {
+    const { data, loading, error } = useIndexRatesQuery({
+        fetchPolicy: 'network-only',
+    })
+
+    const reviewRows: RateInDashboardType[] = []
+    data?.indexRates.edges
+        .map((edge) => edge.node)
+        .forEach((rate) => {
+            const currentRevision = rate.revisions[0]
+            // Set rate display data - could be based on either current or previous revision depending on status
+            let displayRateFormData = currentRevision.formData
+            let lastUpdated = mostRecentDate([
+                currentRevision.submitInfo?.updatedAt,
+                currentRevision.unlockInfo?.updatedAt,
+            ])
+
+            if (rate.status === 'UNLOCKED') {
+                // Errors - data handling
+                const previousRevision = rate.revisions[1]
+                const previousFormData = previousRevision.formData
+
+                // reset package display data since unlock submissions rely on previous revision data
+                displayRateFormData = previousFormData
+                lastUpdated = mostRecentDate([
+                    currentRevision?.submitInfo?.updatedAt,
+                    currentRevision?.unlockInfo?.updatedAt,
+                    previousRevision?.submitInfo?.updatedAt,
+                    previousRevision?.unlockInfo?.updatedAt,
+                ])
+            }
+
+            // Type guards - graphql has loose types with form data, let's narrow in now
+            if (
+                !displayRateFormData ||
+                !displayRateFormData.rateProgramIDs ||
+                !displayRateFormData.rateType ||
+                !displayRateFormData.rateDateEnd ||
+                !displayRateFormData.rateDateStart ||
+                !displayRateFormData.rateCertificationName
+            ) {
+                recordJSException(
+                    `CMSDashboard: Cannot calculate display rate for rate reviews. This is unexpected and needs investigation. ID: ${rate.id}`
+                )
+                return <GenericErrorPage />
+            }
+
+            if (!lastUpdated) {
+                recordJSException(
+                    `CMSDashboard: Cannot find valid last updated date for rate reviews. This is unexpected and needs investigation. Falling back to current revision's last edit timestamp. ID: ${rate.id}`
+                )
+                lastUpdated = new Date(currentRevision.updatedAt)
+            }
+
+            const programs = rate.state.programs
+
+            reviewRows.push({
+                id: rate.id,
+                name: displayRateFormData.rateCertificationName,
+                programs: programs.filter(
+                    (program) =>
+                        displayRateFormData?.rateProgramIDs &&
+                        displayRateFormData.rateProgramIDs.includes(program.id) // only show programs that are still assigned to that state
+                ),
+                submittedAt: rate.initiallySubmittedAt,
+                rateDateStart: displayRateFormData.rateDateStart,
+                rateDateEnd: displayRateFormData.rateDateEnd,
+                status: rate.status,
+                updatedAt: lastUpdated,
+                rateType: displayRateFormData.rateType,
+                stateName: rate.state.name,
+                contractRevisions:
+                    rate.status === 'UNLOCKED'
+                        ? rate.revisions[1].contractRevisions
+                        : rate.revisions[0].contractRevisions,
+            })
+        })
+
+    if (loading || !loggedInUser) {
         return <Loading />
+    } else if (error) {
+        return (
+            <ErrorFailedRequestPage
+                error={error}
+                testID={DASHBOARD_ATTRIBUTE}
+            />
+        )
     } else {
         return (
             <section className={styles.panel}>
-                <div className="srOnly"> RATE REVIEWS DASHBOARD</div>
-                <HealthPlanPackageTable
-                    tableVariant="RATES"
-                    tableData={[]}
-                    user={loggedInUser}
-                    showFilters
-                />
+                <RateReviewsTable tableData={reviewRows} />
             </section>
         )
     }

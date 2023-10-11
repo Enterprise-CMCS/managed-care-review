@@ -14,6 +14,7 @@ import { must, createInsertContractData } from '../../testHelpers'
 import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHelpers'
 
 // TODO: Enable these tests again after reimplementing rate change history that was in contractWithHistoryToDomainModel
+// eslint-disable-next-line jest/no-disabled-tests
 describe.skip('findContract', () => {
     it('finds a stripped down contract with history', async () => {
         const client = await sharedTestPrismaClient()
@@ -236,12 +237,13 @@ describe.skip('findContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateFormDatas:
-                    unlockedContractA.draftRevision?.rateRevisions.filter(
+                rateFormDatas: unlockedContractA.draftRevision?.rateRevisions
+                    .filter(
                         (rateRevision) =>
                             rateRevision.formData.rateID !== rate1.id &&
                             rateRevision.formData.rateID !== rate2.id
-                    ).map(rate => rate.formData),
+                    )
+                    .map((rate) => rate.formData),
             })
         )
         must(
@@ -545,12 +547,13 @@ describe.skip('findContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateFormDatas:
-                    unlockedContractA.draftRevision?.rateRevisions.filter(
+                rateFormDatas: unlockedContractA.draftRevision?.rateRevisions
+                    .filter(
                         (rateRevision) =>
                             rateRevision.formData.rateID !== rate1.id &&
                             rateRevision.formData.rateID !== rate2.id
-                    ).map(rate => rate.formData),
+                    )
+                    .map((rate) => rate.formData),
             })
         )
 

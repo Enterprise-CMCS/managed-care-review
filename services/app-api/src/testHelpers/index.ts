@@ -13,6 +13,13 @@ export {
     createDraftContractData,
 } from './contractAndRates/contractHelpers'
 
+export {
+    createInsertRateData,
+    createRateRevision,
+    createRateData,
+    createDraftRateData,
+} from './contractAndRates/rateHelpers'
+
 export { getStateRecord } from './stateHelpers'
 
 export { consoleLogFullData } from './debugHelpers'

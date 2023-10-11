@@ -6,6 +6,12 @@
     width: 100%;
 }
 
+.backgroundFullPage {
+    background-color: $cms-color-white;
+    width: 100%;
+    flex: 1 0 auto;
+}
+
 .container {
     max-width: $width-max-contained;
     padding: 2rem 0;
@@ -14,3 +20,8 @@
 .banner {
     margin: units(2) auto;
 }
+
+.backLinkContainer {
+    padding-top: units(2);
+    padding-bottom: units(2);
+  }

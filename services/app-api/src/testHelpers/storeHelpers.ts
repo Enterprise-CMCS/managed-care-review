@@ -108,6 +108,9 @@ function mockStoreThatErrors(): Store {
             return genericError
         },
 
+        findRateWithHistory: async (_ID) => {
+            return genericError
+        },
         updateDraftContractWithRates: async (_ID) => {
             return genericError
         },
@@ -120,25 +123,20 @@ function mockStoreThatErrors(): Store {
         findAllContractsWithHistoryBySubmitInfo: async () => {
             return genericError
         },
+        findAllRatesWithHistoryBySubmitInfo: async () => {
+            return genericError
+        },
         submitContract: async (_ID) => {
-            return new Error(
-                'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
-            )
+            return genericError
         },
         unlockContract: async (_ID) => {
-            return new Error(
-                'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
-            )
+            return genericError
         },
         submitRate: async (_ID) => {
-            return new Error(
-                'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
-            )
+            return genericError
         },
         unlockRate: async (_ID) => {
-            return new Error(
-                'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
-            )
+            return genericError
         },
     }
 }

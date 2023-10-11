@@ -6,6 +6,8 @@ import {
 
 const rateSchema = z.object({
     id: z.string().uuid(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
     status: z.union([
         z.literal('SUBMITTED'),
         z.literal('DRAFT'),

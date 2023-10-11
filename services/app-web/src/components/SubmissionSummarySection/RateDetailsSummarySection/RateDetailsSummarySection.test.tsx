@@ -329,7 +329,7 @@ describe('RateDetailsSummarySection', () => {
                 within(supportingDocsTable).getByText('supporting docs test 2')
             ).toBeInTheDocument()
             expect(
-                within(supportingDocsTable).getByText('*supporting docs test 3')
+                within(supportingDocsTable).getByText('supporting docs test 3')
             ).toBeInTheDocument()
 
             // check correct category on supporting docs

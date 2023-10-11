@@ -31,9 +31,9 @@ We have two ways to access the Apollo Explorer tool:
 
 **External Apollo Explorer Tool**:
 >Apollo Explorer is embedded in the local deployment, so there's no need to access it externally, except in rare cases like executing GraphQL operations as user role `ADMIN_USER` when no users with that role has been added.
-> 
+>
 >To connect Apollo Explorer to our local GraphQL api, we must manually configure connection settings in the Explorer tool.
-> 
+>
 >Access the external tool (Only applicable to `local` deployment):
 >- Visit the tool at `https://studio.apollographql.com/sandbox/explorer`.
 >- Top left of the browser, the `SANDBOX` input field will have a gear icon.
@@ -99,7 +99,7 @@ dataExport: DataExport
 
 Once we've told GraphQL what query we want and described that data's return type, we can generate type information that can be shared between the web and api layers. We have a generated file at `/app-web/src/gen/gqlClient.tsx`, which contains graphQL types that we can use in the front end.
 
-_**On the command line, navigate to `/services/app-graphql`.**_  
+_**On the command line, navigate to `/services/app-graphql`.**_
 _**Run `yarn gqlgen`**_
 
 The generated file isn't checked into source control, but if you look inside, you'll now find a new type that you can use on the front-end if necessary.
@@ -183,7 +183,7 @@ When we access the store in our app, the dataExport method we defined above will
 
 ### Creating the resolver
 
-We use Apollo Client to interface with our data source and to provide information from the store to the front-end; the methods to do that are called ["resolvers"](https://www.apollographql.com/docs/apollo-server/data/resolvers/).  
+We use Apollo Client to interface with our data source and to provide information from the store to the front-end; the methods to do that are called ["resolvers"](https://www.apollographql.com/docs/apollo-server/data/resolvers/).
 _**Create `/app-api/src/resolvers/dataExport.ts`**_.
 Here's the code.
 
@@ -221,22 +221,46 @@ And also add it to the Resolvers object. We've made a query, so this line will b
 ```typescript
 dataExport: dataExportResolver(store),
 ```
-
-### Generating prisma code
+### Generating prisma code and types
 
 Once we have our backend code in place, if we've modified the prisma schema (we did not, in this example), we need to run another generate command.
 
-_**On the command line, navigate to `/services/app-api`**_  
+_**On the command line, navigate to `/services/app-api`**_
 _**Run `yarn prisma generate`**_
 
+or from the root run `.dev local --postgres --api` which includes prisma code generation
+
+This command will create `node_modules/.prisma/client/index.d.ts`
+
+### Generating graphql types
+_**On the command line, navigate to `/services/app-graphql`**_
+_**Run `yarn gqlgen`**_
+
+or from the root frun `./dev local` which includes graphql types code generation
+
+Either set of commands will create `app-api/gen/gqlServer.d.ts` used for types on backend as well as `app-web/gen/gqlClient.d.ts` used for types on frontend. The tool for this is set up in the `app-graphql` service.
 ### Getting data on the front end
 
-One result of the `generate` commands is to create a hook that we can use on the front end to call our new resolver. The name of the hook will be of the form _useWhatYourResolverIsCalledQuery_ (it will end with "Mutation" if that's what you've created). You can pull it in and get data.
+One result of the code generation commands a React hook that we can use on the front end to call our new resolver. The name of the hook will be of the form _useWhatYourResolverIsCalledQuery_ (it will end with "Mutation" if that's what you've created). You can pull it in and get data.
 
 ```typescript
 import { useDataExportQuery } from '../../gen/gqlClient'
 const { data, loading, error } = useDataExportQuery()
 ```
+
+### Special case: Add resolver to return custom data type
+
+In GraphQL, resolvers can return resolvers. We can use this pattern to have our resolvers return types that are defined outside GraphQL. This is more advanced pattern for dealing with major data entities with types we use across the stack but want GraphQL  to still understand and return.
+
+For example of this, look at the `User` resolver types. We have a `stateUserResolver`  and a `cmsUserResolver`. These are not queries or mutations, they are just resolvers that add additional data to our graph.
+
+Specifically, `cmsUserResolver` adds `stateAssignments` to CMS users returned from `fetchCurrentUser` addd `state` to the state users.
+
+This is set up in `configureResolvers` just like basic resolvers. In addition, there is code added to `codegen.yml` the config file for our graphql-to-typescript dependency.
+    - See `mappers` key in `codegen.yml`. By adding the specific typescript definition we want to be returned, we ensure that our GRAPHQL resolvers return types match types elsewhere in the application.
+
+Again, this isn't needed for every piece of data returned by GraphQL. It is useful when dealing with those data model types that persist through the frontend and backend. They may have long definitions or validators set up outside both Prisma and GraphQL (like health plan package which is defined by proto or rates and contracts which are defined in zod).
+
 
 ## Lambda
 

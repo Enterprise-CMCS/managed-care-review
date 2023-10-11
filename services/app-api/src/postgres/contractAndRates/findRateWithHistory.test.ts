@@ -16,6 +16,7 @@ import type { DraftContractType } from '../../domain-models/contractAndRates/con
 
 describe('findRate', () => {
     // TODO: Enable this tests again after reimplementing rate change history that was in contractWithHistoryToDomainModel
+    // eslint-disable-next-line jest/no-disabled-tests
     it.skip('finds a stripped down rate with history', async () => {
         const client = await sharedTestPrismaClient()
 
@@ -582,10 +583,12 @@ describe('findRate', () => {
                 contractID: updatedDraftContractA.id,
                 formData: {},
                 rateFormDatas:
-                    updatedDraftContractA.draftRevision?.rateRevisions.filter(
-                        (rateRevision) =>
-                            rateRevision.formData.rateID !== rate1.id
-                    ).map(rate => rate.formData),
+                    updatedDraftContractA.draftRevision?.rateRevisions
+                        .filter(
+                            (rateRevision) =>
+                                rateRevision.formData.rateID !== rate1.id
+                        )
+                        .map((rate) => rate.formData),
             })
         )
         must(

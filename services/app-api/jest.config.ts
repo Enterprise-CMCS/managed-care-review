@@ -29,5 +29,5 @@ module.exports = {
     ],
     moduleNameMapper: {
         '^uuid$': require.resolve('uuid'),
-    }
+    },
 }

@@ -1,5 +1,6 @@
 import {
     SubmissionType,
+    RateType,
     ContractType,
     FederalAuthority,
     ManagedCareEntity,
@@ -26,6 +27,10 @@ const ContractTypeRecord: Record<ContractType, string> = {
     AMENDMENT: 'Contract amendment',
 }
 
+const RateTypeRecord: Record<RateType, string> = {
+    NEW: 'Certification',
+    AMENDMENT: 'Amendment',
+}
 const ContractExecutionStatusRecord: Record<ContractExecutionStatus, string> = {
     EXECUTED: 'Fully executed',
     UNEXECUTED: 'Unexecuted by some or all parties',
@@ -69,6 +74,7 @@ const SubmissionStatusRecord: Record<HealthPlanPackageStatus, string> = {
 }
 
 export {
+    RateTypeRecord,
     ContractTypeRecord,
     SubmissionTypeRecord,
     FederalAuthorityRecord,

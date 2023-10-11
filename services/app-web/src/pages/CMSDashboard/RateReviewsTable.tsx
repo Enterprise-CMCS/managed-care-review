@@ -13,21 +13,25 @@ import {
 } from '@tanstack/react-table'
 import { useAtom } from 'jotai/react'
 import { atomWithHash } from 'jotai-location'
-import { HealthPlanPackageStatus, Program, User } from '../../gen/gqlClient'
-import styles from './HealthPlanPackageTable.module.scss'
+import {
+    HealthPlanPackageStatus,
+    Program,
+    RelatedContractRevisions,
+    RateType,
+} from '../../gen/gqlClient'
+import styles from '../../components/HealthPlanPackageTable/HealthPlanPackageTable.module.scss'
 import { Table, Tag, Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
 import qs from 'qs'
-import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
 import {
     FilterAccordion,
     FilterSelect,
     FilterSelectedOptionsType,
     FilterOptionType,
-} from '../FilterAccordion'
-import { InfoTag, TagProps } from '../InfoTag/InfoTag'
+} from '../../components/FilterAccordion'
 import { pluralize } from '../../common-code/formatters'
+import { RateTypeRecord } from '../../constants/healthPlanPackages'
 
 declare module '@tanstack/table-core' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -39,84 +43,41 @@ declare module '@tanstack/table-core' {
 export type RateInDashboardType = {
     id: string
     name: string
-    submittedAt?: string
+    submittedAt: string
     updatedAt: Date
     status: HealthPlanPackageStatus
     programs: Program[]
-    rateType?: string
-    ratePeriodStart: Date
-    ratePeriodEnd: Date
-    stateName?: string
-}
-export type PackageInDashboardType = {
-    id: string
-    name: string
-    submittedAt?: string
-    updatedAt: Date
-    status: HealthPlanPackageStatus
-    programs: Program[]
-    submissionType?: string
-    stateName?: string
+    rateType: RateType
+    rateDateStart: Date
+    rateDateEnd: Date
+    stateName: string
+    contractRevisions: RelatedContractRevisions[]
 }
 
-export type PackageTableProps = {
-    tableData: PackageInDashboardType[]
-    user: User
+export type RateTableProps = {
+    tableData: RateInDashboardType[]
     showFilters?: boolean
     caption?: string
 }
 
-const isSubmitted = (status: HealthPlanPackageStatus) =>
-    status === 'SUBMITTED' || status === 'RESUBMITTED'
-
-function submissionURL(
-    id: PackageInDashboardType['id'],
-    status: PackageInDashboardType['status'],
-    isCMSOrAdminUser: boolean
-): string {
-    if (isCMSOrAdminUser) {
-        return `/submissions/${id}`
-    } else if (status === 'DRAFT') {
-        return `/submissions/${id}/edit/type`
-    } else if (status === 'UNLOCKED') {
-        return `/submissions/${id}/edit/review-and-submit`
-    }
-    return `/submissions/${id}`
+function rateURL(rate: RateInDashboardType): string {
+    return `/rates/${rate.id}`
 }
 
-const StatusTag = ({
-    status,
-}: {
-    status: HealthPlanPackageStatus
-}): React.ReactElement => {
-    let color: TagProps['color'] = 'gold'
-    if (isSubmitted(status)) {
-        color = 'green'
-    } else if (status === 'UNLOCKED') {
-        color = 'blue'
-    }
-
-    const statusText = isSubmitted(status)
-        ? SubmissionStatusRecord.SUBMITTED
-        : SubmissionStatusRecord[status]
-
-    return <InfoTag color={color}>{statusText}</InfoTag>
-}
-
-const submissionTypeOptions = [
+const rateTypeOptions = [
     {
-        label: 'Contract action only',
-        value: 'Contract action only',
+        label: 'Certification',
+        value: 'Certification',
     },
     {
-        label: 'Contract action and rate certification',
-        value: 'Contract action and rate certification',
+        label: 'Amendment',
+        value: 'Amendment',
     },
 ]
 
 /* To keep the memoization from being refreshed every time, this needs to be
     created outside the render function */
-const columnHelper = createColumnHelper<PackageInDashboardType>()
+const columnHelper = createColumnHelper<RateInDashboardType>()
 
 type ReadableFilters = {
     [key: string]: string[]
@@ -173,18 +134,21 @@ const getSelectedFiltersFromUrl = (
     return filterValues as FilterOptionType[]
 }
 
-export const HealthPlanPackageTable = ({
+type TableVariantConfig = {
+    tableName: string
+    rowIDName: string
+}
+export const RateReviewsTable = ({
     caption,
     tableData,
-    user,
     showFilters = false,
-}: PackageTableProps): React.ReactElement => {
-    const tableConfig = {
-        tableName: 'Submissions',
-        rowIDName: 'submission',
-    }
+}: RateTableProps): React.ReactElement => {
     const lastClickedElement = useRef<string | null>(null)
     const [columnFilters, setColumnFilters] = useAtom(columnHash)
+    const tableConfig: TableVariantConfig = {
+        tableName: 'Rate Reviews',
+        rowIDName: 'rate',
+    }
 
     /* we store the last clicked element in a ref so that when the url is updated and the page rerenders
         we can focus that element.  this useEffect (with no dependency array) will run once on each render.
@@ -218,23 +182,17 @@ export const HealthPlanPackageTable = ({
 
     const [tableCaption, setTableCaption] = useState<React.ReactNode | null>()
 
-    const isCMSOrAdminUser =
-        user.__typename === 'CMSUser' || user.__typename === 'AdminUser'
     const tableColumns = React.useMemo(
         () => [
             columnHelper.accessor((row) => row, {
-                header: 'ID',
+                header: 'Rate review',
                 cell: (info) => (
                     <Link
                         key={`${tableConfig.rowIDName}-id-${
                             info.getValue().id
                         }`}
                         asCustom={NavLink}
-                        to={submissionURL(
-                            info.getValue().id,
-                            info.getValue().status,
-                            isCMSOrAdminUser
-                        )}
+                        to={rateURL(info.getValue())}
                     >
                         {info.getValue().name}
                     </Link>
@@ -252,12 +210,12 @@ export const HealthPlanPackageTable = ({
                 },
                 filterFn: `arrIncludesSome`,
             }),
-            columnHelper.accessor('submissionType', {
-                id: 'submissionType',
-                header: 'Submission type',
-                cell: (info) => <span>{info.getValue()}</span>,
+            columnHelper.accessor('rateType', {
+                id: 'rateType',
+                header: 'Rate type',
+                cell: (info) => <span>{RateTypeRecord[info.getValue()]}</span>,
                 meta: {
-                    dataTestID: 'submission-type',
+                    dataTestID: 'rate-type',
                 },
                 filterFn: `arrIncludesSome`,
             }),
@@ -279,6 +237,26 @@ export const HealthPlanPackageTable = ({
                     dataTestID: `${tableConfig.rowIDName}-programs`,
                 },
             }),
+            columnHelper.accessor('rateDateStart', {
+                header: 'Rate period start date',
+                cell: (info) =>
+                    info.getValue()
+                        ? dayjs(info.getValue()).format('MM/DD/YYYY')
+                        : '',
+                meta: {
+                    dataTestID: `${tableConfig.rowIDName}-date`,
+                },
+            }),
+            columnHelper.accessor('rateDateEnd', {
+                header: 'Rate period end date',
+                cell: (info) =>
+                    info.getValue()
+                        ? dayjs(info.getValue()).format('MM/DD/YYYY')
+                        : '',
+                meta: {
+                    dataTestID: `${tableConfig.rowIDName}-date`,
+                },
+            }),
             columnHelper.accessor('submittedAt', {
                 header: 'Submission date',
                 cell: (info) =>
@@ -289,25 +267,8 @@ export const HealthPlanPackageTable = ({
                     dataTestID: `${tableConfig.rowIDName}-date`,
                 },
             }),
-            columnHelper.accessor('updatedAt', {
-                header: 'Last updated',
-                cell: (info) =>
-                    info.getValue()
-                        ? dayjs(info.getValue()).format('MM/DD/YYYY')
-                        : '',
-                meta: {
-                    dataTestID: `${tableConfig.rowIDName}-last-updated`,
-                },
-            }),
-            columnHelper.accessor('status', {
-                header: 'Status',
-                cell: (info) => <StatusTag status={info.getValue()} />,
-                meta: {
-                    dataTestID: `${tableConfig.rowIDName}-status`,
-                },
-            }),
         ],
-        [isCMSOrAdminUser, tableConfig.rowIDName]
+        [tableConfig.rowIDName]
     )
 
     const reactTable = useReactTable({
@@ -316,13 +277,6 @@ export const HealthPlanPackageTable = ({
         ),
         columns: tableColumns,
         getCoreRowModel: getCoreRowModel(),
-        state: {
-            columnFilters,
-            columnVisibility: {
-                stateName: isCMSOrAdminUser,
-                submissionType: isCMSOrAdminUser,
-            },
-        },
         onColumnFiltersChange: setColumnFilters,
         getFacetedUniqueValues: getFacetedUniqueValues(),
         getFilteredRowModel: getFilteredRowModel(),
@@ -334,10 +288,10 @@ export const HealthPlanPackageTable = ({
 
     const stateColumn = reactTable.getColumn(
         'stateName'
-    ) as Column<PackageInDashboardType>
-    const submissionTypeColumn = reactTable.getColumn(
-        'submissionType'
-    ) as Column<PackageInDashboardType>
+    ) as Column<RateInDashboardType>
+    const rateTypeColumn = reactTable.getColumn(
+        'rateType'
+    ) as Column<RateInDashboardType>
 
     // Filter options based on table data instead of static list of options.
     const stateFilterOptions = Array.from(
@@ -354,14 +308,14 @@ export const HealthPlanPackageTable = ({
     )} applied`
 
     const submissionCount = !showFilters
-        ? `${tableData.length} ${pluralize('submission', tableData.length)}`
+        ? `${tableData.length} ${pluralize('rate', tableData.length)}`
         : `Displaying ${filteredRows.length} of ${tableData.length} ${pluralize(
-              'submission',
+              'rate',
               tableData.length
           )}`
 
     const updateFilters = (
-        column: Column<PackageInDashboardType>,
+        column: Column<RateInDashboardType>,
         selectedOptions: FilterSelectedOptionsType,
         filterName: string
     ) => {
@@ -428,16 +382,16 @@ export const HealthPlanPackageTable = ({
                             <FilterSelect
                                 value={getSelectedFiltersFromUrl(
                                     columnFilters,
-                                    'submissionType'
+                                    'rateType'
                                 )}
-                                name="submissionType"
-                                label="Submission type"
-                                filterOptions={submissionTypeOptions}
+                                name="rateType"
+                                label="Rate Type"
+                                filterOptions={rateTypeOptions}
                                 onChange={(selectedOptions) =>
                                     updateFilters(
-                                        submissionTypeColumn,
+                                        rateTypeColumn,
                                         selectedOptions,
-                                        'submissionType'
+                                        'rateType'
                                     )
                                 }
                             />

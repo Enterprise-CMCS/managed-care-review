@@ -58,7 +58,29 @@ type Query {
     - ForbiddenError: A State users attempts to request Questions for a HPP not in their state
     - UserInputError: pkgID not found
     """
-    indexQuestions(input: IndexQuestionsInput!): IndexQuestionsPayload!
+    indexQuestions(input: IndexQuestionsInput!): IndexQuestionsPayload
+
+    """
+    indexRates returns an array of rates with their revisions and related contracts
+
+    It can be called by CMS users
+
+    Errors:
+    - ForbiddenError: This API is not available due to feature flags.
+    """
+    indexRates: IndexRatesPayload!
+    """
+    fetchRate returns an array of rates with their revisions and related contracts
+
+    It can be called by CMS or State users
+
+    Errors:
+    - ForbiddenError: This API is not available due to feature flags.
+    """
+    fetchRate(
+        input: FetchRateInput!
+    ): FetchRatePayload!
+
 }
 
 type Mutation {
@@ -318,7 +340,7 @@ input CreateQuestionInput {
     "The ID of the package for which to create a question"
     pkgID: ID!
     "A list of documents to attach to the question"
-    documents: [DocumentInput!]!
+    documents: [DocumentInput!]! # should be Generic Document with sha256
     "A note to attach to the question"
     noteText: String
     "The date the answer to the question is due"
@@ -348,7 +370,7 @@ input CreateQuestionResponseInput {
     "The ID of the question for which to create a response"
     questionID: ID!
     "A list of documents to attach to the response"
-    documents: [DocumentInput!]!
+    documents: [DocumentInput!]!  # should be Generic Document with sha256
     "A note to attach to the response"
     noteText: String
 }
@@ -688,4 +710,145 @@ type FetchEmailSettingsPayload {
     "Email settings"
     config: EmailConfiguration
     stateAnalysts: [StateAnalystsConfiguration!]
+}
+
+"""
+GenericDocument
+
+This document type should be used (or extended) everywhere we pass documents through GraphQL regardless of domain
+"""
+type GenericDocument {
+    "The user created name of the document"
+    name: String!
+    "The S3 URL of the document, generated on the FE currently in the FileUpload component"
+    s3URL: String!
+    "The sha256 is a unique string representing the file, generated on the FE currently in the FileUpload component"
+    sha256:  String!
+}
+
+"""
+Rates are rate certifications and their associated actuary contacts and documents
+State users may create, update, and submit several rates at a time
+"""
+enum RateType {
+  NEW
+  AMENDMENT
+}
+
+enum RateCapitationType {
+  RATE_CELL
+  RATE_RANGE
+}
+
+
+enum ActuaryCommunication {
+  OACT_TO_ACTUARY
+  OACT_TO_STATE
+}
+
+enum ActuarialFirm {
+  MERCER
+  MILLIMAN
+  OPTUMAS
+  GUIDEHOUSE
+  DELOITTE
+  STATE_IN_HOUSE
+  OTHER
+}
+
+type ActuaryContact  {
+  name: String!
+  titleRole: String!
+  email: String!
+  actuarialFirm: ActuarialFirm!
+  actuarialFirmOther: String
+}
+
+type PackageWithSameRate  {
+  packageName: String!
+  packageId: String!
+}
+
+
+type RateFormData {
+    rateType: RateType
+    rateCapitationType: RateCapitationType
+    rateDocuments: [GenericDocument!]!
+    supportingDocuments: [GenericDocument!]!
+    rateDateStart: DateTime
+    rateDateEnd: DateTime
+    rateDateCertified: DateTime
+    amendmentEffectiveDateStart: DateTime
+    amendmentEffectiveDateEnd:  DateTime
+    rateProgramIDs: [String!]!
+    rateCertificationName: String
+    certifyingActuaryContacts: [ActuaryContact!]!
+    addtlActuaryContacts: [ActuaryContact!]!
+    actuaryCommunicationPreference: ActuaryCommunication
+    packagesWithSharedRateCerts: [PackageWithSameRate!]!
+}
+
+type RelatedContractRevisions {
+    id: String
+    # contractID: String  # this would be needed in order to link to submission summary
+    submitInfo: UpdateInformation
+    unlockInfo: UpdateInformation
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+type RateRevision {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  """
+    Information about who, when, and why this revision was unlocked.
+    Will be blank on the initial revision.
+    """
+  unlockInfo: UpdateInformation
+    "Information on who, when, and why this revision was submitted."
+  submitInfo: UpdateInformation
+  formData: RateFormData!
+  contractRevisions: [RelatedContractRevisions!]!
+}
+
+type Rate {
+    id: ID!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    """
+    Where the package is in the submission flow.
+    SUBMITTED and RESUBMITTED packages cannot be modified
+    """
+    status: HealthPlanPackageStatus!
+    "The initial date this rate was submitted at. Is not changed by unlock or resubmission."
+    initiallySubmittedAt: Date
+    "The state code (e.g. CA or TN) for the submitting state"
+    stateCode: String!
+    "Fuller state data for the submitting state"
+    state: State!
+    stateNumber: Int!
+    """
+    Array of revisions for this rate. Each revision represents a single submission
+    for the rate and contains the full data from when the rate cert was submitted
+    """
+    revisions: [RateRevision!]!
+    contractRevisions:[RelatedContractRevisions!]!
+}
+
+type RateEdge {
+    node: Rate!
+}
+
+type IndexRatesPayload {
+    totalCount: Int
+    edges: [RateEdge!]!
+}
+
+type FetchRatePayload {
+    rate: Rate!
+}
+
+input FetchRateInput{
+    rateID: ID!
 }

@@ -209,6 +209,8 @@ function rateWithHistoryToDomainModel(
 
     return {
         id: rate.id,
+        createdAt: rate.createdAt,
+        updatedAt: rate.updatedAt,
         status: getContractRateStatus(rateRevisions),
         stateCode: rate.stateCode,
         stateNumber: rate.stateNumber,
