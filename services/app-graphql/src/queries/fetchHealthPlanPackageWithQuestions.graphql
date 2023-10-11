@@ -60,6 +60,7 @@ query fetchHealthPlanPackageWithQuestions($input: FetchHealthPlanPackageInput!) 
             status
             initiallySubmittedAt
             stateCode
+            mccrsID
             state {
                 code
                 name

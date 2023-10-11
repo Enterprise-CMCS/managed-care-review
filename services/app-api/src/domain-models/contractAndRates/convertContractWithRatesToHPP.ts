@@ -38,6 +38,7 @@ function convertContractWithRatesToUnlockedHPP(
     return {
         id: contract.id,
         stateCode: contract.stateCode,
+        mccrsID: contract.mccrsID,
         revisions: healthPlanRevisions,
     }
 }

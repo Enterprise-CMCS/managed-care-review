@@ -26,6 +26,7 @@ import {
 import type { EmailParameterStore } from '../parameterStore'
 import type { LDService } from '../launchDarkly/launchDarkly'
 import { fetchEmailSettingsResolver } from './email/fetchEmailSettings'
+import { updateContract } from './contract/updateContract'
 
 export function configureResolvers(
     store: Store,
@@ -75,6 +76,7 @@ export function configureResolvers(
                 emailParameterStore,
                 launchDarkly
             ),
+            updateContract: updateContract(store, launchDarkly),
             updateCMSUser: updateCMSUserResolver(store),
             createQuestion: createQuestionResolver(store),
             createQuestionResponse: createQuestionResponseResolver(store),

@@ -9,6 +9,7 @@ type HealthPlanPackageStatusType =
 type HealthPlanPackageType = {
     id: string
     stateCode: string
+    mccrsID?: string
     revisions: HealthPlanRevisionType[]
     questions?: IndexQuestionsPayload
 }
