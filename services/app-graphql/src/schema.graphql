@@ -747,7 +747,7 @@ type ActuaryContact  {
 
 type PackageWithSameRate  {
   packageName: String!
-  packageID: String!
+  packageId: String!
 }
 
 

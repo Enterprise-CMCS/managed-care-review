@@ -93,6 +93,7 @@ describe('indexRates', () => {
         })
 
         const ratesIndex = result.data?.indexRates
+        expect(result.errors).toBeUndefined()
 
         // pull out test related rates and order them
         const testRateIDs = [draft1.id, draft2.id]
@@ -101,6 +102,7 @@ describe('indexRates', () => {
             .filter((test: Rate) => {
                 return testRateIDs.includes(test.id)
             })
+
         expect(testRates).toHaveLength(0)
     })
 
@@ -153,6 +155,7 @@ describe('indexRates', () => {
         })
 
         const ratesIndex = result.data?.indexRates
+        expect(result.errors).toBeUndefined()
 
         // pull out test related rates and order them
         const testRateIDs = [
@@ -222,7 +225,7 @@ describe('indexRates', () => {
         })
 
         const ratesIndex = result.data?.indexRates
-
+        expect(result.errors).toBeUndefined()
         // Pull out only the rates results relevant to the test by using id of recently created test packages.
         const allRates: Rate[] = ratesIndex.edges.map(
             (edge: RateEdge) => edge.node
