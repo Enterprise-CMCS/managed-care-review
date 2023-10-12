@@ -4,7 +4,7 @@ import { contractFormDataSchema, rateFormDataSchema } from './formDataTypes'
 
 const contractRevisionSchema = z.object({
     id: z.string().uuid(),
-    // contractID: z.string(),  // TODO we have this data in prisma but we lose it in the domain type - its needed for frontend which uses parent ids for routing
+    contractID: z.string(),
     submitInfo: updateInfoSchema.optional(),
     unlockInfo: updateInfoSchema.optional(),
     createdAt: z.date(),
