@@ -73,6 +73,7 @@ query fetchRate($input: FetchRateInput!) {
             }
              contractRevisions {
                     id
+                    contractID
                     createdAt
                     updatedAt
                     submitInfo {

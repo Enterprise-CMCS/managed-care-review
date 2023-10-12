@@ -74,6 +74,7 @@ query indexRates {
                     }
                     contractRevisions {
                         id
+                        contractID
                         createdAt
                         updatedAt
                         submitInfo {

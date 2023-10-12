@@ -789,12 +789,12 @@ type RateFormData {
 }
 
 type RelatedContractRevisions {
-    id: String
-    # contractID: String  # this would be needed in order to link to submission summary
+    id: String!
+    contractID: String!
     submitInfo: UpdateInformation
     unlockInfo: UpdateInformation
-    createdAt: DateTime
-    updatedAt: DateTime
+    createdAt: DateTime!
+    updatedAt: DateTime!
 }
 
 type RateRevision {
@@ -833,7 +833,6 @@ type Rate {
     for the rate and contains the full data from when the rate cert was submitted
     """
     revisions: [RateRevision!]!
-    contractRevisions:[RelatedContractRevisions!]!
 }
 
 type RateEdge {
