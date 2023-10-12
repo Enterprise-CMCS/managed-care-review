@@ -40,11 +40,9 @@ function draftContractsToDomainModel(
 // -----------
 
 function draftRateRevToDomainModel(
-    revision: RateRevisionTableWithContracts,
-    stateNumber: number,
-    stateCode: string
+    revision: RateRevisionTableWithContracts
 ): RateRevisionWithContractsType | Error {
-    const formData = rateFormDataToDomainModel(revision, stateNumber, stateCode)
+    const formData = rateFormDataToDomainModel(revision)
 
     if (formData instanceof Error) {
         return formData

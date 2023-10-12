@@ -7,6 +7,7 @@ import type {
     RateRevisionType,
     ContractType,
 } from '../../domain-models/contractAndRates'
+import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { includeDraftRates } from './prismaDraftContractHelpers'
 import { rateRevisionToDomainModel } from './prismaSharedContractRateHelpers'
 import type { RateFormEditable } from './updateDraftRate'
@@ -147,15 +148,14 @@ async function updateDraftContractWithRates(
                 return new NotFoundError(err)
             }
 
-            const stateCode = currentContractRev.contract.stateCode
+            const stateCode = currentContractRev.contract
+                .stateCode as StateCodeType
             const ratesFromDB: RateRevisionType[] = []
 
             // Convert all rates from DB to domain model
             for (const rate of currentContractRev.draftRates) {
                 const domainRateRevision = rateRevisionToDomainModel(
-                    rate.revisions[0],
-                    rate.stateNumber,
-                    rate.stateCode
+                    rate.revisions[0]
                 )
 
                 if (domainRateRevision instanceof Error) {
