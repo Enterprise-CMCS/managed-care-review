@@ -10,6 +10,7 @@ import type {
 } from '../../domain-models/contractAndRates'
 import { findStatePrograms } from '../state'
 import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { formatRateNameDate } from '../../../../app-web/src/common-code/dateHelpers'
 
 const subincludeUpdateInfo = {
     updatedBy: true,
@@ -22,6 +23,59 @@ const includeUpdateInfo = {
 type UpdateInfoTableWithUpdater = Prisma.UpdateInfoTableGetPayload<{
     include: typeof subincludeUpdateInfo
 }>
+
+const getRateName = (
+    rateRev: RateRevisionTableWithFormData,
+    stateCode: string,
+    stateNumber: number,
+    statePrograms: ProgramType[]
+): string => {
+    const {
+        rateType,
+        rateDateCertified,
+        rateDateEnd,
+        rateDateStart,
+        rateProgramIDs,
+        amendmentEffectiveDateEnd,
+        amendmentEffectiveDateStart,
+    } = rateRev
+
+    let rateName = `${packageName(
+        stateCode,
+        stateNumber,
+        rateProgramIDs,
+        statePrograms
+    )}-RATE`
+
+    if (rateType === 'AMENDMENT' && amendmentEffectiveDateStart) {
+        rateName = rateName.concat(
+            '-',
+            formatRateNameDate(amendmentEffectiveDateStart ?? undefined)
+        )
+    } else if ((rateType === 'NEW' || !rateType) && rateDateStart) {
+        rateName = rateName.concat('-', formatRateNameDate(rateDateStart))
+    }
+
+    if (rateType === 'AMENDMENT' && amendmentEffectiveDateEnd) {
+        rateName = rateName.concat(
+            '-',
+            formatRateNameDate(amendmentEffectiveDateEnd)
+        )
+    } else if ((rateType === 'NEW' || !rateType) && rateDateEnd) {
+        rateName = rateName.concat('-', formatRateNameDate(rateDateEnd))
+    }
+
+    if (rateType === 'AMENDMENT') {
+        rateName = rateName.concat('-', 'AMENDMENT')
+    } else if (rateType === 'NEW') {
+        rateName = rateName.concat('-', 'CERTIFICATION')
+    }
+
+    if (rateDateCertified) {
+        rateName = rateName.concat('-', formatRateNameDate(rateDateCertified))
+    }
+    return rateName
+}
 
 function convertUpdateInfoToDomainModel(
     info?: UpdateInfoTableWithUpdater | null
@@ -105,7 +159,9 @@ type RateRevisionTableWithFormData = Prisma.RateRevisionTableGetPayload<{
 }>
 
 function rateFormDataToDomainModel(
-    rateRevision: RateRevisionTableWithFormData
+    rateRevision: RateRevisionTableWithFormData,
+    stateNumber: number,
+    stateCode: string
 ): RateFormDataType | Error {
     const packagesWithSharedRateCerts = []
     let statePrograms: ProgramType[] | Error | undefined = undefined
@@ -165,7 +221,15 @@ function rateFormDataToDomainModel(
         amendmentEffectiveDateEnd:
             rateRevision.amendmentEffectiveDateEnd ?? undefined,
         rateProgramIDs: rateRevision.rateProgramIDs,
-        rateCertificationName: rateRevision.rateCertificationName ?? undefined,
+        rateCertificationName:
+            rateRevision.rateCertificationName ??
+            getRateName(
+                rateRevision,
+                stateCode,
+                stateNumber,
+                (statePrograms = [])
+            ) ??
+            'Unknown Rate Name',
         certifyingActuaryContacts: rateRevision.certifyingActuaryContacts
             ? rateRevision.certifyingActuaryContacts.map((actuary) => ({
                   name: actuary.name ?? undefined,
@@ -191,9 +255,11 @@ function rateFormDataToDomainModel(
 }
 
 function rateRevisionToDomainModel(
-    revision: RateRevisionTableWithFormData
+    revision: RateRevisionTableWithFormData,
+    stateNumber: number,
+    stateCode: string
 ): RateRevisionType | Error {
-    const formData = rateFormDataToDomainModel(revision)
+    const formData = rateFormDataToDomainModel(revision, stateNumber, stateCode)
 
     if (formData instanceof Error) {
         return formData
@@ -210,12 +276,18 @@ function rateRevisionToDomainModel(
 }
 
 function ratesRevisionsToDomainModel(
-    rateRevisions: RateRevisionTableWithFormData[]
+    rateRevisions: RateRevisionTableWithFormData[],
+    stateNumber: number,
+    stateCode: string
 ): RateRevisionType[] | Error {
     const domainRevisions: RateRevisionType[] = []
 
     for (const revision of rateRevisions) {
-        const domainRevision = rateRevisionToDomainModel(revision)
+        const domainRevision = rateRevisionToDomainModel(
+            revision,
+            stateNumber,
+            stateCode
+        )
 
         if (domainRevision instanceof Error) {
             return domainRevision

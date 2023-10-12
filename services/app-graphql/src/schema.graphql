@@ -771,7 +771,8 @@ type PackageWithSameRate  {
 
 
 type RateFormData {
-    rateType: RateType
+    rateCertificationName: String!
+    rateType: RateType!
     rateCapitationType: RateCapitationType
     rateDocuments: [GenericDocument!]!
     supportingDocuments: [GenericDocument!]!
@@ -781,7 +782,6 @@ type RateFormData {
     amendmentEffectiveDateStart: Date
     amendmentEffectiveDateEnd:  Date
     rateProgramIDs: [String!]!
-    rateCertificationName: String
     certifyingActuaryContacts: [ActuaryContact!]!
     addtlActuaryContacts: [ActuaryContact!]!
     actuaryCommunicationPreference: ActuaryCommunication

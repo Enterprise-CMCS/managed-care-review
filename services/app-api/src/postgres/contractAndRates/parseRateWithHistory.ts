@@ -49,12 +49,18 @@ interface RateRevisionSet {
 }
 
 function rateSetsToDomainModel(
-    entries: RateRevisionSet[]
+    entries: RateRevisionSet[],
+    stateCode: string,
+    stateNumber: number
 ): RateRevisionWithContractsType[] | Error {
     const revisions: RateRevisionWithContractsType[] = []
 
     for (const entry of entries) {
-        const domainRateRevision = rateRevisionToDomainModel(entry.rateRev)
+        const domainRateRevision = rateRevisionToDomainModel(
+            entry.rateRev,
+            stateCode,
+            stateNumber
+        )
 
         if (domainRateRevision instanceof Error) {
             return domainRateRevision
@@ -75,9 +81,11 @@ function rateSetsToDomainModel(
     return revisions
 }
 function rateRevisionToDomainModel(
-    revision: RateRevisionTableWithFormData
+    revision: RateRevisionTableWithFormData,
+    stateCode: string,
+    stateNumber: number
 ): RateRevisionType | Error {
-    const formData = rateFormDataToDomainModel(revision)
+    const formData = rateFormDataToDomainModel(revision, stateNumber, stateCode)
 
     if (formData instanceof Error) {
         return formData
@@ -94,12 +102,18 @@ function rateRevisionToDomainModel(
 }
 
 function rateRevisionsToDomainModels(
-    rateRevisions: RateRevisionTableWithFormData[]
+    rateRevisions: RateRevisionTableWithFormData[],
+    stateCode: string,
+    stateNumber: number
 ): RateRevisionType[] | Error {
     const domainRateRevisions: RateRevisionType[] = []
 
     for (const rateRevision of rateRevisions) {
-        const domainRateRevision = rateRevisionToDomainModel(rateRevision)
+        const domainRateRevision = rateRevisionToDomainModel(
+            rateRevision,
+            stateCode,
+            stateNumber
+        )
 
         if (domainRateRevision instanceof Error) {
             return domainRateRevision
@@ -134,7 +148,11 @@ function rateWithHistoryToDomainModel(
                 )
             }
 
-            draftRevision = draftRateRevToDomainModel(rateRev)
+            draftRevision = draftRateRevToDomainModel(
+                rateRev,
+                rate.stateNumber,
+                rate.stateCode
+            )
 
             if (draftRevision instanceof Error) {
                 return new Error(
@@ -199,7 +217,11 @@ function rateWithHistoryToDomainModel(
         }
     }
 
-    const revisions = rateSetsToDomainModel(allEntries)
+    const revisions = rateSetsToDomainModel(
+        allEntries,
+        rate.stateCode,
+        rate.stateNumber
+    )
 
     if (revisions instanceof Error) {
         return new Error(

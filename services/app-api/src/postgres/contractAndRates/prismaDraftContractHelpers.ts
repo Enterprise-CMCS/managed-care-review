@@ -59,12 +59,18 @@ type DraftRatesTable = Prisma.RateTableGetPayload<{
 }>
 
 function draftRatesToDomainModel(
-    draftRates: DraftRatesTable[]
+    draftRates: DraftRatesTable[],
+    stateNumber: number,
+    stateCode: string
 ): RateRevisionType[] | Error {
     const domainRates: RateRevisionType[] = []
 
     for (const rate of draftRates) {
-        const domainRate = rateRevisionToDomainModel(rate.revisions[0])
+        const domainRate = rateRevisionToDomainModel(
+            rate.revisions[0],
+            stateNumber,
+            stateCode
+        )
 
         if (domainRate instanceof Error) {
             return domainRate
@@ -79,9 +85,15 @@ function draftRatesToDomainModel(
 // -------------------
 
 function draftContractRevToDomainModel(
-    revision: ContractRevisionTableWithRates
+    revision: ContractRevisionTableWithRates,
+    stateNumber: number,
+    stateCode: string
 ): ContractRevisionWithRatesType | Error {
-    const rateRevisions = draftRatesToDomainModel(revision.draftRates)
+    const rateRevisions = draftRatesToDomainModel(
+        revision.draftRates,
+        stateNumber,
+        stateCode
+    )
 
     if (rateRevisions instanceof Error) {
         return rateRevisions

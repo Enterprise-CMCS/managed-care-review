@@ -53,13 +53,17 @@ interface ContractRevisionSet {
 }
 
 function contractSetsToDomainModel(
-    revisions: ContractRevisionSet[]
+    revisions: ContractRevisionSet[],
+    stateCode: string,
+    stateNumber: number
 ): ContractRevisionWithRatesType[] | Error {
     const contractRevisions = []
 
     for (const revision of revisions) {
         const rateRevisions = ratesRevisionsToDomainModel(
-            revision.rateRevisions
+            revision.rateRevisions,
+            stateNumber,
+            stateCode
         )
 
         if (rateRevisions instanceof Error) {
@@ -120,7 +124,11 @@ function contractWithHistoryToDomainModel(
                 )
             }
 
-            draftRevision = draftContractRevToDomainModel(contractRev)
+            draftRevision = draftContractRevToDomainModel(
+                contractRev,
+                contract.stateNumber,
+                contract.stateCode
+            )
 
             if (draftRevision instanceof Error) {
                 return new Error(
@@ -227,7 +235,11 @@ function contractWithHistoryToDomainModel(
         }
     }
 
-    const revisions = contractSetsToDomainModel(allRevisionSets)
+    const revisions = contractSetsToDomainModel(
+        allRevisionSets,
+        contract.stateCode,
+        contract.stateNumber
+    )
 
     if (revisions instanceof Error) {
         return new Error(

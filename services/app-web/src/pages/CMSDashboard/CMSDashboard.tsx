@@ -269,11 +269,9 @@ const RateReviewsDashboard = (): React.ReactElement => {
 
             const programs = rate.state.programs
 
-            const missingField = 'Missing field'
-
             reviewRows.push({
                 id: rate.id,
-                name: displayRateFormData.rateCertificationName || missingField,
+                name: displayRateFormData.rateCertificationName,
                 programs: programs.filter(
                     (program) =>
                         displayRateFormData?.rateProgramIDs &&
@@ -284,7 +282,7 @@ const RateReviewsDashboard = (): React.ReactElement => {
                 rateDateEnd: displayRateFormData.rateDateEnd,
                 status: rate.status,
                 updatedAt: lastUpdated,
-                rateType: displayRateFormData.rateType || 'NEW',
+                rateType: displayRateFormData.rateType,
                 stateName: rate.state.name,
                 contractRevisions:
                     rate.status === 'UNLOCKED'
