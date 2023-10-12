@@ -133,7 +133,7 @@ type Mutation {
     ): UpdateHealthPlanFormDataPayload!
 
     """
-    updateContract can be used to update fields on the contract 
+    updateContract can be used to update fields on the contract
     as oppossed to an individual revision
     """
     updateContract(
@@ -775,11 +775,11 @@ type RateFormData {
     rateCapitationType: RateCapitationType
     rateDocuments: [GenericDocument!]!
     supportingDocuments: [GenericDocument!]!
-    rateDateStart: DateTime
-    rateDateEnd: DateTime
-    rateDateCertified: DateTime
-    amendmentEffectiveDateStart: DateTime
-    amendmentEffectiveDateEnd:  DateTime
+    rateDateStart: Date
+    rateDateEnd: Date
+    rateDateCertified: Date
+    amendmentEffectiveDateStart: Date
+    amendmentEffectiveDateEnd:  Date
     rateProgramIDs: [String!]!
     rateCertificationName: String
     certifyingActuaryContacts: [ActuaryContact!]!
@@ -832,8 +832,7 @@ type Rate {
     Array of revisions for this rate. Each revision represents a single submission
     for the rate and contains the full data from when the rate cert was submitted
     """
-    revisions: [RateRevision!]!
-    contractRevisions:[RelatedContractRevisions!]!
+    revisions: [RateRevision!]
 }
 
 type RateEdge {

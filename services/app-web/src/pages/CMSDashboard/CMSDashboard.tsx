@@ -256,7 +256,7 @@ const RateReviewsDashboard = (): React.ReactElement => {
                 recordJSException(
                     `CMSDashboard: Cannot calculate one of the required fields displaying rate reviews. This is unexpected and needs investigation. ID: ${
                         rate.id
-                    } formDta: ${JSON.stringify(displayRateFormData)})}`
+                    } formData: ${JSON.stringify(displayRateFormData)})}`
                 )
             }
 
@@ -280,9 +280,8 @@ const RateReviewsDashboard = (): React.ReactElement => {
                         displayRateFormData.rateProgramIDs.includes(program.id) // only show programs that are still assigned to that state
                 ),
                 submittedAt: rate.initiallySubmittedAt,
-                rateDateStart:
-                    displayRateFormData.rateDateStart || missingField,
-                rateDateEnd: displayRateFormData.rateDateEnd || missingField,
+                rateDateStart: displayRateFormData.rateDateStart,
+                rateDateEnd: displayRateFormData.rateDateEnd,
                 status: rate.status,
                 updatedAt: lastUpdated,
                 rateType: displayRateFormData.rateType || 'NEW',
