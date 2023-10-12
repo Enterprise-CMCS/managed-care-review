@@ -83,7 +83,7 @@ export const RateSummary = (): React.ReactElement => {
                     </Link>
                 </div>
                 <SingleRateSummarySection
-                    rate={{ ...rate, contractRevisions: [] }}
+                    rate={rate}
                     isSubmitted // can assume isSubmitted because we are building for CMS users
                     statePrograms={rate.state.programs}
                 />

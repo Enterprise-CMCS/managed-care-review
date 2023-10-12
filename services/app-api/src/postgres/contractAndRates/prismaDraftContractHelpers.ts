@@ -89,6 +89,7 @@ function draftContractRevToDomainModel(
 
     return {
         id: revision.id,
+        contractID: revision.contractID,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
         unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
