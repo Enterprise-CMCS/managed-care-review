@@ -832,7 +832,7 @@ type Rate {
     Array of revisions for this rate. Each revision represents a single submission
     for the rate and contains the full data from when the rate cert was submitted
     """
-    revisions: [RateRevision!]
+    revisions: [RateRevision!]!
 }
 
 type RateEdge {
