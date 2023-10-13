@@ -283,12 +283,18 @@ export const SingleRateSummarySection = ({
                 </SectionHeader>
                 <UploadedDocumentsTable
                     documents={formData.rateDocuments}
+                    packagesWithSharedRateCerts={
+                        formData.packagesWithSharedRateCerts
+                    }
                     multipleDocumentsAllowed={false}
                     documentDateLookupTable={documentDateLookupTable}
                     caption="Rate certification"
                 />
                 <UploadedDocumentsTable
                     documents={formData.supportingDocuments}
+                    packagesWithSharedRateCerts={
+                        formData.packagesWithSharedRateCerts
+                    }
                     documentDateLookupTable={documentDateLookupTable}
                     caption="Rate supporting documents"
                 />
