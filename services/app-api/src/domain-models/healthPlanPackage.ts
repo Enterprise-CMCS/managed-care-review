@@ -37,8 +37,8 @@ function packageStatus(
 // submission has been unlocked and resubmitted the submission date is always the original submit date
 // This method relies on revisions always being presented in most-recent-first order
 function packageSubmittedAt(pkg: HealthPlanPackageType): Date | undefined {
-    const lastSubmittedRev = pkg.revisions[pkg.revisions.length - 1]
-    return lastSubmittedRev?.submitInfo?.updatedAt
+    const firstSubmittedRev = pkg.revisions[pkg.revisions.length - 1]
+    return firstSubmittedRev?.submitInfo?.updatedAt
 }
 
 // submissionCurrentRevision returns the most recent revision

@@ -228,7 +228,7 @@ Once we have our backend code in place, if we've modified the prisma schema (we 
 _**On the command line, navigate to `/services/app-api`**_
 _**Run `yarn prisma generate`**_
 
-or from the root run `.dev local --postgres --api` which includes prisma code generation
+or from the root run  `./dev generate` which includes prisma code generation
 
 This command will create `node_modules/.prisma/client/index.d.ts`
 
@@ -236,7 +236,7 @@ This command will create `node_modules/.prisma/client/index.d.ts`
 _**On the command line, navigate to `/services/app-graphql`**_
 _**Run `yarn gqlgen`**_
 
-or from the root frun `./dev local` which includes graphql types code generation
+or from the root run `./dev generate` which includes graphql types code generation
 
 Either set of commands will create `app-api/gen/gqlServer.d.ts` used for types on backend as well as `app-web/gen/gqlClient.d.ts` used for types on frontend. The tool for this is set up in the `app-graphql` service.
 ### Getting data on the front end
