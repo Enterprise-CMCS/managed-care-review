@@ -12,6 +12,7 @@ import {
     Rate,
     RateFormData,
     RateRevision,
+    RelatedContractRevisions,
 } from '../../../gen/gqlClient'
 import { UploadedDocumentsTable } from '../UploadedDocumentsTable'
 import type { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
@@ -21,6 +22,9 @@ import { DocumentWarningBanner } from '../../Banner'
 import { useS3 } from '../../../contexts/S3Context'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { recordJSException } from '../../../otelHelpers'
+import { Link } from '@trussworks/react-uswds'
+import { NavLink } from 'react-router-dom'
+import { packageName } from '../../../common-code/healthPlanFormDataType'
 
 // This rate summary pages assumes we are using contract and rates API.
 // Eventually RateDetailsSummarySection should share code with this code
@@ -82,6 +86,30 @@ const rateCertificationType = (formData: RateFormData) => {
     }
 }
 
+const relatedSubmissions = (
+    contractRevisions: RelatedContractRevisions[],
+    statePrograms: Program[]
+): React.ReactElement => {
+    return (
+        <>
+            {contractRevisions.map((contractRev) => (
+                <Link
+                    key={contractRev.contract.id}
+                    asCustom={NavLink}
+                    to={`/submissions/${contractRev.contract.id}`}
+                >
+                    {packageName(
+                        contractRev.contract.stateCode,
+                        contractRev.contract.stateNumber,
+                        contractRev.formData.programIDs,
+                        statePrograms
+                    )}
+                </Link>
+            ))}
+        </>
+    )
+}
+
 export const SingleRateSummarySection = ({
     rate,
     isSubmitted,
@@ -91,10 +119,9 @@ export const SingleRateSummarySection = ({
     isSubmitted: boolean
     statePrograms: Program[]
 }): React.ReactElement | null => {
-    const formData: RateFormData =
-        rate?.status === 'UNLOCKED'
-            ? rate?.revisions[1].formData
-            : rate?.revisions[0].formData
+    const rateRevision =
+        rate?.status === 'UNLOCKED' ? rate?.revisions[1] : rate?.revisions[0]
+    const formData: RateFormData = rateRevision?.formData
     const documentDateLookupTable = makeRateDocumentDateTable(rate.revisions)
     const isRateAmendment = formData.rateType === 'AMENDMENT'
 
@@ -237,6 +264,15 @@ export const SingleRateSummarySection = ({
                             label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
                             explainMissingData={!isSubmitted}
                             children={rateCapitationType(formData)}
+                        />
+                        <DataDetail
+                            id="submittedWithContract"
+                            label="Submission this rate was submitted with"
+                            explainMissingData={!isSubmitted}
+                            children={relatedSubmissions(
+                                rateRevision?.contractRevisions,
+                                statePrograms
+                            )}
                         />
                     </DoubleColumnGrid>
                 </dl>
