@@ -236,6 +236,7 @@ function ratesRevisionsToDomainModel(
 const includeContractFormData = {
     unlockInfo: includeUpdateInfo,
     submitInfo: includeUpdateInfo,
+    contract: true,
 
     stateContacts: {
         orderBy: {

@@ -1,79 +1,83 @@
 query fetchRate($input: FetchRateInput!) {
     fetchRate(input: $input) {
         rate {
-        id
-        createdAt
-        updatedAt
-        stateCode
-        stateNumber
-        state {
-            code
-            name
-            programs {
-                id
-                name
-                fullName
-            }
-        }
-        status
-        initiallySubmittedAt
-        revisions {
             id
             createdAt
             updatedAt
-            unlockInfo {
-                updatedAt
-                updatedBy
-                updatedReason
-            }
-            submitInfo {
-                updatedAt
-                updatedBy
-                updatedReason
-            }
-            formData {
-                rateType,
-                rateCapitationType,
-                rateDocuments {
+            stateCode
+            stateNumber
+            state {
+                code
+                name
+                programs {
+                    id
                     name
-                    s3URL
-                    sha256
-                },
-                supportingDocuments {
-                    name
-                    s3URL
-                    sha256
-                },
-                rateDateStart,
-                rateDateEnd,
-                rateDateCertified,
-                amendmentEffectiveDateStart,
-                amendmentEffectiveDateEnd,
-                rateProgramIDs,
-                rateCertificationName,
-                certifyingActuaryContacts {
-                    name
-                    titleRole
-                    email
-                    actuarialFirm
-                    actuarialFirmOther
-                },
-                addtlActuaryContacts {
-                    name
-                    titleRole
-                    email
-                    actuarialFirm
-                    actuarialFirmOther
-                },
-                actuaryCommunicationPreference
-                packagesWithSharedRateCerts {
-                    packageName
-                    packageId
+                    fullName
                 }
             }
-             contractRevisions {
+            status
+            initiallySubmittedAt
+            revisions {
+                id
+                createdAt
+                updatedAt
+                unlockInfo {
+                    updatedAt
+                    updatedBy
+                    updatedReason
+                }
+                submitInfo {
+                    updatedAt
+                    updatedBy
+                    updatedReason
+                }
+                formData {
+                    rateType,
+                    rateCapitationType,
+                    rateDocuments {
+                        name
+                        s3URL
+                        sha256
+                    },
+                    supportingDocuments {
+                        name
+                        s3URL
+                        sha256
+                    },
+                    rateDateStart,
+                    rateDateEnd,
+                    rateDateCertified,
+                    amendmentEffectiveDateStart,
+                    amendmentEffectiveDateEnd,
+                    rateProgramIDs,
+                    rateCertificationName,
+                    certifyingActuaryContacts {
+                        name
+                        titleRole
+                        email
+                        actuarialFirm
+                        actuarialFirmOther
+                    },
+                    addtlActuaryContacts {
+                        name
+                        titleRole
+                        email
+                        actuarialFirm
+                        actuarialFirmOther
+                    },
+                    actuaryCommunicationPreference
+                    packagesWithSharedRateCerts {
+                        packageName
+                        packageId
+                    }
+                }
+                contractRevisions {
                     id
-                    contractID
+                    contract {
+                        id
+                        stateCode
+                        stateNumber
+                    }
                     createdAt
                     updatedAt
                     submitInfo {
@@ -86,9 +90,53 @@ query fetchRate($input: FetchRateInput!) {
                         updatedBy
                         updatedReason
                     }
+                    formData {
+                        programIDs
+                        populationCovered
+                        submissionType
+                        riskBasedContract
+                        submissionDescription
+                        stateContacts {
+                            name,
+                            title
+                            email
+                        }
+                        supportingDocuments {
+                            name
+                            s3URL
+                            sha256
+                        }
+                        contractType
+                        contractExecutionStatus
+                        contractDocuments {
+                            name
+                            s3URL
+                            sha256
+                        }
+                        contractDateStart
+                        contractDateEnd
+                        managedCareEntities
+                        federalAuthorities
+                        inLieuServicesAndSettings
+                        modifiedBenefitsProvided
+                        modifiedGeoAreaServed
+                        modifiedMedicaidBeneficiaries
+                        modifiedRiskSharingStrategy
+                        modifiedIncentiveArrangements
+                        modifiedWitholdAgreements
+                        modifiedStateDirectedPayments
+                        modifiedPassThroughPayments
+                        modifiedPaymentsForMentalDiseaseInstitutions
+                        modifiedMedicalLossRatioStandards
+                        modifiedOtherFinancialPaymentIncentive
+                        modifiedEnrollmentProcess
+                        modifiedGrevienceAndAppeal
+                        modifiedNetworkAdequacyStandards
+                        modifiedLengthOfContract
+                        modifiedNonRiskPaymentArrangements
+                    }
+                }
             }
-        }
-
         }
     }
 }

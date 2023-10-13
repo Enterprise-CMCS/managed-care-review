@@ -4,7 +4,11 @@ import { contractFormDataSchema, rateFormDataSchema } from './formDataTypes'
 
 const contractRevisionSchema = z.object({
     id: z.string().uuid(),
-    contractID: z.string(),
+    contract: z.object({
+        id: z.string().uuid(),
+        stateCode: z.string(),
+        stateNumber: z.number().min(1),
+    }),
     submitInfo: updateInfoSchema.optional(),
     unlockInfo: updateInfoSchema.optional(),
     createdAt: z.date(),

@@ -74,7 +74,11 @@ query indexRates {
                     }
                     contractRevisions {
                         id
-                        contractID
+                        contract {
+                            id
+                            stateCode
+                            stateNumber
+                        }
                         createdAt
                         updatedAt
                         submitInfo {
@@ -86,6 +90,51 @@ query indexRates {
                             updatedAt
                             updatedBy
                             updatedReason
+                        }
+                        formData {
+                            programIDs
+                            populationCovered
+                            submissionType
+                            riskBasedContract
+                            submissionDescription
+                            stateContacts {
+                                name,
+                                title
+                                email
+                            }
+                            supportingDocuments {
+                                name
+                                s3URL
+                                sha256
+                            }
+                            contractType
+                            contractExecutionStatus
+                            contractDocuments {
+                                name
+                                s3URL
+                                sha256
+                            }
+                            contractDateStart
+                            contractDateEnd
+                            managedCareEntities
+                            federalAuthorities
+                            inLieuServicesAndSettings
+                            modifiedBenefitsProvided
+                            modifiedGeoAreaServed
+                            modifiedMedicaidBeneficiaries
+                            modifiedRiskSharingStrategy
+                            modifiedIncentiveArrangements
+                            modifiedWitholdAgreements
+                            modifiedStateDirectedPayments
+                            modifiedPassThroughPayments
+                            modifiedPaymentsForMentalDiseaseInstitutions
+                            modifiedMedicalLossRatioStandards
+                            modifiedOtherFinancialPaymentIncentive
+                            modifiedEnrollmentProcess
+                            modifiedGrevienceAndAppeal
+                            modifiedNetworkAdequacyStandards
+                            modifiedLengthOfContract
+                            modifiedNonRiskPaymentArrangements
                         }
                     }
                 }

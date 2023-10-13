@@ -83,7 +83,7 @@ function contractRevisionToDomainModel(
 ): ContractRevisionType {
     return {
         id: revision.id,
-        contractID: revision.contractID,
+        contract: revision.contract,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
         submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
