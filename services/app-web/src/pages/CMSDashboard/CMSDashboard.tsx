@@ -24,7 +24,6 @@ import { ErrorFailedRequestPage } from '../Errors/ErrorFailedRequestPage'
 import { RoutesRecord } from '../../constants'
 import { featureFlags } from '../../common-code/featureFlags'
 import { RateInDashboardType, RateReviewsTable } from './RateReviewsTable'
-import { GenericErrorPage } from '../Errors/GenericErrorPage'
 
 /**
  * We only pull a subset of data out of the submission and revisions for display in Dashboard
@@ -247,10 +246,7 @@ const RateReviewsDashboard = (): React.ReactElement => {
                     previousRevision?.unlockInfo?.updatedAt,
                 ])
             }
-
-            // Type guards - graphql has loose types with form data, let's narrow in now
             if (
-                !displayRateFormData ||
                 !displayRateFormData.rateProgramIDs ||
                 !displayRateFormData.rateType ||
                 !displayRateFormData.rateDateEnd ||
@@ -258,9 +254,10 @@ const RateReviewsDashboard = (): React.ReactElement => {
                 !displayRateFormData.rateCertificationName
             ) {
                 recordJSException(
-                    `CMSDashboard: Cannot calculate display rate for rate reviews. This is unexpected and needs investigation. ID: ${rate.id}`
+                    `CMSDashboard: Cannot calculate one of the required fields displaying rate reviews. This is unexpected and needs investigation. ID: ${
+                        rate.id
+                    } formData: ${JSON.stringify(displayRateFormData)})}`
                 )
-                return <GenericErrorPage />
             }
 
             if (!lastUpdated) {
@@ -272,9 +269,11 @@ const RateReviewsDashboard = (): React.ReactElement => {
 
             const programs = rate.state.programs
 
+            const missingField = 'Missing field'
+
             reviewRows.push({
                 id: rate.id,
-                name: displayRateFormData.rateCertificationName,
+                name: displayRateFormData.rateCertificationName || missingField,
                 programs: programs.filter(
                     (program) =>
                         displayRateFormData?.rateProgramIDs &&
@@ -285,7 +284,7 @@ const RateReviewsDashboard = (): React.ReactElement => {
                 rateDateEnd: displayRateFormData.rateDateEnd,
                 status: rate.status,
                 updatedAt: lastUpdated,
-                rateType: displayRateFormData.rateType,
+                rateType: displayRateFormData.rateType || 'NEW',
                 stateName: rate.state.name,
                 contractRevisions:
                     rate.status === 'UNLOCKED'

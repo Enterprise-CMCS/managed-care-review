@@ -6,8 +6,8 @@ import type { RateType } from '../../domain-models'
 // Return the date of the first submission for a rate
 // This method relies on revisions always being presented in most-recent-first order
 function initialSubmitDate(rate: RateType): Date | undefined {
-    const lastSubmittedRev = rate.revisions[rate.revisions.length - 1]
-    return lastSubmittedRev?.submitInfo?.updatedAt
+    const firstSubmittedRev = rate.revisions[rate.revisions.length - 1]
+    return firstSubmittedRev?.submitInfo?.updatedAt
 }
 
 export const rateResolver: Resolvers['Rate'] = {

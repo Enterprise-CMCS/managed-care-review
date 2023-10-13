@@ -47,7 +47,6 @@ describe('indexRates', () => {
         const submit1 = await createAndSubmitTestHealthPlanPackage(stateServer)
         const submit2 = await createAndSubmitTestHealthPlanPackage(stateServer)
         const update1 = await createAndUpdateTestHealthPlanPackage(stateServer)
-        await new Promise((resolve) => setTimeout(resolve, 2000))
 
         // index rates
         const result = await cmsServer.executeOperation({
