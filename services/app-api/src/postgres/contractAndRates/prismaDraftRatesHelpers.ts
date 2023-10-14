@@ -6,6 +6,7 @@ import type {
 import type { RateRevisionTableWithContracts } from './prismaSubmittedRateHelpers'
 import { contractRevisionToDomainModel } from './parseContractWithHistory'
 import {
+    convertUpdateInfoToDomainModel,
     includeContractFormData,
     includeUpdateInfo,
     rateFormDataToDomainModel,
@@ -53,6 +54,7 @@ function draftRateRevToDomainModel(
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
         formData,
+        unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
         contractRevisions: draftContractsToDomainModel(revision.draftContracts),
     }
 }

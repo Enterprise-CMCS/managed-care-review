@@ -828,6 +828,8 @@ type Rate {
     "Fuller state data for the submitting state"
     state: State!
     stateNumber: Int!
+    "The currently modifiable revision if the rate is DRAFT or UNLOCKED"
+    draftRevision: RateRevision
     """
     Array of revisions for this rate. Each revision represents a single submission
     for the rate and contains the full data from when the rate cert was submitted

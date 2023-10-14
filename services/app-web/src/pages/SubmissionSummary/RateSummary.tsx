@@ -38,8 +38,7 @@ export const RateSummary = (): React.ReactElement => {
     })
 
     const rate = data?.fetchRate.rate
-    const currentRateRev =
-        rate?.status === 'UNLOCKED' ? rate?.revisions[1] : rate?.revisions[0]
+    const currentRateRev = rate?.revisions[0]
 
     if (loading) {
         return (
