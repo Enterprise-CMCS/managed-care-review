@@ -181,6 +181,108 @@ describe('indexRates', () => {
         })
     })
 
+    it('returns the right revisions as a rate is submitted/unlocked/etc', async () => {
+        const cmsUser = testCMSUser()
+        const server = await constructTestPostgresServer({
+            ldService: mockLDService,
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            ldService: mockLDService,
+        })
+
+        // First, create new submissions
+        const submittedSubmission = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
+        const unlockedSubmission = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
+        const relockedSubmission = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
+
+        // unlock two
+        await unlockTestHealthPlanPackage(
+            cmsServer,
+            unlockedSubmission.id,
+            'Test reason'
+        )
+        await unlockTestHealthPlanPackage(
+            cmsServer,
+            relockedSubmission.id,
+            'Test reason'
+        )
+
+        // resubmit one
+        await resubmitTestHealthPlanPackage(
+            server,
+            relockedSubmission.id,
+            'Test first resubmission'
+        )
+
+        // index rates
+        const result = await cmsServer.executeOperation({
+            query: INDEX_RATES,
+        })
+
+        const ratesIndex = result.data?.indexRates
+        expect(result.errors).toBeUndefined()
+
+        const submittedRateID =
+            latestFormData(submittedSubmission).rateInfos[0].id
+        const unlockedRateID =
+            latestFormData(unlockedSubmission).rateInfos[0].id
+        const resubmittedRateID =
+            latestFormData(relockedSubmission).rateInfos[0].id
+
+        if (!submittedRateID || !unlockedRateID || !resubmittedRateID) {
+            throw new Error('Missing Rate ID')
+        }
+
+        const testRateIDs = [submittedRateID, unlockedRateID, resubmittedRateID]
+
+        const ratesByID: { [id: string]: Rate } = {}
+        for (const rateEdge of ratesIndex.edges) {
+            if (testRateIDs.includes(rateEdge.node.id)) {
+                ratesByID[rateEdge.node.id] = rateEdge.node
+            }
+        }
+
+        expect(Object.keys(ratesByID)).toHaveLength(3)
+
+        const submittedRate = ratesByID[submittedRateID]
+        expect(submittedRate).toBeDefined()
+        expect(submittedRate.status).toBe('SUBMITTED')
+
+        expect(submittedRate.draftRevision).toBeNull()
+
+        expect(submittedRate.revisions).toHaveLength(1)
+        expect(submittedRate.revisions[0].submitInfo).toBeTruthy()
+
+        const unlockedRate = ratesByID[unlockedRateID]
+        expect(unlockedRate).toBeDefined()
+        expect(unlockedRate.status).toBe('UNLOCKED')
+
+        expect(unlockedRate.draftRevision).toBeDefined()
+        expect(unlockedRate.draftRevision?.submitInfo).toBeNull()
+
+        expect(unlockedRate.revisions).toHaveLength(1)
+        expect(unlockedRate.revisions[0].submitInfo).toBeTruthy()
+
+        const resubmittedRate = ratesByID[resubmittedRateID]
+        expect(resubmittedRate).toBeDefined()
+        expect(resubmittedRate.status).toBe('RESUBMITTED')
+
+        expect(resubmittedRate.draftRevision).toBeNull()
+
+        expect(resubmittedRate.revisions).toHaveLength(2)
+        expect(resubmittedRate.revisions[0].submitInfo).toBeTruthy()
+    })
+
     it('return a list of submitted rates from multiple states', async () => {
         const cmsUser = testCMSUser()
         const stateServer = await constructTestPostgresServer({
