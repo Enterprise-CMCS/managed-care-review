@@ -70,6 +70,13 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
+     * Controls the rates filter UI/ This flag should not be turned on without rate-reviews-dashboard also on.
+     */
+    RATE_FILTERS: {
+        flag: 'rate-filters',
+        defaultValue: false,
+    },
+    /**
      * Used in testing to simulate errors in fetching flag value.
      * This flag does not exist in LaunchDarkly dashboard so fetching this will return the defaultValue.
      */
