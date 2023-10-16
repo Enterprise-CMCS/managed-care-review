@@ -12,11 +12,7 @@ import {
     ldUseClientSpy,
     renderWithProviders,
 } from '../../testHelpers/jestHelpers'
-import {
-    CMSDashboard,
-    RateReviewsDashboard,
-    SubmissionsDashboard,
-} from './CMSDashboard'
+import { CMSDashboard, RateReviewsDashboard, SubmissionsDashboard } from './'
 import {
     FeatureFlagLDConstant,
     FlagValue,

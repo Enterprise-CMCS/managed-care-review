@@ -15,7 +15,7 @@ import {
     CMSDashboard,
     SubmissionsDashboard,
     RateReviewsDashboard,
-} from '../CMSDashboard/CMSDashboard'
+} from '../CMSDashboard'
 import { StateDashboard } from '../StateDashboard/StateDashboard'
 import { Settings } from '../Settings/Settings'
 import { AuthenticatedRouteWrapper } from '../Wrapper/AuthenticatedRouteWrapper'
