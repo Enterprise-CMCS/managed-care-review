@@ -25,6 +25,7 @@ import { recordJSException } from '../../../otelHelpers'
 import { Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
+import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 
 // This rate summary pages assumes we are using contract and rates API.
 // Eventually RateDetailsSummarySection should share code with this code
@@ -132,6 +133,15 @@ export const SingleRateSummarySection = ({
     const [zippedFilesURL, setZippedFilesURL] = useState<
         string | undefined | Error
     >(undefined)
+
+    const appendDraftToSharedPackages: UploadedDocumentsTableProps['packagesWithSharedRateCerts'] =
+        rateRevision?.formData.packagesWithSharedRateCerts.map((pkg) => ({
+            packageId: pkg.packageId,
+            packageName:
+                pkg.packageStatus === 'DRAFT'
+                    ? pkg.packageName.concat(' (Draft)')
+                    : pkg.packageName,
+        }))
 
     useDeepCompareEffect(() => {
         // get all the keys for the documents we want to zip
@@ -283,18 +293,14 @@ export const SingleRateSummarySection = ({
                 </SectionHeader>
                 <UploadedDocumentsTable
                     documents={formData.rateDocuments}
-                    packagesWithSharedRateCerts={
-                        formData.packagesWithSharedRateCerts
-                    }
+                    packagesWithSharedRateCerts={appendDraftToSharedPackages}
                     multipleDocumentsAllowed={false}
                     documentDateLookupTable={documentDateLookupTable}
                     caption="Rate certification"
                 />
                 <UploadedDocumentsTable
                     documents={formData.supportingDocuments}
-                    packagesWithSharedRateCerts={
-                        formData.packagesWithSharedRateCerts
-                    }
+                    packagesWithSharedRateCerts={appendDraftToSharedPackages}
                     documentDateLookupTable={documentDateLookupTable}
                     caption="Rate supporting documents"
                 />
