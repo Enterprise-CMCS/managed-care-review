@@ -17,7 +17,8 @@ query fetchRate($input: FetchRateInput!) {
             }
             status
             initiallySubmittedAt
-            revisions {
+
+            draftRevision {
                 id
                 createdAt
                 updatedAt
@@ -74,6 +75,78 @@ query fetchRate($input: FetchRateInput!) {
                 }
                 contractRevisions {
                     id
+                    contractID
+                    createdAt
+                    updatedAt
+                    submitInfo {
+                        updatedAt
+                        updatedBy
+                        updatedReason
+                    }
+                    unlockInfo {
+                        updatedAt
+                        updatedBy
+                        updatedReason
+                    }
+                }
+            }
+
+            revisions {
+                id
+                createdAt
+                updatedAt
+                unlockInfo {
+                    updatedAt
+                    updatedBy
+                    updatedReason
+                }
+                submitInfo {
+                    updatedAt
+                    updatedBy
+                    updatedReason
+                }
+                formData {
+                    rateType,
+                    rateCapitationType,
+                    rateDocuments {
+                        name
+                        s3URL
+                        sha256
+                    },
+                    supportingDocuments {
+                        name
+                        s3URL
+                        sha256
+                    },
+                    rateDateStart,
+                    rateDateEnd,
+                    rateDateCertified,
+                    amendmentEffectiveDateStart,
+                    amendmentEffectiveDateEnd,
+                    rateProgramIDs,
+                    rateCertificationName,
+                    certifyingActuaryContacts {
+                        name
+                        titleRole
+                        email
+                        actuarialFirm
+                        actuarialFirmOther
+                    },
+                    addtlActuaryContacts {
+                        name
+                        titleRole
+                        email
+                        actuarialFirm
+                        actuarialFirmOther
+                    },
+                    actuaryCommunicationPreference
+                    packagesWithSharedRateCerts {
+                        packageName
+                        packageId
+                    }
+                }
+                contractRevisions {
+                    id
                     contract {
                         id
                         stateCode
@@ -86,7 +159,7 @@ query fetchRate($input: FetchRateInput!) {
                         updatedBy
                         updatedReason
                     }
-                    unlockInfo{
+                    unlockInfo {
                         updatedAt
                         updatedBy
                         updatedReason

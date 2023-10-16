@@ -155,7 +155,7 @@ function rateWithHistoryToDomainModel(
 
         allEntries.push(initialEntry)
 
-        let lastEntry = initialEntry
+        const lastEntry = initialEntry
         // go through every contract revision with this rate
         for (const contractRev of rateRev.contractRevisions) {
             if (!contractRev.contractRevision.submitInfo) {
@@ -185,16 +185,20 @@ function rateWithHistoryToDomainModel(
                     lastContracts.push(contractRev.contractRevision)
                 }
 
-                const newRev: RateRevisionSet = {
-                    rateRev,
-                    submitInfo: contractRev.contractRevision.submitInfo,
-                    unlockInfo:
-                        contractRev.contractRevision.unlockInfo || undefined,
-                    contractRevs: lastContracts,
-                }
+                // For now, we just put the most current version of contracts on this rate
+                // skip making entries for each contract revision
+                initialEntry.contractRevs = lastContracts
 
-                lastEntry = newRev
-                allEntries.push(newRev)
+                // const newRev: RateRevisionSet = {
+                //     rateRev,
+                //     submitInfo: contractRev.contractRevision.submitInfo,
+                //     unlockInfo:
+                //         contractRev.contractRevision.unlockInfo || undefined,
+                //     contractRevs: lastContracts,
+                // }
+
+                // lastEntry = newRev
+                // allEntries.push(newRev) // For now, don't make revisions out of contracts
             }
         }
     }

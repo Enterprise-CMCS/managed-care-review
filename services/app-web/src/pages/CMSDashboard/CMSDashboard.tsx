@@ -225,8 +225,9 @@ const RateReviewsDashboard = (): React.ReactElement => {
         .map((edge) => edge.node)
         .forEach((rate) => {
             const currentRevision = rate.revisions[0]
+
             // Set rate display data - could be based on either current or previous revision depending on status
-            let displayRateFormData = currentRevision.formData
+            const displayRateFormData = currentRevision.formData
             let lastUpdated = mostRecentDate([
                 currentRevision.submitInfo?.updatedAt,
                 currentRevision.unlockInfo?.updatedAt,
@@ -234,16 +235,20 @@ const RateReviewsDashboard = (): React.ReactElement => {
 
             if (rate.status === 'UNLOCKED') {
                 // Errors - data handling
-                const previousRevision = rate.revisions[1]
-                const previousFormData = previousRevision.formData
+                const draftRevision = rate.draftRevision
 
-                // reset package display data since unlock submissions rely on previous revision data
-                displayRateFormData = previousFormData
+                if (draftRevision === undefined) {
+                    console.error(
+                        'Programming Error: an unlocked rate came back with no draft',
+                        rate
+                    )
+                }
+
+                // lastUpdated comes from the draft
                 lastUpdated = mostRecentDate([
                     currentRevision?.submitInfo?.updatedAt,
                     currentRevision?.unlockInfo?.updatedAt,
-                    previousRevision?.submitInfo?.updatedAt,
-                    previousRevision?.unlockInfo?.updatedAt,
+                    draftRevision?.unlockInfo?.updatedAt,
                 ])
             }
             if (
@@ -286,10 +291,7 @@ const RateReviewsDashboard = (): React.ReactElement => {
                 updatedAt: lastUpdated,
                 rateType: displayRateFormData.rateType || 'NEW',
                 stateName: rate.state.name,
-                contractRevisions:
-                    rate.status === 'UNLOCKED'
-                        ? rate.revisions[1].contractRevisions
-                        : rate.revisions[0].contractRevisions,
+                contractRevisions: currentRevision.contractRevisions,
             })
         })
 
