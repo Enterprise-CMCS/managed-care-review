@@ -10,7 +10,6 @@ import { RateInDashboardType, RateReviewsTable } from '../RateReviewsTable'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
 import { ErrorFailedRequestPage } from '../../Errors/ErrorFailedRequestPage'
-import { RateTypeRecord } from '../../../constants/healthPlanPackages'
 
 const RateReviewsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
@@ -93,7 +92,7 @@ const RateReviewsDashboard = (): React.ReactElement => {
                 rateDateEnd: displayRateFormData.rateDateEnd,
                 status: rate.status,
                 updatedAt: lastUpdated,
-                rateType: RateTypeRecord[displayRateFormData.rateType || 'NEW'],
+                rateType: displayRateFormData.rateType || 'NEW',
                 stateName: rate.state.name,
                 contractRevisions: currentRevision.contractRevisions,
             })
