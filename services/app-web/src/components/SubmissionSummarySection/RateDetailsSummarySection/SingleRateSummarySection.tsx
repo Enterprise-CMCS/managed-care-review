@@ -120,8 +120,7 @@ export const SingleRateSummarySection = ({
     isSubmitted: boolean
     statePrograms: Program[]
 }): React.ReactElement | null => {
-    const rateRevision =
-        rate?.status === 'UNLOCKED' ? rate?.revisions[1] : rate?.revisions[0]
+    const rateRevision = rate.revisions[0]
     const formData: RateFormData = rateRevision?.formData
     const documentDateLookupTable = makeRateDocumentDateTable(rate.revisions)
     const isRateAmendment = formData.rateType === 'AMENDMENT'
