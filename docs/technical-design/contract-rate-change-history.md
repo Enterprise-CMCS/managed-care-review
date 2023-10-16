@@ -7,8 +7,6 @@ title: Calculating contract and Rate Change History
 ## Overview
 Change history is the feature of MC-Review where the application stores full copies of changes to submission data over time. The data is displayed to users on the submission summary page.
 
- ![Change History on Submission Summary page](../../.images/change-history-feature-ui.png)
-
  This document details how the change history is calculated for contract and rate data and which database fields are used.
 
 ## Contraints
