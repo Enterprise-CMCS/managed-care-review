@@ -69,6 +69,7 @@ query indexRates {
                         packagesWithSharedRateCerts {
                             packageName
                             packageId
+                            packageStatus
                         }
 
                     }

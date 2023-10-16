@@ -23,6 +23,28 @@ type UpdateInfoTableWithUpdater = Prisma.UpdateInfoTableGetPayload<{
     include: typeof subincludeUpdateInfo
 }>
 
+const includeContractFormData = {
+    unlockInfo: includeUpdateInfo,
+    submitInfo: includeUpdateInfo,
+    contract: true,
+
+    stateContacts: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
+    contractDocuments: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
+    supportingDocuments: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
+} satisfies Prisma.ContractRevisionTableInclude
+
 function convertUpdateInfoToDomainModel(
     info?: UpdateInfoTableWithUpdater | null
 ): UpdateInfoType | undefined {
@@ -91,7 +113,7 @@ const includeRateFormData = {
     contractsWithSharedRateRevision: {
         include: {
             revisions: {
-                take: 1,
+                include: includeContractFormData,
                 orderBy: {
                     createdAt: 'desc',
                 },
@@ -131,6 +153,7 @@ function rateFormDataToDomainModel(
                 contractPrograms,
                 statePrograms
             ),
+            packageStatus: getContractRateStatus(contract.revisions),
         })
     }
 
@@ -232,28 +255,6 @@ function ratesRevisionsToDomainModel(
 }
 
 // ------
-
-const includeContractFormData = {
-    unlockInfo: includeUpdateInfo,
-    submitInfo: includeUpdateInfo,
-    contract: true,
-
-    stateContacts: {
-        orderBy: {
-            position: 'asc',
-        },
-    },
-    contractDocuments: {
-        orderBy: {
-            position: 'asc',
-        },
-    },
-    supportingDocuments: {
-        orderBy: {
-            position: 'asc',
-        },
-    },
-} satisfies Prisma.ContractRevisionTableInclude
 
 type ContractRevisionTableWithFormData =
     Prisma.ContractRevisionTableGetPayload<{

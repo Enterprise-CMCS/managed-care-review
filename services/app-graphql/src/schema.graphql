@@ -845,6 +845,7 @@ type ActuaryContact  {
 type PackageWithSameRate  {
   packageName: String!
   packageId: String!
+  packageStatus: String
 }
 
 type RateFormData {

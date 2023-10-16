@@ -69,6 +69,7 @@ query fetchRate($input: FetchRateInput!) {
                     packagesWithSharedRateCerts {
                         packageName
                         packageId
+                        packageStatus
                     }
                 }
                 contractRevisions {
