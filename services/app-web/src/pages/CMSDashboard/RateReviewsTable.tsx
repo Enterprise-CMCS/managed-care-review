@@ -465,7 +465,7 @@ export const RateReviewsTable = ({
                 </>
             ) : (
                 <div
-                    data-testid="dashboard-table"
+                    data-testid="rate-reviews-table"
                     className={styles.panelEmptyNoSubmissionsYet}
                 >
                     <h3>
