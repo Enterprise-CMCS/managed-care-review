@@ -2,29 +2,54 @@
 title: Calculating contract and Rate Change History
 ---
 
-## Calculating contract and Rate Change History
+## Calculating Contract and Rate Change History
 
 ## Overview
-Change history is a feature of MC-Review where we track changes to the submission data over time and display this content to users. This document details how the change history is calculated for contract and rate data and which database fields are used.
+Change history is the feature of MC-Review where the application stores full copies of changes to submission data over time. The data is displayed to users on the submission summary page.
 
-[ADD IMAGE]
+ ![Change History on Submission Summary page](../../.images/change-history-feature-ui.png)
+
+ This document details how the change history is calculated for contract and rate data and which database fields are used.
+
 ## Contraints
-- MC-Review must track actions on contract or a rate (submit, unlock, resubmit) alongside the full form data present at that that momment in the database. This data is used for CMS reporting and audit purposes. It is considered part of the system of system.
-- From a product requirement standpoint, MC-Review does not need to track changes on drafts (each edit a state makes to a draft data directly updates the original resource).
+- MC-Review must track version history once a contract or rate is submitted.
+    - This includes all actions on contract or a rate (submit, unlock, resubmit) alongside the related form data present at that point in time in the database.
+    - This data is used for CMS reporting and audit purposes. It is considered part of the system of record.
 
 ## Implementation
-### A full copy of the submission data at a given point in time is called a revision
-The change history audit log is a list of revisions sorted by data. This is currently stored in the `revisions` field on the Contract and Rate tables.
+### The full copy of the contract or rate  data at a given point in time is called a *revision*. A new revision is added on create or unlock. These are stored in a `revisions` field on the Contract or Rate.
 
-A new revision is created each time a version of the form is submitted by states to CMS.
-### There is important metadata associated with a revision to track user actions
-The `unlockInfo` and `submitInfo` associated with that revision is important metadata. Specifically, revisions that have unlocked have unlock info data. If they do not have unlock info data, we can assume 1. that revision is the latest submitted version 2. that revision is the first submission associated with that contrac tor rate.
+The `revisions` field on the Contract and Rate tables is the most important part of our version history. The user can only ever change one revision at a time. Sorting of revisions is by `createdAt` - so the point in time when the revision was created by a state submit or a CMS unlock.
 
+### Drafts are not part of the `revisions` field in the API
 
-TODO
-- [ ] add discussion `find*WithHistory`
-- [ ] add discussion of `validAfter` and `validUntil`
-- [ ] add discussion `draftRevision`
+A draft revision is created during a create or unlock. Information about drafts is stored outside the `revisions` list in the domain models and the API.
+
+At the Postgres Table level, draft revisions and submitted revisions live in the same table. In our domain models, the revision history only has submitted revisions and the (one max) draft revision if it exists is stored separately.
+
+### The Contract or Rate and its associated change history is parsed into domain model types between the database and the API. See (`contractWithHistory` and `rateWithHistory`)
+
+The list of revisions returned from prisma is run through [Zod](https://zod.dev/) to return [domain mode types](../../services/app-api/src/domain-models/contractAndRates). This is initiated by the `*WithHistory` database functions. See [parseContractWithHistory](../../services/app-api/src/postgres/contractAndRates/parseContractWithHistory.ts) and [parseRateWithHistory](../../services/app-api/src/postgres/contractAndRates/parseRateWithHistory.ts).
+
+*Dev Note*: If the `draftRevision` field has a value and the `revisions` field is an empty array, we know the Contract or Rate we are looking at is an initial draft that has never been submitted.
+
+## The link between contract and rates is versioned. That link is solidified on submit.
+
+It's possible to tell if a link between a contract and rate has become outdated by refencing the `valid After` and `validUntil` fields on the join table between contract and rate revisions. The `validFrom` is set when a link is created (when a contract is submitted with a link to rates). At the point of creation, the `validUntil` is still null.
+
+Later, if the related contract is then unlocked and resubmitted with the linked rate removed, the `validUntil` will be set. The revision link is still kept in the change history. But the link itself will be considered outdated since the `validUntil` is in the past.
+
+*Dev Note*: If the `validUntil` is null we can assume the link between contract and rate is current.
+
+### There is important metadata associated with a revision to track user actions. It is updated on submit and unlock.
+
+The `unlockInfo` and `submitInfo` associated with that revision is important metadata. Specifically, only revisions that are unlocked or resubmitted have unlock info data.
+
+*Dev Note*: If a submission has undefined `unlockInfo`, we can assume two things 1. that revision is the latest submitted version 2. that revision is the first submission associated with that contract or rate.
+
+### When contract and rates are submitted in a package, rates are submitted first in the system.
+
+When constructing a new package with a draft contract that has a draft rate, one of them must be submitted first. We have chosen that rates submit first, then contracts are submitted with a relationship to a set of submitted rates.
 
 ## Related documentation
 - [Contract and Rates Refactor Relationships](./contract-rate-refactor-relationships.md).
