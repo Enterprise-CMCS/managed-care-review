@@ -9,7 +9,7 @@ describe('Landing', () => {
     afterAll(() => jest.clearAllMocks())
 
     it('displays session expired when query parameter included', async () => {
-        ldUseClientSpy({ 'site-maintenance-banner': false })
+        ldUseClientSpy({ 'site-under-maintenance-banner': false })
         renderWithProviders(<Landing />, {
             routerProvider: { route: '/?session-timeout' },
         })
@@ -21,7 +21,7 @@ describe('Landing', () => {
         ).toBeNull()
     })
     it('does not display session expired by default', async () => {
-        ldUseClientSpy({ 'site-maintenance-banner': false })
+        ldUseClientSpy({ 'site-under-maintenance-banner': false })
         renderWithProviders(<Landing />, {
             routerProvider: { route: '/' },
         })
