@@ -8,10 +8,10 @@ import {
     populationCoveredSchema,
     rateCapitationTypeSchema,
     rateTypeSchema,
-    sharedRateCertDisplay,
     stateContactSchema,
     submissionTypeSchema,
 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
+import { statusSchema } from './statusType'
 
 const documentSchema = z.object({
     name: z.string(),
@@ -25,6 +25,12 @@ const managedCareEntitiesSchema = z.union([
     z.literal('PAHP'),
     z.literal('PCCM'),
 ])
+
+const packagesWithSharedRateCerts = z.object({
+    packageName: z.string(),
+    packageId: z.string(),
+    packageStatus: statusSchema.optional(),
+})
 
 const contractFormDataSchema = z.object({
     programIDs: z.array(z.string()),
@@ -77,7 +83,9 @@ const rateFormDataSchema = z.object({
     certifyingActuaryContacts: z.array(actuaryContactSchema).optional(),
     addtlActuaryContacts: z.array(actuaryContactSchema).optional(),
     actuaryCommunicationPreference: actuaryCommunicationTypeSchema.optional(),
-    packagesWithSharedRateCerts: z.array(sharedRateCertDisplay).optional(),
+    packagesWithSharedRateCerts: z
+        .array(packagesWithSharedRateCerts)
+        .optional(),
 })
 
 type ContractFormDataType = z.infer<typeof contractFormDataSchema>

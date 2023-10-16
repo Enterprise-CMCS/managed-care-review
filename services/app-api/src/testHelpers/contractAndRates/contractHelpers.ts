@@ -9,6 +9,15 @@ import type { ContractFormDataType } from '../../domain-models/contractAndRates'
 import { findStatePrograms } from '../../postgres'
 import { must } from '../errorHelpers'
 
+const defaultContractData = () => ({
+    id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    mccrsID: null,
+    stateCode: 'MN',
+    stateNumber: 111,
+})
+
 const createInsertContractData = ({
     stateCode = 'MN',
     ...formData
@@ -40,6 +49,7 @@ const createDraftContractData = (
     stateNumber: 111,
     revisions: contract?.revisions ?? [
         createContractRevision(
+            contract,
             {
                 rateRevisions: undefined,
                 submitInfo: null,
@@ -61,6 +71,7 @@ const createContractData = (
     stateNumber: 111,
     revisions: contract?.revisions ?? [
         createContractRevision(
+            contract,
             {
                 draftRates: undefined,
             },
@@ -71,6 +82,7 @@ const createContractData = (
 })
 
 const createContractRevision = (
+    contract?: Partial<ContractTableFullPayload>,
     revision?: Partial<ContractRevisionTableWithRates>,
     stateCode: StateCodeType = 'MN'
 ): ContractRevisionTableWithRates => {
@@ -78,6 +90,10 @@ const createContractRevision = (
 
     return {
         id: uuidv4(),
+        contract: {
+            ...defaultContractData(),
+            ...contract,
+        },
         createdAt: new Date(),
         updatedAt: new Date(),
         submitInfo: {

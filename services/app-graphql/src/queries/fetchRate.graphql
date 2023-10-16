@@ -1,3 +1,125 @@
+fragment rateRevisionFragment on RateRevision {
+    id
+    createdAt
+    updatedAt
+    unlockInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+    submitInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+    formData {
+        rateType,
+        rateCapitationType,
+        rateDocuments {
+            name
+            s3URL
+            sha256
+        },
+        supportingDocuments {
+            name
+            s3URL
+            sha256
+        },
+        rateDateStart,
+        rateDateEnd,
+        rateDateCertified,
+        amendmentEffectiveDateStart,
+        amendmentEffectiveDateEnd,
+        rateProgramIDs,
+        rateCertificationName,
+        certifyingActuaryContacts {
+            name
+            titleRole
+            email
+            actuarialFirm
+            actuarialFirmOther
+        },
+        addtlActuaryContacts {
+            name
+            titleRole
+            email
+            actuarialFirm
+            actuarialFirmOther
+        },
+        actuaryCommunicationPreference
+        packagesWithSharedRateCerts {
+            packageName
+            packageId
+            packageStatus
+        }
+    }
+    contractRevisions {
+        id
+        contract {
+            id
+            stateCode
+            stateNumber
+        }
+        createdAt
+        updatedAt
+        submitInfo {
+            updatedAt
+            updatedBy
+            updatedReason
+        }
+        unlockInfo {
+            updatedAt
+            updatedBy
+            updatedReason
+        }
+        formData {
+            programIDs
+            populationCovered
+            submissionType
+            riskBasedContract
+            submissionDescription
+            stateContacts {
+                name,
+                title
+                email
+            }
+            supportingDocuments {
+                name
+                s3URL
+                sha256
+            }
+            contractType
+            contractExecutionStatus
+            contractDocuments {
+                name
+                s3URL
+                sha256
+            }
+            contractDateStart
+            contractDateEnd
+            managedCareEntities
+            federalAuthorities
+            inLieuServicesAndSettings
+            modifiedBenefitsProvided
+            modifiedGeoAreaServed
+            modifiedMedicaidBeneficiaries
+            modifiedRiskSharingStrategy
+            modifiedIncentiveArrangements
+            modifiedWitholdAgreements
+            modifiedStateDirectedPayments
+            modifiedPassThroughPayments
+            modifiedPaymentsForMentalDiseaseInstitutions
+            modifiedMedicalLossRatioStandards
+            modifiedOtherFinancialPaymentIncentive
+            modifiedEnrollmentProcess
+            modifiedGrevienceAndAppeal
+            modifiedNetworkAdequacyStandards
+            modifiedLengthOfContract
+            modifiedNonRiskPaymentArrangements
+        }
+    }
+}
+
 query fetchRate($input: FetchRateInput!) {
     fetchRate(input: $input) {
         rate {
@@ -19,147 +141,11 @@ query fetchRate($input: FetchRateInput!) {
             initiallySubmittedAt
 
             draftRevision {
-                id
-                createdAt
-                updatedAt
-                unlockInfo {
-                    updatedAt
-                    updatedBy
-                    updatedReason
-                }
-                submitInfo {
-                    updatedAt
-                    updatedBy
-                    updatedReason
-                }
-                formData {
-                    rateType,
-                    rateCapitationType,
-                    rateDocuments {
-                        name
-                        s3URL
-                        sha256
-                    },
-                    supportingDocuments {
-                        name
-                        s3URL
-                        sha256
-                    },
-                    rateDateStart,
-                    rateDateEnd,
-                    rateDateCertified,
-                    amendmentEffectiveDateStart,
-                    amendmentEffectiveDateEnd,
-                    rateProgramIDs,
-                    rateCertificationName,
-                    certifyingActuaryContacts {
-                        name
-                        titleRole
-                        email
-                        actuarialFirm
-                        actuarialFirmOther
-                    },
-                    addtlActuaryContacts {
-                        name
-                        titleRole
-                        email
-                        actuarialFirm
-                        actuarialFirmOther
-                    },
-                    actuaryCommunicationPreference
-                    packagesWithSharedRateCerts {
-                        packageName
-                        packageId
-                    }
-                }
-                contractRevisions {
-                    id
-                    contractID
-                    createdAt
-                    updatedAt
-                    submitInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
-                    }
-                    unlockInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
-                    }
-                }
+                ...rateRevisionFragment
             }
 
             revisions {
-                id
-                createdAt
-                updatedAt
-                unlockInfo {
-                    updatedAt
-                    updatedBy
-                    updatedReason
-                }
-                submitInfo {
-                    updatedAt
-                    updatedBy
-                    updatedReason
-                }
-                formData {
-                    rateType,
-                    rateCapitationType,
-                    rateDocuments {
-                        name
-                        s3URL
-                        sha256
-                    },
-                    supportingDocuments {
-                        name
-                        s3URL
-                        sha256
-                    },
-                    rateDateStart,
-                    rateDateEnd,
-                    rateDateCertified,
-                    amendmentEffectiveDateStart,
-                    amendmentEffectiveDateEnd,
-                    rateProgramIDs,
-                    rateCertificationName,
-                    certifyingActuaryContacts {
-                        name
-                        titleRole
-                        email
-                        actuarialFirm
-                        actuarialFirmOther
-                    },
-                    addtlActuaryContacts {
-                        name
-                        titleRole
-                        email
-                        actuarialFirm
-                        actuarialFirmOther
-                    },
-                    actuaryCommunicationPreference
-                    packagesWithSharedRateCerts {
-                        packageName
-                        packageId
-                    }
-                }
-                contractRevisions {
-                    id
-                    contractID
-                    createdAt
-                    updatedAt
-                    submitInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
-                    }
-                    unlockInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
-                    }
-                }
+                ...rateRevisionFragment
             }
         }
     }

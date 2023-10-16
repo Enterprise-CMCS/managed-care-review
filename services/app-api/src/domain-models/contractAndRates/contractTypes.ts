@@ -1,17 +1,13 @@
 import { z } from 'zod'
 import { contractRevisionWithRatesSchema } from './revisionTypes'
+import { statusSchema } from './statusType'
 
 // Contract represents the contract specific information in a submission package
 // All that data is contained in revisions, each revision represents the data in a single submission
 // submissions are kept intact here across time
 const contractSchema = z.object({
     id: z.string().uuid(),
-    status: z.union([
-        z.literal('SUBMITTED'),
-        z.literal('DRAFT'),
-        z.literal('UNLOCKED'),
-        z.literal('RESUBMITTED'),
-    ]),
+    status: statusSchema,
     stateCode: z.string(),
     mccrsID: z.string().optional(),
     stateNumber: z.number().min(1),
