@@ -165,10 +165,13 @@ export const SubmissionSummary = (): React.ReactElement => {
                     submissionName={name}
                     headerChildComponent={
                         isCMSUser ? (
-                            <UnlockModalButton
-                                modalRef={modalRef}
-                                disabled={disableUnlockButton}
-                            />
+                            <>
+                                <Link href="#">Add MC-CRS record number</Link>
+                                <UnlockModalButton
+                                    modalRef={modalRef}
+                                    disabled={disableUnlockButton}
+                                />
+                            </>
                         ) : undefined
                     }
                     statePrograms={statePrograms}

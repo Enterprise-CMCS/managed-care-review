@@ -22,6 +22,7 @@ import { AuthenticatedRouteWrapper } from '../Wrapper/AuthenticatedRouteWrapper'
 import { Error404 } from '../Errors/Error404Page'
 import { Help } from '../Help/Help'
 import { Landing } from '../Landing/Landing'
+import { MccrsId } from '../MccrsId/MccrsId'
 import { NewStateSubmissionForm, StateSubmissionForm } from '../StateSubmission'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
@@ -37,7 +38,6 @@ import {
     UploadQuestions,
 } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
-import { RateSummary } from '../SubmissionSummary/RateSummary'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -185,6 +185,10 @@ const CMSUserRoutes = ({
                         />
                     )}
                 </Route>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_MCCRSID}
+                    element={<MccrsId />}
+                />
 
                 <Route element={<SubmissionSideNav />}>
                     {showQuestionResponse && (
@@ -206,11 +210,6 @@ const CMSUserRoutes = ({
                         element={<SubmissionSummary />}
                     />
                 </Route>
-
-                <Route
-                    path={RoutesRecord.RATES_SUMMARY}
-                    element={<RateSummary />}
-                />
 
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
