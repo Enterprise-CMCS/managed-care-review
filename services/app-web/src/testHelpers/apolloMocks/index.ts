@@ -48,7 +48,7 @@ export {
 
 export { mockQuestionsPayload } from './questionResponseDataMocks'
 export { fetchEmailSettings } from './emailGQLMock'
-export { mockMNState, getStatePrograms } from './stateMock'
+export { mockMNState } from './stateMock'
 
 export { rateTestData } from './rateDataMock'
 
