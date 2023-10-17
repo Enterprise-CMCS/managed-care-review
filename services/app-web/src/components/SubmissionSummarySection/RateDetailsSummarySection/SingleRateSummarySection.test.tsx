@@ -1,12 +1,12 @@
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SingleRateSummarySection } from './SingleRateSummarySection'
-import { rateTestData } from '../../../testHelpers/apolloMocks'
+import { rateDataMock } from '../../../testHelpers/apolloMocks'
 import { screen, waitFor, within } from '@testing-library/react'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
 
 describe('SingleRateSummarySection', () => {
     it('can render rate details without errors', () => {
-        const rateData = rateTestData()
+        const rateData = rateDataMock()
         renderWithProviders(
             <SingleRateSummarySection
                 rate={rateData}
@@ -61,7 +61,7 @@ describe('SingleRateSummarySection', () => {
         ).toBeInTheDocument()
     })
     it('renders documents with linked submissions correctly', async () => {
-        const rateData = rateTestData()
+        const rateData = rateDataMock()
         const parentContractRev = rateData.revisions[0].contractRevisions[0]
         const rateDoc = rateData.revisions[0].formData.rateDocuments[0]
         const supportingDoc =
