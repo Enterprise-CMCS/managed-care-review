@@ -6,14 +6,14 @@ import {
 import { mockMNState } from './stateMock'
 import { v4 as uuidv4 } from 'uuid'
 
-const contractRevisionOnRateData = (
+const contractRevisionOnRateDataMock = (
     data?: Partial<RelatedContractRevisions>
 ): RelatedContractRevisions => ({
     __typename: 'RelatedContractRevisions',
-    id: '84b442d5-52ea-47b4-b42e-12bed7680d26',
+    id: uuidv4(),
     contract: {
         __typename: 'ContractOnRevisionType',
-        id: '77598a22-c379-405d-b2ef-17c2c255edb7',
+        id: uuidv4(),
         stateCode: 'MN',
         stateNumber: 3,
     },
@@ -76,7 +76,7 @@ const contractRevisionOnRateData = (
     },
     ...data,
 })
-const rateRevisionData = (data?: Partial<RateRevision>): RateRevision => {
+const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
     return {
         __typename: 'RateRevision',
         id: uuidv4(),
@@ -153,12 +153,12 @@ const rateRevisionData = (data?: Partial<RateRevision>): RateRevision => {
                 },
             ],
         },
-        contractRevisions: [contractRevisionOnRateData()],
+        contractRevisions: [contractRevisionOnRateDataMock()],
         ...data,
     }
 }
 
-const rateTestData = (rateData?: Partial<Rate>): Rate => ({
+const rateDataMock = (rateData?: Partial<Rate>): Rate => ({
     __typename: 'Rate',
     id: uuidv4(),
     createdAt: '2023-10-16T19:01:21.389Z',
@@ -170,7 +170,7 @@ const rateTestData = (rateData?: Partial<Rate>): Rate => ({
     initiallySubmittedAt: '2023-10-16',
     draftRevision: null,
     revisions: [
-        rateRevisionData({
+        rateRevisionDataMock({
             unlockInfo: {
                 __typename: 'UpdateInformation',
                 updatedAt: '2023-10-16T19:05:26.585Z',
@@ -184,7 +184,7 @@ const rateTestData = (rateData?: Partial<Rate>): Rate => ({
                 updatedReason: 'Resubmit',
             },
             contractRevisions: [
-                contractRevisionOnRateData({
+                contractRevisionOnRateDataMock({
                     submitInfo: {
                         __typename: 'UpdateInformation',
                         updatedAt: '2023-10-16T19:06:20.643Z',
@@ -200,8 +200,8 @@ const rateTestData = (rateData?: Partial<Rate>): Rate => ({
                 }),
             ],
         }),
-        rateRevisionData(),
+        rateRevisionDataMock(),
     ],
 })
 
-export { rateTestData, rateRevisionData }
+export { rateDataMock, rateRevisionDataMock }
