@@ -1,6 +1,10 @@
 import { renderWithProviders } from '../../../testHelpers'
 import { RateInDashboardType } from './RateReviewsTable'
-import { mockMNState } from '../../../testHelpers/apolloMocks'
+import {
+    fetchCurrentUserMock,
+    mockMNState,
+    mockValidCMSUser,
+} from '../../../testHelpers/apolloMocks'
 import { RateReviewsTable } from './RateReviewsTable'
 import { waitFor, screen, within } from '@testing-library/react'
 
@@ -47,9 +51,23 @@ describe('RateReviewsTable', () => {
             contractRevisions: [],
         },
     ]
-    it('renders rates in table correctly', async () => {
+    it('renders rates table correctly', async () => {
         renderWithProviders(
-            <RateReviewsTable tableData={tableData()} showFilters={true} />
+            <RateReviewsTable
+                tableData={tableData()}
+                showFilters={true}
+                caption={'Test table caption'}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                    ],
+                },
+            }
         )
 
         await waitFor(() => {
@@ -57,6 +75,12 @@ describe('RateReviewsTable', () => {
                 screen.queryByText('Displaying 3 of 3 rates')
             ).toBeInTheDocument()
         })
+        // expect filter accordion to be present
+        expect(screen.getByTestId('accordion')).toBeInTheDocument()
+        expect(screen.getByText('0 filters applied')).toBeInTheDocument()
+
+        // expect table caption
+        expect(screen.getByText('Test table caption')).toBeInTheDocument()
 
         const tableRows = screen.getAllByRole('row')
 
@@ -73,9 +97,29 @@ describe('RateReviewsTable', () => {
         expect(
             within(tableRows[3]).getByText('rate-1-certification-name')
         ).toBeInTheDocument()
+    })
+    it('renders rates table correctly without filters, captions and no rates', async () => {
+        renderWithProviders(<RateReviewsTable tableData={[]} />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        statusCode: 200,
+                        user: mockValidCMSUser(),
+                    }),
+                ],
+            },
+        })
 
-        // expect filter accordion to be present
-        expect(screen.getByTestId('accordion')).toBeInTheDocument()
-        expect(screen.getByText('0 filters applied')).toBeInTheDocument()
+        // expect no filter accordion to be present
+        expect(screen.queryByTestId('accordion')).not.toBeInTheDocument()
+        expect(screen.queryByText('0 filters applied')).not.toBeInTheDocument()
+
+        // expect no table
+        expect(screen.queryByRole('table')).not.toBeInTheDocument()
+
+        // expect now rate review text
+        expect(
+            screen.getByText('You have no rate reviews yet')
+        ).toBeInTheDocument()
     })
 })
