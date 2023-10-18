@@ -26,12 +26,6 @@ async function findAllRatesWithHistoryBySubmitInfo(
                 stateCode: {
                     not: 'AS', // exclude test state as per ADR 019
                 },
-                draftContractRevisions: {
-                    // rates must be associated with some contract and rate package - do not display bugs from rates refactor where excess rates were created for contract only
-                    some: {
-                        submissionType: 'CONTRACT_AND_RATES',
-                    },
-                },
             },
             include: {
                 ...includeFullRate,
