@@ -21,10 +21,11 @@ export function updateContract(
     return async (_parent, { input }, context) => {
         const { user, span } = context
         setResolverDetailsOnActiveSpan('updateContract', user, span)
-        const ratesDatabaseRefactor = await launchDarkly.getFeatureFlag(
-            context,
-            'rates-db-refactor'
-        )
+        // const ratesDatabaseRefactor = await launchDarkly.getFeatureFlag(
+        //     context,
+        //     'rates-db-refactor'
+        // )
+        const ratesDatabaseRefactor = true
 
         if (ratesDatabaseRefactor) {
             // This resolver is only callable by CMS users

@@ -1,10 +1,18 @@
-import React from 'react'
-import { Form as UswdsForm, ButtonGroup } from '@trussworks/react-uswds'
+import React, { useState } from 'react'
+import { Form as UswdsForm, ButtonGroup, Button } from '@trussworks/react-uswds'
 import { Formik, FormikErrors, FormikHelpers } from 'formik'
 import { FieldTextInput } from '../../components/Form'
 import { ActionButton } from '../../components/ActionButton'
 import { MccrsIdFormSchema } from './MccrsIdSchema'
+import { recordJSException } from '../../otelHelpers/tracingHelper'
 
+import {
+    User,
+    HealthPlanPackage,
+    UpdateInformation,
+    useUpdateContractMutation,
+    UpdateContractInput
+} from '../../gen/gqlClient'
 import styles from './MccrsId.module.scss'
 
 export interface MccrsIdFormValues {
@@ -25,47 +33,53 @@ export const MccrsId = ({
 
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
+    const [showPageErrorMessage, setShowPageErrorMessage] = useState<
+    boolean | string
+    >(false) // string is a custom error message, defaults to generic of true
 
-        const handleFormSubmit = async (
-            values: MccrsIdFormValues,
-            formikHelpers: FormikHelpers<MccrsIdFormValues>
-        ) => {
-           
-            try {
-                    formikHelpers.setSubmitting(false)
-
-                // const updatedSubmission = await updateDraft(draftSubmission)
-                // if (updatedSubmission instanceof Error) {
-                //     formikHelpers.setSubmitting(false)
-                //     redirectToDashboard.current = false
-                //     console.info(
-                //         'Error updating draft submission: ',
-                //         updatedSubmission
-                //     )
-                // } else if (updatedSubmission) {
-                //     if (redirectToDashboard.current) {
-                //         navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
-                //     } else {
-                //         navigate(`../documents`)
-                //     }
-                // }
-            } catch (serverError) {
-                formikHelpers.setSubmitting(false)
+    const [updateFormData] = useUpdateContractMutation()
+    const handleFormSubmit = async (values: MccrsIdFormValues): Promise<HealthPlanPackage | Error> => {
+        // const base64Draft = domainToBase64(input)
+        console.log('clicked!')
+        setShowPageErrorMessage(false)
+        try {
+            const updateResult = await updateFormData({
+                variables: {
+                    input: {
+                        mccrsID: '1245',
+                        id: 'b102352b-09c2-4d7c-b52c-a7166b1fa6ca'
+                    },
+                },
+            })
+            const updatedSubmission: HealthPlanPackage | undefined =
+                updateResult?.data?.updateContract.pkg
+            console.log(updatedSubmission)
+            if (!updatedSubmission) {
+                setShowPageErrorMessage(true)
+                console.info('Failed to update form data', updateResult)
+                recordJSException(
+                    `StateSubmissionForm: Apollo error reported. Error message: Failed to update form data ${updateResult}`
+                )
+                return new Error('Failed to update form data')
             }
+            console.log(updatedSubmission)
+            return updatedSubmission
+        } catch (serverError) {
+            setShowPageErrorMessage(true)
+            recordJSException(
+                `StateSubmissionForm: Apollo error reported. Error message: ${serverError.message}`
+            )
+            console.log(serverError)
+            return new Error(serverError)
         }
+    }
+     
     return (
         <Formik
             initialValues={mccrsIDInitialValues}
-            onSubmit={handleFormSubmit}
-            // onSubmit={(values, { setSubmitting }) => {
-            //     return handleFormSubmit(values, setSubmitting, {
-            //         shouldValidateDocuments: true,
-            //         redirectPath:
-            //             draftSubmission.submissionType === 'CONTRACT_ONLY'
-            //                 ? `../contacts`
-            //                 : `../rate-details`,
-            //     })
-            // }}
+            onSubmit={(values) => {
+                return handleFormSubmit(values)
+            }}
             validationSchema={() => MccrsIdFormSchema()}
         >
             {({
@@ -82,12 +96,11 @@ export const MccrsId = ({
                         id="ContractDetailsForm"
                         aria-label="Contract Details Form"
                         aria-describedby="form-guidance"
-                        onSubmit={() => 'submitted'}
-                        // onSubmit={(e) => {
-                        //     setShouldValidate(true)
-                        //     setFocusErrorSummaryHeading(true)
-                        //     handleSubmit(e)
-                        // }}
+                        onSubmit={(e) => {
+                            setShouldValidate(true)
+                            // setFocusErrorSummaryHeading(true)
+                            handleSubmit(e)
+                        }}
                     >
                         <fieldset className="usa-fieldset">
                             <h3>MC-CRS record number</h3>
@@ -136,17 +149,17 @@ export const MccrsId = ({
                                 Delete Number
                             </ActionButton>
 
-                            <ActionButton
+                            <Button
                                 type="submit"
-                                variant="default"
+                                // variant="default"
                                 data-testid="page-actions-right-primary"
                                 // disabled={disableContinue}
-                                onClick={() => console.info('click')}
-                                animationTimeout={1000}
+                                onSubmit={() => handleFormSubmit(values)}
+                                // animationTimeout={1000}
                                 // loading={actionInProgress && !disableContinue}
                             >
                                 Save MC-CRS number
-                            </ActionButton>
+                            </Button>
                         </ButtonGroup>
                     </UswdsForm>
                 </>
