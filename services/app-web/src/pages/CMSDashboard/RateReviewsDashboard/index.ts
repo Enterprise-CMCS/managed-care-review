@@ -1,0 +1,1 @@
+export { RateReviewsDashboard } from './RateReviewsDashboard'

@@ -9,9 +9,9 @@ import type { ContractTableFullPayload } from './prismaSubmittedContractHelpers'
 
 describe('parseDomainData', () => {
     describe('parseDraftContract', () => {
+        const draftContract = createDraftContractData()
         it('can parse valid draft domain data with no errors', () => {
-            const draftData = createDraftContractData()
-            const validatedDraft = parseContractWithHistory(draftData)
+            const validatedDraft = parseContractWithHistory(draftContract)
             expect(validatedDraft).not.toBeInstanceOf(Error)
         })
 
@@ -37,7 +37,7 @@ describe('parseDomainData', () => {
                 contract: createDraftContractData({
                     stateCode: undefined,
                     revisions: [
-                        createContractRevision({
+                        createContractRevision(draftContract, {
                             submitInfo: {
                                 id: uuidv4(),
                                 updatedAt: new Date(),
@@ -69,11 +69,10 @@ describe('parseDomainData', () => {
         )
     })
     describe('parseDraftContractRevision', () => {
+        const contract = createContractData()
+
         it('cant parse valid contract revision with no errors', () => {
-            const contractRevision = createContractData()
-            expect(
-                parseContractWithHistory(contractRevision)
-            ).not.toBeInstanceOf(Error)
+            expect(parseContractWithHistory(contract)).not.toBeInstanceOf(Error)
         })
         const draftContractRevisionsWithInvalidData: {
             contract: ContractTableFullPayload
@@ -82,7 +81,7 @@ describe('parseDomainData', () => {
             {
                 contract: createContractData({
                     revisions: [
-                        createContractRevision({
+                        createContractRevision(contract, {
                             submissionType: undefined,
                         }),
                     ],
@@ -92,7 +91,7 @@ describe('parseDomainData', () => {
             {
                 contract: createContractData({
                     revisions: [
-                        createContractRevision({
+                        createContractRevision(contract, {
                             submissionDescription: undefined,
                         }),
                     ],
@@ -102,7 +101,7 @@ describe('parseDomainData', () => {
             {
                 contract: createContractData({
                     revisions: [
-                        createContractRevision({
+                        createContractRevision(contract, {
                             contractType: undefined,
                         }),
                     ],
@@ -112,7 +111,7 @@ describe('parseDomainData', () => {
             {
                 contract: createContractData({
                     revisions: [
-                        createContractRevision({
+                        createContractRevision(contract, {
                             managedCareEntities: undefined,
                         }),
                     ],
@@ -128,9 +127,9 @@ describe('parseDomainData', () => {
         )
     })
     describe('parseContractWithHistory', () => {
+        const contract = createContractData()
         it('can parse valid contract domain data with no errors', () => {
-            const contractData = createContractData()
-            const validatedContract = parseContractWithHistory(contractData)
+            const validatedContract = parseContractWithHistory(contract)
             expect(validatedContract).not.toBeInstanceOf(Error)
         })
 
@@ -153,7 +152,7 @@ describe('parseDomainData', () => {
             {
                 contract: createContractData({
                     revisions: [
-                        createContractRevision({
+                        createContractRevision(contract, {
                             rateRevisions: [
                                 {
                                     rateRevisionID: uuidv4(),

@@ -730,6 +730,84 @@ type GenericDocument {
 Rates are rate certifications and their associated actuary contacts and documents
 State users may create, update, and submit several rates at a time
 """
+
+enum PopulationCovered {
+    MEDICAID
+    CHIP
+    MEDICAID_AND_CHIP
+}
+
+enum SubmissionType {
+    CONTRACT_ONLY
+    CONTRACT_AND_RATES
+}
+
+enum ContractType {
+    BASE
+    AMENDMENT
+}
+
+enum ContractExecutionStatus {
+    EXECUTED
+    UNEXECUTED
+}
+
+enum ManagedCareEntity {
+    MCO
+    PIHP
+    PAHP
+    PCCM
+}
+
+enum FederalAuthority {
+    STATE_PLAN
+    WAIVER_1915B
+    WAIVER_1115
+    VOLUNTARY
+    BENCHMARK
+    TITLE_XXI
+}
+
+type StateContact {
+    name: String
+    title: String
+    email: String
+}
+
+type ContractFormData {
+    programIDs: [String!]!
+    populationCovered: PopulationCovered
+    submissionType: SubmissionType!
+    riskBasedContract: Boolean
+    submissionDescription: String!
+    stateContacts: [StateContact!]!
+    supportingDocuments: [GenericDocument!]!
+    contractType: ContractType
+    contractExecutionStatus: ContractExecutionStatus
+    contractDocuments: [GenericDocument!]!
+    contractDateStart: Date
+    contractDateEnd: Date
+    managedCareEntities: [ManagedCareEntity!]!
+    federalAuthorities: [FederalAuthority!]!
+    inLieuServicesAndSettings: Boolean,
+    modifiedBenefitsProvided: Boolean,
+    modifiedGeoAreaServed: Boolean,
+    modifiedMedicaidBeneficiaries: Boolean,
+    modifiedRiskSharingStrategy: Boolean,
+    modifiedIncentiveArrangements: Boolean,
+    modifiedWitholdAgreements: Boolean,
+    modifiedStateDirectedPayments: Boolean,
+    modifiedPassThroughPayments: Boolean,
+    modifiedPaymentsForMentalDiseaseInstitutions: Boolean,
+    modifiedMedicalLossRatioStandards: Boolean,
+    modifiedOtherFinancialPaymentIncentive: Boolean,
+    modifiedEnrollmentProcess: Boolean,
+    modifiedGrevienceAndAppeal: Boolean,
+    modifiedNetworkAdequacyStandards: Boolean,
+    modifiedLengthOfContract: Boolean,
+    modifiedNonRiskPaymentArrangements: Boolean,
+}
+
 enum RateType {
   NEW
   AMENDMENT
@@ -767,8 +845,8 @@ type ActuaryContact  {
 type PackageWithSameRate  {
   packageName: String!
   packageId: String!
+  packageStatus: String
 }
-
 
 type RateFormData {
     rateType: RateType
@@ -788,13 +866,21 @@ type RateFormData {
     packagesWithSharedRateCerts: [PackageWithSameRate!]!
 }
 
+type ContractOnRevisionType {
+    id: String!
+    stateCode: String!
+    mccrsID: String
+    stateNumber: Int!
+}
+
 type RelatedContractRevisions {
     id: String!
-    contractID: String!
+    contract: ContractOnRevisionType!
     submitInfo: UpdateInformation
     unlockInfo: UpdateInformation
     createdAt: DateTime!
     updatedAt: DateTime!
+    formData: ContractFormData!
 }
 
 type RateRevision {

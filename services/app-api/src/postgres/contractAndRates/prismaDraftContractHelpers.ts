@@ -6,47 +6,14 @@ import type {
 import {
     contractFormDataToDomainModel,
     convertUpdateInfoToDomainModel,
-    includeUpdateInfo,
+    includeRateFormData,
     rateRevisionToDomainModel,
 } from './prismaSharedContractRateHelpers'
 import type { ContractRevisionTableWithRates } from './prismaSubmittedContractHelpers'
 
 const includeDraftRates = {
     revisions: {
-        include: {
-            rateDocuments: {
-                orderBy: {
-                    position: 'asc',
-                },
-            },
-            supportingDocuments: {
-                orderBy: {
-                    position: 'asc',
-                },
-            },
-            certifyingActuaryContacts: {
-                orderBy: {
-                    position: 'asc',
-                },
-            },
-            addtlActuaryContacts: {
-                orderBy: {
-                    position: 'asc',
-                },
-            },
-            submitInfo: includeUpdateInfo,
-            unlockInfo: includeUpdateInfo,
-            contractsWithSharedRateRevision: {
-                include: {
-                    revisions: {
-                        take: 1,
-                        orderBy: {
-                            createdAt: 'desc',
-                        },
-                    },
-                },
-            },
-        },
+        include: includeRateFormData,
         take: 1,
         orderBy: {
             createdAt: 'desc',
@@ -89,7 +56,7 @@ function draftContractRevToDomainModel(
 
     return {
         id: revision.id,
-        contractID: revision.contractID,
+        contract: revision.contract,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
         unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),

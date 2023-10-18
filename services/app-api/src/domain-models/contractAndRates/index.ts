@@ -11,6 +11,8 @@ export {
     rateRevisionSchema,
 } from './revisionTypes'
 
+export { statusSchema } from './statusType'
+
 export {
     convertContractWithRatesRevtoHPPRev,
     convertContractWithRatesToUnlockedHPP,

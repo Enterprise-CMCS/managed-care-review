@@ -62,6 +62,7 @@ async function unlockRate(
                             position: 'asc',
                         },
                     },
+                    contractsWithSharedRateRevision: true,
 
                     contractRevisions: {
                         where: {
@@ -94,6 +95,11 @@ async function unlockRate(
             const previouslySubmittedContractIDs =
                 currentRev.contractRevisions.map(
                     (c) => c.contractRevision.contractID
+                )
+
+            const prevContractsWithSharedRateRevisionIDs =
+                currentRev.contractsWithSharedRateRevision.map(
+                    (contract) => contract.id
                 )
 
             await tx.rateRevisionTable.create({
@@ -167,6 +173,13 @@ async function unlockRate(
                             actuarialFirm: c.actuarialFirm,
                             actuarialFirmOther: c.actuarialFirmOther,
                         })),
+                    },
+                    contractsWithSharedRateRevision: {
+                        connect: prevContractsWithSharedRateRevisionIDs.map(
+                            (contractID) => ({
+                                id: contractID,
+                            })
+                        ),
                     },
                 },
                 include: {

@@ -9,13 +9,6 @@ const featureFlags = {
     /**
      Toggles the site maintenance alert on the landing page
     */
-    SITE_MAINTENANCE_BANNER: {
-        flag: 'site-maintenance-banner',
-        defaultValue: false,
-    },
-    /**
-     Toggles the site maintenance alert on the landing page
-    */
     SITE_UNDER_MAINTENANCE_BANNER: {
         flag: 'site-under-maintenance-banner',
         defaultValue: 'OFF',
@@ -74,6 +67,13 @@ const featureFlags = {
      */
     RATE_REVIEWS_DASHBOARD: {
         flag: 'rate-reviews-dashboard',
+        defaultValue: false,
+    },
+    /**
+     * Controls the rates filter UI/ This flag should not be turned on without rate-reviews-dashboard also on.
+     */
+    RATE_FILTERS: {
+        flag: 'rate-filters',
         defaultValue: false,
     },
     /**
