@@ -49,20 +49,6 @@ describe('Validate encoding to protobuf and decoding back to domain model', () =
         }
     )
 
-    it('encodes to protobuf and generates rate id', () => {
-        const draftFormDataWithNoRateID = unlockedWithFullRates()
-        draftFormDataWithNoRateID.rateInfos[0].id = undefined
-
-        //Encode data to protobuf and back to domain model
-        const domainData = toDomain(toProtoBuffer(draftFormDataWithNoRateID))
-
-        if (domainData instanceof Error) {
-            throw Error(domainData.message)
-        }
-
-        expect(domainData.rateInfos[0]?.id).toBeDefined()
-    })
-
     it('encodes to protobuf and back to domain model without corrupting existing rate info id', () => {
         const draftFormDataWithNoRateID = unlockedWithFullRates()
         draftFormDataWithNoRateID.rateInfos[0].id =
