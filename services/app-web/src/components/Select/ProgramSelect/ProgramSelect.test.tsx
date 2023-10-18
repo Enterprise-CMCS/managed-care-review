@@ -1,11 +1,13 @@
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { ProgramSelect } from './ProgramSelect'
-import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
+import {
+    fetchCurrentUserMock,
+    mockMNState,
+} from '../../../testHelpers/apolloMocks'
 import { screen, waitFor } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import userEvent from '@testing-library/user-event'
 import * as useStatePrograms from '../../../hooks/useStatePrograms'
-import { mockMNState } from '../../../common-code/healthPlanFormDataMocks/healthPlanFormData'
 
 const mockOnChange = jest.fn()
 const mockSetValue = jest.fn()
