@@ -1,19 +1,35 @@
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SingleRateSummarySection } from './SingleRateSummarySection'
-import { rateDataMock } from '../../../testHelpers/apolloMocks'
+import {
+    fetchCurrentUserMock,
+    mockValidCMSUser,
+    rateDataMock,
+} from '../../../testHelpers/apolloMocks'
 import { screen, waitFor, within } from '@testing-library/react'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
 
 describe('SingleRateSummarySection', () => {
-    it('can render rate details without errors', () => {
+    it('can render rate details without errors', async () => {
         const rateData = rateDataMock()
-        renderWithProviders(
-            <SingleRateSummarySection
-                rate={rateData}
-                isSubmitted={true}
-                statePrograms={rateData.state.programs}
-            />
-        )
+        await waitFor(() => {
+            renderWithProviders(
+                <SingleRateSummarySection
+                    rate={rateData}
+                    isSubmitted={true}
+                    statePrograms={rateData.state.programs}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidCMSUser(),
+                            }),
+                        ],
+                    },
+                }
+            )
+        })
 
         const rateName = rateData.revisions[0].formData
             .rateCertificationName as string
@@ -77,13 +93,26 @@ describe('SingleRateSummarySection', () => {
             parentContractRev.formData.programIDs,
             rateData.state.programs
         )
-        renderWithProviders(
-            <SingleRateSummarySection
-                rate={rateData}
-                isSubmitted={true}
-                statePrograms={rateData.state.programs}
-            />
-        )
+
+        await waitFor(() => {
+            renderWithProviders(
+                <SingleRateSummarySection
+                    rate={rateData}
+                    isSubmitted={true}
+                    statePrograms={rateData.state.programs}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidCMSUser(),
+                            }),
+                        ],
+                    },
+                }
+            )
+        })
 
         expect(
             screen.getByRole('heading', { name: 'Rate documents' })
