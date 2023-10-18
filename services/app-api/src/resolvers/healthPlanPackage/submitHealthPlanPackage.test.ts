@@ -205,12 +205,14 @@ describe.each(flagValueTestParameters)(
 
             // update one with a new rate start and end date
             const existingFormData = latestFormData(existingRate1)
+            const firstPackageInitialRateID =
+                existingFormData.rateInfos[0]?.id || 'NO_ID'
             expect(existingFormData.rateInfos).toHaveLength(1)
             await updateTestHealthPlanPackage(server, submittedEditedRates.id, {
                 rateInfos: [
                     {
                         ...initialRateInfos[0],
-                        id: existingFormData.rateInfos[0]?.id, // this should be id from existing rate, using the id that is coming back in toDomain to imitate frontend
+                        id: firstPackageInitialRateID, // this should be id from existing rate, using the id that is coming back in toDomain to imitate frontend
                         rateDateStart: new Date(Date.UTC(2025, 1, 1)),
                         rateDateEnd: new Date(Date.UTC(2027, 1, 1)),
                     },
@@ -219,12 +221,14 @@ describe.each(flagValueTestParameters)(
 
             // update the other with additional new rate
             const existingFormData2 = latestFormData(existingRate2)
+            const secondPackageInitialRateID =
+                existingFormData2.rateInfos[0]?.id || 'NO_ID'
             expect(existingFormData2.rateInfos).toHaveLength(1)
             await updateTestHealthPlanPackage(server, submittedNewRates.id, {
                 rateInfos: [
                     {
                         ...initialRateInfos[0],
-                        id: existingFormData.rateInfos[0]?.id, // this should be id from existing rate, using the id that is coming back in toDomain to imitate frontend
+                        id: secondPackageInitialRateID, // this should be id from existing rate, using the id that is coming back in toDomain to imitate frontend
                     },
                     {
                         ...initialRateInfos[0],
