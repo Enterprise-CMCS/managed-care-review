@@ -187,7 +187,7 @@ const CMSUserRoutes = ({
                 </Route>
                 <Route
                     path={RoutesRecord.SUBMISSIONS_MCCRSID}
-                    element={<MccrsId />}
+                    element={<MccrsId mccrsId='12343' showValidations />}
                 />
 
                 <Route element={<SubmissionSideNav />}>
