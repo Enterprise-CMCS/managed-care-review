@@ -210,6 +210,7 @@ describe.each(flagValueTestParameters)(
                 rateInfos: [
                     {
                         ...initialRateInfos[0],
+                        id: existingFormData.rateInfos[0]?.id, // this should be id from existing rate, using the id that is coming back in toDomain to imitate frontend
                         rateDateStart: new Date(Date.UTC(2025, 1, 1)),
                         rateDateEnd: new Date(Date.UTC(2027, 1, 1)),
                     },
@@ -227,6 +228,7 @@ describe.each(flagValueTestParameters)(
                     },
                     {
                         ...initialRateInfos[0],
+                        id: undefined, // this is a new rate
                         rateDateStart: new Date(Date.UTC(2030, 1, 1)),
                         rateDateEnd: new Date(Date.UTC(2030, 12, 1)),
                     },
