@@ -18,8 +18,8 @@ import {
     Program,
     RelatedContractRevisions,
     RateType,
-} from '../../gen/gqlClient'
-import styles from '../../components/HealthPlanPackageTable/HealthPlanPackageTable.module.scss'
+} from '../../../gen/gqlClient'
+import styles from '../../../components/HealthPlanPackageTable/HealthPlanPackageTable.module.scss'
 import { Table, Tag, Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
@@ -29,9 +29,9 @@ import {
     FilterSelect,
     FilterSelectedOptionsType,
     FilterOptionType,
-} from '../../components/FilterAccordion'
-import { pluralize } from '../../common-code/formatters'
-import { RateTypeRecord } from '../../constants/healthPlanPackages'
+} from '../../../components/FilterAccordion'
+import { pluralize } from '../../../common-code/formatters'
+import { RateTypeRecord } from '../../../constants/healthPlanPackages'
 
 declare module '@tanstack/table-core' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

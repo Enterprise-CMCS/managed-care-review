@@ -10,7 +10,10 @@ import { screen, waitFor } from '@testing-library/react'
 
 describe('RateReviewsDashboard', () => {
     it('renders dashboard with rates correctly', async () => {
-        ldUseClientSpy({ 'rate-reviews-dashboard': true, 'rate-filters': true })
+        ldUseClientSpy({
+            'rate-reviews-dashboard': true,
+            'rate-filters': true,
+        })
         renderWithProviders(<RateReviewsDashboard />, {
             apolloProvider: {
                 mocks: [
