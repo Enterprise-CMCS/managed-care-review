@@ -11,6 +11,7 @@ import {
     defaultFloridaRateProgram,
     submitTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
+import { v4 as uuidv4 } from 'uuid'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { base64ToDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import {
@@ -242,6 +243,7 @@ describe.each(flagValueTestParameters)(
                 submissionType: 'CONTRACT_AND_RATES',
                 rateInfos: [
                     {
+                        id: uuidv4(),
                         rateType: 'NEW' as const,
                         rateDateStart: new Date(Date.UTC(2025, 5, 1)),
                         rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
@@ -909,6 +911,7 @@ describe.each(flagValueTestParameters)(
                 submissionType: 'CONTRACT_AND_RATES',
                 rateInfos: [
                     {
+                        id: uuidv4(),
                         rateDateStart: new Date(Date.UTC(2025, 5, 1)),
                         rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
                         rateDateCertified: undefined,
