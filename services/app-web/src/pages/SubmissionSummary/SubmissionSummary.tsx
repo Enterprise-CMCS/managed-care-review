@@ -166,7 +166,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     headerChildComponent={
                         isCMSUser ? (
                             <>
-                                <Link href="#">Add MC-CRS record number</Link>
+                                <Link href={`/submissions/${pkg.id}/MCCRS-record-number`}>Add MC-CRS record number</Link>
                                 <UnlockModalButton
                                     modalRef={modalRef}
                                     disabled={disableUnlockButton}

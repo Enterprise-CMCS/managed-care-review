@@ -13,15 +13,6 @@
     }
 }
 
-.stepIndicator {
-    @include grid-container;
-    width: 100%;
-
-    > [class^='usa-step-indicator'] {
-        width: 100%;
-    }
-}
-
 .formHeader {
     text-align: center;
     width: 100%;
@@ -38,8 +29,8 @@
         @include u-radius('md');
     }
 
-    h2 {
-        margin-top: 0;
+    h3 {
+        font-size: 22px;
     }
 
     > div[class^='usa-form-group']:not(:first-of-type) {
@@ -63,89 +54,38 @@
     margin-top: 0;
 }
 
-.buttonGroup {
-    justify-content: flex-end;
-    margin-right: 0;
-    margin-left: 0;
-    margin-bottom: units(3);
-}
-
-.dateRangePicker {
-    [class^='usa-label'] {
-        font-weight: normal;
-    }
-    [class^='usa-form-group'] {
-        margin-top: 0.75rem;
+div[class^='usa-form-group'] {
+    margin-top: 24px;
+    label[class^='usa-label'] {
+        font-size: 16px;
+        max-width: 100%;
     }
 }
 
-.nestedOptions {
-    padding-left: units(4);
-    margin: units(2) 0;
-    border-left: 4px solid $theme-color-primary;
-
-    legend,
-    label {
-        font-weight: normal;
+div[class^='usa-hint'] span {
+    span {
+        display: inline;
+        font-weight: bold;
     }
-}
+} 
 
-.nestedOptionsError {
-    padding-left: units(4);
-    margin: units(2) 0;
-    border-left: 4px solid $theme-color-error-darker;
-}
-
-.stateContact,
-.actuaryContact {
-    margin-bottom: units(5);
-
-    .removeContactBtn {
-        margin-top: 0.5rem;
-        @include u-text('secondary');
-    }
-}
-
-.rateCertContainer + .rateCertContainer {
-     margin-top: units(6);
-}
-
-.stateContacts,
-.actuaryContacts {
-    .addContactBtn {
-        margin-top: 0.5rem;
-    }
-
-    .removeContactBtn {
-        margin-top: units(4);
-    }
-}
-
-.capitationLegend {
-    p {
+ul[class^='usa-button-group'] {
+    justify-content: space-between;
+    li[class^='usa-button-group__item'] {
         margin-top: 0;
+        button {
+            margin-top: 16px;
+            margin-bottom: 44px;
+        }
+        &:first-of-type {
+            button[class^='usa-button'] {
+                color: $theme-color-error-darker;
+                box-shadow: inset 0 0 0 2px $theme-color-error-darker;
+            }
+        }
+        &:last-of-type {
+            margin-right: .25rem;
+        }
     }
 }
 
-.legendSubHeader {
-    font-weight: normal;
-    &.requiredOptionalText {
-        margin-bottom: units(2);
-    }
-}
-
-.guidanceTextBlock{
-    padding-top: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-.requiredOptionalText {
-    display: block;
-    color: $theme-color-hint;
-}
-
-.guidanceTextBlockNoPadding{
-    display: flex;
-    flex-direction: column;
-}

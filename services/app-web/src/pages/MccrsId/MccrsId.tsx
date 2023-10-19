@@ -5,6 +5,7 @@ import { FieldTextInput } from '../../components/Form'
 import { ActionButton } from '../../components/ActionButton'
 import { MccrsIdFormSchema } from './MccrsIdSchema'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 
 import {
     User,
@@ -21,14 +22,18 @@ export interface MccrsIdFormValues {
 type FormError =
     FormikErrors<MccrsIdFormValues>[keyof FormikErrors<MccrsIdFormValues>]
 
+type RouteParams = {
+    submissionId: string
+}
 export const MccrsId = ({
     mccrsId,
     showValidations = false,
 }: {mccrsId: string, showValidations: boolean}): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
+    const { submissionId } = useParams<keyof RouteParams>()
 
     const mccrsIDInitialValues: MccrsIdFormValues = {
-        mccrsId: 1232,
+        mccrsId: Number(mccrsId),
     }
 
     const showFieldErrors = (error?: FormError) =>
@@ -39,15 +44,14 @@ export const MccrsId = ({
 
     const [updateFormData] = useUpdateContractMutation()
     const handleFormSubmit = async (values: MccrsIdFormValues): Promise<HealthPlanPackage | Error> => {
-        // const base64Draft = domainToBase64(input)
-        console.log('clicked!')
         setShowPageErrorMessage(false)
         try {
             const updateResult = await updateFormData({
                 variables: {
                     input: {
-                        mccrsID: '1245',
-                        id: 'b102352b-09c2-4d7c-b52c-a7166b1fa6ca'
+                        mccrsID: values?.mccrsId?.toString(),
+                        // id: submissionId
+                        id: '217f8e1e-1b09-4d4a-92b9-189d2dbb1c63'
                     },
                 },
             })
@@ -58,7 +62,7 @@ export const MccrsId = ({
                 setShowPageErrorMessage(true)
                 console.info('Failed to update form data', updateResult)
                 recordJSException(
-                    `StateSubmissionForm: Apollo error reported. Error message: Failed to update form data ${updateResult}`
+                    `MCCRSIDForm: Apollo error reported. Error message: Failed to update form data ${updateResult}`
                 )
                 return new Error('Failed to update form data')
             }
@@ -67,7 +71,7 @@ export const MccrsId = ({
         } catch (serverError) {
             setShowPageErrorMessage(true)
             recordJSException(
-                `StateSubmissionForm: Apollo error reported. Error message: ${serverError.message}`
+                `MCCRSIDForm: Apollo error reported. Error message: ${serverError.message}`
             )
             console.log(serverError)
             return new Error(serverError)
@@ -133,7 +137,7 @@ export const MccrsId = ({
                                 type="text"
                                 variant="SUBHEAD"
                                 aria-required
-                                hint="(i.e 4375)"
+                                hint={(<span>(i.e <span>4375</span>)</span>)}
                             />
                         </fieldset>
                         <ButtonGroup type="default">
@@ -149,7 +153,7 @@ export const MccrsId = ({
                                 Delete Number
                             </ActionButton>
 
-                            <Button
+                            <ActionButton
                                 type="submit"
                                 // variant="default"
                                 data-testid="page-actions-right-primary"
@@ -159,7 +163,7 @@ export const MccrsId = ({
                                 // loading={actionInProgress && !disableContinue}
                             >
                                 Save MC-CRS number
-                            </Button>
+                            </ActionButton>
                         </ButtonGroup>
                     </UswdsForm>
                 </>
