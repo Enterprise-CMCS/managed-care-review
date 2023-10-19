@@ -835,10 +835,10 @@ enum ActuarialFirm {
 }
 
 type ActuaryContact  {
-  name: String!
-  titleRole: String!
-  email: String!
-  actuarialFirm: ActuarialFirm!
+  name: String
+  titleRole: String
+  email: String
+  actuarialFirm: ActuarialFirm
   actuarialFirmOther: String
 }
 
