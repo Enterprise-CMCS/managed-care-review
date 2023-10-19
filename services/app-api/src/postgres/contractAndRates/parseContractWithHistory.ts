@@ -194,7 +194,8 @@ function contractWithHistoryToDomainModel(
         //     }
         // }
 
-        // Basically the same as above, except we do not create new contract revisions for rate changes.
+        // Basically the same as above, except we do not create new contract revisions for rate changes and non-draft
+        //  contract revisions do not inlcude rate revisions that where submitted after the contract revision was submitted.
         for (const rateRev of contractRev.rateRevisions) {
             if (!rateRev.rateRevision.submitInfo) {
                 return new Error(
@@ -202,21 +203,17 @@ function contractWithHistoryToDomainModel(
                 )
             }
 
-            // if it's from before this contract was submitted, it's there at the beginning.
+            // If the rate revision was submitted after the contract revision skip adding this rate revision.
+            // We don't want to lump in future rate revisions to a previously submitted contract revision. Since this is
+            // the contract history, we want to preserve rate data at the time of contract submission.
             if (
                 rateRev.rateRevision.submitInfo.updatedAt <=
                 contractRev.submitInfo.updatedAt
             ) {
-                if (!rateRev.isRemoval) {
-                    initialEntry.rateRevisions.push(rateRev.rateRevision)
-                }
-            } else {
-                // if after, then it's always a new entry in the list
                 let lastRates = [...initialEntry.rateRevisions]
-
-                // take out the previous rate revision this revision supersedes
+                // take out the previous rate revision this revision supersedes it
                 lastRates = lastRates.filter(
-                    (r) => r.rateID !== rateRev.rateRevision.rateID
+                    (r) => (r.rateID !== rateRev.rateRevision.rateID)
                 )
                 // an isRemoval entry indicates that this rate was removed from this contract.
                 if (!rateRev.isRemoval) {
