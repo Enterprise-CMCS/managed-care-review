@@ -152,44 +152,43 @@ describe.each(flagValueTestParameters)(
                 ldService: mockLDService,
             })
 
-            const initialRateInfos = [
-                {
-                    rateType: 'NEW' as const,
-                    rateDateStart: new Date(Date.UTC(2025, 5, 1)),
-                    rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
-                    rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
-                    rateDocuments: [
-                        {
-                            name: 'rateDocument.pdf',
-                            s3URL: 'fakeS3URL',
-                            sha256: 'fakesha',
-                            documentCategories: ['RATES' as const],
-                        },
-                    ],
-                    supportingDocuments: [],
-                    rateProgramIDs: [defaultFloridaRateProgram().id],
-                    actuaryContacts: [
-                        {
-                            name: 'test name',
-                            titleRole: 'test title',
-                            email: 'email@example.com',
-                            actuarialFirm: 'MERCER' as const,
-                            actuarialFirmOther: '',
-                        },
-                    ],
-                    actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
-                    packagesWithSharedRateCerts: [],
-                },
-            ]
+            const initialRateInfos = () => ({
+                id: uuidv4(),
+                rateType: 'NEW' as const,
+                rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+                rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+                rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+                rateDocuments: [
+                    {
+                        name: 'rateDocument.pdf',
+                        s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+                supportingDocuments: [],
+                rateProgramIDs: [defaultFloridaRateProgram().id],
+                actuaryContacts: [
+                    {
+                        name: 'test name',
+                        titleRole: 'test title',
+                        email: 'email@example.com',
+                        actuarialFirm: 'MERCER' as const,
+                        actuarialFirmOther: '',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
+                packagesWithSharedRateCerts: [],
+            })
 
             // First, create new submissions
             const submittedEditedRates =
                 await createAndSubmitTestHealthPlanPackage(server, {
-                    rateInfos: initialRateInfos,
+                    rateInfos: [initialRateInfos()],
                 })
             const submittedNewRates =
                 await createAndSubmitTestHealthPlanPackage(server, {
-                    rateInfos: initialRateInfos,
+                    rateInfos: [initialRateInfos()],
                 })
 
             // Unlock both -  one to be rate edited in place, the other to add new rate
@@ -206,14 +205,11 @@ describe.each(flagValueTestParameters)(
 
             // update one with a new rate start and end date
             const existingFormData = latestFormData(existingRate1)
-            const firstPackageInitialRateID =
-                existingFormData.rateInfos[0]?.id || 'NO_ID'
             expect(existingFormData.rateInfos).toHaveLength(1)
             await updateTestHealthPlanPackage(server, submittedEditedRates.id, {
                 rateInfos: [
                     {
-                        ...initialRateInfos[0],
-                        id: firstPackageInitialRateID, // this should be id from existing rate, using the id that is coming back in toDomain to imitate frontend
+                        ...existingFormData.rateInfos[0],
                         rateDateStart: new Date(Date.UTC(2025, 1, 1)),
                         rateDateEnd: new Date(Date.UTC(2027, 1, 1)),
                     },
@@ -222,18 +218,13 @@ describe.each(flagValueTestParameters)(
 
             // update the other with additional new rate
             const existingFormData2 = latestFormData(existingRate2)
-            const secondPackageInitialRateID =
-                existingFormData2.rateInfos[0]?.id || 'NO_ID'
             expect(existingFormData2.rateInfos).toHaveLength(1)
             await updateTestHealthPlanPackage(server, submittedNewRates.id, {
                 rateInfos: [
+                    existingFormData2.rateInfos[0],
                     {
-                        ...initialRateInfos[0],
-                        id: secondPackageInitialRateID, // this should be id from existing rate, using the id that is coming back in toDomain to imitate frontend
-                    },
-                    {
-                        ...initialRateInfos[0],
-                        id: undefined, // this is a new rate
+                        ...initialRateInfos(),
+                        id: uuidv4(), // this is a new rate
                         rateDateStart: new Date(Date.UTC(2030, 1, 1)),
                         rateDateEnd: new Date(Date.UTC(2030, 12, 1)),
                     },
@@ -274,10 +265,10 @@ describe.each(flagValueTestParameters)(
             expect(latestFormData(newRatesPackage).rateInfos).toHaveLength(2)
             expect(
                 latestFormData(newRatesPackage).rateInfos[0].rateDateStart
-            ).toMatchObject(initialRateInfos[0].rateDateStart)
+            ).toMatchObject(initialRateInfos().rateDateStart)
             expect(
                 latestFormData(newRatesPackage).rateInfos[0].rateDateEnd
-            ).toMatchObject(initialRateInfos[0].rateDateEnd)
+            ).toMatchObject(initialRateInfos().rateDateEnd)
             expect(
                 latestFormData(newRatesPackage).rateInfos[1].rateDateStart
             ).toMatchObject(new Date(Date.UTC(2030, 1, 1)))
@@ -294,10 +285,10 @@ describe.each(flagValueTestParameters)(
             )
             expect(
                 previousFormData(editedRatesPackage).rateInfos[0].rateDateStart
-            ).toMatchObject(initialRateInfos[0].rateDateStart)
+            ).toMatchObject(initialRateInfos().rateDateStart)
             expect(
                 previousFormData(editedRatesPackage).rateInfos[0].rateDateEnd
-            ).toMatchObject(initialRateInfos[0].rateDateEnd)
+            ).toMatchObject(initialRateInfos().rateDateEnd)
             expect(
                 editedRatesPackage.revisions[1].node.submitInfo?.updatedReason
             ).toBe('Initial submission')
@@ -305,10 +296,10 @@ describe.each(flagValueTestParameters)(
             expect(previousFormData(newRatesPackage).rateInfos).toHaveLength(1)
             expect(
                 previousFormData(newRatesPackage).rateInfos[0].rateDateStart
-            ).toMatchObject(initialRateInfos[0].rateDateStart)
+            ).toMatchObject(initialRateInfos().rateDateStart)
             expect(
                 previousFormData(newRatesPackage).rateInfos[0].rateDateEnd
-            ).toMatchObject(initialRateInfos[0].rateDateEnd)
+            ).toMatchObject(initialRateInfos().rateDateEnd)
             expect(
                 newRatesPackage.revisions[1].node.submitInfo?.updatedReason
             ).toBe('Initial submission')

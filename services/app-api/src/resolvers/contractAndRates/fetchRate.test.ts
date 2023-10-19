@@ -11,6 +11,7 @@ import { testCMSUser } from '../../testHelpers/userHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { must } from '../../testHelpers'
+import { v4 as uuidv4 } from 'uuid'
 
 describe('fetchRate', () => {
     const mockLDService = testLDService({ 'rates-db-refactor': true })
@@ -28,75 +29,85 @@ describe('fetchRate', () => {
             ldService: mockLDService,
         })
 
-        const initialRateInfos = [
-            {
-                rateType: 'NEW' as const,
-                rateDateStart: new Date(Date.UTC(2025, 5, 1)),
-                rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
-                rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
-                rateDocuments: [
-                    {
-                        name: 'rateDocument.pdf',
-                        s3URL: 'fakeS3URL',
-                        sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
-                    },
-                ],
-                supportingDocuments: [],
-                rateProgramIDs: [defaultFloridaRateProgram().id],
-                actuaryContacts: [
-                    {
-                        name: 'test name',
-                        titleRole: 'test title',
-                        email: 'email@example.com',
-                        actuarialFirm: 'MERCER' as const,
-                        actuarialFirmOther: '',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
-                packagesWithSharedRateCerts: [],
-            },
-        ]
+        const initialRateInfos = () => ({
+            id: uuidv4(),
+            rateType: 'NEW' as const,
+            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+            rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+            rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+            rateDocuments: [
+                {
+                    name: 'rateDocument.pdf',
+                    s3URL: 'fakeS3URL',
+                    sha256: 'fakesha',
+                    documentCategories: ['RATES' as const],
+                },
+            ],
+            supportingDocuments: [],
+            rateProgramIDs: [defaultFloridaRateProgram().id],
+            actuaryContacts: [
+                {
+                    name: 'test name',
+                    titleRole: 'test title',
+                    email: 'email@example.com',
+                    actuarialFirm: 'MERCER' as const,
+                    actuarialFirmOther: '',
+                },
+            ],
+            actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
+            packagesWithSharedRateCerts: [],
+        })
 
         // First, create new submission and unlock to edit rate
         const submittedEditedRates = await createAndSubmitTestHealthPlanPackage(
             server,
             {
-                rateInfos: initialRateInfos,
+                rateInfos: [initialRateInfos()],
             }
         )
         const packageID = submittedEditedRates.id
-        const rateID =
-            latestFormData(submittedEditedRates).rateInfos[0].id || 'NO_ID'
-        await unlockTestHealthPlanPackage(
+
+        // Unlock submission
+        const unlockedHPP = await unlockTestHealthPlanPackage(
             cmsServer,
-            submittedEditedRates.id,
+            packageID,
             'Unlock to edit an existing rate'
         )
 
-        // edit the sake rate
+        // Decode unlocked submission form data
+        const unlockedHppFormData = latestFormData(unlockedHPP)
+        // Get the data of the first and only rate in the HPP
+        const unlockedRate = unlockedHppFormData.rateInfos[0]
+
+        // edit the same rate
         await updateTestHealthPlanPackage(server, packageID, {
             rateInfos: [
                 {
-                    ...initialRateInfos[0],
-                    id: rateID, // edit same rate, use same id
+                    ...unlockedRate,
+                    id: unlockedRate.id, // edit same rate, use same id
                     rateDateStart: new Date(Date.UTC(2025, 1, 1)),
                     rateDateEnd: new Date(Date.UTC(2027, 1, 1)),
                 },
             ],
         })
 
-        await resubmitTestHealthPlanPackage(
+        // Resubmit
+        const resubmittedHPP = await resubmitTestHealthPlanPackage(
             server,
             packageID,
             'Resubmit with edited rate description'
         )
 
+        // Decode resubmitted HPP form data
+        const resubmittedHppFormData = latestFormData(resubmittedHPP)
+
         // fetch and check rate
         const result = await cmsServer.executeOperation({
             query: FETCH_RATE,
             variables: {
-                input: { rateID },
+                input: {
+                    rateID: resubmittedHppFormData.rateInfos[0].id,
+                },
             },
         })
 
@@ -142,41 +153,40 @@ describe('fetchRate', () => {
             ldService: mockLDService,
         })
 
-        const initialRateInfos = [
-            {
-                rateType: 'NEW' as const,
-                rateDateStart: new Date(Date.UTC(2025, 5, 1)),
-                rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
-                rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
-                rateDocuments: [
-                    {
-                        name: 'rateDocument.pdf',
-                        s3URL: 'fakeS3URL',
-                        sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
-                    },
-                ],
-                supportingDocuments: [],
-                rateProgramIDs: [defaultFloridaRateProgram().id],
-                actuaryContacts: [
-                    {
-                        name: 'test name',
-                        titleRole: 'test title',
-                        email: 'email@example.com',
-                        actuarialFirm: 'MERCER' as const,
-                        actuarialFirmOther: '',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
-                packagesWithSharedRateCerts: [],
-            },
-        ]
+        const initialRateInfos = () => ({
+            id: uuidv4(),
+            rateType: 'NEW' as const,
+            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+            rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+            rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+            rateDocuments: [
+                {
+                    name: 'rateDocument.pdf',
+                    s3URL: 'fakeS3URL',
+                    sha256: 'fakesha',
+                    documentCategories: ['RATES' as const],
+                },
+            ],
+            supportingDocuments: [],
+            rateProgramIDs: [defaultFloridaRateProgram().id],
+            actuaryContacts: [
+                {
+                    name: 'test name',
+                    titleRole: 'test title',
+                    email: 'email@example.com',
+                    actuarialFirm: 'MERCER' as const,
+                    actuarialFirmOther: '',
+                },
+            ],
+            actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
+            packagesWithSharedRateCerts: [],
+        })
 
         // First, create new submission and unlock to edit rate
         const submittedInitial = await createAndSubmitTestHealthPlanPackage(
             server,
             {
-                rateInfos: initialRateInfos,
+                rateInfos: [initialRateInfos()],
             }
         )
 
@@ -192,11 +202,9 @@ describe('fetchRate', () => {
         expect(existingFormData.rateInfos).toHaveLength(1)
         await updateTestHealthPlanPackage(server, submittedInitial.id, {
             rateInfos: [
-                { ...initialRateInfos[0], id: firstRateID }, // first rate unchanged
-
+                existingFormData.rateInfos[0], // first rate unchanged
                 {
-                    ...initialRateInfos[0],
-                    id: undefined, // this is a new rate
+                    ...initialRateInfos(),
                     rateDateStart: new Date(Date.UTC(2030, 1, 1)),
                     rateDateEnd: new Date(Date.UTC(2030, 12, 1)),
                     rateDateCertified: new Date(Date.UTC(2029, 10, 31)),
