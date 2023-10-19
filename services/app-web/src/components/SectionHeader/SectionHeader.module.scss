@@ -54,6 +54,15 @@
     justify-content: space-between;
     align-items: center;
     padding-bottom: units(2);
+
+    &.alignTop {
+        align-items: start;
+    }
+
+    a {
+        display: block;
+        margin-top: 17.5px;
+    }
 }
 
 .summarySectionHeaderBorder {

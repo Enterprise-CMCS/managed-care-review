@@ -161,12 +161,13 @@ export const SubmissionSummary = (): React.ReactElement => {
                 )}
 
                 <SubmissionTypeSummarySection
+                    headerLinkURL={`/submissions/${pkg.id}/MCCRS-record-number`}
+                    headerLinkLabel='Add MC-CRS record number'
                     submission={packageData}
                     submissionName={name}
                     headerChildComponent={
                         isCMSUser ? (
                             <>
-                                <Link href={`/submissions/${pkg.id}/MCCRS-record-number`}>Add MC-CRS record number</Link>
                                 <UnlockModalButton
                                     modalRef={modalRef}
                                     disabled={disableUnlockButton}

@@ -18,6 +18,8 @@ export type SubmissionTypeSummarySectionProps = {
     submission: HealthPlanFormDataType
     statePrograms: Program[]
     navigateTo?: string
+    headerLinkURL?: string
+    headerLinkLabel?: string
     headerChildComponent?: React.ReactElement
     initiallySubmittedAt?: Date
     submissionName: string
@@ -27,6 +29,8 @@ export const SubmissionTypeSummarySection = ({
     submission,
     statePrograms,
     navigateTo,
+    headerLinkURL,
+    headerLinkLabel,
     headerChildComponent,
     initiallySubmittedAt,
     submissionName,
@@ -41,6 +45,8 @@ export const SubmissionTypeSummarySection = ({
         <section id="submissionTypeSection" className={styles.summarySection}>
             <SectionHeader
                 header={submissionName}
+                headerLinkURL={headerLinkURL}
+                headerLinkLabel={headerLinkLabel}
                 navigateTo={navigateTo}
                 headerId={'submissionName'}
             >
