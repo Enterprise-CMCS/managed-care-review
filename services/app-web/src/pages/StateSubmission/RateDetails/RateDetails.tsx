@@ -185,6 +185,7 @@ export const RateDetails = ({
 
         const cleanedRateInfos = rateInfos.map((rateInfo) => {
             return {
+                id: rateInfo.id,
                 rateType: rateInfo.rateType,
                 rateCapitationType: rateInfo.rateCapitationType,
                 rateDocuments: formatDocumentsForDomain(

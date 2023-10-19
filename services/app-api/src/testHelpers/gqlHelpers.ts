@@ -1,4 +1,5 @@
 import { ApolloServer } from 'apollo-server-lambda'
+import { v4 as uuidv4 } from 'uuid'
 import CREATE_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/createHealthPlanPackage.graphql'
 import SUBMIT_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/submitHealthPlanPackage.graphql'
 import UNLOCK_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
@@ -234,6 +235,7 @@ const createAndUpdateTestHealthPlanPackage = async (
     ]
     draft.rateInfos = [
         {
+            id: uuidv4(),
             rateType: 'NEW' as const,
             rateDateStart: new Date(Date.UTC(2025, 5, 1)),
             rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
