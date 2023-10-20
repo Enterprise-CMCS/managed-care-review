@@ -38,6 +38,7 @@ const CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     GRAPHQL_EXPLORER: 'dev',
     REPORTS: 'table',
     SETTINGS: 'table',
+    RATES_SUMMARY: 'summary',
     SUBMISSIONS: 'form',
     SUBMISSIONS_NEW: 'form',
     SUBMISSIONS_EDIT_TOP_LEVEL: 'form',

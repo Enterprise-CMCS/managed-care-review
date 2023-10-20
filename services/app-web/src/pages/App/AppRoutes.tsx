@@ -38,6 +38,7 @@ import {
     UploadQuestions,
 } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
+import { RateSummary } from '../SubmissionSummary/RateSummary'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -206,6 +207,11 @@ const CMSUserRoutes = ({
                         element={<SubmissionSummary />}
                     />
                 </Route>
+
+                <Route
+                    path={RoutesRecord.RATES_SUMMARY}
+                    element={<RateSummary />}
+                />
 
                 <Route
                     path={RoutesRecord.SUBMISSIONS_MCCRSID}
