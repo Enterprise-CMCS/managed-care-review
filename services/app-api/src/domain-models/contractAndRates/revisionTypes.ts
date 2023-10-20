@@ -18,7 +18,12 @@ const contractRevisionSchema = z.object({
 
 const rateRevisionSchema = z.object({
     id: z.string().uuid(),
-    // rateID: z.string(), // TODO we have this data in prisma but we lose it in the domain type - its needed for frontend which uses parent ids for routing
+    rate: z.object({
+        id: z.string().uuid(),
+        stateCode: z.string(),
+        stateNumber: z.number().min(1),
+        createdAt: z.date(),
+    }),
     submitInfo: updateInfoSchema.optional(),
     unlockInfo: updateInfoSchema.optional(),
     createdAt: z.date(),
