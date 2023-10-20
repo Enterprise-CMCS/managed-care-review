@@ -85,6 +85,7 @@ function rateRevisionToDomainModel(
 
     return {
         id: revision.id,
+        rate: revision.rate,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
         submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),

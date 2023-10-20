@@ -10,6 +10,7 @@ import {
     createAndSubmitTestHealthPlanPackage,
     defaultFloridaRateProgram,
     submitTestHealthPlanPackage,
+    updateTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
@@ -18,7 +19,10 @@ import {
     generateRateName,
     packageName,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
+import {
+    latestFormData,
+    previousFormData,
+} from '../../testHelpers/healthPlanPackageHelpers'
 import {
     mockEmailParameterStoreError,
     getTestStateAnalystsEmails,
@@ -134,6 +138,172 @@ describe.each(flagValueTestParameters)(
                 resultUpdated.getTime() - createdUpdated.getTime()
             ).toBeGreaterThan(0)
         }, 20000)
+
+        it('returns a state submission with the correct rate data on resubmit', async () => {
+            const cmsUser = testCMSUser()
+            const server = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
+
+            const cmsServer = await constructTestPostgresServer({
+                context: {
+                    user: cmsUser,
+                },
+                ldService: mockLDService,
+            })
+
+            const initialRateInfos = () => ({
+                id: uuidv4(),
+                rateType: 'NEW' as const,
+                rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+                rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+                rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+                rateDocuments: [
+                    {
+                        name: 'rateDocument.pdf',
+                        s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+                supportingDocuments: [],
+                rateProgramIDs: [defaultFloridaRateProgram().id],
+                actuaryContacts: [
+                    {
+                        name: 'test name',
+                        titleRole: 'test title',
+                        email: 'email@example.com',
+                        actuarialFirm: 'MERCER' as const,
+                        actuarialFirmOther: '',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
+                packagesWithSharedRateCerts: [],
+            })
+
+            // First, create new submissions
+            const submittedEditedRates =
+                await createAndSubmitTestHealthPlanPackage(server, {
+                    rateInfos: [initialRateInfos()],
+                })
+            const submittedNewRates =
+                await createAndSubmitTestHealthPlanPackage(server, {
+                    rateInfos: [initialRateInfos()],
+                })
+
+            // Unlock both -  one to be rate edited in place, the other to add new rate
+            const existingRate1 = await unlockTestHealthPlanPackage(
+                cmsServer,
+                submittedEditedRates.id,
+                'Unlock to edit an existing rate'
+            )
+            const existingRate2 = await unlockTestHealthPlanPackage(
+                cmsServer,
+                submittedNewRates.id,
+                'Unlock to add a new rate'
+            )
+
+            // update one with a new rate start and end date
+            const existingFormData = latestFormData(existingRate1)
+            expect(existingFormData.rateInfos).toHaveLength(1)
+            await updateTestHealthPlanPackage(server, submittedEditedRates.id, {
+                rateInfos: [
+                    {
+                        ...existingFormData.rateInfos[0],
+                        rateDateStart: new Date(Date.UTC(2025, 1, 1)),
+                        rateDateEnd: new Date(Date.UTC(2027, 1, 1)),
+                    },
+                ],
+            })
+
+            // update the other with additional new rate
+            const existingFormData2 = latestFormData(existingRate2)
+            expect(existingFormData2.rateInfos).toHaveLength(1)
+            await updateTestHealthPlanPackage(server, submittedNewRates.id, {
+                rateInfos: [
+                    existingFormData2.rateInfos[0],
+                    {
+                        ...initialRateInfos(),
+                        id: uuidv4(), // this is a new rate
+                        rateDateStart: new Date(Date.UTC(2030, 1, 1)),
+                        rateDateEnd: new Date(Date.UTC(2030, 12, 1)),
+                    },
+                ],
+            })
+            // resubmit both
+            await resubmitTestHealthPlanPackage(
+                server,
+                submittedEditedRates.id,
+                'Resubmit with edited rate description'
+            )
+            await resubmitTestHealthPlanPackage(
+                server,
+                submittedNewRates.id,
+                'Resubmit with an additional rate added'
+            )
+
+            // fetch both packages and check that the latest data is correct
+            const editedRatesPackage = await fetchTestHealthPlanPackageById(
+                server,
+                submittedEditedRates.id
+            )
+            expect(latestFormData(editedRatesPackage).rateInfos).toHaveLength(1)
+            expect(
+                latestFormData(editedRatesPackage).rateInfos[0].rateDateStart
+            ).toMatchObject(new Date(Date.UTC(2025, 1, 1)))
+            expect(
+                latestFormData(editedRatesPackage).rateInfos[0].rateDateEnd
+            ).toMatchObject(new Date(Date.UTC(2027, 1, 1)))
+            expect(
+                editedRatesPackage.revisions[0].node.submitInfo?.updatedReason
+            ).toBe('Resubmit with edited rate description')
+
+            const newRatesPackage = await fetchTestHealthPlanPackageById(
+                server,
+                submittedNewRates.id
+            )
+            expect(latestFormData(newRatesPackage).rateInfos).toHaveLength(2)
+            expect(
+                latestFormData(newRatesPackage).rateInfos[0].rateDateStart
+            ).toMatchObject(initialRateInfos().rateDateStart)
+            expect(
+                latestFormData(newRatesPackage).rateInfos[0].rateDateEnd
+            ).toMatchObject(initialRateInfos().rateDateEnd)
+            expect(
+                latestFormData(newRatesPackage).rateInfos[1].rateDateStart
+            ).toMatchObject(new Date(Date.UTC(2030, 1, 1)))
+            expect(
+                latestFormData(newRatesPackage).rateInfos[1].rateDateEnd
+            ).toMatchObject(new Date(Date.UTC(2030, 12, 1)))
+            expect(
+                newRatesPackage.revisions[0].node.submitInfo?.updatedReason
+            ).toBe('Resubmit with an additional rate added')
+
+            // also check both packages to ensure previous revision data is unchanged
+            expect(previousFormData(editedRatesPackage).rateInfos).toHaveLength(
+                1
+            )
+            expect(
+                previousFormData(editedRatesPackage).rateInfos[0].rateDateStart
+            ).toMatchObject(initialRateInfos().rateDateStart)
+            expect(
+                previousFormData(editedRatesPackage).rateInfos[0].rateDateEnd
+            ).toMatchObject(initialRateInfos().rateDateEnd)
+            expect(
+                editedRatesPackage.revisions[1].node.submitInfo?.updatedReason
+            ).toBe('Initial submission')
+
+            expect(previousFormData(newRatesPackage).rateInfos).toHaveLength(1)
+            expect(
+                previousFormData(newRatesPackage).rateInfos[0].rateDateStart
+            ).toMatchObject(initialRateInfos().rateDateStart)
+            expect(
+                previousFormData(newRatesPackage).rateInfos[0].rateDateEnd
+            ).toMatchObject(initialRateInfos().rateDateEnd)
+            expect(
+                newRatesPackage.revisions[1].node.submitInfo?.updatedReason
+            ).toBe('Initial submission')
+        })
 
         it('returns an error if there are no contract documents attached', async () => {
             const server = await constructTestPostgresServer({

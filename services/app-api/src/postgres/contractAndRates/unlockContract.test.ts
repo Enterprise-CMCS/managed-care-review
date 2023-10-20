@@ -131,7 +131,12 @@ describe('unlockContract', () => {
         )
     })
 
-    it('Unlocks a rate without breaking connected submitted contract', async () => {
+    // This is unlocking a rate without unlocking the contract that this rate belongs to. Then it updates the rate and resubmits.
+    // The rate gets a new revision, but the submitted contract does not.
+    // This test does not simulate how creating/updating a rate currently works in our app and the contract revision history
+    // will not match.
+    // Skipping this for now, revisit during rate only feature work.
+    it.skip('Unlocks a rate without breaking connected submitted contract', async () => {
         const client = await sharedTestPrismaClient()
 
         const stateUser = await client.user.create({

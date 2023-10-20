@@ -290,7 +290,7 @@ export function submitHealthPlanPackageResolver(
 
             // reassign variable set up before rates feature flag
             const conversionResult = convertContractWithRatesToFormData(
-                contractWithHistory.revisions[0],
+                contractWithHistory.draftRevision,
                 contractWithHistory.id,
                 contractWithHistory.stateCode,
                 contractWithHistory.stateNumber
@@ -304,7 +304,7 @@ export function submitHealthPlanPackageResolver(
             }
 
             initialFormData = conversionResult
-            contractRevisionID = contractWithHistory.revisions[0].id
+            contractRevisionID = contractWithHistory.draftRevision.id
 
             // Final clean + check of data before submit - parse to state submission
             const maybeLocked = parseAndSubmit(initialFormData)
@@ -367,9 +367,9 @@ export function submitHealthPlanPackageResolver(
             }
 
             // If there are rates, submit those first
-            if (contractWithHistory.revisions[0].rateRevisions.length > 0) {
+            if (contractWithHistory.draftRevision.rateRevisions.length > 0) {
                 const ratePromises: Promise<Error | RateType>[] = []
-                contractWithHistory.revisions[0].rateRevisions.forEach(
+                contractWithHistory.draftRevision.rateRevisions.forEach(
                     (rateRev) => {
                         ratePromises.push(
                             store.submitRate({

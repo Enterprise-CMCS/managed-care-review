@@ -178,6 +178,40 @@ const updateTestHealthPlanFormData = async (
     return updateResult.data.updateHealthPlanFormData.pkg
 }
 
+const updateTestHealthPlanPackage = async (
+    server: ApolloServer,
+    pkgID: string,
+    partialUpdates?: Partial<UnlockedHealthPlanFormDataType>
+): Promise<HealthPlanPackage> => {
+    const pkg = await fetchTestHealthPlanPackageById(server, pkgID)
+    const draft = latestFormData(pkg)
+    const updatedFormData = {
+        ...draft,
+        ...partialUpdates,
+        status: 'DRAFT' as const,
+    }
+    const updateResult = await server.executeOperation({
+        query: UPDATE_HEALTH_PLAN_FORM_DATA,
+        variables: {
+            input: {
+                pkgID: pkgID,
+                healthPlanFormData: domainToBase64(updatedFormData),
+            },
+        },
+    })
+    if (updateResult.errors) {
+        console.info('errors', JSON.stringify(updateResult.errors))
+        throw new Error(
+            `updateTestHealthPlanFormData mutation failed with errors ${updateResult.errors}`
+        )
+    }
+
+    if (!updateResult.data) {
+        throw new Error('updateTestHealthPlanFormData returned nothing')
+    }
+    return updateResult.data.updateHealthPlanFormData.pkg
+}
+
 const createAndUpdateTestHealthPlanPackage = async (
     server: ApolloServer,
     partialUpdates?: Partial<UnlockedHealthPlanFormDataType>,
@@ -276,9 +310,13 @@ const createAndUpdateTestHealthPlanPackage = async (
 }
 
 const createAndSubmitTestHealthPlanPackage = async (
-    server: ApolloServer
+    server: ApolloServer,
+    partialUpdates?: Partial<UnlockedHealthPlanFormDataType>
 ): Promise<HealthPlanPackage> => {
-    const pkg = await createAndUpdateTestHealthPlanPackage(server)
+    const pkg = await createAndUpdateTestHealthPlanPackage(
+        server,
+        partialUpdates
+    )
     return await submitTestHealthPlanPackage(server, pkg.id)
 }
 
@@ -499,4 +537,5 @@ export {
     createTestQuestion,
     indexTestQuestions,
     createTestQuestionResponse,
+    updateTestHealthPlanPackage,
 }

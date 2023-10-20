@@ -163,6 +163,13 @@ describe('parseDomainData', () => {
                                     isRemoval: false,
                                     rateRevision: {
                                         id: uuidv4(),
+                                        rate: {
+                                            id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
+                                            createdAt: new Date(),
+                                            updatedAt: new Date(),
+                                            stateCode: 'MN',
+                                            stateNumber: 111,
+                                        },
                                         rateID: 'Rate ID',
                                         createdAt: new Date(),
                                         updatedAt: new Date(),

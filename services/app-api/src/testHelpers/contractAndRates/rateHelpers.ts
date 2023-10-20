@@ -8,6 +8,14 @@ import type { StateCodeType } from '../../../../app-web/src/common-code/healthPl
 import { findStatePrograms } from '../../postgres'
 import { must } from '../errorHelpers'
 
+const defaultRateData = () => ({
+    id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    stateCode: 'MN',
+    stateNumber: 111,
+})
+
 const createInsertRateData = (
     rateArgs?: Partial<InsertRateArgsType>
 ): InsertRateArgsType => {
@@ -27,6 +35,7 @@ const createDraftRateData = (
     stateNumber: 111,
     revisions: rate?.revisions ?? [
         createRateRevision(
+            rate,
             {
                 contractRevisions: undefined,
                 submitInfo: null,
@@ -47,6 +56,7 @@ const createRateData = (
     stateNumber: 111,
     revisions: rate?.revisions ?? [
         createRateRevision(
+            rate,
             {
                 draftContracts: undefined,
             },
@@ -57,6 +67,7 @@ const createRateData = (
 })
 
 const createRateRevision = (
+    rate?: Partial<RateTableFullPayload>,
     revision?: Partial<RateRevisionTableWithContracts>,
     stateCode: StateCodeType = 'MN'
 ): RateRevisionTableWithContracts => {
@@ -64,6 +75,10 @@ const createRateRevision = (
 
     return {
         id: uuidv4(),
+        rate: {
+            ...defaultRateData(),
+            ...rate,
+        },
         createdAt: new Date(),
         updatedAt: new Date(),
         submitInfo: {
