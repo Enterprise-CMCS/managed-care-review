@@ -203,9 +203,7 @@ function contractWithHistoryToDomainModel(
                 )
             }
 
-            // Make sure this rate revision was not submitted after this contract revision, and it was not removed. We
-            // do not want to include updated rate data from after this submission and we don't want to include revisions
-            // marked isRemoval.
+            // Make sure this rate revision was not submitted after this contract revision, and it was not removed.
             if (
                 rateRev.rateRevision.submitInfo.updatedAt <=
                     contractRev.submitInfo.updatedAt &&
@@ -216,12 +214,9 @@ function contractWithHistoryToDomainModel(
                     (rr) => rr.rateID === rateRev.rateRevision.rateID
                 )
 
-                // This conditional is to retain order of the rate entries by createdAt. contractRev.rateRevisions are
-                // queried from the DB in ASC order of createdAt.
                 if (existingIndex >= 0) {
                     // If rate exists, replace the existing rate entry with the current rate of the loop. We only want
-                    // the latest rate revision that was submitted with this contract revision, any earlier rate revisions
-                    // with the same rateID was from an earlier submission.
+                    // the latest rate revision which was submitted with this contract revision and retain order.
                     initialEntry.rateRevisions.splice(
                         existingIndex,
                         1,
