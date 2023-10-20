@@ -1,4 +1,5 @@
 import SUBMIT_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
+import FETCH_RATE from '../../../../app-graphql/src/queries/fetchRate.graphql'
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
@@ -58,6 +59,9 @@ describe.each(flagValueTestParameters)(
         const cmsUser = testCMSUser()
         const mockLDService = testLDService({ [flagName]: flagValue })
 
+        afterEach(() => {
+            jest.clearAllMocks()
+        })
         it('returns a StateSubmission if complete', async () => {
             const server = await constructTestPostgresServer({
                 ldService: mockLDService,
@@ -579,6 +583,30 @@ describe.each(flagValueTestParameters)(
                     ],
                 })
             )
+
+            //Flag on only tests
+            if (!flagValue) {
+                return
+            }
+
+            // Check to make sure disconnected rates were not submitted.
+            const draftFormData = latestFormData(draft)
+            const draftRates = draftFormData.rateInfos
+
+            for (const rate of draftRates) {
+                const rateWithHistory = await server.executeOperation({
+                    query: FETCH_RATE,
+                    variables: {
+                        input: {
+                            rateID: rate.id,
+                        },
+                    },
+                })
+
+                const rateStatus = rateWithHistory.data?.fetchRate.rate.status
+
+                expect(rateStatus).not.toBe('SUBMITTED')
+            }
         })
 
         it('removes any invalid modified provisions from CHIP submission and submits successfully', async () => {
