@@ -194,8 +194,8 @@ function contractWithHistoryToDomainModel(
         //     }
         // }
 
-        // Basically the same as above, except we do not create new contract revisions for rate changes and non-draft
-        //  contract revisions do not inlcude rate revisions that where submitted after the contract revision was submitted.
+        // This loop is finding the rate revision submitted along with this contract revision to preserve the historical
+        // rate data for the submission history.
         for (const rateRev of contractRev.rateRevisions) {
             if (!rateRev.rateRevision.submitInfo) {
                 return new Error(
@@ -203,24 +203,34 @@ function contractWithHistoryToDomainModel(
                 )
             }
 
-            // If the rate revision was submitted after the contract revision skip adding this rate revision.
-            // We don't want to lump in future rate revisions to a previously submitted contract revision. Since this is
-            // the contract history, we want to preserve rate data at the time of contract submission.
+            // Make sure this rate revision was not submitted after this contract revision, and it was not removed. We
+            // do not want to include updated rate data from after this submission and we don't want to include revisions
+            // marked isRemoval.
             if (
                 rateRev.rateRevision.submitInfo.updatedAt <=
-                contractRev.submitInfo.updatedAt
+                    contractRev.submitInfo.updatedAt &&
+                !rateRev.isRemoval
             ) {
-                let lastRates = [...initialEntry.rateRevisions]
-                // take out the previous rate revision this revision supersedes it
-                lastRates = lastRates.filter(
-                    (r) => (r.rateID !== rateRev.rateRevision.rateID)
+                // See if this rate is already in the list
+                const existingIndex = initialEntry.rateRevisions.findIndex(
+                    (rr) => rr.rateID === rateRev.rateRevision.rateID
                 )
-                // an isRemoval entry indicates that this rate was removed from this contract.
-                if (!rateRev.isRemoval) {
-                    lastRates.push(rateRev.rateRevision)
-                }
 
-                initialEntry.rateRevisions = lastRates
+                // This conditional is to retain order of the rate entries by createdAt. contractRev.rateRevisions are
+                // queried from the DB in ASC order of createdAt.
+                if (existingIndex >= 0) {
+                    // If rate exists, replace the existing rate entry with the current rate of the loop. We only want
+                    // the latest rate revision that was submitted with this contract revision, any earlier rate revisions
+                    // with the same rateID was from an earlier submission.
+                    initialEntry.rateRevisions.splice(
+                        existingIndex,
+                        1,
+                        rateRev.rateRevision
+                    )
+                } else {
+                    // If not we can just push it to the end
+                    initialEntry.rateRevisions.push(rateRev.rateRevision)
+                }
             }
         }
     }
