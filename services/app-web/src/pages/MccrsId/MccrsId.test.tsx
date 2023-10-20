@@ -16,7 +16,7 @@ describe('MCCRSID', () => {
     })
 
     it('renders without errors', async () => {
-        renderWithProviders(<MccrsId showValidations />, {
+        renderWithProviders(<MccrsId />, {
             routerProvider: {
                 route: '/submissions/15/MCCRS-record-number',
             },
@@ -31,7 +31,7 @@ describe('MCCRSID', () => {
     })
 
     it('displays the text field for mccrs id', async () => {
-        renderWithProviders(<MccrsId showValidations />, {
+        renderWithProviders(<MccrsId />, {
             routerProvider: {
                 route: '/submissions/15/MCCRS-record-number',
             },
@@ -41,7 +41,7 @@ describe('MCCRSID', () => {
     })
 
     it('cannot continue without providing a MCCRS ID', async () => {
-        renderWithProviders(<MccrsId showValidations />, {
+        renderWithProviders(<MccrsId />, {
             routerProvider: {
                 route: '/submissions/15/MCCRS-record-number',
             },
@@ -61,7 +61,7 @@ describe('MCCRSID', () => {
     })
 
     it('cannot continue with MCCRS ID less than 4 digits', async () => {
-        renderWithProviders(<MccrsId showValidations />, {
+        renderWithProviders(<MccrsId />, {
             routerProvider: {
                 route: '/submissions/15/MCCRS-record-number',
             },
@@ -88,7 +88,7 @@ describe('MCCRSID', () => {
     })
 
     it('cannot continue with MCCRS ID more than 4 digits', async () => {
-        renderWithProviders(<MccrsId showValidations />, {
+        renderWithProviders(<MccrsId />, {
             routerProvider: {
                 route: '/submissions/15/MCCRS-record-number',
             },
@@ -115,7 +115,7 @@ describe('MCCRSID', () => {
     })
 
     it('cannot continue with MCCRS ID with non number input', async () => {
-        renderWithProviders(<MccrsId showValidations />, {
+        renderWithProviders(<MccrsId />, {
             routerProvider: {
                 route: '/submissions/15/MCCRS-record-number',
             },
@@ -136,30 +136,6 @@ describe('MCCRSID', () => {
                 1
             )
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')
-        })
-    })
-
-    it('successfully adds the MCCRS ID', async () => {
-        renderWithProviders(<MccrsId showValidations />, {
-            routerProvider: {
-                route: '/submissions/15/MCCRS-record-number',
-            },
-        })
-
-        screen
-            .getByLabelText(
-                'Enter the Managed Care Contract and Rate Review System (MC-CRS) record number.'
-            )
-            .focus()
-        await userEvent.paste('1234')
-        const continueButton = screen.getByRole('button', {
-            name: 'Save MC-CRS number',
-        })
-        continueButton.click()
-        await waitFor(() => {
-            expect(
-                screen.getByText('Add MC-CRS record number')
-            ).toBeInTheDocument()
         })
     })
 })

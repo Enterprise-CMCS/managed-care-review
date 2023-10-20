@@ -4,10 +4,9 @@ import styles from './SectionHeader.module.scss'
 
 export type SectionHeaderProps = {
     header: string
-    headerLinkURL?: string
-    headerLinkLabel?: string
     navigateTo?: string
     children?: React.ReactNode
+    subHeaderComponent?: React.ReactNode
     sectionId?: string
     headerId?: string
     hideBorder?: boolean
@@ -15,8 +14,7 @@ export type SectionHeaderProps = {
 
 export const SectionHeader = ({
     header,
-    headerLinkURL,
-    headerLinkLabel,
+    subHeaderComponent,
     navigateTo,
     children,
     sectionId,
@@ -27,14 +25,12 @@ export const SectionHeader = ({
         <div
             className={`${styles.summarySectionHeader} ${
                 !hideBorder ? styles.summarySectionHeaderBorder : ''
-            } ${headerLinkURL ? styles.alignTop : ''}`}
+            } ${subHeaderComponent ? styles.alignTop : ''}`}
             id={sectionId}
         >
             <div>
                 <h2 id={headerId}>{header}</h2>
-            {headerLinkURL && (
-                <Link href={headerLinkURL}>{headerLinkLabel}</Link>
-            )}
+                {subHeaderComponent}
             </div>
             <div>
                 {navigateTo && (

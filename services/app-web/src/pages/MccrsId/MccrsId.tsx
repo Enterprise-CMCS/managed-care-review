@@ -23,12 +23,8 @@ type RouteParams = {
     id: string
 }
 
-export const MccrsId = ({
-    showValidations = false,
-}: {
-    showValidations: boolean
-}): React.ReactElement => {
-    const [shouldValidate, setShouldValidate] = React.useState(showValidations)
+export const MccrsId = (): React.ReactElement => {
+    const [shouldValidate, setShouldValidate] = React.useState(true)
     const { id } = useParams<keyof RouteParams>()
     const navigate = useNavigate()
 

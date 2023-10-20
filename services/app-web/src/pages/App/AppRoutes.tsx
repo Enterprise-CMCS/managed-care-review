@@ -202,14 +202,15 @@ const CMSUserRoutes = ({
                         </>
                     )}
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_MCCRSID}
-                        element={<MccrsId showValidations />}
-                    />
-                    <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
                         element={<SubmissionSummary />}
                     />
                 </Route>
+
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_MCCRSID}
+                    element={<MccrsId />}
+                />
 
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}

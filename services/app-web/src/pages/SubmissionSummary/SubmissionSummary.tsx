@@ -160,12 +160,32 @@ export const SubmissionSummary = (): React.ReactElement => {
                 )}
 
                 <SubmissionTypeSummarySection
-                    headerLinkURL={
-                        isCMSUser
-                            ? `/submissions/${pkg.id}/MCCRS-record-number`
-                            : undefined
+                    subHeaderComponent={
+                        isCMSUser ? (
+                            <div className={styles.subHeader}>
+                                {pkg.mccrsID && (
+                                    <span>
+                                        MC-CRS record number:
+                                        <Link
+                                            href={`https://mc-crs.mathematica-stg.org/ReviewDetails/Index/${pkg.mccrsID}`}
+                                        >
+                                            {pkg.mccrsID}
+                                        </Link>
+                                    </span>
+                                )}
+                                <Link
+                                    href={`/submissions/${pkg.id}/MCCRS-record-number`}
+                                    className={
+                                        pkg.mccrsID ? styles.editLink : ''
+                                    }
+                                >
+                                    {pkg.mccrsID
+                                        ? 'Edit MC-CRS number'
+                                        : 'Add MC-CRS record number'}
+                                </Link>
+                            </div>
+                        ) : undefined
                     }
-                    headerLinkLabel="Add MC-CRS record number"
                     submission={packageData}
                     submissionName={name}
                     headerChildComponent={
