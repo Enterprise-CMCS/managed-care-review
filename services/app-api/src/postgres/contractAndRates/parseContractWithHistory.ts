@@ -209,23 +209,16 @@ function contractWithHistoryToDomainModel(
                     contractRev.submitInfo.updatedAt &&
                 !rateRev.isRemoval
             ) {
-                // See if this rate is already in the list
-                const existingIndex = initialEntry.rateRevisions.findIndex(
-                    (rr) => rr.rateID === rateRev.rateRevision.rateID
+                // take out the previous rate revision this revision supersedes
+                const filteredRevisions = initialEntry.rateRevisions.filter(
+                    (rr) => rr.rateID !== rateRev.rateRevision.rateID
                 )
 
-                if (existingIndex >= 0) {
-                    // If rate exists, replace the existing rate entry with the current rate of the loop. We only want
-                    // the latest rate revision which was submitted with this contract revision and retain order.
-                    initialEntry.rateRevisions.splice(
-                        existingIndex,
-                        1,
-                        rateRev.rateRevision
-                    )
-                } else {
-                    // If not we can just push it to the end
-                    initialEntry.rateRevisions.push(rateRev.rateRevision)
-                }
+                // add latest revision
+                filteredRevisions.push(rateRev.rateRevision)
+
+                // Sort to retain order by rate.createdAt.
+                initialEntry.rateRevisions = filteredRevisions
             }
         }
     }
