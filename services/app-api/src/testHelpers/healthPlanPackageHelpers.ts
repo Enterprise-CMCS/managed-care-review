@@ -17,3 +17,19 @@ export function latestFormData(pkg: HealthPlanPackage): HealthPlanFormDataType {
 
     return unwrapResult
 }
+
+export function previousFormData(
+    pkg: HealthPlanPackage
+): HealthPlanFormDataType {
+    const latestRevision = pkg.revisions[1].node
+    if (!latestRevision) {
+        throw new Error('no previous revisions found for package' + pkg.id)
+    }
+
+    const unwrapResult = base64ToDomain(latestRevision.formDataProto)
+    if (unwrapResult instanceof Error) {
+        throw unwrapResult
+    }
+
+    return unwrapResult
+}

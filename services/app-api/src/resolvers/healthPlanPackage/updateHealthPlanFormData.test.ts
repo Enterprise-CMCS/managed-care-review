@@ -191,6 +191,7 @@ describe.each(flagValueTestParameters)(
 
             // Create 2 rate data for insertion
             const rate1 = {
+                id: uuidv4(),
                 rateType: 'NEW' as const,
                 rateDateStart: new Date(Date.UTC(2025, 5, 1)),
                 rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
@@ -225,6 +226,7 @@ describe.each(flagValueTestParameters)(
             }
 
             const rate2 = {
+                id: uuidv4(),
                 rateType: 'NEW' as const,
                 rateDateStart: new Date(Date.UTC(2025, 5, 1)),
                 rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
@@ -334,6 +336,7 @@ describe.each(flagValueTestParameters)(
             )
 
             const rate3 = {
+                id: uuidv4(),
                 rateType: 'AMENDMENT' as const,
                 rateDateStart: new Date(Date.UTC(2025, 5, 1)),
                 rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
@@ -416,6 +419,169 @@ describe.each(flagValueTestParameters)(
                     ]),
                 })
             )
+        })
+
+        it('errors on a rate with no ID.', async () => {
+            const stateUser = {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER' as const,
+                stateCode: 'MN',
+            }
+            const server = await constructTestPostgresServer({
+                ldService: mockLDService,
+                context: {
+                    user: stateUser,
+                },
+            })
+
+            const stateCode = 'MN'
+            const createdDraft = await createTestHealthPlanPackage(
+                server,
+                stateCode
+            )
+            const statePrograms = must(
+                findStatePrograms(createdDraft.stateCode)
+            )
+
+            // Create 2 valid contracts to attached to packagesWithSharedRateCerts
+            const createdDraftTwo = await createTestHealthPlanPackage(
+                server,
+                stateCode
+            )
+            const createdDraftThree = await createTestHealthPlanPackage(
+                server,
+                stateCode
+            )
+
+            const createdDraftTwoFormData = latestFormData(createdDraftTwo)
+            const createdDraftThreeFormData = latestFormData(createdDraftThree)
+
+            const packageWithSharedRate1 = {
+                packageId: createdDraftTwo.id,
+                packageName: packageName(
+                    createdDraftTwo.stateCode,
+                    createdDraftTwoFormData.stateNumber,
+                    createdDraftTwoFormData.programIDs,
+                    statePrograms
+                ),
+            } as const
+
+            const packageWithSharedRate2 = {
+                packageId: createdDraftThree.id,
+                packageName: packageName(
+                    createdDraftThree.stateCode,
+                    createdDraftThreeFormData.stateNumber,
+                    createdDraftThreeFormData.programIDs,
+                    statePrograms
+                ),
+            } as const
+
+            // Create 2 rate data for insertion
+            const rate1 = {
+                rateType: 'NEW' as const,
+                rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+                rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+                rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+                rateDocuments: [
+                    {
+                        name: 'rateDocument.pdf',
+                        s3URL: 's3://bucketname/key/supporting-documents',
+                        documentCategories: ['RATES' as const],
+                        sha256: 'rate1-sha',
+                    },
+                ],
+                rateAmendmentInfo: undefined,
+                rateCapitationType: undefined,
+                rateCertificationName: undefined,
+                supportingDocuments: [],
+                //We only want one rate ID and use last program in list to differentiate from programID if possible.
+                rateProgramIDs: [statePrograms.reverse()[0].id],
+                actuaryContacts: [
+                    {
+                        name: 'test name',
+                        titleRole: 'test title',
+                        email: 'email@example.com',
+                        actuarialFirm: 'MERCER' as const,
+                        actuarialFirmOther: '',
+                    },
+                ],
+                packagesWithSharedRateCerts: [
+                    packageWithSharedRate1,
+                    packageWithSharedRate2,
+                ],
+            }
+
+            const rate2 = {
+                id: uuidv4(),
+                rateType: 'NEW' as const,
+                rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+                rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+                rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+                rateDocuments: [
+                    {
+                        name: 'rateDocument.pdf',
+                        s3URL: 's3://bucketname/key/supporting-documents',
+                        documentCategories: ['RATES' as const],
+                        sha256: 'rate2-sha',
+                    },
+                ],
+                rateAmendmentInfo: undefined,
+                rateCapitationType: undefined,
+                rateCertificationName: undefined,
+                supportingDocuments: [],
+                //We only want one rate ID and use last program in list to differentiate from programID if possible.
+                rateProgramIDs: [statePrograms.reverse()[0].id],
+                actuaryContacts: [
+                    {
+                        name: 'test name',
+                        titleRole: 'test title',
+                        email: 'email@example.com',
+                        actuarialFirm: 'MERCER' as const,
+                        actuarialFirmOther: '',
+                    },
+                ],
+                packagesWithSharedRateCerts: [],
+            }
+
+            // update that draft form data.
+            const formData = Object.assign(latestFormData(createdDraft), {
+                addtlActuaryContacts: [
+                    {
+                        name: 'additional actuary 1',
+                        titleRole: 'additional actuary title 1',
+                        email: 'additionalactuary1@example.com',
+                        actuarialFirm: 'MERCER' as const,
+                        actuarialFirmOther: '',
+                    },
+                    {
+                        name: 'additional actuary 2',
+                        titleRole: 'additional actuary title 2',
+                        email: 'additionalactuary1@example.com',
+                        actuarialFirm: 'MERCER' as const,
+                        actuarialFirmOther: '',
+                    },
+                ],
+                rateInfos: [rate1, rate2],
+            })
+
+            // convert to base64 proto
+            const updatedB64 = domainToBase64(formData)
+
+            // update the DB contract
+            const updateResult = await server.executeOperation({
+                query: UPDATE_HEALTH_PLAN_FORM_DATA,
+                variables: {
+                    input: {
+                        pkgID: createdDraft.id,
+                        healthPlanFormData: updatedB64,
+                    },
+                },
+            })
+
+            expect(updateResult.errors).toBeDefined()
         })
 
         it('updates relational fields such as documents and contacts', async () => {

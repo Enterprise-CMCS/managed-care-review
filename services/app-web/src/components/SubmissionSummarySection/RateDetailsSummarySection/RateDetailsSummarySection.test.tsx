@@ -3,6 +3,9 @@ import {
     mockContractAndRatesDraft,
     mockStateSubmission,
     mockMNState,
+    fetchCurrentUserMock,
+    mockValidCMSUser,
+    indexHealthPlanPackagesMockSuccess,
 } from '../../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import * as usePreviousSubmission from '../../../hooks/usePreviousSubmission'
@@ -77,6 +80,16 @@ describe('RateDetailsSummarySection', () => {
         },
     ]
 
+    const apolloProvider = {
+        mocks: [
+            fetchCurrentUserMock({
+                statusCode: 200,
+                user: mockValidCMSUser(),
+            }),
+            indexHealthPlanPackagesMockSuccess(),
+        ],
+    }
+
     afterEach(() => jest.clearAllMocks())
 
     it('can render draft submission without errors', () => {
@@ -87,7 +100,10 @@ describe('RateDetailsSummarySection', () => {
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
-            />
+            />,
+            {
+                apolloProvider,
+            }
         )
 
         expect(
@@ -108,7 +124,10 @@ describe('RateDetailsSummarySection', () => {
                 submission={stateSubmission}
                 submissionName="MN-MSHO-0003"
                 statePrograms={statePrograms}
-            />
+            />,
+            {
+                apolloProvider,
+            }
         )
 
         expect(
@@ -141,7 +160,10 @@ describe('RateDetailsSummarySection', () => {
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
-            />
+            />,
+            {
+                apolloProvider,
+            }
         )
         expect(
             screen.getByRole('definition', { name: 'Rate certification type' })
@@ -168,21 +190,28 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
     })
 
-    it('can render correct rate name for new rate submission', () => {
+    it('can render correct rate name for new rate submission', async () => {
         const submission = mockStateSubmission()
         submission.rateInfos[0].rateCertificationName =
             'MCR-MN-0005-SNBC-RATE-20221013-20221013-CERTIFICATION-20221013'
 
         const statePrograms = mockMNState().programs
-        renderWithProviders(
-            <RateDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                submission={submission}
-                navigateTo="rate-details"
-                submissionName="MN-MSHO-0003"
-                statePrograms={statePrograms}
-            />
-        )
+        await waitFor(() => {
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    documentDateLookupTable={{
+                        previousSubmissionDate: '01/01/01',
+                    }}
+                    submission={submission}
+                    navigateTo="rate-details"
+                    submissionName="MN-MSHO-0003"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider,
+                }
+            )
+        })
         const rateName =
             'MCR-MN-0005-SNBC-RATE-20221013-20221013-CERTIFICATION-20221013'
         expect(screen.getByText(rateName)).toBeInTheDocument()
@@ -212,7 +241,10 @@ describe('RateDetailsSummarySection', () => {
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
-            />
+            />,
+            {
+                apolloProvider,
+            }
         )
 
         const rateName =
@@ -221,18 +253,26 @@ describe('RateDetailsSummarySection', () => {
         expect(screen.getByText(rateName)).toBeInTheDocument()
     })
 
-    it('can render all rate details fields for new rate certification submission', () => {
+    it('can render all rate details fields for new rate certification submission', async () => {
         const statePrograms = mockMNState().programs
         stateSubmission.rateInfos[0].rateCertificationName =
             'MCR-MN-0005-SNBC-RATE-20221014-20221014-CERTIFICATION-20221014'
-        renderWithProviders(
-            <RateDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                submission={stateSubmission}
-                submissionName="MN-MSHO-0003"
-                statePrograms={statePrograms}
-            />
-        )
+
+        await waitFor(() => {
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    documentDateLookupTable={{
+                        previousSubmissionDate: '01/01/01',
+                    }}
+                    submission={stateSubmission}
+                    submissionName="MN-MSHO-0003"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider,
+                }
+            )
+        })
 
         const rateName =
             'MCR-MN-0005-SNBC-RATE-20221014-20221014-CERTIFICATION-20221014'
@@ -289,6 +329,7 @@ describe('RateDetailsSummarySection', () => {
                 },
             ],
         }
+
         renderWithProviders(
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
@@ -296,7 +337,10 @@ describe('RateDetailsSummarySection', () => {
                 navigateTo="/rate-details'"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
-            />
+            />,
+            {
+                apolloProvider,
+            }
         )
 
         await waitFor(() => {
@@ -346,7 +390,10 @@ describe('RateDetailsSummarySection', () => {
                 submission={draftSubmission}
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
-            />
+            />,
+            {
+                apolloProvider,
+            }
         )
 
         expect(
@@ -356,15 +403,23 @@ describe('RateDetailsSummarySection', () => {
         ).toBeNull()
     })
 
-    it('does not render download all button when on previous submission', () => {
-        renderWithProviders(
-            <RateDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                submission={stateSubmission}
-                submissionName="MN-PMAP-0001"
-                statePrograms={statePrograms}
-            />
+    it('does not render download all button when on previous submission', async () => {
+        await waitFor(() =>
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    documentDateLookupTable={{
+                        previousSubmissionDate: '01/01/01',
+                    }}
+                    submission={stateSubmission}
+                    submissionName="MN-PMAP-0001"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider,
+                }
+            )
         )
+
         expect(
             screen.queryByRole('button', {
                 name: 'Download all rate documents',
@@ -380,7 +435,10 @@ describe('RateDetailsSummarySection', () => {
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
-            />
+            />,
+            {
+                apolloProvider,
+            }
         )
         expect(
             screen.getByRole('definition', {
@@ -404,7 +462,10 @@ describe('RateDetailsSummarySection', () => {
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
-            />
+            />,
+            {
+                apolloProvider,
+            }
         )
         expect(
             screen.getByRole('definition', {
@@ -431,7 +492,10 @@ describe('RateDetailsSummarySection', () => {
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
-            />
+            />,
+            {
+                apolloProvider,
+            }
         )
         const programElement = screen.getByRole('definition', {
             name: 'Programs this rate certification covers',
@@ -455,7 +519,10 @@ describe('RateDetailsSummarySection', () => {
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
-            />
+            />,
+            {
+                apolloProvider,
+            }
         )
         const programElement = screen.getByRole('definition', {
             name: 'Programs this rate certification covers',
@@ -475,7 +542,10 @@ describe('RateDetailsSummarySection', () => {
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
-            />
+            />,
+            {
+                apolloProvider,
+            }
         )
         const programList = screen.getAllByRole('definition', {
             name: 'Programs this rate certification covers',
@@ -495,7 +565,10 @@ describe('RateDetailsSummarySection', () => {
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
-            />
+            />,
+            {
+                apolloProvider,
+            }
         )
         const certType = screen.getAllByRole('definition', {
             name: 'Rate certification type',
@@ -515,7 +588,10 @@ describe('RateDetailsSummarySection', () => {
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
-            />
+            />,
+            {
+                apolloProvider,
+            }
         )
         await waitFor(() => {
             const rateDocsTables = screen.getAllByRole('table', {
@@ -545,7 +621,10 @@ describe('RateDetailsSummarySection', () => {
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
-            />
+            />,
+            {
+                apolloProvider,
+            }
         )
         await waitFor(() => {
             const certifyingActuary = screen.getAllByRole('definition', {
@@ -621,7 +700,10 @@ describe('RateDetailsSummarySection', () => {
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
-            />
+            />,
+            {
+                apolloProvider,
+            }
         )
         await waitFor(() => {
             const rateDocsTable = screen.getByRole('table', {
@@ -722,7 +804,10 @@ describe('RateDetailsSummarySection', () => {
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
-            />
+            />,
+            {
+                apolloProvider,
+            }
         )
         await waitFor(() => {
             const rateDocsTable = screen.getByRole('table', {
@@ -789,7 +874,10 @@ describe('RateDetailsSummarySection', () => {
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
-            />
+            />,
+            {
+                apolloProvider,
+            }
         )
         await waitFor(() => {
             const rateDocsTable = screen.getByRole('table', {
@@ -812,7 +900,10 @@ describe('RateDetailsSummarySection', () => {
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
-            />
+            />,
+            {
+                apolloProvider,
+            }
         )
 
         expect(screen.queryByRole('link', { name: 'Edit' })).toBeNull()
@@ -841,6 +932,7 @@ describe('RateDetailsSummarySection', () => {
             />,
             {
                 s3Provider,
+                apolloProvider,
             }
         )
 

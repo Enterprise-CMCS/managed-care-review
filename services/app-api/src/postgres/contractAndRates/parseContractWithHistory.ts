@@ -194,7 +194,8 @@ function contractWithHistoryToDomainModel(
         //     }
         // }
 
-        // Basically the same as above, except we do not create new contract revisions for rate changes.
+        // This loop is finding the rate revision submitted along with this contract revision to preserve the historical
+        // rate data for the submission history.
         for (const rateRev of contractRev.rateRevisions) {
             if (!rateRev.rateRevision.submitInfo) {
                 return new Error(
@@ -202,28 +203,22 @@ function contractWithHistoryToDomainModel(
                 )
             }
 
-            // if it's from before this contract was submitted, it's there at the beginning.
+            // Make sure this rate revision was not submitted after this contract revision, and it was not removed.
             if (
                 rateRev.rateRevision.submitInfo.updatedAt <=
-                contractRev.submitInfo.updatedAt
+                    contractRev.submitInfo.updatedAt &&
+                !rateRev.isRemoval
             ) {
-                if (!rateRev.isRemoval) {
-                    initialEntry.rateRevisions.push(rateRev.rateRevision)
-                }
-            } else {
-                // if after, then it's always a new entry in the list
-                let lastRates = [...initialEntry.rateRevisions]
-
                 // take out the previous rate revision this revision supersedes
-                lastRates = lastRates.filter(
-                    (r) => r.rateID !== rateRev.rateRevision.rateID
+                const filteredRevisions = initialEntry.rateRevisions.filter(
+                    (rr) => rr.rateID !== rateRev.rateRevision.rateID
                 )
-                // an isRemoval entry indicates that this rate was removed from this contract.
-                if (!rateRev.isRemoval) {
-                    lastRates.push(rateRev.rateRevision)
-                }
 
-                initialEntry.rateRevisions = lastRates
+                // add latest revision
+                filteredRevisions.push(rateRev.rateRevision)
+
+                // Sort to retain order by rate.createdAt.
+                initialEntry.rateRevisions = filteredRevisions
             }
         }
     }

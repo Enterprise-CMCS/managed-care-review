@@ -29,9 +29,23 @@ At the Postgres Table level, draft revisions and submitted revisions live in the
 
 The list of revisions returned from prisma is run through [Zod](https://zod.dev/) to return [domain mode types](../../services/app-api/src/domain-models/contractAndRates). This is initiated by the `*WithHistory` database functions. See [parseContractWithHistory](../../services/app-api/src/postgres/contractAndRates/parseContractWithHistory.ts) and [parseRateWithHistory](../../services/app-api/src/postgres/contractAndRates/parseRateWithHistory.ts).
 
+#### Contract History
+- `parseContractWithHistory` takes our prisma contract data and parses into our domain `ContractType`. In `ContractType` the `revisions` is an array of **contract** **revisions**; this is the contract history.
+- `revisions` differs from `draftRevision` in the `ContractType`. The `draftRevision` is a singular revision that is not submitted and this data has no historical significance until it is submitted. Most of the data in this revision can be updated.
+- Each **contract revision** in `revisions` is submitted and retains data at the time of the submission. These revision's data will never be updated to retain its historical integrity.
+- An important note about the `rateRevisions` field in each contract revision in `revision`.
+   - Like contracts, rates also have **rate revisions** which are used to construct a rate history through submissions, but the purpose of `rateRevisions` on a contract revision is not for rate history.
+   - The purpose of `rateRevisions` is to retain the data of a rate linked to this contract revision at the time of submission.
+   - For that we need the single rate revision that was submitted at the time this contract revision was submitted.
+   - Here are some guidelines for each rate revision in `rateRevisions` of a contract revision.
+      - Each rate revision in `rateRevisions` is unique by rate id, meaning there will never be two rate revisions with the same rate id in `rateRevisions`
+      - Each rate revision is the latest submitted up till the contract revision submitted time.
+      - Like contract revision, rate revision is read only and cannot be updated to retain its historical integrity.
+
+
 *Dev Note*: If the `draftRevision` field has a value and the `revisions` field is an empty array, we know the Contract or Rate we are looking at is an initial draft that has never been submitted.
 
-## The link between contract and rates is versioned. That link is solidified on submit.
+### The link between contract and rates is versioned. That link is solidified on submit.
 
 It's possible to tell if a link between a contract and rate has become outdated by refencing the `valid After` and `validUntil` fields on the join table between contract and rate revisions. The `validFrom` is set when a link is created (when a contract is submitted with a link to rates). At the point of creation, the `validUntil` is still null.
 

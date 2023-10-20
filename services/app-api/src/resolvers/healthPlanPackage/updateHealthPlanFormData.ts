@@ -116,6 +116,18 @@ export function updateHealthPlanFormDataResolver(
 
         const unlockedFormData: UnlockedHealthPlanFormDataType = formDataResult
 
+        // If the client tries to update a rate without setting its ID that's an error. 
+        for (const rateFD of unlockedFormData.rateInfos) {
+            if (!rateFD.id) {
+                const errMessage = `Attempted to update a rateInfo that has no ID: ${input.pkgID} ${rateFD}`
+                logError('updateHealthPlanFormData', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new UserInputError(errMessage, {
+                    argumentName: 'healthPlanFormData.rateInfo',
+                })
+            }
+        }
+
         // Uses new DB if flag is on
         if (ratesDatabaseRefactor) {
             // Find contract from DB

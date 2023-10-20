@@ -6,7 +6,7 @@ import styles from '../../StateDashboard/StateDashboard.module.scss'
 import { recordJSException } from '../../../otelHelpers/tracingHelper'
 import { Loading } from '../../../components'
 
-import { RateInDashboardType, RateReviewsTable } from '../RateReviewsTable'
+import { RateInDashboardType, RateReviewsTable } from './RateReviewsTable'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
 import { ErrorFailedRequestPage } from '../../Errors/ErrorFailedRequestPage'

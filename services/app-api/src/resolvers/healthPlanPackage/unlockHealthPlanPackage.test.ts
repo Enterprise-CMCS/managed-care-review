@@ -1,5 +1,6 @@
 import type { GraphQLError } from 'graphql'
 import UNLOCK_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
+import { v4 as uuidv4 } from 'uuid'
 import type {
     HealthPlanPackage,
     HealthPlanRevisionEdge,
@@ -259,6 +260,7 @@ describe.each(flagValueTestParameters)(
 
             formData.rateInfos.push(
                 {
+                    id: uuidv4(),
                     rateDateStart: new Date(),
                     rateDateEnd: new Date(),
                     rateProgramIDs: ['5c10fe9f-bec9-416f-a20c-718b152ad633'],
@@ -313,6 +315,7 @@ describe.each(flagValueTestParameters)(
                     ],
                 },
                 {
+                    id: uuidv4(),
                     rateDateStart: new Date(),
                     rateDateEnd: new Date(),
                     rateProgramIDs: ['08d114c2-0c01-4a1a-b8ff-e2b79336672d'],
