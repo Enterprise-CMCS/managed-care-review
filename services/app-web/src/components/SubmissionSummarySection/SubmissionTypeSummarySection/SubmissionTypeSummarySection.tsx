@@ -18,8 +18,6 @@ export type SubmissionTypeSummarySectionProps = {
     submission: HealthPlanFormDataType
     statePrograms: Program[]
     navigateTo?: string
-    headerLinkURL?: string
-    headerLinkLabel?: string
     headerChildComponent?: React.ReactElement
     subHeaderComponent?: React.ReactElement
     initiallySubmittedAt?: Date

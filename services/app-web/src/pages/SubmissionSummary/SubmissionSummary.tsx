@@ -70,6 +70,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     const { pkg, currentRevision, packageData, user, documentDates } =
         useOutletContext<SideNavOutletContextType>()
+
     const isCMSUser = user?.role === 'CMS_USER'
     const submissionStatus = pkg.status
     const statePrograms = pkg.state.programs
@@ -190,12 +191,10 @@ export const SubmissionSummary = (): React.ReactElement => {
                     submissionName={name}
                     headerChildComponent={
                         isCMSUser ? (
-                            <>
-                                <UnlockModalButton
-                                    modalRef={modalRef}
-                                    disabled={disableUnlockButton}
-                                />
-                            </>
+                            <UnlockModalButton
+                                modalRef={modalRef}
+                                disabled={disableUnlockButton}
+                            />
                         ) : undefined
                     }
                     statePrograms={statePrograms}
