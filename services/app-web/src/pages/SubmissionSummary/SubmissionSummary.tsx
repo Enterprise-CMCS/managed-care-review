@@ -70,7 +70,6 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     const { pkg, currentRevision, packageData, user, documentDates } =
         useOutletContext<SideNavOutletContextType>()
-
     const isCMSUser = user?.role === 'CMS_USER'
     const submissionStatus = pkg.status
     const statePrograms = pkg.state.programs
@@ -161,8 +160,12 @@ export const SubmissionSummary = (): React.ReactElement => {
                 )}
 
                 <SubmissionTypeSummarySection
-                    headerLinkURL={`/submissions/${pkg.id}/MCCRS-record-number`}
-                    headerLinkLabel='Add MC-CRS record number'
+                    headerLinkURL={
+                        isCMSUser
+                            ? `/submissions/${pkg.id}/MCCRS-record-number`
+                            : undefined
+                    }
+                    headerLinkLabel="Add MC-CRS record number"
                     submission={packageData}
                     submissionName={name}
                     headerChildComponent={
