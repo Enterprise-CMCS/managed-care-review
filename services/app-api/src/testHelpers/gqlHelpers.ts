@@ -185,17 +185,15 @@ const updateTestHealthPlanPackage = async (
 ): Promise<HealthPlanPackage> => {
     const pkg = await fetchTestHealthPlanPackageById(server, pkgID)
     const draft = latestFormData(pkg)
-    const updatedFormData = {
-        ...draft,
-        ...partialUpdates,
-        status: 'DRAFT' as const,
-    }
+
+    Object.assign(draft, partialUpdates)
+
     const updateResult = await server.executeOperation({
         query: UPDATE_HEALTH_PLAN_FORM_DATA,
         variables: {
             input: {
                 pkgID: pkgID,
-                healthPlanFormData: domainToBase64(updatedFormData),
+                healthPlanFormData: domainToBase64(draft),
             },
         },
     })
