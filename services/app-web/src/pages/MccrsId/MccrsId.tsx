@@ -35,35 +35,34 @@ export const MccrsId = (): React.ReactElement => {
         )
     }
     const navigate = useNavigate()
-    const { packageName } =
-        useOutletContext<SideNavOutletContextType>()
+    const { packageName } = useOutletContext<SideNavOutletContextType>()
 
     // page context
     const { updateHeading } = usePage()
 
-    const customHeading = (
-        <span className={styles.customHeading}>{
-            packageName}
-            <span>MC-CRS record number</span>
-        </span>
-    )
     useEffect(() => {
+        const customHeading = (
+            <span className={styles.customHeading}>
+                {packageName}
+                <span>MC-CRS record number</span>
+            </span>
+        )
         updateHeading({ customHeading })
-    }, [customHeading, updateHeading])
+    }, [packageName, updateHeading])
 
     const [showPageErrorMessage, setShowPageErrorMessage] = useState<
-    boolean | string
+        boolean | string
     >(false) // string is a custom error message, defaults to generic of true
 
     const [updateFormData] = useUpdateContractMutation()
-    
+
     const mccrsIDInitialValues: MccrsIdFormValues = {
         mccrsId: undefined,
     }
 
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
-   
+
     const handleFormSubmit = async (
         values: MccrsIdFormValues
     ): Promise<HealthPlanPackage | Error> => {
