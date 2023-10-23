@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Form as UswdsForm, ButtonGroup } from '@trussworks/react-uswds'
 import { Formik, FormikErrors } from 'formik'
 import { FieldTextInput } from '../../components/Form'
@@ -40,15 +40,17 @@ export const MccrsId = (): React.ReactElement => {
     // page context
     const { updateHeading } = usePage()
 
-    useEffect(() => {
-        const customHeading = (
+    const customHeading = useMemo(() => {
+        return (
             <span className={styles.customHeading}>
                 {packageName}
                 <span>MC-CRS record number</span>
             </span>
         )
+    }, [packageName])
+    useEffect(() => {
         updateHeading({ customHeading })
-    }, [packageName, updateHeading])
+    }, [customHeading, updateHeading])
 
     const [showPageErrorMessage, setShowPageErrorMessage] = useState<
         boolean | string
