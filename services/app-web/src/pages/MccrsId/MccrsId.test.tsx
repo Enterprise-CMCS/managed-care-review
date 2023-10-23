@@ -80,7 +80,7 @@ describe('MCCRSID', () => {
         await waitFor(() => {
             expect(
                 screen.getAllByText(
-                    'You must enter no more than [4] characters'
+                    'You must enter no more than 4 characters'
                 )
             ).toHaveLength(1)
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')
@@ -107,7 +107,7 @@ describe('MCCRSID', () => {
         await waitFor(() => {
             expect(
                 screen.getAllByText(
-                    'You must enter no more than [4] characters'
+                    'You must enter no more than 4 characters'
                 )
             ).toHaveLength(1)
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')

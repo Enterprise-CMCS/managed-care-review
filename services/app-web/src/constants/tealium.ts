@@ -84,7 +84,7 @@ const getTealiumPageName = ({
     user,
 }: {
     route: RouteT | 'UNKNOWN_ROUTE'
-    heading: string | undefined
+    heading: string | React.ReactElement | undefined
     user: User | undefined
 }) => {
     const addSubmissionNameHeading =
@@ -96,7 +96,7 @@ const getTealiumPageName = ({
         title,
     }: {
         title: string
-        heading?: string
+        heading?: string | React.ReactElement
     }) => {
         const headingPrefix =
             heading && addSubmissionNameHeading ? `${heading}: ` : ''

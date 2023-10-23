@@ -7,7 +7,7 @@ export const MccrsIdFormSchema = () => {
             'You must enter a record number or delete this field.'
         )
         .typeError('You must enter a number')
-        .test('len', 'You must enter no more than [4] characters', val => val?.toString().length === 4)
+        .test('len', 'You must enter no more than 4 characters', val => val?.toString().length === 4)
         ,
     })
 }

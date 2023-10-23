@@ -1,12 +1,15 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Form as UswdsForm, ButtonGroup } from '@trussworks/react-uswds'
 import { Formik, FormikErrors } from 'formik'
 import { FieldTextInput } from '../../components/Form'
 import { MccrsIdFormSchema } from './MccrsIdSchema'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useOutletContext } from 'react-router-dom'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { ActionButton } from '../../components/ActionButton'
+import { usePage } from '../../contexts/PageContext'
+import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
+
 import {
     HealthPlanPackage,
     useUpdateContractMutation,
@@ -26,19 +29,41 @@ type RouteParams = {
 export const MccrsId = (): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(true)
     const { id } = useParams<keyof RouteParams>()
+    if (!id) {
+        throw new Error(
+            'PROGRAMMING ERROR: id param not set in state submission form.'
+        )
+    }
     const navigate = useNavigate()
+    const { packageName } =
+        useOutletContext<SideNavOutletContextType>()
 
+    // page context
+    const { updateHeading } = usePage()
+
+    const customHeading = (
+        <span className={styles.customHeading}>{
+            packageName}
+            <span>MC-CRS record number</span>
+        </span>
+    )
+    useEffect(() => {
+        updateHeading({ customHeading })
+    }, [customHeading, updateHeading])
+
+    const [showPageErrorMessage, setShowPageErrorMessage] = useState<
+    boolean | string
+    >(false) // string is a custom error message, defaults to generic of true
+
+    const [updateFormData] = useUpdateContractMutation()
+    
     const mccrsIDInitialValues: MccrsIdFormValues = {
         mccrsId: undefined,
     }
 
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
-    const [showPageErrorMessage, setShowPageErrorMessage] = useState<
-        boolean | string
-    >(false) // string is a custom error message, defaults to generic of true
-
-    const [updateFormData] = useUpdateContractMutation()
+   
     const handleFormSubmit = async (
         values: MccrsIdFormValues
     ): Promise<HealthPlanPackage | Error> => {
@@ -48,7 +73,7 @@ export const MccrsId = (): React.ReactElement => {
                 variables: {
                     input: {
                         mccrsID: values?.mccrsId?.toString(),
-                        id: id || '',
+                        id: id,
                     },
                 },
             })

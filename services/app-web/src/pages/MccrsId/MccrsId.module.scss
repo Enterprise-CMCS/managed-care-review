@@ -62,6 +62,15 @@ div[class^='usa-form-group'] {
     }
 }
 
+.customHeading {
+    font-weight: 700;
+
+    span {
+        font-weight: normal;
+        margin-left: 16px;
+    }
+}
+
 div[class^='usa-hint'] span {
     span {
         display: inline;
