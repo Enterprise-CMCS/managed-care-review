@@ -59,7 +59,7 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_DOCUMENTS: '/submissions/:id/edit/documents',
     SUBMISSIONS_REVIEW_SUBMIT: '/submissions/:id/edit/review-and-submit',
     SUBMISSIONS_SUMMARY: '/submissions/:id',
-    SUBMISSIONS_MCCRSID: '/submissions/:id/MCCRS-record-number',
+    SUBMISSIONS_MCCRSID: '/submissions/:id/mccrs-record-number',
     SUBMISSIONS_REVISION: '/submissions/:id/revisions/:revisionVersion',
     SUBMISSIONS_QUESTIONS_AND_ANSWERS: '/submissions/:id/question-and-answers',
     SUBMISSIONS_UPLOAD_QUESTION:

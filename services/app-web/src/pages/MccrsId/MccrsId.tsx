@@ -65,9 +65,7 @@ export const MccrsId = (): React.ReactElement => {
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
-    const handleFormSubmit = async (
-        values: MccrsIdFormValues
-    ): Promise<HealthPlanPackage | Error> => {
+    const handleFormSubmit = async (values: MccrsIdFormValues) => {
         setShowPageErrorMessage(false)
         try {
             const updateResult = await updateFormData({
@@ -90,11 +88,8 @@ export const MccrsId = (): React.ReactElement => {
                     `MCCRSIDForm: Apollo error reported. Error message: Failed to update form data ${updateResult}`
                 )
                 return new Error('Failed to update form data')
-            } else if (updatedSubmission) {
-                navigate(`/submissions/${updatedSubmission.id}`)
-                return updatedSubmission
             }
-            return updatedSubmission
+            navigate(`/submissions/${updatedSubmission.id}`)
         } catch (serverError) {
             setShowPageErrorMessage(true)
             recordJSException(

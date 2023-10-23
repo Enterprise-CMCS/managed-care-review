@@ -45,7 +45,7 @@ describe('MCCRSID', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/MCCRS-record-number',
+                    route: '/submissions/15/mccrs-record-number',
                 },
             }
         )
@@ -81,7 +81,7 @@ describe('MCCRSID', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/MCCRS-record-number',
+                    route: '/submissions/15/mccrs-record-number',
                 },
             }
         )
@@ -112,7 +112,7 @@ describe('MCCRSID', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/MCCRS-record-number',
+                    route: '/submissions/15/mccrs-record-number',
                 },
             }
         )
@@ -153,7 +153,7 @@ describe('MCCRSID', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/MCCRS-record-number',
+                    route: '/submissions/15/mccrs-record-number',
                 },
             }
         )
@@ -197,7 +197,7 @@ describe('MCCRSID', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/MCCRS-record-number',
+                    route: '/submissions/15/mccrs-record-number',
                 },
             }
         )
@@ -241,7 +241,7 @@ describe('MCCRSID', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/MCCRS-record-number',
+                    route: '/submissions/15/mccrs-record-number',
                 },
             }
         )
