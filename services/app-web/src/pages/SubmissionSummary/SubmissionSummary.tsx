@@ -175,7 +175,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                     </span>
                                 )}
                                 <Link
-                                    href={`/submissions/${pkg.id}/MCCRS-record-number`}
+                                    href={`/submissions/${pkg.id}/mccrs-record-number`}
                                     className={
                                         pkg.mccrsID ? styles.editLink : ''
                                     }
