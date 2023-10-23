@@ -27,6 +27,7 @@ import { testS3Client } from '../../testHelpers/s3Helpers'
 describe('SubmissionSummary', () => {
     beforeEach(() => {
         ldUseClientSpy({ 'cms-questions': false })
+        ldUseClientSpy({ 'mccrs-record-number': true })
     })
     afterEach(() => {
         jest.resetAllMocks()

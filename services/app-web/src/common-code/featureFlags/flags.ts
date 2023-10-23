@@ -42,6 +42,13 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
+     * Enables CMS to add, view, edit and delete MC-CRS record numbers
+     */
+    MCCRS_RECORD_NUMBER: {
+        flag: 'mccrs-record-number',
+        defaultValue: false,
+    },
+    /**
      * Enables packages with shared rates dropdown on rate details page. This was an early version of rates across subs functionality.
      */
     PACKAGES_WITH_SHARED_RATES: {

@@ -16,7 +16,7 @@ import { MccrsId } from './MccrsId'
 
 describe('MCCRSID', () => {
     beforeEach(() => {
-        ldUseClientSpy({ 'cms-questions': false })
+        ldUseClientSpy({ 'mccrs-record-number': true })
     })
     afterEach(() => {
         jest.resetAllMocks()

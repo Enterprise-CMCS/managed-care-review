@@ -68,6 +68,11 @@ export const SubmissionSummary = (): React.ReactElement => {
         featureFlags.CMS_QUESTIONS.defaultValue
     )
 
+    const showMCCRSRecordNumber = ldClient?.variation(
+        featureFlags.MCCRS_RECORD_NUMBER.flag,
+        featureFlags.MCCRS_RECORD_NUMBER.defaultValue
+    )
+
     const { pkg, currentRevision, packageData, user, documentDates } =
         useOutletContext<SideNavOutletContextType>()
 
@@ -162,7 +167,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 <SubmissionTypeSummarySection
                     subHeaderComponent={
-                        isCMSUser ? (
+                        isCMSUser && showMCCRSRecordNumber ? (
                             <div className={styles.subHeader}>
                                 {pkg.mccrsID && (
                                     <span>
