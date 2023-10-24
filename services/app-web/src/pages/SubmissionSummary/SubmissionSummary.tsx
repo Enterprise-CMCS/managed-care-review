@@ -68,6 +68,11 @@ export const SubmissionSummary = (): React.ReactElement => {
         featureFlags.CMS_QUESTIONS.defaultValue
     )
 
+    const showMCCRSRecordNumber = ldClient?.variation(
+        featureFlags.MCCRS_RECORD_NUMBER.flag,
+        featureFlags.MCCRS_RECORD_NUMBER.defaultValue
+    )
+
     const { pkg, currentRevision, packageData, user, documentDates } =
         useOutletContext<SideNavOutletContextType>()
 
@@ -161,6 +166,32 @@ export const SubmissionSummary = (): React.ReactElement => {
                 )}
 
                 <SubmissionTypeSummarySection
+                    subHeaderComponent={
+                        isCMSUser && showMCCRSRecordNumber ? (
+                            <div className={styles.subHeader}>
+                                {pkg.mccrsID && (
+                                    <span>
+                                        MC-CRS record number:
+                                        <Link
+                                            href={`https://mccrs.abtsites.com/Home/Index/${pkg.mccrsID}`}
+                                        >
+                                            {pkg.mccrsID}
+                                        </Link>
+                                    </span>
+                                )}
+                                <Link
+                                    href={`/submissions/${pkg.id}/mccrs-record-number`}
+                                    className={
+                                        pkg.mccrsID ? styles.editLink : ''
+                                    }
+                                >
+                                    {pkg.mccrsID
+                                        ? 'Edit MC-CRS number'
+                                        : 'Add MC-CRS record number'}
+                                </Link>
+                            </div>
+                        ) : undefined
+                    }
                     submission={packageData}
                     submissionName={name}
                     headerChildComponent={

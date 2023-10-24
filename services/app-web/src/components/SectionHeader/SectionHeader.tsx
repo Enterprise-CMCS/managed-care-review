@@ -6,6 +6,7 @@ export type SectionHeaderProps = {
     header: string
     navigateTo?: string
     children?: React.ReactNode
+    subHeaderComponent?: React.ReactNode
     sectionId?: string
     headerId?: string
     hideBorder?: boolean
@@ -13,6 +14,7 @@ export type SectionHeaderProps = {
 
 export const SectionHeader = ({
     header,
+    subHeaderComponent,
     navigateTo,
     children,
     sectionId,
@@ -23,10 +25,13 @@ export const SectionHeader = ({
         <div
             className={`${styles.summarySectionHeader} ${
                 !hideBorder ? styles.summarySectionHeaderBorder : ''
-            }`}
+            } ${subHeaderComponent ? styles.alignTop : ''}`}
             id={sectionId}
         >
-            <h2 id={headerId}>{header}</h2>
+            <div>
+                <h2 id={headerId}>{header}</h2>
+                {subHeaderComponent}
+            </div>
             <div>
                 {navigateTo && (
                     <Link
