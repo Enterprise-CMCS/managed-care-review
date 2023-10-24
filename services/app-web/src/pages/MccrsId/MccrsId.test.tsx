@@ -7,6 +7,8 @@ import {
     fetchCurrentUserMock,
     fetchStateHealthPlanPackageWithQuestionsMockSuccess,
     mockValidCMSUser,
+    mockUnlockedHealthPlanPackage,
+    indexHealthPlanPackagesMockSuccess,
 } from '../../testHelpers/apolloMocks'
 import {
     ldUseClientSpy,
@@ -171,6 +173,45 @@ describe('MCCRSID', () => {
                 1
             )
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')
+        })
+    })
+
+    it('edit - prepopulates the mccrs id when a submission has one', async () => {
+        const submissionsWithRevisions = mockUnlockedHealthPlanPackage()
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_MCCRSID}
+                        element={<MccrsId />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: '15',
+                            stateSubmission: {
+                                mccrsID: '1234',
+                                ...submissionsWithRevisions
+                            },
+                        }),
+                        indexHealthPlanPackagesMockSuccess(),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15/mccrs-record-number',
+                },
+            }
+        )
+        
+        await waitFor(() => {
+            expect(screen.getByDisplayValue('test')).toBeInTheDocument();
         })
     })
 })

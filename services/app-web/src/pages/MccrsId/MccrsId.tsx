@@ -62,6 +62,8 @@ export const MccrsId = (): React.ReactElement => {
         mccrsId: pkg.mccrsID ? Number(pkg.mccrsID) : undefined,
     }
 
+    console.log(pkg)
+
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
