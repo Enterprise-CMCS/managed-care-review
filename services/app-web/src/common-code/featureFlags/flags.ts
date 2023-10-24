@@ -42,7 +42,7 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
-     * Enables CMS to add, view, edit and delete MC-CRS record numbers
+     * Enables CMS users to add, view, edit and delete MC-CRS record numbers
      */
     MCCRS_RECORD_NUMBER: {
         flag: 'mccrs-record-number',
