@@ -166,14 +166,20 @@ function rateWithHistoryToDomainModel(
                 )
             }
 
-            // Finding the contract rev submitted right after rate rev submission date time.
-            //  - It should always be the contract rev right after submission
-            //  - any disconnections will no longer include the contract rev in the prisma query.
+            // Finding the single earliest contract rev submitted right after rate rev submission date time.
             if (
                 contractRev.contractRevision.submitInfo.updatedAt >=
                 rateRev.submitInfo.updatedAt
             ) {
-                initialEntry.contractRevs.push(contractRev.contractRevision)
+                const exists = initialEntry.contractRevs.find(
+                    (cc) =>
+                        cc.contractID ===
+                        contractRev.contractRevision.contractID
+                )
+
+                if (!exists) {
+                    initialEntry.contractRevs.push(contractRev.contractRevision)
+                }
             }
 
             // // if it's from before this rate was submitted, it's there at the beginning.
