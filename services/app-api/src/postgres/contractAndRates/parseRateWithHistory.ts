@@ -181,43 +181,6 @@ function rateWithHistoryToDomainModel(
                     initialEntry.contractRevs.push(contractRev.contractRevision)
                 }
             }
-
-            // // if it's from before this rate was submitted, it's there at the beginning.
-            // if (
-            //     contractRev.contractRevision.submitInfo.updatedAt <=
-            //     rateRev.submitInfo.updatedAt
-            // ) {
-            //     if (!contractRev.isRemoval) {
-            //         initialEntry.contractRevs.push(contractRev.contractRevision)
-            //     }
-            // } else {
-            //     // if after, then it's always a new entry in the list
-            //     let lastContracts = [...lastEntry.contractRevs]
-            //
-            //     // take out the previous contract revision this revision supersedes
-            //     lastContracts = lastContracts.filter(
-            //         (c) =>
-            //             c.contractID !== contractRev.contractRevision.contractID
-            //     )
-            //     if (!contractRev.isRemoval) {
-            //         lastContracts.push(contractRev.contractRevision)
-            //     }
-            //
-            //     // For now, we just put the most current version of contracts on this rate
-            //     // skip making entries for each contract revision
-            //     initialEntry.contractRevs = lastContracts
-            //
-            //     // const newRev: RateRevisionSet = {
-            //     //     rateRev,
-            //     //     submitInfo: contractRev.contractRevision.submitInfo,
-            //     //     unlockInfo:
-            //     //         contractRev.contractRevision.unlockInfo || undefined,
-            //     //     contractRevs: lastContracts,
-            //     // }
-            //
-            //     // lastEntry = newRev
-            //     // allEntries.push(newRev) // For now, don't make revisions out of contracts
-            // }
         }
     }
 
