@@ -89,6 +89,7 @@ function getContractRateStatus(
 const includeRateFormData = {
     submitInfo: includeUpdateInfo,
     unlockInfo: includeUpdateInfo,
+    rate: true,
 
     rateDocuments: {
         orderBy: {
@@ -224,6 +225,7 @@ function rateRevisionToDomainModel(
 
     return {
         id: revision.id,
+        rate: revision.rate,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
         unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
@@ -248,7 +250,7 @@ function ratesRevisionsToDomainModel(
     }
 
     domainRevisions.sort(
-        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+        (a, b) => a.rate.createdAt.getTime() - b.rate.createdAt.getTime()
     )
 
     return domainRevisions

@@ -290,7 +290,7 @@ export function submitHealthPlanPackageResolver(
 
             // reassign variable set up before rates feature flag
             const conversionResult = convertContractWithRatesToFormData(
-                contractWithHistory.revisions[0],
+                contractWithHistory.draftRevision,
                 contractWithHistory.id,
                 contractWithHistory.stateCode,
                 contractWithHistory.stateNumber
@@ -304,7 +304,7 @@ export function submitHealthPlanPackageResolver(
             }
 
             initialFormData = conversionResult
-            contractRevisionID = contractWithHistory.revisions[0].id
+            contractRevisionID = contractWithHistory.draftRevision.id
 
             // Final clean + check of data before submit - parse to state submission
             const maybeLocked = parseAndSubmit(initialFormData)
@@ -366,20 +366,26 @@ export function submitHealthPlanPackageResolver(
                 })
             }
 
-            // If there are rates, submit those first
-            if (contractWithHistory.revisions[0].rateRevisions.length > 0) {
-                const ratePromises: Promise<Error | RateType>[] = []
-                contractWithHistory.revisions[0].rateRevisions.forEach(
-                    (rateRev) => {
-                        ratePromises.push(
-                            store.submitRate({
-                                rateRevisionID: rateRev.id,
-                                submittedByUserID: user.id,
-                                submitReason: updateInfo.updatedReason,
-                            })
-                        )
-                    }
+            if (!updateResult.draftRevision) {
+                throw new Error(
+                    'PROGRAMMING ERROR: draft contract does not contain a draft revision'
                 )
+            }
+
+            // From this point forward we use updateResult instead of contractWithHistory because it is now old data.
+
+            // If there are rates, submit those first
+            if (updateResult.draftRevision.rateRevisions.length > 0) {
+                const ratePromises: Promise<Error | RateType>[] = []
+                updateResult.draftRevision.rateRevisions.forEach((rateRev) => {
+                    ratePromises.push(
+                        store.submitRate({
+                            rateRevisionID: rateRev.id,
+                            submittedByUserID: user.id,
+                            submitReason: updateInfo.updatedReason,
+                        })
+                    )
+                })
 
                 const submitRatesResult = await Promise.all(ratePromises)
                 // if any of the promises reject, which shouldn't happen b/c we don't throw...
@@ -415,7 +421,7 @@ export function submitHealthPlanPackageResolver(
 
             // then submit the contract!
             const submitContractResult = await store.submitContract({
-                contractID: contractWithHistory.id,
+                contractID: updateResult.id,
                 submittedByUserID: user.id,
                 submitReason: updateInfo.updatedReason,
             })
