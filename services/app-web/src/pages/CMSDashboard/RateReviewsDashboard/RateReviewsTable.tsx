@@ -276,6 +276,9 @@ export const RateReviewsTable = ({
             a['updatedAt'] > b['updatedAt'] ? -1 : 1
         ),
         columns: tableColumns,
+        state: {
+            columnFilters,
+        },
         getCoreRowModel: getCoreRowModel(),
         onColumnFiltersChange: setColumnFilters,
         getFacetedUniqueValues: getFacetedUniqueValues(),
