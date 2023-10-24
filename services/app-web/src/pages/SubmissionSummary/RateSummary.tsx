@@ -63,7 +63,7 @@ export const RateSummary = (): React.ReactElement => {
                 data-testid="rate-summary"
                 className={styles.container}
             >
-                <div className={styles.backLinkContainer}>
+                <div>
                     <Link
                         asCustom={NavLink}
                         to={{

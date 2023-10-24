@@ -260,23 +260,23 @@ export const RateDetailsSummarySection = ({
 
     return (
         <section id="rateDetails" className={styles.summarySection}>
-            <dl>
-                <SectionHeader header="Rate details" navigateTo={navigateTo}>
-                    {isSubmitted &&
-                        !isPreviousSubmission &&
-                        renderDownloadButton(zippedFilesURL)}
-                </SectionHeader>
-                {submission.rateInfos.length > 0 ? (
-                    submission.rateInfos.map((rateInfo) => {
-                        return (
-                            // When we complete rates refactor we can remove workaround for the react key
-                            <React.Fragment key={rateInfo.id || uuidv4()}>
-                                <h3
-                                    aria-label={`Rate ID: ${rateInfo.rateCertificationName}`}
-                                    className={styles.rateName}
-                                >
-                                    {rateInfo.rateCertificationName}
-                                </h3>
+            <SectionHeader header="Rate details" navigateTo={navigateTo}>
+                {isSubmitted &&
+                    !isPreviousSubmission &&
+                    renderDownloadButton(zippedFilesURL)}
+            </SectionHeader>
+            {submission.rateInfos.length > 0 ? (
+                submission.rateInfos.map((rateInfo) => {
+                    return (
+                        // When we complete rates refactor we can remove workaround for the react key
+                        <React.Fragment key={rateInfo.id || uuidv4()}>
+                            <h3
+                                aria-label={`Rate ID: ${rateInfo.rateCertificationName}`}
+                                className={styles.rateName}
+                            >
+                                {rateInfo.rateCertificationName}
+                            </h3>
+                            <dl>
                                 <DoubleColumnGrid>
                                     {ratePrograms && (
                                         <DataDetail
@@ -366,47 +366,47 @@ export const RateDetailsSummarySection = ({
                                         children={rateCapitationType(rateInfo)}
                                     />
                                 </DoubleColumnGrid>
-                                {!loading ? (
-                                    <UploadedDocumentsTable
-                                        documents={rateInfo.rateDocuments}
-                                        packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
-                                            rateInfo
-                                        )}
-                                        documentDateLookupTable={
-                                            documentDateLookupTable
-                                        }
-                                        multipleDocumentsAllowed={false}
-                                        caption="Rate certification"
-                                        documentCategory="Rate certification"
-                                        isEditing={isEditing}
-                                        isSubmitted={isSubmitted}
-                                    />
-                                ) : (
-                                    <span className="srOnly">'LOADING...'</span>
-                                )}
-                                {supportingDocsByRate && !loading ? (
-                                    <UploadedDocumentsTable
-                                        documents={rateInfo.supportingDocuments}
-                                        packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
-                                            rateInfo
-                                        )}
-                                        documentDateLookupTable={
-                                            documentDateLookupTable
-                                        }
-                                        caption="Rate supporting documents"
-                                        isSupportingDocuments
-                                        documentCategory="Rate-supporting"
-                                    />
-                                ) : (
-                                    <span className="srOnly">'LOADING...'</span>
-                                )}
-                            </React.Fragment>
-                        )
-                    })
-                ) : (
-                    <DataDetailMissingField />
-                )}
-            </dl>
+                            </dl>
+                            {!loading ? (
+                                <UploadedDocumentsTable
+                                    documents={rateInfo.rateDocuments}
+                                    packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
+                                        rateInfo
+                                    )}
+                                    documentDateLookupTable={
+                                        documentDateLookupTable
+                                    }
+                                    multipleDocumentsAllowed={false}
+                                    caption="Rate certification"
+                                    documentCategory="Rate certification"
+                                    isEditing={isEditing}
+                                    isSubmitted={isSubmitted}
+                                />
+                            ) : (
+                                <span className="srOnly">'LOADING...'</span>
+                            )}
+                            {supportingDocsByRate && !loading ? (
+                                <UploadedDocumentsTable
+                                    documents={rateInfo.supportingDocuments}
+                                    packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
+                                        rateInfo
+                                    )}
+                                    documentDateLookupTable={
+                                        documentDateLookupTable
+                                    }
+                                    caption="Rate supporting documents"
+                                    isSupportingDocuments
+                                    documentCategory="Rate-supporting"
+                                />
+                            ) : (
+                                <span className="srOnly">'LOADING...'</span>
+                            )}
+                        </React.Fragment>
+                    )
+                })
+            ) : (
+                <DataDetailMissingField />
+            )}
             {
                 // START  - This whole block gets deleted when we remove the feature flag.
                 !supportingDocsByRate && (
