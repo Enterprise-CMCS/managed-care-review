@@ -10,6 +10,7 @@ import { RateInDashboardType, RateReviewsTable } from './RateReviewsTable'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
 import { ErrorFailedRequestPage } from '../../Errors/ErrorFailedRequestPage'
+import { RateTypeRecord } from '../../../constants/healthPlanPackages'
 
 const RateReviewsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
@@ -66,6 +67,7 @@ const RateReviewsDashboard = (): React.ReactElement => {
                         rate.id
                     } formData: ${JSON.stringify(displayRateFormData)})}`
                 )
+                return
             }
 
             if (!lastUpdated) {
@@ -78,7 +80,6 @@ const RateReviewsDashboard = (): React.ReactElement => {
             const programs = rate.state.programs
 
             const missingField = 'Missing field'
-
             reviewRows.push({
                 id: rate.id,
                 name: displayRateFormData.rateCertificationName || missingField,
@@ -92,7 +93,9 @@ const RateReviewsDashboard = (): React.ReactElement => {
                 rateDateEnd: displayRateFormData.rateDateEnd,
                 status: rate.status,
                 updatedAt: lastUpdated,
-                rateType: displayRateFormData.rateType || 'NEW',
+                rateType: displayRateFormData.rateType
+                    ? RateTypeRecord[displayRateFormData.rateType]
+                    : missingField,
                 stateName: rate.state.name,
                 contractRevisions: currentRevision.contractRevisions,
             })

@@ -17,7 +17,6 @@ import {
     HealthPlanPackageStatus,
     Program,
     RelatedContractRevisions,
-    RateType,
 } from '../../../gen/gqlClient'
 import styles from '../../../components/HealthPlanPackageTable/HealthPlanPackageTable.module.scss'
 import { Table, Tag, Link } from '@trussworks/react-uswds'
@@ -31,7 +30,6 @@ import {
     FilterOptionType,
 } from '../../../components/FilterAccordion'
 import { pluralize } from '../../../common-code/formatters'
-import { RateTypeRecord } from '../../../constants/healthPlanPackages'
 
 declare module '@tanstack/table-core' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -47,7 +45,7 @@ export type RateInDashboardType = {
     updatedAt: Date
     status: HealthPlanPackageStatus
     programs: Program[]
-    rateType: RateType
+    rateType: string
     rateDateStart: Date
     rateDateEnd: Date
     stateName: string
@@ -128,9 +126,11 @@ const getSelectedFiltersFromUrl = (
             })
         }
     })
+
     const filterValues = valuesFromUrl
         .filter((item) => item.id === id)
         .map((item) => ({ value: item.value, label: item.value }))
+
     return filterValues as FilterOptionType[]
 }
 
@@ -213,7 +213,7 @@ export const RateReviewsTable = ({
             columnHelper.accessor('rateType', {
                 id: 'rateType',
                 header: 'Rate type',
-                cell: (info) => <span>{RateTypeRecord[info.getValue()]}</span>,
+                cell: (info) => <span>{info.getValue()}</span>,
                 meta: {
                     dataTestID: 'rate-type',
                 },
@@ -276,6 +276,9 @@ export const RateReviewsTable = ({
             a['updatedAt'] > b['updatedAt'] ? -1 : 1
         ),
         columns: tableColumns,
+        state: {
+            columnFilters,
+        },
         getCoreRowModel: getCoreRowModel(),
         onColumnFiltersChange: setColumnFilters,
         getFacetedUniqueValues: getFacetedUniqueValues(),
