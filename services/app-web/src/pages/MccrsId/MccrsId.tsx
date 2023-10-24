@@ -35,7 +35,7 @@ export const MccrsId = (): React.ReactElement => {
         )
     }
     const navigate = useNavigate()
-    const { packageName } = useOutletContext<SideNavOutletContextType>()
+    const { pkg, packageName } = useOutletContext<SideNavOutletContextType>()
 
     // page context
     const { updateHeading } = usePage()
@@ -59,7 +59,7 @@ export const MccrsId = (): React.ReactElement => {
     const [updateFormData] = useUpdateContractMutation()
 
     const mccrsIDInitialValues: MccrsIdFormValues = {
-        mccrsId: undefined,
+        mccrsId: pkg.mccrsID ? Number(pkg.mccrsID) : undefined,
     }
 
     const showFieldErrors = (error?: FormError) =>
