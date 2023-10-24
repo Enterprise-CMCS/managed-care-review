@@ -210,15 +210,6 @@ export const RateReviewsTable = ({
                 },
                 filterFn: `arrIncludesSome`,
             }),
-            columnHelper.accessor('rateType', {
-                id: 'rateType',
-                header: 'Rate type',
-                cell: (info) => <span>{info.getValue()}</span>,
-                meta: {
-                    dataTestID: 'rate-type',
-                },
-                filterFn: `arrIncludesSome`,
-            }),
             columnHelper.accessor('programs', {
                 header: 'Programs',
                 cell: (info) =>
@@ -236,6 +227,15 @@ export const RateReviewsTable = ({
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-programs`,
                 },
+            }),
+            columnHelper.accessor('rateType', {
+                id: 'rateType',
+                header: 'Rate type',
+                cell: (info) => <span>{info.getValue()}</span>,
+                meta: {
+                    dataTestID: 'rate-type',
+                },
+                filterFn: `arrIncludesSome`,
             }),
             columnHelper.accessor('rateDateStart', {
                 header: 'Rate period start date',
