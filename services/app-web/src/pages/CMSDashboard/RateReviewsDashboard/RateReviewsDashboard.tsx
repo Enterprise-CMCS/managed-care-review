@@ -67,7 +67,6 @@ const RateReviewsDashboard = (): React.ReactElement => {
                         rate.id
                     } formData: ${JSON.stringify(displayRateFormData)})}`
                 )
-                return
             }
 
             if (!lastUpdated) {
