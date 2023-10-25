@@ -88,6 +88,7 @@ ul[class^='usa-button-group'] {
         }
         &:first-of-type {
             button[class^='usa-button'] {
+                display: none; 
                 color: $theme-color-error-darker;
                 box-shadow: inset 0 0 0 2px $theme-color-error-darker;
             }

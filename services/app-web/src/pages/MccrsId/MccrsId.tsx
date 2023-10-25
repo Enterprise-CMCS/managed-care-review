@@ -35,7 +35,7 @@ export const MccrsId = (): React.ReactElement => {
         )
     }
     const navigate = useNavigate()
-    const { packageName } = useOutletContext<SideNavOutletContextType>()
+    const { pkg, packageName } = useOutletContext<SideNavOutletContextType>()
 
     // page context
     const { updateHeading } = usePage()
@@ -59,7 +59,7 @@ export const MccrsId = (): React.ReactElement => {
     const [updateFormData] = useUpdateContractMutation()
 
     const mccrsIDInitialValues: MccrsIdFormValues = {
-        mccrsId: undefined,
+        mccrsId: pkg.mccrsID ? Number(pkg.mccrsID) : undefined,
     }
 
     const showFieldErrors = (error?: FormError) =>
@@ -127,8 +127,8 @@ export const MccrsId = (): React.ReactElement => {
                                     Add MC-CRS record number
                                 </legend>
                                 <FieldTextInput
-                                    name={'mccrsId'}
-                                    id={'mccrsId'}
+                                    name="mccrsId"
+                                    id="mccrsId"
                                     label="Enter the Managed Care Contract and Rate Review System (MC-CRS) record number."
                                     showError={Boolean(
                                         showFieldErrors(errors.mccrsId)
