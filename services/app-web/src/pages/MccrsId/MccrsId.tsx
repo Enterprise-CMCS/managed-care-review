@@ -62,8 +62,6 @@ export const MccrsId = (): React.ReactElement => {
         mccrsId: pkg.mccrsID ? Number(pkg.mccrsID) : undefined,
     }
 
-    console.log(pkg)
-
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
@@ -129,8 +127,8 @@ export const MccrsId = (): React.ReactElement => {
                                     Add MC-CRS record number
                                 </legend>
                                 <FieldTextInput
-                                    name={'mccrsId'}
-                                    id={'mccrsId'}
+                                    name="mccrsId"
+                                    id="mccrsId"
                                     label="Enter the Managed Care Contract and Rate Review System (MC-CRS) record number."
                                     showError={Boolean(
                                         showFieldErrors(errors.mccrsId)

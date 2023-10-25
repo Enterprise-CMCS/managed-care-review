@@ -7,9 +7,9 @@ import {
     fetchCurrentUserMock,
     fetchStateHealthPlanPackageWithQuestionsMockSuccess,
     mockValidCMSUser,
-    mockUnlockedHealthPlanPackage,
-    indexHealthPlanPackagesMockSuccess,
 } from '../../testHelpers/apolloMocks'
+import { mockSubmittedHealthPlanPackage } from '../../testHelpers/apolloMocks'
+
 import {
     ldUseClientSpy,
     renderWithProviders,
@@ -177,7 +177,6 @@ describe('MCCRSID', () => {
     })
 
     it('edit - prepopulates the mccrs id when a submission has one', async () => {
-        const submissionsWithRevisions = mockUnlockedHealthPlanPackage()
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -197,11 +196,10 @@ describe('MCCRSID', () => {
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
                             id: '15',
                             stateSubmission: {
-                                mccrsID: '1234',
-                                ...submissionsWithRevisions
+                                ...mockSubmittedHealthPlanPackage(),
+                                mccrsID: '3333',
                             },
                         }),
-                        indexHealthPlanPackagesMockSuccess(),
                     ],
                 },
                 routerProvider: {
@@ -209,9 +207,9 @@ describe('MCCRSID', () => {
                 },
             }
         )
-        
+
         await waitFor(() => {
-            expect(screen.getByDisplayValue('test')).toBeInTheDocument();
+            expect(screen.getByDisplayValue('3333')).toBeInTheDocument()
         })
     })
 })
