@@ -161,6 +161,35 @@ export const SubmissionSummary = (): React.ReactElement => {
                 )}
 
                 <SubmissionTypeSummarySection
+                    subHeaderComponent={
+                        isCMSUser ? (
+                            <div className={styles.subHeader}>
+                                {pkg.mccrsID && (
+                                    <span>
+                                        MC-CRS record number:
+                                        <Link
+                                            href={`https://mccrs.abtsites.com/Home/Index/${pkg.mccrsID.replace(
+                                                / /g,
+                                                ''
+                                            )}`}
+                                        >
+                                            {pkg.mccrsID}
+                                        </Link>
+                                    </span>
+                                )}
+                                <Link
+                                    href={`/submissions/${pkg.id}/mccrs-record-number`}
+                                    className={
+                                        pkg.mccrsID ? styles.editLink : ''
+                                    }
+                                >
+                                    {pkg.mccrsID
+                                        ? 'Edit MC-CRS number'
+                                        : 'Add MC-CRS record number'}
+                                </Link>
+                            </div>
+                        ) : undefined
+                    }
                     submission={packageData}
                     submissionName={name}
                     headerChildComponent={

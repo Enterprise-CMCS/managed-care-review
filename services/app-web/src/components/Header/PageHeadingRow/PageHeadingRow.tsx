@@ -18,7 +18,7 @@ const CMSUserRow = ({
     heading,
 }: {
     user: CmsUser | AdminUser | HelpdeskUser | BusinessOwnerUser
-    heading?: string
+    heading?: string | React.ReactElement
 }) => {
     return (
         <div className={styles.dashboardHeading}>
@@ -46,7 +46,7 @@ const StateUserRow = ({
     heading,
 }: {
     user: StateUser
-    heading?: string
+    heading?: string | React.ReactElement
 }) => {
     return (
         <div className={styles.dashboardHeading}>
@@ -99,7 +99,7 @@ const LandingRow = ({ isLoading }: { isLoading: boolean }) => {
 type PageHeadingProps = {
     isLoading?: boolean
     loggedInUser?: User
-    heading?: string
+    heading?: string | React.ReactElement
     route?: string
 }
 

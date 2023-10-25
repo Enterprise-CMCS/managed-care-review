@@ -12,6 +12,16 @@
     align-items: center;
     padding-bottom: units(1);
     min-height: 3rem;
+
+    &.alignTop {
+        align-items: start;
+    }
+
+    a {
+        display: block;
+        margin-top: 17.5px;
+        padding-bottom: units(1);
+    } 
 }
 
 .summarySectionHeaderBorder {
