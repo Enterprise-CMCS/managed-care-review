@@ -1,6 +1,7 @@
 import { Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import styles from './SectionHeader.module.scss'
+import classNames from 'classnames'
 
 export type SectionHeaderProps = {
     header: string
@@ -21,13 +22,13 @@ export const SectionHeader = ({
     headerId,
     hideBorder,
 }: SectionHeaderProps & JSX.IntrinsicElements['div']): React.ReactElement => {
+    const classes = classNames({
+        [styles.summarySectionHeader]: true,
+        [styles.summarySectionHeaderBorder]: !hideBorder,
+        [styles.alignTop]: subHeaderComponent,
+    })
     return (
-        <div
-            className={`${styles.summarySectionHeader} ${
-                !hideBorder ? styles.summarySectionHeaderBorder : ''
-            } ${subHeaderComponent ? styles.alignTop : ''}`}
-            id={sectionId}
-        >
+        <div className={classes} id={sectionId}>
             <div>
                 <h2 id={headerId}>{header}</h2>
                 {subHeaderComponent}

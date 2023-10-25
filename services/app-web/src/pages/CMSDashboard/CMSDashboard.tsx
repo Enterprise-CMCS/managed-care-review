@@ -24,41 +24,43 @@ const CMSDashboard = (): React.ReactElement => {
     return (
         <div data-testid="cms-dashboard-page" className={styles.wrapper}>
             <GridContainer className={styles.container}>
-                <div className={styles.panelHeader}>
-                    <h2>
-                        Submissions
-                        {showRateReviews && <span> and rate reviews</span>}
-                    </h2>
-                </div>
+                <section className={styles.panel}>
+                    <div className={styles.panelHeader}>
+                        <h2>
+                            Submissions
+                            {showRateReviews && <span> and rate reviews</span>}
+                        </h2>
+                    </div>
 
-                {showRateReviews ? (
-                    <Tabs
-                        defaultActiveTab={
-                            loadOnRateReviews
-                                ? TAB_NAMES.RATES
-                                : TAB_NAMES.SUBMISSIONS
-                        }
-                        className={styles.tabs}
-                    >
-                        <TabPanel
-                            id="submissions"
-                            nestedRoute={RoutesRecord.DASHBOARD_SUBMISSIONS}
-                            tabName={TAB_NAMES.SUBMISSIONS}
+                    {showRateReviews ? (
+                        <Tabs
+                            defaultActiveTab={
+                                loadOnRateReviews
+                                    ? TAB_NAMES.RATES
+                                    : TAB_NAMES.SUBMISSIONS
+                            }
+                            className={styles.tabs}
                         >
-                            <Outlet />
-                        </TabPanel>
+                            <TabPanel
+                                id="submissions"
+                                nestedRoute={RoutesRecord.DASHBOARD_SUBMISSIONS}
+                                tabName={TAB_NAMES.SUBMISSIONS}
+                            >
+                                <Outlet />
+                            </TabPanel>
 
-                        <TabPanel
-                            id="rate-reviews"
-                            nestedRoute={RoutesRecord.DASHBOARD_RATES}
-                            tabName={TAB_NAMES.RATES}
-                        >
-                            <Outlet />
-                        </TabPanel>
-                    </Tabs>
-                ) : (
-                    <Outlet />
-                )}
+                            <TabPanel
+                                id="rate-reviews"
+                                nestedRoute={RoutesRecord.DASHBOARD_RATES}
+                                tabName={TAB_NAMES.RATES}
+                            >
+                                <Outlet />
+                            </TabPanel>
+                        </Tabs>
+                    ) : (
+                        <Outlet />
+                    )}
+                </section>
             </GridContainer>
         </div>
     )

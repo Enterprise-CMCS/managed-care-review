@@ -376,7 +376,8 @@ describe('findRate', () => {
         )
     })
 
-    it('finds a full rate', async () => {
+    // This test mimics the way rates are created, updated, and disconnected using the app today.
+    it('finds a full rate with history', async () => {
         const client = await sharedTestPrismaClient()
 
         const stateUser = await client.user.create({
@@ -400,275 +401,343 @@ describe('findRate', () => {
             },
         })
 
-        // setup a couple test contracts
+        // Create 1 contract
         const draftContractData = createInsertContractData({
-            submissionDescription: 'one contract',
+            submissionDescription: 'initial rate two submit',
         })
-        const contractA = must(
+        const draftContract = must(
             await insertDraftContract(client, draftContractData)
         )
-        must(
-            await submitContract(client, {
-                contractID: contractA.id,
-                submittedByUserID: stateUser.id,
-                submitReason: 'initial submit',
-            })
-        )
+        const contractID = draftContract.id
 
-        // Add 3 rates 1, 2, 3 pointing to contract A
-        const rate1 = must(
+        // Create rate 1
+        const draftRateOne = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                rateCertificationName: 'someurle.en',
-            })
-        )
-        must(
-            await updateDraftRate(client, {
-                rateID: rate1.id,
-                formData: { rateCertificationName: 'someurle.en' },
-                contractIDs: [contractA.id],
-            })
-        )
-        must(
-            await submitRate(client, {
-                rateID: rate1.id,
-                submittedByUserID: stateUser.id,
-                submitReason: 'Rate Submit',
+                rateCertificationName: 'first submission rate revision',
             })
         )
 
-        const rate2 = must(
+        // Create rate 2
+        const draftRateTwo = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                rateCertificationName: 'twopointo',
-            })
-        )
-        must(
-            await updateDraftRate(client, {
-                rateID: rate2.id,
-                formData: { rateCertificationName: 'twopointo' },
-                contractIDs: [contractA.id],
-            })
-        )
-        must(
-            await submitRate(client, {
-                rateID: rate2.id,
-                submittedByUserID: stateUser.id,
-                submitReason: 'RateSubmit 2',
+                rateCertificationName: 'first submission rate revision',
             })
         )
 
-        const rate3 = must(
-            await insertDraftRate(client, {
-                stateCode: 'MN',
-                rateCertificationName: 'threepointo',
-            })
-        )
-        must(
-            await updateDraftRate(client, {
-                rateID: rate3.id,
-                formData: { rateCertificationName: 'threepointo' },
-                contractIDs: [contractA.id],
-            })
-        )
-        must(
-            await submitRate(client, {
-                rateID: rate3.id,
-                submittedByUserID: stateUser.id,
-                submitReason: '3.0 create',
-            })
-        )
+        const rateIDOne = draftRateOne.id
+        const rateIDTwo = draftRateTwo.id
 
-        // remove the connection from rate 2
-        must(
-            await unlockRate(client, {
-                rateID: rate2.id,
-                unlockedByUserID: cmsUser.id,
-                unlockReason: 'unlock for 2.1 remove',
-            })
-        )
-        must(
-            await updateDraftRate(client, {
-                rateID: rate2.id,
-                formData: { rateCertificationName: 'twopointone' },
-                contractIDs: [],
-            })
-        )
-        must(
-            await submitRate(client, {
-                rateID: rate2.id,
-                submittedByUserID: stateUser.id,
-                submitReason: '2.1 remove',
-            })
-        )
-
-        // update rate 1 to have a new version, should make one new rev.
-        must(
-            await unlockRate(client, {
-                rateID: rate1.id,
-                unlockedByUserID: cmsUser.id,
-                unlockReason: 'unlock for 1.1',
-            })
-        )
-        must(
-            await updateDraftRate(client, {
-                rateID: rate1.id,
-                formData: { rateCertificationName: 'onepointone' },
-                contractIDs: [contractA.id],
-            })
-        )
-        must(
-            await submitRate(client, {
-                rateID: rate1.id,
-                submittedByUserID: stateUser.id,
-                submitReason: '1.1 new name',
-            })
-        )
-
-        // Make a new Contract Revision, should show up as a single new rev with all the old info
-        must(
-            await unlockContract(client, {
-                contractID: contractA.id,
-                unlockedByUserID: cmsUser.id,
-                unlockReason: 'unlocking A.0',
-            })
-        )
-
+        // Update contract with both rates
         must(
             await updateDraftContractWithRates(client, {
-                contractID: contractA.id,
-                formData: {
-                    submissionType: 'CONTRACT_AND_RATES',
-                    submissionDescription: 'a.1 body',
-                    contractType: 'BASE',
-                    programIDs: draftContractData.programIDs,
-                    populationCovered: 'MEDICAID',
-                    riskBasedContract: false,
-                },
-            })
-        )
-        must(
-            await submitContract(client, {
-                contractID: contractA.id,
-                submittedByUserID: stateUser.id,
-                submitReason: 'Submitting A.1',
-            })
-        )
-
-        // Make a new Contract Revision, changing the connections should show up as a single new rev.
-        must(
-            await unlockContract(client, {
-                contractID: contractA.id,
-                unlockedByUserID: cmsUser.id,
-                unlockReason: 'unlocking A.1',
-            })
-        )
-        // Save update to get latest rate data
-        const updatedDraftContractA = must(
-            await updateDraftContractWithRates(client, {
-                contractID: contractA.id,
-                formData: {
-                    submissionType: 'CONTRACT_AND_RATES',
-                    submissionDescription: 'a.2 body',
-                    contractType: 'BASE',
-                    programIDs: draftContractData.programIDs,
-                    populationCovered: 'MEDICAID',
-                    riskBasedContract: false,
-                },
-            })
-        )
-        // Remove rate1 from contract
-        must(
-            await updateDraftContractWithRates(client, {
-                contractID: updatedDraftContractA.id,
+                contractID,
                 formData: {},
-                rateFormDatas:
-                    updatedDraftContractA.draftRevision?.rateRevisions
-                        .filter(
-                            (rateRevision) =>
-                                rateRevision.formData.rateID !== rate1.id
-                        )
-                        .map((rate) => rate.formData),
+                rateFormDatas: [
+                    { ...draftRateOne.draftRevision?.formData },
+                    { ...draftRateTwo.draftRevision?.formData },
+                ],
+            })
+        )
+
+        // Submit rates then contract
+        must(
+            await submitRate(client, {
+                rateID: rateIDOne,
+                submittedByUserID: stateUser.id,
+                submitReason: 'initial rate one submit',
+            })
+        )
+        // Submit rate then contract
+        must(
+            await submitRate(client, {
+                rateID: rateIDTwo,
+                submittedByUserID: stateUser.id,
+                submitReason: 'initial rate two submit',
             })
         )
         must(
             await submitContract(client, {
-                contractID: updatedDraftContractA.id,
+                contractID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Submitting A.2',
+                submitReason: 'initial contract submit',
             })
         )
 
-        // Now, find that contract and assert the history is what we expected
-        const resultingRate = await findRateWithHistory(client, rate1.id)
-        if (resultingRate instanceof Error) {
-            throw resultingRate
-        }
-
-        const revisions = resultingRate.revisions.reverse()
-
-        console.info(
-            'ALL First REvisions: ',
-            JSON.stringify(revisions, null, '  ')
+        // Rate one history
+        const fetchSubmittedRateOne = must(
+            await findRateWithHistory(client, rateIDOne)
         )
-
-        // Each Revision needs a Reason, one of the contracts or revisions associated with it should have changed and why.
-
-        expect(revisions).toHaveLength(2)
-        expect(revisions[0].contractRevisions).toHaveLength(1)
+        // Expect only one rate revision
+        expect(fetchSubmittedRateOne.revisions).toHaveLength(1)
+        // Expect initial rate two submit to be attached to first submission rate revision
         expect(
-            revisions[0].contractRevisions &&
-                revisions[0].contractRevisions[0].formData
-        ).toEqual(
-            expect.objectContaining({
-                submissionType: 'CONTRACT_AND_RATES',
-                submissionDescription: 'one contract',
-                contractType: 'BASE',
-                programIDs: draftContractData.programIDs,
-                populationCovered: 'MEDICAID',
-                riskBasedContract: false,
+            fetchSubmittedRateOne.revisions[0].submitInfo?.updatedReason
+        ).toBe('initial rate one submit')
+        expect(
+            fetchSubmittedRateOne.revisions[0].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('initial contract submit')
+
+        //Rate two history
+        const fetchSubmittedRateTwo = must(
+            await findRateWithHistory(client, rateIDTwo)
+        )
+        expect(fetchSubmittedRateTwo.revisions).toHaveLength(1)
+        // Expect initial rate two submit to be attached to first submission rate revision
+        expect(
+            fetchSubmittedRateTwo.revisions[0].submitInfo?.updatedReason
+        ).toBe('initial rate two submit')
+        expect(
+            fetchSubmittedRateTwo.revisions[0].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('initial contract submit')
+
+        // Unlock rate and contract
+        must(
+            await unlockRate(client, {
+                rateID: rateIDOne,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'Unlock rate one submission',
             })
         )
-        expect(revisions[0].submitInfo?.updatedReason).toBe('Rate Submit')
-        expect(revisions[0].unlockInfo).toBeUndefined()
 
-        expect(revisions[1].contractRevisions).toHaveLength(0)
-        // expect(
-        //     revisions[1].contractRevisions &&
-        //         revisions[1].contractRevisions[0].formData
-        // ).toEqual(
-        //     expect.objectContaining({
-        //         submissionType: 'CONTRACT_AND_RATES',
-        //         submissionDescription: 'one contract',
-        //         contractType: 'BASE',
-        //         programIDs: draftContractData.programIDs,
-        //         populationCovered: 'MEDICAID',
-        //         riskBasedContract: false,
-        //     })
-        // )
-        expect(revisions[1].submitInfo?.updatedReason).toBe('1.1 new name')
-        expect(revisions[1].unlockInfo?.updatedReason).toBe('unlock for 1.1')
-        expect(revisions[1].unlockInfo?.updatedBy).toBe('zuko@example.com')
+        must(
+            await unlockRate(client, {
+                rateID: rateIDTwo,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'Unlock rate two submission',
+            })
+        )
 
-        // expect(revisions[2].contractRevisions).toHaveLength(1)
-        // expect(
-        //     revisions[2].contractRevisions &&
-        //         revisions[2].contractRevisions[0].formData
-        // ).toEqual(
-        //     expect.objectContaining({
-        //         submissionType: 'CONTRACT_AND_RATES',
-        //         submissionDescription: 'a.1 body',
-        //         contractType: 'BASE',
-        //         programIDs: draftContractData.programIDs,
-        //         populationCovered: 'MEDICAID',
-        //         riskBasedContract: false,
-        //     })
-        // )
-        // expect(revisions[2].submitInfo?.updatedReason).toBe('Submitting A.1')
-        // expect(revisions[2].unlockInfo?.updatedReason).toBe('unlocking A.0')
-        // expect(revisions[2].unlockInfo?.updatedBy).toBe('zuko@example.com')
+        must(
+            await unlockContract(client, {
+                contractID,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'Unlock first contract submission',
+            })
+        )
 
-        // expect(revisions[3].contractRevisions).toHaveLength(0)
-        // expect(revisions[3].submitInfo?.updatedReason).toBe('Submitting A.2')
+        // Resubmit rates then contract
+        must(
+            await submitRate(client, {
+                rateID: rateIDOne,
+                submittedByUserID: stateUser.id,
+                submitReason: 'resubmit rate one',
+            })
+        )
+        must(
+            await submitRate(client, {
+                rateID: rateIDTwo,
+                submittedByUserID: stateUser.id,
+                submitReason: 'resubmit rate two',
+            })
+        )
+        must(
+            await submitContract(client, {
+                contractID,
+                submittedByUserID: stateUser.id,
+                submitReason: 'resubmit contract',
+            })
+        )
+
+        // Rate one resubmission history
+        const fetchResubmittedRateOne = must(
+            await findRateWithHistory(client, rateIDOne)
+        )
+        expect(fetchResubmittedRateOne.revisions).toHaveLength(2)
+        // Expect the earliest submission contract revision to be attached to first submission rate revision
+        expect(
+            fetchResubmittedRateOne.revisions[1].submitInfo?.updatedReason
+        ).toBe('initial rate one submit')
+        expect(
+            fetchResubmittedRateOne.revisions[1].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('initial contract submit')
+        // Expect the latest submission contract revision to be attached to latest submission rate revision
+        expect(
+            fetchResubmittedRateOne.revisions[0].submitInfo?.updatedReason
+        ).toBe('resubmit rate one')
+        expect(
+            fetchResubmittedRateOne.revisions[0].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('resubmit contract')
+
+        // Rate two resubmission history
+        const fetchResubmittedRateTwo = must(
+            await findRateWithHistory(client, rateIDTwo)
+        )
+        expect(fetchResubmittedRateTwo.revisions).toHaveLength(2)
+        // Expect the earliest submission contract revision to be attached to first submission rate revision
+        expect(
+            fetchResubmittedRateTwo.revisions[1].submitInfo?.updatedReason
+        ).toBe('initial rate two submit')
+        expect(
+            fetchResubmittedRateTwo.revisions[1].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('initial contract submit')
+        // Expect the latest submission contract revision to be attached to latest submission rate revision
+        expect(
+            fetchResubmittedRateTwo.revisions[0].submitInfo?.updatedReason
+        ).toBe('resubmit rate two')
+        expect(
+            fetchResubmittedRateTwo.revisions[0].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('resubmit contract')
+
+        // Unlock rate and contract and remove rate one from contract
+        must(
+            await unlockRate(client, {
+                rateID: rateIDOne,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'Unlock to remove this rate from contract',
+            })
+        )
+
+        const unlockedRateTwo = must(
+            await unlockRate(client, {
+                rateID: rateIDTwo,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'No edits to this rate',
+            })
+        )
+
+        must(
+            await unlockContract(client, {
+                contractID,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'Unlock to remove rate one from contract',
+            })
+        )
+
+        // Remove rate one from contact
+        must(
+            await updateDraftContractWithRates(client, {
+                contractID,
+                formData: {
+                    submissionDescription: 'remove rate',
+                },
+                rateFormDatas: [
+                    {
+                        ...unlockedRateTwo.draftRevision?.formData,
+                    },
+                ],
+            })
+        )
+
+        // Submit rate two and contract
+        must(
+            await submitRate(client, {
+                rateID: rateIDTwo,
+                submittedByUserID: stateUser.id,
+                submitReason: 're-resubmit rate two',
+            })
+        )
+        must(
+            await submitContract(client, {
+                contractID,
+                submittedByUserID: stateUser.id,
+                submitReason:
+                    'resubmit contract removing rate one leaving only rate two',
+            })
+        )
+
+        // Unlocked Rate one history
+        const fetchUnlockedRateOne = must(
+            await findRateWithHistory(client, rateIDOne)
+        )
+        // Expect unlocked rate to have a draftRevision
+        expect(fetchUnlockedRateOne.draftRevision).toBeDefined()
+        // Expect our draft revision to have no contract revisions after we removed it
+        expect(
+            fetchUnlockedRateOne.draftRevision?.contractRevisions
+        ).toHaveLength(0)
+        // Expect our unlocked rate to still have the same revision data (revision history)
+        // Expect the earliest submission contract revision to be attached to first submission rate revision
+        expect(
+            fetchUnlockedRateOne.revisions[1].submitInfo?.updatedReason
+        ).toBe('initial rate one submit')
+        expect(
+            fetchUnlockedRateOne.revisions[1].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('initial contract submit')
+        // Expect the resubmitted rate revision to have the attached contract revision that was attached to this rate
+        expect(
+            fetchUnlockedRateOne.revisions[0].submitInfo?.updatedReason
+        ).toBe('resubmit rate one')
+        expect(
+            fetchUnlockedRateOne.revisions[0].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('resubmit contract')
+
+        // Rate two re-resubmission history
+        const latestRateOneResubmit = must(
+            await findRateWithHistory(client, rateIDTwo)
+        )
+        expect(latestRateOneResubmit.revisions).toHaveLength(3)
+        // Expect the earliest submission contract revision to be attached to first submission rate revision
+        expect(
+            latestRateOneResubmit.revisions[2].submitInfo?.updatedReason
+        ).toBe('initial rate two submit')
+        expect(
+            latestRateOneResubmit.revisions[2].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('initial contract submit')
+        // Expect the first resubmission contract revision to be attached to first resubmission rate revision
+        expect(
+            latestRateOneResubmit.revisions[1].submitInfo?.updatedReason
+        ).toBe('resubmit rate two')
+        expect(
+            latestRateOneResubmit.revisions[1].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('resubmit contract')
+        // Expect the latest submission contract revision to be attached to latest submission rate revision
+        expect(
+            latestRateOneResubmit.revisions[0].submitInfo?.updatedReason
+        ).toBe('re-resubmit rate two')
+        expect(
+            latestRateOneResubmit.revisions[0].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('resubmit contract removing rate one leaving only rate two')
+
+        // Rate one re-resubmission history
+        const latestRateTwoResubmit = must(
+            await submitRate(client, {
+                rateID: rateIDOne,
+                submitReason: 'resubmit without contract',
+                submittedByUserID: stateUser.id,
+            })
+        )
+
+        // Expect no draft revision
+        expect(latestRateTwoResubmit.draftRevision).toBeUndefined()
+
+        // Expect our resubmitted rate to still have the same revision history along with the newest submitted rate
+        // Expect the earliest submission contract revision to be attached to first submission rate revision
+        expect(
+            latestRateTwoResubmit.revisions[2].submitInfo?.updatedReason
+        ).toBe('initial rate one submit')
+        expect(
+            latestRateTwoResubmit.revisions[2].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('initial contract submit')
+
+        // Expect the resubmitted rate revision to have the attached contract revision that was attached to this rate
+        expect(
+            latestRateTwoResubmit.revisions[1].submitInfo?.updatedReason
+        ).toBe('resubmit rate one')
+        expect(
+            latestRateTwoResubmit.revisions[1].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('resubmit contract')
+
+        // Expect the latest resubmitted rate revision to have no attached contract revision
+        expect(
+            latestRateTwoResubmit.revisions[0].submitInfo?.updatedReason
+        ).toBe('resubmit without contract')
+        expect(
+            latestRateTwoResubmit.revisions[0].contractRevisions
+        ).toHaveLength(0)
     })
 })
