@@ -173,7 +173,10 @@ export const SubmissionSummary = (): React.ReactElement => {
                                     <span>
                                         MC-CRS record number:
                                         <Link
-                                            href={`https://mccrs.abtsites.com/Home/Index/${pkg.mccrsID}`}
+                                            href={`https://mccrs.abtsites.com/Home/Index/${pkg.mccrsID.replace(
+                                                / /g,
+                                                ''
+                                            )}`}
                                         >
                                             {pkg.mccrsID}
                                         </Link>
