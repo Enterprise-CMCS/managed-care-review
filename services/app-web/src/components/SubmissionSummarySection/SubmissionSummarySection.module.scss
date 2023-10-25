@@ -22,7 +22,6 @@
             font-size: size('body', 'lg');
         }
     }
-
     ul {
         list-style-type: none;
         margin: 0;
@@ -46,24 +45,9 @@
             padding-bottom: 0;
         }
     }
-}
-
-.summarySectionHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: units(4);
-    padding-bottom: units(2);
-    border-bottom: 1px solid $theme-color-base-lighter;
-}
-
-.summarySectionSubHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: units(4) 0;
-    padding-top: units(4);
-    border-top: 1px solid $theme-color-base-lighter;
+    table:last-of-type {
+       margin-bottom: units(2);
+    }
 }
 
 .contactInfo p {

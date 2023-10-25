@@ -4,7 +4,6 @@
 .wrapper {
     display: flex;
     flex: 1 0 auto;
-    padding-top: units(4);
     width: 100%;
     max-width: 100%;
     background-color: $cms-color-white;
@@ -31,6 +30,7 @@
         align-items: center;
         justify-content: space-between;
         font-weight: 700;
+        padding-bottom: units(2);
     }
 }
 
