@@ -79,22 +79,14 @@ div[class^='usa-hint'] span {
 } 
 
 ul[class^='usa-button-group'] {
-    justify-content: space-between;
+    justify-content: end;
     li[class^='usa-button-group__item'] {
         margin-top: 0;
         button {
             margin-top: 16px;
             margin-bottom: 44px;
-        }
-        &:first-of-type {
-            button[class^='usa-button'] {
-                color: $theme-color-error-darker;
-                box-shadow: inset 0 0 0 2px $theme-color-error-darker;
-            }
-        }
-        &:last-of-type {
             margin-right: .25rem;
         }
-    }
+    } 
 }
 

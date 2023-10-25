@@ -160,11 +160,6 @@ const CMSUserRoutes = ({
         featureFlags.RATE_REVIEWS_DASHBOARD.defaultValue
     )
 
-    const showMCCRSRecordNumber = ldClient?.variation(
-        featureFlags.MCCRS_RECORD_NUMBER.flag,
-        featureFlags.MCCRS_RECORD_NUMBER.defaultValue
-    )
-
     return (
         <AuthenticatedRouteWrapper authMode={authMode} setAlert={setAlert}>
             <Routes>
@@ -212,12 +207,12 @@ const CMSUserRoutes = ({
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
                         element={<SubmissionSummary />}
                     />
-                    {showMCCRSRecordNumber && (
+                    {
                         <Route
                             path={RoutesRecord.SUBMISSIONS_MCCRSID}
                             element={<MccrsId />}
                         />
-                    )}
+                    }
                 </Route>
 
                 <Route

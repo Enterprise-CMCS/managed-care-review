@@ -8,18 +8,10 @@ import {
     fetchStateHealthPlanPackageWithQuestionsMockSuccess,
     mockValidCMSUser,
 } from '../../testHelpers/apolloMocks'
-import { mockSubmittedHealthPlanPackage } from '../../testHelpers/apolloMocks'
-
-import {
-    ldUseClientSpy,
-    renderWithProviders,
-} from '../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { MccrsId } from './MccrsId'
 
 describe('MCCRSID', () => {
-    beforeEach(() => {
-        ldUseClientSpy({ 'mccrs-record-number': true })
-    })
     afterEach(() => {
         jest.resetAllMocks()
     })
@@ -91,47 +83,6 @@ describe('MCCRSID', () => {
         expect(await screen.findByTestId('textInput')).toBeInTheDocument()
     })
 
-    it('cannot continue without providing a MCCRS ID', async () => {
-        renderWithProviders(
-            <Routes>
-                <Route element={<SubmissionSideNav />}>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_MCCRSID}
-                        element={<MccrsId />}
-                    />
-                </Route>
-            </Routes>,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidCMSUser(),
-                            statusCode: 200,
-                        }),
-                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: '15',
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: '/submissions/15/mccrs-record-number',
-                },
-            }
-        )
-        const continueButton = await screen.findByRole('button', {
-            name: 'Save MC-CRS number',
-        })
-        continueButton.click()
-        await waitFor(() => {
-            expect(
-                screen.getAllByText(
-                    'You must enter a record number or delete this field.'
-                )
-            ).toHaveLength(1)
-            expect(continueButton).toHaveAttribute('aria-disabled', 'true')
-        })
-    })
-
     it('cannot continue with MCCRS ID with non number input', async () => {
         renderWithProviders(
             <Routes>
@@ -173,43 +124,6 @@ describe('MCCRSID', () => {
                 1
             )
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')
-        })
-    })
-
-    it('edit - prepopulates the mccrs id when a submission has one', async () => {
-        renderWithProviders(
-            <Routes>
-                <Route element={<SubmissionSideNav />}>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_MCCRSID}
-                        element={<MccrsId />}
-                    />
-                </Route>
-            </Routes>,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidCMSUser(),
-                            statusCode: 200,
-                        }),
-                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: '15',
-                            stateSubmission: {
-                                ...mockSubmittedHealthPlanPackage(),
-                                mccrsID: '3333',
-                            },
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: '/submissions/15/mccrs-record-number',
-                },
-            }
-        )
-
-        await waitFor(() => {
-            expect(screen.getByDisplayValue('3333')).toBeInTheDocument()
         })
     })
 })

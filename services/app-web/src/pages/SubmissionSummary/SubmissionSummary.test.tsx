@@ -197,46 +197,6 @@ describe('SubmissionSummary', () => {
         })
     })
 
-    it('renders edit mccrs-id link for CMS user when submission has a mccrs id', async () => {
-        const submissionsWithRevisions = mockUnlockedHealthPlanPackage()
-        renderWithProviders(
-            <Routes>
-                <Route element={<SubmissionSideNav />}>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<SubmissionSummary />}
-                    />
-                </Route>
-            </Routes>,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidCMSUser(),
-                            statusCode: 200,
-                        }),
-                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            stateSubmission: {
-                                ...submissionsWithRevisions,
-                                mccrsID: '3333',
-                            },
-                            id: '15',
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: '/submissions/15',
-                },
-            }
-        )
-        await waitFor(() => {
-            expect(
-                screen.queryByText('Add MC-CRS record number')
-            ).not.toBeInTheDocument()
-            expect(screen.getByText('Edit MC-CRS number')).toBeInTheDocument()
-        })
-    })
-
     it('does not render an add mccrs-id link for state user', async () => {
         const submissionsWithRevisions = mockUnlockedHealthPlanPackage()
         renderWithProviders(

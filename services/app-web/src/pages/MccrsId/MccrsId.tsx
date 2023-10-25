@@ -145,16 +145,6 @@ export const MccrsId = (): React.ReactElement => {
                             </fieldset>
                             <ButtonGroup type="default">
                                 <ActionButton
-                                    type="button"
-                                    variant="outline"
-                                    secondary
-                                    data-testid="page-actions-left-secondary"
-                                    onClick={() => console.info('delete')}
-                                >
-                                    Delete Number
-                                </ActionButton>
-
-                                <ActionButton
                                     type="submit"
                                     variant="default"
                                     data-testid="page-actions-right-primary"
