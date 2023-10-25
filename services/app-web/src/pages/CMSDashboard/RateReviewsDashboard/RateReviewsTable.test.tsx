@@ -7,6 +7,8 @@ import {
 } from '../../../testHelpers/apolloMocks'
 import { RateReviewsTable } from './RateReviewsTable'
 import { waitFor, screen, within } from '@testing-library/react'
+import selectEvent from 'react-select-event'
+import userEvent from '@testing-library/user-event'
 
 describe('RateReviewsTable', () => {
     const statePrograms = mockMNState().programs
@@ -34,7 +36,7 @@ describe('RateReviewsTable', () => {
             status: 'SUBMITTED',
             updatedAt: new Date('2023-11-18'),
             rateType: 'AMENDMENT',
-            stateName: 'Minnesota',
+            stateName: 'Ohio',
             contractRevisions: [],
         },
         {
@@ -47,7 +49,7 @@ describe('RateReviewsTable', () => {
             status: 'UNLOCKED',
             updatedAt: new Date('2023-12-01'),
             rateType: 'NEW',
-            stateName: 'Minnesota',
+            stateName: 'Florida',
             contractRevisions: [],
         },
     ]
@@ -121,5 +123,66 @@ describe('RateReviewsTable', () => {
         expect(
             screen.getByText('You have no rate reviews yet')
         ).toBeInTheDocument()
+    })
+    it('can filter table by submission state', async () => {
+        renderWithProviders(
+            <RateReviewsTable
+                tableData={tableData()}
+                showFilters={true}
+                caption={'Test table caption'}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                    ],
+                },
+            }
+        )
+
+        const stateFilter = screen.getByTestId('state-filter')
+        const accordionButton = screen.getByTestId(
+            'accordionButton_filterAccordionItems'
+        )
+        await waitFor(async () => {
+            //Expect filter accordion and state filter to exist
+            expect(screen.queryByTestId('accordion')).toBeInTheDocument()
+            //Expand filter accordion
+            await userEvent.click(accordionButton)
+        })
+
+        //Look for state filter
+        const stateCombobox = within(stateFilter).getByRole('combobox')
+        expect(stateCombobox).toBeInTheDocument()
+
+        //Open combobox
+        selectEvent.openMenu(stateCombobox)
+        //Expect combobox options to exist
+        const comboboxOptions = screen.getByTestId('state-filter-options')
+        expect(comboboxOptions).toBeInTheDocument()
+
+        await waitFor(async () => {
+            //Expected options are present
+            expect(
+                within(comboboxOptions).getByText('Ohio')
+            ).toBeInTheDocument()
+            expect(
+                within(comboboxOptions).getByText('Florida')
+            ).toBeInTheDocument()
+            expect(
+                within(comboboxOptions).getByText('Minnesota')
+            ).toBeInTheDocument()
+            //Select option Ohio
+            await selectEvent.select(comboboxOptions, 'Ohio')
+        })
+
+        //Expect only Ohio to show on table
+        const rows = await screen.findAllByRole('row')
+        expect(rows).toHaveLength(2)
+        expect(rows[1]).toHaveTextContent('Ohio') // row[0] is the header
+        expect(screen.getByText('Displaying 1 of 3 rates')).toBeInTheDocument()
     })
 })

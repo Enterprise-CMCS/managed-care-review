@@ -5,55 +5,13 @@
     max-width: 50rem;
 }
 
-.summarySection {
-    margin: units(2) auto;
-    background: $cms-color-white;
-    padding: units(2) units(4);
-    border: 1px solid $theme-color-base-lighter;
-    line-height: units(3);
-    @include u-radius('md');
-
-    h2 {
-        margin: 0;
-        @include u-text('normal');
-    }
-    &:first-of-type {
-        h2 {
-            @include u-text('bold');
-            font-size: size('body', 'lg');
-        }
-    }
-
-    ul {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-
-        li {
-            padding: units(1) 0;
-        }
-    }
-
-    // align state contacts
-    dl div[class^='grid-container'] {
-        padding: 0;
-
-        div {
-            padding-bottom: units(2);
-        }
-
-        // dont bottom pad last two grid items
-        div:nth-last-child(-n + 2) {
-            padding-bottom: 0;
-        }
-    }
-}
 
 .summarySectionHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: units(2);
+    padding-bottom: units(1);
+    min-height: 3rem;
 
     &.alignTop {
         align-items: start;
@@ -62,6 +20,7 @@
     a {
         display: block;
         margin-top: 17.5px;
+        padding-bottom: units(1);
     }
 }
 
@@ -79,25 +38,8 @@
     border-top: 1px solid $theme-color-base-lighter;
 }
 
-.contactInfo p {
-    margin: units(1) 0;
-}
-
-.documentDesc {
-    margin: 0;
-}
-
-.submitButton {
-    background: $theme-color-success;
-    &:hover {
-        background-color: #2a7a3b !important;
-    }
-}
 
 @media print {
-    header,
-    footer,
-    .pageActions,
     .summarySectionHeader a {
         display: none;
     }

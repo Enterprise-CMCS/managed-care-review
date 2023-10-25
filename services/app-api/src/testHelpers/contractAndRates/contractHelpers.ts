@@ -10,7 +10,7 @@ import { findStatePrograms } from '../../postgres'
 import { must } from '../errorHelpers'
 
 const defaultContractData = () => ({
-    id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
+    id: uuidv4(),
     createdAt: new Date(),
     updatedAt: new Date(),
     mccrsID: null,
@@ -35,13 +35,14 @@ const createInsertContractData = ({
         programIDs: formData?.programIDs ?? [statePrograms[0].id],
         populationCovered: formData?.populationCovered ?? 'MEDICAID',
         riskBasedContract: formData?.riskBasedContract ?? false,
+        ...formData,
     }
 }
 
 const createDraftContractData = (
     contract?: Partial<ContractTableFullPayload>
 ): ContractTableFullPayload => ({
-    id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
+    id: uuidv4(),
     createdAt: new Date(),
     updatedAt: new Date(),
     mccrsID: null,
@@ -63,7 +64,7 @@ const createDraftContractData = (
 const createContractData = (
     contract?: Partial<ContractTableFullPayload>
 ): ContractTableFullPayload => ({
-    id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
+    id: uuidv4(),
     createdAt: new Date(),
     updatedAt: new Date(),
     mccrsID: null,

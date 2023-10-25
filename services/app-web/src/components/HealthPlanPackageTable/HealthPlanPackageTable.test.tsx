@@ -92,28 +92,67 @@ const submissions: PackageInDashboardType[] = [
     },
 ]
 
+const mockCMSUser = (): User => ({
+    __typename: 'CMSUser' as const,
+    id: 'foo-id',
+    givenName: 'Bob',
+    familyName: 'Dumas',
+    role: 'CMS User',
+    email: 'cms@exmaple.com',
+    divisionAssignment: 'DMCO',
+    stateAssignments: [],
+})
+
+const mockStateUser = (): User => ({
+    __typename: 'StateUser' as const,
+    id: 'foo-id',
+    givenName: 'Bob',
+    familyName: 'Statie',
+    role: 'State User',
+    email: 'state@example.com',
+    state: {
+        __typename: 'State',
+        code: 'MN',
+        name: 'Minnesota',
+        programs: [],
+    },
+})
+
+const apolloProviderWithStateUser = () => ({
+    mocks: [
+        fetchCurrentUserMock({
+            statusCode: 200,
+            user: mockStateUser(),
+        }),
+    ],
+})
+
+const apolloProviderWithCMSUser = () => ({
+    mocks: [
+        fetchCurrentUserMock({
+            statusCode: 200,
+            user: mockCMSUser(),
+        }),
+    ],
+})
+
 describe('HealthPlanPackageTable for CMS User (with filters)', () => {
     beforeEach(() => {
         window.location.assign('#')
+        jest.clearAllMocks()
     })
-    const mockCMSUser: User = {
-        __typename: 'CMSUser' as const,
-        id: 'foo-id',
-        givenName: 'Bob',
-        familyName: 'Dumas',
-        role: 'CMS User',
-        email: 'cms@exmaple.com',
-        stateAssignments: [],
-    }
 
     it('renders table and caption if passed in', async () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
-                user={mockCMSUser}
+                user={mockCMSUser()}
                 caption="Table 1"
                 showFilters
-            />
+            />,
+            {
+                apolloProvider: apolloProviderWithStateUser(),
+            }
         )
         expect(screen.getByRole('table')).toBeInTheDocument()
         expect(screen.getByText('Table 1')).toBeInTheDocument()
@@ -123,9 +162,12 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
-                user={mockCMSUser}
+                user={mockCMSUser()}
                 showFilters
-            />
+            />,
+            {
+                apolloProvider: apolloProviderWithStateUser(),
+            }
         )
         const rows = await screen.findAllByRole('row')
         expect(screen.getByRole('table')).toBeInTheDocument()
@@ -140,17 +182,11 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={[]}
-                user={mockCMSUser}
+                user={mockCMSUser()}
                 showFilters
             />,
             {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            statusCode: 200,
-                        }),
-                    ],
-                },
+                apolloProvider: apolloProviderWithStateUser(),
             }
         )
 
@@ -166,9 +202,12 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
-                user={mockCMSUser}
+                user={mockCMSUser()}
                 showFilters
-            />
+            />,
+            {
+                apolloProvider: apolloProviderWithCMSUser(),
+            }
         )
         const submissionsInTable = screen.getAllByTestId(`submission-id`)
         const table = screen.getByRole('table')
@@ -186,9 +225,12 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
-                user={mockCMSUser}
+                user={mockCMSUser()}
                 showFilters
-            />
+            />,
+            {
+                apolloProvider: apolloProviderWithCMSUser(),
+            }
         )
 
         const rows = await screen.findAllByRole('row')
@@ -218,9 +260,12 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={stateSubmissions}
-                user={mockCMSUser}
+                user={mockCMSUser()}
                 showFilters
-            />
+            />,
+            {
+                apolloProvider: apolloProviderWithCMSUser(),
+            }
         )
 
         const rows = await screen.findAllByRole('row')
@@ -234,8 +279,11 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
-                user={mockCMSUser}
-            />
+                user={mockCMSUser()}
+            />,
+            {
+                apolloProvider: apolloProviderWithCMSUser(),
+            }
         )
         const row1 = await screen.findByTestId(`row-${submissions[0].id}`)
         const tags1 = within(row1).getAllByTestId('program-tag')
@@ -264,17 +312,11 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
-                user={mockCMSUser}
+                user={mockCMSUser()}
                 showFilters
             />,
             {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            statusCode: 200,
-                        }),
-                    ],
-                },
+                apolloProvider: apolloProviderWithCMSUser(),
             }
         )
 
@@ -297,8 +339,11 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
-                user={mockCMSUser}
-            />
+                user={mockCMSUser()}
+            />,
+            {
+                apolloProvider: apolloProviderWithCMSUser(),
+            }
         )
 
         await waitFor(() => {
@@ -314,17 +359,11 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
-                user={mockCMSUser}
+                user={mockCMSUser()}
                 showFilters
             />,
             {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            statusCode: 200,
-                        }),
-                    ],
-                },
+                apolloProvider: apolloProviderWithCMSUser(),
             }
         )
 
@@ -401,17 +440,11 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={stateSubmissions}
-                user={mockCMSUser}
+                user={mockCMSUser()}
                 showFilters
             />,
             {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            statusCode: 200,
-                        }),
-                    ],
-                },
+                apolloProvider: apolloProviderWithCMSUser(),
             }
         )
 
@@ -509,17 +542,11 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={stateSubmissions}
-                user={mockCMSUser}
+                user={mockCMSUser()}
                 showFilters
             />,
             {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            statusCode: 200,
-                        }),
-                    ],
-                },
+                apolloProvider: apolloProviderWithCMSUser(),
             }
         )
 
@@ -582,17 +609,11 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
-                user={mockCMSUser}
+                user={mockCMSUser()}
                 showFilters
             />,
             {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            statusCode: 200,
-                        }),
-                    ],
-                },
+                apolloProvider: apolloProviderWithCMSUser(),
             }
         )
 
@@ -681,17 +702,11 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={stateSubmissions}
-                user={mockCMSUser}
+                user={mockCMSUser()}
                 showFilters
             />,
             {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            statusCode: 200,
-                        }),
-                    ],
-                },
+                apolloProvider: apolloProviderWithCMSUser(),
             }
         )
 
@@ -782,27 +797,16 @@ describe('HealthPlanPackageTable state user tests', () => {
     beforeEach(() => {
         window.location.assign('#')
     })
-    const mockStateUser: User = {
-        __typename: 'StateUser' as const,
-        id: 'foo-id',
-        givenName: 'Bob',
-        familyName: 'Statie',
-        role: 'State User',
-        email: 'state@example.com',
-        state: {
-            __typename: 'State',
-            code: 'MN',
-            name: 'Minnesota',
-            programs: [],
-        },
-    }
 
     it('does not display State and Submission type columns for state users', async () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
-                user={mockStateUser}
-            />
+                user={mockStateUser()}
+            />,
+            {
+                apolloProvider: apolloProviderWithStateUser(),
+            }
         )
         const submissionsInTable = screen.getAllByTestId(`submission-id`)
         const table = screen.getByRole('table')
@@ -842,8 +846,11 @@ describe('HealthPlanPackageTable state user tests', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={stateSubmissions}
-                user={mockStateUser}
-            />
+                user={mockStateUser()}
+            />,
+            {
+                apolloProvider: apolloProviderWithStateUser(),
+            }
         )
 
         const rows = await screen.findAllByRole('row')

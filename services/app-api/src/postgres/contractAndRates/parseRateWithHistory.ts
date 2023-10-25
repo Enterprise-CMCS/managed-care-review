@@ -156,7 +156,8 @@ function rateWithHistoryToDomainModel(
 
         allEntries.push(initialEntry)
 
-        const lastEntry = initialEntry
+        // const lastEntry = initialEntry
+
         // go through every contract revision with this rate
         for (const contractRev of rateRev.contractRevisions) {
             if (!contractRev.contractRevision.submitInfo) {
@@ -165,41 +166,20 @@ function rateWithHistoryToDomainModel(
                 )
             }
 
-            // if it's from before this rate was submitted, it's there at the beginning.
+            // Finding the single earliest contract rev submitted right after rate rev submission date time.
             if (
-                contractRev.contractRevision.submitInfo.updatedAt <=
+                contractRev.contractRevision.submitInfo.updatedAt >=
                 rateRev.submitInfo.updatedAt
             ) {
-                if (!contractRev.isRemoval) {
+                const exists = initialEntry.contractRevs.find(
+                    (cc) =>
+                        cc.contractID ===
+                        contractRev.contractRevision.contractID
+                )
+
+                if (!exists) {
                     initialEntry.contractRevs.push(contractRev.contractRevision)
                 }
-            } else {
-                // if after, then it's always a new entry in the list
-                let lastContracts = [...lastEntry.contractRevs]
-
-                // take out the previous contract revision this revision supersedes
-                lastContracts = lastContracts.filter(
-                    (c) =>
-                        c.contractID !== contractRev.contractRevision.contractID
-                )
-                if (!contractRev.isRemoval) {
-                    lastContracts.push(contractRev.contractRevision)
-                }
-
-                // For now, we just put the most current version of contracts on this rate
-                // skip making entries for each contract revision
-                initialEntry.contractRevs = lastContracts
-
-                // const newRev: RateRevisionSet = {
-                //     rateRev,
-                //     submitInfo: contractRev.contractRevision.submitInfo,
-                //     unlockInfo:
-                //         contractRev.contractRevision.unlockInfo || undefined,
-                //     contractRevs: lastContracts,
-                // }
-
-                // lastEntry = newRev
-                // allEntries.push(newRev) // For now, don't make revisions out of contracts
             }
         }
     }
