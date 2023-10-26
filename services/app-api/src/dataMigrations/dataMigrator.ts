@@ -114,27 +114,3 @@ export async function migrate(
     }
     return undefined
 }
-
-async function main() {
-    const args = process.argv.slice(2)
-
-    const usage = `USAGE: 
-./migrate_data.js [PATH TO MIGRATIONS] :: run migrations against the db`
-
-    const pathToProtos = args[0]
-    if (pathToProtos === undefined) {
-        console.info(usage)
-        process.exit(1)
-    }
-
-    const dbConn = process.env.DATABASE_URL
-    if (!dbConn) {
-        throw new Error('DATABASE_URL must be defined in env')
-    }
-
-    const migrator = newDBMigrator(dbConn)
-
-    await migrate(migrator, pathToProtos)
-}
-
-void main()
