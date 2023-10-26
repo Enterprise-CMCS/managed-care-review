@@ -71,7 +71,7 @@ export const MccrsId = (): React.ReactElement => {
             const updateResult = await updateFormData({
                 variables: {
                     input: {
-                        mccrsID: values?.mccrsId?.toString(),
+                        mccrsID: values?.mccrsId?.toString().replace(/ /g, ''),
                         id: id,
                     },
                 },
@@ -101,7 +101,6 @@ export const MccrsId = (): React.ReactElement => {
 
     return (
         <>
-            {showPageErrorMessage && <GenericApiErrorBanner />}
             <Formik
                 initialValues={mccrsIDInitialValues}
                 onSubmit={(values) => {
@@ -121,6 +120,7 @@ export const MccrsId = (): React.ReactElement => {
                                 handleSubmit(e)
                             }}
                         >
+                            {showPageErrorMessage && <GenericApiErrorBanner />}
                             <fieldset className="usa-fieldset">
                                 <h3>MC-CRS record number</h3>
                                 <legend className="srOnly">
