@@ -19,6 +19,7 @@ export type SubmissionTypeSummarySectionProps = {
     statePrograms: Program[]
     navigateTo?: string
     headerChildComponent?: React.ReactElement
+    subHeaderComponent?: React.ReactElement
     initiallySubmittedAt?: Date
     submissionName: string
 }
@@ -27,6 +28,7 @@ export const SubmissionTypeSummarySection = ({
     submission,
     statePrograms,
     navigateTo,
+    subHeaderComponent,
     headerChildComponent,
     initiallySubmittedAt,
     submissionName,
@@ -41,6 +43,7 @@ export const SubmissionTypeSummarySection = ({
         <section id="submissionTypeSection" className={styles.summarySection}>
             <SectionHeader
                 header={submissionName}
+                subHeaderComponent={subHeaderComponent}
                 navigateTo={navigateTo}
                 headerId={'submissionName'}
             >

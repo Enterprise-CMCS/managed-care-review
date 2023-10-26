@@ -38,14 +38,11 @@ export const ContactsSummarySection = ({
 
     return (
         <section id="stateContacts" className={styles.summarySection}>
-            <dl>
-                <SectionHeader
-                    header="State contacts"
-                    navigateTo={navigateTo}
-                />
+            <SectionHeader header="State contacts" navigateTo={navigateTo} />
 
-                <GridContainer>
-                    <Grid row>
+            <GridContainer>
+                <Grid row>
+                    <dl>
                         {submission.stateContacts.length > 0 ? (
                             submission.stateContacts.map(
                                 (stateContact, index) => (
@@ -70,9 +67,9 @@ export const ContactsSummarySection = ({
                                 children={undefined}
                             />
                         )}
-                    </Grid>
-                </GridContainer>
-            </dl>
+                    </dl>
+                </Grid>
+            </GridContainer>
 
             {submission.submissionType === 'CONTRACT_AND_RATES' && (
                 <>

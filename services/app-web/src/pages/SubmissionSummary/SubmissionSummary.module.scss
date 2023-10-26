@@ -17,11 +17,29 @@
     padding: 2rem 0;
 }
 
+.subHeader {
+    margin-top: 17.5px;
+    span {
+        font-weight: bold;
+        a {
+            display: inline;
+            margin-left: 5px;
+        }
+
+    }
+    .editLink {
+        margin-top: 0;
+    }
+}
+
 .banner {
     margin: units(2) auto;
 }
 
 .backLinkContainer {
     padding-top: units(2);
+    padding-bottom: units(2);
+  }
+  .backLinkContainerNoSideBar {
     padding-bottom: units(2);
   }
