@@ -167,7 +167,7 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
 
     const migrationResult = await migrate(
         dataMigrator,
-        '../dataMigrations/migrations'
+        '/opt/nodejs/dataMigrations/migrations/'
     )
     if (migrationResult instanceof Error) {
         const errMsg = `Could not migrate the database protobufs: ${migrationResult}`

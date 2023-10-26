@@ -1,4 +1,5 @@
 import fs from 'fs'
+import path from 'path'
 
 import { PrismaClient } from '@prisma/client'
 import type { PrismaTransactionType } from '../postgres/prismaTypes'
@@ -71,24 +72,18 @@ export function newDBMigrator(dbConnString: string): MigratorType {
 
 export async function migrate(
     migrator: MigratorType,
-    path: string
+    migrationPath: string
 ): Promise<undefined | Error> {
-    const migrationPath = path
-
     const migrationFiles = fs
         .readdirSync(migrationPath)
         .filter((m) => m.endsWith('.js') && !m.endsWith('.test.js'))
 
     const migrations: DBMigrationType[] = []
     for (const migrationFile of migrationFiles) {
-        // const fullPath = `./build/migrations/${migrationFile}`
-        const fullPath = './migrations/0001_test_migration'
+        // const fullPath = './migrations/0001_test_migration'
+        const migrationName = path.parse(migrationFile).name
 
-        const migrationName = migrationFile.substring(
-            0,
-            migrationFile.lastIndexOf('.')
-        )
-
+        const fullPath = path.join(migrationPath, migrationFile)
         const migration = await import(fullPath)
 
         migrations.push({
