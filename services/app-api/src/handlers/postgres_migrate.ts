@@ -3,7 +3,7 @@ import { RDSClient, CreateDBClusterSnapshotCommand } from '@aws-sdk/client-rds'
 import { spawnSync } from 'child_process'
 import { getDBClusterID, getPostgresURL } from './configuration'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
-import { migrate, newDBMigrator } from '../dataMigraitons/dataMigrator'
+import { migrate, newDBMigrator } from '../dataMigrations/dataMigrator'
 
 export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // setup otel tracing
