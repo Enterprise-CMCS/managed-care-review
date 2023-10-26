@@ -77,7 +77,7 @@ export function updateContract(
                 contractWithHistory.status === 'UNLOCKED'
 
             if (!isSubmittedOrUnlocked) {
-                const errMessage = `Can not update a contract has not been submitted. Fails for contract with ID: ${contractWithHistory.id}`
+                const errMessage = `Can not update a contract has not been submitted or unlocked. Fails for contract with ID: ${contractWithHistory.id}`
                 logError('updateContract', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new UserInputError(errMessage, {
