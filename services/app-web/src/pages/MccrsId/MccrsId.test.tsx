@@ -10,6 +10,7 @@ import {
 } from '../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { MccrsId } from './MccrsId'
+import { mockSubmittedHealthPlanPackage } from '../../testHelpers/apolloMocks'
 
 describe('MCCRSID', () => {
     afterEach(() => {
@@ -124,6 +125,43 @@ describe('MCCRSID', () => {
                 1
             )
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')
+        })
+    })
+
+    it('edit - prepopulates the mccrs id when a submission has one', async () => {
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_MCCRSID}
+                        element={<MccrsId />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: '15',
+                            stateSubmission: {
+                                ...mockSubmittedHealthPlanPackage(),
+                                mccrsID: '3333',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15/mccrs-record-number',
+                },
+            }
+        )
+
+        await waitFor(() => {
+            expect(screen.getByDisplayValue('3333')).toBeInTheDocument()
         })
     })
 })
