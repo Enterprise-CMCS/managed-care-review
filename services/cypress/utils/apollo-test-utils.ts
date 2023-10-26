@@ -77,6 +77,76 @@ const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
     rateInfos: [],
 })
 
+const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
+    stateContacts: [
+        {
+            name: 'Name',
+            titleRole: 'Title',
+            email: 'example@example.com',
+        },
+    ],
+    addtlActuaryContacts: [],
+    documents: [],
+    contractExecutionStatus: 'EXECUTED' as const,
+    contractDocuments: [
+        {
+            name: 'Contract Cert.pdf',
+            s3URL: 's3://local-uploads/1684382956834-Contract Cert.pdf/Contract Cert.pdf',
+            documentCategories: ['CONTRACT'],
+            sha256: 'abc123',
+        },
+    ],
+    contractDateStart: new Date('2023-05-01T00:00:00.000Z'),
+    contractDateEnd: new Date('2023-05-31T00:00:00.000Z'),
+    contractAmendmentInfo: {
+        modifiedProvisions: {
+            inLieuServicesAndSettings: false,
+            modifiedRiskSharingStrategy: false,
+            modifiedIncentiveArrangements: false,
+            modifiedWitholdAgreements: false,
+            modifiedStateDirectedPayments: false,
+            modifiedPassThroughPayments: false,
+            modifiedPaymentsForMentalDiseaseInstitutions: false,
+            modifiedNonRiskPaymentArrangements: false,
+        },
+    },
+    managedCareEntities: ['MCO'],
+    federalAuthorities: ['STATE_PLAN'],
+    rateInfos:[
+        {
+            id: uuidv4(),
+            rateType: 'NEW' as const,
+            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+            rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+            rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+            rateDocuments: [
+                {
+                    name: 'rateDocument.pdf',
+                    s3URL: 'fakeS3URL',
+                    sha256: 'fakesha',
+                    documentCategories: ['RATES' as const],
+                },
+            ],
+            supportingDocuments: [],
+            //We only want one rate ID and use last program in list to differentiate from programID if possible.
+            rateProgramIDs: [ratePrograms.reverse()[0].id],
+            actuaryContacts: [
+                {
+                    name: 'test name',
+                    titleRole: 'test title',
+                    email: 'email@example.com',
+                    actuarialFirm: 'MERCER' as const,
+                    actuarialFirmOther: '',
+                },
+            ],
+            actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
+            packagesWithSharedRateCerts: [],
+        },
+    ]
+
+
+})
+
 const newSubmissionInput = (): Partial<UnlockedHealthPlanFormDataType> => ({
     populationCovered: 'MEDICAID',
     programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
