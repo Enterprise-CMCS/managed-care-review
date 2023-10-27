@@ -1,8 +1,7 @@
-import fs from 'fs'
-import path from 'path'
-
 import { PrismaClient } from '@prisma/client'
 import type { PrismaTransactionType } from '../postgres/prismaTypes'
+import { migrate as migrate1 } from './migrations/20231026123042_test_migrator_works'
+import { migrate as migrate2 } from './migrations/20231026124442_fix_rate_submittedat'
 
 // MigrationType describes a single migration with a name and a callable function called migrateProto
 interface DBMigrationType {
@@ -72,25 +71,39 @@ export function newDBMigrator(dbConnString: string): MigratorType {
 
 export async function migrate(
     migrator: MigratorType,
-    migrationPath: string
+    _migrationPath: string
 ): Promise<undefined | Error> {
-    const migrationFiles = fs
-        .readdirSync(migrationPath)
-        .filter((m) => m.endsWith('.js') && !m.endsWith('.test.js'))
+    // const migrationFiles = fs
+    //     .readdirSync(migrationPath)
+    //     .filter((m) => m.endsWith('.js') && !m.endsWith('.test.js'))
 
-    const migrations: DBMigrationType[] = []
-    for (const migrationFile of migrationFiles) {
-        // const fullPath = './migrations/0001_test_migration'
-        const migrationName = path.parse(migrationFile).name
+    // for now we do this explicitly.
+    const migrations: DBMigrationType[] = [
+        {
+            name: '20231026123042_test_migrator_works',
+            module: {
+                migrate: migrate1,
+            },
+        },
+        {
+            name: '20231026124442_fix_rate_submittedat',
+            module: {
+                migrate: migrate2,
+            },
+        },
+    ]
+    // for (const migrationFile of migrationFiles) {
+    //     // const fullPath = './migrations/0001_test_migration'
+    //     const migrationName = path.parse(migrationFile).name
 
-        const fullPath = path.join(migrationPath, migrationFile)
-        const migration = await import(fullPath)
+    //     const fullPath = path.join(migrationPath, migrationFile)
+    //     const migration = await import(fullPath)
 
-        migrations.push({
-            name: migrationName,
-            module: migration,
-        })
-    }
+    //     migrations.push({
+    //         name: migrationName,
+    //         module: migration,
+    //     })
+    // }
 
     const previouslyAppliedMigrationNames =
         await migrator.listMigrationsThatHaveRun()

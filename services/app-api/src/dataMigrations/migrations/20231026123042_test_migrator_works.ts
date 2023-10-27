@@ -1,8 +1,7 @@
 import type { PrismaTransactionType } from '../../postgres/prismaTypes'
 
 export async function migrate(
-    client: PrismaTransactionType,
-    _contractIDs?: string[]
+    client: PrismaTransactionType
 ): Promise<Error | undefined> {
     const rateCount = await client.rateTable.count()
     const contractCount = await client.contractTable.count()
