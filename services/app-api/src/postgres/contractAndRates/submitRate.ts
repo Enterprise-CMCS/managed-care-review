@@ -94,6 +94,9 @@ async function submitRate(
                             })),
                         },
                     },
+                    draftContracts: {
+                        set: [],
+                    },
                 },
                 include: {
                     contractRevisions: {
