@@ -207,17 +207,16 @@ const CMSUserRoutes = ({
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
                         element={<SubmissionSummary />}
                     />
-                    {
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_MCCRSID}
-                            element={<MccrsId />}
-                        />
-                    }
                 </Route>
 
                 <Route
                     path={RoutesRecord.RATES_SUMMARY}
                     element={<RateSummary />}
+                />
+
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_MCCRSID}
+                    element={<MccrsId />}
                 />
 
                 <Route

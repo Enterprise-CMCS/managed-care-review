@@ -1,19 +1,31 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { Form as UswdsForm, ButtonGroup } from '@trussworks/react-uswds'
+import {
+    Form as UswdsForm,
+    ButtonGroup,
+    GridContainer,
+} from '@trussworks/react-uswds'
 import { Formik, FormikErrors } from 'formik'
 import { FieldTextInput } from '../../components/Form'
 import { MccrsIdFormSchema } from './MccrsIdSchema'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
-import { useNavigate, useParams, useOutletContext } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { ActionButton } from '../../components/ActionButton'
 import { usePage } from '../../contexts/PageContext'
-import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
-
+import { Loading } from '../../components'
+import { useAuth } from '../../contexts/AuthContext'
+import { Breadcrumbs } from '../../components/Breadcrumbs/Breadcrumbs'
+import { RoutesRecord } from '../../constants'
+import { ApolloError } from '@apollo/client'
+import { handleApolloError } from '../../gqlHelpers/apolloErrors'
+import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import { Error404 } from '../Errors/Error404Page'
 import {
     HealthPlanPackage,
     useUpdateContractMutation,
 } from '../../gen/gqlClient'
+import { useFetchHealthPlanPackageWithQuestionsWrapper } from '../../gqlHelpers'
+import { packageName } from '../../common-code/healthPlanFormDataType'
 import styles from './MccrsId.module.scss'
 
 export interface MccrsIdFormValues {
@@ -34,20 +46,22 @@ export const MccrsId = (): React.ReactElement => {
             'PROGRAMMING ERROR: id param not set in state submission form.'
         )
     }
+
+    const { loggedInUser } = useAuth()
     const navigate = useNavigate()
-    const { pkg, packageName } = useOutletContext<SideNavOutletContextType>()
 
     // page context
     const { updateHeading } = usePage()
+    const [pkgName, setPkgName] = useState<string | undefined>(undefined)
 
     const customHeading = useMemo(() => {
         return (
             <span className={styles.customHeading}>
-                {packageName}
+                {pkgName}
                 <span>MC-CRS record number</span>
             </span>
         )
-    }, [packageName])
+    }, [pkgName])
     useEffect(() => {
         updateHeading({ customHeading })
     }, [customHeading, updateHeading])
@@ -55,8 +69,56 @@ export const MccrsId = (): React.ReactElement => {
     const [showPageErrorMessage, setShowPageErrorMessage] = useState<
         boolean | string
     >(false) // string is a custom error message, defaults to generic of true
-
     const [updateFormData] = useUpdateContractMutation()
+    const { result: fetchResult } =
+        useFetchHealthPlanPackageWithQuestionsWrapper(id)
+    if (fetchResult.status === 'ERROR') {
+        const err = fetchResult.error
+        console.error('Error from API fetch', fetchResult.error)
+        if (err instanceof ApolloError) {
+            handleApolloError(err, true)
+
+            if (err.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+                return <Error404 />
+            }
+        }
+
+        recordJSException(err)
+        return <GenericErrorPage /> // api failure or protobuf decode failure
+    }
+
+    if (fetchResult.status === 'LOADING') {
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
+    }
+
+    const { data, revisionsLookup } = fetchResult
+    const pkg = data.fetchHealthPlanPackage.pkg
+
+    // Display generic error page if getting logged in user returns undefined.
+    if (!loggedInUser) {
+        return <GenericErrorPage />
+    }
+    const edge = pkg.revisions.find((rEdge) => rEdge.node.submitInfo)
+    if (!edge) {
+        const errMsg = `No currently submitted revision for this package: ${pkg.id}, programming error. `
+        recordJSException(errMsg)
+        return <GenericErrorPage />
+    }
+    const currentRevision = edge.node
+    const packageData = revisionsLookup[currentRevision.id].formData
+    const healthPkgName = packageName(
+        packageData.stateCode,
+        packageData.stateNumber,
+        packageData.programIDs,
+        pkg.state.programs
+    )
+    if (pkgName !== healthPkgName) {
+        setPkgName(healthPkgName)
+    }
 
     const mccrsIDInitialValues: MccrsIdFormValues = {
         mccrsId: pkg.mccrsID ? Number(pkg.mccrsID) : undefined,
@@ -71,7 +133,9 @@ export const MccrsId = (): React.ReactElement => {
             const updateResult = await updateFormData({
                 variables: {
                     input: {
-                        mccrsID: values?.mccrsId?.toString().replace(/ /g, ''),
+                        mccrsID:
+                            values?.mccrsId?.toString().replace(/ /g, '') ||
+                            undefined,
                         id: id,
                     },
                 },
@@ -100,7 +164,7 @@ export const MccrsId = (): React.ReactElement => {
     }
 
     return (
-        <>
+        <div className={styles.mccrsIDForm}>
             <Formik
                 initialValues={mccrsIDInitialValues}
                 onSubmit={(values) => {
@@ -110,6 +174,19 @@ export const MccrsId = (): React.ReactElement => {
             >
                 {({ values, errors, handleSubmit, isSubmitting }) => (
                     <>
+                        <Breadcrumbs
+                            items={[
+                                {
+                                    link: RoutesRecord.DASHBOARD_SUBMISSIONS,
+                                    text: 'Dashboard',
+                                },
+                                {
+                                    link: `/submissions/${id}`,
+                                    text: pkgName || '',
+                                },
+                                { text: 'MC-CRS record number' },
+                            ]}
+                        />
                         <UswdsForm
                             className={styles.formContainer}
                             id="MCCRSIDForm"
@@ -166,6 +243,6 @@ export const MccrsId = (): React.ReactElement => {
                     </>
                 )}
             </Formik>
-        </>
+        </div>
     )
 }
