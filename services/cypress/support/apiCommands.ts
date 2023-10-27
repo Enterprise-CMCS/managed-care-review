@@ -75,6 +75,7 @@ const createAndSubmitContractOnlyPackage = async (
 const createAndSubmitContractWithRates = async (
     apolloClient: ApolloClient<NormalizedCacheObject>
 ): Promise<HealthPlanPackage> => {
+    console.log('in here')
     const newSubmission1 = await apolloClient.mutate({
         mutation: CreateHealthPlanPackageDocument,
         variables: {
@@ -115,8 +116,6 @@ const createAndSubmitContractWithRates = async (
             },
         },
     })
-
-
     return submission1.data.submitHealthPlanPackage.pkg
 }
 
@@ -173,6 +172,19 @@ Cypress.Commands.add(
                 schema,
                 stateUser,
                 createAndSubmitContractOnlyPackage
+            )
+        )
+)
+
+
+Cypress.Commands.add(
+    'apiCreateAndSubmitContractWithRates',
+    (stateUser): Cypress.Chainable<HealthPlanPackage> =>
+        cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
+            apolloClientWrapper(
+                schema,
+                stateUser,
+                createAndSubmitContractWithRates
             )
         )
 )

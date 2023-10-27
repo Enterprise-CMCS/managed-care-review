@@ -411,7 +411,7 @@ export const RateReviewsTable = ({
                         </div>
                     </div>
                     <Table fullWidth>
-                        <thead>
+                        <thead data-testid="rate-reviews-table">
                             {reactTable.getHeaderGroups().map((headerGroup) => (
                                 <tr key={headerGroup.id}>
                                     {headerGroup.headers.map((header) => (
