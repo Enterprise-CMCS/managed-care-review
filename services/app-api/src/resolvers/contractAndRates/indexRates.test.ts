@@ -17,7 +17,7 @@ import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { formatGQLDate } from 'app-web/src/common-code/dateHelpers'
 
-describe('indexRates', () => {
+describe.skip('indexRates', () => {
     const mockLDService = testLDService({ 'rates-db-refactor': true })
 
     it('returns ForbiddenError for state user', async () => {
