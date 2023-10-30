@@ -24,7 +24,7 @@ WithAction.decorators = [(Story) => ProvidersDecorator(Story, {})]
 
 WithAction.args = {
     submission: mockContractAndRatesDraft(),
-    navigateTo: 'contract-details',
+    editNavigateTo: 'contract-details',
 }
 
 export const WithoutAction = Template.bind({})

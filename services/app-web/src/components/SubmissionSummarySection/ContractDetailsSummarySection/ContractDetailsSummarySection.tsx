@@ -37,7 +37,7 @@ import { InlineDocumentWarning } from '../../DocumentWarning'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
-    navigateTo?: string
+    editNavigateTo?: string
     documentDateLookupTable: DocumentDateLookupTableType
     isCMSUser?: boolean
     submissionName: string
@@ -60,7 +60,7 @@ function renderDownloadButton(zippedFilesURL: string | undefined | Error) {
 
 export const ContractDetailsSummarySection = ({
     submission,
-    navigateTo, // this is the edit link for the section. When this prop exists, summary section is loaded in edit mode
+    editNavigateTo, // this is the edit link for the section. When this prop exists, summary section is loaded in edit mode
     documentDateLookupTable,
     submissionName,
     onDocumentError,
@@ -75,7 +75,7 @@ export const ContractDetailsSummarySection = ({
     const contractSupportingDocuments = submission.documents.filter((doc) =>
         doc.documentCategories.includes('CONTRACT_RELATED' as const)
     )
-    const isEditing = !isSubmitted(submission) && navigateTo !== undefined
+    const isEditing = !isSubmitted(submission) && editNavigateTo !== undefined
     const applicableFederalAuthorities = isCHIPOnly(submission)
         ? submission.federalAuthorities.filter((authority) =>
               federalAuthorityKeysForCHIP.includes(
@@ -134,7 +134,10 @@ export const ContractDetailsSummarySection = ({
 
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>
-            <SectionHeader header="Contract details" navigateTo={navigateTo}>
+            <SectionHeader
+                header="Contract details"
+                editNavigateTo={editNavigateTo}
+            >
                 {isSubmitted(submission) &&
                     !isPreviousSubmission &&
                     renderDownloadButton(zippedFilesURL)}

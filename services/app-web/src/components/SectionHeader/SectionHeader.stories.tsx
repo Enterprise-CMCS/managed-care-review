@@ -20,7 +20,7 @@ WithAction.decorators = [(Story) => ProvidersDecorator(Story, {})]
 
 WithAction.args = {
     header: 'Contract details',
-    navigateTo: 'contract-details',
+    editNavigateTo: 'contract-details',
 }
 
 export const WithoutAction = Template.bind({})

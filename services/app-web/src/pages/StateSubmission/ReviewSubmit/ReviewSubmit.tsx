@@ -47,13 +47,13 @@ export const ReviewSubmit = ({
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
                 submissionName={submissionName}
-                navigateTo="../type"
+                editNavigateTo="../type"
                 statePrograms={statePrograms}
             />
 
             <ContractDetailsSummarySection
                 submission={draftSubmission}
-                navigateTo="../contract-details"
+                editNavigateTo="../contract-details"
                 submissionName={submissionName}
                 documentDateLookupTable={documentDateLookupTable}
             />
@@ -61,7 +61,7 @@ export const ReviewSubmit = ({
             {isContractActionAndRateCertification && (
                 <RateDetailsSummarySection
                     submission={draftSubmission}
-                    navigateTo="../rate-details"
+                    editNavigateTo="../rate-details"
                     submissionName={submissionName}
                     documentDateLookupTable={documentDateLookupTable}
                     statePrograms={statePrograms}
@@ -70,12 +70,12 @@ export const ReviewSubmit = ({
 
             <ContactsSummarySection
                 submission={draftSubmission}
-                navigateTo="../contacts"
+                editNavigateTo="../contacts"
             />
 
             <SupportingDocumentsSummarySection
                 submission={draftSubmission}
-                navigateTo="../documents"
+                editNavigateTo="../documents"
             />
 
             <PageActionsContainer
