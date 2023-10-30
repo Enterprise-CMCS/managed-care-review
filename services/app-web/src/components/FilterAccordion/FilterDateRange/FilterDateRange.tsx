@@ -7,8 +7,8 @@ export type FilterDateRangePropType = {
     label?: string
     onStartChange: (date?: string | undefined) => void
     onEndChange: (date?: string | undefined) => void
-    startDateValue?: string
-    endDateValue?: string
+    startDateDefaultValue?: string
+    endDateDefaultValue?: string
 }
 
 export const FilterDateRange = ({
@@ -16,8 +16,8 @@ export const FilterDateRange = ({
     label,
     onStartChange,
     onEndChange,
-    startDateValue,
-    endDateValue,
+    startDateDefaultValue,
+    endDateDefaultValue,
 }: FilterDateRangePropType): React.ReactElement => {
     return (
         <Fieldset data-testid={`${name}-filter`} legend={label}>
@@ -27,7 +27,7 @@ export const FilterDateRange = ({
                 startDateLabel="Start date"
                 startDatePickerProps={{
                     disabled: false,
-                    value: startDateValue,
+                    defaultValue: startDateDefaultValue,
                     id: `${name}DateStart`,
                     name: `${name}DateStart`,
                     onChange: onStartChange,
@@ -35,9 +35,10 @@ export const FilterDateRange = ({
                 endDateHint="mm/dd/yyyy"
                 endDateLabel="End date"
                 endDatePickerProps={{
+                    disabled: false,
+                    defaultValue: endDateDefaultValue,
                     id: `${name}DateEnd`,
                     name: `${name}DateEnd`,
-                    value: endDateValue,
                     onChange: onEndChange,
                 }}
             />

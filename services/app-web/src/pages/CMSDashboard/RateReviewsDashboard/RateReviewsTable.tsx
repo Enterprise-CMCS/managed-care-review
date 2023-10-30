@@ -395,6 +395,8 @@ export const RateReviewsTable = ({
             filterName === 'rateDateStart'
                 ? 'ratingPeriodDateStart'
                 : 'ratingPeriodDateEnd'
+
+        setTableCaption(null)
         if (!date) {
             updateFilters(filterColumn, [], filterElRefName)
         } else {
@@ -485,9 +487,13 @@ export const RateReviewsTable = ({
                             <FilterDateRange
                                 name={'ratingPeriod'}
                                 label={'Rating period start date'}
-                                startDateValue={getDateRangeFilterFromUrl(
+                                startDateDefaultValue={getDateRangeFilterFromUrl(
                                     columnFilters,
                                     'rateDateStart'
+                                )}
+                                endDateDefaultValue={getDateRangeFilterFromUrl(
+                                    columnFilters,
+                                    'rateDateEnd'
                                 )}
                                 onStartChange={(date) =>
                                     updateRatingPeriodFilter(
