@@ -313,7 +313,7 @@ export const RateReviewsTable = ({
     const submissionCount = !showFilters
         ? `${tableData.length} ${pluralize('rate', tableData.length)}`
         : `Displaying ${filteredRows.length} of ${tableData.length} ${pluralize(
-              'rate reviews',
+              'rate review',
               tableData.length
           )}`
 
