@@ -75,7 +75,6 @@ const createAndSubmitContractOnlyPackage = async (
 const createAndSubmitContractWithRates = async (
     apolloClient: ApolloClient<NormalizedCacheObject>
 ): Promise<HealthPlanPackage> => {
-    console.log('in here')
     const newSubmission1 = await apolloClient.mutate({
         mutation: CreateHealthPlanPackageDocument,
         variables: {
