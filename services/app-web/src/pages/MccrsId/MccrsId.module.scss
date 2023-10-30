@@ -5,15 +5,13 @@
     width: 100%;
 }
 
-// [class^='grid-container'] {
-//     flex-direction: column;
-
-//     [class^='usa-alert'] {
-//         min-width: 40rem;
-//         max-width: 20rem;
-//         margin: 0 auto;
-//     }
-// }
+.mccrsIDForm  {
+    [class^='usa-breadcrumb'] {
+        min-width: 40rem;
+        max-width: 20rem;
+        margin: 0 auto;
+    }
+}
 
 .formContainer.tableContainer {
 

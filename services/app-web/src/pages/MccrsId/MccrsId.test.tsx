@@ -1,7 +1,6 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
-import { SubmissionSideNav } from '../SubmissionSideNav'
 import { RoutesRecord } from '../../constants/routes'
 import {
     fetchCurrentUserMock,
@@ -20,12 +19,10 @@ describe('MCCRSID', () => {
     it('renders without errors', async () => {
         renderWithProviders(
             <Routes>
-                <Route element={<SubmissionSideNav />}>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_MCCRSID}
-                        element={<MccrsId />}
-                    />
-                </Route>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_MCCRSID}
+                    element={<MccrsId />}
+                />
             </Routes>,
             {
                 apolloProvider: {
@@ -56,12 +53,10 @@ describe('MCCRSID', () => {
     it('displays the text field for mccrs id', async () => {
         renderWithProviders(
             <Routes>
-                <Route element={<SubmissionSideNav />}>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_MCCRSID}
-                        element={<MccrsId />}
-                    />
-                </Route>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_MCCRSID}
+                    element={<MccrsId />}
+                />
             </Routes>,
             {
                 apolloProvider: {
@@ -87,12 +82,10 @@ describe('MCCRSID', () => {
     it('cannot continue with MCCRS ID with non number input', async () => {
         renderWithProviders(
             <Routes>
-                <Route element={<SubmissionSideNav />}>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_MCCRSID}
-                        element={<MccrsId />}
-                    />
-                </Route>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_MCCRSID}
+                    element={<MccrsId />}
+                />
             </Routes>,
             {
                 apolloProvider: {
@@ -131,12 +124,10 @@ describe('MCCRSID', () => {
     it('edit - prepopulates the mccrs id when a submission has one', async () => {
         renderWithProviders(
             <Routes>
-                <Route element={<SubmissionSideNav />}>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_MCCRSID}
-                        element={<MccrsId />}
-                    />
-                </Route>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_MCCRSID}
+                    element={<MccrsId />}
+                />
             </Routes>,
             {
                 apolloProvider: {
