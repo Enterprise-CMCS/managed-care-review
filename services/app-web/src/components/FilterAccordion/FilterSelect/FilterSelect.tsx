@@ -70,10 +70,6 @@ export const FilterSelect = ({
                 ariaLiveMessages={{
                     onFocus,
                 }}
-                // menuPortalTarget moves the dropdown element to the document body because when inside the Accordion
-                // component the menu list will be cut off.
-                menuPortalTarget={document.body}
-                //This custom MenuList component, just places a test ID on the menu list. We need this for testing.
                 components={{ MenuList }}
                 {...selectProps}
             />
