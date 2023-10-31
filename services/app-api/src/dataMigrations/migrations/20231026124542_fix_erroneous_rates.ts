@@ -75,9 +75,9 @@ export async function migrate(
         for (const contract of contracts) {
             const finalRates: RateSet[] = []
             // look at every contract revision from old to new
-            console.info('REVS', contract.revisions.length)
+            // console.info('REVS', contract.revisions.length)
             for (const contractRev of contract.revisions) {
-                console.info('Start: ', finalRates)
+                // console.info('Start: ', finalRates)
 
                 // First, get the rates associated with this contract revision.
                 // Different for submitted and non-submitted revs.
@@ -90,11 +90,11 @@ export async function migrate(
                         (rr) => rr.validAfter <= submittedAt
                     )
 
-                    console.info(
-                        'any rates from before? ',
-                        contractRev.rateRevisions.map((rr) => rr.validAfter),
-                        submittedAt
-                    )
+                    // console.info(
+                    //     'any rates from before? ',
+                    //     contractRev.rateRevisions.map((rr) => rr.validAfter),
+                    //     submittedAt
+                    // )
 
                     // because we have join table entries for removals, filter out removals.
                     if (
@@ -117,8 +117,8 @@ export async function migrate(
                 }
 
                 // Now we have the rateRevisions associated with this contractRevision
-                console.info('Matchign Rates: ', associatedRates.length)
-                console.info('Second Pass')
+                // console.info('Matchign Rates: ', associatedRates.length)
+                // console.info('Second Pass')
 
                 for (let idx = 0; idx < associatedRates.length; idx++) {
                     const rateRev = associatedRates[idx]
@@ -159,7 +159,7 @@ export async function migrate(
                     }
                 }
 
-                console.info('setting draft rates', draftRateIDs)
+                // console.info('setting draft rates', draftRateIDs)
                 // now set to the correct rates.
                 await client.contractRevisionTable.update({
                     where: {
@@ -175,7 +175,7 @@ export async function migrate(
                 })
             }
 
-            console.info('Got Rate Set', finalRates)
+            // console.info('Got Rate Set', finalRates)
 
             // draftRates are going to be deleted, and we have a bug where we weren't resetting the
             // draftRates of old revisions. So let's reset the draftRates for all our contractRevisions
