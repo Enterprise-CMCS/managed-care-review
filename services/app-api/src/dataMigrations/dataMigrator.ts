@@ -41,21 +41,26 @@ export function newDBMigrator(dbConnString: string): MigratorType {
         async runMigrations(migrations: DBMigrationType[]) {
             for (const migration of migrations) {
                 try {
-                    await prismaClient.$transaction(async (tx) => {
-                        const res = await migration.module.migrate(tx)
+                    await prismaClient.$transaction(
+                        async (tx) => {
+                            const res = await migration.module.migrate(tx)
 
-                        if (!(res instanceof Error)) {
-                            await tx.protoMigrationsTable.create({
-                                data: {
-                                    migrationName: migration.name,
-                                },
-                            })
-                        } else {
-                            console.error('migrator error:', res)
-                            // Since we're inside a transaction block, we throw to abort the transaction
-                            throw res
+                            if (!(res instanceof Error)) {
+                                await tx.protoMigrationsTable.create({
+                                    data: {
+                                        migrationName: migration.name,
+                                    },
+                                })
+                            } else {
+                                console.error('migrator error:', res)
+                                // Since we're inside a transaction block, we throw to abort the transaction
+                                throw res
+                            }
+                        },
+                        {
+                            timeout: 20000, // 20 second timeout
                         }
-                    })
+                    )
                 } catch (err) {
                     console.info('Error came from transaction', migration, err)
                     return new Error(
