@@ -30,7 +30,7 @@
 .formContainer {
     > [class^='usa-fieldset'] {
         padding: units(4);
-        margin-bottom: units(2);
+        padding-top: 32px;
         margin-top: units(2);
         background: $cms-color-white;
         border: 1px solid $theme-color-base-lighter;
@@ -39,6 +39,7 @@
 
     h3 {
         font-size: 22px;
+        margin-top: 0;
     }
 
     > div[class^='usa-form-group']:not(:first-of-type) {

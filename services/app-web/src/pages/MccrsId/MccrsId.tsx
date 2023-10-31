@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
     Form as UswdsForm,
     ButtonGroup,
@@ -54,17 +54,9 @@ export const MccrsId = (): React.ReactElement => {
     const { updateHeading } = usePage()
     const [pkgName, setPkgName] = useState<string | undefined>(undefined)
 
-    const customHeading = useMemo(() => {
-        return (
-            <span className={styles.customHeading}>
-                {pkgName}
-                <span>MC-CRS record number</span>
-            </span>
-        )
-    }, [pkgName])
     useEffect(() => {
-        updateHeading({ customHeading })
-    }, [customHeading, updateHeading])
+        updateHeading({ customHeading: pkgName })
+    }, [pkgName, updateHeading])
 
     const [showPageErrorMessage, setShowPageErrorMessage] = useState<
         boolean | string
