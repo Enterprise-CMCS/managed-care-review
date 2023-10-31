@@ -10,13 +10,13 @@ type PrismaTransactionType = Omit<
     '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'
 >
 
-function arrayEquals<T>(a: T[], b: T[]) {
-    return (
-        Array.isArray(a) &&
-        Array.isArray(b) &&
-        a.length === b.length &&
-        a.every((val, index) => val === b[index])
-    )
+type RateRevisionWithSubmitInfo = RateRevisionTable & {
+    submitInfo: UpdateInfoTable | null
+    unlockInfo: UpdateInfoTable | null
+}
+
+interface RateSet {
+    revs: RateRevisionWithSubmitInfo[]
 }
 
 export async function migrate(
@@ -73,24 +73,15 @@ export async function migrate(
         // this tracks all the rate revisions we are blessing. ALL OTHERS WILL BE DELETED
         const allRateRevisionsConnectedToContractsIDs: string[] = []
         for (const contract of contracts) {
-            type RateRevisionWithSubmitInfo = RateRevisionTable & {
-                submitInfo: UpdateInfoTable | null
-                unlockInfo: UpdateInfoTable | null
-            }
-
-            interface RateSet {
-                revs: RateRevisionWithSubmitInfo[]
-            }
-
-            // let firstPass = true
             const finalRates: RateSet[] = []
             // look at every contract revision from old to new
             console.info('REVS', contract.revisions.length)
             for (const contractRev of contract.revisions) {
                 console.info('Start: ', finalRates)
 
+                // First, get the rates associated with this contract revision.
+                // Different for submitted and non-submitted revs.
                 let associatedRates: RateRevisionWithSubmitInfo[] = []
-                // if this revision has any rates, lets start a rate list
                 if (contractRev.submitInfo) {
                     const submittedAt = contractRev.submitInfo.updatedAt
 
@@ -105,8 +96,7 @@ export async function migrate(
                         submittedAt
                     )
 
-                    // because we're adding entries for removals, we can have more than just
-                    // the initial set here.
+                    // because we have join table entries for removals, filter out removals.
                     if (
                         initialRateJoins.some((rj) => rj.isRemoval) &&
                         initialRateJoins.some((rj) => !rj.isRemoval)
@@ -126,7 +116,7 @@ export async function migrate(
                     )
                 }
 
-                // console.info('all rates', contractRev.rateRevisions)
+                // Now we have the rateRevisions associated with this contractRevision
                 console.info('Matchign Rates: ', associatedRates.length)
                 console.info('Second Pass')
 
@@ -134,58 +124,34 @@ export async function migrate(
                     const rateRev = associatedRates[idx]
 
                     // submit info was getting messed up by our extra creations.
+                    // copy it over from the contractRev.
                     rateRev.submitInfo = contractRev.submitInfo
                     rateRev.unlockInfo = contractRev.unlockInfo
 
-                    let foundMatch = false
-
-                    // programs they cover is a very good sign
-                    for (const rateSet of finalRates) {
-                        // console.info('Checking', rateSet)
-                        if (
-                            arrayEquals(
-                                rateSet.revs[0].rateProgramIDs,
-                                rateRev.rateProgramIDs
-                            )
-                        ) {
-                            console.info(
-                                'Matchied',
-                                rateSet.revs[0].rateProgramIDs,
-                                rateRev.rateProgramIDs
-                            )
-                            // These match!
-                            rateSet.revs.push(rateRev)
-                            allRateRevisionsConnectedToContractsIDs.push(
-                                rateRev.id
-                            )
-                            foundMatch = true
-                        }
-                    }
-
-                    console.info('Finished checking')
-
-                    // TODO: check doc filename?
-                    // if two rateRevs have the same document filename, that's a great sign
-
-                    if (!foundMatch) {
-                        console.info('pusthing newbie')
+                    // for each contractRevision, we assume that all rate revisions belong to a rate by their given index in the list
+                    // this is gross and would not catch situations where someone removed a rate and added a new one at the end
+                    // but since this works on prod we don't care.
+                    if (finalRates[idx] === undefined) {
                         finalRates.push({
                             revs: [rateRev],
                         })
-                        allRateRevisionsConnectedToContractsIDs.push(rateRev.id)
+                    } else {
+                        finalRates[idx].revs.push(rateRev)
                     }
+                    allRateRevisionsConnectedToContractsIDs.push(rateRev.id)
                 }
+
                 // Now clean up this contractRevision's draftRates
                 const draftRateIDs: string[] = []
                 if (!contractRev.submitInfo) {
                     // for each rate rev in this unsubmitted contract
                     for (const rate of contractRev.draftRates) {
                         // there MUST be an entry in our rate sets.
-
                         for (const rateSet of finalRates) {
                             if (
                                 rateSet.revs.some((rs) => rs.rateID === rate.id)
                             ) {
+                                // add the draft rate revs' new rate id to the set
                                 draftRateIDs.push(rateSet.revs[0].rateID)
                                 continue
                             }
