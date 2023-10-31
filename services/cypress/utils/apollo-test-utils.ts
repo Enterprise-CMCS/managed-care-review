@@ -1,4 +1,5 @@
 import { AxiosResponse } from 'axios'
+import { v4 as uuidv4 } from 'uuid'
 import {
     ApolloClient,
     DocumentNode,
@@ -39,6 +40,30 @@ type DivisionType = 'DMCO' | 'DMCP' | 'OACT'
 
 type UserType = StateUserType | AdminUserType | CMSUserType
 
+// programs for state used in tests
+const minnesotaStatePrograms =[
+    {
+        "id": "abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce",
+        "fullName": "Special Needs Basic Care",
+        "name": "SNBC"
+    },
+    {
+        "id": "d95394e5-44d1-45df-8151-1cc1ee66f100",
+        "fullName": "Prepaid Medical Assistance Program",
+        "name": "PMAP"
+    },
+    {
+        "id": "ea16a6c0-5fc6-4df8-adac-c627e76660ab",
+        "fullName": "Minnesota Senior Care Plus ",
+        "name": "MSC+"
+    },
+    {
+        "id": "3fd36500-bf2c-47bc-80e8-e7aa417184c5",
+        "fullName": "Minnesota Senior Health Options",
+        "name": "MSHO"
+    }
+]
+
 const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
     stateContacts: [
         {
@@ -77,14 +102,122 @@ const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
     rateInfos: [],
 })
 
-const newSubmissionInput = (): Partial<UnlockedHealthPlanFormDataType> => ({
-    populationCovered: 'MEDICAID',
-    programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-    submissionType: 'CONTRACT_ONLY',
-    riskBasedContract: false,
-    submissionDescription: 'Test Q&A',
-    contractType: 'BASE',
+const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
+    stateCode: 'MN',
+    stateContacts: [
+        {
+            name: 'Name',
+            titleRole: 'Title',
+            email: 'example@example.com',
+        },
+    ],
+    addtlActuaryContacts: [],
+    documents: [],
+    contractExecutionStatus: 'EXECUTED' as const,
+    contractDocuments: [
+        {
+            name: 'Contract Cert.pdf',
+            s3URL: 's3://local-uploads/1684382956834-Contract Cert.pdf/Contract Cert.pdf',
+            documentCategories: ['CONTRACT'],
+            sha256: 'abc123',
+        },
+    ],
+    contractDateStart: new Date('2023-05-01T00:00:00.000Z'),
+    contractDateEnd: new Date('2023-05-31T00:00:00.000Z'),
+    contractAmendmentInfo: {
+        modifiedProvisions: {
+            inLieuServicesAndSettings: false,
+            modifiedRiskSharingStrategy: false,
+            modifiedIncentiveArrangements: false,
+            modifiedWitholdAgreements: false,
+            modifiedStateDirectedPayments: false,
+            modifiedPassThroughPayments: false,
+            modifiedPaymentsForMentalDiseaseInstitutions: false,
+            modifiedNonRiskPaymentArrangements: false,
+        },
+    },
+    managedCareEntities: ['MCO'],
+    federalAuthorities: ['STATE_PLAN'],
+    rateInfos:[
+        {
+            id: uuidv4(),
+            rateType: 'NEW' as const,
+            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+            rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+            rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+            rateDocuments: [
+                {
+                    name: 'rate1Document1.pdf',
+                    s3URL: 'fakeS3URL',
+                    sha256: 'fakesha',
+                    documentCategories: ['RATES' as const],
+                },
+            ],
+            supportingDocuments: [   {
+                name: 'rate1SupportingDocument1.pdf',
+                s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
+                documentCategories: ['RATES' as const],
+            }],
+            rateProgramIDs: [minnesotaStatePrograms[0].id],
+            actuaryContacts: [
+                {
+                    name: 'actuary1',
+                    titleRole: 'test title',
+                    email: 'email@example.com',
+                    actuarialFirm: 'MERCER' as const,
+                    actuarialFirmOther: '',
+                },
+            ],
+            actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
+            packagesWithSharedRateCerts: [],
+        },
+            {
+                id: uuidv4(),
+                rateType: 'NEW' as const,
+                rateDateStart: new Date(Date.UTC(2030, 5, 1)),
+                rateDateEnd: new Date(Date.UTC(2036, 4, 30)),
+                rateDateCertified: new Date(Date.UTC(2035, 3, 15)),
+                rateDocuments: [
+                    {
+                        name: 'rate2Document1.pdf',
+                        s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+                supportingDocuments: [],
+                rateProgramIDs: [minnesotaStatePrograms[0].id],
+                actuaryContacts: [
+                    {
+                        name: 'actuary2',
+                        titleRole: 'test title',
+                        email: 'email@example.com',
+                        actuarialFirm: 'MERCER' as const,
+                        actuarialFirmOther: '',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
+                packagesWithSharedRateCerts: [],
+            },
+    ]
+
+
 })
+
+const newSubmissionInput = (overrides?: Partial<UnlockedHealthPlanFormDataType> ): Partial<UnlockedHealthPlanFormDataType> => {
+    return Object.assign(
+        {
+            populationCovered: 'MEDICAID',
+            programIDs: [minnesotaStatePrograms[0].id],
+            submissionType: 'CONTRACT_ONLY',
+            riskBasedContract: false,
+            submissionDescription: 'Test Q&A',
+            contractType: 'BASE'
+        },
+        overrides
+    )
+    }
 
 const stateUser = ():StateUserType => ({
     id: 'user1',
@@ -298,10 +431,12 @@ const apolloClientWrapper = async <T>(
 export {
     apolloClientWrapper,
     contractOnlyData,
+    contractAndRatesData,
     newSubmissionInput,
     cmsUser,
     adminUser,
     stateUser,
+    minnesotaStatePrograms
 }
 export type {
     StateUserType,
