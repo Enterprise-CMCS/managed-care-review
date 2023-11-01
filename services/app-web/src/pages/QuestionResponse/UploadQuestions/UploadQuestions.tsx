@@ -80,7 +80,7 @@ export const UploadQuestions = () => {
         })
 
         const input: CreateQuestionInput = {
-            pkgID: id as string,
+            contractID: id as string,
             documents: questionDocs,
         }
 

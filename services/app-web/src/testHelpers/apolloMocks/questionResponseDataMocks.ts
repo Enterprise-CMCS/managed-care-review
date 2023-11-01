@@ -1,7 +1,7 @@
 import { CmsUser, IndexQuestionsPayload, StateUser } from '../../gen/gqlClient'
 import { mockValidCMSUser, mockValidUser } from './userGQLMock'
 
-function mockQuestionsPayload(pkgID: string): IndexQuestionsPayload {
+function mockQuestionsPayload(contractID: string): IndexQuestionsPayload {
     return {
         DMCOQuestions: {
             totalCount: 2,
@@ -11,7 +11,7 @@ function mockQuestionsPayload(pkgID: string): IndexQuestionsPayload {
                     node: {
                         __typename: 'Question' as const,
                         id: 'dmco-question-1-id',
-                        pkgID,
+                        contractID,
                         createdAt: new Date('2022-12-15'),
                         addedBy: mockValidCMSUser({
                             divisionAssignment: 'DMCO',
@@ -45,7 +45,7 @@ function mockQuestionsPayload(pkgID: string): IndexQuestionsPayload {
                     node: {
                         __typename: 'Question' as const,
                         id: 'dmco-question-2-id',
-                        pkgID,
+                        contractID,
                         createdAt: new Date('2022-12-18'),
                         addedBy: mockValidCMSUser() as CmsUser,
                         documents: [
@@ -86,7 +86,7 @@ function mockQuestionsPayload(pkgID: string): IndexQuestionsPayload {
                     node: {
                         __typename: 'Question' as const,
                         id: 'dmcp-question-1-id',
-                        pkgID,
+                        contractID,
                         createdAt: new Date('2022-12-15'),
                         addedBy: mockValidCMSUser({
                             divisionAssignment: 'DMCP',
@@ -125,7 +125,7 @@ function mockQuestionsPayload(pkgID: string): IndexQuestionsPayload {
                     node: {
                         __typename: 'Question' as const,
                         id: 'oact-question-1-id',
-                        pkgID,
+                        contractID,
                         createdAt: new Date('2022-12-15'),
                         addedBy: mockValidCMSUser({
                             divisionAssignment: 'OACT',

@@ -9,7 +9,7 @@ type Document = {
 
 type Question = {
     id: string
-    pkgID: string
+    contractID: string
     createdAt: Date
     addedBy: CMSUserType
     documents: Document[]
@@ -40,7 +40,7 @@ type CreateQuestionPayload = {
 }
 
 type CreateQuestionInput = {
-    pkgID: string
+    contractID: string
     documents: Document[]
 }
 

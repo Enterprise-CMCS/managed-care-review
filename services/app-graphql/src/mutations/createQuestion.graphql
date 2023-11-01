@@ -2,7 +2,7 @@ mutation createQuestion($input: CreateQuestionInput!) {
     createQuestion(input: $input) {
         question {
             id
-            pkgID
+            contractID
             createdAt
             addedBy {
                 id

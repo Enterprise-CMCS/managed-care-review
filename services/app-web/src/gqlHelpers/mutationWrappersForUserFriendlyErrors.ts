@@ -168,7 +168,7 @@ export const createQuestionWrapper = async (
                                 query: FetchHealthPlanPackageWithQuestionsDocument,
                                 variables: {
                                     input: {
-                                        pkgID: newQuestion.pkgID,
+                                        pkgID: newQuestion.contractID,
                                     },
                                 },
                             }

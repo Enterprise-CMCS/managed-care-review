@@ -3,7 +3,6 @@ import { protoToBase64 } from '../../../../app-web/src/common-code/proto/healthP
 import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
 import type { Resolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
-import { isStoreError } from '../../postgres'
 import { convertToIndexQuestionsPayload } from '../../postgres/questionResponse'
 import { logError } from '../../logger'
 import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
@@ -59,15 +58,13 @@ export function healthPlanPackageResolver(
             }
             return state
         },
-        questions: async (parent, args, context) => {
+        questions: async (parent, _args, context) => {
             const { span } = context
             const pkgID = parent.id
-            const result = await store.findAllQuestionsByHealthPlanPackage(
-                pkgID
-            )
+            const result = await store.findAllQuestionsByContract(pkgID)
 
-            if (isStoreError(result)) {
-                const errMessage = `Issue finding questions of type ${result.code} for package with id: ${pkgID}. Message: ${result.message}`
+            if (result instanceof Error) {
+                const errMessage = `Issue finding questions for package with id: ${pkgID}. Message: ${result.message}`
                 logError('indexQuestions', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new GraphQLError(errMessage, {

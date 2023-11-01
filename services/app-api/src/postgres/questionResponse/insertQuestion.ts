@@ -25,9 +25,9 @@ export async function insertQuestion(
         const result = await client.question.create({
             data: {
                 id: uuidv4(),
-                pkg: {
+                contract: {
                     connect: {
-                        id: questionInput.pkgID,
+                        id: questionInput.contractID,
                     },
                 },
                 addedBy: {
