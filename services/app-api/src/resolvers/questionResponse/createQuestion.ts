@@ -69,12 +69,8 @@ export function createQuestionResolver(
             })
         }
 
-        // Return error if package status is DRAFT
-        // TODO we should have a helper for this
-        if (
-            contractResult.revisions.length === 1 &&
-            contractResult.revisions[0].submitInfo === undefined
-        ) {
+        // Return error if package status is DRAFT, contract will have no submitted revisions
+        if (contractResult.revisions.length === 0) {
             const errMessage = `Issue creating question for health plan package. Message: Cannot create question for health plan package in DRAFT status`
             logError('createQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
