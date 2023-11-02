@@ -11,6 +11,10 @@ import selectEvent from 'react-select-event'
 import userEvent from '@testing-library/user-event'
 
 describe('RateReviewsTable', () => {
+    afterEach(() => {
+        window.history.pushState({}, '', 'dashboard/rate-reviews')
+    })
+
     const statePrograms = mockMNState().programs
     const tableData = (): RateInDashboardType[] => [
         {
