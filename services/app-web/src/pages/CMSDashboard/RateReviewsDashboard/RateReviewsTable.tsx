@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useLayoutEffect } from 'react'
 import {
     ColumnFiltersState,
     createColumnHelper,
@@ -13,7 +13,9 @@ import {
     FilterFn,
 } from '@tanstack/react-table'
 import { useAtom } from 'jotai/react'
+import { atom } from 'jotai'
 import { atomWithHash } from 'jotai-location'
+import { loadable } from 'jotai/vanilla/utils'
 import {
     HealthPlanPackageStatus,
     Program,
@@ -33,6 +35,8 @@ import {
 } from '../../../components/FilterAccordion'
 import { pluralize } from '../../../common-code/formatters'
 import { DoubleColumnGrid } from '../../../components'
+import { FilterDateRangeRef } from '../../../components/FilterAccordion/FilterDateRange/FilterDateRange'
+import { Loading } from '../../../components'
 
 declare module '@tanstack/table-core' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -88,17 +92,17 @@ type ReadableFilters = {
     [key: string]: string[]
 }
 
-const fromColumnFiltersToReadableUrl = (input: ColumnFiltersState) => {
+const fromColumnFiltersToReadableUrl = (input?: ColumnFiltersState) => {
     const output: ReadableFilters = {}
-    input.forEach((element) => {
-        output[element.id] = element.value as string[]
-    })
+    if (input) {
+        input.forEach((element) => {
+            output[element.id] = element.value as string[]
+        })
+    }
     return qs.stringify(output, { arrayFormat: 'comma', encode: false })
 }
 
-const fromReadableUrlToColumnFilters = (
-    input: string | null
-): ColumnFiltersState => {
+const fromReadableUrlToColumnFilters = (input?: string): ColumnFiltersState => {
     if (!input) {
         return []
     }
@@ -109,14 +113,33 @@ const fromReadableUrlToColumnFilters = (
     }))
 }
 
+/* We have two atomWithHash with an initial value on first render.
+  - columnHash is initialized with [], which is used with for setting column filter state in react table. Setting
+    the initialized value as undefined breaks react table since it does not accept undefined.
+  - initWithNullColumnHash is initialized with undefined, this is used for setting the defaultValues for the filters
+    on load. We need this separate hash because if first render is always [], then it will cause table flickering.
+    initWithNullColumnHash is used in `loadable` from jotai to return loading state we can then use this to show
+    a loading component until filters from the url have been parsed and returned.
+*/
 const columnHash = atomWithHash('filters', [] as ColumnFiltersState, {
     serialize: fromColumnFiltersToReadableUrl,
     deserialize: fromReadableUrlToColumnFilters,
 })
 
+const initWithNullColumnHash = atomWithHash('filters', undefined, {
+    serialize: fromColumnFiltersToReadableUrl,
+    deserialize: fromReadableUrlToColumnFilters,
+})
+
+/* This loadableColumnHash helps us control our loading logic for table filters from the url. This is to prevent table
+    flickering from the initial atomWithHash value */
+const loadableColumnHash = loadable(
+    atom(async (get) => get(initWithNullColumnHash))
+)
+
 /* transform react-table's ColumnFilterState (stringified, formatted, and stored in the URL) to react-select's FilterOptionType
     and return only the items matching the FilterSelect component that's calling the function*/
-const getSelectedFiltersFromUrl = (
+const getSelectedFiltersFromColumnState = (
     columnFilters: ColumnFiltersState,
     id: string
 ) => {
@@ -156,22 +179,25 @@ const getDateRangeFilterFromUrl = (
     return undefined
 }
 
-const startDateFilter: FilterFn<unknown> = (row, columnId, value, addMeta) => {
+// Even though both date filters are similar we don't want to combine into one function because we don't always know
+// what the columnId will be. These could be used on the contract table which have different column names, so we cannot
+// use column names to check greater or less than.
+const startDateFilter: FilterFn<unknown> = (row, columnId, value) => {
     if (!value) {
         return true
     }
-    const columnValue = new Date(row.getValue('rateDateStart')).getTime()
-    const startDate = new Date(value).getTime()
-    return columnValue >= startDate
+    const columnDate = new Date(row.getValue(columnId)).getTime()
+    const filterDate = new Date(value).getTime()
+    return columnDate >= filterDate
 }
 
 const endDateFilter: FilterFn<unknown> = (row, columnId, value, addMeta) => {
     if (!value) {
         return true
     }
-    const columnValue = new Date(row.getValue('rateDateEnd')).getTime()
-    const endDate = new Date(value).getTime()
-    return columnValue <= endDate
+    const columnDate = new Date(row.getValue(columnId)).getTime()
+    const filterDate = new Date(value).getTime()
+    return columnDate <= filterDate
 }
 
 type TableVariantConfig = {
@@ -184,7 +210,13 @@ export const RateReviewsTable = ({
     showFilters = false,
 }: RateTableProps): React.ReactElement => {
     const lastClickedElement = useRef<string | null>(null)
+    const filterDateRangeRef = useRef<FilterDateRangeRef>(null)
     const [columnFilters, setColumnFilters] = useAtom(columnHash)
+    const [defaultFiltersFromUrl] = useAtom(loadableColumnHash)
+    const [defaultColumnState, setFiltersFromUrl] = useState<
+        ColumnFiltersState | undefined
+    >(undefined)
+
     const tableConfig: TableVariantConfig = {
         tableName: 'Rate Reviews',
         rowIDName: 'rate',
@@ -396,28 +428,22 @@ export const RateReviewsTable = ({
                 ? 'ratingPeriodDateStart'
                 : 'ratingPeriodDateEnd'
 
+        lastClickedElement.current = filterElRefName
         setTableCaption(null)
         if (!date) {
-            updateFilters(filterColumn, [], filterElRefName)
+            filterColumn.setFilterValue([])
         } else {
-            updateFilters(
-                filterColumn,
-                [
-                    {
-                        label: filterName,
-                        value: date,
-                    },
-                ],
-                filterElRefName
-            )
+            filterColumn.setFilterValue([date])
         }
     }
 
     const clearFilters = () => {
-        lastClickedElement.current = 'clearFiltersButton'
         setTableCaption(null)
-
         setColumnFilters([])
+        if (filterDateRangeRef.current) {
+            filterDateRangeRef.current.clearFilter()
+        }
+        lastClickedElement.current = 'clearFiltersButton'
     }
 
     //Store caption element in state in order for screen readers to read dynamic captions.
@@ -441,6 +467,22 @@ export const RateReviewsTable = ({
         tableConfig.tableName,
     ])
 
+    // This sets filters from the url to be used as defaultValues for all the filters
+    useLayoutEffect(() => {
+        // state if `hasData` does not mean the data is not undefined, but that the atom value has the data field. The field
+        // only is available when loading is finished and there was not errors.
+        if (defaultFiltersFromUrl.state === 'hasData' && !defaultColumnState) {
+            /* Dashboard urls can have #filters= or not, both mean no filters. When #filters= is not present then the
+                data will be undefined, at which we set to [] so we do not run this hook again. When just #filters= is
+                present data will be [] so we can just set defaultColumnState as the data value.*/
+            setFiltersFromUrl(defaultFiltersFromUrl.data ?? [])
+        }
+    }, [defaultFiltersFromUrl, defaultColumnState])
+
+    if (defaultColumnState === undefined) {
+        return <Loading />
+    }
+
     return (
         <>
             {tableData.length ? (
@@ -452,8 +494,12 @@ export const RateReviewsTable = ({
                         >
                             <DoubleColumnGrid>
                                 <FilterSelect
-                                    value={getSelectedFiltersFromUrl(
+                                    value={getSelectedFiltersFromColumnState(
                                         columnFilters,
+                                        'stateName'
+                                    )}
+                                    defaultValue={getSelectedFiltersFromColumnState(
+                                        defaultColumnState,
                                         'stateName'
                                     )}
                                     name="state"
@@ -468,8 +514,12 @@ export const RateReviewsTable = ({
                                     }
                                 />
                                 <FilterSelect
-                                    value={getSelectedFiltersFromUrl(
+                                    value={getSelectedFiltersFromColumnState(
                                         columnFilters,
+                                        'rateType'
+                                    )}
+                                    defaultValue={getSelectedFiltersFromColumnState(
+                                        defaultColumnState,
                                         'rateType'
                                     )}
                                     name="rateType"
@@ -485,14 +535,15 @@ export const RateReviewsTable = ({
                                 />
                             </DoubleColumnGrid>
                             <FilterDateRange
+                                ref={filterDateRangeRef}
                                 name={'ratingPeriod'}
                                 label={'Rating period start date'}
                                 startDateDefaultValue={getDateRangeFilterFromUrl(
-                                    columnFilters,
+                                    defaultColumnState,
                                     'rateDateStart'
                                 )}
                                 endDateDefaultValue={getDateRangeFilterFromUrl(
-                                    columnFilters,
+                                    defaultColumnState,
                                     'rateDateEnd'
                                 )}
                                 onStartChange={(date) =>
