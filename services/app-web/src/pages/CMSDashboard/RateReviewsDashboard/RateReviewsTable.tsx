@@ -92,20 +92,15 @@ type ReadableFilters = {
     [key: string]: string[]
 }
 
-const fromColumnFiltersToReadableUrl = (input?: ColumnFiltersState) => {
+const fromColumnFiltersToReadableUrl = (input: ColumnFiltersState) => {
     const output: ReadableFilters = {}
-    if (input) {
-        input.forEach((element) => {
-            output[element.id] = element.value as string[]
-        })
-    }
+    input.forEach((element) => {
+        output[element.id] = element.value as string[]
+    })
     return qs.stringify(output, { arrayFormat: 'comma', encode: false })
 }
 
-const fromReadableUrlToColumnFilters = (input?: string): ColumnFiltersState => {
-    if (!input) {
-        return []
-    }
+const fromReadableUrlToColumnFilters = (input: string): ColumnFiltersState => {
     const parsed = qs.parse(input) as { [key: string]: string }
     return Object.entries(parsed).map(([id, value]) => ({
         id,
@@ -113,29 +108,14 @@ const fromReadableUrlToColumnFilters = (input?: string): ColumnFiltersState => {
     }))
 }
 
-/* We have two atomWithHash with an initial value on first render.
-  - columnHash is initialized with [], which is used with for setting column filter state in react table. Setting
-    the initialized value as undefined breaks react table since it does not accept undefined.
-  - initWithNullColumnHash is initialized with undefined, this is used for setting the defaultValues for the filters
-    on load. We need this separate hash because if first render is always [], then it will cause table flickering.
-    initWithNullColumnHash is used in `loadable` from jotai to return loading state we can then use this to show
-    a loading component until filters from the url have been parsed and returned.
-*/
 const columnHash = atomWithHash('filters', [] as ColumnFiltersState, {
     serialize: fromColumnFiltersToReadableUrl,
     deserialize: fromReadableUrlToColumnFilters,
 })
 
-const initWithNullColumnHash = atomWithHash('filters', undefined, {
-    serialize: fromColumnFiltersToReadableUrl,
-    deserialize: fromReadableUrlToColumnFilters,
-})
-
-/* This loadableColumnHash helps us control our loading logic for table filters from the url. This is to prevent table
-    flickering from the initial atomWithHash value */
-const loadableColumnHash = loadable(
-    atom(async (get) => get(initWithNullColumnHash))
-)
+/* This returns the url filters along with a loading status. This is used to prevent flickering on first load with filters
+    in the url. */
+const loadableColumnHash = loadable(atom(async (get) => get(columnHash)))
 
 /* transform react-table's ColumnFilterState (stringified, formatted, and stored in the URL) to react-select's FilterOptionType
     and return only the items matching the FilterSelect component that's calling the function*/
@@ -213,7 +193,7 @@ export const RateReviewsTable = ({
     const filterDateRangeRef = useRef<FilterDateRangeRef>(null)
     const [columnFilters, setColumnFilters] = useAtom(columnHash)
     const [defaultFiltersFromUrl] = useAtom(loadableColumnHash)
-    const [defaultColumnState, setFiltersFromUrl] = useState<
+    const [defaultColumnFilters, setDefaultColumnState] = useState<
         ColumnFiltersState | undefined
     >(undefined)
 
@@ -467,19 +447,17 @@ export const RateReviewsTable = ({
         tableConfig.tableName,
     ])
 
-    // This sets filters from the url to be used as defaultValues for all the filters
     useLayoutEffect(() => {
-        // state if `hasData` does not mean the data is not undefined, but that the atom value has the data field. The field
-        // only is available when loading is finished and there was not errors.
-        if (defaultFiltersFromUrl.state === 'hasData' && !defaultColumnState) {
-            /* Dashboard urls can have #filters= or not, both mean no filters. When #filters= is not present then the
-                data will be undefined, at which we set to [] so we do not run this hook again. When just #filters= is
-                present data will be [] so we can just set defaultColumnState as the data value.*/
-            setFiltersFromUrl(defaultFiltersFromUrl.data ?? [])
+        // Do not set default column state again
+        if (
+            defaultFiltersFromUrl.state === 'hasData' &&
+            !defaultColumnFilters
+        ) {
+            setDefaultColumnState(defaultFiltersFromUrl.data)
         }
-    }, [defaultFiltersFromUrl, defaultColumnState])
+    }, [defaultFiltersFromUrl, defaultColumnFilters])
 
-    if (defaultColumnState === undefined) {
+    if (defaultColumnFilters === undefined) {
         return <Loading />
     }
 
@@ -499,7 +477,7 @@ export const RateReviewsTable = ({
                                         'stateName'
                                     )}
                                     defaultValue={getSelectedFiltersFromColumnState(
-                                        defaultColumnState,
+                                        defaultColumnFilters,
                                         'stateName'
                                     )}
                                     name="state"
@@ -519,7 +497,7 @@ export const RateReviewsTable = ({
                                         'rateType'
                                     )}
                                     defaultValue={getSelectedFiltersFromColumnState(
-                                        defaultColumnState,
+                                        defaultColumnFilters,
                                         'rateType'
                                     )}
                                     name="rateType"
@@ -539,11 +517,11 @@ export const RateReviewsTable = ({
                                 name={'ratingPeriod'}
                                 label={'Rating period start date'}
                                 startDateDefaultValue={getDateRangeFilterFromUrl(
-                                    defaultColumnState,
+                                    defaultColumnFilters,
                                     'rateDateStart'
                                 )}
                                 endDateDefaultValue={getDateRangeFilterFromUrl(
-                                    defaultColumnState,
+                                    defaultColumnFilters,
                                     'rateDateEnd'
                                 )}
                                 onStartChange={(date) =>
