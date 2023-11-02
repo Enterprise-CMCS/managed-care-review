@@ -185,4 +185,89 @@ describe('RateReviewsTable', () => {
         expect(rows[1]).toHaveTextContent('Ohio') // row[0] is the header
         expect(screen.getByText('Displaying 1 of 3 rates')).toBeInTheDocument()
     })
+    it('can filter on date ranges', async () => {
+        renderWithProviders(
+            <RateReviewsTable
+                tableData={tableData()}
+                showFilters={true}
+                caption={'Test table caption'}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                    ],
+                },
+            }
+        )
+
+        await waitFor(() => {
+            expect(
+                screen.queryByText('Displaying 3 of 3 rates')
+            ).toBeInTheDocument()
+        })
+
+        const accordionButton = screen.getByTestId(
+            'accordionButton_filterAccordionItems'
+        )
+
+        await waitFor(async () => {
+            //Expect filter accordion and state filter to exist
+            expect(screen.queryByTestId('accordion')).toBeInTheDocument()
+            //Expand filter accordion
+            await userEvent.click(accordionButton)
+        })
+
+        const ratingPeriodFilter = screen.getByTestId('date-range-picker')
+        const dateRangePickerInputs = within(
+            ratingPeriodFilter
+        ).queryAllByTestId('date-picker-external-input')
+        const startDateInput = dateRangePickerInputs[0]
+        const endDateInput = dateRangePickerInputs[1]
+
+        expect(startDateInput).toBeInTheDocument()
+        expect(endDateInput).toBeInTheDocument()
+
+        // filter rates by start date after 11/01/2023
+        await userEvent.type(startDateInput, '11/01/2023')
+
+        // expect to only show rates with start dates on or after 11/01/2023
+        const firstFilterRows = await screen.findAllByRole('row')
+        expect(firstFilterRows).toHaveLength(3)
+        expect(
+            within(firstFilterRows[1]).getByText('rate-3-certification-name')
+        ).toBeInTheDocument()
+        expect(
+            within(firstFilterRows[2]).getByText('rate-2-certification-name')
+        ).toBeInTheDocument()
+        expect(screen.getByText('Displaying 2 of 3 rates')).toBeInTheDocument()
+
+        // filter rates by start date on or after 11/01/2023 and end date on or before 11/30/2024
+        await userEvent.type(endDateInput, '11/30/2024')
+
+        // only one rate rate-2-certification-name should be visible
+        const secondFilterRows = await screen.findAllByRole('row')
+        expect(secondFilterRows).toHaveLength(2)
+        expect(
+            within(secondFilterRows[1]).getByText('rate-2-certification-name')
+        ).toBeInTheDocument()
+        expect(screen.getByText('Displaying 1 of 3 rates')).toBeInTheDocument()
+
+        // filter rates by end date on or before 11/30/2024, by removing the date in start date input
+        await userEvent.clear(startDateInput)
+
+        // expect to only show rates with end dates on or before 11/30/2024
+        const thirdFilterRows = await screen.findAllByRole('row')
+        expect(thirdFilterRows).toHaveLength(3)
+        expect(
+            within(thirdFilterRows[1]).getByText('rate-2-certification-name')
+        ).toBeInTheDocument()
+        expect(
+            within(thirdFilterRows[2]).getByText('rate-1-certification-name')
+        ).toBeInTheDocument()
+        expect(screen.getByText('Displaying 2 of 3 rates')).toBeInTheDocument()
+    })
 })
