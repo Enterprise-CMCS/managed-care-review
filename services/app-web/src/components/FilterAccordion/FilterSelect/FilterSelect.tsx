@@ -25,7 +25,6 @@ export type FilterSelectedOptionsType = MultiValue<FilterOptionType>
 
 export const FilterSelect = ({
     name,
-    value,
     filterOptions,
     label,
     toggleClearFilter,
@@ -57,7 +56,6 @@ export const FilterSelect = ({
                 <label htmlFor={`${name}-filter-select-input`}>{label}</label>
             )}
             <Select
-                value={value}
                 options={filterOptions}
                 className={styles.multiSelect}
                 classNamePrefix="select"
