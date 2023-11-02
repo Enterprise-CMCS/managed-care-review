@@ -136,10 +136,8 @@ export const UploadedDocumentsTable = ({
             <table
                 className={`${borderTopGradientStyles} ${supportingDocsTopMarginStyles}`}
             >
-                <caption className="text-bold">
-                    <div className={styles.captionContainer}>
-                        {tableCaptionJSX}
-                    </div>
+                <caption>
+                    {tableCaptionJSX}
                     {!multipleDocumentsAllowed &&
                         documents.length > 1 &&
                         !isSubmitted && (
