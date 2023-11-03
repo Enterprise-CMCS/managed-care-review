@@ -21,7 +21,7 @@ Since we're in a serverless environment running Aurora Postgres Serverless in a 
 CMS scans security groups and changes rule sets that are deemed too permissive. That means we have to add our IP addresses to what is essentially an allowlist for ssh access to the VM.
 
 1. Determine your public facing IP address. An easy way to do this is to `curl https://ifconfig.me/`
-2. Locate the EC2 instance in the AWS console. Click into the security groups.
+2. Locate the EC2 instance in the AWS console. Click and go into Security > Security groups.
 3. There should be two security groups attached to the instance, the default and the postgres one. Select the postgres security group.
 4. On the `Inbound rules` tab select `Edit inbound rules`
 5. Add a rule for `ssh` with the `source` set to your local IP address with `/32` appended to it (e.g. `1.2.3.4/32`)
@@ -31,7 +31,7 @@ CMS scans security groups and changes rule sets that are deemed too permissive. 
 
 You should now be able to ssh to the jump box.
 
-1. Locate the public IP address of the instance. This can be found on by clicking into the VM on the `Instances` section of the EC2 console.
+1. Locate the Public IPv4 address of the instance. This can be found on by clicking into the VM on the `Instances` section of the EC2 console.
 2. ssh ubuntu@public-ip
 
 You should be using public key auth to ssh. If you need to point to your private key, use `ssh -i ~/.ssh/${yourkeyfile} ubuntu@public-ip`
@@ -40,9 +40,9 @@ You should be using public key auth to ssh. If you need to point to your private
 
 Our credentials for Postgres access are stored in Secrets Manager, which can be accessed as follows.
 
-1. Navigate to secrets manager in the AWS Console
+1. Navigate to Secrets Manager in the AWS Console
 2. Find the deployment that is associated with the Aurora DB (e.g. `aurora_postgres_prod`)
-3. Scroll down to `Retreive Secret Value` and click that button.
+3. Scroll down to `Retrieve Secret Value` and click that button.
 4. You will now see the aurora host name, db name, port, hostname, and password.
 
 These values will be used in the next steps.
@@ -54,6 +54,12 @@ If you need to get on the Postgres CLI, `psql` is installed on the jumpbox to co
 `psql -h $hostname -p $port -U $username -d $dbname`
 
 You then will be prompted for a password, after which you should be on the postgres CLI.
+
+### Completing test database dump (for use with local testing)
+- `pg_dump -Fc -h $hostname -p $port -U $username -d $dbname > [prod]-[date].sqlfc`
+-`scp -i .ssh/wml_jumpbox ubuntu@3.92.221.76:~/prod_202310261247.sql .`
+- `pg_restore -h localhost -p 5432 -U postgres -d postgres --clean [prod]-[date].sqlfc shhhsecret -C`
+
 
 ### Fixing Prisma migration issues
 
