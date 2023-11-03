@@ -39,12 +39,17 @@ export const Tabs = ({
                             role="tab"
                             aria-selected={activeTab === tab.name}
                         >
-                            <Heading className={styles['easi-tabs__tab-btn']}>
+                            <Heading
+                                className={styles['easi-tabs__tab-btn']}
+                                aria-description={
+                                    activeTab === tab.name ? 'active' : ''
+                                }
+                            >
                                 <button
                                     type="button"
                                     className={styles['easi-tabs__tab-btn']}
                                     aria-controls={tab.id}
-                                    onClick={() => {
+                                    onClick={(e) => {
                                         if (tab.route) navigate(tab.route)
                                         setActiveTab(tab.name)
                                     }}
