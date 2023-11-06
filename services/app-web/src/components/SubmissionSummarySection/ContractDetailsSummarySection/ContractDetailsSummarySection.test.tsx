@@ -36,7 +36,7 @@ describe('ContractDetailsSummarySection', () => {
             <ContractDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={testSubmission}
-                navigateTo="contract-details"
+                editNavigateTo="contract-details"
                 submissionName="MN-PMAP-0001"
             />,
             {
@@ -105,7 +105,7 @@ describe('ContractDetailsSummarySection', () => {
             <ContractDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={mockContractAndRatesDraft()}
-                navigateTo="contract-details"
+                editNavigateTo="contract-details"
                 submissionName="MN-PMAP-0001"
             />
         )
@@ -616,7 +616,7 @@ describe('ContractDetailsSummarySection', () => {
                     }}
                     submission={contractWithUnansweredProvisions}
                     submissionName="MN-PMAP-0001"
-                    navigateTo="contract-details"
+                    editNavigateTo="contract-details"
                 />,
                 {
                     apolloProvider: {
@@ -667,7 +667,7 @@ describe('ContractDetailsSummarySection', () => {
                     }}
                     submission={contractWithUnansweredProvisions}
                     submissionName="MN-PMAP-0001"
-                    navigateTo="contract-details"
+                    editNavigateTo="contract-details"
                 />,
                 {
                     apolloProvider: {
@@ -772,7 +772,7 @@ describe('ContractDetailsSummarySection', () => {
                     }}
                     submission={contractWithAllUnmodifiedProvisions}
                     submissionName="MN-PMAP-0001"
-                    navigateTo="contract-details"
+                    editNavigateTo="contract-details"
                 />,
                 {
                     apolloProvider: {

@@ -11,7 +11,7 @@ import { DataDetail, DataDetailContactField } from '../../DataDetail'
 
 export type ContactsSummarySectionProps = {
     submission: HealthPlanFormDataType
-    navigateTo?: string
+    editNavigateTo?: string
 }
 
 export const getActuaryFirm = (actuaryContact: ActuaryContact): string => {
@@ -32,13 +32,16 @@ export const getActuaryFirm = (actuaryContact: ActuaryContact): string => {
 
 export const ContactsSummarySection = ({
     submission,
-    navigateTo,
+    editNavigateTo,
 }: ContactsSummarySectionProps): React.ReactElement => {
     const isSubmitted = submission.status === 'SUBMITTED'
 
     return (
         <section id="stateContacts" className={styles.summarySection}>
-            <SectionHeader header="State contacts" navigateTo={navigateTo} />
+            <SectionHeader
+                header="State contacts"
+                editNavigateTo={editNavigateTo}
+            />
 
             <GridContainer>
                 <Grid row>

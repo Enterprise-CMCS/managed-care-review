@@ -22,9 +22,9 @@ describe('SectionHeader', () => {
             screen.getByRole('button', { name: 'Click Me' })
         ).toBeInTheDocument()
     })
-    it('displays Edit link if navigateTo prop is passed in', () => {
+    it('displays Edit link if editNavigateTo prop is passed in', () => {
         renderWithProviders(
-            <SectionHeader header="Page 2" navigateTo="/some-edit-path">
+            <SectionHeader header="Page 2" editNavigateTo="/some-edit-path">
                 <button>Click Me</button>
             </SectionHeader>
         )
