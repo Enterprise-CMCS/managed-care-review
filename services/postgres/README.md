@@ -6,7 +6,7 @@ This service deploys a postgres database in Amazon Aurora Serverless. It also de
 
 None. The database is configured and built in the [`app-api`](../app-api) service.
 
-## Access to Aurora Postgres via AWS Jump Box
+### Access to Aurora Postgres via AWS Jump Box
 
 Since we're in a serverless environment running Aurora Postgres Serverless in a VPC that is not accessible to the public Internet, we've set up a single VM in each of dev, val, and prod that can connect over to Aurora when needed. We keep the instance shut down, but it can be turned on from the AWS Console and connected to by sshing into the instance.
 
@@ -54,12 +54,6 @@ If you need to get on the Postgres CLI, `psql` is installed on the jumpbox to co
 `psql -h $hostname -p $port -U $username -d $dbname`
 
 You then will be prompted for a password, after which you should be on the postgres CLI.
-
-### Completing test database dump (for use with local testing)
-- `pg_dump -Fc -h $hostname -p $port -U $username -d $dbname > [prod]-[date].sqlfc`
--`scp -i .ssh/wml_jumpbox ubuntu@3.92.221.76:~/prod_202310261247.sql .`
-- `pg_restore -h localhost -p 5432 -U postgres -d postgres --clean [prod]-[date].sqlfc shhhsecret -C`
-
 
 ### Fixing Prisma migration issues
 
