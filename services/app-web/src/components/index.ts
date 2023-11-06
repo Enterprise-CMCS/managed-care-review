@@ -85,5 +85,3 @@ export { ActionButton } from './ActionButton'
 export { Breadcrumbs } from './Breadcrumbs'
 
 export { InlineDocumentWarning } from './DocumentWarning'
-
-export { DatePicker } from './DatePicker/DatePicker'

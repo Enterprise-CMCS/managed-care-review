@@ -29,7 +29,6 @@ export type ValidationStatus = 'error' | 'success'
 
 export type DatePickerRef = {
     clearInput: () => void
-    setInputValue: (date: string) => void
 }
 
 type BaseDatePickerProps = {
@@ -84,10 +83,7 @@ export const DatePicker = ({
     React.useImperativeHandle(inputRef, () => ({
         clearInput: () => {
             handleClearInput()
-        },
-        setInputValue: (date) => {
-            handleSelectDate(date, false)
-        },
+        }
     }))
 
     const isError = validationStatus === 'error'
@@ -251,7 +247,7 @@ export const DatePicker = ({
         setShowCalendar(!showCalendar)
     }
 
-    // This is why the DatePicker requires React 17
+    // This is why the _DatePicker requires React 17
     const handleFocusOut = (event: FocusEvent<HTMLDivElement>): void => {
         if (!datePickerEl.current?.contains(event?.relatedTarget as Element)) {
             if (showCalendar) {

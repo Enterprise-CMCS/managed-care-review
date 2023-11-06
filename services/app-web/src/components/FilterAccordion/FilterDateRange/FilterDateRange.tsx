@@ -4,14 +4,25 @@ import {
     DatePicker,
     DatePickerProps,
     DatePickerRef,
-} from '../../DatePicker/DatePicker'
-import { formatDate, parseDateString } from '../../DatePicker/utils'
-import { DEFAULT_EXTERNAL_DATE_FORMAT } from '../../DatePicker/constants'
+} from './_DatePicker/DatePicker'
+import { formatDate, parseDateString } from './_DatePicker/utils'
+import { DEFAULT_EXTERNAL_DATE_FORMAT } from './_DatePicker/constants'
 import classnames from 'classnames'
 import styles from './FilterDateRange.module.scss'
 import { formatUserInputDate } from '../../../formHelpers'
 import { dayjs } from '../../../common-code/dateHelpers/dayjs'
 import { PoliteErrorMessage } from '../../PoliteErrorMessage'
+
+/**
+ * This component uses a modified DatePicker component located in ./_DatePicker. This was done because we needed a ref to
+ * the DatePicker input for clearing input values using the clear filter button on the filter accordion, input
+ * validations, and displaying error messages on each DatePicker input. This component is essentially recreating the
+ * DateRangePicker with the modification to display error messages on the individual DatePicker inputs.
+ *
+ * We will no loner need to a modified DatePicker when:
+ * - DatePicker is updated to surface a ref to the input
+ * - DateRangePicker adds the option to display errors on each DatePicker input
+ */
 
 export type FilterDateRangePropType = {
     startDateLabel?: string
@@ -188,6 +199,8 @@ export const FilterDateRange = forwardRef(
         const validateDate = (date: string) =>
             date.length === 10 && dayjs(date).isValid()
 
+        // Validate when valid date format is inputted and return if valid. If date is undefined also return; this is
+        // when the date is cleared out of the input.
         const onStartDateChangeValidation = (date?: string) => {
             if (date && validateDate(date)) {
                 setShowStartDateError(false)

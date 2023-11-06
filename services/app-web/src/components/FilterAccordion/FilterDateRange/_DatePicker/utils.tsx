@@ -3,7 +3,7 @@ import React, { KeyboardEvent } from 'react'
 import { DEFAULT_EXTERNAL_DATE_FORMAT, INTERNAL_DATE_FORMAT } from './constants'
 
 /**
- * This file contains the USWDS DatePicker date manipulation functions converted to TypeScript
+ * This file contains the USWDS _DatePicker date manipulation functions converted to TypeScript
  */
 
 /**

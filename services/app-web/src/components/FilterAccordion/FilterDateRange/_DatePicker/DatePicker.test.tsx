@@ -17,7 +17,7 @@ import {
   VALIDATION_MESSAGE,
 } from './constants'
 
-describe('DatePicker component', () => {
+describe('_DatePicker component', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
