@@ -5,9 +5,10 @@ describe('Q&A', () => {
         cy.interceptGraphQL()
     })
 
-    it.skip('can add questions and responses', () => {
+    it('can add questions and responses', () => {
         cy.interceptFeatureFlags({
             'cms-questions': true,
+            'rates-db-refactor': true
         })
 
         // Assign Division to CMS user zuko
