@@ -23,49 +23,40 @@ export const Tabs = ({
         name: child.props.tabName,
         route: child.props.nestedRoute,
     }))
+
+    const handleClick = (name: string, route: string) => {
+        if (route) navigate(route)
+        setActiveTab(name)
+    }
+
     const [activeTab, setActiveTab] = useState(defaultActiveTab || tabs[0].name)
     const adjustContentWithRoutes = tabs[0].route
     return (
         <div className={styles['easi-tabs']} data-testid="tabs" {...tabProps}>
             <div className={styles['easi-tabs__navigation']}>
-                <ul className={styles['easi-tabs__tab-list']} role="tablist">
-                    {tabs.map((tab) => (
-                        <li
-                            key={tab.id}
+                <div className={styles['easi-tabs__tab-list']} role="tablist">
+                    {tabs.map((tab, index) => (
+                        <button
+                            type="button"
                             className={classnames(styles['easi-tabs__tab'], {
                                 [styles['easi-tabs__tab--selected']]:
                                     activeTab === tab.name,
                             })}
+                            aria-controls={tab.id}
+                            key={`tab-${index}`}
                             role="tab"
+                            onClick={() => handleClick(tab.name, tab.route)}
                             aria-selected={activeTab === tab.name}
+                            id={`tab-id-${index}`}
                         >
-                            <Heading
-                                className={styles['easi-tabs__tab-btn']}
-                                aria-description={
-                                    activeTab === tab.name ? 'active' : ''
-                                }
-                            >
-                                <button
-                                    type="button"
-                                    className={styles['easi-tabs__tab-btn']}
-                                    aria-controls={tab.id}
-                                    onClick={(e) => {
-                                        if (tab.route) navigate(tab.route)
-                                        setActiveTab(tab.name)
-                                    }}
-                                >
-                                    <span
-                                        className={
-                                            styles['easi-tabs__tab-text']
-                                        }
-                                    >
-                                        {tab.name}
-                                    </span>
-                                </button>
+                            <Heading className={styles['easi-tabs__tab-btn']}>
+                                <span className={styles['easi-tabs__tab-text']}>
+                                    {tab.name}
+                                </span>
                             </Heading>
-                        </li>
+                        </button>
                     ))}
-                </ul>
+                </div>
             </div>
             {React.Children.map(children, (child) => {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
