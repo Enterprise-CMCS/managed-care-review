@@ -308,7 +308,7 @@ type IndexHealthPlanPackagesPayload {
 
 input IndexQuestionsInput {
     "The ID of the package for which to fetch associated questions"
-    pkgID: ID!
+    contractID: ID!
 }
 
 type IndexQuestionsPayload {
@@ -338,7 +338,7 @@ input DocumentInput {
 
 input CreateQuestionInput {
     "The ID of the package for which to create a question"
-    pkgID: ID!
+    contractID: ID!
     "A list of documents to attach to the question"
     documents: [DocumentInput!]! # should be Generic Document with sha256
     "A note to attach to the question"
@@ -664,7 +664,7 @@ QuestionResponse with documents that answer the questions posed by CMS.
 """
 type Question {
     id: ID!
-    pkgID: ID!
+    contractID: ID!
     createdAt: DateTime!
     addedBy: CMSUser!
     documents: [Document!]!

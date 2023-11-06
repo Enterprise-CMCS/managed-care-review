@@ -4,17 +4,15 @@ import type {
     Question,
     QuestionResponseType,
 } from '../../domain-models'
-import type { StoreError } from '../storeError'
-import { convertPrismaErrorToStoreError } from '../storeError'
 
-export async function findAllQuestionsByHealthPlanPackage(
+export async function findAllQuestionsByContract(
     client: PrismaClient,
-    pkgID: string
-): Promise<Question[] | StoreError> {
+    contractID: string
+): Promise<Question[] | Error> {
     try {
         const findResult = await client.question.findMany({
             where: {
-                pkgID: pkgID,
+                contractID: contractID,
             },
             include: {
                 documents: {
@@ -49,6 +47,10 @@ export async function findAllQuestionsByHealthPlanPackage(
 
         return questions
     } catch (e: unknown) {
-        return convertPrismaErrorToStoreError(e)
+        if (e instanceof Error) {
+            return e
+        }
+        console.error('Unknown object thrown by Prisma', e)
+        return new Error('Unknown object thrown by Prisma')
     }
 }

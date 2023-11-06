@@ -95,8 +95,8 @@ function mockStoreThatErrors(): Store {
         insertQuestion: async (_ID) => {
             return genericStoreError
         },
-        findAllQuestionsByHealthPlanPackage: async (_pkgID) => {
-            return genericStoreError
+        findAllQuestionsByContract: async (_pkgID) => {
+            return genericError
         },
         insertQuestionResponse: async (_ID) => {
             return genericStoreError
