@@ -22,7 +22,7 @@ import {
     RelatedContractRevisions,
 } from '../../../gen/gqlClient'
 import styles from '../../../components/HealthPlanPackageTable/HealthPlanPackageTable.module.scss'
-import { Table, Tag, Link } from '@trussworks/react-uswds'
+import { Table, Tag, Link, Fieldset } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
 import qs from 'qs'
@@ -403,13 +403,10 @@ export const RateReviewsTable = ({
             filterName === 'rateDateStart'
                 ? rateDateStartColumn
                 : rateDateEndColumn
-        const filterElRefName =
-            filterName === 'rateDateStart'
-                ? 'ratingPeriodDateStart'
-                : 'ratingPeriodDateEnd'
 
-        lastClickedElement.current = filterElRefName
+        lastClickedElement.current = `${filterName}Picker`
         setTableCaption(null)
+
         if (!date) {
             filterColumn.setFilterValue([])
         } else {
@@ -512,31 +509,44 @@ export const RateReviewsTable = ({
                                     }
                                 />
                             </DoubleColumnGrid>
-                            <FilterDateRange
-                                ref={filterDateRangeRef}
-                                name={'ratingPeriod'}
-                                label={'Rating period start date'}
-                                startDateDefaultValue={getDateRangeFilterFromUrl(
-                                    defaultColumnFilters,
-                                    'rateDateStart'
-                                )}
-                                endDateDefaultValue={getDateRangeFilterFromUrl(
-                                    defaultColumnFilters,
-                                    'rateDateEnd'
-                                )}
-                                onStartChange={(date) =>
-                                    updateRatingPeriodFilter(
-                                        date,
-                                        'rateDateStart'
-                                    )
-                                }
-                                onEndChange={(date) =>
-                                    updateRatingPeriodFilter(
-                                        date,
-                                        'rateDateEnd'
-                                    )
-                                }
-                            />
+                            <Fieldset
+                                data-testid={'rating-period-filter'}
+                                legend={'Rating period start date'}
+                            >
+                                <FilterDateRange
+                                    ref={filterDateRangeRef}
+                                    startDateHint="mm/dd/yyyy"
+                                    startDateLabel="From"
+                                    startDatePickerProps={{
+                                        id: 'rateDateStartPicker',
+                                        name: 'rateDateStartPicker',
+                                        defaultValue: getDateRangeFilterFromUrl(
+                                            defaultColumnFilters,
+                                            'rateDateStart'
+                                        ),
+                                        onChange: (date) =>
+                                            updateRatingPeriodFilter(
+                                                date,
+                                                'rateDateStart'
+                                            ),
+                                    }}
+                                    endDateHint="mm/dd/yyyy"
+                                    endDateLabel="To"
+                                    endDatePickerProps={{
+                                        id: 'rateDateEndPicker',
+                                        name: 'rateDateEndPicker',
+                                        defaultValue: getDateRangeFilterFromUrl(
+                                            defaultColumnFilters,
+                                            'rateDateEnd'
+                                        ),
+                                        onChange: (date) =>
+                                            updateRatingPeriodFilter(
+                                                date,
+                                                'rateDateEnd'
+                                            ),
+                                    }}
+                                />
+                            </Fieldset>
                         </FilterAccordion>
                     )}
                     <div aria-live="polite" aria-atomic>
