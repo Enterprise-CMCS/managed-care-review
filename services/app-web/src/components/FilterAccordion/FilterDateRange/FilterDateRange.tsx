@@ -191,14 +191,18 @@ export const FilterDateRange = forwardRef(
         const onStartDateChangeValidation = (date?: string) => {
             if (date && validateDate(date)) {
                 setShowStartDateError(false)
-                startDatePickerOnChange(formatUserInputDate(date))
+                startDatePickerOnChange(formatUserInputDate(date.trimEnd()))
+            } else if (!date) {
+                startDatePickerOnChange(date)
             }
         }
 
         const onEndDateChangeValidation = (date?: string) => {
             if (date && validateDate(date)) {
                 setShowEndDateError(false)
-                endDatePickerOnChange(formatUserInputDate(date))
+                endDatePickerOnChange(formatUserInputDate(date.trimEnd()))
+            } else if (!date) {
+                endDatePickerOnChange(date)
             }
         }
 
@@ -206,7 +210,7 @@ export const FilterDateRange = forwardRef(
             const e = event as React.FocusEvent<HTMLInputElement>
             const date = e.target.value
             if (date.length > 0) {
-                setShowStartDateError(!validateDate(date))
+                setShowStartDateError(!validateDate(date.trimEnd()))
             }
         }
 
@@ -214,7 +218,7 @@ export const FilterDateRange = forwardRef(
             const e = event as React.FocusEvent<HTMLInputElement>
             const date = e.target.value
             if (date.length > 0) {
-                setShowEndDateError(!validateDate(date))
+                setShowEndDateError(!validateDate(date.trimEnd()))
             }
         }
 

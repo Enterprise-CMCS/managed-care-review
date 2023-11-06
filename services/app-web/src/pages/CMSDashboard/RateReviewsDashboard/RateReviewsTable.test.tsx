@@ -225,7 +225,9 @@ describe('RateReviewsTable', () => {
             await userEvent.click(accordionButton)
         })
 
-        const ratingPeriodFilter = screen.getByTestId('date-range-picker')
+        const ratingPeriodFilter = screen.getByTestId(
+            'filter-date-range-picker'
+        )
         const dateRangePickerInputs = within(
             ratingPeriodFilter
         ).queryAllByTestId('date-picker-external-input')
