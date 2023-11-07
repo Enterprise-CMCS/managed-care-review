@@ -41,46 +41,69 @@ const createInsertContractData = ({
 
 const createDraftContractData = (
     contract?: Partial<ContractTableFullPayload>
-): ContractTableFullPayload => ({
-    id: uuidv4(),
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    mccrsID: null,
-    stateCode: 'MN',
-    stateNumber: 111,
-    revisions: contract?.revisions ?? [
-        createContractRevision(
-            contract,
-            {
-                rateRevisions: undefined,
-                submitInfo: null,
-            },
-            contract?.stateCode as StateCodeType
-        ) as ContractRevisionTableWithRates,
-    ],
-    ...contract,
-})
+): ContractTableFullPayload => {
+    const contractData = {
+        id: uuidv4(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        mccrsID: null,
+        stateCode: 'MN',
+        stateNumber: 111,
+        revisions: [],
+        ...contract,
+    }
+
+    Object.assign(contractData, {
+        revisions: contract?.revisions ?? [
+            createContractRevision(
+                {
+                    ...contractData,
+                    ...contract,
+                },
+                {
+                    draftRates: [],
+                    rateRevisions: [],
+                    submitInfo: null,
+                },
+                contract?.stateCode as StateCodeType
+            ) as ContractRevisionTableWithRates,
+        ],
+    })
+
+    return contractData
+}
 
 const createContractData = (
     contract?: Partial<ContractTableFullPayload>
-): ContractTableFullPayload => ({
-    id: uuidv4(),
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    mccrsID: null,
-    stateCode: 'MN',
-    stateNumber: 111,
-    revisions: contract?.revisions ?? [
-        createContractRevision(
-            contract,
-            {
-                draftRates: undefined,
-            },
-            contract?.stateCode as StateCodeType
-        ) as ContractRevisionTableWithRates,
-    ],
-    ...contract,
-})
+): ContractTableFullPayload => {
+    const contractData = {
+        id: uuidv4(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        mccrsID: null,
+        stateCode: 'MN',
+        stateNumber: 111,
+        revisions: [],
+        ...contract,
+    }
+
+    Object.assign(contractData, {
+        revisions: contract?.revisions ?? [
+            createContractRevision(
+                {
+                    ...contractData,
+                    ...contract,
+                },
+                {
+                    draftRates: [],
+                },
+                contract?.stateCode as StateCodeType
+            ) as ContractRevisionTableWithRates,
+        ],
+    })
+
+    return contractData
+}
 
 const createContractRevision = (
     contract?: Partial<ContractTableFullPayload>,
