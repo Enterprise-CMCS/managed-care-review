@@ -3,10 +3,17 @@ import { SingleRateSummarySection } from './SingleRateSummarySection'
 import {
     fetchCurrentUserMock,
     mockValidCMSUser,
+    mockValidStateUser,
     rateDataMock,
 } from '../../../testHelpers/apolloMocks'
-import { screen, waitFor, within } from '@testing-library/react'
+import {
+    screen,
+    waitFor,
+    waitForElementToBeRemoved,
+    within,
+} from '@testing-library/react'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
+import { RateRevision } from '../../../gen/gqlClient'
 
 describe('SingleRateSummarySection', () => {
     it('can render rate details without errors', async () => {
@@ -126,7 +133,8 @@ describe('SingleRateSummarySection', () => {
         })
 
         // Wait for all the documents to be in the table
-        await waitFor(() => {
+        await waitFor(async () => {
+            await waitForElementToBeRemoved(() => screen.findByText('loading'))
             expect(
                 screen.getByRole('link', {
                     name: 'Download all rate documents',
@@ -193,5 +201,64 @@ describe('SingleRateSummarySection', () => {
                 `${linkedSubmissionTwo.packageName}`
             )
         ).toBeInTheDocument()
+    })
+
+    it('should not display missing field text to CMS users', () => {
+        const rateData = rateDataMock({
+            rateType: undefined,
+            rateDateCertified: undefined,
+        } as unknown as Partial<RateRevision>)
+        renderWithProviders(
+            <SingleRateSummarySection
+                rate={rateData}
+                isSubmitted={false}
+                statePrograms={rateData.state.programs}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                    ],
+                },
+            }
+        )
+
+        expect(
+            screen.queryByText(/You must provide this information/)
+        ).toBeNull()
+    })
+
+    it('should display missing field text to state users', async () => {
+        const rateData = rateDataMock(
+            {
+                rateType: undefined,
+                rateDateCertified: undefined,
+            } as unknown as Partial<RateRevision>,
+            { status: 'UNLOCKED' }
+        )
+        renderWithProviders(
+            <SingleRateSummarySection
+                rate={rateData}
+                isSubmitted={false}
+                statePrograms={rateData.state.programs}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidStateUser(),
+                        }),
+                    ],
+                },
+            }
+        )
+
+        expect(
+            await screen.findAllByText(/You must provide this information/)
+        ).toHaveLength(2)
     })
 })

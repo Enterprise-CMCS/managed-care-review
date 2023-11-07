@@ -169,10 +169,8 @@ export const SingleRateSummarySection = ({
             )
             if (zippedURL instanceof Error) {
                 const msg = `ERROR: getBulkDlURL failed to generate URL for a rate. ID: ${rate?.id} Message: ${zippedURL}`
-                console.info(msg)
 
                 setDocumentError(true)
-
                 recordJSException(msg)
             }
 
