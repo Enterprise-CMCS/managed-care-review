@@ -16,7 +16,7 @@ type DocumentWithLink = { url: string | null } & SubmissionDocument
 
 export type SupportingDocumentsSummarySectionProps = {
     submission: HealthPlanFormDataType
-    navigateTo?: string
+    editNavigateTo?: string
     submissionName?: string
     onDocumentError?: (error: true) => void
 }
@@ -45,7 +45,7 @@ function renderDownloadButton(zippedFilesURL: string | undefined | Error) {
 // since supporting documents are now displayed in the rate and contract sections
 export const SupportingDocumentsSummarySection = ({
     submission,
-    navigateTo,
+    editNavigateTo,
     submissionName,
     onDocumentError,
 }: SupportingDocumentsSummarySectionProps): React.ReactElement | null => {
@@ -139,7 +139,7 @@ export const SupportingDocumentsSummarySection = ({
         <section id="documents" className={styles.summarySection}>
             <SectionHeader
                 header="Supporting documents"
-                navigateTo={navigateTo}
+                editNavigateTo={editNavigateTo}
             >
                 {isSubmitted && renderDownloadButton(zippedFilesURL)}
             </SectionHeader>

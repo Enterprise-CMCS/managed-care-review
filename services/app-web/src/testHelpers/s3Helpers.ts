@@ -2,9 +2,11 @@ import { S3ClientT } from '../s3'
 import { parseKey } from '../common-code/s3URLEncoding'
 
 export const testS3Client: () => S3ClientT = () => {
+    let fakeKeyID = 0
+
     return {
         uploadFile: async (file: File): Promise<string> => {
-            return `${Date.now()}-${file.name}`
+            return `fakeS3Key${fakeKeyID++}-${file.name}`
         },
         deleteFile: async (filename: string): Promise<void> => {
             return

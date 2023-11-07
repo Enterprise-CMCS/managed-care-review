@@ -19,9 +19,11 @@ import {
 } from '../../../testHelpers/apolloMocks'
 import {
     createQuestionNetworkFailure,
+    createQuestionSuccess,
     fetchStateHealthPlanPackageWithQuestionsMockSuccess,
 } from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
 import { SubmissionSideNav } from '../../SubmissionSideNav'
+import { Location } from 'react-router-dom'
 
 describe('UploadQuestions', () => {
     beforeEach(() => {
@@ -124,8 +126,77 @@ describe('UploadQuestions', () => {
         })
     })
 
+    it('allows submission with an uploaded doc', async () => {
+        let testLocation: Location
+        const { user } = renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                        element={<UploadQuestions />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: '15',
+                        }),
+                        createQuestionSuccess({
+                            contractID: '15',
+                            documents: [
+                                {
+                                    name: 'testFile.doc',
+                                    s3URL: 's3://fake-bucket/fakeS3Key0-testFile.doc/testFile.doc',
+                                },
+                            ],
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: '15',
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/submissions/15/question-and-answers/dmco/upload-questions`,
+                },
+                location: (location) => (testLocation = location),
+            }
+        )
+
+        await screen.findByRole('heading', {
+            name: /Add questions/,
+            level: 2,
+        })
+        const input = screen.getByLabelText('Upload questions')
+        expect(input).toBeInTheDocument()
+        expect(input).toHaveAttribute('accept', ACCEPTED_SUBMISSION_FILE_TYPES)
+        await userEvent.upload(input, [TEST_DOC_FILE])
+        await waitFor(() => {
+            expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
+        })
+
+        // OK, this document has been uploaded with an S3Key of the current timestamp
+        // is that serving us at all? gives us unique keys which is good.
+        // makes it pretty difficult to create the correct mock, since everything needs to match exactly.
+
+        await user.click(
+            await screen.findByRole('button', { name: /Add questions/ })
+        )
+
+        await waitFor(() =>
+            expect(testLocation.pathname).toBe(
+                `/submissions/15/question-and-answers`
+            )
+        )
+    })
+
     it('displays form validation error if attempting to add question with zero files', async () => {
-        renderWithProviders(
+        const { user } = renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
@@ -160,7 +231,7 @@ describe('UploadQuestions', () => {
         })
         expect(continueButton).not.toHaveAttribute('aria-disabled')
 
-        await continueButton.click()
+        await user.click(continueButton)
 
         await waitFor(() => {
             expect(
@@ -170,7 +241,7 @@ describe('UploadQuestions', () => {
     })
 
     it('displays file upload alert if attempting to add question with all invalid files', async () => {
-        renderWithProviders(
+        const { user } = renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
@@ -205,14 +276,14 @@ describe('UploadQuestions', () => {
         })
 
         const targetEl = screen.getByTestId('file-input-droptarget')
-        await dragAndDrop(targetEl, [TEST_PNG_FILE])
+        dragAndDrop(targetEl, [TEST_PNG_FILE])
 
         expect(
             await screen.findByText('This is not a valid file type.')
         ).toBeInTheDocument()
 
         expect(continueButton).not.toHaveAttribute('aria-disabled')
-        await continueButton.click()
+        await user.click(continueButton)
 
         expect(
             await screen.findAllByText('You must upload at least one document')
@@ -284,7 +355,7 @@ describe('UploadQuestions', () => {
     })
 
     it('displays api error if createQuestion fails', async () => {
-        renderWithProviders(
+        const { user } = renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
@@ -303,7 +374,15 @@ describe('UploadQuestions', () => {
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
                             id: '15',
                         }),
-                        createQuestionNetworkFailure(),
+                        createQuestionNetworkFailure({
+                            contractID: '15',
+                            documents: [
+                                {
+                                    name: 'testFile.doc',
+                                    s3URL: 's3://fake-bucket/fakeS3Key0-testFile.doc/testFile.doc',
+                                },
+                            ],
+                        }),
                     ],
                 },
             }
@@ -322,7 +401,7 @@ describe('UploadQuestions', () => {
         await screen.findByText(TEST_DOC_FILE.name)
         await screen.findByText(/1 complete/)
 
-        createQuestionButton.click()
+        await user.click(createQuestionButton)
 
         await screen.findByTestId('error-alert')
         expect(

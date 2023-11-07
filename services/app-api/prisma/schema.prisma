@@ -13,7 +13,6 @@ model HealthPlanPackageTable {
   stateCode String
   state     State                     @relation(fields: [stateCode], references: [stateCode])
   revisions HealthPlanRevisionTable[]
-  questions Question[]
 }
 
 model ProtoMigrationsTable {
@@ -41,8 +40,10 @@ model ContractTable {
 
   mccrsID     String?
   stateCode   String
-  state       State  @relation(fields: [stateCode], references: [stateCode])
+  state       State   @relation(fields: [stateCode], references: [stateCode])
   stateNumber Int
+
+  questions Question[]
 
   revisions          ContractRevisionTable[]
   // This relationship is a scam. We never call it in our code but Prisma
@@ -72,8 +73,8 @@ model ContractRevisionTable {
   contractID String
   contract   ContractTable @relation(fields: [contractID], references: [id])
 
-  rateRevisions                                RateRevisionsOnContractRevisionsTable[]
-  draftRates                                   RateTable[]
+  rateRevisions RateRevisionsOnContractRevisionsTable[]
+  draftRates    RateTable[]
 
   unlockInfoID String?
   unlockInfo   UpdateInfoTable? @relation("unlockContractInfo", fields: [unlockInfoID], references: [id])
@@ -130,21 +131,21 @@ model RateRevisionTable {
   submitInfoID String?
   submitInfo   UpdateInfoTable? @relation("submitRateInfo", fields: [submitInfoID], references: [id], onDelete: Cascade)
 
-  rateType                       RateType?
-  rateCapitationType             RateCapitationType?
-  rateDocuments                  RateDocument[]
-  supportingDocuments            RateSupportingDocument[] 
-  rateDateStart                  DateTime?                  @db.Date
-  rateDateEnd                    DateTime?                  @db.Date
-  rateDateCertified              DateTime?                  @db.Date
-  amendmentEffectiveDateStart    DateTime?                  @db.Date
-  amendmentEffectiveDateEnd      DateTime?                  @db.Date
-  rateProgramIDs                 String[]
-  rateCertificationName          String?
-  certifyingActuaryContacts      ActuaryContact[]           @relation(name: "CertifyingActuaryOnRateRevision")
-  addtlActuaryContacts           ActuaryContact[]           @relation(name: "AddtlActuaryOnRateRevision")
-  actuaryCommunicationPreference ActuaryCommunication?
-  contractsWithSharedRateRevision ContractTable[] @relation(name: "SharedRateRevisions")
+  rateType                        RateType?
+  rateCapitationType              RateCapitationType?
+  rateDocuments                   RateDocument[]
+  supportingDocuments             RateSupportingDocument[]
+  rateDateStart                   DateTime?                @db.Date
+  rateDateEnd                     DateTime?                @db.Date
+  rateDateCertified               DateTime?                @db.Date
+  amendmentEffectiveDateStart     DateTime?                @db.Date
+  amendmentEffectiveDateEnd       DateTime?                @db.Date
+  rateProgramIDs                  String[]
+  rateCertificationName           String?
+  certifyingActuaryContacts       ActuaryContact[]         @relation(name: "CertifyingActuaryOnRateRevision")
+  addtlActuaryContacts            ActuaryContact[]         @relation(name: "AddtlActuaryOnRateRevision")
+  actuaryCommunicationPreference  ActuaryCommunication?
+  contractsWithSharedRateRevision ContractTable[]          @relation(name: "SharedRateRevisions")
 }
 
 model RateRevisionsOnContractRevisionsTable {
@@ -291,12 +292,12 @@ model UserAudit {
 }
 
 model Question {
-  id            String                 @id @default(uuid())
-  createdAt     DateTime               @default(now())
-  updatedAt     DateTime               @default(now()) @updatedAt
-  pkgID         String
-  pkg           HealthPlanPackageTable @relation(fields: [pkgID], references: [id])
-  addedBy       User                   @relation(fields: [addedByUserID], references: [id])
+  id            String             @id @default(uuid())
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @default(now()) @updatedAt
+  contractID    String
+  contract      ContractTable      @relation(fields: [contractID], references: [id])
+  addedBy       User               @relation(fields: [addedByUserID], references: [id])
   addedByUserID String
   division      Division
   documents     QuestionDocument[]
@@ -327,10 +328,10 @@ model QuestionResponse {
   id            String                     @id @default(uuid())
   createdAt     DateTime                   @default(now())
   updatedAt     DateTime                   @updatedAt
-  question      Question                   @relation(fields: [questionID], references: [id])
-  addedBy       User                       @relation(fields: [addedByUserID], references: [id])
   questionID    String
+  question      Question                   @relation(fields: [questionID], references: [id])
   addedByUserID String
+  addedBy       User                       @relation(fields: [addedByUserID], references: [id])
   documents     QuestionResponseDocument[]
 }
 

@@ -1,7 +1,7 @@
 fragment questionEdgeFragment on QuestionEdge {
     node {
         id
-        pkgID
+        contractID
         createdAt
         addedBy {
             id

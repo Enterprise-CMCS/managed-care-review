@@ -5,9 +5,9 @@ import classNames from 'classnames'
 
 export type SectionHeaderProps = {
     header: string
-    navigateTo?: string
     children?: React.ReactNode
-    subHeaderComponent?: React.ReactNode
+    editNavigateTo?: string // Controls appearance of edit link to the right of main heading - should be pathname substring for use with NavLink
+    subHeaderComponent?: React.ReactNode // Controls appearance of additional component below main heading
     sectionId?: string
     headerId?: string
     hideBorder?: boolean
@@ -16,7 +16,7 @@ export type SectionHeaderProps = {
 export const SectionHeader = ({
     header,
     subHeaderComponent,
-    navigateTo,
+    editNavigateTo,
     children,
     sectionId,
     headerId,
@@ -25,7 +25,7 @@ export const SectionHeader = ({
     const classes = classNames({
         [styles.summarySectionHeader]: true,
         [styles.summarySectionHeaderBorder]: !hideBorder,
-        [styles.alignTop]: subHeaderComponent,
+        [styles.hasSubheader]: subHeaderComponent,
     })
     return (
         <div className={classes} id={sectionId}>
@@ -34,12 +34,12 @@ export const SectionHeader = ({
                 {subHeaderComponent}
             </div>
             <div>
-                {navigateTo && (
+                {editNavigateTo && (
                     <Link
                         variant="unstyled"
                         asCustom={NavLink}
                         className="usa-button usa-button--outline"
-                        to={navigateTo}
+                        to={editNavigateTo}
                     >
                         Edit <span className="srOnly">{header}</span>
                     </Link>

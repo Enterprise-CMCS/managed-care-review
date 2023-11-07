@@ -97,7 +97,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={draftSubmission}
-                navigateTo="rate-details"
+                editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
             />,
@@ -157,7 +157,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={draftSubmission}
-                navigateTo="rate-details"
+                editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
             />,
@@ -203,7 +203,7 @@ describe('RateDetailsSummarySection', () => {
                         previousSubmissionDate: '01/01/01',
                     }}
                     submission={submission}
-                    navigateTo="rate-details"
+                    editNavigateTo="rate-details"
                     submissionName="MN-MSHO-0003"
                     statePrograms={statePrograms}
                 />,
@@ -238,7 +238,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={submission}
-                navigateTo="rate-details"
+                editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
             />,
@@ -334,7 +334,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={testSubmission}
-                navigateTo="/rate-details'"
+                editNavigateTo="/rate-details'"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
             />,
@@ -432,7 +432,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={draftSubmission}
-                navigateTo="rate-details"
+                editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
             />,
@@ -459,7 +459,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={draftSubmission}
-                navigateTo="rate-details"
+                editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
             />,
@@ -489,7 +489,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={draftSubmission}
-                navigateTo="rate-details"
+                editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
             />,
@@ -516,7 +516,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={draftSubmission}
-                navigateTo="rate-details"
+                editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
             />,
@@ -539,7 +539,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={draftSubmission}
-                navigateTo="rate-details"
+                editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
             />,
@@ -562,7 +562,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={draftSubmission}
-                navigateTo="rate-details"
+                editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
             />,
@@ -585,7 +585,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={draftSubmission}
-                navigateTo="rate-details"
+                editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
             />,
@@ -618,7 +618,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={draftSubmission}
-                navigateTo="rate-details"
+                editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
             />,
@@ -697,7 +697,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={testSubmission}
-                navigateTo="rate-details"
+                editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
             />,
@@ -801,7 +801,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={testSubmission}
-                navigateTo="rate-details"
+                editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
             />,
@@ -871,7 +871,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={testSubmission}
-                navigateTo="rate-details"
+                editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
             />,
@@ -897,7 +897,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={draftSubmission}
-                navigateTo="rate-details"
+                editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
             />,

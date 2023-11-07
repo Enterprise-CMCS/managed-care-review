@@ -74,7 +74,7 @@ describe('RateReviewsTable', () => {
 
         await waitFor(() => {
             expect(
-                screen.queryByText('Displaying 3 of 3 rates')
+                screen.queryByText('Displaying 3 of 3 rate reviews')
             ).toBeInTheDocument()
         })
         // expect filter accordion to be present
@@ -183,6 +183,8 @@ describe('RateReviewsTable', () => {
         const rows = await screen.findAllByRole('row')
         expect(rows).toHaveLength(2)
         expect(rows[1]).toHaveTextContent('Ohio') // row[0] is the header
-        expect(screen.getByText('Displaying 1 of 3 rates')).toBeInTheDocument()
+        expect(
+            screen.getByText('Displaying 1 of 3 rate reviews')
+        ).toBeInTheDocument()
     })
 })

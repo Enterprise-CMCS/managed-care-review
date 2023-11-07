@@ -33,7 +33,9 @@ describe('RateReviewsDashboard', () => {
         })
 
         // Expect 3 rates to be displayed
-        expect(screen.getByText('Displaying 3 of 3 rates')).toBeInTheDocument()
+        expect(
+            screen.getByText('Displaying 3 of 3 rate reviews')
+        ).toBeInTheDocument()
     })
 
     it('renders error failed request page', async () => {

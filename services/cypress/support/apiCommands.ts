@@ -23,6 +23,7 @@ import {
     CMSUserType,
 } from '../utils/apollo-test-utils'
 import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
+import {UnlockedHealthPlanFormDataType} from 'app-web/src/common-code/healthPlanFormDataType';
 
 const createAndSubmitContractOnlyPackage = async (
     apolloClient: ApolloClient<NormalizedCacheObject>
@@ -47,7 +48,7 @@ const createAndSubmitContractOnlyPackage = async (
         ...contractOnlyData(),
     }
 
-    const formDataProto = domainToBase64(fullFormData)
+    const formDataProto = domainToBase64(fullFormData as UnlockedHealthPlanFormDataType)
 
     await apolloClient.mutate({
         mutation: UpdateHealthPlanFormDataDocument,
@@ -94,7 +95,7 @@ const createAndSubmitContractWithRates = async (
         ...contractAndRatesData(),
     }
 
-    const formDataProto = domainToBase64(fullFormData1)
+    const formDataProto = domainToBase64(fullFormData1 as UnlockedHealthPlanFormDataType)
 
     await apolloClient.mutate({
         mutation: UpdateHealthPlanFormDataDocument,

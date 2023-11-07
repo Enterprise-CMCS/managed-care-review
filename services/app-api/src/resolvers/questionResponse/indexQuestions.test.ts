@@ -11,8 +11,11 @@ import {
     createDBUsersWithFullData,
     testCMSUser,
 } from '../../testHelpers/userHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 describe('indexQuestions', () => {
+    const mockLDService = testLDService({ ['rates-db-refactor']: true })
+
     const dmcoCMSUser = testCMSUser({
         divisionAssignment: 'DMCO',
     })
@@ -28,21 +31,26 @@ describe('indexQuestions', () => {
     })
 
     it('returns package with questions and responses for each division', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            ldService: mockLDService,
+        })
         const dmcoCMSServer = await constructTestPostgresServer({
             context: {
                 user: dmcoCMSUser,
             },
+            ldService: mockLDService,
         })
         const dmcpCMSServer = await constructTestPostgresServer({
             context: {
                 user: dmcpCMSUser,
             },
+            ldService: mockLDService,
         })
         const oactCMServer = await constructTestPostgresServer({
             context: {
                 user: oactCMSUser,
             },
+            ldService: mockLDService,
         })
 
         const submittedPkg = await createAndSubmitTestHealthPlanPackage(
@@ -117,7 +125,7 @@ describe('indexQuestions', () => {
                             node: expect.objectContaining({
                                 id: expect.any(String),
                                 createdAt: expect.any(Date),
-                                pkgID: submittedPkg.id,
+                                contractID: submittedPkg.id,
                                 division: 'DMCO',
                                 documents: [
                                     {
@@ -138,7 +146,7 @@ describe('indexQuestions', () => {
                             node: expect.objectContaining({
                                 id: expect.any(String),
                                 createdAt: expect.any(Date),
-                                pkgID: submittedPkg.id,
+                                contractID: submittedPkg.id,
                                 division: 'DMCP',
                                 documents: [
                                     {
@@ -159,7 +167,7 @@ describe('indexQuestions', () => {
                             node: expect.objectContaining({
                                 id: expect.any(String),
                                 createdAt: expect.any(Date),
-                                pkgID: submittedPkg.id,
+                                contractID: submittedPkg.id,
                                 division: 'OACT',
                                 documents: [
                                     {
@@ -177,7 +185,9 @@ describe('indexQuestions', () => {
         )
     })
     it('returns an error if you are requesting for a different state (403)', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            ldService: mockLDService,
+        })
         const otherStateServer = await constructTestPostgresServer({
             context: {
                 user: {
@@ -189,11 +199,13 @@ describe('indexQuestions', () => {
                     givenName: 'Aang',
                 },
             },
+            ldService: mockLDService,
         })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: dmcoCMSUser,
             },
+            ldService: mockLDService,
         })
 
         const submittedPkg = await createAndSubmitTestHealthPlanPackage(
@@ -206,7 +218,7 @@ describe('indexQuestions', () => {
             query: INDEX_QUESTIONS,
             variables: {
                 input: {
-                    pkgID: submittedPkg.id,
+                    contractID: submittedPkg.id,
                 },
             },
         })
@@ -218,7 +230,9 @@ describe('indexQuestions', () => {
         )
     })
     it('returns an error if health plan package does not exist', async () => {
-        const server = await constructTestPostgresServer()
+        const server = await constructTestPostgresServer({
+            ldService: mockLDService,
+        })
 
         await createAndSubmitTestHealthPlanPackage(server)
 
@@ -226,7 +240,7 @@ describe('indexQuestions', () => {
             query: INDEX_QUESTIONS,
             variables: {
                 input: {
-                    pkgID: 'invalid-pkg-id',
+                    contractID: 'invalid-pkg-id',
                 },
             },
         })
@@ -234,7 +248,7 @@ describe('indexQuestions', () => {
         expect(result.errors).toBeDefined()
         expect(assertAnErrorCode(result)).toBe('NOT_FOUND')
         expect(assertAnError(result).message).toBe(
-            'Issue finding a package with id invalid-pkg-id. Message: Package with id invalid-pkg-id does not exist'
+            'Issue finding a contract with id invalid-pkg-id. Message: Contract with id invalid-pkg-id does not exist'
         )
     })
 })

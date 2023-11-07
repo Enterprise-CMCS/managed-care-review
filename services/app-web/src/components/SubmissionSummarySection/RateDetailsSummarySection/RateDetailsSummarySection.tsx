@@ -38,7 +38,7 @@ type PackageNamesLookupType = {
 
 export type RateDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
-    navigateTo?: string
+    editNavigateTo?: string
     documentDateLookupTable: DocumentDateLookupTableType
     isCMSUser?: boolean
     submissionName: string
@@ -64,7 +64,7 @@ export function renderDownloadButton(
 
 export const RateDetailsSummarySection = ({
     submission,
-    navigateTo,
+    editNavigateTo,
     documentDateLookupTable,
     isCMSUser,
     submissionName,
@@ -82,7 +82,7 @@ export const RateDetailsSummarySection = ({
         React.useState<PackageNamesLookupType | null>(null)
 
     const isSubmitted = submission.status === 'SUBMITTED'
-    const isEditing = !isSubmitted && navigateTo !== undefined
+    const isEditing = !isSubmitted && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
     const submissionLevelRateSupportingDocuments = submission.documents.filter(
         (doc) => doc.documentCategories.includes('RATES_RELATED')
@@ -260,7 +260,10 @@ export const RateDetailsSummarySection = ({
 
     return (
         <section id="rateDetails" className={styles.summarySection}>
-            <SectionHeader header="Rate details" navigateTo={navigateTo}>
+            <SectionHeader
+                header="Rate details"
+                editNavigateTo={editNavigateTo}
+            >
                 {isSubmitted &&
                     !isPreviousSubmission &&
                     renderDownloadButton(zippedFilesURL)}
