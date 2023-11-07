@@ -27,10 +27,13 @@ const sortRatesForUpdate = (
     ratesFromClient: RateFormDataType[]
 ): {
     upsertRates: RateFormEditable[]
-    disconnectRateIDs: string[]
+    disconnectRates: {
+        rateID: string
+        revisionID: string
+    }[]
 } => {
     const upsertRates = []
-    const disconnectRateIDs = []
+    const disconnectRates = []
 
     // Find rates to create or update
     for (const clientRateData of ratesFromClient) {
@@ -65,21 +68,25 @@ const sortRatesForUpdate = (
     }
 
     // Find rates to disconnect
-    for (const dbRate of ratesFromDB) {
+    for (const dbRateRev of ratesFromDB) {
         //Find a matching rate revision id in the ratesFromClient
         const matchingHPPRate = ratesFromClient.find(
-            (clientRateData) => clientRateData.id === dbRate.formData.rateID
+            (clientRateData) => clientRateData.id === dbRateRev.formData.rateID
         )
 
-        // If convertedRateData does not contain the rate revision id from DB, we push these revisions rateID in disconnectRateIDs
-        if (!matchingHPPRate && dbRate.formData.rateID) {
-            disconnectRateIDs.push(dbRate.formData.rateID)
+        // If convertedRateData does not contain the rate revision id from DB, we push these revisions id and  rate id
+        // in disconnectRates
+        if (!matchingHPPRate && dbRateRev.formData.rateID) {
+            disconnectRates.push({
+                rateID: dbRateRev.formData.rateID,
+                revisionID: dbRateRev.id,
+            })
         }
     }
 
     return {
         upsertRates,
-        disconnectRateIDs,
+        disconnectRates,
     }
 }
 
@@ -498,11 +505,24 @@ async function updateDraftContractWithRates(
                         modifiedNonRiskPaymentArrangements
                     ),
                     draftRates: {
-                        disconnect: updateRates?.disconnectRateIDs
-                            ? updateRates.disconnectRateIDs.map((rateID) => ({
-                                  id: rateID,
+                        disconnect: updateRates?.disconnectRates
+                            ? updateRates.disconnectRates.map((rate) => ({
+                                  id: rate.rateID,
                               }))
                             : [],
+                    },
+                    contract: {
+                        update: {
+                            draftRateRevisions: {
+                                disconnect: updateRates?.disconnectRates
+                                    ? updateRates.disconnectRates.map(
+                                          (rate) => ({
+                                              id: rate.revisionID,
+                                          })
+                                      )
+                                    : [],
+                            },
+                        },
                     },
                 },
             })
