@@ -6,12 +6,7 @@ import {
     mockValidStateUser,
     rateDataMock,
 } from '../../../testHelpers/apolloMocks'
-import {
-    screen,
-    waitFor,
-    waitForElementToBeRemoved,
-    within,
-} from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
 import { RateRevision } from '../../../gen/gqlClient'
 
@@ -36,6 +31,13 @@ describe('SingleRateSummarySection', () => {
                     },
                 }
             )
+        })
+        // Wait for all the documents to be in the table
+        await screen.findByText(
+            rateData.revisions[0].formData.rateDocuments[0].name
+        )
+        await screen.findByRole('link', {
+            name: 'Download all rate documents',
         })
 
         const rateName = rateData.revisions[0].formData
@@ -133,15 +135,9 @@ describe('SingleRateSummarySection', () => {
         })
 
         // Wait for all the documents to be in the table
-        await waitFor(async () => {
-            await waitForElementToBeRemoved(() => screen.findByText('loading'))
-            expect(
-                screen.getByRole('link', {
-                    name: 'Download all rate documents',
-                })
-            ).toBeInTheDocument()
-            expect(rateDocsTable).toBeInTheDocument()
-            expect(supportingDocsTable).toBeInTheDocument()
+        await screen.findByText(rateDoc.name)
+        await screen.findByRole('link', {
+            name: 'Download all rate documents',
         })
 
         const parentContractSubmission = screen.getByRole('definition', {
@@ -203,7 +199,7 @@ describe('SingleRateSummarySection', () => {
         ).toBeInTheDocument()
     })
 
-    it('should not display missing field text to CMS users', () => {
+    it('should not display missing field text to CMS users', async () => {
         const rateData = rateDataMock({
             rateType: undefined,
             rateDateCertified: undefined,
@@ -225,6 +221,14 @@ describe('SingleRateSummarySection', () => {
                 },
             }
         )
+
+        // Wait for all the documents to be in the table
+        await screen.findByText(
+            rateData.revisions[0].formData.rateDocuments[0].name
+        )
+        await screen.findByRole('link', {
+            name: 'Download all rate documents',
+        })
 
         expect(
             screen.queryByText(/You must provide this information/)
@@ -256,6 +260,14 @@ describe('SingleRateSummarySection', () => {
                 },
             }
         )
+
+        // Wait for all the documents to be in the table
+        await screen.findByText(
+            rateData.revisions[0].formData.rateDocuments[0].name
+        )
+        await screen.findByRole('link', {
+            name: 'Download all rate documents',
+        })
 
         expect(
             await screen.findAllByText(/You must provide this information/)
