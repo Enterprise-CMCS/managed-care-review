@@ -37,8 +37,7 @@ declare module '@tanstack/table-core' {
         dataTestID: string
     }
     interface FilterFns {
-        startDateFilter: FilterFn<unknown>
-        endDateFilter: FilterFn<unknown>
+        dateRangeFilter: FilterFn<unknown>
     }
 }
 
@@ -322,8 +321,7 @@ export const HealthPlanPackageTable = ({
         ),
         columns: tableColumns,
         filterFns: {
-            startDateFilter: () => true,
-            endDateFilter: () => true,
+            dateRangeFilter: () => true,
         },
         getCoreRowModel: getCoreRowModel(),
         state: {

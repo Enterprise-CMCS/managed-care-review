@@ -212,7 +212,7 @@ describe('RateReviewsTable', () => {
 
         await waitFor(() => {
             expect(
-                screen.queryByText('Displaying 3 of 3 rates')
+                screen.queryByText('Displaying 3 of 3 rate reviews')
             ).toBeInTheDocument()
         })
 
@@ -233,14 +233,14 @@ describe('RateReviewsTable', () => {
         const dateRangePickerInputs = within(
             ratingPeriodFilter
         ).queryAllByTestId('date-picker-external-input')
-        const startDateInput = dateRangePickerInputs[0]
-        const endDateInput = dateRangePickerInputs[1]
+        const startDateFromInput = dateRangePickerInputs[0]
+        const startDateToInput = dateRangePickerInputs[1]
 
-        expect(startDateInput).toBeInTheDocument()
-        expect(endDateInput).toBeInTheDocument()
+        expect(startDateFromInput).toBeInTheDocument()
+        expect(startDateToInput).toBeInTheDocument()
 
-        // filter rates by start date after 11/01/2023
-        await userEvent.type(startDateInput, '11/01/2023')
+        // filter rates by start date from 11/01/2023
+        await userEvent.type(startDateFromInput, '11/01/2023')
 
         // expect to only show rates with start dates on or after 11/01/2023
         const firstFilterRows = await screen.findAllByRole('row')
@@ -251,10 +251,12 @@ describe('RateReviewsTable', () => {
         expect(
             within(firstFilterRows[2]).getByText('rate-2-certification-name')
         ).toBeInTheDocument()
-        expect(screen.getByText('Displaying 2 of 3 rates')).toBeInTheDocument()
+        expect(
+            screen.getByText('Displaying 2 of 3 rate reviews')
+        ).toBeInTheDocument()
 
-        // filter rates by start date on or after 11/01/2023 and end date on or before 11/30/2024
-        await userEvent.type(endDateInput, '11/30/2024')
+        // filter rates by start date from 11/01/2023 to 11/30/2024
+        await userEvent.type(startDateToInput, '11/30/2023')
 
         // only one rate rate-2-certification-name should be visible
         const secondFilterRows = await screen.findAllByRole('row')
@@ -262,12 +264,14 @@ describe('RateReviewsTable', () => {
         expect(
             within(secondFilterRows[1]).getByText('rate-2-certification-name')
         ).toBeInTheDocument()
-        expect(screen.getByText('Displaying 1 of 3 rates')).toBeInTheDocument()
+        expect(
+            screen.getByText('Displaying 1 of 3 rate reviews')
+        ).toBeInTheDocument()
 
-        // filter rates by end date on or before 11/30/2024, by removing the date in start date input
-        await userEvent.clear(startDateInput)
+        // filter rates by start to before 11/30/2023 and removing the from date input
+        await userEvent.clear(startDateFromInput)
 
-        // expect to only show rates with end dates on or before 11/30/2024
+        // expect to only show rates with end dates on or before 11/30/2023
         const thirdFilterRows = await screen.findAllByRole('row')
         expect(thirdFilterRows).toHaveLength(3)
         expect(
@@ -276,6 +280,85 @@ describe('RateReviewsTable', () => {
         expect(
             within(thirdFilterRows[2]).getByText('rate-1-certification-name')
         ).toBeInTheDocument()
-        expect(screen.getByText('Displaying 2 of 3 rates')).toBeInTheDocument()
+        expect(
+            screen.getByText('Displaying 2 of 3 rate reviews')
+        ).toBeInTheDocument()
+    })
+    it('can clear date range filter with clear filter button', async () => {
+        renderWithProviders(
+            <RateReviewsTable
+                tableData={tableData()}
+                showFilters={true}
+                caption={'Test table caption'}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                    ],
+                },
+            }
+        )
+
+        await waitFor(() => {
+            expect(
+                screen.queryByText('Displaying 3 of 3 rate reviews')
+            ).toBeInTheDocument()
+        })
+
+        const accordionButton = screen.getByTestId(
+            'accordionButton_filterAccordionItems'
+        )
+
+        await waitFor(async () => {
+            //Expect filter accordion and state filter to exist
+            expect(screen.queryByTestId('accordion')).toBeInTheDocument()
+            //Expand filter accordion
+            await userEvent.click(accordionButton)
+        })
+
+        const ratingPeriodFilter = screen.getByTestId(
+            'filter-date-range-picker'
+        )
+        const dateRangePickerInputs = within(
+            ratingPeriodFilter
+        ).queryAllByTestId('date-picker-external-input')
+        const startDateFromInput = dateRangePickerInputs[0]
+        const startDateToInput = dateRangePickerInputs[1]
+
+        expect(startDateFromInput).toBeInTheDocument()
+        expect(startDateToInput).toBeInTheDocument()
+
+        // filter rates by start date from 11/01/2023
+        await userEvent.type(startDateFromInput, '11/01/2023')
+
+        // expect to only show rates with start dates on or after 11/01/2023
+        const firstFilterRows = await screen.findAllByRole('row')
+        expect(firstFilterRows).toHaveLength(3)
+        expect(
+            within(firstFilterRows[1]).getByText('rate-3-certification-name')
+        ).toBeInTheDocument()
+        expect(
+            within(firstFilterRows[2]).getByText('rate-2-certification-name')
+        ).toBeInTheDocument()
+        expect(
+            screen.getByText('Displaying 2 of 3 rate reviews')
+        ).toBeInTheDocument()
+
+        const clearFilterButton = screen.getByRole('button', {
+            name: /Clear filters/,
+        })
+        expect(clearFilterButton).toBeInTheDocument()
+
+        // Clear all filters
+        await userEvent.click(clearFilterButton)
+
+        // expect all rates to be displayed
+        expect(
+            screen.getByText('Displaying 3 of 3 rate reviews')
+        ).toBeInTheDocument()
     })
 })

@@ -6,6 +6,7 @@ import {
     getCoreRowModel,
     getFilteredRowModel,
     getSortedRowModel,
+    getFacetedMinMaxValues,
     RowData,
     useReactTable,
     getFacetedUniqueValues,
@@ -44,8 +45,7 @@ declare module '@tanstack/table-core' {
         dataTestID: string
     }
     interface FilterFns {
-        startDateFilter: FilterFn<unknown>
-        endDateFilter: FilterFn<unknown>
+        dateRangeFilter: FilterFn<unknown>
     }
 }
 
@@ -68,6 +68,8 @@ export type RateTableProps = {
     showFilters?: boolean
     caption?: string
 }
+
+type RatingPeriodFilterType = [string, string] | []
 
 function rateURL(rate: RateInDashboardType): string {
     return `/rates/${rate.id}`
@@ -147,37 +149,39 @@ const getSelectedFiltersFromColumnState = (
 const getDateRangeFilterFromUrl = (
     columnFilters: ColumnFiltersState,
     id: string
-): string | undefined => {
+): RatingPeriodFilterType => {
     const filterLookup: { [key: string]: string[] } = {}
     columnFilters.forEach(
         (filter) => (filterLookup[filter.id] = filter.value as string[])
     )
 
     if (filterLookup[id]) {
-        return filterLookup[id][0]
+        return [filterLookup[id][0], filterLookup[id][1]]
     }
-    return undefined
+
+    return ['', '']
 }
 
-// Even though both date filters are similar we don't want to combine into one function because we don't always know
-// what the columnId will be. These could be used on the contract table which have different column names, so we cannot
-// use column names to check greater or less than.
-const startDateFilter: FilterFn<unknown> = (row, columnId, value) => {
-    if (!value) {
+const dateRangeFilter: FilterFn<unknown> = (
+    row,
+    columnId,
+    value: RatingPeriodFilterType
+) => {
+    if (value.length === 0) {
         return true
     }
+    const fromDate = new Date(value[0]).getTime()
+    const toDate = new Date(value[1]).getTime()
     const columnDate = new Date(row.getValue(columnId)).getTime()
-    const filterDate = new Date(value).getTime()
-    return columnDate >= filterDate
-}
 
-const endDateFilter: FilterFn<unknown> = (row, columnId, value, addMeta) => {
-    if (!value) {
-        return true
-    }
-    const columnDate = new Date(row.getValue(columnId)).getTime()
-    const filterDate = new Date(value).getTime()
-    return columnDate <= filterDate
+    const ratingPeriodFilterResults = [
+        //If date is greater than rating period TO filter date. Return true if filter date is not valud
+        Number.isNaN(fromDate) ? true : columnDate >= fromDate,
+        //If date is greater than rating period FROM filter date. Return true if filter date is not valud
+        Number.isNaN(toDate) ? true : columnDate <= toDate,
+    ]
+
+    return ratingPeriodFilterResults.every((result) => result)
 }
 
 type TableVariantConfig = {
@@ -299,7 +303,7 @@ export const RateReviewsTable = ({
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-date`,
                 },
-                filterFn: 'startDateFilter',
+                filterFn: 'dateRangeFilter',
             }),
             columnHelper.accessor('rateDateEnd', {
                 id: 'rateDateEnd',
@@ -311,7 +315,6 @@ export const RateReviewsTable = ({
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-date`,
                 },
-                filterFn: 'endDateFilter',
             }),
             columnHelper.accessor('submittedAt', {
                 header: 'Submission date',
@@ -333,8 +336,7 @@ export const RateReviewsTable = ({
         ),
         columns: tableColumns,
         filterFns: {
-            startDateFilter: startDateFilter,
-            endDateFilter: endDateFilter,
+            dateRangeFilter: dateRangeFilter,
         },
         state: {
             columnFilters,
@@ -344,6 +346,7 @@ export const RateReviewsTable = ({
         getFacetedUniqueValues: getFacetedUniqueValues(),
         getFilteredRowModel: getFilteredRowModel(),
         getSortedRowModel: getSortedRowModel(),
+        getFacetedMinMaxValues: getFacetedMinMaxValues(),
     })
 
     const filteredRows = reactTable.getRowModel().rows
@@ -357,9 +360,6 @@ export const RateReviewsTable = ({
     ) as Column<RateInDashboardType>
     const rateDateStartColumn = reactTable.getColumn(
         'rateDateStart'
-    ) as Column<RateInDashboardType>
-    const rateDateEndColumn = reactTable.getColumn(
-        'rateDateEnd'
     ) as Column<RateInDashboardType>
 
     // Filter options based on table data instead of static list of options.
@@ -396,22 +396,37 @@ export const RateReviewsTable = ({
     }
 
     const updateRatingPeriodFilter = (
-        date: string | undefined,
-        filterName: 'rateDateStart' | 'rateDateEnd'
+        date: [string | undefined, string | undefined],
+        filterColumn: Column<RateInDashboardType>,
+        elementName: string
     ) => {
-        const filterColumn =
-            filterName === 'rateDateStart'
-                ? rateDateStartColumn
-                : rateDateEndColumn
-
-        lastClickedElement.current = `${filterName}Picker`
+        lastClickedElement.current = elementName
         setTableCaption(null)
 
-        if (!date) {
-            filterColumn.setFilterValue([])
-        } else {
-            filterColumn.setFilterValue([date])
-        }
+        filterColumn.setFilterValue(
+            (value: RatingPeriodFilterType): RatingPeriodFilterType => {
+                const prevDates = value ?? ['', '']
+                const toDate =
+                    date[0] !== undefined
+                        ? date[0]
+                        : prevDates[0] !== undefined
+                        ? prevDates[0]
+                        : ''
+                const fromDate =
+                    date[1] !== undefined
+                        ? date[1]
+                        : prevDates[1] !== undefined
+                        ? prevDates[1]
+                        : ''
+                const newDates = [toDate, fromDate] as RatingPeriodFilterType
+
+                if (newDates.every((date) => !date)) {
+                    return []
+                }
+
+                return newDates
+            }
+        )
     }
 
     const clearFilters = () => {
@@ -518,31 +533,33 @@ export const RateReviewsTable = ({
                                     startDateHint="mm/dd/yyyy"
                                     startDateLabel="From"
                                     startDatePickerProps={{
-                                        id: 'rateDateStartPicker',
-                                        name: 'rateDateStartPicker',
+                                        id: 'ratingPeriodStartFrom',
+                                        name: 'ratingPeriodStartFrom',
                                         defaultValue: getDateRangeFilterFromUrl(
                                             defaultColumnFilters,
                                             'rateDateStart'
-                                        ),
+                                        )[0],
                                         onChange: (date) =>
                                             updateRatingPeriodFilter(
-                                                date,
-                                                'rateDateStart'
+                                                [date, undefined],
+                                                rateDateStartColumn,
+                                                'ratingPeriodStartFrom'
                                             ),
                                     }}
                                     endDateHint="mm/dd/yyyy"
                                     endDateLabel="To"
                                     endDatePickerProps={{
-                                        id: 'rateDateEndPicker',
-                                        name: 'rateDateEndPicker',
+                                        id: 'ratingPeriodStartTo',
+                                        name: 'ratingPeriodStartTo',
                                         defaultValue: getDateRangeFilterFromUrl(
                                             defaultColumnFilters,
-                                            'rateDateEnd'
-                                        ),
+                                            'rateDateStart'
+                                        )[1],
                                         onChange: (date) =>
                                             updateRatingPeriodFilter(
-                                                date,
-                                                'rateDateEnd'
+                                                [undefined, date],
+                                                rateDateStartColumn,
+                                                'ratingPeriodStartTo'
                                             ),
                                     }}
                                 />

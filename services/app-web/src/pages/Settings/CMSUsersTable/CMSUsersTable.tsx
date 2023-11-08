@@ -31,8 +31,7 @@ declare module '@tanstack/table-core' {
         dataTestID: string
     }
     interface FilterFns {
-        startDateFilter: FilterFn<unknown>
-        endDateFilter: FilterFn<unknown>
+        dateRangeFilter: FilterFn<unknown>
     }
 }
 
@@ -146,8 +145,7 @@ function CMSUserTableWithData({
     const table = useReactTable({
         data: cmsUsers,
         filterFns: {
-            startDateFilter: () => false,
-            endDateFilter: () => false,
+            dateRangeFilter: () => true,
         },
         columns,
         getCoreRowModel: getCoreRowModel(),
