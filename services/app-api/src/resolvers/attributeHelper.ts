@@ -8,7 +8,10 @@ export function setResolverDetailsOnActiveSpan(
     user: Context['user'],
     span: Context['span']
 ): void {
-    if (!span) return
+    if (!span) {
+        console.info(`No span set on ${name} call`)
+        return
+    }
     span.setAttributes({
         [SemanticAttributes.ENDUSER_ID]: user.email,
         [SemanticAttributes.ENDUSER_ROLE]: user.role,
