@@ -411,18 +411,8 @@ export const RateReviewsTable = ({
                 // This handles the existing `from` or `to` input date when updating the opposite input. When calling
                 // this function, the updated input has a value and the other should be undefined. If both are present,
                 // it will set both.
-                const toDate =
-                    date[0] !== undefined
-                        ? date[0]
-                        : prevDates[0] !== undefined
-                        ? prevDates[0]
-                        : ''
-                const fromDate =
-                    date[1] !== undefined
-                        ? date[1]
-                        : prevDates[1] !== undefined
-                        ? prevDates[1]
-                        : ''
+                const toDate = date[0] ?? prevDates[0]
+                const fromDate = date[1] ?? prevDates[1]
                 const newDates = [toDate, fromDate] as RatingPeriodFilterType
 
                 if (newDates.every((date) => !date)) {
