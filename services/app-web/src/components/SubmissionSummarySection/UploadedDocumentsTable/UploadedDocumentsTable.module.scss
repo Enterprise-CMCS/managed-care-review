@@ -4,11 +4,6 @@
 .uploadedDocumentsTable {
     width: 100%;
 
-    caption {
-        text-align: left;
-        margin-bottom: units(2);
-        margin-top: units(2)
-    }
 
     th {
         font-size: size('body', '2xs');
@@ -52,6 +47,13 @@
 
 .docTagContainer {
     margin-right: 5px !important;
+}
+
+caption {
+    text-align: left;
+    margin-bottom: units(2);
+    margin-top: units(2);
+    font-weight: 700;
 }
 
 .missingInfo {
