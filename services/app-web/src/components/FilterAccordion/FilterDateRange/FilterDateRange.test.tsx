@@ -123,6 +123,7 @@ describe('FilterDateRange', () => {
     })
 
     it('shows error on invalid date input', async () => {
+        const ref = React.createRef<FilterDateRangeRef>()
         const onStartChange = jest.fn((date?: string) => date)
         const onEndChange = jest.fn((date?: string) => date)
         renderWithProviders(
@@ -137,6 +138,7 @@ describe('FilterDateRange', () => {
                     name: 'ratingPeriodEndPicker',
                     onChange: onEndChange,
                 }}
+                ref={ref}
             />,
             {
                 apolloProvider: {
@@ -183,6 +185,30 @@ describe('FilterDateRange', () => {
         expect(endDateInput).toHaveAttribute('value', '11/11/20434')
 
         // expect two date errors to be shown
+        expect(
+            within(filterDateRange).queryAllByText(
+                'You must enter a valid date'
+            )
+        ).toHaveLength(2)
+
+        // use the ref to call clearFilter function.
+        await waitFor(() => {
+            ref?.current?.clearFilter()
+        })
+
+        // expect no date errors to be shown
+        expect(
+            within(filterDateRange).queryAllByText(
+                'You must enter a valid date'
+            )
+        ).toHaveLength(0)
+
+        // expect error to show when start date is greater than end date
+        await userEvent.type(endDateInput, '11/11/2000')
+        await userEvent.type(startDateInput, '11/11/2043')
+        await userEvent.tab()
+
+        // expect no date errors to be shown
         expect(
             within(filterDateRange).queryAllByText(
                 'You must enter a valid date'

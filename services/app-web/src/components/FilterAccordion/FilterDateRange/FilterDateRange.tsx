@@ -40,10 +40,6 @@ export type FilterDateRangeRef = {
     clearFilter: () => void
 }
 
-type DatePickerOnBlurType =
-    | React.FocusEvent<HTMLInputElement>
-    | React.FocusEvent<HTMLDivElement>
-
 export const FilterDateRange = forwardRef(
     (
         props: FilterDateRangePropType & JSX.IntrinsicElements['div'],
@@ -202,13 +198,17 @@ export const FilterDateRange = forwardRef(
             date.length === 10 && dayjs(date).isValid()
 
         // Validate start date is less than or equal to end date.
-        const isValidateDateRange = ({
+        const validateDateRange = ({
             startDate,
             endDate,
         }: {
             startDate: Date
             endDate: Date
-        }): boolean => startDate.getTime() <= endDate.getTime()
+        }): void => {
+            const isValidRange = startDate.getTime() <= endDate.getTime()
+            setShowStartDateError(!isValidRange)
+            setShowEndDateError(!isValidRange)
+        }
 
         // Validate when valid date format is inputted and return if valid. If date is undefined also return; this is
         // when the date is cleared out of the input.
@@ -230,42 +230,21 @@ export const FilterDateRange = forwardRef(
             }
         }
 
-        const onStartDateBlurValidation = (event: DatePickerOnBlurType) => {
-            const e = event as React.FocusEvent<HTMLInputElement>
-            const date = e.target.value
-            if (date.length > 0) {
-                // If end date exists validate date ranges else just validate start date
-                if (
-                    endDateInputRef?.current?.value &&
-                    isValidateDate(date.trimEnd())
-                ) {
-                    const startDate = new Date(date)
-                    const endDate = new Date(endDateInputRef.current.value)
-                    setShowStartDateError(
-                        !isValidateDateRange({ startDate, endDate })
-                    )
-                } else {
-                    setShowStartDateError(!isValidateDate(date.trimEnd()))
-                }
-            }
-        }
+        const onBlurValidation = () => {
+            const startDate = startDateInputRef?.current?.value ?? ''
+            const endDate = endDateInputRef?.current?.value ?? ''
 
-        const onEndDateBlurValidation = (event: DatePickerOnBlurType) => {
-            const e = event as React.FocusEvent<HTMLInputElement>
-            const date = e.target.value
-            if (date.length > 0) {
-                // If start date exists validate date ranges else just validate end date
-                if (
-                    startDateInputRef?.current?.value &&
-                    isValidateDate(date.trimEnd())
-                ) {
-                    const startDate = new Date(startDateInputRef.current.value)
-                    const endDate = new Date(date)
-                    setShowEndDateError(
-                        !isValidateDateRange({ startDate, endDate })
-                    )
-                } else {
-                    setShowEndDateError(!isValidateDate(date.trimEnd()))
+            if (isValidateDate(startDate) && isValidateDate(endDate)) {
+                validateDateRange({
+                    startDate: new Date(startDate),
+                    endDate: new Date(endDate),
+                })
+            } else {
+                if (startDate) {
+                    setShowStartDateError(!isValidateDate(startDate))
+                }
+                if (endDate) {
+                    setShowEndDateError(!isValidateDate(endDate))
                 }
             }
         }
@@ -304,7 +283,7 @@ export const FilterDateRange = forwardRef(
                         onChange={onStartDateChangeValidation}
                         maxDate={getMaxStartDate()}
                         inputRef={startDateInputRef}
-                        onBlur={onStartDateBlurValidation}
+                        onBlur={onBlurValidation}
                     />
                 </FormGroup>
 
@@ -336,7 +315,7 @@ export const FilterDateRange = forwardRef(
                         onChange={onEndDateChangeValidation}
                         minDate={getMinEndDate()}
                         inputRef={endDateInputRef}
-                        onBlur={onEndDateBlurValidation}
+                        onBlur={onBlurValidation}
                     />
                 </FormGroup>
             </div>
