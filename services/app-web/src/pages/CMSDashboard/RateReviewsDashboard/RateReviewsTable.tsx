@@ -406,6 +406,11 @@ export const RateReviewsTable = ({
         filterColumn.setFilterValue(
             (value: RatingPeriodFilterType): RatingPeriodFilterType => {
                 const prevDates = value ?? ['', '']
+                // When updating, we need to set either the `from` or `to` in that array while preserving the opposite input
+                // value to not clear it out.
+                // This handles the existing `from` or `to` input date when updating the opposite input. When calling
+                // this function, the updated input has a value and the other should be undefined. If both are present,
+                // it will set both.
                 const toDate =
                     date[0] !== undefined
                         ? date[0]
