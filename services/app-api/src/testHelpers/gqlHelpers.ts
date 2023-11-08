@@ -427,8 +427,8 @@ const fetchTestHealthPlanPackageById = async (
 
 const createTestQuestion = async (
     server: ApolloServer,
-    pkgID: string,
-    questionData?: Omit<CreateQuestionInput, 'pkgID'>
+    contractID: string,
+    questionData?: Omit<CreateQuestionInput, 'contractID'>
 ): Promise<CreateQuestionPayload> => {
     const question = questionData || {
         documents: [
@@ -442,7 +442,7 @@ const createTestQuestion = async (
         query: CREATE_QUESTION,
         variables: {
             input: {
-                pkgID,
+                contractID,
                 ...question,
             },
         },
@@ -462,13 +462,13 @@ const createTestQuestion = async (
 
 const indexTestQuestions = async (
     server: ApolloServer,
-    pkgID: string
+    contractID: string
 ): Promise<IndexQuestionsPayload> => {
     const indexQuestionsResult = await server.executeOperation({
         query: INDEX_QUESTIONS,
         variables: {
             input: {
-                pkgID: pkgID,
+                contractID,
             },
         },
     })

@@ -91,7 +91,7 @@ describe('updateContract', () => {
 
         expect(updateResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(updateResult.errors[0].message).toBe(
-            `Can not update a contract has not been submitted. Fails for contract with ID: ${draftSubmission.id}`
+            `Can not update a contract has not been submitted or unlocked. Fails for contract with ID: ${draftSubmission.id}`
         )
     })
 

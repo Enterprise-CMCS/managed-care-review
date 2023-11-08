@@ -22,10 +22,10 @@ import { AuthenticatedRouteWrapper } from '../Wrapper/AuthenticatedRouteWrapper'
 import { Error404 } from '../Errors/Error404Page'
 import { Help } from '../Help/Help'
 import { Landing } from '../Landing/Landing'
+import { MccrsId } from '../MccrsId/MccrsId'
 import { NewStateSubmissionForm, StateSubmissionForm } from '../StateSubmission'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
-import { Reports } from '../../components/Reports/Reports'
 import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
 import { featureFlags } from '../../common-code/featureFlags'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
@@ -158,6 +158,7 @@ const CMSUserRoutes = ({
         featureFlags.RATE_REVIEWS_DASHBOARD.flag,
         featureFlags.RATE_REVIEWS_DASHBOARD.defaultValue
     )
+
     return (
         <AuthenticatedRouteWrapper authMode={authMode} setAlert={setAlert}>
             <Routes>
@@ -213,6 +214,11 @@ const CMSUserRoutes = ({
                 />
 
                 <Route
+                    path={RoutesRecord.SUBMISSIONS_MCCRSID}
+                    element={<MccrsId />}
+                />
+
+                <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
                     element={<SubmissionRevisionSummary />}
                 />
@@ -222,7 +228,6 @@ const CMSUserRoutes = ({
                         element={<GraphQLExplorer />}
                     />
                 )}
-                <Route path={RoutesRecord.REPORTS} element={<Reports />} />
                 <Route path={RoutesRecord.SETTINGS} element={<Settings />} />
                 {UniversalRoutes}
                 <Route path="*" element={<Error404 />} />

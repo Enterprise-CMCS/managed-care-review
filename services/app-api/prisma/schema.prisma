@@ -13,7 +13,6 @@ model HealthPlanPackageTable {
   stateCode String
   state     State                     @relation(fields: [stateCode], references: [stateCode])
   revisions HealthPlanRevisionTable[]
-  questions Question[]
 }
 
 model ProtoMigrationsTable {
@@ -41,10 +40,14 @@ model ContractTable {
 
   mccrsID     String?
   stateCode   String
-  state       State  @relation(fields: [stateCode], references: [stateCode])
+  state       State   @relation(fields: [stateCode], references: [stateCode])
   stateNumber Int
 
+  questions Question[]
+
   revisions          ContractRevisionTable[]
+  // This relationship is a scam. We never call it in our code but Prisma
+  // requires that there be an inverse to RateRevision.draftContracts which we do use
   draftRateRevisions RateRevisionTable[]
 
   sharedRateRevisions RateRevisionTable[] @relation(name: "SharedRateRevisions")
@@ -60,6 +63,8 @@ model RateTable {
   stateNumber Int
 
   revisions              RateRevisionTable[]
+  // This relationship is a scam. We never call it in our code but Prisma
+  // requires that there be an inverse to ContractRevision.draftRates which we do use
   draftContractRevisions ContractRevisionTable[]
 }
 
@@ -68,8 +73,8 @@ model ContractRevisionTable {
   contractID String
   contract   ContractTable @relation(fields: [contractID], references: [id])
 
-  rateRevisions                                RateRevisionsOnContractRevisionsTable[]
-  draftRates                                   RateTable[]
+  rateRevisions RateRevisionsOnContractRevisionsTable[]
+  draftRates    RateTable[]
 
   unlockInfoID String?
   unlockInfo   UpdateInfoTable? @relation("unlockContractInfo", fields: [unlockInfoID], references: [id])
@@ -122,30 +127,30 @@ model RateRevisionTable {
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @default(now()) @updatedAt
   unlockInfoID String?
-  unlockInfo   UpdateInfoTable? @relation("unlockRateInfo", fields: [unlockInfoID], references: [id])
+  unlockInfo   UpdateInfoTable? @relation("unlockRateInfo", fields: [unlockInfoID], references: [id], onDelete: Cascade)
   submitInfoID String?
-  submitInfo   UpdateInfoTable? @relation("submitRateInfo", fields: [submitInfoID], references: [id])
+  submitInfo   UpdateInfoTable? @relation("submitRateInfo", fields: [submitInfoID], references: [id], onDelete: Cascade)
 
-  rateType                       RateType?
-  rateCapitationType             RateCapitationType?
-  rateDocuments                  RateDocument[]
-  supportingDocuments            RateSupportingDocument[]
-  rateDateStart                  DateTime?                  @db.Date
-  rateDateEnd                    DateTime?                  @db.Date
-  rateDateCertified              DateTime?                  @db.Date
-  amendmentEffectiveDateStart    DateTime?                  @db.Date
-  amendmentEffectiveDateEnd      DateTime?                  @db.Date
-  rateProgramIDs                 String[]
-  rateCertificationName          String?
-  certifyingActuaryContacts      ActuaryContact[]           @relation(name: "CertifyingActuaryOnRateRevision")
-  addtlActuaryContacts           ActuaryContact[]           @relation(name: "AddtlActuaryOnRateRevision")
-  actuaryCommunicationPreference ActuaryCommunication?
-  contractsWithSharedRateRevision ContractTable[] @relation(name: "SharedRateRevisions")
+  rateType                        RateType?
+  rateCapitationType              RateCapitationType?
+  rateDocuments                   RateDocument[]
+  supportingDocuments             RateSupportingDocument[]
+  rateDateStart                   DateTime?                @db.Date
+  rateDateEnd                     DateTime?                @db.Date
+  rateDateCertified               DateTime?                @db.Date
+  amendmentEffectiveDateStart     DateTime?                @db.Date
+  amendmentEffectiveDateEnd       DateTime?                @db.Date
+  rateProgramIDs                  String[]
+  rateCertificationName           String?
+  certifyingActuaryContacts       ActuaryContact[]         @relation(name: "CertifyingActuaryOnRateRevision")
+  addtlActuaryContacts            ActuaryContact[]         @relation(name: "AddtlActuaryOnRateRevision")
+  actuaryCommunicationPreference  ActuaryCommunication?
+  contractsWithSharedRateRevision ContractTable[]          @relation(name: "SharedRateRevisions")
 }
 
 model RateRevisionsOnContractRevisionsTable {
   rateRevisionID     String
-  rateRevision       RateRevisionTable     @relation(fields: [rateRevisionID], references: [id])
+  rateRevision       RateRevisionTable     @relation(fields: [rateRevisionID], references: [id], onDelete: Cascade)
   contractRevisionID String
   contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
   validAfter         DateTime
@@ -180,8 +185,8 @@ model ActuaryContact {
   actuarialFirmOther          String?
   rateWithCertifyingActuaryID String?
   rateWithAddtlActuaryID      String?
-  rateActuaryCertifying       RateRevisionTable? @relation(name: "CertifyingActuaryOnRateRevision", fields: [rateWithCertifyingActuaryID], references: [id])
-  rateActuaryAddtl            RateRevisionTable? @relation(name: "AddtlActuaryOnRateRevision", fields: [rateWithAddtlActuaryID], references: [id])
+  rateActuaryCertifying       RateRevisionTable? @relation(name: "CertifyingActuaryOnRateRevision", fields: [rateWithCertifyingActuaryID], references: [id], onDelete: Cascade)
+  rateActuaryAddtl            RateRevisionTable? @relation(name: "AddtlActuaryOnRateRevision", fields: [rateWithAddtlActuaryID], references: [id], onDelete: Cascade)
 }
 
 model ContractDocument {
@@ -217,7 +222,7 @@ model RateDocument {
   s3URL          String
   sha256         String
   rateRevisionID String
-  rateRevision   RateRevisionTable @relation(fields: [rateRevisionID], references: [id])
+  rateRevision   RateRevisionTable @relation(fields: [rateRevisionID], references: [id], onDelete: Cascade)
 }
 
 model RateSupportingDocument {
@@ -229,7 +234,7 @@ model RateSupportingDocument {
   s3URL          String
   sha256         String
   rateRevisionID String
-  rateRevision   RateRevisionTable @relation(fields: [rateRevisionID], references: [id])
+  rateRevision   RateRevisionTable @relation(fields: [rateRevisionID], references: [id], onDelete: Cascade)
 }
 
 model StateContact {
@@ -287,12 +292,12 @@ model UserAudit {
 }
 
 model Question {
-  id            String                 @id @default(uuid())
-  createdAt     DateTime               @default(now())
-  updatedAt     DateTime               @default(now()) @updatedAt
-  pkgID         String
-  pkg           HealthPlanPackageTable @relation(fields: [pkgID], references: [id])
-  addedBy       User                   @relation(fields: [addedByUserID], references: [id])
+  id            String             @id @default(uuid())
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @default(now()) @updatedAt
+  contractID    String
+  contract      ContractTable      @relation(fields: [contractID], references: [id])
+  addedBy       User               @relation(fields: [addedByUserID], references: [id])
   addedByUserID String
   division      Division
   documents     QuestionDocument[]
@@ -323,10 +328,10 @@ model QuestionResponse {
   id            String                     @id @default(uuid())
   createdAt     DateTime                   @default(now())
   updatedAt     DateTime                   @updatedAt
-  question      Question                   @relation(fields: [questionID], references: [id])
-  addedBy       User                       @relation(fields: [addedByUserID], references: [id])
   questionID    String
+  question      Question                   @relation(fields: [questionID], references: [id])
   addedByUserID String
+  addedBy       User                       @relation(fields: [addedByUserID], references: [id])
   documents     QuestionResponseDocument[]
 }
 

@@ -15,7 +15,7 @@ describe('ContactsSummarySection', () => {
         renderWithProviders(
             <ContactsSummarySection
                 submission={draftSubmission}
-                navigateTo="contacts"
+                editNavigateTo="contacts"
             />
         )
 
@@ -54,7 +54,7 @@ describe('ContactsSummarySection', () => {
         renderWithProviders(
             <ContactsSummarySection
                 submission={draftSubmission}
-                navigateTo="contacts"
+                editNavigateTo="contacts"
             />
         )
 

@@ -4,7 +4,6 @@ import {
     CreateQuestionResponseDocument,
     CreateQuestionInput,
     CreateQuestionMutation,
-    Question as QuestionType,
     QuestionResponse as QuestionResponseType,
     FetchHealthPlanPackageWithQuestionsDocument,
     FetchHealthPlanPackageWithQuestionsQuery,
@@ -25,8 +24,8 @@ const createQuestionSuccess = (
     question?: CreateQuestionInput | Partial<CreateQuestionInput>
 ): MockedResponse<CreateQuestionMutation> => {
     const defaultQuestionInput: CreateQuestionInput = {
-        dueDate: new Date('11-11-2100'),
-        pkgID: '123-abc',
+        // dueDate: new Date('11-11-2100'),
+        contractID: '123-abc',
         documents: [
             {
                 name: 'Test document',
@@ -47,7 +46,7 @@ const createQuestionSuccess = (
                 createQuestion: {
                     question: {
                         id: 'test123',
-                        pkgID: testInput.pkgID,
+                        contractID: testInput.contractID,
                         createdAt: new Date(),
                         addedBy: mockValidCMSUser(),
                         division: 'DMCO',
@@ -60,15 +59,18 @@ const createQuestionSuccess = (
 }
 
 const createQuestionNetworkFailure = (
-    question?: QuestionType | Partial<QuestionType>
+    input: CreateQuestionInput
 ): MockedResponse<CreateQuestionMutation> => {
     return {
-        request: { query: CreateQuestionDocument },
+        request: {
+            query: CreateQuestionDocument,
+            variables: { input },
+        },
         error: new Error('A network error occurred'),
     }
 }
 const createQuestionResponseNetworkFailure = (
-    question?: QuestionResponseType | Partial<QuestionResponseType>
+    _question?: QuestionResponseType | Partial<QuestionResponseType>
 ): MockedResponse<CreateQuestionMutation> => {
     return {
         request: { query: CreateQuestionResponseDocument },

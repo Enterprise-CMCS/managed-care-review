@@ -18,10 +18,12 @@ import {
     DivisionType,
     adminUser,
     contractOnlyData,
+    contractAndRatesData,
     newSubmissionInput,
     CMSUserType,
 } from '../utils/apollo-test-utils'
 import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
+import {UnlockedHealthPlanFormDataType} from 'app-web/src/common-code/healthPlanFormDataType';
 
 const createAndSubmitContractOnlyPackage = async (
     apolloClient: ApolloClient<NormalizedCacheObject>
@@ -46,7 +48,7 @@ const createAndSubmitContractOnlyPackage = async (
         ...contractOnlyData(),
     }
 
-    const formDataProto = domainToBase64(fullFormData)
+    const formDataProto = domainToBase64(fullFormData as UnlockedHealthPlanFormDataType)
 
     await apolloClient.mutate({
         mutation: UpdateHealthPlanFormDataDocument,
@@ -70,6 +72,53 @@ const createAndSubmitContractOnlyPackage = async (
 
     return submission.data.submitHealthPlanPackage.pkg
 }
+
+const createAndSubmitContractWithRates = async (
+    apolloClient: ApolloClient<NormalizedCacheObject>
+): Promise<HealthPlanPackage> => {
+    const newSubmission1 = await apolloClient.mutate({
+        mutation: CreateHealthPlanPackageDocument,
+        variables: {
+            input: newSubmissionInput({submissionType: 'CONTRACT_AND_RATES'}),
+        },
+    })
+    const pkg1 = newSubmission1.data.createHealthPlanPackage.pkg
+    const pkg1FirstRev = pkg1.revisions[0].node
+
+    const formData1 = base64ToDomain(pkg1FirstRev.formDataProto)
+    if (formData1 instanceof Error) {
+        throw new Error(formData1.message)
+    }
+
+    const fullFormData1 = {
+        ...formData1,
+        ...contractAndRatesData(),
+    }
+
+    const formDataProto = domainToBase64(fullFormData1 as UnlockedHealthPlanFormDataType)
+
+    await apolloClient.mutate({
+        mutation: UpdateHealthPlanFormDataDocument,
+        variables: {
+            input: {
+                healthPlanFormData: formDataProto,
+                pkgID: pkg1.id,
+            },
+        },
+    })
+
+    const submission1 = await apolloClient.mutate({
+        mutation: SubmitHealthPlanPackageDocument,
+        variables: {
+            input: {
+                pkgID: pkg1.id,
+                submittedReason: 'Submit package for Rates Dashboard tests',
+            },
+        },
+    })
+    return submission1.data.submitHealthPlanPackage.pkg
+}
+
 
 const assignCmsDivision = async (
     apolloClient: ApolloClient<NormalizedCacheObject>,
@@ -123,6 +172,19 @@ Cypress.Commands.add(
                 schema,
                 stateUser,
                 createAndSubmitContractOnlyPackage
+            )
+        )
+)
+
+
+Cypress.Commands.add(
+    'apiCreateAndSubmitContractWithRates',
+    (stateUser): Cypress.Chainable<HealthPlanPackage> =>
+        cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
+            apolloClientWrapper(
+                schema,
+                stateUser,
+                createAndSubmitContractWithRates
             )
         )
 )

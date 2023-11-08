@@ -282,7 +282,7 @@ export const RateReviewsTable = ({
             }),
             columnHelper.accessor('rateType', {
                 id: 'rateType',
-                header: 'Rate type',
+                header: 'Rate Type',
                 cell: (info) => <span>{info.getValue()}</span>,
                 meta: {
                     dataTestID: 'rate-type',
@@ -379,7 +379,7 @@ export const RateReviewsTable = ({
     const submissionCount = !showFilters
         ? `${tableData.length} ${pluralize('rate', tableData.length)}`
         : `Displaying ${filteredRows.length} of ${tableData.length} ${pluralize(
-              'rate',
+              'rate review',
               tableData.length
           )}`
 
@@ -560,7 +560,7 @@ export const RateReviewsTable = ({
                         </div>
                     </div>
                     <Table fullWidth>
-                        <thead>
+                        <thead data-testid="rate-reviews-table">
                             {reactTable.getHeaderGroups().map((headerGroup) => (
                                 <tr key={headerGroup.id}>
                                     {headerGroup.headers.map((header) => (

@@ -36,7 +36,6 @@ const CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     DASHBOARD_RATES: 'table',
     HELP: 'glossary',
     GRAPHQL_EXPLORER: 'dev',
-    REPORTS: 'table',
     SETTINGS: 'table',
     RATES_SUMMARY: 'summary',
     SUBMISSIONS: 'form',
@@ -51,6 +50,7 @@ const CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_SUMMARY: 'summary',
     SUBMISSIONS_REVISION: 'summary',
     SUBMISSIONS_QUESTIONS_AND_ANSWERS: 'summary',
+    SUBMISSIONS_MCCRSID: 'form',
     SUBMISSIONS_UPLOAD_QUESTION: 'form',
     SUBMISSIONS_UPLOAD_RESPONSE: 'form',
     UNKNOWN_ROUTE: '404',
@@ -83,7 +83,7 @@ const getTealiumPageName = ({
     user,
 }: {
     route: RouteT | 'UNKNOWN_ROUTE'
-    heading: string | undefined
+    heading: string | React.ReactElement | undefined
     user: User | undefined
 }) => {
     const addSubmissionNameHeading =
@@ -95,7 +95,7 @@ const getTealiumPageName = ({
         title,
     }: {
         title: string
-        heading?: string
+        heading?: string | React.ReactElement
     }) => {
         const headingPrefix =
             heading && addSubmissionNameHeading ? `${heading}: ` : ''

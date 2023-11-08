@@ -26,7 +26,7 @@ WithAction.args = {
     submission: mockContractAndRatesDraft(),
     //TODO: Use better mock program data
     statePrograms: [],
-    navigateTo: 'submission-type',
+    editNavigateTo: 'submission-type',
 }
 
 export const WithoutAction = Template.bind({})
