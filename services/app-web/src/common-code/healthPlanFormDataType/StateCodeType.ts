@@ -17,6 +17,7 @@ const StateCodes = [
     'IL',
     'IN',
     'KS',
+    'KY',
     'LA',
     'MA',
     'MD',
@@ -53,7 +54,7 @@ const StateCodes = [
     'WY',
 ] as const
 
-type StateCodeType = typeof StateCodes[number] // iterable union type
+type StateCodeType = (typeof StateCodes)[number] // iterable union type
 
 function isValidStateCode(
     maybeStateCode: string
