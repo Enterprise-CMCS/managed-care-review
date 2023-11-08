@@ -29,7 +29,7 @@ export type ValidationStatus = 'error' | 'success'
 
 export type DatePickerRef = {
     clearInput: () => void
-}
+} & HTMLInputElement
 
 type BaseDatePickerProps = {
     id: string
@@ -49,7 +49,7 @@ type BaseDatePickerProps = {
             | React.FocusEvent<HTMLDivElement>
     ) => void
     i18n?: DatePickerLocalization
-    inputRef?: Ref<DatePickerRef>
+    inputRef?: Ref<DatePickerRef | undefined>
 }
 
 export type DatePickerProps = BaseDatePickerProps &
@@ -80,11 +80,17 @@ export const DatePicker = ({
     const datePickerEl = React.useRef<HTMLDivElement>(null)
     const externalInputEl = React.useRef<HTMLInputElement | null>(null)
 
-    React.useImperativeHandle(inputRef, () => ({
-        clearInput: () => {
-            handleClearInput()
+    React.useImperativeHandle(inputRef, () => {
+        if (externalInputEl.current) {
+            return {
+                clearInput: () => {
+                    handleClearInput()
+                },
+                ...externalInputEl.current,
+            }
         }
-    }))
+        return undefined
+    })
 
     const isError = validationStatus === 'error'
     const isSuccess = validationStatus === 'success'

@@ -198,13 +198,22 @@ export const FilterDateRange = forwardRef(
         const endDatePickerLabelId = `${endDatePickerProps.id}-label`
         const endDatePickerHintId = `${endDatePickerProps.id}-hint`
 
-        const validateDate = (date: string) =>
+        const isValidateDate = (date: string) =>
             date.length === 10 && dayjs(date).isValid()
+
+        // Validate start date is less than or equal to end date.
+        const isValidateDateRange = ({
+            startDate,
+            endDate,
+        }: {
+            startDate: Date
+            endDate: Date
+        }): boolean => startDate.getTime() <= endDate.getTime()
 
         // Validate when valid date format is inputted and return if valid. If date is undefined also return; this is
         // when the date is cleared out of the input.
         const onStartDateChangeValidation = (date?: string) => {
-            if (date && validateDate(date)) {
+            if (date && isValidateDate(date)) {
                 setShowStartDateError(false)
                 startDatePickerOnChange(formatUserInputDate(date.trimEnd()))
             } else if (!date) {
@@ -213,7 +222,7 @@ export const FilterDateRange = forwardRef(
         }
 
         const onEndDateChangeValidation = (date?: string) => {
-            if (date && validateDate(date)) {
+            if (date && isValidateDate(date)) {
                 setShowEndDateError(false)
                 endDatePickerOnChange(formatUserInputDate(date.trimEnd()))
             } else if (!date) {
@@ -225,7 +234,19 @@ export const FilterDateRange = forwardRef(
             const e = event as React.FocusEvent<HTMLInputElement>
             const date = e.target.value
             if (date.length > 0) {
-                setShowStartDateError(!validateDate(date.trimEnd()))
+                // If end date exists validate date ranges else just validate start date
+                if (
+                    endDateInputRef?.current?.value &&
+                    isValidateDate(date.trimEnd())
+                ) {
+                    const startDate = new Date(date)
+                    const endDate = new Date(endDateInputRef.current.value)
+                    setShowStartDateError(
+                        !isValidateDateRange({ startDate, endDate })
+                    )
+                } else {
+                    setShowStartDateError(!isValidateDate(date.trimEnd()))
+                }
             }
         }
 
@@ -233,7 +254,19 @@ export const FilterDateRange = forwardRef(
             const e = event as React.FocusEvent<HTMLInputElement>
             const date = e.target.value
             if (date.length > 0) {
-                setShowEndDateError(!validateDate(date.trimEnd()))
+                // If start date exists validate date ranges else just validate end date
+                if (
+                    startDateInputRef?.current?.value &&
+                    isValidateDate(date.trimEnd())
+                ) {
+                    const startDate = new Date(startDateInputRef.current.value)
+                    const endDate = new Date(date)
+                    setShowEndDateError(
+                        !isValidateDateRange({ startDate, endDate })
+                    )
+                } else {
+                    setShowEndDateError(!isValidateDate(date.trimEnd()))
+                }
             }
         }
 
