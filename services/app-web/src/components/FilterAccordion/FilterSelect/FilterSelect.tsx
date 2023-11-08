@@ -25,7 +25,6 @@ export type FilterSelectedOptionsType = MultiValue<FilterOptionType>
 
 export const FilterSelect = ({
     name,
-    value,
     filterOptions,
     label,
     toggleClearFilter,
@@ -57,7 +56,6 @@ export const FilterSelect = ({
                 <label htmlFor={`${name}-filter-select-input`}>{label}</label>
             )}
             <Select
-                value={value}
                 options={filterOptions}
                 className={styles.multiSelect}
                 classNamePrefix="select"
@@ -70,10 +68,6 @@ export const FilterSelect = ({
                 ariaLiveMessages={{
                     onFocus,
                 }}
-                // menuPortalTarget moves the dropdown element to the document body because when inside the Accordion
-                // component the menu list will be cut off.
-                menuPortalTarget={document.body}
-                //This custom MenuList component, just places a test ID on the menu list. We need this for testing.
                 components={{ MenuList }}
                 {...selectProps}
             />

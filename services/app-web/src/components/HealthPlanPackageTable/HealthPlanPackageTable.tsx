@@ -10,6 +10,7 @@ import {
     useReactTable,
     getFacetedUniqueValues,
     Column,
+    FilterFn,
 } from '@tanstack/react-table'
 import { useAtom } from 'jotai/react'
 import { atomWithHash } from 'jotai-location'
@@ -28,11 +29,15 @@ import {
 } from '../FilterAccordion'
 import { InfoTag, TagProps } from '../InfoTag/InfoTag'
 import { pluralize } from '../../common-code/formatters'
+import { DoubleColumnGrid } from '../DoubleColumnGrid'
 
 declare module '@tanstack/table-core' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface ColumnMeta<TData extends RowData, TValue> {
         dataTestID: string
+    }
+    interface FilterFns {
+        dateRangeFilter: FilterFn<unknown>
     }
 }
 
@@ -315,6 +320,9 @@ export const HealthPlanPackageTable = ({
             a['updatedAt'] > b['updatedAt'] ? -1 : 1
         ),
         columns: tableColumns,
+        filterFns: {
+            dateRangeFilter: () => true,
+        },
         getCoreRowModel: getCoreRowModel(),
         state: {
             columnFilters,
@@ -409,38 +417,40 @@ export const HealthPlanPackageTable = ({
                             onClearFilters={clearFilters}
                             filterTitle="Filters"
                         >
-                            <FilterSelect
-                                value={getSelectedFiltersFromUrl(
-                                    columnFilters,
-                                    'stateName'
-                                )}
-                                name="state"
-                                label="State"
-                                filterOptions={stateFilterOptions}
-                                onChange={(selectedOptions) =>
-                                    updateFilters(
-                                        stateColumn,
-                                        selectedOptions,
-                                        'state'
-                                    )
-                                }
-                            />
-                            <FilterSelect
-                                value={getSelectedFiltersFromUrl(
-                                    columnFilters,
-                                    'submissionType'
-                                )}
-                                name="submissionType"
-                                label="Submission type"
-                                filterOptions={submissionTypeOptions}
-                                onChange={(selectedOptions) =>
-                                    updateFilters(
-                                        submissionTypeColumn,
-                                        selectedOptions,
+                            <DoubleColumnGrid>
+                                <FilterSelect
+                                    value={getSelectedFiltersFromUrl(
+                                        columnFilters,
+                                        'stateName'
+                                    )}
+                                    name="state"
+                                    label="State"
+                                    filterOptions={stateFilterOptions}
+                                    onChange={(selectedOptions) =>
+                                        updateFilters(
+                                            stateColumn,
+                                            selectedOptions,
+                                            'state'
+                                        )
+                                    }
+                                />
+                                <FilterSelect
+                                    value={getSelectedFiltersFromUrl(
+                                        columnFilters,
                                         'submissionType'
-                                    )
-                                }
-                            />
+                                    )}
+                                    name="submissionType"
+                                    label="Submission type"
+                                    filterOptions={submissionTypeOptions}
+                                    onChange={(selectedOptions) =>
+                                        updateFilters(
+                                            submissionTypeColumn,
+                                            selectedOptions,
+                                            'submissionType'
+                                        )
+                                    }
+                                />
+                            </DoubleColumnGrid>
                         </FilterAccordion>
                     )}
                     <div aria-live="polite" aria-atomic>
