@@ -14,7 +14,9 @@ import { dayjs } from '../../../common-code/dateHelpers/dayjs'
 import { PoliteErrorMessage } from '../../PoliteErrorMessage'
 
 /**
- *  This component recreates the @trussworks/react-uswds DateRangePicker with a modification to validate and clear individual DatePicker inputs. In addition, a modified version of the @trussworks/react-uswds DatePicker component is used, located in ./_DatePicker.
+ *  This component recreates the @trussworks/react-uswds DateRangePicker with a modification to validate and clear
+ *  individual DatePicker inputs. In addition, a modified version of the @trussworks/react-uswds DatePicker component is
+ *  used, located in ./_DatePicker.
  
  *This was done to unlock ability for the user to use date inputs as controlled components. There are two current use cases:
  *  clear both input values at once (such as when using the clear filter button on the filter accordion)
