@@ -39,6 +39,8 @@ import { DoubleColumnGrid } from '../../../components'
 import { FilterDateRangeRef } from '../../../components/FilterAccordion/FilterDateRange/FilterDateRange'
 import { Loading } from '../../../components'
 
+type RatingPeriodFilterType = [string, string] | []
+
 declare module '@tanstack/table-core' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface ColumnMeta<TData extends RowData, TValue> {
@@ -68,8 +70,6 @@ export type RateTableProps = {
     showFilters?: boolean
     caption?: string
 }
-
-type RatingPeriodFilterType = [string, string] | []
 
 function rateURL(rate: RateInDashboardType): string {
     return `/rates/${rate.id}`
@@ -162,7 +162,7 @@ const getDateRangeFilterFromUrl = (
     return ['', '']
 }
 
-const dateRangeFilter: FilterFn<unknown> = (
+const dateRangeFilter: FilterFn<RatingPeriodFilterType> = (
     row,
     columnId,
     value: RatingPeriodFilterType
@@ -411,9 +411,9 @@ export const RateReviewsTable = ({
                 // This handles the existing `from` or `to` input date when updating the opposite input. When calling
                 // this function, the updated input has a value and the other should be undefined. If both are present,
                 // it will set both.
-                const toDate = date[0] ?? prevDates[0]
-                const fromDate = date[1] ?? prevDates[1]
-                const newDates = [toDate, fromDate] as RatingPeriodFilterType
+                const fromDate = date[0] ?? prevDates[0]
+                const toDate = date[1] ?? prevDates[1]
+                const newDates = [fromDate, toDate] as RatingPeriodFilterType
 
                 if (newDates.every((date) => !date)) {
                     return []
