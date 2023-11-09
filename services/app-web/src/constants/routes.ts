@@ -101,8 +101,8 @@ const QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
 */
 const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
     ROOT: 'Dashboard',
-    DASHBOARD_SUBMISSIONS: 'Dashboard',
-    DASHBOARD_RATES: 'Dashboard',
+    DASHBOARD_SUBMISSIONS: 'Submissions Dashboard',
+    DASHBOARD_RATES: 'Rate Reviews Dashboard',
     SUBMISSIONS_NEW: 'New submission',
     UNKNOWN_ROUTE: '404',
 }
