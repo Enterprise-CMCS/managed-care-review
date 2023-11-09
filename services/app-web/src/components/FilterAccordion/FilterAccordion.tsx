@@ -29,7 +29,7 @@ export const FilterAccordion = ({
             headingLevel: 'h4',
             content: (
                 <>
-                    <div className={styles.filters}>{childFilters}</div>
+                    <div>{childFilters}</div>
                     <Button
                         id="clearFiltersButton"
                         type="button"

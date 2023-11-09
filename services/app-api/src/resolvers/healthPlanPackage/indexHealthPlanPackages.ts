@@ -53,7 +53,8 @@ export function indexHealthPlanPackagesResolver(
 ): QueryResolvers['indexHealthPlanPackages'] {
     return async (_parent, _args, context) => {
         const { user, span } = context
-        setResolverDetailsOnActiveSpan('fetchHealthPlanPackage', user, span)
+
+        setResolverDetailsOnActiveSpan('indexHealthPlanPackages', user, span)
 
         const ratesDatabaseRefactor = await launchDarkly.getFeatureFlag(
             context,
@@ -70,7 +71,7 @@ export function indexHealthPlanPackagesResolver(
 
                 if (contractsWithHistory instanceof Error) {
                     const errMessage = `Issue finding contracts with history by stateCode: ${user.stateCode}. Message: ${contractsWithHistory.message}`
-                    logError('fetchHealthPlanPackage', errMessage)
+                    logError('indexHealthPlanPackages', errMessage)
                     setErrorAttributesOnActiveSpan(errMessage, span)
 
                     if (contractsWithHistory instanceof NotFoundError) {
@@ -111,7 +112,7 @@ export function indexHealthPlanPackagesResolver(
 
                 if (contractsWithHistory instanceof Error) {
                     const errMessage = `Issue finding contracts with history by submit info. Message: ${contractsWithHistory.message}`
-                    logError('fetchHealthPlanPackage', errMessage)
+                    logError('indexHealthPlanPackages', errMessage)
                     setErrorAttributesOnActiveSpan(errMessage, span)
 
                     if (contractsWithHistory instanceof NotFoundError) {
