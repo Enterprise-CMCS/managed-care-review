@@ -37,7 +37,7 @@ const createDraftRateData = (
         createRateRevision(
             rate,
             {
-                contractRevisions: undefined,
+                contractRevisions: [],
                 submitInfo: null,
             },
             rate?.stateCode as StateCodeType
@@ -58,7 +58,7 @@ const createRateData = (
         createRateRevision(
             rate,
             {
-                draftContracts: undefined,
+                draftContracts: [],
             },
             rate?.stateCode as StateCodeType
         ) as RateRevisionTableWithContracts,
