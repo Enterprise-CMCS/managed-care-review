@@ -92,6 +92,13 @@
         line-height: 1.5;
     }
 }
+
+.singleColumnGrid {
+    @include at-media(tablet) {
+        margin-bottom: units(2);
+    }
+}
+
 @media print {
     header,
     footer,

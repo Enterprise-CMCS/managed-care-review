@@ -34,6 +34,14 @@ import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocume
 import { recordJSException } from '../../../otelHelpers'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../DocumentWarning'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../../common-code/featureFlags'
+import { Grid } from '@trussworks/react-uswds'
+import { booleanAsYesNoFormValue } from '../../Form/FieldYesNo'
+import {
+    StatutoryRegulatoryAttestation,
+    StatutoryRegulatoryAttestationQuestion,
+} from '../../../constants/statutoryRegulatoryAttestation'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -72,6 +80,17 @@ export const ContractDetailsSummarySection = ({
     const [zippedFilesURL, setZippedFilesURL] = useState<
         string | undefined | Error
     >(undefined)
+    const ldClient = useLDClient()
+
+    const contract438Attestation = ldClient?.variation(
+        featureFlags.CONTRACT_438_ATTESTATION.flag,
+        featureFlags.CONTRACT_438_ATTESTATION.defaultValue
+    )
+
+    const attestationYesNo = booleanAsYesNoFormValue(
+        submission.statutoryRegulatoryAttestation
+    )
+
     const contractSupportingDocuments = submission.documents.filter((doc) =>
         doc.documentCategories.includes('CONTRACT_RELATED' as const)
     )
@@ -143,6 +162,23 @@ export const ContractDetailsSummarySection = ({
                     renderDownloadButton(zippedFilesURL)}
             </SectionHeader>
             <dl>
+                {contract438Attestation && (
+                    <Grid row gap className={styles.singleColumnGrid}>
+                        <Grid col={12}>
+                            <DataDetail
+                                id="statutoryRegulatoryAttestation"
+                                label={StatutoryRegulatoryAttestationQuestion}
+                                explainMissingData={!isSubmitted(submission)}
+                                children={
+                                    attestationYesNo !== undefined &&
+                                    StatutoryRegulatoryAttestation[
+                                        attestationYesNo
+                                    ]
+                                }
+                            />
+                        </Grid>
+                    </Grid>
+                )}
                 <DoubleColumnGrid>
                     <DataDetail
                         id="contractExecutionStatus"
