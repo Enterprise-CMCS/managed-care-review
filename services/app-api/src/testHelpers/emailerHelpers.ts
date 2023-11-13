@@ -337,6 +337,7 @@ const mockContractAndRatesFormData = (
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         ...submissionPartial,
+        statutoryRegulatoryAttestation: false,
     }
 }
 
@@ -520,6 +521,7 @@ const mockContractOnlyFormData = (
             },
         ],
         addtlActuaryContacts: [],
+        statutoryRegulatoryAttestation: false,
         ...submissionPartial,
     }
 }
@@ -606,6 +608,7 @@ const mockContractAmendmentFormData = (
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        statutoryRegulatoryAttestation: false,
         ...submissionPartial,
     }
 }

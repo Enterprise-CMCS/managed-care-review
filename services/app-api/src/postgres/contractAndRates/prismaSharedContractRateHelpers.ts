@@ -339,6 +339,8 @@ function contractFormDataToDomainModel(
             contractRevision.modifiedNonRiskPaymentArrangements ?? undefined,
         inLieuServicesAndSettings:
             contractRevision.inLieuServicesAndSettings ?? undefined,
+        statutoryRegulatoryAttestation:
+            contractRevision.statutoryRegulatoryAttestation ?? undefined,
     }
 }
 

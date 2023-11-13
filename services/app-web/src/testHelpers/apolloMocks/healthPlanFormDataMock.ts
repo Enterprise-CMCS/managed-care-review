@@ -318,6 +318,7 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
         ],
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
+        statutoryRegulatoryAttestation: false,
     }
 }
 
@@ -417,6 +418,7 @@ function mockStateSubmissionContractAmendment(): LockedHealthPlanFormDataType {
         ],
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
+        statutoryRegulatoryAttestation: false,
     }
 }
 
