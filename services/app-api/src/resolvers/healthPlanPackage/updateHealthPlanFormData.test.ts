@@ -101,6 +101,7 @@ describe.each(flagValueTestParameters)(
                         modifiedNonRiskPaymentArrangements: undefined,
                     },
                 },
+                statutoryRegulatoryAttestation: true,
                 rateInfos: [],
             })
 
