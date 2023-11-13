@@ -1,0 +1,49 @@
+/*
+   MC-Review Colors
+
+   Application-wide colors. Must be prefixed with mcr-. Please use these everywhere you want to reference color.
+   Generally our application uses USWDS but sometimes our designs include CMS-influenced variations, particularly with blues.
+
+   CMDS palette: https://design.cms.gov/style/color/
+   USWDS palette: https://designsystem.digital.gov/design-tokens/color/system-tokens/
+*/
+
+$mcr-primary-base: #005ea2; // USWDS 'primary'
+$mcr-primary-dark : #1a4480; // USWDS 'primary-dark'
+$mcr-primary-darkest:  #162e51; // USWDS 'primary-darker',
+$mcr-primary-light: #73b3e7; // USWDS 'primary-light',
+$mcr-primary-lighter: #e1f3f8; // USWDS 'blue-cool-5v'
+$mcr-primary-lightest: #d9e8f6; // USWDS 'blue-10'
+
+$mcr-cmsblue-base: #0071bc; // CMSDS 'color-primary'
+$mcr-cmsblue-dark: #205493; // CMSDS 'color-primary-darker
+$mcr-cmsblue-darkest: #112e51; // CMSDS 'color-primary-darkest'
+$mcr-cmsblue-lightest: #f0fafd;// This color is slightly off from CMSDS 'color-primary-alt-lightest', don't think it maps to either system
+
+$mcr-cyan-base: #02bfe7; // CMSDS 'color-primary-alt'
+$mcr-cyan-dark: #009ec1; // USWDS 'cyan-40v'
+$mcr-cyan-light: #99deea;// USWDS 'cyan-20'
+
+$mcr-gold-base: #ffbe2e; // USWFS 'gold-20v'
+$mcr-gold-dark: #e5a000; // USWDS 'gold-30v'
+$mcr-gold-darker: #ca9318; // CMSDS 'color-warn-darker'
+
+$mcr-gray-base :#a9aeb1; // USWDS 'gray-cool-30'
+$mcr-gray-dark: #565c65; // USWDS 'gray-cool-60'
+$mcr-gray-lighter:#dfe1e2; // USWDS 'gray-cool-10'
+$mcr-gray-lightest: #f0f0f0; /// USWDS 'gray-5'
+
+// mcr-foundation is used for text and containers
+$mcr-foundation-ink:#1b1b1b; // USWDS 'gray-90'
+$mcr-foundation-hint: #71767a; // USWDS 'text-base'
+$mcr-foundation-link: $mcr-primary-base;
+$mcr-foundation-white: #fff;
+
+// mcr-success is used for submit buttons and completed actions
+$mcr-success-base: #2e8540; // CMSDS 'color-success'
+$mcr-success-hover:$mcr-success-hover; // CMSDS 'color-success-dark"
+$mcr-success-dark: #4d8055; // USWDS 'green-cool-50'
+
+// mcr-error is used for error, validations, and incomplete actions
+$mcr-error-base: #b50909; // USWDS  'red-60v'
+$mcr-error-light:#f4e3db; // USWDS 'red-warm-10'
