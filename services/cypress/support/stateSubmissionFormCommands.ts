@@ -99,6 +99,9 @@ Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
     })
 Cypress.Commands.add('fillOutBaseContractDetails', () => {
     // Must be on '/submissions/:id/edit/contract-details'
+    // Contract 438 attestation question
+    cy.findByText('Yes the contract fully complies with all applicable requirements.').click()
+
     cy.findByText('Fully executed').click()
     cy.findAllByLabelText('Start date', {timeout: 2000})
         .parents()
