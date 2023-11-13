@@ -57,10 +57,12 @@ describe.each(flagValueTestParameters)(
     `Tests $testName`,
     ({ flagName, flagValue }) => {
         const cmsUser = testCMSUser()
-        const mockLDService = testLDService({ [flagName]: flagValue })
+        const mockLDService = testLDService({
+            [flagName]: flagValue,
+        })
 
         afterEach(() => {
-            jest.clearAllMocks()
+            jest.restoreAllMocks()
         })
         it('returns a StateSubmission if complete', async () => {
             const server = await constructTestPostgresServer({
@@ -1250,6 +1252,75 @@ describe.each(flagValueTestParameters)(
                 expect(submitResult.errors?.[0].extensions?.message).toBe(
                     'formData is missing required contract fields'
                 )
+            }, 20000)
+        })
+
+        describe('Feature flagged 4348 attestation question test', () => {
+            const ldService = testLDService({
+                ...mockLDService,
+                '438-attestation': true,
+            })
+
+            it('errors when contract 4348 attestation question is undefined', async () => {
+                const server = await constructTestPostgresServer({
+                    ldService: ldService,
+                })
+
+                // setup
+                const initialPkg = await createAndUpdateTestHealthPlanPackage(
+                    server,
+                    {
+                        statutoryRegulatoryAttestation: undefined,
+                    }
+                )
+                const draft = latestFormData(initialPkg)
+                const draftID = draft.id
+
+                await new Promise((resolve) => setTimeout(resolve, 2000))
+
+                // submit
+                const submitResult = await server.executeOperation({
+                    query: SUBMIT_HEALTH_PLAN_PACKAGE,
+                    variables: {
+                        input: {
+                            pkgID: draftID,
+                        },
+                    },
+                })
+
+                expect(submitResult.errors).toBeDefined()
+                expect(submitResult.errors?.[0].extensions?.message).toBe(
+                    'formData is missing required contract fields'
+                )
+            }, 20000)
+            it('successfully submits when contract 4348 attestation question is valid', async () => {
+                const server = await constructTestPostgresServer({
+                    ldService: ldService,
+                })
+
+                // setup
+                const initialPkg = await createAndUpdateTestHealthPlanPackage(
+                    server,
+                    {
+                        statutoryRegulatoryAttestation: false,
+                    }
+                )
+                const draft = latestFormData(initialPkg)
+                const draftID = draft.id
+
+                await new Promise((resolve) => setTimeout(resolve, 2000))
+
+                // submit
+                const submitResult = await server.executeOperation({
+                    query: SUBMIT_HEALTH_PLAN_PACKAGE,
+                    variables: {
+                        input: {
+                            pkgID: draftID,
+                        },
+                    },
+                })
+
+                expect(submitResult.errors).toBeUndefined()
             }, 20000)
         })
     }
