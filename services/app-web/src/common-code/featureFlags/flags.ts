@@ -76,6 +76,10 @@ const featureFlags = {
         flag: 'rate-filters',
         defaultValue: false,
     },
+    CONTRACT_438_ATTESTATION: {
+        flag: '438-attestation',
+        defaultValue: false,
+    },
     /**
      * Used in testing to simulate errors in fetching flag value.
      * This flag does not exist in LaunchDarkly dashboard so fetching this will return the defaultValue.
