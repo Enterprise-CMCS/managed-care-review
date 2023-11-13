@@ -43,23 +43,21 @@ export const ContactsSummarySection = ({
                 editNavigateTo={editNavigateTo}
             />
 
-            <GridContainer>
+            <GridContainer className="padding-left-0">
                 <Grid row>
                     <dl>
                         {submission.stateContacts.length > 0 ? (
                             submission.stateContacts.map(
                                 (stateContact, index) => (
-                                    <Grid col={6} key={'statecontact_' + index}>
-                                        <DataDetail
-                                            id={'statecontact_' + index}
-                                            label={`Contact ${index + 1}`}
-                                            children={
-                                                <DataDetailContactField
-                                                    contact={stateContact}
-                                                />
-                                            }
-                                        />
-                                    </Grid>
+                                    <DataDetail
+                                        id={'statecontact_' + index}
+                                        label={`Contact ${index + 1}`}
+                                        children={
+                                            <DataDetailContactField
+                                                contact={stateContact}
+                                            />
+                                        }
+                                    />
                                 )
                             )
                         ) : (

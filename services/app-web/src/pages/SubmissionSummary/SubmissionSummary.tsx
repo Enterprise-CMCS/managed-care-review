@@ -165,7 +165,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                         isCMSUser ? (
                             <div className={styles.subHeader}>
                                 {pkg.mccrsID && (
-                                    <span>
+                                    <span className={styles.mccrsID}>
                                         MC-CRS record number:
                                         <Link
                                             href={`https://mccrs.abtsites.com/Home/Index/${pkg.mccrsID}`}
