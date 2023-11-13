@@ -169,6 +169,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                         MC-CRS record number:
                                         <Link
                                             href={`https://mccrs.abtsites.com/Home/Index/${pkg.mccrsID}`}
+                                            aria-label="MC-CRS system login"
                                         >
                                             {pkg.mccrsID}
                                         </Link>
@@ -178,6 +179,11 @@ export const SubmissionSummary = (): React.ReactElement => {
                                     href={`/submissions/${pkg.id}/mccrs-record-number`}
                                     className={
                                         pkg.mccrsID ? styles.editLink : ''
+                                    }
+                                    aria-label={
+                                        pkg.mccrsID
+                                            ? 'Edit MC-CRS number'
+                                            : 'Add MC-CRS record number'
                                     }
                                 >
                                     {pkg.mccrsID
