@@ -269,6 +269,14 @@ export const SingleRateSummarySection = ({
                             }
                         />
                         <DataDetail
+                            id="rateSubmissionDate"
+                            label="Rate submission date"
+                            explainMissingData={!isSubmitted}
+                            children={formatCalendarDate(
+                                rate.initiallySubmittedAt
+                            )}
+                        />
+                        <DataDetail
                             id="rateCapitationType"
                             label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
                             explainMissingData={!isSubmitted}
