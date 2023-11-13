@@ -211,6 +211,7 @@ function mockContractAndRatesDraft(
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        statutoryRegulatoryAttestation: true,
         ...partial,
     }
 }
