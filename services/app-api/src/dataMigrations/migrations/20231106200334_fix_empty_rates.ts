@@ -6,13 +6,6 @@ export const migrate = async (
     try {
         const initialRates = await tx.rateTable.findMany({
             where: {
-                revisions: {
-                    some: {
-                        submitInfo: {
-                            isNot: null,
-                        },
-                    },
-                },
                 stateCode: {
                     not: 'AS', // exclude test state as per ADR 019
                 },
@@ -22,26 +15,30 @@ export const migrate = async (
             ` ---- Prepare to migrate. Currently there are ${initialRates.length} rates`
         )
 
-        const badRateRevisions = await tx.rateRevisionTable.findMany({
+        const badRateRevisionsDelete = await tx.rateRevisionTable.deleteMany({
             where: {
                 rateDateStart: null,
                 rateDateEnd: null,
                 rateDateCertified: null,
                 rateType: null,
-            },
-        })
-
-        console.info(`Found ${badRateRevisions.length} empty rate revisions`)
-
-        await tx.rateRevisionTable.deleteMany({
-            where: {
-                id: {
-                    in: badRateRevisions.map((rev) => rev.id),
+                submitInfo: {
+                    isNot: null,
+                },
+                contractRevisions: {
+                    every: {
+                        contractRevision: {
+                            submissionType: 'CONTRACT_ONLY',
+                        },
+                    },
                 },
             },
         })
 
-        const badRates = await tx.rateTable.findMany({
+        console.info(
+            `Successfully deleted ${badRateRevisionsDelete.count} malformatted rate revisions`
+        )
+
+        const badRatesDelete = await tx.rateTable.deleteMany({
             where: {
                 revisions: {
                     none: {},
@@ -49,27 +46,10 @@ export const migrate = async (
             },
         })
 
-        console.info(`Found ${badRates.length} rates with empty revisions`)
-
-        await tx.rateTable.deleteMany({
-            where: {
-                id: {
-                    in: badRates.map((rate) => rate.id),
-                },
-            },
-        })
-
-        console.info(`Succesfully deleted ${badRates.length} empty rates`)
+        console.info(`Successfully deleted ${badRatesDelete.count} empty rates`)
 
         const endingRates = await tx.rateTable.findMany({
             where: {
-                revisions: {
-                    some: {
-                        submitInfo: {
-                            isNot: null,
-                        },
-                    },
-                },
                 stateCode: {
                     not: 'AS', // exclude test state as per ADR 019
                 },
@@ -81,5 +61,6 @@ export const migrate = async (
         return
     } catch (error) {
         console.error(`Data migrationclean_empty_rates ERROR: ${error}`)
+        return error
     }
 }

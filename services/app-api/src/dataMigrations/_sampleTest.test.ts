@@ -14,7 +14,9 @@ describe.skip('Model of how to test a migration locally', () => {
     it('Example migration test for local dev purposes', async () => {
         const client = await sharedTestPrismaClient()
 
-        await migrate(client)
-        throw new Error('ROLLBACK TO CONTINUE TESTING')
+        await client.$transaction(async (tx) => {
+            await migrate(tx)
+            throw new Error('ROLLBACK TO CONTINUE TESTING')
+        })
     })
 })
