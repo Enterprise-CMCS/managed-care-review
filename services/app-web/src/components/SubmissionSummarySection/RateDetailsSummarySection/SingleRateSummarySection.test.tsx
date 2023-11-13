@@ -62,11 +62,6 @@ describe('SingleRateSummarySection', () => {
             screen.getByRole('definition', {
                 name: 'Rate submission date',
             })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('definition', {
-                name: 'Rate submission date',
-            })
         ).toHaveTextContent('10/16/2023')
         expect(
             screen.getByRole('definition', { name: 'Certifying actuary' })
