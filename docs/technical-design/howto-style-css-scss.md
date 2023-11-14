@@ -4,7 +4,7 @@
 
 MC-Review has an application specific color palette written in SCSS. All color variables in the palette are prefixed with `$mcr-`. The palette is viewable in Storybook as well (`Global/Colors`). Anytime you need a color prefer the variable -  e.g. $mcr-gold-base. Avoid using color hex codes directly or using random design system variables for color.
 
-The colors variables are defined in  `styles/mcr-colors.scss`. By reusing color variables from one place, we make future refactors easy and reduce styles tech debt. For example, if we needed to add a dark mode in the application or do a re-design, we start from one place. Note that we have colors in the application coming from both USWDS and CMDS currently in the application. These patterns are easier to see when our colors are defined in one place.
+The colors variables are defined in  `styles/mcrColors.scss`. By reusing color variables from one place, we make future refactors easy and reduce styles tech debt. For example, if we needed to add a dark mode in the application or do a re-design, we start from one place. Note that we have colors in the application coming from both USWDS and CMDS currently in the application. These patterns are easier to see when our colors are defined in one place.
 
 ## Containers
 

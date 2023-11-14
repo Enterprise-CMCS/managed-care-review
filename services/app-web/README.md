@@ -70,10 +70,8 @@ Open [http://localhost:6000](http://localhost:6000) to view in the browser.
 
 ### SCSS files
 
--   Use modular styles. This means creating`<component>.module.scss` or `<component>.module.css` files in your component folders.
--   Learn about [Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html) and [CSS modules](https://github.com/css-modules/css-modules) as well [uswds scss classes, tokens, and mixins](https://designsystem.digital.gov/design-tokens/).
--   Syntax: Sass styles should be written in camelCase. Import styles from a component's stylesheet using something like `import styles from 'InvoicePanel.module.scss'`. Access the styles with dot notation `styles.myclassname`. If fewer than 50% of the styles are used from a stylesheet, import only the styles used (ex. `import { myclassname } from 'MyComponent.module.scss'`).
--   To reference sass variables, bring in uswds scss or project/cms scss as `@import 'styles/uswdsImports.scss';` and `@import 'styles/custom.scss'` accordingly.
+- Use modular styles. This means creating`<component>.module.scss` or `<component>.module.css` files in your component folders.
+- Read [how to styles](/docs/technical-design/howto-style-css-scss.md) documentation.
 
 ### `/gen`
 

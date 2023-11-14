@@ -1,16 +1,58 @@
-/* Order matters in this file. */
-@import 'theme/_cms';
+/*
+    Custom application styles and main file imported into component specific modules.
+
+    Use caution editing this file. Order matters. Add comments for any new class or variable.
+
+    Here are concrete examples where global styles are needed:
+    1. We are dealing with container elements that repeat throughout the application outside of a specific component (divs, cards, display tables)
+    2. We need override a behavior in USWDS that we can't control via settings throughout the application
+    3. We want to hide an element from the screen using our global screenreader only class
+*/
+
+// Allows access of all app styles in component scss modules
 @import 'theme/_color';
+@import 'mcrColors';
 
-// Custom app wide styles
+/* CONTAINERS */
 
-// containers
-$width-max-contained: 50rem;
-.app-container-horizontal-pad {
-    max-width: $width-max-contained;
+// Every page starts with a flex container
+@mixin container {
+  display: flex;
+  flex: 1 0 auto;
+}
+// We have some established width limits how far page content should stretch laterally. Right now this is controlled by CSS width properties
+$mcr-container-standard-width-fixed: 50rem;
+$mcr-container-max-width-fixed: 75rem;
+
+// Default page width and styles in MC-Review
+@mixin default-page-container {
+    @include container;
+    width: $mcr-container-max-width-fixed;
+    background-color: $mcr-foundation-white;
 }
 
-// accessibility
+// Form pages have larger margin on either side
+@mixin form-page-container {
+    @include container;
+    width: $mcr-container-standard-width-fixed;
+}
+
+// Adds blue-cyan  gradient to top border of a container, used on document tables
+.borderTopLinearGradient {
+    border: 0 solid;
+    border-top: 10px solid;
+    border-image-slice: 1;
+    border-image-source: linear-gradient(
+        to right,
+        $mcr-primary-dark,
+        $mcr-cyan-base
+    );
+    box-shadow: inset 0 0 1px $mcr-gray-dark,
+        0px 0px 24px rgb(0 0 0 / 5%);
+}
+
+/* ACCESSIBILITY */
+// Re-useable classname for hiding UI visually but still having it be read by screenreaders
 .srOnly {
     position: absolute;
     left: -1000px;
@@ -20,73 +62,49 @@ $width-max-contained: 50rem;
     overflow: hidden;
 }
 
-// Top border linear gradient
-.borderTopLinearGradient {
-    border: 0 solid;
-    border-top: 10px solid;
-    border-image-slice: 1;
-    border-image-source: linear-gradient(
-        to right,
-        $theme-color-gradient-dark,
-        $theme-color-gradient-light
-    );
-    box-shadow: inset 0 0 1px $theme-color-base-dark,
-        0px 0px 24px rgb(0 0 0 / 5%);
-}
-
-.usa-logo {
-    @include u-margin-y(2);
-}
-
-.usa-label,
-.usa-legend {
-    font-weight: bold;
-}
-
-.address {
-    line-height: 1.5;
-}
-
-.usa-hint span {
-    display: block;
-    margin-top: units(1);
-}
-
+// Accessibility button contrast color fix for inverse button.
 .usa-button--outline.usa-button--inverse {
-    // Accessibility button contrast fix for inverse button. I couldn't get the color value to set properly unless I set it to !important... not ideal.
-    box-shadow: inset 0 0 0 2px $cms-color-white;
-    color: $cms-color-white !important;
-
+    box-shadow: inset 0 0 0 2px $mcr-foundation-white;
+    color: $mcr-foundation-white !important;
     &:hover {
-        box-shadow: inset 0 0 0 2px #dfe1e2;
-        color: #dfe1e2 !important;
+        box-shadow: inset 0 0 0 2px $mcr-gray-lighter;
+        color: $mcr-gray-lighter !important;
     }
 }
 
-.usa-checkbox__label,
-.usa-radio__label {
-    // The default spacing between checkboxes and radio buttons in USWDS feels too small, would like to increase this across the app.
-    margin-top: 1rem;
+/* COMPONENT OR ELEMENT SPECIFIC */
+
+// These are used to adjust forms application wide. Could be part of mixin along with code in StateSubmissionForm
+    .usa-label,
+    .usa-legend {
+        font-weight: bold;
+    }
+
+    .usa-hint span {
+        display: block;
+        margin-top: units(1);
+    }
+
+    .usa-checkbox__label,
+    .usa-radio__label {
+        margin-top: 1rem;
+    }
+
+// This should be set by USWDS but isn't
+// It can be removed when https://github.com/uswds/uswds/issues/4458 is fixed
+.usa-tooltip__body {
+  opacity: 0;
 }
 
-// Remove link styles from button-styled links
+h3 {
+    margin-top: 0;
+    font-weight: normal;
+    font-size: 1.3em;
+}
+
+// This should probably be a standalone component rather than set in global styles
+// Removes html link styles from uswds button-styled links, used anywhere we have a link (Add New Submission) that looks a button
 a[class^='usa-button usa-button--outline'] {
     text-decoration: none !important;
-    color: #1a4480 !important;
+    color: $mcr-primary-dark !important;
 }
-
-div[class^='usa-step-indicator'] {
-    background-color: transparent;
-    width: 66rem;
-    margin: 1.25rem auto;
-    text-align: center;
-
-    ol {
-        justify-content: center;
-    }
-}
-
-[class^='usa-step-indicator__header'] {
-    display: inline;
-}
-
