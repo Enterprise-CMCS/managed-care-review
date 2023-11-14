@@ -171,6 +171,9 @@ resources:
         InstanceType: t2.micro
         ImageId: ami-05bfc1ab11bfbf484
         IamInstanceProfile: !Ref PgVMIAMInstanceProfile
+        Tags:
+          - Key: mcr-vmuse
+            Value: jumpbox
         NetworkInterfaces:
           - AssociatePublicIpAddress: true
             DeviceIndex: '0'
@@ -181,7 +184,11 @@ resources:
         UserData:
           Fn::Base64: !Sub |
             #!/bin/bash
-            apt update && apt install unzip postgresql postgresql-contrib -y
+            # get apt data for postgres-14
+            sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+            wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+
+            apt update && apt install unzip postgresql-14 postgresql-contrib -y
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip
             ./aws/install
 
