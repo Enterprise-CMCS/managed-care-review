@@ -52,7 +52,11 @@ export const ContractDetailsFormSchema = (
         }
     }
 
+    // Errors in the error summary is ordered by the position of each ket in the yup object.
     return Yup.object().shape({
+        statutoryRegulatoryAttestation: activeFeatureFlags['438-attestation']
+            ? Yup.string().defined('You must select yes or no')
+            : Yup.string(),
         contractExecutionStatus: Yup.string().defined(
             'You must select a contract status'
         ),
@@ -134,8 +138,5 @@ export const ContractDetailsFormSchema = (
         modifiedNonRiskPaymentArrangements: yesNoError(
             'modifiedNonRiskPaymentArrangements'
         ),
-        statutoryRegulatoryAttestation: activeFeatureFlags['438-attestation']
-            ? Yup.string().defined('You must select yes or no')
-            : Yup.string(),
     })
 }
