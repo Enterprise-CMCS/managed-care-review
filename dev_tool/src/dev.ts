@@ -504,6 +504,10 @@ async function main() {
                                 type: 'boolean',
                                 default: true,
                             })
+                            .option('ssh-key', {
+                                type: 'string',
+                                default: '~/.ssh/id_rsa',
+                            })
                             .example([
                                 [
                                     '$0 jumpbox clone dev',
@@ -512,7 +516,11 @@ async function main() {
                             ])
                     },
                     async (args) => {
-                        await cloneDBLocally(args.env, args.stopAfter)
+                        await cloneDBLocally(
+                            args.env,
+                            args.sshKey,
+                            args.stopAfter
+                        )
                     }
                 )
                 .demandCommand(1, 'you must pick a subcommand for jumpbox')

@@ -30,7 +30,7 @@ const accountURLs: { [key: string]: string } = {
 async function checkAWSAccess(envName: string): Promise<undefined | Error> {
     // Our environments will always have CloudFront distributions for the UI of the app
     // Let's fetch those and make sure we're in the right place.
-    const client = new CloudFrontClient()
+    const client = new CloudFrontClient({ region: 'us-east-1' })
     const command = new ListDistributionsCommand({})
 
     try {
@@ -76,7 +76,7 @@ async function checkAWSAccess(envName: string): Promise<undefined | Error> {
 async function describeSecurityGroup(
     groupID: string
 ): Promise<SecurityGroup | Error> {
-    const ec2 = new EC2Client()
+    const ec2 = new EC2Client({ region: 'us-east-1' })
     const describeSGs = new DescribeSecurityGroupsCommand({
         Filters: [{ Name: 'group-id', Values: [groupID] }],
     })
@@ -98,13 +98,13 @@ async function describeSecurityGroup(
     }
 }
 
-// addWhitelistRuleToGroup adds an SSH whitelist rule to the given groupID
-async function addSSHWhitelistRuleToGroup(
+// addAllowlistRuleToGroup adds an SSH Allowlist rule to the given groupID
+async function addSSHAllowlistRuleToGroup(
     groupID: string,
     ipAddress: string
 ): Promise<undefined | Error> {
-    const ec2 = new EC2Client()
-    const addWhiteliest = new AuthorizeSecurityGroupIngressCommand({
+    const ec2 = new EC2Client({ region: 'us-east-1' })
+    const addAllowlist = new AuthorizeSecurityGroupIngressCommand({
         CidrIp: ipAddress + '/32',
         FromPort: 22,
         IpProtocol: 'TCP',
@@ -113,7 +113,7 @@ async function addSSHWhitelistRuleToGroup(
     })
 
     try {
-        await ec2.send(addWhiteliest)
+        await ec2.send(addAllowlist)
         return undefined
     } catch (err) {
         return err
@@ -124,7 +124,7 @@ async function addSSHWhitelistRuleToGroup(
 async function describeInstance(
     input: DescribeInstancesCommandInput = {}
 ): Promise<Instance | Error> {
-    const ec2 = new EC2Client()
+    const ec2 = new EC2Client({ region: 'us-east-1' })
     const describeInstances = new DescribeInstancesCommand(input)
 
     try {
@@ -145,7 +145,7 @@ async function describeInstance(
 }
 
 async function stopInstance(id: string) {
-    const ec2 = new EC2Client()
+    const ec2 = new EC2Client({ region: 'us-east-1' })
     const cmd = new StopInstancesCommand({
         InstanceIds: [id],
     })
@@ -159,7 +159,7 @@ async function stopInstance(id: string) {
 }
 
 async function startInstance(id: string) {
-    const ec2 = new EC2Client()
+    const ec2 = new EC2Client({ region: 'us-east-1' })
 
     const cmd = new StartInstancesCommand({
         InstanceIds: [id],
@@ -182,7 +182,7 @@ interface DBConnection {
 }
 
 async function getSecretsForRDS(stage: string): Promise<DBConnection | Error> {
-    const client = new SecretsManagerClient()
+    const client = new SecretsManagerClient({ region: 'us-east-1' })
     const SMName = `aurora_postgres_${stage}`
 
     const list = new ListSecretsCommand({
@@ -236,7 +236,7 @@ export {
     checkAWSAccess,
     describeInstance,
     describeSecurityGroup,
-    addSSHWhitelistRuleToGroup,
+    addSSHAllowlistRuleToGroup,
     getSecretsForRDS,
     stopInstance,
     startInstance,

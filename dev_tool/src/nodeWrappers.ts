@@ -1,4 +1,5 @@
 import http from 'node:http'
+import fs from 'node:fs'
 
 // httpRequest wraps node's http request in a promise.
 // Right now this only supports getting a URL, but could be extended to cover the whole api
@@ -39,4 +40,17 @@ async function httpRequest(url: string): Promise<string | Error> {
     })
 }
 
-export { httpRequest }
+// fileExists returns whether or not a file exists
+function fileExists(path: string): boolean | Error {
+    try {
+        fs.statSync(path)
+        return true
+    } catch (err) {
+        if (err.code === 'ENOENT') {
+            return false
+        }
+        return err
+    }
+}
+
+export { httpRequest, fileExists }

@@ -1,5 +1,5 @@
 import {
-    addSSHWhitelistRuleToGroup,
+    addSSHAllowlistRuleToGroup,
     checkAWSAccess,
     describeInstance,
     describeSecurityGroup,
@@ -8,8 +8,9 @@ import {
     stopInstance,
 } from './aws.js'
 import { NodeSSH } from 'node-ssh'
+import os from 'node:os'
 import { retry } from './retry.js'
-import { httpRequest } from './nodeWrappers.js'
+import { fileExists, httpRequest } from './nodeWrappers.js'
 import { Instance } from '@aws-sdk/client-ec2'
 
 function stageForEnv(env: string): string {
@@ -73,7 +74,6 @@ async function ensureJumpboxIsRunning(): Promise<Instance | Error> {
         ],
     })
     if (instance instanceof Error) {
-        console.error('error fetching jumpbox', instance)
         return instance
     }
 
@@ -98,7 +98,7 @@ async function ensureJumpboxIsRunning(): Promise<Instance | Error> {
 
     if (jumpboxStartState !== 80) {
         console.info('Jumpbox is not stopped yet. waiting to start it')
-        // wait for it to be running
+        // wait for it to be stopped
         const stopped = await waitForJumpboxToReachState(jumpboxStartID, 80) // 80 is stopped
         if (stopped instanceof Error) {
             return stopped
@@ -136,7 +136,7 @@ async function ensureJumpboxIsRunning(): Promise<Instance | Error> {
     return startedInstance
 }
 
-async function ensureWhitelistIP(
+async function ensureAllowlistIP(
     instance: Instance
 ): Promise<undefined | Error> {
     // get my IP address
@@ -172,15 +172,15 @@ async function ensureWhitelistIP(
         range.CidrIp?.startsWith(myIPAddress)
     )
     if (myRule) {
-        // if our IP is already whitelisted, we're good.
-        console.info('Already Whitelisted')
+        // if our IP is already allowlisted, we're good.
+        console.info('Already Allowlisted')
         return undefined
     }
 
     // in this case, now we need to add our IP address.
-    console.info('Whitelisting', myIPAddress)
+    console.info('Allowlisting', myIPAddress)
 
-    const result = await addSSHWhitelistRuleToGroup(
+    const result = await addSSHAllowlistRuleToGroup(
         securityGroupID.GroupId,
         myIPAddress
     )
@@ -191,7 +191,33 @@ async function ensureWhitelistIP(
     return undefined
 }
 
-async function cloneDBLocally(envName: string, stopAfter = true) {
+async function cloneDBLocally(
+    envName: string,
+    sshKeyPath: string,
+    stopAfter = true
+) {
+    // check that the ssh key exists
+    // node doesn't support ~ expansion natively, so we do it here.
+    if (sshKeyPath.startsWith('~/')) {
+        sshKeyPath = sshKeyPath.replace(/^~(?=$|\/|\\)/, os.homedir())
+    }
+
+    const sshKeyExists = fileExists(sshKeyPath)
+    if (sshKeyExists instanceof Error) {
+        console.error('failed to check if the ssh key exists', sshKeyExists)
+        process.exit(2)
+    }
+    if (!sshKeyExists) {
+        console.error(
+            'The provided SSH key does not appear to exist: ',
+            sshKeyPath
+        )
+        console.error(
+            'use the --ssh-key option to specify your ssh key for the jumpbox'
+        )
+        process.exit(1)
+    }
+
     const check = await checkAWSAccess(envName)
     if (check instanceof Error) {
         process.exit(1)
@@ -200,13 +226,13 @@ async function cloneDBLocally(envName: string, stopAfter = true) {
     // Figure out if Jumpbox is running
     const instance = await ensureJumpboxIsRunning()
     if (instance instanceof Error) {
-        console.error('Error setting IP whitelist', instance)
+        console.error('Error getting jumpbox running', instance)
         process.exit(1)
     }
 
-    const whitelist = await ensureWhitelistIP(instance)
-    if (whitelist instanceof Error) {
-        console.error('Error setting IP whitelist', whitelist)
+    const allowlist = await ensureAllowlistIP(instance)
+    if (allowlist instanceof Error) {
+        console.error('Error setting IP allowlist', allowlist)
         process.exit(1)
     }
 
@@ -242,7 +268,7 @@ async function cloneDBLocally(envName: string, stopAfter = true) {
                 await ssh.connect({
                     host: jumpboxIP,
                     username: 'ubuntu',
-                    privateKeyPath: '/Users/macrae/.ssh/wml_jumpbox',
+                    privateKeyPath: '/Users/macrae/.ssh/wml_jumpbox', // FIGURE THIS
                 })
                 console.info('Connected')
                 return true
@@ -270,7 +296,7 @@ async function cloneDBLocally(envName: string, stopAfter = true) {
                 2,
                 '0'
             )}${now.getDate()}${now.getHours()}${now.getMinutes()}${now.getSeconds()}`
-        const thereDumpFileName = `${envName}-${timeStamp}.sqlfc`
+        const thereDumpFileName = `dbdump-${envName}-${timeStamp}.sqlfc`
 
         console.info('dumping db on the server')
         // `pg_dump -Fc -h $hostname -p $port -U $username -d $dbname > [prod]-[date].sqlfc`
@@ -298,7 +324,7 @@ async function cloneDBLocally(envName: string, stopAfter = true) {
         }
 
         await ssh.getFile(thereDumpFileName, thereDumpFileName)
-        console.info('copied db locally')
+        console.info('copied db locally: ', thereDumpFileName)
 
         // remove the file on the server
         await ssh.exec('rm', [thereDumpFileName])
