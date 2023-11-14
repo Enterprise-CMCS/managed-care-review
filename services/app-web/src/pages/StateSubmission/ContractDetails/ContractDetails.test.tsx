@@ -1028,7 +1028,7 @@ describe('ContractDetails', () => {
     })
 
     describe('Contract 438 attestation', () => {
-        it('renders 438 attestation question errors', async () => {
+        it('renders 438 attestation question without errors', async () => {
             ldUseClientSpy({ '438-attestation': true })
             const draft = mockBaseContract({
                 statutoryRegulatoryAttestation: true,
