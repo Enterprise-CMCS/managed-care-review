@@ -3,6 +3,7 @@ import type { PrismaTransactionType } from '../postgres/prismaTypes'
 import { migrate as migrate1 } from './migrations/20231026123042_test_migrator_works'
 import { migrate as migrate2 } from './migrations/20231026124442_fix_rate_submittedat'
 import { migrate as migrate3 } from './migrations/20231026124542_fix_erroneous_rates'
+import { migrate as migrate4 } from './migrations/20231106200334_fix_empty_rates'
 
 // MigrationType describes a single migration with a name and a callable function called migrateProto
 interface DBMigrationType {
@@ -101,6 +102,12 @@ export async function migrate(
             name: '20231026124542_fix_erroneous_rates',
             module: {
                 migrate: migrate3,
+            },
+        },
+        {
+            name: 'migrations/20231106200334_fix_empty_rates',
+            module: {
+                migrate: migrate4,
             },
         },
     ]

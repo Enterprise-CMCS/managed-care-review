@@ -1,5 +1,5 @@
 import styles from './QATable.module.scss'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
     CmsUser,
     Document,
@@ -20,7 +20,7 @@ type QuestionDocumentWithLink = {
 
 export type QuestionData = {
     id: string
-    pkgID: string
+    contractID: string
     createdAt: Date
     addedBy: CmsUser
     documents: Document[]

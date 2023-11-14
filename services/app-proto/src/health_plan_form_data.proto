@@ -315,4 +315,5 @@ enum StateCode {
   STATE_CODE_WI = 50;
   STATE_CODE_WV = 51;
   STATE_CODE_WY= 52;
+  STATE_CODE_KY = 53;
 }

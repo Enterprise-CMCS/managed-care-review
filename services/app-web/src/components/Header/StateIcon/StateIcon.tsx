@@ -19,6 +19,7 @@ import { ReactComponent as IaIcon } from '../../../assets/icons/ia-icon.svg'
 import { ReactComponent as IdIcon } from '../../../assets/icons/id-icon.svg'
 import { ReactComponent as IlIcon } from '../../../assets/icons/il-icon.svg'
 import { ReactComponent as KsIcon } from '../../../assets/icons/ks-icon.svg'
+import { ReactComponent as KyIcon } from '../../../assets/icons/ky-icon.svg'
 import { ReactComponent as LaIcon } from '../../../assets/icons/la-icon.svg'
 import { ReactComponent as MaIcon } from '../../../assets/icons/ma-icon.svg'
 import { ReactComponent as MdIcon } from '../../../assets/icons/md-icon.svg'
@@ -99,6 +100,8 @@ export const StateIcon = ({ code }: StateIconProps): React.ReactElement => {
             return <IlIcon />
         case 'KS':
             return <KsIcon />
+        case 'KY':
+            return <KyIcon />
         case 'LA':
             return <LaIcon />
         case 'MA':

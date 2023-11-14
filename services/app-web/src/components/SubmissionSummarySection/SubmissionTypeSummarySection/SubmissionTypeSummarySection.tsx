@@ -17,7 +17,7 @@ import styles from '../SubmissionSummarySection.module.scss'
 export type SubmissionTypeSummarySectionProps = {
     submission: HealthPlanFormDataType
     statePrograms: Program[]
-    navigateTo?: string
+    editNavigateTo?: string
     headerChildComponent?: React.ReactElement
     subHeaderComponent?: React.ReactElement
     initiallySubmittedAt?: Date
@@ -27,7 +27,7 @@ export type SubmissionTypeSummarySectionProps = {
 export const SubmissionTypeSummarySection = ({
     submission,
     statePrograms,
-    navigateTo,
+    editNavigateTo,
     subHeaderComponent,
     headerChildComponent,
     initiallySubmittedAt,
@@ -44,7 +44,7 @@ export const SubmissionTypeSummarySection = ({
             <SectionHeader
                 header={submissionName}
                 subHeaderComponent={subHeaderComponent}
-                navigateTo={navigateTo}
+                editNavigateTo={editNavigateTo}
                 headerId={'submissionName'}
             >
                 {headerChildComponent && headerChildComponent}

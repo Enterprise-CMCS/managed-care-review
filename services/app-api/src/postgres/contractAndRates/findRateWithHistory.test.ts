@@ -422,7 +422,7 @@ describe('findRate', () => {
         const draftRateTwo = must(
             await insertDraftRate(client, {
                 stateCode: 'MN',
-                rateCertificationName: 'first submission rate revision',
+                rateCertificationName: 'second submission rate revision',
             })
         )
 

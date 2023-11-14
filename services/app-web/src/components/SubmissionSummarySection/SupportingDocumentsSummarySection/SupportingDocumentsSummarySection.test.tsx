@@ -39,7 +39,7 @@ describe('SupportingDocumentsSummarySection', () => {
         renderWithProviders(
             <SupportingDocumentsSummarySection
                 submission={testSubmission}
-                navigateTo="documents"
+                editNavigateTo="documents"
             />,
             {
                 apolloProvider: {

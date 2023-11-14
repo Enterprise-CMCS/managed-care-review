@@ -43,7 +43,7 @@ import {
     insertManyUsers,
 } from './user'
 import {
-    findAllQuestionsByHealthPlanPackage,
+    findAllQuestionsByContract,
     insertQuestion,
     insertQuestionResponse,
 } from './questionResponse'
@@ -139,9 +139,7 @@ type Store = {
         user: CMSUserType
     ) => Promise<Question | StoreError>
 
-    findAllQuestionsByHealthPlanPackage: (
-        pkgID: string
-    ) => Promise<Question[] | StoreError>
+    findAllQuestionsByContract: (pkgID: string) => Promise<Question[] | Error>
 
     insertQuestionResponse: (
         questionInput: InsertQuestionResponseArgs,
@@ -240,8 +238,8 @@ function NewPostgresStore(client: PrismaClient): Store {
         findAllUsers: () => findAllUsers(client),
         insertQuestion: (questionInput, user) =>
             insertQuestion(client, questionInput, user),
-        findAllQuestionsByHealthPlanPackage: (pkgID) =>
-            findAllQuestionsByHealthPlanPackage(client, pkgID),
+        findAllQuestionsByContract: (pkgID) =>
+            findAllQuestionsByContract(client, pkgID),
         insertQuestionResponse: (questionInput, user) =>
             insertQuestionResponse(client, questionInput, user),
         /**

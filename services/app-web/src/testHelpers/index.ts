@@ -21,4 +21,5 @@ export {
     TEST_XLS_FILE,
 } from './jestHelpers'
 
+export { testS3Client } from './s3Helpers'
 export { updateDateRange } from './userEventHelpers'

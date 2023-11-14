@@ -211,7 +211,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: yarn
@@ -446,7 +446,7 @@ jobs:
     if: always() && needs.finishing-prep.result == 'success'
     runs-on: ubuntu-20.04
     container:
-      image: cypress/browsers:node16.17.0-chrome106
+      image: cypress/browsers:node18.12.0-chrome107
       options: --user 1001
     permissions:
       deployments: write

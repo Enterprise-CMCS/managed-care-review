@@ -13,8 +13,10 @@ import {
     createDBUsersWithFullData,
     testCMSUser,
 } from '../../testHelpers/userHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 describe('createQuestion', () => {
+    const mockLDService = testLDService({ ['rates-db-refactor']: true })
     const cmsUser = testCMSUser()
     beforeAll(async () => {
         //Inserting a new CMS user, with division assigned, in postgres in order to create the question to user relationship.
@@ -22,11 +24,14 @@ describe('createQuestion', () => {
     })
 
     it('returns question data after creation', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            ldService: mockLDService,
+        })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
+            ldService: mockLDService,
         })
 
         const submittedPkg = await createAndSubmitTestHealthPlanPackage(
@@ -41,7 +46,7 @@ describe('createQuestion', () => {
         expect(createdQuestion.question).toEqual(
             expect.objectContaining({
                 id: expect.any(String),
-                pkgID: submittedPkg.id,
+                contractID: submittedPkg.id,
                 division: 'DMCO',
                 documents: [
                     {
@@ -54,11 +59,14 @@ describe('createQuestion', () => {
         )
     })
     it('allows question creation on UNLOCKED and RESUBMITTED package', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            ldService: mockLDService,
+        })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
+            ldService: mockLDService,
         })
 
         const submittedPkg = await createAndSubmitTestHealthPlanPackage(
@@ -104,7 +112,7 @@ describe('createQuestion', () => {
                             node: expect.objectContaining({
                                 id: expect.any(String),
                                 createdAt: expect.any(Date),
-                                pkgID: submittedPkg.id,
+                                contractID: submittedPkg.id,
                                 division: 'DMCO',
                                 documents: [
                                     {
@@ -119,7 +127,7 @@ describe('createQuestion', () => {
                             node: expect.objectContaining({
                                 id: expect.any(String),
                                 createdAt: expect.any(Date),
-                                pkgID: submittedPkg.id,
+                                contractID: submittedPkg.id,
                                 division: 'DMCO',
                                 documents: [
                                     {
@@ -144,11 +152,14 @@ describe('createQuestion', () => {
         )
     })
     it('returns an error package status is DRAFT', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            ldService: mockLDService,
+        })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
+            ldService: mockLDService,
         })
 
         const draftPkg = await createTestHealthPlanPackage(stateServer)
@@ -157,7 +168,7 @@ describe('createQuestion', () => {
             query: CREATE_QUESTION,
             variables: {
                 input: {
-                    pkgID: draftPkg.id,
+                    contractID: draftPkg.id,
                     documents: [
                         {
                             name: 'Test Question',
@@ -175,7 +186,9 @@ describe('createQuestion', () => {
         )
     })
     it('returns an error if a state user attempts to create a question for a package', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            ldService: mockLDService,
+        })
         const submittedPkg = await createAndSubmitTestHealthPlanPackage(
             stateServer
         )
@@ -184,7 +197,7 @@ describe('createQuestion', () => {
             query: CREATE_QUESTION,
             variables: {
                 input: {
-                    pkgID: submittedPkg.id,
+                    contractID: submittedPkg.id,
                     documents: [
                         {
                             name: 'Test Question',
@@ -202,11 +215,14 @@ describe('createQuestion', () => {
         )
     })
     it('returns error on invalid package id', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            ldService: mockLDService,
+        })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
+            ldService: mockLDService,
         })
 
         await createAndSubmitTestHealthPlanPackage(stateServer)
@@ -215,7 +231,7 @@ describe('createQuestion', () => {
             query: CREATE_QUESTION,
             variables: {
                 input: {
-                    pkgID: 'invalid-pkg-id',
+                    contractID: 'invalid-pkg-id',
                     documents: [
                         {
                             name: 'Test Question',
@@ -229,7 +245,7 @@ describe('createQuestion', () => {
         expect(createdQuestion.errors).toBeDefined()
         expect(assertAnErrorCode(createdQuestion)).toBe('NOT_FOUND')
         expect(assertAnError(createdQuestion).message).toBe(
-            `Issue finding a package with id invalid-pkg-id. Message: Package with id invalid-pkg-id does not exist`
+            `Package with id invalid-pkg-id does not exist`
         )
     })
     it('returns error when CMS user division is unassigned', async () => {
@@ -237,11 +253,14 @@ describe('createQuestion', () => {
             divisionAssignment: undefined,
         })
         await createDBUsersWithFullData([cmsUserWithNoDivision])
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            ldService: mockLDService,
+        })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUserWithNoDivision,
             },
+            ldService: mockLDService,
         })
 
         await createAndSubmitTestHealthPlanPackage(stateServer)
@@ -250,7 +269,7 @@ describe('createQuestion', () => {
             query: CREATE_QUESTION,
             variables: {
                 input: {
-                    pkgID: 'invalid-pkg-id',
+                    contractID: 'invalid-pkg-id',
                     documents: [
                         {
                             name: 'Test Question',

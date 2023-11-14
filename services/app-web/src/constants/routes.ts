@@ -10,7 +10,6 @@ const ROUTES = [
     'DASHBOARD_RATES',
     'GRAPHQL_EXPLORER',
     'HELP',
-    'REPORTS',
     'SETTINGS',
     'RATES_SUMMARY',
     'SUBMISSIONS',
@@ -46,7 +45,6 @@ const RoutesRecord: Record<RouteT, string> = {
     DASHBOARD_RATES: '/dashboard/rate-reviews',
     GRAPHQL_EXPLORER: '/dev/graphql-explorer',
     HELP: '/help',
-    REPORTS: '/reports',
     SETTINGS: '/settings',
     RATES_SUMMARY: 'rates/:id',
     SUBMISSIONS: '/submissions',
@@ -103,8 +101,8 @@ const QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
 */
 const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
     ROOT: 'Dashboard',
-    DASHBOARD_SUBMISSIONS: 'Dashboard',
-    DASHBOARD_RATES: 'Dashboard',
+    DASHBOARD_SUBMISSIONS: 'Submissions Dashboard',
+    DASHBOARD_RATES: 'Rate Reviews Dashboard',
     SUBMISSIONS_NEW: 'New submission',
     UNKNOWN_ROUTE: '404',
 }
@@ -119,7 +117,6 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     AUTH: 'Login',
     GRAPHQL_EXPLORER: 'GraphQL explorer',
     HELP: 'Help',
-    REPORTS: 'Reports',
     SETTINGS: 'Settings',
     DASHBOARD: 'Dashboard',
     DASHBOARD_RATES: 'Rate Review Dashboard',

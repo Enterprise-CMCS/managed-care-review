@@ -21,13 +21,16 @@
     margin-top: 17.5px;
     span {
         font-weight: bold;
-        a {
-            display: inline;
-            margin-left: 5px;
-        }
+        margin-top: 0;
 
+        &.mccrsID a {
+            display: inline-block;
+            margin-left: 5px;
+            margin-top: 0px;
+            
+        }
     }
-    .editLink {
+    a.editLink {
         margin-top: 0;
     }
 }

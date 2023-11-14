@@ -47,8 +47,9 @@ const renderWithProviders = (
 
     const { route } = routerProvider
     const s3Client: S3ClientT = s3Provider ?? testS3Client()
+    const user = userEvent.setup()
 
-    return render(
+    const renderResult = render(
         <MockedProvider {...apolloProvider}>
             <MemoryRouter initialEntries={[route || '']}>
                 <AuthProvider authMode={'AWS_COGNITO'} {...authProvider}>
@@ -60,6 +61,10 @@ const renderWithProviders = (
             </MemoryRouter>
         </MockedProvider>
     )
+    return {
+        user,
+        ...renderResult,
+    }
 }
 
 const WithLocation = ({

@@ -10,7 +10,7 @@ function useIndexQuestionsQueryWrapper(id: string): WrappedFetchResultType {
         useIndexQuestionsQuery({
             variables: {
                 input: {
-                    pkgID: id,
+                    contractID: id,
                 },
             },
         })

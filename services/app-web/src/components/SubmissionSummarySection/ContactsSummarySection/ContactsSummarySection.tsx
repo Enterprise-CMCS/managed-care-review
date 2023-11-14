@@ -11,7 +11,7 @@ import { DataDetail, DataDetailContactField } from '../../DataDetail'
 
 export type ContactsSummarySectionProps = {
     submission: HealthPlanFormDataType
-    navigateTo?: string
+    editNavigateTo?: string
 }
 
 export const getActuaryFirm = (actuaryContact: ActuaryContact): string => {
@@ -32,31 +32,32 @@ export const getActuaryFirm = (actuaryContact: ActuaryContact): string => {
 
 export const ContactsSummarySection = ({
     submission,
-    navigateTo,
+    editNavigateTo,
 }: ContactsSummarySectionProps): React.ReactElement => {
     const isSubmitted = submission.status === 'SUBMITTED'
 
     return (
         <section id="stateContacts" className={styles.summarySection}>
-            <SectionHeader header="State contacts" navigateTo={navigateTo} />
+            <SectionHeader
+                header="State contacts"
+                editNavigateTo={editNavigateTo}
+            />
 
-            <GridContainer>
+            <GridContainer className="padding-left-0">
                 <Grid row>
                     <dl>
                         {submission.stateContacts.length > 0 ? (
                             submission.stateContacts.map(
                                 (stateContact, index) => (
-                                    <Grid col={6} key={'statecontact_' + index}>
-                                        <DataDetail
-                                            id={'statecontact_' + index}
-                                            label={`Contact ${index + 1}`}
-                                            children={
-                                                <DataDetailContactField
-                                                    contact={stateContact}
-                                                />
-                                            }
-                                        />
-                                    </Grid>
+                                    <DataDetail
+                                        id={'statecontact_' + index}
+                                        label={`Contact ${index + 1}`}
+                                        children={
+                                            <DataDetailContactField
+                                                contact={stateContact}
+                                            />
+                                        }
+                                    />
                                 )
                             )
                         ) : (

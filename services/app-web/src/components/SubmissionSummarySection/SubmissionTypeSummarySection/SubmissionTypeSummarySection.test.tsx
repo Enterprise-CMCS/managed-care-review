@@ -21,7 +21,7 @@ describe('SubmissionTypeSummarySection', () => {
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
                 statePrograms={statePrograms}
-                navigateTo="submission-type"
+                editNavigateTo="submission-type"
                 submissionName="MN-PMAP-0001"
             />
         )
@@ -70,7 +70,7 @@ describe('SubmissionTypeSummarySection', () => {
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
                 statePrograms={statePrograms}
-                navigateTo="submission-type"
+                editNavigateTo="submission-type"
                 submissionName="MN-PMAP-0001"
             />
         )
@@ -109,7 +109,7 @@ describe('SubmissionTypeSummarySection', () => {
                     } as unknown as HealthPlanFormDataType
                 } // allow type coercion to be able to test edge case
                 statePrograms={statePrograms}
-                navigateTo="submission-type"
+                editNavigateTo="submission-type"
                 submissionName="MN-PMAP-0001"
             />
         )
@@ -138,7 +138,7 @@ describe('SubmissionTypeSummarySection', () => {
                     } as unknown as HealthPlanFormDataType
                 } // allow type coercion to be able to test edge case
                 statePrograms={statePrograms}
-                navigateTo="submission-type"
+                editNavigateTo="submission-type"
                 submissionName="MN-PMAP-0001"
             />
         )
@@ -165,7 +165,7 @@ describe('SubmissionTypeSummarySection', () => {
             <SubmissionTypeSummarySection
                 submission={{ ...stateSubmission, status: 'SUBMITTED' }}
                 statePrograms={statePrograms}
-                navigateTo="submission-type"
+                editNavigateTo="submission-type"
                 submissionName="MN-MSHO-0003"
             />
         )
@@ -187,7 +187,7 @@ describe('SubmissionTypeSummarySection', () => {
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
                 statePrograms={statePrograms}
-                navigateTo="submission-type"
+                editNavigateTo="submission-type"
                 submissionName="MN-PMAP-0001"
             />
         )
@@ -200,7 +200,7 @@ describe('SubmissionTypeSummarySection', () => {
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
                 statePrograms={statePrograms}
-                navigateTo="submission-type"
+                editNavigateTo="submission-type"
                 headerChildComponent={<button>Test button</button>}
                 submissionName="MN-PMAP-0001"
             />

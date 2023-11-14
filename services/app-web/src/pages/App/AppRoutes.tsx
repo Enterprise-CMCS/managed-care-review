@@ -26,7 +26,6 @@ import { MccrsId } from '../MccrsId/MccrsId'
 import { NewStateSubmissionForm, StateSubmissionForm } from '../StateSubmission'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
-import { Reports } from '../../components/Reports/Reports'
 import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
 import { featureFlags } from '../../common-code/featureFlags'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
@@ -229,7 +228,6 @@ const CMSUserRoutes = ({
                         element={<GraphQLExplorer />}
                     />
                 )}
-                <Route path={RoutesRecord.REPORTS} element={<Reports />} />
                 <Route path={RoutesRecord.SETTINGS} element={<Settings />} />
                 {UniversalRoutes}
                 <Route path="*" element={<Error404 />} />
