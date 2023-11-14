@@ -102,7 +102,10 @@ export const UploadQuestions = () => {
                         text: 'Dashboard',
                     },
                     { link: `/submissions/${id}`, text: packageName },
-                    { text: 'Add questions' },
+                    {
+                        text: 'Add questions',
+                        link: RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION,
+                    },
                 ]}
             />
 

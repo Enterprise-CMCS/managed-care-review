@@ -114,7 +114,10 @@ export const UploadResponse = () => {
                         text: 'Dashboard',
                     },
                     { link: `/submissions/${id}`, text: packageName },
-                    { text: 'Add response' },
+                    {
+                        text: 'Add response',
+                        link: RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE,
+                    },
                 ]}
             />
 

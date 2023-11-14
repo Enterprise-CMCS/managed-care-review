@@ -4,7 +4,7 @@ import styles from './Breadcrumbs.module.scss'
 
 type BreadcrumbItem = {
     text: string
-    link?: string
+    link: string
 }
 export type BreadcrumbsProps = {
     items: BreadcrumbItem[]
@@ -12,21 +12,13 @@ export type BreadcrumbsProps = {
 
 const Crumb = (crumb: BreadcrumbItem) => {
     const { link, text } = crumb
-    if (link) {
-        return (
-            <Breadcrumb>
-                <Link asCustom={NavLink} to={link} end>
-                    <span>{text}</span>
-                </Link>
-            </Breadcrumb>
-        )
-    } else {
-        return (
-            <Breadcrumb>
+    return (
+        <Breadcrumb>
+            <Link asCustom={NavLink} to={link} end>
                 <span>{text}</span>
-            </Breadcrumb>
-        )
-    }
+            </Link>
+        </Breadcrumb>
+    )
 }
 
 const Breadcrumbs = ({ items }: BreadcrumbsProps) => {
