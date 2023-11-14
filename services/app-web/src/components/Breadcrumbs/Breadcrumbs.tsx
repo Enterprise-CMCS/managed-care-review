@@ -15,7 +15,7 @@ const Crumb = (crumb: BreadcrumbItem) => {
     if (link) {
         return (
             <Breadcrumb>
-                <Link asCustom={NavLink} to={link}>
+                <Link asCustom={NavLink} to={link} end>
                     <span>{text}</span>
                 </Link>
             </Breadcrumb>

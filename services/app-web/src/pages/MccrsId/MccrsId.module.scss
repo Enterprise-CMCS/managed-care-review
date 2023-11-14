@@ -10,7 +10,14 @@
         min-width: 40rem;
         max-width: 20rem;
         margin: 0 auto;
+
+        li:last-child a {
+            text-decoration: none;
+            color: $theme-color-base-ink;
+        }
     }
+
+    
 }
 
 .formContainer.tableContainer {
