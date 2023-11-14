@@ -268,7 +268,7 @@ async function cloneDBLocally(
                 await ssh.connect({
                     host: jumpboxIP,
                     username: 'ubuntu',
-                    privateKeyPath: '/Users/macrae/.ssh/wml_jumpbox', // FIGURE THIS
+                    privateKeyPath: sshKeyPath,
                 })
                 console.info('Connected')
                 return true
