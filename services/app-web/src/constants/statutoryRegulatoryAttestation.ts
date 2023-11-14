@@ -1,6 +1,6 @@
 const StatutoryRegulatoryAttestation = {
     YES: 'Yes the contract fully complies with all applicable requirements.',
-    NO: 'No the contract does not fully comply with all applicable requirements',
+    NO: 'No the contract does not fully comply with all applicable requirements.',
 }
 
 const StatutoryRegulatoryAttestationQuestion =
