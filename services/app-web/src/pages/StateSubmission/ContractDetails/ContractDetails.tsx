@@ -604,13 +604,45 @@ export const ContractDetails = ({
                                                 }
                                             </b>
                                         </legend>
-                                        <span
+                                        <div
+                                            role="note"
                                             className={
-                                                styles.requiredOptionalText
+                                                styles.contractAttestationHint
                                             }
                                         >
-                                            Required
-                                        </span>
+                                            <span
+                                                className={
+                                                    styles.requiredOptionalText
+                                                }
+                                            >
+                                                Required
+                                            </span>
+                                            <span>
+                                                <Link
+                                                    aria-label="Managed Care Contract Review and Approval State Guide (opens in new window)"
+                                                    href={
+                                                        'https://www.medicaid.gov/sites/default/files/2022-01/mce-checklist-state-user-guide.pdf'
+                                                    }
+                                                    variant="external"
+                                                    target="_blank"
+                                                >
+                                                    Managed Care Contract Review
+                                                    and Approval State Guide
+                                                </Link>
+                                                <Link
+                                                    aria-label="CHIP Managed Care Contract Review and Approval State Guide (opens in new window)"
+                                                    href={
+                                                        'https://www.medicaid.gov/sites/default/files/2022-04/chip-managed-care-contract-guide_0.pdf'
+                                                    }
+                                                    variant="external"
+                                                    target="_blank"
+                                                >
+                                                    CHIP Managed Care Contract
+                                                    Review and Approval State
+                                                    Guide
+                                                </Link>
+                                            </span>
+                                        </div>
                                         {showFieldErrors(
                                             errors.statutoryRegulatoryAttestation
                                         ) && (
