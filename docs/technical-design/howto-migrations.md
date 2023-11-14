@@ -4,18 +4,40 @@
 
 Migrations are a controlled way to change existing records in the database or else change the shape of tables/relationships. They are necessary when fields are added, removed, or when the meaning behind fields and their relationships change.
 
-## General Guidance
+## Schema Migrations
 
--   Prioritize testing in environments that have data similar to production. If you are testing on a review app, you should pre-populate data through using the deployed app as a user or via Cypress runs to have a diversity of test data available.
--   Run in all deployed environments and validate for each environment.
--   Write migrations that can be tested repeatedly. Include logic to skip or handle data that has already been changed or doesn't need to be migrated, so repeated runs of the lambda don't result in bad data.
--   Avoid making migrations directly dependent on a specific feature being available in production.
+Schema migrations are changes to the database models and relationships.
+
+We use Prisma to perform schema migrations. Right now the developer process for schema migrations is described a bit [here](../../README.md#updating-the-database). More detailed steps forthcoming.
 
 ## Data Migrations
 
-Currently data migrations change existing records in the database. They are run as standalone lambdas that developers must manually trigger by environment. They can be prototyped for fast feedback in the local environment, and then tested more thoroughly in lower environments.
+Data migrations change existing records in the database. Here are steps to prepare for a data migration.
 
-### Local prototyping
+1. Define clear acceptance criteria and QA steps early
+    - How do you know migration applied?
+    - What will be checked either in the app, via api request, or in the reports CSV?
+    - Developers may have to verify that the change worked multiple timesas migration through different environments.
+
+1. Prepare for manual testing in lower environments.
+    - Build a PR review app off `main` to start out to get Cypress running.
+    - Prepare local environment by [dumping VAL database](#how-to-dump-val-data-for-local-testing) and relying on that for local runs.
+
+1. Write a migration script that includes verbose logs.
+    - Console statements are essential because there are line numbers in Cloudwatch when the migration fails or does not apply correctly. There is little additional context about why a run execution paused or failed.
+    - Here is an example of verbose debug console statements wrapping a loop:
+      ![debug consoles in data migration script](../../.images/verbose-logs-example.png)
+
+### Data migration via `app-api` tooling **recommended option for data migrations*
+
+We now have tooling for data migrations in `app-api/src/dataMigrations`. These are JS scripts that can use Prisma functions, be tested locally, and then run sequentially on higher environment databases.
+
+🚩 More detailed steps forthcoming.
+
+### Migration via AWS Lambda
+This type of migration is run as standalone lambda that developers must manually trigger by environment. They can be prototyped for fast feedback in the local environment, and then tested more thoroughly in lower environments.
+
+#### Local prototyping for AWS lambda
 
 1. Log into the AWS console (you'll need to be connected to the CMS VPN).
 1. Go to the Dev environment dropdown: Cloud Access Roles --> Developer Admin --> Short-term Access Keys.
@@ -32,17 +54,8 @@ Currently data migrations change existing records in the database. They are run 
 1. Run `npx serverless invoke local --function `name_of_your_lambda``. You should see it build with webpack, then run. Any log statements you've put in your code will display in this window.
 1. You can inspect the database again and should see any changes or additions you've made.
 
-### Running in a lower environment
+#### Running in a lower environment for AWS lambda
 
-1. Prepare for manual testing in lower environments.
-    - Build a PR review app off `main` to start out. Try to populate with submissions similar to what is in production (For example, populate submissions via Cypress and if there are specific submissions types you know you will need to test, make sure add them).
-1. Write the migration with verbose logs.
-    - The migration will be written as a [Node lambda](https://docs.aws.amazon.com/lambda/latest/dg/nodejs-handler.html) and live in `app-api/src/handlers`. Make sure you use ES6 async await.
-    - Console statements are essential because there are line numbers in Cloudwatch when the migration fails or does not apply correctly. There is little additional context about why a run execution paused or failed.
-    - Here is an example of verbose debug console statements wrapping a loop:
-      ![debug consoles in data migration script](../../.images/verbose-logs-example.png)
-1. Write unit tests.
-    - Consider including a test for `migration can be run repeatedly without data loss or unexpected results". Using repeatable migrations (when possible) makes it easier on developers and easier to unwind work.
 1. Manually test the migration in your review app.
     - Log into [AWS Lambda Console](https://console.aws.amazon.com/lambda/home) and find the lambda. This means choosing `app-api-` lambda with your branch name and migration name included.
     - Click the Test tab and the `Test` button. Use the generic hello world event.
@@ -52,18 +65,24 @@ Currently data migrations change existing records in the database. They are run 
         - If this is to be run in DEV (`main`) you will have to reshape your `envrc.local` to imitate configuration on that stage. See AWS console for Lambda to reference the shape of config.
           ![lambda configuration panel in aws](../../.images/aws-console-lambda-config.png)
         - Command line serverless scripts should not be used on PROD. Ideally do not use in VAL either. Running a migration via the AWS lambda console web interface is preferred because it is guaranteed to build off merged code and use similar configuration to how our application is deployed in CI.
-1. Define clear acceptance criteria, this will be re-used.
-    - How do you know migration applied? What will be checked either in the app, via api request, or in the reports CSV?
-    - Developers will have to verify that the change worked multiple times, basically each time the migration is run on a new environment since the data could be quite different.
-    - If verification involves looking into reports and comparing fields, consider using a CSV tool like [CSVKit](https://csvkit.readthedocs.io/en/latest/index.html) if the comparisons seem involved.
 1. After the PR merges and promotes,run in higher environments.
     - Start with DEV. Follow similar steps Step #4 but now using the `main` lambda for your migration.
     - Run the migration DEV > VAL > PROD in order, verifying in the application (or via reporting output) after each run.
 
-## Schema Migrations
+## How to dump VAL data for local testing
 
-We use Prisma to perform schema migrations. Right now the developer process for schema migrations is described a bit [here](../../README.md#updating-the-database). More detailed steps forthcoming.
+Dependencies:
+- [Jumpbox access exists for your IP](../../services/postgres/README.md#access-to-aurora-postgres-via-aws-jump-box)
+- `postgresql` installed locally
 
-## Proto migrations
+1. SSH to instance of db you will copy and make sure you have DB secrets available for that environment db.
+    - See [SSH directions](../../services/postgres/README.md#ssh-to-the-instances) and [postgres credentials docs](../../services/postgres/README.md#accessing-postgres-authentication-credentials)
 
-The [proto migrations approach](../../services/app-proto/README.md#adding-a-new-migration) is no longer recommended - we are moving off protos.
+1. Dump database.
+   -  `pg_dump -Fc -h $hostname -p $port -U $username -d $dbname > [val]-[date].sqlfc`. You will have to enter the db password (also in the secrets).
+
+1. Exit SSH. Copy down from from remote to the current directory.
+    -  `scp ubuntu@$host:[val]-[date].sqlfc .`
+
+1. From current directory, start up localhost db with the copied db
+    - `pg_restore -h localhost -p 5432 -U postgres -d postgres --clean val]-[date].sqlfc`. You will be promoted to enter in local db password `shhhsecret`. You will see print out errors but the database has spun up successfully.

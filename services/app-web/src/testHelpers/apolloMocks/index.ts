@@ -34,6 +34,7 @@ export {
 
 export {
     fetchCurrentUserMock,
+    mockValidStateUser,
     mockValidCMSUser,
     mockValidUser,
     mockValidAdminUser,
@@ -55,3 +56,4 @@ export { rateDataMock } from './rateDataMock'
 export { indexRatesMockSuccess, indexRatesMockFailure } from './rateGQLMocks'
 
 export { updateUserMockError, updateUserMockSuccess } from './updateUserMock'
+export { fetchRateMockSuccess } from './rateGQLMocks'

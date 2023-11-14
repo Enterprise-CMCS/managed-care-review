@@ -3,10 +3,12 @@ import { SingleRateSummarySection } from './SingleRateSummarySection'
 import {
     fetchCurrentUserMock,
     mockValidCMSUser,
+    mockValidStateUser,
     rateDataMock,
 } from '../../../testHelpers/apolloMocks'
 import { screen, waitFor, within } from '@testing-library/react'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
+import { RateRevision } from '../../../gen/gqlClient'
 
 describe('SingleRateSummarySection', () => {
     it('can render rate details without errors', async () => {
@@ -29,6 +31,13 @@ describe('SingleRateSummarySection', () => {
                     },
                 }
             )
+        })
+        // Wait for all the documents to be in the table
+        await screen.findByText(
+            rateData.revisions[0].formData.rateDocuments[0].name
+        )
+        await screen.findByRole('link', {
+            name: 'Download all rate documents',
         })
 
         const rateName = rateData.revisions[0].formData
@@ -126,14 +135,9 @@ describe('SingleRateSummarySection', () => {
         })
 
         // Wait for all the documents to be in the table
-        await waitFor(() => {
-            expect(
-                screen.getByRole('link', {
-                    name: 'Download all rate documents',
-                })
-            ).toBeInTheDocument()
-            expect(rateDocsTable).toBeInTheDocument()
-            expect(supportingDocsTable).toBeInTheDocument()
+        await screen.findByText(rateDoc.name)
+        await screen.findByRole('link', {
+            name: 'Download all rate documents',
         })
 
         const parentContractSubmission = screen.getByRole('definition', {
@@ -193,5 +197,80 @@ describe('SingleRateSummarySection', () => {
                 `${linkedSubmissionTwo.packageName}`
             )
         ).toBeInTheDocument()
+    })
+
+    it('should not display missing field text to CMS users', async () => {
+        const rateData = rateDataMock({
+            rateType: undefined,
+            rateDateCertified: undefined,
+        } as unknown as Partial<RateRevision>)
+        renderWithProviders(
+            <SingleRateSummarySection
+                rate={rateData}
+                isSubmitted={false}
+                statePrograms={rateData.state.programs}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                    ],
+                },
+            }
+        )
+
+        // Wait for all the documents to be in the table
+        await screen.findByText(
+            rateData.revisions[0].formData.rateDocuments[0].name
+        )
+        await screen.findByRole('link', {
+            name: 'Download all rate documents',
+        })
+
+        expect(
+            screen.queryByText(/You must provide this information/)
+        ).toBeNull()
+    })
+
+    it('should display missing field text to state users', async () => {
+        const rateData = rateDataMock(
+            {
+                rateType: undefined,
+                rateDateCertified: undefined,
+            } as unknown as Partial<RateRevision>,
+            { status: 'UNLOCKED' }
+        )
+        renderWithProviders(
+            <SingleRateSummarySection
+                rate={rateData}
+                isSubmitted={false}
+                statePrograms={rateData.state.programs}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidStateUser(),
+                        }),
+                    ],
+                },
+            }
+        )
+
+        // Wait for all the documents to be in the table
+        await screen.findByText(
+            rateData.revisions[0].formData.rateDocuments[0].name
+        )
+        await screen.findByRole('link', {
+            name: 'Download all rate documents',
+        })
+
+        expect(
+            await screen.findAllByText(/You must provide this information/)
+        ).toHaveLength(2)
     })
 })

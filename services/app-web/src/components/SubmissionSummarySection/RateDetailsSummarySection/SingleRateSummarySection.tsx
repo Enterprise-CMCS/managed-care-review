@@ -26,6 +26,7 @@ import { Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
 import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
+import { useAuth } from '../../../contexts/AuthContext'
 
 // This rate summary pages assumes we are using contract and rates API.
 // Eventually RateDetailsSummarySection should share code with this code
@@ -120,10 +121,13 @@ export const SingleRateSummarySection = ({
     isSubmitted: boolean
     statePrograms: Program[]
 }): React.ReactElement | null => {
+    const { loggedInUser } = useAuth()
     const rateRevision = rate.revisions[0]
     const formData: RateFormData = rateRevision?.formData
     const documentDateLookupTable = makeRateDocumentDateTable(rate.revisions)
     const isRateAmendment = formData.rateType === 'AMENDMENT'
+    const explainMissingData =
+        !isSubmitted && loggedInUser?.role === 'STATE_USER'
 
     // TODO BULK DOWNLOAD
     // needs to be wrap in a standalone hook
@@ -165,10 +169,8 @@ export const SingleRateSummarySection = ({
             )
             if (zippedURL instanceof Error) {
                 const msg = `ERROR: getBulkDlURL failed to generate URL for a rate. ID: ${rate?.id} Message: ${zippedURL}`
-                console.info(msg)
 
                 setDocumentError(true)
-
                 recordJSException(msg)
             }
 
@@ -201,14 +203,14 @@ export const SingleRateSummarySection = ({
                             <DataDetail
                                 id="ratePrograms"
                                 label="Programs this rate certification covers"
-                                explainMissingData={!isSubmitted}
+                                explainMissingData={explainMissingData}
                                 children={ratePrograms(formData, statePrograms)}
                             />
                         )}
                         <DataDetail
                             id="rateType"
                             label="Rate certification type"
-                            explainMissingData={!isSubmitted}
+                            explainMissingData={explainMissingData}
                             children={rateCertificationType(formData)}
                         />
                         <DataDetail
@@ -218,7 +220,7 @@ export const SingleRateSummarySection = ({
                                     ? 'Rating period of original rate certification'
                                     : 'Rating period'
                             }
-                            explainMissingData={!isSubmitted}
+                            explainMissingData={explainMissingData}
                             children={
                                 formData.rateDateStart &&
                                 formData.rateDateEnd ? (
@@ -239,7 +241,7 @@ export const SingleRateSummarySection = ({
                                     ? 'Date certified for rate amendment'
                                     : 'Date certified'
                             }
-                            explainMissingData={!isSubmitted}
+                            explainMissingData={explainMissingData}
                             children={formatCalendarDate(
                                 formData.rateDateCertified
                             )}
@@ -248,7 +250,7 @@ export const SingleRateSummarySection = ({
                             <DataDetail
                                 id="effectiveRatingPeriod"
                                 label="Rate amendment effective dates"
-                                explainMissingData={!isSubmitted}
+                                explainMissingData={explainMissingData}
                                 children={`${formatCalendarDate(
                                     formData.amendmentEffectiveDateStart
                                 )} to ${formatCalendarDate(
@@ -259,7 +261,7 @@ export const SingleRateSummarySection = ({
                         <DataDetail
                             id="certifyingActuary"
                             label="Certifying actuary"
-                            explainMissingData={!isSubmitted}
+                            explainMissingData={explainMissingData}
                             children={
                                 <DataDetailContactField
                                     contact={
@@ -271,13 +273,13 @@ export const SingleRateSummarySection = ({
                         <DataDetail
                             id="rateCapitationType"
                             label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
-                            explainMissingData={!isSubmitted}
+                            explainMissingData={explainMissingData}
                             children={rateCapitationType(formData)}
                         />
                         <DataDetail
                             id="submittedWithContract"
                             label="Submission this rate was submitted with"
-                            explainMissingData={!isSubmitted}
+                            explainMissingData={explainMissingData}
                             children={relatedSubmissions(
                                 rateRevision?.contractRevisions,
                                 statePrograms
