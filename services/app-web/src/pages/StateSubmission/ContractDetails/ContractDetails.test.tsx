@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event'
 import {
     mockDraft,
     fetchCurrentUserMock,
+    mockBaseContract,
 } from '../../../testHelpers/apolloMocks'
 
 import {
@@ -15,6 +16,7 @@ import {
     TEST_PNG_FILE,
     dragAndDrop,
     selectYesNoRadio,
+    ldUseClientSpy,
 } from '../../../testHelpers/jestHelpers'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { ContractDetails } from './'
@@ -25,6 +27,10 @@ import {
     modifiedProvisionMedicaidAmendmentKeys,
     modifiedProvisionMedicaidBaseKeys,
 } from '../../../common-code/healthPlanFormDataType'
+import {
+    StatutoryRegulatoryAttestation,
+    StatutoryRegulatoryAttestationQuestion,
+} from '../../../constants/statutoryRegulatoryAttestation'
 
 const scrollIntoViewMock = jest.fn()
 HTMLElement.prototype.scrollIntoView = scrollIntoViewMock
@@ -1018,6 +1024,96 @@ describe('ContractDetails', () => {
                     ],
                 })
             )
+        })
+    })
+
+    describe('Contract 438 attestation', () => {
+        it('renders 438 attestation question errors', async () => {
+            ldUseClientSpy({ '438-attestation': true })
+            const draft = mockBaseContract({
+                statutoryRegulatoryAttestation: true,
+            })
+            await waitFor(() => {
+                renderWithProviders(
+                    <ContractDetails
+                        draftSubmission={draft}
+                        updateDraft={jest.fn()}
+                        previousDocuments={[]}
+                    />,
+                    {
+                        apolloProvider: defaultApolloProvider,
+                    }
+                )
+            })
+
+            // expect 438 attestation question to be on the page
+            expect(
+                screen.getByText(StatutoryRegulatoryAttestationQuestion)
+            ).toBeInTheDocument()
+
+            const yesRadio = screen.getByRole('radio', {
+                name: StatutoryRegulatoryAttestation.YES,
+            })
+            const noRadio = screen.getByRole('radio', {
+                name: StatutoryRegulatoryAttestation.YES,
+            })
+
+            // expect both yes and no answers on the page and yes to be checked
+            expect(yesRadio).toBeChecked()
+            expect(noRadio).toBeInTheDocument()
+        })
+        it('errors when continuing without answering 438 attestation question', async () => {
+            ldUseClientSpy({ '438-attestation': true })
+            const draft = mockBaseContract({
+                statutoryRegulatoryAttestation: undefined,
+            })
+            const mockUpdateDraftFn = jest.fn()
+            await waitFor(() => {
+                renderWithProviders(
+                    <ContractDetails
+                        draftSubmission={draft}
+                        updateDraft={mockUpdateDraftFn}
+                        previousDocuments={[]}
+                    />,
+                    {
+                        apolloProvider: defaultApolloProvider,
+                    }
+                )
+            })
+
+            // expect 438 attestation question to be on the page
+            expect(
+                screen.getByText(StatutoryRegulatoryAttestationQuestion)
+            ).toBeInTheDocument()
+
+            const yesRadio = screen.getByRole('radio', {
+                name: StatutoryRegulatoryAttestation.YES,
+            })
+            const noRadio = screen.getByRole('radio', {
+                name: StatutoryRegulatoryAttestation.YES,
+            })
+
+            // expect both yes and no answers on the page and yes to be checked
+            expect(yesRadio).toBeInTheDocument()
+            expect(noRadio).toBeInTheDocument()
+
+            // check no radio
+            await userEvent.click(noRadio)
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+
+            // click continue
+            await userEvent.click(continueButton)
+
+            // expect errors for attestation question
+            await waitFor(() => {
+                expect(mockUpdateDraftFn).not.toHaveBeenCalled()
+                expect(
+                    screen.queryAllByText('You must select yes or no')
+                ).toHaveLength(2)
+            })
         })
     })
 })

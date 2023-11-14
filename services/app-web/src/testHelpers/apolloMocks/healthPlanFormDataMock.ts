@@ -116,6 +116,7 @@ function mockBaseContract(
         ],
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
+        statutoryRegulatoryAttestation: true,
         ...partial,
     }
 }
