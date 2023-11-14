@@ -365,10 +365,12 @@ export const RateReviewsTable = ({
     // Filter options based on table data instead of static list of options.
     const stateFilterOptions = Array.from(
         stateColumn.getFacetedUniqueValues().keys()
-    ).map((state) => ({
-        value: state,
-        label: state,
-    }))
+    )
+        .sort()
+        .map((state) => ({
+            value: state,
+            label: state,
+        }))
 
     const filterLength = columnFilters.flatMap((filter) => filter.value).length
     const filtersApplied = `${filterLength} ${pluralize(
