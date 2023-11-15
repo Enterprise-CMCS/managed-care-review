@@ -231,6 +231,8 @@ function convertContractWithRatesToFormData(
                     contractRev.formData.modifiedNonRiskPaymentArrangements,
             },
         },
+        statutoryRegulatoryAttestation:
+            contractRev.formData.statutoryRegulatoryAttestation,
         rateInfos,
     }
 

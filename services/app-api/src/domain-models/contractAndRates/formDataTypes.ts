@@ -64,6 +64,7 @@ const contractFormDataSchema = z.object({
     modifiedNetworkAdequacyStandards: z.boolean().optional(),
     modifiedLengthOfContract: z.boolean().optional(),
     modifiedNonRiskPaymentArrangements: z.boolean().optional(),
+    statutoryRegulatoryAttestation: z.boolean().optional(),
 })
 
 const rateFormDataSchema = z.object({

@@ -130,6 +130,7 @@ async function updateDraftContractWithRates(
         modifiedLengthOfContract,
         modifiedNonRiskPaymentArrangements,
         inLieuServicesAndSettings,
+        statutoryRegulatoryAttestation,
     } = formData
 
     try {
@@ -503,6 +504,9 @@ async function updateDraftContractWithRates(
                     modifiedLengthOfContract: nullify(modifiedLengthOfContract),
                     modifiedNonRiskPaymentArrangements: nullify(
                         modifiedNonRiskPaymentArrangements
+                    ),
+                    statutoryRegulatoryAttestation: nullify(
+                        statutoryRegulatoryAttestation
                     ),
                     draftRates: {
                         disconnect: updateRates?.disconnectRates

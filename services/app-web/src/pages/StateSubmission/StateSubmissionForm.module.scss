@@ -149,3 +149,10 @@
     display: flex;
     flex-direction: column;
 }
+
+.contractAttestationHint {
+    margin-bottom: units(3);
+    a {
+        margin-top: units(1);
+    }
+}

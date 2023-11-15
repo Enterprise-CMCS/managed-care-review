@@ -17,11 +17,13 @@ import {
     isMedicaidAmendmentProvision,
     isMedicaidBaseProvision,
 } from '../../../common-code/healthPlanFormDataType/ModifiedProvisions'
+import { FeatureFlagSettings } from '../../../common-code/featureFlags'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 export const ContractDetailsFormSchema = (
-    draftSubmission: UnlockedHealthPlanFormDataType
+    draftSubmission: UnlockedHealthPlanFormDataType,
+    activeFeatureFlags: FeatureFlagSettings = {}
 ) => {
     const yesNoError = (provision: GeneralizedProvisionType) => {
         const noValidation = Yup.string().nullable()
@@ -50,7 +52,11 @@ export const ContractDetailsFormSchema = (
         }
     }
 
+    // Errors in the error summary is ordered by the position of each ket in the yup object.
     return Yup.object().shape({
+        statutoryRegulatoryAttestation: activeFeatureFlags['438-attestation']
+            ? Yup.string().defined('You must select yes or no')
+            : Yup.string(),
         contractExecutionStatus: Yup.string().defined(
             'You must select a contract status'
         ),

@@ -38,7 +38,7 @@ const submissionDocumentSchema = z.object({
             .optional()
     ),
     sha256: z.string().optional(),
-    id: z.string().optional() // doesn't exist for newly created
+    id: z.string().optional(), // doesn't exist for newly created
 })
 
 const contractAmendmentInfoSchema = z.object({
@@ -168,6 +168,7 @@ const unlockedHealthPlanFormDataZodSchema = z.object({
     federalAuthorities: z.array(federalAuthoritySchema),
     contractAmendmentInfo: contractAmendmentInfoSchema.optional(),
     rateInfos: z.array(rateInfosTypeSchema),
+    statutoryRegulatoryAttestation: z.boolean().optional(),
 })
 
 /*

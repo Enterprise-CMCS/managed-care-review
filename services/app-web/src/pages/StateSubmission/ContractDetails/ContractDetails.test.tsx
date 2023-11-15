@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event'
 import {
     mockDraft,
     fetchCurrentUserMock,
+    mockBaseContract,
 } from '../../../testHelpers/apolloMocks'
 
 import {
@@ -15,6 +16,7 @@ import {
     TEST_PNG_FILE,
     dragAndDrop,
     selectYesNoRadio,
+    ldUseClientSpy,
 } from '../../../testHelpers/jestHelpers'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { ContractDetails } from './'
@@ -25,6 +27,10 @@ import {
     modifiedProvisionMedicaidAmendmentKeys,
     modifiedProvisionMedicaidBaseKeys,
 } from '../../../common-code/healthPlanFormDataType'
+import {
+    StatutoryRegulatoryAttestation,
+    StatutoryRegulatoryAttestationQuestion,
+} from '../../../constants/statutoryRegulatoryAttestation'
 
 const scrollIntoViewMock = jest.fn()
 HTMLElement.prototype.scrollIntoView = scrollIntoViewMock
@@ -38,6 +44,10 @@ describe('ContractDetails', () => {
         ...mockDraft(),
     }
 
+    const defaultApolloProvider = {
+        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+    }
+
     it('displays correct form guidance', async () => {
         renderWithProviders(
             <ContractDetails
@@ -46,9 +56,7 @@ describe('ContractDetails', () => {
                 previousDocuments={[]}
             />,
             {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
+                apolloProvider: defaultApolloProvider,
             }
         )
         expect(
@@ -69,9 +77,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
 
@@ -106,9 +112,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
 
@@ -129,9 +133,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
 
@@ -155,20 +157,27 @@ describe('ContractDetails', () => {
     })
 
     describe('Federal authorities', () => {
-        it('displays correct form fields for federal authorities with medicaid contract', () => {
-            renderWithProviders(
-                <ContractDetails
-                    draftSubmission={{
-                        ...mockDraft(),
-                        populationCovered: 'MEDICAID',
-                    }}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />
-            )
+        it('displays correct form fields for federal authorities with medicaid contract', async () => {
+            await waitFor(() => {
+                renderWithProviders(
+                    <ContractDetails
+                        draftSubmission={{
+                            ...mockDraft(),
+                            populationCovered: 'MEDICAID',
+                        }}
+                        updateDraft={jest.fn()}
+                        previousDocuments={[]}
+                    />,
+                    {
+                        apolloProvider: defaultApolloProvider,
+                    }
+                )
+            })
+
             const fedAuthQuestion = screen.getByRole('group', {
                 name: 'Active federal operating authority',
             })
+
             expect(fedAuthQuestion).toBeInTheDocument()
             expect(
                 within(fedAuthQuestion).getAllByRole('checkbox')
@@ -189,7 +198,10 @@ describe('ContractDetails', () => {
                     }}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
-                />
+                />,
+                {
+                    apolloProvider: defaultApolloProvider,
+                }
             )
             const fedAuthQuestion = await screen.findByRole('group', {
                 name: 'Active federal operating authority',
@@ -233,9 +245,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
             await screen.findByRole('form')
@@ -281,9 +291,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
             // trigger validations
@@ -343,9 +351,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
             await screen.findByRole('form')
@@ -378,9 +384,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
 
@@ -433,9 +437,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
             await screen.findByRole('form')
@@ -457,9 +459,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
             await screen.findByRole('form')
@@ -501,9 +501,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
 
@@ -566,9 +564,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
 
@@ -592,9 +588,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
 
@@ -623,9 +617,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
 
@@ -634,7 +626,7 @@ describe('ContractDetails', () => {
             })
             expect(continueButton).not.toHaveAttribute('aria-disabled')
 
-            continueButton.click()
+            await userEvent.click(continueButton)
 
             await waitFor(() => {
                 expect(
@@ -653,9 +645,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
 
@@ -667,9 +657,10 @@ describe('ContractDetails', () => {
             await userEvent.upload(input, [TEST_DOC_FILE])
             await userEvent.upload(input, []) // clear input and ensure we add same file twice
             await userEvent.upload(input, [TEST_DOC_FILE])
-            expect(continueButton).not.toHaveAttribute('aria-disabled')
 
-            continueButton.click()
+            expect(continueButton).not.toHaveAttribute('aria-disabled')
+            await userEvent.click(continueButton)
+
             await waitFor(() => {
                 expect(
                     screen.getAllByText(
@@ -689,9 +680,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
             const continueButton = screen.getByRole('button', {
@@ -706,7 +695,7 @@ describe('ContractDetails', () => {
             ).toBeInTheDocument()
 
             expect(continueButton).not.toHaveAttribute('aria-disabled')
-            continueButton.click()
+            await userEvent.click(continueButton)
 
             expect(
                 await screen.findAllByText(
@@ -724,9 +713,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
             const continueButton = screen.getByRole('button', {
@@ -749,14 +736,16 @@ describe('ContractDetails', () => {
                 'file-input-preview-image'
             )[1]
             expect(imageElFile2).toHaveClass('is-loading')
-            fireEvent.click(continueButton)
-            expect(continueButton).toHaveAttribute('aria-disabled', 'true')
+            await waitFor(() => {
+                fireEvent.click(continueButton)
+                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
 
-            expect(
-                screen.getAllByText(
-                    'You must wait for all documents to finish uploading before continuing'
-                )
-            ).toHaveLength(2)
+                expect(
+                    screen.getAllByText(
+                        'You must wait for all documents to finish uploading before continuing'
+                    )
+                ).toHaveLength(2)
+            })
         })
     })
 
@@ -770,9 +759,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
 
@@ -797,9 +784,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
 
@@ -826,9 +811,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
 
@@ -864,9 +847,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
 
@@ -891,9 +872,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
             const input = screen.getByLabelText('Upload contract')
@@ -931,9 +910,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
 
@@ -957,9 +934,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
 
@@ -986,9 +961,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
 
@@ -1013,9 +986,7 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloProvider,
                 }
             )
 
@@ -1053,6 +1024,96 @@ describe('ContractDetails', () => {
                     ],
                 })
             )
+        })
+    })
+
+    describe('Contract 438 attestation', () => {
+        it('renders 438 attestation question without errors', async () => {
+            ldUseClientSpy({ '438-attestation': true })
+            const draft = mockBaseContract({
+                statutoryRegulatoryAttestation: true,
+            })
+            await waitFor(() => {
+                renderWithProviders(
+                    <ContractDetails
+                        draftSubmission={draft}
+                        updateDraft={jest.fn()}
+                        previousDocuments={[]}
+                    />,
+                    {
+                        apolloProvider: defaultApolloProvider,
+                    }
+                )
+            })
+
+            // expect 438 attestation question to be on the page
+            expect(
+                screen.getByText(StatutoryRegulatoryAttestationQuestion)
+            ).toBeInTheDocument()
+
+            const yesRadio = screen.getByRole('radio', {
+                name: StatutoryRegulatoryAttestation.YES,
+            })
+            const noRadio = screen.getByRole('radio', {
+                name: StatutoryRegulatoryAttestation.YES,
+            })
+
+            // expect both yes and no answers on the page and yes to be checked
+            expect(yesRadio).toBeChecked()
+            expect(noRadio).toBeInTheDocument()
+        })
+        it('errors when continuing without answering 438 attestation question', async () => {
+            ldUseClientSpy({ '438-attestation': true })
+            const draft = mockBaseContract({
+                statutoryRegulatoryAttestation: undefined,
+            })
+            const mockUpdateDraftFn = jest.fn()
+            await waitFor(() => {
+                renderWithProviders(
+                    <ContractDetails
+                        draftSubmission={draft}
+                        updateDraft={mockUpdateDraftFn}
+                        previousDocuments={[]}
+                    />,
+                    {
+                        apolloProvider: defaultApolloProvider,
+                    }
+                )
+            })
+
+            // expect 438 attestation question to be on the page
+            expect(
+                screen.getByText(StatutoryRegulatoryAttestationQuestion)
+            ).toBeInTheDocument()
+
+            const yesRadio = screen.getByRole('radio', {
+                name: StatutoryRegulatoryAttestation.YES,
+            })
+            const noRadio = screen.getByRole('radio', {
+                name: StatutoryRegulatoryAttestation.YES,
+            })
+
+            // expect both yes and no answers on the page and yes to be checked
+            expect(yesRadio).toBeInTheDocument()
+            expect(noRadio).toBeInTheDocument()
+
+            // check no radio
+            await userEvent.click(noRadio)
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+
+            // click continue
+            await userEvent.click(continueButton)
+
+            // expect errors for attestation question
+            await waitFor(() => {
+                expect(mockUpdateDraftFn).not.toHaveBeenCalled()
+                expect(
+                    screen.queryAllByText('You must select yes or no')
+                ).toHaveLength(2)
+            })
         })
     })
 })

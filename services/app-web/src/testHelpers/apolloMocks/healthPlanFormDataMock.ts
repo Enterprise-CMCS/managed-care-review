@@ -116,6 +116,7 @@ function mockBaseContract(
         ],
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
+        statutoryRegulatoryAttestation: true,
         ...partial,
     }
 }
@@ -211,6 +212,7 @@ function mockContractAndRatesDraft(
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        statutoryRegulatoryAttestation: true,
         ...partial,
     }
 }
@@ -318,6 +320,7 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
         ],
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
+        statutoryRegulatoryAttestation: false,
     }
 }
 
@@ -417,6 +420,7 @@ function mockStateSubmissionContractAmendment(): LockedHealthPlanFormDataType {
         ],
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
+        statutoryRegulatoryAttestation: false,
     }
 }
 

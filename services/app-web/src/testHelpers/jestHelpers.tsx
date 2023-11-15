@@ -23,6 +23,8 @@ import {
     FeatureFlagLDConstant,
     FlagValue,
     FeatureFlagSettings,
+    featureFlagKeys,
+    featureFlags,
 } from '../common-code/featureFlags'
 
 /* Render */
@@ -77,6 +79,13 @@ const WithLocation = ({
     return null
 }
 
+const getDefaultFeatureFlags = (): FeatureFlagSettings =>
+    featureFlagKeys.reduce((a, c) => {
+        const flag = featureFlags[c].flag
+        const defaultValue = featureFlags[c].defaultValue
+        return Object.assign(a, { [flag]: defaultValue })
+    }, {} as FeatureFlagSettings)
+
 //WARNING: This required tests using this function to clear mocks afterwards.
 const ldUseClientSpy = (featureFlags: FeatureFlagSettings) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -108,6 +117,11 @@ const ldUseClientSpy = (featureFlags: FeatureFlagSettings) => {
                 return featureFlags[flag] === undefined
                     ? defaultValue
                     : featureFlags[flag]
+            },
+            allFlags: () => {
+                const defaultFeatureFlags = getDefaultFeatureFlags()
+                Object.assign(defaultFeatureFlags, featureFlags)
+                return defaultFeatureFlags
             },
         }
     })

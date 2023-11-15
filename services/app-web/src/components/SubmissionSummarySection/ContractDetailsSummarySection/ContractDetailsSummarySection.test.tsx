@@ -1,5 +1,8 @@
 import { screen, waitFor, within } from '@testing-library/react'
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import {
+    ldUseClientSpy,
+    renderWithProviders,
+} from '../../../testHelpers/jestHelpers'
 import { ContractDetailsSummarySection } from './ContractDetailsSummarySection'
 import {
     fetchCurrentUserMock,
@@ -8,8 +11,19 @@ import {
 } from '../../../testHelpers/apolloMocks'
 import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { testS3Client } from '../../../testHelpers/s3Helpers'
+import {
+    StatutoryRegulatoryAttestation,
+    StatutoryRegulatoryAttestationQuestion,
+} from '../../../constants/statutoryRegulatoryAttestation'
 
 describe('ContractDetailsSummarySection', () => {
+    afterEach(() => {
+        jest.restoreAllMocks()
+    })
+    const defaultApolloMocks = {
+        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+    }
+
     it('can render draft submission without errors (review and submit behavior)', async () => {
         const testSubmission = {
             ...mockContractAndRatesDraft(),
@@ -40,9 +54,7 @@ describe('ContractDetailsSummarySection', () => {
                 submissionName="MN-PMAP-0001"
             />,
             {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
+                apolloProvider: defaultApolloMocks,
             }
         )
 
@@ -76,7 +88,10 @@ describe('ContractDetailsSummarySection', () => {
                     status: 'SUBMITTED',
                 }}
                 submissionName="MN-PMAP-0001"
-            />
+            />,
+            {
+                apolloProvider: defaultApolloMocks,
+            }
         )
 
         expect(
@@ -101,14 +116,27 @@ describe('ContractDetailsSummarySection', () => {
     })
 
     it('can render all contract details fields', () => {
+        ldUseClientSpy({ '438-attestation': true })
+        const submission = mockContractAndRatesDraft({
+            statutoryRegulatoryAttestation: true,
+        })
         renderWithProviders(
             <ContractDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                submission={mockContractAndRatesDraft()}
+                submission={submission}
                 editNavigateTo="contract-details"
                 submissionName="MN-PMAP-0001"
-            />
+            />,
+            {
+                apolloProvider: defaultApolloMocks,
+            }
         )
+
+        expect(
+            screen.getByRole('definition', {
+                name: StatutoryRegulatoryAttestationQuestion,
+            })
+        ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', { name: 'Contract status' })
         ).toBeInTheDocument()
@@ -137,14 +165,49 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeInTheDocument()
     })
 
-    it('displays correct effective dates text for base contract', () => {
+    it('displays correct contract 438 attestation yes and no text', async () => {
+        ldUseClientSpy({ '438-attestation': true })
+        const submission = mockContractAndRatesDraft({
+            statutoryRegulatoryAttestation: true,
+        })
         renderWithProviders(
             <ContractDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                submission={mockStateSubmission()}
+                submission={submission}
+                editNavigateTo="contract-details"
                 submissionName="MN-PMAP-0001"
-            />
+            />,
+            {
+                apolloProvider: defaultApolloMocks,
+            }
         )
+
+        const attestationYes = StatutoryRegulatoryAttestation.YES
+
+        expect(
+            screen.getByRole('definition', {
+                name: StatutoryRegulatoryAttestationQuestion,
+            })
+        ).toBeInTheDocument()
+        expect(await screen.findByText(attestationYes)).toBeInTheDocument()
+    })
+
+    it('displays correct effective dates text for base contract', async () => {
+        await waitFor(() => {
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    documentDateLookupTable={{
+                        previousSubmissionDate: '01/01/01',
+                    }}
+                    submission={mockStateSubmission()}
+                    submissionName="MN-PMAP-0001"
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                }
+            )
+        })
+
         expect(screen.getByText('Contract effective dates')).toBeInTheDocument()
     })
 
@@ -154,7 +217,10 @@ describe('ContractDetailsSummarySection', () => {
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={mockContractAndRatesDraft()}
                 submissionName="MN-PMAP-0001"
-            />
+            />,
+            {
+                apolloProvider: defaultApolloMocks,
+            }
         )
         expect(
             screen.getByText('Contract amendment effective dates')
@@ -201,7 +267,10 @@ describe('ContractDetailsSummarySection', () => {
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={testSubmission}
                 submissionName="MN-PMAP-0001"
-            />
+            />,
+            {
+                apolloProvider: defaultApolloMocks,
+            }
         )
 
         await waitFor(() => {
@@ -243,7 +312,10 @@ describe('ContractDetailsSummarySection', () => {
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={mockContractAndRatesDraft()}
                 submissionName="MN-PMAP-0001"
-            />
+            />,
+            {
+                apolloProvider: defaultApolloMocks,
+            }
         )
 
         expect(
@@ -259,7 +331,10 @@ describe('ContractDetailsSummarySection', () => {
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 submission={mockContractAndRatesDraft()}
                 submissionName="MN-PMAP-0001"
-            />
+            />,
+            {
+                apolloProvider: defaultApolloMocks,
+            }
         )
         expect(
             screen.queryByRole('button', {
@@ -287,9 +362,7 @@ describe('ContractDetailsSummarySection', () => {
                 submissionName="MN-PMAP-0001"
             />,
             {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
+                apolloProvider: defaultApolloMocks,
             }
         )
 
@@ -329,9 +402,7 @@ describe('ContractDetailsSummarySection', () => {
                 submissionName="MN-PMAP-0001"
             />,
             {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
+                apolloProvider: defaultApolloMocks,
             }
         )
 
@@ -370,6 +441,7 @@ describe('ContractDetailsSummarySection', () => {
                 submissionName="MN-PMAP-0001"
             />,
             {
+                apolloProvider: defaultApolloMocks,
                 s3Provider,
             }
         )
@@ -389,7 +461,10 @@ describe('ContractDetailsSummarySection', () => {
                     }}
                     submission={mockContractAndRatesDraft()}
                     submissionName="MN-PMAP-0001"
-                />
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                }
             )
 
             expect(
@@ -487,7 +562,10 @@ describe('ContractDetailsSummarySection', () => {
                         contractType: 'BASE',
                     })}
                     submissionName="MN-PMAP-0001"
-                />
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                }
             )
 
             const modifiedProvisions = screen.getByLabelText(
@@ -541,9 +619,7 @@ describe('ContractDetailsSummarySection', () => {
                     submissionName="MN-PMAP-0001"
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloMocks,
                 }
             )
             expect(
@@ -619,9 +695,7 @@ describe('ContractDetailsSummarySection', () => {
                     editNavigateTo="contract-details"
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloMocks,
                 }
             )
 
@@ -670,9 +744,7 @@ describe('ContractDetailsSummarySection', () => {
                     editNavigateTo="contract-details"
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloMocks,
                 }
             )
 
@@ -720,9 +792,7 @@ describe('ContractDetailsSummarySection', () => {
                     submissionName="MN-PMAP-0001"
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloMocks,
                 }
             )
 
@@ -775,9 +845,7 @@ describe('ContractDetailsSummarySection', () => {
                     editNavigateTo="contract-details"
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloMocks,
                 }
             )
 
@@ -836,9 +904,7 @@ describe('ContractDetailsSummarySection', () => {
                     submissionName="MN-PMAP-0001"
                 />,
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    apolloProvider: defaultApolloMocks,
                 }
             )
 

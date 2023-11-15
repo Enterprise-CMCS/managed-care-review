@@ -543,6 +543,8 @@ const toDomain = (
         stateContacts: cleanedStateContacts,
         addtlActuaryContacts: parseActuaryContacts(addtlActuaryContacts),
         documents: parseProtoDocuments(formDataMessage.documents),
+        statutoryRegulatoryAttestation:
+            contractInfo?.statutoryRegulatoryAttestation ?? undefined,
     }
 
     // Now that we've gotten things into our combined draft & state domain format.

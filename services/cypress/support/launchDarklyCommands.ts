@@ -86,7 +86,8 @@ Cypress.Commands.add('stubFeatureFlags', () => {
     cy.interceptFeatureFlags({
         'packages-with-shared-rates': true,
         'rates-db-refactor': true,
-        'supporting-docs-by-rate': true
+        'supporting-docs-by-rate': true,
+        '438-attestation': true
     })
 })
 

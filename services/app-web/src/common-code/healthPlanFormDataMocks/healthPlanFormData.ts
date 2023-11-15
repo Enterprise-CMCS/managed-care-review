@@ -763,6 +763,7 @@ function basicLockedHealthPlanFormData(): LockedHealthPlanFormDataType {
         programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_ONLY',
         riskBasedContract: false,
+        statutoryRegulatoryAttestation: false,
         submissionDescription: 'A real submission',
         documents: [],
         contractType: 'BASE',
