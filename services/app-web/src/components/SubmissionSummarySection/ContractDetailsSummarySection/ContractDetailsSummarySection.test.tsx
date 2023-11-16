@@ -165,10 +165,11 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeInTheDocument()
     })
 
-    it('displays correct contract 438 attestation yes and no text', async () => {
+    it('displays correct contract 438 attestation yes and no text and description', async () => {
         ldUseClientSpy({ '438-attestation': true })
         const submission = mockContractAndRatesDraft({
-            statutoryRegulatoryAttestation: true,
+            statutoryRegulatoryAttestation: false,
+            statutoryRegulatoryAttestationDescription: 'No compliance',
         })
         renderWithProviders(
             <ContractDetailsSummarySection
@@ -182,14 +183,20 @@ describe('ContractDetailsSummarySection', () => {
             }
         )
 
-        const attestationYes = StatutoryRegulatoryAttestation.YES
-
         expect(
             screen.getByRole('definition', {
                 name: StatutoryRegulatoryAttestationQuestion,
             })
         ).toBeInTheDocument()
-        expect(await screen.findByText(attestationYes)).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: 'Non-compliance description',
+            })
+        ).toBeInTheDocument()
+        expect(
+            await screen.findByText(StatutoryRegulatoryAttestation.NO)
+        ).toBeInTheDocument()
+        expect(await screen.findByText('No compliance')).toBeInTheDocument()
     })
 
     it('displays correct effective dates text for base contract', async () => {

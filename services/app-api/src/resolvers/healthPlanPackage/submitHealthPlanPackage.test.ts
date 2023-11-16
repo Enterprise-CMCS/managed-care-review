@@ -1257,7 +1257,7 @@ describe.each(flagValueTestParameters)(
 
         describe('Feature flagged 4348 attestation question test', () => {
             const ldService = testLDService({
-                ...mockLDService,
+                [flagName]: flagValue,
                 '438-attestation': true,
             })
 
@@ -1271,6 +1271,40 @@ describe.each(flagValueTestParameters)(
                     server,
                     {
                         statutoryRegulatoryAttestation: undefined,
+                        statutoryRegulatoryAttestationDescription: undefined,
+                    }
+                )
+                const draft = latestFormData(initialPkg)
+                const draftID = draft.id
+
+                await new Promise((resolve) => setTimeout(resolve, 2000))
+
+                // submit
+                const submitResult = await server.executeOperation({
+                    query: SUBMIT_HEALTH_PLAN_PACKAGE,
+                    variables: {
+                        input: {
+                            pkgID: draftID,
+                        },
+                    },
+                })
+
+                expect(submitResult.errors).toBeDefined()
+                expect(submitResult.errors?.[0].extensions?.message).toBe(
+                    'formData is missing required contract fields'
+                )
+            }, 20000)
+            it('errors when contract 4348 attestation question is false without a description', async () => {
+                const server = await constructTestPostgresServer({
+                    ldService: ldService,
+                })
+
+                // setup
+                const initialPkg = await createAndUpdateTestHealthPlanPackage(
+                    server,
+                    {
+                        statutoryRegulatoryAttestation: false,
+                        statutoryRegulatoryAttestationDescription: undefined,
                     }
                 )
                 const draft = latestFormData(initialPkg)
@@ -1303,6 +1337,8 @@ describe.each(flagValueTestParameters)(
                     server,
                     {
                         statutoryRegulatoryAttestation: false,
+                        statutoryRegulatoryAttestationDescription:
+                            'No compliance',
                     }
                 )
                 const draft = latestFormData(initialPkg)

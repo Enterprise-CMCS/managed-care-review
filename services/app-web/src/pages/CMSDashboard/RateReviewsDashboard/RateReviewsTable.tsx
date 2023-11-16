@@ -23,7 +23,7 @@ import {
     RelatedContractRevisions,
 } from '../../../gen/gqlClient'
 import styles from '../../../components/HealthPlanPackageTable/HealthPlanPackageTable.module.scss'
-import { Table, Tag, Link, Fieldset } from '@trussworks/react-uswds'
+import { Table, Tag, Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
 import qs from 'qs'
@@ -521,46 +521,42 @@ export const RateReviewsTable = ({
                                     }
                                 />
                             </DoubleColumnGrid>
-                            <Fieldset
-                                data-testid={'rating-period-filter'}
+                            <FilterDateRange
+                                ref={filterDateRangeRef}
                                 legend={'Rating period start date'}
-                            >
-                                <FilterDateRange
-                                    ref={filterDateRangeRef}
-                                    startDateHint="mm/dd/yyyy"
-                                    startDateLabel="From"
-                                    startDatePickerProps={{
-                                        id: 'ratingPeriodStartFrom',
-                                        name: 'ratingPeriodStartFrom',
-                                        defaultValue: getDateRangeFilterFromUrl(
-                                            defaultColumnFilters,
-                                            'rateDateStart'
-                                        )[0],
-                                        onChange: (date) =>
-                                            updateRatingPeriodFilter(
-                                                [date, undefined],
-                                                rateDateStartColumn,
-                                                'ratingPeriodStartFrom'
-                                            ),
-                                    }}
-                                    endDateHint="mm/dd/yyyy"
-                                    endDateLabel="To"
-                                    endDatePickerProps={{
-                                        id: 'ratingPeriodStartTo',
-                                        name: 'ratingPeriodStartTo',
-                                        defaultValue: getDateRangeFilterFromUrl(
-                                            defaultColumnFilters,
-                                            'rateDateStart'
-                                        )[1],
-                                        onChange: (date) =>
-                                            updateRatingPeriodFilter(
-                                                [undefined, date],
-                                                rateDateStartColumn,
-                                                'ratingPeriodStartTo'
-                                            ),
-                                    }}
-                                />
-                            </Fieldset>
+                                startDateHint="mm/dd/yyyy"
+                                startDateLabel="From"
+                                startDatePickerProps={{
+                                    id: 'ratingPeriodStartFrom',
+                                    name: 'ratingPeriodStartFrom',
+                                    defaultValue: getDateRangeFilterFromUrl(
+                                        defaultColumnFilters,
+                                        'rateDateStart'
+                                    )[0],
+                                    onChange: (date) =>
+                                        updateRatingPeriodFilter(
+                                            [date, undefined],
+                                            rateDateStartColumn,
+                                            'ratingPeriodStartFrom'
+                                        ),
+                                }}
+                                endDateHint="mm/dd/yyyy"
+                                endDateLabel="To"
+                                endDatePickerProps={{
+                                    id: 'ratingPeriodStartTo',
+                                    name: 'ratingPeriodStartTo',
+                                    defaultValue: getDateRangeFilterFromUrl(
+                                        defaultColumnFilters,
+                                        'rateDateStart'
+                                    )[1],
+                                    onChange: (date) =>
+                                        updateRatingPeriodFilter(
+                                            [undefined, date],
+                                            rateDateStartColumn,
+                                            'ratingPeriodStartTo'
+                                        ),
+                                }}
+                            />
                         </FilterAccordion>
                     )}
                     <div aria-live="polite" aria-atomic>

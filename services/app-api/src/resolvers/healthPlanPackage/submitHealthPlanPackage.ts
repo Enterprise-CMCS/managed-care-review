@@ -110,7 +110,7 @@ const validateStatusAndUpdateInfo = (
 // "parse, don't validate" article: https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
 export function parseAndSubmit(
     draft: HealthPlanFormDataType,
-    featureFlag: FeatureFlagSettings
+    featureFlag?: FeatureFlagSettings
 ): LockedHealthPlanFormDataType | SubmissionError {
     // Remove fields from edits on irrelevant logic branches
     //  - CONTRACT_ONLY submission type should not contain any CONTRACT_AND_RATE rates data.
@@ -129,22 +129,23 @@ export function parseAndSubmit(
         submittedAt: new Date(),
     }
 
-    // Check for valid attestation. Returns true if flag is off.
-    const isValid438Attestation = !featureFlag['438-attestation']
-        ? true
-        : Boolean(featureFlag['438-attestation']) &&
-          draft.statutoryRegulatoryAttestation !== undefined
+    const hasValid438Attestation =
+        featureFlag?.['438-attestation'] === false
+            ? true
+            : draft.statutoryRegulatoryAttestation ||
+              (draft.statutoryRegulatoryAttestation === false &&
+                  draft.statutoryRegulatoryAttestationDescription)
 
     if (
         isValidAndCurrentLockedHealthPlanFormData(maybeStateSubmission) &&
-        isValid438Attestation
-    )
+        hasValid438Attestation
+    ) {
         return maybeStateSubmission
-    else if (
+    } else if (
         !hasValidContract(
             maybeStateSubmission as LockedHealthPlanFormDataType
         ) ||
-        !isValid438Attestation
+        !hasValid438Attestation
     ) {
         return {
             code: 'INCOMPLETE',
@@ -196,14 +197,8 @@ export function submitHealthPlanPackageResolver(
     launchDarkly: LDService
 ): MutationResolvers['submitHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
-        const ratesDatabaseRefactor = await launchDarkly.getFeatureFlag(
-            context,
-            'rates-db-refactor'
-        )
-        const contract438Attestation = await launchDarkly.getFeatureFlag(
-            context,
-            '438-attestation'
-        )
+        const featureFlags = await launchDarkly.allFlags(context)
+
         const { user, span } = context
         const { submittedReason, pkgID } = input
         setResolverDetailsOnActiveSpan('submitHealthPlanPackage', user, span)
@@ -236,7 +231,7 @@ export function submitHealthPlanPackageResolver(
         }
         const stateFromCurrentUser: State['code'] = user.stateCode
 
-        if (ratesDatabaseRefactor) {
+        if (featureFlags?.['rates-db-refactor']) {
             // fetch contract and related reates - convert to HealthPlanPackage and proto-ize to match the pattern for flag off\
             // this could be replaced with parsing to locked versus unlocked contracts and rates when types are available
             const contractWithHistory = await store.findContractWithHistory(
@@ -327,9 +322,7 @@ export function submitHealthPlanPackageResolver(
             contractRevisionID = contractWithHistory.draftRevision.id
 
             // Final clean + check of data before submit - parse to state submission
-            const maybeLocked = parseAndSubmit(initialFormData, {
-                '438-attestation': contract438Attestation,
-            })
+            const maybeLocked = parseAndSubmit(initialFormData, featureFlags)
 
             if (isSubmissionError(maybeLocked)) {
                 const errMessage = maybeLocked.message
@@ -552,9 +545,7 @@ export function submitHealthPlanPackageResolver(
             contractRevisionID = initialPackage.revisions[0].id
 
             // Final clean + check of data before submit - parse to state submission
-            const maybeLocked = parseAndSubmit(initialFormData, {
-                '438-attestation': contract438Attestation,
-            })
+            const maybeLocked = parseAndSubmit(initialFormData, featureFlags)
 
             if (isSubmissionError(maybeLocked)) {
                 const errMessage = maybeLocked.message

@@ -102,6 +102,7 @@ describe.each(flagValueTestParameters)(
                     },
                 },
                 statutoryRegulatoryAttestation: true,
+                statutoryRegulatoryAttestationDescription: undefined,
                 rateInfos: [],
             })
 

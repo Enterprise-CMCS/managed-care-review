@@ -207,6 +207,7 @@ const createContractRevision = (
         rateRevisions: [],
         draftRates: [],
         statutoryRegulatoryAttestation: null,
+        statutoryRegulatoryAttestationDescription: null,
         ...revision,
     }
 }

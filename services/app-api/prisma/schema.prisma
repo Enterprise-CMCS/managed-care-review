@@ -116,6 +116,7 @@ model ContractRevisionTable {
   modifiedNonRiskPaymentArrangements           Boolean?
   inLieuServicesAndSettings                    Boolean?
   statutoryRegulatoryAttestation               Boolean?
+  statutoryRegulatoryAttestationDescription    String?
 }
 
 model RateRevisionTable {

@@ -74,10 +74,7 @@ export function updateHealthPlanFormDataResolver(
         const { user, span } = context
         setResolverDetailsOnActiveSpan('updateHealthPlanFormData', user, span)
 
-        const ratesDatabaseRefactor = await launchDarkly.getFeatureFlag(
-            context,
-            'rates-db-refactor'
-        )
+        const featureFlags = await launchDarkly.allFlags(context)
 
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {
@@ -116,7 +113,7 @@ export function updateHealthPlanFormDataResolver(
 
         const unlockedFormData: UnlockedHealthPlanFormDataType = formDataResult
 
-        // If the client tries to update a rate without setting its ID that's an error. 
+        // If the client tries to update a rate without setting its ID that's an error.
         for (const rateFD of unlockedFormData.rateInfos) {
             if (!rateFD.id) {
                 const errMessage = `Attempted to update a rateInfo that has no ID: ${input.pkgID} ${rateFD}`
@@ -128,8 +125,17 @@ export function updateHealthPlanFormDataResolver(
             }
         }
 
+        // Clear out existing statutoryRegulatoryAttestationDescription if statutoryRegulatoryAttestation is true
+        if (
+            featureFlags?.['438-attestation'] &&
+            formDataResult.statutoryRegulatoryAttestation &&
+            formDataResult.statutoryRegulatoryAttestationDescription
+        ) {
+            formDataResult.statutoryRegulatoryAttestationDescription = undefined
+        }
+
         // Uses new DB if flag is on
-        if (ratesDatabaseRefactor) {
+        if (featureFlags?.['rates-db-refactor']) {
             // Find contract from DB
             const contractWithHistory = await store.findContractWithHistory(
                 input.pkgID

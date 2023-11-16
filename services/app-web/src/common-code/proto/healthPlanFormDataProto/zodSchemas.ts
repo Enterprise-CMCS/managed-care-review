@@ -169,6 +169,7 @@ const unlockedHealthPlanFormDataZodSchema = z.object({
     contractAmendmentInfo: contractAmendmentInfoSchema.optional(),
     rateInfos: z.array(rateInfosTypeSchema),
     statutoryRegulatoryAttestation: z.boolean().optional(),
+    statutoryRegulatoryAttestationDescription: z.string().optional(),
 })
 
 /*

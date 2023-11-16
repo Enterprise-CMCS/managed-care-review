@@ -8,7 +8,7 @@ import {
     DateRangePicker,
 } from '@trussworks/react-uswds'
 import { v4 as uuidv4 } from 'uuid'
-import { useNavigate } from 'react-router-dom'
+import { Link as ReactRouterLink, useNavigate } from 'react-router-dom'
 import { Formik, FormikErrors } from 'formik'
 
 import styles from '../StateSubmissionForm.module.scss'
@@ -22,6 +22,7 @@ import {
     ErrorSummary,
     PoliteErrorMessage,
     FieldYesNo,
+    FieldTextarea,
 } from '../../../components'
 import {
     formatForForm,
@@ -66,6 +67,7 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
 import {
     StatutoryRegulatoryAttestation,
+    StatutoryRegulatoryAttestationDescription,
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../constants/statutoryRegulatoryAttestation'
 
@@ -120,6 +122,7 @@ export interface ContractDetailsFormValues {
     modifiedLengthOfContract: string | undefined
     modifiedNonRiskPaymentArrangements: string | undefined
     statutoryRegulatoryAttestation: string | undefined
+    statutoryRegulatoryAttestationDescription: string | undefined
 }
 type FormError =
     FormikErrors<ContractDetailsFormValues>[keyof FormikErrors<ContractDetailsFormValues>]
@@ -338,6 +341,9 @@ export const ContractDetails = ({
         statutoryRegulatoryAttestation: formatForForm(
             draftSubmission?.statutoryRegulatoryAttestation
         ),
+        statutoryRegulatoryAttestationDescription: formatForForm(
+            draftSubmission?.statutoryRegulatoryAttestationDescription
+        ),
     }
 
     const showFieldErrors = (error?: FormError) =>
@@ -410,6 +416,9 @@ export const ContractDetails = ({
         draftSubmission.statutoryRegulatoryAttestation = formatYesNoForProto(
             values.statutoryRegulatoryAttestation
         )
+        // If contract is in compliance, we set the description to undefined. This clears out previous non-compliance description
+        draftSubmission.statutoryRegulatoryAttestationDescription =
+            values.statutoryRegulatoryAttestationDescription
 
         if (isContractWithProvisions(draftSubmission)) {
             draftSubmission.contractAmendmentInfo = {
@@ -595,21 +604,12 @@ export const ContractDetails = ({
                                     <Fieldset
                                         role="radiogroup"
                                         aria-required
-                                        className={styles.radioGroup}
+                                        className={styles.contractAttestation}
+                                        legend={
+                                            StatutoryRegulatoryAttestationQuestion
+                                        }
                                     >
-                                        <legend>
-                                            <b>
-                                                {
-                                                    StatutoryRegulatoryAttestationQuestion
-                                                }
-                                            </b>
-                                        </legend>
-                                        <div
-                                            role="note"
-                                            className={
-                                                styles.contractAttestationHint
-                                            }
-                                        >
+                                        <div role="note">
                                             <span
                                                 className={
                                                     styles.requiredOptionalText
@@ -658,7 +658,7 @@ export const ContractDetails = ({
                                                 StatutoryRegulatoryAttestation.YES
                                             }
                                             id="statutoryRegulatoryAttestationYes"
-                                            value="YES"
+                                            value={'YES'}
                                             aria-required
                                         />
                                         <FieldRadio
@@ -667,12 +667,46 @@ export const ContractDetails = ({
                                                 StatutoryRegulatoryAttestation.NO
                                             }
                                             id="statutoryRegulatoryAttestationNo"
-                                            value="NO"
+                                            value={'NO'}
                                             aria-required
                                         />
                                     </Fieldset>
                                 </FormGroup>
                             )}
+                            {contract438Attestation &&
+                                values.statutoryRegulatoryAttestation ===
+                                    'NO' && (
+                                    <div className={styles.contractAttestation}>
+                                        <FieldTextarea
+                                            label={
+                                                StatutoryRegulatoryAttestationDescription
+                                            }
+                                            id="statutoryRegulatoryAttestationDescription"
+                                            name="statutoryRegulatoryAttestationDescription"
+                                            aria-required
+                                            showError={showFieldErrors(
+                                                errors.statutoryRegulatoryAttestationDescription
+                                            )}
+                                            hint={
+                                                <Link
+                                                    variant="external"
+                                                    asCustom={ReactRouterLink}
+                                                    className={
+                                                        'margin-bottom-1'
+                                                    }
+                                                    to={{
+                                                        pathname: '/help',
+                                                        hash: '#non-compliance-guidance',
+                                                    }}
+                                                    target="_blank"
+                                                >
+                                                    Non-compliance definitions
+                                                    and examples
+                                                </Link>
+                                            }
+                                        />
+                                    </div>
+                                )}
                             <FormGroup
                                 error={showFieldErrors(
                                     errors.contractExecutionStatus

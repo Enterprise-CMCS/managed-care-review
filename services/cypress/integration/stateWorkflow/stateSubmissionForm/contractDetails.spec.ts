@@ -25,7 +25,7 @@ describe('contract details', () => {
                 /Primary Care Case Management Entity/
             ).safeClick()
             cy.navigateFormByButtonClick('SAVE_DRAFT')
-            cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+            cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
         })
     })
 

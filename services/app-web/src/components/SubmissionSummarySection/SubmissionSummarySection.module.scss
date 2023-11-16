@@ -95,7 +95,9 @@
 
 .singleColumnGrid {
     @include at-media(tablet) {
-        margin-bottom: units(2);
+        > * {
+            margin-bottom: units(2);
+        }
     }
 }
 

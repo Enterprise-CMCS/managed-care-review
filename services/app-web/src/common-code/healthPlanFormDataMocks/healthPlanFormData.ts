@@ -58,6 +58,7 @@ function newHealthPlanFormData(): UnlockedHealthPlanFormDataType {
         federalAuthorities: [],
         stateContacts: [],
         addtlActuaryContacts: [],
+        statutoryRegulatoryAttestation: true,
     }
 }
 
@@ -85,6 +86,7 @@ function basicHealthPlanFormData(): UnlockedHealthPlanFormDataType {
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         stateContacts: [],
         addtlActuaryContacts: [],
+        statutoryRegulatoryAttestation: true,
     }
 }
 
@@ -112,6 +114,7 @@ function contractOnly(): UnlockedHealthPlanFormDataType {
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         stateContacts: [],
         addtlActuaryContacts: [],
+        statutoryRegulatoryAttestation: true,
     }
 }
 
@@ -160,6 +163,8 @@ function contractAmendedOnly(): UnlockedHealthPlanFormDataType {
                 modifiedNonRiskPaymentArrangements: true,
             },
         },
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 
@@ -248,6 +253,8 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 
@@ -363,6 +370,8 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 
@@ -471,6 +480,8 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 
@@ -607,6 +618,8 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 
@@ -747,6 +760,8 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 
@@ -763,7 +778,6 @@ function basicLockedHealthPlanFormData(): LockedHealthPlanFormDataType {
         programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_ONLY',
         riskBasedContract: false,
-        statutoryRegulatoryAttestation: false,
         submissionDescription: 'A real submission',
         documents: [],
         contractType: 'BASE',
@@ -789,6 +803,8 @@ function basicLockedHealthPlanFormData(): LockedHealthPlanFormDataType {
         ],
         addtlActuaryContacts: [],
         rateInfos: [],
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 
