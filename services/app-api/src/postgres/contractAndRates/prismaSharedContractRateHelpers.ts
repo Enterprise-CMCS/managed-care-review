@@ -341,6 +341,9 @@ function contractFormDataToDomainModel(
             contractRevision.inLieuServicesAndSettings ?? undefined,
         statutoryRegulatoryAttestation:
             contractRevision.statutoryRegulatoryAttestation ?? undefined,
+        statutoryRegulatoryAttestationDescription:
+            contractRevision.statutoryRegulatoryAttestationDescription ??
+            undefined,
     }
 }
 

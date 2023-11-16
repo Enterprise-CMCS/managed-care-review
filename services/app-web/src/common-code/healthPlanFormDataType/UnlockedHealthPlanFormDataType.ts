@@ -119,6 +119,7 @@ type UnlockedHealthPlanFormDataType = {
     contractAmendmentInfo?: UnlockedContractAmendmentInfo
     rateInfos: RateInfoType[]
     statutoryRegulatoryAttestation?: boolean
+    statutoryRegulatoryAttestationDescription?: string
 }
 
 export type {

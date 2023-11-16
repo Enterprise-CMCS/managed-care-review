@@ -202,7 +202,8 @@ const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
                 packagesWithSharedRateCerts: [],
             },
     ],
-    statutoryRegulatoryAttestation: true
+    statutoryRegulatoryAttestation: false,
+    statutoryRegulatoryAttestationDescription: 'No compliance'
 })
 
 const newSubmissionInput = (overrides?: Partial<UnlockedHealthPlanFormDataType> ): Partial<UnlockedHealthPlanFormDataType> => {

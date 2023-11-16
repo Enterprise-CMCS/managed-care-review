@@ -72,7 +72,7 @@ Cypress.Commands.add(
             // Default behavior on login is to go to CMS dashboard submissions
             cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
             cy.findByTestId('cms-dashboard-page',{timeout: 10_000 }).should('exist')
-            cy.findByRole('heading', {name: /Submissions Dashboard/}).should('exist')
+            cy.findByRole('heading', {name: /Submissions dashboard/}).should('exist')
         }
     }
 )

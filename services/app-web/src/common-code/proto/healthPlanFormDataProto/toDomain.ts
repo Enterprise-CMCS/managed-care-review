@@ -545,6 +545,9 @@ const toDomain = (
         documents: parseProtoDocuments(formDataMessage.documents),
         statutoryRegulatoryAttestation:
             contractInfo?.statutoryRegulatoryAttestation ?? undefined,
+        statutoryRegulatoryAttestationDescription:
+            contractInfo?.statutoryRegulatoryAttestationDescription ??
+            undefined,
     }
 
     // Now that we've gotten things into our combined draft & state domain format.

@@ -233,6 +233,8 @@ function convertContractWithRatesToFormData(
         },
         statutoryRegulatoryAttestation:
             contractRev.formData.statutoryRegulatoryAttestation,
+        statutoryRegulatoryAttestationDescription:
+            contractRev.formData.statutoryRegulatoryAttestationDescription,
         rateInfos,
     }
 

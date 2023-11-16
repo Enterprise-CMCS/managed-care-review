@@ -228,6 +228,8 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                     email: 'additionalactuarycontact1@test.com',
                 },
             ],
+            statutoryRegulatoryAttestation: false,
+            statutoryRegulatoryAttestationDescription: 'No compliance',
         }
 
         const expectDomainRates: RateFormDataType[] = [

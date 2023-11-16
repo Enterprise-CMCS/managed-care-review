@@ -168,7 +168,10 @@ export const ContractDetailsSummarySection = ({
             <dl>
                 {contract438Attestation && (
                     <Grid row gap className={styles.singleColumnGrid}>
-                        <Grid col={12}>
+                        <Grid
+                            tablet={{ col: 12 }}
+                            key="statutoryRegulatoryAttestation"
+                        >
                             <DataDetail
                                 id="statutoryRegulatoryAttestation"
                                 label={StatutoryRegulatoryAttestationQuestion}
@@ -181,6 +184,21 @@ export const ContractDetailsSummarySection = ({
                                 }
                             />
                         </Grid>
+                        {attestationYesNo === 'NO' && (
+                            <Grid
+                                tablet={{ col: 12 }}
+                                key="statutoryRegulatoryAttestationDescription"
+                            >
+                                <DataDetail
+                                    id="statutoryRegulatoryAttestationDescription"
+                                    label="Non-compliance description"
+                                    explainMissingData={!isSubmitted}
+                                    children={
+                                        submission.statutoryRegulatoryAttestationDescription
+                                    }
+                                />
+                            </Grid>
+                        )}
                     </Grid>
                 )}
                 <DoubleColumnGrid>

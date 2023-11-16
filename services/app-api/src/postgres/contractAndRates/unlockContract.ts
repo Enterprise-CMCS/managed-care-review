@@ -143,6 +143,8 @@ async function unlockContract(
                         currentRev.modifiedNonRiskPaymentArrangements,
                     statutoryRegulatoryAttestation:
                         currentRev.statutoryRegulatoryAttestation,
+                    statutoryRegulatoryAttestationDescription:
+                        currentRev.statutoryRegulatoryAttestationDescription,
 
                     contractDocuments: {
                         create: currentRev.contractDocuments.map((d) => ({

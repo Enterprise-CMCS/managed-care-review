@@ -299,7 +299,8 @@ const createAndUpdateTestHealthPlanPackage = async (
             modifiedNonRiskPaymentArrangements: true,
         },
     }
-    draft.statutoryRegulatoryAttestation = true
+    draft.statutoryRegulatoryAttestation = false
+    draft.statutoryRegulatoryAttestationDescription = 'No compliance'
 
     Object.assign(draft, partialUpdates)
 
