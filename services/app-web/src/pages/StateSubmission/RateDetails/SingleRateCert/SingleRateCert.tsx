@@ -157,7 +157,6 @@ export const SingleRateCert = ({
                 data-testid={`rate-certification-form`}
                 key={key}
                 id={`${fieldNamePrefix}.container.${rateInfo.id}`}
-                className={styles.rateCertContainer}
             >
                 <FormGroup error={Boolean(showFieldErrors('rateDocuments'))}>
                     <FileUpload
