@@ -3,7 +3,7 @@
 .section {
    @include sectionCard;
 
-   > h3 {
+   >h3, fieldset>h3{
       margin-top: 0; // adjust vertical space between section edge and the first heading
    }
 

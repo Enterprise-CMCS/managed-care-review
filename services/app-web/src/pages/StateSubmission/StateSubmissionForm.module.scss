@@ -34,10 +34,6 @@
         @include sectionCard
     }
 
-    h2 {
-        margin-top: 0;
-    }
-
     > div[class^='usa-form-group']:not(:first-of-type) {
         margin-top: 2.5rem;
     }
@@ -106,6 +102,10 @@
     margin-top: 0 !important; // overriding USWDS form btn styles for this case
 }
 
+.rateName {
+    margin-bottom: 0;
+}
+
 .stateContacts,
 .actuaryContacts {
     .addContactBtn {
@@ -145,14 +145,6 @@
     display: flex;
     flex-direction: column;
 }
-
-
-.rateName {
-    display: block;
-    font-weight: bold;
-    margin: 0
-}
-
 
 .contractAttestationHint {
     margin-bottom: units(3);
