@@ -55,6 +55,8 @@ function mockDraft(
         stateContacts: [],
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
         ...partial,
     }
 }
@@ -116,7 +118,8 @@ function mockBaseContract(
         ],
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
-        statutoryRegulatoryAttestation: true,
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
         ...partial,
     }
 }
@@ -139,7 +142,14 @@ function mockContractAndRatesDraft(
         documents: [],
         contractType: 'AMENDMENT',
         contractExecutionStatus: 'EXECUTED',
-        contractDocuments: [],
+        contractDocuments: [
+            {
+                s3URL: 's3://bucketname/key/contract',
+                sha256: 'fakesha',
+                name: 'contract',
+                documentCategories: ['CONTRACT' as const],
+            },
+        ],
         contractDateStart: new Date(),
         contractDateEnd: new Date(),
         contractAmendmentInfo: {
@@ -212,7 +222,8 @@ function mockContractAndRatesDraft(
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-        statutoryRegulatoryAttestation: true,
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
         ...partial,
     }
 }
@@ -321,6 +332,7 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
         statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 
@@ -421,6 +433,7 @@ function mockStateSubmissionContractAmendment(): LockedHealthPlanFormDataType {
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
         statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 

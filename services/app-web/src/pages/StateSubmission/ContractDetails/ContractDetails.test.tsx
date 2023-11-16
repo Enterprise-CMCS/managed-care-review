@@ -6,6 +6,7 @@ import {
     mockDraft,
     fetchCurrentUserMock,
     mockBaseContract,
+    mockContractAndRatesDraft,
 } from '../../../testHelpers/apolloMocks'
 
 import {
@@ -29,6 +30,7 @@ import {
 } from '../../../common-code/healthPlanFormDataType'
 import {
     StatutoryRegulatoryAttestation,
+    StatutoryRegulatoryAttestationDescription,
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../constants/statutoryRegulatoryAttestation'
 
@@ -1055,17 +1057,31 @@ describe('ContractDetails', () => {
                 name: StatutoryRegulatoryAttestation.YES,
             })
             const noRadio = screen.getByRole('radio', {
-                name: StatutoryRegulatoryAttestation.YES,
+                name: StatutoryRegulatoryAttestation.NO,
             })
 
             // expect both yes and no answers on the page and yes to be checked
             expect(yesRadio).toBeChecked()
             expect(noRadio).toBeInTheDocument()
+
+            await userEvent.click(noRadio)
+            expect(noRadio).toBeChecked()
+
+            const nonComplianceTextBox = screen.getByRole('textbox', {
+                name: StatutoryRegulatoryAttestationDescription,
+            })
+            // expect 438 non-compliance description text box to be in the document
+            await waitFor(() => {
+                expect(nonComplianceTextBox).toBeInTheDocument()
+            })
         })
         it('errors when continuing without answering 438 attestation question', async () => {
             ldUseClientSpy({ '438-attestation': true })
-            const draft = mockBaseContract({
+            const draft = mockContractAndRatesDraft({
+                contractDateStart: new Date('11-12-2023'),
+                contractDateEnd: new Date('11-12-2024'),
                 statutoryRegulatoryAttestation: undefined,
+                statutoryRegulatoryAttestationDescription: undefined,
             })
             const mockUpdateDraftFn = jest.fn()
             await waitFor(() => {
@@ -1090,15 +1106,12 @@ describe('ContractDetails', () => {
                 name: StatutoryRegulatoryAttestation.YES,
             })
             const noRadio = screen.getByRole('radio', {
-                name: StatutoryRegulatoryAttestation.YES,
+                name: StatutoryRegulatoryAttestation.NO,
             })
 
             // expect both yes and no answers on the page and yes to be checked
             expect(yesRadio).toBeInTheDocument()
             expect(noRadio).toBeInTheDocument()
-
-            // check no radio
-            await userEvent.click(noRadio)
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
@@ -1113,6 +1126,94 @@ describe('ContractDetails', () => {
                 expect(
                     screen.queryAllByText('You must select yes or no')
                 ).toHaveLength(2)
+            })
+
+            // Click the Yes radio
+            await userEvent.click(yesRadio)
+
+            // click continue
+            await userEvent.click(continueButton)
+
+            // There should be no errors
+            await waitFor(() => {
+                expect(mockUpdateDraftFn).toHaveBeenCalled()
+                expect(
+                    screen.queryAllByText('You must select yes or no')
+                ).toHaveLength(0)
+            })
+        })
+        it('errors when continuing without description for 438 non-compliance', async () => {
+            ldUseClientSpy({ '438-attestation': true })
+            const draft = mockContractAndRatesDraft({
+                contractDateStart: new Date('11-12-2023'),
+                contractDateEnd: new Date('11-12-2024'),
+                statutoryRegulatoryAttestation: undefined,
+                statutoryRegulatoryAttestationDescription: undefined,
+            })
+            const mockUpdateDraftFn = jest.fn()
+            await waitFor(() => {
+                renderWithProviders(
+                    <ContractDetails
+                        draftSubmission={draft}
+                        updateDraft={mockUpdateDraftFn}
+                        previousDocuments={[]}
+                    />,
+                    {
+                        apolloProvider: defaultApolloProvider,
+                    }
+                )
+            })
+
+            // expect 438 attestation question to be on the page
+            expect(
+                screen.getByText(StatutoryRegulatoryAttestationQuestion)
+            ).toBeInTheDocument()
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            const noRadio = screen.getByRole('radio', {
+                name: StatutoryRegulatoryAttestation.NO,
+            })
+
+            // check no radio
+            await userEvent.click(noRadio)
+
+            const nonComplianceTextBox = screen.getByRole('textbox', {
+                name: StatutoryRegulatoryAttestationDescription,
+            })
+
+            // expect 438 non-compliance description text box to be in the document
+            await waitFor(() => {
+                expect(nonComplianceTextBox).toBeInTheDocument()
+            })
+
+            // try to continue without typing in non-compliance explanation
+            await userEvent.click(continueButton)
+
+            // expect errors for attestation question
+            await waitFor(() => {
+                expect(mockUpdateDraftFn).not.toHaveBeenCalled()
+                expect(
+                    screen.queryAllByText(
+                        'You must provide a description of the contract’s non-compliance'
+                    )
+                ).toHaveLength(2)
+            })
+
+            await userEvent.type(nonComplianceTextBox, 'No compliance')
+
+            // continue with explanation
+            await userEvent.click(continueButton)
+
+            // expect no errors
+            await waitFor(() => {
+                expect(mockUpdateDraftFn).toHaveBeenCalled()
+                expect(
+                    screen.queryAllByText(
+                        'You must provide a description of the contract’s non-compliance'
+                    )
+                ).toHaveLength(0)
             })
         })
     })
