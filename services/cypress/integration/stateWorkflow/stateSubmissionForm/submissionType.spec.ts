@@ -23,7 +23,7 @@ describe('submission type', () => {
 
             // Navigate to dashboard page by clicking cancel
             cy.findByRole('button', { name: /Cancel/, timeout: 5_000}).click()
-            cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+            cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
 
             // Navigate to type page
             cy.navigateFormByDirectLink(
@@ -32,7 +32,7 @@ describe('submission type', () => {
 
             // Navigate to dashboard page by clicking save as draft
             cy.navigateFormByButtonClick('SAVE_DRAFT')
-            cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+            cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
 
             // Navigate to back to submission type page
             cy.navigateFormByDirectLink(
@@ -96,7 +96,7 @@ describe('submission type', () => {
             // Navigate to dashboard page by clicking cancel
             cy.findByRole('button', { name: /Cancel/ }).click()
             cy.wait('@indexHealthPlanPackagesQuery', { timeout: 50_000 })
-            cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+            cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
 
             // Navigate to type page
             cy.navigateFormByDirectLink(
@@ -121,7 +121,7 @@ describe('submission type', () => {
 
             // Click Save as draft button to save changes and navigate to dashboard
             cy.navigateFormByButtonClick('SAVE_DRAFT')
-            cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+            cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
 
             // Navigate back to submission type page
             cy.navigateFormByDirectLink(

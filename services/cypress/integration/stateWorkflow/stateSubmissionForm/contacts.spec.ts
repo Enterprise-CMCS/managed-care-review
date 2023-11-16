@@ -29,7 +29,7 @@ describe('contacts', () => {
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
             cy.fillOutStateContact()
             cy.navigateFormByButtonClick('SAVE_DRAFT')
-            cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+            cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
         })
     })
     it('can navigate back and save as draft from contacts page with contract and rates submission', () => {
@@ -94,7 +94,7 @@ describe('contacts', () => {
             ).click()
 
             cy.navigateFormByButtonClick('SAVE_DRAFT')
-            cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+            cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
         })
     })
 
