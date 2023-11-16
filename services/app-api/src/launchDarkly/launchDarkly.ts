@@ -64,7 +64,7 @@ function offlineLDService(): LDService {
         },
         allFlags: async (context) => {
             logError(
-                'getFeatureFlag',
+                'allFlags',
                 `No connection to LaunchDarkly, fallback to offlineLDService with default values`
             )
             setErrorAttributesOnActiveSpan(
