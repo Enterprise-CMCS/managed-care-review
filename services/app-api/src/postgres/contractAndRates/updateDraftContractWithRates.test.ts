@@ -105,6 +105,8 @@ describe('updateDraftContract', () => {
             modifiedLengthOfContract: true,
             modifiedNonRiskPaymentArrangements: true,
             inLieuServicesAndSettings: true,
+            statutoryRegulatoryAttestation: false,
+            statutoryRegulatoryAttestationDescription: 'No compliance',
         }
     }
 

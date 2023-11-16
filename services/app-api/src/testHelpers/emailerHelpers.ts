@@ -338,6 +338,7 @@ const mockContractAndRatesFormData = (
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         ...submissionPartial,
         statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 
@@ -422,6 +423,8 @@ const mockUnlockedContractAndRatesFormData = (
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
         ...submissionPartial,
     }
 }
@@ -471,6 +474,8 @@ const mockUnlockedContractOnlyFormData = (
             },
         ],
         addtlActuaryContacts: [],
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
         ...submissionPartial,
     }
 }
@@ -522,6 +527,7 @@ const mockContractOnlyFormData = (
         ],
         addtlActuaryContacts: [],
         statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
         ...submissionPartial,
     }
 }
@@ -609,6 +615,7 @@ const mockContractAmendmentFormData = (
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
         ...submissionPartial,
     }
 }
