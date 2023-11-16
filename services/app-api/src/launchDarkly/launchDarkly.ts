@@ -25,6 +25,7 @@ type LDService = {
         context: Context,
         flag: FeatureFlagLDConstant
     ) => Promise<FlagValue | undefined>
+    allFlags: (context: Context) => Promise<FeatureFlagSettings | undefined>
 }
 
 function ldService(ldClient: LDClient): LDService {
@@ -35,6 +36,14 @@ function ldService(ldClient: LDClient): LDService {
                 key: context.user.email,
             }
             return await ldClient.variation(flag, ldContext, false)
+        },
+        allFlags: async (context) => {
+            const ldContext = {
+                kind: 'user',
+                key: context.user.email,
+            }
+            const state = await ldClient.allFlagsState(ldContext)
+            return state.allValues()
         },
     }
 }
@@ -52,6 +61,17 @@ function offlineLDService(): LDService {
             )
             const featureFlags = defaultFeatureFlags()
             return featureFlags[flag]
+        },
+        allFlags: async (context) => {
+            logError(
+                'getFeatureFlag',
+                `No connection to LaunchDarkly, fallback to offlineLDService with default values`
+            )
+            setErrorAttributesOnActiveSpan(
+                `No connection to LaunchDarkly, fallback to offlineLDService with default values`,
+                context.span
+            )
+            return defaultFeatureFlags()
         },
     }
 }
