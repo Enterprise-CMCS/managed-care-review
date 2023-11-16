@@ -65,6 +65,49 @@ export const Help = (): React.ReactElement => {
                 </p>
             </section>
             <section className={styles.helpSection}>
+                <h3 id="non-compliance-guidance">Non-compliance guidance</h3>
+                <h4>Contractual versus operational compliance</h4>
+                <p className="line-height-sans-4 measure-6">
+                    A contract action is contractually compliant if the
+                    requirements are explicitly stated in the contract.
+                </p>
+                <p className="line-height-sans-4 measure-6">
+                    A contract action is operationally compliant if the
+                    associated health plans adhere to the requirement, but the
+                    requirement is not stated explicitly in the contract.
+                    Operational compliance does not achieve contractual
+                    compliance.
+                </p>
+                <p className="line-height-sans-4 measure-6">
+                    If the contract action is only operationally compliant, you
+                    must select, “No, the contract does not fully comply with
+                    all applicable requirements.” and complete the question that
+                    follows.
+                </p>
+                <h4>Example #1</h4>
+                <p className="line-height-sans-4 measure-6">
+                    This contract action is not compliant with § 438.71(a), due
+                    to the need for legislative approval. We plan to incorporate
+                    this new requirement into our contracts effective July 1,
+                    2024, and submit the amendment to CMS no later than August
+                    1, 2024. We have communicated this new requirement to health
+                    plans, informing them that the system must be implemented no
+                    later than July 1, 2024.
+                </p>
+                <h4>Example #2</h4>
+                <p className="line-height-sans-4 measure-6">
+                    This contract action does not include the requirement at
+                    §438.10(c)(6)(ii). The state overlooked this requirement
+                    when developing SFY24 contracts. However, we conduct ongoing
+                    monitoring of plans’ compliance with all information
+                    requirements, and attest to the plans’ operational
+                    compliance with §438.10(c)(6)(ii). We will be updating our
+                    contracts with this provision, effective July 1, 2024, and
+                    will submit the amendment to CMS no later than August 1,
+                    2024.
+                </p>
+            </section>
+            <section className={styles.helpSection}>
                 <h3 id="rate-cert-type-definitions">
                     Rate certification type definitions
                 </h3>
