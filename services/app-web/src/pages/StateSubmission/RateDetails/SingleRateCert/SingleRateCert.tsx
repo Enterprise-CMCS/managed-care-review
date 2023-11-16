@@ -148,7 +148,7 @@ export const SingleRateCert = ({
 
     return (
         <SectionCard>
-            <h3>
+            <h3 className={styles.rateName}>
                 {displayAsStandaloneRate
                     ? `Rate certification`
                     : `Rate certification ${rateCertNumber}`}

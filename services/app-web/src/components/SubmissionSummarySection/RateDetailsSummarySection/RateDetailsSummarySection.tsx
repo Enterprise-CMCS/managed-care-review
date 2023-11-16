@@ -273,7 +273,7 @@ export const RateDetailsSummarySection = ({
                 submission.rateInfos.map((rateInfo) => {
                     return (
                         // When we complete rates refactor we can remove workaround for the react key
-                        <React.Fragment key={rateInfo.id || uuidv4()}>
+                        <SectionCard key={rateInfo.id || uuidv4()}>
                             <h3
                                 aria-label={`Rate ID: ${rateInfo.rateCertificationName}`}
                                 className={styles.rateName}
@@ -405,7 +405,7 @@ export const RateDetailsSummarySection = ({
                             ) : (
                                 <span className="srOnly">'LOADING...'</span>
                             )}
-                        </React.Fragment>
+                        </SectionCard>
                     )
                 })
             ) : (

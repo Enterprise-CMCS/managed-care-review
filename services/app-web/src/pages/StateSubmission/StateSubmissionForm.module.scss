@@ -146,6 +146,14 @@
     flex-direction: column;
 }
 
+
+.rateName {
+    display: block;
+    font-weight: bold;
+    margin: 0
+}
+
+
 .contractAttestationHint {
     margin-bottom: units(3);
     a {
