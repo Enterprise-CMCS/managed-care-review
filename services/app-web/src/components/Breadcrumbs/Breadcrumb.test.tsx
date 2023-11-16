@@ -17,11 +17,11 @@ describe('Breadcrumbs', () => {
         const items = [
             { text: 'First link', link: '/firstlink' },
             { text: 'Second link', link: '/secondlink' },
-            { text: 'Active link, no href needed' },
+            { text: 'Active link', link: '/thirdlink' },
         ]
         renderWithProviders(<Breadcrumbs items={items} />)
         expect(screen.getAllByRole('listitem')).toHaveLength(items.length)
-        expect(screen.getAllByRole('link')).toHaveLength(items.length - 1)
+        expect(screen.getAllByRole('link')).toHaveLength(items.length)
     })
 
     it('renders nothing if no items passed in', () => {

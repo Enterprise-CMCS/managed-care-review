@@ -104,6 +104,10 @@ export const SubmissionSummary = (): React.ReactElement => {
     const handleDocumentDownloadError = (error: boolean) =>
         setDocumentError(error)
 
+    const editOrAddMCCRSID = pkg.mccrsID
+        ? 'Edit MC-CRS number'
+        : 'Add MC-CRS record number'
+
     return (
         <div className={styles.background}>
             <GridContainer
@@ -169,6 +173,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                         MC-CRS record number:
                                         <Link
                                             href={`https://mccrs.abtsites.com/Home/Index/${pkg.mccrsID}`}
+                                            aria-label="MC-CRS system login"
                                         >
                                             {pkg.mccrsID}
                                         </Link>
@@ -179,10 +184,9 @@ export const SubmissionSummary = (): React.ReactElement => {
                                     className={
                                         pkg.mccrsID ? styles.editLink : ''
                                     }
+                                    aria-label={editOrAddMCCRSID}
                                 >
-                                    {pkg.mccrsID
-                                        ? 'Edit MC-CRS number'
-                                        : 'Add MC-CRS record number'}
+                                    {editOrAddMCCRSID}
                                 </Link>
                             </div>
                         ) : undefined

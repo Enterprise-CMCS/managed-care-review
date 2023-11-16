@@ -1,5 +1,14 @@
+@import '../../styles/uswdsImports.scss';
+
 .crumbContainer {
     margin-top: 1em;
     margin-bottom: 1em;
     background: none;
+
+    [class^='usa-breadcrumb'] {
+        li:last-child a {
+            text-decoration: none;
+            color: $theme-color-base-ink;
+        }
+    }
 }

@@ -176,7 +176,10 @@ export const MccrsId = (): React.ReactElement => {
                                     link: `/submissions/${id}`,
                                     text: pkgName || '',
                                 },
-                                { text: 'MC-CRS record number' },
+                                {
+                                    text: 'MC-CRS record number',
+                                    link: `/submissions/${id}/mccrs-record-number`,
+                                },
                             ]}
                         />
                         <UswdsForm
