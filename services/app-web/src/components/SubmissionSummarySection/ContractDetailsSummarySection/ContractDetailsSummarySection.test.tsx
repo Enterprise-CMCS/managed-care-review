@@ -165,7 +165,7 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeInTheDocument()
     })
 
-    it('displays correct contract 438 attestation yes and no text', async () => {
+    it('displays correct contract 438 attestation yes and no text and description', async () => {
         ldUseClientSpy({ '438-attestation': true })
         const submission = mockContractAndRatesDraft({
             statutoryRegulatoryAttestation: false,
