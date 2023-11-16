@@ -42,6 +42,7 @@ import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../constants/statutoryRegulatoryAttestation'
+import { SectionCard } from '../../SectionCard'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -152,7 +153,10 @@ export const ContractDetailsSummarySection = ({
     ])
 
     return (
-        <section id="contractDetailsSection" className={styles.summarySection}>
+        <SectionCard
+            id="contractDetailsSection"
+            className={styles.summarySection}
+        >
             <SectionHeader
                 header="Contract details"
                 editNavigateTo={editNavigateTo}
@@ -293,6 +297,6 @@ export const ContractDetailsSummarySection = ({
                 isSupportingDocuments
                 isEditing={isEditing}
             />
-        </section>
+        </SectionCard>
     )
 }

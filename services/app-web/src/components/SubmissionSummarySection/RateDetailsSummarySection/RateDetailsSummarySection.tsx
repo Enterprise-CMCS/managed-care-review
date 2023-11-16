@@ -26,6 +26,7 @@ import { featureFlags } from '../../../common-code/featureFlags'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../DocumentWarning'
+import { SectionCard } from '../../SectionCard'
 // Used for refreshed packages names keyed by their package id
 // package name includes (Draft) for draft packages.
 type PackageNameType = string
@@ -259,7 +260,7 @@ export const RateDetailsSummarySection = ({
     ])
 
     return (
-        <section id="rateDetails" className={styles.summarySection}>
+        <SectionCard id="rateDetails" className={styles.summarySection}>
             <SectionHeader
                 header="Rate details"
                 editNavigateTo={editNavigateTo}
@@ -424,6 +425,6 @@ export const RateDetailsSummarySection = ({
                 )
                 // This whole block gets deleted when we remove the feature flag - END
             }
-        </section>
+        </SectionCard>
     )
 }
