@@ -198,6 +198,8 @@ const toProtoBuffer = (
             contractAmendmentInfo: contractAmendmentInfo,
             statutoryRegulatoryAttestation:
                 domainData.statutoryRegulatoryAttestation,
+            statutoryRegulatoryAttestationDescription:
+                domainData.statutoryRegulatoryAttestationDescription,
         },
         rateInfos:
             domainData.rateInfos && domainData.rateInfos.length

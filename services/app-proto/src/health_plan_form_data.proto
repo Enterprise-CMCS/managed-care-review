@@ -82,6 +82,7 @@ message ContractInfo {
   repeated Document contract_documents = 6;
   optional ContractExecutionStatus contract_execution_status = 7;
   optional bool statutory_regulatory_attestation = 8;
+  optional string statutory_regulatory_attestation_description = 9;
 
   // Rates Refactor: No need for nested contract amendment info
   optional ContractAmendmentInfo contract_amendment_info  = 50;

@@ -43,4 +43,5 @@ export type LockedHealthPlanFormDataType = {
     addtlActuaryContacts: ActuaryContact[]
     addtlActuaryCommunicationPreference?: ActuaryCommunicationType
     statutoryRegulatoryAttestation: boolean
+    statutoryRegulatoryAttestationDescription?: string
 }
