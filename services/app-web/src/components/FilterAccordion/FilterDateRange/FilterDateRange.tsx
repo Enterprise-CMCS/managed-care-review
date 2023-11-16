@@ -1,5 +1,5 @@
 import React, { useRef, forwardRef, useImperativeHandle, useState } from 'react'
-import { FormGroup, Label } from '@trussworks/react-uswds'
+import { Fieldset, FormGroup, Label } from '@trussworks/react-uswds'
 import {
     DatePicker,
     DatePickerProps,
@@ -8,10 +8,10 @@ import {
 import { formatDate, parseDateString } from './_DatePicker/utils'
 import { DEFAULT_EXTERNAL_DATE_FORMAT } from './_DatePicker/constants'
 import classnames from 'classnames'
-import styles from './FilterDateRange.module.scss'
 import { formatUserInputDate } from '../../../formHelpers'
 import { dayjs } from '../../../common-code/dateHelpers/dayjs'
 import { PoliteErrorMessage } from '../../PoliteErrorMessage'
+import styles from './FilterDateRange.module.scss'
 
 /**
  *  This component recreates the @trussworks/react-uswds DateRangePicker with a modification to validate and clear
@@ -27,6 +27,7 @@ import { PoliteErrorMessage } from '../../PoliteErrorMessage'
  */
 
 export type FilterDateRangePropType = {
+    legend?: string
     startDateLabel?: string
     startDateHint?: string
     startDatePickerProps: Omit<DatePickerProps, 'rangeDate'>
@@ -46,6 +47,7 @@ export const FilterDateRange = forwardRef(
         ref: React.Ref<FilterDateRangeRef>
     ): React.ReactElement => {
         const {
+            legend,
             startDateLabel,
             startDateHint,
             startDatePickerProps,
@@ -250,7 +252,11 @@ export const FilterDateRange = forwardRef(
         }
 
         return (
-            <div className={classes} data-testid="filter-date-range-picker">
+            <Fieldset
+                className={classes}
+                data-testid="filter-date-range-picker"
+                legend={legend}
+            >
                 <FormGroup error={showStartDateError}>
                     {startDateLabel && (
                         <Label
@@ -318,7 +324,7 @@ export const FilterDateRange = forwardRef(
                         onBlur={onBlurValidation}
                     />
                 </FormGroup>
-            </div>
+            </Fieldset>
         )
     }
 )
