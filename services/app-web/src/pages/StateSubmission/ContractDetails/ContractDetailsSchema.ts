@@ -56,7 +56,20 @@ export const ContractDetailsFormSchema = (
     return Yup.object().shape({
         statutoryRegulatoryAttestation: activeFeatureFlags['438-attestation']
             ? Yup.string().defined('You must select yes or no')
-            : Yup.string(),
+            : Yup.string().notRequired(),
+        statutoryRegulatoryAttestationDescription: Yup.string().when(
+            ['statutoryRegulatoryAttestation'],
+            {
+                is: (statutoryRegulatoryAttestation: string) =>
+                    statutoryRegulatoryAttestation === 'NO' &&
+                    activeFeatureFlags['438-attestation'],
+                then: (schema) =>
+                    schema.defined(
+                        'You must provide a description of the contract’s non-compliance'
+                    ),
+                otherwise: (schema) => schema.notRequired(),
+            }
+        ),
         contractExecutionStatus: Yup.string().defined(
             'You must select a contract status'
         ),

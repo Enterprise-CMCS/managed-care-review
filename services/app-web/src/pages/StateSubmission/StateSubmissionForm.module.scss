@@ -150,9 +150,15 @@
     flex-direction: column;
 }
 
-.contractAttestationHint {
-    margin-bottom: units(3);
-    a {
-        margin-top: units(1);
+.contractAttestation {
+    max-width: none;
+    legend {
+        max-width: none;
+    }
+    label {
+        max-width: none;
+    }
+    div[role=note] {
+        margin-top: units(0);
     }
 }
