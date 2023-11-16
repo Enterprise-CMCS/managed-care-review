@@ -101,8 +101,8 @@ const QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
 */
 const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
     ROOT: 'Dashboard',
-    DASHBOARD_SUBMISSIONS: 'Submissions Dashboard',
-    DASHBOARD_RATES: 'Rate Reviews Dashboard',
+    DASHBOARD_SUBMISSIONS: 'Submissions dashboard',
+    DASHBOARD_RATES: 'Rate reviews dashboard',
     SUBMISSIONS_NEW: 'New submission',
     UNKNOWN_ROUTE: '404',
 }
@@ -119,7 +119,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     HELP: 'Help',
     SETTINGS: 'Settings',
     DASHBOARD: 'Dashboard',
-    DASHBOARD_RATES: 'Rate Review Dashboard',
+    DASHBOARD_RATES: 'Rate review dashboard',
     DASHBOARD_SUBMISSIONS: 'Dashboard',
     RATES_SUMMARY: 'Rate summary',
     SUBMISSIONS: 'Submissions',
