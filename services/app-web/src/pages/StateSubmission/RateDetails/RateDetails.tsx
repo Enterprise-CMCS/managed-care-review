@@ -31,6 +31,7 @@ import { useS3 } from '../../../contexts/S3Context'
 import { S3ClientT } from '../../../s3'
 import { isLoadingOrHasFileErrors } from '../../../components/FileUpload'
 import { RoutesRecord } from '../../../constants'
+import { SectionCard } from '../../../components/SectionCard'
 
 // This function is used to get initial form values as well return empty form values when we add a new rate or delete a rate
 // We need to include the getKey function in params because there are no guarantees currently file is in s3 even if when we load data from API
@@ -320,7 +321,7 @@ export const RateDetails = ({
                                 handleSubmit(e)
                             }}
                         >
-                            <fieldset className="usa-fieldset">
+                            <fieldset className="usa-fieldset with-sections">
                                 <legend className="srOnly">Rate Details</legend>
 
                                 {shouldValidate && (
@@ -365,19 +366,26 @@ export const RateDetails = ({
                                                     />
                                                 )
                                             )}
-                                            <button
-                                                type="button"
-                                                className={`usa-button usa-button--outline ${styles.addContactBtn}`}
-                                                onClick={() => {
-                                                    const newRate =
-                                                        generateRateCertFormValues()
-                                                    push(newRate)
-                                                    setFocusNewRate(true)
-                                                }}
-                                                ref={newRateButtonRef}
-                                            >
-                                                Add another rate certification
-                                            </button>
+                                            <SectionCard>
+                                                <h3>
+                                                    Additional rate
+                                                    certification
+                                                </h3>
+                                                <button
+                                                    type="button"
+                                                    className={`usa-button usa-button--outline ${styles.addRateBtn}`}
+                                                    onClick={() => {
+                                                        const newRate =
+                                                            generateRateCertFormValues()
+                                                        push(newRate)
+                                                        setFocusNewRate(true)
+                                                    }}
+                                                    ref={newRateButtonRef}
+                                                >
+                                                    Add another rate
+                                                    certification
+                                                </button>
+                                            </SectionCard>
                                         </>
                                     )}
                                 </FieldArray>
