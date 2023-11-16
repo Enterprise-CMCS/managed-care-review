@@ -12,6 +12,7 @@ import {
     runWebAgainstAWS,
     runWebAgainstDocker,
     runWebLocally,
+    installPrismaDeps,
 } from './local/index.js'
 import { commandMustSucceedSync } from './localProcess.js'
 import LabeledProcessRunner from './runner.js'
@@ -24,28 +25,34 @@ import {
     runWebTestsWatch,
 } from './test/index.js'
 
+// Run clean commands from every single lerna package. For a list, run yarn lerna list from the root.
 async function runAllClean() {
     const runner = new LabeledProcessRunner()
-    runner.runCommandAndOutput(
+    await runner.runCommandAndOutput(
         'clean',
-        [
-            'npx',
-            'lerna',
-            'run',
-            'clean',
-            '--scope=app-api',
-            '--scope=app-web',
-            '--scope=cypress',
-        ],
+        ['npx', 'lerna', 'run', 'clean'],
         ''
     )
 }
 
+// Run lint commands from every single lerna package. For a list, run yarn lerna list from the root.
 async function runAllLint() {
     const runner = new LabeledProcessRunner()
     await runner.runCommandAndOutput(
         'lint',
         ['npx', 'lerna', 'run', 'lint'],
+        ''
+    )
+}
+
+// Rebuild- this is for use after .dev clean
+// Runs yarn install, tsc, generate compiled types
+async function runAllBuild(runner: LabeledProcessRunner) {
+    await runner.runCommandAndOutput('yarn install', ['npx', 'yarn'], '')
+    await runAllGenerate()
+    await runner.runCommandAndOutput(
+        'build',
+        ['npx', 'lerna', 'run', 'build'],
         ''
     )
 }
@@ -59,10 +66,12 @@ async function runAllFormat() {
     )
 }
 
+// create generated types for graphql, proto, prisma
 async function runAllGenerate() {
     const runner = new LabeledProcessRunner()
     await compileGraphQLTypesOnce(runner)
     await compileProto(runner)
+    await installPrismaDeps(runner)
 }
 
 // runAllLocally runs all of our services locally
@@ -311,6 +320,11 @@ function main() {
                 )
             }
         )
+        .command('rebuild', 'rebuild modules and types manually', () => {
+            const runner = new LabeledProcessRunner()
+
+            runAllBuild(runner)
+        })
         .command(
             'test',
             'run tests. If no flags are passed runs both --unit and --online',
