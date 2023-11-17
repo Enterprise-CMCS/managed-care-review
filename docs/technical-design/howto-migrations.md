@@ -71,18 +71,7 @@ This type of migration is run as standalone lambda that developers must manually
 
 ## How to dump VAL data for local testing
 
-Dependencies:
-- [Jumpbox access exists for your IP](../../services/postgres/README.md#access-to-aurora-postgres-via-aws-jump-box)
-- `postgresql` installed locally
+1. use `./dev jumpbox clone val` to clone the val database to your local machine
 
-1. SSH to instance of db you will copy and make sure you have DB secrets available for that environment db.
-    - See [SSH directions](../../services/postgres/README.md#ssh-to-the-instances) and [postgres credentials docs](../../services/postgres/README.md#accessing-postgres-authentication-credentials)
-
-1. Dump database.
-   -  `pg_dump -Fc -h $hostname -p $port -U $username -d $dbname > [val]-[date].sqlfc`. You will have to enter the db password (also in the secrets).
-
-1. Exit SSH. Copy down from from remote to the current directory.
-    -  `scp ubuntu@$host:[val]-[date].sqlfc .`
-
-1. From current directory, start up localhost db with the copied db
-    - `pg_restore -h localhost -p 5432 -U postgres -d postgres --clean val]-[date].sqlfc`. You will be promoted to enter in local db password `shhhsecret`. You will see print out errors but the database has spun up successfully.
+2. Load that db dump into your local running postgres instance
+    - `pg_restore -h localhost -p 5432 -U postgres -d postgres --clean val-[date].sqlfc`. You will be promoted to enter in local db password `shhhsecret`. You will see print out errors but the database has spun up successfully.
