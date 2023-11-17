@@ -75,7 +75,7 @@ type Emailer = {
         stateAnalystsEmails: StateAnalystsEmails,
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
-    sendUnlockPackageStateEmail: (
+    sendUnlockPackageStateEmail: ( 
         formData: UnlockedHealthPlanFormDataType,
         updateInfo: UpdateInfoType,
         statePrograms: ProgramType[],

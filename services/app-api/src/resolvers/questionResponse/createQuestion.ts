@@ -1,5 +1,5 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { isCMSUser } from '../../domain-models'
+import { isCMSUser, packageSubmitters } from '../../domain-models'
 import { logError, logSuccess } from '../../logger'
 import {
     setErrorAttributesOnActiveSpan,
@@ -11,13 +11,17 @@ import type { Store } from '../../postgres'
 import { isStoreError } from '../../postgres'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison } from '../../domain-models'
+import {
+    convertContractWithRatesToFormData,
+    convertContractWithRatesToUnlockedHPP
+} from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
 
 export function createQuestionResolver(
     store: Store
 ): MutationResolvers['createQuestion'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
-
+ 
         if (!isCMSUser(user)) {
             const msg = 'user not authorized to create a question'
             logError('createQuestion', msg)
@@ -68,6 +72,43 @@ export function createQuestionResolver(
                 },
             })
         }
+
+        if (!contractResult.draftRevision) {
+            throw new Error(
+                'PROGRAMMING ERROR: Status should not be submittable without a draft revision'
+            )
+        }
+        const conversionResult = convertContractWithRatesToFormData(
+            contractResult.draftRevision,
+            contractResult.id,
+            contractResult.stateCode,
+            contractResult.stateNumber
+        )
+
+        if (conversionResult instanceof Error) {
+            const errMessage = conversionResult.message
+            logError('submitHealthPlanPackage', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new Error(errMessage)
+        }
+
+        // Now we do the conversions
+        const pkg = convertContractWithRatesToUnlockedHPP(contractResult)
+
+        if (pkg instanceof Error) {
+            const errMessage = `Error converting draft contract. Message: ${pkg.message}`
+            logError('createHealthPlanPackage', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'PROTO_DECODE_ERROR',
+                },
+            })
+        }
+
+        const statePrograms = store.findStatePrograms(conversionResult.stateCode)
+        const submitterEmails = packageSubmitters(pkg)
 
         // Return error if package status is DRAFT, contract will have no submitted revisions
         if (contractResult.revisions.length === 0) {
