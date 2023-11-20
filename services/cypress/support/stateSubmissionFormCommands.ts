@@ -184,7 +184,7 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     cy.findByText('No, the contract does not fully comply with all applicable requirements').click()
     cy.findByRole('textbox', {name: 'Provide a brief description of any contractual or operational non-compliance, including regulatory citations and expected timeframe for remediation'})
         .type('Non compliance explanation')
-
+ 
     cy.findByText('Unexecuted by some or all parties').click()
 
     cy.findAllByLabelText('Start date', {timeout: 2000})
