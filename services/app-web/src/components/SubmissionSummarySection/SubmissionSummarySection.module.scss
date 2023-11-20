@@ -5,12 +5,7 @@
 }
 
 .summarySection {
-    margin: units(2) auto;
-    background: $cms-color-white;
-    padding: units(2) units(4);
-    border: 1px solid $theme-color-base-lighter;
     line-height: units(3);
-    @include u-radius('md');
 
     h2 {
         margin: 0;
@@ -47,6 +42,12 @@
     }
     table:last-of-type {
        margin-bottom: units(2);
+    }
+
+    // with nested sections, collapse bottom margin/padding for last in list
+    // rely on margin from the parent .summarySection. Relevant for multi-rate experience
+    section:last-of-type {
+        margin-bottom: 0 !important;
     }
 }
 

@@ -20,7 +20,6 @@ import { getCurrentRevisionFromHealthPlanPackage } from '../../../gqlHelpers'
 import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 import { DataDetailContactField } from '../../DataDetail/DataDetailContactField/DataDetailContactField'
-import { v4 as uuidv4 } from 'uuid'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
@@ -272,8 +271,10 @@ export const RateDetailsSummarySection = ({
             {submission.rateInfos.length > 0 ? (
                 submission.rateInfos.map((rateInfo) => {
                     return (
-                        // When we complete rates refactor we can remove workaround for the react key
-                        <SectionCard key={rateInfo.id || uuidv4()}>
+                        <SectionCard
+                            id={`rate-details-${rateInfo.id}`}
+                            key={rateInfo.id}
+                        >
                             <h3
                                 aria-label={`Rate ID: ${rateInfo.rateCertificationName}`}
                                 className={styles.rateName}
