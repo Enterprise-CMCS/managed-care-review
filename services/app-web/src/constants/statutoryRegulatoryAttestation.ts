@@ -7,7 +7,7 @@ const StatutoryRegulatoryAttestationQuestion =
     'Do you attest that this contract complies with all applicable statutory and regulatory requirements including those contained in Title 42 Part 438 and Part 457 of the Code of Federal Regulations (CFR)?'
 
 const StatutoryRegulatoryAttestationDescription =
-    'Please provide a brief description of the contract’s non-compliance (with regulatory citations) and expected timeframe for remediation'
+    'Provide a brief description of the contract’s non-compliance (with regulatory citations) and expected timeframe for remediation'
 
 export {
     StatutoryRegulatoryAttestation,
