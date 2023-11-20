@@ -13,6 +13,7 @@ import { Program } from '../../../gen/gqlClient'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import { booleanAsYesNoUserValue } from '../../../components/Form/FieldYesNo/FieldYesNo'
 import styles from '../SubmissionSummarySection.module.scss'
+import { SectionCard } from '../../SectionCard'
 
 export type SubmissionTypeSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -40,7 +41,10 @@ export const SubmissionTypeSummarySection = ({
     const isSubmitted = submission.status === 'SUBMITTED'
 
     return (
-        <section id="submissionTypeSection" className={styles.summarySection}>
+        <SectionCard
+            id="submissionTypeSection"
+            className={styles.summarySection}
+        >
             <SectionHeader
                 header={submissionName}
                 subHeaderComponent={subHeaderComponent}
@@ -124,6 +128,6 @@ export const SubmissionTypeSummarySection = ({
                     </Grid>
                 </Grid>
             </dl>
-        </section>
+        </SectionCard>
     )
 }

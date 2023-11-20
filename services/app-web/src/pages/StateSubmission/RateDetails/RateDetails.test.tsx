@@ -706,14 +706,14 @@ describe('RateDetails', () => {
             await clickAddNewRate(screen)
 
             await waitFor(() => {
-                const rateInfoContainers = screen.getAllByRole('group', {
-                    name: /certification/,
-                })
+                const rateInfoContainers = screen.getAllByTestId(
+                    'rate-certification-form'
+                )
                 expect(rateInfoContainers).toHaveLength(2)
             })
-            const rateInfo2 = screen.getAllByRole('group', {
-                name: /certification/,
-            })[1]
+            const rateInfo2 = screen.getAllByTestId(
+                'rate-certification-form'
+            )[1]
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',

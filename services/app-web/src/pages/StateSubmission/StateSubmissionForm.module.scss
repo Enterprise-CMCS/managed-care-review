@@ -5,14 +5,6 @@
     width: 100%;
 }
 
-.formContainer.tableContainer {
-
-    &[class^='usa-form'] {
-        max-width: 100%;
-        width: 75rem;
-    }
-}
-
 .stepIndicator {
     @include grid-container;
     width: 100%;
@@ -29,17 +21,17 @@
 }
 
 .formContainer {
-    > [class^='usa-fieldset'] {
-        padding: units(4);
-        margin-bottom: units(2);
-        margin-top: units(2);
-        background: $cms-color-white;
-        border: 1px solid $theme-color-base-lighter;
-        @include u-radius('md');
+    // for supporting documents
+    >& .tableContainer {
+        &[class^='usa-form'] {
+            max-width: 100%;
+            width: 75rem;
+        }
     }
-
-    h2 {
-        margin-top: 0;
+    // the first fieldset of the form sets up form container
+    // in cases where form has multiple sub sections using SectionCard - use .withSections class
+    > [class^='usa-fieldset']:not([class~='with-sections']) {
+        @include sectionCard
     }
 
     > div[class^='usa-form-group']:not(:first-of-type) {
@@ -106,8 +98,12 @@
     }
 }
 
-.rateCertContainer + .rateCertContainer {
-     margin-top: units(6);
+.addRateBtn {
+    margin-top: 0 !important; // overriding USWDS form btn styles for this case
+}
+
+.rateName {
+    margin-bottom: 0;
 }
 
 .stateContacts,
