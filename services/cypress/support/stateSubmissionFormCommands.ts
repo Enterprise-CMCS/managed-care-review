@@ -186,7 +186,7 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
         .type('Non compliance explanation')
  
     cy.findByText('Unexecuted by some or all parties').click()
-
+ 
     cy.findAllByLabelText('Start date', {timeout: 2000})
         .parents()
         .findByTestId('date-picker-external-input')
