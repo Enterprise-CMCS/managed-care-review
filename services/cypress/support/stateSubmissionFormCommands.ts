@@ -102,7 +102,7 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
     // Contract 438 attestation question
     cy.findByText('No, the contract does not fully comply with all applicable requirements').click()
 
-    cy.findByRole('textbox', {name: 'Provide a brief description of the contract’s non-compliance (with regulatory citations) and expected timeframe for remediation'})
+    cy.findByRole('textbox', {name: 'Provide a brief description of any contractual or operational non-compliance, including regulatory citations and expected timeframe for remediation'})
         .type('Non compliance explanation')
 
     cy.findByText('Fully executed').click()
