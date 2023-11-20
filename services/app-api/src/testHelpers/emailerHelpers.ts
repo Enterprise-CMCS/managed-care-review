@@ -2,6 +2,7 @@ import type { EmailConfiguration, EmailData, Emailer } from '../emailer'
 import {
     newPackageCMSEmail,
     newPackageStateEmail,
+    newQuestionStateEmail,
     unlockPackageCMSEmail,
     unlockPackageStateEmail,
     resubmitPackageStateEmail,
@@ -141,6 +142,27 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
                 config,
                 statePrograms,
                 submitterEmails
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return this.sendEmail(emailData)
+            }
+        },
+        sendQuestionsStateEmail: async function (
+            formData,
+            cmsRequesor,
+            submitterEmails,
+            statePrograms,
+            dateAsked
+        ): Promise<void | Error> {
+            const emailData = await newQuestionStateEmail(
+                formData,
+                submitterEmails,
+                cmsRequesor,
+                config,
+                statePrograms,
+                dateAsked
             )
             if (emailData instanceof Error) {
                 return emailData
