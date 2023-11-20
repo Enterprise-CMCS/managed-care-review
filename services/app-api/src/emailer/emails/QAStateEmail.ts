@@ -1,23 +1,24 @@
-import type { HealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { packageName as generatePackageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
-import { formatEmailAddresses, pruneDuplicateEmails } from '../formatters'
+import type { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import { packageName as generatePackageName } from 'app-web/src/common-code/healthPlanFormDataType'
+import { formatCalendarDate } from 'app-web/src/common-code/dateHelpers'
+import { pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData } from '..'
 import type { ProgramType, CMSUserType } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
-    SubmissionTypeRecord,
+    // SubmissionTypeRecord,
     renderTemplate,
     findPackagePrograms,
 } from '../templateHelpers'
 import { submissionSummaryURL } from '../generateURLs'
- 
-export const QAStateEmail = async (
+
+export const qaStateEmail = async (
     formData: HealthPlanFormDataType,
     submitterEmails: string[],
     cmsRequestor: CMSUserType,
     config: EmailConfiguration,
-    statePrograms: ProgramType[]
+    statePrograms: ProgramType[],
+    dateAsked: Date
 ): Promise<EmailData | Error> => {
     const stateContactEmails: string[] = []
     formData.stateContacts.forEach((contact) => {
@@ -50,13 +51,11 @@ export const QAStateEmail = async (
         submissionURL: packageURL,
         cmsRequestorEmail: cmsRequestor.email,
         cmsRequestorName: `${cmsRequestor.givenName} ${cmsRequestor.familyName}`,
-        cmsRequestorDivision: cmsRequestor.divisionAssignment
+        cmsRequestorDivision: cmsRequestor.divisionAssignment,
+        dateAsked: formatCalendarDate(dateAsked),
     }
 
-    const result = await renderTemplate<typeof data>(
-        'QAStateEmail',
-        data
-    )
+    const result = await renderTemplate<typeof data>('qaStateEmail', data)
 
     if (result instanceof Error) {
         return result
@@ -67,7 +66,7 @@ export const QAStateEmail = async (
             replyToAddresses: [config.helpDeskEmail],
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
-            }${packageName} was sent to CMS`,
+            }Questions sent for ${packageName}`,
             bodyText: stripHTMLFromTemplate(result),
             bodyHTML: result,
         }

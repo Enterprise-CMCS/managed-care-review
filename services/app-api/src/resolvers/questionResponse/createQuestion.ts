@@ -11,17 +11,19 @@ import type { Store } from '../../postgres'
 import { isStoreError } from '../../postgres'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison } from '../../domain-models'
+import type { Emailer } from '../../emailer'
 import {
     convertContractWithRatesToFormData,
-    convertContractWithRatesToUnlockedHPP
+    convertContractWithRatesToUnlockedHPP,
 } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
 
 export function createQuestionResolver(
-    store: Store
+    store: Store,
+    emailer: Emailer
 ): MutationResolvers['createQuestion'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
- 
+
         if (!isCMSUser(user)) {
             const msg = 'user not authorized to create a question'
             logError('createQuestion', msg)
@@ -107,8 +109,21 @@ export function createQuestionResolver(
             })
         }
 
-        const statePrograms = store.findStatePrograms(conversionResult.stateCode)
+        const statePrograms = store.findStatePrograms(
+            conversionResult.stateCode
+        )
         const submitterEmails = packageSubmitters(pkg)
+
+        if (statePrograms instanceof Error) {
+            logError('findStatePrograms', statePrograms.message)
+            setErrorAttributesOnActiveSpan(statePrograms.message, span)
+            throw new GraphQLError(statePrograms.message, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
+        }
 
         // Return error if package status is DRAFT, contract will have no submitted revisions
         if (contractResult.revisions.length === 0) {
@@ -125,6 +140,30 @@ export function createQuestionResolver(
             logError('createQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
+        }
+
+        const dateAsked = new Date()
+        const sendQuestionsStateEmailResult =
+            await emailer.sendQuestionsStateEmail(
+                conversionResult,
+                user,
+                submitterEmails,
+                statePrograms,
+                dateAsked
+            )
+
+        if (sendQuestionsStateEmailResult instanceof Error) {
+            logError(
+                'sendQuestionsStateEmail - state email failed',
+                sendQuestionsStateEmailResult
+            )
+            setErrorAttributesOnActiveSpan('state email failed', span)
+            throw new GraphQLError('Email failed.', {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
         }
 
         logSuccess('createQuestion')

@@ -7,6 +7,7 @@ export {
     unlockPackageStateEmail,
     resubmitPackageStateEmail,
     resubmitPackageCMSEmail,
+    qaStateEmail,
 } from './emails'
 export type {
     EmailConfiguration,

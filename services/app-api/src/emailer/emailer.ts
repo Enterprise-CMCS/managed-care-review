@@ -8,12 +8,14 @@ import {
     unlockPackageStateEmail,
     resubmitPackageStateEmail,
     resubmitPackageCMSEmail,
+    qaStateEmail,
 } from './'
 import type {
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
+    HealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import type { UpdateInfoType, ProgramType } from '../domain-models'
+import type { UpdateInfoType, ProgramType, CMSUserType } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 
 // See more discussion of configuration in docs/Configuration.md
@@ -75,11 +77,18 @@ type Emailer = {
         stateAnalystsEmails: StateAnalystsEmails,
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
-    sendUnlockPackageStateEmail: ( 
+    sendUnlockPackageStateEmail: (
         formData: UnlockedHealthPlanFormDataType,
         updateInfo: UpdateInfoType,
         statePrograms: ProgramType[],
         submitterEmails: string[]
+    ) => Promise<void | Error>
+    sendQuestionsStateEmail: (
+        formData: HealthPlanFormDataType,
+        cmsRequesor: CMSUserType,
+        submitterEmails: string[],
+        statePrograms: ProgramType[],
+        dateAsked: Date
     ) => Promise<void | Error>
     sendResubmittedStateEmail: (
         formData: LockedHealthPlanFormDataType,
@@ -179,6 +188,27 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
                 config,
                 statePrograms,
                 submitterEmails
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendQuestionsStateEmail: async function (
+            formData,
+            cmsRequestor,
+            submitterEmails,
+            statePrograms,
+            dateAsked
+        ) {
+            const emailData = await qaStateEmail(
+                formData,
+                submitterEmails,
+                cmsRequestor,
+                config,
+                statePrograms,
+                dateAsked
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -308,6 +338,27 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
                 config,
                 statePrograms,
                 submitterEmails
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                localEmailerLogger(emailData)
+            }
+        },
+        sendQuestionsStateEmail: async (
+            formData,
+            cmsRequesor,
+            submitterEmails,
+            statePrograms,
+            dateAsked
+        ) => {
+            const emailData = await qaStateEmail(
+                formData,
+                submitterEmails,
+                cmsRequesor,
+                config,
+                statePrograms,
+                dateAsked
             )
             if (emailData instanceof Error) {
                 return emailData
