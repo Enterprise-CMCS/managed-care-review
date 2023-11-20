@@ -6,13 +6,12 @@ import type { EmailConfiguration, EmailData } from '..'
 import type { ProgramType, CMSUserType } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
-    // SubmissionTypeRecord,
     renderTemplate,
     findPackagePrograms,
 } from '../templateHelpers'
 import { submissionSummaryURL } from '../generateURLs'
 
-export const qaStateEmail = async (
+export const newQuestionStateEmail = async (
     formData: HealthPlanFormDataType,
     submitterEmails: string[],
     cmsRequestor: CMSUserType,
@@ -55,7 +54,10 @@ export const qaStateEmail = async (
         dateAsked: formatCalendarDate(dateAsked),
     }
 
-    const result = await renderTemplate<typeof data>('qaStateEmail', data)
+    const result = await renderTemplate<typeof data>(
+        'newQuestionStateEmail',
+        data
+    )
 
     if (result instanceof Error) {
         return result
@@ -66,7 +68,7 @@ export const qaStateEmail = async (
             replyToAddresses: [config.helpDeskEmail],
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
-            }Questions sent for ${packageName}`,
+            }New questions about ${packageName}`,
             bodyText: stripHTMLFromTemplate(result),
             bodyHTML: result,
         }
