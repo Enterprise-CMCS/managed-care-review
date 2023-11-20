@@ -84,7 +84,7 @@ export function configureResolvers(
             ),
             updateContract: updateContract(store, launchDarkly),
             updateCMSUser: updateCMSUserResolver(store),
-            createQuestion: createQuestionResolver(store),
+            createQuestion: createQuestionResolver(store, emailer),
             createQuestionResponse: createQuestionResponseResolver(store),
         },
         User: {
