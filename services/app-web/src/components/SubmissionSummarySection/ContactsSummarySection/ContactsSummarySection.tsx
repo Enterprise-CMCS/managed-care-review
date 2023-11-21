@@ -8,6 +8,7 @@ import {
 import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { ActuaryContact } from '../../../common-code/healthPlanFormDataType'
 import { DataDetail, DataDetailContactField } from '../../DataDetail'
+import { SectionCard } from '../../SectionCard'
 
 export type ContactsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -37,7 +38,7 @@ export const ContactsSummarySection = ({
     const isSubmitted = submission.status === 'SUBMITTED'
 
     return (
-        <section id="stateContacts" className={styles.summarySection}>
+        <SectionCard id="stateContacts" className={styles.summarySection}>
             <SectionHeader
                 header="State contacts"
                 editNavigateTo={editNavigateTo}
@@ -124,6 +125,6 @@ export const ContactsSummarySection = ({
                     </dl>
                 </>
             )}
-        </section>
+        </SectionCard>
     )
 }

@@ -737,16 +737,6 @@ enum PopulationCovered {
     MEDICAID_AND_CHIP
 }
 
-enum SubmissionType {
-    CONTRACT_ONLY
-    CONTRACT_AND_RATES
-}
-
-enum ContractType {
-    BASE
-    AMENDMENT
-}
-
 enum ContractExecutionStatus {
     EXECUTED
     UNEXECUTED

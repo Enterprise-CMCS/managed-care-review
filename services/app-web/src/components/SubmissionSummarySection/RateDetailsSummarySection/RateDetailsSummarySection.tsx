@@ -20,12 +20,12 @@ import { getCurrentRevisionFromHealthPlanPackage } from '../../../gqlHelpers'
 import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 import { DataDetailContactField } from '../../DataDetail/DataDetailContactField/DataDetailContactField'
-import { v4 as uuidv4 } from 'uuid'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../DocumentWarning'
+import { SectionCard } from '../../SectionCard'
 // Used for refreshed packages names keyed by their package id
 // package name includes (Draft) for draft packages.
 type PackageNameType = string
@@ -259,7 +259,7 @@ export const RateDetailsSummarySection = ({
     ])
 
     return (
-        <section id="rateDetails" className={styles.summarySection}>
+        <SectionCard id="rateDetails" className={styles.summarySection}>
             <SectionHeader
                 header="Rate details"
                 editNavigateTo={editNavigateTo}
@@ -271,8 +271,10 @@ export const RateDetailsSummarySection = ({
             {submission.rateInfos.length > 0 ? (
                 submission.rateInfos.map((rateInfo) => {
                     return (
-                        // When we complete rates refactor we can remove workaround for the react key
-                        <React.Fragment key={rateInfo.id || uuidv4()}>
+                        <SectionCard
+                            id={`rate-details-${rateInfo.id}`}
+                            key={rateInfo.id}
+                        >
                             <h3
                                 aria-label={`Rate ID: ${rateInfo.rateCertificationName}`}
                                 className={styles.rateName}
@@ -404,7 +406,7 @@ export const RateDetailsSummarySection = ({
                             ) : (
                                 <span className="srOnly">'LOADING...'</span>
                             )}
-                        </React.Fragment>
+                        </SectionCard>
                     )
                 })
             ) : (
@@ -424,6 +426,6 @@ export const RateDetailsSummarySection = ({
                 )
                 // This whole block gets deleted when we remove the feature flag - END
             }
-        </section>
+        </SectionCard>
     )
 }

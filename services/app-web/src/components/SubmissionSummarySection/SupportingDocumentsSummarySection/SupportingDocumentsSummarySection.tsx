@@ -11,6 +11,7 @@ import {
 import { recordJSException } from '../../../otelHelpers'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../DocumentWarning'
+import { SectionCard } from '../../SectionCard'
 
 type DocumentWithLink = { url: string | null } & SubmissionDocument
 
@@ -136,7 +137,7 @@ export const SupportingDocumentsSummarySection = ({
     if (refreshedDocs.length === 0) return null
 
     return (
-        <section id="documents" className={styles.summarySection}>
+        <SectionCard id="documents" className={styles.summarySection}>
             <SectionHeader
                 header="Supporting documents"
                 editNavigateTo={editNavigateTo}
@@ -162,6 +163,6 @@ export const SupportingDocumentsSummarySection = ({
                     </li>
                 ))}
             </ul>
-        </section>
+        </SectionCard>
     )
 }

@@ -27,6 +27,7 @@ import { NavLink } from 'react-router-dom'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
 import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 import { useAuth } from '../../../contexts/AuthContext'
+import { SectionCard } from '../../SectionCard'
 
 // This rate summary pages assumes we are using contract and rates API.
 // Eventually RateDetailsSummarySection should share code with this code
@@ -183,7 +184,7 @@ export const SingleRateSummarySection = ({
 
     return (
         <React.Fragment key={rate.id}>
-            <section
+            <SectionCard
                 id={`"rate-details-${rate.id}`}
                 className={styles.summarySection}
             >
@@ -295,8 +296,8 @@ export const SingleRateSummarySection = ({
                         />
                     </DoubleColumnGrid>
                 </dl>
-            </section>
-            <section className={styles.summarySection}>
+            </SectionCard>
+            <SectionCard className={styles.summarySection}>
                 <SectionHeader header="Rate documents">
                     {renderDownloadButton(zippedFilesURL)}
                 </SectionHeader>
@@ -313,7 +314,7 @@ export const SingleRateSummarySection = ({
                     documentDateLookupTable={documentDateLookupTable}
                     caption="Rate supporting documents"
                 />
-            </section>
+            </SectionCard>
         </React.Fragment>
     )
 }

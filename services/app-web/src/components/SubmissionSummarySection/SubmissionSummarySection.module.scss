@@ -5,12 +5,7 @@
 }
 
 .summarySection {
-    margin: units(2) auto;
-    background: $cms-color-white;
-    padding: units(2) units(4);
-    border: 1px solid $theme-color-base-lighter;
     line-height: units(3);
-    @include u-radius('md');
 
     h2 {
         margin: 0;
@@ -48,6 +43,12 @@
     table:last-of-type {
        margin-bottom: units(2);
     }
+
+    // with nested sections, collapse bottom margin/padding for last in list
+    // rely on margin from the parent .summarySection. Relevant for multi-rate experience
+    section:last-of-type {
+        margin-bottom: 0 !important;
+    }
 }
 
 .contactInfo p {
@@ -67,12 +68,8 @@
 
 .rateName {
     display: block;
-    margin-block-start: 1.33em;
-    margin-block-end: 1.33em;
-    margin-inline-start: 0;
-    margin-inline-end: 0;
     font-weight: bold;
-    font-size: 16px;
+    margin: 0
 }
 
 .certifyingActuaryDetail {

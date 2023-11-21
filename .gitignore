@@ -20,6 +20,7 @@ gen/
 todo.txt
 notes/
 .tool-versions
+dbdump-*
 
 
 # testing
