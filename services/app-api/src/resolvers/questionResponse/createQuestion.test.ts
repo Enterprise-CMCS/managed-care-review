@@ -18,9 +18,6 @@ import {
 import { base64ToDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-// import {
-//     mockEmailParameterStoreError,
-// } from '../../testHelpers/parameterStoreHelpers'
 
 describe('createQuestion', () => {
     const mockLDService = testLDService({ ['rates-db-refactor']: true })
