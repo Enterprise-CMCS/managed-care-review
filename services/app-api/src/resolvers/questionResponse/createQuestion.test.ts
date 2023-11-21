@@ -343,8 +343,41 @@ describe('createQuestion', () => {
                 toAddresses: expect.arrayContaining(
                     Array.from(stateReceiverEmails)
                 ),
-                bodyHTML: expect.stringContaining(name),
+                bodyText: expect.stringContaining(
+                    `CMS asked questions about ${name}`
+                ),
+                bodyHTML: expect.stringContaining(
+                    `<a href="http://localhost/submissions/${stateSubmission.id}">Open the submission in MC-Review to answer questions</a>`
+                ),
             })
         )
+    })
+    it('does not send any emails if submission fails', async () => {
+        const mockEmailer = testEmailer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            ldService: mockLDService,
+            emailer: mockEmailer,
+        })
+
+        const submitResult = await cmsServer.executeOperation({
+            query: CREATE_QUESTION,
+            variables: {
+                input: {
+                    contractID: '1234',
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 'testS3Url',
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(submitResult.errors).toBeDefined()
+        expect(mockEmailer.sendEmail).not.toHaveBeenCalled()
     })
 })
