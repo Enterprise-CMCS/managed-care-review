@@ -1,17 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders overall email for a new package with a rate amendment as expected 1`] = `
-"CMS asked questions about MCR-MN-0003-SNBC<br />
-<b>Sent by:</b> Ronald McDonald (DMCO)<br />
-<b>Date:</b> 11/20/2023<br />
-<br />
-You must answer the question before CMS can continue reviewing it<br />
-<br />
-<a href="http://localhost/submissions/test-abc-125">Open the submission in MC-Review to answer questions</a>
-
-"
-`;
-
 exports[`renders overall email for a new question as expected 1`] = `
 "CMS asked questions about MCR-MN-0003-SNBC<br />
 <b>Sent by:</b> Ronald McDonald (DMCO) <a href="cms@email.com">cms@email.com</a>
