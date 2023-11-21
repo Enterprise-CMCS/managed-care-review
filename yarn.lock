@@ -15962,6 +15962,14 @@
   dependencies:
     "@types/unist" "*"
 
+"@types/hoist-non-react-statics@^3.3.1":
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.3.5.tgz#dab7867ef789d87e2b4b0003c9d65c49cc44a494"
+  integrity sha512-SbcrWzkKBw2cdwRTwQAswfpB9g9LJWfjtUeW/jvNwbhC8cpmmNYVePa+ncbUe0rGTQ7G3Ff6mYUN2VMfLVr+Sg==
+  dependencies:
+    "@types/react" "*"
+    hoist-non-react-statics "^3.3.0"
+
 "@types/html-minifier-terser@^5.0.0":
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/@types/html-minifier-terser/-/html-minifier-terser-5.1.2.tgz#693b316ad323ea97eed6b38ed1a3cc02b1672b57"
@@ -16219,9 +16227,9 @@
   integrity sha512-Abq9fBviLV93OiXMu+f6r0elxCzRwc0RC5f99cU892uBITL44pTvgvEqlRlPRi8EGcO1z7Cp8A4d0s/p3J/+Nw==
 
 "@types/node@^16.18.39":
-  version "16.18.62"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.62.tgz#5b80d7a800f86842c5fadc066a63d6312208805c"
-  integrity sha512-/zbPnIBkef8sT+6vw6BxdvU3dCxRI0v6rBu/6IvXnRNtOPILucigqhUBPYxtQ/8JdAna0JLTAcNTCDmQ77QYkQ==
+  version "16.18.63"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.63.tgz#17703190b6f623cf2dfb4cc624b1db9b60b4c634"
+  integrity sha512-Q2VSI/lVKza0Z5qeY/JrHcwi9fxzBktDvNHthr0TVA/D3yMdHDw9syggng+wJPlsBLgx4jPpOrcJ100wnpniTg==
 
 "@types/node@^18.11.18":
   version "18.18.8"
@@ -16427,9 +16435,9 @@
   integrity sha512-0kSuKjAS0TrGLJ0M/+8MaFkGsQhZpB6pxOmvS3K8FYI72K//YmdfoW9X2qPsAKh1mkwxGD5zib9s1FIFed6E8g==
 
 "@types/sizzle@^2.3.2":
-  version "2.3.6"
-  resolved "https://registry.yarnpkg.com/@types/sizzle/-/sizzle-2.3.6.tgz#e39b7123dac4631001939bd4c2a26d46010f2275"
-  integrity sha512-m04Om5Gz6kbjUwAQ7XJJQ30OdEFsSmAVsvn4NYwcTRyMVpKKa1aPuESw1n2CxS5fYkOQv3nHgDKeNa8e76fUkw==
+  version "2.3.7"
+  resolved "https://registry.yarnpkg.com/@types/sizzle/-/sizzle-2.3.7.tgz#ab5744eceb30daea3e0c6a9c2d9e1a3817ef7656"
+  integrity sha512-sU5MNKvSFdbT97qLSabU6jxceY9BfYQe9uF+b8E1rdTecpq9ROkkKoiHlblUlhgfaz9bdCByWjAI40Y3mHf1iQ==
 
 "@types/sockjs@^0.3.33":
   version "0.3.33"
@@ -23192,10 +23200,11 @@ formidable@^2.0.1:
     qs "6.9.3"
 
 formik@^2.2.9:
-  version "2.4.2"
-  resolved "https://registry.yarnpkg.com/formik/-/formik-2.4.2.tgz#a1115457cfb012a5c782cea3ad4b40b2fe36fa18"
-  integrity sha512-C6nx0hifW2uENP3M6HpPmnAE6HFWCcd8/sqBZEOHZY6lpHJ5qehsfAy43ktpFLEmkBmhiZDei726utcUB9leqg==
+  version "2.4.5"
+  resolved "https://registry.yarnpkg.com/formik/-/formik-2.4.5.tgz#f899b5b7a6f103a8fabb679823e8fafc7e0ee1b4"
+  integrity sha512-Gxlht0TD3vVdzMDHwkiNZqJ7Mvg77xQNfmBRrNtvzcHZs72TJppSTDKHpImCMJZwcWPBJ8jSQQ95GJzXFf1nAQ==
   dependencies:
+    "@types/hoist-non-react-statics" "^3.3.1"
     deepmerge "^2.1.1"
     hoist-non-react-statics "^3.3.0"
     lodash "^4.17.21"
