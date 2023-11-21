@@ -75,13 +75,16 @@ export function createQuestionResolver(
             })
         }
 
-        if (!contractResult.draftRevision) {
-            throw new Error(
-                'PROGRAMMING ERROR: Status should not be submittable without a draft revision'
-            )
+        // Return error if package status is DRAFT, contract will have no submitted revisions
+        if (contractResult.revisions.length === 0) {
+            const errMessage = `Issue creating question for health plan package. Message: Cannot create question for health plan package in DRAFT status`
+            logError('createQuestion', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new UserInputError(errMessage)
         }
+
         const conversionResult = convertContractWithRatesToFormData(
-            contractResult.draftRevision,
+            contractResult.revisions[0],
             contractResult.id,
             contractResult.stateCode,
             contractResult.stateNumber
@@ -94,9 +97,7 @@ export function createQuestionResolver(
             throw new Error(errMessage)
         }
 
-        // Now we do the conversions
         const pkg = convertContractWithRatesToUnlockedHPP(contractResult)
-
         if (pkg instanceof Error) {
             const errMessage = `Error converting draft contract. Message: ${pkg.message}`
             logError('createHealthPlanPackage', errMessage)
@@ -109,9 +110,7 @@ export function createQuestionResolver(
             })
         }
 
-        const statePrograms = store.findStatePrograms(
-            conversionResult.stateCode
-        )
+        const statePrograms = store.findStatePrograms(contractResult.stateCode)
         const submitterEmails = packageSubmitters(pkg)
 
         if (statePrograms instanceof Error) {
@@ -123,14 +122,6 @@ export function createQuestionResolver(
                     cause: 'DB_ERROR',
                 },
             })
-        }
-
-        // Return error if package status is DRAFT, contract will have no submitted revisions
-        if (contractResult.revisions.length === 0) {
-            const errMessage = `Issue creating question for health plan package. Message: Cannot create question for health plan package in DRAFT status`
-            logError('createQuestion', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage)
         }
 
         const questionResult = await store.insertQuestion(input, user)

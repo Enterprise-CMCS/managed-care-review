@@ -7,13 +7,20 @@ import {
     unlockTestHealthPlanPackage,
     createTestQuestion,
     indexTestQuestions,
+    defaultFloridaProgram,
 } from '../../testHelpers/gqlHelpers'
+import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { assertAnError, assertAnErrorCode } from '../../testHelpers'
 import {
     createDBUsersWithFullData,
     testCMSUser,
 } from '../../testHelpers/userHelpers'
+import { base64ToDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
+// import {
+//     mockEmailParameterStoreError,
+// } from '../../testHelpers/parameterStoreHelpers'
 
 describe('createQuestion', () => {
     const mockLDService = testLDService({ ['rates-db-refactor']: true })
@@ -151,7 +158,7 @@ describe('createQuestion', () => {
             })
         )
     })
-    it('returns an error package status is DRAFT', async () => {
+    it('returns an error if package status is DRAFT', async () => {
         const stateServer = await constructTestPostgresServer({
             ldService: mockLDService,
         })
@@ -284,6 +291,63 @@ describe('createQuestion', () => {
         expect(assertAnErrorCode(createdQuestion)).toBe('FORBIDDEN')
         expect(assertAnError(createdQuestion).message).toBe(
             `users without an assigned division are not authorized to create a question`
+        )
+    })
+    it('send state email to state contacts and all submitters when unlocking submission succeeds', async () => {
+        const config = testEmailConfig()
+        const mockEmailer = testEmailer(config)
+        //mock invoke email submit lambda
+        const stateServer = await constructTestPostgresServer({
+            ldService: mockLDService,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            ldService: mockLDService,
+            emailer: mockEmailer,
+        })
+
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
+
+        await createTestQuestion(cmsServer, stateSubmission.id)
+
+        const currentRevision = stateSubmission.revisions[0].node.formDataProto
+
+        const sub = base64ToDomain(currentRevision)
+        if (sub instanceof Error) {
+            throw sub
+        }
+
+        const programs = [defaultFloridaProgram()]
+        const name = packageName(
+            sub.stateCode,
+            sub.stateNumber,
+            sub.programIDs,
+            programs
+        )
+
+        const stateReceiverEmails = [
+            'james@example.com',
+            ...sub.stateContacts.map((contact) => contact.email),
+        ]
+
+        // email subject line is correct for state email
+        // Mock emailer is called 1 time
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `[LOCAL] New questions about ${name}`
+                ),
+                sourceEmail: config.emailSource,
+                toAddresses: expect.arrayContaining(
+                    Array.from(stateReceiverEmails)
+                ),
+                bodyHTML: expect.stringContaining(name),
+            })
         )
     })
 })
