@@ -11,7 +11,7 @@ import {
 } from '../templateHelpers'
 import { submissionSummaryURL } from '../generateURLs'
 
-export const newQuestionStateEmail = async (
+export const sendQuestionStateEmail = async (
     formData: HealthPlanFormDataType,
     submitterEmails: string[],
     cmsRequestor: CMSUserType,
@@ -55,7 +55,7 @@ export const newQuestionStateEmail = async (
     }
 
     const result = await renderTemplate<typeof data>(
-        'newQuestionStateEmail',
+        'sendQuestionStateEmail',
         data
     )
 

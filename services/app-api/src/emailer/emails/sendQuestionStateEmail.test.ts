@@ -6,9 +6,9 @@ import {
 } from '../../testHelpers/emailerHelpers'
 import type { CMSUserType, StateType } from '../../domain-models'
 
-import type { LockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { newQuestionStateEmail } from './index'
+import type { LockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
+import { sendQuestionStateEmail } from './index'
 
 const defaultSubmitters = ['submitter1@example.com', 'submitter2@example.com']
 
@@ -31,7 +31,7 @@ const dateAsked = new Date('01/01/2024')
 test('to addresses list includes submitter emails', async () => {
     const sub = mockContractOnlyFormData()
     const defaultStatePrograms = mockMNState().programs
-    const template = await newQuestionStateEmail(
+    const template = await sendQuestionStateEmail(
         sub,
         defaultSubmitters,
         cmsUser,
@@ -69,7 +69,7 @@ test('to addresses list includes all state contacts on submission', async () => 
         ],
     }
     const defaultStatePrograms = mockMNState().programs
-    const template = await newQuestionStateEmail(
+    const template = await sendQuestionStateEmail(
         sub,
         defaultSubmitters,
         cmsUser,
@@ -109,7 +109,7 @@ test('to addresses list does not include duplicate state receiver emails on subm
         ],
     }
     const defaultStatePrograms = mockMNState().programs
-    const template = await newQuestionStateEmail(
+    const template = await sendQuestionStateEmail(
         sub,
         defaultSubmitters,
         cmsUser,
@@ -140,7 +140,7 @@ test('subject line is correct and clearly states submission is complete', async 
         defaultStatePrograms
     )
 
-    const template = await newQuestionStateEmail(
+    const template = await sendQuestionStateEmail(
         sub,
         defaultSubmitters,
         cmsUser,
@@ -165,7 +165,7 @@ test('subject line is correct and clearly states submission is complete', async 
 test('includes link to submission', async () => {
     const sub = mockContractAmendmentFormData()
     const defaultStatePrograms = mockMNState().programs
-    const template = await newQuestionStateEmail(
+    const template = await sendQuestionStateEmail(
         sub,
         defaultSubmitters,
         cmsUser,
@@ -194,7 +194,7 @@ test('includes link to submission', async () => {
 test('includes information about what to do next', async () => {
     const sub = mockContractAmendmentFormData()
     const defaultStatePrograms = mockMNState().programs
-    const template = await newQuestionStateEmail(
+    const template = await sendQuestionStateEmail(
         sub,
         defaultSubmitters,
         cmsUser,
@@ -221,7 +221,7 @@ test('includes expected data on the CMS analyst who sent the question', async ()
     const sub = mockContractAmendmentFormData()
     const defaultStatePrograms = mockMNState().programs
 
-    const template = await newQuestionStateEmail(
+    const template = await sendQuestionStateEmail(
         sub,
         defaultSubmitters,
         cmsUser,
@@ -252,7 +252,7 @@ test('includes expected data on the CMS analyst who sent the question', async ()
 test('renders overall email for a new question as expected', async () => {
     const sub = mockContractAmendmentFormData()
     const defaultStatePrograms = mockMNState().programs
-    const result = await newQuestionStateEmail(
+    const result = await sendQuestionStateEmail(
         sub,
         defaultSubmitters,
         cmsUser,

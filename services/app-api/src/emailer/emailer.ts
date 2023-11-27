@@ -8,7 +8,7 @@ import {
     unlockPackageStateEmail,
     resubmitPackageStateEmail,
     resubmitPackageCMSEmail,
-    newQuestionStateEmail,
+    sendQuestionStateEmail,
 } from './'
 import type {
     LockedHealthPlanFormDataType,
@@ -202,7 +202,7 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             statePrograms,
             dateAsked
         ) {
-            const emailData = await newQuestionStateEmail(
+            const emailData = await sendQuestionStateEmail(
                 formData,
                 submitterEmails,
                 cmsRequestor,
@@ -352,7 +352,7 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             statePrograms,
             dateAsked
         ) => {
-            const emailData = await newQuestionStateEmail(
+            const emailData = await sendQuestionStateEmail(
                 formData,
                 submitterEmails,
                 cmsRequesor,
