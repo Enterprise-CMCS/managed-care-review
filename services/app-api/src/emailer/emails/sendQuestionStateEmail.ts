@@ -1,5 +1,5 @@
-import { packageName as generatePackageName } from 'app-web/src/common-code/healthPlanFormDataType'
-import { formatCalendarDate } from 'app-web/src/common-code/dateHelpers'
+import { packageName as generatePackageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData } from '..'
 import type { ProgramType, CMSUserType } from '../../domain-models'
