@@ -1,5 +1,5 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { isCMSUser, packageSubmitters } from '../../domain-models'
+import { isCMSUser, contractSubmitters } from '../../domain-models'
 import { logError, logSuccess } from '../../logger'
 import {
     setErrorAttributesOnActiveSpan,
@@ -12,10 +12,6 @@ import { isStoreError } from '../../postgres'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison } from '../../domain-models'
 import type { Emailer } from '../../emailer'
-import {
-    convertContractWithRatesToFormData,
-    convertContractWithRatesToUnlockedHPP,
-} from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
 
 export function createQuestionResolver(
     store: Store,
@@ -83,35 +79,8 @@ export function createQuestionResolver(
             throw new UserInputError(errMessage)
         }
 
-        const conversionResult = convertContractWithRatesToFormData(
-            contractResult.revisions[0],
-            contractResult.id,
-            contractResult.stateCode,
-            contractResult.stateNumber
-        )
-
-        if (conversionResult instanceof Error) {
-            const errMessage = conversionResult.message
-            logError('submitHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
-        }
-
-        const pkg = convertContractWithRatesToUnlockedHPP(contractResult)
-        if (pkg instanceof Error) {
-            const errMessage = `Error converting draft contract. Message: ${pkg.message}`
-            logError('createHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'PROTO_DECODE_ERROR',
-                },
-            })
-        }
-
         const statePrograms = store.findStatePrograms(contractResult.stateCode)
-        const submitterEmails = packageSubmitters(pkg)
+        const submitterEmails = contractSubmitters(contractResult)
 
         if (statePrograms instanceof Error) {
             logError('findStatePrograms', statePrograms.message)
@@ -136,7 +105,7 @@ export function createQuestionResolver(
         const dateAsked = new Date()
         const sendQuestionsStateEmailResult =
             await emailer.sendQuestionsStateEmail(
-                conversionResult,
+                contractResult.revisions[0],
                 user,
                 submitterEmails,
                 statePrograms,

@@ -13,9 +13,13 @@ import {
 import type {
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
-    HealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import type { UpdateInfoType, ProgramType, CMSUserType } from '../domain-models'
+import type {
+    UpdateInfoType,
+    ProgramType,
+    CMSUserType,
+    ContractRevisionWithRatesType,
+} from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 
 // See more discussion of configuration in docs/Configuration.md
@@ -84,7 +88,7 @@ type Emailer = {
         submitterEmails: string[]
     ) => Promise<void | Error>
     sendQuestionsStateEmail: (
-        formData: HealthPlanFormDataType,
+        contract: ContractRevisionWithRatesType,
         cmsRequesor: CMSUserType,
         submitterEmails: string[],
         statePrograms: ProgramType[],
@@ -196,14 +200,14 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             }
         },
         sendQuestionsStateEmail: async function (
-            formData,
+            contract,
             cmsRequestor,
             submitterEmails,
             statePrograms,
             dateAsked
         ) {
             const emailData = await sendQuestionStateEmail(
-                formData,
+                contract,
                 submitterEmails,
                 cmsRequestor,
                 config,

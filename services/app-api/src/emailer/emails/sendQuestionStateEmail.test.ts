@@ -1,12 +1,14 @@
 import {
     testEmailConfig,
-    mockContractAmendmentFormData,
-    mockContractOnlyFormData,
+    mockContractRev,
     mockMNState,
 } from '../../testHelpers/emailerHelpers'
-import type { CMSUserType, StateType } from '../../domain-models'
-
-import type { LockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type {
+    CMSUserType,
+    ContractRevisionWithRatesType,
+    StateType,
+} from '../../domain-models'
+import type { ContractFormDataType } from '../../domain-models'
 import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
 import { sendQuestionStateEmail } from './index'
 
@@ -27,9 +29,67 @@ const cmsUser: CMSUserType = {
     stateAssignments: [flState],
 }
 
+const formData: ContractFormDataType = {
+    programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+    populationCovered: 'CHIP',
+    submissionType: 'CONTRACT_AND_RATES',
+    riskBasedContract: false,
+    submissionDescription: 'A submitted submission',
+    supportingDocuments: [
+        {
+            s3URL: 'bar',
+            name: 'foo',
+            sha256: 'fakesha',
+        },
+    ],
+    contractType: 'BASE',
+    contractExecutionStatus: undefined,
+    contractDocuments: [
+        {
+            s3URL: 'bar',
+            name: 'foo',
+            sha256: 'fakesha',
+        },
+    ],
+    contractDateStart: new Date('01/01/2024'),
+    contractDateEnd: new Date('01/01/2025'),
+    managedCareEntities: ['MCO'],
+    federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+    inLieuServicesAndSettings: undefined,
+    modifiedBenefitsProvided: undefined,
+    modifiedGeoAreaServed: undefined,
+    modifiedMedicaidBeneficiaries: undefined,
+    modifiedRiskSharingStrategy: undefined,
+    modifiedIncentiveArrangements: undefined,
+    modifiedWitholdAgreements: undefined,
+    modifiedStateDirectedPayments: undefined,
+    modifiedPassThroughPayments: undefined,
+    modifiedPaymentsForMentalDiseaseInstitutions: undefined,
+    modifiedMedicalLossRatioStandards: undefined,
+    modifiedOtherFinancialPaymentIncentive: undefined,
+    modifiedEnrollmentProcess: undefined,
+    modifiedGrevienceAndAppeal: undefined,
+    modifiedNetworkAdequacyStandards: undefined,
+    modifiedLengthOfContract: undefined,
+    modifiedNonRiskPaymentArrangements: undefined,
+    statutoryRegulatoryAttestation: undefined,
+    statutoryRegulatoryAttestationDescription: undefined,
+    stateContacts: [
+        {
+            name: 'test1',
+            titleRole: 'Foo1',
+            email: 'test1@example.com',
+        },
+        {
+            name: 'test2',
+            titleRole: 'Foo2',
+            email: 'test2@example.com',
+        },
+    ],
+}
 const dateAsked = new Date('01/01/2024')
 test('to addresses list includes submitter emails', async () => {
-    const sub = mockContractOnlyFormData()
+    const sub = mockContractRev()
     const defaultStatePrograms = mockMNState().programs
     const template = await sendQuestionStateEmail(
         sub,
@@ -53,20 +113,8 @@ test('to addresses list includes submitter emails', async () => {
 })
 
 test('to addresses list includes all state contacts on submission', async () => {
-    const sub: LockedHealthPlanFormDataType = {
-        ...mockContractOnlyFormData(),
-        stateContacts: [
-            {
-                name: 'test1',
-                titleRole: 'Foo1',
-                email: 'test1@example.com',
-            },
-            {
-                name: 'test2',
-                titleRole: 'Foo2',
-                email: 'test2@example.com',
-            },
-        ],
+    const sub: ContractRevisionWithRatesType = {
+        ...mockContractRev({ formData }),
     }
     const defaultStatePrograms = mockMNState().programs
     const template = await sendQuestionStateEmail(
@@ -83,7 +131,7 @@ test('to addresses list includes all state contacts on submission', async () => 
         return
     }
 
-    sub.stateContacts.forEach((contact) => {
+    sub.formData.stateContacts.forEach((contact) => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([contact.email]),
@@ -93,8 +141,8 @@ test('to addresses list includes all state contacts on submission', async () => 
 })
 
 test('to addresses list does not include duplicate state receiver emails on submission', async () => {
-    const sub: LockedHealthPlanFormDataType = {
-        ...mockContractOnlyFormData(),
+    const formDataWithDuplicateStateContacts = {
+        ...formData,
         stateContacts: [
             {
                 name: 'test1',
@@ -107,6 +155,9 @@ test('to addresses list does not include duplicate state receiver emails on subm
                 email: 'test1@example.com',
             },
         ],
+    }
+    const sub: ContractRevisionWithRatesType = {
+        ...mockContractRev({ formData: formDataWithDuplicateStateContacts }),
     }
     const defaultStatePrograms = mockMNState().programs
     const template = await sendQuestionStateEmail(
@@ -131,12 +182,12 @@ test('to addresses list does not include duplicate state receiver emails on subm
 })
 
 test('subject line is correct and clearly states submission is complete', async () => {
-    const sub = mockContractOnlyFormData()
+    const sub = mockContractRev()
     const defaultStatePrograms = mockMNState().programs
     const name = packageName(
-        sub.stateCode,
-        sub.stateNumber,
-        sub.programIDs,
+        sub.contract.stateCode,
+        sub.contract.stateNumber,
+        sub.formData.programIDs,
         defaultStatePrograms
     )
 
@@ -163,7 +214,7 @@ test('subject line is correct and clearly states submission is complete', async 
 })
 
 test('includes link to submission', async () => {
-    const sub = mockContractAmendmentFormData()
+    const sub = mockContractRev()
     const defaultStatePrograms = mockMNState().programs
     const template = await sendQuestionStateEmail(
         sub,
@@ -185,14 +236,14 @@ test('includes link to submission', async () => {
                 'Open the submission in MC-Review to answer questions'
             ),
             bodyHTML: expect.stringContaining(
-                `href="http://localhost/submissions/${sub.id}"`
+                `href="http://localhost/submissions/${sub.contract.id}"`
             ),
         })
     )
 })
 
 test('includes information about what to do next', async () => {
-    const sub = mockContractAmendmentFormData()
+    const sub = mockContractRev()
     const defaultStatePrograms = mockMNState().programs
     const template = await sendQuestionStateEmail(
         sub,
@@ -218,7 +269,7 @@ test('includes information about what to do next', async () => {
 })
 
 test('includes expected data on the CMS analyst who sent the question', async () => {
-    const sub = mockContractAmendmentFormData()
+    const sub = mockContractRev()
     const defaultStatePrograms = mockMNState().programs
 
     const template = await sendQuestionStateEmail(
@@ -250,7 +301,7 @@ test('includes expected data on the CMS analyst who sent the question', async ()
 })
 
 test('renders overall email for a new question as expected', async () => {
-    const sub = mockContractAmendmentFormData()
+    const sub = mockContractRev()
     const defaultStatePrograms = mockMNState().programs
     const result = await sendQuestionStateEmail(
         sub,

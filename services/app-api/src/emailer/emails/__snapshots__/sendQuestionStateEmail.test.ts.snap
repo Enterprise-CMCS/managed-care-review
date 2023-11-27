@@ -8,7 +8,7 @@ exports[`renders overall email for a new question as expected 1`] = `
 <br />
 You must answer the question before CMS can continue reviewing it<br />
 <br />
-<a href="http://localhost/submissions/test-abc-125">Open the submission in MC-Review to answer questions</a>
+<a href="http://localhost/submissions/12345">Open the submission in MC-Review to answer questions</a>
 
 "
 `;

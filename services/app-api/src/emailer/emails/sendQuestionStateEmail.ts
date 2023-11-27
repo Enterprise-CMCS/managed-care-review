@@ -1,4 +1,3 @@
-import type { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 import { packageName as generatePackageName } from 'app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from 'app-web/src/common-code/dateHelpers'
 import { pruneDuplicateEmails } from '../formatters'
@@ -7,12 +6,13 @@ import type { ProgramType, CMSUserType } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
     renderTemplate,
-    findPackagePrograms,
+    findContractPrograms,
 } from '../templateHelpers'
 import { submissionSummaryURL } from '../generateURLs'
+import type { ContractRevisionWithRatesType } from '../../domain-models/contractAndRates'
 
 export const sendQuestionStateEmail = async (
-    formData: HealthPlanFormDataType,
+    contractRev: ContractRevisionWithRatesType,
     submitterEmails: string[],
     cmsRequestor: CMSUserType,
     config: EmailConfiguration,
@@ -20,7 +20,8 @@ export const sendQuestionStateEmail = async (
     dateAsked: Date
 ): Promise<EmailData | Error> => {
     const stateContactEmails: string[] = []
-    formData.stateContacts.forEach((contact) => {
+
+    contractRev.formData.stateContacts.forEach((contact) => {
         if (contact.email) stateContactEmails.push(contact.email)
     })
     const receiverEmails = pruneDuplicateEmails([
@@ -30,20 +31,22 @@ export const sendQuestionStateEmail = async (
     ])
 
     //This checks to make sure all programs contained in submission exists for the state.
-    const packagePrograms = findPackagePrograms(formData, statePrograms)
-
+    const packagePrograms = findContractPrograms(contractRev, statePrograms)
     if (packagePrograms instanceof Error) {
         return packagePrograms
     }
 
     const packageName = generatePackageName(
-        formData.stateCode,
-        formData.stateNumber,
-        formData.programIDs,
+        contractRev.contract.stateCode,
+        contractRev.contract.stateNumber,
+        contractRev.formData.programIDs,
         packagePrograms
     )
 
-    const packageURL = submissionSummaryURL(formData.id, config.baseUrl)
+    const packageURL = submissionSummaryURL(
+        contractRev.contract.id,
+        config.baseUrl
+    )
 
     const data = {
         packageName,
