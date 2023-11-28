@@ -16227,9 +16227,9 @@
   integrity sha512-Abq9fBviLV93OiXMu+f6r0elxCzRwc0RC5f99cU892uBITL44pTvgvEqlRlPRi8EGcO1z7Cp8A4d0s/p3J/+Nw==
 
 "@types/node@^16.18.39":
-  version "16.18.63"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.63.tgz#17703190b6f623cf2dfb4cc624b1db9b60b4c634"
-  integrity sha512-Q2VSI/lVKza0Z5qeY/JrHcwi9fxzBktDvNHthr0TVA/D3yMdHDw9syggng+wJPlsBLgx4jPpOrcJ100wnpniTg==
+  version "16.18.65"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.65.tgz#b07eb49a14a808777b82879288a7e6f5a296ccfa"
+  integrity sha512-5E9WgTy95B7i90oISjui9U5Zu7iExUPfU4ygtv4yXEy6zJFE3oQYHCnh5H1jZRPkjphJt2Ml3oQW6M0qtK534A==
 
 "@types/node@^18.11.18":
   version "18.18.8"
@@ -16435,9 +16435,9 @@
   integrity sha512-0kSuKjAS0TrGLJ0M/+8MaFkGsQhZpB6pxOmvS3K8FYI72K//YmdfoW9X2qPsAKh1mkwxGD5zib9s1FIFed6E8g==
 
 "@types/sizzle@^2.3.2":
-  version "2.3.7"
-  resolved "https://registry.yarnpkg.com/@types/sizzle/-/sizzle-2.3.7.tgz#ab5744eceb30daea3e0c6a9c2d9e1a3817ef7656"
-  integrity sha512-sU5MNKvSFdbT97qLSabU6jxceY9BfYQe9uF+b8E1rdTecpq9ROkkKoiHlblUlhgfaz9bdCByWjAI40Y3mHf1iQ==
+  version "2.3.8"
+  resolved "https://registry.yarnpkg.com/@types/sizzle/-/sizzle-2.3.8.tgz#518609aefb797da19bf222feb199e8f653ff7627"
+  integrity sha512-0vWLNK2D5MT9dg0iOo8GlKguPAU02QjmZitPEsXRuJXU/OGIOt9vT9Fc26wtYuavLxtO45v9PGleoL9Z0k1LHg==
 
 "@types/sockjs@^0.3.33":
   version "0.3.33"
@@ -26628,9 +26628,9 @@ jotai-location@^0.5.1:
   integrity sha512-4S9hDh1wYp4SG4Laq3+Xd0GdW7jwnWlbEuL8U22kv3wUZW892n6gXlNhwU0LaoXnWoGG0gtjSLBuFm5iodFKLg==
 
 jotai@^2.2.1:
-  version "2.4.3"
-  resolved "https://registry.yarnpkg.com/jotai/-/jotai-2.4.3.tgz#a8eff8ca6de968d6a04616329dd1335ce52e70f3"
-  integrity sha512-CSAHX9LqWG5WCrU8OgBoZbBJ+Bo9rQU0mPusEF4e0CZ/SNFgurG26vb3UpgvCSJZgYVcUQNiUBM5q86PA8rstQ==
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/jotai/-/jotai-2.6.0.tgz#68b5d634f78a9ea55adfb8d92206ef59304b5dd5"
+  integrity sha512-Vt6hsc04Km4j03l+Ax+Sc+FVft5cRJhqgxt6GTz6GM2eM3DyX3CdBdzcG0z2FrlZToL1/0OAkqDghIyARWnSuQ==
 
 js-cookie@^2.2.1:
   version "2.2.1"
