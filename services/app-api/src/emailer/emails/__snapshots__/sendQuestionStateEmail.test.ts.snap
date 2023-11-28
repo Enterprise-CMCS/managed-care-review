@@ -6,7 +6,7 @@ exports[`renders overall email for a new question as expected 1`] = `
 <br />
 <b>Date:</b> 01/01/2024<br />
 <br />
-You must answer the question before CMS can continue reviewing it<br />
+You must answer the question before CMS can continue reviewing it.<br />
 <br />
 <a href="http://localhost/submissions/12345">Open the submission in MC-Review to answer questions</a>
 
