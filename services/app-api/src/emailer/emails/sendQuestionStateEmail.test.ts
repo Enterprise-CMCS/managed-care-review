@@ -101,8 +101,7 @@ test('to addresses list includes submitter emails', async () => {
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
