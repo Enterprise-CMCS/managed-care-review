@@ -32638,9 +32638,9 @@ serverless-s3-local@^0.7.1:
     shelljs "^0.8.5"
 
 serverless-s3-sync@^3.0.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/serverless-s3-sync/-/serverless-s3-sync-3.1.0.tgz#58a669d928303a2e69ec121a951ad3a8f075b754"
-  integrity sha512-qgbPQkq8i70tBB6lUHUpdvitGJAHjq+m5xIg8mrjiCv412+5LEXnDi5P5AegJ54CEGWmmZaxSA9lvYPrAnfOiA==
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/serverless-s3-sync/-/serverless-s3-sync-3.2.0.tgz#3005566ad85a4c825fb0ef882e7cb0b0d3443ba6"
+  integrity sha512-V7rUA/5oU1fxvaX7zM+ZeNEyZ/aGWRtuUpmGX4HVgbQgcfyrAvf0/MZ68qu9KqUdbqSy7//sMa63KQjSo7XXiA==
   dependencies:
     "@auth0/s3" "^1.0.0"
     bluebird "^3.5.4"
