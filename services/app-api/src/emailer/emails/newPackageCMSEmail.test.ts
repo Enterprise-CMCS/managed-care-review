@@ -27,8 +27,7 @@ test('to addresses list includes review team email addresses', async () => {
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     testEmailConfig().devReviewTeamEmails.forEach((emailAddress) => {
@@ -51,8 +50,7 @@ test('to addresses list includes OACT and DMCP group emails for contract and rat
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     testEmailConfig().oactEmails.forEach((emailAddress) => {
@@ -92,8 +90,7 @@ test('to addresses list  does not include OACT and DMCP group emails for CHIP su
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     testEmailConfig().oactEmails.forEach((emailAddress) => {
@@ -124,8 +121,7 @@ test('to addresses list does not include help addresses', async () => {
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -155,8 +151,7 @@ test('to addresses list does not include duplicate review email addresses', asyn
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template.toAddresses).toEqual(['duplicate@example.com'])
@@ -180,8 +175,7 @@ test('subject line is correct', async () => {
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -208,8 +202,7 @@ test('includes expected data summary for a contract only submission', async () =
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -281,8 +274,7 @@ test('includes expected data summary for a contract and rates submission CMS ema
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -432,8 +424,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -551,8 +542,7 @@ test('includes expected data summary for a contract amendment submission', async
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -636,8 +626,7 @@ test('includes expected data summary for a rate amendment submission CMS email',
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -674,8 +663,7 @@ test('includes link to submission', async () => {
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -699,8 +687,7 @@ test('includes state specific analyst on contract only submission', async () => 
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     const reviewerEmails = [
@@ -728,8 +715,7 @@ test('includes state specific analyst on contract and rate submission', async ()
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     const reviewerEmails = [
@@ -758,8 +744,7 @@ test('does not include state specific analyst on contract and rate submission', 
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     testStateAnalystEmails.forEach((emailAddress) => {
@@ -782,8 +767,7 @@ test('includes oactEmails on contract and rate submission', async () => {
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     const reviewerEmails = [
@@ -810,8 +794,7 @@ test('does not include oactEmails on contract only submission', async () => {
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     const ratesReviewerEmails = [...testEmailConfig().oactEmails]
@@ -839,8 +822,7 @@ test('CHIP contract only submission does include state specific analysts emails'
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     testStateAnalystEmails.forEach((emailAddress) => {
@@ -896,8 +878,7 @@ test('CHIP contract and rate submission does include state specific analysts ema
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     testStateAnalystEmails.forEach((emailAddress) => {
@@ -923,8 +904,7 @@ test('CHIP contract only submission does not include oactEmails', async () => {
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     const excludedEmails = [...testEmailConfig().oactEmails]
@@ -981,8 +961,7 @@ test('CHIP contract and rate submission does not include oactEmails', async () =
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     const excludedEmails = [...testEmailConfig().oactEmails]
@@ -1006,8 +985,7 @@ test('does not include rate name on contract only submission', async () => {
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
