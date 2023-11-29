@@ -1,5 +1,5 @@
 export { getSESEmailParams, sendSESEmail } from './awsSES'
-export { newLocalEmailer, newSESEmailer } from './emailer'
+export { newLocalEmailer, newSESEmailer, emailer } from './emailer'
 export {
     newPackageCMSEmail,
     newPackageStateEmail,

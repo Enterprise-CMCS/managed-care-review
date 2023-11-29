@@ -62,9 +62,11 @@ type EmailData = {
     bodyHTML?: string
 }
 
+type SendEmailFunction = (emailData: EmailData) => Promise<void | Error>
+
 type Emailer = {
     config: EmailConfiguration
-    sendEmail: (emailData: EmailData) => Promise<void | Error>
+    sendEmail: SendEmailFunction
     sendCMSNewPackage: (
         formData: LockedHealthPlanFormDataType,
         stateAnalystsEmails: StateAnalystsEmails,
@@ -115,34 +117,13 @@ const localEmailerLogger = (emailData: EmailData) =>
         ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
     `)
 
-type LocalLoggerFunction = (emailData: EmailData) => void
 function emailer(
     config: EmailConfiguration,
-    localLogger: LocalLoggerFunction | undefined
+    sendEmail: SendEmailFunction
 ): Emailer {
     return {
         config,
-        sendEmail: async (emailData: EmailData): Promise<void | Error> => {
-            if (localLogger) {
-                localEmailerLogger(emailData)
-            } else {
-                const emailRequestParams = getSESEmailParams(emailData)
-
-                try {
-                    await sendSESEmail(emailRequestParams)
-                    return
-                } catch (err) {
-                    if (err instanceof SESServiceException) {
-                        return new Error(
-                            'SES email send failed. Error: ' +
-                                JSON.stringify(err)
-                        )
-                    }
-
-                    return new Error('SES email send failed. Error: ' + err)
-                }
-            }
-        },
+        sendEmail,
         sendCMSNewPackage: async function (
             formData,
             stateAnalystsEmails,
@@ -154,19 +135,10 @@ function emailer(
                 stateAnalystsEmails,
                 statePrograms
             )
-            if (localLogger) {
-                if (emailData instanceof Error) {
-                    console.error(emailData)
-                    return emailData
-                } else {
-                    localLogger(emailData)
-                }
+            if (emailData instanceof Error) {
+                return emailData
             } else {
-                if (emailData instanceof Error) {
-                    return emailData
-                } else {
-                    return await this.sendEmail(emailData)
-                }
+                return await this.sendEmail(emailData)
             }
         },
         sendStateNewPackage: async function (
@@ -180,19 +152,10 @@ function emailer(
                 config,
                 statePrograms
             )
-            if (localLogger) {
-                if (emailData instanceof Error) {
-                    console.error(emailData)
-                    return emailData
-                } else {
-                    localLogger(emailData)
-                }
+            if (emailData instanceof Error) {
+                return emailData
             } else {
-                if (emailData instanceof Error) {
-                    return emailData
-                } else {
-                    return await this.sendEmail(emailData)
-                }
+                return await this.sendEmail(emailData)
             }
         },
         sendUnlockPackageCMSEmail: async function (
@@ -208,19 +171,10 @@ function emailer(
                 stateAnalystsEmails,
                 statePrograms
             )
-            if (localLogger) {
-                if (emailData instanceof Error) {
-                    console.error(emailData)
-                    return emailData
-                } else {
-                    localLogger(emailData)
-                }
+            if (emailData instanceof Error) {
+                return emailData
             } else {
-                if (emailData instanceof Error) {
-                    return emailData
-                } else {
-                    return await this.sendEmail(emailData)
-                }
+                return await this.sendEmail(emailData)
             }
         },
         sendUnlockPackageStateEmail: async function (
@@ -236,19 +190,10 @@ function emailer(
                 statePrograms,
                 submitterEmails
             )
-            if (localLogger) {
-                if (emailData instanceof Error) {
-                    console.error(emailData)
-                    return emailData
-                } else {
-                    localLogger(emailData)
-                }
+            if (emailData instanceof Error) {
+                return emailData
             } else {
-                if (emailData instanceof Error) {
-                    return emailData
-                } else {
-                    return await this.sendEmail(emailData)
-                }
+                return await this.sendEmail(emailData)
             }
         },
         sendQuestionsStateEmail: async function (
@@ -266,19 +211,10 @@ function emailer(
                 statePrograms,
                 dateAsked
             )
-            if (localLogger) {
-                if (emailData instanceof Error) {
-                    console.error(emailData)
-                    return emailData
-                } else {
-                    localLogger(emailData)
-                }
+            if (emailData instanceof Error) {
+                return emailData
             } else {
-                if (emailData instanceof Error) {
-                    return emailData
-                } else {
-                    return await this.sendEmail(emailData)
-                }
+                return await this.sendEmail(emailData)
             }
         },
         sendResubmittedStateEmail: async function (
@@ -294,19 +230,10 @@ function emailer(
                 config,
                 statePrograms
             )
-            if (localLogger) {
-                if (emailData instanceof Error) {
-                    console.error(emailData)
-                    return emailData
-                } else {
-                    localLogger(emailData)
-                }
+            if (emailData instanceof Error) {
+                return emailData
             } else {
-                if (emailData instanceof Error) {
-                    return emailData
-                } else {
-                    return await this.sendEmail(emailData)
-                }
+                return await this.sendEmail(emailData)
             }
         },
         sendResubmittedCMSEmail: async function (
@@ -322,31 +249,43 @@ function emailer(
                 stateAnalystsEmails,
                 statePrograms
             )
-            if (localLogger) {
-                if (emailData instanceof Error) {
-                    console.error(emailData)
-                    return emailData
-                } else {
-                    localLogger(emailData)
-                }
+            if (emailData instanceof Error) {
+                return emailData
             } else {
-                if (emailData instanceof Error) {
-                    return emailData
-                } else {
-                    return await this.sendEmail(emailData)
-                }
+                return await this.sendEmail(emailData)
             }
         },
     }
 }
 
+const sendSESEmails = async (emailData: EmailData): Promise<void | Error> => {
+    const emailRequestParams = getSESEmailParams(emailData)
+
+    try {
+        await sendSESEmail(emailRequestParams)
+        return
+    } catch (err) {
+        if (err instanceof SESServiceException) {
+            return new Error(
+                'SES email send failed. Error: ' + JSON.stringify(err)
+            )
+        }
+
+        return new Error('SES email send failed. Error: ' + err)
+    }
+}
+
 function newSESEmailer(config: EmailConfiguration): Emailer {
-    return emailer(config, undefined)
+    return emailer(config, sendSESEmails)
+}
+
+const sendLocalEmails = async (emailData: EmailData): Promise<void | Error> => {
+    localEmailerLogger(emailData)
 }
 
 function newLocalEmailer(config: EmailConfiguration): Emailer {
-    return emailer(config, localEmailerLogger)
+    return emailer(config, sendLocalEmails)
 }
 
-export { newLocalEmailer, newSESEmailer }
+export { newLocalEmailer, newSESEmailer, emailer }
 export type { Emailer, EmailConfiguration, EmailData, StateAnalystsEmails }

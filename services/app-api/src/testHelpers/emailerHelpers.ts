@@ -1,13 +1,5 @@
 import type { EmailConfiguration, EmailData, Emailer } from '../emailer'
-import {
-    newPackageCMSEmail,
-    newPackageStateEmail,
-    sendQuestionStateEmail,
-    unlockPackageCMSEmail,
-    unlockPackageStateEmail,
-    resubmitPackageStateEmail,
-    resubmitPackageCMSEmail,
-} from '../emailer'
+import { emailer } from '../emailer'
 import type {
     LockedHealthPlanFormDataType,
     ProgramArgType,
@@ -60,158 +52,24 @@ const testDuplicateStateAnalystsEmails: string[] = [
     'duplicate@example.com',
 ]
 
+const sendTestEmails = jest.fn(
+    async (emailData: EmailData): Promise<void | Error> => {
+        try {
+            await testSendSESEmail(emailData)
+        } catch (err) {
+            if (err instanceof SESServiceException) {
+                return new Error(
+                    'SES email send failed. Error is from Amazon SES. Error: ' +
+                        JSON.stringify(err)
+                )
+            }
+            return new Error('SES email send failed. Error: ' + err)
+        }
+    }
+)
 function testEmailer(customConfig?: EmailConfiguration): Emailer {
     const config = customConfig || testEmailConfig()
-    return {
-        config,
-        sendEmail: jest.fn(
-            async (emailData: EmailData): Promise<void | Error> => {
-                try {
-                    await testSendSESEmail(emailData)
-                } catch (err) {
-                    if (err instanceof SESServiceException) {
-                        return new Error(
-                            'SES email send failed. Error is from Amazon SES. Error: ' +
-                                JSON.stringify(err)
-                        )
-                    }
-                    return new Error('SES email send failed. Error: ' + err)
-                }
-            }
-        ),
-        sendCMSNewPackage: async function (
-            formData,
-            stateAnalystsEmails,
-            statePrograms
-        ): Promise<void | Error> {
-            const emailData = await newPackageCMSEmail(
-                formData,
-                config,
-                stateAnalystsEmails,
-                statePrograms
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return await this.sendEmail(emailData)
-            }
-        },
-        sendStateNewPackage: async function (
-            formData,
-            submitterEmails,
-            statePrograms
-        ): Promise<void | Error> {
-            const emailData = await newPackageStateEmail(
-                formData,
-                submitterEmails,
-                config,
-                statePrograms
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return await this.sendEmail(emailData)
-            }
-        },
-        sendUnlockPackageCMSEmail: async function (
-            formData,
-            updateInfo,
-            stateAnalystsEmails,
-            statePrograms
-        ): Promise<void | Error> {
-            const emailData = await unlockPackageCMSEmail(
-                formData,
-                updateInfo,
-                config,
-                stateAnalystsEmails,
-                statePrograms
-            )
-
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return this.sendEmail(emailData)
-            }
-        },
-        sendUnlockPackageStateEmail: async function (
-            formData,
-            updateInfo,
-            statePrograms,
-            submitterEmails
-        ): Promise<void | Error> {
-            const emailData = await unlockPackageStateEmail(
-                formData,
-                updateInfo,
-                config,
-                statePrograms,
-                submitterEmails
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return this.sendEmail(emailData)
-            }
-        },
-        sendQuestionsStateEmail: async function (
-            contractRev,
-            cmsRequesor,
-            submitterEmails,
-            statePrograms,
-            dateAsked
-        ): Promise<void | Error> {
-            const emailData = await sendQuestionStateEmail(
-                contractRev,
-                submitterEmails,
-                cmsRequesor,
-                config,
-                statePrograms,
-                dateAsked
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return this.sendEmail(emailData)
-            }
-        },
-        sendResubmittedStateEmail: async function (
-            formData,
-            updateInfo,
-            submitterEmails,
-            statePrograms
-        ): Promise<void | Error> {
-            const emailData = await resubmitPackageStateEmail(
-                formData,
-                submitterEmails,
-                updateInfo,
-                config,
-                statePrograms
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return this.sendEmail(emailData)
-            }
-        },
-        sendResubmittedCMSEmail: async function (
-            formData,
-            updateInfo,
-            stateAnalystsEmails,
-            statePrograms
-        ): Promise<void | Error> {
-            const emailData = await resubmitPackageCMSEmail(
-                formData,
-                updateInfo,
-                config,
-                stateAnalystsEmails,
-                statePrograms
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return this.sendEmail(emailData)
-            }
-        },
-    }
+    return emailer(config, sendTestEmails)
 }
 
 const mockUser = (): StateUserType => {
