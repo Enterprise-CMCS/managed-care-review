@@ -52,24 +52,23 @@ const testDuplicateStateAnalystsEmails: string[] = [
     'duplicate@example.com',
 ]
 
-const sendTestEmails = jest.fn(
-    async (emailData: EmailData): Promise<void | Error> => {
-        try {
-            await testSendSESEmail(emailData)
-        } catch (err) {
-            if (err instanceof SESServiceException) {
-                return new Error(
-                    'SES email send failed. Error is from Amazon SES. Error: ' +
-                        JSON.stringify(err)
-                )
-            }
-            return new Error('SES email send failed. Error: ' + err)
+const sendTestEmails = async (emailData: EmailData): Promise<void | Error> => {
+    try {
+        await testSendSESEmail(emailData)
+    } catch (err) {
+        if (err instanceof SESServiceException) {
+            return new Error(
+                'SES email send failed. Error is from Amazon SES. Error: ' +
+                    JSON.stringify(err)
+            )
         }
+        return new Error('SES email send failed. Error: ' + err)
     }
-)
+}
+
 function testEmailer(customConfig?: EmailConfiguration): Emailer {
     const config = customConfig || testEmailConfig()
-    return emailer(config, sendTestEmails)
+    return emailer(config, jest.fn(sendTestEmails))
 }
 
 const mockUser = (): StateUserType => {
