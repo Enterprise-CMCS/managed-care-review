@@ -74,8 +74,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         expect(template).toEqual(
@@ -94,8 +93,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         expect(template).toEqual(
@@ -245,8 +243,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         expect(template).toEqual(
@@ -321,8 +318,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         testEmailConfig().oactEmails.forEach((emailAddress) => {
@@ -361,8 +357,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         expect(template).toEqual(
@@ -392,8 +387,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         testStateAnalystEmails.forEach((emailAddress) => {
@@ -419,8 +413,7 @@ describe('unlockPackageCMSEmail', () => {
         ]
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         reviewerEmails.forEach((emailAddress) => {
@@ -457,8 +450,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         testStateAnalystEmails.forEach((emailAddress) => {
@@ -480,8 +472,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         const ratesReviewerEmails = [...testEmailConfig().oactEmails]
@@ -504,8 +495,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         testStateAnalystEmails.forEach((emailAddress) => {
@@ -531,8 +521,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         testStateAnalystEmails.forEach((emailAddress) => {
@@ -559,8 +548,7 @@ describe('unlockPackageCMSEmail', () => {
         const excludedEmails = [...testEmailConfig().oactEmails]
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         excludedEmails.forEach((emailAddress) => {
@@ -622,8 +610,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         testStateAnalystEmails.forEach((emailAddress) => {
@@ -679,8 +666,7 @@ describe('unlockPackageCMSEmail', () => {
         const excludedEmails = [...testEmailConfig().oactEmails]
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         excludedEmails.forEach((emailAddress) => {
@@ -709,8 +695,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         expect(template).toEqual(
@@ -731,8 +716,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         expect(template.bodyHTML).toMatchSnapshot()

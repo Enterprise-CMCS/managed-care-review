@@ -126,8 +126,7 @@ test('to addresses list includes all state contacts on submission', async () => 
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     sub.formData.stateContacts.forEach((contact) => {
@@ -155,9 +154,10 @@ test('to addresses list does not include duplicate state receiver emails on subm
             },
         ],
     }
-    const sub: ContractRevisionWithRatesType = {
-        ...mockContractRev({ formData: formDataWithDuplicateStateContacts }),
-    }
+
+    const sub: ContractRevisionWithRatesType = mockContractRev({
+        formData: formDataWithDuplicateStateContacts,
+    })
     const defaultStatePrograms = mockMNState().programs
     const template = await sendQuestionStateEmail(
         sub,
@@ -169,8 +169,7 @@ test('to addresses list does not include duplicate state receiver emails on subm
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template.toAddresses).toEqual([
@@ -200,8 +199,7 @@ test('subject line is correct and clearly states submission is complete', async 
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -225,8 +223,7 @@ test('includes link to submission', async () => {
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -254,8 +251,7 @@ test('includes information about what to do next', async () => {
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -281,8 +277,7 @@ test('includes expected data on the CMS analyst who sent the question', async ()
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
