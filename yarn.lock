@@ -16251,9 +16251,9 @@
   integrity sha512-kUNnecmtkunAoQ3CnjmMkzNU/gtxG8guhi+Fk2U/kOpIKjIMKnXGp4IJCgQJrXSgMsWYimYG4TGjz/UzbGEBTw==
 
 "@types/path-browserify@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@types/path-browserify/-/path-browserify-1.0.0.tgz#294ec6e88b6b0d340a3897b7120e5b393f16690e"
-  integrity sha512-XMCcyhSvxcch8b7rZAtFAaierBYdeHXVvg2iYnxOV0MCQHmPuRRmGZPFDRzPayxcGiiSL1Te9UIO+f3cuj0tfw==
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@types/path-browserify/-/path-browserify-1.0.2.tgz#14b62d4371316016f254b9cca5c10e60ef33dcc0"
+  integrity sha512-ZkC5IUqqIFPXx3ASTTybTzmQdwHwe2C0u3eL75ldQ6T9E9IWFJodn6hIfbZGab73DfyiHN4Xw15gNxUq2FbvBA==
 
 "@types/pg-pool@2.0.3":
   version "2.0.3"
