@@ -1,5 +1,6 @@
 import {
     filterChipAndPRSubmissionReviewers,
+    findContractPrograms,
     generateCMSReviewerEmails,
     handleAsCHIPSubmission,
 } from './templateHelpers'
@@ -7,10 +8,12 @@ import type { UnlockedHealthPlanFormDataType } from '../../../app-web/src/common
 import {
     mockUnlockedContractAndRatesFormData,
     mockUnlockedContractOnlyFormData,
+    mockContractRev,
     testEmailConfig,
     testStateAnalystsEmails,
 } from '../testHelpers/emailerHelpers'
 import type { EmailConfiguration, StateAnalystsEmails } from './emailer'
+import type { ProgramType } from '../domain-models'
 
 describe('templateHelpers', () => {
     const contractOnlyWithValidRateData: {
@@ -216,4 +219,37 @@ describe('templateHelpers', () => {
             ).toEqual(expectedResult)
         }
     )
+    test('findContractPrograms successfully returns programs for a contract', async () => {
+        const sub = mockContractRev()
+        const statePrograms: [ProgramType] = [
+            {
+                id: 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                name: 'CHIP',
+                fullName: 'MN CHIP',
+            },
+        ]
+
+        const programs = findContractPrograms(sub, statePrograms)
+
+        expect(programs).toEqual(statePrograms)
+    })
+
+    test('findContractPrograms throws error if state and contract program ids do not match', async () => {
+        const sub = mockContractRev()
+        const statePrograms: [ProgramType] = [
+            {
+                id: 'unmatched-id',
+                name: 'CHIP',
+                fullName: 'MN CHIP',
+            },
+        ]
+
+        const result = findContractPrograms(sub, statePrograms)
+        if (!(result instanceof Error)) {
+            throw new Error('must be an error')
+        }
+        expect(result.message).toContain(
+            "Can't find programs abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce from state MN"
+        )
+    })
 })

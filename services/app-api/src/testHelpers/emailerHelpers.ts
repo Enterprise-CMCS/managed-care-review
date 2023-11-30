@@ -1,18 +1,14 @@
 import type { EmailConfiguration, EmailData, Emailer } from '../emailer'
-import {
-    newPackageCMSEmail,
-    newPackageStateEmail,
-    unlockPackageCMSEmail,
-    unlockPackageStateEmail,
-    resubmitPackageStateEmail,
-    resubmitPackageCMSEmail,
-} from '../emailer'
+import { emailer } from '../emailer'
 import type {
     LockedHealthPlanFormDataType,
     ProgramArgType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import type { StateUserType } from '../domain-models'
+import type {
+    ContractRevisionWithRatesType,
+    StateUserType,
+} from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 import { testSendSESEmail } from './awsSESHelpers'
 
@@ -56,137 +52,23 @@ const testDuplicateStateAnalystsEmails: string[] = [
     'duplicate@example.com',
 ]
 
+const sendTestEmails = async (emailData: EmailData): Promise<void | Error> => {
+    try {
+        await testSendSESEmail(emailData)
+    } catch (err) {
+        if (err instanceof SESServiceException) {
+            return new Error(
+                'SES email send failed. Error is from Amazon SES. Error: ' +
+                    JSON.stringify(err)
+            )
+        }
+        return new Error('SES email send failed. Error: ' + err)
+    }
+}
+
 function testEmailer(customConfig?: EmailConfiguration): Emailer {
     const config = customConfig || testEmailConfig()
-    return {
-        config,
-        sendEmail: jest.fn(
-            async (emailData: EmailData): Promise<void | Error> => {
-                try {
-                    await testSendSESEmail(emailData)
-                } catch (err) {
-                    if (err instanceof SESServiceException) {
-                        return new Error(
-                            'SES email send failed. Error is from Amazon SES. Error: ' +
-                                JSON.stringify(err)
-                        )
-                    }
-                    return new Error('SES email send failed. Error: ' + err)
-                }
-            }
-        ),
-        sendCMSNewPackage: async function (
-            formData,
-            stateAnalystsEmails,
-            statePrograms
-        ): Promise<void | Error> {
-            const emailData = await newPackageCMSEmail(
-                formData,
-                config,
-                stateAnalystsEmails,
-                statePrograms
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return await this.sendEmail(emailData)
-            }
-        },
-        sendStateNewPackage: async function (
-            formData,
-            submitterEmails,
-            statePrograms
-        ): Promise<void | Error> {
-            const emailData = await newPackageStateEmail(
-                formData,
-                submitterEmails,
-                config,
-                statePrograms
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return await this.sendEmail(emailData)
-            }
-        },
-        sendUnlockPackageCMSEmail: async function (
-            formData,
-            updateInfo,
-            stateAnalystsEmails,
-            statePrograms
-        ): Promise<void | Error> {
-            const emailData = await unlockPackageCMSEmail(
-                formData,
-                updateInfo,
-                config,
-                stateAnalystsEmails,
-                statePrograms
-            )
-
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return this.sendEmail(emailData)
-            }
-        },
-        sendUnlockPackageStateEmail: async function (
-            formData,
-            updateInfo,
-            statePrograms,
-            submitterEmails
-        ): Promise<void | Error> {
-            const emailData = await unlockPackageStateEmail(
-                formData,
-                updateInfo,
-                config,
-                statePrograms,
-                submitterEmails
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return this.sendEmail(emailData)
-            }
-        },
-        sendResubmittedStateEmail: async function (
-            formData,
-            updateInfo,
-            submitterEmails,
-            statePrograms
-        ): Promise<void | Error> {
-            const emailData = await resubmitPackageStateEmail(
-                formData,
-                submitterEmails,
-                updateInfo,
-                config,
-                statePrograms
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return this.sendEmail(emailData)
-            }
-        },
-        sendResubmittedCMSEmail: async function (
-            formData,
-            updateInfo,
-            stateAnalystsEmails,
-            statePrograms
-        ): Promise<void | Error> {
-            const emailData = await resubmitPackageCMSEmail(
-                formData,
-                updateInfo,
-                config,
-                stateAnalystsEmails,
-                statePrograms
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return this.sendEmail(emailData)
-            }
-        },
-    }
+    return emailer(config, jest.fn(sendTestEmails))
 }
 
 const mockUser = (): StateUserType => {
@@ -251,6 +133,127 @@ export function mockMSState(): State {
             },
         ],
         code: 'MS',
+    }
+}
+const mockContractRev = (
+    submissionPartial?: Partial<ContractRevisionWithRatesType>
+): ContractRevisionWithRatesType => {
+    return {
+        createdAt: new Date('01/01/2021'),
+        updatedAt: new Date('02/01/2021'),
+        contract: {
+            stateCode: 'MN',
+            stateNumber: 3,
+            id: '12345',
+        },
+        id: 'test-abc-125',
+        formData: {
+            programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+            populationCovered: 'CHIP',
+            submissionType: 'CONTRACT_AND_RATES',
+            riskBasedContract: false,
+            submissionDescription: 'A submitted submission',
+            stateContacts: [
+                {
+                    name: 'Test Person',
+                    titleRole: 'A Role',
+                    email: 'test+state+contact@example.com',
+                },
+            ],
+            supportingDocuments: [
+                {
+                    s3URL: 'bar',
+                    name: 'foo',
+                    sha256: 'fakesha',
+                },
+            ],
+            contractType: 'BASE',
+            contractExecutionStatus: undefined,
+            contractDocuments: [
+                {
+                    s3URL: 'bar',
+                    name: 'foo',
+                    sha256: 'fakesha',
+                },
+            ],
+            contractDateStart: new Date('01/01/2024'),
+            contractDateEnd: new Date('01/01/2025'),
+            managedCareEntities: ['MCO'],
+            federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+            inLieuServicesAndSettings: undefined,
+            modifiedBenefitsProvided: undefined,
+            modifiedGeoAreaServed: undefined,
+            modifiedMedicaidBeneficiaries: undefined,
+            modifiedRiskSharingStrategy: undefined,
+            modifiedIncentiveArrangements: undefined,
+            modifiedWitholdAgreements: undefined,
+            modifiedStateDirectedPayments: undefined,
+            modifiedPassThroughPayments: undefined,
+            modifiedPaymentsForMentalDiseaseInstitutions: undefined,
+            modifiedMedicalLossRatioStandards: undefined,
+            modifiedOtherFinancialPaymentIncentive: undefined,
+            modifiedEnrollmentProcess: undefined,
+            modifiedGrevienceAndAppeal: undefined,
+            modifiedNetworkAdequacyStandards: undefined,
+            modifiedLengthOfContract: undefined,
+            modifiedNonRiskPaymentArrangements: undefined,
+            statutoryRegulatoryAttestation: undefined,
+            statutoryRegulatoryAttestationDescription: undefined,
+        },
+        rateRevisions: [
+            {
+                id: '12345',
+                rate: {
+                    id: 'rate-id',
+                    stateCode: 'MN',
+                    stateNumber: 3,
+                    createdAt: new Date(11 / 27 / 2023),
+                },
+                submitInfo: undefined,
+                unlockInfo: undefined,
+                createdAt: new Date(11 / 27 / 2023),
+                updatedAt: new Date(11 / 27 / 2023),
+                formData: {
+                    id: 'test-id-1234',
+                    rateID: 'test-id-1234',
+                    rateType: 'NEW',
+                    rateCapitationType: 'RATE_CELL',
+                    rateDocuments: [
+                        {
+                            s3URL: 'bar',
+                            name: 'foo',
+                            sha256: 'fakesha',
+                        },
+                    ],
+                    supportingDocuments: [],
+                    rateDateStart: new Date('01/01/2024'),
+                    rateDateEnd: new Date('01/01/2025'),
+                    rateDateCertified: new Date('01/01/2024'),
+                    amendmentEffectiveDateStart: new Date('01/01/2024'),
+                    amendmentEffectiveDateEnd: new Date('01/01/2025'),
+                    rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+                    rateCertificationName: 'Rate Cert Name',
+                    certifyingActuaryContacts: [
+                        {
+                            actuarialFirm: 'DELOITTE',
+                            name: 'Actuary Contact 1',
+                            titleRole: 'Test Actuary Contact 1',
+                            email: 'actuarycontact1@example.com',
+                        },
+                    ],
+                    addtlActuaryContacts: [],
+                    actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                    packagesWithSharedRateCerts: [
+                        {
+                            packageName: 'pkgName',
+                            packageId: '12345',
+                            packageStatus: 'SUBMITTED',
+                        },
+                    ],
+                },
+            },
+        ],
+        ...submissionPartial,
     }
 }
 
@@ -627,6 +630,7 @@ export {
     testDuplicateStateAnalystsEmails,
     mockContractAmendmentFormData,
     mockContractOnlyFormData,
+    mockContractRev,
     mockContractAndRatesFormData,
     mockUnlockedContractAndRatesFormData,
     mockUnlockedContractOnlyFormData,

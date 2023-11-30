@@ -1,0 +1,9 @@
+CMS asked questions about <%= it.packageName %><br />
+<b>Sent by:</b> <%= it.cmsRequestorName %> (<%= it.cmsRequestorDivision %>) <a href="<%= it.cmsRequestorEmail %>"><%= it.cmsRequestorEmail %></a>
+<br />
+<b>Date:</b> <%= it.dateAsked %><br />
+<br />
+You must answer the question before CMS can continue reviewing it.<br />
+<br />
+<a href="<%= it.submissionURL %>">Open the submission in MC-Review to answer questions</a>
+

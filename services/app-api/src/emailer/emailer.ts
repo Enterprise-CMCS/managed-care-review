@@ -8,12 +8,18 @@ import {
     unlockPackageStateEmail,
     resubmitPackageStateEmail,
     resubmitPackageCMSEmail,
+    sendQuestionStateEmail,
 } from './'
 import type {
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import type { UpdateInfoType, ProgramType } from '../domain-models'
+import type {
+    UpdateInfoType,
+    ProgramType,
+    CMSUserType,
+    ContractRevisionWithRatesType,
+} from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 
 // See more discussion of configuration in docs/Configuration.md
@@ -56,9 +62,11 @@ type EmailData = {
     bodyHTML?: string
 }
 
+type SendEmailFunction = (emailData: EmailData) => Promise<void | Error>
+
 type Emailer = {
     config: EmailConfiguration
-    sendEmail: (emailData: EmailData) => Promise<void | Error>
+    sendEmail: SendEmailFunction
     sendCMSNewPackage: (
         formData: LockedHealthPlanFormDataType,
         stateAnalystsEmails: StateAnalystsEmails,
@@ -81,6 +89,13 @@ type Emailer = {
         statePrograms: ProgramType[],
         submitterEmails: string[]
     ) => Promise<void | Error>
+    sendQuestionsStateEmail: (
+        contract: ContractRevisionWithRatesType,
+        cmsRequesor: CMSUserType,
+        submitterEmails: string[],
+        statePrograms: ProgramType[],
+        dateAsked: Date
+    ) => Promise<void | Error>
     sendResubmittedStateEmail: (
         formData: LockedHealthPlanFormDataType,
         updateInfo: UpdateInfoType,
@@ -94,26 +109,21 @@ type Emailer = {
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
 }
+const localEmailerLogger = (emailData: EmailData) =>
+    console.info(`
+        EMAIL SENT
+        ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+        ${JSON.stringify(getSESEmailParams(emailData))}
+        ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+    `)
 
-function newSESEmailer(config: EmailConfiguration): Emailer {
+function emailer(
+    config: EmailConfiguration,
+    sendEmail: SendEmailFunction
+): Emailer {
     return {
         config,
-        sendEmail: async (emailData: EmailData): Promise<void | Error> => {
-            const emailRequestParams = getSESEmailParams(emailData)
-
-            try {
-                await sendSESEmail(emailRequestParams)
-                return
-            } catch (err) {
-                if (err instanceof SESServiceException) {
-                    return new Error(
-                        'SES email send failed. Error: ' + JSON.stringify(err)
-                    )
-                }
-
-                return new Error('SES email send failed. Error: ' + err)
-            }
-        },
+        sendEmail,
         sendCMSNewPackage: async function (
             formData,
             stateAnalystsEmails,
@@ -186,6 +196,27 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
                 return await this.sendEmail(emailData)
             }
         },
+        sendQuestionsStateEmail: async function (
+            contract,
+            cmsRequestor,
+            submitterEmails,
+            statePrograms,
+            dateAsked
+        ) {
+            const emailData = await sendQuestionStateEmail(
+                contract,
+                submitterEmails,
+                cmsRequestor,
+                config,
+                statePrograms,
+                dateAsked
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
         sendResubmittedStateEmail: async function (
             formData,
             updateInfo,
@@ -227,134 +258,34 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
     }
 }
 
-const localEmailerLogger = (emailData: EmailData) =>
-    console.info(`
-        EMAIL SENT
-        ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-        ${JSON.stringify(getSESEmailParams(emailData))}
-        ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-    `)
+const sendSESEmails = async (emailData: EmailData): Promise<void | Error> => {
+    const emailRequestParams = getSESEmailParams(emailData)
 
-function newLocalEmailer(config: EmailConfiguration): Emailer {
-    return {
-        config,
-        sendEmail: async (emailData: EmailData): Promise<void | Error> => {
-            localEmailerLogger(emailData)
-        },
-        sendCMSNewPackage: async (
-            formData,
-            stateAnalystsEmails,
-            statePrograms
-        ) => {
-            const result = await newPackageCMSEmail(
-                formData,
-                config,
-                stateAnalystsEmails,
-                statePrograms
+    try {
+        await sendSESEmail(emailRequestParams)
+        return
+    } catch (err) {
+        if (err instanceof SESServiceException) {
+            return new Error(
+                'SES email send failed. Error: ' + JSON.stringify(err)
             )
-            if (result instanceof Error) {
-                console.error(result)
-                return result
-            } else {
-                localEmailerLogger(result)
-            }
-        },
-        sendStateNewPackage: async (
-            formData,
-            submitterEmails,
-            statePrograms
-        ) => {
-            const result = await newPackageStateEmail(
-                formData,
-                submitterEmails,
-                config,
-                statePrograms
-            )
-            if (result instanceof Error) {
-                console.error(result)
-                return result
-            } else {
-                localEmailerLogger(result)
-            }
-        },
-        sendUnlockPackageCMSEmail: async (
-            formData,
-            updateInfo,
-            stateAnalystsEmails,
-            statePrograms
-        ) => {
-            const emailData = await unlockPackageCMSEmail(
-                formData,
-                updateInfo,
-                config,
-                stateAnalystsEmails,
-                statePrograms
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                localEmailerLogger(emailData)
-            }
-        },
-        sendUnlockPackageStateEmail: async (
-            formData,
-            updateInfo,
-            statePrograms,
-            submitterEmails
-        ) => {
-            const emailData = await unlockPackageStateEmail(
-                formData,
-                updateInfo,
-                config,
-                statePrograms,
-                submitterEmails
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                localEmailerLogger(emailData)
-            }
-        },
-        sendResubmittedStateEmail: async (
-            formData,
-            updateInfo,
-            submitterEmails,
-            statePrograms
-        ) => {
-            const emailData = await resubmitPackageStateEmail(
-                formData,
-                submitterEmails,
-                updateInfo,
-                config,
-                statePrograms
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                localEmailerLogger(emailData)
-            }
-        },
-        sendResubmittedCMSEmail: async (
-            formData,
-            updateInfo,
-            stateAnalystsEmails,
-            statePrograms
-        ) => {
-            const emailData = await resubmitPackageCMSEmail(
-                formData,
-                updateInfo,
-                config,
-                stateAnalystsEmails,
-                statePrograms
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                localEmailerLogger(emailData)
-            }
-        },
+        }
+
+        return new Error('SES email send failed. Error: ' + err)
     }
 }
 
-export { newLocalEmailer, newSESEmailer }
+function newSESEmailer(config: EmailConfiguration): Emailer {
+    return emailer(config, sendSESEmails)
+}
+
+const sendLocalEmails = async (emailData: EmailData): Promise<void | Error> => {
+    localEmailerLogger(emailData)
+}
+
+function newLocalEmailer(config: EmailConfiguration): Emailer {
+    return emailer(config, sendLocalEmails)
+}
+
+export { newLocalEmailer, newSESEmailer, emailer }
 export type { Emailer, EmailConfiguration, EmailData, StateAnalystsEmails }

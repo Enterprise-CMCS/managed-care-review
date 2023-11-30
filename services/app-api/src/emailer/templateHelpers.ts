@@ -7,7 +7,10 @@ import type {
     SubmissionType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import type { EmailConfiguration, StateAnalystsEmails } from '.'
-import type { ProgramType } from '../domain-models'
+import type {
+    ContractRevisionWithRatesType,
+    ProgramType,
+} from '../domain-models'
 import { logError } from '../logger'
 import { pruneDuplicateEmails } from './formatters'
 
@@ -174,6 +177,24 @@ const findPackagePrograms = (
     return programs
 }
 
+//Find state programs from contract with rates
+const findContractPrograms = (
+    contractRev: ContractRevisionWithRatesType,
+    statePrograms: ProgramType[]
+): ProgramType[] | Error => {
+    const programIDs = contractRev.formData.programIDs
+    const programs = statePrograms.filter((program) =>
+        programIDs.includes(program.id)
+    )
+    if (!programs || programs.length !== programIDs.length) {
+        const errMessage = `Can't find programs ${programIDs} from state ${contractRev.contract.stateCode}`
+        logError('newPackageCMSEmail', errMessage)
+        return new Error(errMessage)
+    }
+
+    return programs
+}
+
 // Clean out HTML tags from an HTML based template
 // this way we still have a text alternative for email client rendering html in plaintext
 // plaintext is also referenced for unit testing
@@ -199,5 +220,6 @@ export {
     SubmissionTypeRecord,
     findAllPackageProgramIds,
     findPackagePrograms,
+    findContractPrograms,
     filterChipAndPRSubmissionReviewers,
 }
