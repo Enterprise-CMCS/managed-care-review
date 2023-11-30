@@ -1,15 +1,7 @@
-import type { Handler } from 'aws-lambda'
 import type { Readable } from 'stream'
 import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
-import type { HealthPlanRevisionTable } from '@prisma/client'
-import type {
-    HealthPlanFormDataType,
-    SubmissionDocument,
-} from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import type { StoreError } from '../postgres/storeError'
-import { isStoreError } from '../postgres/storeError'
+import type { SubmissionDocument } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
 import { createHash } from 'crypto'
 import type { Store } from '../postgres'
@@ -17,11 +9,7 @@ import {
     parseKey,
     parseBucketName,
 } from '../../../app-web/src/common-code/s3URLEncoding'
-import {
-    initTracer,
-    initMeter,
-    recordException,
-} from '../../../uploads/src/lib/otel'
+import { recordException } from '../../../uploads/src/lib/otel'
 
 const s3 = new S3Client({ region: 'us-east-1' })
 
@@ -89,61 +77,6 @@ export const updateDocumentsSHA256 = async (
     }
 }
 
-export const processRevisions = async (
-    store: Store,
-    revisions: HealthPlanRevisionTable[],
-    serviceName: string
-): Promise<void> => {
-    for (const revision of revisions) {
-        const pkgID = revision.pkgID
-        const decodedFormDataProto = toDomain(revision.formDataProto)
-        if (!(decodedFormDataProto instanceof Error)) {
-            const formData = decodedFormDataProto as HealthPlanFormDataType
-            formData.documents = await updateDocumentsSHA256(
-                formData.documents,
-                serviceName
-            )
-            formData.contractDocuments = await updateDocumentsSHA256(
-                formData.contractDocuments,
-                serviceName
-            )
-            for (const rateInfo of formData.rateInfos) {
-                rateInfo.rateDocuments = await updateDocumentsSHA256(
-                    rateInfo.rateDocuments,
-                    serviceName
-                )
-            }
-            try {
-                const update = await store.updateHealthPlanRevision(
-                    pkgID,
-                    revision.id,
-                    formData
-                )
-                if (isStoreError(update)) {
-                    console.error(
-                        `StoreError updating revision ${
-                            revision.id
-                        }: ${JSON.stringify(update)}`
-                    )
-                    throw new Error('Error updating revision')
-                }
-            } catch (err) {
-                console.error(`Error updating revision ${revision.id}: ${err}`)
-                throw err
-            }
-        } else {
-            console.error(
-                `Error decoding formDataProto for revision ${revision.id} in sha migration: ${decodedFormDataProto}`
-            )
-            recordException(
-                `Error decoding formDataProto for revision ${revision.id} in sha migration: ${decodedFormDataProto}`,
-                serviceName,
-                'processRevisions'
-            )
-        }
-    }
-}
-
 export const getDatabaseConnection = async (): Promise<Store> => {
     const dbURL = process.env.DATABASE_URL
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
@@ -168,48 +101,4 @@ export const getDatabaseConnection = async (): Promise<Store> => {
     const store = NewPostgresStore(pgResult)
 
     return store
-}
-
-export const getRevisions = async (
-    store: Store
-): Promise<HealthPlanRevisionTable[]> => {
-    const result: HealthPlanRevisionTable[] | StoreError =
-        await store.findAllRevisions()
-    if (isStoreError(result)) {
-        console.error(
-            `Error getting revisions from db ${JSON.stringify(result)}`
-        )
-        throw new Error('Error getting records; cannot generate report')
-    }
-
-    return result
-}
-
-export const main: Handler = async (event, context) => {
-    // Check on the values for our required config
-    const stageName = process.env.stage ?? 'stageNotSet'
-    const serviceName = `add_sha_lambda-${stageName}`
-    const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
-    if (otelCollectorURL) {
-        initTracer(serviceName, otelCollectorURL)
-    } else {
-        console.error(
-            'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
-        )
-    }
-
-    initMeter(serviceName)
-    const store = await getDatabaseConnection()
-
-    const revisions = await getRevisions(store)
-    // Get the pkgID from the first revision in the list
-    const pkgID = revisions[0].pkgID
-    if (!pkgID) {
-        console.error('Package ID is missing in the revisions')
-        throw new Error('Package ID is required')
-    }
-
-    await processRevisions(store, revisions, serviceName)
-
-    console.info('SHA256 update complete')
 }

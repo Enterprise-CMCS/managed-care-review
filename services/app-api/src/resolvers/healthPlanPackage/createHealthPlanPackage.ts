@@ -2,7 +2,7 @@ import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { isStateUser } from '../../domain-models'
 import type { MutationResolvers, State } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import type { InsertHealthPlanPackageArgsType, Store } from '../../postgres'
+import type { InsertContractArgsType, Store } from '../../postgres'
 import { pluralize } from '../../../../app-web/src/common-code/formatters'
 import {
     setResolverDetailsOnActiveSpan,
@@ -55,16 +55,19 @@ export function createHealthPlanPackageResolver(
             })
         }
 
-        const insertArgs: InsertHealthPlanPackageArgsType = {
+        // Why do we need to do this? I feel like I don't understand Maybe here exactly.
+        const riskBasedContract =
+            input.riskBasedContract === undefined
+                ? undefined
+                : input.riskBasedContract?.valueOf()
+
+        const insertArgs: InsertContractArgsType = {
             stateCode: stateFromCurrentUser,
-            populationCovered:
-                input.populationCovered as InsertHealthPlanPackageArgsType['populationCovered'],
+            populationCovered: input.populationCovered,
             programIDs: input.programIDs,
-            riskBasedContract:
-                input.riskBasedContract as InsertHealthPlanPackageArgsType['riskBasedContract'],
+            riskBasedContract: riskBasedContract,
             submissionDescription: input.submissionDescription,
-            submissionType:
-                input.submissionType as InsertHealthPlanPackageArgsType['submissionType'],
+            submissionType: input.submissionType,
             contractType: input.contractType,
         }
 

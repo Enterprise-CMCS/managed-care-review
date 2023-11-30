@@ -870,10 +870,6 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         const postgresStore = NewPostgresStore(prismaClient)
         const failStore = mockStoreThatErrors()
 
-        // set store error for flag off
-        postgresStore.updateHealthPlanRevision =
-            failStore.updateHealthPlanRevision
-
         // set store error for flag on.
         postgresStore.updateDraftContractWithRates =
             failStore.updateDraftContractWithRates
