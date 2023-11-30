@@ -974,13 +974,13 @@
     uuid "^8.3.2"
 
 "@aws-sdk/client-cloudfront@^3.450.0":
-  version "3.461.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-cloudfront/-/client-cloudfront-3.461.0.tgz#71d01fbc84ce38244f1a606f5911cf4cdbab5f60"
-  integrity sha512-GpLCdrgEQGY6BlMqAKxHsXMdSYlkVs981ux8IB+7DvGBzSRSuGtCON/tnlkZcZSBNjprEYzUZg1q+8/QZiwOsA==
+  version "3.462.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-cloudfront/-/client-cloudfront-3.462.0.tgz#bc2e0f4f625f3afcb4b1d40290aaf34dfc17f10e"
+  integrity sha512-MtMyhhyCk2fFTXYm/XOkRguToPDYtALF9B420G7dfVxxcxkTr3EdPn4i7kbetMUy14i7V3AKpXHH6z28joa/4g==
   dependencies:
     "@aws-crypto/sha256-browser" "3.0.0"
     "@aws-crypto/sha256-js" "3.0.0"
-    "@aws-sdk/client-sts" "3.461.0"
+    "@aws-sdk/client-sts" "3.462.0"
     "@aws-sdk/core" "3.451.0"
     "@aws-sdk/credential-provider-node" "3.460.0"
     "@aws-sdk/middleware-host-header" "3.460.0"
@@ -3151,10 +3151,10 @@
     fast-xml-parser "4.2.5"
     tslib "^2.5.0"
 
-"@aws-sdk/client-sts@3.461.0", "@aws-sdk/client-sts@^3.410.0":
-  version "3.461.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sts/-/client-sts-3.461.0.tgz#f62f75bb7483f73169896bd283ab126b7e97f287"
-  integrity sha512-1u+t31m23vuc9zkiUk51L4QbwuRQEuBeMArHK/thmq4V+A0VmjoAr/x2D0eQ0deOuBqG5YC62oaqUfIhj03SIw==
+"@aws-sdk/client-sts@3.462.0", "@aws-sdk/client-sts@^3.410.0":
+  version "3.462.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sts/-/client-sts-3.462.0.tgz#7168e8c29e2c3b67aca64841a72acd041c409a65"
+  integrity sha512-oO6SVGB9kR0dwc4T/M3++TcioBVv26cEpxZGS4BcKMDxSjkCLqJ/jE37aCNNPGTlCAhnuOAwqGjFqYrsehsI1Q==
   dependencies:
     "@aws-crypto/sha256-browser" "3.0.0"
     "@aws-crypto/sha256-js" "3.0.0"
@@ -16219,9 +16219,9 @@
   integrity sha512-Abq9fBviLV93OiXMu+f6r0elxCzRwc0RC5f99cU892uBITL44pTvgvEqlRlPRi8EGcO1z7Cp8A4d0s/p3J/+Nw==
 
 "@types/node@^16.18.39":
-  version "16.18.65"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.65.tgz#b07eb49a14a808777b82879288a7e6f5a296ccfa"
-  integrity sha512-5E9WgTy95B7i90oISjui9U5Zu7iExUPfU4ygtv4yXEy6zJFE3oQYHCnh5H1jZRPkjphJt2Ml3oQW6M0qtK534A==
+  version "16.18.66"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.66.tgz#f59cc2ff96cc47f972a11a458a9b29bf0a209c34"
+  integrity sha512-sePmD/imfKvC4re/Wwos1NEcXYm6O96CAG5gQVY53nmDb8ePQ4qPku6uruN7n6TJ0t5FhcoUc2+yvE2/UZVDZw==
 
 "@types/node@^18.11.18":
   version "18.18.8"
