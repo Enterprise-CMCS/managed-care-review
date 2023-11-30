@@ -56,13 +56,6 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
-     * Rates refactor database handlers live behind this flag. We will use this to switchover to the new database tables when we migrate.
-     */
-    RATES_DATABASE_REFACTOR: {
-        flag: 'rates-db-refactor',
-        defaultValue: false,
-    },
-    /**
      * Controls the rates review dashboard UI. This flag should not be turned on without rates-db-refactor also on.
      */
     RATE_REVIEWS_DASHBOARD: {

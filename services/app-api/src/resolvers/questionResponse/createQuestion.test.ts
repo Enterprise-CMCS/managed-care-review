@@ -16,11 +16,9 @@ import {
     testCMSUser,
 } from '../../testHelpers/userHelpers'
 import { base64ToDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 
 describe('createQuestion', () => {
-    const mockLDService = testLDService({ ['rates-db-refactor']: true })
     const cmsUser = testCMSUser()
     beforeAll(async () => {
         //Inserting a new CMS user, with division assigned, in postgres in order to create the question to user relationship.
@@ -28,19 +26,15 @@ describe('createQuestion', () => {
     })
 
     it('returns question data after creation', async () => {
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
         })
 
-        const submittedPkg = await createAndSubmitTestHealthPlanPackage(
-            stateServer
-        )
+        const submittedPkg =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
 
         const createdQuestion = await createTestQuestion(
             cmsServer,
@@ -63,19 +57,15 @@ describe('createQuestion', () => {
         )
     })
     it('allows question creation on UNLOCKED and RESUBMITTED package', async () => {
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
         })
 
-        const submittedPkg = await createAndSubmitTestHealthPlanPackage(
-            stateServer
-        )
+        const submittedPkg =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
 
         const unlockedPkg = await unlockTestHealthPlanPackage(
             cmsServer,
@@ -156,14 +146,11 @@ describe('createQuestion', () => {
         )
     })
     it('returns an error if package status is DRAFT', async () => {
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
         })
 
         const draftPkg = await createTestHealthPlanPackage(stateServer)
@@ -190,12 +177,9 @@ describe('createQuestion', () => {
         )
     })
     it('returns an error if a state user attempts to create a question for a package', async () => {
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
-        const submittedPkg = await createAndSubmitTestHealthPlanPackage(
-            stateServer
-        )
+        const stateServer = await constructTestPostgresServer()
+        const submittedPkg =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
 
         const createdQuestion = await stateServer.executeOperation({
             query: CREATE_QUESTION,
@@ -219,14 +203,11 @@ describe('createQuestion', () => {
         )
     })
     it('returns error on invalid package id', async () => {
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
         })
 
         await createAndSubmitTestHealthPlanPackage(stateServer)
@@ -257,14 +238,11 @@ describe('createQuestion', () => {
             divisionAssignment: undefined,
         })
         await createDBUsersWithFullData([cmsUserWithNoDivision])
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUserWithNoDivision,
             },
-            ldService: mockLDService,
         })
 
         await createAndSubmitTestHealthPlanPackage(stateServer)
@@ -294,20 +272,16 @@ describe('createQuestion', () => {
         const config = testEmailConfig()
         const mockEmailer = testEmailer(config)
         //mock invoke email submit lambda
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
             emailer: mockEmailer,
         })
 
-        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
-            stateServer
-        )
+        const stateSubmission =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
 
         await createTestQuestion(cmsServer, stateSubmission.id)
 
@@ -358,7 +332,6 @@ describe('createQuestion', () => {
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
             emailer: mockEmailer,
         })
 

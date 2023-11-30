@@ -5,24 +5,18 @@ import {
     createTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import { testCMSUser } from '../../testHelpers/userHelpers'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 describe('updateContract', () => {
     const cmsUser = testCMSUser()
-    const mockLDService = testLDService({ ['rates-db-refactor']: true })
 
     it('updates the contract', async () => {
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
-        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
-            stateServer
-        )
+        const stateSubmission =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
 
         const cmsServer = await constructTestPostgresServer({
-            ldService: mockLDService,
             context: {
                 user: cmsUser,
             },
@@ -61,14 +55,11 @@ describe('updateContract', () => {
     })
 
     it('errors if the contract is not submitted', async () => {
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
 
         // First, create a draft submission
         const draftSubmission = await createTestHealthPlanPackage(stateServer)
         const cmsServer = await constructTestPostgresServer({
-            ldService: mockLDService,
             context: {
                 user: cmsUser,
             },
@@ -96,14 +87,11 @@ describe('updateContract', () => {
     })
 
     it('errors if a State user calls it', async () => {
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
-        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
-            stateServer
-        )
+        const stateSubmission =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
         // Update
         const updateResult = await stateServer.executeOperation({
             query: UPDATE_CONTRACT_MUTATION,

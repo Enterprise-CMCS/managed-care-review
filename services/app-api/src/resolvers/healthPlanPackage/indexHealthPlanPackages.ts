@@ -17,7 +17,6 @@ import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import type { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql/index'
 import { validateContractsAndConvert } from './contractAndRates/resolverHelpers'
 
@@ -48,55 +47,40 @@ const validateAndReturnHealthPlanPackages = (
 }
 
 export function indexHealthPlanPackagesResolver(
-    store: Store,
-    launchDarkly: LDService
+    store: Store
 ): QueryResolvers['indexHealthPlanPackages'] {
     return async (_parent, _args, context) => {
         const { user, span } = context
 
         setResolverDetailsOnActiveSpan('indexHealthPlanPackages', user, span)
 
-        const ratesDatabaseRefactor = await launchDarkly.getFeatureFlag(
-            context,
-            'rates-db-refactor'
-        )
-
         if (isStateUser(user)) {
-            let results: StoreError | HealthPlanPackageType[] = []
-            if (ratesDatabaseRefactor) {
-                const contractsWithHistory =
-                    await store.findAllContractsWithHistoryByState(
-                        user.stateCode
-                    )
+            const contractsWithHistory =
+                await store.findAllContractsWithHistoryByState(user.stateCode)
 
-                if (contractsWithHistory instanceof Error) {
-                    const errMessage = `Issue finding contracts with history by stateCode: ${user.stateCode}. Message: ${contractsWithHistory.message}`
-                    logError('indexHealthPlanPackages', errMessage)
-                    setErrorAttributesOnActiveSpan(errMessage, span)
+            if (contractsWithHistory instanceof Error) {
+                const errMessage = `Issue finding contracts with history by stateCode: ${user.stateCode}. Message: ${contractsWithHistory.message}`
+                logError('indexHealthPlanPackages', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
 
-                    if (contractsWithHistory instanceof NotFoundError) {
-                        throw new GraphQLError(errMessage, {
-                            extensions: {
-                                code: 'NOT_FOUND',
-                                cause: 'DB_ERROR',
-                            },
-                        })
-                    }
-
+                if (contractsWithHistory instanceof NotFoundError) {
                     throw new GraphQLError(errMessage, {
                         extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
+                            code: 'NOT_FOUND',
                             cause: 'DB_ERROR',
                         },
                     })
                 }
 
-                results = validateContractsAndConvert(contractsWithHistory)
-            } else {
-                results = await store.findAllHealthPlanPackagesByState(
-                    user.stateCode
-                )
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
             }
+
+            const results = validateContractsAndConvert(contractsWithHistory)
 
             return validateAndReturnHealthPlanPackages(results, span)
         } else if (
@@ -105,37 +89,32 @@ export function indexHealthPlanPackagesResolver(
             isHelpdeskUser(user) ||
             isBusinessOwnerUser(user)
         ) {
-            let results: StoreError | HealthPlanPackageType[] = []
-            if (ratesDatabaseRefactor) {
-                const contractsWithHistory =
-                    await store.findAllContractsWithHistoryBySubmitInfo()
+            const contractsWithHistory =
+                await store.findAllContractsWithHistoryBySubmitInfo()
 
-                if (contractsWithHistory instanceof Error) {
-                    const errMessage = `Issue finding contracts with history by submit info. Message: ${contractsWithHistory.message}`
-                    logError('indexHealthPlanPackages', errMessage)
-                    setErrorAttributesOnActiveSpan(errMessage, span)
+            if (contractsWithHistory instanceof Error) {
+                const errMessage = `Issue finding contracts with history by submit info. Message: ${contractsWithHistory.message}`
+                logError('indexHealthPlanPackages', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
 
-                    if (contractsWithHistory instanceof NotFoundError) {
-                        throw new GraphQLError(errMessage, {
-                            extensions: {
-                                code: 'NOT_FOUND',
-                                cause: 'DB_ERROR',
-                            },
-                        })
-                    }
-
+                if (contractsWithHistory instanceof NotFoundError) {
                     throw new GraphQLError(errMessage, {
                         extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
+                            code: 'NOT_FOUND',
                             cause: 'DB_ERROR',
                         },
                     })
                 }
 
-                results = validateContractsAndConvert(contractsWithHistory)
-            } else {
-                results = await store.findAllHealthPlanPackagesBySubmittedAt()
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
             }
+
+            const results = validateContractsAndConvert(contractsWithHistory)
 
             return validateAndReturnHealthPlanPackages(results, span)
         } else {
