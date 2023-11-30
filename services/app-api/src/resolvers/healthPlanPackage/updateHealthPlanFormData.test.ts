@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
 import { findStatePrograms, NewPostgresStore } from '../../postgres'
-import * as add_sha from '../../handlers/add_sha'
 import { submitContract } from '../../postgres/contractAndRates/submitContract'
 import UPDATE_HEALTH_PLAN_FORM_DATA from '../../../../app-graphql/src/mutations/updateHealthPlanFormData.graphql'
 import { domainToBase64 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
@@ -26,9 +25,6 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
 
     beforeEach(() => {
         jest.resetAllMocks()
-        jest.spyOn(add_sha, 'calculateSHA256').mockImplementation(() => {
-            return Promise.resolve('mockSHA256')
-        })
     })
 
     it('updates valid scalar fields in the formData', async () => {
