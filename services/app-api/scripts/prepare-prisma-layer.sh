@@ -10,7 +10,6 @@ function preparePrismaLayer() {
     mkdir -p lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines
     mkdir -p lambda-layers-prisma-client-migration/nodejs/node_modules/prisma
     mkdir -p lambda-layers-prisma-client-migration/nodejs/prisma
-    mkdir -p lambda-layers-prisma-client-migration/nodejs/protoMigrator
     mkdir -p lambda-layers-prisma-client-migration/nodejs/dataMigrations
     mkdir -p lambda-layers-prisma-client-migration/nodejs/gen
 
@@ -43,7 +42,6 @@ function preparePrismaLayer() {
     rsync -av prisma/ lambda-layers-prisma-client-engine/nodejs/prisma
 
     echo "Copy proto migration files to layer..."
-    rsync -av ../app-proto/build/ lambda-layers-prisma-client-migration/nodejs/protoMigrator
     rsync -av ../app-proto/gen/ lambda-layers-prisma-client-migration/nodejs/gen
     rsync -av ../../node_modules/uuid/ lambda-layers-prisma-client-migration/nodejs/node_modules/uuid
 
