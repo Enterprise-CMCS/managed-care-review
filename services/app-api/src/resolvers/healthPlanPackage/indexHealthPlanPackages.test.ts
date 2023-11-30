@@ -369,11 +369,6 @@ describe(`indexHealthPlanPackages`, () => {
             expect(otherStatePackages).toHaveLength(1)
         })
     })
-})
-describe('indexHealthPlanPackages test rates-db-refactor flag on only', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    })
 
     it('correctly filters and log contracts that failed parsing or converting', async () => {
         const client = await sharedTestPrismaClient()

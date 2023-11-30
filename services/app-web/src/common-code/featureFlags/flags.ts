@@ -56,7 +56,7 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
-     * Controls the rates review dashboard UI. This flag should not be turned on without rates-db-refactor also on.
+     * Controls the rates review dashboard UI.
      */
     RATE_REVIEWS_DASHBOARD: {
         flag: 'rate-reviews-dashboard',
