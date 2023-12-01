@@ -13,7 +13,6 @@ import type { ContractRevisionWithRatesType } from '../../domain-models/contract
 
 export const sendQuestionCMSEmail = async (
     contractRev: ContractRevisionWithRatesType,
-    submitterEmails: string[],
     stateAnalystsEmails: StateAnalystsEmails,
     cmsRequestor: CMSUserType,
     config: EmailConfiguration,
@@ -21,11 +20,13 @@ export const sendQuestionCMSEmail = async (
     dateAsked: Date,
     roundNumber: number
 ): Promise<EmailData | Error> => {
-    const receiverEmails = pruneDuplicateEmails([
-        ...stateAnalystsEmails,
-        ...submitterEmails,
-        ...config.devReviewTeamEmails,
-    ])
+    let receiverEmails = [...stateAnalystsEmails, ...config.devReviewTeamEmails]
+    if (cmsRequestor.divisionAssignment === 'DMCP') {
+        receiverEmails.push(...config.dmcpEmails)
+    } else if (cmsRequestor.divisionAssignment === 'OACT') {
+        receiverEmails.push(...config.oactEmails)
+    }
+    receiverEmails = pruneDuplicateEmails(receiverEmails)
 
     //This checks to make sure all programs contained in submission exists for the state.
     const packagePrograms = findContractPrograms(contractRev, statePrograms)

@@ -98,11 +98,9 @@ type Emailer = {
         dateAsked: Date
     ) => Promise<void | Error>
     sendQuestionsCMSEmail: (
-        contractRev: ContractRevisionWithRatesType,
-        submitterEmails: string[],
+        contract: ContractRevisionWithRatesType,
         stateAnalystsEmails: StateAnalystsEmails,
         cmsRequestor: CMSUserType,
-        config: EmailConfiguration,
         statePrograms: ProgramType[],
         dateAsked: Date,
         roundNumber: number
@@ -229,18 +227,15 @@ function emailer(
             }
         },
         sendQuestionsCMSEmail: async function (
-            contractRev,
-            submitterEmails,
+            contract,
             stateAnalystsEmails,
             cmsRequestor,
-            config,
             statePrograms,
             dateAsked,
             roundNumber
         ) {
             const emailData = await sendQuestionCMSEmail(
-                contractRev,
-                submitterEmails,
+                contract,
                 stateAnalystsEmails,
                 cmsRequestor,
                 config,

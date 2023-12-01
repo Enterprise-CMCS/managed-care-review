@@ -12,9 +12,11 @@ import { isStoreError } from '../../postgres'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison } from '../../domain-models'
 import type { Emailer } from '../../emailer'
+import type { EmailParameterStore } from '../../parameterStore'
 
 export function createQuestionResolver(
     store: Store,
+    emailParameterStore: EmailParameterStore,
     emailer: Emailer
 ): MutationResolvers['createQuestion'] {
     return async (_parent, { input }, context) => {
@@ -126,6 +128,39 @@ export function createQuestionResolver(
             })
         }
 
+        let stateAnalystsEmails =
+            await emailParameterStore.getStateAnalystsEmails(
+                contractResult.stateCode
+            )
+        //If error log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
+        if (stateAnalystsEmails instanceof Error) {
+            logError('getStateAnalystsEmails', stateAnalystsEmails.message)
+            setErrorAttributesOnActiveSpan(stateAnalystsEmails.message, span)
+            stateAnalystsEmails = []
+        }
+
+        const sendQuestionsCMSEmailResult = await emailer.sendQuestionsCMSEmail(
+            contractResult.revisions[0],
+            stateAnalystsEmails,
+            user,
+            statePrograms,
+            dateAsked,
+            1
+        )
+
+        if (sendQuestionsCMSEmailResult instanceof Error) {
+            logError(
+                'sendQuestionsCMSEmail - CMS email failed',
+                sendQuestionsCMSEmailResult
+            )
+            setErrorAttributesOnActiveSpan('CMS email failed', span)
+            throw new GraphQLError('Email failed.', {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
+        }
         logSuccess('createQuestion')
         setSuccessAttributesOnActiveSpan(span)
 
