@@ -9,6 +9,7 @@ import {
     resubmitPackageStateEmail,
     resubmitPackageCMSEmail,
     sendQuestionStateEmail,
+    sendQuestionCMSEmail,
 } from './'
 import type {
     LockedHealthPlanFormDataType,
@@ -95,6 +96,16 @@ type Emailer = {
         submitterEmails: string[],
         statePrograms: ProgramType[],
         dateAsked: Date
+    ) => Promise<void | Error>
+    sendQuestionsCMSEmail: (
+        contractRev: ContractRevisionWithRatesType,
+        submitterEmails: string[],
+        stateAnalystsEmails: StateAnalystsEmails,
+        cmsRequestor: CMSUserType,
+        config: EmailConfiguration,
+        statePrograms: ProgramType[],
+        dateAsked: Date,
+        roundNumber: number
     ) => Promise<void | Error>
     sendResubmittedStateEmail: (
         formData: LockedHealthPlanFormDataType,
@@ -210,6 +221,32 @@ function emailer(
                 config,
                 statePrograms,
                 dateAsked
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendQuestionsCMSEmail: async function (
+            contractRev,
+            submitterEmails,
+            stateAnalystsEmails,
+            cmsRequestor,
+            config,
+            statePrograms,
+            dateAsked,
+            roundNumber
+        ) {
+            const emailData = await sendQuestionCMSEmail(
+                contractRev,
+                submitterEmails,
+                stateAnalystsEmails,
+                cmsRequestor,
+                config,
+                statePrograms,
+                dateAsked,
+                roundNumber
             )
             if (emailData instanceof Error) {
                 return emailData

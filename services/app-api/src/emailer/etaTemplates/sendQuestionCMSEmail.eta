@@ -6,4 +6,4 @@
 <b>Date:</b> <%= it.dateAsked %><br />
 <br />
 <br />
-<a href="<%= it.submissionQuestionResponseURL %>">View submission Q&A</a>
+<a href="<%= it.questionResponseURL %>">View submission Q&A</a>
