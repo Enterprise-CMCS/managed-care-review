@@ -3,7 +3,7 @@ import type { UpdateInfoType } from '../../domain-models'
 import type { PrismaClient } from '@prisma/client'
 import type { RateType } from '../../domain-models/contractAndRates'
 import { includeLatestSubmittedRateRev } from './prismaSubmittedContractHelpers'
-import { NotFoundError } from '../storeError'
+import { NotFoundError } from '../postgresErrors'
 
 type SubmitRateArgsType = {
     rateID?: string

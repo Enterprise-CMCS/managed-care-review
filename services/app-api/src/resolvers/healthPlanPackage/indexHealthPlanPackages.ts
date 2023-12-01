@@ -10,8 +10,8 @@ import {
 import { isHelpdeskUser } from '../../domain-models/user'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import type { Store, StoreError } from '../../postgres'
-import { isStoreError, NotFoundError } from '../../postgres'
+import type { Store } from '../../postgres'
+import { NotFoundError } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
@@ -21,16 +21,9 @@ import { GraphQLError } from 'graphql/index'
 import { validateContractsAndConvert } from './contractAndRates/resolverHelpers'
 
 const validateAndReturnHealthPlanPackages = (
-    results: HealthPlanPackageType[] | StoreError,
+    results: HealthPlanPackageType[],
     span?: Span
 ) => {
-    if (isStoreError(results)) {
-        const errMessage = `Issue indexing packages of type ${results.code}. Message: ${results.message}`
-        logError('indexHealthPlanPackages', errMessage)
-        setErrorAttributesOnActiveSpan(errMessage, span)
-        throw new Error(errMessage)
-    }
-
     const packages: HealthPlanPackageType[] = results
 
     const edges = packages.map((sub) => {

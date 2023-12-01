@@ -1,18 +1,17 @@
 import type { PrismaClient } from '@prisma/client'
-import type { StoreError } from '../storeError'
-import { convertPrismaErrorToStoreError } from '../storeError'
 import type {
     InsertQuestionResponseArgs,
     QuestionResponseType,
     StateUserType,
 } from '../../domain-models'
 import { v4 as uuidv4 } from 'uuid'
+import { NotFoundError } from '../postgresErrors'
 
 export async function insertQuestionResponse(
     client: PrismaClient,
     response: InsertQuestionResponseArgs,
     user: StateUserType
-): Promise<QuestionResponseType | StoreError> {
+): Promise<QuestionResponseType | Error> {
     const documents = response.documents.map((document) => ({
         id: uuidv4(),
         name: document.name,
@@ -48,7 +47,14 @@ export async function insertQuestionResponse(
         }
 
         return createdResponse
-    } catch (e: unknown) {
-        return convertPrismaErrorToStoreError(e)
+    } catch (e) {
+        // Return a NotFoundError if prisma fails on the primary key constraint
+        // An operation failed because it depends on one or more records
+        // that were required but not found.
+        if (e.code === 'P2025') {
+            return new NotFoundError('Question was not found to respond to')
+        }
+
+        return e
     }
 }

@@ -13,7 +13,6 @@ import type {
     RateType,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
-import type { StoreError } from './storeError'
 import type { InsertUserArgsType } from './user'
 import {
     findUser,
@@ -63,17 +62,17 @@ type Store = {
 
     findStatePrograms: (stateCode: string) => ProgramType[] | Error
 
-    findAllSupportedStates: () => Promise<StateType[] | StoreError>
+    findAllSupportedStates: () => Promise<StateType[] | Error>
 
-    findAllUsers: () => Promise<UserType[] | StoreError>
+    findAllUsers: () => Promise<UserType[] | Error>
 
-    findUser: (id: string) => Promise<UserType | undefined | StoreError>
+    findUser: (id: string) => Promise<UserType | undefined | Error>
 
-    insertUser: (user: InsertUserArgsType) => Promise<UserType | StoreError>
+    insertUser: (user: InsertUserArgsType) => Promise<UserType | Error>
 
     insertManyUsers: (
         users: InsertUserArgsType[]
-    ) => Promise<UserType[] | StoreError>
+    ) => Promise<UserType[] | Error>
 
     updateCmsUserProperties: (
         userID: string,
@@ -81,19 +80,19 @@ type Store = {
         idOfUserPerformingUpdate: string,
         divisionAssignment?: Division,
         description?: string | null
-    ) => Promise<CMSUserType | StoreError>
+    ) => Promise<CMSUserType | Error>
 
     insertQuestion: (
         questionInput: CreateQuestionInput,
         user: CMSUserType
-    ) => Promise<Question | StoreError>
+    ) => Promise<Question | Error>
 
     findAllQuestionsByContract: (pkgID: string) => Promise<Question[] | Error>
 
     insertQuestionResponse: (
         questionInput: InsertQuestionResponseArgs,
         user: StateUserType
-    ) => Promise<QuestionResponseType | StoreError>
+    ) => Promise<QuestionResponseType | Error>
 
     /**
      * Rates database refactor prisma functions

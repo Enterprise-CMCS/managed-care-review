@@ -1,5 +1,5 @@
 import type { InsertUserArgsType } from '../postgres'
-import { isStoreError, NewPostgresStore } from '../postgres'
+import { NewPostgresStore } from '../postgres'
 import type {
     AdminUserType,
     CMSUserType,
@@ -58,8 +58,8 @@ const createDBUsersWithFullData = async (
 
     const result = await postgresStore.insertManyUsers(usersSeed)
 
-    if (isStoreError(result)) {
-        throw new Error(result.message)
+    if (result instanceof Error) {
+        throw result
     }
 
     return result

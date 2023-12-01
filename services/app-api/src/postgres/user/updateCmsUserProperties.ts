@@ -1,10 +1,9 @@
-import type { StoreError } from '../storeError'
-import { convertPrismaErrorToStoreError, isStoreError } from '../storeError'
 import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type { Division, PrismaClient } from '@prisma/client'
 import { AuditAction } from '@prisma/client'
 import type { CMSUserType } from '../../domain-models'
 import { domainUserFromPrismaUser } from './prismaDomainUser'
+import { NotFoundError } from '../postgresErrors'
 
 export async function updateCmsUserProperties(
     client: PrismaClient,
@@ -13,7 +12,7 @@ export async function updateCmsUserProperties(
     idOfUserPerformingUpdate: string,
     divisionAssignment?: Division,
     description?: string | null
-): Promise<CMSUserType | StoreError> {
+): Promise<CMSUserType | Error> {
     try {
         const statesWithCode = stateCodes.map((s) => {
             return { stateCode: s }
@@ -29,7 +28,7 @@ export async function updateCmsUserProperties(
         /* get the old user values before updating */
         let userBeforeUpdate
         try {
-            userBeforeUpdate = await client.user.findFirstOrThrow({
+            userBeforeUpdate = await client.user.findFirst({
                 where: {
                     id: userID,
                     role: 'CMS_USER',
@@ -39,14 +38,11 @@ export async function updateCmsUserProperties(
                 },
             })
         } catch (err) {
-            return convertPrismaErrorToStoreError(err)
+            return err
         }
 
         if (!userBeforeUpdate) {
-            return {
-                code: 'UNEXPECTED_EXCEPTION',
-                message: 'Unable to retrieve user to be updated',
-            }
+            return new NotFoundError('user to update was not found')
         }
 
         /* if all was well with the old values, update the user and make an audit record; 
@@ -94,19 +90,18 @@ export async function updateCmsUserProperties(
 
         const domainUser = domainUserFromPrismaUser(updateResult)
 
-        if (isStoreError(domainUser)) {
+        if (domainUser instanceof Error) {
             return domainUser
         }
 
         if (domainUser.role !== 'CMS_USER') {
-            return {
-                code: 'UNEXPECTED_EXCEPTION',
-                message: 'Updated user was not a CMS User!',
-            }
+            return new Error(
+                'UNEXPECTED EXCEPTION: should have gotten a CMS user back'
+            )
         }
 
         return domainUser
     } catch (err) {
-        return convertPrismaErrorToStoreError(err)
+        return err
     }
 }

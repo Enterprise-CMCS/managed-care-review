@@ -1,7 +1,7 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import UPDATE_CMS_USER from '../../../../app-graphql/src/mutations/updateCMSUser.graphql'
 import type { InsertUserArgsType } from '../../postgres'
-import { isStoreError, NewPostgresStore } from '../../postgres'
+import { NewPostgresStore } from '../../postgres'
 import { v4 as uuidv4 } from 'uuid'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import {
@@ -36,8 +36,8 @@ describe('updateCMSUser', () => {
         }
 
         const newUser = await postgresStore.insertUser(userToInsert)
-        if (isStoreError(newUser)) {
-            throw new Error(newUser.code)
+        if (newUser instanceof Error) {
+            throw newUser
         }
 
         const updateRes = await server.executeOperation({
@@ -112,8 +112,8 @@ describe('updateCMSUser', () => {
         }
 
         const newUser = await postgresStore.insertUser(userToInsert)
-        if (isStoreError(newUser)) {
-            throw new Error(newUser.code)
+        if (newUser instanceof Error) {
+            throw newUser
         }
 
         // make the first update to the division assignment
@@ -209,8 +209,8 @@ describe('updateCMSUser', () => {
         }
 
         const newUser = await postgresStore.insertUser(userToInsert)
-        if (isStoreError(newUser)) {
-            throw new Error(newUser.code)
+        if (newUser instanceof Error) {
+            throw newUser
         }
 
         const updateRes = await server.executeOperation({
@@ -333,8 +333,8 @@ describe('updateCMSUser', () => {
             email: 'zuko@example.com',
         }
         const newUser = await postgresStore.insertUser(userToInsert)
-        if (isStoreError(newUser)) {
-            throw new Error(newUser.code)
+        if (newUser instanceof Error) {
+            throw newUser
         }
         const updateRes = await server.executeOperation({
             query: UPDATE_CMS_USER,

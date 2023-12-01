@@ -6,8 +6,8 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { NotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
-import { isStoreError } from '../../postgres'
 
 export function createQuestionResponseResolver(
     store: Store
@@ -31,11 +31,18 @@ export function createQuestionResponseResolver(
 
         const responseResult = await store.insertQuestionResponse(input, user)
 
-        if (isStoreError(responseResult)) {
-            const errMessage = `Issue creating question response for question ${input.questionID} of type ${responseResult.code}. Message: ${responseResult.message}`
+        if (responseResult instanceof Error) {
+            if (responseResult instanceof NotFoundError) {
+                const errMessage = `Question with ID: ${input.questionID} not found to attach response to`
+                logError('createQuestionResponse', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new UserInputError(errMessage)
+            }
+
+            const errMessage = `Issue creating question response for question ${input.questionID}. Message: ${responseResult.message}`
             logError('createQuestionResponse', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage)
+            throw new Error(errMessage)
         }
 
         logSuccess('createQuestionResponse')

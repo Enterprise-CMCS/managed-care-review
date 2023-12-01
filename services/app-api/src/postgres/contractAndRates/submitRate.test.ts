@@ -1,7 +1,7 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import { submitRate } from './submitRate'
-import { NotFoundError } from '../storeError'
+import { NotFoundError } from '../postgresErrors'
 import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHelpers'
 import { createInsertContractData, must } from '../../testHelpers'
 import { insertDraftRate } from './insertRate'

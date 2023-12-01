@@ -5,8 +5,8 @@ import type { StateCodeType } from '../../../../app-web/src/common-code/healthPl
 import { isValidStateCode } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
+import { NotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
-import { isStoreError } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
@@ -103,8 +103,8 @@ export function updateCMSUserResolver(
             divisionAssignment,
             'Updated user assignments' // someday might have a note field and make this a param
         )
-        if (isStoreError(result)) {
-            if (result.code === 'NOT_FOUND_ERROR') {
+        if (result instanceof Error) {
+            if (result instanceof NotFoundError) {
                 const errMsg = 'cmsUserID does not exist'
                 logError('updateCmsUser', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)

@@ -1,5 +1,5 @@
 import { findContractWithHistory } from './findContractWithHistory'
-import { NotFoundError } from '../storeError'
+import { NotFoundError } from '../postgresErrors'
 import type { PrismaClient } from '@prisma/client'
 import type {
     ContractFormDataType,

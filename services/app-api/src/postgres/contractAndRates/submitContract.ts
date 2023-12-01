@@ -1,7 +1,7 @@
 import type { PrismaClient } from '@prisma/client'
 import type { ContractType } from '../../domain-models/contractAndRates'
 import { findContractWithHistory } from './findContractWithHistory'
-import { NotFoundError } from '../storeError'
+import { NotFoundError } from '../postgresErrors'
 import type { UpdateInfoType } from '../../domain-models'
 import { includeLatestSubmittedRateRev } from './prismaSubmittedRateHelpers'
 
