@@ -43,24 +43,6 @@ function mockStoreThatErrors(): Store {
     )
 
     return {
-        findAllHealthPlanPackagesByState: async (_stateCode) => {
-            return genericStoreError
-        },
-        findAllHealthPlanPackagesBySubmittedAt: async () => {
-            return genericStoreError
-        },
-        insertHealthPlanPackage: async (_args) => {
-            return genericStoreError
-        },
-        findHealthPlanPackage: async (_draftUUID) => {
-            return genericStoreError
-        },
-        insertHealthPlanRevision: async (_pkgID, _draft) => {
-            return genericStoreError
-        },
-        updateHealthPlanRevision: async (_pkgID, _formData) => {
-            return genericStoreError
-        },
         findPrograms: () => {
             return new Error(
                 'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
@@ -72,9 +54,6 @@ function mockStoreThatErrors(): Store {
             )
         },
         findAllSupportedStates: async () => {
-            return genericStoreError
-        },
-        findAllRevisions: async () => {
             return genericStoreError
         },
         findAllUsers: async () => {

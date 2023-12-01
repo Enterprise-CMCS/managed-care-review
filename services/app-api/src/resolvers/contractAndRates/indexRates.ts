@@ -8,7 +8,6 @@ import {
 import { hasAdminPermissions, isCMSUser } from '../../domain-models/user'
 import { NotFoundError } from '../../postgres'
 import type { QueryResolvers } from '../../gen/gqlServer'
-import type { LDService } from '../../launchDarkly/launchDarkly'
 import type { Store } from '../../postgres'
 import type { RateOrErrorArrayType } from '../../postgres/contractAndRates'
 import { logError } from '../../logger'
@@ -41,23 +40,11 @@ const validateAndReturnRates = (
     return parsedRates
 }
 
-export function indexRatesResolver(
-    store: Store,
-    launchDarkly: LDService
-): QueryResolvers['indexRates'] {
+export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
     return async (_parent, _args, context) => {
         const { user, span } = context
         setResolverDetailsOnActiveSpan('indexRates', user, span)
-        const ratesDatabaseRefactor = await launchDarkly.getFeatureFlag(
-            context,
-            'rates-db-refactor'
-        )
 
-        if (!ratesDatabaseRefactor) {
-            throw new ForbiddenError(
-                'indexRates must be used with rates database refactor flag'
-            )
-        }
         if (hasAdminPermissions(user) || isCMSUser(user)) {
             const ratesWithHistory =
                 await store.findAllRatesWithHistoryBySubmitInfo()

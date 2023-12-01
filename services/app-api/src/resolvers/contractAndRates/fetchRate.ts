@@ -1,4 +1,3 @@
-import { ForbiddenError } from 'apollo-server-core'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
@@ -6,27 +5,13 @@ import {
 } from '../attributeHelper'
 import { NotFoundError } from '../../postgres'
 import type { QueryResolvers } from '../../gen/gqlServer'
-import type { LDService } from '../../launchDarkly/launchDarkly'
 import type { Store } from '../../postgres'
 import { GraphQLError } from 'graphql'
 
-export function fetchRateResolver(
-    store: Store,
-    launchDarkly: LDService
-): QueryResolvers['fetchRate'] {
+export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
         setResolverDetailsOnActiveSpan('fetchRate', user, span)
-        const ratesDatabaseRefactor = await launchDarkly.getFeatureFlag(
-            context,
-            'rates-db-refactor'
-        )
-
-        if (!ratesDatabaseRefactor) {
-            throw new ForbiddenError(
-                'fetchRate must be used with rates database refactor flag'
-            )
-        }
 
         const rateWithHistory = await store.findRateWithHistory(input.rateID)
         if (rateWithHistory instanceof Error) {

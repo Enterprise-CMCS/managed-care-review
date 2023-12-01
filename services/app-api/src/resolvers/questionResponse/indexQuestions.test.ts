@@ -11,11 +11,8 @@ import {
     createDBUsersWithFullData,
     testCMSUser,
 } from '../../testHelpers/userHelpers'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 describe('indexQuestions', () => {
-    const mockLDService = testLDService({ ['rates-db-refactor']: true })
-
     const dmcoCMSUser = testCMSUser({
         divisionAssignment: 'DMCO',
     })
@@ -31,31 +28,25 @@ describe('indexQuestions', () => {
     })
 
     it('returns package with questions and responses for each division', async () => {
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const dmcoCMSServer = await constructTestPostgresServer({
             context: {
                 user: dmcoCMSUser,
             },
-            ldService: mockLDService,
         })
         const dmcpCMSServer = await constructTestPostgresServer({
             context: {
                 user: dmcpCMSUser,
             },
-            ldService: mockLDService,
         })
         const oactCMServer = await constructTestPostgresServer({
             context: {
                 user: oactCMSUser,
             },
-            ldService: mockLDService,
         })
 
-        const submittedPkg = await createAndSubmitTestHealthPlanPackage(
-            stateServer
-        )
+        const submittedPkg =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
 
         const createdDMCOQuestion = await createTestQuestion(
             dmcoCMSServer,
@@ -185,9 +176,7 @@ describe('indexQuestions', () => {
         )
     })
     it('returns an error if you are requesting for a different state (403)', async () => {
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const otherStateServer = await constructTestPostgresServer({
             context: {
                 user: {
@@ -199,18 +188,15 @@ describe('indexQuestions', () => {
                     givenName: 'Aang',
                 },
             },
-            ldService: mockLDService,
         })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: dmcoCMSUser,
             },
-            ldService: mockLDService,
         })
 
-        const submittedPkg = await createAndSubmitTestHealthPlanPackage(
-            stateServer
-        )
+        const submittedPkg =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
 
         await createTestQuestion(cmsServer, submittedPkg.id)
 
@@ -230,9 +216,7 @@ describe('indexQuestions', () => {
         )
     })
     it('returns an error if health plan package does not exist', async () => {
-        const server = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const server = await constructTestPostgresServer()
 
         await createAndSubmitTestHealthPlanPackage(server)
 

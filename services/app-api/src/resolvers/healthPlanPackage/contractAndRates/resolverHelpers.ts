@@ -12,7 +12,6 @@ import type {
     SubmissionDocument,
     UnlockedHealthPlanFormDataType,
 } from '../../../../../app-web/src/common-code/healthPlanFormDataType'
-import { calculateSHA256 } from '../../../handlers/add_sha'
 import { rateFormDataSchema } from '../../../domain-models/contractAndRates'
 import assert from 'assert'
 import type { ContractOrErrorArrayType } from '../../../postgres/contractAndRates/findAllContractsWithHistoryByState'
@@ -72,16 +71,10 @@ const validateContractsAndConvert = (
 const convertHPPDocsToDomain = async (docs: SubmissionDocument[]) =>
     await Promise.all(
         docs.map(async ({ name, s3URL, sha256 }): Promise<DocumentType> => {
-            let sha = sha256
-
-            if (!sha) {
-                sha = await calculateSHA256(s3URL)
-            }
-
             return {
                 name,
                 s3URL,
-                sha256: sha,
+                sha256,
             }
         })
     )
