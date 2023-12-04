@@ -8,7 +8,7 @@ import {
     renderTemplate,
     findContractPrograms,
 } from '../templateHelpers'
-import { submissionSummaryURL } from '../generateURLs'
+import { submissionQuestionResponseURL } from '../generateURLs'
 import type { ContractRevisionWithRatesType } from '../../domain-models/contractAndRates'
 
 export const sendQuestionStateEmail = async (
@@ -43,14 +43,14 @@ export const sendQuestionStateEmail = async (
         packagePrograms
     )
 
-    const packageURL = submissionSummaryURL(
+    const questionResponseURL = submissionQuestionResponseURL(
         contractRev.contract.id,
         config.baseUrl
     )
 
     const data = {
         packageName,
-        submissionURL: packageURL,
+        submissionURL: questionResponseURL,
         cmsRequestorEmail: cmsRequestor.email,
         cmsRequestorName: `${cmsRequestor.givenName} ${cmsRequestor.familyName}`,
         cmsRequestorDivision: cmsRequestor.divisionAssignment,

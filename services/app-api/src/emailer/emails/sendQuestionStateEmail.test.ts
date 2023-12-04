@@ -232,7 +232,7 @@ test('includes link to submission', async () => {
                 'Open the submission in MC-Review to answer questions'
             ),
             bodyHTML: expect.stringContaining(
-                `href="http://localhost/submissions/${sub.contract.id}"`
+                `http://localhost/submissions/${sub.contract.id}/question-and-answer`
             ),
         })
     )

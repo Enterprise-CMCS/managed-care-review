@@ -344,7 +344,7 @@ describe('createQuestion', () => {
                     `CMS asked questions about ${name}`
                 ),
                 bodyHTML: expect.stringContaining(
-                    `<a href="http://localhost/submissions/${stateSubmission.id}">Open the submission in MC-Review to answer questions</a>`
+                    `http://localhost/submissions/${sub.id}/question-and-answers`
                 ),
             })
         )
