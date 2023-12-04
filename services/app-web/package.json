@@ -125,7 +125,7 @@
         "@storybook/addon-a11y": "^6.5.15",
         "@storybook/addon-essentials": "^6.5.15",
         "@storybook/addon-links": "^6.5.15",
-        "@storybook/builder-webpack5": "^6.5.4",
+        "@storybook/builder-webpack5": "^7.6.3",
         "@storybook/manager-webpack5": "^6.5.15",
         "@storybook/preset-create-react-app": "7.3.2",
         "@storybook/react": "^6.5.15",
