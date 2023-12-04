@@ -139,13 +139,14 @@ export function createQuestionResolver(
             stateAnalystsEmails = []
         }
 
+        const roundNumber = questionResult.responses.length + 1
         const sendQuestionsCMSEmailResult = await emailer.sendQuestionsCMSEmail(
             contractResult.revisions[0],
             stateAnalystsEmails,
             user,
             statePrograms,
             dateAsked,
-            1
+            roundNumber
         )
 
         if (sendQuestionsCMSEmailResult instanceof Error) {
