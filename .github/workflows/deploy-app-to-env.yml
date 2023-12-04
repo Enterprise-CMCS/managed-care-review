@@ -82,9 +82,6 @@ jobs:
       - name: Generate Code
         run: npx lerna run generate
 
-      - name: Compile proto migration files
-        run: npx lerna run build --scope=app-proto
-
       - name: upload app web gen directory
         uses: actions/upload-artifact@v3
         with:

@@ -48,7 +48,7 @@ This type of migration is run as standalone lambda that developers must manually
 1. Start the app.
 1. When the app is running, connect to the local database so that you can inspect the changes you're making. Use the DATABASE_URL from your .envrc.local file to connect to the database interface of your choice. You can connect via the terminal, or an app like TablePlus, dBeaver, Postico, DataGrip, etc.
 1. Run some Cypress tests to populate the database. The CMSWorkflow tests are a good choice, since they create two entries which contain rates, one of which has a revision.
-1. Verify that in the local database you can see entries in the HealthPlanPackageTable and HealthPlanRevisionTable.
+1. Verify that in the local database you can see entries in the ContractTable and ContractRevisionTable.
 1. Now you're ready to run your lambda. In a different terminal instance, run `DIRENV ALLOW` again.
 1. Navigate to `services/app-api`.
 1. Run `npx serverless invoke local --function `name_of_your_lambda``. You should see it build with webpack, then run. Any log statements you've put in your code will display in this window.

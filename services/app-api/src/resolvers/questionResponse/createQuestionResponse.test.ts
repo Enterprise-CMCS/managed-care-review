@@ -10,10 +10,8 @@ import {
     createDBUsersWithFullData,
     testCMSUser,
 } from '../../testHelpers/userHelpers'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 describe('createQuestionResponse', () => {
-    const mockLDService = testLDService({ ['rates-db-refactor']: true })
     const cmsUser = testCMSUser()
     beforeAll(async () => {
         //Inserting a new CMS user, with division assigned, in postgres in order to create the question to user relationship.
@@ -21,19 +19,15 @@ describe('createQuestionResponse', () => {
     })
 
     it('returns question response data', async () => {
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
         })
 
-        const submittedPkg = await createAndSubmitTestHealthPlanPackage(
-            stateServer
-        )
+        const submittedPkg =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
 
         const createdQuestion = await createTestQuestion(
             cmsServer,
@@ -63,9 +57,7 @@ describe('createQuestionResponse', () => {
     })
 
     it('returns an error when attempting to create response for a question that does not exist', async () => {
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const fakeID = 'abc-123'
 
         const createdResponse = await stateServer.executeOperation({
@@ -91,18 +83,14 @@ describe('createQuestionResponse', () => {
     })
 
     it('returns an error if a cms user attempts to create a question response for a package', async () => {
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
         })
-        const submittedPkg = await createAndSubmitTestHealthPlanPackage(
-            stateServer
-        )
+        const submittedPkg =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
         const createdQuestion = await createTestQuestion(
             cmsServer,
             submittedPkg.id
