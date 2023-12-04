@@ -70,7 +70,7 @@ export const sendQuestionCMSEmail = async (
             replyToAddresses: [config.helpDeskEmail],
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
-            }New questions about ${packageName}`,
+            }Questions sent for ${packageName}`,
             bodyText: stripHTMLFromTemplate(result),
             bodyHTML: result,
         }
