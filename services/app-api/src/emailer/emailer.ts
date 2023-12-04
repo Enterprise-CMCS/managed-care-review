@@ -18,8 +18,8 @@ import type {
 import type {
     UpdateInfoType,
     ProgramType,
-    CMSUserType,
     ContractRevisionWithRatesType,
+    Question,
 } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 
@@ -92,18 +92,15 @@ type Emailer = {
     ) => Promise<void | Error>
     sendQuestionsStateEmail: (
         contract: ContractRevisionWithRatesType,
-        cmsRequesor: CMSUserType,
         submitterEmails: string[],
         statePrograms: ProgramType[],
-        dateAsked: Date
+        question: Question
     ) => Promise<void | Error>
     sendQuestionsCMSEmail: (
         contract: ContractRevisionWithRatesType,
         stateAnalystsEmails: StateAnalystsEmails,
-        cmsRequestor: CMSUserType,
         statePrograms: ProgramType[],
-        dateAsked: Date,
-        roundNumber: number
+        question: Question
     ) => Promise<void | Error>
     sendResubmittedStateEmail: (
         formData: LockedHealthPlanFormDataType,
@@ -207,18 +204,16 @@ function emailer(
         },
         sendQuestionsStateEmail: async function (
             contract,
-            cmsRequestor,
             submitterEmails,
             statePrograms,
-            dateAsked
+            question
         ) {
             const emailData = await sendQuestionStateEmail(
                 contract,
                 submitterEmails,
-                cmsRequestor,
                 config,
                 statePrograms,
-                dateAsked
+                question
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -229,19 +224,15 @@ function emailer(
         sendQuestionsCMSEmail: async function (
             contract,
             stateAnalystsEmails,
-            cmsRequestor,
             statePrograms,
-            dateAsked,
-            roundNumber
+            question
         ) {
             const emailData = await sendQuestionCMSEmail(
                 contract,
                 stateAnalystsEmails,
-                cmsRequestor,
                 config,
                 statePrograms,
-                dateAsked,
-                roundNumber
+                question
             )
             if (emailData instanceof Error) {
                 return emailData

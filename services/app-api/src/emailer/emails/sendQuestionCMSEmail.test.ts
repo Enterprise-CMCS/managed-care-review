@@ -3,7 +3,7 @@ import {
     mockContractRev,
     mockMNState,
 } from '../../testHelpers/emailerHelpers'
-import type { CMSUserType, StateType } from '../../domain-models'
+import type { CMSUserType, StateType, Question } from '../../domain-models'
 import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
 import { sendQuestionCMSEmail } from './index'
 
@@ -27,8 +27,15 @@ const cmsUser: CMSUserType = {
     stateAssignments: [flState],
 }
 
-const roundNumber = 1
-const dateAsked = new Date('01/01/2024')
+const question: Question = {
+    id: '1234',
+    contractID: 'contract-id-test',
+    createdAt: new Date('01/01/2024'),
+    addedBy: cmsUser,
+    documents: [],
+    division: 'DMCO',
+    responses: [],
+}
 
 test('to addresses list only includes state analyst when a DMCO user submits a question', async () => {
     const sub = mockContractRev()
@@ -37,11 +44,9 @@ test('to addresses list only includes state analyst when a DMCO user submits a q
     const template = await sendQuestionCMSEmail(
         sub,
         stateAnalysts,
-        cmsUser,
         testEmailConfig(),
         defaultStatePrograms,
-        dateAsked,
-        roundNumber
+        question
     )
 
     if (template instanceof Error) {
@@ -71,14 +76,16 @@ test('to addresses list includes state analyst and OACT group emails when an OAC
         ...cmsUser,
         divisionAssignment: 'OACT',
     }
+    const questionFromOACT: Question = {
+        ...question,
+        addedBy: oactUser,
+    }
     const template = await sendQuestionCMSEmail(
         sub,
         stateAnalysts,
-        oactUser,
         testEmailConfig(),
         defaultStatePrograms,
-        dateAsked,
-        roundNumber
+        questionFromOACT
     )
 
     if (template instanceof Error) {
@@ -102,14 +109,16 @@ test('to addresses list includes state analyst and DMCP group emails when a DMCP
         ...cmsUser,
         divisionAssignment: 'DMCP',
     }
+    const questionFromDMCP: Question = {
+        ...question,
+        addedBy: dmcpUser,
+    }
     const template = await sendQuestionCMSEmail(
         sub,
         stateAnalysts,
-        dmcpUser,
         testEmailConfig(),
         defaultStatePrograms,
-        dateAsked,
-        roundNumber
+        questionFromDMCP
     )
 
     if (template instanceof Error) {
@@ -139,11 +148,9 @@ test('subject line is correct', async () => {
     const template = await sendQuestionCMSEmail(
         sub,
         stateAnalysts,
-        cmsUser,
         testEmailConfig(),
         defaultStatePrograms,
-        dateAsked,
-        roundNumber
+        question
     )
 
     if (template instanceof Error) {
@@ -164,11 +171,9 @@ test('includes link to the question response page', async () => {
     const template = await sendQuestionCMSEmail(
         sub,
         stateAnalysts,
-        cmsUser,
         testEmailConfig(),
         defaultStatePrograms,
-        dateAsked,
-        roundNumber
+        question
     )
 
     if (template instanceof Error) {
@@ -192,11 +197,9 @@ test('includes expected data on the CMS analyst who sent the question', async ()
     const template = await sendQuestionCMSEmail(
         sub,
         stateAnalysts,
-        cmsUser,
         testEmailConfig(),
         defaultStatePrograms,
-        dateAsked,
-        roundNumber
+        question
     )
 
     if (template instanceof Error) {
@@ -223,11 +226,9 @@ test('renders overall email for a new question as expected', async () => {
     const result = await sendQuestionCMSEmail(
         sub,
         stateAnalysts,
-        cmsUser,
         testEmailConfig(),
         defaultStatePrograms,
-        dateAsked,
-        roundNumber
+        question
     )
 
     if (result instanceof Error) {

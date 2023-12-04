@@ -2,7 +2,7 @@ import { packageName as generatePackageName } from '../../../../app-web/src/comm
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData } from '..'
-import type { ProgramType, CMSUserType } from '../../domain-models'
+import type { ProgramType, Question } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
     renderTemplate,
@@ -14,10 +14,9 @@ import type { ContractRevisionWithRatesType } from '../../domain-models/contract
 export const sendQuestionStateEmail = async (
     contractRev: ContractRevisionWithRatesType,
     submitterEmails: string[],
-    cmsRequestor: CMSUserType,
     config: EmailConfiguration,
     statePrograms: ProgramType[],
-    dateAsked: Date
+    question: Question
 ): Promise<EmailData | Error> => {
     const stateContactEmails: string[] = []
 
@@ -50,11 +49,11 @@ export const sendQuestionStateEmail = async (
 
     const data = {
         packageName,
-        submissionURL: questionResponseURL,
-        cmsRequestorEmail: cmsRequestor.email,
-        cmsRequestorName: `${cmsRequestor.givenName} ${cmsRequestor.familyName}`,
-        cmsRequestorDivision: cmsRequestor.divisionAssignment,
-        dateAsked: formatCalendarDate(dateAsked),
+        questionResponseURL: questionResponseURL,
+        cmsRequestorEmail: question.addedBy.email,
+        cmsRequestorName: `${question.addedBy.givenName} ${question.addedBy.familyName}`,
+        cmsRequestorDivision: question.addedBy.divisionAssignment,
+        dateAsked: formatCalendarDate(question.createdAt),
     }
 
     const result = await renderTemplate<typeof data>(

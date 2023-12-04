@@ -2,7 +2,7 @@ import { packageName as generatePackageName } from '../../../../app-web/src/comm
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData, StateAnalystsEmails } from '..'
-import type { ProgramType, CMSUserType } from '../../domain-models'
+import type { ProgramType, Question } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
     renderTemplate,
@@ -14,16 +14,14 @@ import type { ContractRevisionWithRatesType } from '../../domain-models/contract
 export const sendQuestionCMSEmail = async (
     contractRev: ContractRevisionWithRatesType,
     stateAnalystsEmails: StateAnalystsEmails,
-    cmsRequestor: CMSUserType,
     config: EmailConfiguration,
     statePrograms: ProgramType[],
-    dateAsked: Date,
-    roundNumber: number
+    question: Question
 ): Promise<EmailData | Error> => {
     let receiverEmails = [...stateAnalystsEmails, ...config.devReviewTeamEmails]
-    if (cmsRequestor.divisionAssignment === 'DMCP') {
+    if (question.addedBy.divisionAssignment === 'DMCP') {
         receiverEmails.push(...config.dmcpEmails)
-    } else if (cmsRequestor.divisionAssignment === 'OACT') {
+    } else if (question.addedBy.divisionAssignment === 'OACT') {
         receiverEmails.push(...config.oactEmails)
     }
     receiverEmails = pruneDuplicateEmails(receiverEmails)
@@ -45,14 +43,15 @@ export const sendQuestionCMSEmail = async (
         contractRev.contract.id,
         config.baseUrl
     )
+    const roundNumber = question.responses.length + 1
 
     const data = {
         packageName,
         questionResponseURL,
-        cmsRequestorEmail: cmsRequestor.email,
-        cmsRequestorName: `${cmsRequestor.givenName} ${cmsRequestor.familyName}`,
-        cmsRequestorDivision: cmsRequestor.divisionAssignment,
-        dateAsked: formatCalendarDate(dateAsked),
+        cmsRequestorEmail: question.addedBy.email,
+        cmsRequestorName: `${question.addedBy.givenName} ${question.addedBy.familyName}`,
+        cmsRequestorDivision: question.addedBy.divisionAssignment,
+        dateAsked: formatCalendarDate(question.createdAt),
         roundNumber,
     }
 

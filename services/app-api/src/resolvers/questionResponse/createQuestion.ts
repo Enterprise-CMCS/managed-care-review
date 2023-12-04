@@ -104,14 +104,12 @@ export function createQuestionResolver(
             throw new Error(errMessage)
         }
 
-        const dateAsked = new Date()
         const sendQuestionsStateEmailResult =
             await emailer.sendQuestionsStateEmail(
                 contractResult.revisions[0],
-                user,
                 submitterEmails,
                 statePrograms,
-                dateAsked
+                questionResult
             )
 
         if (sendQuestionsStateEmailResult instanceof Error) {
@@ -120,7 +118,9 @@ export function createQuestionResolver(
                 sendQuestionsStateEmailResult
             )
             setErrorAttributesOnActiveSpan('state email failed', span)
-            throw new GraphQLError('Email failed.', {
+            const errMessage = `Error sending a state email for 
+                questionID: ${questionResult.id} and contractID: ${contractResult.id}`
+            throw new GraphQLError(errMessage, {
                 extensions: {
                     code: 'INTERNAL_SERVER_ERROR',
                     cause: 'EMAIL_ERROR',
@@ -139,14 +139,11 @@ export function createQuestionResolver(
             stateAnalystsEmails = []
         }
 
-        const roundNumber = questionResult.responses.length + 1
         const sendQuestionsCMSEmailResult = await emailer.sendQuestionsCMSEmail(
             contractResult.revisions[0],
             stateAnalystsEmails,
-            user,
             statePrograms,
-            dateAsked,
-            roundNumber
+            questionResult
         )
 
         if (sendQuestionsCMSEmailResult instanceof Error) {
@@ -155,7 +152,9 @@ export function createQuestionResolver(
                 sendQuestionsCMSEmailResult
             )
             setErrorAttributesOnActiveSpan('CMS email failed', span)
-            throw new GraphQLError('Email failed.', {
+            const errMessage = `Error sending a CMS email for 
+                questionID: ${questionResult.id} and contractID: ${contractResult.id}`
+            throw new GraphQLError(errMessage, {
                 extensions: {
                     code: 'INTERNAL_SERVER_ERROR',
                     cause: 'EMAIL_ERROR',
