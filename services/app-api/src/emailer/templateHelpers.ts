@@ -83,17 +83,18 @@ const filterChipAndPRSubmissionReviewers = (
     reviewers: string[],
     config: EmailConfiguration
 ) => {
-    const { oactEmails, dmcpEmails } = config
+    const { oactEmails, dmcpSubmissionEmails } = config
 
     return reviewers.filter(
-        (email) => !dmcpEmails.includes(email) && !oactEmails.includes(email)
+        (email) =>
+            !dmcpSubmissionEmails.includes(email) && !oactEmails.includes(email)
     )
 }
 
 /* 
     Determine reviewers for a given health plan package and state
     - devReviewTeamEmails added to all emails by default
-    - dmcpEmails added in both CONTRACT_ONLY and CONTRACT_AND_RATES
+    - dmcpSubmissionEmails added in both CONTRACT_ONLY and CONTRACT_AND_RATES
     - oactEmails added for CONTRACT_AND_RATES
     - dmco is added to emails via state analysts
     
@@ -113,7 +114,7 @@ const generateCMSReviewerEmails = (
         )
     }
 
-    const { oactEmails, dmcpEmails } = config
+    const { oactEmails, dmcpSubmissionEmails } = config
     let reviewers: string[] = []
 
     if (pkg.submissionType === 'CONTRACT_ONLY') {
@@ -121,14 +122,14 @@ const generateCMSReviewerEmails = (
         reviewers = [
             ...config.devReviewTeamEmails,
             ...stateAnalystsEmails,
-            ...dmcpEmails,
+            ...dmcpSubmissionEmails,
         ]
     } else if (pkg.submissionType === 'CONTRACT_AND_RATES') {
         //Contract and rate submissions reviewer emails.
         reviewers = [
             ...config.devReviewTeamEmails,
             ...stateAnalystsEmails,
-            ...dmcpEmails,
+            ...dmcpSubmissionEmails,
             ...oactEmails,
         ]
     }

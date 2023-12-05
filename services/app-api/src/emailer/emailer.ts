@@ -37,7 +37,8 @@ type EmailConfiguration = {
      */
     devReviewTeamEmails: string[] // added by default to all incoming submissions
     oactEmails: string[] // OACT division emails
-    dmcpEmails: string[] // DMCP division emails
+    dmcpReviewEmails: string[] // DMCP division emails for reviews
+    dmcpSubmissionEmails: string[] // DMCP division emails for submissions
     dmcoEmails: string[] // DMCO division emails
 
     /* Email addresses used in display text

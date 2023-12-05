@@ -20,7 +20,7 @@ export const sendQuestionCMSEmail = async (
 ): Promise<EmailData | Error> => {
     let receiverEmails = [...stateAnalystsEmails, ...config.devReviewTeamEmails]
     if (question.addedBy.divisionAssignment === 'DMCP') {
-        receiverEmails.push(...config.dmcpEmails)
+        receiverEmails.push(...config.dmcpReviewEmails)
     } else if (question.addedBy.divisionAssignment === 'OACT') {
         receiverEmails.push(...config.oactEmails)
     }

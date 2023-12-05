@@ -57,7 +57,7 @@ test('to addresses list only includes state analyst when a DMCO user submits a q
         expect.not.objectContaining({
             toAddresses: expect.arrayContaining([
                 ...testEmailConfig().oactEmails,
-                ...testEmailConfig().dmcpEmails,
+                ...testEmailConfig().dmcpReviewEmails,
             ]),
         })
     )
@@ -129,7 +129,7 @@ test('to addresses list includes state analyst and DMCP group emails when a DMCP
         expect.objectContaining({
             toAddresses: expect.arrayContaining([
                 ...stateAnalysts,
-                ...testEmailConfig().dmcpEmails,
+                ...testEmailConfig().dmcpReviewEmails,
             ]),
         })
     )

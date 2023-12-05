@@ -320,7 +320,7 @@ describe('with rates', () => {
             throw template
         }
 
-        testEmailConfig().dmcpEmails.forEach((emailAddress) => {
+        testEmailConfig().dmcpSubmissionEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),

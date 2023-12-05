@@ -695,7 +695,8 @@ type EmailConfiguration {
     emailSource: String!
     devReviewTeamEmails: [String!]!
     oactEmails: [String!]!
-    dmcpEmails: [String!]!
+    dmcpReviewEmails: [String!]!
+    dmcpSubmissionEmails: [String!]!
     dmcoEmails: [String!]!
     cmsReviewHelpEmailAddress: String!
     cmsRateHelpEmailAddress: String!
