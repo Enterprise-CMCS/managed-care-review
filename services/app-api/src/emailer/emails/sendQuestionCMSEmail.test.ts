@@ -27,15 +27,17 @@ const cmsUser: CMSUserType = {
     stateAssignments: [flState],
 }
 
-const question: Question = {
-    id: '1234',
-    contractID: 'contract-id-test',
-    createdAt: new Date('01/01/2024'),
-    addedBy: cmsUser,
-    documents: [],
-    division: 'DMCO',
-    responses: [],
-}
+const questions: Question[] = [
+    {
+        id: '1234',
+        contractID: 'contract-id-test',
+        createdAt: new Date('01/01/2024'),
+        addedBy: cmsUser,
+        documents: [],
+        division: 'DMCO',
+        responses: [],
+    },
+]
 
 test('to addresses list only includes state analyst when a DMCO user submits a question', async () => {
     const sub = mockContractRev()
@@ -46,7 +48,7 @@ test('to addresses list only includes state analyst when a DMCO user submits a q
         stateAnalysts,
         testEmailConfig(),
         defaultStatePrograms,
-        question
+        questions
     )
 
     if (template instanceof Error) {
@@ -76,16 +78,18 @@ test('to addresses list includes state analyst and OACT group emails when an OAC
         ...cmsUser,
         divisionAssignment: 'OACT',
     }
-    const questionFromOACT: Question = {
-        ...question,
-        addedBy: oactUser,
-    }
+    const questionsFromOACT: Question[] = [
+        {
+            ...questions[0],
+            addedBy: oactUser,
+        },
+    ]
     const template = await sendQuestionCMSEmail(
         sub,
         stateAnalysts,
         testEmailConfig(),
         defaultStatePrograms,
-        questionFromOACT
+        questionsFromOACT
     )
 
     if (template instanceof Error) {
@@ -109,16 +113,18 @@ test('to addresses list includes state analyst and DMCP group emails when a DMCP
         ...cmsUser,
         divisionAssignment: 'DMCP',
     }
-    const questionFromDMCP: Question = {
-        ...question,
-        addedBy: dmcpUser,
-    }
+    const questionsFromDMCP: Question[] = [
+        {
+            ...questions[0],
+            addedBy: dmcpUser,
+        },
+    ]
     const template = await sendQuestionCMSEmail(
         sub,
         stateAnalysts,
         testEmailConfig(),
         defaultStatePrograms,
-        questionFromDMCP
+        questionsFromDMCP
     )
 
     if (template instanceof Error) {
@@ -150,7 +156,7 @@ test('subject line is correct', async () => {
         stateAnalysts,
         testEmailConfig(),
         defaultStatePrograms,
-        question
+        questions
     )
 
     if (template instanceof Error) {
@@ -173,7 +179,7 @@ test('includes link to the question response page', async () => {
         stateAnalysts,
         testEmailConfig(),
         defaultStatePrograms,
-        question
+        questions
     )
 
     if (template instanceof Error) {
@@ -199,7 +205,7 @@ test('includes expected data on the CMS analyst who sent the question', async ()
         stateAnalysts,
         testEmailConfig(),
         defaultStatePrograms,
-        question
+        questions
     )
 
     if (template instanceof Error) {
@@ -228,7 +234,7 @@ test('renders overall email for a new question as expected', async () => {
         stateAnalysts,
         testEmailConfig(),
         defaultStatePrograms,
-        question
+        questions
     )
 
     if (result instanceof Error) {

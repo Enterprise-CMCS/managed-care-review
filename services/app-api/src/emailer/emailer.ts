@@ -95,13 +95,13 @@ type Emailer = {
         contract: ContractRevisionWithRatesType,
         submitterEmails: string[],
         statePrograms: ProgramType[],
-        question: Question
+        questions: Question[]
     ) => Promise<void | Error>
     sendQuestionsCMSEmail: (
         contract: ContractRevisionWithRatesType,
         stateAnalystsEmails: StateAnalystsEmails,
         statePrograms: ProgramType[],
-        question: Question
+        questions: Question[]
     ) => Promise<void | Error>
     sendResubmittedStateEmail: (
         formData: LockedHealthPlanFormDataType,
@@ -207,14 +207,14 @@ function emailer(
             contract,
             submitterEmails,
             statePrograms,
-            question
+            questions
         ) {
             const emailData = await sendQuestionStateEmail(
                 contract,
                 submitterEmails,
                 config,
                 statePrograms,
-                question
+                questions
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -226,14 +226,14 @@ function emailer(
             contract,
             stateAnalystsEmails,
             statePrograms,
-            question
+            questions
         ) {
             const emailData = await sendQuestionCMSEmail(
                 contract,
                 stateAnalystsEmails,
                 config,
                 statePrograms,
-                question
+                questions
             )
             if (emailData instanceof Error) {
                 return emailData

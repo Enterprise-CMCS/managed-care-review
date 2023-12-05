@@ -16,12 +16,13 @@ export const sendQuestionCMSEmail = async (
     stateAnalystsEmails: StateAnalystsEmails,
     config: EmailConfiguration,
     statePrograms: ProgramType[],
-    question: Question
+    questions: Question[]
 ): Promise<EmailData | Error> => {
+    const newQuestion = questions[questions.length - 1]
     let receiverEmails = [...stateAnalystsEmails, ...config.devReviewTeamEmails]
-    if (question.addedBy.divisionAssignment === 'DMCP') {
+    if (newQuestion.addedBy.divisionAssignment === 'DMCP') {
         receiverEmails.push(...config.dmcpReviewEmails)
-    } else if (question.addedBy.divisionAssignment === 'OACT') {
+    } else if (newQuestion.addedBy.divisionAssignment === 'OACT') {
         receiverEmails.push(...config.oactEmails)
     }
     receiverEmails = pruneDuplicateEmails(receiverEmails)
@@ -43,15 +44,15 @@ export const sendQuestionCMSEmail = async (
         contractRev.contract.id,
         config.baseUrl
     )
-    const roundNumber = question.responses.length + 1
+    const roundNumber = questions.length
 
     const data = {
         packageName,
         questionResponseURL,
-        cmsRequestorEmail: question.addedBy.email,
-        cmsRequestorName: `${question.addedBy.givenName} ${question.addedBy.familyName}`,
-        cmsRequestorDivision: question.addedBy.divisionAssignment,
-        dateAsked: formatCalendarDate(question.createdAt),
+        cmsRequestorEmail: newQuestion.addedBy.email,
+        cmsRequestorName: `${newQuestion.addedBy.givenName} ${newQuestion.addedBy.familyName}`,
+        cmsRequestorDivision: newQuestion.addedBy.divisionAssignment,
+        dateAsked: formatCalendarDate(newQuestion.createdAt),
         roundNumber,
     }
 

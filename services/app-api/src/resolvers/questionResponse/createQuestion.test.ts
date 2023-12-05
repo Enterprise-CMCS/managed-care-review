@@ -389,6 +389,63 @@ describe('createQuestion', () => {
         )
     })
 
+    it('send CMS email to state analysts with correct round number if multiple questions have been asked', async () => {
+        const config = testEmailConfig()
+        const mockEmailer = testEmailer(config)
+        //mock invoke email submit lambda
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            emailer: mockEmailer,
+        })
+
+        const stateSubmission =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
+
+        await createTestQuestion(cmsServer, stateSubmission.id)
+        await createTestQuestion(cmsServer, stateSubmission.id)
+
+        const currentRevision = stateSubmission.revisions[0].node.formDataProto
+
+        const sub = base64ToDomain(currentRevision)
+        if (sub instanceof Error) {
+            throw sub
+        }
+
+        const programs = [defaultFloridaProgram()]
+        const name = packageName(
+            sub.stateCode,
+            sub.stateNumber,
+            sub.programIDs,
+            programs
+        )
+        const stateAnalystsEmails = getTestStateAnalystsEmails(sub.stateCode)
+
+        const cmsEmails = [
+            ...config.devReviewTeamEmails,
+            ...stateAnalystsEmails,
+        ]
+
+        // email subject line is correct for CMS email
+        // email is sent to the state anaylsts since it
+        // was submitted by a DCMO user
+        // Mock emailer is called 4 times,
+        // first called to send the state email, then to CMS, two times each
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            4,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `[LOCAL] Questions sent for ${name}`
+                ),
+                sourceEmail: config.emailSource,
+                toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
+                bodyText: expect.stringContaining('Round: 2'),
+            })
+        )
+    })
+
     it('does not send any emails if submission fails', async () => {
         const mockEmailer = testEmailer()
         const cmsServer = await constructTestPostgresServer({

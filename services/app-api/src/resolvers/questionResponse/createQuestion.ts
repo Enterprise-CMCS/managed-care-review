@@ -95,6 +95,16 @@ export function createQuestionResolver(
             })
         }
 
+        const allQuestions = await store.findAllQuestionsByContract(
+            contractResult.id
+        )
+        if (allQuestions instanceof Error) {
+            const errMessage = `Issue finding all questions associated with the contract: ${contractResult.id}`
+            logError('createQuestion', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new Error(errMessage)
+        }
+
         const questionResult = await store.insertQuestion(input, user)
 
         if (isStoreError(questionResult)) {
@@ -104,12 +114,14 @@ export function createQuestionResolver(
             throw new Error(errMessage)
         }
 
+        allQuestions.push(questionResult)
+
         const sendQuestionsStateEmailResult =
             await emailer.sendQuestionsStateEmail(
                 contractResult.revisions[0],
                 submitterEmails,
                 statePrograms,
-                questionResult
+                allQuestions
             )
 
         if (sendQuestionsStateEmailResult instanceof Error) {
@@ -143,7 +155,7 @@ export function createQuestionResolver(
             contractResult.revisions[0],
             stateAnalystsEmails,
             statePrograms,
-            questionResult
+            allQuestions
         )
 
         if (sendQuestionsCMSEmailResult instanceof Error) {
