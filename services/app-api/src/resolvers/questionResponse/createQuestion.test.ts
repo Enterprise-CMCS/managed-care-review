@@ -9,6 +9,7 @@ import {
     indexTestQuestions,
     defaultFloridaProgram,
 } from '../../testHelpers/gqlHelpers'
+import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
 import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { assertAnError, assertAnErrorCode } from '../../testHelpers'
 import {
@@ -268,7 +269,7 @@ describe('createQuestion', () => {
             `users without an assigned division are not authorized to create a question`
         )
     })
-    it('send state email to state contacts and all submitters when unlocking submission succeeds', async () => {
+    it('send state email to state contacts and all submitters when submitting a question succeeds', async () => {
         const config = testEmailConfig()
         const mockEmailer = testEmailer(config)
         //mock invoke email submit lambda
@@ -321,11 +322,137 @@ describe('createQuestion', () => {
                     `CMS asked questions about ${name}`
                 ),
                 bodyHTML: expect.stringContaining(
-                    `<a href="http://localhost/submissions/${stateSubmission.id}">Open the submission in MC-Review to answer questions</a>`
+                    `http://localhost/submissions/${sub.id}/question-and-answers`
                 ),
             })
         )
     })
+
+    it('send CMS email to state analysts if question is successfully submitted', async () => {
+        const config = testEmailConfig()
+        const mockEmailer = testEmailer(config)
+        //mock invoke email submit lambda
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            emailer: mockEmailer,
+        })
+
+        const stateSubmission =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
+
+        await createTestQuestion(cmsServer, stateSubmission.id)
+
+        const currentRevision = stateSubmission.revisions[0].node.formDataProto
+
+        const sub = base64ToDomain(currentRevision)
+        if (sub instanceof Error) {
+            throw sub
+        }
+
+        const programs = [defaultFloridaProgram()]
+        const name = packageName(
+            sub.stateCode,
+            sub.stateNumber,
+            sub.programIDs,
+            programs
+        )
+        const stateAnalystsEmails = getTestStateAnalystsEmails(sub.stateCode)
+
+        const cmsEmails = [
+            ...config.devReviewTeamEmails,
+            ...stateAnalystsEmails,
+        ]
+
+        // email subject line is correct for CMS email
+        // email is sent to the state anaylsts since it
+        // was submitted by a DCMO user
+        // Mock emailer is called 2 times,
+        // first called to send the state email, then to CMS
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            2,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `[LOCAL] Questions sent for ${name}`
+                ),
+                sourceEmail: config.emailSource,
+                toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
+                bodyText: expect.stringContaining(
+                    `DMCO sent questions to the state for submission ${name}`
+                ),
+                bodyHTML: expect.stringContaining(
+                    `http://localhost/submissions/${sub.id}/question-and-answers`
+                ),
+            })
+        )
+    })
+
+    it('send CMS email to state analysts with correct round number if multiple questions have been asked', async () => {
+        const config = testEmailConfig()
+        const mockEmailer = testEmailer(config)
+        //mock invoke email submit lambda
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            emailer: mockEmailer,
+        })
+        const cmsDMCPUser = testCMSUser({ divisionAssignment: 'DMCP' })
+        const cmsDMCPServer = await constructTestPostgresServer({
+            context: {
+                user: cmsDMCPUser,
+            },
+            emailer: mockEmailer,
+        })
+        const stateSubmission =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
+
+        await createTestQuestion(cmsDMCPServer, stateSubmission.id)
+        await createTestQuestion(cmsServer, stateSubmission.id)
+        await createTestQuestion(cmsServer, stateSubmission.id)
+
+        const currentRevision = stateSubmission.revisions[0].node.formDataProto
+
+        const sub = base64ToDomain(currentRevision)
+        if (sub instanceof Error) {
+            throw sub
+        }
+
+        const programs = [defaultFloridaProgram()]
+        const name = packageName(
+            sub.stateCode,
+            sub.stateNumber,
+            sub.programIDs,
+            programs
+        )
+        const stateAnalystsEmails = getTestStateAnalystsEmails(sub.stateCode)
+
+        const cmsEmails = [
+            ...config.devReviewTeamEmails,
+            ...stateAnalystsEmails,
+        ]
+
+        // email subject line is correct for CMS email
+        // email is sent to the state anaylsts since it
+        // was submitted by a DCMO user
+        // Mock emailer is called 4 times,
+        // first called to send the state email, then to CMS, two times each
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            6,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `[LOCAL] Questions sent for ${name}`
+                ),
+                sourceEmail: config.emailSource,
+                toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
+                bodyText: expect.stringContaining('Round: 2'),
+            })
+        )
+    })
+
     it('does not send any emails if submission fails', async () => {
         const mockEmailer = testEmailer()
         const cmsServer = await constructTestPostgresServer({

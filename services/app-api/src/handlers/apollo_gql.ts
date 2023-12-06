@@ -240,7 +240,9 @@ async function initializeGQLHandler(): Promise<Handler> {
     const cmsRateHelpEmailAddress =
         await emailParameterStore.getCmsRateHelpEmail()
     const oactEmails = await emailParameterStore.getOACTEmails()
-    const dmcpEmails = await emailParameterStore.getDMCPEmails()
+    const dmcpReviewEmails = await emailParameterStore.getDMCPReviewEmails()
+    const dmcpSubmissionEmails =
+        await emailParameterStore.getDMCPSubmissionEmails()
     const dmcoEmails = await emailParameterStore.getDMCOEmails()
 
     if (emailSource instanceof Error)
@@ -267,8 +269,11 @@ async function initializeGQLHandler(): Promise<Handler> {
     if (oactEmails instanceof Error)
         throw new Error(`Configuration Error: ${oactEmails.message}`)
 
-    if (dmcpEmails instanceof Error)
-        throw new Error(`Configuration Error: ${dmcpEmails.message}`)
+    if (dmcpReviewEmails instanceof Error)
+        throw new Error(`Configuration Error: ${dmcpReviewEmails.message}`)
+
+    if (dmcpSubmissionEmails instanceof Error)
+        throw new Error(`Configuration Error: ${dmcpSubmissionEmails.message}`)
 
     if (dmcoEmails instanceof Error)
         throw new Error(`Configuration Error: ${dmcoEmails.message}`)
@@ -324,7 +329,8 @@ async function initializeGQLHandler(): Promise<Handler> {
                   cmsReviewHelpEmailAddress,
                   cmsRateHelpEmailAddress,
                   oactEmails,
-                  dmcpEmails,
+                  dmcpReviewEmails,
+                  dmcpSubmissionEmails,
                   dmcoEmails,
                   helpDeskEmail,
               })
@@ -336,7 +342,8 @@ async function initializeGQLHandler(): Promise<Handler> {
                   cmsReviewHelpEmailAddress,
                   cmsRateHelpEmailAddress,
                   oactEmails,
-                  dmcpEmails,
+                  dmcpReviewEmails,
+                  dmcpSubmissionEmails,
                   dmcoEmails,
                   helpDeskEmail,
               })

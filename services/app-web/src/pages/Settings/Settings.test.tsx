@@ -50,16 +50,15 @@ describe('Settings', () => {
         expect(tableAutomated).toBeInTheDocument()
 
         const tableRows = await within(tableAutomated).findAllByRole('row')
-        expect(tableRows).toHaveLength(5)
+        expect(tableRows).toHaveLength(6)
 
         // Check analysts table
         const tableAnalysts = await screen.findByRole('table', {
             name: 'Analyst emails',
         })
         expect(tableAnalysts).toBeInTheDocument()
-        const tableRowsAnalysts = await within(tableAnalysts).findAllByRole(
-            'row'
-        )
+        const tableRowsAnalysts =
+            await within(tableAnalysts).findAllByRole('row')
         expect(tableRowsAnalysts).toHaveLength(2)
 
         // Check support table

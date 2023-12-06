@@ -1,0 +1,8 @@
+<%= it.cmsRequestorDivision %> sent questions to the state for submission <%= it.packageName %><br />
+<b>Sent by:</b> <%= it.cmsRequestorName %> (<%= it.cmsRequestorDivision %>) <a href="<%= it.cmsRequestorEmail %>"><%= it.cmsRequestorEmail %></a>
+<br />
+<b>Round:</b> <%= it.roundNumber %>
+<br />
+<b>Date:</b> <%= it.dateAsked %><br />
+<br />
+<a href="<%= it.questionResponseURL %>">View submission Q&A</a>

@@ -5,5 +5,5 @@ CMS asked questions about <%= it.packageName %><br />
 <br />
 You must answer the question before CMS can continue reviewing it.<br />
 <br />
-<a href="<%= it.submissionURL %>">Open the submission in MC-Review to answer questions</a>
+<a href="<%= it.questionResponseURL %>">Open the submission in MC-Review to answer questions</a>
 
