@@ -44,7 +44,9 @@ export const sendQuestionCMSEmail = async (
         contractRev.contract.id,
         config.baseUrl
     )
-    const roundNumber = questions.length
+    const roundNumber = questions.filter(
+        (question) => question.division === newQuestion.division
+    ).length
 
     const data = {
         packageName,

@@ -400,10 +400,17 @@ describe('createQuestion', () => {
             },
             emailer: mockEmailer,
         })
-
+        const cmsDMCPUser = testCMSUser({ divisionAssignment: 'DMCP' })
+        const cmsDMCPServer = await constructTestPostgresServer({
+            context: {
+                user: cmsDMCPUser,
+            },
+            emailer: mockEmailer,
+        })
         const stateSubmission =
             await createAndSubmitTestHealthPlanPackage(stateServer)
 
+        await createTestQuestion(cmsDMCPServer, stateSubmission.id)
         await createTestQuestion(cmsServer, stateSubmission.id)
         await createTestQuestion(cmsServer, stateSubmission.id)
 
@@ -434,7 +441,7 @@ describe('createQuestion', () => {
         // Mock emailer is called 4 times,
         // first called to send the state email, then to CMS, two times each
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            4,
+            6,
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `[LOCAL] Questions sent for ${name}`
