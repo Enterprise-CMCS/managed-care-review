@@ -1,6 +1,6 @@
-The state submitted responses to <%= it.cmsDivision %>'s questions about <%= it.packageName %><br />
+The state submitted responses to <%= it.cmsRequestorDivision %>'s questions about <%= it.packageName %><br />
 <b>Submitted by:</b> <%= it.stateResponseSubmitterName %> <a href="<%= it.stateResponseSubmitterEmail %>"><%= it.stateResponseSubmitterEmail %></a><br />
 <b>Round:</b> <%= it.questionRound %><br />
 <b>Questions sent on:</b> <%= it.dateAsked %><br />
 <br />
-<a href="<%= it.submissionURL %>">View submission Q&A</a>
+<a href="<%= it.questionResponseURL %>">View submission Q&A</a>

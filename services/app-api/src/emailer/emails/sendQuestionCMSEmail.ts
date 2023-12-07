@@ -10,6 +10,7 @@ import {
 } from '../templateHelpers'
 import { submissionQuestionResponseURL } from '../generateURLs'
 import type { ContractRevisionWithRatesType } from '../../domain-models/contractAndRates'
+import { getQuestionRound } from '../../postgres/questionResponse'
 
 export const sendQuestionCMSEmail = async (
     contractRev: ContractRevisionWithRatesType,
@@ -44,9 +45,11 @@ export const sendQuestionCMSEmail = async (
         contractRev.contract.id,
         config.baseUrl
     )
-    const roundNumber = questions.filter(
-        (question) => question.division === newQuestion.division
-    ).length
+    const questionRound = getQuestionRound(questions, newQuestion)
+
+    if (questionRound instanceof Error) {
+        return questionRound
+    }
 
     const data = {
         packageName,
@@ -55,7 +58,7 @@ export const sendQuestionCMSEmail = async (
         cmsRequestorName: `${newQuestion.addedBy.givenName} ${newQuestion.addedBy.familyName}`,
         cmsRequestorDivision: newQuestion.addedBy.divisionAssignment,
         dateAsked: formatCalendarDate(newQuestion.createdAt),
-        roundNumber,
+        questionRound,
     }
 
     const result = await renderTemplate<typeof data>(

@@ -180,7 +180,7 @@ describe('createQuestionResponse', () => {
         ]
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            4, // New response notification is the fourth email
+            5, // New response CMS email notification is the fifth email
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `[LOCAL] New Responses for ${pkgName}`
@@ -193,7 +193,7 @@ describe('createQuestionResponse', () => {
                     `The state submitted responses to OACT's questions about ${pkgName}`
                 ),
                 bodyHTML: expect.stringContaining(
-                    `<a href="http://localhost/submissions/${submittedPkg.id}">View submission Q&A</a>`
+                    `<a href="http://localhost/submissions/${submittedPkg.id}/question-and-answers">View submission Q&A</a>`
                 ),
             })
         )

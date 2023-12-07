@@ -8,7 +8,7 @@ import {
     renderTemplate,
     findContractPrograms,
 } from '../templateHelpers'
-import { submissionSummaryURL } from '../generateURLs'
+import { submissionQuestionResponseURL } from '../generateURLs'
 import type { ContractRevisionWithRatesType } from '../../domain-models/contractAndRates'
 import type { StateAnalystsEmails } from '..'
 import { getQuestionRound } from '../../postgres/questionResponse'
@@ -21,6 +21,7 @@ export const sendQuestionResponseCMSEmail = async (
     currentQuestion: Question,
     allContractQuestions: Question[]
 ): Promise<EmailData | Error> => {
+    // currentQuestion is the question the new response belongs to. Responses can be uploaded to any question round.
     const { responses, division } = currentQuestion
     const latestResponse = responses[0]
     const questionRound = getQuestionRound(
@@ -34,9 +35,7 @@ export const sendQuestionResponseCMSEmail = async (
 
     let receiverEmails = [...stateAnalystsEmails, ...config.devReviewTeamEmails]
     if (division === 'DMCP') {
-        // TODO: Remove placeholder after merging in Pearls work.
-        // receiverEmails.push(...config.dmcpReviewEmails)
-        receiverEmails.push('dmcpQAEmail@example.com')
+        receiverEmails.push(...config.dmcpReviewEmails)
     } else if (division === 'OACT') {
         receiverEmails.push(...config.oactEmails)
     }
@@ -55,19 +54,18 @@ export const sendQuestionResponseCMSEmail = async (
         packagePrograms
     )
 
-    // TODO: Replace this function with Q&A function after merging in Pearls work
-    const packageURL = submissionSummaryURL(
+    const questionResponseURL = submissionQuestionResponseURL(
         contractRev.contract.id,
         config.baseUrl
     )
 
     const data = {
         packageName,
-        submissionURL: packageURL,
-        cmsDivision: division,
+        questionResponseURL,
+        cmsRequestorDivision: division,
         stateResponseSubmitterEmail: latestResponse.addedBy.email,
         stateResponseSubmitterName: `${latestResponse.addedBy.givenName} ${latestResponse.addedBy.familyName}`,
-        questionRound: questionRound,
+        questionRound,
         dateAsked: formatCalendarDate(currentQuestion.createdAt),
     }
 
