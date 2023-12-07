@@ -84,8 +84,6 @@ Cypress.Commands.add('stubFeatureFlags', () => {
      * Useful if you want default feature flags for tests that are different than default values set in common-code featureFlags
      **/
     cy.interceptFeatureFlags({
-        'packages-with-shared-rates': true,
-        'supporting-docs-by-rate': true,
         '438-attestation': true
     })
 })

@@ -9,7 +9,6 @@ import {
     TEST_VIDEO_FILE,
     TEST_PNG_FILE,
     dragAndDrop,
-    ldUseClientSpy,
 } from '../../../testHelpers/jestHelpers'
 import {
     fetchCurrentUserMock,
@@ -43,9 +42,7 @@ describe('Documents', () => {
                 screen.getByRole('button', { name: 'Continue' })
             ).not.toHaveAttribute('aria-disabled')
         })
-        expect(
-            screen.getByText('You have not uploaded any files')
-        ).toBeInTheDocument()
+        expect(screen.getByText('0 files added')).toBeInTheDocument()
     })
 
     it('accepts a new document', async () => {
@@ -236,11 +233,15 @@ describe('Documents', () => {
 
             await userEvent.upload(input, [TEST_XLS_FILE])
 
+            const fileList = screen.getAllByRole('list')[0]
+
             await waitFor(() => {
                 expect(
                     screen.queryAllByText('Duplicate file, please remove')
                 ).toHaveLength(0)
-                expect(screen.queryAllByRole('row')).toHaveLength(2)
+                expect(within(fileList).getAllByRole('listitem')).toHaveLength(
+                    1
+                )
             })
             // note: userEvent.upload does not re-trigger input event when selected files are the same as before, this is why we upload nothing in between
             await userEvent.upload(input, [])
@@ -250,7 +251,9 @@ describe('Documents', () => {
                 expect(
                     screen.queryAllByText('Duplicate file, please remove')
                 ).toHaveLength(1)
-                expect(screen.queryAllByRole('row')).toHaveLength(3)
+                expect(within(fileList).getAllByRole('listitem')).toHaveLength(
+                    2
+                )
             })
 
             await userEvent.upload(input, [])
@@ -260,7 +263,9 @@ describe('Documents', () => {
                 expect(
                     screen.queryAllByText('Duplicate file, please remove')
                 ).toHaveLength(2)
-                expect(screen.queryAllByRole('row')).toHaveLength(4)
+                expect(within(fileList).getAllByRole('listitem')).toHaveLength(
+                    3
+                )
             })
         })
 
@@ -306,69 +311,6 @@ describe('Documents', () => {
                 screen.queryByText('Duplicate file, please remove')
             ).toBeNull()
         })
-
-        it('not shown in file items list for document categories on initial load in table view, only shown after validation', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
-
-            const input = screen.getByLabelText(
-                'Upload contract-supporting documents'
-            )
-            await userEvent.upload(input, [TEST_PDF_FILE])
-            await userEvent.upload(input, [TEST_DOC_FILE])
-
-            await waitFor(() => {
-                expect(
-                    screen.queryAllByText(
-                        'Must select at least one category checkbox'
-                    )
-                ).toHaveLength(0)
-            })
-
-            // check a category for the second row
-            const rows = screen.getAllByRole('row')
-            expect(rows).toHaveLength(3)
-            await userEvent.click(
-                within(rows[1]).getByRole('checkbox', {
-                    name: 'contract-supporting',
-                })
-            )
-
-            await waitFor(() => {
-                expect(
-                    screen.queryAllByText(
-                        'Must select at least one category checkbox'
-                    )
-                ).toHaveLength(0)
-            })
-
-            // click continue and enter validation state
-            await userEvent.click(
-                screen.getByRole('button', { name: 'Continue' })
-            )
-
-            await waitFor(() => {
-                expect(
-                    screen.queryAllByText(
-                        'Must select at least one category checkbox'
-                    )
-                ).toHaveLength(1)
-            })
-        })
     })
 
     describe('error summary at top of page', () => {
@@ -401,9 +343,6 @@ describe('Documents', () => {
             await waitFor(() => {
                 // error summary messages don't appear on load
                 expect(
-                    screen.queryAllByText('You must select a document category')
-                ).toHaveLength(0)
-                expect(
                     screen.queryAllByText('You must remove duplicate files')
                 ).toHaveLength(0)
             })
@@ -414,9 +353,6 @@ describe('Documents', () => {
             )
 
             await waitFor(() => {
-                expect(
-                    screen.queryAllByText('You must select a document category')
-                ).toHaveLength(2)
                 expect(
                     screen.queryAllByText('You must remove duplicate files')
                 ).toHaveLength(1)
@@ -639,14 +575,14 @@ describe('Documents', () => {
 
             // upload one file
             dragAndDrop(targetEl, [TEST_PDF_FILE])
-            const imageElFile1 = screen.getByTestId('file-input-loading-image')
+            const imageElFile1 = screen.getByTestId('file-input-preview-image')
             expect(imageElFile1).toHaveClass('is-loading')
 
             // upload second file
             dragAndDrop(targetEl, [TEST_DOC_FILE])
 
             const imageElFile2 = screen.getAllByTestId(
-                'file-input-loading-image'
+                'file-input-preview-image'
             )[1]
             expect(imageElFile2).toHaveClass('is-loading')
 
@@ -942,338 +878,161 @@ describe('Documents', () => {
         })
     })
 
-    describe('Document categories checkbox', () => {
-        it('present on contract and rates submission', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
-                        documents: [
-                            {
-                                s3URL: 's3://bucketname/key/supporting-documents',
-                                name: 'supporting documents',
-                                sha256: 'fakesha',
-                                documentCategories: ['RATES_RELATED' as const],
-                            },
-                        ],
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
+    it('checkboxes not present on contract and rates submission when SUPPORTING_DOCS_BY_RATE is on', async () => {
+        const mockDraftSubmission = {
+            ...mockDraft(),
+            submissionType: 'CONTRACT_AND_RATES' as const,
+            documents: [
                 {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
-            await waitFor(() => {
-                expect(
-                    screen.getAllByText('Contract-supporting').length
-                ).toBeGreaterThanOrEqual(1)
-                expect(
-                    screen.getAllByText('Rate-supporting').length
-                ).toBeGreaterThanOrEqual(1)
-            })
+                    s3URL: 's3://bucketname/key/supporting-documents',
+                    name: 'supporting documents',
+                    sha256: 'fakesha',
+                    documentCategories: ['RATES_RELATED' as const],
+                },
+            ],
+        }
+        const mockUpdateDraftFn = jest.fn()
+        renderWithProviders(
+            <Documents
+                draftSubmission={mockDraftSubmission}
+                updateDraft={mockUpdateDraftFn}
+                previousDocuments={[]}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        await waitFor(() => {
+            expect(screen.getByText('supporting documents')).toBeInTheDocument()
         })
 
-        it('present on contract and rates submission in categories error state', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
-                        documents: [
-                            {
-                                s3URL: 's3://bucketname/key/supporting-documents',
-                                name: 'supporting documents',
-                                sha256: 'fakesha',
-                                documentCategories: ['RATES_RELATED' as const],
-                            },
-                        ],
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+        expect(screen.queryByText('Contract-supporting')).toBeNull()
+        expect(screen.queryByText('Rate-supporting')).toBeNull()
 
-            const input = screen.getByLabelText(
-                'Upload contract-supporting documents'
-            )
-
-            await userEvent.upload(input, [TEST_DOC_FILE])
-
-            // no errors before validation but checkboxes present
-            await waitFor(() => {
-                expect(
-                    screen.queryAllByText('You must select a document category')
-                ).toHaveLength(0)
-
-                expect(
-                    screen.queryAllByText('Contract-supporting')
-                ).toHaveLength(1)
-                expect(screen.queryAllByText('Rate-supporting')).toHaveLength(1)
-            })
-
-            await userEvent.click(
-                screen.getByRole('button', { name: 'Continue' })
-            )
-
-            // errors after validation and checkboxes still present
-            await waitFor(() => {
-                expect(
-                    screen.queryAllByText('You must select a document category')
-                ).toHaveLength(1)
-                expect(
-                    screen.queryAllByText('Contract-supporting')
-                ).toHaveLength(1)
-                expect(screen.queryAllByText('Rate-supporting')).toHaveLength(1)
-            })
-        })
-
-        it('not present on contract and rates submission in duplicate name error rows', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
-
-            const input = screen.getByLabelText(
-                'Upload contract-supporting documents'
-            )
-
-            await userEvent.upload(input, [TEST_DOC_FILE])
-            await userEvent.upload(input, [TEST_PDF_FILE])
-            await userEvent.upload(input, [TEST_DOC_FILE])
-
-            const rows = screen.getAllByRole('row')
-            await waitFor(() => expect(rows).toHaveLength(4))
-
-            // check a category for the second row
-            await userEvent.click(
-                within(rows[2]).getByRole('checkbox', {
-                    name: 'contract-supporting',
-                })
-            )
-
-            // confirm checkboxes are present or hidden when expected
-            const missingDocumentCategoriesRow = rows[1]
-            const validAndHasCategoriesRow = rows[2]
-            const duplicateNameRow = rows[3]
-
-            expect(
-                within(missingDocumentCategoriesRow).getAllByRole('checkbox')
-            ).toHaveLength(2)
-
-            expect(
-                within(validAndHasCategoriesRow).getAllByRole('checkbox')
-            ).toHaveLength(2)
-            expect(within(duplicateNameRow).queryByRole('checkbox')).toBeNull()
-
-            // click continue and enter validation state
-            await userEvent.click(
-                screen.getByRole('button', { name: 'Continue' })
-            )
-            await waitFor(() => {
-                expect(
-                    screen.queryAllByText('You must select a document category')
-                ).toHaveLength(1)
-            })
-
-            // checkboxes presence is unchanged
-            expect(
-                within(missingDocumentCategoriesRow).getAllByRole('checkbox')
-            ).toHaveLength(2)
-
-            expect(
-                within(validAndHasCategoriesRow).getAllByRole('checkbox')
-            ).toHaveLength(2)
-            expect(within(duplicateNameRow).queryByRole('checkbox')).toBeNull()
-        })
+        jest.clearAllMocks()
     })
 
-    describe('SUPPORTING_DOCS_BY_RATE feature flag on', () => {
-        it('checkboxes not present on contract and rates submission when SUPPORTING_DOCS_BY_RATE is on', async () => {
-            ldUseClientSpy({ 'supporting-docs-by-rate': true })
-            const mockDraftSubmission = {
-                ...mockDraft(),
-                submissionType: 'CONTRACT_AND_RATES' as const,
-                documents: [
-                    {
-                        s3URL: 's3://bucketname/key/supporting-documents',
-                        name: 'supporting documents',
-                        sha256: 'fakesha',
-                        documentCategories: ['RATES_RELATED' as const],
-                    },
-                ],
+    it('documents are always categorized as CONTRACT_RELATED', async () => {
+        const mockUpdateDraftFn = jest.fn()
+
+        renderWithProviders(
+            <Documents
+                draftSubmission={{
+                    ...mockDraft(),
+                    submissionType: 'CONTRACT_AND_RATES' as const,
+                }}
+                updateDraft={mockUpdateDraftFn}
+                previousDocuments={[]}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
             }
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={mockDraftSubmission}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+        )
 
-            await waitFor(() => {
-                expect(
-                    screen.getByText('supporting documents')
-                ).toBeInTheDocument()
-            })
+        const continueButton = screen.getByRole('button', {
+            name: 'Continue',
+        })
+        const input = screen.getByLabelText(
+            'Upload contract-supporting documents'
+        )
 
-            expect(screen.queryByText('Contract-supporting')).toBeNull()
-            expect(screen.queryByText('Rate-supporting')).toBeNull()
+        expect(input).toBeInTheDocument()
 
-            jest.clearAllMocks()
+        await userEvent.upload(input, [TEST_DOC_FILE])
+
+        await waitFor(() => {
+            expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
+            expect(continueButton).toBeInTheDocument()
+            continueButton.click()
+            expect(mockUpdateDraftFn).toHaveBeenCalled()
         })
 
-        it('documents are always categorized as CONTRACT_RELATED when SUPPORTING_DOCS_BY_RATE is on', async () => {
-            ldUseClientSpy({ 'supporting-docs-by-rate': true })
-            const mockUpdateDraftFn = jest.fn()
+        const updatedDraft = mockUpdateDraftFn.mock.calls[0][0]
 
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES' as const,
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+        expect(updatedDraft.documents).toHaveLength(1)
+        expect(updatedDraft.documents).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    name: 'testFile.doc',
+                    s3URL: expect.anything(),
+                    sha256: expect.anything(),
+                    documentCategories: ['CONTRACT_RELATED'],
+                }),
+            ])
+        )
 
-            const continueButton = screen.getByRole('button', {
-                name: 'Continue',
-            })
-            const input = screen.getByLabelText(
-                'Upload contract-supporting documents'
-            )
+        jest.clearAllMocks()
+    })
 
-            expect(input).toBeInTheDocument()
+    it('existing documents categories are not overwritten', async () => {
+        const mockUpdateDraftFn = jest.fn()
 
-            await userEvent.upload(input, [TEST_DOC_FILE])
+        renderWithProviders(
+            <Documents
+                draftSubmission={{
+                    ...mockDraft(),
+                    submissionType: 'CONTRACT_AND_RATES' as const,
+                    documents: [
+                        {
+                            s3URL: 's3://bucketname/key/supporting-documents',
+                            name: 'supporting documents',
+                            sha256: 'fakesha2',
+                            documentCategories: ['RATES_RELATED' as const],
+                        },
+                    ],
+                }}
+                updateDraft={mockUpdateDraftFn}
+                previousDocuments={[]}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
 
-            await waitFor(() => {
-                expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
-                expect(continueButton).toBeInTheDocument()
-                continueButton.click()
-                expect(mockUpdateDraftFn).toHaveBeenCalled()
-            })
+        const continueButton = screen.getByRole('button', {
+            name: 'Continue',
+        })
+        const input = screen.getByLabelText(
+            'Upload contract-supporting documents'
+        )
+        expect(input).toBeInTheDocument()
+        await userEvent.upload(input, [TEST_DOC_FILE])
 
-            const updatedDraft = mockUpdateDraftFn.mock.calls[0][0]
-
-            expect(updatedDraft.documents).toHaveLength(1)
-            expect(updatedDraft.documents).toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        name: 'testFile.doc',
-                        s3URL: expect.anything(),
-                        sha256: expect.anything(),
-                        documentCategories: ['CONTRACT_RELATED'],
-                    }),
-                ])
-            )
-
-            jest.clearAllMocks()
+        await waitFor(() => {
+            expect(screen.getByText('supporting documents')).toBeInTheDocument()
+            expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
+            expect(continueButton).toBeInTheDocument()
+            continueButton.click()
+            expect(mockUpdateDraftFn).toHaveBeenCalled()
         })
 
-        it('existing documents categories are not overwritten when SUPPORTING_DOCS_BY_RATE is on', async () => {
-            ldUseClientSpy({ 'supporting-docs-by-rate': true })
-            const mockUpdateDraftFn = jest.fn()
+        const updatedDraft = mockUpdateDraftFn.mock.calls[0][0]
 
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES' as const,
-                        documents: [
-                            {
-                                s3URL: 's3://bucketname/key/supporting-documents',
-                                name: 'supporting documents',
-                                sha256: 'fakesha2',
-                                documentCategories: ['RATES_RELATED' as const],
-                            },
-                        ],
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+        expect(updatedDraft.documents).toHaveLength(2)
+        expect(updatedDraft.documents).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    name: 'supporting documents',
+                    s3URL: expect.anything(),
+                    sha256: expect.anything(),
+                    documentCategories: ['RATES_RELATED'],
+                }),
+                expect.objectContaining({
+                    name: 'testFile.doc',
+                    s3URL: expect.anything(),
+                    sha256: expect.anything(),
+                    documentCategories: ['CONTRACT_RELATED'],
+                }),
+            ])
+        )
 
-            const continueButton = screen.getByRole('button', {
-                name: 'Continue',
-            })
-            const input = screen.getByLabelText(
-                'Upload contract-supporting documents'
-            )
-            expect(input).toBeInTheDocument()
-            await userEvent.upload(input, [TEST_DOC_FILE])
-
-            await waitFor(() => {
-                expect(
-                    screen.getByText('supporting documents')
-                ).toBeInTheDocument()
-                expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
-                expect(continueButton).toBeInTheDocument()
-                continueButton.click()
-                expect(mockUpdateDraftFn).toHaveBeenCalled()
-            })
-
-            const updatedDraft = mockUpdateDraftFn.mock.calls[0][0]
-
-            expect(updatedDraft.documents).toHaveLength(2)
-            expect(updatedDraft.documents).toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        name: 'supporting documents',
-                        s3URL: expect.anything(),
-                        sha256: expect.anything(),
-                        documentCategories: ['RATES_RELATED'],
-                    }),
-                    expect.objectContaining({
-                        name: 'testFile.doc',
-                        s3URL: expect.anything(),
-                        sha256: expect.anything(),
-                        documentCategories: ['CONTRACT_RELATED'],
-                    }),
-                ])
-            )
-
-            jest.clearAllMocks()
-        })
+        jest.clearAllMocks()
     })
 })

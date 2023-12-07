@@ -17,8 +17,6 @@ import { PageActions } from '../PageActions'
 import classNames from 'classnames'
 import { ErrorSummary } from '../../../components/Form'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
 import { RoutesRecord } from '../../../constants'
 
 export const Documents = ({
@@ -29,12 +27,6 @@ export const Documents = ({
     const [shouldValidate, setShouldValidate] = useState(false)
     const isContractOnly = draftSubmission.submissionType === 'CONTRACT_ONLY'
     const navigate = useNavigate()
-    const ldClient = useLDClient()
-
-    const supportingDocsByRate = ldClient?.variation(
-        featureFlags.SUPPORTING_DOCS_BY_RATE.flag,
-        featureFlags.SUPPORTING_DOCS_BY_RATE.defaultValue
-    )
 
     // Documents state management
     const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
@@ -83,9 +75,9 @@ export const Documents = ({
         showFileUploadError && hasLoadingFiles
             ? 'You must wait for all documents to finish uploading before continuing'
             : (showFileUploadError && !hasValidFiles) ||
-              (shouldValidate && hasMissingCategories)
-            ? 'You must remove all documents with error messages before continuing'
-            : undefined
+                (shouldValidate && hasMissingCategories)
+              ? 'You must remove all documents with error messages before continuing'
+              : undefined
 
     // Error summary state management
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
@@ -138,15 +130,13 @@ export const Documents = ({
     }: {
         fileItems: FileItemT[]
     }) => {
-        // When supportingDocsByRate flag is on, all documents on the supporting documents page are CONTRACT_RELATED.
+        // all documents on the supporting documents page are CONTRACT_RELATED.
         // If the files documentCategories contains a category we skip as to not overwrite existing documents.
-        if (supportingDocsByRate) {
-            fileItems = fileItems.map((file) =>
-                file.documentCategories.length
-                    ? file
-                    : { ...file, documentCategories: ['CONTRACT_RELATED'] }
-            )
-        }
+        fileItems = fileItems.map((file) =>
+            file.documentCategories.length
+                ? file
+                : { ...file, documentCategories: ['CONTRACT_RELATED'] }
+        )
         setFileItems(fileItems)
     }
 
@@ -305,7 +295,7 @@ export const Documents = ({
                         id="documents"
                         name="documents"
                         label="Upload contract-supporting documents"
-                        renderMode={supportingDocsByRate ? 'list' : 'table'}
+                        renderMode={'list'}
                         hint={
                             <>
                                 <Link
