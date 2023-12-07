@@ -1,4 +1,7 @@
 export { findAllQuestionsByContract } from './findAllQuestionsByContract'
 export { insertQuestion } from './insertQuestion'
-export { convertToIndexQuestionsPayload } from './questionHelpers'
+export {
+    convertToIndexQuestionsPayload,
+    getQuestionRound,
+} from './questionHelpers'
 export { insertQuestionResponse } from './insertQuestionResponse'

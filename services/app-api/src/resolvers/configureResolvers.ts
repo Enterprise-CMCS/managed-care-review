@@ -75,7 +75,11 @@ export function configureResolvers(
             updateContract: updateContract(store),
             updateCMSUser: updateCMSUserResolver(store),
             createQuestion: createQuestionResolver(store, emailer),
-            createQuestionResponse: createQuestionResponseResolver(store),
+            createQuestionResponse: createQuestionResponseResolver(
+                store,
+                emailer,
+                emailParameterStore
+            ),
         },
         User: {
             // resolveType is required to differentiate Unions

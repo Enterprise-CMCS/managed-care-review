@@ -9,6 +9,7 @@ import {
     resubmitPackageStateEmail,
     resubmitPackageCMSEmail,
     sendQuestionStateEmail,
+    sendQuestionResponseCMSEmail,
 } from './'
 import type {
     LockedHealthPlanFormDataType,
@@ -19,6 +20,7 @@ import type {
     ProgramType,
     CMSUserType,
     ContractRevisionWithRatesType,
+    Question,
 } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 
@@ -89,13 +91,6 @@ type Emailer = {
         statePrograms: ProgramType[],
         submitterEmails: string[]
     ) => Promise<void | Error>
-    sendQuestionsStateEmail: (
-        contract: ContractRevisionWithRatesType,
-        cmsRequesor: CMSUserType,
-        submitterEmails: string[],
-        statePrograms: ProgramType[],
-        dateAsked: Date
-    ) => Promise<void | Error>
     sendResubmittedStateEmail: (
         formData: LockedHealthPlanFormDataType,
         updateInfo: UpdateInfoType,
@@ -107,6 +102,20 @@ type Emailer = {
         updateInfo: UpdateInfoType,
         stateAnalystsEmails: StateAnalystsEmails,
         statePrograms: ProgramType[]
+    ) => Promise<void | Error>
+    sendQuestionsStateEmail: (
+        contract: ContractRevisionWithRatesType,
+        cmsRequesor: CMSUserType,
+        submitterEmails: string[],
+        statePrograms: ProgramType[],
+        dateAsked: Date
+    ) => Promise<void | Error>
+    sendQuestionResponseCMSEmail: (
+        contractRevision: ContractRevisionWithRatesType,
+        statePrograms: ProgramType[],
+        stateAnalystsEmails: StateAnalystsEmails,
+        currentQuestion: Question,
+        allContractQuestions: Question[]
     ) => Promise<void | Error>
 }
 const localEmailerLogger = (emailData: EmailData) =>
@@ -196,27 +205,6 @@ function emailer(
                 return await this.sendEmail(emailData)
             }
         },
-        sendQuestionsStateEmail: async function (
-            contract,
-            cmsRequestor,
-            submitterEmails,
-            statePrograms,
-            dateAsked
-        ) {
-            const emailData = await sendQuestionStateEmail(
-                contract,
-                submitterEmails,
-                cmsRequestor,
-                config,
-                statePrograms,
-                dateAsked
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return await this.sendEmail(emailData)
-            }
-        },
         sendResubmittedStateEmail: async function (
             formData,
             updateInfo,
@@ -248,6 +236,48 @@ function emailer(
                 config,
                 stateAnalystsEmails,
                 statePrograms
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendQuestionsStateEmail: async function (
+            contract,
+            cmsRequestor,
+            submitterEmails,
+            statePrograms,
+            dateAsked
+        ) {
+            const emailData = await sendQuestionStateEmail(
+                contract,
+                submitterEmails,
+                cmsRequestor,
+                config,
+                statePrograms,
+                dateAsked
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendQuestionResponseCMSEmail: async function (
+            contractRevision,
+            statePrograms,
+            stateAnalystsEmails,
+            currentQuestion,
+            allContractQuestions
+        ) {
+            const emailData = await sendQuestionResponseCMSEmail(
+                contractRevision,
+                config,
+                statePrograms,
+                stateAnalystsEmails,
+                currentQuestion,
+                allContractQuestions
             )
             if (emailData instanceof Error) {
                 return emailData
