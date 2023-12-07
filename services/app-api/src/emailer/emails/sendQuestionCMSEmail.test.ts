@@ -2,15 +2,14 @@ import {
     testEmailConfig,
     mockContractRev,
     mockMNState,
+    mockQuestionAndResponses,
 } from '../../testHelpers/emailerHelpers'
 import type { CMSUserType, StateType, Question } from '../../domain-models'
 import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
 import { sendQuestionCMSEmail } from './index'
+import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
 
-const stateAnalysts = [
-    'stateAnalysts1@example.com',
-    'stateAnalysts1@example.com',
-]
+const stateAnalysts = getTestStateAnalystsEmails('FL')
 
 const flState: StateType = {
     stateCode: 'FL',
@@ -28,15 +27,11 @@ const cmsUser: CMSUserType = {
 }
 
 const questions: Question[] = [
-    {
-        id: '1234',
-        contractID: 'contract-id-test',
-        createdAt: new Date('01/01/2024'),
+    mockQuestionAndResponses({
+        id: 'test-question-id-1',
         addedBy: cmsUser,
-        documents: [],
         division: 'DMCO',
-        responses: [],
-    },
+    }),
 ]
 
 test('to addresses list only includes state analyst when a DMCO user submits a question', async () => {
