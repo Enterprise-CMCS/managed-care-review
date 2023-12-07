@@ -63,7 +63,7 @@ describe('EmailSettings', () => {
 
         // Count the table rows
         const tableRows = await within(table).findAllByRole('row')
-        expect(tableRows).toHaveLength(5)
+        expect(tableRows).toHaveLength(6)
 
         // Check the table headers
         expect(

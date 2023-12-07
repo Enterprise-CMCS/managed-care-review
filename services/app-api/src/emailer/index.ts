@@ -8,6 +8,7 @@ export {
     resubmitPackageStateEmail,
     resubmitPackageCMSEmail,
     sendQuestionStateEmail,
+    sendQuestionCMSEmail,
     sendQuestionResponseCMSEmail,
 } from './emails'
 export type {

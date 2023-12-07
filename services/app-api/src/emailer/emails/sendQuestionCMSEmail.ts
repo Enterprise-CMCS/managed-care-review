@@ -1,7 +1,7 @@
 import { packageName as generatePackageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { pruneDuplicateEmails } from '../formatters'
-import type { EmailConfiguration, EmailData } from '..'
+import type { EmailConfiguration, EmailData, StateAnalystsEmails } from '..'
 import type { ProgramType, Question } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
@@ -11,24 +11,21 @@ import {
 import { submissionQuestionResponseURL } from '../generateURLs'
 import type { ContractRevisionWithRatesType } from '../../domain-models/contractAndRates'
 
-export const sendQuestionStateEmail = async (
+export const sendQuestionCMSEmail = async (
     contractRev: ContractRevisionWithRatesType,
-    submitterEmails: string[],
+    stateAnalystsEmails: StateAnalystsEmails,
     config: EmailConfiguration,
     statePrograms: ProgramType[],
     questions: Question[]
 ): Promise<EmailData | Error> => {
-    const stateContactEmails: string[] = []
     const newQuestion = questions[questions.length - 1]
-
-    contractRev.formData.stateContacts.forEach((contact) => {
-        if (contact.email) stateContactEmails.push(contact.email)
-    })
-    const receiverEmails = pruneDuplicateEmails([
-        ...stateContactEmails,
-        ...submitterEmails,
-        ...config.devReviewTeamEmails,
-    ])
+    let receiverEmails = [...stateAnalystsEmails, ...config.devReviewTeamEmails]
+    if (newQuestion.addedBy.divisionAssignment === 'DMCP') {
+        receiverEmails.push(...config.dmcpReviewEmails)
+    } else if (newQuestion.addedBy.divisionAssignment === 'OACT') {
+        receiverEmails.push(...config.oactEmails)
+    }
+    receiverEmails = pruneDuplicateEmails(receiverEmails)
 
     //This checks to make sure all programs contained in submission exists for the state.
     const packagePrograms = findContractPrograms(contractRev, statePrograms)
@@ -47,18 +44,22 @@ export const sendQuestionStateEmail = async (
         contractRev.contract.id,
         config.baseUrl
     )
+    const roundNumber = questions.filter(
+        (question) => question.division === newQuestion.division
+    ).length
 
     const data = {
         packageName,
-        questionResponseURL: questionResponseURL,
+        questionResponseURL,
         cmsRequestorEmail: newQuestion.addedBy.email,
         cmsRequestorName: `${newQuestion.addedBy.givenName} ${newQuestion.addedBy.familyName}`,
         cmsRequestorDivision: newQuestion.addedBy.divisionAssignment,
         dateAsked: formatCalendarDate(newQuestion.createdAt),
+        roundNumber,
     }
 
     const result = await renderTemplate<typeof data>(
-        'sendQuestionStateEmail',
+        'sendQuestionCMSEmail',
         data
     )
 
@@ -71,7 +72,7 @@ export const sendQuestionStateEmail = async (
             replyToAddresses: [config.helpDeskEmail],
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
-            }New questions about ${packageName}`,
+            }Questions sent for ${packageName}`,
             bodyText: stripHTMLFromTemplate(result),
             bodyHTML: result,
         }

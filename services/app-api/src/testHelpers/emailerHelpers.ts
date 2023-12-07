@@ -20,7 +20,8 @@ const testEmailConfig = (): EmailConfiguration => ({
     cmsReviewHelpEmailAddress: '"MCOG Example" <mcog@example.com>',
     cmsRateHelpEmailAddress: '"Rates Example" <rates@example.com>',
     oactEmails: ['ratesreview@example.com'],
-    dmcpEmails: ['policyreview1@example.com'],
+    dmcpReviewEmails: ['policyreview1@example.com'],
+    dmcpSubmissionEmails: ['policyreviewsubmission1@example.com'],
     dmcoEmails: ['overallreview@example.com'],
     helpDeskEmail: '"MC-Review Help Desk" <MC_Review_HelpDesk@example.com>',
 })
@@ -37,7 +38,8 @@ const testDuplicateEmailConfig: EmailConfiguration = {
     cmsReviewHelpEmailAddress: 'duplicate@example.com',
     cmsRateHelpEmailAddress: 'duplicate@example.com',
     oactEmails: ['duplicate@example.com', 'duplicate@example.com'],
-    dmcpEmails: ['duplicate@example.com', 'duplicate@example.com'],
+    dmcpReviewEmails: ['duplicate@example.com', 'duplicate@example.com'],
+    dmcpSubmissionEmails: ['duplicate@example.com', 'duplicate@example.com'],
     dmcoEmails: ['duplicate@example.com', 'duplicate@example.com'],
     helpDeskEmail: 'duplicate@example.com',
 }

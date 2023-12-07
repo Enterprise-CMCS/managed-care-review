@@ -64,8 +64,16 @@ const EmailsGeneralTable = ({ config }: { config: EmailConfiguration }) => {
                         <td>None</td>
                     </tr>
                     <tr>
-                        <td>{formatEmails(config?.dmcpEmails)}</td>
-                        <td>DMCP division emails</td>
+                        <td>{formatEmails(config?.dmcpReviewEmails)}</td>
+                        <td>DMCP division emails used for reviews</td>
+                        <td>
+                            All submissions; excluding CHIP programs and PR
+                            state
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{formatEmails(config?.dmcpSubmissionEmails)}</td>
+                        <td>DMCP division emails used for submissions</td>
                         <td>
                             All submissions; excluding CHIP programs and PR
                             state

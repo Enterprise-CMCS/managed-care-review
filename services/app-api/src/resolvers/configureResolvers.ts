@@ -74,7 +74,11 @@ export function configureResolvers(
             ),
             updateContract: updateContract(store),
             updateCMSUser: updateCMSUserResolver(store),
-            createQuestion: createQuestionResolver(store, emailer),
+            createQuestion: createQuestionResolver(
+                store,
+                emailParameterStore,
+                emailer
+            ),
             createQuestionResponse: createQuestionResponseResolver(
                 store,
                 emailer,
