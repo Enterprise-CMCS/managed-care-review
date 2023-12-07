@@ -78,7 +78,9 @@ const getQuestionRound = (
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
 
     if (divisionQuestions.length === 0) {
-        return new Error('Current question not found')
+        return new Error(
+            'Error getting question round, current question not found'
+        )
     }
 
     // Find index of the current question, this is it's round. First, index 0, in the array is round 1
@@ -86,7 +88,9 @@ const getQuestionRound = (
         (question) => question.id === currentQuestion.id
     )
     if (questionIndex === -1) {
-        return new Error('Current question index not found')
+        return new Error(
+            'Error getting question round, current question index not found'
+        )
     }
 
     return questionIndex + 1
