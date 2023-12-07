@@ -105,7 +105,7 @@ const RateReviewsDashboard = (): React.ReactElement => {
     } else {
         return (
             <section className={styles.panel}>
-                <RateReviewsTable tableData={reviewRows} showFilters={true} />
+                <RateReviewsTable tableData={reviewRows} />
             </section>
         )
     }
