@@ -113,20 +113,9 @@ describe('indexQuestions', () => {
                     totalCount: 1,
                     edges: expect.arrayContaining([
                         {
-                            node: expect.objectContaining({
-                                id: expect.any(String),
-                                createdAt: expect.any(Date),
-                                contractID: submittedPkg.id,
-                                division: 'DMCO',
-                                documents: [
-                                    {
-                                        name: 'Test Question 1',
-                                        s3URL: 'testS3Url1',
-                                    },
-                                ],
-                                addedBy: dmcoCMSUser,
-                                responses: [responseToDMCO.response],
-                            }),
+                            node: expect.objectContaining(
+                                responseToDMCO.question
+                            ),
                         },
                     ]),
                 }),
@@ -134,20 +123,9 @@ describe('indexQuestions', () => {
                     totalCount: 1,
                     edges: [
                         {
-                            node: expect.objectContaining({
-                                id: expect.any(String),
-                                createdAt: expect.any(Date),
-                                contractID: submittedPkg.id,
-                                division: 'DMCP',
-                                documents: [
-                                    {
-                                        name: 'Test Question 2',
-                                        s3URL: 'testS3Url2',
-                                    },
-                                ],
-                                addedBy: dmcpCMSUser,
-                                responses: [responseToDMCP.response],
-                            }),
+                            node: expect.objectContaining(
+                                responseToDMCP.question
+                            ),
                         },
                     ],
                 }),
@@ -155,20 +133,9 @@ describe('indexQuestions', () => {
                     totalCount: 1,
                     edges: [
                         {
-                            node: expect.objectContaining({
-                                id: expect.any(String),
-                                createdAt: expect.any(Date),
-                                contractID: submittedPkg.id,
-                                division: 'OACT',
-                                documents: [
-                                    {
-                                        name: 'Test Question 3',
-                                        s3URL: 'testS3Url3',
-                                    },
-                                ],
-                                addedBy: oactCMSUser,
-                                responses: [responseToOACT.response],
-                            }),
+                            node: expect.objectContaining(
+                                responseToOACT.question
+                            ),
                         },
                     ],
                 }),
