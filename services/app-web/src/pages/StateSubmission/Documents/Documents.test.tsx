@@ -878,7 +878,7 @@ describe('Documents', () => {
         })
     })
 
-    it('checkboxes not present on contract and rates submission when SUPPORTING_DOCS_BY_RATE is on', async () => {
+    it('checkboxes not present on contract and rates submission', async () => {
         const mockDraftSubmission = {
             ...mockDraft(),
             submissionType: 'CONTRACT_AND_RATES' as const,

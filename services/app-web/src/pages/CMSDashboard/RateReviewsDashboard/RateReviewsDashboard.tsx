@@ -7,18 +7,11 @@ import { recordJSException } from '../../../otelHelpers/tracingHelper'
 import { Loading } from '../../../components'
 
 import { RateInDashboardType, RateReviewsTable } from './RateReviewsTable'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
 import { ErrorFailedRequestPage } from '../../Errors/ErrorFailedRequestPage'
 import { RateTypeRecord } from '../../../constants/healthPlanPackages'
 
 const RateReviewsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
-    const ldClient = useLDClient()
-    const showFilters = ldClient?.variation(
-        featureFlags.RATE_FILTERS.flag,
-        featureFlags.RATE_FILTERS.defaultValue
-    )
 
     const { data, loading, error } = useIndexRatesQuery({
         fetchPolicy: 'network-only',
@@ -112,10 +105,7 @@ const RateReviewsDashboard = (): React.ReactElement => {
     } else {
         return (
             <section className={styles.panel}>
-                <RateReviewsTable
-                    tableData={reviewRows}
-                    showFilters={showFilters}
-                />
+                <RateReviewsTable tableData={reviewRows} showFilters={true} />
             </section>
         )
     }
