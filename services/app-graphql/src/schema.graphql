@@ -376,8 +376,8 @@ input CreateQuestionResponseInput {
 }
 
 type CreateQuestionResponsePayload {
-    "The newly created QuestionResponse"
-    response: QuestionResponse!
+    "Question with newly created response"
+    question: Question!
 }
 
 type UserEdge {
