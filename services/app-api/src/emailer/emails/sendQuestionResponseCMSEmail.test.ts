@@ -98,7 +98,7 @@ test.each([
             ...stateAnalysts,
             ...testEmailConfig().devReviewTeamEmails,
         ],
-        testDescription: 'DMCP Q&A response email contains correct recipients',
+        testDescription: 'DMCO Q&A response email contains correct recipients',
     },
 ])(
     '$testDescription',
