@@ -61,7 +61,7 @@ test('to addresses list includes OACT and DMCP group emails for contract and rat
         )
     })
 
-    testEmailConfig().dmcpEmails.forEach((emailAddress) => {
+    testEmailConfig().dmcpSubmissionEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),
@@ -101,7 +101,7 @@ test('to addresses list  does not include OACT and DMCP group emails for CHIP su
         )
     })
 
-    testEmailConfig().dmcpEmails.forEach((emailAddress) => {
+    testEmailConfig().dmcpSubmissionEmails.forEach((emailAddress) => {
         expect(template).not.toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),

@@ -8,7 +8,7 @@ import type {
     ContractRevisionWithRatesType,
     StateType,
 } from '../../domain-models'
-import type { ContractFormDataType } from '../../domain-models'
+import type { ContractFormDataType, Question } from '../../domain-models'
 import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
 import { sendQuestionStateEmail } from './index'
 
@@ -28,6 +28,18 @@ const cmsUser: CMSUserType = {
     email: 'cms@email.com',
     stateAssignments: [flState],
 }
+
+const questions: Question[] = [
+    {
+        id: '1234',
+        contractID: 'contract-id-test',
+        createdAt: new Date('01/01/2024'),
+        addedBy: cmsUser,
+        documents: [],
+        division: 'DMCO',
+        responses: [],
+    },
+]
 
 const formData: ContractFormDataType = {
     programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
@@ -87,17 +99,16 @@ const formData: ContractFormDataType = {
         },
     ],
 }
-const dateAsked = new Date('01/01/2024')
+
 test('to addresses list includes submitter emails', async () => {
     const sub = mockContractRev()
     const defaultStatePrograms = mockMNState().programs
     const template = await sendQuestionStateEmail(
         sub,
         defaultSubmitters,
-        cmsUser,
         testEmailConfig(),
         defaultStatePrograms,
-        dateAsked
+        questions
     )
 
     if (template instanceof Error) {
@@ -119,10 +130,9 @@ test('to addresses list includes all state contacts on submission', async () => 
     const template = await sendQuestionStateEmail(
         sub,
         defaultSubmitters,
-        cmsUser,
         testEmailConfig(),
         defaultStatePrograms,
-        dateAsked
+        questions
     )
 
     if (template instanceof Error) {
@@ -162,10 +172,9 @@ test('to addresses list does not include duplicate state receiver emails on subm
     const template = await sendQuestionStateEmail(
         sub,
         defaultSubmitters,
-        cmsUser,
         testEmailConfig(),
         defaultStatePrograms,
-        dateAsked
+        questions
     )
 
     if (template instanceof Error) {
@@ -192,10 +201,9 @@ test('subject line is correct and clearly states submission is complete', async 
     const template = await sendQuestionStateEmail(
         sub,
         defaultSubmitters,
-        cmsUser,
         testEmailConfig(),
         defaultStatePrograms,
-        dateAsked
+        questions
     )
 
     if (template instanceof Error) {
@@ -216,10 +224,9 @@ test('includes link to submission', async () => {
     const template = await sendQuestionStateEmail(
         sub,
         defaultSubmitters,
-        cmsUser,
         testEmailConfig(),
         defaultStatePrograms,
-        dateAsked
+        questions
     )
 
     if (template instanceof Error) {
@@ -232,7 +239,7 @@ test('includes link to submission', async () => {
                 'Open the submission in MC-Review to answer questions'
             ),
             bodyHTML: expect.stringContaining(
-                `href="http://localhost/submissions/${sub.contract.id}"`
+                `http://localhost/submissions/${sub.contract.id}/question-and-answer`
             ),
         })
     )
@@ -244,10 +251,9 @@ test('includes information about what to do next', async () => {
     const template = await sendQuestionStateEmail(
         sub,
         defaultSubmitters,
-        cmsUser,
         testEmailConfig(),
         defaultStatePrograms,
-        dateAsked
+        questions
     )
 
     if (template instanceof Error) {
@@ -270,10 +276,9 @@ test('includes expected data on the CMS analyst who sent the question', async ()
     const template = await sendQuestionStateEmail(
         sub,
         defaultSubmitters,
-        cmsUser,
         testEmailConfig(),
         defaultStatePrograms,
-        dateAsked
+        questions
     )
 
     if (template instanceof Error) {
@@ -300,10 +305,9 @@ test('renders overall email for a new question as expected', async () => {
     const result = await sendQuestionStateEmail(
         sub,
         defaultSubmitters,
-        cmsUser,
         testEmailConfig(),
         defaultStatePrograms,
-        dateAsked
+        questions
     )
 
     if (result instanceof Error) {

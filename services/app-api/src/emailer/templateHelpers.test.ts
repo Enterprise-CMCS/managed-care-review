@@ -31,7 +31,7 @@ describe('templateHelpers', () => {
             expectedResult: [
                 ...testEmailConfig().devReviewTeamEmails,
                 ...testStateAnalystsEmails,
-                ...testEmailConfig().dmcpEmails,
+                ...testEmailConfig().dmcpSubmissionEmails,
             ],
         },
         {
@@ -42,7 +42,7 @@ describe('templateHelpers', () => {
             expectedResult: [
                 ...testEmailConfig().devReviewTeamEmails,
                 ...testStateAnalystsEmails,
-                ...testEmailConfig().dmcpEmails,
+                ...testEmailConfig().dmcpSubmissionEmails,
                 ...testEmailConfig().oactEmails,
             ],
         },
@@ -202,7 +202,7 @@ describe('templateHelpers', () => {
             reviewers: [
                 'Bobloblaw@example.com',
                 'Lucille.Bluth@example.com',
-                testEmailConfig().dmcpEmails[0],
+                testEmailConfig().dmcpSubmissionEmails[0],
             ],
             config: testEmailConfig(),
             testDescription: 'removes dmcp emails',

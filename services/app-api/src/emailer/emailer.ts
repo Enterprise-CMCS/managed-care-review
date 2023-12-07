@@ -9,6 +9,7 @@ import {
     resubmitPackageStateEmail,
     resubmitPackageCMSEmail,
     sendQuestionStateEmail,
+    sendQuestionCMSEmail,
 } from './'
 import type {
     LockedHealthPlanFormDataType,
@@ -17,8 +18,8 @@ import type {
 import type {
     UpdateInfoType,
     ProgramType,
-    CMSUserType,
     ContractRevisionWithRatesType,
+    Question,
 } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 
@@ -36,7 +37,8 @@ type EmailConfiguration = {
      */
     devReviewTeamEmails: string[] // added by default to all incoming submissions
     oactEmails: string[] // OACT division emails
-    dmcpEmails: string[] // DMCP division emails
+    dmcpReviewEmails: string[] // DMCP division emails for reviews
+    dmcpSubmissionEmails: string[] // DMCP division emails for submissions
     dmcoEmails: string[] // DMCO division emails
 
     /* Email addresses used in display text
@@ -91,10 +93,15 @@ type Emailer = {
     ) => Promise<void | Error>
     sendQuestionsStateEmail: (
         contract: ContractRevisionWithRatesType,
-        cmsRequesor: CMSUserType,
         submitterEmails: string[],
         statePrograms: ProgramType[],
-        dateAsked: Date
+        questions: Question[]
+    ) => Promise<void | Error>
+    sendQuestionsCMSEmail: (
+        contract: ContractRevisionWithRatesType,
+        stateAnalystsEmails: StateAnalystsEmails,
+        statePrograms: ProgramType[],
+        questions: Question[]
     ) => Promise<void | Error>
     sendResubmittedStateEmail: (
         formData: LockedHealthPlanFormDataType,
@@ -198,18 +205,35 @@ function emailer(
         },
         sendQuestionsStateEmail: async function (
             contract,
-            cmsRequestor,
             submitterEmails,
             statePrograms,
-            dateAsked
+            questions
         ) {
             const emailData = await sendQuestionStateEmail(
                 contract,
                 submitterEmails,
-                cmsRequestor,
                 config,
                 statePrograms,
-                dateAsked
+                questions
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendQuestionsCMSEmail: async function (
+            contract,
+            stateAnalystsEmails,
+            statePrograms,
+            questions
+        ) {
+            const emailData = await sendQuestionCMSEmail(
+                contract,
+                stateAnalystsEmails,
+                config,
+                statePrograms,
+                questions
             )
             if (emailData instanceof Error) {
                 return emailData
