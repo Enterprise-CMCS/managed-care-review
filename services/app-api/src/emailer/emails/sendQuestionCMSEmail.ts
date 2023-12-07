@@ -7,10 +7,10 @@ import {
     stripHTMLFromTemplate,
     renderTemplate,
     findContractPrograms,
+    getQuestionRound,
 } from '../templateHelpers'
 import { submissionQuestionResponseURL } from '../generateURLs'
 import type { ContractRevisionWithRatesType } from '../../domain-models/contractAndRates'
-import { getQuestionRound } from '../../postgres/questionResponse'
 
 export const sendQuestionCMSEmail = async (
     contractRev: ContractRevisionWithRatesType,
