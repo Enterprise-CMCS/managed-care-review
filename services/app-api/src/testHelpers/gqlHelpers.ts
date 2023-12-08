@@ -496,7 +496,7 @@ const createTestQuestionResponse = async (
     const response = responseData || {
         documents: [
             {
-                name: 'Test Question',
+                name: 'Test Question Response',
                 s3URL: 'testS3Url',
             },
         ],
@@ -505,8 +505,8 @@ const createTestQuestionResponse = async (
         query: CREATE_QUESTION_RESPONSE,
         variables: {
             input: {
-                questionID,
                 ...response,
+                questionID,
             },
         },
     })

@@ -10,6 +10,11 @@ import {
     createDBUsersWithFullData,
     testCMSUser,
 } from '../../testHelpers/userHelpers'
+import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
+import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
+import { findStatePrograms } from '../../postgres'
+import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
 
 describe('createQuestionResponse', () => {
     const cmsUser = testCMSUser()
@@ -34,33 +39,38 @@ describe('createQuestionResponse', () => {
             submittedPkg.id
         )
 
-        const createdResponse = await createTestQuestionResponse(
+        const createResponseResult = await createTestQuestionResponse(
             stateServer,
-            createdQuestion?.question.id
+            createdQuestion.question.id
         )
 
-        expect(createdResponse).toEqual({
-            response: expect.objectContaining({
-                id: expect.any(String),
-                questionID: createdQuestion?.question.id,
-                documents: [
-                    {
-                        name: 'Test Question',
-                        s3URL: 'testS3Url',
-                    },
-                ],
-                addedBy: expect.objectContaining({
-                    role: 'STATE_USER',
-                }),
-            }),
-        })
+        expect(createResponseResult.question).toEqual(
+            expect.objectContaining({
+                ...createdQuestion.question,
+                responses: expect.arrayContaining([
+                    expect.objectContaining({
+                        id: expect.any(String),
+                        questionID: createdQuestion.question.id,
+                        documents: [
+                            {
+                                name: 'Test Question Response',
+                                s3URL: 'testS3Url',
+                            },
+                        ],
+                        addedBy: expect.objectContaining({
+                            role: 'STATE_USER',
+                        }),
+                    }),
+                ]),
+            })
+        )
     })
 
     it('returns an error when attempting to create response for a question that does not exist', async () => {
         const stateServer = await constructTestPostgresServer()
         const fakeID = 'abc-123'
 
-        const createdResponse = await stateServer.executeOperation({
+        const createResponseResult = await stateServer.executeOperation({
             query: CREATE_QUESTION_RESPONSE,
             variables: {
                 input: {
@@ -75,9 +85,9 @@ describe('createQuestionResponse', () => {
             },
         })
 
-        expect(createdResponse.errors).toBeDefined()
-        expect(assertAnErrorCode(createdResponse)).toBe('BAD_USER_INPUT')
-        expect(assertAnError(createdResponse).message).toBe(
+        expect(createResponseResult.errors).toBeDefined()
+        expect(assertAnErrorCode(createResponseResult)).toBe('BAD_USER_INPUT')
+        expect(assertAnError(createResponseResult).message).toBe(
             `Issue creating question response for question ${fakeID} of type NOT_FOUND_ERROR. Message: An operation failed because it depends on one or more records that were required but not found.`
         )
     })
@@ -96,7 +106,7 @@ describe('createQuestionResponse', () => {
             submittedPkg.id
         )
 
-        const createdResponse = await cmsServer.executeOperation({
+        const createResponseResult = await cmsServer.executeOperation({
             query: CREATE_QUESTION_RESPONSE,
             variables: {
                 input: {
@@ -111,10 +121,81 @@ describe('createQuestionResponse', () => {
             },
         })
 
-        expect(createdResponse.errors).toBeDefined()
-        expect(assertAnErrorCode(createdResponse)).toBe('FORBIDDEN')
-        expect(assertAnError(createdResponse).message).toBe(
+        expect(createResponseResult.errors).toBeDefined()
+        expect(assertAnErrorCode(createResponseResult)).toBe('FORBIDDEN')
+        expect(assertAnError(createResponseResult).message).toBe(
             'user not authorized to create a question response'
+        )
+    })
+
+    it('sends CMS email', async () => {
+        const emailConfig = testEmailConfig()
+        const mockEmailer = testEmailer(emailConfig)
+        const oactCMS = testCMSUser({
+            divisionAssignment: 'OACT' as const,
+        })
+        const stateServer = await constructTestPostgresServer({
+            emailer: mockEmailer,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: oactCMS,
+            },
+            emailer: mockEmailer,
+        })
+
+        const submittedPkg =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
+
+        const formData = latestFormData(submittedPkg)
+
+        const createdQuestion = await createTestQuestion(cmsServer, formData.id)
+
+        await createTestQuestionResponse(
+            stateServer,
+            createdQuestion?.question.id
+        )
+
+        const statePrograms = findStatePrograms(formData.stateCode)
+        if (statePrograms instanceof Error) {
+            throw new Error(
+                `Unexpected error: No state programs found for stateCode ${formData.stateCode}`
+            )
+        }
+
+        const pkgName = packageName(
+            formData.stateCode,
+            formData.stateNumber,
+            formData.programIDs,
+            statePrograms
+        )
+
+        const stateAnalystsEmails = getTestStateAnalystsEmails(
+            formData.stateCode
+        )
+        const cmsRecipientEmails = [
+            ...stateAnalystsEmails,
+            ...emailConfig.devReviewTeamEmails,
+            ...emailConfig.oactEmails,
+        ]
+
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            5, // New response CMS email notification is the fifth email
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `[LOCAL] New Responses for ${pkgName}`
+                ),
+                sourceEmail: emailConfig.emailSource,
+                toAddresses: expect.arrayContaining(
+                    Array.from(cmsRecipientEmails)
+                ),
+                bodyText: expect.stringContaining(
+                    `The state submitted responses to OACT's questions about ${pkgName}`
+                ),
+                bodyHTML: expect.stringContaining(
+                    `<a href="http://localhost/submissions/${submittedPkg.id}/question-and-answers">View submission Q&A</a>`
+                ),
+            })
         )
     })
 })

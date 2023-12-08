@@ -9,6 +9,7 @@ export {
     resubmitPackageCMSEmail,
     sendQuestionStateEmail,
     sendQuestionCMSEmail,
+    sendQuestionResponseCMSEmail,
 } from './emails'
 export type {
     EmailConfiguration,

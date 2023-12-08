@@ -1,8 +1,8 @@
 mutation createQuestionResponse($input: CreateQuestionResponseInput!) {
     createQuestionResponse(input: $input) {
-        response {
+        question {
             id
-            questionID
+            contractID
             createdAt
             addedBy {
                 id
@@ -10,19 +10,41 @@ mutation createQuestionResponse($input: CreateQuestionResponseInput!) {
                 email
                 givenName
                 familyName
-                state {
+                divisionAssignment
+                stateAssignments {
                     code
                     name
-                    programs {
-                        id
-                        name
-                        fullName
-                    }
                 }
             }
+            division
             documents {
                 name
                 s3URL
+            }
+            responses {
+                id
+                questionID
+                createdAt
+                addedBy {
+                    id
+                    role
+                    email
+                    givenName
+                    familyName
+                    state {
+                        code
+                        name
+                        programs {
+                            id
+                            name
+                            fullName
+                        }
+                    }
+                }
+                documents {
+                    name
+                    s3URL
+                }
             }
         }
     }

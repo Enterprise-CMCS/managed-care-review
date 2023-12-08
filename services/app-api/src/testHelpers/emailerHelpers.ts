@@ -5,12 +5,11 @@ import type {
     ProgramArgType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import type {
-    ContractRevisionWithRatesType,
-    StateUserType,
-} from '../domain-models'
+import type { ContractRevisionWithRatesType, Question } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 import { testSendSESEmail } from './awsSESHelpers'
+import { testCMSUser, testStateUser } from './userHelpers'
+import { v4 as uuidv4 } from 'uuid'
 
 const testEmailConfig = (): EmailConfiguration => ({
     stage: 'LOCAL',
@@ -71,17 +70,6 @@ const sendTestEmails = async (emailData: EmailData): Promise<void | Error> => {
 function testEmailer(customConfig?: EmailConfiguration): Emailer {
     const config = customConfig || testEmailConfig()
     return emailer(config, jest.fn(sendTestEmails))
-}
-
-const mockUser = (): StateUserType => {
-    return {
-        id: '6ec0e9a7-b5fc-44c2-a049-2d60ac37c6ee',
-        role: 'STATE_USER',
-        email: 'test+state+user@example.com',
-        stateCode: 'MN',
-        familyName: 'State',
-        givenName: 'User',
-    }
 }
 
 type State = {
@@ -625,6 +613,57 @@ const mockContractAmendmentFormData = (
     }
 }
 
+const mockQuestionAndResponses = (
+    questionData?: Partial<Question>
+): Question => {
+    const question: Question = {
+        id: `test-question-id-1`,
+        contractID: 'contract-id-test',
+        createdAt: new Date('01/01/2024'),
+        addedBy: testCMSUser(),
+        documents: [
+            {
+                name: 'Test Question',
+                s3URL: 'testS3Url',
+            },
+        ],
+        division: 'DMCO',
+        responses: [],
+        ...questionData,
+    }
+
+    const defaultResponses = [
+        {
+            id: uuidv4(),
+            questionID: question.id,
+            //Add 1 day to date, to make sure this date is always after question.createdAt
+            createdAt: ((): Date => {
+                const responseDate = new Date(question.createdAt)
+                return new Date(
+                    responseDate.setDate(responseDate.getDate() + 1)
+                )
+            })(),
+            addedBy: testStateUser(),
+            documents: [
+                {
+                    name: 'Test Question Response',
+                    s3URL: 'testS3Url',
+                },
+            ],
+        },
+    ]
+
+    // If responses are passed in, use that and replace questionIDs, so they match the question.
+    question.responses = questionData?.responses
+        ? questionData.responses.map((response) => ({
+              ...response,
+              questionID: question.id,
+          }))
+        : defaultResponses
+
+    return question
+}
+
 export {
     testEmailConfig,
     testStateAnalystsEmails,
@@ -636,6 +675,6 @@ export {
     mockContractAndRatesFormData,
     mockUnlockedContractAndRatesFormData,
     mockUnlockedContractOnlyFormData,
-    mockUser,
     testEmailer,
+    mockQuestionAndResponses,
 }
