@@ -10,6 +10,7 @@ import {
     resubmitPackageCMSEmail,
     sendQuestionStateEmail,
     sendQuestionCMSEmail,
+    sendQuestionResponseCMSEmail,
 } from './'
 import type {
     LockedHealthPlanFormDataType,
@@ -91,6 +92,18 @@ type Emailer = {
         statePrograms: ProgramType[],
         submitterEmails: string[]
     ) => Promise<void | Error>
+    sendResubmittedStateEmail: (
+        formData: LockedHealthPlanFormDataType,
+        updateInfo: UpdateInfoType,
+        submitterEmails: string[],
+        statePrograms: ProgramType[]
+    ) => Promise<void | Error>
+    sendResubmittedCMSEmail: (
+        formData: LockedHealthPlanFormDataType,
+        updateInfo: UpdateInfoType,
+        stateAnalystsEmails: StateAnalystsEmails,
+        statePrograms: ProgramType[]
+    ) => Promise<void | Error>
     sendQuestionsStateEmail: (
         contract: ContractRevisionWithRatesType,
         submitterEmails: string[],
@@ -103,17 +116,12 @@ type Emailer = {
         statePrograms: ProgramType[],
         questions: Question[]
     ) => Promise<void | Error>
-    sendResubmittedStateEmail: (
-        formData: LockedHealthPlanFormDataType,
-        updateInfo: UpdateInfoType,
-        submitterEmails: string[],
-        statePrograms: ProgramType[]
-    ) => Promise<void | Error>
-    sendResubmittedCMSEmail: (
-        formData: LockedHealthPlanFormDataType,
-        updateInfo: UpdateInfoType,
+    sendQuestionResponseCMSEmail: (
+        contractRevision: ContractRevisionWithRatesType,
+        statePrograms: ProgramType[],
         stateAnalystsEmails: StateAnalystsEmails,
-        statePrograms: ProgramType[]
+        currentQuestion: Question,
+        allContractQuestions: Question[]
     ) => Promise<void | Error>
 }
 const localEmailerLogger = (emailData: EmailData) =>
@@ -203,6 +211,44 @@ function emailer(
                 return await this.sendEmail(emailData)
             }
         },
+        sendResubmittedStateEmail: async function (
+            formData,
+            updateInfo,
+            submitterEmails,
+            statePrograms
+        ) {
+            const emailData = await resubmitPackageStateEmail(
+                formData,
+                submitterEmails,
+                updateInfo,
+                config,
+                statePrograms
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendResubmittedCMSEmail: async function (
+            formData,
+            updateInfo,
+            stateAnalystsEmails,
+            statePrograms
+        ) {
+            const emailData = await resubmitPackageCMSEmail(
+                formData,
+                updateInfo,
+                config,
+                stateAnalystsEmails,
+                statePrograms
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
         sendQuestionsStateEmail: async function (
             contract,
             submitterEmails,
@@ -241,37 +287,20 @@ function emailer(
                 return await this.sendEmail(emailData)
             }
         },
-        sendResubmittedStateEmail: async function (
-            formData,
-            updateInfo,
-            submitterEmails,
-            statePrograms
-        ) {
-            const emailData = await resubmitPackageStateEmail(
-                formData,
-                submitterEmails,
-                updateInfo,
-                config,
-                statePrograms
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return await this.sendEmail(emailData)
-            }
-        },
-        sendResubmittedCMSEmail: async function (
-            formData,
-            updateInfo,
+        sendQuestionResponseCMSEmail: async function (
+            contractRevision,
+            statePrograms,
             stateAnalystsEmails,
-            statePrograms
+            currentQuestion,
+            allContractQuestions
         ) {
-            const emailData = await resubmitPackageCMSEmail(
-                formData,
-                updateInfo,
+            const emailData = await sendQuestionResponseCMSEmail(
+                contractRevision,
                 config,
+                statePrograms,
                 stateAnalystsEmails,
-                statePrograms
+                currentQuestion,
+                allContractQuestions
             )
             if (emailData instanceof Error) {
                 return emailData

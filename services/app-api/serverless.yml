@@ -209,6 +209,7 @@ functions:
           method: post
           cors: true
           authorizer: aws_iam
+    timeout: 60 # zipping large amount of files hits default time out of 6 seconds
 
   cleanup:
     handler: src/handlers/cleanup.main

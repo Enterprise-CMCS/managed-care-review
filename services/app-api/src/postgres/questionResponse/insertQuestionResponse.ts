@@ -1,17 +1,18 @@
 import type { PrismaClient } from '@prisma/client'
 import type {
     InsertQuestionResponseArgs,
-    QuestionResponseType,
     StateUserType,
+    Question,
 } from '../../domain-models'
 import { v4 as uuidv4 } from 'uuid'
+import { questionInclude, questionPrismaToDomainType } from './questionHelpers'
 import { NotFoundError } from '../postgresErrors'
 
 export async function insertQuestionResponse(
     client: PrismaClient,
     response: InsertQuestionResponseArgs,
     user: StateUserType
-): Promise<QuestionResponseType | Error> {
+): Promise<Question | Error> {
     const documents = response.documents.map((document) => ({
         id: uuidv4(),
         name: document.name,
@@ -19,34 +20,29 @@ export async function insertQuestionResponse(
     }))
 
     try {
-        const result = await client.questionResponse.create({
+        const result = await client.question.update({
+            where: {
+                id: response.questionID,
+            },
             data: {
-                id: uuidv4(),
-                question: {
-                    connect: {
-                        id: response.questionID,
+                responses: {
+                    create: {
+                        id: uuidv4(),
+                        addedBy: {
+                            connect: {
+                                id: user.id,
+                            },
+                        },
+                        documents: {
+                            create: documents,
+                        },
                     },
                 },
-                addedBy: {
-                    connect: {
-                        id: user.id,
-                    },
-                },
-                documents: {
-                    create: documents,
-                },
             },
-            include: {
-                documents: true,
-            },
+            include: questionInclude,
         })
 
-        const createdResponse: QuestionResponseType = {
-            ...result,
-            addedBy: user,
-        }
-
-        return createdResponse
+        return questionPrismaToDomainType(result)
     } catch (e) {
         // Return a NotFoundError if prisma fails on the primary key constraint
         // An operation failed because it depends on one or more records

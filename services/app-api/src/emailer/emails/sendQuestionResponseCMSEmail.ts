@@ -1,7 +1,7 @@
 import { packageName as generatePackageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { pruneDuplicateEmails } from '../formatters'
-import type { EmailConfiguration, EmailData, StateAnalystsEmails } from '..'
+import type { EmailConfiguration, EmailData } from '..'
 import type { ProgramType, Question } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
@@ -11,19 +11,32 @@ import {
 } from '../templateHelpers'
 import { submissionQuestionResponseURL } from '../generateURLs'
 import type { ContractRevisionWithRatesType } from '../../domain-models/contractAndRates'
+import type { StateAnalystsEmails } from '..'
 
-export const sendQuestionCMSEmail = async (
+export const sendQuestionResponseCMSEmail = async (
     contractRev: ContractRevisionWithRatesType,
-    stateAnalystsEmails: StateAnalystsEmails,
     config: EmailConfiguration,
     statePrograms: ProgramType[],
-    questions: Question[]
+    stateAnalystsEmails: StateAnalystsEmails,
+    currentQuestion: Question,
+    allContractQuestions: Question[]
 ): Promise<EmailData | Error> => {
-    const newQuestion = questions[questions.length - 1]
+    // currentQuestion is the question the new response belongs to. Responses can be uploaded to any question round.
+    const { responses, division } = currentQuestion
+    const latestResponse = responses[0]
+    const questionRound = getQuestionRound(
+        allContractQuestions,
+        currentQuestion
+    )
+
+    if (questionRound instanceof Error) {
+        return questionRound
+    }
+
     let receiverEmails = [...stateAnalystsEmails, ...config.devReviewTeamEmails]
-    if (newQuestion.addedBy.divisionAssignment === 'DMCP') {
+    if (division === 'DMCP') {
         receiverEmails.push(...config.dmcpReviewEmails)
-    } else if (newQuestion.addedBy.divisionAssignment === 'OACT') {
+    } else if (division === 'OACT') {
         receiverEmails.push(...config.oactEmails)
     }
     receiverEmails = pruneDuplicateEmails(receiverEmails)
@@ -45,24 +58,19 @@ export const sendQuestionCMSEmail = async (
         contractRev.contract.id,
         config.baseUrl
     )
-    const questionRound = getQuestionRound(questions, newQuestion)
-
-    if (questionRound instanceof Error) {
-        return questionRound
-    }
 
     const data = {
         packageName,
         questionResponseURL,
-        cmsRequestorEmail: newQuestion.addedBy.email,
-        cmsRequestorName: `${newQuestion.addedBy.givenName} ${newQuestion.addedBy.familyName}`,
-        cmsRequestorDivision: newQuestion.addedBy.divisionAssignment,
-        dateAsked: formatCalendarDate(newQuestion.createdAt),
+        cmsRequestorDivision: division,
+        stateResponseSubmitterEmail: latestResponse.addedBy.email,
+        stateResponseSubmitterName: `${latestResponse.addedBy.givenName} ${latestResponse.addedBy.familyName}`,
         questionRound,
+        dateAsked: formatCalendarDate(currentQuestion.createdAt),
     }
 
     const result = await renderTemplate<typeof data>(
-        'sendQuestionCMSEmail',
+        'sendQuestionResponseCMSEmail',
         data
     )
 
@@ -75,7 +83,7 @@ export const sendQuestionCMSEmail = async (
             replyToAddresses: [config.helpDeskEmail],
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
-            }Questions sent for ${packageName}`,
+            }New Responses for ${packageName}`,
             bodyText: stripHTMLFromTemplate(result),
             bodyHTML: result,
         }

@@ -79,7 +79,11 @@ export function configureResolvers(
                 emailParameterStore,
                 emailer
             ),
-            createQuestionResponse: createQuestionResponseResolver(store),
+            createQuestionResponse: createQuestionResponseResolver(
+                store,
+                emailer,
+                emailParameterStore
+            ),
         },
         User: {
             // resolveType is required to differentiate Unions

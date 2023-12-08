@@ -494,7 +494,6 @@ export function submitHealthPlanPackageResolver(
         let statePackageEmailResult
 
         if (status === 'RESUBMITTED') {
-            logSuccess('It was resubmitted')
             cmsPackageEmailResult = await emailer.sendResubmittedCMSEmail(
                 lockedFormData,
                 updateInfo,

@@ -7,7 +7,6 @@ import type {
     StateUserType,
     Question,
     CreateQuestionInput,
-    QuestionResponseType,
     InsertQuestionResponseArgs,
     StateType,
     RateType,
@@ -92,11 +91,8 @@ type Store = {
     insertQuestionResponse: (
         questionInput: InsertQuestionResponseArgs,
         user: StateUserType
-    ) => Promise<QuestionResponseType | Error>
+    ) => Promise<Question | Error>
 
-    /**
-     * Rates database refactor prisma functions
-     */
     insertDraftContract: (
         args: InsertContractArgsType
     ) => Promise<ContractType | Error>
@@ -162,15 +158,14 @@ function NewPostgresStore(client: PrismaClient): Store {
         findStatePrograms: findStatePrograms,
         findAllSupportedStates: () => findAllSupportedStates(client),
         findAllUsers: () => findAllUsers(client),
+
         insertQuestion: (questionInput, user) =>
             insertQuestion(client, questionInput, user),
         findAllQuestionsByContract: (pkgID) =>
             findAllQuestionsByContract(client, pkgID),
         insertQuestionResponse: (questionInput, user) =>
             insertQuestionResponse(client, questionInput, user),
-        /**
-         * Rates database refactor prisma functions
-         */
+
         insertDraftContract: (args) => insertDraftContract(client, args),
         findContractWithHistory: (args) =>
             findContractWithHistory(client, args),

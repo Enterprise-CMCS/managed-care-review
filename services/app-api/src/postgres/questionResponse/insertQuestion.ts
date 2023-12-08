@@ -1,12 +1,12 @@
 import type { PrismaClient } from '@prisma/client'
 import type {
     CMSUserType,
-    QuestionResponseType,
     Question,
     CreateQuestionInput,
     DivisionType,
 } from '../../domain-models'
 import { v4 as uuidv4 } from 'uuid'
+import { questionPrismaToDomainType, questionInclude } from './questionHelpers'
 
 export async function insertQuestion(
     client: PrismaClient,
@@ -38,33 +38,10 @@ export async function insertQuestion(
                 },
                 division: user.divisionAssignment as DivisionType,
             },
-            include: {
-                documents: {
-                    orderBy: {
-                        createdAt: 'desc',
-                    },
-                },
-                responses: {
-                    include: {
-                        addedBy: true,
-                        documents: true,
-                    },
-                    orderBy: {
-                        createdAt: 'desc',
-                    },
-                },
-            },
+            include: questionInclude,
         })
 
-        const createdQuestion: Question = {
-            ...result,
-            addedBy: user,
-            responses: result.responses.map(
-                (response) => response as QuestionResponseType
-            ),
-        }
-
-        return createdQuestion
+        return questionPrismaToDomainType(result)
     } catch (e) {
         return e
     }
