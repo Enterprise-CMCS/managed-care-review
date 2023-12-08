@@ -165,7 +165,7 @@ export const SingleRateCert = ({
                                     Document definitions and requirements
                                 </Link>
                                 <span className="padding-top-2">
-                                    {`Upload only one rate certification document. ${'Additional rates can be added later.'}`}
+                                    {`Upload only one rate certification document. Additional rates can be added later.`}
                                 </span>
 
                                 <span className="padding-top-1">
