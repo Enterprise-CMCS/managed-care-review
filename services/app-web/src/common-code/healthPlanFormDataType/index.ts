@@ -64,7 +64,6 @@ export {
     programNames,
     packageName,
     generateRateName,
-    convertRateSupportingDocs,
     removeInvalidProvisionsAndAuthorities,
     removeRatesData,
     hasValidPopulationCoverage,

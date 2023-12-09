@@ -85,10 +85,10 @@ describe('createQuestionResponse', () => {
             },
         })
 
-        expect(createResponseResult.errors).toBeDefined()
+        expect(createResponseResult).toBeDefined()
         expect(assertAnErrorCode(createResponseResult)).toBe('BAD_USER_INPUT')
         expect(assertAnError(createResponseResult).message).toBe(
-            `Issue creating question response for question ${fakeID} of type NOT_FOUND_ERROR. Message: An operation failed because it depends on one or more records that were required but not found.`
+            `Question with ID: ${fakeID} not found to attach response to`
         )
     })
 

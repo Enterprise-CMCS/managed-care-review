@@ -38,8 +38,6 @@ import {
 } from '../../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { ActuaryContactFields } from '../../Contacts'
 import { PackagesWithSharedRates } from '../PackagesWithSharedRates/PackagesWithSharedRates'
-import { featureFlags } from '../../../../common-code/featureFlags'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 const isRateTypeEmpty = (values: RateCertFormType): boolean =>
     values.rateType === undefined
@@ -120,17 +118,6 @@ export const SingleRateCert = ({
     previousDocuments,
     index = 0,
 }: SingleRateCertProps): React.ReactElement => {
-    // feature flags
-    const ldClient = useLDClient()
-    const showPackagesWithSharedRatesDropdown: boolean = ldClient?.variation(
-        featureFlags.PACKAGES_WITH_SHARED_RATES.flag,
-        featureFlags.PACKAGES_WITH_SHARED_RATES.defaultValue
-    )
-    const supportingDocsByRate = ldClient?.variation(
-        featureFlags.SUPPORTING_DOCS_BY_RATE.flag,
-        featureFlags.SUPPORTING_DOCS_BY_RATE.defaultValue
-    )
-
     // page level setup
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
     const key = rateInfo.key
@@ -178,11 +165,7 @@ export const SingleRateCert = ({
                                     Document definitions and requirements
                                 </Link>
                                 <span className="padding-top-2">
-                                    {`Upload only one rate certification document. ${
-                                        supportingDocsByRate
-                                            ? 'Additional rates can be added later.'
-                                            : 'Additional rates and supporting documents can be added later.'
-                                    }`}
+                                    {`Upload only one rate certification document. Additional rates can be added later.`}
                                 </span>
 
                                 <span className="padding-top-1">
@@ -216,80 +199,70 @@ export const SingleRateCert = ({
                     />
                 </FormGroup>
 
-                {supportingDocsByRate && (
-                    <FormGroup
-                        error={Boolean(showFieldErrors('supportingDocuments'))}
-                    >
-                        <FileUpload
-                            id={`${fieldNamePrefix}.supportingDocuments`}
-                            name={`${fieldNamePrefix}.supportingDocuments`}
-                            label="Upload supporting documents"
-                            renderMode="list"
-                            aria-required={false}
-                            error={showFieldErrors('supportingDocuments')}
-                            hint={
-                                <span
-                                    className={
-                                        styles.guidanceTextBlockNoPadding
-                                    }
+                <FormGroup
+                    error={Boolean(showFieldErrors('supportingDocuments'))}
+                >
+                    <FileUpload
+                        id={`${fieldNamePrefix}.supportingDocuments`}
+                        name={`${fieldNamePrefix}.supportingDocuments`}
+                        label="Upload supporting documents"
+                        renderMode="list"
+                        aria-required={false}
+                        error={showFieldErrors('supportingDocuments')}
+                        hint={
+                            <span className={styles.guidanceTextBlockNoPadding}>
+                                <Link
+                                    aria-label="Document definitions and requirements (opens in new window)"
+                                    href={'/help#key-documents'}
+                                    variant="external"
+                                    target="_blank"
                                 >
-                                    <Link
-                                        aria-label="Document definitions and requirements (opens in new window)"
-                                        href={'/help#key-documents'}
-                                        variant="external"
-                                        target="_blank"
-                                    >
-                                        Document definitions and requirements
-                                    </Link>
-                                    <span className="padding-top-1">
-                                        {`Upload any supporting documents for Rate certification ${rateCertNumber}`}
-                                    </span>
-                                    <span>
-                                        {supportingDocsByRate
-                                            ? 'Additional rates can be added later.'
-                                            : 'Additional rates and supporting documents can be added later.'}
-                                    </span>
-
-                                    <span className="padding-top-1">
-                                        This input only accepts PDF, CSV, DOC,
-                                        DOCX, XLS, XLSX files.
-                                    </span>
+                                    Document definitions and requirements
+                                </Link>
+                                <span className="padding-top-1">
+                                    {`Upload any supporting documents for Rate certification ${rateCertNumber}`}
                                 </span>
-                            }
-                            accept={ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES}
-                            initialItems={rateInfo.supportingDocuments}
-                            uploadFile={(file) =>
-                                handleUploadFile(file, 'HEALTH_PLAN_DOCS')
-                            }
-                            scanFile={(key) =>
-                                handleScanFile(key, 'HEALTH_PLAN_DOCS')
-                            }
-                            deleteFile={(key) =>
-                                handleDeleteFile(
-                                    key,
-                                    'HEALTH_PLAN_DOCS',
-                                    previousDocuments
-                                )
-                            }
-                            onFileItemsUpdate={({ fileItems }) =>
-                                setFieldValue(
-                                    `${fieldNamePrefix}.supportingDocuments`,
-                                    fileItems
-                                )
-                            }
-                        />
-                    </FormGroup>
-                )}
+                                <span>
+                                    Additional rates can be added later.
+                                </span>
 
-                {showPackagesWithSharedRatesDropdown && (
-                    <PackagesWithSharedRates
-                        index={index}
-                        keyProp={key}
-                        fieldNamePrefix={fieldNamePrefix}
-                        shouldValidate={shouldValidate}
-                        parentSubmissionID={parentSubmissionID}
+                                <span className="padding-top-1">
+                                    This input only accepts PDF, CSV, DOC, DOCX,
+                                    XLS, XLSX files.
+                                </span>
+                            </span>
+                        }
+                        accept={ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES}
+                        initialItems={rateInfo.supportingDocuments}
+                        uploadFile={(file) =>
+                            handleUploadFile(file, 'HEALTH_PLAN_DOCS')
+                        }
+                        scanFile={(key) =>
+                            handleScanFile(key, 'HEALTH_PLAN_DOCS')
+                        }
+                        deleteFile={(key) =>
+                            handleDeleteFile(
+                                key,
+                                'HEALTH_PLAN_DOCS',
+                                previousDocuments
+                            )
+                        }
+                        onFileItemsUpdate={({ fileItems }) =>
+                            setFieldValue(
+                                `${fieldNamePrefix}.supportingDocuments`,
+                                fileItems
+                            )
+                        }
                     />
-                )}
+                </FormGroup>
+
+                <PackagesWithSharedRates
+                    index={index}
+                    keyProp={key}
+                    fieldNamePrefix={fieldNamePrefix}
+                    shouldValidate={shouldValidate}
+                    parentSubmissionID={parentSubmissionID}
+                />
 
                 <FormGroup error={Boolean(showFieldErrors('rateProgramIDs'))}>
                     <Label htmlFor={`${fieldNamePrefix}.rateProgramIDs`}>

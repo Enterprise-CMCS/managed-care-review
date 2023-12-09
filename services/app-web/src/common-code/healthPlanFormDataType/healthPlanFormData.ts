@@ -1,6 +1,5 @@
 import {
     RateInfoType,
-    SubmissionDocument,
     UnlockedHealthPlanFormDataType,
     ActuaryContact,
 } from './UnlockedHealthPlanFormDataType'
@@ -59,12 +58,12 @@ const hasValidModifiedProvisions = (
               (provision) => provisions[provision] !== undefined
           )
         : isBaseContract(sub)
-        ? modifiedProvisionMedicaidBaseKeys.every(
-              (provision) => provisions[provision] !== undefined
-          )
-        : modifiedProvisionMedicaidAmendmentKeys.every(
-              (provision) => provisions[provision] !== undefined
-          )
+          ? modifiedProvisionMedicaidBaseKeys.every(
+                (provision) => provisions[provision] !== undefined
+            )
+          : modifiedProvisionMedicaidAmendmentKeys.every(
+                (provision) => provisions[provision] !== undefined
+            )
 }
 const hasValidContract = (sub: LockedHealthPlanFormDataType): boolean =>
     sub.contractType !== undefined &&
@@ -314,35 +313,12 @@ const generateRateName = (
     return rateName
 }
 
-// This logic is no longer needed once SUPPORTING_DOCS_BY_RATE flag is on in production
-const convertRateSupportingDocs = (
-    documents: SubmissionDocument[]
-): SubmissionDocument[] => {
-    if (
-        documents.some(
-            (document) =>
-                document.documentCategories.includes('CONTRACT') ||
-                document.documentCategories.includes('RATES')
-        )
-    ) {
-        const errorMessage =
-            'convertRateSupportingDocs does not support CONTRACT or RATES documents.'
-        console.error(errorMessage)
-        throw new Error(errorMessage)
-    }
-    return documents.map((document) => ({
-        ...document,
-        documentCategories: ['CONTRACT_RELATED'],
-    }))
-}
-
 const removeRatesData = (
     pkg: HealthPlanFormDataType
 ): HealthPlanFormDataType => {
     pkg.rateInfos = []
     pkg.addtlActuaryContacts = []
     pkg.addtlActuaryCommunicationPreference = undefined
-    pkg.documents = convertRateSupportingDocs(pkg.documents)
 
     return pkg
 }
@@ -395,7 +371,6 @@ export {
     programNames,
     packageName,
     generateRateName,
-    convertRateSupportingDocs,
     removeRatesData,
     removeInvalidProvisionsAndAuthorities,
     hasValidPopulationCoverage,

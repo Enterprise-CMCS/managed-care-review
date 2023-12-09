@@ -28,7 +28,6 @@ import {
     TEST_PNG_FILE,
     dragAndDrop,
     updateDateRange,
-    ldUseClientSpy,
 } from '../../../testHelpers'
 import { RateDetails } from './RateDetails'
 import {
@@ -92,8 +91,6 @@ describe('RateDetails', () => {
         })
 
         it('displays correct form guidance', async () => {
-            ldUseClientSpy({ 'supporting-docs-by-rate': true })
-
             renderWithProviders(
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft()}
@@ -110,7 +107,7 @@ describe('RateDetails', () => {
                 screen.queryByText(/All fields are required/)
             ).not.toBeInTheDocument()
             const requiredLabels = await screen.findAllByText('Required')
-            expect(requiredLabels).toHaveLength(6)
+            expect(requiredLabels).toHaveLength(7)
             const optionalLabels = screen.queryAllByText('Optional')
             expect(optionalLabels).toHaveLength(1)
         })
@@ -151,10 +148,12 @@ describe('RateDetails', () => {
                     name: 'Certification of rate ranges of capitation rates per rate cell',
                 })
             ).not.toBeChecked()
-            expect(screen.getByTestId('file-input')).toBeInTheDocument()
+            expect(screen.getAllByTestId('file-input')).toHaveLength(2)
+            expect(screen.getAllByTestId('file-input')[0]).toBeInTheDocument()
+            expect(screen.getAllByTestId('file-input')[1]).toBeInTheDocument()
             expect(
                 within(
-                    screen.getByTestId('file-input-preview-list')
+                    screen.getAllByTestId('file-input-preview-list')[0]
                 ).queryAllByRole('listitem')
             ).toHaveLength(0)
 
@@ -252,7 +251,6 @@ describe('RateDetails', () => {
         })
 
         it('progressively disclose new rate form fields as expected', async () => {
-            ldUseClientSpy({ 'packages-with-shared-rates': true })
             renderWithProviders(
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft()}
@@ -438,16 +436,16 @@ describe('RateDetails', () => {
             )
 
             await waitFor(() => {
-                expect(screen.getByTestId('file-input')).toBeInTheDocument()
-                expect(screen.getByTestId('file-input')).toHaveClass(
-                    'usa-file-input'
-                )
+                const textInputs = screen.getAllByTestId('file-input')
+                expect(textInputs).toHaveLength(2)
+                expect(textInputs[0]).toBeInTheDocument()
+                expect(textInputs[0]).toHaveClass('usa-file-input')
                 expect(
                     screen.getByRole('button', { name: 'Continue' })
                 ).not.toHaveAttribute('aria-disabled')
                 expect(
                     within(
-                        screen.getByTestId('file-input-preview-list')
+                        screen.getAllByTestId('file-input-preview-list')[0]
                     ).queryAllByRole('listitem')
                 ).toHaveLength(0)
             })
@@ -521,8 +519,6 @@ describe('RateDetails', () => {
         })
 
         it('accepts multiple pdf, word, excel documents for supporting documents', async () => {
-            ldUseClientSpy({ 'supporting-docs-by-rate': true })
-
             renderWithProviders(
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft()}
@@ -733,7 +729,6 @@ describe('RateDetails', () => {
 
     describe('handles rates across submissions', () => {
         it('correctly checks shared rate certification radios and selects shared packages', async () => {
-            ldUseClientSpy({ 'packages-with-shared-rates': true })
             //Spy on useStatePrograms hook to get up-to-date state programs
             jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
                 mockMNState().programs
@@ -965,7 +960,6 @@ describe('RateDetails', () => {
         }, 10000)
 
         it('cannot continue when shared rate radio is unchecked', async () => {
-            ldUseClientSpy({ 'packages-with-shared-rates': true })
             //Spy on useStatePrograms hook to get up-to-date state programs
             jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
                 mockMNState().programs
@@ -1095,7 +1089,6 @@ describe('RateDetails', () => {
         })
 
         it('cannot continue when shared rate radio is checked and no package is selected', async () => {
-            ldUseClientSpy({ 'packages-with-shared-rates': true })
             //Spy on useStatePrograms hook to get up-to-date state programs
             jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
                 mockMNState().programs
@@ -1279,7 +1272,7 @@ describe('RateDetails', () => {
             const input = screen.getByLabelText(
                 'Upload one rate certification document'
             )
-            const targetEl = screen.getByTestId('file-input-droptarget')
+            const targetEl = screen.getAllByTestId('file-input-droptarget')[0]
 
             await userEvent.upload(input, [TEST_DOC_FILE])
             dragAndDrop(targetEl, [TEST_PNG_FILE])
@@ -1445,7 +1438,7 @@ describe('RateDetails', () => {
                 name: 'Continue',
             })
 
-            const targetEl = screen.getByTestId('file-input-droptarget')
+            const targetEl = screen.getAllByTestId('file-input-droptarget')[0]
             dragAndDrop(targetEl, [TEST_PNG_FILE])
 
             expect(
@@ -1465,8 +1458,6 @@ describe('RateDetails', () => {
         })
         // eslint-disable-next-line jest/no-disabled-tests
         it('disabled with alert when trying to continue while a file is still uploading', async () => {
-            ldUseClientSpy({ 'supporting-docs-by-rate': true })
-
             renderWithProviders(
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft()}
@@ -1567,7 +1558,7 @@ describe('RateDetails', () => {
             const input = screen.getByLabelText(
                 'Upload one rate certification document'
             )
-            const targetEl = screen.getByTestId('file-input-droptarget')
+            const targetEl = screen.getAllByTestId('file-input-droptarget')[0]
 
             await userEvent.upload(input, [TEST_DOC_FILE])
             dragAndDrop(targetEl, [TEST_PNG_FILE])
@@ -1647,7 +1638,6 @@ describe('RateDetails', () => {
         })
 
         it('when duplicate files present, triggers error alert on click', async () => {
-            ldUseClientSpy({ 'supporting-docs-by-rate': true })
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
@@ -1737,7 +1727,7 @@ describe('RateDetails', () => {
             const input = screen.getByLabelText(
                 'Upload one rate certification document'
             )
-            const targetEl = screen.getByTestId('file-input-droptarget')
+            const targetEl = screen.getAllByTestId('file-input-droptarget')[0]
 
             await userEvent.upload(input, [TEST_DOC_FILE])
             dragAndDrop(targetEl, [TEST_PNG_FILE])
@@ -1775,7 +1765,6 @@ describe('RateDetails', () => {
         })
 
         it('when duplicate files present, does not trigger duplicate documents alert on click and silently updates rate and supporting documents lists without duplicates', async () => {
-            ldUseClientSpy({ 'supporting-docs-by-rate': true })
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
@@ -1860,7 +1849,6 @@ describe('RateDetails', () => {
 // Helper functions
 
 const fillOutIndexRate = async (screen: Screen, index: number) => {
-    ldUseClientSpy({ 'packages-with-shared-rates': true })
     const targetRateCert = rateCertifications(screen)[index]
     expect(targetRateCert).toBeDefined()
     const withinTargetRateCert = within(targetRateCert)

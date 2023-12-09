@@ -153,12 +153,6 @@ const CMSUserRoutes = ({
     showQuestionResponse: boolean
     stageName?: string
 }): React.ReactElement => {
-    const ldClient = useLDClient()
-    const showRateReviews = ldClient?.variation(
-        featureFlags.RATE_REVIEWS_DASHBOARD.flag,
-        featureFlags.RATE_REVIEWS_DASHBOARD.defaultValue
-    )
-
     return (
         <AuthenticatedRouteWrapper authMode={authMode} setAlert={setAlert}>
             <Routes>
@@ -179,12 +173,10 @@ const CMSUserRoutes = ({
                         path={`submissions`}
                         element={<SubmissionsDashboard />}
                     />
-                    {showRateReviews && (
-                        <Route
-                            path={'rate-reviews'}
-                            element={<RateReviewsDashboard />}
-                        />
-                    )}
+                    <Route
+                        path={'rate-reviews'}
+                        element={<RateReviewsDashboard />}
+                    />
                 </Route>
 
                 <Route element={<SubmissionSideNav />}>

@@ -303,6 +303,20 @@ describe('RateDetailsSummarySection', () => {
                             documentCategories: ['RATES' as const],
                         },
                     ],
+                    supportingDocuments: [
+                        {
+                            s3URL: 's3://foo/bar/test-2',
+                            name: 'supporting docs test 2',
+                            sha256: 'fakesha',
+                            documentCategories: ['RATES_RELATED' as const],
+                        },
+                        {
+                            s3URL: 's3://foo/bar/test-3',
+                            name: 'supporting docs test 3',
+                            sha256: 'fakesha',
+                            documentCategories: ['RATES_RELATED' as const],
+                        },
+                    ],
                 },
             ],
             documents: [
@@ -311,21 +325,6 @@ describe('RateDetailsSummarySection', () => {
                     name: 'supporting docs test 1',
                     sha256: 'fakesha',
                     documentCategories: ['CONTRACT_RELATED' as const],
-                },
-                {
-                    s3URL: 's3://foo/bar/test-2',
-                    name: 'supporting docs test 2',
-                    sha256: 'fakesha',
-                    documentCategories: ['RATES_RELATED' as const],
-                },
-                {
-                    s3URL: 's3://foo/bar/test-3',
-                    name: 'supporting docs test 3',
-                    sha256: 'fakesha',
-                    documentCategories: [
-                        'CONTRACT_RELATED' as const,
-                        'RATES_RELATED' as const,
-                    ],
                 },
             ],
         }
@@ -353,11 +352,6 @@ describe('RateDetailsSummarySection', () => {
 
             expect(rateDocsTable).toBeInTheDocument()
             expect(supportingDocsTable).toBeInTheDocument()
-            expect(
-                screen.getByRole('link', {
-                    name: /Edit Rate supporting documents/,
-                })
-            ).toHaveAttribute('href', '/documents')
 
             const supportingDocsTableRows =
                 within(supportingDocsTable).getAllByRole('rowgroup')

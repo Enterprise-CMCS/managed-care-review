@@ -223,7 +223,6 @@ export const FileProcessor = ({
             hasRecoverableError={hasRecoverableError}
             handleDelete={handleDelete}
             handleRetry={handleRetry}
-            handleCheckboxClick={handleCheckboxClick}
         />
     )
 }

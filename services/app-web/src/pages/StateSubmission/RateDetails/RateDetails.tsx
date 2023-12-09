@@ -15,8 +15,6 @@ import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { useFocus } from '../../../hooks'
 
-import { featureFlags } from '../../../common-code/featureFlags'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
 import {
     formatActuaryContactsForForm,
     formatDocumentsForDomain,
@@ -79,9 +77,9 @@ const generateRateCertFormValues = (params?: {
             rateInfo?.packagesWithSharedRateCerts === undefined
                 ? undefined
                 : (rateInfo?.packagesWithSharedRateCerts &&
-                      rateInfo?.packagesWithSharedRateCerts.length) >= 1
-                ? 'YES'
-                : 'NO',
+                        rateInfo?.packagesWithSharedRateCerts.length) >= 1
+                  ? 'YES'
+                  : 'NO',
     }
 }
 
@@ -107,17 +105,6 @@ export const RateDetails = ({
     const navigate = useNavigate()
     const { getKey } = useS3()
 
-    // feature flags state management
-    const ldClient = useLDClient()
-    const showPackagesWithSharedRatesDropdown: boolean = ldClient?.variation(
-        featureFlags.PACKAGES_WITH_SHARED_RATES.flag,
-        featureFlags.PACKAGES_WITH_SHARED_RATES.defaultValue
-    )
-    const supportingDocsByRate = ldClient?.variation(
-        featureFlags.SUPPORTING_DOCS_BY_RATE.flag,
-        featureFlags.SUPPORTING_DOCS_BY_RATE.defaultValue
-    )
-
     // form validation state management
     const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
         React.useState(false)
@@ -138,10 +125,7 @@ export const RateDetails = ({
     const newRateNameRef = React.useRef<HTMLElement | null>(null)
     const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
 
-    const rateDetailsFormSchema = RateDetailsFormSchema({
-        'packages-with-shared-rates': showPackagesWithSharedRatesDropdown,
-        'supporting-docs-by-rate': supportingDocsByRate,
-    })
+    const rateDetailsFormSchema = RateDetailsFormSchema()
 
     React.useEffect(() => {
         if (focusNewRate) {

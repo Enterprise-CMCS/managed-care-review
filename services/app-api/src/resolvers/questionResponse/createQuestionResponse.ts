@@ -6,10 +6,9 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import type { Store } from '../../postgres'
-import { isStoreError } from '../../postgres'
-import { GraphQLError } from 'graphql/index'
 import { NotFoundError } from '../../postgres'
+import type { Store } from '../../postgres'
+import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import type { EmailParameterStore } from '../../parameterStore'
 
@@ -39,11 +38,19 @@ export function createQuestionResponseResolver(
             input,
             user
         )
-        if (isStoreError(createResponseResult)) {
-            const errMessage = `Issue creating question response for question ${input.questionID} of type ${createResponseResult.code}. Message: ${createResponseResult.message}`
+
+        if (createResponseResult instanceof Error) {
+            if (createResponseResult instanceof NotFoundError) {
+                const errMessage = `Question with ID: ${input.questionID} not found to attach response to`
+                logError('createQuestionResponse', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new UserInputError(errMessage)
+            }
+
+            const errMessage = `Issue creating question response for question ${input.questionID}. Message: ${createResponseResult.message}`
             logError('createQuestionResponse', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage)
+            throw new Error(errMessage)
         }
 
         const questions = await store.findAllQuestionsByContract(
