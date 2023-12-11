@@ -136,10 +136,7 @@ const hasAnyValidRateData = (
 ): boolean => {
     return (
         //Any rate inside array of rateInfo would mean there is rate data.
-        Boolean(sub.rateInfos.length) ||
-        sub.documents.some((document) =>
-            document.documentCategories.includes('CONTRACT_RELATED')
-        )
+        sub.rateInfos.length > 0
     )
 }
 
@@ -153,26 +150,6 @@ const hasValidDocuments = (sub: LockedHealthPlanFormDataType): boolean => {
 
     const validContractDocuments = sub.contractDocuments.length !== 0
     return validRateDocuments && validContractDocuments
-}
-
-const hasValidSupportingDocumentCategories = (
-    sub: LockedHealthPlanFormDataType
-): boolean => {
-    // every document must have a category
-    if (!sub.documents.every((doc) => doc.documentCategories.length > 0)) {
-        return false
-    }
-    // if the submission is contract-only, all supporting docs must be 'CONTRACT-RELATED
-    if (
-        sub.submissionType === 'CONTRACT_ONLY' &&
-        sub.documents.length > 0 &&
-        !sub.documents.every((doc) =>
-            doc.documentCategories.includes('CONTRACT_RELATED')
-        )
-    ) {
-        return false
-    }
-    return true
 }
 
 const isLockedHealthPlanFormData = (
@@ -356,7 +333,6 @@ export {
     hasValidModifiedProvisions,
     hasValidContract,
     hasValidDocuments,
-    hasValidSupportingDocumentCategories,
     hasValidRates,
     hasAnyValidRateData,
     isBaseContract,

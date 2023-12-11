@@ -27,16 +27,6 @@ const capitationRatesAmendedReasonSchema = z.union([
 const submissionDocumentSchema = z.object({
     name: z.string(),
     s3URL: z.string(),
-    documentCategories: z.array(
-        z
-            .union([
-                z.literal('CONTRACT'),
-                z.literal('RATES'),
-                z.literal('CONTRACT_RELATED'),
-                z.literal('RATES_RELATED'),
-            ])
-            .optional()
-    ),
     sha256: z.string().optional(),
     id: z.string().optional(), // doesn't exist for newly created
 })

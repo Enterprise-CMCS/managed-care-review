@@ -58,7 +58,6 @@ describe('makeDocumentDateTable', () => {
                     s3URL: 's3://bucketname/testDateDoc/testDateDoc.pdf',
                     name: 'Test Date Doc',
                     sha256: 'fakesha',
-                    documentCategories: ['CONTRACT_RELATED'],
                 },
             ],
             contractDocuments: [
@@ -66,7 +65,6 @@ describe('makeDocumentDateTable', () => {
                     s3URL: 's3://bucketname/key/replaced-contract.pdf',
                     name: 'replaced contract',
                     sha256: 'fakesha1',
-                    documentCategories: ['CONTRACT'],
                 },
             ],
             rateInfos: [
@@ -98,7 +96,6 @@ describe('makeDocumentDateTable', () => {
                         s3URL: 's3://bucketname/key/original-contract.pdf',
                         name: 'original contract',
                         sha256: 'fakesha2',
-                        documentCategories: ['CONTRACT'],
                     },
                 ],
             },

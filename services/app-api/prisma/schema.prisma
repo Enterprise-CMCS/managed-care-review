@@ -392,13 +392,6 @@ enum ContractType {
   AMENDMENT
 }
 
-enum DocumentCategory {
-  CONTRACT
-  RATES
-  CONTRACT_RELATED
-  RATES_RELATED
-}
-
 enum ActuaryCommunication {
   OACT_TO_ACTUARY
   OACT_TO_STATE

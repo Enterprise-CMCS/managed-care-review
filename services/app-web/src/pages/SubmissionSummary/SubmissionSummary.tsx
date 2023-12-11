@@ -13,7 +13,6 @@ import {
     ContractDetailsSummarySection,
     RateDetailsSummarySection,
     SubmissionTypeSummarySection,
-    SupportingDocumentsSummarySection,
 } from '../../components/SubmissionSummarySection'
 import {
     SubmissionUnlockedBanner,
@@ -224,11 +223,6 @@ export const SubmissionSummary = (): React.ReactElement => {
                 )}
 
                 <ContactsSummarySection submission={packageData} />
-
-                <SupportingDocumentsSummarySection
-                    submission={packageData}
-                    onDocumentError={handleDocumentDownloadError}
-                />
 
                 <ChangeHistory submission={pkg} />
                 {

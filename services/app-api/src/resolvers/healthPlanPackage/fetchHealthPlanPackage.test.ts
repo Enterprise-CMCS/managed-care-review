@@ -62,7 +62,6 @@ describe(`fetchHealthPlanPackage`, () => {
                 name: 'contractDocument.pdf',
                 s3URL: 'fakeS3URL',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT'],
             },
         ])
     })

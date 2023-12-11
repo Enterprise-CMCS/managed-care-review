@@ -75,9 +75,6 @@ export const RateDetailsSummarySection = ({
     const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
-    const submissionLevelRateSupportingDocuments = submission.documents.filter(
-        (doc) => doc.documentCategories.includes('RATES_RELATED')
-    )
 
     const { getKey, getBulkDlURL } = useS3()
     const [zippedFilesURL, setZippedFilesURL] = useState<
@@ -233,7 +230,6 @@ export const RateDetailsSummarySection = ({
         getKey,
         getBulkDlURL,
         submission,
-        submissionLevelRateSupportingDocuments,
         submissionName,
         isSubmitted,
         isPreviousSubmission,

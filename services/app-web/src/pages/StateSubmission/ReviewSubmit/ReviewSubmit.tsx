@@ -10,7 +10,6 @@ import {
     ContractDetailsSummarySection,
     RateDetailsSummarySection,
     SubmissionTypeSummarySection,
-    SupportingDocumentsSummarySection,
 } from '../../../components/SubmissionSummarySection'
 import { PageActionsContainer } from '../PageActions'
 import styles from './ReviewSubmit.module.scss'
@@ -71,11 +70,6 @@ export const ReviewSubmit = ({
             <ContactsSummarySection
                 submission={draftSubmission}
                 editNavigateTo="../contacts"
-            />
-
-            <SupportingDocumentsSummarySection
-                submission={draftSubmission}
-                editNavigateTo="../documents"
             />
 
             <PageActionsContainer

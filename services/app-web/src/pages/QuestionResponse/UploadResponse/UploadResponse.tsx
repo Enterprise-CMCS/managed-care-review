@@ -155,7 +155,6 @@ export const UploadResponse = () => {
                             id="response-upload"
                             name="response-upload"
                             label="Upload response"
-                            renderMode="list"
                             aria-required
                             error={showFileUploadError ? fileUploadError : ''}
                             hint={

@@ -2,25 +2,16 @@ import React from 'react'
 import classnames from 'classnames'
 import { FileItemT, FileStatus } from '../FileProcessor/FileProcessor'
 import styles from '../FileUpload.module.scss'
-import { TableWrapper } from '../TableWrapper/TableWrapper'
 import { ListWrapper } from '../ListWrapper/ListWrapper'
 
 export const FileItemsList = ({
     fileItems,
     deleteItem,
     retryItem,
-    renderMode,
-    handleCheckboxClick,
-    isContractOnly,
-    shouldValidate,
 }: {
     fileItems: FileItemT[]
     deleteItem: (id: FileItemT) => void
     retryItem: (item: FileItemT) => void
-    renderMode: 'table' | 'list'
-    handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
-    isContractOnly?: boolean
-    shouldValidate?: boolean
 }): React.ReactElement => {
     const liClasses = (status: FileStatus): string => {
         const hasError =
@@ -33,22 +24,12 @@ export const FileItemsList = ({
         })
     }
 
-    return renderMode === 'table' ? (
-        <TableWrapper
-            fileItems={fileItems}
-            deleteItem={deleteItem}
-            retryItem={retryItem}
-            handleCheckboxClick={handleCheckboxClick}
-            isContractOnly={isContractOnly}
-            shouldValidate={shouldValidate}
-        />
-    ) : (
+    return (
         <ListWrapper
             fileItems={fileItems}
             deleteItem={deleteItem}
             retryItem={retryItem}
             liClasses={liClasses}
-            handleCheckboxClick={handleCheckboxClick}
         />
     )
 }
