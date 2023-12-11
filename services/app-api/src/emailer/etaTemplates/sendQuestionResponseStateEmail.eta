@@ -1,4 +1,4 @@
-<%= it.cmsRequestorDivision %> round <%= it.questionRound %> response was successfully submitted
+<%= it.cmsRequestorDivision %> round <%= it.questionRound %> response was successfully submitted<br />
 <br />
 <b>Date:</b> <%= it.dateAsked %>
 <br />
