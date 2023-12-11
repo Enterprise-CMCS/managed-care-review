@@ -29,17 +29,15 @@ const cmsUser: CMSUserType = {
     stateAssignments: [flState],
 }
 
-const questions: Question[] = [
-    {
-        id: '1234',
-        contractID: 'contract-id-test',
-        createdAt: new Date('01/01/2024'),
-        addedBy: cmsUser,
-        documents: [],
-        division: 'DMCO',
-        responses: [],
-    },
-]
+const currentQuestion: Question = {
+    id: '1234',
+    contractID: 'contract-id-test',
+    createdAt: new Date('01/01/2024'),
+    addedBy: cmsUser,
+    documents: [],
+    division: 'DMCO',
+    responses: [],
+}
 
 const formData: ContractFormDataType = {
     programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
@@ -108,7 +106,7 @@ test('to addresses list includes submitter emails', async () => {
         defaultSubmitters,
         testEmailConfig(),
         defaultStatePrograms,
-        questions
+        currentQuestion
     )
 
     if (template instanceof Error) {
@@ -132,7 +130,7 @@ test('to addresses list includes all state contacts on submission', async () => 
         defaultSubmitters,
         testEmailConfig(),
         defaultStatePrograms,
-        questions
+        currentQuestion
     )
 
     if (template instanceof Error) {
@@ -174,7 +172,7 @@ test('to addresses list does not include duplicate state receiver emails on subm
         defaultSubmitters,
         testEmailConfig(),
         defaultStatePrograms,
-        questions
+        currentQuestion
     )
 
     if (template instanceof Error) {
@@ -203,7 +201,7 @@ test('subject line is correct and clearly states submission is complete', async 
         defaultSubmitters,
         testEmailConfig(),
         defaultStatePrograms,
-        questions
+        currentQuestion
     )
 
     if (template instanceof Error) {
@@ -226,7 +224,7 @@ test('includes link to submission', async () => {
         defaultSubmitters,
         testEmailConfig(),
         defaultStatePrograms,
-        questions
+        currentQuestion
     )
 
     if (template instanceof Error) {
@@ -236,7 +234,7 @@ test('includes link to submission', async () => {
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                'Open the submission in MC-Review to answer questions'
+                'Open the submission in MC-Review to answer question'
             ),
             bodyHTML: expect.stringContaining(
                 `http://localhost/submissions/${sub.contract.id}/question-and-answer`
@@ -253,7 +251,7 @@ test('includes information about what to do next', async () => {
         defaultSubmitters,
         testEmailConfig(),
         defaultStatePrograms,
-        questions
+        currentQuestion
     )
 
     if (template instanceof Error) {
@@ -278,7 +276,7 @@ test('includes expected data on the CMS analyst who sent the question', async ()
         defaultSubmitters,
         testEmailConfig(),
         defaultStatePrograms,
-        questions
+        currentQuestion
     )
 
     if (template instanceof Error) {
@@ -307,7 +305,7 @@ test('renders overall email for a new question as expected', async () => {
         defaultSubmitters,
         testEmailConfig(),
         defaultStatePrograms,
-        questions
+        currentQuestion
     )
 
     if (result instanceof Error) {

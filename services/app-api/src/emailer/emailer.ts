@@ -109,7 +109,7 @@ type Emailer = {
         contract: ContractRevisionWithRatesType,
         submitterEmails: string[],
         statePrograms: ProgramType[],
-        questions: Question[]
+        question: Question
     ) => Promise<void | Error>
     sendQuestionsCMSEmail: (
         contract: ContractRevisionWithRatesType,
@@ -261,14 +261,14 @@ function emailer(
             contract,
             submitterEmails,
             statePrograms,
-            questions
+            question
         ) {
             const emailData = await sendQuestionStateEmail(
                 contract,
                 submitterEmails,
                 config,
                 statePrograms,
-                questions
+                question
             )
             if (emailData instanceof Error) {
                 return emailData

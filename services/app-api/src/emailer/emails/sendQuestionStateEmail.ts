@@ -16,10 +16,9 @@ export const sendQuestionStateEmail = async (
     submitterEmails: string[],
     config: EmailConfiguration,
     statePrograms: ProgramType[],
-    questions: Question[]
+    currentQuestion: Question
 ): Promise<EmailData | Error> => {
     const stateContactEmails: string[] = []
-    const newQuestion = questions[questions.length - 1]
 
     contractRev.formData.stateContacts.forEach((contact) => {
         if (contact.email) stateContactEmails.push(contact.email)
@@ -51,10 +50,10 @@ export const sendQuestionStateEmail = async (
     const data = {
         packageName,
         questionResponseURL: questionResponseURL,
-        cmsRequestorEmail: newQuestion.addedBy.email,
-        cmsRequestorName: `${newQuestion.addedBy.givenName} ${newQuestion.addedBy.familyName}`,
-        cmsRequestorDivision: newQuestion.addedBy.divisionAssignment,
-        dateAsked: formatCalendarDate(newQuestion.createdAt),
+        cmsRequestorEmail: currentQuestion.addedBy.email,
+        cmsRequestorName: `${currentQuestion.addedBy.givenName} ${currentQuestion.addedBy.familyName}`,
+        cmsRequestorDivision: currentQuestion.addedBy.divisionAssignment,
+        dateAsked: formatCalendarDate(currentQuestion.createdAt),
     }
 
     const result = await renderTemplate<typeof data>(
