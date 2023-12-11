@@ -1,6 +1,6 @@
 <%= it.cmsRequestorDivision %> round <%= it.questionRound %> response was successfully submitted
 <br />
-<b>Date:</b> <%= it.dateAsked %><br />
+<b>Date:</b> <%= it.dateAsked %>
 <br />
 <br />
 <a href="<%= it.questionResponseURL %>">View response</a>
