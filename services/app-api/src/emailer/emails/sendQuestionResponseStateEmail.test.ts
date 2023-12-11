@@ -29,15 +29,17 @@ const cmsUser: CMSUserType = {
     stateAssignments: [flState],
 }
 
-const questions: Question[] = [{
-    id: '1234',
-    contractID: 'contract-id-test',
-    createdAt: new Date('01/01/2024'),
-    addedBy: cmsUser,
-    documents: [],
-    division: 'DMCO',
-    responses: [],
-}]
+const questions: Question[] = [
+    {
+        id: '1234',
+        contractID: 'contract-id-test',
+        createdAt: new Date('01/01/2024'),
+        addedBy: cmsUser,
+        documents: [],
+        division: 'DMCO',
+        responses: [],
+    },
+]
 
 const currentQuestion = questions[0]
 
@@ -202,7 +204,7 @@ test('subject line is correct and clearly states submission was successful', asy
     )
 
     const template = await sendQuestionResponseStateEmail(
-         sub,
+        sub,
         testEmailConfig(),
         defaultSubmitters,
         defaultStatePrograms,
@@ -216,7 +218,9 @@ test('subject line is correct and clearly states submission was successful', asy
 
     expect(template).toEqual(
         expect.objectContaining({
-            subject: expect.stringContaining(`Response submitted to CMS for ${name}`),
+            subject: expect.stringContaining(
+                `Response submitted to CMS for ${name}`
+            ),
         })
     )
 })
@@ -239,9 +243,7 @@ test('includes link to submission', async () => {
 
     expect(template).toEqual(
         expect.objectContaining({
-            bodyText: expect.stringContaining(
-                'View response'
-            ),
+            bodyText: expect.stringContaining('View response'),
             bodyHTML: expect.stringContaining(
                 `http://localhost/submissions/${sub.contract.id}/question-and-answer`
             ),
@@ -296,7 +298,7 @@ test('includes expected data', async () => {
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                'DMCO round one response was successfully submitted'
+                'DMCO round 1 response was successfully submitted'
             ),
         })
     )

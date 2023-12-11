@@ -9,10 +9,8 @@ import {
     findContractPrograms,
     getQuestionRound,
 } from '../templateHelpers'
-import { mapNumberToStringWord } from '../../helpers'
 import { submissionQuestionResponseURL } from '../generateURLs'
 import type { ContractRevisionWithRatesType } from '../../domain-models/contractAndRates'
-
 
 export const sendQuestionResponseStateEmail = async (
     contractRev: ContractRevisionWithRatesType,
@@ -20,12 +18,12 @@ export const sendQuestionResponseStateEmail = async (
     submitterEmails: string[],
     statePrograms: ProgramType[],
     allContractQuestions: Question[],
-    currentQuestion: Question,
+    currentQuestion: Question
 ): Promise<EmailData | Error> => {
     // currentQuestion is the question the new response belongs to. Responses can be uploaded to any question round.
     const division = currentQuestion.division
     const stateContactEmails: string[] = []
-   
+
     contractRev.formData.stateContacts.forEach((contact) => {
         if (contact.email) stateContactEmails.push(contact.email)
     })
@@ -68,7 +66,7 @@ export const sendQuestionResponseStateEmail = async (
         rateName,
         cmsRequestorDivision: division,
         dateAsked: formatCalendarDate(currentQuestion.createdAt),
-        questionRound: mapNumberToStringWord(questionRound)
+        questionRound,
     }
 
     const result = await renderTemplate<typeof data>(

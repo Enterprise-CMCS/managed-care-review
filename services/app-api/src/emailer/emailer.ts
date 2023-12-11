@@ -11,6 +11,7 @@ import {
     sendQuestionStateEmail,
     sendQuestionCMSEmail,
     sendQuestionResponseCMSEmail,
+    sendQuestionResponseStateEmail,
 } from './'
 import type {
     LockedHealthPlanFormDataType,
@@ -120,6 +121,13 @@ type Emailer = {
         contractRevision: ContractRevisionWithRatesType,
         statePrograms: ProgramType[],
         stateAnalystsEmails: StateAnalystsEmails,
+        currentQuestion: Question,
+        allContractQuestions: Question[]
+    ) => Promise<void | Error>
+    sendQuestionResponseStateEmail: (
+        contractRevision: ContractRevisionWithRatesType,
+        statePrograms: ProgramType[],
+        submitterEmails: string[],
         currentQuestion: Question,
         allContractQuestions: Question[]
     ) => Promise<void | Error>
@@ -301,6 +309,27 @@ function emailer(
                 stateAnalystsEmails,
                 currentQuestion,
                 allContractQuestions
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendQuestionResponseStateEmail: async function (
+            contractRevision,
+            statePrograms,
+            submitterEmails,
+            currentQuestion,
+            allContractQuestions
+        ) {
+            const emailData = await sendQuestionResponseStateEmail(
+                contractRevision,
+                config,
+                submitterEmails,
+                statePrograms,
+                allContractQuestions,
+                currentQuestion
             )
             if (emailData instanceof Error) {
                 return emailData
