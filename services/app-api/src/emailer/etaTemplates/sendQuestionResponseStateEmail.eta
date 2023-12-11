@@ -1,7 +1,6 @@
 <%= it.cmsRequestorDivision %> round <%= it.questionRound %> response was successfully submitted
 <br />
 <b>Date:</b> <%= it.dateAsked %><br />
-<b>Related rate:</b> <%= it.rateName %><br />
 <br />
 <br />
 <a href="<%= it.questionResponseURL %>">View response</a>

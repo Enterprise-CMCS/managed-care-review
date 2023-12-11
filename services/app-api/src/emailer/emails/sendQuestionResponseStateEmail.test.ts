@@ -308,12 +308,6 @@ test('includes expected data', async () => {
             bodyText: expect.stringContaining('Date: 01/01/2024'),
         })
     )
-    // Includes correct related rate name
-    expect(template).toEqual(
-        expect.objectContaining({
-            bodyText: expect.stringContaining('Rate Cert Name'),
-        })
-    )
 })
 
 test('renders overall email for a new response as expected', async () => {

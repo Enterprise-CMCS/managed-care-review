@@ -54,7 +54,6 @@ export const sendQuestionResponseStateEmail = async (
         packagePrograms
     )
 
-    const rateName = contractRev.rateRevisions[0].formData.rateCertificationName
     const questionResponseURL = submissionQuestionResponseURL(
         contractRev.contract.id,
         config.baseUrl
@@ -63,7 +62,6 @@ export const sendQuestionResponseStateEmail = async (
     const data = {
         packageName,
         questionResponseURL,
-        rateName,
         cmsRequestorDivision: division,
         dateAsked: formatCalendarDate(currentQuestion.createdAt),
         questionRound,

@@ -4,7 +4,6 @@ exports[`renders overall email for a new response as expected 1`] = `
 "DMCO round 1 response was successfully submitted
 <br />
 <b>Date:</b> 01/01/2024<br />
-<b>Related rate:</b> Rate Cert Name<br />
 <br />
 <br />
 <a href="http://localhost/submissions/12345/question-and-answers">View response</a>
