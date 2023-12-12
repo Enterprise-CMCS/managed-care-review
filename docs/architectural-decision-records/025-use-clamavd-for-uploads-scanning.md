@@ -75,11 +75,11 @@ This option would introduce an always on clamavd process in our infrastructure t
 
 #### A: Connecting over an API
 
-    We’d need to put the file on an EFS mount shared between the lambda and the clamavd server. We’d then call a small API that we’d need to write that would take the file path of the file to scan and trigger a scan of the file, sending results back over to the lambda.
+We’d need to put the file on an EFS mount shared between the lambda and the clamavd server. We’d then call a small API that we’d need to write that would take the file path of the file to scan and trigger a scan of the file, sending results back over to the lambda.
 
 #### B: Connecting over a TCP socket
 
-    clamdscan can be configured to connect to a clamavd instance either locally or remotely. In this case we would configure a new lambda layer to have the clamdscan tool and the appropriate config files. We’d also be building the ec2 instance that runs and configures clamavd.
+clamdscan can be configured to connect to a clamavd instance either locally or remotely. In this case we would configure a new lambda layer to have the clamdscan tool and the appropriate config files. We’d also be building the ec2 instance that runs and configures clamavd.
 
 The major difference here is that if we can rely on the clamavd server to accept connections over TCP we won’t have to write and maintain a special API to receive scan requests on the ClamAV server.
 
