@@ -7,17 +7,21 @@ import {
     stripHTMLFromTemplate,
     renderTemplate,
     findContractPrograms,
+    getQuestionRound,
 } from '../templateHelpers'
 import { submissionQuestionResponseURL } from '../generateURLs'
 import type { ContractRevisionWithRatesType } from '../../domain-models/contractAndRates'
 
-export const sendQuestionStateEmail = async (
+export const sendQuestionResponseStateEmail = async (
     contractRev: ContractRevisionWithRatesType,
-    submitterEmails: string[],
     config: EmailConfiguration,
+    submitterEmails: string[],
     statePrograms: ProgramType[],
+    allContractQuestions: Question[],
     currentQuestion: Question
 ): Promise<EmailData | Error> => {
+    // currentQuestion is the question the new response belongs to. Responses can be uploaded to any question round.
+    const division = currentQuestion.division
     const stateContactEmails: string[] = []
 
     contractRev.formData.stateContacts.forEach((contact) => {
@@ -29,6 +33,14 @@ export const sendQuestionStateEmail = async (
         ...config.devReviewTeamEmails,
     ])
 
+    const questionRound = getQuestionRound(
+        allContractQuestions,
+        currentQuestion
+    )
+
+    if (questionRound instanceof Error) {
+        return questionRound
+    }
     //This checks to make sure all programs contained in submission exists for the state.
     const packagePrograms = findContractPrograms(contractRev, statePrograms)
     if (packagePrograms instanceof Error) {
@@ -49,15 +61,14 @@ export const sendQuestionStateEmail = async (
 
     const data = {
         packageName,
-        questionResponseURL: questionResponseURL,
-        cmsRequestorEmail: currentQuestion.addedBy.email,
-        cmsRequestorName: `${currentQuestion.addedBy.givenName} ${currentQuestion.addedBy.familyName}`,
-        cmsRequestorDivision: currentQuestion.addedBy.divisionAssignment,
+        questionResponseURL,
+        cmsRequestorDivision: division,
         dateAsked: formatCalendarDate(currentQuestion.createdAt),
+        questionRound,
     }
 
     const result = await renderTemplate<typeof data>(
-        'sendQuestionStateEmail',
+        'sendQuestionResponseStateEmail',
         data
     )
 
@@ -70,7 +81,7 @@ export const sendQuestionStateEmail = async (
             replyToAddresses: [config.helpDeskEmail],
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
-            }New questions about ${packageName}`,
+            }Response submitted to CMS for ${packageName}`,
             bodyText: stripHTMLFromTemplate(result),
             bodyHTML: result,
         }

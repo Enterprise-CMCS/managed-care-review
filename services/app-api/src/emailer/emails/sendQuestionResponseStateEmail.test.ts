@@ -10,7 +10,7 @@ import type {
 } from '../../domain-models'
 import type { ContractFormDataType, Question } from '../../domain-models'
 import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
-import { sendQuestionStateEmail } from './index'
+import { sendQuestionResponseStateEmail } from './index'
 
 const defaultSubmitters = ['submitter1@example.com', 'submitter2@example.com']
 
@@ -29,15 +29,19 @@ const cmsUser: CMSUserType = {
     stateAssignments: [flState],
 }
 
-const currentQuestion: Question = {
-    id: '1234',
-    contractID: 'contract-id-test',
-    createdAt: new Date('01/01/2024'),
-    addedBy: cmsUser,
-    documents: [],
-    division: 'DMCO',
-    responses: [],
-}
+const questions: Question[] = [
+    {
+        id: '1234',
+        contractID: 'contract-id-test',
+        createdAt: new Date('01/01/2024'),
+        addedBy: cmsUser,
+        documents: [],
+        division: 'DMCO',
+        responses: [],
+    },
+]
+
+const currentQuestion = questions[0]
 
 const formData: ContractFormDataType = {
     programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
@@ -101,11 +105,12 @@ const formData: ContractFormDataType = {
 test('to addresses list includes submitter emails', async () => {
     const sub = mockContractRev()
     const defaultStatePrograms = mockMNState().programs
-    const template = await sendQuestionStateEmail(
+    const template = await sendQuestionResponseStateEmail(
         sub,
-        defaultSubmitters,
         testEmailConfig(),
+        defaultSubmitters,
         defaultStatePrograms,
+        questions,
         currentQuestion
     )
 
@@ -125,11 +130,12 @@ test('to addresses list includes all state contacts on submission', async () => 
         ...mockContractRev({ formData }),
     }
     const defaultStatePrograms = mockMNState().programs
-    const template = await sendQuestionStateEmail(
+    const template = await sendQuestionResponseStateEmail(
         sub,
-        defaultSubmitters,
         testEmailConfig(),
+        defaultSubmitters,
         defaultStatePrograms,
+        questions,
         currentQuestion
     )
 
@@ -167,11 +173,12 @@ test('to addresses list does not include duplicate state receiver emails on subm
         formData: formDataWithDuplicateStateContacts,
     })
     const defaultStatePrograms = mockMNState().programs
-    const template = await sendQuestionStateEmail(
+    const template = await sendQuestionResponseStateEmail(
         sub,
-        defaultSubmitters,
         testEmailConfig(),
+        defaultSubmitters,
         defaultStatePrograms,
+        questions,
         currentQuestion
     )
 
@@ -186,7 +193,7 @@ test('to addresses list does not include duplicate state receiver emails on subm
     ])
 })
 
-test('subject line is correct and clearly states submission is complete', async () => {
+test('subject line is correct and clearly states submission was successful', async () => {
     const sub = mockContractRev()
     const defaultStatePrograms = mockMNState().programs
     const name = packageName(
@@ -196,11 +203,12 @@ test('subject line is correct and clearly states submission is complete', async 
         defaultStatePrograms
     )
 
-    const template = await sendQuestionStateEmail(
+    const template = await sendQuestionResponseStateEmail(
         sub,
-        defaultSubmitters,
         testEmailConfig(),
+        defaultSubmitters,
         defaultStatePrograms,
+        questions,
         currentQuestion
     )
 
@@ -210,8 +218,9 @@ test('subject line is correct and clearly states submission is complete', async 
 
     expect(template).toEqual(
         expect.objectContaining({
-            subject: expect.stringContaining(`New questions about ${name}`),
-            bodyText: expect.stringContaining(`${name}`),
+            subject: expect.stringContaining(
+                `Response submitted to CMS for ${name}`
+            ),
         })
     )
 })
@@ -219,11 +228,12 @@ test('subject line is correct and clearly states submission is complete', async 
 test('includes link to submission', async () => {
     const sub = mockContractRev()
     const defaultStatePrograms = mockMNState().programs
-    const template = await sendQuestionStateEmail(
+    const template = await sendQuestionResponseStateEmail(
         sub,
-        defaultSubmitters,
         testEmailConfig(),
+        defaultSubmitters,
         defaultStatePrograms,
+        questions,
         currentQuestion
     )
 
@@ -233,9 +243,7 @@ test('includes link to submission', async () => {
 
     expect(template).toEqual(
         expect.objectContaining({
-            bodyText: expect.stringContaining(
-                'Open the submission in MC-Review to answer question'
-            ),
+            bodyText: expect.stringContaining('View response'),
             bodyHTML: expect.stringContaining(
                 `http://localhost/submissions/${sub.contract.id}/question-and-answer`
             ),
@@ -246,11 +254,12 @@ test('includes link to submission', async () => {
 test('includes information about what to do next', async () => {
     const sub = mockContractRev()
     const defaultStatePrograms = mockMNState().programs
-    const template = await sendQuestionStateEmail(
+    const template = await sendQuestionResponseStateEmail(
         sub,
-        defaultSubmitters,
         testEmailConfig(),
+        defaultSubmitters,
         defaultStatePrograms,
+        questions,
         currentQuestion
     )
 
@@ -261,21 +270,22 @@ test('includes information about what to do next', async () => {
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                'You must answer the question before CMS can continue reviewing it'
+                'Questions: You may receive additional questions from CMS as they conduct their reviews.'
             ),
         })
     )
 })
 
-test('includes expected data on the CMS analyst who sent the question', async () => {
+test('includes expected data', async () => {
     const sub = mockContractRev()
     const defaultStatePrograms = mockMNState().programs
 
-    const template = await sendQuestionStateEmail(
+    const template = await sendQuestionResponseStateEmail(
         sub,
-        defaultSubmitters,
         testEmailConfig(),
+        defaultSubmitters,
         defaultStatePrograms,
+        questions,
         currentQuestion
     )
 
@@ -283,13 +293,16 @@ test('includes expected data on the CMS analyst who sent the question', async ()
         throw template
     }
 
+    // Includes correct division the response was sent to
+    // Includes the correct round number for the response
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                'Sent by: Ronald McDonald (DMCO)  cms@email.com (cms@email.com)'
+                'DMCO round 1 response was successfully submitted'
             ),
         })
     )
+    // Includes correct date response was submitted
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining('Date: 01/01/2024'),
@@ -297,14 +310,15 @@ test('includes expected data on the CMS analyst who sent the question', async ()
     )
 })
 
-test('renders overall email for a new question as expected', async () => {
+test('renders overall email for a new response as expected', async () => {
     const sub = mockContractRev()
     const defaultStatePrograms = mockMNState().programs
-    const result = await sendQuestionStateEmail(
+    const result = await sendQuestionResponseStateEmail(
         sub,
-        defaultSubmitters,
         testEmailConfig(),
+        defaultSubmitters,
         defaultStatePrograms,
+        questions,
         currentQuestion
     )
 
