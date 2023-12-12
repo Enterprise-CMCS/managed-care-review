@@ -5,10 +5,6 @@ set -e
 VERSION=${VERSION:-1.0.3-30349}
 echo "prepping clamav (${VERSION})"
 
-rm -rf bin
-rm -rf lib
-rm lambda_layer.zip || true
-
 yum update -y
 amazon-linux-extras install epel -y
 yum install -y cpio yum-utils zip

@@ -249,6 +249,27 @@ jobs:
           name: lambda-layers-prisma-client-engine
           path: ./services/app-api/lambda-layers-prisma-client-engine
 
+  build-clamav-layer:
+    name: build - clamav layer
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: yarn
+
+      - name: Prepare ClamAV layer
+        working-directory: services/uploads/src/avLayer
+        run: ./dockerbuild.sh
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: lambda-layers-clamav
+          path: ./services/uploads/src/avLayer/build/lambda_layer.zip
+
   deploy-infra:
     needs: [begin-deployment]
     uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
