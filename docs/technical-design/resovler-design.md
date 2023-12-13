@@ -23,7 +23,7 @@ title: Genric Resolver Design
 flowchart TD
     subgraph request[GraphQL Request]
     end
-    subgraph container[ ]
+    subgraph container[Flow]
       direction LR
       subgraph resolver[Resolver]
           subgraph errorHandling[Error Handling]
@@ -119,13 +119,13 @@ flowchart RL
     end
 
     callInsertContract -- Domain Model --> insertContractHandler
-    parseContractWithHistory -- Domain Model | Error --> callInsertContract
+    parseContractWithHistory -- Domain Model --> callInsertContract
 
     prismaOrm -- Operation --> dbContainer
     dbContainer -- Data --> prismaOrm
 
-    style resolver stroke:,stroke-width:4px,fill:#1f1f1f;
-    style postgresHandlers stroke:,stroke-width:4px,fill:#1f1f1f;
+    style resolver stroke-width:4px,fill:#1f1f1f;
+    style postgresHandlers stroke-width:4px,fill:#1f1f1f;
 ```
 Form the diagram above, you can see that `createHealthPlanPackage` resolver calls `insertDraftContract` Postgres handler function to create a new draft contract. Within the `insertDraftContract` after performing the database operation using Prisma we pass the Prisma model data into `parseContractWithHistory`, which is a function that coverts our Prisma model to domain model before returning data to the resolver.
 
