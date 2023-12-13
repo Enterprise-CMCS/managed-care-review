@@ -87,7 +87,9 @@ flowchart TD
 ```
 ## General Guidance
 ### Postgres Database Operations
-[Postgres](https://www.postgresql.org/docs/) database operations are contained in functions that we call **postgres handlers**. In these handler functions the database operations are performed using [Prisma ORM](https://www.prisma.io/docs/orm) which itself uses Prisma generated types and returns data from the database as these types. So in most of the handlers, data from the operation must be converted to a domain model type before returning to the resolver and errors occurring in the handler functions should be returned to the resolver to handle.
+[Postgres](https://www.postgresql.org/docs/) database operations are contained in functions that we call **postgres handlers**. You can find all the handlers in [`services/app-api/src/postgres/`](../../services/app-api/src/postgres). In these handler functions the database operations are performed using [Prisma ORM](https://www.prisma.io/docs/orm) which itself uses Prisma generated types and returns data from the database as these types. So in most of the handlers, data from the operation must be converted to a domain model type before returning to the resolver and errors occurring in the handler functions should be returned to the resolver to handle.
+
+It's important that data from the DB is converted to the domain model before returning to the resolver to adhere to our strategy of using the domain model as the internal communication protocol for different parts of our app. 
 
 Resolvers are passed Postgres handlers via [dependency inject](design-patterns.md#dependency-injection). The configuration for the Postgres handler dependency and many others are done in [apollo_gql.ts](../../services/app-api/src/handlers).
 
@@ -125,7 +127,7 @@ flowchart RL
     style resolver stroke:,stroke-width:4px,fill:#1f1f1f;
     style postgresHandlers stroke:,stroke-width:4px,fill:#1f1f1f;
 ```
-Form the diagram above, you can see that `createHealthPlanPackage` resolver calls `insertDraftContract` Postgres handler function to create a new draft contract. Within the `insertDraftContract` after performing the database operation using Prisma we pass the Prisma model data into `parseContractWithHistory`, which is a function that coverts our Prisma model to domain model before returning data to the reslover.
+Form the diagram above, you can see that `createHealthPlanPackage` resolver calls `insertDraftContract` Postgres handler function to create a new draft contract. Within the `insertDraftContract` after performing the database operation using Prisma we pass the Prisma model data into `parseContractWithHistory`, which is a function that coverts our Prisma model to domain model before returning data to the resolver.
 
 ### Data transformation
 ### Validations
