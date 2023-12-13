@@ -1,4 +1,12 @@
-# Use a JWT Lambda Authorizer to enable 3rd party access to our API
+---
+title: Use a JWT Lambda Authorizer to enable 3rd party access to our API
+---
+## ADR 0026 — Use a JWT Lambda Authorizer to enable 3rd party access to our API
+
+- Status: Decided
+- Date: 2023-12-12
+
+## Decision Drivers
 
 We are granting another team access to our API which up until now has only been used by our very own app-web. This access pattern is very different from one of our end users. End users log in using IDM to acquire a 30 minute web session. This tool is going to be hitting our API on a regular basis indefinitely from within a CMS datacenter. We need to be able to furnish them with long lived credentials that grant them access to our API .
 
@@ -42,6 +50,6 @@ Have clients set up their own AWS IAM User in their own AWS account that they ca
 * Clients would need to set up/have their own AWS accounts & infra
 * Clients have to figure out how to use AWS API Gateway tooling to correctly sign requests
 
-## Decision
+## Chosen Solution
 
-We're going to setup a Lambda Authorizer to grant access to our API. This plan is simplest for our users to adopt and give us control over API access credentials without involving the complexity of IAM users and roles which are heavily managed. 
+We're going to setup a Lambda Authorizer to grant access to our API. This plan provides thorough security and is simplest for our users to adopt. Plus, it gives us control over API access credentials without involving the complexity of IAM users and roles which are heavily managed. 
