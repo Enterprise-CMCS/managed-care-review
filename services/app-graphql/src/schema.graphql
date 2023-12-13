@@ -740,6 +740,7 @@ type GenericDocument {
     sha256:  String!
 }
 
+"The large overarching population of people that the program covers."
 enum PopulationCovered {
     MEDICAID
     CHIP
@@ -821,9 +822,11 @@ type ContractFormData {
     Options are: BASE, AMENDMENT
     """
     contractType: ContractType
-    "Execution status for a contract. 
+    """
+    Execution status for a contract. 
     Contracts are fully executed or unexecuted by some or all parties
-    Status can be either EXECUTED or UNEXECUTED"
+    Status can be either EXECUTED or UNEXECUTED
+    """
     contractExecutionStatus: ContractExecutionStatus
     """
     State upload of the submitted contract
