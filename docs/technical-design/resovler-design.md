@@ -71,7 +71,7 @@ flowchart TD
       protobuf2[Protobuf] -- HealthPlanPackageFormDataType --> domainToHPPType
 
       emailNotification -- Domain Model Type --> emailerService
-      emailerService -- Void | Error --> emailNotification
+      emailerService -- Void OR Error --> emailNotification
       emailerService -- API Request --> sesEmailer[AWS SES Email Service]
       sesEmailer[AWS SES Email Service] -- API Response --> emailerService
     end
@@ -83,7 +83,7 @@ flowchart TD
 
     style request stroke:#3498DB,stroke-width:4px
     style response stroke:#3498DB,stroke-width:4px
-    style resolver stroke:#3498DB,stroke-width:4px,fill:#1f1f1f;
+    style resolver stroke:#3498DB,stroke-width:4px,fill:#1f1f1f
 ```
 ## General Guidance
 ### Postgres Database Operations
@@ -119,7 +119,7 @@ flowchart RL
     end
 
     callInsertContract -- Domain Model --> insertContractHandler
-    parseContractWithHistory -- Domain Model --> callInsertContract
+    parseContractWithHistory -- Domain Model OR Error --> callInsertContract
 
     prismaOrm -- Operation --> dbContainer
     dbContainer -- Data --> prismaOrm
