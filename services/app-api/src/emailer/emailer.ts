@@ -11,6 +11,7 @@ import {
     sendQuestionStateEmail,
     sendQuestionCMSEmail,
     sendQuestionResponseCMSEmail,
+    sendQuestionResponseStateEmail,
 } from './'
 import type {
     LockedHealthPlanFormDataType,
@@ -108,7 +109,7 @@ type Emailer = {
         contract: ContractRevisionWithRatesType,
         submitterEmails: string[],
         statePrograms: ProgramType[],
-        questions: Question[]
+        question: Question
     ) => Promise<void | Error>
     sendQuestionsCMSEmail: (
         contract: ContractRevisionWithRatesType,
@@ -120,6 +121,13 @@ type Emailer = {
         contractRevision: ContractRevisionWithRatesType,
         statePrograms: ProgramType[],
         stateAnalystsEmails: StateAnalystsEmails,
+        currentQuestion: Question,
+        allContractQuestions: Question[]
+    ) => Promise<void | Error>
+    sendQuestionResponseStateEmail: (
+        contractRevision: ContractRevisionWithRatesType,
+        statePrograms: ProgramType[],
+        submitterEmails: string[],
         currentQuestion: Question,
         allContractQuestions: Question[]
     ) => Promise<void | Error>
@@ -253,14 +261,14 @@ function emailer(
             contract,
             submitterEmails,
             statePrograms,
-            questions
+            question
         ) {
             const emailData = await sendQuestionStateEmail(
                 contract,
                 submitterEmails,
                 config,
                 statePrograms,
-                questions
+                question
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -301,6 +309,27 @@ function emailer(
                 stateAnalystsEmails,
                 currentQuestion,
                 allContractQuestions
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendQuestionResponseStateEmail: async function (
+            contractRevision,
+            statePrograms,
+            submitterEmails,
+            currentQuestion,
+            allContractQuestions
+        ) {
+            const emailData = await sendQuestionResponseStateEmail(
+                contractRevision,
+                config,
+                submitterEmails,
+                statePrograms,
+                allContractQuestions,
+                currentQuestion
             )
             if (emailData instanceof Error) {
                 return emailData

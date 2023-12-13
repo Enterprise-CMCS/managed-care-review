@@ -10,6 +10,7 @@ export {
     sendQuestionStateEmail,
     sendQuestionCMSEmail,
     sendQuestionResponseCMSEmail,
+    sendQuestionResponseStateEmail,
 } from './emails'
 export type {
     EmailConfiguration,
