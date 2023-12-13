@@ -83,7 +83,7 @@ flowchart TD
 
     style request stroke:#3498DB,stroke-width:4px
     style response stroke:#3498DB,stroke-width:4px
-    style resolver stroke:,stroke-width:4px,fill:#1f1f1f;
+    style resolver stroke:#3498DB,stroke-width:4px,fill:#1f1f1f;
 ```
 ## General Guidance
 ### Postgres Database Operations
