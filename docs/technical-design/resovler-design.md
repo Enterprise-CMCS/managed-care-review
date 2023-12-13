@@ -91,7 +91,7 @@ flowchart TD
 
 It's important that data from the DB is converted to the domain model before returning to the resolver to adhere to our strategy of using the domain model as the internal communication protocol for different parts of our app. 
 
-Resolvers are passed Postgres handlers via [dependency inject](design-patterns.md#dependency-injection). The configuration for the Postgres handler dependency and many others are done in [apollo_gql.ts](../../services/app-api/src/handlers).
+Resolvers are passed Postgres handlers via [dependency injection](design-patterns.md#dependency-injection). The configuration for the Postgres handler dependency and many others are done in [apollo_gql.ts](../../services/app-api/src/handlers).
 
 The diagram below is the data flow diagram for `createHealthPlanPackage` resolver.
 ```mermaid
