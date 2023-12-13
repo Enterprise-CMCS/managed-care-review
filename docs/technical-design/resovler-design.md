@@ -7,8 +7,8 @@ These tasks include:
 - Business logic, data transformation, and validations
 - Database operations
 - Third party API calls
-   - Email notifications
-   - LaunchDarkly API calls
+   - SES Email
+   - LaunchDarkly Feature Flags
 - Error handling
 
 The resolvers often do not directly contain the code to perform these tasks, instead they call functions specific for each task. Importantly we use types defined in our [domain models](design-patterns.md#domain-models) as the internal communication interface for different services as an attempt to decrease the coupling of our code.
