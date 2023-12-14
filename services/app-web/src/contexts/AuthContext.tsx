@@ -194,7 +194,7 @@ function AuthProvider({
                 if (sessionExpirationTime.current) {
                     insideCountdownDurationPeriod = dayjs(Date.now()).isAfter(
                         dayjs(sessionExpirationTime.current).subtract(
-                            countdownDurationSeconds,
+                            MODAL_COUNTDOWN_DURATION,
                             'second'
                         )
                     )

@@ -295,7 +295,7 @@ export const AppRoutes = ({
             void extendSession()
         }
         updateSessionExpirationState(false)
-        // Every thirty seconds, check if the current time is within `countdownDuration` of the session expiration time
+        // Every thirty seconds, check if the current time is within `countdownDurationSeconds` of the session expiration time
         checkIfSessionsIsAboutToExpire()
     }
 
