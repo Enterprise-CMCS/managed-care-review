@@ -8,6 +8,6 @@
 
 
 ## Additional folders with technical details and history
-- The [technical design folder](./technical-design/) contains technical design documents and how-tos for developer workflows.
+- The [Technical Design folder](./technical-design/) contains technical design documents, feature briefs, and how-tos for developer workflows.
 - The [Architectural Decision Records(ADRs) folder](./architectural-decision-records/) summarizes major technical decisions in application development.
 - The [Templates folder](./templates/) contains markdown templates for creating new documentation.
