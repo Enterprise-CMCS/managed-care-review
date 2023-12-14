@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders overall email for a new response as expected 1`] = `
+"DMCO round 1 response was successfully submitted<br />
+<br />
+<b>Date:</b> 01/01/2024<br />
+<br />
+<a href="http://localhost/submissions/12345/question-and-answers">View response</a>
+<br />
+<br />
+<b>What comes next:</b><br />
+<ol>
+    <li>Questions: You may receive additional questions from CMS as they conduct their reviews.</li>
+    <li>Decision: Once all questions have been addressed, CMS will contact you with their final recommendation.</li>
+</ol>
+<br />
+<b>If you need assistance or to make changes to your submission: </b><br />
+<ul>
+    <li>For assistance with programmatic, contractual, or operational issues, please reach out to MCOGDMCOActions@cms.hhs.gov and/or your CMS primary contact. </li>
+    <li>For assistance on policy and actuarial issues, please reach out to MMCratesetting@cms.hhs.gov.</li>
+    <li>For issues related to MC-Review or all other inquiries, please reach out to MC_Review_HelpDesk@cms.hhs.gov.</li>
+</ul>
+
+"
+`;

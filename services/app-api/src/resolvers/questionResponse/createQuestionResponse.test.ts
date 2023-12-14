@@ -5,6 +5,7 @@ import {
     createTestQuestion,
     createTestQuestionResponse,
 } from '../../testHelpers/gqlHelpers'
+import { base64ToDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { assertAnError, assertAnErrorCode } from '../../testHelpers'
 import {
     createDBUsersWithFullData,
@@ -194,6 +195,79 @@ describe('createQuestionResponse', () => {
                 ),
                 bodyHTML: expect.stringContaining(
                     `<a href="http://localhost/submissions/${submittedPkg.id}/question-and-answers">View submission Q&A</a>`
+                ),
+            })
+        )
+    })
+
+    it('sends State email', async () => {
+        const emailConfig = testEmailConfig()
+        const mockEmailer = testEmailer(emailConfig)
+        const oactCMS = testCMSUser({
+            divisionAssignment: 'OACT' as const,
+        })
+        const stateServer = await constructTestPostgresServer({
+            emailer: mockEmailer,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: oactCMS,
+            },
+            emailer: mockEmailer,
+        })
+
+        const submittedPkg =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
+
+        const formData = latestFormData(submittedPkg)
+
+        const createdQuestion = await createTestQuestion(cmsServer, formData.id)
+
+        await createTestQuestionResponse(
+            stateServer,
+            createdQuestion?.question.id
+        )
+
+        const statePrograms = findStatePrograms(formData.stateCode)
+        if (statePrograms instanceof Error) {
+            throw new Error(
+                `Unexpected error: No state programs found for stateCode ${formData.stateCode}`
+            )
+        }
+
+        const pkgName = packageName(
+            formData.stateCode,
+            formData.stateNumber,
+            formData.programIDs,
+            statePrograms
+        )
+        const currentRevision = submittedPkg.revisions[0].node.formDataProto
+
+        const sub = base64ToDomain(currentRevision)
+        if (sub instanceof Error) {
+            throw sub
+        }
+
+        const stateReceiverEmails = [
+            'james@example.com',
+            ...sub.stateContacts.map((contact) => contact.email),
+        ]
+
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            6, // New response CMS email notification is the fifth email
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `[LOCAL] Response submitted to CMS for ${pkgName}`
+                ),
+                sourceEmail: emailConfig.emailSource,
+                toAddresses: expect.arrayContaining(
+                    Array.from(stateReceiverEmails)
+                ),
+                bodyText: expect.stringContaining(
+                    `${oactCMS.divisionAssignment} round 1 response was successfully submitted`
+                ),
+                bodyHTML: expect.stringContaining(
+                    `<a href="http://localhost/submissions/${submittedPkg.id}/question-and-answers">View response</a>`
                 ),
             })
         )

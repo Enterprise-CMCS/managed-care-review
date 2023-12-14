@@ -1,5 +1,5 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { isStateUser } from '../../domain-models'
+import { isStateUser, contractSubmitters } from '../../domain-models'
 import { logError, logSuccess } from '../../logger'
 import {
     setErrorAttributesOnActiveSpan,
@@ -103,6 +103,7 @@ export function createQuestionResponseResolver(
                 },
             })
         }
+        const submitterEmails = contractSubmitters(contract)
 
         let stateAnalystsEmails =
             await emailParameterStore.getStateAnalystsEmails(contract.stateCode)
@@ -129,6 +130,32 @@ export function createQuestionResponseResolver(
             )
             setErrorAttributesOnActiveSpan(
                 `Send CMS email failed: ${sendQuestionResponseCMSEmailResult.message}`,
+                span
+            )
+            throw new GraphQLError('Email failed', {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
+        }
+
+        const sendQuestionResponseStateEmailResult =
+            await emailer.sendQuestionResponseStateEmail(
+                contract.revisions[0],
+                statePrograms,
+                submitterEmails,
+                createResponseResult,
+                questions
+            )
+
+        if (sendQuestionResponseStateEmailResult instanceof Error) {
+            logError(
+                'sendQuestionResponseStateEmail - Send State email',
+                sendQuestionResponseStateEmailResult.message
+            )
+            setErrorAttributesOnActiveSpan(
+                `Send State email failed: ${sendQuestionResponseStateEmailResult.message}`,
                 span
             )
             throw new GraphQLError('Email failed', {
