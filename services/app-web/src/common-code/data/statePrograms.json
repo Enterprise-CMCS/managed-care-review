@@ -594,9 +594,9 @@
             "name": "Montana",
             "programs": [
                 {
-                    "id": "9e79aa85-64cc-4751-9c63-3492d49af68f",
-                    "fullName": "Passport to Health",
-                    "name": "PCCM"
+                    "id": "c757ddee-19a2-4aaa-aa70-3aaeee970f91",
+                    "fullName": "Tribal Health Improvement Program",
+                    "name": "(T-HIP)"
                 }
             ],
             "code": "MT"
@@ -843,11 +843,6 @@
                     "id": "46246196-3b63-40be-8db1-c09cec281dae",
                     "fullName": "Coordinated Care Organizations",
                     "name": "CCO"
-                },
-                {
-                    "id": "7f44b186-2a82-4200-a595-a0b8c0de6318",
-                    "fullName": "Dental Care Organizations",
-                    "name": "DCO"
                 }
             ],
             "code": "OR"

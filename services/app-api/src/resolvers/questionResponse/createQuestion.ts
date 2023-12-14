@@ -120,7 +120,7 @@ export function createQuestionResolver(
                 contractResult.revisions[0],
                 submitterEmails,
                 statePrograms,
-                allQuestions
+                questionResult
             )
 
         if (sendQuestionsStateEmailResult instanceof Error) {
