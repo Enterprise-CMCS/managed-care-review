@@ -2,13 +2,11 @@ import React, { useState } from 'react'
 import { Modal } from '../../components/Modal/Modal'
 import { ModalRef } from '@trussworks/react-uswds'
 import { createRef, useCallback, useEffect } from 'react'
-import { useAuth } from '../../contexts/AuthContext'
+import { MODAL_COUNTDOWN_DURATION, useAuth } from '../../contexts/AuthContext'
 import { AuthModeType } from '../../common-code/config'
 import { extendSession } from '../Auth/cognitoAuth'
-import { featureFlags } from '../../common-code/featureFlags/flags'
 import styles from '../StateSubmission/ReviewSubmit/ReviewSubmit.module.scss'
 import { dayjs } from '../../common-code/dateHelpers/dayjs'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { recordJSException } from '../../otelHelpers'
 import { ErrorAlertSignIn } from '../../components'
 
@@ -35,12 +33,6 @@ export const AuthenticatedRouteWrapper = ({
         announcementTimes.push(i)
     }
     const modalRef = createRef<ModalRef>()
-    const ldClient = useLDClient()
-    const countdownDuration: number =
-        ldClient?.variation(
-            featureFlags.MODAL_COUNTDOWN_DURATION.flag,
-            featureFlags.MODAL_COUNTDOWN_DURATION.defaultValue
-        ) * 60
 
     const logoutSession = useCallback(
         (forcedSessionSignout: boolean) => {
@@ -58,7 +50,7 @@ export const AuthenticatedRouteWrapper = ({
     const resetSessionTimeout = () => {
         updateSessionExpirationState(false)
         updateSessionExpirationTime()
-        setLogoutCountdownDuration(countdownDuration)
+        setLogoutCountdownDuration(MODAL_COUNTDOWN_DURATION)
         if (authMode !== 'LOCAL') {
             void extendSession()
         }
