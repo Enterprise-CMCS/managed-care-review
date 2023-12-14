@@ -1,11 +1,8 @@
 # Feature brief: Session Expiration
 
-LINK TO PRODUCT BRIEF?
- LINK TO IDM DOCS?
-
 ## Introduction
 
-We use a third-party authentication provider (IDM) which automatically logs out sessions due to inactivity after about 30 minutes. We don't have direct access to their timekeeping, but we know this is about how long they allow a session to be inactive. Thus, we manuallytrack sessions internally for the same time period as our auth provider.
+We use a third-party authentication provider ([IDM](https://confluenceent.cms.gov/display/IDM/IDM+Trainings+and+Guides)) which automatically logs out sessions due to inactivity after about 30 minutes. We don't have direct access to their timekeeping, but we know this is about how long they allow a session to be inactive. Thus, we manually track sessions internally for the same time period.
 
 ## Expected behavior
  Two minutes before the session will expire due to inactivity we show a warning modal. The modal displays a live countdown and has CTA buttons with 1. the ability to log out immediately 2. the ability to extend the session. This helps us fufill accessibility requirements around [WCAG 2.2.1 Timing Adjustable](https://www.w3.org/WAI/WCAG21/Understanding/timing-adjustable.html).
