@@ -21,4 +21,7 @@ module.exports = {
     moduleFileExtensions: ['js', 'json', 'jsx', 'd.ts', 'ts', 'node'],
     coveragePathIgnorePatterns: [],
     modulePathIgnorePatterns: ['local_buckets'],
+    moduleNameMapper: {
+        '^uuid$': require.resolve('uuid'),
+    },
 }
