@@ -21,18 +21,11 @@ const featureFlags = {
         defaultValue: true,
     },
     /**
-     The number of minutes before the session expires
+     The number of minutes before the session expires and countdown modal appears
     */
     MINUTES_UNTIL_SESSION_EXPIRES: {
         flag: 'session-expiration-minutes',
         defaultValue: 30,
-    },
-    /**
-     The number of minutes before session expiration that the warning modal appears
-    */
-    MODAL_COUNTDOWN_DURATION: {
-        flag: 'modal-countdown-duration',
-        defaultValue: 2,
     },
     /**
      * Enables state and CMS Q&A features
