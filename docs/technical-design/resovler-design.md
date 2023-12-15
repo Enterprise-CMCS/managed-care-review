@@ -1,7 +1,7 @@
 # Resolver design
 
 ## Background
-Resolver functions are responsible for handling requests made to the MC-Review GraphQL API and populating data for the response. Between receiving the request data and returning a response, the resolvers perform various tasks for generating the response.
+Resolver functions are responsible for handling requests made to the MC-Review GraphQL API and populating data for the response on the backend. Between receiving the request data and returning a response, the `app-api` resolvers perform various tasks for generating the response.
 
 These tasks include:
 - Business logic, data transformation, and validations
