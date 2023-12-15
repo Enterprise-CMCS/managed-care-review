@@ -76,8 +76,8 @@ function AuthProvider({
     )
     const [logoutCountdownDuration, setLogoutCountdownDuration] =
         useState<number>(MODAL_COUNTDOWN_DURATION)
-    const modalCountdownTimers = useRef<NodeJS.Timer[]>([])
-    const sessionExpirationTimers = useRef<NodeJS.Timer[]>([])
+    const modalCountdownTimers = useRef<NodeJS.Timeout[]>([])
+    const sessionExpirationTimers = useRef<NodeJS.Timeout[]>([])
     const { loading, data, error, refetch } = useFetchCurrentUserQuery({
         notifyOnNetworkStatusChange: true,
     })
@@ -128,8 +128,8 @@ function AuthProvider({
     const computedLoginStatus: LoginStatusType = loading
         ? 'LOADING'
         : loggedInUser !== undefined
-        ? 'LOGGED_IN'
-        : 'LOGGED_OUT'
+          ? 'LOGGED_IN'
+          : 'LOGGED_OUT'
 
     if (loginStatus !== computedLoginStatus) {
         setLoginStatus(computedLoginStatus)
