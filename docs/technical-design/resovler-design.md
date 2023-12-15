@@ -11,7 +11,7 @@ These tasks include:
    - LaunchDarkly Feature Flags
 - Error handling
 
-The resolvers often do not directly contain the code to perform these tasks, instead they call functions specific for each task. Importantly we use types defined in our [domain models](design-patterns.md#domain-models) as the internal communication interface for different services as an attempt to decrease the coupling of our code.
+The resolvers often do not directly contain the code to perform these tasks, instead they call functions specific for each task. Importantly we use types defined in our [domain models](design-patterns.md#domain-models) as the internal communication interface on the backend for different services as an attempt to decrease the coupling of our code.
 
 Errors from these tasks propagate up to the resolver where it will be handled and a response sent to the client. See docs about [error handling](error-handling.md) for details.
 
