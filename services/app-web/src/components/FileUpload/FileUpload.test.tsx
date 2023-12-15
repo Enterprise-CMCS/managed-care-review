@@ -20,19 +20,19 @@ describe('FileUpload component', () => {
         id: 'Default',
         name: 'Default Input',
         label: 'File input label',
-        uploadFile: (file: File) =>
+        uploadFile: (_file: File) =>
             fakeRequest<S3FileData>(true, {
                 key: 'testtest',
                 s3URL: 'fakeS3url',
             }),
-        deleteFile: async (key: string) => {
+        deleteFile: async (_key: string) => {
             await fakeRequest<S3FileData>(true, {
                 key: 'testtest',
                 s3URL: 'fakeS3url',
             })
             return
         },
-        scanFile: async (key: string) => {
+        scanFile: async (_key: string) => {
             await fakeRequest<S3FileData>(true, {
                 key: 'testtest',
                 s3URL: 'fakeS3url',
@@ -42,12 +42,11 @@ describe('FileUpload component', () => {
         onFileItemsUpdate: () => {
             return
         },
-        renderMode: 'list',
     }
     beforeEach(() => jest.clearAllMocks())
 
     it('renders without errors', async () => {
-        await render(<FileUpload {...testProps} />)
+        render(<FileUpload {...testProps} />)
         expect(screen.getByTestId('file-input')).toBeInTheDocument()
         expect(screen.getByTestId('file-input')).toHaveClass('usa-file-input')
         expect(screen.getByText('File input label')).toBeInTheDocument()
@@ -61,11 +60,10 @@ describe('FileUpload component', () => {
                 name: 'Trussel Guide to Truss - trussels-guide.pdf',
                 s3URL: "s3://local-uploads/1620164967212-Trussels' Guide to Truss - trussels-guide.pdf/Trussels' Guide to Truss - trussels-guide.pdf",
                 status: 'UPLOAD_COMPLETE',
-                documentCategories: [],
             },
         ]
 
-        await render(<FileUpload {...testProps} initialItems={initialItems} />)
+        render(<FileUpload {...testProps} initialItems={initialItems} />)
 
         // check for initial items
         const items = screen.getAllByRole('listitem')
@@ -129,7 +127,7 @@ describe('FileUpload component', () => {
     })
 
     it('accepts multiple files', async () => {
-        await render(<FileUpload {...testProps} />)
+        render(<FileUpload {...testProps} />)
 
         const inputEl = screen.getByTestId('file-input-input')
 
@@ -146,7 +144,7 @@ describe('FileUpload component', () => {
     })
 
     it('accepts an upload file of a valid type', async () => {
-        await render(<FileUpload {...testProps} accept=".pdf,.txt" />)
+        render(<FileUpload {...testProps} accept=".pdf,.txt" />)
 
         const inputEl = screen.getByTestId('file-input-input')
         expect(inputEl).toHaveAttribute('accept', '.pdf,.txt')
@@ -163,7 +161,7 @@ describe('FileUpload component', () => {
     })
 
     it('does not accept upload file of invalid type', async () => {
-        await render(<FileUpload {...testProps} accept=".pdf,.txt" />)
+        render(<FileUpload {...testProps} accept=".pdf,.txt" />)
 
         const inputEl = screen.getByTestId('file-input-input')
         expect(inputEl).toHaveAttribute('accept', '.pdf,.txt')
@@ -176,7 +174,7 @@ describe('FileUpload component', () => {
     })
 
     it('displays a duplicate file error when expected', async () => {
-        await render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
+        render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
 
         const input = screen.getByTestId('file-input-input')
         await userEvent.upload(input, [TEST_DOC_FILE])
@@ -204,7 +202,6 @@ describe('FileUpload component', () => {
             scanFile: jest.fn().mockResolvedValue(undefined),
             onFileItemsUpdate: jest.fn().mockResolvedValue(undefined),
             accept: '.pdf,.txt',
-            renderMode: 'list',
         }
 
         render(<FileUpload {...props} />)
@@ -231,7 +228,6 @@ describe('FileUpload component', () => {
             scanFile: jest.fn().mockRejectedValue(new Error('failed')),
             onFileItemsUpdate: jest.fn().mockResolvedValue(undefined),
             accept: '.pdf,.txt',
-            renderMode: 'list',
         }
 
         render(<FileUpload {...props} />)
@@ -258,7 +254,6 @@ describe('FileUpload component', () => {
             scanFile: jest.fn().mockRejectedValue(new Error('failed')),
             onFileItemsUpdate: jest.fn().mockResolvedValue(undefined),
             accept: '.pdf,.txt',
-            renderMode: 'list',
         }
 
         render(<FileUpload {...props} />)
@@ -276,7 +271,7 @@ describe('FileUpload component', () => {
 
     describe('list summary heading', () => {
         it('display list count - X files added', async () => {
-            await render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
+            render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
 
             const input = screen.getByTestId('file-input-input')
             await userEvent.upload(input, [TEST_DOC_FILE])
@@ -287,7 +282,7 @@ describe('FileUpload component', () => {
         })
 
         it('displays error count when scan error occurs', async () => {
-            await render(
+            render(
                 <FileUpload
                     {...testProps}
                     scanFile={jest.fn().mockRejectedValue(new Error('failed'))}
@@ -304,7 +299,7 @@ describe('FileUpload component', () => {
         })
 
         it('displays error count when duplicate name occurs', async () => {
-            await render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
+            render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
 
             const input = screen.getByTestId('file-input-input')
             await userEvent.upload(input, [TEST_DOC_FILE])
@@ -315,7 +310,7 @@ describe('FileUpload component', () => {
         })
 
         it('displays complete count when file upload completes without issue', async () => {
-            await render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
+            render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
 
             const input = screen.getByTestId('file-input-input')
             await userEvent.upload(input, [TEST_DOC_FILE])
@@ -336,7 +331,7 @@ describe('FileUpload component', () => {
         })
 
         it('displays pending count when file upload is still in progress', async () => {
-            await render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
+            render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
 
             const input = screen.getByTestId('file-input-input')
             await userEvent.upload(input, [TEST_DOC_FILE])

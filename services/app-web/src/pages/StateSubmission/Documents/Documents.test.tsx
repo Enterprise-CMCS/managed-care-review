@@ -887,7 +887,6 @@ describe('Documents', () => {
                     s3URL: 's3://bucketname/key/supporting-documents',
                     name: 'supporting documents',
                     sha256: 'fakesha',
-                    documentCategories: ['RATES_RELATED' as const],
                 },
             ],
         }
@@ -961,7 +960,6 @@ describe('Documents', () => {
                     name: 'testFile.doc',
                     s3URL: expect.anything(),
                     sha256: expect.anything(),
-                    documentCategories: ['CONTRACT_RELATED'],
                 }),
             ])
         )
@@ -982,7 +980,6 @@ describe('Documents', () => {
                             s3URL: 's3://bucketname/key/supporting-documents',
                             name: 'supporting documents',
                             sha256: 'fakesha2',
-                            documentCategories: ['RATES_RELATED' as const],
                         },
                     ],
                 }}
@@ -1022,13 +1019,11 @@ describe('Documents', () => {
                     name: 'supporting documents',
                     s3URL: expect.anything(),
                     sha256: expect.anything(),
-                    documentCategories: ['RATES_RELATED'],
                 }),
                 expect.objectContaining({
                     name: 'testFile.doc',
                     s3URL: expect.anything(),
                     sha256: expect.anything(),
-                    documentCategories: ['CONTRACT_RELATED'],
                 }),
             ])
         )

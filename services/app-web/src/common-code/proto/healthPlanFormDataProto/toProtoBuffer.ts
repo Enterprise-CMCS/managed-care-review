@@ -71,10 +71,6 @@ const domainDocsToProtoDocs = (
     return domainDocs.map((doc) => ({
         s3Url: doc.s3URL,
         name: doc.name,
-        documentCategories: domainEnumArrayToProto(
-            mcreviewproto.DocumentCategory,
-            doc.documentCategories
-        ),
         sha256: doc.sha256,
     }))
 }
@@ -296,10 +292,6 @@ const toProtoBuffer = (
         documents: domainData.documents.map((doc) => ({
             s3Url: doc.s3URL,
             name: doc.name,
-            documentCategories: domainEnumArrayToProto(
-                mcreviewproto.DocumentCategory,
-                doc.documentCategories
-            ),
             sha256: doc.sha256,
         })),
     }

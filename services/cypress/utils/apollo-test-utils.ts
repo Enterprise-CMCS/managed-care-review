@@ -79,7 +79,6 @@ const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
         {
             name: 'Contract Cert.pdf',
             s3URL: 's3://local-uploads/1684382956834-Contract Cert.pdf/Contract Cert.pdf',
-            documentCategories: ['CONTRACT'],
             sha256: 'abc123',
         },
     ],
@@ -119,7 +118,6 @@ const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
         {
             name: 'Contract Cert.pdf',
             s3URL: 's3://local-uploads/1684382956834-Contract Cert.pdf/Contract Cert.pdf',
-            documentCategories: ['CONTRACT'],
             sha256: 'abc123',
         },
     ],
@@ -151,14 +149,12 @@ const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
                     name: 'rate1Document1.pdf',
                     s3URL: 'fakeS3URL',
                     sha256: 'fakesha',
-                    documentCategories: ['RATES' as const],
                 },
             ],
             supportingDocuments: [   {
                 name: 'rate1SupportingDocument1.pdf',
                 s3URL: 'fakeS3URL',
                 sha256: 'fakesha',
-                documentCategories: ['RATES' as const],
             }],
             rateProgramIDs: [minnesotaStatePrograms[0].id],
             actuaryContacts: [
@@ -184,7 +180,6 @@ const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
                         name: 'rate2Document1.pdf',
                         s3URL: 'fakeS3URL',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],

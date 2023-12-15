@@ -167,7 +167,6 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
                 {
                     name: 'rateDocument.pdf',
                     s3URL: 's3://bucketname/key/supporting-documents',
-                    documentCategories: ['RATES' as const],
                     sha256: 'rate1-sha',
                 },
             ],
@@ -202,7 +201,6 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
                 {
                     name: 'rateDocument.pdf',
                     s3URL: 's3://bucketname/key/supporting-documents',
-                    documentCategories: ['RATES' as const],
                     sha256: 'rate2-sha',
                 },
             ],
@@ -447,7 +445,6 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
                 {
                     name: 'rateDocument.pdf',
                     s3URL: 's3://bucketname/key/supporting-documents',
-                    documentCategories: ['RATES' as const],
                     sha256: 'rate1-sha',
                 },
             ],
@@ -482,7 +479,6 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
                 {
                     name: 'rateDocument.pdf',
                     s3URL: 's3://bucketname/key/supporting-documents',
-                    documentCategories: ['RATES' as const],
                     sha256: 'rate2-sha',
                 },
             ],
@@ -565,7 +561,6 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
                 {
                     name: 'supportingDocument11.pdf',
                     s3URL: 'fakeS3URL',
-                    documentCategories: ['CONTRACT_RELATED' as const],
                     sha256: 'needs-to-be-there',
                 },
             ],

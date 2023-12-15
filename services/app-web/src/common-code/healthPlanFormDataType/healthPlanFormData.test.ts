@@ -7,7 +7,6 @@ import {
 } from '../../testHelpers/apolloMocks'
 import {
     generateRateName,
-    hasValidSupportingDocumentCategories,
     HealthPlanFormDataType,
     isValidAndCurrentLockedHealthPlanFormData,
     LockedHealthPlanFormDataType,
@@ -58,113 +57,6 @@ describe('submission type assertions', () => {
 
     test.each([
         [mockStateSubmission(), true],
-        [
-            {
-                ...mockStateSubmission(),
-                documents: [
-                    {
-                        name: 'A.pdf',
-                        s3URL: 's3://local-uploads/1644167870842-A.pdf/A.pdf',
-                        documentCategories: [],
-                    },
-                ],
-            },
-            false,
-        ],
-        [
-            {
-                ...mockStateSubmission(),
-                documents: [
-                    {
-                        name: 'A.pdf',
-                        s3URL: 's3://local-uploads/1644167870842-A.pdf/A.pdf',
-                        documentCategories: ['RATES_RELATED'],
-                    },
-                ],
-                submissionType: 'CONTRACT_ONLY',
-            },
-            false,
-        ],
-        [
-            {
-                ...mockStateSubmission(),
-                documents: [
-                    {
-                        name: 'A.pdf',
-                        s3URL: 's3://local-uploads/1644167870842-A.pdf/A.pdf',
-                        documentCategories: ['CONTRACT_RELATED'],
-                    },
-                ],
-                submissionType: 'CONTRACT_ONLY',
-            },
-            true,
-        ],
-        [
-            {
-                ...mockStateSubmission(),
-                documents: [
-                    {
-                        name: 'A.pdf',
-                        s3URL: 's3://local-uploads/1644167870842-A.pdf/A.pdf',
-                        documentCategories: ['RATES_RELATED'],
-                    },
-                ],
-                submissionType: 'CONTRACT_AND_RATES',
-            },
-            true,
-        ],
-        [
-            {
-                ...mockStateSubmission(),
-                documents: [
-                    {
-                        name: 'A.pdf',
-                        s3URL: 's3://local-uploads/1644167870842-A.pdf/A.pdf',
-                        documentCategories: ['RATES_RELATED'],
-                    },
-                    {
-                        name: 'B.pdf',
-                        s3URL: 's3://local-uploads/1644167870842-B.pdf/B.pdf',
-                        documentCategories: ['CONTRACT_RELATED'],
-                    },
-                ],
-                submissionType: 'CONTRACT_ONLY',
-            },
-            false,
-        ],
-        [
-            {
-                ...mockStateSubmission(),
-                documents: [
-                    {
-                        name: 'A.pdf',
-                        s3URL: 's3://local-uploads/1644167870842-A.pdf/A.pdf',
-                        documentCategories: ['CONTRACT_RELATED'],
-                    },
-                    {
-                        name: 'B.pdf',
-                        s3URL: 's3://local-uploads/1644167870842-B.pdf/B.pdf',
-                        documentCategories: ['CONTRACT_RELATED'],
-                    },
-                ],
-                submissionType: 'CONTRACT_ONLY',
-            },
-            true,
-        ],
-    ])(
-        'hasValidSupportingDocumentCategories evaluates as expected',
-        (submission, expectedResponse) => {
-            // type coercion to allow us to test
-            expect(
-                hasValidSupportingDocumentCategories(
-                    submission as unknown as LockedHealthPlanFormDataType
-                )
-            ).toEqual(expectedResponse)
-        }
-    )
-
-    test.each([
-        [mockStateSubmission(), true],
         [{ ...mockStateSubmission(), documents: [] }, true],
         [
             {
@@ -178,7 +70,6 @@ describe('submission type assertions', () => {
                             {
                                 s3URL: 's3://bucketname/key/rate',
                                 name: 'rate',
-                                documentCategories: ['RATES' as const],
                             },
                         ],
                         rateDateStart: new Date(),

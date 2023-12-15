@@ -1320,19 +1320,16 @@ describe('RateDetails', () => {
                 {
                     s3URL: 's3://bucketname/one-one/one-one.png',
                     name: 'one one',
-                    documentCategories: ['CONTRACT_RELATED'],
                     sha256: 'fakeSha1',
                 },
                 {
                     s3URL: 's3://bucketname/one-two/one-two.png',
                     name: 'one two',
-                    documentCategories: ['CONTRACT_RELATED'],
                     sha256: 'fakeSha2',
                 },
                 {
                     s3URL: 's3://bucketname/one-three/one-three.png',
                     name: 'one three',
-                    documentCategories: ['CONTRACT_RELATED'],
                     sha256: 'fakeSha3',
                 },
             ]
@@ -1603,7 +1600,6 @@ describe('RateDetails', () => {
                     {
                         name: 'aasdf3423af',
                         s3URL: 's3://bucketname/key/fileName',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -1820,7 +1816,6 @@ describe('RateDetails', () => {
                 {
                     name: 'testFile.doc',
                     s3URL: expect.any(String),
-                    documentCategories: ['RATES'],
                     sha256: 'da7d22ce886b5ab262cd7ab28901212a027630a5edf8e88c8488087b03ffd833', // pragma: allowlist secret
                 },
             ])
@@ -1832,13 +1827,11 @@ describe('RateDetails', () => {
                 {
                     name: 'testFile.xls',
                     s3URL: expect.any(String),
-                    documentCategories: ['RATES_RELATED'],
                     sha256: '76dbe3fd2b5c00001d424347bd28047b3bb2196561fc703c04fe254c10964c80', // pragma: allowlist secret
                 },
                 {
                     name: 'testFile.doc',
                     s3URL: expect.any(String),
-                    documentCategories: ['RATES_RELATED'],
                     sha256: 'da7d22ce886b5ab262cd7ab28901212a027630a5edf8e88c8488087b03ffd833', // pragma: allowlist secret
                 },
             ])

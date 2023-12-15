@@ -92,9 +92,7 @@ export const ContractDetailsSummarySection = ({
         submission.statutoryRegulatoryAttestation
     )
 
-    const contractSupportingDocuments = submission.documents.filter((doc) =>
-        doc.documentCategories.includes('CONTRACT_RELATED' as const)
-    )
+    const contractSupportingDocuments = submission.documents
     const isEditing = !isSubmitted(submission) && editNavigateTo !== undefined
     const applicableFederalAuthorities = isCHIPOnly(submission)
         ? submission.federalAuthorities.filter((authority) =>

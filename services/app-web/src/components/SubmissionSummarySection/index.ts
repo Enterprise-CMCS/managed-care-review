@@ -5,5 +5,4 @@ export {
     ContactsSummarySection,
     getActuaryFirm,
 } from './ContactsSummarySection'
-export { SupportingDocumentsSummarySection } from './SupportingDocumentsSummarySection'
 export { UploadedDocumentsTable } from './UploadedDocumentsTable'

@@ -150,7 +150,6 @@ export const SingleRateCert = ({
                         id={`${fieldNamePrefix}.rateDocuments`}
                         name={`${fieldNamePrefix}.rateDocuments`}
                         label="Upload one rate certification document"
-                        renderMode="list"
                         aria-required
                         allowMultipleUploads={false}
                         error={showFieldErrors('rateDocuments')}
@@ -206,7 +205,6 @@ export const SingleRateCert = ({
                         id={`${fieldNamePrefix}.supportingDocuments`}
                         name={`${fieldNamePrefix}.supportingDocuments`}
                         label="Upload supporting documents"
-                        renderMode="list"
                         aria-required={false}
                         error={showFieldErrors('supportingDocuments')}
                         hint={

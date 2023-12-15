@@ -40,7 +40,6 @@ export {
     ContractDetailsSummarySection,
     RateDetailsSummarySection,
     ContactsSummarySection,
-    SupportingDocumentsSummarySection,
     UploadedDocumentsTable,
 } from './SubmissionSummarySection'
 

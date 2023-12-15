@@ -8,7 +8,6 @@ import {
     removeRatesData,
     removeInvalidProvisionsAndAuthorities,
     isValidAndCurrentLockedHealthPlanFormData,
-    hasValidSupportingDocumentCategories,
     isContractOnly,
     isCHIPOnly,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType/healthPlanFormData'
@@ -168,16 +167,6 @@ export function parseAndSubmit(
         return {
             code: 'INCOMPLETE',
             message: 'formData must have valid documents',
-        }
-    } else if (
-        !hasValidSupportingDocumentCategories(
-            maybeStateSubmission as LockedHealthPlanFormDataType
-        )
-    ) {
-        return {
-            code: 'INCOMPLETE',
-            message:
-                'formData must have valid categories for supporting documents',
         }
     } else
         return {

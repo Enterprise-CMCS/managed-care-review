@@ -97,7 +97,7 @@ CapitationRatesAmendedInfo {
 Document {
     string name
     string S3URL
-    array documentCategories
+    string sha256
 }
 
 

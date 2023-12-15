@@ -173,13 +173,9 @@ export const RateDetails = ({
                 id: rateInfo.id,
                 rateType: rateInfo.rateType,
                 rateCapitationType: rateInfo.rateCapitationType,
-                rateDocuments: formatDocumentsForDomain(
-                    rateInfo.rateDocuments,
-                    ['RATES']
-                ),
+                rateDocuments: formatDocumentsForDomain(rateInfo.rateDocuments),
                 supportingDocuments: formatDocumentsForDomain(
-                    rateInfo.supportingDocuments,
-                    ['RATES_RELATED']
+                    rateInfo.supportingDocuments
                 ),
                 rateDateStart: formatFormDateForDomain(rateInfo.rateDateStart),
                 rateDateEnd: formatFormDateForDomain(rateInfo.rateDateEnd),
