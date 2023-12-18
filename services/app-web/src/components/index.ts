@@ -40,7 +40,6 @@ export {
     ContractDetailsSummarySection,
     RateDetailsSummarySection,
     ContactsSummarySection,
-    SupportingDocumentsSummarySection,
     UploadedDocumentsTable,
 } from './SubmissionSummarySection'
 
@@ -85,3 +84,4 @@ export { ActionButton } from './ActionButton'
 export { Breadcrumbs } from './Breadcrumbs'
 
 export { InlineDocumentWarning } from './DocumentWarning'
+export { SectionCard } from './SectionCard'

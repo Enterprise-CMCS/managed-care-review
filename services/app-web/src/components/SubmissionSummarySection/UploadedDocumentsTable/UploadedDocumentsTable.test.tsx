@@ -18,7 +18,6 @@ describe('UploadedDocumentsTable', () => {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT_RELATED' as const],
             },
         ]
         renderWithProviders(
@@ -58,16 +57,11 @@ describe('UploadedDocumentsTable', () => {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
                 sha256: 'fakesha',
-                documentCategories: [
-                    'CONTRACT_RELATED' as const,
-                    'RATES_RELATED' as const,
-                ],
             },
         ]
 
@@ -105,22 +99,16 @@ describe('UploadedDocumentsTable', () => {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
                 sha256: 'fakesha1',
-                documentCategories: ['RATES_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
                 sha256: 'fakesha2',
-                documentCategories: [
-                    'CONTRACT_RELATED' as const,
-                    'RATES_RELATED' as const,
-                ],
             },
         ]
         const dateLookupTable: DocumentDateLookupTableType = {
@@ -168,22 +156,16 @@ describe('UploadedDocumentsTable', () => {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
                 sha256: 'fakesha1',
-                documentCategories: ['RATES_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
                 sha256: 'fakesha2',
-                documentCategories: [
-                    'CONTRACT_RELATED' as const,
-                    'RATES_RELATED' as const,
-                ],
             },
         ]
         const dateLookupTable: DocumentDateLookupTableType = {
@@ -231,22 +213,16 @@ describe('UploadedDocumentsTable', () => {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
                 sha256: 'fakesha1',
-                documentCategories: ['RATES_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
                 sha256: 'fakesha2',
-                documentCategories: [
-                    'CONTRACT_RELATED' as const,
-                    'RATES_RELATED' as const,
-                ],
             },
         ]
         const dateLookupTable: DocumentDateLookupTableType = {
@@ -294,22 +270,16 @@ describe('UploadedDocumentsTable', () => {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
                 sha256: 'fakesha1',
-                documentCategories: ['RATES_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
                 sha256: 'fakesha2',
-                documentCategories: [
-                    'CONTRACT_RELATED' as const,
-                    'RATES_RELATED' as const,
-                ],
             },
         ]
         const dateLookupTable: DocumentDateLookupTableType = {
@@ -351,13 +321,11 @@ describe('UploadedDocumentsTable', () => {
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
-                documentCategories: ['CONTRACT_RELATED' as const],
                 sha256: 'fakeSha1',
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
-                documentCategories: ['RATES_RELATED' as const],
                 sha256: 'fakeSha2',
             },
         ]
@@ -395,22 +363,16 @@ describe('UploadedDocumentsTable', () => {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
                 sha256: 'fakesha1',
-                documentCategories: ['RATES_RELATED' as const],
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
                 sha256: 'fakesha2',
-                documentCategories: [
-                    'CONTRACT_RELATED' as const,
-                    'RATES_RELATED' as const,
-                ],
             },
         ]
         const dateLookupTable = {

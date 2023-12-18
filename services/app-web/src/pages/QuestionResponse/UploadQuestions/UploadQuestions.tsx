@@ -102,7 +102,10 @@ export const UploadQuestions = () => {
                         text: 'Dashboard',
                     },
                     { link: `/submissions/${id}`, text: packageName },
-                    { text: 'Add questions' },
+                    {
+                        text: 'Add questions',
+                        link: RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION,
+                    },
                 ]}
             />
 
@@ -140,7 +143,6 @@ export const UploadQuestions = () => {
                             id="questions-upload"
                             name="questions-upload"
                             label="Upload questions"
-                            renderMode="list"
                             aria-required
                             error={showFileUploadError ? fileUploadError : ''}
                             hint={

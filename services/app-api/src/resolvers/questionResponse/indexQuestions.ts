@@ -20,14 +20,14 @@ export function indexQuestionsResolver(
         if (contractResult instanceof Error) {
             if (contractResult instanceof NotFoundError) {
                 const errMessage = `Issue finding a contract with id ${input.contractID}. Message: Contract with id ${input.contractID} does not exist`
-                logError('createQuestion', errMessage)
+                logError('indexQuestion', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new GraphQLError(errMessage, {
                     extensions: { code: 'NOT_FOUND' },
                 })
             }
             const errMessage = `Issue finding a package. Message: ${contractResult.message}`
-            logError('createQuestion', errMessage)
+            logError('indexQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage)
         }

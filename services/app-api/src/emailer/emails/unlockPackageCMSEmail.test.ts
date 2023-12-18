@@ -30,7 +30,6 @@ const sub: UnlockedHealthPlanFormDataType = {
                     s3URL: 'bar',
                     name: 'foo',
                     sha256: 'fakesha',
-                    documentCategories: ['RATES' as const],
                 },
             ],
             supportingDocuments: [],
@@ -74,8 +73,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         expect(template).toEqual(
@@ -94,8 +92,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         expect(template).toEqual(
@@ -148,7 +145,6 @@ describe('unlockPackageCMSEmail', () => {
                             s3URL: 'bar',
                             name: 'foo',
                             sha256: 'fakesha',
-                            documentCategories: ['RATES' as const],
                         },
                     ],
                     supportingDocuments: [],
@@ -177,7 +173,6 @@ describe('unlockPackageCMSEmail', () => {
                             s3URL: 'bar',
                             name: 'foo',
                             sha256: 'fakesha',
-                            documentCategories: ['RATES' as const],
                         },
                     ],
                     supportingDocuments: [],
@@ -206,7 +201,6 @@ describe('unlockPackageCMSEmail', () => {
                             s3URL: 'bar',
                             name: 'foo',
                             sha256: 'fakesha',
-                            documentCategories: ['RATES' as const],
                         },
                     ],
                     supportingDocuments: [],
@@ -245,8 +239,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         expect(template).toEqual(
@@ -321,8 +314,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         testEmailConfig().oactEmails.forEach((emailAddress) => {
@@ -333,7 +325,7 @@ describe('unlockPackageCMSEmail', () => {
             )
         })
 
-        testEmailConfig().dmcpEmails.forEach((emailAddress) => {
+        testEmailConfig().dmcpSubmissionEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
@@ -361,8 +353,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         expect(template).toEqual(
@@ -392,8 +383,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         testStateAnalystEmails.forEach((emailAddress) => {
@@ -419,8 +409,7 @@ describe('unlockPackageCMSEmail', () => {
         ]
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         reviewerEmails.forEach((emailAddress) => {
@@ -457,8 +446,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         testStateAnalystEmails.forEach((emailAddress) => {
@@ -480,8 +468,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         const ratesReviewerEmails = [...testEmailConfig().oactEmails]
@@ -504,8 +491,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         testStateAnalystEmails.forEach((emailAddress) => {
@@ -531,8 +517,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         testStateAnalystEmails.forEach((emailAddress) => {
@@ -559,8 +544,7 @@ describe('unlockPackageCMSEmail', () => {
         const excludedEmails = [...testEmailConfig().oactEmails]
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         excludedEmails.forEach((emailAddress) => {
@@ -590,7 +574,6 @@ describe('unlockPackageCMSEmail', () => {
                             s3URL: 'bar',
                             name: 'foo',
                             sha256: 'fakesha',
-                            documentCategories: ['RATES' as const],
                         },
                     ],
                     supportingDocuments: [],
@@ -622,8 +605,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         testStateAnalystEmails.forEach((emailAddress) => {
@@ -646,7 +628,6 @@ describe('unlockPackageCMSEmail', () => {
                             s3URL: 'bar',
                             name: 'foo',
                             sha256: 'fakesha',
-                            documentCategories: ['RATES' as const],
                         },
                     ],
                     supportingDocuments: [],
@@ -679,8 +660,7 @@ describe('unlockPackageCMSEmail', () => {
         const excludedEmails = [...testEmailConfig().oactEmails]
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         excludedEmails.forEach((emailAddress) => {
@@ -709,8 +689,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         expect(template).toEqual(
@@ -731,8 +710,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         expect(template.bodyHTML).toMatchSnapshot()

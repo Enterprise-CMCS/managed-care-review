@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders overall email for a new question as expected 1`] = `
+"CMS asked questions about MCR-MN-0003-SNBC<br />
+<b>Sent by:</b> Ronald McDonald (DMCO) <a href="cms@email.com">cms@email.com</a>
+<br />
+<b>Date:</b> 01/01/2024<br />
+<br />
+You must answer the question before CMS can continue reviewing it.<br />
+<br />
+<a href="http://localhost/submissions/12345/question-and-answers">Open the submission in MC-Review to answer questions</a>
+
+"
+`;

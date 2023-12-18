@@ -26,7 +26,10 @@ function mockEmailParameterStoreError(error?: string): EmailParameterStore {
         getDMCOEmails: async (): Promise<Error> => {
             return new Error(message)
         },
-        getDMCPEmails: async (): Promise<Error> => {
+        getDMCPReviewEmails: async (): Promise<Error> => {
+            return new Error(message)
+        },
+        getDMCPSubmissionEmails: async (): Promise<Error> => {
             return new Error(message)
         },
         getSourceEmail: async (): Promise<Error> => {

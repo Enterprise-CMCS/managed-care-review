@@ -41,7 +41,7 @@
     "devDependencies": {
         "husky": "^8.0.1",
         "lint-staged": "^14.0.1",
-        "prettier": "^2.4.1"
+        "prettier": "^3.1.0"
     },
     "dependencies": {
         "@apollo/client": "^3.4.15",

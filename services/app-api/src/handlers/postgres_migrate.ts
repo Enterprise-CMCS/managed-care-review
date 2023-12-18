@@ -120,43 +120,6 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
         }
     }
 
-    // run the proto data migration. this will run any data changes to the protobufs stored in postgres
-    try {
-        const connectTimeout = process.env.CONNECT_TIMEOUT ?? '60'
-        const migrateProtosResult = spawnSync(
-            `${process.execPath}`,
-            [
-                '/opt/nodejs/protoMigrator/migrate_protos.js',
-                'db',
-                '/opt/nodejs/protoMigrator/healthPlanFormDataMigrations',
-            ],
-            {
-                env: {
-                    DATABASE_URL:
-                        dbConnectionURL + `&connect_timeout=${connectTimeout}`,
-                },
-            }
-        )
-
-        console.info(
-            'stderror',
-            migrateProtosResult.stderr && migrateProtosResult.stderr.toString()
-        )
-        console.info(
-            'stdout',
-            migrateProtosResult.stdout && migrateProtosResult.stdout.toString()
-        )
-        if (migrateProtosResult.status !== 0) {
-            const errMsg = `Could not run migrate_protos db: ${migrateProtosResult.stderr.toString()}`
-            recordException(errMsg, serviceName, 'migrate_protos db')
-            return fmtMigrateError(errMsg)
-        }
-    } catch (err) {
-        const errMsg = `Could not migrate the database protobufs: ${err}`
-        recordException(errMsg, serviceName, 'migrate protos db')
-        return fmtMigrateError(errMsg)
-    }
-
     // Run the prisma dataMigrations.
     // these are compiled in app-api so we can call them directly
 

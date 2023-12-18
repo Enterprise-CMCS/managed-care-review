@@ -18,7 +18,14 @@ export {
 } from './cmsRateHelpEmail/getCmsRateHelpEmail'
 export { getDMCOEmails, getDMCOEmailsLocal } from './dmcoEmails/getDMCOEmails'
 export { getOACTEmails, getOACTEmailsLocal } from './oactEmails/getOACTEmails'
-export { getDMCPEmails, getDMCPEmailsLocal } from './dmcpEmails/getDMCPEmails'
+export {
+    getDMCPReviewEmails,
+    getDMCPReviewEmailsLocal,
+} from './dmcpEmails/getDMCPReviewEmails'
+export {
+    getDMCPSubmissionEmails,
+    getDMCPSubmissionEmailsLocal,
+} from './dmcpEmails/getDMCPSubmissionEmails'
 export {
     getSourceEmail,
     getSourceEmailLocal,

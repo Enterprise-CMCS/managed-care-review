@@ -20,6 +20,6 @@ Default.args = {
     items: [
         { text: 'First link', link: '/firstlink' },
         { text: 'Second link', link: '/secondlink' },
-        { text: 'Active link, no href needed' },
+        { text: 'Active link', link: '/thirdlink' },
     ],
 }

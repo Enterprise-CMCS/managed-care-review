@@ -58,6 +58,7 @@ function newHealthPlanFormData(): UnlockedHealthPlanFormDataType {
         federalAuthorities: [],
         stateContacts: [],
         addtlActuaryContacts: [],
+        statutoryRegulatoryAttestation: true,
     }
 }
 
@@ -85,6 +86,7 @@ function basicHealthPlanFormData(): UnlockedHealthPlanFormDataType {
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         stateContacts: [],
         addtlActuaryContacts: [],
+        statutoryRegulatoryAttestation: true,
     }
 }
 
@@ -112,6 +114,7 @@ function contractOnly(): UnlockedHealthPlanFormDataType {
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         stateContacts: [],
         addtlActuaryContacts: [],
+        statutoryRegulatoryAttestation: true,
     }
 }
 
@@ -160,6 +163,8 @@ function contractAmendedOnly(): UnlockedHealthPlanFormDataType {
                 modifiedNonRiskPaymentArrangements: true,
             },
         },
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 
@@ -248,6 +253,8 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 
@@ -269,13 +276,11 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'contract doc',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT_RELATED'],
             },
             {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'rates and contract addendum doc',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT_RELATED', 'RATES_RELATED'],
             },
         ],
         contractType: 'BASE',
@@ -287,7 +292,6 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'contract doc',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT'],
             },
         ],
         rateInfos: [
@@ -310,7 +314,6 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
                         s3URL: 's3://bucketname/key/foo.png',
                         name: 'Rates certification',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES'],
                     },
                 ],
                 supportingDocuments: [],
@@ -363,6 +366,8 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 
@@ -384,13 +389,11 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'contract doc',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT_RELATED'],
             },
             {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'rates and contract addendum doc',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT_RELATED', 'RATES_RELATED'],
             },
         ],
         contractType: 'BASE',
@@ -420,7 +423,6 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
                         s3URL: 's3://bucketname/key/foo.png',
                         name: 'Rates certification',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES'],
                     },
                 ],
                 supportingDocuments: [],
@@ -471,6 +473,8 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 
@@ -492,13 +496,11 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'contract doc',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT_RELATED'],
             },
             {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'rates and contract addendum doc',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT_RELATED', 'RATES_RELATED'],
             },
         ],
         contractType: 'AMENDMENT',
@@ -510,7 +512,6 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'contract doc',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT'],
             },
         ],
         contractAmendmentInfo: {
@@ -556,7 +557,6 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
                         s3URL: 's3://bucketname/key/foo.png',
                         name: 'Rates certification',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES'],
                     },
                 ],
                 supportingDocuments: [],
@@ -607,6 +607,8 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 
@@ -632,7 +634,6 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'contract doc',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT_RELATED'],
             },
         ],
         contractType: 'AMENDMENT',
@@ -644,7 +645,6 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'contract doc',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT'],
             },
         ],
         contractAmendmentInfo: {
@@ -680,13 +680,11 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
                         s3URL: 's3://bucketname/key/foo.png',
                         name: 'rates cert 1',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES_RELATED'],
                     },
                     {
                         s3URL: 's3://bucketname/key/foo.png',
                         name: 'rates cert 2',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES_RELATED'],
                     },
                 ],
                 supportingDocuments: [],
@@ -747,6 +745,8 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 
@@ -774,7 +774,6 @@ function basicLockedHealthPlanFormData(): LockedHealthPlanFormDataType {
                 s3URL: 's3://bucketname/key/foo.png',
                 name: 'contract doc',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT'],
             },
         ],
         managedCareEntities: ['PIHP'],
@@ -788,6 +787,8 @@ function basicLockedHealthPlanFormData(): LockedHealthPlanFormDataType {
         ],
         addtlActuaryContacts: [],
         rateInfos: [],
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 

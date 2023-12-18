@@ -34,6 +34,15 @@ import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocume
 import { recordJSException } from '../../../otelHelpers'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../DocumentWarning'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../../common-code/featureFlags'
+import { Grid } from '@trussworks/react-uswds'
+import { booleanAsYesNoFormValue } from '../../Form/FieldYesNo'
+import {
+    StatutoryRegulatoryAttestation,
+    StatutoryRegulatoryAttestationQuestion,
+} from '../../../constants/statutoryRegulatoryAttestation'
+import { SectionCard } from '../../SectionCard'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -72,9 +81,18 @@ export const ContractDetailsSummarySection = ({
     const [zippedFilesURL, setZippedFilesURL] = useState<
         string | undefined | Error
     >(undefined)
-    const contractSupportingDocuments = submission.documents.filter((doc) =>
-        doc.documentCategories.includes('CONTRACT_RELATED' as const)
+    const ldClient = useLDClient()
+
+    const contract438Attestation = ldClient?.variation(
+        featureFlags.CONTRACT_438_ATTESTATION.flag,
+        featureFlags.CONTRACT_438_ATTESTATION.defaultValue
     )
+
+    const attestationYesNo = booleanAsYesNoFormValue(
+        submission.statutoryRegulatoryAttestation
+    )
+
+    const contractSupportingDocuments = submission.documents
     const isEditing = !isSubmitted(submission) && editNavigateTo !== undefined
     const applicableFederalAuthorities = isCHIPOnly(submission)
         ? submission.federalAuthorities.filter((authority) =>
@@ -133,7 +151,10 @@ export const ContractDetailsSummarySection = ({
     ])
 
     return (
-        <section id="contractDetailsSection" className={styles.summarySection}>
+        <SectionCard
+            id="contractDetailsSection"
+            className={styles.summarySection}
+        >
             <SectionHeader
                 header="Contract details"
                 editNavigateTo={editNavigateTo}
@@ -143,6 +164,41 @@ export const ContractDetailsSummarySection = ({
                     renderDownloadButton(zippedFilesURL)}
             </SectionHeader>
             <dl>
+                {contract438Attestation && (
+                    <Grid row gap className={styles.singleColumnGrid}>
+                        <Grid
+                            tablet={{ col: 12 }}
+                            key="statutoryRegulatoryAttestation"
+                        >
+                            <DataDetail
+                                id="statutoryRegulatoryAttestation"
+                                label={StatutoryRegulatoryAttestationQuestion}
+                                explainMissingData={!isSubmitted(submission)}
+                                children={
+                                    attestationYesNo !== undefined &&
+                                    StatutoryRegulatoryAttestation[
+                                        attestationYesNo
+                                    ]
+                                }
+                            />
+                        </Grid>
+                        {attestationYesNo === 'NO' && (
+                            <Grid
+                                tablet={{ col: 12 }}
+                                key="statutoryRegulatoryAttestationDescription"
+                            >
+                                <DataDetail
+                                    id="statutoryRegulatoryAttestationDescription"
+                                    label="Non-compliance description"
+                                    explainMissingData={!isSubmitted}
+                                    children={
+                                        submission.statutoryRegulatoryAttestationDescription
+                                    }
+                                />
+                            </Grid>
+                        )}
+                    </Grid>
+                )}
                 <DoubleColumnGrid>
                     <DataDetail
                         id="contractExecutionStatus"
@@ -257,6 +313,6 @@ export const ContractDetailsSummarySection = ({
                 isSupportingDocuments
                 isEditing={isEditing}
             />
-        </section>
+        </SectionCard>
     )
 }

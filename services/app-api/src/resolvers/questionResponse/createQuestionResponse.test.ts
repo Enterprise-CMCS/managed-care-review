@@ -5,15 +5,19 @@ import {
     createTestQuestion,
     createTestQuestionResponse,
 } from '../../testHelpers/gqlHelpers'
+import { base64ToDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { assertAnError, assertAnErrorCode } from '../../testHelpers'
 import {
     createDBUsersWithFullData,
     testCMSUser,
 } from '../../testHelpers/userHelpers'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
+import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
+import { findStatePrograms } from '../../postgres'
+import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
 
 describe('createQuestionResponse', () => {
-    const mockLDService = testLDService({ ['rates-db-refactor']: true })
     const cmsUser = testCMSUser()
     beforeAll(async () => {
         //Inserting a new CMS user, with division assigned, in postgres in order to create the question to user relationship.
@@ -21,54 +25,53 @@ describe('createQuestionResponse', () => {
     })
 
     it('returns question response data', async () => {
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
         })
 
-        const submittedPkg = await createAndSubmitTestHealthPlanPackage(
-            stateServer
-        )
+        const submittedPkg =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
 
         const createdQuestion = await createTestQuestion(
             cmsServer,
             submittedPkg.id
         )
 
-        const createdResponse = await createTestQuestionResponse(
+        const createResponseResult = await createTestQuestionResponse(
             stateServer,
-            createdQuestion?.question.id
+            createdQuestion.question.id
         )
 
-        expect(createdResponse).toEqual({
-            response: expect.objectContaining({
-                id: expect.any(String),
-                questionID: createdQuestion?.question.id,
-                documents: [
-                    {
-                        name: 'Test Question',
-                        s3URL: 'testS3Url',
-                    },
-                ],
-                addedBy: expect.objectContaining({
-                    role: 'STATE_USER',
-                }),
-            }),
-        })
+        expect(createResponseResult.question).toEqual(
+            expect.objectContaining({
+                ...createdQuestion.question,
+                responses: expect.arrayContaining([
+                    expect.objectContaining({
+                        id: expect.any(String),
+                        questionID: createdQuestion.question.id,
+                        documents: [
+                            {
+                                name: 'Test Question Response',
+                                s3URL: 'testS3Url',
+                            },
+                        ],
+                        addedBy: expect.objectContaining({
+                            role: 'STATE_USER',
+                        }),
+                    }),
+                ]),
+            })
+        )
     })
 
     it('returns an error when attempting to create response for a question that does not exist', async () => {
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const fakeID = 'abc-123'
 
-        const createdResponse = await stateServer.executeOperation({
+        const createResponseResult = await stateServer.executeOperation({
             query: CREATE_QUESTION_RESPONSE,
             variables: {
                 input: {
@@ -83,32 +86,28 @@ describe('createQuestionResponse', () => {
             },
         })
 
-        expect(createdResponse.errors).toBeDefined()
-        expect(assertAnErrorCode(createdResponse)).toBe('BAD_USER_INPUT')
-        expect(assertAnError(createdResponse).message).toBe(
-            `Issue creating question response for question ${fakeID} of type NOT_FOUND_ERROR. Message: An operation failed because it depends on one or more records that were required but not found.`
+        expect(createResponseResult).toBeDefined()
+        expect(assertAnErrorCode(createResponseResult)).toBe('BAD_USER_INPUT')
+        expect(assertAnError(createResponseResult).message).toBe(
+            `Question with ID: ${fakeID} not found to attach response to`
         )
     })
 
     it('returns an error if a cms user attempts to create a question response for a package', async () => {
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
         })
-        const submittedPkg = await createAndSubmitTestHealthPlanPackage(
-            stateServer
-        )
+        const submittedPkg =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
         const createdQuestion = await createTestQuestion(
             cmsServer,
             submittedPkg.id
         )
 
-        const createdResponse = await cmsServer.executeOperation({
+        const createResponseResult = await cmsServer.executeOperation({
             query: CREATE_QUESTION_RESPONSE,
             variables: {
                 input: {
@@ -123,10 +122,154 @@ describe('createQuestionResponse', () => {
             },
         })
 
-        expect(createdResponse.errors).toBeDefined()
-        expect(assertAnErrorCode(createdResponse)).toBe('FORBIDDEN')
-        expect(assertAnError(createdResponse).message).toBe(
+        expect(createResponseResult.errors).toBeDefined()
+        expect(assertAnErrorCode(createResponseResult)).toBe('FORBIDDEN')
+        expect(assertAnError(createResponseResult).message).toBe(
             'user not authorized to create a question response'
+        )
+    })
+
+    it('sends CMS email', async () => {
+        const emailConfig = testEmailConfig()
+        const mockEmailer = testEmailer(emailConfig)
+        const oactCMS = testCMSUser({
+            divisionAssignment: 'OACT' as const,
+        })
+        const stateServer = await constructTestPostgresServer({
+            emailer: mockEmailer,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: oactCMS,
+            },
+            emailer: mockEmailer,
+        })
+
+        const submittedPkg =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
+
+        const formData = latestFormData(submittedPkg)
+
+        const createdQuestion = await createTestQuestion(cmsServer, formData.id)
+
+        await createTestQuestionResponse(
+            stateServer,
+            createdQuestion?.question.id
+        )
+
+        const statePrograms = findStatePrograms(formData.stateCode)
+        if (statePrograms instanceof Error) {
+            throw new Error(
+                `Unexpected error: No state programs found for stateCode ${formData.stateCode}`
+            )
+        }
+
+        const pkgName = packageName(
+            formData.stateCode,
+            formData.stateNumber,
+            formData.programIDs,
+            statePrograms
+        )
+
+        const stateAnalystsEmails = getTestStateAnalystsEmails(
+            formData.stateCode
+        )
+        const cmsRecipientEmails = [
+            ...stateAnalystsEmails,
+            ...emailConfig.devReviewTeamEmails,
+            ...emailConfig.oactEmails,
+        ]
+
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            5, // New response CMS email notification is the fifth email
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `[LOCAL] New Responses for ${pkgName}`
+                ),
+                sourceEmail: emailConfig.emailSource,
+                toAddresses: expect.arrayContaining(
+                    Array.from(cmsRecipientEmails)
+                ),
+                bodyText: expect.stringContaining(
+                    `The state submitted responses to OACT's questions about ${pkgName}`
+                ),
+                bodyHTML: expect.stringContaining(
+                    `<a href="http://localhost/submissions/${submittedPkg.id}/question-and-answers">View submission Q&A</a>`
+                ),
+            })
+        )
+    })
+
+    it('sends State email', async () => {
+        const emailConfig = testEmailConfig()
+        const mockEmailer = testEmailer(emailConfig)
+        const oactCMS = testCMSUser({
+            divisionAssignment: 'OACT' as const,
+        })
+        const stateServer = await constructTestPostgresServer({
+            emailer: mockEmailer,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: oactCMS,
+            },
+            emailer: mockEmailer,
+        })
+
+        const submittedPkg =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
+
+        const formData = latestFormData(submittedPkg)
+
+        const createdQuestion = await createTestQuestion(cmsServer, formData.id)
+
+        await createTestQuestionResponse(
+            stateServer,
+            createdQuestion?.question.id
+        )
+
+        const statePrograms = findStatePrograms(formData.stateCode)
+        if (statePrograms instanceof Error) {
+            throw new Error(
+                `Unexpected error: No state programs found for stateCode ${formData.stateCode}`
+            )
+        }
+
+        const pkgName = packageName(
+            formData.stateCode,
+            formData.stateNumber,
+            formData.programIDs,
+            statePrograms
+        )
+        const currentRevision = submittedPkg.revisions[0].node.formDataProto
+
+        const sub = base64ToDomain(currentRevision)
+        if (sub instanceof Error) {
+            throw sub
+        }
+
+        const stateReceiverEmails = [
+            'james@example.com',
+            ...sub.stateContacts.map((contact) => contact.email),
+        ]
+
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            6, // New response CMS email notification is the fifth email
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `[LOCAL] Response submitted to CMS for ${pkgName}`
+                ),
+                sourceEmail: emailConfig.emailSource,
+                toAddresses: expect.arrayContaining(
+                    Array.from(stateReceiverEmails)
+                ),
+                bodyText: expect.stringContaining(
+                    `${oactCMS.divisionAssignment} round 1 response was successfully submitted`
+                ),
+                bodyHTML: expect.stringContaining(
+                    `<a href="http://localhost/submissions/${submittedPkg.id}/question-and-answers">View response</a>`
+                ),
+            })
         )
     })
 })

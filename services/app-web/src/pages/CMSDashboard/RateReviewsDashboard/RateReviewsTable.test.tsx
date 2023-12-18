@@ -61,7 +61,6 @@ describe('RateReviewsTable', () => {
         renderWithProviders(
             <RateReviewsTable
                 tableData={tableData()}
-                showFilters={true}
                 caption={'Test table caption'}
             />,
             {
@@ -132,7 +131,6 @@ describe('RateReviewsTable', () => {
         renderWithProviders(
             <RateReviewsTable
                 tableData={tableData()}
-                showFilters={true}
                 caption={'Test table caption'}
             />,
             {
@@ -195,7 +193,6 @@ describe('RateReviewsTable', () => {
         renderWithProviders(
             <RateReviewsTable
                 tableData={tableData()}
-                showFilters={true}
                 caption={'Test table caption'}
             />,
             {

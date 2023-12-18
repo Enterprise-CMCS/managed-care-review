@@ -99,6 +99,12 @@ Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
     })
 Cypress.Commands.add('fillOutBaseContractDetails', () => {
     // Must be on '/submissions/:id/edit/contract-details'
+    // Contract 438 attestation question
+    cy.findByText('No, the contract does not fully comply with all applicable requirements').click()
+
+    cy.findByRole('textbox', {name: 'Provide a brief description of any contractual or operational non-compliance, including regulatory citations and expected timeframe for remediation'})
+        .type('Non compliance explanation')
+
     cy.findByText('Fully executed').click()
     cy.findAllByLabelText('Start date', {timeout: 2000})
         .parents()
@@ -174,8 +180,13 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
 
 Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     // Must be on '/submissions/:id/edit/contract-details'
+    // Contract 438 attestation question
+    cy.findByText('No, the contract does not fully comply with all applicable requirements').click()
+    cy.findByRole('textbox', {name: 'Provide a brief description of any contractual or operational non-compliance, including regulatory citations and expected timeframe for remediation'})
+        .type('Non compliance explanation')
+ 
     cy.findByText('Unexecuted by some or all parties').click()
-
+ 
     cy.findAllByLabelText('Start date', {timeout: 2000})
         .parents()
         .findByTestId('date-picker-external-input')
@@ -451,17 +462,11 @@ Cypress.Commands.add('fillOutSupportingDocuments', () => {
 })
 
 // for fileupload with the table view and checkboxes- tableView can be assigned to a number that representes how many items in the list should be preses
-Cypress.Commands.add('waitForDocumentsToLoad', ({ tableView } = {tableView: false}) => {
-    if (tableView) {
-        cy.findAllByTestId('file-input-loading-image', {
-            timeout: 200_000,
-        }).should('not.exist')
-    } else {
-        // list view is the default behavior
-        cy.findAllByTestId('file-input-preview-image', {
-            timeout: 200_000,
-        }).should('not.have.class', 'is-loading')
-    }
+Cypress.Commands.add('waitForDocumentsToLoad', () => {
+    // list view is the default behavior
+    cy.findAllByTestId('file-input-preview-image', {
+        timeout: 200_000,
+    }).should('not.have.class', 'is-loading')
 })
 
 Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {

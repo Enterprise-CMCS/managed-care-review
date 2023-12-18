@@ -24,6 +24,10 @@ function mockValidUser(userData?: Partial<StateUser>): StateUser {
     }
 }
 
+const mockValidStateUser = (userData?: Partial<StateUser>): StateUser => {
+    return mockValidUser(userData)
+}
+
 function mockValidCMSUser(userData?: Partial<CmsUser>): CmsUser {
     return {
         __typename: 'CMSUser' as const,
@@ -119,6 +123,7 @@ const indexUsersQueryMock = (): MockedResponse<IndexUsersQuery> => {
 
 export {
     fetchCurrentUserMock,
+    mockValidStateUser,
     mockValidCMSUser,
     mockValidUser,
     mockValidAdminUser,

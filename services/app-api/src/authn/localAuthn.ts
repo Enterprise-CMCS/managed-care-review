@@ -2,7 +2,6 @@ import type { Result } from 'neverthrow'
 import { ok, err } from 'neverthrow'
 import type { UserType } from '../domain-models/index'
 import type { Store, InsertUserArgsType } from '../postgres'
-import { isStoreError } from '../postgres'
 import { lookupUserAurora } from './cognitoAuthn'
 
 export async function userFromLocalAuthProvider(
@@ -55,7 +54,7 @@ export async function insertUserToLocalAurora(
 
         const result = await store.insertUser(userToInsert)
 
-        if (isStoreError(result)) {
+        if (result instanceof Error) {
             console.error(`Could not insert user: ${JSON.stringify(result)}`)
             return localUser
         }

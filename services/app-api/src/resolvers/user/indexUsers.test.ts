@@ -1,5 +1,5 @@
 import type { InsertUserArgsType } from '../../postgres'
-import { isStoreError, NewPostgresStore } from '../../postgres'
+import { NewPostgresStore } from '../../postgres'
 import INDEX_USERS from '../../../../app-graphql/src/queries/indexUsers.graphql'
 import { v4 as uuidv4 } from 'uuid'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
@@ -62,8 +62,8 @@ describe('indexUsers', () => {
 
         const newUsers = await postgresStore.insertManyUsers(usersToInsert)
 
-        if (isStoreError(newUsers)) {
-            throw new Error(newUsers.code)
+        if (newUsers instanceof Error) {
+            throw newUsers
         }
 
         const updateRes = await server.executeOperation({

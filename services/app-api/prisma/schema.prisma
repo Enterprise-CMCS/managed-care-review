@@ -115,6 +115,8 @@ model ContractRevisionTable {
   modifiedLengthOfContract                     Boolean?
   modifiedNonRiskPaymentArrangements           Boolean?
   inLieuServicesAndSettings                    Boolean?
+  statutoryRegulatoryAttestation               Boolean?
+  statutoryRegulatoryAttestationDescription    String?
 }
 
 model RateRevisionTable {
@@ -388,13 +390,6 @@ enum ContractExecutionStatus {
 enum ContractType {
   BASE
   AMENDMENT
-}
-
-enum DocumentCategory {
-  CONTRACT
-  RATES
-  CONTRACT_RELATED
-  RATES_RELATED
 }
 
 enum ActuaryCommunication {

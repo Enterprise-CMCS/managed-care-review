@@ -26,8 +26,7 @@ test('to addresses list includes submitter emails', async () => {
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -62,8 +61,7 @@ test('to addresses list includes all state contacts on submission', async () => 
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     sub.stateContacts.forEach((contact) => {
@@ -100,8 +98,7 @@ test('to addresses list does not include duplicate state receiver emails on subm
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template.toAddresses).toEqual([
@@ -129,8 +126,7 @@ test('subject line is correct and clearly states submission is complete', async 
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -161,8 +157,7 @@ test('includes mcog, rate, and team email addresses', async () => {
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -204,8 +199,7 @@ test('includes link to submission', async () => {
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -235,8 +229,7 @@ test('includes information about what is next', async () => {
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -259,7 +252,6 @@ test('includes expected data summary for a contract and rates submission State e
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -293,8 +285,7 @@ test('includes expected data summary for a contract and rates submission State e
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -347,7 +338,6 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -376,7 +366,6 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -405,7 +394,6 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -445,8 +433,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -517,7 +504,6 @@ test('includes expected data summary for a rate amendment submission State email
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -554,8 +540,7 @@ test('includes expected data summary for a rate amendment submission State email
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -600,7 +585,6 @@ test('renders overall email for a new package with a rate amendment as expected'
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],

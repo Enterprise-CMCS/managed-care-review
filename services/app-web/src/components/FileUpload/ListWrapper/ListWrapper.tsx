@@ -7,8 +7,6 @@ type ListWrapperProps = {
     liClasses: (status: FileItemT['status']) => string
     deleteItem: (id: FileItemT) => void
     retryItem: (item: FileItemT) => void
-    handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
-    isContractOnly?: boolean
 }
 
 export const ListWrapper = ({
@@ -16,8 +14,6 @@ export const ListWrapper = ({
     liClasses,
     deleteItem,
     retryItem,
-    handleCheckboxClick,
-    isContractOnly,
 }: ListWrapperProps): React.ReactElement => {
     return (
         <ul
@@ -36,9 +32,6 @@ export const ListWrapper = ({
                         deleteItem={deleteItem}
                         retryItem={retryItem}
                         item={item}
-                        renderMode="list"
-                        handleCheckboxClick={handleCheckboxClick}
-                        isContractOnly={isContractOnly}
                     />
                 </li>
             ))}

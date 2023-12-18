@@ -11,8 +11,7 @@
         "proto:copy-web": "rsync -av ./gen/ ../app-web/src/gen",
         "proto:copy-cypress": "rsync -av ./gen/ ../cypress/gen",
         "precommit": "lint-staged",
-        "lint": "protolint lint .",
-        "build": "tsc"
+        "lint": "protolint lint ."
     },
     "lint-staged": {
         "*.proto": [

@@ -13,17 +13,13 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import type { RateEdge, Rate } from '../../gen/gqlServer'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { formatGQLDate } from 'app-web/src/common-code/dateHelpers'
 
 describe.skip('indexRates', () => {
-    const mockLDService = testLDService({ 'rates-db-refactor': true })
 
     it('returns ForbiddenError for state user', async () => {
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
 
         // submit packages that include rates
         await createAndSubmitTestHealthPlanPackage(stateServer)
@@ -38,11 +34,8 @@ describe.skip('indexRates', () => {
 
     it('returns rate reviews list for cms user with no errors', async () => {
         const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
-            ldService: mockLDService,
             context: {
                 user: cmsUser,
             },
@@ -77,14 +70,11 @@ describe.skip('indexRates', () => {
 
     it('does not return rates still in initial draft', async () => {
         const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
         })
         // First, create new submissions
         const draft1 = await createAndUpdateTestHealthPlanPackage(stateServer)
@@ -114,14 +104,11 @@ describe.skip('indexRates', () => {
 
     it('does not add rates when contract only packages submitted', async () => {
         const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
         })
         // baseline
         const initial = await cmsServer.executeOperation({
@@ -155,14 +142,11 @@ describe.skip('indexRates', () => {
 
     it('does not add rates a for draft contract and rates package that is submitted later as contract only', async () => {
         const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
         })
 
         // baseline
@@ -216,15 +200,12 @@ describe.skip('indexRates', () => {
 
     it('returns a rate with history with correct data in each revision', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const server = await constructTestPostgresServer()
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
         })
 
         // baseline
@@ -244,7 +225,6 @@ describe.skip('indexRates', () => {
                     name: 'rateDocument.pdf',
                     s3URL: 'fakeS3URL',
                     sha256: 'fakesha',
-                    documentCategories: ['RATES' as const],
                 },
             ],
             supportingDocuments: [],
@@ -410,15 +390,12 @@ describe.skip('indexRates', () => {
 
     it('synthesizes the right statuses as a rate is submitted/unlocked/etc', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const server = await constructTestPostgresServer()
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
         })
 
         // First, create new submissions
@@ -486,15 +463,12 @@ describe.skip('indexRates', () => {
 
     it('returns the right revisions as a rate is submitted/unlocked/etc', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const server = await constructTestPostgresServer()
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
         })
 
         // First, create new submissions
@@ -588,14 +562,11 @@ describe.skip('indexRates', () => {
 
     it('return a list of submitted rates from multiple states', async () => {
         const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
         })
         const otherStateServer = await constructTestPostgresServer({
             context: {
@@ -604,7 +575,6 @@ describe.skip('indexRates', () => {
                     email: 'aang@mn.gov',
                 }),
             },
-            ldService: mockLDService,
         })
         // submit packages from two different states
         const defaultState1 = await createAndSubmitTestHealthPlanPackage(

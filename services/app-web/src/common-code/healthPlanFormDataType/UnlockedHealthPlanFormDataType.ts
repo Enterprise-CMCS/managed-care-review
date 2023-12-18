@@ -7,18 +7,11 @@ type SubmissionType = 'CONTRACT_ONLY' | 'CONTRACT_AND_RATES'
 
 type PopulationCoveredType = 'MEDICAID' | 'CHIP' | 'MEDICAID_AND_CHIP'
 
-type DocumentCategoryType =
-    | 'CONTRACT'
-    | 'RATES'
-    | 'CONTRACT_RELATED'
-    | 'RATES_RELATED'
-
 type SubmissionDocument = {
     id?: string
     name: string
     s3URL: string
     sha256: string
-    documentCategories: DocumentCategoryType[]
 }
 
 type ContractAmendmentInfo = {
@@ -118,10 +111,11 @@ type UnlockedHealthPlanFormDataType = {
     federalAuthorities: FederalAuthority[]
     contractAmendmentInfo?: UnlockedContractAmendmentInfo
     rateInfos: RateInfoType[]
+    statutoryRegulatoryAttestation?: boolean
+    statutoryRegulatoryAttestationDescription?: string
 }
 
 export type {
-    DocumentCategoryType,
     SubmissionType,
     SubmissionDocument,
     RateType,

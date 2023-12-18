@@ -96,7 +96,7 @@ jobs:
         run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
 
       - name: Generate protos
-        run: npx lerna run generate --scope=app-proto && npx lerna run build --scope=app-proto
+        run: npx lerna run generate --scope=app-proto
 
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client

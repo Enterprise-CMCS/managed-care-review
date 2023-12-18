@@ -78,8 +78,7 @@ const contractRevisionOnRateDataMock = (
 })
 const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
     return {
-        __typename: 'RateRevision',
-        id: uuidv4(),
+        id: data?.id ?? uuidv4(),
         createdAt: '2023-10-16T19:01:21.389Z',
         updatedAt: '2023-10-16T19:02:26.767Z',
         unlockInfo: null,
@@ -90,7 +89,6 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
             updatedReason: 'Initial submission',
         },
         formData: {
-            __typename: 'RateFormData',
             rateType: 'AMENDMENT',
             rateCapitationType: 'RATE_CELL',
             rateDocuments: [
@@ -152,56 +150,66 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
                     packageStatus: 'SUBMITTED',
                 },
             ],
+            ...data,
+            __typename: 'RateFormData',
         },
         contractRevisions: [contractRevisionOnRateDataMock()],
-        ...data,
+        __typename: 'RateRevision',
     }
 }
 
-const rateDataMock = (rateData?: Partial<Rate>): Rate => ({
-    __typename: 'Rate',
-    id: uuidv4(),
-    createdAt: '2023-10-16T19:01:21.389Z',
-    updatedAt: '2023-10-16T19:01:21.389Z',
-    stateCode: 'MN',
-    stateNumber: 10,
-    state: mockMNState(),
-    status: 'RESUBMITTED',
-    initiallySubmittedAt: '2023-10-16',
-    draftRevision: null,
-    revisions: [
-        rateRevisionDataMock({
-            unlockInfo: {
-                __typename: 'UpdateInformation',
-                updatedAt: '2023-10-16T19:05:26.585Z',
-                updatedBy: 'zuko@example.com',
-                updatedReason: 'Unlock',
-            },
-            submitInfo: {
-                __typename: 'UpdateInformation',
-                updatedAt: '2023-10-16T19:06:20.581Z',
-                updatedBy: 'aang@example.com',
-                updatedReason: 'Resubmit',
-            },
-            contractRevisions: [
-                contractRevisionOnRateDataMock({
-                    submitInfo: {
-                        __typename: 'UpdateInformation',
-                        updatedAt: '2023-10-16T19:06:20.643Z',
-                        updatedBy: 'aang@example.com',
-                        updatedReason: 'Resubmit',
-                    },
-                    unlockInfo: {
-                        __typename: 'UpdateInformation',
-                        updatedAt: '2023-10-16T19:05:26.660Z',
-                        updatedBy: 'zuko@example.com',
-                        updatedReason: 'Unlock',
-                    },
-                }),
-            ],
-        }),
-        rateRevisionDataMock(),
-    ],
-})
+const rateDataMock = (
+    revision?: Partial<RateRevision>,
+    rate?: Partial<Rate>
+): Rate => {
+    const rateID = rate?.id ?? uuidv4()
+    return {
+        __typename: 'Rate',
+        createdAt: '2023-10-16T19:01:21.389Z',
+        updatedAt: '2023-10-16T19:01:21.389Z',
+        stateCode: 'MN',
+        stateNumber: 10,
+        state: mockMNState(),
+        status: 'RESUBMITTED',
+        initiallySubmittedAt: '2023-10-16',
+        draftRevision: null,
+        ...rate,
+        id: rateID,
+        revisions: [
+            rateRevisionDataMock({
+                unlockInfo: {
+                    __typename: 'UpdateInformation',
+                    updatedAt: '2023-10-16T19:05:26.585Z',
+                    updatedBy: 'zuko@example.com',
+                    updatedReason: 'Unlock',
+                },
+                submitInfo: {
+                    __typename: 'UpdateInformation',
+                    updatedAt: '2023-10-16T19:06:20.581Z',
+                    updatedBy: 'aang@example.com',
+                    updatedReason: 'Resubmit',
+                },
+                contractRevisions: [
+                    contractRevisionOnRateDataMock({
+                        submitInfo: {
+                            __typename: 'UpdateInformation',
+                            updatedAt: '2023-10-16T19:06:20.643Z',
+                            updatedBy: 'aang@example.com',
+                            updatedReason: 'Resubmit',
+                        },
+                        unlockInfo: {
+                            __typename: 'UpdateInformation',
+                            updatedAt: '2023-10-16T19:05:26.660Z',
+                            updatedBy: 'zuko@example.com',
+                            updatedReason: 'Unlock',
+                        },
+                    }),
+                ],
+                ...revision,
+            }),
+            rateRevisionDataMock(),
+        ],
+    }
+}
 
 export { rateDataMock, rateRevisionDataMock }

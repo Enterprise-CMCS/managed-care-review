@@ -85,7 +85,7 @@
         "husky": "^8.0.1",
         "lerna": "^7.0.0",
         "lint-staged": "^14.0.1",
-        "prettier": "^2.4.1"
+        "prettier": "^3.1.0"
     },
     "dependencies": {
         "cypress-file-upload": "^5.0.8",

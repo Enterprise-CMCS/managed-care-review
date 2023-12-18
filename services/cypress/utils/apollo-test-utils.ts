@@ -79,7 +79,6 @@ const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
         {
             name: 'Contract Cert.pdf',
             s3URL: 's3://local-uploads/1684382956834-Contract Cert.pdf/Contract Cert.pdf',
-            documentCategories: ['CONTRACT'],
             sha256: 'abc123',
         },
     ],
@@ -100,6 +99,7 @@ const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
     managedCareEntities: ['MCO'],
     federalAuthorities: ['STATE_PLAN'],
     rateInfos: [],
+    statutoryRegulatoryAttestation: true
 })
 
 const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
@@ -118,7 +118,6 @@ const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
         {
             name: 'Contract Cert.pdf',
             s3URL: 's3://local-uploads/1684382956834-Contract Cert.pdf/Contract Cert.pdf',
-            documentCategories: ['CONTRACT'],
             sha256: 'abc123',
         },
     ],
@@ -150,14 +149,12 @@ const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
                     name: 'rate1Document1.pdf',
                     s3URL: 'fakeS3URL',
                     sha256: 'fakesha',
-                    documentCategories: ['RATES' as const],
                 },
             ],
             supportingDocuments: [   {
                 name: 'rate1SupportingDocument1.pdf',
                 s3URL: 'fakeS3URL',
                 sha256: 'fakesha',
-                documentCategories: ['RATES' as const],
             }],
             rateProgramIDs: [minnesotaStatePrograms[0].id],
             actuaryContacts: [
@@ -183,7 +180,6 @@ const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
                         name: 'rate2Document1.pdf',
                         s3URL: 'fakeS3URL',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -200,9 +196,9 @@ const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
                 packagesWithSharedRateCerts: [],
             },
-    ]
-
-
+    ],
+    statutoryRegulatoryAttestation: false,
+    statutoryRegulatoryAttestationDescription: 'No compliance'
 })
 
 const newSubmissionInput = (overrides?: Partial<UnlockedHealthPlanFormDataType> ): Partial<UnlockedHealthPlanFormDataType> => {

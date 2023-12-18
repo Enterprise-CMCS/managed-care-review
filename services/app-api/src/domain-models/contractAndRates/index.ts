@@ -1,6 +1,10 @@
 export { rateSchema, draftRateSchema } from './rateTypes'
 
-export { contractSchema, draftContractSchema } from './contractTypes'
+export {
+    contractSchema,
+    draftContractSchema,
+    contractSubmitters,
+} from './contractTypes'
 
 export { contractFormDataSchema, rateFormDataSchema } from './formDataTypes'
 

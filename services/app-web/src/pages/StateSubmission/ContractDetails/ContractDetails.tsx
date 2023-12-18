@@ -8,7 +8,7 @@ import {
     DateRangePicker,
 } from '@trussworks/react-uswds'
 import { v4 as uuidv4 } from 'uuid'
-import { useNavigate } from 'react-router-dom'
+import { Link as ReactRouterLink, useNavigate } from 'react-router-dom'
 import { Formik, FormikErrors } from 'formik'
 
 import styles from '../StateSubmissionForm.module.scss'
@@ -22,6 +22,7 @@ import {
     ErrorSummary,
     PoliteErrorMessage,
     FieldYesNo,
+    FieldTextarea,
 } from '../../../components'
 import {
     formatForForm,
@@ -62,6 +63,13 @@ import {
     isContractWithProvisions,
 } from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
 import { RoutesRecord } from '../../../constants'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../../common-code/featureFlags'
+import {
+    StatutoryRegulatoryAttestation,
+    StatutoryRegulatoryAttestationDescription,
+    StatutoryRegulatoryAttestationQuestion,
+} from '../../../constants/statutoryRegulatoryAttestation'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -113,6 +121,8 @@ export interface ContractDetailsFormValues {
     modifiedNetworkAdequacyStandards: string | undefined
     modifiedLengthOfContract: string | undefined
     modifiedNonRiskPaymentArrangements: string | undefined
+    statutoryRegulatoryAttestation: string | undefined
+    statutoryRegulatoryAttestationDescription: string | undefined
 }
 type FormError =
     FormikErrors<ContractDetailsFormValues>[keyof FormikErrors<ContractDetailsFormValues>]
@@ -125,6 +135,12 @@ export const ContractDetails = ({
 }: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const navigate = useNavigate()
+    const ldClient = useLDClient()
+
+    const contract438Attestation = ldClient?.variation(
+        featureFlags.CONTRACT_438_ATTESTATION.flag,
+        featureFlags.CONTRACT_438_ATTESTATION.defaultValue
+    )
 
     // Contract documents state management
     const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
@@ -140,10 +156,10 @@ export const ContractDetails = ({
         showFileUploadError && hasLoadingFiles
             ? 'You must wait for all documents to finish uploading before continuing'
             : showFileUploadError && fileItems.length === 0
-            ? ' You must upload at least one document'
-            : showFileUploadError && !hasValidFiles
-            ? ' You must remove all documents with error messages before continuing'
-            : undefined
+              ? ' You must upload at least one document'
+              : showFileUploadError && !hasValidFiles
+                ? ' You must remove all documents with error messages before continuing'
+                : undefined
     const documentsErrorKey =
         fileItems.length === 0 ? 'documents' : '#file-items-list'
 
@@ -173,7 +189,6 @@ export const ContractDetails = ({
                     s3URL: undefined,
                     status: 'UPLOAD_ERROR',
                     sha256: doc.sha256,
-                    documentCategories: doc.documentCategories,
                 }
             }
             return {
@@ -183,7 +198,6 @@ export const ContractDetails = ({
                 s3URL: doc.s3URL,
                 status: 'UPLOAD_COMPLETE',
                 sha256: doc.sha256,
-                documentCategories: doc.documentCategories,
             }
         })
 
@@ -322,6 +336,12 @@ export const ContractDetails = ({
             draftSubmission?.contractAmendmentInfo?.modifiedProvisions
                 .modifiedNonRiskPaymentArrangements
         ),
+        statutoryRegulatoryAttestation: formatForForm(
+            draftSubmission?.statutoryRegulatoryAttestation
+        ),
+        statutoryRegulatoryAttestationDescription: formatForForm(
+            draftSubmission?.statutoryRegulatoryAttestationDescription
+        ),
     }
 
     const showFieldErrors = (error?: FormError) =>
@@ -373,7 +393,6 @@ export const ContractDetails = ({
                         name: fileItem.name,
                         s3URL: fileItem.s3URL,
                         sha256: fileItem.sha256,
-                        documentCategories: ['CONTRACT'],
                     })
                 }
                 return formDataDocuments
@@ -391,6 +410,12 @@ export const ContractDetails = ({
         draftSubmission.managedCareEntities = values.managedCareEntities
         draftSubmission.federalAuthorities = values.federalAuthorities
         draftSubmission.contractDocuments = contractDocuments
+        draftSubmission.statutoryRegulatoryAttestation = formatYesNoForProto(
+            values.statutoryRegulatoryAttestation
+        )
+        // If contract is in compliance, we set the description to undefined. This clears out previous non-compliance description
+        draftSubmission.statutoryRegulatoryAttestationDescription =
+            values.statutoryRegulatoryAttestationDescription
 
         if (isContractWithProvisions(draftSubmission)) {
             draftSubmission.contractAmendmentInfo = {
@@ -480,7 +505,9 @@ export const ContractDetails = ({
                             : `../rate-details`,
                 })
             }}
-            validationSchema={() => ContractDetailsFormSchema(draftSubmission)}
+            validationSchema={() =>
+                ContractDetailsFormSchema(draftSubmission, ldClient?.allFlags())
+            }
         >
             {({
                 values,
@@ -528,7 +555,6 @@ export const ContractDetails = ({
                                     id="documents"
                                     name="documents"
                                     label="Upload contract"
-                                    renderMode="list"
                                     aria-required
                                     error={documentsErrorMessage}
                                     hint={
@@ -565,6 +591,118 @@ export const ContractDetails = ({
                                     onFileItemsUpdate={onFileItemsUpdate}
                                 />
                             </FormGroup>
+                            {contract438Attestation && (
+                                <FormGroup
+                                    error={showFieldErrors(
+                                        errors.statutoryRegulatoryAttestation
+                                    )}
+                                >
+                                    <Fieldset
+                                        role="radiogroup"
+                                        aria-required
+                                        className={styles.contractAttestation}
+                                        legend={
+                                            StatutoryRegulatoryAttestationQuestion
+                                        }
+                                    >
+                                        <div role="note">
+                                            <span
+                                                className={
+                                                    styles.requiredOptionalText
+                                                }
+                                            >
+                                                Required
+                                            </span>
+                                            <span>
+                                                <Link
+                                                    aria-label="Managed Care Contract Review and Approval State Guide (opens in new window)"
+                                                    href={
+                                                        'https://www.medicaid.gov/sites/default/files/2022-01/mce-checklist-state-user-guide.pdf'
+                                                    }
+                                                    variant="external"
+                                                    target="_blank"
+                                                >
+                                                    Managed Care Contract Review
+                                                    and Approval State Guide
+                                                </Link>
+                                                <Link
+                                                    aria-label="CHIP Managed Care Contract Review and Approval State Guide (opens in new window)"
+                                                    href={
+                                                        'https://www.medicaid.gov/sites/default/files/2022-04/chip-managed-care-contract-guide_0.pdf'
+                                                    }
+                                                    variant="external"
+                                                    target="_blank"
+                                                >
+                                                    CHIP Managed Care Contract
+                                                    Review and Approval State
+                                                    Guide
+                                                </Link>
+                                            </span>
+                                        </div>
+                                        {showFieldErrors(
+                                            errors.statutoryRegulatoryAttestation
+                                        ) && (
+                                            <PoliteErrorMessage>
+                                                {
+                                                    errors.statutoryRegulatoryAttestation
+                                                }
+                                            </PoliteErrorMessage>
+                                        )}
+                                        <FieldRadio
+                                            name="statutoryRegulatoryAttestation"
+                                            label={
+                                                StatutoryRegulatoryAttestation.YES
+                                            }
+                                            id="statutoryRegulatoryAttestationYes"
+                                            value={'YES'}
+                                            aria-required
+                                        />
+                                        <FieldRadio
+                                            name="statutoryRegulatoryAttestation"
+                                            label={
+                                                StatutoryRegulatoryAttestation.NO
+                                            }
+                                            id="statutoryRegulatoryAttestationNo"
+                                            value={'NO'}
+                                            aria-required
+                                        />
+                                    </Fieldset>
+                                </FormGroup>
+                            )}
+                            {contract438Attestation &&
+                                values.statutoryRegulatoryAttestation ===
+                                    'NO' && (
+                                    <div className={styles.contractAttestation}>
+                                        <FieldTextarea
+                                            label={
+                                                StatutoryRegulatoryAttestationDescription
+                                            }
+                                            id="statutoryRegulatoryAttestationDescription"
+                                            name="statutoryRegulatoryAttestationDescription"
+                                            aria-required
+                                            showError={showFieldErrors(
+                                                errors.statutoryRegulatoryAttestationDescription
+                                            )}
+                                            hint={
+                                                <Link
+                                                    variant="external"
+                                                    asCustom={ReactRouterLink}
+                                                    className={
+                                                        'margin-bottom-1'
+                                                    }
+                                                    to={{
+                                                        pathname: '/help',
+                                                        hash: '#non-compliance-guidance',
+                                                    }}
+                                                    target="_blank"
+                                                >
+                                                    Non-compliance definitions
+                                                    and examples
+                                                </Link>
+                                            }
+                                        />
+                                    </div>
+                                )}
                             <FormGroup
                                 error={showFieldErrors(
                                     errors.contractExecutionStatus

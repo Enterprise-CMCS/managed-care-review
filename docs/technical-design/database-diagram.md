@@ -8,22 +8,7 @@ State {
    Int latestStateSubmissionNumber
    String stateCode
 }
-HealthPlanPackageTable {
-   String stateCode
-   String id
-}
-HealthPlanRevisionTable {
-   DateTime createdAt
-   String pkgID
-   String formDataProto
-   DateTime submittedAt
-   DateTime unlockedAt
-   String unlockedBy
-   String unlockedReason
-   String submittedBy
-   String submittedReason
-   String id
-}
+
 Question {
    String pkgID
    DateTime createdAt
@@ -66,24 +51,15 @@ QuestionResponseDocument {
    String id
 }
 
-State ||--o{ HealthPlanPackageTable : stateCode
-HealthPlanPackageTable ||--o{ HealthPlanRevisionTable : pkgID
-HealthPlanPackageTable ||--o{ Question : pkgID
+State ||--o{ ContractTable : stateCode
+ContractTable ||--o{ Question : pkgID
 User  ||--o{  Question : addedByUserID
 User  ||--o{  QuestionReponse : addedByUserID
 Question  ||--o{  QuestionDocument : questionID
 Question ||--o{ QuestionReponse: questionID
 QuestionReponse ||--o{ QuestionResponseDocument: questionResponseID
 User  }o--o{  State : ""
-```
 
-
-## Contract & Rates DB
-
-This is the db diagram for the contracts and rates work, still disconnected from the rest of the db. 
-
-```mermaid
-erDiagram
 
 ContractTable {
    String id
@@ -154,6 +130,5 @@ User {
    String stateCode
    String id
 }
-
 
 ```

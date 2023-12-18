@@ -65,14 +65,12 @@ function domainEnumStringToProtoString(
     return protoEnumString
 }
 
-const domainDocsToProtoDocs = (domainDocs:SubmissionDocument[]): mcreviewproto.IDocument[] | null | undefined => {
+const domainDocsToProtoDocs = (
+    domainDocs: SubmissionDocument[]
+): mcreviewproto.IDocument[] | null | undefined => {
     return domainDocs.map((doc) => ({
         s3Url: doc.s3URL,
         name: doc.name,
-        documentCategories: domainEnumArrayToProto(
-            mcreviewproto.DocumentCategory,
-            doc.documentCategories
-        ),
         sha256: doc.sha256,
     }))
 }
@@ -190,8 +188,14 @@ const toProtoBuffer = (
                 mcreviewproto.FederalAuthority,
                 domainData.federalAuthorities
             ),
-            contractDocuments: domainDocsToProtoDocs(domainData.contractDocuments),
+            contractDocuments: domainDocsToProtoDocs(
+                domainData.contractDocuments
+            ),
             contractAmendmentInfo: contractAmendmentInfo,
+            statutoryRegulatoryAttestation:
+                domainData.statutoryRegulatoryAttestation,
+            statutoryRegulatoryAttestationDescription:
+                domainData.statutoryRegulatoryAttestationDescription,
         },
         rateInfos:
             domainData.rateInfos && domainData.rateInfos.length
@@ -215,8 +219,12 @@ const toProtoBuffer = (
                           rateDateCertified: domainDateToProtoDate(
                               rateInfo.rateDateCertified
                           ),
-                          rateDocuments: domainDocsToProtoDocs(rateInfo.rateDocuments),
-                          supportingDocuments: domainDocsToProtoDocs(rateInfo.supportingDocuments),
+                          rateDocuments: domainDocsToProtoDocs(
+                              rateInfo.rateDocuments
+                          ),
+                          supportingDocuments: domainDocsToProtoDocs(
+                              rateInfo.supportingDocuments
+                          ),
                           rateCertificationName: generateRateName(
                               domainData,
                               rateInfo,
@@ -284,10 +292,6 @@ const toProtoBuffer = (
         documents: domainData.documents.map((doc) => ({
             s3Url: doc.s3URL,
             name: doc.name,
-            documentCategories: domainEnumArrayToProto(
-                mcreviewproto.DocumentCategory,
-                doc.documentCategories
-            ),
             sha256: doc.sha256,
         })),
     }

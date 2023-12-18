@@ -8,25 +8,19 @@ import {
     updateTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import { testCMSUser } from '../../testHelpers/userHelpers'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { must } from '../../testHelpers'
 import { v4 as uuidv4 } from 'uuid'
 
 describe('fetchRate', () => {
-    const mockLDService = testLDService({ 'rates-db-refactor': true })
-
     it('returns correct rate revisions on resubmit when existing rate is edited', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const server = await constructTestPostgresServer()
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
         })
 
         const initialRateInfos = () => ({
@@ -40,7 +34,6 @@ describe('fetchRate', () => {
                     name: 'rateDocument.pdf',
                     s3URL: 'fakeS3URL',
                     sha256: 'fakesha',
-                    documentCategories: ['RATES' as const],
                 },
             ],
             supportingDocuments: [],
@@ -142,15 +135,12 @@ describe('fetchRate', () => {
 
     it('returns correct rate revisions on resubmit when new rate added', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const server = await constructTestPostgresServer()
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
         })
 
         const initialRateInfos = () => ({
@@ -164,7 +154,6 @@ describe('fetchRate', () => {
                     name: 'rateDocument.pdf',
                     s3URL: 'fakeS3URL',
                     sha256: 'fakesha',
-                    documentCategories: ['RATES' as const],
                 },
             ],
             supportingDocuments: [],
@@ -284,20 +273,16 @@ describe('fetchRate', () => {
 
     it('returns the right revisions as a rate is unlocked', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+        const server = await constructTestPostgresServer()
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService: mockLDService,
         })
 
-        const unlockedSubmission = await createAndSubmitTestHealthPlanPackage(
-            server
-        )
+        const unlockedSubmission =
+            await createAndSubmitTestHealthPlanPackage(server)
 
         // unlock two
         await unlockTestHealthPlanPackage(

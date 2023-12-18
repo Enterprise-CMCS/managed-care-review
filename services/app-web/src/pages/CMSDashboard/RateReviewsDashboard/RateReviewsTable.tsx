@@ -23,7 +23,7 @@ import {
     RelatedContractRevisions,
 } from '../../../gen/gqlClient'
 import styles from '../../../components/HealthPlanPackageTable/HealthPlanPackageTable.module.scss'
-import { Table, Tag, Link, Fieldset } from '@trussworks/react-uswds'
+import { Table, Tag, Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
 import qs from 'qs'
@@ -67,7 +67,6 @@ export type RateInDashboardType = {
 
 export type RateTableProps = {
     tableData: RateInDashboardType[]
-    showFilters?: boolean
     caption?: string
 }
 
@@ -191,7 +190,6 @@ type TableVariantConfig = {
 export const RateReviewsTable = ({
     caption,
     tableData,
-    showFilters = false,
 }: RateTableProps): React.ReactElement => {
     const lastClickedElement = useRef<string | null>(null)
     const filterDateRangeRef = useRef<FilterDateRangeRef>(null)
@@ -365,10 +363,12 @@ export const RateReviewsTable = ({
     // Filter options based on table data instead of static list of options.
     const stateFilterOptions = Array.from(
         stateColumn.getFacetedUniqueValues().keys()
-    ).map((state) => ({
-        value: state,
-        label: state,
-    }))
+    )
+        .sort()
+        .map((state) => ({
+            value: state,
+            label: state,
+        }))
 
     const filterLength = columnFilters.flatMap((filter) => filter.value).length
     const filtersApplied = `${filterLength} ${pluralize(
@@ -376,12 +376,9 @@ export const RateReviewsTable = ({
         filterLength
     )} applied`
 
-    const submissionCount = !showFilters
-        ? `${tableData.length} ${pluralize('rate', tableData.length)}`
-        : `Displaying ${filteredRows.length} of ${tableData.length} ${pluralize(
-              'rate review',
-              tableData.length
-          )}`
+    const submissionCount = `Displaying ${filteredRows.length} of ${
+        tableData.length
+    } ${pluralize('rate review', tableData.length)}`
 
     const updateFilters = (
         column: Column<RateInDashboardType>,
@@ -438,21 +435,11 @@ export const RateReviewsTable = ({
         setTableCaption(
             <caption className={caption ? '' : styles.srOnly}>
                 {caption ?? tableConfig.tableName}
-                {showFilters && (
-                    <span
-                        className={styles.srOnly}
-                    >{`, ${filtersApplied}`}</span>
-                )}
+                <span className={styles.srOnly}>{`, ${filtersApplied}`}</span>
                 <span className={styles.srOnly}>{`, ${submissionCount}.`}</span>
             </caption>
         )
-    }, [
-        filtersApplied,
-        submissionCount,
-        caption,
-        showFilters,
-        tableConfig.tableName,
-    ])
+    }, [filtersApplied, submissionCount, caption, tableConfig.tableName])
 
     useLayoutEffect(() => {
         // Do not set default column state again
@@ -472,101 +459,93 @@ export const RateReviewsTable = ({
         <>
             {tableData.length ? (
                 <>
-                    {showFilters && (
-                        <FilterAccordion
-                            onClearFilters={clearFilters}
-                            filterTitle="Filters"
-                        >
-                            <DoubleColumnGrid>
-                                <FilterSelect
-                                    value={getSelectedFiltersFromColumnState(
-                                        columnFilters,
-                                        'stateName'
-                                    )}
-                                    defaultValue={getSelectedFiltersFromColumnState(
-                                        defaultColumnFilters,
-                                        'stateName'
-                                    )}
-                                    name="state"
-                                    label="State"
-                                    filterOptions={stateFilterOptions}
-                                    onChange={(selectedOptions) =>
-                                        updateFilters(
-                                            stateColumn,
-                                            selectedOptions,
-                                            'state'
-                                        )
-                                    }
-                                />
-                                <FilterSelect
-                                    value={getSelectedFiltersFromColumnState(
-                                        columnFilters,
+                    <FilterAccordion
+                        onClearFilters={clearFilters}
+                        filterTitle="Filters"
+                    >
+                        <DoubleColumnGrid>
+                            <FilterSelect
+                                value={getSelectedFiltersFromColumnState(
+                                    columnFilters,
+                                    'stateName'
+                                )}
+                                defaultValue={getSelectedFiltersFromColumnState(
+                                    defaultColumnFilters,
+                                    'stateName'
+                                )}
+                                name="state"
+                                label="State"
+                                filterOptions={stateFilterOptions}
+                                onChange={(selectedOptions) =>
+                                    updateFilters(
+                                        stateColumn,
+                                        selectedOptions,
+                                        'state'
+                                    )
+                                }
+                            />
+                            <FilterSelect
+                                value={getSelectedFiltersFromColumnState(
+                                    columnFilters,
+                                    'rateType'
+                                )}
+                                defaultValue={getSelectedFiltersFromColumnState(
+                                    defaultColumnFilters,
+                                    'rateType'
+                                )}
+                                name="rateType"
+                                label="Rate Type"
+                                filterOptions={rateTypeOptions}
+                                onChange={(selectedOptions) =>
+                                    updateFilters(
+                                        rateTypeColumn,
+                                        selectedOptions,
                                         'rateType'
-                                    )}
-                                    defaultValue={getSelectedFiltersFromColumnState(
-                                        defaultColumnFilters,
-                                        'rateType'
-                                    )}
-                                    name="rateType"
-                                    label="Rate Type"
-                                    filterOptions={rateTypeOptions}
-                                    onChange={(selectedOptions) =>
-                                        updateFilters(
-                                            rateTypeColumn,
-                                            selectedOptions,
-                                            'rateType'
-                                        )
-                                    }
-                                />
-                            </DoubleColumnGrid>
-                            <Fieldset
-                                data-testid={'rating-period-filter'}
-                                legend={'Rating period start date'}
-                            >
-                                <FilterDateRange
-                                    ref={filterDateRangeRef}
-                                    startDateHint="mm/dd/yyyy"
-                                    startDateLabel="From"
-                                    startDatePickerProps={{
-                                        id: 'ratingPeriodStartFrom',
-                                        name: 'ratingPeriodStartFrom',
-                                        defaultValue: getDateRangeFilterFromUrl(
-                                            defaultColumnFilters,
-                                            'rateDateStart'
-                                        )[0],
-                                        onChange: (date) =>
-                                            updateRatingPeriodFilter(
-                                                [date, undefined],
-                                                rateDateStartColumn,
-                                                'ratingPeriodStartFrom'
-                                            ),
-                                    }}
-                                    endDateHint="mm/dd/yyyy"
-                                    endDateLabel="To"
-                                    endDatePickerProps={{
-                                        id: 'ratingPeriodStartTo',
-                                        name: 'ratingPeriodStartTo',
-                                        defaultValue: getDateRangeFilterFromUrl(
-                                            defaultColumnFilters,
-                                            'rateDateStart'
-                                        )[1],
-                                        onChange: (date) =>
-                                            updateRatingPeriodFilter(
-                                                [undefined, date],
-                                                rateDateStartColumn,
-                                                'ratingPeriodStartTo'
-                                            ),
-                                    }}
-                                />
-                            </Fieldset>
-                        </FilterAccordion>
-                    )}
+                                    )
+                                }
+                            />
+                        </DoubleColumnGrid>
+                        <FilterDateRange
+                            ref={filterDateRangeRef}
+                            legend={'Rating period start date'}
+                            startDateHint="mm/dd/yyyy"
+                            startDateLabel="From"
+                            startDatePickerProps={{
+                                id: 'ratingPeriodStartFrom',
+                                name: 'ratingPeriodStartFrom',
+                                defaultValue: getDateRangeFilterFromUrl(
+                                    defaultColumnFilters,
+                                    'rateDateStart'
+                                )[0],
+                                onChange: (date) =>
+                                    updateRatingPeriodFilter(
+                                        [date, undefined],
+                                        rateDateStartColumn,
+                                        'ratingPeriodStartFrom'
+                                    ),
+                            }}
+                            endDateHint="mm/dd/yyyy"
+                            endDateLabel="To"
+                            endDatePickerProps={{
+                                id: 'ratingPeriodStartTo',
+                                name: 'ratingPeriodStartTo',
+                                defaultValue: getDateRangeFilterFromUrl(
+                                    defaultColumnFilters,
+                                    'rateDateStart'
+                                )[1],
+                                onChange: (date) =>
+                                    updateRatingPeriodFilter(
+                                        [undefined, date],
+                                        rateDateStartColumn,
+                                        'ratingPeriodStartTo'
+                                    ),
+                            }}
+                        />
+                    </FilterAccordion>
                     <div aria-live="polite" aria-atomic>
-                        {showFilters && (
-                            <div className={styles.filterCount}>
-                                {filtersApplied}
-                            </div>
-                        )}
+                        <div className={styles.filterCount}>
+                            {filtersApplied}
+                        </div>
                         <div className={styles.filterCount}>
                             {submissionCount}
                         </div>

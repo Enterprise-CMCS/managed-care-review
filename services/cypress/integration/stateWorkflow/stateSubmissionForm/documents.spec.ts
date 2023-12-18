@@ -75,7 +75,7 @@ describe('documents', () => {
 
             //  Save as draft
             cy.navigateFormByButtonClick('SAVE_DRAFT')
-            cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+            cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
         })
     })
 

@@ -26,7 +26,7 @@ describe('review and submit', () => {
 
             // Navigate to dashboard page by clicking save as draft
             cy.navigateFormByButtonClick('SAVE_DRAFT', false)
-            cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+            cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
         })
     })
 

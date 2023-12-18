@@ -1,6 +1,4 @@
 import type { PrismaClient } from '@prisma/client'
-import type { StoreError } from '../storeError'
-import { convertPrismaErrorToStoreError } from '../storeError'
 import type { UserType } from '../../domain-models'
 import { toDomainUser } from '../../domain-models'
 import type { InsertUserArgsType } from './insertUser'
@@ -8,7 +6,7 @@ import type { InsertUserArgsType } from './insertUser'
 export async function insertManyUsers(
     client: PrismaClient,
     users: InsertUserArgsType[]
-): Promise<UserType[] | StoreError> {
+): Promise<UserType[] | Error> {
     try {
         console.info(`Trying to insert ${users.length} users into postgres....`)
 
@@ -39,6 +37,6 @@ export async function insertManyUsers(
 
         return usersResult.map((user) => toDomainUser(user))
     } catch (err) {
-        return convertPrismaErrorToStoreError(err)
+        return err
     }
 }

@@ -1,7 +1,40 @@
-import { IndexRatesDocument, IndexRatesQuery, Rate } from '../../gen/gqlClient'
+import {
+    FetchRateDocument,
+    FetchRateQuery,
+    IndexRatesDocument,
+    IndexRatesQuery,
+    Rate,
+    RateRevision,
+} from '../../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
 import { rateDataMock } from './rateDataMock'
 import { GraphQLError } from 'graphql/index'
+
+const fetchRateMockSuccess = ({
+    revision,
+    rate,
+}: {
+    revision?: Partial<RateRevision>
+    rate?: Partial<Rate>
+}): MockedResponse<FetchRateQuery> => {
+    const rateData = rateDataMock(revision, rate)
+
+    return {
+        request: {
+            query: FetchRateDocument,
+            variables: { input: { rateID: rateData.id } },
+        },
+        result: {
+            data: {
+                fetchRate: {
+                    rate: {
+                        ...rateData,
+                    },
+                },
+            },
+        },
+    }
+}
 
 const indexRatesMockSuccess = (
     rates: Rate[] = [
@@ -48,4 +81,4 @@ const indexRatesMockFailure = (): MockedResponse<IndexRatesQuery> => {
     }
 }
 
-export { indexRatesMockSuccess, indexRatesMockFailure }
+export { fetchRateMockSuccess, indexRatesMockSuccess, indexRatesMockFailure }

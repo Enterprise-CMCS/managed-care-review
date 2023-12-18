@@ -1,5 +1,5 @@
 import { findRateWithHistory } from './findRateWithHistory'
-import type { NotFoundError } from '../storeError'
+import type { NotFoundError } from '../postgresErrors'
 import type {
     RateFormDataType,
     RateType,

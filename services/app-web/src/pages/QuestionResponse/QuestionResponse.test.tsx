@@ -1,4 +1,3 @@
-import React from 'react'
 import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router-dom'
 import { SubmissionSideNav } from '../SubmissionSideNav'
@@ -302,7 +301,7 @@ describe('QuestionResponse', () => {
             ).toBeInTheDocument()
         })
 
-        const qaSections = await screen.queryByTestId(/.*-qa-section/)
+        const qaSections = screen.queryByTestId(/.*-qa-section/)
 
         //Expect there to be no QA sections
         expect(qaSections).toBeNull()

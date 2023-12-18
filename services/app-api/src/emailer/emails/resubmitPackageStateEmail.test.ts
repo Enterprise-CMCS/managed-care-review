@@ -27,7 +27,6 @@ const submission: LockedHealthPlanFormDataType = {
                     s3URL: 'bar',
                     name: 'foo',
                     sha256: 'fakesha',
-                    documentCategories: ['RATES' as const],
                 },
             ],
             supportingDocuments: [],
@@ -68,8 +67,7 @@ test('contains correct subject and clearly states successful resubmission', asyn
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -94,8 +92,7 @@ test('includes expected data summary for a contract and rates resubmission State
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -152,7 +149,6 @@ test('includes expected data summary for a multi-rate contract and rates resubmi
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -181,7 +177,6 @@ test('includes expected data summary for a multi-rate contract and rates resubmi
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -210,7 +205,6 @@ test('includes expected data summary for a multi-rate contract and rates resubmi
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -249,8 +243,7 @@ test('includes expected data summary for a multi-rate contract and rates resubmi
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -317,8 +310,7 @@ test('renders overall email as expected', async () => {
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template.bodyHTML).toMatchSnapshot()

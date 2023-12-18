@@ -1,18 +1,23 @@
 import {
     filterChipAndPRSubmissionReviewers,
+    findContractPrograms,
     generateCMSReviewerEmails,
+    getQuestionRound,
     handleAsCHIPSubmission,
 } from './templateHelpers'
 import type { UnlockedHealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     mockUnlockedContractAndRatesFormData,
     mockUnlockedContractOnlyFormData,
+    mockContractRev,
     testEmailConfig,
     testStateAnalystsEmails,
+    mockQuestionAndResponses,
 } from '../testHelpers/emailerHelpers'
 import type { EmailConfiguration, StateAnalystsEmails } from './emailer'
+import type { ProgramType } from '../domain-models'
 
-describe('templateHelpers', () => {
+describe('generateCMSReviewerEmails', () => {
     const contractOnlyWithValidRateData: {
         submission: UnlockedHealthPlanFormDataType
         emailConfig: EmailConfiguration
@@ -24,22 +29,22 @@ describe('templateHelpers', () => {
             submission: mockUnlockedContractOnlyFormData(),
             emailConfig: testEmailConfig(),
             stateAnalystsEmails: testStateAnalystsEmails,
-            testDescription: 'Contract only submission',
+            testDescription: 'contract only submission',
             expectedResult: [
                 ...testEmailConfig().devReviewTeamEmails,
                 ...testStateAnalystsEmails,
-                ...testEmailConfig().dmcpEmails,
+                ...testEmailConfig().dmcpSubmissionEmails,
             ],
         },
         {
             submission: mockUnlockedContractAndRatesFormData(),
             emailConfig: testEmailConfig(),
             stateAnalystsEmails: testStateAnalystsEmails,
-            testDescription: 'Contract and rates submission',
+            testDescription: 'contract and rates submission',
             expectedResult: [
                 ...testEmailConfig().devReviewTeamEmails,
                 ...testStateAnalystsEmails,
-                ...testEmailConfig().dmcpEmails,
+                ...testEmailConfig().dmcpSubmissionEmails,
                 ...testEmailConfig().oactEmails,
             ],
         },
@@ -51,7 +56,7 @@ describe('templateHelpers', () => {
             emailConfig: testEmailConfig(),
             stateAnalystsEmails: testStateAnalystsEmails,
             testDescription:
-                'Submission with CHIP program specified for contract certification',
+                'submission with CHIP program specified for contract certification',
             expectedResult: [
                 'devreview1@example.com',
                 'devreview2@example.com',
@@ -70,7 +75,6 @@ describe('templateHelpers', () => {
                                 s3URL: 'bar',
                                 name: 'foo',
                                 sha256: 'fakesha',
-                                documentCategories: ['RATES' as const],
                             },
                         ],
                         supportingDocuments: [],
@@ -97,7 +101,7 @@ describe('templateHelpers', () => {
             emailConfig: testEmailConfig(),
             stateAnalystsEmails: testStateAnalystsEmails,
             testDescription:
-                'Submission with CHIP program specified for rate certification',
+                'submission with CHIP program specified for rate certification',
             expectedResult: [
                 'devreview1@example.com',
                 'devreview2@example.com',
@@ -125,14 +129,14 @@ describe('templateHelpers', () => {
             }),
             emailConfig: testEmailConfig(),
             stateAnalystsEmails: testStateAnalystsEmails,
-            testDescription: 'Error result.',
+            testDescription: 'error result.',
             expectedResult: new Error(
-                `generateCMSReviewerEmails does not currently support submission type: undefined.`
+                `does not currently support submission type: undefined.`
             ),
         },
     ]
     test.each(contractOnlyWithValidRateData)(
-        'Generate CMS Reviewer email: $testDescription',
+        '$testDescription',
         ({ submission, emailConfig, stateAnalystsEmails, expectedResult }) => {
             expect(
                 generateCMSReviewerEmails(
@@ -143,7 +147,9 @@ describe('templateHelpers', () => {
             ).toEqual(expect.objectContaining(expectedResult))
         }
     )
+})
 
+describe('handleAsCHIPSubmission', () => {
     test.each([
         {
             pkg: mockUnlockedContractAndRatesFormData({
@@ -177,13 +183,12 @@ describe('templateHelpers', () => {
             testDescription: 'for non CHIP submission',
             expectedResult: false,
         },
-    ])(
-        'handleAsCHIPSubmission: $testDescription',
-        ({ pkg, expectedResult }) => {
-            expect(handleAsCHIPSubmission(pkg)).toEqual(expectedResult)
-        }
-    )
+    ])('$testDescription', ({ pkg, expectedResult }) => {
+        expect(handleAsCHIPSubmission(pkg)).toEqual(expectedResult)
+    })
+})
 
+describe('filterChipAndPRSubmissionReviewers', () => {
     test.each([
         {
             reviewers: [
@@ -199,7 +204,7 @@ describe('templateHelpers', () => {
             reviewers: [
                 'Bobloblaw@example.com',
                 'Lucille.Bluth@example.com',
-                testEmailConfig().dmcpEmails[0],
+                testEmailConfig().dmcpSubmissionEmails[0],
             ],
             config: testEmailConfig(),
             testDescription: 'removes dmcp emails',
@@ -208,12 +213,171 @@ describe('templateHelpers', () => {
                 'Lucille.Bluth@example.com',
             ],
         },
-    ])(
-        'filterChipAndPRSubmissionReviewers: $testDescription',
-        ({ reviewers, config, expectedResult }) => {
-            expect(
-                filterChipAndPRSubmissionReviewers(reviewers, config)
-            ).toEqual(expectedResult)
+    ])('$testDescription', ({ reviewers, config, expectedResult }) => {
+        expect(filterChipAndPRSubmissionReviewers(reviewers, config)).toEqual(
+            expectedResult
+        )
+    })
+})
+
+describe('findContractPrograms', () => {
+    test('successfully returns programs for a contract', async () => {
+        const sub = mockContractRev()
+        const statePrograms: [ProgramType] = [
+            {
+                id: 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                name: 'CHIP',
+                fullName: 'MN CHIP',
+            },
+        ]
+
+        const programs = findContractPrograms(sub, statePrograms)
+
+        expect(programs).toEqual(statePrograms)
+    })
+
+    test('throws error if state and contract program ids do not match', async () => {
+        const sub = mockContractRev()
+        const statePrograms: [ProgramType] = [
+            {
+                id: 'unmatched-id',
+                name: 'CHIP',
+                fullName: 'MN CHIP',
+            },
+        ]
+
+        const result = findContractPrograms(sub, statePrograms)
+        if (!(result instanceof Error)) {
+            throw new Error('must be an error')
         }
-    )
+        expect(result.message).toContain(
+            "Can't find programs abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce from state MN"
+        )
+    })
+})
+
+describe('getQuestionRound', () => {
+    test.each([
+        {
+            questions: [
+                mockQuestionAndResponses({
+                    id: 'target-question',
+                    division: 'OACT',
+                    createdAt: new Date('03/01/2024'),
+                }),
+                mockQuestionAndResponses({
+                    division: 'DMCO',
+                    createdAt: new Date('03/01/2024'),
+                }),
+                mockQuestionAndResponses({
+                    division: 'OACT',
+                    createdAt: new Date('02/01/2024'),
+                }),
+                mockQuestionAndResponses({
+                    division: 'OACT',
+                    createdAt: new Date('01/01/2024'),
+                }),
+            ],
+            currentQuestion: mockQuestionAndResponses({
+                id: 'target-question',
+                division: 'OACT',
+                createdAt: new Date('03/01/2024'),
+            }),
+            expectedResult: 3,
+            testDescription: 'Gets correct round for latest question from OACT',
+        },
+        {
+            questions: [
+                mockQuestionAndResponses({
+                    division: 'OACT',
+                    createdAt: new Date('03/01/2024'),
+                }),
+                mockQuestionAndResponses({
+                    division: 'DMCO',
+                    createdAt: new Date('03/01/2024'),
+                }),
+                mockQuestionAndResponses({
+                    id: 'target-question',
+                    division: 'OACT',
+                    createdAt: new Date('02/01/2024'),
+                }),
+                mockQuestionAndResponses({
+                    division: 'OACT',
+                    createdAt: new Date('01/01/2024'),
+                }),
+            ],
+            currentQuestion: mockQuestionAndResponses({
+                id: 'target-question',
+                division: 'OACT',
+                createdAt: new Date('03/01/2024'),
+            }),
+            expectedResult: 2,
+            testDescription: 'Gets correct round for second question from OACT',
+        },
+        {
+            questions: [
+                mockQuestionAndResponses({
+                    division: 'OACT',
+                    createdAt: new Date('03/01/2024'),
+                }),
+                mockQuestionAndResponses({
+                    division: 'DMCO',
+                    createdAt: new Date('03/01/2024'),
+                }),
+                mockQuestionAndResponses({
+                    id: 'target-question',
+                    division: 'OACT',
+                    createdAt: new Date('02/01/2024'),
+                }),
+                mockQuestionAndResponses({
+                    division: 'OACT',
+                    createdAt: new Date('01/01/2024'),
+                }),
+            ],
+            currentQuestion: mockQuestionAndResponses({
+                id: 'not-found-question',
+                division: 'OACT',
+                createdAt: new Date('03/01/2024'),
+            }),
+            expectedResult: new Error(
+                'Error getting question round, current question index not found'
+            ),
+            testDescription:
+                'Returns error if question is not found in questions',
+        },
+        {
+            questions: [
+                mockQuestionAndResponses({
+                    division: 'OACT',
+                    createdAt: new Date('03/01/2024'),
+                }),
+                mockQuestionAndResponses({
+                    division: 'DMCO',
+                    createdAt: new Date('03/01/2024'),
+                }),
+                mockQuestionAndResponses({
+                    id: 'target-question',
+                    division: 'OACT',
+                    createdAt: new Date('02/01/2024'),
+                }),
+                mockQuestionAndResponses({
+                    division: 'OACT',
+                    createdAt: new Date('01/01/2024'),
+                }),
+            ],
+            currentQuestion: mockQuestionAndResponses({
+                id: 'not-found-question',
+                division: 'DMCP',
+                createdAt: new Date('03/01/2024'),
+            }),
+            expectedResult: new Error(
+                'Error getting question round, current question not found'
+            ),
+            testDescription: 'Returns error if divison has no questions',
+        },
+    ])('$testDescription', ({ questions, currentQuestion, expectedResult }) => {
+        expect(getQuestionRound(questions, currentQuestion)).toEqual(
+            expectedResult
+        )
+    })
 })

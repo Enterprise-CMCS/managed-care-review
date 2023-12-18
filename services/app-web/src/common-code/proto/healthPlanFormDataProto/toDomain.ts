@@ -6,7 +6,6 @@ import {
 import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
-    DocumentCategoryType,
     ActuarialFirmType,
     FederalAuthority,
     ManagedCareEntity,
@@ -27,12 +26,12 @@ import { findStatePrograms } from '../../healthPlanFormDataType/findStateProgram
 type RecursivelyReplaceNullWithUndefined<T> = T extends null
     ? undefined
     : T extends Date
-    ? T
-    : {
-          [K in keyof T]: T[K] extends (infer U)[]
-              ? RecursivelyReplaceNullWithUndefined<U>[]
-              : RecursivelyReplaceNullWithUndefined<T[K]>
-      }
+      ? T
+      : {
+            [K in keyof T]: T[K] extends (infer U)[]
+                ? RecursivelyReplaceNullWithUndefined<U>[]
+                : RecursivelyReplaceNullWithUndefined<T[K]>
+        }
 
 export function replaceNullsWithUndefineds<T extends object>(
     obj: T
@@ -46,9 +45,11 @@ export function replaceNullsWithUndefineds<T extends object>(
             v === null
                 ? undefined
                 : // eslint-disable-next-line no-proto
-                v && typeof v === 'object' && v.__proto__.constructor === Object
-                ? replaceNullsWithUndefineds(v)
-                : v
+                  v &&
+                    typeof v === 'object' &&
+                    v.__proto__.constructor === Object
+                  ? replaceNullsWithUndefineds(v)
+                  : v
     })
     return newObj
 }
@@ -187,10 +188,6 @@ function parseProtoDocuments(
     return replaceNullsWithUndefineds(docs).map((doc) => ({
         s3URL: doc.s3Url,
         name: doc.name,
-        documentCategories: protoEnumArrayToDomain(
-            mcreviewproto.DocumentCategory,
-            doc.documentCategories
-        ) as DocumentCategoryType[],
         sha256: doc.sha256 || 'sha_undefined_in_proto',
     }))
 }
@@ -543,6 +540,11 @@ const toDomain = (
         stateContacts: cleanedStateContacts,
         addtlActuaryContacts: parseActuaryContacts(addtlActuaryContacts),
         documents: parseProtoDocuments(formDataMessage.documents),
+        statutoryRegulatoryAttestation:
+            contractInfo?.statutoryRegulatoryAttestation ?? undefined,
+        statutoryRegulatoryAttestationDescription:
+            contractInfo?.statutoryRegulatoryAttestationDescription ??
+            undefined,
     }
 
     // Now that we've gotten things into our combined draft & state domain format.

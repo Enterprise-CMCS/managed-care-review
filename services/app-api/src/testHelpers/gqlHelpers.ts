@@ -110,7 +110,8 @@ const constructTestEmailer = (): Emailer => {
         cmsReviewHelpEmailAddress: 'mcog@example.com',
         cmsRateHelpEmailAddress: 'rates@example.com',
         oactEmails: ['testRate@example.com'],
-        dmcpEmails: ['testPolicy@example.com'],
+        dmcpReviewEmails: ['testPolicy@example.com'],
+        dmcpSubmissionEmails: ['testPolicySubmission@example.com'],
         dmcoEmails: ['testDmco@example.com'],
         helpDeskEmail: 'MC_Review_HelpDesk@example.com>',
     }
@@ -243,7 +244,6 @@ const createAndUpdateTestHealthPlanPackage = async (
                     name: 'rateDocument.pdf',
                     s3URL: 'fakeS3URL',
                     sha256: 'fakesha',
-                    documentCategories: ['RATES' as const],
                 },
             ],
             supportingDocuments: [],
@@ -280,7 +280,6 @@ const createAndUpdateTestHealthPlanPackage = async (
         {
             name: 'contractDocument.pdf',
             s3URL: 'fakeS3URL',
-            documentCategories: ['CONTRACT' as const],
             sha256: 'fakesha',
         },
     ]
@@ -299,6 +298,8 @@ const createAndUpdateTestHealthPlanPackage = async (
             modifiedNonRiskPaymentArrangements: true,
         },
     }
+    draft.statutoryRegulatoryAttestation = false
+    draft.statutoryRegulatoryAttestationDescription = 'No compliance'
 
     Object.assign(draft, partialUpdates)
 
@@ -493,7 +494,7 @@ const createTestQuestionResponse = async (
     const response = responseData || {
         documents: [
             {
-                name: 'Test Question',
+                name: 'Test Question Response',
                 s3URL: 'testS3Url',
             },
         ],
@@ -502,8 +503,8 @@ const createTestQuestionResponse = async (
         query: CREATE_QUESTION_RESPONSE,
         variables: {
             input: {
-                questionID,
                 ...response,
+                questionID,
             },
         },
     })

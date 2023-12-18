@@ -1,6 +1,6 @@
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { RateType } from '../../domain-models/contractAndRates'
-import { NotFoundError } from '../storeError'
+import { NotFoundError } from '../postgresErrors'
 import { includeFullRate } from './prismaSubmittedRateHelpers'
 import { parseRateWithHistory } from './parseRateWithHistory'
 

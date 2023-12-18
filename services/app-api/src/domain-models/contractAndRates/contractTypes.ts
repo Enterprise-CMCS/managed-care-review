@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { contractRevisionWithRatesSchema } from './revisionTypes'
 import { statusSchema } from './statusType'
+import { pruneDuplicateEmails } from '../../emailer/formatters'
 
 // Contract represents the contract specific information in a submission package
 // All that data is contained in revisions, each revision represents the data in a single submission
@@ -26,6 +27,22 @@ const draftContractSchema = contractSchema.extend({
 type ContractType = z.infer<typeof contractSchema>
 type DraftContractType = z.infer<typeof draftContractSchema>
 
-export { contractRevisionWithRatesSchema, draftContractSchema, contractSchema }
+function contractSubmitters(contract: ContractType): string[] {
+    const submitters: string[] = []
+    contract.revisions.forEach(
+        (revision) =>
+            revision.submitInfo?.updatedBy &&
+            submitters.push(revision.submitInfo?.updatedBy)
+    )
+
+    return pruneDuplicateEmails(submitters)
+}
+
+export {
+    contractRevisionWithRatesSchema,
+    draftContractSchema,
+    contractSchema,
+    contractSubmitters,
+}
 
 export type { ContractType, DraftContractType }

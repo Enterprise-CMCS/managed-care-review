@@ -55,6 +55,8 @@ function mockDraft(
         stateContacts: [],
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
         ...partial,
     }
 }
@@ -116,6 +118,8 @@ function mockBaseContract(
         ],
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
         ...partial,
     }
 }
@@ -138,7 +142,13 @@ function mockContractAndRatesDraft(
         documents: [],
         contractType: 'AMENDMENT',
         contractExecutionStatus: 'EXECUTED',
-        contractDocuments: [],
+        contractDocuments: [
+            {
+                s3URL: 's3://bucketname/key/contract',
+                sha256: 'fakesha',
+                name: 'contract',
+            },
+        ],
         contractDateStart: new Date(),
         contractDateEnd: new Date(),
         contractAmendmentInfo: {
@@ -211,6 +221,8 @@ function mockContractAndRatesDraft(
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
         ...partial,
     }
 }
@@ -234,7 +246,6 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
                 s3URL: 's3://bucketname/key/supporting-documents',
                 sha256: 'fakesha',
                 name: 'supporting documents',
-                documentCategories: ['CONTRACT_RELATED' as const],
             },
         ],
         contractType: 'BASE',
@@ -244,7 +255,6 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
                 s3URL: 's3://bucketname/key/contract',
                 sha256: 'fakesha',
                 name: 'contract',
-                documentCategories: ['CONTRACT' as const],
             },
         ],
         contractDateStart: new Date(),
@@ -281,7 +291,6 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
                         s3URL: 's3://bucketname/key/rate',
                         sha256: 'fakesha',
                         name: 'rate',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [
@@ -289,7 +298,6 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
                         s3URL: 's3://bucketname/key/supporting-documents',
                         sha256: 'fakesha',
                         name: 'supporting documents',
-                        documentCategories: ['RATES_RELATED' as const],
                     },
                 ],
                 rateDateStart: new Date(),
@@ -318,6 +326,8 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
         ],
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 
@@ -340,7 +350,6 @@ function mockStateSubmissionContractAmendment(): LockedHealthPlanFormDataType {
                 s3URL: 's3://bucketname/key/supporting-documents',
                 sha256: 'fakesha',
                 name: 'supporting documents',
-                documentCategories: ['RATES_RELATED' as const],
             },
         ],
         contractType: 'AMENDMENT',
@@ -350,7 +359,6 @@ function mockStateSubmissionContractAmendment(): LockedHealthPlanFormDataType {
                 s3URL: 's3://bucketname/key/contract',
                 sha256: 'fakesha',
                 name: 'contract',
-                documentCategories: ['CONTRACT' as const],
             },
         ],
         contractDateStart: new Date(),
@@ -387,7 +395,6 @@ function mockStateSubmissionContractAmendment(): LockedHealthPlanFormDataType {
                         s3URL: 's3://bucketname/key/rate',
                         sha256: 'fakesha',
                         name: 'rate',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -417,6 +424,8 @@ function mockStateSubmissionContractAmendment(): LockedHealthPlanFormDataType {
         ],
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
 }
 
@@ -691,19 +700,16 @@ function mockUnlockedHealthPlanPackageWithDocuments(): HealthPlanPackage {
             s3URL: 's3://bucketname/one-one/one-one.png',
             sha256: 'fakesha',
             name: 'one one',
-            documentCategories: ['CONTRACT_RELATED'],
         },
         {
             s3URL: 's3://bucketname/one-two/one-two.png',
             sha256: 'fakesha',
             name: 'one two',
-            documentCategories: ['CONTRACT_RELATED'],
         },
         {
             s3URL: 's3://bucketname/one-three/one-three.png',
             sha256: 'fakesha',
             name: 'one three',
-            documentCategories: ['CONTRACT_RELATED'],
         },
     ]
     const docs2: SubmissionDocument[] = [
@@ -711,19 +717,16 @@ function mockUnlockedHealthPlanPackageWithDocuments(): HealthPlanPackage {
             s3URL: 's3://bucketname/one-two/one-two.png',
             sha256: 'fakesha',
             name: 'one two',
-            documentCategories: ['CONTRACT_RELATED'],
         },
         {
             s3URL: 's3://bucketname/one-three/one-three.png',
             sha256: 'fakesha',
             name: 'one three',
-            documentCategories: ['CONTRACT_RELATED'],
         },
         {
             s3URL: 's3://bucketname/two-one/two-one.png',
             sha256: 'fakesha',
             name: 'two one',
-            documentCategories: ['CONTRACT_RELATED'],
         },
     ]
     const docs3: SubmissionDocument[] = [
@@ -731,19 +734,16 @@ function mockUnlockedHealthPlanPackageWithDocuments(): HealthPlanPackage {
             s3URL: 's3://bucketname/one-two/one-two.png',
             sha256: 'fakesha',
             name: 'one two',
-            documentCategories: ['CONTRACT_RELATED'],
         },
         {
             s3URL: 's3://bucketname/two-one/two-one.png',
             sha256: 'fakesha',
             name: 'two one',
-            documentCategories: ['CONTRACT_RELATED'],
         },
         {
             s3URL: 's3://bucketname/three-one/three-one.png',
             sha256: 'fakesha',
             name: 'three one',
-            documentCategories: ['CONTRACT_RELATED'],
         },
     ]
 
