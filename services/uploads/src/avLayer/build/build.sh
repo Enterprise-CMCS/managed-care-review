@@ -64,5 +64,4 @@ cp -R /tmp/build/usr/lib64/* lib/.
 cp -R /tmp/build/lib64/* lib/.
 cp freshclam.conf bin/freshclam.conf
 
-zip -r9 /opt/app/lambda_layer.zip bin
-zip -r9 /opt/app/lambda_layer.zip lib
+tar -czvf /opt/app/lambda_layer.tar.gz -C /opt/app bin lib
