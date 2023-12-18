@@ -271,8 +271,8 @@ jobs:
           path: ./services/uploads/src/avLayer/build/lambda_layer.zip
 
   deploy-infra:
-    needs: [begin-deployment]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+    needs: [begin-deployment, build-clamav-layer]
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@mt-av-layer
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
@@ -288,7 +288,6 @@ jobs:
       [
         begin-deployment,
         build-prisma-client-lambda-layer,
-        build-clamav-layer,
         web-unit-tests,
         api-unit-tests,
         deploy-infra,
@@ -299,7 +298,6 @@ jobs:
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
       needs.build-prisma-client-lambda-layer.result == 'success' &&
-      needs.build-clamav-layer.result == 'success' &&
       needs.begin-deployment.result == 'success'
     uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
