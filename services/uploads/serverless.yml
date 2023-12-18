@@ -60,11 +60,7 @@ custom:
   scripts:
     hooks:
       # This script is run locally when running 'serverless deploy'
-      package:initialize: |
-        set -e
-        curl -L --output lambda_layer.zip https://github.com/CMSgov/lambda-clamav-layer/releases/download/0.7/lambda_layer.zip
       deploy:finalize: |
-        rm lambda_layer.zip
         serverless invoke --stage ${sls:stage} --function avDownloadDefinitions -t Event
   serverless-offline-ssm:
     stages:
@@ -95,9 +91,8 @@ custom:
       - main
 
 layers:
-  clamDefs:
-    package:
-      artifact: lambda_layer.zip
+  clamAv:
+    path: lambda-layers-clamav
 
 functions:
   avScan:
@@ -107,7 +102,7 @@ functions:
     memorySize: 4096
     ephemeralStorageSize: 1024
     layers:
-      - !Ref ClamDefsLambdaLayer
+      - !Ref ClamAvLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:2
     environment:
       stage: ${sls:stage}
@@ -124,7 +119,7 @@ functions:
     timeout: 300 # 300 seconds = 5 minutes
     memorySize: 1024
     layers:
-      - !Ref ClamDefsLambdaLayer
+      - !Ref ClamAvLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:2
     environment:
       stage: ${sls:stage}
@@ -139,7 +134,7 @@ functions:
     timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
     maximumRetryAttempts: 0
     layers:
-      - !Ref ClamDefsLambdaLayer
+      - !Ref ClamAvLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:2
     environment:
       stage: ${sls:stage}
@@ -159,7 +154,7 @@ functions:
     ephemeralStorageSize: 1024
     maximumRetryAttempts: 0
     layers:
-      - !Ref ClamDefsLambdaLayer
+      - !Ref ClamAvLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:2
     environment:
       stage: ${sls:stage}
