@@ -5,7 +5,7 @@
     padding-left: 0;
 }
 .cardContainer {
-    border: 1px solid $theme-color-base-lighter;
+    border: 1px solid $mcr-gray-lighter;
     padding: units(2);
     display: flex;
     justify-content: space-between;
@@ -15,7 +15,7 @@
     transition: background-color 200ms linear;
 
     &:hover {
-        background-color: $theme-color-base-lightest;
+        background-color: $mcr-gray-lightest
     }
 }
 
@@ -51,10 +51,10 @@
 }
 
 .tagSuccess {
-    background: $theme-color-success;
+    background: $mcr-success-base;
 }
 
 .tagWarning {
-    background: $theme-color-warning-dark;
+    background: $mcr-gold-dark;
     @include u-text('ink');
 }

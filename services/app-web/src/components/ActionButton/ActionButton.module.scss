@@ -16,11 +16,11 @@
 }
 
 .successButton {
-    background: $theme-color-success;
+    background: $mcr-success-base;
     &:hover {
-        background-color: #2a7a3b !important;
+        background-color: $mcr-success-hover !important;
     }
     &:active {
-       background-color: #2a7a3b !important;
+       background-color: $mcr-success-hover !important;
     }
 }

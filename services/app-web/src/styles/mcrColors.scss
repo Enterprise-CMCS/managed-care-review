@@ -37,13 +37,16 @@ $mcr-gray-lightest: #f0f0f0; /// USWDS 'gray-5'
 $mcr-foundation-ink:#1b1b1b; // USWDS 'gray-90'
 $mcr-foundation-hint: #71767a; // USWDS 'text-base'
 $mcr-foundation-link: $mcr-primary-base;
+$mcr-foundation-focus:#3e94cf; // CMS 'color-focus'
 $mcr-foundation-white: #fff;
+$mcr-foundation-visited: #4c2c92; // CMS 'color-visited'
 
 // mcr-success is used for submit buttons and completed actions
 $mcr-success-base: #2e8540; // CMSDS 'color-success'
-$mcr-success-hover:$mcr-success-hover; // CMSDS 'color-success-dark"
+$mcr-success-hover:#2a7a3b; // CMSDS 'color-success-dark" // CMSDS 'color-success-dark"
 $mcr-success-dark: #4d8055; // USWDS 'green-cool-50'
 
 // mcr-error is used for error, validations, and incomplete actions
 $mcr-error-base: #b50909; // USWDS  'red-60v'
-$mcr-error-light:#f4e3db; // USWDS 'red-warm-10'
+$mcr-error-dark: #981b1e; // CMS 'red-darkest
+$mcr-error-light: #f4e3db; // USWDS 'red-warm-10'

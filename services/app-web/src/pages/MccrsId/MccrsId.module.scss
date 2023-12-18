@@ -32,8 +32,8 @@
         padding: units(4);
         padding-top: 32px;
         margin-top: units(2);
-        background: $cms-color-white;
-        border: 1px solid $theme-color-base-lighter;
+        background: $mcr-foundation-white;
+        border: 1px solid $mcr-gray-lighter;
         @include u-radius('md');
     }
 
@@ -85,7 +85,7 @@ div[class^='usa-hint'] span {
         display: inline;
         font-weight: bold;
     }
-} 
+}
 
 ul[class^='usa-button-group'] {
     justify-content: end;
@@ -96,6 +96,6 @@ ul[class^='usa-button-group'] {
             margin-bottom: 44px;
             margin-right: .25rem;
         }
-    } 
+    }
 }
 

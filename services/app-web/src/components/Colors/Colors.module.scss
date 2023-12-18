@@ -1,0 +1,53 @@
+@use '../../styles/custom.scss' as *;
+
+:export {
+  mcr: {
+    primary: {
+        lightest: $mcr-primary-lightest;
+        lighter: $mcr-primary-lighter;
+        light: $mcr-primary-light;
+        base: $mcr-primary-base;
+        dark: $mcr-primary-dark;
+        darkest: $mcr-primary-darkest;
+        }
+    cmsblue: {
+      lightest: $mcr-cmsblue-lightest;
+      base: $mcr-cmsblue-base;
+      dark: $mcr-cmsblue-dark;
+      darkest: $mcr-cmsblue-darkest;
+    }
+    cyan: {
+      light: $mcr-cyan-light;
+      base:  $mcr-cyan-base;
+      dark: $mcr-cyan-dark;
+        }
+    gold: {
+      base:  $mcr-gold-base;
+       dark: $mcr-gold-dark;
+      darker: $mcr-gold-darker;
+    }
+    gray: {
+      dark: $mcr-gray-dark;
+      base : $mcr-gray-base;
+      lighter: $mcr-gray-lighter;
+      lightest: $mcr-gray-lightest;
+    }
+     foundation: {
+     white: $mcr-foundation-white;
+      hint: $mcr-foundation-hint;
+      link: $mcr-foundation-link;
+      ink : $mcr-foundation-ink;
+    }
+    success: {
+        base: $mcr-success-base;
+        hover: $mcr-success-hover;
+        dark: $mcr-success-dark;
+    }
+    error: {
+      light: $mcr-error-light;
+      base: $mcr-error-base;
+
+    }
+  }
+
+}

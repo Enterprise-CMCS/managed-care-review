@@ -2,7 +2,7 @@
 @import '../../styles/custom.scss';
 
 .logosRow {
-    background-color: $theme-footer-logos-background;
+    background-color: $mcr-cmsblue-lightest;
     & img,
     svg {
         padding-right: units(4);
@@ -29,19 +29,19 @@
 }
 
 .contactRow {
-    background-color: $theme-color-primary;
-    color: $cms-color-white;
+    background-color: $mcr-primary-base;
+    color: $mcr-foundation-white;
     padding: units(3) 0;
     > span {
         margin: units(1);
     }
     a {
-        color: $cms-color-white;
+        color: $mcr-foundation-white;
 
         &:hover,
         &:active,
         &:visited {
-            color: $cms-color-white;
+            color: $mcr-foundation-white;
         }
     }
 }

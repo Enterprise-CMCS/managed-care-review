@@ -2,20 +2,20 @@
 @import '../../styles/custom.scss';
 
 .background {
-  background-color: $cms-color-white;
+  background-color: $mcr-foundation-white;
   width: 100%;
 }
 
 .container {
-  max-width: $width-max-contained;
+  max-width: $mcr-container-standard-width-fixed;
   padding: 2rem 0;
 }
 
 .questionSection {
   margin: units(2) auto;
-  background: $cms-color-white;
+  background: $mcr-foundation-white;
   padding: units(4) units(4);
-  border: 1px solid $theme-color-base-lighter;
+  border: 1px solid $mcr-gray-lighter;
   line-height: units(3);
   width: 100%;
   @include u-radius('md');
@@ -38,8 +38,8 @@
         padding: units(4);
         margin-bottom: units(2);
         margin-top: units(2);
-        background: $cms-color-white;
-        border: 1px solid $theme-color-base-lighter;
+        background: $mcr-foundation-white;
+        border: 1px solid $mcr-gray-lighter;
         @include u-radius('md');
     }
 

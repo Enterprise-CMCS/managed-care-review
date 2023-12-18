@@ -64,7 +64,6 @@ Open [http://localhost:6000](http://localhost:6000) to view in the browser.
 -   **`src/index.tsx`** main React application entrypoint - configures authentication, api, s3. Further configuration can be found in `src/pages/App`/
 -   `src/pages` folder is used for components and logic specific to a page (content that is inside `<main>`).
 -   `src/components` folder is used abstracted, reuseable components. These are components without significant routing or page-specific logic. Often these components work well in storybook.
--   Follow guidance in the engineering playbook around [implementing UI](https://github.com/trussworks/Engineering-Playbook/blob/main/web/frontend/developing-ui.md)
 -   Use nested folders named after the component. Tests are stored alongside components.
 -   List file imports in this order: React imports, external imports, assets/styles imports, local imports. [needs automation]
 

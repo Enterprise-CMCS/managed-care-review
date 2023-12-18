@@ -6,9 +6,9 @@
 
 .summarySection {
     margin: units(2) auto;
-    background: $cms-color-white;
+    background: $mcr-foundation-white;
     padding: units(2) units(4);
-    border: 1px solid $theme-color-base-lighter;
+    border: 1px solid $mcr-gray-lighter;
     line-height: units(3);
     @include u-radius('md');
 
@@ -59,9 +59,9 @@
 }
 
 .submitButton {
-    background: $theme-color-success;
+    background: $mcr-success-base;
     &:hover {
-        background-color: #2a7a3b !important;
+        background-color: $mcr-success-hover !important;
     }
 }
 

@@ -11,8 +11,8 @@
     }
     p {
         font-weight: font-weight('normal');
-        font-size: 0.875rem;
-        text-align: center;
+    font-size: 0.875rem;
+    text-align: center;
     }
 }
 
@@ -27,27 +27,27 @@
 }
 
 .programTag {
-    background: $theme-color-secondary-lighter;
-    color: $theme-color-base-ink;
+    background:$mcr-primary-lighter;
+    color: $mcr-foundation-ink;
     display: inline-block;
 }
 
 .submittedTag {
-    background: $theme-color-success;
+    background: $mcr-success-base;
 }
 
 .draftTag {
-    background: $theme-color-warning-dark;
-    color: $theme-color-base-ink;
+    background: $mcr-gold-dark;
+    color: $mcr-foundation-ink;
 }
 
 .unlockedTag {
     background: #99deea;
-    color: $theme-color-base-ink;
+    color: $mcr-foundation-ink;
 }
 
 .filterCount {
     font-weight: font-weight('bold');
-    color: $theme-color-base-ink;
+    color: $mcr-foundation-ink;
     padding-top: units(3);
 }

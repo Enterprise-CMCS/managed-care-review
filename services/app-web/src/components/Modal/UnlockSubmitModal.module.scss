@@ -2,14 +2,14 @@
 @import '../../styles/custom.scss';
 
 .reviewSectionWrapper {
-    max-width: $width-max-contained;
+    max-width: $mcr-container-standard-width-fixed;
 }
 
 
 .submitButton {
-    background: $theme-color-success;
+    background: $mcr-success-base;
     &:hover {
-      background-color: #2a7a3b !important;
+      background-color: $mcr-success-hover !important;
     }
 }
 

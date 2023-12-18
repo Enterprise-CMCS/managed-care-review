@@ -1,4 +1,5 @@
 @import '../../../styles/uswdsImports.scss';
+@import '../../../styles/custom.scss';
 
 .message {
     a {
@@ -9,7 +10,7 @@
         font-weight: normal;
         text-align: left;
         &, &:visited {
-            color: color($theme-link-color);
+            color: $mcr-foundation-ink;
         }
     }
 }

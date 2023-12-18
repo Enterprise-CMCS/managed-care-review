@@ -1,12 +1,12 @@
 import {
     GridContainer,
+    Icon,
     Link,
     ModalRef,
     ModalToggleButton,
 } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
 import { NavLink, useOutletContext } from 'react-router-dom'
-import sprite from 'uswds/src/img/sprite.svg'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import {
     ContactsSummarySection,
@@ -144,14 +144,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                             pathname: RoutesRecord.DASHBOARD_SUBMISSIONS,
                         }}
                     >
-                        <svg
-                            className="usa-icon"
-                            aria-hidden="true"
-                            focusable="false"
-                            role="img"
-                        >
-                            <use xlinkHref={`${sprite}#arrow_back`}></use>
-                        </svg>
+                        <Icon.ArrowBack />
                         {user?.__typename === 'StateUser' ? (
                             <span>&nbsp;Back to state dashboard</span>
                         ) : (

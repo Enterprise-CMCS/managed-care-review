@@ -4,9 +4,9 @@
 $details-text-line-height: 1.5;
 
 .detailsSection {
-    background-color: $cms-color-background;
+    background-color: $mcr-foundation-white;
     flex: 1;
-    color: $theme-color-base;
+    color: $mcr-cmsblue-base;
     padding: units(4) 0;
     .detailsSectionContent {
         max-width: 65rem;
@@ -15,7 +15,7 @@ $details-text-line-height: 1.5;
         }
         .detailsSteps {
             padding: units(4);
-            border: 1px solid $theme-color-base-lighter;
+            border: 1px solid $mcr-gray-lighter;
             @include u-radius('lg');
             h2 {
                 margin-top: 0;
@@ -28,7 +28,7 @@ $details-text-line-height: 1.5;
             }
             ul > li {
                 padding: 0 0 units(7) 0;
-                border-left: 3px solid $theme-color-base-lighter;
+                border-left: 3px solid $mcr-gray-lighter;
                 padding-left: units(4);
                 position: relative;
                 line-height: $details-text-line-height;
@@ -41,7 +41,7 @@ $details-text-line-height: 1.5;
                     position: absolute;
                     left: -18px;
                     top: -5px;
-                    background-color: $cms-color-white;
+                    background-color: $mcr-foundation-white;
                 }
                 &.login::before {
                     content: url(../../assets/images/login-icon.svg);

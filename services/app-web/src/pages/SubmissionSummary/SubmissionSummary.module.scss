@@ -2,18 +2,18 @@
 @import '../../styles/custom.scss';
 
 .background {
-    background-color: $cms-color-white;
+    background-color: $mcr-foundation-white;
     width: 100%;
 }
 
 .backgroundFullPage {
-    background-color: $cms-color-white;
+    background-color: $mcr-foundation-white;
     width: 100%;
     flex: 1 0 auto;
 }
 
 .container {
-    max-width: $width-max-contained;
+    max-width: $mcr-container-standard-width-fixed;
     padding: 2rem 0;
 }
 
@@ -27,7 +27,7 @@
             display: inline-block;
             margin-left: 5px;
             margin-top: 0px;
-            
+
         }
     }
     a.editLink {

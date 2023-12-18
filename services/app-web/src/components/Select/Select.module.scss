@@ -8,18 +8,18 @@
     border-radius: 99rem 99rem 99rem 99rem;
   }
   [class*='select__multi-value__label'] {
-    background: $theme-color-secondary-lighter;
-    color: $theme-color-base-ink;
+    background:$mcr-primary-lighter;
+    color: $mcr-foundation-ink;
     border-radius: 99rem 0rem 0rem 99rem;
   }
   [class*='select__multi-value__remove'] {
-    background: $theme-color-secondary-lighter;
-    color: $theme-color-base-ink;
+    background:$mcr-primary-lighter;
+    color: $mcr-foundation-ink;
     border-radius: 0rem 99rem 99rem 0rem;
 
     &:hover {
-      background: darken($theme-color-secondary-lighter, 5%);
-      color: $theme-color-base-ink;
+      background: darken($mcr-primary-lighter, 5%);
+      color: $mcr-foundation-ink;
     }
   }
 }

@@ -33,8 +33,8 @@
         padding: units(4);
         margin-bottom: units(2);
         margin-top: units(2);
-        background: $cms-color-white;
-        border: 1px solid $theme-color-base-lighter;
+        background: $mcr-foundation-white;
+        border: 1px solid $mcr-gray-lighter;
         @include u-radius('md');
     }
 
@@ -82,7 +82,7 @@
 .nestedOptions {
     padding-left: units(4);
     margin: units(2) 0;
-    border-left: 4px solid $theme-color-primary;
+    border-left: 4px solid $mcr-primary-base;
 
     legend,
     label {
@@ -93,7 +93,7 @@
 .nestedOptionsError {
     padding-left: units(4);
     margin: units(2) 0;
-    border-left: 4px solid $theme-color-error-darker;
+    border-left: 4px solid $mcr-error-base;
 }
 
 .stateContact,
@@ -142,7 +142,7 @@
 
 .requiredOptionalText {
     display: block;
-    color: $theme-color-hint;
+    color: $mcr-foundation-hint;
 }
 
 .guidanceTextBlockNoPadding{

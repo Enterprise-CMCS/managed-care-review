@@ -4,15 +4,15 @@
 .userInfo {
     font-weight: font-weight('light');
     padding: 0 units(1);
-    color: $cms-color-white;
+    color: $mcr-foundation-white;
 
     button, a {
-        color: $cms-color-white;
+        color: $mcr-foundation-white;
 
         &:hover,
         &:active,
         &:visited {
-            color: $cms-color-white;
+            color: $mcr-foundation-white;
         }
     }
 }
@@ -22,8 +22,8 @@
 }
 
 .dashboardHeading {
-    background-color: $theme-color-primary-dark;
-    color: $cms-color-white;
+    background-color: $mcr-primary-dark;
+    color: $mcr-foundation-white;
     & h1 {
         display: flex;
         flex-wrap: wrap;
@@ -35,8 +35,8 @@
 }
 
 .landingPageHeading {
-    background-color: $theme-color-primary-dark;
-    color: $cms-color-white;
+    background-color: $mcr-primary-dark;
+    color: $mcr-foundation-white;
     padding: units(2) 0;
     & h1 {
         display: flex;
@@ -48,7 +48,7 @@
 }
 
 .banner {
-    background: $cms-color-primary;
+    background: $mcr-primary-base;
 }
 
 .bannerLogo {
@@ -58,14 +58,14 @@
     text-decoration: none;
 
     .logoImg {
-        border-right: 2px solid $cms-color-white;
+        border-right: 2px solid $mcr-foundation-white;
         padding-right: units(2);
     }
 
     span {
         margin-left: units(2);
         font-size: size('body', 'lg');
-        color: $cms-color-white;
+        color: $mcr-foundation-white;
         height: 100%;
     }
 }

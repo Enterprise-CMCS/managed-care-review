@@ -8,7 +8,7 @@
 }
 
 .fileInputError {
-    background-color: $theme-color-error-lighter;
+    background-color: $mcr-error-light;
 }
 
 .loadingImage {
@@ -28,13 +28,13 @@
 .fileInputHint {
     display: flex;
     flex-direction: column;
-    color: theme-color-hint;
+    color: $mcr-foundation-hint;
     margin-bottom: 0.5rem;
 }
 
 .requiredOptionalText {
     display: block;
-    color: $theme-color-hint;
+    color: $mcr-foundation-hint;
 }
 
 .fileSummary {
@@ -42,7 +42,7 @@
     @include u-font('sans', 'sm');
     @include u-padding(1);
     @include u-margin-y(1px);
-    background: $theme-color-primary-lighter;
+    background: $mcr-primary-lighter;
 }
 
 .fileItemsList {

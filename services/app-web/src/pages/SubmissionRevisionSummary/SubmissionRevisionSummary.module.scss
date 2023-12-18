@@ -2,12 +2,12 @@
 @import '../../styles/custom.scss';
 
 .background {
-    background-color: $cms-color-white;
+    background-color: $mcr-foundation-white;
     width: 100%;
 }
 
 .container {
-    max-width: $width-max-contained;
+    max-width: $mcr-container-standard-width-fixed;
     padding: 2rem 0;
 
     [id=submissionTypeSection] {
@@ -27,6 +27,6 @@
 }
 
 .submissionVersion {
-    color: $theme-color-warning-dark;
+    color: $mcr-gold-dark;
     margin: 0;
 }
