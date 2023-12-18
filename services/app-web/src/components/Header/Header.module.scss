@@ -22,7 +22,7 @@
 }
 
 .dashboardHeading {
-    background-color: $mcr-primary-dark;
+    background-color: $mcr-cmsblue-dark;;
     color: $mcr-foundation-white;
     & h1 {
         display: flex;
@@ -35,7 +35,7 @@
 }
 
 .landingPageHeading {
-    background-color: $mcr-primary-dark;
+    background-color: $mcr-cmsblue-dark;
     color: $mcr-foundation-white;
     padding: units(2) 0;
     & h1 {
@@ -48,7 +48,7 @@
 }
 
 .banner {
-    background: $mcr-primary-base;
+    background: $mcr-cmsblue-base;
 }
 
 .bannerLogo {

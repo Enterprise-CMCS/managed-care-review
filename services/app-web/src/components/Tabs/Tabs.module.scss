@@ -37,7 +37,7 @@
         background: none;
 
         &:after {
-            background-color: $mcr-primary-base;
+            background-color: $mcr-cmsblue-base;
             content: '';
             height: 4px;
             left: -1px;
@@ -52,7 +52,7 @@
             border-bottom: 1px solid #fff;
 
             .easi-tabs__tab-btn {
-                color: $mcr-primary-base;
+                color: $mcr-cmsblue-base;
             }
 
             &:after {

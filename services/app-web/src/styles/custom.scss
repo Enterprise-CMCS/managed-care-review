@@ -99,16 +99,27 @@ $mcr-container-max-width-fixed: 75rem;
         margin-top: 1rem;
     }
 
+// Step indicator background and alignment overrides
+
+div[class^='usa-step-indicator'] {
+    background-color: transparent;
+    width: 66rem;
+    margin: 1.25rem auto;
+    text-align: center;
+
+    ol {
+        justify-content: center;
+    }
+}
+
+[class^='usa-step-indicator__header'] {
+    display: inline;
+}
+
 // This should be set by USWDS but isn't
 // It can be removed when https://github.com/uswds/uswds/issues/4458 is fixed
 .usa-tooltip__body {
   opacity: 0;
-}
-
-h3 {
-    margin-top: 0;
-    font-weight: normal;
-    font-size: 1.3em;
 }
 
 // This should probably be a standalone component rather than set in global styles
@@ -117,3 +128,9 @@ a[class^='usa-button usa-button--outline'] {
     text-decoration: none !important;
     color: $mcr-primary-dark !important;
 }
+
+// we want all usa-logo to have same vertical margin
+.usa-logo {
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+  }
