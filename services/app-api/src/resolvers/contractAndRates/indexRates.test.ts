@@ -225,7 +225,6 @@ describe.skip('indexRates', () => {
                     name: 'rateDocument.pdf',
                     s3URL: 'fakeS3URL',
                     sha256: 'fakesha',
-                    documentCategories: ['RATES' as const],
                 },
             ],
             supportingDocuments: [],

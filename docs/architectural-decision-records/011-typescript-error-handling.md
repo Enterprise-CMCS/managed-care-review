@@ -8,7 +8,7 @@ Sometimes the code we call will error. There are a number of different ways to h
 
 ### Functions that can error return their success type unioned with the Error type
 
-For example, our postgres store functions like insertDraftSubmission should return the DraftSubmissionType that was inserted when the insertion is successful, or a StoreError type if not. So the signature will look like:
+For example, our postgres store functions like insertDraftSubmission should return the DraftSubmissionType that was inserted when the insertion is successful, or an Error type if not. So the signature will look like:
 
 ```
 function insertDraftSubmission(args: {...}): DraftSubmissionType | Error

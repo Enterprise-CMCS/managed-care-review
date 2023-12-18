@@ -1,5 +1,5 @@
 import type { PrismaTransactionType } from '../prismaTypes'
-import { NotFoundError } from '../storeError'
+import { NotFoundError } from '../postgresErrors'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaSubmittedContractHelpers'
 import type { ContractOrErrorArrayType } from './findAllContractsWithHistoryByState'

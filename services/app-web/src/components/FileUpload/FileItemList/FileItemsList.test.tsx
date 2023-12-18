@@ -1,4 +1,3 @@
-import React from 'react'
 import { render, screen } from '@testing-library/react'
 import renderer from 'react-test-renderer'
 import userEvent from '@testing-library/user-event'
@@ -15,7 +14,6 @@ describe('FileItemList component', () => {
         key: undefined,
         s3URL: undefined,
         status: 'PENDING',
-        documentCategories: ['CONTRACT_RELATED'],
     }
     const scanning: FileItemT = {
         id: 'testFile1',
@@ -24,7 +22,6 @@ describe('FileItemList component', () => {
         key: '4545454-testFile1',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile1',
         status: 'SCANNING',
-        documentCategories: [],
     }
     const uploadError: FileItemT = {
         id: 'testFile2',
@@ -33,7 +30,6 @@ describe('FileItemList component', () => {
         key: undefined,
         s3URL: undefined,
         status: 'UPLOAD_ERROR',
-        documentCategories: ['CONTRACT_RELATED'],
     }
 
     const scanningError: FileItemT = {
@@ -43,7 +39,6 @@ describe('FileItemList component', () => {
         key: '4545454-testFile3',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile3',
         status: 'SCANNING_ERROR',
-        documentCategories: [],
     }
 
     const complete: FileItemT = {
@@ -53,7 +48,6 @@ describe('FileItemList component', () => {
         key: '4545454-testFile4',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile4',
         status: 'UPLOAD_COMPLETE',
-        documentCategories: ['CONTRACT_RELATED'],
     }
 
     const duplicateError: FileItemT = {
@@ -63,28 +57,16 @@ describe('FileItemList component', () => {
         key: '1234545454-testFile4',
         s3URL: 'tests3://uploaded-12313123213/1234545454-testFile4',
         status: 'DUPLICATE_NAME_ERROR',
-        documentCategories: [],
     }
     const buttonActionProps = {
         deleteItem: jest.fn(),
         retryItem: jest.fn(),
     }
 
-    const categoryCheckboxProps = {
-        handleCheckboxClick: jest.fn(),
-    }
-
     beforeEach(() => jest.clearAllMocks())
     it('renders a list without errors', () => {
         const fileItems = [pending, uploadError]
-        render(
-            <FileItemsList
-                renderMode="list"
-                fileItems={fileItems}
-                {...buttonActionProps}
-                {...categoryCheckboxProps}
-            />
-        )
+        render(<FileItemsList fileItems={fileItems} {...buttonActionProps} />)
 
         expect(screen.getAllByRole('listitem')).toHaveLength(fileItems.length)
         expect(screen.getByText(/testFile.pdf/)).toBeInTheDocument()
@@ -93,16 +75,9 @@ describe('FileItemList component', () => {
 
     it('renders a table without errors', () => {
         const fileItems = [pending, uploadError]
-        render(
-            <FileItemsList
-                renderMode="table"
-                fileItems={fileItems}
-                {...buttonActionProps}
-                {...categoryCheckboxProps}
-            />
-        )
+        render(<FileItemsList fileItems={fileItems} {...buttonActionProps} />)
         // the table has a header row so we need to add 1 to the length
-        expect(screen.getAllByRole('row')).toHaveLength(fileItems.length + 1)
+        expect(screen.getAllByRole('listitem')).toHaveLength(fileItems.length)
         expect(screen.getByText(/testFile.pdf/)).toBeInTheDocument()
         expect(screen.getByText('testFile2.pdf')).toBeInTheDocument()
     })
@@ -117,12 +92,7 @@ describe('FileItemList component', () => {
         ]
         const tree = renderer
             .create(
-                <FileItemsList
-                    renderMode="list"
-                    fileItems={fileItems}
-                    {...buttonActionProps}
-                    {...categoryCheckboxProps}
-                />
+                <FileItemsList fileItems={fileItems} {...buttonActionProps} />
             )
             .toJSON()
         expect(tree).toMatchSnapshot()
@@ -130,14 +100,7 @@ describe('FileItemList component', () => {
 
     it('button actions in a list work as expected', async () => {
         const fileItems = [uploadError]
-        render(
-            <FileItemsList
-                renderMode="list"
-                fileItems={fileItems}
-                {...buttonActionProps}
-                {...categoryCheckboxProps}
-            />
-        )
+        render(<FileItemsList fileItems={fileItems} {...buttonActionProps} />)
 
         await userEvent.click(screen.getByRole('button', { name: /Retry/ }))
         expect(buttonActionProps.retryItem).toHaveBeenCalled()
@@ -148,14 +111,7 @@ describe('FileItemList component', () => {
 
     it('button actions in a table work as expected', async () => {
         const fileItems = [uploadError]
-        render(
-            <FileItemsList
-                renderMode="table"
-                fileItems={fileItems}
-                {...buttonActionProps}
-                {...categoryCheckboxProps}
-            />
-        )
+        render(<FileItemsList fileItems={fileItems} {...buttonActionProps} />)
 
         await userEvent.click(screen.getByText('Retry'))
         expect(buttonActionProps.retryItem).toHaveBeenCalled()
@@ -173,14 +129,7 @@ describe('FileItemList component', () => {
             duplicateError,
             scanning,
         ]
-        render(
-            <FileItemsList
-                renderMode="list"
-                fileItems={fileItems}
-                {...buttonActionProps}
-                {...categoryCheckboxProps}
-            />
-        )
+        render(<FileItemsList fileItems={fileItems} {...buttonActionProps} />)
 
         const listItems = screen.getAllByRole('listitem')
         const loadingListItem = listItems[0]
@@ -222,22 +171,15 @@ describe('FileItemList component', () => {
             duplicateError,
             scanning,
         ]
-        render(
-            <FileItemsList
-                renderMode="table"
-                fileItems={fileItems}
-                {...buttonActionProps}
-                {...categoryCheckboxProps}
-            />
-        )
+        render(<FileItemsList fileItems={fileItems} {...buttonActionProps} />)
 
-        const rows = screen.getAllByRole('row')
-        const loadingRow = rows[1]
-        const uploadErrorRow = rows[2]
-        const scanningErrorRow = rows[3]
-        const completeRow = rows[4]
-        const duplicateErrorRow = rows[5]
-        const scanningRow = rows[6]
+        const rows = screen.getAllByRole('listitem')
+        const loadingRow = rows[0]
+        const uploadErrorRow = rows[1]
+        const scanningErrorRow = rows[2]
+        const completeRow = rows[3]
+        const duplicateErrorRow = rows[4]
+        const scanningRow = rows[5]
 
         // Items not in error state
         expect(loadingRow).not.toHaveClass('bg-error-lighter')

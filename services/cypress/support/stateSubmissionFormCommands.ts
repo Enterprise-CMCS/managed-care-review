@@ -462,17 +462,11 @@ Cypress.Commands.add('fillOutSupportingDocuments', () => {
 })
 
 // for fileupload with the table view and checkboxes- tableView can be assigned to a number that representes how many items in the list should be preses
-Cypress.Commands.add('waitForDocumentsToLoad', ({ tableView } = {tableView: false}) => {
-    if (tableView) {
-        cy.findAllByTestId('file-input-loading-image', {
-            timeout: 200_000,
-        }).should('not.exist')
-    } else {
-        // list view is the default behavior
-        cy.findAllByTestId('file-input-preview-image', {
-            timeout: 200_000,
-        }).should('not.have.class', 'is-loading')
-    }
+Cypress.Commands.add('waitForDocumentsToLoad', () => {
+    // list view is the default behavior
+    cy.findAllByTestId('file-input-preview-image', {
+        timeout: 200_000,
+    }).should('not.have.class', 'is-loading')
 })
 
 Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {

@@ -9,7 +9,6 @@ import {
 import type { UserType } from '../domain-models'
 import { performance } from 'perf_hooks'
 import type { Store, InsertUserArgsType } from '../postgres'
-import { isStoreError } from '../postgres'
 import { isValidCmsDivison } from '../domain-models'
 
 export function parseAuthProvider(
@@ -238,7 +237,7 @@ export async function userFromCognitoAuthProvider(
         }
 
         const result = await store.insertUser(userToInsert)
-        if (isStoreError(result)) {
+        if (result instanceof Error) {
             console.error(`Could not insert user: ${JSON.stringify(result)}`)
             return cognitoUserResult
         }
@@ -273,9 +272,9 @@ export async function lookupUserAurora(
     userID: string
 ): Promise<UserType | undefined | Error> {
     const userFromPG = await store.findUser(userID)
-    if (isStoreError(userFromPG)) {
+    if (userFromPG instanceof Error) {
         return new Error(
-            `Error looking up user in postgres: ${userFromPG.code}: ${userFromPG.message}`
+            `Error looking up user in postgres: ${userFromPG.message}`
         )
     }
 

@@ -8,7 +8,6 @@ import {
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { NotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
-import { isStoreError } from '../../postgres'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison } from '../../domain-models'
 import type { Emailer } from '../../emailer'
@@ -107,8 +106,8 @@ export function createQuestionResolver(
 
         const questionResult = await store.insertQuestion(input, user)
 
-        if (isStoreError(questionResult)) {
-            const errMessage = `Issue creating question for package of type ${questionResult.code}. Message: ${questionResult.message}`
+        if (questionResult instanceof Error) {
+            const errMessage = `Issue creating question for package. Message: ${questionResult.message}`
             logError('createQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
@@ -121,7 +120,7 @@ export function createQuestionResolver(
                 contractResult.revisions[0],
                 submitterEmails,
                 statePrograms,
-                allQuestions
+                questionResult
             )
 
         if (sendQuestionsStateEmailResult instanceof Error) {

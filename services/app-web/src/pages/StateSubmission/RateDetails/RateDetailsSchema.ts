@@ -9,28 +9,20 @@ import {
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
-const SingleRateCertSchema = (activeFeatureFlags: FeatureFlagSettings) =>
+const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
     Yup.object().shape({
         rateDocuments: validateFileItemsListSingleUpload({ required: true }),
-        supportingDocuments: activeFeatureFlags['supporting-docs-by-rate']
-            ? validateFileItemsList({ required: false })
-            : Yup.mixed(),
-        hasSharedRateCert: activeFeatureFlags['packages-with-shared-rates']
-            ? Yup.string().defined('You must select yes or no')
-            : Yup.string(),
-        packagesWithSharedRateCerts: activeFeatureFlags[
-            'packages-with-shared-rates'
-        ]
-            ? Yup.array()
-                  .when('hasSharedRateCert', {
-                      is: 'YES',
-                      then: Yup.array().min(
-                          1,
-                          'You must select at least one submission'
-                      ),
-                  })
-                  .required()
-            : Yup.array(),
+        supportingDocuments: validateFileItemsList({ required: false }),
+        hasSharedRateCert: Yup.string().defined('You must select yes or no'),
+        packagesWithSharedRateCerts: Yup.array()
+            .when('hasSharedRateCert', {
+                is: 'YES',
+                then: Yup.array().min(
+                    1,
+                    'You must select at least one submission'
+                ),
+            })
+            .required(),
         rateProgramIDs: Yup.array().min(1, 'You must select a program'),
         rateType: Yup.string().defined(
             'You must choose a rate certification type'

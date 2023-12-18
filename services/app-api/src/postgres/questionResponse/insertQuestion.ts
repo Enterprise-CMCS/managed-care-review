@@ -5,8 +5,6 @@ import type {
     CreateQuestionInput,
     DivisionType,
 } from '../../domain-models'
-import type { StoreError } from '../storeError'
-import { convertPrismaErrorToStoreError } from '../storeError'
 import { v4 as uuidv4 } from 'uuid'
 import { questionPrismaToDomainType, questionInclude } from './questionHelpers'
 
@@ -14,7 +12,7 @@ export async function insertQuestion(
     client: PrismaClient,
     questionInput: CreateQuestionInput,
     user: CMSUserType
-): Promise<Question | StoreError> {
+): Promise<Question | Error> {
     const documents = questionInput.documents.map((document) => ({
         id: uuidv4(),
         name: document.name,
@@ -44,7 +42,7 @@ export async function insertQuestion(
         })
 
         return questionPrismaToDomainType(result)
-    } catch (e: unknown) {
-        return convertPrismaErrorToStoreError(e)
+    } catch (e) {
+        return e
     }
 }

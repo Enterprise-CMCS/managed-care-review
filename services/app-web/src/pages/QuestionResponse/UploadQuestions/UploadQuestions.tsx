@@ -143,7 +143,6 @@ export const UploadQuestions = () => {
                             id="questions-upload"
                             name="questions-upload"
                             label="Upload questions"
-                            renderMode="list"
                             aria-required
                             error={showFileUploadError ? fileUploadError : ''}
                             hint={

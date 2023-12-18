@@ -67,7 +67,7 @@ describe('UploadResponse', () => {
             level: 2,
         })
         // Expect text to display correct division from url parameters.
-        await screen.queryByText(`Questions from ${division.toUpperCase()}`)
+        screen.queryByText(`Questions from ${division.toUpperCase()}`)
         // Expect file upload input on page
         expect(await screen.findByTestId('file-input')).toBeInTheDocument()
         expect(screen.getByLabelText('Upload response')).toBeInTheDocument()
@@ -322,7 +322,7 @@ describe('UploadResponse', () => {
 
         await screen.findByTestId('error-alert')
         expect(
-            await screen.getByText("We're having trouble loading this page.")
+            screen.getByText("We're having trouble loading this page.")
         ).toBeDefined()
     })
 })

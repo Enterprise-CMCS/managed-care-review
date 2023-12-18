@@ -62,20 +62,23 @@ type Query {
 
     """
     indexRates returns an array of rates with their revisions and related contracts
-
-    It can be called by CMS users
+    Only rates with at least one submitted revision are returned
+    indexRates can be called by CMS and admin users
 
     Errors:
-    - ForbiddenError: This API is not available due to feature flags.
+    - ForbiddenError: User must be a CMS or Admin type user
+    - NotFoundError: No rates with at least one submitted revision were found 
     """
     indexRates: IndexRatesPayload!
     """
-    fetchRate returns an array of rates with their revisions and related contracts
+    fetchRate returns a rate with its revisions, including contract revisions
+    for a given rate's ID
 
     It can be called by CMS or State users
 
     Errors:
     - ForbiddenError: This API is not available due to feature flags.
+    - NotFoundError: rate for rate.ID not found in database
     """
     fetchRate(
         input: FetchRateInput!
@@ -269,16 +272,26 @@ type Mutation {
 }
 
 input CreateHealthPlanPackageInput {
-    "Population that the contract covers"
+    """
+    The large overarching population of people that the program covers.
+    Options are MEDICAID, CHIP, MEDICAID_AND_CHIP
+    """
     populationCovered: PopulationCoveredType!
     "An array of managed care program IDs this package covers"
     programIDs: [ID!]!
     "Whether or not this contract is risk based"
     riskBasedContract: Boolean
-    "The submission type of this package"
+    """
+    The submission type of this package
+    Options are CONTRACT_ONLY and CONTRACT_AND_RATES
+    """
     submissionType: SubmissionType!
-    "User description of the package"
+    "User description of the reason for the submission"
     submissionDescription: String!
+    """
+    Type of contract the state is submitting
+    Options are: BASE, AMENDMENT
+    """
     contractType: ContractType!
 }
 
@@ -727,22 +740,22 @@ type GenericDocument {
     sha256:  String!
 }
 
-"""
-Rates are rate certifications and their associated actuary contacts and documents
-State users may create, update, and submit several rates at a time
-"""
-
+"The large overarching population of people that the program covers."
 enum PopulationCovered {
     MEDICAID
     CHIP
     MEDICAID_AND_CHIP
 }
-
+"Whether contract has been fully executed by all parties or not"
 enum ContractExecutionStatus {
     EXECUTED
     UNEXECUTED
 }
 
+"""
+The type of organization the state is contracting with in order to deliver
+managed care services
+"""
 enum ManagedCareEntity {
     MCO
     PIHP
@@ -750,6 +763,10 @@ enum ManagedCareEntity {
     PCCM
 }
 
+"""
+The state plan and/or waiver authorities that allow the 
+state to run its managed care programs
+"""
 enum FederalAuthority {
     STATE_PLAN
     WAIVER_1915B
@@ -758,63 +775,156 @@ enum FederalAuthority {
     BENCHMARK
     TITLE_XXI
 }
-
+"Contact information for contacting states regarding their submission"
 type StateContact {
     name: String
     title: String
     email: String
 }
 
+"""
+ContractFormData represents the form data that was inputted by the state
+This type is used for the form data field found on a contract revision
+"""
 type ContractFormData {
+    """
+    An array of IDs representing state programs that the contract covers
+    """
     programIDs: [String!]!
+    """
+    The large overarching population of people that the program covers.
+    Options are MEDICAID, CHIP, MEDICAID_AND_CHIP
+    """
     populationCovered: PopulationCovered
+    """
+    The submission type of this package
+    Options are CONTRACT_ONLY and CONTRACT_AND_RATES
+    """
     submissionType: SubmissionType!
+    """
+    Whether or not this contract is risk based
+    Risk-based contracts have specific requirements that 
+    non-risk based contracts do not have
+    """
     riskBasedContract: Boolean
+    "State provided summary of the contract being submitted"
     submissionDescription: String!
+    """
+    Array of state contacts of state representatives who should be
+    contacted about updates to the contract
+    Each state contact contains string fields for: name, title, and email
+    """
     stateContacts: [StateContact!]!
+    """
+    Additional documents the state uploads to support a contract
+    Files can be PDF, DOC, DOCX, XLSX, CSV format
+    """
     supportingDocuments: [GenericDocument!]!
+    """
+    Type of contract the state is submitting
+    Options are: BASE, AMENDMENT
+    """
     contractType: ContractType
+    """
+    Execution status for a contract. 
+    Contracts are fully executed or unexecuted by some or all parties
+    Status can be either EXECUTED or UNEXECUTED
+    """
     contractExecutionStatus: ContractExecutionStatus
+    """
+    State upload of the submitted contract
+    """
     contractDocuments: [GenericDocument!]!
+    "Start date of the contract"
     contractDateStart: Date
+    "End date of the contract"
     contractDateEnd: Date
+    """
+    The type of organization the state is contracting with
+    in order to deliver managed care services
+    Options are MCO, PIHP, PAHP, and PCCM
+    """
     managedCareEntities: [ManagedCareEntity!]!
+    """
+    The state plan and/or waiver authorities that allow the state
+    to run its managed care programs
+    """
     federalAuthorities: [FederalAuthority!]!
+    """
+    If contract is in Lieu-of Services and Settings (ILOSs) 
+    in accordance with 42 CFR § 438.3(e)(2)
+    """
     inLieuServicesAndSettings: Boolean,
+    "If contract includes modifications to benefits provided by the managed care plans"
     modifiedBenefitsProvided: Boolean,
+    "If contract includes modifications to the geographic areas served by the managed care plans"
     modifiedGeoAreaServed: Boolean,
+    """
+    If contract includes modifications to the Medicaid beneficiaries served by the managed care
+    plans (e.g. eligibility or enrollment criteria)
+    """
     modifiedMedicaidBeneficiaries: Boolean,
+    "If contract includes modifications to the risk sharing strategy"
     modifiedRiskSharingStrategy: Boolean,
+    "If contract includes modifications to incentive arrangements"
     modifiedIncentiveArrangements: Boolean,
+    "If contract includes modifications to the withold agreements"
     modifiedWitholdAgreements: Boolean,
+    "If contract includes modifications to the state directed payments"
     modifiedStateDirectedPayments: Boolean,
+    "If contract includes modifications to the pass-through payments"
     modifiedPassThroughPayments: Boolean,
+    """
+    If contract includes modifications to payments to MCOs and PIHPs for enrollees that 
+    are a patient in an institution for mental disease
+    """
     modifiedPaymentsForMentalDiseaseInstitutions: Boolean,
+    "If contract includes modifications to the medical loss ratio standards"
     modifiedMedicalLossRatioStandards: Boolean,
+    """
+    If contract includes modifications to
+    other financial, payment, incentive or related contractual provisions
+    """
     modifiedOtherFinancialPaymentIncentive: Boolean,
+    "If contract includes modifications to the enrollment/disenrollment process"
     modifiedEnrollmentProcess: Boolean,
+    "If contract includes modifications to the grevience and appeal system"
     modifiedGrevienceAndAppeal: Boolean,
+    "If contract includes modifications to the network adequacy standards"
     modifiedNetworkAdequacyStandards: Boolean,
+    "If contract includes modifications to the length of the contract period"
     modifiedLengthOfContract: Boolean,
+    "If contract includes modifications to the non-risk payment arrangements"
     modifiedNonRiskPaymentArrangements: Boolean,
 }
 
+"Either new capitation rates (NEW) or updates to previously certified capitation rates (AMENDMENT)"
 enum RateType {
   NEW
   AMENDMENT
 }
 
+"""
+Determines on what basis the capitation rate is actuarially sound.
+With RATE_RANGE the state certifies a range of rates
+from the low to high end of the range as actuarially sound
+"""
 enum RateCapitationType {
   RATE_CELL
   RATE_RANGE
 }
 
-
+"""
+State's communication preference for contacting their actuaries. Either:
+- wants CMS to reach out to their actuaries directly or 
+- go through them
+"""
 enum ActuaryCommunication {
   OACT_TO_ACTUARY
   OACT_TO_STATE
 }
 
+"The firm that the certifying actuary works for"
 enum ActuarialFirm {
   MERCER
   MILLIMAN
@@ -825,6 +935,7 @@ enum ActuarialFirm {
   OTHER
 }
 
+"Contact information for the certifying or additional state actuary"
 type ActuaryContact  {
   name: String
   titleRole: String
@@ -833,68 +944,167 @@ type ActuaryContact  {
   actuarialFirmOther: String
 }
 
+"""
+A package in the system 
+that shares a rate with another package.
+It's used as a part of RateFormData
+"""
 type PackageWithSameRate  {
   packageName: String!
   packageId: String!
   packageStatus: String
 }
 
+"""
+RateFormData represents the form data that was inputted by the state
+This type is used for the form data field found on a rate revision
+"""
 type RateFormData {
+    """
+    Can be 'NEW' or 'AMENDMENT'
+    Refers to whether the state is submitting a brand new rate certification
+    or an amendment to an existing rate certification
+    """
     rateType: RateType
+    """
+    Can be 'RATE_CELL' or 'RATE_RANGE'
+    These values represent on what basis the capitation rate is actuarially sound 
+    """
     rateCapitationType: RateCapitationType
+    """
+    Signed certification documents the state uploads 
+    Files can be PDF, DOC, or DOCX format
+    """
     rateDocuments: [GenericDocument!]!
+    """
+    Additional documents the state uploads to support a rate cert
+    Files can be PDF, DOC, DOCX, XLSX, CSV format
+    """
     supportingDocuments: [GenericDocument!]!
+    """
+    If the rateType is NEW this is the start date of the 
+    rating period for a new certification.
+    If the rateType is AMENDMENT this is the start date of the
+    rating period for the original rate certification
+    """
     rateDateStart: Date
+    """
+    If the rateType is NEW this is the end date of the 
+    rating period for a new certification.
+    If the rateType is AMENDMENT this is the end date of the
+    rating period for the original rate certification
+    """
     rateDateEnd: Date
+    """
+    The date the rate certification was 
+    certified/signed by the state's actuary
+    """
     rateDateCertified: Date
+    """
+    The start date of the rate amendment
+    Only relevant if rate type is AMENDMENT
+    """
     amendmentEffectiveDateStart: Date
+    """
+    The end date of the rate amendment
+    Only relevant if rate type is AMENDMENT
+    """
     amendmentEffectiveDateEnd:  Date
+    """
+    An array of IDs representing state programs that the rate covers
+    """
     rateProgramIDs: [String!]!
+    """
+    Represents the name of the rate. 
+    This value is auto generated based on rate, package and state program details
+    """
     rateCertificationName: String
+    """
+    An array of ActuaryContacts
+    Each element includes the the name, title/role and email 
+    of the actuaries who certified the rate
+    """
     certifyingActuaryContacts: [ActuaryContact!]!
+    """
+    An array of additional ActuaryContacts
+    Each element includes the the name, title/role and email 
+    """
     addtlActuaryContacts: [ActuaryContact!]!
+    """
+    Is either OACT_TO_ACTUARY or OACT_TO_STATE
+    It specifies whether the state wants CMS to reach out to their actuaries 
+    directly or go through them
+    """
     actuaryCommunicationPreference: ActuaryCommunication
+    """
+    An array of PackageWithSameRate elements 
+    which contain the packageName, packageId, and packageStatus
+    These elements represent other packages in the system 
+    that are using this rate
+    """
     packagesWithSharedRateCerts: [PackageWithSameRate!]!
 }
 
 type ContractOnRevisionType {
     id: String!
+    "The two letter abbreviation for the state the contract covers"
     stateCode: String!
+    """
+    Maps a MC-Review contract to the record number
+    used in the MC-CRS system
+    """
     mccrsID: String
+    "Number of contracts a state has"
     stateNumber: Int!
 }
 
 type RelatedContractRevisions {
     id: String!
     contract: ContractOnRevisionType!
+    """
+    Information about who, when, and why this revision was unlocked.
+    Will be blank on the initial revision.
+    """
     submitInfo: UpdateInformation
+    "Information on who, when, and why this revision was submitted."
     unlockInfo: UpdateInformation
     createdAt: DateTime!
     updatedAt: DateTime!
     formData: ContractFormData!
 }
 
+"""
+A rate revision represents a single submission
+for the rate and contains the full data from when the rate cert was submitted
+"""
 type RateRevision {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
   """
-    Information about who, when, and why this revision was unlocked.
-    Will be blank on the initial revision.
-    """
+  Information about who, when, and why this revision was unlocked.
+  Will be blank on the initial revision.
+  """
   unlockInfo: UpdateInformation
-    "Information on who, when, and why this revision was submitted."
+  "Information on who, when, and why this revision was submitted."
   submitInfo: UpdateInformation
+  "The rate related form data that was inputed by the state"
   formData: RateFormData!
+  "Contract revisions related to the rate"
   contractRevisions: [RelatedContractRevisions!]!
 }
 
+"""
+Rates are rate certifications and their associated actuary contacts and documents
+State users may create, update, and submit several rates at a time
+"""
 type Rate {
     id: ID!
     createdAt: DateTime!
     updatedAt: DateTime!
     """
     Where the package is in the submission flow.
+    Options are DRAFT, SUBMITTED, RESUBMITTED and UNLOCKED
     SUBMITTED and RESUBMITTED packages cannot be modified
     """
     status: HealthPlanPackageStatus!
@@ -904,6 +1114,10 @@ type Rate {
     stateCode: String!
     "Fuller state data for the submitting state"
     state: State!
+    """
+    The number of contracts this rate relates to.
+    This value is used to generate the rateName
+    """
     stateNumber: Int!
     "The currently modifiable revision if the rate is DRAFT or UNLOCKED"
     draftRevision: RateRevision
@@ -919,11 +1133,18 @@ type RateEdge {
 }
 
 type IndexRatesPayload {
+    "Total number of submitted rates returned on request"
     totalCount: Int
+    """
+    Rates that include rate and contract revisions
+    """
     edges: [RateEdge!]!
 }
 
 type FetchRatePayload {
+    """
+    A rate that include contract and rate revisions
+    """
     rate: Rate!
 }
 

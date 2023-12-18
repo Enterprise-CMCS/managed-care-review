@@ -130,7 +130,6 @@ describe(`Tests $testName`, () => {
                     name: 'rateDocument.pdf',
                     s3URL: 'fakeS3URL',
                     sha256: 'fakesha',
-                    documentCategories: ['RATES' as const],
                 },
             ],
             supportingDocuments: [],
@@ -380,7 +379,6 @@ describe(`Tests $testName`, () => {
                             name: 'rateDocument.pdf',
                             s3URL: 'fakeS3URL',
                             sha256: 'fakesha',
-                            documentCategories: ['RATES' as const],
                         },
                     ],
                     supportingDocuments: [],
@@ -421,13 +419,11 @@ describe(`Tests $testName`, () => {
                     name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                     s3URL: 'fakeS3URL',
                     sha256: 'fakesha',
-                    documentCategories: ['CONTRACT_RELATED' as const],
                 },
                 {
                     name: 'rate_only_supporting_doc.pdf',
                     s3URL: 'fakeS3URL',
                     sha256: 'fakesha',
-                    documentCategories: ['CONTRACT_RELATED' as const],
                 },
             ],
         })
@@ -457,13 +453,11 @@ describe(`Tests $testName`, () => {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                         s3URL: 'fakeS3URL',
                         sha256: 'fakesha',
-                        documentCategories: ['CONTRACT_RELATED' as const],
                     },
                     {
                         name: 'rate_only_supporting_doc.pdf',
                         s3URL: 'fakeS3URL',
                         sha256: 'fakesha',
-                        documentCategories: ['CONTRACT_RELATED' as const],
                     },
                 ],
             })
@@ -481,13 +475,11 @@ describe(`Tests $testName`, () => {
                     name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                     s3URL: 'fakeS3URL',
                     sha256: 'fakesha',
-                    documentCategories: ['CONTRACT_RELATED' as const],
                 },
                 {
                     name: 'rate_only_supporting_doc.pdf',
                     s3URL: 'fakeS3URL',
                     sha256: 'fakesha',
-                    documentCategories: ['CONTRACT_RELATED' as const],
                 },
             ],
         })
@@ -510,13 +502,11 @@ describe(`Tests $testName`, () => {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                         s3URL: 'fakeS3URL',
                         sha256: 'fakesha',
-                        documentCategories: ['CONTRACT_RELATED'],
                     },
                     {
                         name: 'rate_only_supporting_doc.pdf',
                         s3URL: 'fakeS3URL',
                         sha256: 'fakesha',
-                        documentCategories: ['CONTRACT_RELATED'],
                     },
                 ],
             })

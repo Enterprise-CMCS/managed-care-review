@@ -20,8 +20,6 @@ import { getCurrentRevisionFromHealthPlanPackage } from '../../../gqlHelpers'
 import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 import { DataDetailContactField } from '../../DataDetail/DataDetailContactField/DataDetailContactField'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../DocumentWarning'
@@ -71,22 +69,12 @@ export const RateDetailsSummarySection = ({
     statePrograms,
     onDocumentError,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
-    // feature flags state management
-    const ldClient = useLDClient()
-    const supportingDocsByRate = ldClient?.variation(
-        featureFlags.SUPPORTING_DOCS_BY_RATE.flag,
-        featureFlags.SUPPORTING_DOCS_BY_RATE.defaultValue
-    )
-
     const [packageNamesLookup, setPackageNamesLookup] =
         React.useState<PackageNamesLookupType | null>(null)
 
     const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
-    const submissionLevelRateSupportingDocuments = submission.documents.filter(
-        (doc) => doc.documentCategories.includes('RATES_RELATED')
-    )
 
     const { getKey, getBulkDlURL } = useS3()
     const [zippedFilesURL, setZippedFilesURL] = useState<
@@ -208,16 +196,7 @@ export const RateDetailsSummarySection = ({
         async function fetchZipUrl() {
             const keysFromDocs = submission.rateInfos
                 .flatMap((rateInfo) =>
-                    supportingDocsByRate
-                        ? rateInfo.rateDocuments.concat(
-                              rateInfo.supportingDocuments
-                          )
-                        : rateInfo.rateDocuments
-                )
-                .concat(
-                    supportingDocsByRate
-                        ? []
-                        : submissionLevelRateSupportingDocuments
+                    rateInfo.rateDocuments.concat(rateInfo.supportingDocuments)
                 )
                 .map((doc) => {
                     const key = getKey(doc.s3URL)
@@ -251,9 +230,7 @@ export const RateDetailsSummarySection = ({
         getKey,
         getBulkDlURL,
         submission,
-        submissionLevelRateSupportingDocuments,
         submissionName,
-        supportingDocsByRate,
         isSubmitted,
         isPreviousSubmission,
     ])
@@ -390,7 +367,7 @@ export const RateDetailsSummarySection = ({
                             ) : (
                                 <span className="srOnly">'LOADING...'</span>
                             )}
-                            {supportingDocsByRate && !loading ? (
+                            {!loading ? (
                                 <UploadedDocumentsTable
                                     documents={rateInfo.supportingDocuments}
                                     packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
@@ -412,20 +389,6 @@ export const RateDetailsSummarySection = ({
             ) : (
                 <DataDetailMissingField />
             )}
-            {
-                // START  - This whole block gets deleted when we remove the feature flag.
-                !supportingDocsByRate && (
-                    <UploadedDocumentsTable
-                        documents={submissionLevelRateSupportingDocuments}
-                        documentDateLookupTable={documentDateLookupTable}
-                        caption="Rate supporting documents"
-                        documentCategory="Rate-supporting"
-                        isSupportingDocuments
-                        isEditing={isEditing}
-                    />
-                )
-                // This whole block gets deleted when we remove the feature flag - END
-            }
         </SectionCard>
     )
 }

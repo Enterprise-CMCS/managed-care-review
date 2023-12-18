@@ -1,22 +1,19 @@
 import type { User, State } from '@prisma/client'
 import type { UserType } from '../../domain-models'
-import type { StoreError } from '../storeError'
-import { isStoreError } from '../storeError'
 
 // We are storing all the possible values for any of the user types in the same
 // table in prisma, so we need to parse those into valid UserTypes or error if something
 // got stored wrong.
 function domainUserFromPrismaUser(
     prismaUser: User & { stateAssignments?: State[] }
-): UserType | StoreError {
+): UserType | Error {
     const divisionAssignment = prismaUser.divisionAssignment ?? undefined
     switch (prismaUser.role) {
         case 'STATE_USER':
             if (!prismaUser.stateCode) {
-                return {
-                    code: 'USER_FORMAT_ERROR',
-                    message: `StateUser has no stateCode; id: ${prismaUser.id}`,
-                }
+                return new Error(
+                    `StateUser has no stateCode; id: ${prismaUser.id}`
+                )
             }
 
             return {
@@ -29,10 +26,9 @@ function domainUserFromPrismaUser(
             }
         case 'CMS_USER':
             if (!prismaUser.stateAssignments) {
-                return {
-                    code: 'USER_FORMAT_ERROR',
-                    message: `CMSUser has no states array, probably a programming error; id: ${prismaUser.id}`,
-                }
+                return new Error(
+                    `CMSUser has no states array, probably a programming error; id: ${prismaUser.id}`
+                )
             }
 
             return {
@@ -73,12 +69,12 @@ function domainUserFromPrismaUser(
 
 function parseDomainUsersFromPrismaUsers(
     prismaUsers: (User & { stateAssignments?: State[] })[]
-): UserType[] | StoreError {
+): UserType[] | Error {
     const users: UserType[] = []
-    const errors: StoreError[] = []
+    const errors: Error[] = []
     for (const prismaUser of prismaUsers) {
         const result = domainUserFromPrismaUser(prismaUser)
-        if (isStoreError(result)) {
+        if (result instanceof Error) {
             errors.push(result)
         } else {
             users.push(result)
@@ -86,12 +82,10 @@ function parseDomainUsersFromPrismaUsers(
     }
 
     if (errors.length > 0) {
-        return {
-            code: 'USER_FORMAT_ERROR',
-            message: `Some of the fetched users did not have all their required fields in the db: ${errors
-                .map((e) => e.message)
-                .join(', ')}`,
-        }
+        const msg = `Some of the fetched users did not have all their required fields in the db: ${errors
+            .map((e) => e.message)
+            .join(', ')}`
+        return new Error(msg)
     }
 
     return users

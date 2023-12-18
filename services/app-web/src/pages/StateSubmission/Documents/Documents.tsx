@@ -17,8 +17,6 @@ import { PageActions } from '../PageActions'
 import classNames from 'classnames'
 import { ErrorSummary } from '../../../components/Form'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
 import { RoutesRecord } from '../../../constants'
 
 export const Documents = ({
@@ -27,14 +25,7 @@ export const Documents = ({
     updateDraft,
 }: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(false)
-    const isContractOnly = draftSubmission.submissionType === 'CONTRACT_ONLY'
     const navigate = useNavigate()
-    const ldClient = useLDClient()
-
-    const supportingDocsByRate = ldClient?.variation(
-        featureFlags.SUPPORTING_DOCS_BY_RATE.flag,
-        featureFlags.SUPPORTING_DOCS_BY_RATE.defaultValue
-    )
 
     // Documents state management
     const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
@@ -44,16 +35,6 @@ export const Documents = ({
     )
     const [isSubmitting, setIsSubmitting] = useState(false) // mock same behavior as formik isSubmitting
 
-    const hasMissingCategories =
-        /* fileItems must have some document category.  a contract-only submission
-       must have "CONTRACT_RELATED" as the document category. */
-        fileItems.length > 0 &&
-        (fileItems.some((docs) => docs.documentCategories.length === 0) ||
-            (isContractOnly &&
-                fileItems.some(
-                    (docs) =>
-                        !docs.documentCategories.includes('CONTRACT_RELATED')
-                )))
     const hasLoadingFiles =
         fileItems.some((item) => item.status === 'PENDING') ||
         fileItems.some((item) => item.status === 'SCANNING')
@@ -71,8 +52,6 @@ export const Documents = ({
             } else if (item.status === 'UPLOAD_ERROR') {
                 errorsObject[key] =
                     'You must remove or retry files that failed to upload'
-            } else if (item.documentCategories.length === 0) {
-                errorsObject[key] = 'You must select a document category'
             }
         })
         return errorsObject
@@ -82,10 +61,9 @@ export const Documents = ({
     const errorSummary =
         showFileUploadError && hasLoadingFiles
             ? 'You must wait for all documents to finish uploading before continuing'
-            : (showFileUploadError && !hasValidFiles) ||
-              (shouldValidate && hasMissingCategories)
-            ? 'You must remove all documents with error messages before continuing'
-            : undefined
+            : showFileUploadError && !hasValidFiles
+              ? 'You must remove all documents with error messages before continuing'
+              : undefined
 
     // Error summary state management
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
@@ -113,7 +91,6 @@ export const Documents = ({
                     s3URL: undefined,
                     sha256: doc.sha256,
                     status: 'UPLOAD_ERROR',
-                    documentCategories: doc.documentCategories,
                 }
             }
             return {
@@ -123,7 +100,6 @@ export const Documents = ({
                 s3URL: doc.s3URL,
                 sha256: doc.sha256,
                 status: 'UPLOAD_COMPLETE',
-                documentCategories: doc.documentCategories,
             }
         })
 
@@ -138,15 +114,6 @@ export const Documents = ({
     }: {
         fileItems: FileItemT[]
     }) => {
-        // When supportingDocsByRate flag is on, all documents on the supporting documents page are CONTRACT_RELATED.
-        // If the files documentCategories contains a category we skip as to not overwrite existing documents.
-        if (supportingDocsByRate) {
-            fileItems = fileItems.map((file) =>
-                file.documentCategories.length
-                    ? file
-                    : { ...file, documentCategories: ['CONTRACT_RELATED'] }
-            )
-        }
         setFileItems(fileItems)
     }
 
@@ -210,7 +177,7 @@ export const Documents = ({
             // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
             // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
             if (shouldValidateDocuments) {
-                if (!hasValidFiles || hasMissingCategories) {
+                if (!hasValidFiles) {
                     setShouldValidate(true)
                     setFocusErrorSummaryHeading(true)
                     return
@@ -244,8 +211,6 @@ export const Documents = ({
                             name: fileItem.name,
                             s3URL: fileItem.s3URL,
                             sha256: fileItem.sha256,
-                            documentCategories:
-                                fileItem.documentCategories || [],
                         })
                     }
                     return formDataDocuments
@@ -305,7 +270,6 @@ export const Documents = ({
                         id="documents"
                         name="documents"
                         label="Upload contract-supporting documents"
-                        renderMode={supportingDocsByRate ? 'list' : 'table'}
                         hint={
                             <>
                                 <Link
@@ -333,12 +297,6 @@ export const Documents = ({
                         scanFile={handleScanFile}
                         deleteFile={handleDeleteFile}
                         onFileItemsUpdate={onFileItemsUpdate}
-                        isContractOnly={isContractOnly}
-                        shouldDisplayMissingCategoriesError={
-                            !isContractOnly &&
-                            shouldValidate &&
-                            hasMissingCategories
-                        }
                     />
                 </fieldset>
                 <PageActions
