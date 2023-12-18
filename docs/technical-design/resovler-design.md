@@ -22,7 +22,7 @@ Errors from these functions propagate up to the resolver where it will be handle
 
 ### Diagram
 [Miro link](https://miro.com/app/board/o9J_lS5oLDk=/?moveToWidget=3458764573512051070&cot=14)
-![resolver-design-diagram](../../.images/resolver-design-diagram.png)#
+![resolver-design-diagram](../../.images/resolver-design-diagram.png)
 
 ## General Guidance
 ### Postgres Database Operations
