@@ -7,7 +7,7 @@ echo "prepping clamav (${VERSION})"
 
 yum update -y
 amazon-linux-extras install epel -y
-yum install -y cpio yum-utils zip
+yum install -y cpio yum-utils tar
 
 # extract binaries for clamav, json-c, pcre
 mkdir -p /tmp/build
