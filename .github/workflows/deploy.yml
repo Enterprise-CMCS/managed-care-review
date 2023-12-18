@@ -458,12 +458,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: cypress-gen
           path: ./services/cypress/gen
@@ -560,7 +560,7 @@ jobs:
           echo $(pwd)
           ls
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
 
       - name: Create combined test coverage report
         run: |
