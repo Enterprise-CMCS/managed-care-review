@@ -11,14 +11,14 @@
 
 .container {
     width: 100%;
-    max-width: $mcr-container-standard-width-fixed;
+    max-width: $mcr-container-max-width-fixed;
     padding: 0 2rem 0 2rem;
 }
 
 .alertContainer {
     padding-top: units(4);
     margin: auto;
-    max-width: $mcr-container-standard-width-fixed;
+    max-width: $mcr-container-max-width-fixed;
 }
 
 .panel {
