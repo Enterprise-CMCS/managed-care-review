@@ -179,7 +179,7 @@ jobs:
 
       - name: Unzip clamav layer
         run: |
-          tar -C /services/uploads/lambda-layers-clamav -xf ./services/uploads/lambda-layers-clamav/lambda_layer.tar.gz
+          tar -C ./services/uploads/lambda-layers-clamav -xf ./services/uploads/lambda-layers-clamav/lambda_layer.tar.gz
           rm -f ./services/uploads/lambda-layers-clamav/lambda_layer.tar.gz
 
       - name: deploy uploads
