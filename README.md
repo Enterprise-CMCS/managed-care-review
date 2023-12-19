@@ -109,8 +109,8 @@ When run locally (with LOCAL_LOGIN=true), auth bypasses Cognito and uses [`serve
 Run whole app locally
 
 -   `./dev local` to run the entire app and storybook
--   Available flags: `--storybook`, `--web`, `--api`, `--s3`, '--postgres' for running services individually
--   (you can also exclude services by using the yargs 'no' standard: `./dev local --no-storybook`)
+-   Available flags:  `--web`, `--api`, `--s3`, '--postgres' for running services individually
+-   (you can also exclude services by using the yargs 'no' standard: `./dev local --no-webk`)
 
 Run individual services locally
 
@@ -128,9 +128,13 @@ Run tests locally
 -   `./dev test` (or `dev test check`) to run all the tests that CI runs, once. This will run the web, api, and browser tests, requires the database to be running.
 -   Run with flags `./dev test --unit`, `.dev test --online`, to filter down, but still run once.
 
-Clear dependencies
+Clear and rebuild dependencies
 
--   `./dev clean`
+-   `./dev clean` && `./dev rebuild`
+
+Run storybook
+
+-   `./dev storybook`
 
 Run web app locally, but configured to run against a deployed backend
 

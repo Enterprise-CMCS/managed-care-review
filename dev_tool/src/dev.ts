@@ -81,7 +81,6 @@ type runLocalFlags = {
     runPostgres: boolean
     runOtel: boolean
     runS3: boolean
-    runStoryBook: boolean
 }
 async function runAllLocally({
     runAPI,
@@ -89,16 +88,16 @@ async function runAllLocally({
     runPostgres,
     runOtel,
     runS3,
-    runStoryBook,
 }: runLocalFlags) {
     const runner = new LabeledProcessRunner()
 
-    runPostgres && runPostgresLocally(runner)
-    runOtel && runOtelLocally(runner)
-    runS3 && runS3Locally(runner)
-    runAPI && runAPILocally(runner)
-    runWeb && runWebLocally(runner)
-    runStoryBook && runStorybookLocally(runner)
+    await Promise.all([
+        runPostgres && runPostgresLocally(runner),
+        runOtel && runOtelLocally(runner),
+        runS3 && runS3Locally(runner),
+        runAPI && runAPILocally(runner),
+        runWeb && runWebLocally(runner),
+    ])
 }
 
 async function runAllTests({
@@ -184,13 +183,9 @@ function main() {
                 return yargs
                     .command(
                         ['all', '*'], // adding '*' here makes this subcommand the default command
-                        'runs all local services. You can exclude specific services with --no-* like --no-storybook',
+                        'runs all local services. You can exclude specific services with --no-* like --no-web',
                         (yargs) => {
                             return yargs
-                                .option('storybook', {
-                                    type: 'boolean',
-                                    describe: 'run storybook locally',
-                                })
                                 .option('web', {
                                     type: 'boolean',
                                     describe: 'run web locally',
@@ -214,8 +209,8 @@ function main() {
                                 .example([
                                     ['$0 local', 'run all local services'],
                                     [
-                                        '$0 local --no-storybook',
-                                        'run all services except storybook',
+                                        '$0 local --no-web',
+                                        'run all services except web',
                                     ],
                                     [
                                         '$0 local --api --postgres',
@@ -223,14 +218,13 @@ function main() {
                                     ],
                                 ])
                         },
-                        (args) => {
+                        async (args) => {
                             const inputFlags = {
                                 runAPI: args.api,
                                 runWeb: args.web,
                                 runPostgres: args.postgres,
                                 runOtel: args.otel,
                                 runS3: args.s3,
-                                runStoryBook: args.storybook,
                             }
 
                             const parsedFlags = parseRunFlags(inputFlags)
@@ -242,7 +236,7 @@ function main() {
                                 process.exit(1)
                             }
 
-                            runAllLocally(parsedFlags)
+                            await runAllLocally(parsedFlags)
                         }
                     )
                     .command(
