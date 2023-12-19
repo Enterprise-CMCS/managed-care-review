@@ -23,7 +23,7 @@ curl -L --output glibc-2.28-127.el8.x86_64.rpm https://www.rpmfind.net/linux/cen
 rpm2cpio glibc*.rpm | cpio -vimd
 
 # Download other package dependencies
-yumdownloader -x \*i686 --archlist=x86_64 clamav clamav-lib clamav-update json-c pcre2 libxml2 bzip2-libs libtool-ltdl xz-libs libprelude gnutls nettle libcurl libnghttp2 libidn2 libssh2 openldap libffi krb5-libs keyutils-libs libunistring cyrus-sasl-lib nss nspr libselinux openssl-libs libcrypt systemd-libs
+yumdownloader -x \*i686 --archlist=x86_64 clamav clamav-lib clamav-update json-c pcre2 libxml2 bzip2-libs libtool-ltdl xz-libs libprelude gnutls nettle libcurl libnghttp2 libidn2 libssh2 openldap libffi krb5-libs keyutils-libs libunistring cyrus-sasl-lib nss nspr libselinux openssl-libs libcrypt systemd-libs lz4
 rpm2cpio clamav-lib*.rpm | cpio -vimd
 rpm2cpio clamav-update*.rpm | cpio -vimd
 rpm2cpio json-c*.rpm | cpio -vimd
@@ -51,6 +51,7 @@ rpm2cpio libselinux*.rpm | cpio -vimd
 rpm2cpio openssl-libs*.rpm | cpio -vimd
 rpm2cpio libcrypt*.rpm | cpio -vimd
 rpm2cpio systemd-libs*.rpm | cpio -vimd
+rpm2cpio lz4*.rpm | cpio -vimd
 
 # reset the timestamps so that we generate a reproducible zip file where
 # running with the same file contents we get the exact same hash even if we
