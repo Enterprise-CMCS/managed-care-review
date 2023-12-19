@@ -25,7 +25,7 @@ Errors from these functions propagate up to the resolver where it will be handle
 ![resolver-design-diagram](../../.images/resolver-design-diagram.png)
 
 ## General Guidance
-### Postgres Database Operations
+### Postgres Module
 [Postgres](https://www.postgresql.org/docs/) database operations are contained in functions that we call **postgres handlers**. You can find all the handlers in [`services/app-api/src/postgres/`](../../services/app-api/src/postgres). In these handler functions the database operations are performed using [Prisma ORM](https://www.prisma.io/docs/orm) which itself uses Prisma generated types and returns data from the database as these types. So in most of the handlers, data from the operation must be converted to a domain model type before returning to the resolver. Any errors occurring in the handler functions should be returned to the resolver to handle.
 
 It's important that data from the DB is converted to the domain model before returning to the resolver to adhere to our strategy of using the domain model as the internal communication protocol for different parts of our app. 
@@ -37,7 +37,7 @@ The diagram below is the data flow diagram for `createHealthPlanPackage` resolve
 [Miro link](https://miro.com/app/board/o9J_lS5oLDk=/?moveToWidget=3458764573517610448&cot=14)
 ![postgres-handler-diagram](../../.images/postgres-handler-diagram.png)
 
-Form the diagram above, you can see that `createHealthPlanPackage` resolver calls `insertDraftContract` Postgres handler function to create a new draft contract. 
+Form the diagram above, you can see that `createHealthPlanPackage` resolver calls `insertDraftContract` handler function in the Postgres Module to create a new draft contract. 
 
 Notice the arrow coming from the resolver to the handler does not directly connect to the `Prisma ORM` this is because most handlers will do more data transformations and validations before passing them off to the `Prisma ORM` to perform the `Postgres` operation.
 
@@ -45,12 +45,11 @@ After performing the operation the `Postgres` data returned to `Prisma ORM` is p
 
 Any errors that occurs in the handlers should be returned to the resolver to handle.
 
-### Feature Flags
-### Parameter Store
-### Email Notifications
-### Data transformation
+### Feature Flag Module
+### Parameter Store Module
+### Email Notifications Module
+### Proto Module
 ### Validations
-### Protobuf Module
 ### Error handling
 
 ## Related Documentation
