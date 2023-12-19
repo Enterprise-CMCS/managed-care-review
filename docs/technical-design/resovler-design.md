@@ -35,7 +35,7 @@ Resolvers are passed Postgres handlers via [dependency injection](design-pattern
 The diagram below is the data flow diagram for `createHealthPlanPackage` resolver.
 
 [Miro link](https://miro.com/app/board/o9J_lS5oLDk=/?moveToWidget=3458764573517610448&cot=14)
-![createHealthPlanPackage-diagram](../../.images/createHealthPlanPackage-diagram.png)
+![postgres-handler-diagram](../../.images/postgres-handler-diagram.png)
 
 Form the diagram above, you can see that `createHealthPlanPackage` resolver calls `insertDraftContract` Postgres handler function to create a new draft contract. 
 
