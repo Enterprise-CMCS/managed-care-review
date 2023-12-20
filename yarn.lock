@@ -11692,16 +11692,16 @@
   integrity sha512-5iV2NKZnzxJwZZ4DM5JVbRG/nkhAbzEskKaLBB82PmYGKzaDHuMHP1lcPoD/rtYMlowZgNA/RQndfKvPBPwmXA==
 
 "@octokit/action@^5.0.2":
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/@octokit/action/-/action-5.0.2.tgz#c0bbbc6094f81a013556e8b45e3ab552e575f719"
-  integrity sha512-MisDAUHxASngd6fvh4Klibxmwfszd8GLYEXfKfaeH2A4j3g5BGwZyy17Y0lawZpOGHOfNu8fqY1pKgzXnqBkOA==
+  version "5.0.6"
+  resolved "https://registry.yarnpkg.com/@octokit/action/-/action-5.0.6.tgz#ff8de161ae6da37a5cba75ede11c8904d903d3b4"
+  integrity sha512-jVZctvHzD9Cp1YZ5izcmcu2L9Y08Pe3ldjDu7vC2hyWQwz0fBhGrfKT5s4eNZ19K92UzO40cFzAFf1U4IOf13A==
   dependencies:
     "@octokit/auth-action" "^2.0.0"
     "@octokit/core" "^4.0.0"
     "@octokit/plugin-paginate-rest" "^6.0.0"
     "@octokit/plugin-rest-endpoint-methods" "^7.0.0"
     "@octokit/types" "^9.0.0"
-    https-proxy-agent "^5.0.1"
+    https-proxy-agent "^7.0.0"
 
 "@octokit/app@^13.1.5":
   version "13.1.8"
@@ -17511,6 +17511,13 @@ agent-base@6, agent-base@^6.0.0, agent-base@^6.0.2:
   integrity sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==
   dependencies:
     debug "4"
+
+agent-base@^7.0.2:
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-7.1.0.tgz#536802b76bc0b34aa50195eb2442276d613e3434"
+  integrity sha512-o/zjMZRhJxny7OyEF+Op8X+efiELC7k7yOjMzgfzVqOzXqkBkWI79YoTdOtsuWd5BWhAGAuOY/Xa6xpiaWXiNg==
+  dependencies:
+    debug "^4.3.4"
 
 agentkeepalive@^4.2.1:
   version "4.2.1"
@@ -24795,6 +24802,14 @@ https-proxy-agent@5, https-proxy-agent@^5.0.0, https-proxy-agent@^5.0.1:
   integrity sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==
   dependencies:
     agent-base "6"
+    debug "4"
+
+https-proxy-agent@^7.0.0:
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-7.0.2.tgz#e2645b846b90e96c6e6f347fb5b2e41f1590b09b"
+  integrity sha512-NmLNjm6ucYwtcUmL7JQC1ZQ57LmHP4lT15FQ8D61nak1rO6DH+fz5qNK2Ap5UN4ZapYICE3/0KodcLYSPsPbaA==
+  dependencies:
+    agent-base "^7.0.2"
     debug "4"
 
 human-signals@^1.1.1:
