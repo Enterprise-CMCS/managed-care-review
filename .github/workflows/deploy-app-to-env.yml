@@ -85,13 +85,13 @@ jobs:
       - name: upload app web gen directory
         uses: actions/upload-artifact@v4
         with:
-          name: app-web-gen - app to env
+          name: app-web-gen deploy
           path: ./services/app-web/src/gen
 
       - name: upload cypress gen directory
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-gen - app to env
+          name: cypress-gen deploy
           path: ./services/cypress/gen
 
       - uses: actions/download-artifact@v4

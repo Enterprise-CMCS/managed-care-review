@@ -518,7 +518,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always() && steps.cypress.outcome != 'skipped'
         with:
-          name: cypress-videos
+          name: cypress-videos deploy
           path: services/cypress/videos
       - name: upload partial cypress coverage
         uses: actions/upload-artifact@v4
