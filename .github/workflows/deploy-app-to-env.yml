@@ -82,13 +82,13 @@ jobs:
       - name: Generate Code
         run: npx lerna run generate
 
-      - name: upload app web gen directory
+      - name: upload app web gen directory - app to env
         uses: actions/upload-artifact@v4
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
-      - name: upload cypress gen directory
+      - name: upload cypress gen directory - app to env
         uses: actions/upload-artifact@v4
         with:
           name: cypress-gen
