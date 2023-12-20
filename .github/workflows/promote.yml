@@ -225,12 +225,12 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: app-web-gen
+          name: app-web-gen deploy prod
           path: ./services/app-web/src/gen
 
       - uses: actions/download-artifact@v4
         with:
-          name: cypress-gen
+          name: cypress-gen deploy prod
           path: ./services/cypress/gen
 
       - name: Cypress chrome fix
