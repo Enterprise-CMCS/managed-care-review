@@ -109,19 +109,19 @@ jobs:
         run: yarn test:once --coverage
 
       - name: upload app web gen directory
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
       - name: upload cypress gen directory
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: cypress-gen
           path: ./services/cypress/gen
 
       - name: upload unit test coverage
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: unit-test-coverage
           path: ./services/app-web/coverage/coverage-final.json
@@ -189,7 +189,7 @@ jobs:
           yarn test:once --coverage
 
       - name: upload api test coverage
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: api-test-coverage
           path: ./services/app-api/coverage/coverage-final.json
@@ -239,12 +239,12 @@ jobs:
         working-directory: services/app-api
         run: ./scripts/prepare-prisma-layer.sh
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/app-api/lambda-layers-prisma-client-migration
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/app-api/lambda-layers-prisma-client-engine
@@ -278,7 +278,7 @@ jobs:
       needs.api-unit-tests.result == 'success' &&
       needs.build-prisma-client-lambda-layer.result == 'success' &&
       needs.begin-deployment.result == 'success'
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@Bump-actions-download-and-upload-artifact-from-3-to-4
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
@@ -458,12 +458,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: cypress-gen
           path: ./services/cypress/gen
@@ -508,26 +508,26 @@ jobs:
           CYPRESS_VIDEOS_FOLDER: services/cypress/videos
 
       - name: Upload cypress screenshots
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure() && steps.cypress.outcome == 'failure'
         with:
-          name: cypress-screenshots
+          name: cypress-screenshots-${{ matrix.containers}}
           path: services/cypress/screenshots
 
       - name: Upload cypress video
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always() && steps.cypress.outcome != 'skipped'
         with:
-          name: cypress-videos
+          name: cypress-videos-${{ matrix.containers}}
           path: services/cypress/videos
       - name: upload partial cypress coverage
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: partial-cypress-coverage-${{ matrix.containers}}
           path: ./coverage-cypress/lcov.info
 
       - name: upload partial cypress coverage json
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: cypress-json-coverage-${{ matrix.containers}}
           path: ./coverage-cypress/coverage-final.json
@@ -560,7 +560,7 @@ jobs:
           echo $(pwd)
           ls
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
 
       - name: Create combined test coverage report
         run: |
@@ -597,7 +597,7 @@ jobs:
           cd coverage-all
           echo "Coverage reports merged"
       - name: Upload combined test coverage
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: combined-test-coverage
           path: ./coverage-all/
