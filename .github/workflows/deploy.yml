@@ -511,14 +511,14 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure() && steps.cypress.outcome == 'failure'
         with:
-          name: cypress-screenshots
+          name: cypress-screenshots-${{ matrix.containers}}
           path: services/cypress/screenshots
 
       - name: Upload cypress video
         uses: actions/upload-artifact@v4
         if: always() && steps.cypress.outcome != 'skipped'
         with:
-          name: cypress-videos deploy
+          name: cypress-videos-${{ matrix.containers}}
           path: services/cypress/videos
       - name: upload partial cypress coverage
         uses: actions/upload-artifact@v4
