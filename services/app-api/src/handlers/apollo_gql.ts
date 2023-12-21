@@ -32,6 +32,7 @@ import {
     ApolloServerPluginLandingPageLocalDefault,
     ApolloServerPluginLandingPageDisabled,
 } from 'apollo-server-core'
+import { newJWTLib } from '../jwt'
 
 const requestSpanKey = 'REQUEST_SPAN'
 let tracer: Tracer
@@ -307,6 +308,13 @@ async function initializeGQLHandler(): Promise<Handler> {
         plugins = [ApolloServerPluginLandingPageLocalDefault({ embed: true })]
     }
 
+    // Hard coding this for now, next job is to run this config to this app.
+    const jwtLib = newJWTLib({
+        issuer: 'fakeIssuer',
+        signingKey: 'notrandom',
+        expirationDurationS: 90 * 24 * 60 * 60, // 90 days
+    })
+
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
     console.info('Running With Config: ', {
         authMode,
@@ -353,7 +361,8 @@ async function initializeGQLHandler(): Promise<Handler> {
         store,
         emailer,
         emailParameterStore,
-        launchDarkly
+        launchDarkly,
+        jwtLib
     )
 
     const userFetcher =

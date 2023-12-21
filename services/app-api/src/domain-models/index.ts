@@ -67,3 +67,5 @@ export type {
     QuestionResponseType,
     QuestionResponseDocument,
 } from './QuestionResponseType'
+
+export type { APIKeyType } from './apiKey'
