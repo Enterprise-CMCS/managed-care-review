@@ -59,6 +59,7 @@
         "neverthrow": "^6.0.0",
         "path-to-regexp": "^6.2.1",
         "protobufjs": "^6.11.2",
+        "purify-ts": "^2.0.1",
         "request": "^2.88.2",
         "uuid": "^9.0.0",
         "zod": "^3.11.6"

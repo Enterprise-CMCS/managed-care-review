@@ -1,0 +1,6 @@
+mutation createAPIKey {
+    createAPIKey {
+        key
+        expiresAt
+    }
+}
