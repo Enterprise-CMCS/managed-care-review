@@ -252,6 +252,8 @@ jobs:
   build-clamav-layer:
     name: build - clamav layer
     runs-on: ubuntu-20.04
+    container:
+      image: public.ecr.aws/sam/build-nodejs18.x:1
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
