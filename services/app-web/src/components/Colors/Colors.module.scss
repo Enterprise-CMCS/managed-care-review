@@ -1,51 +1,51 @@
-@use '../../styles/custom.scss' as *;
+@use '../../styles/custom.scss' as custom;
 
 :export {
   mcr: {
     primary: {
-        lightest: $mcr-primary-lightest;
-        lighter: $mcr-primary-lighter;
-        light: $mcr-primary-light;
-        base: $mcr-primary-base;
-        dark: $mcr-primary-dark;
-        darkest: $mcr-primary-darkest;
+        lightest: custom.$mcr-primary-lightest;
+        lighter: custom.$mcr-primary-lighter;
+        light: custom.$mcr-primary-light;
+        base: custom.$mcr-primary-base;
+        dark: custom.$mcr-primary-dark;
+        darkest: custom.$mcr-primary-darkest;
         }
     cmsblue: {
-      lightest: $mcr-cmsblue-lightest;
-      base: $mcr-cmsblue-base;
-      dark: $mcr-cmsblue-dark;
-      darkest: $mcr-cmsblue-darkest;
+      lightest: custom.$mcr-cmsblue-lightest;
+      base: custom.$mcr-cmsblue-base;
+      dark: custom.$mcr-cmsblue-dark;
+      darkest: custom.$mcr-cmsblue-darkest;
     }
     cyan: {
-      light: $mcr-cyan-light;
-      base:  $mcr-cyan-base;
-      dark: $mcr-cyan-dark;
+      light: custom.$mcr-cyan-light;
+      base:  custom.$mcr-cyan-base;
+      dark: custom.$mcr-cyan-dark;
         }
     gold: {
-      base:  $mcr-gold-base;
-       dark: $mcr-gold-dark;
-      darker: $mcr-gold-darker;
+      base:  custom.$mcr-gold-base;
+       dark: custom.$mcr-gold-dark;
+      darker: custom.$mcr-gold-darker;
     }
     gray: {
-      dark: $mcr-gray-dark;
-      base : $mcr-gray-base;
-      lighter: $mcr-gray-lighter;
-      lightest: $mcr-gray-lightest;
+      dark: custom.$mcr-gray-dark;
+      base : custom.$mcr-gray-base;
+      lighter: custom.$mcr-gray-lighter;
+      lightest: custom.$mcr-gray-lightest;
     }
      foundation: {
-     white: $mcr-foundation-white;
-      hint: $mcr-foundation-hint;
-      link: $mcr-foundation-link;
-      ink : $mcr-foundation-ink;
+     white: custom.$mcr-foundation-white;
+      hint: custom.$mcr-foundation-hint;
+      link: custom.$mcr-foundation-link;
+      ink : custom.$mcr-foundation-ink;
     }
     success: {
-        base: $mcr-success-base;
-        hover: $mcr-success-hover;
-        dark: $mcr-success-dark;
+        base: custom.$mcr-success-base;
+        hover: custom.$mcr-success-hover;
+        dark: custom.$mcr-success-dark;
     }
     error: {
-      light: $mcr-error-light;
-      base: $mcr-error-base;
+      light: custom.$mcr-error-light;
+      base: custom.$mcr-error-base;
 
     }
   }

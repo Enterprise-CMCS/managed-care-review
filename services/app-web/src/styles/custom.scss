@@ -2,13 +2,14 @@
     Custom Application Styles
 
     This is the main scss for import into component module.scss files.
-    This file forwards mcr colors as well.
+    Defines custom scss mixins, scss variables and css classes in use across the application.
+    Forwards mcr colors variables as well.
 */
 
-// Allows access to colors anywhere custom is in @use
-@forward 'mcrColors';
+@forward 'mcrColors'; // Allows access to colors anywhere custom is imported
 
 @use 'mcrColors' as *;
+@use'uswdsImports.scss' as uswds;
 
 /* CONTAINERS */
 // Every page starts with a flex container
@@ -50,12 +51,12 @@ $mcr-container-max-width-fixed: 75rem;
 /* ACCESSIBILITY */
 // Re-useable classname for hiding UI visually but still having it be read by screenreaders
 @mixin sectionCard {
-    padding: units(4);
-    margin-bottom: units(2);
-    margin-top: units(2);
+    padding: uswds.units(4);
+    margin-bottom: uswds.units(2);
+    margin-top: uswds.units(2);
     background: $mcr-foundation-white;
     border: 1px solid $mcr-gray-lighter;
-    @include u-radius('md');
+    @include uswds.u-radius('md');
 }
 // accessibility
 .srOnly {

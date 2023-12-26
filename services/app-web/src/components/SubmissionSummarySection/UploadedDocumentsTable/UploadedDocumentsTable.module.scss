@@ -1,23 +1,23 @@
-@import '../../../styles/uswdsImports.scss';
-@import '../../../styles/custom.scss';
+@use '../../../styles/custom.scss' as custom;
+@use '../../../styles/uswdsImports.scss' as uswds;
 
 .uploadedDocumentsTable {
     width: 100%;
 
 
     th {
-        font-size: size('body', '2xs');
+        font-size: uswds.size('body', '2xs');
     }
 
     th,
     td {
         text-align: left;
-        padding: units(1);
+        padding: uswds.units(1);
     }
 
     tbody {
         tr:nth-child(even) {
-            background: $mcr-gray-lightest
+            background: custom.$mcr-gray-lightest
         }
     }
 }
@@ -51,8 +51,8 @@
 
 caption {
     text-align: left;
-    margin-bottom: units(2);
-    margin-top: units(2);
+    margin-bottom: uswds.units(2);
+    margin-top: uswds.units(2);
     font-weight: 700;
 }
 

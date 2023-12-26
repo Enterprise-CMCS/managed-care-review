@@ -1,10 +1,10 @@
-@import '../../styles/uswdsImports.scss';
-@import '../../styles/custom.scss';
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
 
 .dataDetail {
-    margin-bottom: units(4);
+    margin-bottom: uswds.units(4);
 
-    @include at-media(tablet) {
+    @include uswds.at-media(tablet) {
         margin-bottom: 0;
     }
 
@@ -21,7 +21,7 @@
 }
 
 .missingInfo {
-    color: #b50909;
+    color: custom.$mcr-error-base;
     font-weight: 700;
     display: flex;
 }

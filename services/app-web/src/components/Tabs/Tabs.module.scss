@@ -1,5 +1,5 @@
-@import '../../styles/uswdsImports.scss';
-@import '../../styles/custom.scss';
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
 
 .easi-only-print {
     display: none;
@@ -13,7 +13,7 @@
         display: flex;
         justify-content: space-between;
         position: relative;
-        max-width: $mcr-container-standard-width-fixed;
+        max-width: custom.$mcr-container-standard-width-fixed;
         margin: 0 auto;
     }
 
@@ -23,7 +23,7 @@
         margin: 0 0 -1px;
         list-style-type: none;
         white-space: nowrap;
-        background-color: $mcr-foundation-white;
+        background-color: custom.$mcr-foundation-white;
     }
 
     &__tab {
@@ -32,12 +32,12 @@
         height: 100%;
         flex-shrink: 0;
         position: relative;
-        border: 1px solid $mcr-gray-lighter;
-        border-right: 1px solid $mcr-gray-lighter;
+        border: 1px solid custom.$mcr-gray-lighter;
+        border-right: 1px solid custom.$mcr-gray-lighter;
         background: none;
 
         &:after {
-            background-color: $mcr-cmsblue-base;
+            background-color: custom.$mcr-cmsblue-base;
             content: '';
             height: 4px;
             left: -1px;
@@ -52,7 +52,7 @@
             border-bottom: 1px solid #fff;
 
             .easi-tabs__tab-btn {
-                color: $mcr-cmsblue-base;
+                color: custom.$mcr-cmsblue-base;
             }
 
             &:after {
@@ -79,9 +79,9 @@
 
     &__tab-panel {
         overflow: auto;
-        border: 1px solid $mcr-gray-lighter;
+        border: 1px solid custom.$mcr-gray-lighter;
         height: 100%;
-        background-color: #fff;
+        background-color: custom.$mcr-foundation-white;
         padding: 1.5em;
         min-height: 500px;
     }

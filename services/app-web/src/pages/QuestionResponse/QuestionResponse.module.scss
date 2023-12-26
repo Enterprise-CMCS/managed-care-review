@@ -1,46 +1,46 @@
-@import '../../styles/uswdsImports.scss';
-@import '../../styles/custom.scss';
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
 
 .background {
-  background-color: $mcr-foundation-white;
+  background-color: custom.$mcr-foundation-white;
   width: 100%;
 }
 
 .container {
-  max-width: $mcr-container-standard-width-fixed;
+  max-width: custom.$mcr-container-standard-width-fixed;
   padding: 2rem 0;
 }
 
 .questionSection {
-  margin: units(2) auto;
-  background: $mcr-foundation-white;
-  padding: units(4) units(4);
-  border: 1px solid $mcr-gray-lighter;
-  line-height: units(3);
+  margin:uswds.units(2) auto;
+  background: custom.$mcr-foundation-white;
+  padding:uswds.units(4)uswds.units(4);
+  border: 1px solid custom.$mcr-gray-lighter;
+  line-height:uswds.units(3);
   width: 100%;
-  @include u-radius('md');
+  @include uswds.u-radius('md');
 
   h3 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: units(2) 0;
-    @include u-text('normal');
+    padding: uswds.units(2) 0;
+    @include uswds.u-text('normal');
   }
 }
 
 .breadcrumbs {
   background: none;
-  margin: units(2) auto;
+  margin:uswds.units(2) auto;
 }
 .formContainer {
     > [class^='usa-fieldset'] {
-        padding: units(4);
-        margin-bottom: units(2);
-        margin-top: units(2);
-        background: $mcr-foundation-white;
-        border: 1px solid $mcr-gray-lighter;
-        @include u-radius('md');
+        padding: uswds.units(4);
+        margin-bottom:uswds.units(2);
+        margin-top:uswds.units(2);
+        background: custom.$mcr-foundation-white;
+        border: 1px solid custom.$mcr-gray-lighter;
+        @include uswds.u-radius('md');
     }
 
     h2 {
@@ -56,7 +56,7 @@
         min-width: 100%;
         max-width: 100%;
 
-        @include at-media(tablet){
+        @include uswds.at-media(tablet){
             min-width: 40rem;
             max-width: 20rem;
             margin: 0 auto;

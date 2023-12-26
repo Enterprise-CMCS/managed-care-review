@@ -1,28 +1,28 @@
-@import '../../styles/uswdsImports.scss';
-@import '../../styles/custom.scss';
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
 
 .wrapper {
     display: flex;
     flex: 1 0 auto;
     width: 100%;
     max-width: 100%;
-    background-color: $mcr-foundation-white;
+    background-color: custom.$mcr-foundation-white;
 }
 
 .container {
     width: 100%;
-    max-width: $mcr-container-max-width-fixed;
+    max-width: custom.$mcr-container-max-width-fixed;
     padding: 0 2rem 0 2rem;
 }
 
 .alertContainer {
-    padding-top: units(4);
+    padding-top: uswds.units(4);
     margin: auto;
-    max-width: $mcr-container-max-width-fixed;
+    max-width: custom.$mcr-container-max-width-fixed;
 }
 
 .panel {
-    padding: units(2);
+    padding: uswds.units(2);
     width: 100%;
 
     & .panelHeader {
@@ -30,18 +30,18 @@
         align-items: center;
         justify-content: space-between;
         font-weight: 700;
-        padding-bottom: units(2);
+        padding-bottom: uswds.units(2);
     }
 }
 
 .alert {
     div {
-        margin-top: units(1);
+        margin-top: uswds.units(1);
     }
     ol {
         margin-top: 0;
     }
     li {
-        padding: units(1) 0;
+        padding: uswds.units(1) 0;
     }
 }

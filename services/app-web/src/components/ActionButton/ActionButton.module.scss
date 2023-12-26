@@ -1,5 +1,5 @@
-@use '../../styles/uswdsImports.scss';
-@use '../../styles/custom.scss' as *;
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
 
 // preferred way to show a button that is disabled. avoid cursor: none
 .disabledCursor {
@@ -16,11 +16,11 @@
 }
 
 .successButton {
-    background: $mcr-success-base;
+    background: custom.$mcr-success-base;
     &:hover {
-        background-color: $mcr-success-hover !important;
+        background-color: custom.$mcr-success-hover !important;
     }
     &:active {
-       background-color: $mcr-success-hover !important;
+       background-color: custom.$mcr-success-hover !important;
     }
 }

@@ -1,5 +1,5 @@
-@import '../../styles/uswdsImports.scss';
-@import '../../styles/custom.scss';
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
 
 // react-select draws the chips in two parts, so we round the outer and square in the inner corners
 .multiSelect {
@@ -8,18 +8,18 @@
     border-radius: 99rem 99rem 99rem 99rem;
   }
   [class*='select__multi-value__label'] {
-    background:$mcr-primary-lighter;
-    color: $mcr-foundation-ink;
+    background:custom.$mcr-primary-lighter;
+    color: custom.$mcr-foundation-ink;
     border-radius: 99rem 0rem 0rem 99rem;
   }
   [class*='select__multi-value__remove'] {
-    background:$mcr-primary-lighter;
-    color: $mcr-foundation-ink;
+    background:custom.$mcr-primary-lighter;
+    color: custom.$mcr-foundation-ink;
     border-radius: 0rem 99rem 99rem 0rem;
 
     &:hover {
-      background: darken($mcr-primary-lighter, 5%);
-      color: $mcr-foundation-ink;
+      background: darken(custom.$mcr-primary-lighter, 5%);
+      color: custom.$mcr-foundation-ink;
     }
   }
 }

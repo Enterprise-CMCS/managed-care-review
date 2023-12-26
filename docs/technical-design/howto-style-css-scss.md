@@ -16,7 +16,7 @@ We currently have ~three types of containers in the application. See our `custom
 
 Make sure heading levels (`h2`, `h3` etc) are properly used for text content. There are clear [guidelines](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Heading_Elements) around heading levels to follow. For example, page titles should always have some kind of heading, use only one h1 per page, headings should be nested by level, etc. If the heading is not styled the way you expect by default, CSS can be used to override things like font weight, size, etc. If you are noticing something with heading that need to be overridden across the app, this likely calls for global styles.
 
-Note also that there is a specific color to be used for links (`$mcr-foundation-link`) and hint text (`$mcr-foundation-hint`).
+Note also that there is a specific color to be used for links (`$$mcr-foundation-link`) and hint text (`$mcr-foundation-hint`).
 
 ## Patterns and technologies related to styles in MC-Review
 
@@ -38,7 +38,16 @@ Example of scoped styles:
 - Shared styles live close to the workflow they apply to. For example, directories in  `/pages` folder may share a `*.module.scss` stylesheet if needed for templates in that area of the application. CSS selectors should be used to further scope down styles.
 - Re-useable atomic components (see `/components` folder) have self contained styles. There is a named `*.module.scss` file for each component.
 
+## How to import
+- Prefer namespaced scss imports with [`@use`](https://sass-lang.com/documentation/at-rules/use/) over [`@import`](https://sass-lang.com/documentation/at-rules/import/) for scss to reduce loading styles multiple times. Sass team is deprecating [`@import`](https://github.com/sass/sass/blob/main/accepted/module-system.md#timeline).
 
+In `*.module.scss` files this looks like (at top of file):
+```
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
+```
+
+and then referring to varibles and mixins inline with the [namespace](https://sass-lang.com/documentation/at-rules/use/#choosing-a-namespace) - such as `custom.$mcr-foundation-white` or  `@include uswds.uswds-at-media(tablet)`
 #### When to use global overrides
 
 Global styles live in a single file (`overrides.scss`). This should be used sparingly.

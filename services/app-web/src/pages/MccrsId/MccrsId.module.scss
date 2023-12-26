@@ -1,5 +1,5 @@
-@import '../../styles/uswdsImports.scss';
-@import '../../styles/custom.scss';
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
 
 .formPage {
     width: 100%;
@@ -11,8 +11,6 @@
         max-width: 20rem;
         margin: 0 auto;
     }
-
-
 }
 
 .formContainer.tableContainer {
@@ -26,17 +24,17 @@
 .formHeader {
     text-align: center;
     width: 100%;
-    padding: units(4) 0;
+    padding:uswds.units(4) 0;
 }
 
 .formContainer {
     > [class^='usa-fieldset'] {
-        padding: units(4);
+        padding: uswds.units(4);
         padding-top: 32px;
-        margin-top: units(2);
-        background: $mcr-foundation-white;
-        border: 1px solid $mcr-gray-lighter;
-        @include u-radius('md');
+        margin-top: uswds.units(2);
+        background: custom.$mcr-foundation-white;
+        border: 1px solid custom.$mcr-gray-lighter;
+        @include uswds.u-radius('md');
     }
 
     h3 {
@@ -53,7 +51,7 @@
         min-width: 100%;
         max-width: 100%;
 
-        @include at-media(tablet){
+        @include uswds.at-media(tablet){
             min-width: 40rem;
             max-width: 20rem;
             margin: 0 auto;
