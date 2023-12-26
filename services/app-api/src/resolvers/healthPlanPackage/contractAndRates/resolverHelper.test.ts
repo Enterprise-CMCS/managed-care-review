@@ -150,7 +150,6 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                             s3URL: 's3://bucketname/key/rate',
                             name: 'rate',
                             sha256: 'fakesha',
-                            documentCategories: ['RATES' as const],
                         },
                     ],
                     supportingDocuments: [],
@@ -181,7 +180,6 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                         {
                             s3URL: 's3://bucketname/key/supporting-documents',
                             name: 'supporting documents',
-                            documentCategories: ['RATES_RELATED' as const],
                             sha256: 'supportingDocsSha',
                         },
                     ],

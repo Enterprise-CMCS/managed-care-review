@@ -1,13 +1,11 @@
 import type { PrismaClient } from '@prisma/client'
-import type { StoreError } from '../storeError'
-import { convertPrismaErrorToStoreError } from '../storeError'
 import type { UserType } from '../../domain-models'
 import { domainUserFromPrismaUser } from './prismaDomainUser'
 
 export async function findUser(
     client: PrismaClient,
     id: string
-): Promise<UserType | StoreError | undefined> {
+): Promise<UserType | Error | undefined> {
     try {
         const findResult = await client.user.findUnique({
             where: {
@@ -24,6 +22,6 @@ export async function findUser(
 
         return domainUserFromPrismaUser(findResult)
     } catch (err) {
-        return convertPrismaErrorToStoreError(err)
+        return err
     }
 }

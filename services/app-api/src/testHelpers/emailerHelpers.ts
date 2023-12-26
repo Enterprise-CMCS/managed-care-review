@@ -1,20 +1,15 @@
 import type { EmailConfiguration, EmailData, Emailer } from '../emailer'
-import {
-    newPackageCMSEmail,
-    newPackageStateEmail,
-    unlockPackageCMSEmail,
-    unlockPackageStateEmail,
-    resubmitPackageStateEmail,
-    resubmitPackageCMSEmail,
-} from '../emailer'
+import { emailer } from '../emailer'
 import type {
     LockedHealthPlanFormDataType,
     ProgramArgType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import type { StateUserType } from '../domain-models'
+import type { ContractRevisionWithRatesType, Question } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 import { testSendSESEmail } from './awsSESHelpers'
+import { testCMSUser, testStateUser } from './userHelpers'
+import { v4 as uuidv4 } from 'uuid'
 
 const testEmailConfig = (): EmailConfiguration => ({
     stage: 'LOCAL',
@@ -24,7 +19,8 @@ const testEmailConfig = (): EmailConfiguration => ({
     cmsReviewHelpEmailAddress: '"MCOG Example" <mcog@example.com>',
     cmsRateHelpEmailAddress: '"Rates Example" <rates@example.com>',
     oactEmails: ['ratesreview@example.com'],
-    dmcpEmails: ['policyreview1@example.com'],
+    dmcpReviewEmails: ['policyreview1@example.com'],
+    dmcpSubmissionEmails: ['policyreviewsubmission1@example.com'],
     dmcoEmails: ['overallreview@example.com'],
     helpDeskEmail: '"MC-Review Help Desk" <MC_Review_HelpDesk@example.com>',
 })
@@ -41,7 +37,8 @@ const testDuplicateEmailConfig: EmailConfiguration = {
     cmsReviewHelpEmailAddress: 'duplicate@example.com',
     cmsRateHelpEmailAddress: 'duplicate@example.com',
     oactEmails: ['duplicate@example.com', 'duplicate@example.com'],
-    dmcpEmails: ['duplicate@example.com', 'duplicate@example.com'],
+    dmcpReviewEmails: ['duplicate@example.com', 'duplicate@example.com'],
+    dmcpSubmissionEmails: ['duplicate@example.com', 'duplicate@example.com'],
     dmcoEmails: ['duplicate@example.com', 'duplicate@example.com'],
     helpDeskEmail: 'duplicate@example.com',
 }
@@ -56,148 +53,23 @@ const testDuplicateStateAnalystsEmails: string[] = [
     'duplicate@example.com',
 ]
 
-function testEmailer(customConfig?: EmailConfiguration): Emailer {
-    const config = customConfig || testEmailConfig()
-    return {
-        config,
-        sendEmail: jest.fn(
-            async (emailData: EmailData): Promise<void | Error> => {
-                try {
-                    await testSendSESEmail(emailData)
-                } catch (err) {
-                    if (err instanceof SESServiceException) {
-                        return new Error(
-                            'SES email send failed. Error is from Amazon SES. Error: ' +
-                                JSON.stringify(err)
-                        )
-                    }
-                    return new Error('SES email send failed. Error: ' + err)
-                }
-            }
-        ),
-        sendCMSNewPackage: async function (
-            formData,
-            stateAnalystsEmails,
-            statePrograms
-        ): Promise<void | Error> {
-            const emailData = await newPackageCMSEmail(
-                formData,
-                config,
-                stateAnalystsEmails,
-                statePrograms
+const sendTestEmails = async (emailData: EmailData): Promise<void | Error> => {
+    try {
+        await testSendSESEmail(emailData)
+    } catch (err) {
+        if (err instanceof SESServiceException) {
+            return new Error(
+                'SES email send failed. Error is from Amazon SES. Error: ' +
+                    JSON.stringify(err)
             )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return await this.sendEmail(emailData)
-            }
-        },
-        sendStateNewPackage: async function (
-            formData,
-            submitterEmails,
-            statePrograms
-        ): Promise<void | Error> {
-            const emailData = await newPackageStateEmail(
-                formData,
-                submitterEmails,
-                config,
-                statePrograms
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return await this.sendEmail(emailData)
-            }
-        },
-        sendUnlockPackageCMSEmail: async function (
-            formData,
-            updateInfo,
-            stateAnalystsEmails,
-            statePrograms
-        ): Promise<void | Error> {
-            const emailData = await unlockPackageCMSEmail(
-                formData,
-                updateInfo,
-                config,
-                stateAnalystsEmails,
-                statePrograms
-            )
-
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return this.sendEmail(emailData)
-            }
-        },
-        sendUnlockPackageStateEmail: async function (
-            formData,
-            updateInfo,
-            statePrograms,
-            submitterEmails
-        ): Promise<void | Error> {
-            const emailData = await unlockPackageStateEmail(
-                formData,
-                updateInfo,
-                config,
-                statePrograms,
-                submitterEmails
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return this.sendEmail(emailData)
-            }
-        },
-        sendResubmittedStateEmail: async function (
-            formData,
-            updateInfo,
-            submitterEmails,
-            statePrograms
-        ): Promise<void | Error> {
-            const emailData = await resubmitPackageStateEmail(
-                formData,
-                submitterEmails,
-                updateInfo,
-                config,
-                statePrograms
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return this.sendEmail(emailData)
-            }
-        },
-        sendResubmittedCMSEmail: async function (
-            formData,
-            updateInfo,
-            stateAnalystsEmails,
-            statePrograms
-        ): Promise<void | Error> {
-            const emailData = await resubmitPackageCMSEmail(
-                formData,
-                updateInfo,
-                config,
-                stateAnalystsEmails,
-                statePrograms
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return this.sendEmail(emailData)
-            }
-        },
+        }
+        return new Error('SES email send failed. Error: ' + err)
     }
 }
 
-const mockUser = (): StateUserType => {
-    return {
-        id: '6ec0e9a7-b5fc-44c2-a049-2d60ac37c6ee',
-        role: 'STATE_USER',
-        email: 'test+state+user@example.com',
-        stateCode: 'MN',
-        familyName: 'State',
-        givenName: 'User',
-    }
+function testEmailer(customConfig?: EmailConfiguration): Emailer {
+    const config = customConfig || testEmailConfig()
+    return emailer(config, jest.fn(sendTestEmails))
 }
 
 type State = {
@@ -253,6 +125,127 @@ export function mockMSState(): State {
         code: 'MS',
     }
 }
+const mockContractRev = (
+    submissionPartial?: Partial<ContractRevisionWithRatesType>
+): ContractRevisionWithRatesType => {
+    return {
+        createdAt: new Date('01/01/2021'),
+        updatedAt: new Date('02/01/2021'),
+        contract: {
+            stateCode: 'MN',
+            stateNumber: 3,
+            id: '12345',
+        },
+        id: 'test-abc-125',
+        formData: {
+            programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+            populationCovered: 'CHIP',
+            submissionType: 'CONTRACT_AND_RATES',
+            riskBasedContract: false,
+            submissionDescription: 'A submitted submission',
+            stateContacts: [
+                {
+                    name: 'Test Person',
+                    titleRole: 'A Role',
+                    email: 'test+state+contact@example.com',
+                },
+            ],
+            supportingDocuments: [
+                {
+                    s3URL: 'bar',
+                    name: 'foo',
+                    sha256: 'fakesha',
+                },
+            ],
+            contractType: 'BASE',
+            contractExecutionStatus: undefined,
+            contractDocuments: [
+                {
+                    s3URL: 'bar',
+                    name: 'foo',
+                    sha256: 'fakesha',
+                },
+            ],
+            contractDateStart: new Date('01/01/2024'),
+            contractDateEnd: new Date('01/01/2025'),
+            managedCareEntities: ['MCO'],
+            federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+            inLieuServicesAndSettings: undefined,
+            modifiedBenefitsProvided: undefined,
+            modifiedGeoAreaServed: undefined,
+            modifiedMedicaidBeneficiaries: undefined,
+            modifiedRiskSharingStrategy: undefined,
+            modifiedIncentiveArrangements: undefined,
+            modifiedWitholdAgreements: undefined,
+            modifiedStateDirectedPayments: undefined,
+            modifiedPassThroughPayments: undefined,
+            modifiedPaymentsForMentalDiseaseInstitutions: undefined,
+            modifiedMedicalLossRatioStandards: undefined,
+            modifiedOtherFinancialPaymentIncentive: undefined,
+            modifiedEnrollmentProcess: undefined,
+            modifiedGrevienceAndAppeal: undefined,
+            modifiedNetworkAdequacyStandards: undefined,
+            modifiedLengthOfContract: undefined,
+            modifiedNonRiskPaymentArrangements: undefined,
+            statutoryRegulatoryAttestation: undefined,
+            statutoryRegulatoryAttestationDescription: undefined,
+        },
+        rateRevisions: [
+            {
+                id: '12345',
+                rate: {
+                    id: 'rate-id',
+                    stateCode: 'MN',
+                    stateNumber: 3,
+                    createdAt: new Date(11 / 27 / 2023),
+                },
+                submitInfo: undefined,
+                unlockInfo: undefined,
+                createdAt: new Date(11 / 27 / 2023),
+                updatedAt: new Date(11 / 27 / 2023),
+                formData: {
+                    id: 'test-id-1234',
+                    rateID: 'test-id-1234',
+                    rateType: 'NEW',
+                    rateCapitationType: 'RATE_CELL',
+                    rateDocuments: [
+                        {
+                            s3URL: 'bar',
+                            name: 'foo',
+                            sha256: 'fakesha',
+                        },
+                    ],
+                    supportingDocuments: [],
+                    rateDateStart: new Date('01/01/2024'),
+                    rateDateEnd: new Date('01/01/2025'),
+                    rateDateCertified: new Date('01/01/2024'),
+                    amendmentEffectiveDateStart: new Date('01/01/2024'),
+                    amendmentEffectiveDateEnd: new Date('01/01/2025'),
+                    rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+                    rateCertificationName: 'Rate Cert Name',
+                    certifyingActuaryContacts: [
+                        {
+                            actuarialFirm: 'DELOITTE',
+                            name: 'Actuary Contact 1',
+                            titleRole: 'Test Actuary Contact 1',
+                            email: 'actuarycontact1@example.com',
+                        },
+                    ],
+                    addtlActuaryContacts: [],
+                    actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                    packagesWithSharedRateCerts: [
+                        {
+                            packageName: 'pkgName',
+                            packageId: '12345',
+                            packageStatus: 'SUBMITTED',
+                        },
+                    ],
+                },
+            },
+        ],
+        ...submissionPartial,
+    }
+}
 
 const mockContractAndRatesFormData = (
     submissionPartial?: Partial<LockedHealthPlanFormDataType>
@@ -274,7 +267,6 @@ const mockContractAndRatesFormData = (
                 s3URL: 'bar',
                 name: 'foo',
                 sha256: 'fakesha',
-                documentCategories: ['RATES_RELATED' as const],
             },
         ],
         contractType: 'BASE',
@@ -284,7 +276,6 @@ const mockContractAndRatesFormData = (
                 s3URL: 'bar',
                 name: 'foo',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT' as const],
             },
         ],
         contractDateStart: new Date('01/01/2021'),
@@ -299,7 +290,6 @@ const mockContractAndRatesFormData = (
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -361,7 +351,6 @@ const mockUnlockedContractAndRatesFormData = (
                 s3URL: 'bar',
                 name: 'foo',
                 sha256: 'fakesha',
-                documentCategories: ['RATES_RELATED' as const],
             },
         ],
         contractType: 'BASE',
@@ -371,7 +360,6 @@ const mockUnlockedContractAndRatesFormData = (
                 s3URL: 'bar',
                 name: 'foo',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT' as const],
             },
         ],
         contractDateStart: new Date('01/01/2021'),
@@ -386,7 +374,6 @@ const mockUnlockedContractAndRatesFormData = (
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -448,7 +435,6 @@ const mockUnlockedContractOnlyFormData = (
                 s3URL: 'bar',
                 name: 'foo',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT_RELATED' as const],
             },
         ],
         contractType: 'BASE',
@@ -458,7 +444,6 @@ const mockUnlockedContractOnlyFormData = (
                 s3URL: 'bar',
                 name: 'foo',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT' as const],
             },
         ],
         contractDateStart: new Date('01/01/2021'),
@@ -500,7 +485,6 @@ const mockContractOnlyFormData = (
                 s3URL: 'bar',
                 name: 'foo',
                 sha256: 'fakesha',
-                documentCategories: ['RATES_RELATED' as const],
             },
         ],
         contractType: 'BASE',
@@ -510,7 +494,6 @@ const mockContractOnlyFormData = (
                 s3URL: 'bar',
                 name: 'foo',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT' as const],
             },
         ],
         contractDateStart: new Date('01/01/2021'),
@@ -552,7 +535,6 @@ const mockContractAmendmentFormData = (
                 s3URL: 'bar',
                 name: 'foo',
                 sha256: 'fakesha',
-                documentCategories: ['RATES_RELATED' as const],
             },
         ],
         contractType: 'AMENDMENT',
@@ -562,7 +544,6 @@ const mockContractAmendmentFormData = (
                 s3URL: 'bar',
                 name: 'foo',
                 sha256: 'fakesha',
-                documentCategories: ['CONTRACT' as const],
             },
         ],
         contractDateStart: new Date('01/01/2021'),
@@ -577,7 +558,6 @@ const mockContractAmendmentFormData = (
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -620,6 +600,57 @@ const mockContractAmendmentFormData = (
     }
 }
 
+const mockQuestionAndResponses = (
+    questionData?: Partial<Question>
+): Question => {
+    const question: Question = {
+        id: `test-question-id-1`,
+        contractID: 'contract-id-test',
+        createdAt: new Date('01/01/2024'),
+        addedBy: testCMSUser(),
+        documents: [
+            {
+                name: 'Test Question',
+                s3URL: 'testS3Url',
+            },
+        ],
+        division: 'DMCO',
+        responses: [],
+        ...questionData,
+    }
+
+    const defaultResponses = [
+        {
+            id: uuidv4(),
+            questionID: question.id,
+            //Add 1 day to date, to make sure this date is always after question.createdAt
+            createdAt: ((): Date => {
+                const responseDate = new Date(question.createdAt)
+                return new Date(
+                    responseDate.setDate(responseDate.getDate() + 1)
+                )
+            })(),
+            addedBy: testStateUser(),
+            documents: [
+                {
+                    name: 'Test Question Response',
+                    s3URL: 'testS3Url',
+                },
+            ],
+        },
+    ]
+
+    // If responses are passed in, use that and replace questionIDs, so they match the question.
+    question.responses = questionData?.responses
+        ? questionData.responses.map((response) => ({
+              ...response,
+              questionID: question.id,
+          }))
+        : defaultResponses
+
+    return question
+}
+
 export {
     testEmailConfig,
     testStateAnalystsEmails,
@@ -627,9 +658,10 @@ export {
     testDuplicateStateAnalystsEmails,
     mockContractAmendmentFormData,
     mockContractOnlyFormData,
+    mockContractRev,
     mockContractAndRatesFormData,
     mockUnlockedContractAndRatesFormData,
     mockUnlockedContractOnlyFormData,
-    mockUser,
     testEmailer,
+    mockQuestionAndResponses,
 }

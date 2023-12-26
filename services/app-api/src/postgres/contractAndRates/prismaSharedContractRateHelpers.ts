@@ -1,5 +1,4 @@
 import type { Prisma } from '@prisma/client'
-import type { DocumentCategoryType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type { ProgramType } from '../../domain-models'
 import type {
     ContractFormDataType,
@@ -168,7 +167,6 @@ function rateFormDataToDomainModel(
                   name: doc.name,
                   s3URL: doc.s3URL,
                   sha256: doc.sha256,
-                  documentCategories: ['RATES'] as DocumentCategoryType[],
               }))
             : [],
         supportingDocuments: rateRevision.supportingDocuments
@@ -176,9 +174,6 @@ function rateFormDataToDomainModel(
                   name: doc.name,
                   s3URL: doc.s3URL,
                   sha256: doc.sha256,
-                  documentCategories: [
-                      'RATES_RELATED',
-                  ] as DocumentCategoryType[],
               }))
             : [],
         rateDateStart: rateRevision.rateDateStart ?? undefined,

@@ -82,22 +82,19 @@ jobs:
       - name: Generate Code
         run: npx lerna run generate
 
-      - name: Compile proto migration files
-        run: npx lerna run build --scope=app-proto
-
       - name: upload app web gen directory
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: app-web-gen
+          name: app-web-gen deploy ${{ inputs.stage_name }}
           path: ./services/app-web/src/gen
 
       - name: upload cypress gen directory
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: cypress-gen
+          name: cypress-gen deploy ${{ inputs.stage_name }}
           path: ./services/cypress/gen
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/app-api/lambda-layers-prisma-client-migration
@@ -107,7 +104,7 @@ jobs:
           tar -C ./services/app-api/lambda-layers-prisma-client-migration -xf ./services/app-api/lambda-layers-prisma-client-migration/nodejs.tar.gz
           rm -rf ./services/app-api/lambda-layers-prisma-client-migration/nodejs.tar.gz
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/app-api/lambda-layers-prisma-client-engine

@@ -70,3 +70,7 @@ Once you have the credentials from Secrets Manager (see above), you can set the 
 A recent copy of our code base will need to be checked out onto the jumpbox to run `prisma` commands. Just `git clone` this repository to the jumpbox and `yarn install` things in order to get the appropriate `prisma` commands.
 
 You can now use `npx prisma diff` and the other [prisma tools](https://www.prisma.io/docs/guides/migrate/production-troubleshooting) to fix up the failed migration.
+
+## Using the ./dev jumpbox command
+
+The `./dev jumpbox` command allows you to interact with the jumpbox from the CLI. Currently only `./dev jumpbox clone` is implemented. This command will log into the jumpbox, dump the db into a file, and copy that file locally. 

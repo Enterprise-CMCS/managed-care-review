@@ -53,7 +53,7 @@ export function parseRunFlags<T extends runFlags>(
     // Sadly, `any` lives in here. The types in parseRunFlags's signature are right, but it's not clear to me how
     // to make typescript happy with actually mapping one type to another.
     // so we do the unsafe thing. Having the types in the signature is still a big win.
-    let parsedFlags = Object.fromEntries(
+    const parsedFlags = Object.fromEntries(
         Object.entries(inputFlags).map(
             ([key, value]: [string, boolean | undefined]): [
                 string,

@@ -4,7 +4,6 @@ import { hasAdminPermissions } from '../../domain-models'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { logError } from '../../logger'
 import type { Store } from '../../postgres'
-import { isStoreError } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
@@ -23,7 +22,7 @@ export function indexUsersResolver(store: Store): QueryResolvers['indexUsers'] {
         }
 
         const findResult = await store.findAllUsers()
-        if (isStoreError(findResult)) {
+        if (findResult instanceof Error) {
             logError('indexUsers', findResult.message)
             setErrorAttributesOnActiveSpan(findResult.message, span)
             throw new Error('Unexpected Error Querying Users')

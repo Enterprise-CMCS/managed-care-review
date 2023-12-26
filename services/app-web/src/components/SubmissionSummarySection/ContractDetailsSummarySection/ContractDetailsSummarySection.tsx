@@ -42,6 +42,7 @@ import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../constants/statutoryRegulatoryAttestation'
+import { SectionCard } from '../../SectionCard'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -91,9 +92,7 @@ export const ContractDetailsSummarySection = ({
         submission.statutoryRegulatoryAttestation
     )
 
-    const contractSupportingDocuments = submission.documents.filter((doc) =>
-        doc.documentCategories.includes('CONTRACT_RELATED' as const)
-    )
+    const contractSupportingDocuments = submission.documents
     const isEditing = !isSubmitted(submission) && editNavigateTo !== undefined
     const applicableFederalAuthorities = isCHIPOnly(submission)
         ? submission.federalAuthorities.filter((authority) =>
@@ -152,7 +151,10 @@ export const ContractDetailsSummarySection = ({
     ])
 
     return (
-        <section id="contractDetailsSection" className={styles.summarySection}>
+        <SectionCard
+            id="contractDetailsSection"
+            className={styles.summarySection}
+        >
             <SectionHeader
                 header="Contract details"
                 editNavigateTo={editNavigateTo}
@@ -311,6 +313,6 @@ export const ContractDetailsSummarySection = ({
                 isSupportingDocuments
                 isEditing={isEditing}
             />
-        </section>
+        </SectionCard>
     )
 }

@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@prisma/client'
-import type { Store, StoreError } from '../postgres'
+import type { Store } from '../postgres'
 import { NewPrismaClient } from '../postgres'
 
 async function configurePrismaClient(): Promise<PrismaClient> {
@@ -33,34 +33,11 @@ async function sharedTestPrismaClient(): Promise<PrismaClient> {
 }
 
 function mockStoreThatErrors(): Store {
-    const genericStoreError: StoreError = {
-        code: 'UNEXPECTED_EXCEPTION',
-        message: 'this error came from the generic store with errors mock',
-    }
-
     const genericError: Error = new Error(
         'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
     )
 
     return {
-        findAllHealthPlanPackagesByState: async (_stateCode) => {
-            return genericStoreError
-        },
-        findAllHealthPlanPackagesBySubmittedAt: async () => {
-            return genericStoreError
-        },
-        insertHealthPlanPackage: async (_args) => {
-            return genericStoreError
-        },
-        findHealthPlanPackage: async (_draftUUID) => {
-            return genericStoreError
-        },
-        insertHealthPlanRevision: async (_pkgID, _draft) => {
-            return genericStoreError
-        },
-        updateHealthPlanRevision: async (_pkgID, _formData) => {
-            return genericStoreError
-        },
         findPrograms: () => {
             return new Error(
                 'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
@@ -72,34 +49,31 @@ function mockStoreThatErrors(): Store {
             )
         },
         findAllSupportedStates: async () => {
-            return genericStoreError
-        },
-        findAllRevisions: async () => {
-            return genericStoreError
+            return genericError
         },
         findAllUsers: async () => {
-            return genericStoreError
+            return genericError
         },
         findUser: async (_ID) => {
-            return genericStoreError
+            return genericError
         },
         insertUser: async (_args) => {
-            return genericStoreError
+            return genericError
         },
         insertManyUsers: async (_args) => {
-            return genericStoreError
+            return genericError
         },
         updateCmsUserProperties: async (_ID, _State) => {
-            return genericStoreError
+            return genericError
         },
         insertQuestion: async (_ID) => {
-            return genericStoreError
+            return genericError
         },
         findAllQuestionsByContract: async (_pkgID) => {
             return genericError
         },
         insertQuestionResponse: async (_ID) => {
-            return genericStoreError
+            return genericError
         },
         insertDraftContract: async (_ID) => {
             return genericError

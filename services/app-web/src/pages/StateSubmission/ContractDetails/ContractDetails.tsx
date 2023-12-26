@@ -156,10 +156,10 @@ export const ContractDetails = ({
         showFileUploadError && hasLoadingFiles
             ? 'You must wait for all documents to finish uploading before continuing'
             : showFileUploadError && fileItems.length === 0
-            ? ' You must upload at least one document'
-            : showFileUploadError && !hasValidFiles
-            ? ' You must remove all documents with error messages before continuing'
-            : undefined
+              ? ' You must upload at least one document'
+              : showFileUploadError && !hasValidFiles
+                ? ' You must remove all documents with error messages before continuing'
+                : undefined
     const documentsErrorKey =
         fileItems.length === 0 ? 'documents' : '#file-items-list'
 
@@ -189,7 +189,6 @@ export const ContractDetails = ({
                     s3URL: undefined,
                     status: 'UPLOAD_ERROR',
                     sha256: doc.sha256,
-                    documentCategories: doc.documentCategories,
                 }
             }
             return {
@@ -199,7 +198,6 @@ export const ContractDetails = ({
                 s3URL: doc.s3URL,
                 status: 'UPLOAD_COMPLETE',
                 sha256: doc.sha256,
-                documentCategories: doc.documentCategories,
             }
         })
 
@@ -395,7 +393,6 @@ export const ContractDetails = ({
                         name: fileItem.name,
                         s3URL: fileItem.s3URL,
                         sha256: fileItem.sha256,
-                        documentCategories: ['CONTRACT'],
                     })
                 }
                 return formDataDocuments
@@ -558,7 +555,6 @@ export const ContractDetails = ({
                                     id="documents"
                                     name="documents"
                                     label="Upload contract"
-                                    renderMode="list"
                                     aria-required
                                     error={documentsErrorMessage}
                                     hint={

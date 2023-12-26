@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders overall email for a new question as expected 1`] = `
+"DMCO sent questions to the state for submission MCR-MN-0003-SNBC<br />
+<b>Sent by:</b> Ronald McDonald (DMCO) <a href="cms@email.com">cms@email.com</a>
+<br />
+<b>Round:</b> 1<br />
+<b>Date:</b> 01/01/2024<br />
+<br />
+<a href="http://localhost/submissions/12345/question-and-answers">View submission Q&A</a>
+"
+`;

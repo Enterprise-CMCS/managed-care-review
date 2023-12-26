@@ -1,5 +1,5 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { isCMSUser } from '../../domain-models'
+import { isCMSUser, contractSubmitters } from '../../domain-models'
 import { logError, logSuccess } from '../../logger'
 import {
     setErrorAttributesOnActiveSpan,
@@ -8,12 +8,15 @@ import {
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { NotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
-import { isStoreError } from '../../postgres'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison } from '../../domain-models'
+import type { Emailer } from '../../emailer'
+import type { EmailParameterStore } from '../../parameterStore'
 
 export function createQuestionResolver(
-    store: Store
+    store: Store,
+    emailParameterStore: EmailParameterStore,
+    emailer: Emailer
 ): MutationResolvers['createQuestion'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
@@ -77,15 +80,98 @@ export function createQuestionResolver(
             throw new UserInputError(errMessage)
         }
 
-        const questionResult = await store.insertQuestion(input, user)
+        const statePrograms = store.findStatePrograms(contractResult.stateCode)
+        const submitterEmails = contractSubmitters(contractResult)
 
-        if (isStoreError(questionResult)) {
-            const errMessage = `Issue creating question for package of type ${questionResult.code}. Message: ${questionResult.message}`
+        if (statePrograms instanceof Error) {
+            logError('findStatePrograms', statePrograms.message)
+            setErrorAttributesOnActiveSpan(statePrograms.message, span)
+            throw new GraphQLError(statePrograms.message, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
+        }
+
+        const allQuestions = await store.findAllQuestionsByContract(
+            contractResult.id
+        )
+        if (allQuestions instanceof Error) {
+            const errMessage = `Issue finding all questions associated with the contract: ${contractResult.id}`
             logError('createQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
+        const questionResult = await store.insertQuestion(input, user)
+
+        if (questionResult instanceof Error) {
+            const errMessage = `Issue creating question for package. Message: ${questionResult.message}`
+            logError('createQuestion', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new Error(errMessage)
+        }
+
+        allQuestions.push(questionResult)
+
+        const sendQuestionsStateEmailResult =
+            await emailer.sendQuestionsStateEmail(
+                contractResult.revisions[0],
+                submitterEmails,
+                statePrograms,
+                questionResult
+            )
+
+        if (sendQuestionsStateEmailResult instanceof Error) {
+            logError(
+                'sendQuestionsStateEmail - state email failed',
+                sendQuestionsStateEmailResult
+            )
+            setErrorAttributesOnActiveSpan('state email failed', span)
+            const errMessage = `Error sending a state email for 
+                questionID: ${questionResult.id} and contractID: ${contractResult.id}`
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
+        }
+
+        let stateAnalystsEmails =
+            await emailParameterStore.getStateAnalystsEmails(
+                contractResult.stateCode
+            )
+        //If error log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
+        if (stateAnalystsEmails instanceof Error) {
+            logError('getStateAnalystsEmails', stateAnalystsEmails.message)
+            setErrorAttributesOnActiveSpan(stateAnalystsEmails.message, span)
+            stateAnalystsEmails = []
+        }
+
+        const sendQuestionsCMSEmailResult = await emailer.sendQuestionsCMSEmail(
+            contractResult.revisions[0],
+            stateAnalystsEmails,
+            statePrograms,
+            allQuestions
+        )
+
+        if (sendQuestionsCMSEmailResult instanceof Error) {
+            logError(
+                'sendQuestionsCMSEmail - CMS email failed',
+                sendQuestionsCMSEmailResult
+            )
+            setErrorAttributesOnActiveSpan('CMS email failed', span)
+            const errMessage = `Error sending a CMS email for 
+                questionID: ${questionResult.id} and contractID: ${contractResult.id}`
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
+        }
         logSuccess('createQuestion')
         setSuccessAttributesOnActiveSpan(span)
 

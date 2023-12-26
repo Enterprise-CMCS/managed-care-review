@@ -8,8 +8,10 @@ import {
     getCmsReviewHelpEmailLocal,
     getCmsRateHelpEmail,
     getCmsRateHelpEmailLocal,
-    getDMCPEmails,
-    getDMCPEmailsLocal,
+    getDMCPReviewEmails,
+    getDMCPSubmissionEmails,
+    getDMCPReviewEmailsLocal,
+    getDMCPSubmissionEmailsLocal,
     getOACTEmails,
     getOACTEmailsLocal,
     getDMCOEmails,
@@ -31,7 +33,8 @@ export type EmailParameterStore = {
     getDevReviewTeamEmails: () => Promise<string[] | Error>
     getCmsReviewHelpEmail: () => Promise<string | Error>
     getCmsRateHelpEmail: () => Promise<string | Error>
-    getDMCPEmails: () => Promise<string[] | Error>
+    getDMCPReviewEmails: () => Promise<string[] | Error>
+    getDMCPSubmissionEmails: () => Promise<string[] | Error>
     getOACTEmails: () => Promise<string[] | Error>
     getDMCOEmails: () => Promise<string[] | Error>
     getSourceEmail: () => Promise<string | Error>
@@ -45,7 +48,8 @@ function newLocalEmailParameterStore(): EmailParameterStore {
         getDevReviewTeamEmails: getDevReviewTeamEmailsLocal,
         getCmsReviewHelpEmail: getCmsReviewHelpEmailLocal,
         getCmsRateHelpEmail: getCmsRateHelpEmailLocal,
-        getDMCPEmails: getDMCPEmailsLocal,
+        getDMCPReviewEmails: getDMCPReviewEmailsLocal,
+        getDMCPSubmissionEmails: getDMCPSubmissionEmailsLocal,
         getOACTEmails: getOACTEmailsLocal,
         getDMCOEmails: getDMCOEmailsLocal,
         getSourceEmail: getSourceEmailLocal,
@@ -61,7 +65,8 @@ function newAWSEmailParameterStore(): EmailParameterStore {
         getCmsReviewHelpEmail: getCmsReviewHelpEmail,
         getCmsRateHelpEmail: getCmsRateHelpEmail,
         getDMCOEmails: getDMCOEmails,
-        getDMCPEmails: getDMCPEmails,
+        getDMCPReviewEmails: getDMCPReviewEmails,
+        getDMCPSubmissionEmails: getDMCPSubmissionEmails,
         getOACTEmails: getOACTEmails,
         getSourceEmail: getSourceEmail,
         getHelpDeskEmail: getHelpDeskEmail,

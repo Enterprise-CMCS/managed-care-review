@@ -7,9 +7,13 @@ import type {
     SubmissionType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import type { EmailConfiguration, StateAnalystsEmails } from '.'
-import type { ProgramType } from '../domain-models'
+import type {
+    ContractRevisionWithRatesType,
+    ProgramType,
+} from '../domain-models'
 import { logError } from '../logger'
 import { pruneDuplicateEmails } from './formatters'
+import type { Question } from '../domain-models'
 
 // ETA SETUP
 Eta.configure({
@@ -80,17 +84,18 @@ const filterChipAndPRSubmissionReviewers = (
     reviewers: string[],
     config: EmailConfiguration
 ) => {
-    const { oactEmails, dmcpEmails } = config
+    const { oactEmails, dmcpSubmissionEmails } = config
 
     return reviewers.filter(
-        (email) => !dmcpEmails.includes(email) && !oactEmails.includes(email)
+        (email) =>
+            !dmcpSubmissionEmails.includes(email) && !oactEmails.includes(email)
     )
 }
 
 /* 
     Determine reviewers for a given health plan package and state
     - devReviewTeamEmails added to all emails by default
-    - dmcpEmails added in both CONTRACT_ONLY and CONTRACT_AND_RATES
+    - dmcpSubmissionEmails added in both CONTRACT_ONLY and CONTRACT_AND_RATES
     - oactEmails added for CONTRACT_AND_RATES
     - dmco is added to emails via state analysts
     
@@ -110,7 +115,7 @@ const generateCMSReviewerEmails = (
         )
     }
 
-    const { oactEmails, dmcpEmails } = config
+    const { oactEmails, dmcpSubmissionEmails } = config
     let reviewers: string[] = []
 
     if (pkg.submissionType === 'CONTRACT_ONLY') {
@@ -118,14 +123,14 @@ const generateCMSReviewerEmails = (
         reviewers = [
             ...config.devReviewTeamEmails,
             ...stateAnalystsEmails,
-            ...dmcpEmails,
+            ...dmcpSubmissionEmails,
         ]
     } else if (pkg.submissionType === 'CONTRACT_AND_RATES') {
         //Contract and rate submissions reviewer emails.
         reviewers = [
             ...config.devReviewTeamEmails,
             ...stateAnalystsEmails,
-            ...dmcpEmails,
+            ...dmcpSubmissionEmails,
             ...oactEmails,
         ]
     }
@@ -174,6 +179,24 @@ const findPackagePrograms = (
     return programs
 }
 
+//Find state programs from contract with rates
+const findContractPrograms = (
+    contractRev: ContractRevisionWithRatesType,
+    statePrograms: ProgramType[]
+): ProgramType[] | Error => {
+    const programIDs = contractRev.formData.programIDs
+    const programs = statePrograms.filter((program) =>
+        programIDs.includes(program.id)
+    )
+    if (!programs || programs.length !== programIDs.length) {
+        const errMessage = `Can't find programs ${programIDs} from state ${contractRev.contract.stateCode}`
+        logError('newPackageCMSEmail', errMessage)
+        return new Error(errMessage)
+    }
+
+    return programs
+}
+
 // Clean out HTML tags from an HTML based template
 // this way we still have a text alternative for email client rendering html in plaintext
 // plaintext is also referenced for unit testing
@@ -191,6 +214,34 @@ const stripHTMLFromTemplate = (template: string) => {
     return formatted.replace(/(<([^>]+)>)/gi, '')
 }
 
+const getQuestionRound = (
+    allQuestions: Question[],
+    currentQuestion: Question
+): number | Error => {
+    // Filter out other divisions question and sort by created at in ascending order
+    const divisionQuestions = allQuestions
+        .filter((question) => question.division === currentQuestion.division)
+        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+
+    if (divisionQuestions.length === 0) {
+        return new Error(
+            'Error getting question round, current question not found'
+        )
+    }
+
+    // Find index of the current question, this is it's round. First, index 0, in the array is round 1
+    const questionIndex = divisionQuestions.findIndex(
+        (question) => question.id === currentQuestion.id
+    )
+    if (questionIndex === -1) {
+        return new Error(
+            'Error getting question round, current question index not found'
+        )
+    }
+
+    return questionIndex + 1
+}
+
 export {
     stripHTMLFromTemplate,
     handleAsCHIPSubmission,
@@ -199,5 +250,7 @@ export {
     SubmissionTypeRecord,
     findAllPackageProgramIds,
     findPackagePrograms,
+    findContractPrograms,
     filterChipAndPRSubmissionReviewers,
+    getQuestionRound,
 }

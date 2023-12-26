@@ -2,6 +2,7 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { PageActions } from './'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
 
 describe('PageActions', () => {
     describe('generic page behavior', () => {
@@ -10,7 +11,12 @@ describe('PageActions', () => {
                 <PageActions
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={jest.fn()}
-                />
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
             )
             const buttons = screen.getAllByRole('button')
             expect(buttons).toHaveLength(3)
@@ -35,7 +41,12 @@ describe('PageActions', () => {
                     continueOnClick={jest.fn()}
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={backAction}
-                />
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
             )
 
             await userEvent.click(screen.getByRole('button', { name: 'Back' }))
@@ -48,7 +59,12 @@ describe('PageActions', () => {
                     continueOnClick={jest.fn()}
                     saveAsDraftOnClick={saveAction}
                     backOnClick={jest.fn()}
-                />
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
             )
 
             await userEvent.click(
@@ -63,7 +79,12 @@ describe('PageActions', () => {
                     continueOnClick={continueAction}
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={jest.fn()}
-                />
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
             )
 
             await userEvent.click(
@@ -79,7 +100,12 @@ describe('PageActions', () => {
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={jest.fn()}
                     disableContinue
-                />
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
             )
 
             await userEvent.click(
@@ -97,7 +123,12 @@ describe('PageActions', () => {
                     continueOnClick={jest.fn()}
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={jest.fn()}
-                />
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
             )
             const buttons = screen.getAllByRole('button')
             expect(buttons).toHaveLength(2)
@@ -119,7 +150,12 @@ describe('PageActions', () => {
                     continueOnClick={jest.fn()}
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={jest.fn()}
-                />
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
             )
             const buttons = screen.getAllByRole('button')
             expect(buttons).toHaveLength(3)
@@ -145,7 +181,12 @@ describe('PageActions', () => {
                     continueOnClick={jest.fn()}
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={backAction}
-                />
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
             )
 
             await userEvent.click(
@@ -162,7 +203,12 @@ describe('PageActions', () => {
                     continueOnClick={continueAction}
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={jest.fn()}
-                />
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
             )
 
             await userEvent.click(
@@ -180,7 +226,12 @@ describe('PageActions', () => {
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={jest.fn()}
                     disableContinue
-                />
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
             )
 
             await userEvent.click(
@@ -196,7 +247,12 @@ describe('PageActions', () => {
                     continueOnClick={jest.fn()}
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={jest.fn()}
-                />
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
             )
             const buttons = screen.getAllByRole('button')
             expect(buttons).toHaveLength(3)
@@ -222,7 +278,12 @@ describe('PageActions', () => {
                     continueOnClick={continueAction}
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={jest.fn()}
-                />
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
             )
 
             await userEvent.click(
@@ -238,7 +299,12 @@ describe('PageActions', () => {
                     continueOnClick={jest.fn()}
                     saveAsDraftOnClick={saveAsDraftOnClick}
                     backOnClick={jest.fn()}
-                />
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
             )
 
             await userEvent.click(
@@ -254,7 +320,12 @@ describe('PageActions', () => {
                     continueOnClick={jest.fn()}
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={backOnClick}
-                />
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
             )
 
             await userEvent.click(
@@ -276,7 +347,12 @@ describe('PageActions', () => {
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={jest.fn()}
                     actionInProgress
-                />
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
             )
 
             await userEvent.click(

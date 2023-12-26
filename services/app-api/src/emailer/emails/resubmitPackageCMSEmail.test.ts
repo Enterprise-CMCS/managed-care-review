@@ -39,8 +39,7 @@ describe('with rates', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         expect(template).toEqual(
@@ -65,7 +64,6 @@ describe('with rates', () => {
                             s3URL: 'bar',
                             name: 'foo',
                             sha256: 'fakesha',
-                            documentCategories: ['RATES' as const],
                         },
                     ],
                     supportingDocuments: [],
@@ -98,8 +96,7 @@ describe('with rates', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         expect(template).toEqual(
@@ -166,7 +163,6 @@ describe('with rates', () => {
                             s3URL: 'bar',
                             name: 'foo',
                             sha256: 'fakesha',
-                            documentCategories: ['RATES' as const],
                         },
                     ],
                     supportingDocuments: [],
@@ -195,7 +191,6 @@ describe('with rates', () => {
                             s3URL: 'bar',
                             name: 'foo',
                             sha256: 'fakesha',
-                            documentCategories: ['RATES' as const],
                         },
                     ],
                     supportingDocuments: [],
@@ -224,7 +219,6 @@ describe('with rates', () => {
                             s3URL: 'bar',
                             name: 'foo',
                             sha256: 'fakesha',
-                            documentCategories: ['RATES' as const],
                         },
                     ],
                     supportingDocuments: [],
@@ -263,8 +257,7 @@ describe('with rates', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         //Expect only have 3 rate names using regex to match name pattern specific to rate names.
@@ -320,11 +313,10 @@ describe('with rates', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
-        testEmailConfig().dmcpEmails.forEach((emailAddress) => {
+        testEmailConfig().dmcpSubmissionEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
@@ -360,8 +352,7 @@ describe('with rates', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         expect(template).toEqual(
@@ -395,8 +386,7 @@ describe('with rates', () => {
         ]
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         reviewerEmails.forEach((emailAddress) => {
@@ -426,7 +416,6 @@ describe('with rates', () => {
                             s3URL: 'bar',
                             name: 'foo',
                             sha256: 'fakesha',
-                            documentCategories: ['RATES' as const],
                         },
                     ],
                     supportingDocuments: [],
@@ -458,8 +447,7 @@ describe('with rates', () => {
         )
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         testStateAnalystEmails.forEach((emailAddress) => {
@@ -482,7 +470,6 @@ describe('with rates', () => {
                             s3URL: 'bar',
                             name: 'foo',
                             sha256: 'fakesha',
-                            documentCategories: ['RATES' as const],
                         },
                     ],
                     supportingDocuments: [],
@@ -515,8 +502,7 @@ describe('with rates', () => {
         const excludedEmails = [...testEmailConfig().oactEmails]
 
         if (template instanceof Error) {
-            console.error(template)
-            return
+            throw template
         }
 
         excludedEmails.forEach((emailAddress) => {
@@ -721,7 +707,6 @@ test('renders overall email as expected', async () => {
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -750,7 +735,6 @@ test('renders overall email as expected', async () => {
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],

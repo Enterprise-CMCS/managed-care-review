@@ -1,6 +1,40 @@
 import type { IndexQuestionsPayload, Question } from '../../domain-models'
+import type { Prisma } from '@prisma/client'
 
-export const convertToIndexQuestionsPayload = (
+const questionInclude = {
+    documents: {
+        orderBy: {
+            createdAt: 'desc',
+        },
+    },
+    responses: {
+        include: {
+            addedBy: true,
+            documents: true,
+        },
+        orderBy: {
+            createdAt: 'desc',
+        },
+    },
+    addedBy: true,
+} satisfies Prisma.QuestionInclude
+
+type PrismaQuestionType = Prisma.QuestionGetPayload<{
+    include: typeof questionInclude
+}>
+
+const questionPrismaToDomainType = (
+    prismaQuestion: PrismaQuestionType
+): Question => ({
+    ...prismaQuestion,
+    addedBy: {
+        ...prismaQuestion.addedBy,
+        stateAssignments: [],
+    } as Question['addedBy'],
+    responses: prismaQuestion.responses as Question['responses'],
+})
+
+const convertToIndexQuestionsPayload = (
     questions: Question[]
 ): IndexQuestionsPayload => {
     const questionsPayload: IndexQuestionsPayload = {
@@ -32,4 +66,10 @@ export const convertToIndexQuestionsPayload = (
     })
 
     return questionsPayload
+}
+
+export {
+    questionInclude,
+    questionPrismaToDomainType,
+    convertToIndexQuestionsPayload,
 }

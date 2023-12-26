@@ -211,9 +211,14 @@ We plan to move this to the DB down the road. Until then, know that if these val
 
 *[same in prod/val]* This the help address displayed in state emails for contacting the analyst review team.
 
-#### `/configuration/email/dmcp`
+#### `/configuration/email/dmcpSubmission`
 
-*[environment specific]* This contains the DMCP primary inbox. The DMCP team is focused on policy issues related to managed care. They review all submissions, excluding CHIP and state of PR.
+*[environment specific]* This contains the DMCP primary inbox. The DMCP team is focused on policy issues related to managed care. They review all submissions, excluding CHIP and state of PR. This inbox is also primarily used for internal communication between DMCP, OACT, and DMCO.
+
+#### `/configuration/email/dmcpReview`
+
+*[environment specific]* This contains the DMCP inbox for external communication and Q&A notifications. 
+
 
 #### `/configuration/email/oact`
 
@@ -222,6 +227,7 @@ We plan to move this to the DB down the road. Until then, know that if these val
 #### `/configuration/email/dmco`
 
 *[environment specific]* This contains the DMCO primary inbox. The DMCO team is focused on managed care contracts and they review all submissions.
+
 
 #### `/configuration/email/reviewTeamAddresses`
 

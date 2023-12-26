@@ -21,59 +21,17 @@ const featureFlags = {
         defaultValue: true,
     },
     /**
-     The number of minutes before the session expires
+     The number of minutes before the session expires and countdown modal appears
     */
     MINUTES_UNTIL_SESSION_EXPIRES: {
         flag: 'session-expiration-minutes',
         defaultValue: 30,
     },
     /**
-     The number of minutes before session expiration that the warning modal appears
-    */
-    MODAL_COUNTDOWN_DURATION: {
-        flag: 'modal-countdown-duration',
-        defaultValue: 2,
-    },
-    /**
      * Enables state and CMS Q&A features
      */
     CMS_QUESTIONS: {
         flag: 'cms-questions',
-        defaultValue: false,
-    },
-    /**
-     * Enables packages with shared rates dropdown on rate details page. This was an early version of rates across subs functionality.
-     */
-    PACKAGES_WITH_SHARED_RATES: {
-        flag: 'packages-with-shared-rates',
-        defaultValue: false,
-    },
-    /**
-     * Enables supporting documents to be associated with a specific rate certification on the Rate Details page
-     */
-    SUPPORTING_DOCS_BY_RATE: {
-        flag: 'supporting-docs-by-rate',
-        defaultValue: false,
-    },
-    /**
-     * Rates refactor database handlers live behind this flag. We will use this to switchover to the new database tables when we migrate.
-     */
-    RATES_DATABASE_REFACTOR: {
-        flag: 'rates-db-refactor',
-        defaultValue: false,
-    },
-    /**
-     * Controls the rates review dashboard UI. This flag should not be turned on without rates-db-refactor also on.
-     */
-    RATE_REVIEWS_DASHBOARD: {
-        flag: 'rate-reviews-dashboard',
-        defaultValue: false,
-    },
-    /**
-     * Controls the rates filter UI/ This flag should not be turned on without rate-reviews-dashboard also on.
-     */
-    RATE_FILTERS: {
-        flag: 'rate-filters',
         defaultValue: false,
     },
     CONTRACT_438_ATTESTATION: {
@@ -87,13 +45,6 @@ const featureFlags = {
     TEST_ERROR_FETCHING_FLAG: {
         flag: 'test-error-fetching-flag',
         defaultValue: undefined,
-    },
-    /*
-    Temporary flag for the cutover to a new support email address
-    */
-    HELPDESK_EMAIL: {
-        flag: 'helpdesk-email',
-        defaultValue: false,
     },
 } as const
 

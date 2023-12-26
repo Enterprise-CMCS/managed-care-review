@@ -1,8 +1,5 @@
 import { screen } from '@testing-library/react'
-import {
-    renderWithProviders,
-    ldUseClientSpy,
-} from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { UserLoginInfo } from './UserLoginInfo'
 import { useStringConstants } from '../../../hooks/useStringConstants'
 
@@ -56,7 +53,6 @@ describe('UserLoginInfo', () => {
     })
 
     it('renders link to support email', () => {
-        ldUseClientSpy({ 'helpdesk-email': true })
         const stringConstants = useStringConstants()
         const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
         const jestFn = jest.fn()

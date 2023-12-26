@@ -15,8 +15,6 @@ import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { useFocus } from '../../../hooks'
 
-import { featureFlags } from '../../../common-code/featureFlags'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
 import {
     formatActuaryContactsForForm,
     formatDocumentsForDomain,
@@ -31,6 +29,7 @@ import { useS3 } from '../../../contexts/S3Context'
 import { S3ClientT } from '../../../s3'
 import { isLoadingOrHasFileErrors } from '../../../components/FileUpload'
 import { RoutesRecord } from '../../../constants'
+import { SectionCard } from '../../../components/SectionCard'
 
 // This function is used to get initial form values as well return empty form values when we add a new rate or delete a rate
 // We need to include the getKey function in params because there are no guarantees currently file is in s3 even if when we load data from API
@@ -78,9 +77,9 @@ const generateRateCertFormValues = (params?: {
             rateInfo?.packagesWithSharedRateCerts === undefined
                 ? undefined
                 : (rateInfo?.packagesWithSharedRateCerts &&
-                      rateInfo?.packagesWithSharedRateCerts.length) >= 1
-                ? 'YES'
-                : 'NO',
+                        rateInfo?.packagesWithSharedRateCerts.length) >= 1
+                  ? 'YES'
+                  : 'NO',
     }
 }
 
@@ -106,17 +105,6 @@ export const RateDetails = ({
     const navigate = useNavigate()
     const { getKey } = useS3()
 
-    // feature flags state management
-    const ldClient = useLDClient()
-    const showPackagesWithSharedRatesDropdown: boolean = ldClient?.variation(
-        featureFlags.PACKAGES_WITH_SHARED_RATES.flag,
-        featureFlags.PACKAGES_WITH_SHARED_RATES.defaultValue
-    )
-    const supportingDocsByRate = ldClient?.variation(
-        featureFlags.SUPPORTING_DOCS_BY_RATE.flag,
-        featureFlags.SUPPORTING_DOCS_BY_RATE.defaultValue
-    )
-
     // form validation state management
     const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
         React.useState(false)
@@ -137,10 +125,7 @@ export const RateDetails = ({
     const newRateNameRef = React.useRef<HTMLElement | null>(null)
     const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
 
-    const rateDetailsFormSchema = RateDetailsFormSchema({
-        'packages-with-shared-rates': showPackagesWithSharedRatesDropdown,
-        'supporting-docs-by-rate': supportingDocsByRate,
-    })
+    const rateDetailsFormSchema = RateDetailsFormSchema()
 
     React.useEffect(() => {
         if (focusNewRate) {
@@ -188,13 +173,9 @@ export const RateDetails = ({
                 id: rateInfo.id,
                 rateType: rateInfo.rateType,
                 rateCapitationType: rateInfo.rateCapitationType,
-                rateDocuments: formatDocumentsForDomain(
-                    rateInfo.rateDocuments,
-                    ['RATES']
-                ),
+                rateDocuments: formatDocumentsForDomain(rateInfo.rateDocuments),
                 supportingDocuments: formatDocumentsForDomain(
-                    rateInfo.supportingDocuments,
-                    ['RATES_RELATED']
+                    rateInfo.supportingDocuments
                 ),
                 rateDateStart: formatFormDateForDomain(rateInfo.rateDateStart),
                 rateDateEnd: formatFormDateForDomain(rateInfo.rateDateEnd),
@@ -320,7 +301,7 @@ export const RateDetails = ({
                                 handleSubmit(e)
                             }}
                         >
-                            <fieldset className="usa-fieldset">
+                            <fieldset className="usa-fieldset with-sections">
                                 <legend className="srOnly">Rate Details</legend>
 
                                 {shouldValidate && (
@@ -365,19 +346,26 @@ export const RateDetails = ({
                                                     />
                                                 )
                                             )}
-                                            <button
-                                                type="button"
-                                                className={`usa-button usa-button--outline ${styles.addContactBtn}`}
-                                                onClick={() => {
-                                                    const newRate =
-                                                        generateRateCertFormValues()
-                                                    push(newRate)
-                                                    setFocusNewRate(true)
-                                                }}
-                                                ref={newRateButtonRef}
-                                            >
-                                                Add another rate certification
-                                            </button>
+                                            <SectionCard>
+                                                <h3>
+                                                    Additional rate
+                                                    certification
+                                                </h3>
+                                                <button
+                                                    type="button"
+                                                    className={`usa-button usa-button--outline ${styles.addRateBtn}`}
+                                                    onClick={() => {
+                                                        const newRate =
+                                                            generateRateCertFormValues()
+                                                        push(newRate)
+                                                        setFocusNewRate(true)
+                                                    }}
+                                                    ref={newRateButtonRef}
+                                                >
+                                                    Add another rate
+                                                    certification
+                                                </button>
+                                            </SectionCard>
                                         </>
                                     )}
                                 </FieldArray>

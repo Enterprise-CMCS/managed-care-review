@@ -6,7 +6,8 @@ query fetchEmailSettings {
             emailSource
             devReviewTeamEmails
             oactEmails
-            dmcpEmails
+            dmcpReviewEmails
+            dmcpSubmissionEmails
             dmcoEmails
             cmsReviewHelpEmailAddress
             cmsRateHelpEmailAddress

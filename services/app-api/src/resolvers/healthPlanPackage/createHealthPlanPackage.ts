@@ -2,8 +2,7 @@ import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { isStateUser } from '../../domain-models'
 import type { MutationResolvers, State } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import type { InsertHealthPlanPackageArgsType, Store } from '../../postgres'
-import { isStoreError } from '../../postgres'
+import type { InsertContractArgsType, Store } from '../../postgres'
 import { pluralize } from '../../../../app-web/src/common-code/formatters'
 import {
     setResolverDetailsOnActiveSpan,
@@ -11,21 +10,14 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql/index'
-import type { LDService } from '../../launchDarkly/launchDarkly'
 import { convertContractWithRatesToUnlockedHPP } from '../../domain-models'
 
 export function createHealthPlanPackageResolver(
-    store: Store,
-    launchDarkly: LDService
+    store: Store
 ): MutationResolvers['createHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
         setResolverDetailsOnActiveSpan('createHealthPlanPackage', user, span)
-
-        const ratesDatabaseRefactor = await launchDarkly.getFeatureFlag(
-            context,
-            'rates-db-refactor'
-        )
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
@@ -63,73 +55,53 @@ export function createHealthPlanPackageResolver(
             })
         }
 
-        const insertArgs: InsertHealthPlanPackageArgsType = {
+        // Why do we need to do this? I feel like I don't understand Maybe here exactly.
+        const riskBasedContract =
+            input.riskBasedContract === undefined
+                ? undefined
+                : input.riskBasedContract?.valueOf()
+
+        const insertArgs: InsertContractArgsType = {
             stateCode: stateFromCurrentUser,
-            populationCovered:
-                input.populationCovered as InsertHealthPlanPackageArgsType['populationCovered'],
+            populationCovered: input.populationCovered,
             programIDs: input.programIDs,
-            riskBasedContract:
-                input.riskBasedContract as InsertHealthPlanPackageArgsType['riskBasedContract'],
+            riskBasedContract: riskBasedContract,
             submissionDescription: input.submissionDescription,
-            submissionType:
-                input.submissionType as InsertHealthPlanPackageArgsType['submissionType'],
+            submissionType: input.submissionType,
             contractType: input.contractType,
         }
 
-        //Here is where we flag the insert
-        if (ratesDatabaseRefactor) {
-            const contractResult = await store.insertDraftContract(insertArgs)
-            if (contractResult instanceof Error) {
-                const errMessage = `Error creating a draft contract. Message: ${contractResult.message}`
-                logError('createHealthPlanPackage', errMessage)
-                setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'DB_ERROR',
-                    },
-                })
-            }
-
-            // Now we do the conversions
-            const pkg = convertContractWithRatesToUnlockedHPP(contractResult)
-
-            if (pkg instanceof Error) {
-                const errMessage = `Error converting draft contract. Message: ${pkg.message}`
-                logError('createHealthPlanPackage', errMessage)
-                setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'PROTO_DECODE_ERROR',
-                    },
-                })
-            }
-
-            logSuccess('createHealthPlanPackage')
-            setSuccessAttributesOnActiveSpan(span)
-
-            return { pkg }
-        } else {
-            const pkgResult = await store.insertHealthPlanPackage(insertArgs)
-            if (isStoreError(pkgResult)) {
-                const errMessage = `Error creating a package of type ${pkgResult.code}. Message: ${pkgResult.message}`
-                logError('createHealthPlanPackage', errMessage)
-                setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'DB_ERROR',
-                    },
-                })
-            }
-
-            logSuccess('createHealthPlanPackage')
-            setSuccessAttributesOnActiveSpan(span)
-
-            return {
-                pkg: pkgResult,
-            }
+        const contractResult = await store.insertDraftContract(insertArgs)
+        if (contractResult instanceof Error) {
+            const errMessage = `Error creating a draft contract. Message: ${contractResult.message}`
+            logError('createHealthPlanPackage', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
+
+        // Now we do the conversions
+        const pkg = convertContractWithRatesToUnlockedHPP(contractResult)
+
+        if (pkg instanceof Error) {
+            const errMessage = `Error converting draft contract. Message: ${pkg.message}`
+            logError('createHealthPlanPackage', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'PROTO_DECODE_ERROR',
+                },
+            })
+        }
+
+        logSuccess('createHealthPlanPackage')
+        setSuccessAttributesOnActiveSpan(span)
+
+        return { pkg }
     }
 }

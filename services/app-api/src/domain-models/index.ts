@@ -31,6 +31,7 @@ export {
 export {
     convertContractWithRatesRevtoHPPRev,
     convertContractWithRatesToUnlockedHPP,
+    contractSubmitters,
 } from './contractAndRates'
 
 export type {

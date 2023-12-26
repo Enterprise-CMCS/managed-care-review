@@ -10,6 +10,14 @@ $width-max-contained: 50rem;
     max-width: $width-max-contained;
 }
 
+@mixin sectionCard {
+    padding: units(4);
+    margin-bottom: units(2);
+    margin-top: units(2);
+    background: $cms-color-white;
+    border: 1px solid $theme-color-base-lighter;
+    @include u-radius('md');
+}
 // accessibility
 .srOnly {
     position: absolute;

@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders overall CMS email for a new state response as expected 1`] = `
+"The state submitted responses to OACT's questions about MCR-MN-0003-SNBC<br />
+<b>Submitted by:</b> James Brown <a href="james@example.com">james@example.com</a><br />
+<b>Round:</b> 2<br />
+<b>Questions sent on:</b> 02/03/2024<br />
+<br />
+<a href="http://localhost/submissions/12345/question-and-answers">View submission Q&A</a>
+"
+`;

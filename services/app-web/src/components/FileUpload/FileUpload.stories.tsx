@@ -14,20 +14,18 @@ export const DemoListUploadSuccess = (): React.ReactElement => {
             id="Default"
             name="Default Input"
             label="FileInput"
-            renderMode="list"
-            uploadFile={(file: File) =>
+            uploadFile={(_file: File) =>
                 fakeRequest<S3FileData>(true, resolveData)
             }
-            scanFile={async (key: string) => {
+            scanFile={async (_key: string) => {
                 await fakeRequest<S3FileData>(true, resolveData)
                 return
             }}
-            deleteFile={async (key: string) => {
+            deleteFile={async (_key: string) => {
                 await fakeRequest<S3FileData>(true, resolveData)
                 return
             }}
             onFileItemsUpdate={() => console.info('Async load complete')}
-            isContractOnly={false}
         />
     )
 }
@@ -38,20 +36,18 @@ export const DemoTableUploadSuccess = (): React.ReactElement => {
             id="Default"
             name="Default Input"
             label="FileInput"
-            renderMode="table"
-            uploadFile={(file: File) =>
+            uploadFile={(_file: File) =>
                 fakeRequest<S3FileData>(true, resolveData)
             }
-            scanFile={async (key: string) => {
+            scanFile={async (_key: string) => {
                 await fakeRequest<S3FileData>(true, resolveData)
                 return
             }}
-            deleteFile={async (key: string) => {
+            deleteFile={async (_key: string) => {
                 await fakeRequest<S3FileData>(true, resolveData)
                 return
             }}
             onFileItemsUpdate={() => console.info('Async load complete')}
-            isContractOnly={false}
         />
     )
 }
@@ -62,20 +58,18 @@ export const DemoListUploadFailure = (): React.ReactElement => {
             id="Default"
             name="Default Input"
             label="FileInput"
-            renderMode="list"
-            uploadFile={(file: File) =>
+            uploadFile={(_file: File) =>
                 fakeRequest<S3FileData>(false, resolveData)
             }
-            scanFile={async (key: string) => {
+            scanFile={async (_key: string) => {
                 await fakeRequest<S3FileData>(true, resolveData)
                 return
             }}
-            deleteFile={async (key: string) => {
+            deleteFile={async (_key: string) => {
                 await fakeRequest<S3FileData>(true, resolveData)
                 return
             }}
             onFileItemsUpdate={() => console.info('Async load complete')}
-            isContractOnly={false}
         />
     )
 }
@@ -86,20 +80,18 @@ export const DemoTableUploadFailure = (): React.ReactElement => {
             id="Default"
             name="Default Input"
             label="FileInput"
-            renderMode="table"
-            uploadFile={(file: File) =>
+            uploadFile={(_file: File) =>
                 fakeRequest<S3FileData>(false, resolveData)
             }
-            scanFile={async (key: string) => {
+            scanFile={async (_key: string) => {
                 await fakeRequest<S3FileData>(true, resolveData)
                 return
             }}
-            deleteFile={async (key: string) => {
+            deleteFile={async (_key: string) => {
                 await fakeRequest<S3FileData>(true, resolveData)
                 return
             }}
             onFileItemsUpdate={() => console.info('Async load complete')}
-            isContractOnly={false}
         />
     )
 }
@@ -110,20 +102,18 @@ export const DemoListScanFailure = (): React.ReactElement => {
             id="Default"
             name="Default Input"
             label="FileInput"
-            renderMode="list"
-            uploadFile={(file: File) =>
+            uploadFile={(_file: File) =>
                 fakeRequest<S3FileData>(true, resolveData)
             }
-            scanFile={async (key: string) => {
+            scanFile={async (_key: string) => {
                 await fakeRequest<S3FileData>(false, resolveData)
                 return
             }}
-            deleteFile={async (key: string) => {
+            deleteFile={async (_key: string) => {
                 await fakeRequest<S3FileData>(true, resolveData)
                 return
             }}
             onFileItemsUpdate={() => console.info('Async load complete')}
-            isContractOnly={false}
         />
     )
 }
@@ -134,20 +124,18 @@ export const DemoTableScanFailure = (): React.ReactElement => {
             id="Default"
             name="Default Input"
             label="FileInput"
-            renderMode="table"
-            uploadFile={(file: File) =>
+            uploadFile={(_file: File) =>
                 fakeRequest<S3FileData>(true, resolveData)
             }
-            scanFile={async (key: string) => {
+            scanFile={async (_key: string) => {
                 await fakeRequest<S3FileData>(false, resolveData)
                 return
             }}
-            deleteFile={async (key: string) => {
+            deleteFile={async (_key: string) => {
                 await fakeRequest<S3FileData>(true, resolveData)
                 return
             }}
             onFileItemsUpdate={() => console.info('Async load complete')}
-            isContractOnly={false}
         />
     )
 }

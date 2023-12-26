@@ -1,6 +1,7 @@
 import { spawn } from 'child_process'
 import yargs from 'yargs'
 import { parseRunFlags } from './flags.js'
+import { cloneDBLocally } from './jumpbox.js'
 import {
     compileGraphQLTypesOnce,
     compileProto,
@@ -155,7 +156,7 @@ function runPrisma(args: string[]) {
     })
 }
 
-function main() {
+async function main() {
     // check to see if local direnv vars have loaded
     if (!process.env.REACT_APP_AUTH_MODE) {
         console.info(
@@ -174,7 +175,7 @@ function main() {
       All valid arguments to dev should be enumerated here, this is the entrypoint to the script
     */
 
-    yargs(process.argv.slice(2))
+    await yargs(process.argv.slice(2))
         .scriptName('dev')
         .command(
             'local',
@@ -493,6 +494,45 @@ function main() {
                 )
             }
         )
+        .command('jumpbox', 'run commands on a jumpbox', (yargs) => {
+            return yargs
+                .command(
+                    'clone <env>',
+                    'copy the database in the given aws environment locally',
+                    (yargs) => {
+                        return yargs
+                            .positional('env', {
+                                describe:
+                                    'the environment to clone from. You must have AWS credentials configured for this environment.',
+                                demandOption: true,
+                                type: 'string',
+                                choices: ['dev', 'val', 'prod'],
+                            })
+                            .option('stop-after', {
+                                type: 'boolean',
+                                default: true,
+                            })
+                            .option('ssh-key', {
+                                type: 'string',
+                                default: '~/.ssh/id_rsa',
+                            })
+                            .example([
+                                [
+                                    '$0 jumpbox clone dev',
+                                    'clone the db from the dev AWS environment to your local machine',
+                                ],
+                            ])
+                    },
+                    async (args) => {
+                        await cloneDBLocally(
+                            args.env,
+                            args.sshKey,
+                            args.stopAfter
+                        )
+                    }
+                )
+                .demandCommand(1, 'you must pick a subcommand for jumpbox')
+        })
         .command(
             'prisma',
             'run the prisma command in app-api. all arguments after -- will be passed directly into the prisma command.',
@@ -545,20 +585,6 @@ function main() {
             {},
             () => {
                 runAllGenerate()
-            }
-        )
-        .command(
-            'hybrid',
-            '[deprecated use ./dev local web --hybrid instead] run app-web locally connected to the review app deployed for this branch',
-            (yargs) => {
-                return yargs.option('stage', {
-                    type: 'string',
-                    describe:
-                        'an alternative Serverless stage in your AWS account to run against',
-                })
-            },
-            (args) => {
-                runWebAgainstAWS(args.stage)
             }
         )
         .demandCommand(1, '')

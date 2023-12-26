@@ -42,14 +42,8 @@ export function configureResolvers(
         DateTime: GraphQLDateTime,
         Query: {
             fetchCurrentUser: fetchCurrentUserResolver(),
-            fetchHealthPlanPackage: fetchHealthPlanPackageResolver(
-                store,
-                launchDarkly
-            ),
-            indexHealthPlanPackages: indexHealthPlanPackagesResolver(
-                store,
-                launchDarkly
-            ),
+            fetchHealthPlanPackage: fetchHealthPlanPackageResolver(store),
+            indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
             indexUsers: indexUsersResolver(store),
             indexQuestions: indexQuestionsResolver(store),
             fetchEmailSettings: fetchEmailSettingsResolver(
@@ -58,14 +52,11 @@ export function configureResolvers(
                 emailParameterStore
             ),
             // Rates refactor
-            indexRates: indexRatesResolver(store, launchDarkly),
-            fetchRate: fetchRateResolver(store, launchDarkly),
+            indexRates: indexRatesResolver(store),
+            fetchRate: fetchRateResolver(store),
         },
         Mutation: {
-            createHealthPlanPackage: createHealthPlanPackageResolver(
-                store,
-                launchDarkly
-            ),
+            createHealthPlanPackage: createHealthPlanPackageResolver(store),
             updateHealthPlanFormData: updateHealthPlanFormDataResolver(
                 store,
                 launchDarkly
@@ -79,13 +70,20 @@ export function configureResolvers(
             unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
                 store,
                 emailer,
-                emailParameterStore,
-                launchDarkly
+                emailParameterStore
             ),
-            updateContract: updateContract(store, launchDarkly),
+            updateContract: updateContract(store),
             updateCMSUser: updateCMSUserResolver(store),
-            createQuestion: createQuestionResolver(store),
-            createQuestionResponse: createQuestionResponseResolver(store),
+            createQuestion: createQuestionResolver(
+                store,
+                emailParameterStore,
+                emailer
+            ),
+            createQuestionResponse: createQuestionResponseResolver(
+                store,
+                emailer,
+                emailParameterStore
+            ),
         },
         User: {
             // resolveType is required to differentiate Unions

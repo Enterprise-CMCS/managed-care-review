@@ -1,39 +1,17 @@
-import type {
-    PrismaClient,
-    HealthPlanRevisionTable,
-    Division,
-} from '@prisma/client'
-import type {
-    UnlockedHealthPlanFormDataType,
-    HealthPlanFormDataType,
-    StateCodeType,
-} from '../../../app-web/src/common-code/healthPlanFormDataType'
+import type { PrismaClient, Division } from '@prisma/client'
+import type { StateCodeType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import type {
     ProgramType,
-    HealthPlanPackageType,
-    UpdateInfoType,
     UserType,
     CMSUserType,
     StateUserType,
     Question,
     CreateQuestionInput,
-    QuestionResponseType,
     InsertQuestionResponseArgs,
     StateType,
     RateType,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
-import type { StoreError } from './storeError'
-import type { InsertHealthPlanPackageArgsType } from './healthPlanPackage'
-import {
-    findAllHealthPlanPackagesByState,
-    findAllHealthPlanPackagesBySubmittedAt,
-    findHealthPlanPackage,
-    insertHealthPlanPackage,
-    insertHealthPlanRevision,
-    updateHealthPlanRevision,
-    findAllRevisions,
-} from './healthPlanPackage'
 import type { InsertUserArgsType } from './user'
 import {
     findUser,
@@ -83,48 +61,17 @@ type Store = {
 
     findStatePrograms: (stateCode: string) => ProgramType[] | Error
 
-    findAllSupportedStates: () => Promise<StateType[] | StoreError>
+    findAllSupportedStates: () => Promise<StateType[] | Error>
 
-    findAllRevisions: () => Promise<HealthPlanRevisionTable[] | StoreError>
+    findAllUsers: () => Promise<UserType[] | Error>
 
-    findAllUsers: () => Promise<UserType[] | StoreError>
+    findUser: (id: string) => Promise<UserType | undefined | Error>
 
-    findHealthPlanPackage: (
-        draftUUID: string
-    ) => Promise<HealthPlanPackageType | undefined | StoreError>
-
-    findAllHealthPlanPackagesByState: (
-        stateCode: string
-    ) => Promise<HealthPlanPackageType[] | StoreError>
-
-    findAllHealthPlanPackagesBySubmittedAt: () => Promise<
-        HealthPlanPackageType[] | StoreError
-    >
-
-    insertHealthPlanPackage: (
-        args: InsertHealthPlanPackageArgsType
-    ) => Promise<HealthPlanPackageType | StoreError>
-
-    updateHealthPlanRevision: (
-        pkgID: string,
-        revisionID: string,
-        formData: HealthPlanFormDataType,
-        submitInfo?: UpdateInfoType
-    ) => Promise<HealthPlanPackageType | StoreError>
-
-    insertHealthPlanRevision: (
-        pkgID: string,
-        unlockInfo: UpdateInfoType,
-        draft: UnlockedHealthPlanFormDataType
-    ) => Promise<HealthPlanPackageType | StoreError>
-
-    findUser: (id: string) => Promise<UserType | undefined | StoreError>
-
-    insertUser: (user: InsertUserArgsType) => Promise<UserType | StoreError>
+    insertUser: (user: InsertUserArgsType) => Promise<UserType | Error>
 
     insertManyUsers: (
         users: InsertUserArgsType[]
-    ) => Promise<UserType[] | StoreError>
+    ) => Promise<UserType[] | Error>
 
     updateCmsUserProperties: (
         userID: string,
@@ -132,23 +79,20 @@ type Store = {
         idOfUserPerformingUpdate: string,
         divisionAssignment?: Division,
         description?: string | null
-    ) => Promise<CMSUserType | StoreError>
+    ) => Promise<CMSUserType | Error>
 
     insertQuestion: (
         questionInput: CreateQuestionInput,
         user: CMSUserType
-    ) => Promise<Question | StoreError>
+    ) => Promise<Question | Error>
 
     findAllQuestionsByContract: (pkgID: string) => Promise<Question[] | Error>
 
     insertQuestionResponse: (
         questionInput: InsertQuestionResponseArgs,
         user: StateUserType
-    ) => Promise<QuestionResponseType | StoreError>
+    ) => Promise<Question | Error>
 
-    /**
-     * Rates database refactor prisma functions
-     */
     insertDraftContract: (
         args: InsertContractArgsType
     ) => Promise<ContractType | Error>
@@ -192,27 +136,6 @@ type Store = {
 
 function NewPostgresStore(client: PrismaClient): Store {
     return {
-        insertHealthPlanPackage: (args) =>
-            insertHealthPlanPackage(client, args),
-        findHealthPlanPackage: (id) => findHealthPlanPackage(client, id),
-        findAllHealthPlanPackagesByState: (stateCode) =>
-            findAllHealthPlanPackagesByState(client, stateCode),
-        findAllHealthPlanPackagesBySubmittedAt: () =>
-            findAllHealthPlanPackagesBySubmittedAt(client),
-        updateHealthPlanRevision: (pkgID, revisionID, formData, submitInfo) =>
-            updateHealthPlanRevision(
-                client,
-                pkgID,
-                revisionID,
-                formData,
-                submitInfo
-            ),
-        insertHealthPlanRevision: (pkgID, unlockInfo, draft) =>
-            insertHealthPlanRevision(client, {
-                pkgID,
-                unlockInfo,
-                draft,
-            }),
         findPrograms: findPrograms,
         findUser: (id) => findUser(client, id),
         insertUser: (args) => insertUser(client, args),
@@ -234,17 +157,15 @@ function NewPostgresStore(client: PrismaClient): Store {
             ),
         findStatePrograms: findStatePrograms,
         findAllSupportedStates: () => findAllSupportedStates(client),
-        findAllRevisions: () => findAllRevisions(client),
         findAllUsers: () => findAllUsers(client),
+
         insertQuestion: (questionInput, user) =>
             insertQuestion(client, questionInput, user),
         findAllQuestionsByContract: (pkgID) =>
             findAllQuestionsByContract(client, pkgID),
         insertQuestionResponse: (questionInput, user) =>
             insertQuestionResponse(client, questionInput, user),
-        /**
-         * Rates database refactor prisma functions
-         */
+
         insertDraftContract: (args) => insertDraftContract(client, args),
         findContractWithHistory: (args) =>
             findContractWithHistory(client, args),

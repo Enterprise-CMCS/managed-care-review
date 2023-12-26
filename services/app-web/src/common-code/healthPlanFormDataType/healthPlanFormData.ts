@@ -1,6 +1,5 @@
 import {
     RateInfoType,
-    SubmissionDocument,
     UnlockedHealthPlanFormDataType,
     ActuaryContact,
 } from './UnlockedHealthPlanFormDataType'
@@ -59,12 +58,12 @@ const hasValidModifiedProvisions = (
               (provision) => provisions[provision] !== undefined
           )
         : isBaseContract(sub)
-        ? modifiedProvisionMedicaidBaseKeys.every(
-              (provision) => provisions[provision] !== undefined
-          )
-        : modifiedProvisionMedicaidAmendmentKeys.every(
-              (provision) => provisions[provision] !== undefined
-          )
+          ? modifiedProvisionMedicaidBaseKeys.every(
+                (provision) => provisions[provision] !== undefined
+            )
+          : modifiedProvisionMedicaidAmendmentKeys.every(
+                (provision) => provisions[provision] !== undefined
+            )
 }
 const hasValidContract = (sub: LockedHealthPlanFormDataType): boolean =>
     sub.contractType !== undefined &&
@@ -137,10 +136,7 @@ const hasAnyValidRateData = (
 ): boolean => {
     return (
         //Any rate inside array of rateInfo would mean there is rate data.
-        Boolean(sub.rateInfos.length) ||
-        sub.documents.some((document) =>
-            document.documentCategories.includes('CONTRACT_RELATED')
-        )
+        sub.rateInfos.length > 0
     )
 }
 
@@ -154,26 +150,6 @@ const hasValidDocuments = (sub: LockedHealthPlanFormDataType): boolean => {
 
     const validContractDocuments = sub.contractDocuments.length !== 0
     return validRateDocuments && validContractDocuments
-}
-
-const hasValidSupportingDocumentCategories = (
-    sub: LockedHealthPlanFormDataType
-): boolean => {
-    // every document must have a category
-    if (!sub.documents.every((doc) => doc.documentCategories.length > 0)) {
-        return false
-    }
-    // if the submission is contract-only, all supporting docs must be 'CONTRACT-RELATED
-    if (
-        sub.submissionType === 'CONTRACT_ONLY' &&
-        sub.documents.length > 0 &&
-        !sub.documents.every((doc) =>
-            doc.documentCategories.includes('CONTRACT_RELATED')
-        )
-    ) {
-        return false
-    }
-    return true
 }
 
 const isLockedHealthPlanFormData = (
@@ -314,35 +290,12 @@ const generateRateName = (
     return rateName
 }
 
-// This logic is no longer needed once SUPPORTING_DOCS_BY_RATE flag is on in production
-const convertRateSupportingDocs = (
-    documents: SubmissionDocument[]
-): SubmissionDocument[] => {
-    if (
-        documents.some(
-            (document) =>
-                document.documentCategories.includes('CONTRACT') ||
-                document.documentCategories.includes('RATES')
-        )
-    ) {
-        const errorMessage =
-            'convertRateSupportingDocs does not support CONTRACT or RATES documents.'
-        console.error(errorMessage)
-        throw new Error(errorMessage)
-    }
-    return documents.map((document) => ({
-        ...document,
-        documentCategories: ['CONTRACT_RELATED'],
-    }))
-}
-
 const removeRatesData = (
     pkg: HealthPlanFormDataType
 ): HealthPlanFormDataType => {
     pkg.rateInfos = []
     pkg.addtlActuaryContacts = []
     pkg.addtlActuaryCommunicationPreference = undefined
-    pkg.documents = convertRateSupportingDocs(pkg.documents)
 
     return pkg
 }
@@ -380,7 +333,6 @@ export {
     hasValidModifiedProvisions,
     hasValidContract,
     hasValidDocuments,
-    hasValidSupportingDocumentCategories,
     hasValidRates,
     hasAnyValidRateData,
     isBaseContract,
@@ -395,7 +347,6 @@ export {
     programNames,
     packageName,
     generateRateName,
-    convertRateSupportingDocs,
     removeRatesData,
     removeInvalidProvisionsAndAuthorities,
     hasValidPopulationCoverage,

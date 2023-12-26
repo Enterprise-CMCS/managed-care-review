@@ -14,6 +14,7 @@ import { handleApolloError } from '../gqlHelpers/apolloErrors'
 type LogoutFn = () => Promise<null>
 
 export type LoginStatusType = 'LOADING' | 'LOGGED_OUT' | 'LOGGED_IN'
+export const MODAL_COUNTDOWN_DURATION = 2 * 60 // session expiration modal counts down for 120 seconds (2 minutes)
 
 type AuthContextType = {
     /* See docs/AuthContext.md for an explanation of some of these variables */
@@ -73,15 +74,10 @@ function AuthProvider({
     const sessionExpirationTime = useRef<dayjs.Dayjs>(
         dayjs(Date.now()).add(minutesUntilExpiration, 'minute')
     )
-    const countdownDurationSeconds: number =
-        ldClient?.variation(
-            featureFlags.MODAL_COUNTDOWN_DURATION.flag,
-            featureFlags.MODAL_COUNTDOWN_DURATION.defaultValue
-        ) * 60
     const [logoutCountdownDuration, setLogoutCountdownDuration] =
-        useState<number>(countdownDurationSeconds)
-    const modalCountdownTimers = useRef<NodeJS.Timer[]>([])
-    const sessionExpirationTimers = useRef<NodeJS.Timer[]>([])
+        useState<number>(MODAL_COUNTDOWN_DURATION)
+    const modalCountdownTimers = useRef<NodeJS.Timeout[]>([])
+    const sessionExpirationTimers = useRef<NodeJS.Timeout[]>([])
     const { loading, data, error, refetch } = useFetchCurrentUserQuery({
         notifyOnNetworkStatusChange: true,
     })
@@ -104,7 +100,7 @@ function AuthProvider({
             modalCountdownTimers.current = []
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [sessionIsExpiring, countdownDurationSeconds]) // full dep array causes a loop, because we're resetting the dep in the useEffect
+    }, [sessionIsExpiring]) // full dep array causes a loop, because we're resetting the dep in the useEffect
 
     const isAuthenticated = loggedInUser !== undefined
 
@@ -132,8 +128,8 @@ function AuthProvider({
     const computedLoginStatus: LoginStatusType = loading
         ? 'LOADING'
         : loggedInUser !== undefined
-        ? 'LOGGED_IN'
-        : 'LOGGED_OUT'
+          ? 'LOGGED_IN'
+          : 'LOGGED_OUT'
 
     if (loginStatus !== computedLoginStatus) {
         setLoginStatus(computedLoginStatus)
@@ -198,7 +194,7 @@ function AuthProvider({
                 if (sessionExpirationTime.current) {
                     insideCountdownDurationPeriod = dayjs(Date.now()).isAfter(
                         dayjs(sessionExpirationTime.current).subtract(
-                            countdownDurationSeconds,
+                            MODAL_COUNTDOWN_DURATION,
                             'second'
                         )
                     )

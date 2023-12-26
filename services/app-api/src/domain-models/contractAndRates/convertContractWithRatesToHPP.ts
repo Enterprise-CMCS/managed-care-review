@@ -142,11 +142,9 @@ function convertContractWithRatesToFormData(
                 rateCapitationType,
                 rateDocuments: rateDocuments.map((doc) => ({
                     ...doc,
-                    documentCategories: ['RATES'],
                 })) as SubmissionDocument[],
                 supportingDocuments: supportingDocuments.map((doc) => ({
                     ...doc,
-                    documentCategories: ['RATES_RELATED'],
                 })) as SubmissionDocument[],
                 rateAmendmentInfo: rateAmendmentInfo,
                 rateDateStart,
@@ -178,14 +176,12 @@ function convertContractWithRatesToFormData(
         addtlActuaryContacts: [...pkgAdditionalCertifyingActuaries],
         documents: contractRev.formData.supportingDocuments.map((doc) => ({
             ...doc,
-            documentCategories: ['CONTRACT_RELATED'],
         })) as SubmissionDocument[],
         contractType: contractRev.formData.contractType,
         contractExecutionStatus: contractRev.formData.contractExecutionStatus,
         contractDocuments: contractRev.formData.contractDocuments.map(
             (doc) => ({
                 ...doc,
-                documentCategories: ['CONTRACT'],
             })
         ) as SubmissionDocument[],
         contractDateStart: contractRev.formData.contractDateStart,

@@ -96,7 +96,7 @@ jobs:
         run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
 
       - name: Generate protos
-        run: npx lerna run generate --scope=app-proto && npx lerna run build --scope=app-proto
+        run: npx lerna run generate --scope=app-proto
 
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client
@@ -107,12 +107,12 @@ jobs:
         working-directory: services/app-api
         run: ./scripts/prepare-prisma-layer.sh
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/app-api/lambda-layers-prisma-client-migration
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/app-api/lambda-layers-prisma-client-engine
@@ -223,14 +223,14 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: app-web-gen
+          name: app-web-gen deploy prod
           path: ./services/app-web/src/gen
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: cypress-gen
+          name: cypress-gen deploy prod
           path: ./services/cypress/gen
 
       - name: Cypress chrome fix
@@ -264,7 +264,7 @@ jobs:
           CYPRESS_VIDEOS_FOLDER: services/cypress/videos
 
       - name: Upload cypress video
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure() && steps.cypress.outcome == 'failure'
         with:
           name: cypress-videos

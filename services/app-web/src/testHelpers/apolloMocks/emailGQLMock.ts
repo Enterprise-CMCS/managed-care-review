@@ -22,7 +22,10 @@ export const fetchEmailSettings =
                             cmsRateHelpEmailAddress: 'rates@example.com',
                             helpDeskEmail: 'helpdesk@example.com',
                             oactEmails: ['testRate@example.com'],
-                            dmcpEmails: ['testPolicy@example.com'],
+                            dmcpReviewEmails: ['testPolicy@example.com'],
+                            dmcpSubmissionEmails: [
+                                'testPolicySubmission@example.com',
+                            ],
                             dmcoEmails: ['testDmco@example.com'],
                         },
                         stateAnalysts: [

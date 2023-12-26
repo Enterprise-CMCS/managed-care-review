@@ -81,8 +81,7 @@ async function avScan(event: S3Event, _context: Context) {
             clamAV,
             s3ObjectKey,
             s3ObjectBucket,
-            maxFileSize,
-            '/tmp/downloads'
+            maxFileSize
         )
 
         // Record the duration of the av scan

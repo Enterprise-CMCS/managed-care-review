@@ -27,7 +27,6 @@ const sub: UnlockedHealthPlanFormDataType = {
                     s3URL: 'bar',
                     name: 'foo',
                     sha256: 'fakesha',
-                    documentCategories: ['RATES' as const],
                 },
             ],
             supportingDocuments: [],
@@ -71,8 +70,7 @@ test('subject line is correct and clearly states submission is unlocked', async 
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -94,8 +92,7 @@ test('includes expected data summary for a contract and rates submission unlock 
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -150,7 +147,6 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -179,7 +175,6 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -208,7 +203,6 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -247,8 +241,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template).toEqual(
@@ -343,7 +336,6 @@ test('renders overall email as expected', async () => {
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -372,7 +364,6 @@ test('renders overall email as expected', async () => {
                         s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
-                        documentCategories: ['RATES' as const],
                     },
                 ],
                 supportingDocuments: [],
@@ -405,8 +396,7 @@ test('renders overall email as expected', async () => {
     )
 
     if (template instanceof Error) {
-        console.error(template)
-        return
+        throw template
     }
 
     expect(template.bodyHTML).toMatchSnapshot()

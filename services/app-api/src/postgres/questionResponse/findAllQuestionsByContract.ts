@@ -1,9 +1,6 @@
 import type { PrismaClient } from '@prisma/client'
-import type {
-    CMSUserType,
-    Question,
-    QuestionResponseType,
-} from '../../domain-models'
+import type { Question } from '../../domain-models'
+import { questionPrismaToDomainType, questionInclude } from './questionHelpers'
 
 export async function findAllQuestionsByContract(
     client: PrismaClient,
@@ -14,36 +11,15 @@ export async function findAllQuestionsByContract(
             where: {
                 contractID: contractID,
             },
-            include: {
-                documents: {
-                    orderBy: {
-                        createdAt: 'desc',
-                    },
-                },
-                responses: {
-                    include: {
-                        addedBy: true,
-                        documents: true,
-                    },
-                    orderBy: {
-                        createdAt: 'desc',
-                    },
-                },
-                addedBy: true,
-            },
+            include: questionInclude,
             orderBy: {
                 createdAt: 'desc',
             },
         })
 
-        const questions: Question[] = findResult.map((question) => ({
-            ...question,
-            addedBy: {
-                ...question.addedBy,
-                stateAssignments: [],
-            } as CMSUserType,
-            responses: question.responses as QuestionResponseType[],
-        }))
+        const questions: Question[] = findResult.map((question) =>
+            questionPrismaToDomainType(question)
+        )
 
         return questions
     } catch (e: unknown) {

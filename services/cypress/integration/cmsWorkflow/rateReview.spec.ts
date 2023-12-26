@@ -25,11 +25,6 @@ describe('CMS user can view rate reviews', () => {
 
 
     it('and navigate to a specific rate from the rates dashboard', () => {
-        cy.interceptFeatureFlags({
-            'rates-db-refactor':true,
-            'rate-reviews-dashboard': true
-        })
-
           cy.apiAssignDivisionToCMSUser(cmsUser(), 'DMCO').then(() => {
 
             // Create a new contract and rates submission with two attached rates

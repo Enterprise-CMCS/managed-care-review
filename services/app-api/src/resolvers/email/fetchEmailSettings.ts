@@ -11,7 +11,6 @@ import type { QueryResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import type { EmailParameterStore } from '../../parameterStore'
 import type { Store } from '../../postgres'
-import { isStoreError } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
@@ -46,7 +45,7 @@ export function fetchEmailSettingsResolver(
         // Then get list of supported states
         const findAllStatesResult = await store.findAllSupportedStates()
 
-        if (isStoreError(findAllStatesResult)) {
+        if (findAllStatesResult instanceof Error) {
             logError('indexUsers', findAllStatesResult.message)
             setErrorAttributesOnActiveSpan(findAllStatesResult.message, span)
             throw new Error('Unexpected Error Querying Users')

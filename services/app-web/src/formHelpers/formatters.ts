@@ -1,7 +1,6 @@
 import { dayjs } from '../../../app-web/src/common-code/dateHelpers'
 import {
     SubmissionDocument,
-    DocumentCategoryType,
     ActuaryContact,
 } from '../common-code/healthPlanFormDataType'
 import { FileItemT } from '../components'
@@ -72,8 +71,7 @@ const formatFormDateForDomain = (attribute: string): Date | undefined => {
 }
 
 const formatDocumentsForDomain = (
-    fileItems: FileItemT[],
-    documentCategory?: DocumentCategoryType[] // if present will override any existing categories on the file items
+    fileItems: FileItemT[]
 ): SubmissionDocument[] => {
     return fileItems.reduce((cleanedFileItems, fileItem) => {
         if (fileItem.status === 'UPLOAD_ERROR') {
@@ -101,8 +99,6 @@ const formatDocumentsForDomain = (
                 name: fileItem.name,
                 s3URL: fileItem.s3URL,
                 sha256: fileItem.sha256,
-                documentCategories:
-                    documentCategory || fileItem.documentCategories,
             })
         }
         return cleanedFileItems
@@ -131,7 +127,6 @@ const formatDocumentsForForm = ({
                     s3URL: undefined,
                     sha256: doc.sha256,
                     status: 'UPLOAD_ERROR',
-                    documentCategories: doc.documentCategories,
                 }
             }
             return {
@@ -141,7 +136,6 @@ const formatDocumentsForForm = ({
                 s3URL: doc.s3URL,
                 sha256: doc.sha256,
                 status: 'UPLOAD_COMPLETE',
-                documentCategories: doc.documentCategories,
             }
         }) || []
     )

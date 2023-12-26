@@ -12,7 +12,6 @@ describe('FileProcessor component', () => {
         key: undefined,
         s3URL: undefined,
         status: 'PENDING',
-        documentCategories: ['CONTRACT_RELATED'],
     }
     const scanning: FileItemT = {
         id: 'testFile1',
@@ -21,7 +20,6 @@ describe('FileProcessor component', () => {
         key: '4545454-testFile1',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile1',
         status: 'SCANNING',
-        documentCategories: [],
     }
     const uploadError: FileItemT = {
         id: 'testFile2',
@@ -30,7 +28,6 @@ describe('FileProcessor component', () => {
         key: undefined,
         s3URL: undefined,
         status: 'UPLOAD_ERROR',
-        documentCategories: [],
     }
 
     const scanningError: FileItemT = {
@@ -40,7 +37,6 @@ describe('FileProcessor component', () => {
         key: '4545454-testFile3',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile3',
         status: 'SCANNING_ERROR',
-        documentCategories: [],
     }
 
     const uploadComplete: FileItemT = {
@@ -50,7 +46,6 @@ describe('FileProcessor component', () => {
         key: '4545454-testFile4',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile4',
         status: 'UPLOAD_COMPLETE',
-        documentCategories: [],
     }
 
     const duplicateError: FileItemT = {
@@ -60,7 +55,6 @@ describe('FileProcessor component', () => {
         key: '4545454-testFile4',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile4',
         status: 'DUPLICATE_NAME_ERROR',
-        documentCategories: [],
     }
 
     const buttonActionProps = {
@@ -76,7 +70,6 @@ describe('FileProcessor component', () => {
     it('renders a list without errors', () => {
         render(
             <FileProcessor
-                renderMode="list"
                 item={uploadComplete}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -89,7 +82,6 @@ describe('FileProcessor component', () => {
     it('renders a table without errors', () => {
         render(
             <FileProcessor
-                renderMode="table"
                 item={uploadComplete}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -102,7 +94,6 @@ describe('FileProcessor component', () => {
     it('includes appropriate aria- attributes in the list', () => {
         render(
             <FileProcessor
-                renderMode="list"
                 item={uploadError}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -122,7 +113,6 @@ describe('FileProcessor component', () => {
     it('includes appropriate aria- attributes in the table', () => {
         render(
             <FileProcessor
-                renderMode="table"
                 item={uploadError}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -142,7 +132,6 @@ describe('FileProcessor component', () => {
     it('button actions work as expected in the list', async () => {
         render(
             <FileProcessor
-                renderMode="list"
                 item={uploadError}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -159,7 +148,6 @@ describe('FileProcessor component', () => {
     it('button actions work as expected in the table', async () => {
         render(
             <FileProcessor
-                renderMode="list"
                 item={uploadError}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -176,7 +164,6 @@ describe('FileProcessor component', () => {
     it('displays loading image, loading text, and remove button when status is LOADING in the list', () => {
         render(
             <FileProcessor
-                renderMode="list"
                 item={pending}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -194,7 +181,6 @@ describe('FileProcessor component', () => {
     it('displays loading image, loading text, and remove button when status is LOADING in the table', () => {
         render(
             <FileProcessor
-                renderMode="table"
                 item={pending}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -208,7 +194,6 @@ describe('FileProcessor component', () => {
     it('displays loading image, scanning text, and remove button when status is SCANNING in the list', () => {
         render(
             <FileProcessor
-                renderMode="list"
                 item={scanning}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -226,7 +211,6 @@ describe('FileProcessor component', () => {
     it('displays loading image, scanning text, and remove button when status is SCANNING in the table', () => {
         render(
             <FileProcessor
-                renderMode="table"
                 item={scanning}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -240,7 +224,6 @@ describe('FileProcessor component', () => {
     it('displays file image and remove button when status is UPLOAD_COMPLETE in a list', () => {
         render(
             <FileProcessor
-                renderMode="list"
                 item={uploadComplete}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -255,63 +238,9 @@ describe('FileProcessor component', () => {
         expect(screen.queryByRole('button', { name: /Retry/ })).toBeNull()
     })
 
-    it('has clickable document category checkboxes', async () => {
-        render(
-            <FileProcessor
-                renderMode="table"
-                item={uploadComplete}
-                {...buttonActionProps}
-                {...categoryCheckboxProps}
-            />
-        )
-        const contractCheckbox = screen.getByRole('checkbox', {
-            name: 'contract-supporting',
-        })
-        const ratesCheckbox = screen.getByRole('checkbox', {
-            name: 'rate-supporting',
-        })
-        await userEvent.click(contractCheckbox)
-        expect(categoryCheckboxProps.handleCheckboxClick).toHaveBeenCalledWith(
-            expect.objectContaining({
-                target: expect.objectContaining({
-                    name: 'contract-supporting',
-                }),
-            })
-        )
-        await userEvent.click(ratesCheckbox)
-        expect(categoryCheckboxProps.handleCheckboxClick).toHaveBeenCalledWith(
-            expect.objectContaining({
-                target: expect.objectContaining({
-                    name: 'rate-supporting',
-                }),
-            })
-        )
-    })
-
-    it('does not have clickable document category checkboxes for a contract-only submission', () => {
-        render(
-            <FileProcessor
-                renderMode="table"
-                isContractOnly={true}
-                item={uploadComplete}
-                {...buttonActionProps}
-                {...categoryCheckboxProps}
-            />
-        )
-        const contractCheckbox = screen.queryByRole('checkbox', {
-            name: 'contract-supporting',
-        })
-        const ratesCheckbox = screen.queryByRole('checkbox', {
-            name: 'rate-supporting',
-        })
-        expect(contractCheckbox).not.toBeInTheDocument()
-        expect(ratesCheckbox).not.toBeInTheDocument()
-    })
-
     it('displays the remove button when status is UPLOAD_COMPLETE in a table', () => {
         render(
             <FileProcessor
-                renderMode="table"
                 item={uploadComplete}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -324,7 +253,6 @@ describe('FileProcessor component', () => {
     it('displays upload failed message and both retry and remove buttons when status is UPLOAD_ERROR in a list', async () => {
         render(
             <FileProcessor
-                renderMode="list"
                 item={uploadError}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -351,7 +279,6 @@ describe('FileProcessor component', () => {
     it('displays upload failed message, without checkboxes, and both retry and remove buttons when status is UPLOAD_ERROR in a table', async () => {
         render(
             <FileProcessor
-                renderMode="table"
                 item={uploadError}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -378,7 +305,6 @@ describe('FileProcessor component', () => {
     it('displays security scan failed message and both retry and remove buttons when status is SCANNING_ERROR in a list', () => {
         render(
             <FileProcessor
-                renderMode="list"
                 item={scanningError}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -401,7 +327,6 @@ describe('FileProcessor component', () => {
     it('displays security scan failed message, without checkboxes, and both retry and remove buttons when status is SCANNING_ERROR in a table', async () => {
         render(
             <FileProcessor
-                renderMode="table"
                 item={scanningError}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -430,7 +355,6 @@ describe('FileProcessor component', () => {
     it('displays duplicate name error message and remove button when status is DUPLICATE_NAME_ERROR in a list', () => {
         render(
             <FileProcessor
-                renderMode="list"
                 item={duplicateError}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -451,7 +375,6 @@ describe('FileProcessor component', () => {
     it('displays duplicate name error message, without checkboxes , and remove button when status is DUPLICATE_NAME_ERROR in a table', () => {
         render(
             <FileProcessor
-                renderMode="table"
                 item={duplicateError}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -472,59 +395,9 @@ describe('FileProcessor component', () => {
         expect(screen.queryByText('Retry')).not.toBeInTheDocument()
     })
 
-    it('displays document categories error with checkboxes when expected for categories error (in table view)', () => {
-        render(
-            <FileProcessor
-                renderMode="table"
-                item={{ ...uploadComplete, documentCategories: [] }}
-                {...buttonActionProps}
-                {...categoryCheckboxProps}
-                isContractOnly={false}
-                shouldValidate={true}
-            />
-        )
-
-        const contractCheckbox = screen.queryByRole('checkbox', {
-            name: 'contract-supporting',
-        })
-        const ratesCheckbox = screen.queryByRole('checkbox', {
-            name: 'rate-supporting',
-        })
-        const itemTableRow = screen.getByRole('row')
-
-        expect(contractCheckbox).toBeInTheDocument()
-        expect(ratesCheckbox).toBeInTheDocument()
-        expect(itemTableRow).toHaveClass('warningRow')
-        expect(
-            screen.getByText(/Must select at least one category checkbox/)
-        ).toBeInTheDocument()
-        expect(screen.queryByRole('button', { name: /Retry/ })).toBeNull()
-    })
-
-    it('does not display document categories error when expected (relevant in table view before validation)', () => {
-        render(
-            <FileProcessor
-                renderMode="table"
-                item={{ ...uploadComplete }}
-                {...buttonActionProps}
-                {...categoryCheckboxProps}
-                isContractOnly={false}
-                shouldValidate={false}
-            />
-        )
-
-        const itemTableRow = screen.getByRole('row')
-        expect(itemTableRow).not.toHaveClass('bg-error-lighter warningRow')
-
-        expect(
-            screen.queryByText(/Must select at least one category checkbox/)
-        ).not.toBeInTheDocument()
-    })
-
     it('displays unexpected error message and remove button when status is UPLOAD_ERROR but file reference is undefined (this is an unexpected state but it would mean the upload cannot be retried) in a list', () => {
         render(
             <FileProcessor
-                renderMode="list"
                 item={{ ...uploadError, file: undefined }}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
@@ -543,7 +416,6 @@ describe('FileProcessor component', () => {
     it('displays unexpected error message and remove button when status is UPLOAD_ERROR but file reference is undefined (this is an unexpected state but it would mean the upload cannot be retried) in a table', () => {
         render(
             <FileProcessor
-                renderMode="table"
                 item={{ ...uploadError, file: undefined }}
                 {...buttonActionProps}
                 {...categoryCheckboxProps}
