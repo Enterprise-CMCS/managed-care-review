@@ -6,7 +6,6 @@ VERSION=${VERSION:-0.104.4-27025}
 echo "prepping clamav (${VERSION})"
 
 yum update -y
-amazon-linux-extras install epel -y
 yum install -y cpio yum-utils tar gzip systemd-libs
 
 # extract binaries for clamav, json-c, pcre
