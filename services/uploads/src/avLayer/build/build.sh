@@ -22,7 +22,7 @@ curl -L --output glibc-2.28-127.el8.x86_64.rpm https://www.rpmfind.net/linux/cen
 rpm2cpio glibc*.rpm | cpio -vimd
 
 # Download other package dependencies
-yumdownloader -x \*i686 --archlist=x86_64 clamav clamav-lib clamav-update json-c pcre2 libxml2 bzip2-libs libtool-ltdl xz-libs libprelude gnutls nettle libcurl libnghttp2 libidn2 libssh2 openldap libffi krb5-libs keyutils-libs libunistring cyrus-sasl-lib nss nspr libselinux openssl-libs libcrypt systemd-libs lz4 libgcrypt libgpg-error elfutils
+yumdownloader -x \*i686 --archlist=x86_64 clamav clamav-lib clamav-update json-c pcre2 libxml2 bzip2-libs libtool-ltdl xz-libs gnutls nettle libcurl libnghttp2 libidn2 libssh2 openldap libffi krb5-libs keyutils-libs libunistring cyrus-sasl-lib nss nspr libselinux openssl-libs libcrypt systemd-libs lz4 libgcrypt libgpg-error elfutils
 
 rpm2cpio clamav-lib*.rpm | cpio -vimd
 rpm2cpio clamav-update*.rpm | cpio -vimd
@@ -32,7 +32,6 @@ rpm2cpio libxml2*.rpm | cpio -vimd
 rpm2cpio bzip2-libs*.rpm | cpio -vimd
 rpm2cpio libtool-ltdl*.rpm | cpio -vimd
 rpm2cpio xz-libs*.rpm | cpio -vimd
-rpm2cpio libprelude*.rpm | cpio -vimd
 rpm2cpio gnutls*.rpm | cpio -vimd
 rpm2cpio nettle*.rpm | cpio -vimd
 rpm2cpio libcurl*.rpm | cpio -vimd
