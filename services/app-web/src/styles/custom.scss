@@ -1,20 +1,16 @@
 /*
-    Custom application styles and main file imported into component specific modules.
+    Custom Application Styles
 
-    Use caution editing this file. Order matters. Add comments for any new class or variable.
-
-    Here are concrete examples where global styles are needed:
-    1. We are dealing with container elements that repeat throughout the application outside of a specific component (divs, cards, display tables)
-    2. We need override a behavior in USWDS that we can't control via settings throughout the application
-    3. We want to hide an element from the screen using our global screenreader only class
+    This is the main scss for import into component module.scss files.
+    This file forwards mcr colors as well.
 */
 
-// Allows access of all app styles in component scss modules
-@import 'theme/_color';
-@import 'mcrColors';
+// Allows access to colors anywhere custom is in @use
+@forward 'mcrColors';
+
+@use 'mcrColors' as *;
 
 /* CONTAINERS */
-
 // Every page starts with a flex container
 @mixin container {
   display: flex;
@@ -70,67 +66,3 @@ $mcr-container-max-width-fixed: 75rem;
     height: 1px;
     overflow: hidden;
 }
-
-// Accessibility button contrast color fix for inverse button.
-.usa-button--outline.usa-button--inverse {
-    box-shadow: inset 0 0 0 2px $mcr-foundation-white;
-    color: $mcr-foundation-white !important;
-    &:hover {
-        box-shadow: inset 0 0 0 2px $mcr-gray-lighter;
-        color: $mcr-gray-lighter !important;
-    }
-}
-
-/* COMPONENT OR ELEMENT SPECIFIC */
-
-// These are used to adjust forms application wide. Could be part of mixin along with code in StateSubmissionForm
-    .usa-label,
-    .usa-legend {
-        font-weight: bold;
-    }
-
-    .usa-hint span {
-        display: block;
-        margin-top: units(1);
-    }
-
-    .usa-checkbox__label,
-    .usa-radio__label {
-        margin-top: 1rem;
-    }
-
-// Step indicator background and alignment overrides
-
-div[class^='usa-step-indicator'] {
-    background-color: transparent;
-    width: 66rem;
-    margin: 1.25rem auto;
-    text-align: center;
-
-    ol {
-        justify-content: center;
-    }
-}
-
-[class^='usa-step-indicator__header'] {
-    display: inline;
-}
-
-// This should be set by USWDS but isn't
-// It can be removed when https://github.com/uswds/uswds/issues/4458 is fixed
-.usa-tooltip__body {
-  opacity: 0;
-}
-
-// This should probably be a standalone component rather than set in global styles
-// Removes html link styles from uswds button-styled links, used anywhere we have a link (Add New Submission) that looks a button
-a[class^='usa-button usa-button--outline'] {
-    text-decoration: none !important;
-    color: $mcr-primary-dark !important;
-}
-
-// we want all usa-logo to have same vertical margin
-.usa-logo {
-    margin-bottom: 1rem;
-    margin-top: 1rem;
-  }

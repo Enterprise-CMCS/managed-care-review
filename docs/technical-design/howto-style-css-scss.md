@@ -35,10 +35,21 @@ This is 101 but easy to forget. Please read [this section](https://github.com/tr
 TL;DR Less is more with styles. In our application, the preferred way to style React code is via locally scoped [CSS module](https://github.com/css-modules/css-modules), written as a `<component>.module.scss` file and stored alongside React component files. We also use [CSS selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference#selectors) to further target styles. Tightly scoped styles and CSS [specificity](https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity) ensure separation of concerns.
 
 Example of scoped styles:
-
-- Global styles live in a single file (`custom.scss`) and are used sparingly.
 - Shared styles live close to the workflow they apply to. For example, directories in  `/pages` folder may share a `*.module.scss` stylesheet if needed for templates in that area of the application. CSS selectors should be used to further scope down styles.
 - Re-useable atomic components (see `/components` folder) have self contained styles. There is a named `*.module.scss` file for each component.
+
+
+#### When to use global overrides
+
+Global styles live in a single file (`overrides.scss`). This should be used sparingly.
+
+Here are concrete examples where global style overrides are needed:
+    1. We are dealing with container elements that repeat throughout the application outside of a specific component (divs, cards, display tables)
+    2. We need override a behavior in USWDS that we can't control via settings throughout the application
+    3. We want to hide an element from the screen using our global screenreader only class
+
+
+Prefer encapsulating into components with their own module.scss.
 
 ### React components may use conditional styles and compose together styles using the `classnames` package
 

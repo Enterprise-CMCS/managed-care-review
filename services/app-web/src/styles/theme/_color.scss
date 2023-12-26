@@ -1,21 +1,6 @@
 @import '../mcrColors';
-/*
-* * * * * ==============================
-* * * * * ==============================
-* * * * * ==============================
-* * * * * ==============================
-========================================
-========================================
-========================================
-----------------------------------------
-Read more about settings and
-USWDS color tokens in the documentation:
-https://v2.designsystem.digital.gov/style-tokens/color
-
-
-PREFER MCR COLORS. DO NOT REFERENCE THESE. OVERIDING IN CASE SOMEONE FORGETS
-----------------------------------------
-*/
+// THIS FILE IS FOR REFERENCE OF CMS COLORS ONLY. DO NOT IMPORT IN CODE. Prefer MCRCOLORS.
+// This file can be deleted when we complete v3 USWDS upgrade
 
 // Base colors
 $theme-color-base-lightest: $mcr-gray-lightest;

@@ -1,11 +1,8 @@
 /*
    MC-Review Colors
 
-   Application-wide colors. Must be prefixed with mcr-. Please use these everywhere you want to reference color.
-   Generally our application uses USWDS but sometimes our designs include CMS-influenced variations, particularly with blues.
-
-   CMDS palette: https://design.cms.gov/style/color/
-   USWDS palette: https://designsystem.digital.gov/design-tokens/color/system-tokens/
+   Application-wide colors. Every variable must be prefixed with mcr-.
+   This file should not be imported directly. Instead, it is @forward-ed from `custom.scss`.
 */
 
 $mcr-primary-base: #005ea2; // USWDS 'primary'

@@ -1,0 +1,48 @@
+/*
+    Overrides and Global Styles
+
+    Use caution editing this file. Changes to this file impact css across the application. Order matters as well.
+    Discussion of this file can be found in "How to style with CSS and SCSS" documentation.
+*/
+
+@use 'mcrColors' as *;
+
+// FORM FIELDS
+    .usa-label,
+    .usa-legend {
+        font-weight: bold;
+    }
+
+    .usa-hint span {
+        display: block;
+        margin-top: 1rem;
+    }
+
+    .usa-checkbox__label,
+    .usa-radio__label {
+        margin-top: 1rem;
+    }
+
+// TOOLTIP
+// This can be removed removed when https://github.com/uswds/uswds/issues/4458 is fixed
+.usa-tooltip__body {
+  opacity: 0;
+}
+
+// BUTTONS
+// todo - bring these styles into ActionButton, use ActionButton everywhere and delete this override
+// Removes html link styles from uswds button-styled links, used anywhere we have a link (Add New Submission) that looks a button
+a[class^='usa-button usa-button--outline'] {
+    text-decoration: none !important;
+    color: $mcr-primary-dark !important;
+}
+
+// accessibility contrast color fix for the inverse button.
+.usa-button--outline.usa-button--inverse {
+    box-shadow: inset 0 0 0 2px $mcr-foundation-white;
+    color: $mcr-foundation-white !important;
+    &:hover {
+        box-shadow: inset 0 0 0 2px $mcr-gray-lighter;
+        color: $mcr-gray-lighter !important;
+    }
+}

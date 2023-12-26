@@ -1,0 +1,15 @@
+.stepIndicator {
+    background-color: transparent;
+    width: 66rem;
+    margin: 1.25rem auto;
+    text-align: center;
+
+    ol {
+        justify-content: center;
+    }
+
+
+    [class^='usa-step-indicator__header'] {
+        display: inline;
+    }
+}
