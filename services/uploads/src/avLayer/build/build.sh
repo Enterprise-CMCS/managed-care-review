@@ -4,9 +4,12 @@ set -e
 
 VERSION=${VERSION:-0.104.4-27025}
 echo "prepping clamav (${VERSION})"
+uname -m
 
 yum update -y
-yum install -y cpio yum-utils tar gzip systemd-libs
+amazon-linux-extras install epel -y
+yum install -y cpio yum-utils tar gzip systemd-libs rsync
+yum install -y clamav clamav-lib clamav-update json-c pcre2 libxml2 bzip2-libs libtool-ltdl xz-libs libprelude gnutls nettle libcurl libnghttp2 libidn2 libssh2 openldap libffi krb5-libs keyutils-libs libunistring cyrus-sasl-lib nss nspr libselinux openssl-libs libcrypt systemd-libs lz4 libgcrypt libgpg-error elfutils
 
 # extract binaries for clamav, json-c, pcre
 mkdir -p /tmp/build
@@ -22,8 +25,7 @@ curl -L --output glibc-2.28-127.el8.x86_64.rpm https://www.rpmfind.net/linux/cen
 rpm2cpio glibc*.rpm | cpio -vimd
 
 # Download other package dependencies
-yumdownloader -x \*i686 --archlist=x86_64 clamav clamav-lib clamav-update json-c pcre2 libxml2 bzip2-libs libtool-ltdl xz-libs gnutls nettle libcurl libnghttp2 libidn2 libssh2 openldap libffi krb5-libs keyutils-libs libunistring cyrus-sasl-lib nss nspr libselinux openssl-libs libcrypt systemd-libs lz4 libgcrypt libgpg-error elfutils
-
+yumdownloader -x \*i686 --archlist=x86_64 clamav clamav-lib clamav-update json-c pcre2 libxml2 bzip2-libs libtool-ltdl xz-libs libprelude gnutls nettle libcurl libnghttp2 libidn2 libssh2 openldap libffi krb5-libs keyutils-libs libunistring cyrus-sasl-lib nss nspr libselinux openssl-libs libcrypt
 rpm2cpio clamav-lib*.rpm | cpio -vimd
 rpm2cpio clamav-update*.rpm | cpio -vimd
 rpm2cpio json-c*.rpm | cpio -vimd
@@ -32,6 +34,7 @@ rpm2cpio libxml2*.rpm | cpio -vimd
 rpm2cpio bzip2-libs*.rpm | cpio -vimd
 rpm2cpio libtool-ltdl*.rpm | cpio -vimd
 rpm2cpio xz-libs*.rpm | cpio -vimd
+rpm2cpio libprelude*.rpm | cpio -vimd
 rpm2cpio gnutls*.rpm | cpio -vimd
 rpm2cpio nettle*.rpm | cpio -vimd
 rpm2cpio libcurl*.rpm | cpio -vimd
@@ -49,11 +52,6 @@ rpm2cpio nspr*.rpm | cpio -vimd
 rpm2cpio libselinux*.rpm | cpio -vimd
 rpm2cpio openssl-libs*.rpm | cpio -vimd
 rpm2cpio libcrypt*.rpm | cpio -vimd
-rpm2cpio systemd-libs*.rpm | cpio -vimd
-rpm2cpio lz4*.rpm | cpio -vimd
-rpm2cpio libgcrypt*.rpm | cpio -vimd
-rpm2cpio libgpg-error*.rpm | cpio -vimd
-rpm2cpio elfutils*.rpm | cpio -vimd
 
 # reset the timestamps so that we generate a reproducible zip file where
 # running with the same file contents we get the exact same hash even if we
@@ -63,9 +61,12 @@ popd
 
 mkdir -p bin lib
 
-cp /tmp/build/usr/bin/clamscan /tmp/build/usr/bin/freshclam bin/.
-cp -R /tmp/build/usr/lib64/* lib/.
-cp -R /tmp/build/lib64/* lib/.
+rsync -L --no-links -av /tmp/build/usr/lib64/ lib
+rsync -L --no-links -av /tmp/build/lib64/ lib
+
+cp -L /tmp/build/usr/bin/clamscan /tmp/build/usr/bin/freshclam bin/.
+#cp -LR /tmp/build/usr/lib64/* lib/.
+#cp -LR /tmp/build/lib64/* lib/.
 cp freshclam.conf bin/freshclam.conf
 
 tar -czvf /opt/app/lambda_layer.tar.gz bin lib

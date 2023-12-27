@@ -2,6 +2,7 @@ version: '2'
 services:
   layer:
     image: amazonlinux:latest
+    platform: linux/amd64
     working_dir: /opt/app
     volumes:
       - ./build:/opt/app
