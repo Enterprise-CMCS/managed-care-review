@@ -160,6 +160,22 @@ functions:
           method: get
           cors: true
 
+  third_party_api_authorizer:
+    handler: src/handlers/third_party_API_authorizer.main
+
+  # TODO: create an entry point that uses the authorizer for testing purposes
+  # health:
+  #     handler: src/handlers/health_check.main
+  #     events:
+  #       - http:
+  #           path: health_check
+  #           method: get
+  #           cors: true
+  #           authorizer:
+  #             name: third_party_api_authorizer
+  #             identitySource: method.request.header.Authorization 
+  #             resultTtlInSeconds: 3600 # cache the result for 1 hour
+              
   otel:
     handler: src/handlers/otel_proxy.main
     events:
