@@ -18,7 +18,7 @@
     border-radius: 0rem 99rem 99rem 0rem;
 
     &:hover {
-      background: darken(custom.$mcr-primary-lighter, 5%);
+      background: color.adjust(custom.$mcr-primary-lighter, -5%);
       color: custom.$mcr-foundation-ink;
     }
   }

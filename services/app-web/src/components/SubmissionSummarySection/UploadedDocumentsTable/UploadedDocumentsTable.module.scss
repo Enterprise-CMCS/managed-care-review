@@ -1,7 +1,7 @@
 @use '../../../styles/custom.scss' as custom;
 @use '../../../styles/uswdsImports.scss' as uswds;
 
-.uploadedDocumentsTable {
+@mixin docs-table {
     width: 100%;
 
 
@@ -20,6 +20,9 @@
             background: custom.$mcr-gray-lightest
         }
     }
+}
+.uploadedDocumentsTable {
+   @include docs-table
 }
 
 .supportingDocsEmpty {

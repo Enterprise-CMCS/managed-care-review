@@ -13,6 +13,15 @@
     }
 }
 
+.customHeading {
+    font-weight: 700;
+
+    span {
+        font-weight: normal;
+        margin-left: 16px;
+    }
+}
+
 .formContainer.tableContainer {
 
     &[class^='usa-form'] {
@@ -42,6 +51,14 @@
         margin-top: 0;
     }
 
+    div[class^='usa-form-group'] {
+        margin-top: 24px;
+        label[class^='usa-label'] {
+            font-size: 16px;
+            max-width: 100%;
+        }
+    }
+
     > div[class^='usa-form-group']:not(:first-of-type) {
         margin-top: 2.5rem;
     }
@@ -59,14 +76,6 @@
     }
     [class^='usa-legend'] {
         margin-top: 0;
-    }
-
-    div[class^='usa-form-group'] {
-        margin-top: 24px;
-        label[class^='usa-label'] {
-            font-size: 16px;
-            max-width: 100%;
-        }
     }
 
     div[class^='usa-hint'] span {
@@ -90,11 +99,3 @@
 
 }
 
-.customHeading {
-    font-weight: 700;
-
-    span {
-        font-weight: normal;
-        margin-left: 16px;
-    }
-}

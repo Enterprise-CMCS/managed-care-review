@@ -21,18 +21,6 @@
     padding: 0 uswds.units(1);
 }
 
-.dashboardHeading {
-    background-color: custom.$mcr-cmsblue-dark;;
-    color: custom.$mcr-foundation-white;
-    & h1 {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: baseline;
-        > span {
-            padding: 0 uswds.units(1);
-        }
-    }
-}
 
 .landingPageHeading {
     background-color: custom.$mcr-cmsblue-dark;
@@ -67,5 +55,18 @@
         font-size: size('body', 'lg');
         color: custom.$mcr-foundation-white;
         height: 100%;
+    }
+}
+
+.dashboardHeading {
+    background-color: custom.$mcr-cmsblue-dark;;
+    color: custom.$mcr-foundation-white;
+    & h1 {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        > span {
+            padding: 0 uswds.units(1);
+        }
     }
 }

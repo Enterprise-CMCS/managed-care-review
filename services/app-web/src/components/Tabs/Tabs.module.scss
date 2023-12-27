@@ -26,6 +26,17 @@
         background-color: custom.$mcr-foundation-white;
     }
 
+    &__tab-btn {
+        padding: 0;
+        border: 0;
+        font-size: 100%;
+        font-weight: 700;
+
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
     &__tab {
         display: inline-flex;
         align-items: center;
@@ -59,17 +70,6 @@
                 opacity: 1;
                 transform: scaleX(1);
             }
-        }
-    }
-
-    &__tab-btn {
-        padding: 0;
-        border: 0;
-        font-size: 100%;
-        font-weight: 700;
-
-        &:hover {
-            cursor: pointer;
         }
     }
 

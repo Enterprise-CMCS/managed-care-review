@@ -1,9 +1,9 @@
 @use '../../../styles/custom.scss' as custom;
 @use '../../../styles/uswdsImports.scss' as uswds;
-@use '../../../components/SubmissionSummarySection/UploadedDocumentsTable/UploadedDocumentsTable.module.scss' as *;
+@use '../../../components/SubmissionSummarySection/UploadedDocumentsTable/UploadedDocumentsTable.module.scss' as uploadedDocumentsTable;
 
 .qaDocumentTable {
-  @extend .uploadedDocumentsTable;
+  @include uploadedDocumentsTable.docs-table;
   margin: 0 0 uswds.units(4) 0;
 }
 
