@@ -40,6 +40,10 @@ custom:
     includeModules:
       forceExclude:
         - '@prisma/client'
+        - '@opentelemetry/resources'
+        - '@opentelemetry/sdk-trace-base'
+        - '@opentelemetry/sdk-trace-node'
+        - '@opentelemetry/semantic-conventions'
       nodeModulesRelativeDir: '../../'
     packagerOptions:
       lockFile: '../../yarn.lock'
