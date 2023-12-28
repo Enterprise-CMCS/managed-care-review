@@ -58,5 +58,8 @@ services/app-proto/build
 services/postgres/scripts/*.js
 
 services/uploads/src/avLayer/build/lambda_layer
+services/uploads/src/avLayer/build/lib
+services/uploads/src/avLayer/build/bin
+services/uploads/src/avLayer/build/*.tar.gz
 
 tests/cypress/fixtures/stores/featureFlagStore.json
