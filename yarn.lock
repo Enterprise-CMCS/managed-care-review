@@ -12169,7 +12169,7 @@
   dependencies:
     "@opentelemetry/api" "^1.0.0"
 
-"@opentelemetry/api@^1.0.0":
+"@opentelemetry/api@^1.0.0", "@opentelemetry/api@^1.6.0":
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.7.0.tgz#b139c81999c23e3c8d3c0a7234480e945920fc40"
   integrity sha512-AdY5wvN0P2vXBi3b29hxZgSFvdhdxPB9+f0B6s//P9Q8nibRWeA3cHm8UmLpio9ABigkVHJ5NMPk+Mz8VCCyrw==
@@ -12178,11 +12178,6 @@
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.4.0.tgz#2c91791a9ba6ca0a0f4aaac5e45d58df13639ac8"
   integrity sha512-IgMK9i3sFGNUqPMbjABm0G26g0QCKCUBfglhQ7rQq6WcxbKfEHRcmwsoER4hZcuYqJgkYn2OeuoJIv7Jsftp7g==
-
-"@opentelemetry/api@^1.18.1":
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.6.0.tgz#de2c6823203d6f319511898bb5de7e70f5267e19"
-  integrity sha512-OWlrQAnWn9577PhVgqjUvMr1pg57Bc4jv0iL4w0PRuOSRvq67rvHW9Ie/dZVMvCzhSCB+UxhcY/PmCmFj33Q+g==
 
 "@opentelemetry/auto-instrumentations-node@^0.36.3":
   version "0.36.3"
@@ -12320,7 +12315,7 @@
     "@opentelemetry/resources" "1.9.1"
     "@opentelemetry/sdk-trace-base" "1.9.1"
 
-"@opentelemetry/exporter-trace-otlp-http@^0.37.3":
+"@opentelemetry/exporter-trace-otlp-http@^0.45.1":
   version "0.45.1"
   resolved "https://registry.yarnpkg.com/@opentelemetry/exporter-trace-otlp-http/-/exporter-trace-otlp-http-0.45.1.tgz#2265181bd4787dc6660bdac33d658490a883283a"
   integrity sha512-a6CGqSG66n5R1mghzLMzyzn3iGap1b0v+0PjKFjfYuwLtpHQBxh2PHxItu+m2mXSwnM4R0GJlk9oUW5sQkCE0w==
@@ -12532,7 +12527,7 @@
     "@opentelemetry/semantic-conventions" "1.9.1"
     semver "^7.3.5"
 
-"@opentelemetry/instrumentation-http@^0.37.3":
+"@opentelemetry/instrumentation-http@^0.45.1":
   version "0.45.1"
   resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-http/-/instrumentation-http-0.45.1.tgz#d337aac0e46ded596db594ed587035a993b78707"
   integrity sha512-ph7kv38Lipg/ggvoNJrwc3RCceLnTkVZwRbE5iu6w7fGsMjjc9jwlSmaOXKxUJjIimil2hL1qBm8xg2lmOVwxg==
@@ -12744,7 +12739,7 @@
     semver "^7.3.2"
     shimmer "^1.2.1"
 
-"@opentelemetry/instrumentation@0.45.1", "@opentelemetry/instrumentation@^0.37.3":
+"@opentelemetry/instrumentation@0.45.1", "@opentelemetry/instrumentation@^0.45.1":
   version "0.45.1"
   resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation/-/instrumentation-0.45.1.tgz#043ac90a889fae8a551c8d06e16be443984449af"
   integrity sha512-V1Cr0g8hSg35lpW3G/GYVZurrhHrQZJdmP68WyJ83f1FDn3iru+/Vnlto9kiOSm7PHhW+pZGdb9Fbv+mkQ31CA==
