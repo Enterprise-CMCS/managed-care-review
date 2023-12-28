@@ -38,7 +38,6 @@ module.exports = {
         '@opentelemetry/resources',
         '@opentelemetry/semantic-conventions',
         '@opentelemetry/api',
-        '@opentelemetry/exporter-trace-otlp-http',
         '@opentelemetry/id-generator-aws-xray',
         '@opentelemetry/instrumentation',
         '@opentelemetry/instrumentation-http',
