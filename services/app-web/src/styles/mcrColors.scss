@@ -10,7 +10,6 @@ $mcr-primary-dark : #1a4480; // USWDS 'primary-dark'
 $mcr-primary-darkest:  #162e51; // USWDS 'primary-darker',
 $mcr-primary-light: #d9e8f6; // USWDS 'bg-primary-lighter',
 $mcr-primary-lighter: #e1f3f8; // USWDS 'blue-cool-5v'
-$mcr-primary-lightest: #d9e8f6; // USWDS 'blue-10'
 
 $mcr-cmsblue-base: #0071bc; // CMSDS 'color-primary'
 $mcr-cmsblue-dark: #205493; // CMSDS 'color-primary-darker
@@ -20,8 +19,11 @@ $mcr-cmsblue-lightest: #f0fafd;// This color is slightly off from CMSDS 'color-p
 $mcr-cyan-base: #02bfe7; // CMSDS 'color-primary-alt'
 $mcr-cyan-dark: #009ec1; // USWDS 'cyan-40v'
 $mcr-cyan-light: #99deea;// USWDS 'cyan-20'
+$mcr-cyan-lighter: #e7f6F8; // USWDS 'cyan-5'
 
-$mcr-gold-base: #ffbe2e; // USWFS 'gold-20v'
+$mcr-gold-lighter: #faf3d1; //USWDS yellow-5
+$mcr-gold-light:  #fee685; // USWDS yellow 10v
+$mcr-gold-base: #ffbe2e; // USWDS 'gold-20v'
 $mcr-gold-dark: #e5a000; // USWDS 'gold-30v'
 $mcr-gold-darker: #ca9318; // CMSDS 'color-warn-darker'
 

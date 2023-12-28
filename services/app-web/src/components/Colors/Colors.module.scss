@@ -4,7 +4,6 @@
 :export {
   mcr: {
     primary: {
-        lightest: custom.$mcr-primary-lightest;
         lighter: custom.$mcr-primary-lighter;
         light: custom.$mcr-primary-light;
         base: custom.$mcr-primary-base;
@@ -34,10 +33,13 @@
       lightest: custom.$mcr-gray-lightest;
     }
      foundation: {
-     white: custom.$mcr-foundation-white;
+      white: custom.$mcr-foundation-white;
+      ink : custom.$mcr-foundation-ink;
       hint: custom.$mcr-foundation-hint;
       link: custom.$mcr-foundation-link;
-      ink : custom.$mcr-foundation-ink;
+      focus: custom.$mcr-foundation-focus;
+      visited: custom.$mcr-foundation-visited;
+
     }
     success: {
         base: custom.$mcr-success-base;
@@ -47,7 +49,7 @@
     error: {
       light: custom.$mcr-error-light;
       base: custom.$mcr-error-base;
-
+      dark:$mcr-error-dark;
     }
   }
 
