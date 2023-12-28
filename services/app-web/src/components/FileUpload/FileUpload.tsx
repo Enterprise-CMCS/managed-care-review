@@ -180,8 +180,8 @@ export const FileUpload = ({
     }
     // Upload to S3 and update file items in component state with the async loading status
     // This includes moving from pending/loading UI to display success or errors
-    const asyncS3Upload = (files: File[] | File) => {
-        const upload = async (file: File) => {
+    const handleS3Upload = (files: File[] | File) => {
+        const asyncUploadAndScan = async (file: File) => {
             const sha = (await calculateSHA256(file)) || ''
             uploadFile(file)
                 .then((data) => {
@@ -291,10 +291,10 @@ export const FileUpload = ({
 
         if (!(files instanceof File)) {
             files.forEach((file) => {
-                upload(file).catch((e) => console.error(e))
+                asyncUploadAndScan(file).catch((e) => console.error(e))
             })
         } else {
-            upload(files).catch((e) => console.error(e))
+            asyncUploadAndScan(files).catch((e) => console.error(e))
         }
     }
 
@@ -318,7 +318,7 @@ export const FileUpload = ({
             })
         })
 
-        asyncS3Upload(item.file)
+        handleS3Upload(item.file)
     }
 
     const addFilesAndUpdateList = (files: File[]) => {
@@ -334,7 +334,7 @@ export const FileUpload = ({
                 })
             })
         setFileItems((array) => [...array, ...items])
-        asyncS3Upload(files)
+        handleS3Upload(files)
 
         // reset input immediately to prepare for next interaction
         fileInputRef.current?.clearFiles()
