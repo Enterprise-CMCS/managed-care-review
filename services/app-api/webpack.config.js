@@ -32,6 +32,9 @@ module.exports = {
         }),
         'prisma',
         '@prisma/client',
+        '@opentelemetry/core',
+        '@opentelemetry/sdk-trace-base',
+        '@opentelemetry/sdk-trace-node',
     ],
     devtool: 'source-map',
     resolve: {
