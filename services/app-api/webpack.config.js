@@ -35,6 +35,8 @@ module.exports = {
         '@opentelemetry/core',
         '@opentelemetry/sdk-trace-base',
         '@opentelemetry/sdk-trace-node',
+        '@opentelemetry/resources',
+        '@opentelemetry/semantic-conventions',
     ],
     devtool: 'source-map',
     resolve: {
