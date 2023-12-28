@@ -43,6 +43,9 @@ module.exports = {
         '@opentelemetry/instrumentation',
         '@opentelemetry/instrumentation-http',
         '@opentelemetry/propagator-aws-xray',
+        '@opentelemetry/auto-instrumentations-node',
+        '@opentelemetry/exporter-metrics-otlp-http',
+        '@opentelemetry/sdk-metrics',
     ],
     devtool: 'source-map',
     resolve: {
