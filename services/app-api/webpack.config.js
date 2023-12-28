@@ -37,6 +37,12 @@ module.exports = {
         '@opentelemetry/sdk-trace-node',
         '@opentelemetry/resources',
         '@opentelemetry/semantic-conventions',
+        '@opentelemetry/api',
+        '@opentelemetry/exporter-trace-otlp-http',
+        '@opentelemetry/id-generator-aws-xray',
+        '@opentelemetry/instrumentation',
+        '@opentelemetry/instrumentation-http',
+        '@opentelemetry/propagator-aws-xray',
     ],
     devtool: 'source-map',
     resolve: {

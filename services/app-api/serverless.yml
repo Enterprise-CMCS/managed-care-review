@@ -44,6 +44,13 @@ custom:
         - '@opentelemetry/sdk-trace-base'
         - '@opentelemetry/sdk-trace-node'
         - '@opentelemetry/semantic-conventions'
+        - '@opentelemetry/api'
+        - '@opentelemetry/core'
+        - '@opentelemetry/exporter-trace-otlp-http'
+        - '@opentelemetry/id-generator-aws-xray'
+        - '@opentelemetry/instrumentation'
+        - '@opentelemetry/instrumentation-http'
+        - '@opentelemetry/propagator-aws-xray'
       nodeModulesRelativeDir: '../../'
     packagerOptions:
       lockFile: '../../yarn.lock'
