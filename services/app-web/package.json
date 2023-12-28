@@ -24,6 +24,7 @@
     "lint-staged": {
         "*.{js,jsx,ts,tsx}": [
             "eslint --fix --max-warnings=0",
+            "stylelint **/*.scss --fix",
             "prettier --write"
         ]
     },
@@ -161,8 +162,6 @@
         "serverless-cloudfront-invalidate": "^1.11.0",
         "serverless-s3-sync": "^3.0.0",
         "serverless-stack-termination-protection": "^2.0.2",
-        "stylelint": "^16.1.0",
-        "stylelint-config-recommended-scss": "^14.0.0",
         "webpack": "^5.72.0",
         "yarn": "^1.22.19"
     }
