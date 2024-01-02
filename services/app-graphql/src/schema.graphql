@@ -269,6 +269,13 @@ type Mutation {
     createQuestionResponse(
         input: CreateQuestionResponseInput!
     ): CreateQuestionResponsePayload!
+
+
+    """
+    createAPIKey creates a valid API key for the logged in user, valid for 90 days
+    """
+    createAPIKey: CreateAPIKeyPayload!
+
 }
 
 input CreateHealthPlanPackageInput {
@@ -462,6 +469,11 @@ input UpdateContractInput {
 
 type UpdateContractPayload {
     pkg: HealthPlanPackage!
+}
+
+type CreateAPIKeyPayload {
+    key: String!
+    expiresAt: DateTime!
 }
 
 "Date is a CalendarDate representing a day without time information"

@@ -43,6 +43,8 @@ import { insertUserToLocalAurora } from '../authn'
 import { testStateUser } from './userHelpers'
 import { findStatePrograms } from '../postgres'
 import { must } from './errorHelpers'
+import { newJWTLib } from '../jwt'
+import type { JWTLib } from '../jwt'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -74,6 +76,7 @@ const constructTestPostgresServer = async (opts?: {
     store?: Store
     emailParameterStore?: EmailParameterStore
     ldService?: LDService
+    jwt?: JWTLib
 }): Promise<ApolloServer> => {
     // set defaults
     const context = opts?.context || defaultContext()
@@ -84,6 +87,13 @@ const constructTestPostgresServer = async (opts?: {
 
     const prismaClient = await sharedTestPrismaClient()
     const postgresStore = opts?.store || NewPostgresStore(prismaClient)
+    const jwt =
+        opts?.jwt ||
+        newJWTLib({
+            issuer: 'mcreviewtest',
+            signingKey: 'foo',
+            expirationDurationS: 1000,
+        })
 
     await insertUserToLocalAurora(postgresStore, context.user)
 
@@ -91,7 +101,8 @@ const constructTestPostgresServer = async (opts?: {
         postgresStore,
         emailer,
         parameterStore,
-        ldService
+        ldService,
+        jwt
     )
 
     return new ApolloServer({
