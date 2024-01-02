@@ -15,4 +15,4 @@ The JWT will have 3 claims in it:
 
 These are all standard fields and are explicitly accounted for in the JWT library we are using
 
-
+We are using the library [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) to sign and verify JWTs, wrapped in our jwt module.

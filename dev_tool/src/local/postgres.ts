@@ -67,9 +67,14 @@ export async function runPostgresLocally(runner: LabeledProcessRunner) {
 
     // reset the db, wiping it and running all the migrations files that exist
     // does not db push schema changes into the database
-    await runner.runCommandAndOutput(
+    const migrateResponse = await runner.runCommandAndOutput(
         'prisma reset',
         ['npx', 'lerna', 'run', 'prisma:reset'],
         ''
     )
+
+    if (migrateResponse !== 0) {
+        console.error(`prisma:reset failed - check migrations file`)
+        process.exit()
+    }
 }
