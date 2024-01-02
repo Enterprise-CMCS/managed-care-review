@@ -25,7 +25,7 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
             const msg = 'Invalid auth token'
             console.error(msg)
 
-            return generatePolicy('', event)
+            return generatePolicy(undefined, event)
         }
 
         console.info({
@@ -36,13 +36,16 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
 
         return generatePolicy(userId, event)
     } catch (err) {
-        console.error('Invalid auth token. err => ', err)
-        return generatePolicy('', event)
+        console.error(
+            'unexpected exception attempting to validate authorization',
+            err
+        )
+        return generatePolicy(undefined, event)
     }
 }
 
 const generatePolicy = function (
-    userId: string,
+    userId: string | undefined,
     event: APIGatewayTokenAuthorizerEvent
 ): APIGatewayAuthorizerResult {
     // If the JWT is verified as valid, send an Allow policy
@@ -60,7 +63,7 @@ const generatePolicy = function (
     }
 
     const response: APIGatewayAuthorizerResult = {
-        principalId: userId,
+        principalId: userId || '',
         policyDocument,
     }
 
