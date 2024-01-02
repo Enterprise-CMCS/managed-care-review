@@ -167,13 +167,12 @@ functions:
       handler: src/handlers/health_check.main
       events:
         - http:
-            path: health_check
+            path: jwt_health_check
             method: get
             cors: true
             authorizer:
               name: third_party_api_authorizer
               identitySource: method.request.header.Authorization 
-              resultTtlInSeconds: 3600 # cache the result for 1 hour
               
   otel:
     handler: src/handlers/otel_proxy.main
