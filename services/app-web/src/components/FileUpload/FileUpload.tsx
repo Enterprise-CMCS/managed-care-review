@@ -18,6 +18,7 @@ import { pluralize } from '../../common-code/formatters'
 
 import { recordUserInputException } from '../../otelHelpers'
 import { calculateSHA256 } from '../../common-code/sha/generateSha'
+import { useAuth } from '../../contexts/AuthContext'
 
 export type S3FileData = {
     key: string
@@ -67,6 +68,7 @@ export const FileUpload = ({
     const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
     const summaryRef = useRef<HTMLHeadingElement>(null) // reference to the heading that we will focus
     const previousFileItems = usePrevious(fileItems)
+    const { checkAuth } = useAuth()
     const isRequired = inputProps['aria-required']
     const inputRequired = inputProps['aria-required'] || inputProps.required
 
@@ -270,13 +272,21 @@ export const FileUpload = ({
                         }
                     }
                 })
-                .catch((_e) => {
+                .catch(async (_e) => {
+                    const error = new Error(
+                        `UPLOAD_ERROR: ${JSON.stringify(
+                            _e
+                        )}. Files added: ${JSON.stringify(files)}`
+                    )
+                    recordJSException(error)
+                    // file upload failing could be due to session timeout that did not hit the modal
+                    // double check the user still has their session, if not logout to update the React state with their login status
+                    await checkAuth()
+
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
                         return newItems.map((item) => {
                             if (item.file === file) {
-                                const error = new Error(`UPLOAD_ERROR: ${item}`)
-                                recordJSException(error)
                                 return {
                                     ...item,
                                     status: 'UPLOAD_ERROR',

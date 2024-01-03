@@ -3,28 +3,29 @@ import { useNavigate } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import * as ld from 'launchdarkly-js-client-sdk'
 import { AuthModeType } from '../common-code/config'
-import { useFetchCurrentUserQuery, User as UserType } from '../gen/gqlClient'
+import {
+    FetchCurrentUserQuery,
+    useFetchCurrentUserQuery,
+    User as UserType,
+} from '../gen/gqlClient'
 import { logoutLocalUser } from '../localAuth'
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
 import { featureFlags } from '../common-code/featureFlags'
 import { dayjs } from '../common-code/dateHelpers/dayjs'
 import { recordJSException } from '../otelHelpers/tracingHelper'
 import { handleApolloError } from '../gqlHelpers/apolloErrors'
-
-type LogoutFn = () => Promise<null>
+import { ApolloQueryResult } from '@apollo/client'
 
 export type LoginStatusType = 'LOADING' | 'LOGGED_OUT' | 'LOGGED_IN'
 export const MODAL_COUNTDOWN_DURATION = 2 * 60 // session expiration modal counts down for 120 seconds (2 minutes)
 
 type AuthContextType = {
     /* See docs/AuthContext.md for an explanation of some of these variables */
-    checkAuth: () => Promise<void> // this can probably be simpler, letting callers use the loading states etc instead.
+    checkAuth: () => Promise<ApolloQueryResult<FetchCurrentUserQuery> | Error> // manually refetch to confirm auth status, logout if not authenticated
     checkIfSessionsIsAboutToExpire: () => void
     loggedInUser: UserType | undefined
     loginStatus: LoginStatusType
-    logout:
-        | undefined
-        | (({ sessionTimeout }: { sessionTimeout: boolean }) => Promise<void>) // sessionTimeout true when logout is due to session ending
+    logout: ({ sessionTimeout }: { sessionTimeout: boolean }) => Promise<void> // sessionTimeout true when logout is due to session ending
     logoutCountdownDuration: number
     sessionExpirationTime: MutableRefObject<dayjs.Dayjs | undefined>
     sessionIsExpiring: boolean
@@ -38,7 +39,7 @@ const AuthContext = React.createContext<AuthContextType>({
     checkIfSessionsIsAboutToExpire: () => void 0,
     loggedInUser: undefined,
     loginStatus: 'LOADING',
-    logout: undefined,
+    logout: () => Promise.resolve(undefined),
     logoutCountdownDuration: 120,
     sessionExpirationTime: { current: undefined },
     sessionIsExpiring: false,
@@ -152,7 +153,9 @@ function AuthProvider({
             if (!isAuthenticated) {
                 const currentUser = data.fetchCurrentUser
                 setLDUser(currentUser).catch((err) => {
-                    console.info(err)
+                    recordJSException(
+                        new Error(`Cannot set LD User. ${JSON.stringify(err)}`)
+                    )
                 })
                 setLoggedInUser(currentUser)
                 setLoginStatus('LOGGED_IN')
@@ -160,17 +163,13 @@ function AuthProvider({
         }
     }
 
-    const checkAuth = () => {
-        return new Promise<void>((resolve, reject) => {
-            refetch()
-                .then(() => {
-                    resolve()
-                })
-                .catch((e) => {
-                    console.info('Check Auth Failed.', e)
-                    reject(e)
-                })
-        })
+    const checkAuth = async () => {
+        try {
+            return await refetch()
+        } catch (e) {
+            await logout({ sessionTimeout: true })
+            return new Error(e)
+        }
     }
 
     const updateSessionExpirationState = (value: boolean) => {
@@ -212,31 +211,23 @@ function AuthProvider({
         }
     }
 
-    const realLogout: LogoutFn =
-        authMode === 'LOCAL' ? logoutLocalUser : cognitoSignOut
-
-    const logout =
-        loggedInUser === undefined
-            ? undefined
-            : ({ sessionTimeout }: { sessionTimeout: boolean }) => {
-                  return new Promise<void>((_resolve, reject) => {
-                      realLogout()
-                          .then(() => {
-                              // Hard navigate back to /
-                              // this is more like how things work with IDM anyway.
-                              if (sessionTimeout) {
-                                  window.location.href =
-                                      '/?session-timeout=true'
-                              } else {
-                                  window.location.href = '/'
-                              }
-                          })
-                          .catch((e) => {
-                              console.info('Logout Failed.', e)
-                              reject(e)
-                          })
-                  })
-              }
+    const logout = async ({ sessionTimeout }: { sessionTimeout: boolean }) => {
+        const realLogout =
+            authMode === 'LOCAL' ? logoutLocalUser : cognitoSignOut
+        try {
+            await realLogout()
+            if (sessionTimeout) {
+                window.location.href = '/?session-timeout=true'
+            } else {
+                window.location.href = '/'
+            }
+            return
+        } catch (e) {
+            recordJSException(new Error(`Logout Failed. ${JSON.stringify(e)}`))
+            window.location.href = '/'
+            return
+        }
+    }
 
     return (
         <AuthContext.Provider
