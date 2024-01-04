@@ -11,7 +11,7 @@
         "eject": "react-scripts eject",
         "clean": "rm -rf node_modules && yarn cache clean",
         "format": "prettier --write src/**/*.ts{,x}",
-        "lint": "tsc --noEmit && eslint src/ --max-warnings=0",
+        "lint": "tsc --noEmit && eslint src/ --max-warnings=0 && stylelint **/*/.scss",
         "test": "TZ=UTC react-scripts test",
         "test:once": "TZ=UTC react-scripts test --watchAll=false --runInBand --ci",
         "test:update": "react-scripts test -u",

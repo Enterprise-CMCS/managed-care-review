@@ -48,8 +48,6 @@ $mcr-container-max-width-fixed: 75rem;
         0px 0px 24px rgb(0 0 0 / 5%);
 }
 
-/* ACCESSIBILITY */
-// Re-useable classname for hiding UI visually but still having it be read by screenreaders
 @mixin sectionCard {
     padding: uswds.units(4);
     margin-bottom: uswds.units(2);
@@ -58,7 +56,8 @@ $mcr-container-max-width-fixed: 75rem;
     border: 1px solid $mcr-gray-lighter;
     @include uswds.u-radius('md');
 }
-// accessibility
+/* ACCESSIBILITY */
+// Re-useable classname for hiding UI visually but still having it be read by screenreaders
 .srOnly {
     position: absolute;
     left: -1000px;
