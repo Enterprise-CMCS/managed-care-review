@@ -18,9 +18,9 @@ Make sure heading levels (`h2`, `h3` etc) are properly used for text content. Th
 
 Note also that there is a specific color to be used for links (`$$mcr-foundation-link`) and hint text (`$mcr-foundation-hint`).
 
-## Patterns and technologies related to styles in MC-Review
+## Technologies related to styles in MC-Review
 
-### Use Sass / SCSS stylsheets
+### Sass / SCSS stylesheets
 
 [Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html) is the way we write styles in the project. It is an extension of CSS. All files that `.scss` extension use Sass. Some basic concepts of Sass that are good to understand/review that are listed below.
 
@@ -28,17 +28,32 @@ Note also that there is a specific color to be used for links (`$$mcr-foundation
 - How to [use nested selectors](https://sass-lang.com/documentation/style-rules#nesting)
 - How to [structure a Sass stylesheet](https://sass-lang.com/documentation/syntax/structure)
 
+###  United States Web Design System
+
+See the ADR on [`Use USWDS as the design system`](../architectural-decision-records/014-use-uswds-design-system.md).
+
+What this means for styling the application is that you will see some USWDS language and patterns. This can also be used a common language between design and engineering. For example, the names of our components follow [USWDS names for components](https://designsystem.digital.gov/components/overview/). And when you look at our application in the dev tool, every class with `usa-*` in front of it is coming from USWDS. USWDS has [design tokens](https://designsystem.digital.gov/design-tokens/) and mixins we can rely on as well.
+
+## Style patterns in MC-Review
+
 ### Styles should be as narrowly scoped as possible
 
 This is 101 but easy to forget. Please read [this section](https://github.com/trussworks/Engineering-Playbook/blob/main/docs/web/frontend/developing-ui.md#style-with-css-modules) of the Truss eng playbook for a good summary.
 
-TL;DR Less is more with styles. In our application, the preferred way to style React code is via locally scoped [CSS module](https://github.com/css-modules/css-modules), written as a `<component>.module.scss` file and stored alongside React component files. We also use [CSS selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference#selectors) to further target styles. Tightly scoped styles and CSS [specificity](https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity) ensure separation of concerns.
+TL;DR Less is more with styles. In our application, the preferred way to style React code is via locally scoped [CSS module](https://github.com/css-modules/css-modules), written as a `<component>.module.scss` file. This is stored alongside React component files. We also use [CSS selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference#selectors) to further target styles. Tightly scoped styles and CSS [specificity](https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity) ensure separation of concerns.
 
-Example of scoped styles:
+Example of scoped styles in use:
 - Shared styles live close to the workflow they apply to. For example, directories in  `/pages` folder may share a `*.module.scss` stylesheet if needed for templates in that area of the application. CSS selectors should be used to further scope down styles.
 - Re-useable atomic components (see `/components` folder) have self contained styles. There is a named `*.module.scss` file for each component.
 
-## How to import
+
+###  Global styles live in `styles/custom.scss`
+
+Global styles should be uncommmon. They generally change only during a styles refactor across the application.
+
+The `styles/custom.scss` is also the main file imported into components to reference global SCSS variables. This file `@forward`s the MCR color palette and USWDS sass variables to the rest of the application.
+
+### Import styles with `@use`
 - Prefer namespaced scss imports with [`@use`](https://sass-lang.com/documentation/at-rules/use/) over [`@import`](https://sass-lang.com/documentation/at-rules/import/) for scss to reduce loading styles multiple times. Sass team is deprecating [`@import`](https://github.com/sass/sass/blob/main/accepted/module-system.md#timeline).
 
 In `*.module.scss` files this looks like (at top of file):
@@ -48,52 +63,43 @@ In `*.module.scss` files this looks like (at top of file):
 ```
 
 and then referring to varibles and mixins inline with the [namespace](https://sass-lang.com/documentation/at-rules/use/#choosing-a-namespace) - such as `custom.$mcr-foundation-white` or  `@include uswds.uswds-at-media(tablet)`
-#### When to use global overrides
 
-Global styles live in a single file (`overrides.scss`). This should be used sparingly.
+### Watch out for global style overrides that can impact UI across the application.
 
-Here are concrete examples where global style overrides are needed:
-    1. We are dealing with container elements that repeat throughout the application outside of a specific component (divs, cards, display tables)
-    2. We need override a behavior in USWDS that we can't control via settings throughout the application
-    3. We want to hide an element from the screen using our global screenreader only class
+Always nest your scss styles code in a css class to benefit from [the advantages of CSS/SCSS modules](https://css-tricks.com/css-modules-part-1-need/). Eencapsulates styles in classes throughout `[component].module.scss`. Do not use html and `usa-*` class overrides at the top level of the module files. This will override global styles across the application.
+
+If you must, make global overrides changes in (`overrides.scss`). Here are concrete examples where global style overrides are needed:
+
+1. We are dealing with container elements that repeat throughout the application outside of a specific component (divs, cards, display tables)
+2. We need override a behavior in USWDS that we can't control via settings throughout the application
+3. We want to hide an element from the screen using our global screenreader only class
 
 
-Prefer encapsulating into components with their own module.scss.
+### Compose together styles in React component files using the `classnames` package
 
-### React components may use conditional styles and compose together styles using the `classnames` package
+- Sometimes React components have complex logic related to styles. To assist with this and follow patterns from `@trussworks/react-uswds` we use [`classnames`](https://github.com/JedWatson/classnames) package to compose together styles from different places. In the future if desired, we could make a similar utility in code and remove this dependency.
 
-- Sometimes React components have complex logic related to styles. To assist with this use [`classnames`](https://github.com/JedWatson/classnames) to compose together styles from different places.
-
-Example of conditional styles:
+Example of complex conditional styles from ActionButton:
 
 ```react
-      const combinedStyles = classNames(
-        'usa-tag',
+    const classes = classnames(
         {
-            [styles['green']]: color === 'green',
-            [styles['cyan']]: color === 'cyan',
-            [styles['gold']]: color === 'gold',
-            [styles['blue']]: color === 'blue',
+            'usa-button--outline-disabled': isDisabled && isOutline,
+            'usa-button--disabled': isDisabled,
+            'usa-button--active': isLoading && !isSuccess,
+            [styles.successButton]: isSuccess && !isDisabled,
+            [styles.disabledCursor]: isDisabled || isLoading,
         },
-
         className
     )
-  ````
+```
 
-In this example, `'usa-tag'` is the the string literal for a class coming directly from USWDS, `styles[color]` variables are coming from that component's module SCSS file, and `className` is coming from React props. The logic can be understood as
+In this example, ActionButton has different states (loading, disabled,success) that can be combined and there are is secondary visual variant (outline) to consider.
 
-1. `'usa-tag'` is applied to all instances of the component.
-2. component specific styles from the `styles` object are conditionally applied based on the value of the prop `color`
-3. `className` prop is applied to all instances of the component (also overriding anything applied earlier if styles reference to the same CSS attribute). It is a best practice is to apply any consumer defined `className` last.
+ The `'usa-button---'`  classes are string literals for the class coming directly from USWDS. We want to use these in some cases. Then there are variables like `styles.disabledCursor` which come from the component module SCSS file. Finally, there is the `className` is coming from React props passed into the component from the parent. Ut is a best practice is to apply any consumer defined `className` styles last in re-useable components.
 
-### `styles/custom.scss` holds global styles for the application
+The logic can be understood as
 
-Global styles should be uncommmon. They generally change only during a styles refactor across the application.
-
-The `styles/custom.scss` is also the main file imported into components to reference global SCSS variables. This file `@forward`s the MCR color palette and USWDS sass variables to the rest of the application.
-
-### `USWDS` is the main design system in use
-
-See the [`Use USWDS as the design system`](../architectural-decision-records/014-use-uswds-design-system.md).
-
-What this means for styling the application is that you will see some USWDS language and patterns. This can also be used a common language between design and engineering. For example, the names of our components follow [USWDS names for components](https://designsystem.digital.gov/components/overview/). And when you look at our application in the dev tool, every class with `usa-*` in front of it is coming from USWDS. USWDS has [design tokens](https://designsystem.digital.gov/design-tokens/) and mixins we can rely on as well.
+1. USWDS styles are conditionally applied
+2. component specific styles from the module `styles` object are conditionally applied
+3. `className` prop is applied to all instances of the component (also overriding anything applied earlier if styles reference to the same CSS attribute).
