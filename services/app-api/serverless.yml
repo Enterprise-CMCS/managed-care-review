@@ -211,6 +211,13 @@ functions:
     events:
       - http:
           path: v1/graphql/external
+          method: post
+          cors: true
+          authorizer:
+              name: third_party_api_authorizer
+              identitySource: method.request.header.Authorization
+      - http:
+          path: v1/graphql/external
           method: get
           cors: true
           authorizer:
