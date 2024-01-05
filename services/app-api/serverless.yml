@@ -175,18 +175,7 @@ functions:
 
   third_party_api_authorizer:
     handler: src/handlers/third_party_API_authorizer.main
-
-  jwthealth:
-      handler: src/handlers/health_check.main
-      events:
-        - http:
-            path: jwt_health_check
-            method: get
-            cors: true
-            authorizer:
-              name: third_party_api_authorizer
-              identitySource: method.request.header.Authorization 
-              
+         
   otel:
     handler: src/handlers/otel_proxy.main
     events:
@@ -217,6 +206,24 @@ functions:
       - !Ref PrismaClientEngineLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
 
+  graphql_external:
+    handler: src/handlers/apollo_gql.graphqlHandler
+    events:
+      - http:
+          path: v1/graphql/external
+          method: get
+          cors: true
+          authorizer:
+              name: third_party_api_authorizer
+              identitySource: method.request.header.Authorization
+    timeout: 60 # aurora cold start can be long
+    vpc:
+      securityGroupIds:
+        - ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+    layers:
+      - !Ref PrismaClientEngineLambdaLayer
+      
   migrate:
     handler: src/handlers/postgres_migrate.main
     timeout: 60
