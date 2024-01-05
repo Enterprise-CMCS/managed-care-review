@@ -1,10 +1,9 @@
 import React from 'react'
-import { Link, SideNav, GridContainer } from '@trussworks/react-uswds'
+import { Link, SideNav, GridContainer, Icon } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import styles from './SubmissionSideNav.module.scss'
 import { useParams, useLocation, useNavigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import sprite from 'uswds/src/img/sprite.svg'
 import {
     QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES,
     RouteT,
@@ -172,14 +171,7 @@ export const SubmissionSideNav = () => {
                                         RoutesRecord.DASHBOARD_SUBMISSIONS,
                                 }}
                             >
-                                <svg
-                                    className="usa-icon"
-                                    aria-hidden="true"
-                                    focusable="false"
-                                    role="img"
-                                >
-                                    <use xlinkHref={`${sprite}#arrow_back`} />
-                                </svg>
+                                <Icon.ArrowBack />
                                 {loggedInUser?.__typename === 'StateUser' ? (
                                     <span>&nbsp;Back to state dashboard</span>
                                 ) : (

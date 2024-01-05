@@ -1,17 +1,17 @@
-@import '../../../styles/uswdsImports.scss';
-@import '../../../styles/custom.scss';
-@import '../../../components/SubmissionSummarySection/UploadedDocumentsTable/UploadedDocumentsTable.module.scss';
+@use '../../../styles/custom.scss' as custom;
+@use '../../../styles/uswdsImports.scss' as uswds;
+@use '../../../components/SubmissionSummarySection/UploadedDocumentsTable/UploadedDocumentsTable.module.scss' as uploadedDocumentsTable;
 
 .qaDocumentTable {
-  @extend .uploadedDocumentsTable;
-  margin: 0 0 units(4) 0;
+  @include uploadedDocumentsTable.docs-table;
+  margin: 0 0 uswds.units(4) 0;
 }
 
 .tableHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: units(3);
+  padding-bottom: uswds.units(3);
   h4 {
     padding: 0;
     margin: 0;

@@ -1,54 +1,42 @@
-@import '../../styles/uswdsImports.scss';
-@import '../../styles/custom.scss';
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
 
 .userInfo {
-    font-weight: font-weight('light');
-    padding: 0 units(1);
-    color: $cms-color-white;
+    font-weight: uswds.font-weight('light');
+    padding: 0 uswds.units(1);
+    color: custom.$mcr-foundation-white;
 
     button, a {
-        color: $cms-color-white;
+        color: custom.$mcr-foundation-white;
 
         &:hover,
         &:active,
         &:visited {
-            color: $cms-color-white;
+            color: custom.$mcr-foundation-white;
         }
     }
 }
 
 .divider {
-    padding: 0 units(1);
+    padding: 0 uswds.units(1);
 }
 
-.dashboardHeading {
-    background-color: $theme-color-primary-dark;
-    color: $cms-color-white;
-    & h1 {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: baseline;
-        > span {
-            padding: 0 units(1);
-        }
-    }
-}
 
 .landingPageHeading {
-    background-color: $theme-color-primary-dark;
-    color: $cms-color-white;
-    padding: units(2) 0;
+    background-color: custom.$mcr-cmsblue-dark;
+    color: custom.$mcr-foundation-white;
+    padding: uswds.units(2) 0;
     & h1 {
         display: flex;
         flex-flow: column;
         text-align: center;
-        font-weight: font-weight('light');
+        font-weight: uswds.font-weight('light');
         line-height: 1.5;
     }
 }
 
 .banner {
-    background: $cms-color-primary;
+    background: custom.$mcr-cmsblue-base;
 }
 
 .bannerLogo {
@@ -58,14 +46,27 @@
     text-decoration: none;
 
     .logoImg {
-        border-right: 2px solid $cms-color-white;
-        padding-right: units(2);
+        border-right: 2px solid custom.$mcr-foundation-white;
+        padding-right: uswds.units(2);
     }
 
     span {
-        margin-left: units(2);
+        margin-left: uswds.units(2);
         font-size: size('body', 'lg');
-        color: $cms-color-white;
+        color: custom.$mcr-foundation-white;
         height: 100%;
+    }
+}
+
+.dashboardHeading {
+    background-color: custom.$mcr-cmsblue-dark;;
+    color: custom.$mcr-foundation-white;
+    & h1 {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        > span {
+            padding: 0 uswds.units(1);
+        }
     }
 }

@@ -1,19 +1,24 @@
-@import '../../styles/uswdsImports.scss';
-@import '../../styles/custom.scss';
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
+
 .summarySectionWrapper {
     max-width: 50rem;
 }
 
 .summarySection {
-    line-height: units(3);
+    margin: uswds.units(2) auto;
+    background: custom.$mcr-foundation-white;
+    padding: uswds.units(2)uswds.units(4);
+    border: 1px solid custom.$mcr-gray-lighter;
+    line-height:uswds.units(3);
 
     h2 {
         margin: 0;
-        @include u-text('normal');
+        @include uswds.u-text('normal');
     }
     &:first-of-type {
         h2 {
-            @include u-text('bold');
+            @include uswds.u-text('bold');
             font-size: size('body', 'lg');
         }
     }
@@ -23,7 +28,7 @@
         padding: 0;
 
         li {
-            padding: units(1) 0;
+            padding:uswds.units(1) 0;
         }
     }
 
@@ -32,7 +37,7 @@
         padding: 0;
 
         div {
-            padding-bottom: units(2);
+            padding-bottom:uswds.units(2);
         }
 
         // dont bottom pad last two grid items
@@ -41,7 +46,7 @@
         }
     }
     table:last-of-type {
-       margin-bottom: units(2);
+       margin-bottom:uswds.units(2);
     }
 
     // with nested sections, collapse bottom margin/padding for last in list
@@ -52,7 +57,7 @@
 }
 
 .contactInfo p {
-    margin: units(1) 0;
+    margin:uswds.units(1) 0;
 }
 
 .documentDesc {
@@ -60,9 +65,9 @@
 }
 
 .submitButton {
-    background: $theme-color-success;
+    background: custom.$mcr-success-base;
     &:hover {
-        background-color: #2a7a3b !important;
+        background-color: custom.$mcr-success-hover !important;
     }
 }
 
@@ -73,9 +78,9 @@
 }
 
 .certifyingActuaryDetail {
-    margin-bottom: units(4);
+    margin-bottom:uswds.units(4);
 
-    @include at-media(tablet) {
+    @include uswds.at-media(tablet) {
         margin-bottom: 0;
     }
 
@@ -91,9 +96,9 @@
 }
 
 .singleColumnGrid {
-    @include at-media(tablet) {
+    @include uswds.at-media(tablet) {
         > * {
-            margin-bottom: units(2);
+            margin-bottom:uswds.units(2);
         }
     }
 }

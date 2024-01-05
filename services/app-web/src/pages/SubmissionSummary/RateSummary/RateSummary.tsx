@@ -1,7 +1,7 @@
-import { GridContainer, Link } from '@trussworks/react-uswds'
+import { GridContainer, Icon, Link } from '@trussworks/react-uswds'
 import React, { useEffect, useState } from 'react'
 import { NavLink, useParams } from 'react-router-dom'
-import sprite from 'uswds/src/img/sprite.svg'
+
 import { Loading } from '../../../components'
 import { usePage } from '../../../contexts/PageContext'
 import { useFetchRateQuery } from '../../../gen/gqlClient'
@@ -70,14 +70,7 @@ export const RateSummary = (): React.ReactElement => {
                             pathname: RoutesRecord.DASHBOARD_RATES,
                         }}
                     >
-                        <svg
-                            className="usa-icon"
-                            aria-hidden="true"
-                            focusable="false"
-                            role="img"
-                        >
-                            <use xlinkHref={`${sprite}#arrow_back`} />
-                        </svg>
+                        <Icon.ArrowBack />
                         <span>&nbsp;Back to dashboard</span>
                     </Link>
                 </div>

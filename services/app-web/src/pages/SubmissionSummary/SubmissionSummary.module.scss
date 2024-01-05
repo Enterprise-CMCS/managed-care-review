@@ -1,19 +1,19 @@
-@import '../../styles/uswdsImports.scss';
-@import '../../styles/custom.scss';
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
 
 .background {
-    background-color: $cms-color-white;
+    background-color: custom.$mcr-foundation-white;
     width: 100%;
 }
 
 .backgroundFullPage {
-    background-color: $cms-color-white;
+    background-color: custom.$mcr-foundation-white;
     width: 100%;
     flex: 1 0 auto;
 }
 
 .container {
-    max-width: $width-max-contained;
+    max-width: custom.$mcr-container-standard-width-fixed;
     padding: 2rem 0;
 }
 
@@ -27,7 +27,7 @@
             display: inline-block;
             margin-left: 5px;
             margin-top: 0px;
-            
+
         }
     }
     a.editLink {
@@ -36,13 +36,13 @@
 }
 
 .banner {
-    margin: units(2) auto;
+    margin: uswds.units(2) auto;
 }
 
 .backLinkContainer {
-    padding-top: units(2);
-    padding-bottom: units(2);
+    padding-top: uswds.units(2);
+    padding-bottom: uswds.units(2);
   }
   .backLinkContainerNoSideBar {
-    padding-bottom: units(2);
+    padding-bottom: uswds.units(2);
   }

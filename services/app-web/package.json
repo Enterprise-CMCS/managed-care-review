@@ -11,7 +11,8 @@
         "eject": "react-scripts eject",
         "clean": "rm -rf node_modules && yarn cache clean",
         "format": "prettier --write src/**/*.ts{,x}",
-        "lint": "tsc --noEmit && eslint src/ --max-warnings=0",
+        "lint": "tsc --noEmit && eslint src/ --max-warnings=0 && yarn lint:style",
+        "lint:style": "npx stylelint '**/*.scss'",
         "test": "TZ=UTC react-scripts test",
         "test:once": "TZ=UTC react-scripts test --watchAll=false --runInBand --ci",
         "test:update": "react-scripts test -u",
@@ -22,8 +23,12 @@
         "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""
     },
     "lint-staged": {
-        "*.{js,jsx,ts,tsx}": [
+        "*.{js,jsx, ts,tsx}": [
             "eslint --fix --max-warnings=0",
+            "prettier --write"
+        ],
+        "**/*.scss": [
+            "yarn lint:style",
             "prettier --write"
         ]
     },
@@ -161,6 +166,8 @@
         "serverless-cloudfront-invalidate": "^1.11.0",
         "serverless-s3-sync": "^3.0.0",
         "serverless-stack-termination-protection": "^2.0.2",
+        "stylelint": "^16.1.0",
+        "stylelint-config-recommended-scss": "^14.0.0",
         "webpack": "^5.72.0",
         "yarn": "^1.22.19"
     }

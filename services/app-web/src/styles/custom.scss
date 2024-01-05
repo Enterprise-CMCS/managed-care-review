@@ -1,24 +1,63 @@
-/* Order matters in this file. */
-@import 'theme/_cms';
-@import 'theme/_color';
+/*
+    Custom Application Styles
 
-// Custom app wide styles
+    This is the main scss for import into component module.scss files.
+    Defines custom scss mixins, scss variables and css classes in use across the application.
+    Forwards mcr colors variables as well.
+*/
 
-// containers
-$width-max-contained: 50rem;
-.app-container-horizontal-pad {
-    max-width: $width-max-contained;
+@forward 'mcrColors'; // Allows access to colors anywhere custom is imported
+
+@use 'mcrColors' as *;
+@use'uswdsImports.scss' as uswds;
+
+/* CONTAINERS */
+// Every page starts with a flex container
+@mixin container {
+  display: flex;
+  flex: 1 0 auto;
+}
+// We have some established width limits how far page content should stretch laterally. Right now this is controlled by CSS width properties
+$mcr-container-standard-width-fixed: 50rem;
+$mcr-container-max-width-fixed: 75rem;
+
+// Default page width and styles in MC-Review
+@mixin default-page-container {
+    @include container;
+    width: $mcr-container-max-width-fixed;
+    background-color: $mcr-foundation-white;
+}
+
+// Form pages have larger margin on either side
+@mixin form-page-container {
+    @include container;
+    width: $mcr-container-standard-width-fixed;
+}
+
+// Adds blue-cyan  gradient to top border of a container, used on document tables
+.borderTopLinearGradient {
+    border: 0 solid;
+    border-top: 10px solid;
+    border-image-slice: 1;
+    border-image-source: linear-gradient(
+        to right,
+        $mcr-primary-dark,
+        $mcr-cyan-base
+    );
+    box-shadow: inset 0 0 1px $mcr-gray-dark,
+        0px 0px 24px rgb(0 0 0 / 5%);
 }
 
 @mixin sectionCard {
-    padding: units(4);
-    margin-bottom: units(2);
-    margin-top: units(2);
-    background: $cms-color-white;
-    border: 1px solid $theme-color-base-lighter;
-    @include u-radius('md');
+    padding: uswds.units(4);
+    margin-bottom: uswds.units(2);
+    margin-top: uswds.units(2);
+    background: $mcr-foundation-white;
+    border: 1px solid $mcr-gray-lighter;
+    @include uswds.u-radius('md');
 }
-// accessibility
+/* ACCESSIBILITY */
+// Re-useable classname for hiding UI visually but still having it be read by screenreaders
 .srOnly {
     position: absolute;
     left: -1000px;
@@ -27,74 +66,3 @@ $width-max-contained: 50rem;
     height: 1px;
     overflow: hidden;
 }
-
-// Top border linear gradient
-.borderTopLinearGradient {
-    border: 0 solid;
-    border-top: 10px solid;
-    border-image-slice: 1;
-    border-image-source: linear-gradient(
-        to right,
-        $theme-color-gradient-dark,
-        $theme-color-gradient-light
-    );
-    box-shadow: inset 0 0 1px $theme-color-base-dark,
-        0px 0px 24px rgb(0 0 0 / 5%);
-}
-
-.usa-logo {
-    @include u-margin-y(2);
-}
-
-.usa-label,
-.usa-legend {
-    font-weight: bold;
-}
-
-.address {
-    line-height: 1.5;
-}
-
-.usa-hint span {
-    display: block;
-    margin-top: units(1);
-}
-
-.usa-button--outline.usa-button--inverse {
-    // Accessibility button contrast fix for inverse button. I couldn't get the color value to set properly unless I set it to !important... not ideal.
-    box-shadow: inset 0 0 0 2px $cms-color-white;
-    color: $cms-color-white !important;
-
-    &:hover {
-        box-shadow: inset 0 0 0 2px #dfe1e2;
-        color: #dfe1e2 !important;
-    }
-}
-
-.usa-checkbox__label,
-.usa-radio__label {
-    // The default spacing between checkboxes and radio buttons in USWDS feels too small, would like to increase this across the app.
-    margin-top: 1rem;
-}
-
-// Remove link styles from button-styled links
-a[class^='usa-button usa-button--outline'] {
-    text-decoration: none !important;
-    color: #1a4480 !important;
-}
-
-div[class^='usa-step-indicator'] {
-    background-color: transparent;
-    width: 66rem;
-    margin: 1.25rem auto;
-    text-align: center;
-
-    ol {
-        justify-content: center;
-    }
-}
-
-[class^='usa-step-indicator__header'] {
-    display: inline;
-}
-

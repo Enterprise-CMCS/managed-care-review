@@ -1,8 +1,8 @@
-@import '../../styles/uswdsImports.scss';
-@import '../../styles/custom.scss';
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
 
 .background {
-  background-color: $cms-color-white;
+  background-color: custom.$mcr-foundation-white;
   width: 100%;
   height: 100%;
   display: flex;
