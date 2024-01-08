@@ -11,8 +11,8 @@
     }
     p {
         font-weight: uswds.font-weight('normal');
-    font-size: 0.875rem;
-    text-align: center;
+        font-size: 0.875rem;
+        text-align: center;
     }
 }
 
@@ -27,7 +27,7 @@
 }
 
 .programTag {
-    background:custom.$mcr-primary-lighter;
+    background: custom.$mcr-primary-lighter;
     color: custom.$mcr-foundation-ink;
     display: inline-block;
 }
@@ -47,7 +47,7 @@
 }
 
 .filterCount {
-    font-weight: uswds,font-weight('bold');
+    font-weight: uswds.font-weight('bold');
     color: custom.$mcr-foundation-ink;
-    padding-top: uswds,units(3);
+    padding-top: uswds.units(3);
 }
