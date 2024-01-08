@@ -14,7 +14,7 @@
         "**/ua-parser-js": "0.7.24"
     },
     "devDependencies": {
-        "@graphql-codegen/cli": "^2.2.2",
+        "@graphql-codegen/cli": "^5.0.0",
         "@graphql-codegen/introspection": "^4.0.0",
         "@graphql-codegen/typescript": "^3.0.2",
         "@graphql-codegen/typescript-operations": "^4.0.0",
