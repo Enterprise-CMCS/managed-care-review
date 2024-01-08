@@ -49,11 +49,7 @@ export function AppBody({
                 </div>
             )}
 
-            <Header
-                authMode={authMode}
-                setAlert={setGlobalAlert}
-                disableLogin={siteUnderMaintenance}
-            />
+            <Header authMode={authMode} disableLogin={siteUnderMaintenance} />
             <main id="main-content" className={styles.mainContent} role="main">
                 {globalAlert && globalAlert}
                 {siteUnderMaintenance ? (
