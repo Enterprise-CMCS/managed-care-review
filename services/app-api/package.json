@@ -91,7 +91,7 @@
         "serverless-associate-waf": "^1.2.1",
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
         "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
-        "serverless-offline": "^12.0.4",
+        "serverless-offline": "^13.3.2",
         "serverless-offline-ssm": "^6.2.0",
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^2.0.2",
