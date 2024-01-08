@@ -27,7 +27,7 @@ So when fetching on the unlocked contract on 1/20/2024 the data will return with
 #### Example 2
 In example 2, we are fetching the contract on 1/21/2024 in a submitted state.
 In this example there are no draft revisions, so the data returned is just the revision history.
-You will notice that in at this date and time, the contract, Draft Contract Rev 4, that was in draft state on 1/20/2024 is no longer in draft state and now in the contract history column. When a contract or rate that is unlocked gets resubmitted and turned into a historical revision.
+You will notice that in at this date and time the contract, Contract Rev 4, that was in draft state on 1/20/2024 is no longer in draft state and now in the contract history column. When a contract or rate that is unlocked gets resubmitted its drafts are turned into a historical revision.
 
 ## Contraints
 - MC-Review must track version history once a contract or rate is submitted.
