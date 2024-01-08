@@ -34,4 +34,26 @@ describe('Landing', () => {
             screen.queryByText(/You have been logged out due to inactivity/)
         ).toBeNull()
     })
+
+    it('displays sign in error when query parameter included', async () => {
+        ldUseClientSpy({ 'site-under-maintenance-banner': false })
+        renderWithProviders(<Landing />, {
+            routerProvider: { route: '/?auth-error' },
+        })
+        expect(
+            screen.queryByRole('heading', { name: 'Sign in error' })
+        ).toBeNull()
+    })
+
+    it('does not display sign in error by default', async () => {
+        ldUseClientSpy({ 'site-under-maintenance-banner': false })
+        renderWithProviders(<Landing />, {
+            routerProvider: { route: '/' },
+        })
+        expect(
+            screen.queryByRole('heading', {
+                name: 'Sign in error',
+            })
+        ).toBeNull()
+    })
 })

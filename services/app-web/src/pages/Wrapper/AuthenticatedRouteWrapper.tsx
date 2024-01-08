@@ -36,15 +36,12 @@ export const AuthenticatedRouteWrapper = ({
 
     const logoutSession = useCallback(
         (forcedSessionSignout: boolean) => {
-            updateSessionExpirationState(false)
-            if (logout) {
-                logout({ sessionTimeout: forcedSessionSignout }).catch((e) => {
-                    recordJSException(`Error with logout: ${e}`)
-                    setAlert && setAlert(<ErrorAlertSignIn />)
-                })
-            }
+            logout({ sessionTimeout: forcedSessionSignout }).catch((e) => {
+                recordJSException(`Error with logout: ${e}`)
+                setAlert && setAlert(<ErrorAlertSignIn />)
+            })
         },
-        [logout, setAlert, updateSessionExpirationState]
+        [logout, setAlert]
     )
 
     const resetSessionTimeout = () => {

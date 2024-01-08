@@ -13,7 +13,7 @@ import {
 import { CognitoLogin } from './CognitoLogin'
 import { LocalLogin } from '../../localAuth'
 import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks'
-/*  
+/*
 This file should only have basic user flows for auth. Form and implementation details are tested at the component level.
 */
 
@@ -243,7 +243,7 @@ describe('Auth', () => {
             })
         })
 
-        it('when login fails, stay on page and display error alert', async () => {
+        it('when login fails, kick back to landing page', async () => {
             let testLocation: Location
 
             renderWithProviders(
@@ -266,7 +266,7 @@ describe('Auth', () => {
 
             await userClickByTestId(screen, 'TophButton')
             await waitFor(() => {
-                expect(testLocation.pathname).toBe('/auth')
+                expect(testLocation.pathname).toBe('/')
             })
         })
     })

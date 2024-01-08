@@ -10,12 +10,9 @@ import { Logo } from '../Logo'
 import styles from './Header.module.scss'
 import { PageHeadingRow } from './PageHeadingRow/PageHeadingRow'
 import { UserLoginInfo } from './UserLoginInfo/UserLoginInfo'
-import { recordJSException } from '../../otelHelpers'
-import { ErrorAlertSignIn } from '../ErrorAlert'
 
 export type HeaderProps = {
     authMode: AuthModeType
-    setAlert?: React.Dispatch<React.ReactElement>
     disableLogin?: boolean
 }
 
@@ -24,25 +21,16 @@ export type HeaderProps = {
  */
 export const Header = ({
     authMode,
-    setAlert,
     disableLogin = false,
 }: HeaderProps): React.ReactElement => {
     const { logout, loggedInUser, loginStatus } = useAuth()
     const { heading } = usePage()
     const { currentRoute: route } = useCurrentRoute()
 
-    const handleLogout = (
+    const handleLogout = async (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>
     ) => {
-        if (!logout) {
-            console.info('Something went wrong ', e)
-            return
-        }
-
-        logout({ sessionTimeout: false }).catch((e) => {
-            recordJSException(`Error with logout: ${e}`)
-            setAlert && setAlert(<ErrorAlertSignIn />)
-        })
+        await logout({ sessionTimeout: false })
     }
 
     return (

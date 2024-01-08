@@ -21,11 +21,19 @@ export const MODAL_COUNTDOWN_DURATION = 2 * 60 // session expiration modal count
 
 type AuthContextType = {
     /* See docs/AuthContext.md for an explanation of some of these variables */
-    checkAuth: () => Promise<ApolloQueryResult<FetchCurrentUserQuery> | Error> // manually refetch to confirm auth status, logout if not authenticated
+    checkAuth: (
+        failureRedirect?: string
+    ) => Promise<ApolloQueryResult<FetchCurrentUserQuery> | Error>
     checkIfSessionsIsAboutToExpire: () => void
     loggedInUser: UserType | undefined
     loginStatus: LoginStatusType
-    logout: ({ sessionTimeout }: { sessionTimeout: boolean }) => Promise<void> // sessionTimeout true when logout is due to session ending
+    logout: ({
+        sessionTimeout,
+        redirectPath,
+    }: {
+        sessionTimeout: boolean
+        redirectPath?: string
+    }) => Promise<void>
     logoutCountdownDuration: number
     sessionExpirationTime: MutableRefObject<dayjs.Dayjs | undefined>
     sessionIsExpiring: boolean
@@ -163,11 +171,25 @@ function AuthProvider({
         }
     }
 
-    const checkAuth = async () => {
+    /*
+        Refetches current user and confirms authentication
+        @param {failureRedirectPath} passed through to logout which is called on certain checkAuth failures
+
+        Use this function to reconfirm the user is logged in. Also used in CognitoLogin
+    */
+    const checkAuth: AuthContextType['checkAuth'] = async (
+        failureRedirectPath = '/'
+    ) => {
         try {
             return await refetch()
         } catch (e) {
-            await logout({ sessionTimeout: true })
+            // if we fail auth at a time we expected logged in user, the session may have timed out. Logout fully to reflect that and force Reat state to update
+            if (loggedInUser) {
+                await logout({
+                    sessionTimeout: true,
+                    redirectPath: failureRedirectPath,
+                })
+            }
             return new Error(e)
         }
     }
@@ -211,20 +233,35 @@ function AuthProvider({
         }
     }
 
-    const logout = async ({ sessionTimeout }: { sessionTimeout: boolean }) => {
+    /*
+        Close user session and handle redirect afterward
+
+        @param {sessionTimeout} will pass along a URL query param to display session expired alert
+        @param {redirectPath} optionally changes redirect path on logout - useful for cognito and local login\
+
+        Logout is called when user clicks to logout from header or session expiration modal
+        Also called in the background with session times out
+    */
+    const logout: AuthContextType['logout'] = async ({
+        sessionTimeout,
+        redirectPath = '/',
+    }) => {
         const realLogout =
             authMode === 'LOCAL' ? logoutLocalUser : cognitoSignOut
+
+        updateSessionExpirationState(false)
+
         try {
             await realLogout()
             if (sessionTimeout) {
-                window.location.href = '/?session-timeout=true'
+                window.location.href = `${redirectPath}?session-timeout=true'`
             } else {
-                window.location.href = '/'
+                window.location.href = redirectPath
             }
             return
         } catch (e) {
             recordJSException(new Error(`Logout Failed. ${JSON.stringify(e)}`))
-            window.location.href = '/'
+            window.location.href = redirectPath
             return
         }
     }

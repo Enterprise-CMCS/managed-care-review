@@ -8,9 +8,12 @@ import {
     ErrorAlertSiteUnavailable,
     ErrorAlertSessionExpired,
     ErrorAlertScheduledMaintenance,
+    ErrorAlertSignIn,
 } from '../../components'
 
-function maintenanceBannerForVariation(flag: string): React.ReactNode {
+function maintenanceBannerForVariation(
+    flag: string
+): React.ReactElement | undefined {
     if (flag === 'UNSCHEDULED') {
         return <ErrorAlertSiteUnavailable />
     } else if (flag === 'SCHEDULED') {
@@ -27,7 +30,7 @@ export const Landing = (): React.ReactElement => {
         featureFlags.SITE_UNDER_MAINTENANCE_BANNER.defaultValue
     )
 
-    const maybeMaintenaceBanner = maintenanceBannerForVariation(
+    const maintainenceBanner = maintenanceBannerForVariation(
         siteUnderMaintenanceBannerFlag
     )
 
@@ -35,13 +38,20 @@ export const Landing = (): React.ReactElement => {
         'session-timeout'
     )
 
+    const redirectFromAuthError = new URLSearchParams(location.search).get(
+        'auth-error'
+    )
+
     return (
         <>
             <section className={styles.detailsSection}>
                 <GridContainer className={styles.detailsSectionContent}>
-                    {maybeMaintenaceBanner}
-                    {redirectFromSessionTimeout && !maybeMaintenaceBanner && (
+                    {maintainenceBanner}
+                    {redirectFromSessionTimeout && !maintainenceBanner && (
                         <ErrorAlertSessionExpired />
+                    )}
+                    {redirectFromAuthError && !maintainenceBanner && (
+                        <ErrorAlertSignIn />
                     )}
                     <Grid row gap className="margin-top-2">
                         <Grid tablet={{ col: 6 }}>

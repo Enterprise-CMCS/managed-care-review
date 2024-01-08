@@ -58,17 +58,19 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
                 setShowFormAlert(true)
                 console.info('Error', result.message)
             } else {
-                try {
-                    await checkAuth()
-                } catch (e) {
-                    console.info('UNEXPECTED NOT LOGGED IN AFTER LOGGIN', e)
+                const result = await checkAuth('/auth')
+                if (result instanceof Error) {
+                    console.error(
+                        'UNEXPECTED -  NOT AUTHENTICATED BUT COGNITO PASSWORD LOGIN HAS RESOLVED WITHOUT ERROR',
+                        result
+                    )
                     setShowFormAlert(true)
                 }
-
                 navigate('/')
             }
         } catch (err) {
-            console.info('Unexpected error signing in:', err)
+            setShowFormAlert(true)
+            console.info('Sign in error:', err)
         }
     }
 
