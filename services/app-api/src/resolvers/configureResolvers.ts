@@ -32,6 +32,7 @@ import { rateResolver } from './rate/rateResolver'
 import { fetchRateResolver } from './rate/fetchRate'
 import { updateContract } from './contract/updateContract'
 import { createAPIKeyResolver } from './APIKey'
+import { unlockRate } from './rate/unlockRate'
 
 export function configureResolvers(
     store: Store,
@@ -88,6 +89,7 @@ export function configureResolvers(
                 emailParameterStore
             ),
             createAPIKey: createAPIKeyResolver(jwt),
+            unlockRate: unlockRate(store),
         },
         User: {
             // resolveType is required to differentiate Unions
