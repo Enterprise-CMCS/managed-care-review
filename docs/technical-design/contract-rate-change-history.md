@@ -13,6 +13,8 @@ Change history is the feature of MC-Review where the application stores full cop
 [Miro link](https://miro.com/app/board/o9J_lS5oLDk=/?moveToWidget=3458764574794469060&cot=14)\
 ![contract-and-rate-history-diagram](../../.images/contract-and-rate-history-diagram.png)
 
+In this diagram when a contract or rate is unlocked, a new draft revision version is created from the previous submitted revision. When submitted the draft revision is turned into a submitted revision that is then a part of the revision history.
+
 ### Reading history
 [Miro Link](https://miro.com/app/board/o9J_lS5oLDk=/?moveToWidget=3458764574799194467&cot=14)\
 ![reading-contract-history](../../.images/read-contract-and-rate-history-diagram.png)
