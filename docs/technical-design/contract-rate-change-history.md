@@ -9,6 +9,28 @@ Change history is the feature of MC-Review where the application stores full cop
 
  This document details how the change history is calculated for contract and rate data and which database fields are used.
 
+## Diagram
+[Miro link](https://miro.com/app/board/o9J_lS5oLDk=/?moveToWidget=3458764574794469060&cot=14)\
+![contract-and-rate-history-diagram](../../.images/contract-and-rate-history-diagram.png)
+
+In this diagram when a contract or rate is unlocked, a new draft revision version is created from the previous submitted revision. When submitted the draft revision is turned into a submitted revision that is then a part of the revision history.
+
+### Reading history
+[Miro Link](https://miro.com/app/board/o9J_lS5oLDk=/?moveToWidget=3458764574799194467&cot=14)\
+![reading-contract-history](../../.images/read-contract-and-rate-history-diagram.png)
+
+#### Example 1
+In example 1, we are fetching the contract data on 1/20/2024 (pretend that proceeding actions have not occurred yet).
+On this date, the contract has been unlocked and Rate B was removed from the contract.
+When unlocking a contract or rate, a new draft revision is made. Any changes made to the contract or rate is reflected in these draft revisions.
+Until the contract or rate is submitted, the draft revision will remain in the data when we fetch.
+So when fetching on the unlocked contract on 1/20/2024 the data will return with a draft revision for the contract, then the revision history in reverse order.
+
+#### Example 2
+In example 2, we are fetching the contract on 1/21/2024 in a submitted state.
+In this example there are no draft revisions, so the data returned is just the revision history.
+You will notice that in at this date and time the contract, Contract Rev 4, that was in draft state on 1/20/2024 is no longer in draft state and now in the contract history column. When a contract or rate that is unlocked gets resubmitted its drafts are turned into a historical revision.
+
 ## Contraints
 - MC-Review must track version history once a contract or rate is submitted.
     - This includes all actions on contract or a rate (submit, unlock, resubmit) alongside the related form data present at that point in time in the database.
