@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import styles from '../SubmissionSummarySection.module.scss'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import {
@@ -22,12 +22,13 @@ import { DocumentWarningBanner } from '../../Banner'
 import { useS3 } from '../../../contexts/S3Context'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { recordJSException } from '../../../otelHelpers'
-import { Link } from '@trussworks/react-uswds'
+import { Link, ModalRef } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
 import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 import { useAuth } from '../../../contexts/AuthContext'
 import { SectionCard } from '../../SectionCard'
+import { UnlockRateButton } from './UnlockRateButton'
 
 // This rate summary pages assumes we are using contract and rates API.
 // Eventually RateDetailsSummarySection should share code with this code
@@ -123,12 +124,15 @@ export const SingleRateSummarySection = ({
     statePrograms: Program[]
 }): React.ReactElement | null => {
     const { loggedInUser } = useAuth()
+    const modalRef = useRef<ModalRef>(null)
     const rateRevision = rate.revisions[0]
     const formData: RateFormData = rateRevision?.formData
     const documentDateLookupTable = makeRateDocumentDateTable(rate.revisions)
     const isRateAmendment = formData.rateType === 'AMENDMENT'
     const explainMissingData =
         !isSubmitted && loggedInUser?.role === 'STATE_USER'
+    const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const disableUnlockButton = ['DRAFT', 'UNLOCKED'].includes(rate.status)
 
     // TODO BULK DOWNLOAD
     // needs to be wrap in a standalone hook
@@ -193,6 +197,14 @@ export const SingleRateSummarySection = ({
                         header={
                             rate.revisions[0].formData.rateCertificationName ||
                             'Unknown rate name'
+                        }
+                        subHeaderComponent={
+                            isCMSUser ? (
+                                <UnlockRateButton
+                                    modalRef={modalRef}
+                                    disabled={disableUnlockButton}
+                                />
+                            ) : null
                         }
                     />
                     {documentError && (
