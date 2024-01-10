@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 import styles from '../SubmissionSummarySection.module.scss'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import {
@@ -13,6 +13,7 @@ import {
     RateFormData,
     RateRevision,
     RelatedContractRevisions,
+    useUnlockRateMutation,
 } from '../../../gen/gqlClient'
 import { UploadedDocumentsTable } from '../UploadedDocumentsTable'
 import type { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
@@ -22,13 +23,15 @@ import { DocumentWarningBanner } from '../../Banner'
 import { useS3 } from '../../../contexts/S3Context'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { recordJSException } from '../../../otelHelpers'
-import { Link, ModalRef } from '@trussworks/react-uswds'
+import { Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
 import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 import { useAuth } from '../../../contexts/AuthContext'
 import { SectionCard } from '../../SectionCard'
 import { UnlockRateButton } from './UnlockRateButton'
+import { ERROR_MESSAGES } from '../../../constants'
+import { handleApolloErrorsAndAddUserFacingMessages } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 
 // This rate summary pages assumes we are using contract and rates API.
 // Eventually RateDetailsSummarySection should share code with this code
@@ -124,15 +127,14 @@ export const SingleRateSummarySection = ({
     statePrograms: Program[]
 }): React.ReactElement | null => {
     const { loggedInUser } = useAuth()
-    const modalRef = useRef<ModalRef>(null)
     const rateRevision = rate.revisions[0]
     const formData: RateFormData = rateRevision?.formData
     const documentDateLookupTable = makeRateDocumentDateTable(rate.revisions)
     const isRateAmendment = formData.rateType === 'AMENDMENT'
+    const isUnlocked = rate.status === 'UNLOCKED'
     const explainMissingData =
         !isSubmitted && loggedInUser?.role === 'STATE_USER'
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
-    const disableUnlockButton = ['DRAFT', 'UNLOCKED'].includes(rate.status)
 
     // TODO BULK DOWNLOAD
     // needs to be wrap in a standalone hook
@@ -186,6 +188,35 @@ export const SingleRateSummarySection = ({
     }, [getKey, getBulkDlURL, formData])
     // END bulk download logic
 
+    const [unlockRate, { loading: unlockLoading }] = useUnlockRateMutation()
+
+    const handleUnlockRate = async () => {
+        try {
+            const { data } = await unlockRate({
+                variables: {
+                    input: {
+                        rateID: rate.id,
+                        unlockedReason: '',
+                    },
+                },
+            })
+
+            if (data?.unlockRate.rate) {
+                // navigate('') TODO
+            } else {
+                recordJSException(
+                    `[UNEXPECTED]: Error attempting to unlock rate, no data present.`
+                )
+                return new Error(ERROR_MESSAGES.unlock_error_generic)
+            }
+        } catch (error) {
+            return handleApolloErrorsAndAddUserFacingMessages(
+                error,
+                'UNLOCK_RATE'
+            )
+        }
+    }
+
     return (
         <React.Fragment key={rate.id}>
             <SectionCard
@@ -198,15 +229,17 @@ export const SingleRateSummarySection = ({
                             rate.revisions[0].formData.rateCertificationName ||
                             'Unknown rate name'
                         }
-                        subHeaderComponent={
-                            isCMSUser ? (
-                                <UnlockRateButton
-                                    modalRef={modalRef}
-                                    disabled={disableUnlockButton}
-                                />
-                            ) : null
-                        }
-                    />
+                    >
+                        {isCMSUser ? (
+                            <UnlockRateButton
+                                disabled={isUnlocked || unlockLoading}
+                                onClick={handleUnlockRate}
+                            >
+                                {' '}
+                                Unlock Rate{' '}
+                            </UnlockRateButton>
+                        ) : null}
+                    </SectionHeader>
                     {documentError && (
                         <DocumentWarningBanner className={styles.banner} />
                     )}

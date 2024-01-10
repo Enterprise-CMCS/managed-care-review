@@ -1,10 +1,9 @@
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
-.summarySectionWrapper {
-    max-width: 50rem;
+.primaryDiv {
+    flex-basis: 73%;
 }
-
 
 .summarySectionHeader {
     display: flex;
@@ -20,23 +19,12 @@
             margin-top: 17.5px;
         }
     }
-
 }
 
 .summarySectionHeaderBorder {
     border-bottom: 1px solid custom.$mcr-gray-lighter;
     margin-bottom: uswds.units(2);
 }
-
-.summarySectionSubHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: uswds.units(4) 0;
-    padding-top: uswds.units(4);
-    border-top: 1px solid custom.$mcr-gray-lighter;
-}
-
 
 @media print {
     .summarySectionHeader a {

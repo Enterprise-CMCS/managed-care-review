@@ -1,22 +1,23 @@
-import { ModalRef, ModalToggleButton } from '@trussworks/react-uswds'
-import styles from '../SubmissionSummarySection.module.scss'
+import { ActionButton } from '../../ActionButton'
+
+// Eventually ActionButton will be entirely swapped out for ModalToggleButton - part of TICKET NUMBER when modal is hooked into unlockRate
+type UnlockRateButtonProps = JSX.IntrinsicElements['button']
 
 export const UnlockRateButton = ({
+    onClick,
     disabled,
-    modalRef,
-}: {
-    disabled: boolean
-    modalRef: React.RefObject<ModalRef>
-}): React.ReactElement => {
+    children,
+    ...props
+}: UnlockRateButtonProps): React.ReactElement => {
     return (
-        <ModalToggleButton
-            modalRef={modalRef}
-            className={styles.submitButton}
+        <ActionButton
+            {...props}
+            type="button"
+            variant="outline"
             disabled={disabled}
-            outline
-            opener
+            onClick={onClick}
         >
-            Unlock rate
-        </ModalToggleButton>
+            {children}
+        </ActionButton>
     )
 }
