@@ -1,4 +1,7 @@
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import {
+    ldUseClientSpy,
+    renderWithProviders,
+} from '../../../testHelpers/jestHelpers'
 import { SingleRateSummarySection } from './SingleRateSummarySection'
 import {
     fetchCurrentUserMock,
@@ -11,6 +14,13 @@ import { packageName } from '../../../common-code/healthPlanFormDataType'
 import { RateRevision } from '../../../gen/gqlClient'
 
 describe('SingleRateSummarySection', () => {
+    beforeEach(() => {
+        ldUseClientSpy({ 'rate-edit-unlock': true })
+    })
+    afterEach(() => {
+        jest.resetAllMocks()
+    })
+
     it('can render rate details without errors', async () => {
         const rateData = rateDataMock()
         await waitFor(() => {

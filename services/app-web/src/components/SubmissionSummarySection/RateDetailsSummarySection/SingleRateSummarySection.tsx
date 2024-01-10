@@ -32,6 +32,8 @@ import { SectionCard } from '../../SectionCard'
 import { UnlockRateButton } from './UnlockRateButton'
 import { ERROR_MESSAGES } from '../../../constants'
 import { handleApolloErrorsAndAddUserFacingMessages } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../../common-code/featureFlags'
 
 // This rate summary pages assumes we are using contract and rates API.
 // Eventually RateDetailsSummarySection should share code with this code
@@ -136,6 +138,13 @@ export const SingleRateSummarySection = ({
         !isSubmitted && loggedInUser?.role === 'STATE_USER'
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
 
+    // feature flags
+    const ldClient = useLDClient()
+    const showRateUnlock: boolean = ldClient?.variation(
+        featureFlags.RATE_EDIT_UNLOCK.flag,
+        featureFlags.RATE_EDIT_UNLOCK.defaultValue
+    )
+
     // TODO BULK DOWNLOAD
     // needs to be wrap in a standalone hook
     const { getKey, getBulkDlURL } = useS3()
@@ -230,7 +239,7 @@ export const SingleRateSummarySection = ({
                             'Unknown rate name'
                         }
                     >
-                        {isCMSUser ? (
+                        {showRateUnlock && isCMSUser ? (
                             <UnlockRateButton
                                 disabled={isUnlocked || unlockLoading}
                                 onClick={handleUnlockRate}
