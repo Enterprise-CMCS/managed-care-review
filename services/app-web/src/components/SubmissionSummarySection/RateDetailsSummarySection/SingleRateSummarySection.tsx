@@ -235,8 +235,7 @@ export const SingleRateSummarySection = ({
                                 disabled={isUnlocked || unlockLoading}
                                 onClick={handleUnlockRate}
                             >
-                                {' '}
-                                Unlock Rate{' '}
+                                Unlock rate
                             </UnlockRateButton>
                         ) : null}
                     </SectionHeader>

@@ -278,4 +278,104 @@ describe('SingleRateSummarySection', () => {
             await screen.findAllByText(/You must provide this information/)
         ).toHaveLength(2)
     })
+
+    describe('Unlock rate', () => {
+        it('renders the unlock button to CMS users', async () => {
+            const rateData = rateDataMock(
+                {
+                    rateType: undefined,
+                    rateDateCertified: undefined,
+                } as unknown as Partial<RateRevision>,
+                { status: 'UNLOCKED' }
+            )
+            renderWithProviders(
+                <SingleRateSummarySection
+                    rate={rateData}
+                    isSubmitted={false}
+                    statePrograms={rateData.state.programs}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidCMSUser(),
+                            }),
+                        ],
+                    },
+                }
+            )
+            expect(
+                await screen.findByRole('button', {
+                    name: 'Unlock rate',
+                })
+            ).toBeInTheDocument()
+        })
+
+        it('disables the unlock button for CMS users when rate already unlocked', async () => {
+            const rateData = rateDataMock(
+                {
+                    rateType: undefined,
+                    rateDateCertified: undefined,
+                } as unknown as Partial<RateRevision>,
+                { status: 'UNLOCKED' }
+            )
+            renderWithProviders(
+                <SingleRateSummarySection
+                    rate={rateData}
+                    isSubmitted={false}
+                    statePrograms={rateData.state.programs}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidCMSUser(),
+                            }),
+                        ],
+                    },
+                }
+            )
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('button', {
+                        name: 'Unlock rate',
+                    })
+                ).toHaveAttribute('aria-disabled', 'true')
+            })
+        })
+
+        it('does not render the unlock button to state users', async () => {
+            const rateData = rateDataMock(
+                {
+                    rateType: undefined,
+                    rateDateCertified: undefined,
+                } as unknown as Partial<RateRevision>,
+                { status: 'UNLOCKED' }
+            )
+            renderWithProviders(
+                <SingleRateSummarySection
+                    rate={rateData}
+                    isSubmitted={false}
+                    statePrograms={rateData.state.programs}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidStateUser(),
+                            }),
+                        ],
+                    },
+                }
+            )
+            expect(
+                await screen.queryByRole('button', {
+                    name: 'Unlock rate',
+                })
+            ).toBeNull()
+        })
+    })
 })
