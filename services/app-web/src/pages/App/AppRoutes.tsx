@@ -92,7 +92,6 @@ const StateUserRoutes = ({
                     path={RoutesRecord.DASHBOARD_SUBMISSIONS}
                     element={<StateDashboard />}
                 />
-
                 <Route
                     path={RoutesRecord.SUBMISSIONS}
                     element={<StateDashboard />}
@@ -100,6 +99,10 @@ const StateUserRoutes = ({
                 <Route
                     path={RoutesRecord.SUBMISSIONS_NEW}
                     element={<NewStateSubmissionForm />}
+                />
+                <Route
+                    path={RoutesRecord.RATES_SUMMARY}
+                    element={<RateSummary />}
                 />
                 <Route element={<SubmissionSideNav />}>
                     {showQuestionResponse && (
