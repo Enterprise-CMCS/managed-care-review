@@ -13,6 +13,7 @@ import type { userFromAuthProvider } from '../authn'
 import {
     userFromCognitoAuthProvider,
     userFromLocalAuthProvider,
+    userFromThirdPartyAuthorizer,
 } from '../authn'
 import { newLocalEmailer, newSESEmailer } from '../emailer'
 import { NewPostgresStore } from '../postgres/postgresStore'
@@ -47,7 +48,10 @@ export interface Context {
 
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
 // and turns that into our GQL resolver context object
-function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
+function contextForRequestForFetcher(
+    userFetcher: userFromAuthProvider,
+    authMode: string
+): ({
     event,
 }: {
     event: APIGatewayProxyEvent
@@ -59,9 +63,16 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const anyContext = context as any
         const requestSpan = anyContext[requestSpanKey]
-
         const authProvider =
             event.requestContext.identity.cognitoAuthenticationProvider
+        // This handler is shared with the third_party_API_authorizer
+        // when called from the 3rd party authorizer the cognito auth provider
+        // is not valid for instead the authorizer returns a user ID
+        // that is used to fetch the user
+        const fromAuthorizer =
+            event.requestContext.path === '/v1/graphql/external'
+        const userId = event.requestContext.authorizer?.principalId
+
         if (authProvider) {
             try {
                 // check if the user is stored in postgres
@@ -81,8 +92,11 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                 }
 
                 const store = NewPostgresStore(pgResult)
-                const userResult = await userFetcher(authProvider, store)
+                const passUserId = fromAuthorizer ? userId : undefined
 
+                const userResult = fromAuthorizer
+                    ? await userFromThirdPartyAuthorizer(store, userId)
+                    : await userFetcher(authProvider, store, passUserId)
                 if (!userResult.isErr()) {
                     return {
                         user: userResult.value,
@@ -132,7 +146,6 @@ function tracingMiddleware(wrapped: Handler): Handler {
     return async function (event, context, completion) {
         // get the parent context from headers
         const ctx = propagation.extract(ROOT_CONTEXT, event.headers)
-
         const span = tracer.startSpan(
             'handleRequest',
             {
@@ -371,7 +384,7 @@ async function initializeGQLHandler(): Promise<Handler> {
             : userFromCognitoAuthProvider
 
     // Our user-context function is parametrized with a local or
-    const contextForRequest = contextForRequestForFetcher(userFetcher)
+    const contextForRequest = contextForRequestForFetcher(userFetcher, authMode)
 
     const server = new ApolloServer({
         typeDefs,

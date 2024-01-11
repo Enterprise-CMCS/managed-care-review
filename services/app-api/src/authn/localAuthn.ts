@@ -6,13 +6,18 @@ import { lookupUserAurora } from './cognitoAuthn'
 
 export async function userFromLocalAuthProvider(
     authProvider: string,
-    store?: Store
-): Promise<Result<UserType, Error>> {
+    store?: Store,
+    userId?: string
+): Promise<Result<UserType, Error | undefined>> {
     try {
-        const localUser: UserType = JSON.parse(authProvider)
-
+        const localUser: UserType = userId
+            ? store?.findUser(userId)
+            : JSON.parse(authProvider)
         if (store === undefined) {
             return ok(localUser)
+        }
+        if (localUser instanceof Error) {
+            return err(localUser)
         }
 
         const auroraUser = await insertUserToLocalAurora(store, localUser)

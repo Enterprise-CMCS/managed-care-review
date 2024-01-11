@@ -4,5 +4,6 @@ import type { Store } from '../postgres'
 
 export type userFromAuthProvider = (
     authProvider: string,
-    store?: Store
-) => Promise<Result<UserType, Error>>
+    store?: Store,
+    userId?: string
+) => Promise<Result<UserType, Error | undefined>>
