@@ -48,10 +48,7 @@ export interface Context {
 
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
 // and turns that into our GQL resolver context object
-function contextForRequestForFetcher(
-    userFetcher: userFromAuthProvider,
-    authMode: string
-): ({
+function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
     event,
 }: {
     event: APIGatewayProxyEvent
@@ -69,7 +66,7 @@ function contextForRequestForFetcher(
         // when called from the 3rd party authorizer the cognito auth provider
         // is not valid for instead the authorizer returns a user ID
         // that is used to fetch the user
-        const fromAuthorizer =
+        const fromThirdPartyAuthorizer =
             event.requestContext.path === '/v1/graphql/external'
         const userId = event.requestContext.authorizer?.principalId
 
@@ -92,11 +89,10 @@ function contextForRequestForFetcher(
                 }
 
                 const store = NewPostgresStore(pgResult)
-                const passUserId = fromAuthorizer ? userId : undefined
 
-                const userResult = fromAuthorizer
+                const userResult = fromThirdPartyAuthorizer
                     ? await userFromThirdPartyAuthorizer(store, userId)
-                    : await userFetcher(authProvider, store, passUserId)
+                    : await userFetcher(authProvider, store)
                 if (!userResult.isErr()) {
                     return {
                         user: userResult.value,
@@ -384,7 +380,7 @@ async function initializeGQLHandler(): Promise<Handler> {
             : userFromCognitoAuthProvider
 
     // Our user-context function is parametrized with a local or
-    const contextForRequest = contextForRequestForFetcher(userFetcher, authMode)
+    const contextForRequest = contextForRequestForFetcher(userFetcher)
 
     const server = new ApolloServer({
         typeDefs,
