@@ -91,7 +91,7 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                 const userId = event.requestContext.authorizer?.principalId
 
                 let userResult
-                if (authProvider) {
+                if (authProvider && !fromThirdPartyAuthorizer) {
                     userResult = await userFetcher(authProvider, store)
                 } else if (fromThirdPartyAuthorizer) {
                     userResult = await userFromThirdPartyAuthorizer(
