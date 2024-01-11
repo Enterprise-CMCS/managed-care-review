@@ -1,6 +1,6 @@
 import { ActionButton } from '../../ActionButton'
 
-// Eventually ActionButton will be entirely swapped out for ModalToggleButton - part of TICKET NUMBER when modal is hooked into unlockRate
+// Eventually ActionButton will be entirely swapped out for ModalToggleButton - part MCR-3782 when unlock reason modal is added
 type UnlockRateButtonProps = JSX.IntrinsicElements['button']
 
 export const UnlockRateButton = ({

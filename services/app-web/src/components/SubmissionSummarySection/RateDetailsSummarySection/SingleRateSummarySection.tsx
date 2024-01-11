@@ -232,26 +232,25 @@ export const SingleRateSummarySection = ({
                 id={`"rate-details-${rate.id}`}
                 className={styles.summarySection}
             >
+                <SectionHeader
+                    header={
+                        rate.revisions[0].formData.rateCertificationName ||
+                        'Unknown rate name'
+                    }
+                >
+                    {showRateUnlock && isCMSUser ? (
+                        <UnlockRateButton
+                            disabled={isUnlocked || unlockLoading}
+                            onClick={handleUnlockRate}
+                        >
+                            Unlock rate
+                        </UnlockRateButton>
+                    ) : null}
+                </SectionHeader>
+                {documentError && (
+                    <DocumentWarningBanner className={styles.banner} />
+                )}
                 <dl>
-                    <SectionHeader
-                        header={
-                            rate.revisions[0].formData.rateCertificationName ||
-                            'Unknown rate name'
-                        }
-                    >
-                        {showRateUnlock && isCMSUser ? (
-                            <UnlockRateButton
-                                disabled={isUnlocked || unlockLoading}
-                                onClick={handleUnlockRate}
-                            >
-                                Unlock rate
-                            </UnlockRateButton>
-                        ) : null}
-                    </SectionHeader>
-                    {documentError && (
-                        <DocumentWarningBanner className={styles.banner} />
-                    )}
-
                     <DoubleColumnGrid>
                         {ratePrograms && (
                             <DataDetail
