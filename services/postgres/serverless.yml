@@ -103,6 +103,7 @@ resources:
       - !Equals ['${sls:stage}', 'main']
       - !Equals ['${sls:stage}', 'val']
       - !Equals ['${sls:stage}', 'prod']
+      - !Equals ['${sls:stage}', 'mtsechubsg']
 
   Resources:
     # VPC endpoint for rotation lambda
