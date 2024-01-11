@@ -59,7 +59,7 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
             logError('unlockRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
-                argumentName: 'pkgID',
+                argumentName: 'rateID',
                 cause: 'INVALID_PACKAGE_STATUS',
             })
         }

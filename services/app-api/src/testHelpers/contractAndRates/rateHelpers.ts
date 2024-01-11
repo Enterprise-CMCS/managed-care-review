@@ -6,7 +6,7 @@ import type {
 } from '../../postgres/contractAndRates/prismaSubmittedRateHelpers'
 import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { findStatePrograms } from '../../postgres'
-import { must } from '../errorHelpers'
+import { must } from '../assertionHelpers'
 
 const defaultRateData = () => ({
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
