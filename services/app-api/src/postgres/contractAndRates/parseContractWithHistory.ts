@@ -223,19 +223,11 @@ function contractWithHistoryToDomainModel(
             }
 
             // Check if rate revision submitted date is earlier than the proceeding contract revisions unlocked date.
-            const isRateSubmittedDateValid = (
-                rateSubmittedDate: Date
-            ): boolean => {
-                if (nextContractRev && nextContractRev.unlockInfo) {
-                    // Invalid if the rate revision submit date was after the proceeding contract revisions unlocked date
-                    return (
-                        rateSubmittedDate.getTime() <
-                        nextContractRev.unlockInfo.updatedAt.getTime()
-                    )
-                }
-                // If no proceeding contract, then there is no date constraint
-                return true
-            }
+            // If nextContractRev does not exist, then there is no date constraint.
+            const isRateSubmittedDateValid = nextContractRev?.unlockInfo
+                ? rateRev.rateRevision.submitInfo.updatedAt.getTime() <
+                  nextContractRev.unlockInfo.updatedAt.getTime()
+                : true
 
             // Does initial entries rateRevisions already include a revision for this rate
             const isRateIncluded = !!initialEntry.rateRevisions.find(
@@ -247,13 +239,11 @@ function contractWithHistoryToDomainModel(
             // - Not already in the initial entry. We are looping through this in desc order, so the first rate rev is the latest.
             // - Not removed from the contract
             if (
-                isRateSubmittedDateValid(
-                    rateRev.rateRevision.submitInfo.updatedAt
-                ) &&
+                isRateSubmittedDateValid &&
                 !isRateIncluded &&
                 !rateRev.isRemoval
             ) {
-                // unshift rate revision into entries to reverse order back to asc
+                // unshift rate revision into entries to asc order
                 initialEntry.rateRevisions.unshift(rateRev.rateRevision)
             }
         }
