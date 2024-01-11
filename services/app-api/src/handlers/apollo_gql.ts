@@ -68,9 +68,8 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
         // that is used to fetch the user
         const fromThirdPartyAuthorizer =
             event.requestContext.path === '/v1/graphql/external'
-        const userId = event.requestContext.authorizer?.principalId
 
-        if (authProvider) {
+        if (authProvider || fromThirdPartyAuthorizer) {
             try {
                 // check if the user is stored in postgres
                 // going to clean this up, but we need the store in the
@@ -89,10 +88,21 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                 }
 
                 const store = NewPostgresStore(pgResult)
+                const userId = event.requestContext.authorizer?.principalId
 
-                const userResult = fromThirdPartyAuthorizer
-                    ? await userFromThirdPartyAuthorizer(store, userId)
-                    : await userFetcher(authProvider, store)
+                let userResult
+                if (authProvider) {
+                    userResult = await userFetcher(authProvider, store)
+                } else if (fromThirdPartyAuthorizer) {
+                    userResult = await userFromThirdPartyAuthorizer(
+                        store,
+                        userId
+                    )
+                }
+
+                if (userResult === undefined) {
+                    throw new Error(`Log: userResult must be supplied`)
+                }
                 if (!userResult.isErr()) {
                     return {
                         user: userResult.value,
@@ -108,7 +118,7 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                 throw new Error('Log: placing user in gql context failed')
             }
         } else {
-            throw new Error('Log: no AuthProvider')
+            throw new Error('Log: no AuthProvider from an internal API user')
         }
     }
 }
