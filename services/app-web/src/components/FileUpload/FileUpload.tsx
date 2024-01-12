@@ -68,7 +68,7 @@ export const FileUpload = ({
     const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
     const summaryRef = useRef<HTMLHeadingElement>(null) // reference to the heading that we will focus
     const previousFileItems = usePrevious(fileItems)
-    const { checkAuth } = useAuth()
+    const { checkAuth, logout } = useAuth()
     const isRequired = inputProps['aria-required']
     const inputRequired = inputProps['aria-required'] || inputProps.required
 
@@ -182,8 +182,8 @@ export const FileUpload = ({
     }
     // Upload to S3 and update file items in component state with the async loading status
     // This includes moving from pending/loading UI to display success or errors
-    const handleS3Upload = (files: File[] | File) => {
-        const asyncUploadAndScan = async (file: File) => {
+    const handleFileAddOrRetryInS3 = (files: File[] | File) => {
+        const uploadAndScan = async (file: File) => {
             const sha = (await calculateSHA256(file)) || ''
             uploadFile(file)
                 .then((data) => {
@@ -279,9 +279,16 @@ export const FileUpload = ({
                         )}. Files added: ${JSON.stringify(files)}`
                     )
                     recordJSException(error)
+
                     // file upload failing could be due to session timeout that did not hit the modal
-                    // double check the user still has their session, if not logout to update the React state with their login status
-                    await checkAuth()
+                    // double check the user still has their session, if not, logout to update the React state with their login status
+                    try {
+                        await checkAuth()
+                    } catch (e) {
+                        await logout({
+                            sessionTimeout: true,
+                        })
+                    }
 
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
@@ -301,10 +308,10 @@ export const FileUpload = ({
 
         if (!(files instanceof File)) {
             files.forEach((file) => {
-                asyncUploadAndScan(file).catch((e) => console.error(e))
+                uploadAndScan(file).catch((e) => console.error(e))
             })
         } else {
-            asyncUploadAndScan(files).catch((e) => console.error(e))
+            uploadAndScan(files).catch((e) => console.error(e))
         }
     }
 
@@ -328,7 +335,7 @@ export const FileUpload = ({
             })
         })
 
-        handleS3Upload(item.file)
+        handleFileAddOrRetryInS3(item.file)
     }
 
     const addFilesAndUpdateList = (files: File[]) => {
@@ -344,7 +351,7 @@ export const FileUpload = ({
                 })
             })
         setFileItems((array) => [...array, ...items])
-        handleS3Upload(files)
+        handleFileAddOrRetryInS3(files)
 
         // reset input immediately to prepare for next interaction
         fileInputRef.current?.clearFiles()
