@@ -41,6 +41,7 @@ describe('SectionHeader', () => {
             screen.getByRole('link', { name: 'Edit Page 2' })
         ).toHaveAttribute('href', '/some-edit-path')
     })
+
     it('respects the hideBorder prop', () => {
         renderWithProviders(
             <SectionHeader header="This is a section" hideBorder />
@@ -50,5 +51,13 @@ describe('SectionHeader', () => {
                 .getByRole('heading', { name: 'This is a section' })
                 .closest('div')
         ).not.toHaveClass('summarySectionHeaderBorder')
+    })
+
+    it('does not render invisible zero-width space character in accesible name', () => {
+        renderWithProviders(<SectionHeader header="THIS-IS-123-456-67-RATE" />)
+
+        expect(
+            screen.getByRole('heading', { name: 'THIS-IS-123-456-67-RATE' })
+        ).toHaveAccessibleName('THIS-IS-123-456-67-RATE')
     })
 })
