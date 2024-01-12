@@ -4,8 +4,14 @@ import { Button, GridContainer, Grid } from '@trussworks/react-uswds'
 import { Signup } from './Signup'
 import { ConfirmSignUp } from './ConfirmSignUp'
 import { Login } from './Login'
+import { ErrorAlertSessionExpired } from '../../components'
+import { useLocation } from 'react-router-dom'
 
 export const CognitoLogin = (): React.ReactElement => {
+    const location = useLocation()
+    const redirectFromSessionTimeout = new URLSearchParams(location.search).get(
+        'session-timeout'
+    )
     const [showConfirmation, setShowConfirmation] = useState(false)
     const [showLogin, setShowLogin] = useState(false)
     const [enteredEmail, setEnteredEmail] = useState('')
@@ -18,6 +24,7 @@ export const CognitoLogin = (): React.ReactElement => {
 
     return showForms ? (
         <GridContainer>
+            {redirectFromSessionTimeout && <ErrorAlertSessionExpired />}
             <h2>Auth Page</h2>
             <Grid row>
                 {!showLogin && (

@@ -254,7 +254,7 @@ function AuthProvider({
         try {
             await realLogout()
             if (sessionTimeout) {
-                window.location.href = `${redirectPath}?session-timeout=true'`
+                window.location.href = `${redirectPath}?session-timeout=true`
             } else {
                 window.location.href = redirectPath
             }
