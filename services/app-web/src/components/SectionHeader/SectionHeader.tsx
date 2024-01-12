@@ -12,24 +12,6 @@ export type SectionHeaderProps = {
     headerId?: string
     hideBorder?: boolean
 }
-/*
-    Handle word breaks with complex strings by adding zero-wdith space character after each hyphen
-    @param {header} section title, submission name or rate name depending on page
-
-    This is for use with rate names which combine letters, numbers, hypens.
-    CSS break-word and overflow-wrap do not work as expected here.
-*/
-const headerWithReasonableBreaks = (header: string): React.ReactElement => {
-    const characters = header.split('')
-
-    return (
-        <>
-            {characters.map((char) => {
-                return char === '-' ? <>{char}&#8203;</> : char
-            })}
-        </>
-    )
-}
 
 export const SectionHeader = ({
     header,
@@ -48,13 +30,7 @@ export const SectionHeader = ({
     return (
         <div className={classes} id={sectionId}>
             <div className={styles.primaryDiv}>
-                <h2
-                    id={headerId}
-                    aria-label={header}
-                    style={{ wordWrap: 'break-word' }}
-                >
-                    {headerWithReasonableBreaks(header)}
-                </h2>
+                <h2 id={headerId}>{header}</h2>
                 {subHeaderComponent}
             </div>
             <div>
