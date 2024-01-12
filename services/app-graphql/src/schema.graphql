@@ -1157,13 +1157,6 @@ type Rate {
     This value is used to generate the rateName
     """
     stateNumber: Int!
-     """
-    Information about who, when, and why this revision was unlocked.
-    Will be blank on the initial revision.
-    """
-    unlockInfo: UpdateInformation
-    "Information on who, when, and why this revision was submitted."
-    submitInfo: UpdateInformation
     "The currently modifiable revision if the rate is DRAFT or UNLOCKED"
     draftRevision: RateRevision
     """

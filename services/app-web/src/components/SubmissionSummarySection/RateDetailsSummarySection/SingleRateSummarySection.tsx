@@ -211,7 +211,7 @@ export const SingleRateSummarySection = ({
             })
 
             if (data?.unlockRate.rate) {
-                // navigate('') TODO
+                // don't do anything, eventually this entire function will be in the modal
             } else {
                 recordJSException(
                     `[UNEXPECTED]: Error attempting to unlock rate, no data present.`
