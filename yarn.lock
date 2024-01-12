@@ -6582,9 +6582,9 @@
   integrity sha512-AHPmaAx+RYfZz0eYu6Gviiagpmiyw98ySSlQvCUhVGDRtDFe4DBS0x1bSjdF3gqUDYOczB+yYvBTtEylYSdRhg==
 
 "@enterprise-cmcs/serverless-waf-plugin@^1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@enterprise-cmcs/serverless-waf-plugin/-/serverless-waf-plugin-1.3.0.tgz#b2f241f68218b94b62987596888730975c99b019"
-  integrity sha512-Xysp8ejNhkrxCMQ4CximHmphKO1vGt3JGKKzGs0tLX1r4yK8BdobmauX/GmDwAfrzqlHVGDRsdvvY1Grv1W0yw==
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@enterprise-cmcs/serverless-waf-plugin/-/serverless-waf-plugin-1.3.2.tgz#66efd0b91326b7d1b045ab7ea7ba5826ed2e635d"
+  integrity sha512-577MWRddWK2uPEaeUMorOFQq6rhUhGwbdmz+tuKaU9+v77/bDQPqoc6cmhF2oYMswqpxvMgW0P07HAAcmKtquw==
 
 "@esbuild/android-arm64@0.19.5":
   version "0.19.5"
