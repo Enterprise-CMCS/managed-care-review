@@ -1,5 +1,5 @@
 import { screen, waitFor } from '@testing-library/react'
-import { renderWithProviders, testS3Client } from '../../../testHelpers'
+import { renderWithProviders, testS3Client, ldUseClientSpy } from '../../../testHelpers'
 import {
     fetchCurrentUserMock,
     fetchRateMockSuccess,
@@ -112,6 +112,10 @@ describe('RateSummary', () => {
     })
 
     describe('Viewing RateSummary as a State user', () => {
+        beforeEach(() => {
+            ldUseClientSpy({'rate-edit-unlock': true})
+        })
+
         it('renders without errors', async () => {
             renderWithProviders(wrapInRoutes(<RateSummary />), {
                 apolloProvider: {
@@ -126,6 +130,10 @@ describe('RateSummary', () => {
                 routerProvider: {
                     route: '/rates/1337'
                 },
+            })
+
+            await waitFor(() => {
+                expect(screen.queryByTestId('rate-summary')).toBeInTheDocument()
             })
 
             expect(
