@@ -175,18 +175,7 @@ functions:
 
   third_party_api_authorizer:
     handler: src/handlers/third_party_API_authorizer.main
-
-  jwthealth:
-      handler: src/handlers/health_check.main
-      events:
-        - http:
-            path: jwt_health_check
-            method: get
-            cors: true
-            authorizer:
-              name: third_party_api_authorizer
-              identitySource: method.request.header.Authorization 
-              
+         
   otel:
     handler: src/handlers/otel_proxy.main
     events:
@@ -208,6 +197,20 @@ functions:
           method: get
           cors: true
           authorizer: aws_iam
+      - http:
+          path: v1/graphql/external
+          method: post
+          cors: true
+          authorizer:
+              name: third_party_api_authorizer
+              identitySource: method.request.header.Authorization
+      - http:
+          path: v1/graphql/external
+          method: get
+          cors: true
+          authorizer:
+              name: third_party_api_authorizer
+              identitySource: method.request.header.Authorization
     timeout: 60 # aurora cold start can be long
     vpc:
       securityGroupIds:

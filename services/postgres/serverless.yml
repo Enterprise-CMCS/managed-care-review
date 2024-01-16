@@ -280,7 +280,31 @@ resources:
           - IpProtocol: tcp
             FromPort: 22
             ToPort: 22
-            CidrIp: 0.0.0.0/0
+            CidrIp: 34.196.35.156/32
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            CidrIp: 73.170.112.247/32
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            CidrIp: 172.58.0.0/16
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            CidrIp: 162.218.226.179/32
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            CidrIp: 66.108.108.206/32
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            CidrIp: 207.153.23.192/32
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            CidrIpv6: 2601:483:5300:22cf:e1a1:88e9:46b7:2c49/128
 
     PostgresSubnetGroup:
       Type: AWS::RDS::DBSubnetGroup

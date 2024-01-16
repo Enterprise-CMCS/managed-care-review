@@ -13,6 +13,7 @@ import {
     RateFormData,
     RateRevision,
     RelatedContractRevisions,
+    useUnlockRateMutation,
 } from '../../../gen/gqlClient'
 import { UploadedDocumentsTable } from '../UploadedDocumentsTable'
 import type { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
@@ -28,6 +29,11 @@ import { packageName } from '../../../common-code/healthPlanFormDataType'
 import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 import { useAuth } from '../../../contexts/AuthContext'
 import { SectionCard } from '../../SectionCard'
+import { UnlockRateButton } from './UnlockRateButton'
+import { ERROR_MESSAGES } from '../../../constants'
+import { handleApolloErrorsAndAddUserFacingMessages } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../../common-code/featureFlags'
 
 // This rate summary pages assumes we are using contract and rates API.
 // Eventually RateDetailsSummarySection should share code with this code
@@ -127,8 +133,17 @@ export const SingleRateSummarySection = ({
     const formData: RateFormData = rateRevision?.formData
     const documentDateLookupTable = makeRateDocumentDateTable(rate.revisions)
     const isRateAmendment = formData.rateType === 'AMENDMENT'
+    const isUnlocked = rate.status === 'UNLOCKED'
     const explainMissingData =
         !isSubmitted && loggedInUser?.role === 'STATE_USER'
+    const isCMSUser = loggedInUser?.role === 'CMS_USER'
+
+    // feature flags
+    const ldClient = useLDClient()
+    const showRateUnlock: boolean = ldClient?.variation(
+        featureFlags.RATE_EDIT_UNLOCK.flag,
+        featureFlags.RATE_EDIT_UNLOCK.defaultValue
+    )
 
     // TODO BULK DOWNLOAD
     // needs to be wrap in a standalone hook
@@ -182,23 +197,60 @@ export const SingleRateSummarySection = ({
     }, [getKey, getBulkDlURL, formData])
     // END bulk download logic
 
+    const [unlockRate, { loading: unlockLoading }] = useUnlockRateMutation()
+
+    const handleUnlockRate = async () => {
+        try {
+            const { data } = await unlockRate({
+                variables: {
+                    input: {
+                        rateID: rate.id,
+                        unlockedReason: '',
+                    },
+                },
+            })
+
+            if (data?.unlockRate.rate) {
+                // don't do anything, eventually this entire function will be in the modal
+            } else {
+                recordJSException(
+                    `[UNEXPECTED]: Error attempting to unlock rate, no data present.`
+                )
+                return new Error(ERROR_MESSAGES.unlock_error_generic)
+            }
+        } catch (error) {
+            return handleApolloErrorsAndAddUserFacingMessages(
+                error,
+                'UNLOCK_RATE'
+            )
+        }
+    }
+
     return (
         <React.Fragment key={rate.id}>
             <SectionCard
                 id={`"rate-details-${rate.id}`}
                 className={styles.summarySection}
             >
+                <SectionHeader
+                    header={
+                        rate.revisions[0].formData.rateCertificationName ||
+                        'Unknown rate name'
+                    }
+                >
+                    {showRateUnlock && isCMSUser ? (
+                        <UnlockRateButton
+                            disabled={isUnlocked || unlockLoading}
+                            onClick={handleUnlockRate}
+                        >
+                            Unlock rate
+                        </UnlockRateButton>
+                    ) : null}
+                </SectionHeader>
+                {documentError && (
+                    <DocumentWarningBanner className={styles.banner} />
+                )}
                 <dl>
-                    <SectionHeader
-                        header={
-                            rate.revisions[0].formData.rateCertificationName ||
-                            'Unknown rate name'
-                        }
-                    />
-                    {documentError && (
-                        <DocumentWarningBanner className={styles.banner} />
-                    )}
-
                     <DoubleColumnGrid>
                         {ratePrograms && (
                             <DataDetail

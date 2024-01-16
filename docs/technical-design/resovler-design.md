@@ -21,7 +21,7 @@ Many of these functions are accessible from the resolver via [dependency injecti
 Errors from these functions propagate up to the resolver where it will be handled and a response sent to the client. See docs about [error handling](error-handling.md) for details.
 
 ### Diagram
-[Miro link](https://miro.com/app/board/o9J_lS5oLDk=/?moveToWidget=3458764573512051070&cot=14)
+[Miro link](https://miro.com/app/board/o9J_lS5oLDk=/?moveToWidget=3458764573512051070&cot=14)\
 ![resolver-design-diagram](../../.images/resolver-design-diagram.png)
 
 ## General Guidance
@@ -34,7 +34,7 @@ Resolvers are passed Postgres handlers via [dependency injection](design-pattern
 
 The diagram below is the data flow diagram for `createHealthPlanPackage` resolver.
 
-[Miro link](https://miro.com/app/board/o9J_lS5oLDk=/?moveToWidget=3458764573517610448&cot=14)
+[Miro link](https://miro.com/app/board/o9J_lS5oLDk=/?moveToWidget=3458764573517610448&cot=14)\
 ![postgres-handler-diagram](../../.images/postgres-handler-diagram.png)
 
 Form the diagram above, you can see that `createHealthPlanPackage` resolver calls `insertDraftContract` handler function in the Postgres Module to create a new draft contract. 

@@ -4,7 +4,7 @@ export {
     assertAnErrorCode,
 } from './gqlAssertions'
 
-export { must } from './errorHelpers'
+export { must } from './assertionHelpers'
 
 export {
     createInsertContractData,
