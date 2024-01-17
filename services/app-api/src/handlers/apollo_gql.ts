@@ -118,7 +118,9 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                 throw new Error('Log: placing user in gql context failed')
             }
         } else {
-            throw new Error('Log: no AuthProvider from an internal API user')
+            throw new Error(
+                `Log: no AuthProvider from an internal API user. [Testing only, path: ${event.requestContext.path}]`
+            )
         }
     }
 }
