@@ -200,7 +200,7 @@ function contractWithHistoryToDomainModel(
          *
          * The approach to finding the **single** rate revision for the submitted contract revision is to find
          * the latest rate revision submitted before the next contract revision unlock date. The latest rate revision
-         * and not the one submitted with the contract, because rates and be unlocked and resubmitted independently of
+         * and not the one submitted with the contract, because rates can be unlocked and resubmitted independently of
          * the contract.
          *
          * The idea is that once a contract is unlocked again, the new contract revision created is now the "active"
@@ -208,11 +208,11 @@ function contractWithHistoryToDomainModel(
          * should not be reflected on it, including rate changes.
          **/
 
-        // Get next contract revision's unlockInfo.updatedAt. revisions are queried from DB in asc order by createdAt.
+        // Get next contract revision in the array
         const nextContractRev: ContractRevisionTableWithFormData | undefined =
             contractRevisions[contractRevIndex + 1]
 
-        // rateRevisions from DB are in asc order by created at, we need it to be desc order to find the latest rev first.
+        // Reverse rateRevisions so it is in DESC order.
         const rateRevisions = contractRev.rateRevisions.reverse()
 
         for (const rateRev of rateRevisions) {
