@@ -9,12 +9,8 @@ export async function userFromThirdPartyAuthorizer(
     userId: string
 ): Promise<Result<UserType, Error | undefined>> {
     try {
-        // Lookup user from postgress
+        // Lookup user from postgres
         const auroraUser = await lookupUserAurora(store, userId)
-        if (auroraUser instanceof Error) {
-            return err(auroraUser)
-        }
-
         if (auroraUser instanceof Error) {
             return err(auroraUser)
         }
@@ -25,7 +21,7 @@ export async function userFromThirdPartyAuthorizer(
 
         return ok(auroraUser)
     } catch (e) {
-        console.error('ERROR: failed to parse user from authorizer')
+        console.error('ERROR: failed to look user in postgres')
         return err(e)
     }
 }
