@@ -146,6 +146,7 @@ resources:
                   'aws:SecureTransport': false
               Resource:
                 - !Sub ${S3FirehoseEventsBucket.Arn}
+                - !Sub ${S3FirehoseEventsBucket.Arn}/*
               Sid: DenyUnencryptedConnections
 
     FirehoseStreamToNewRelic:
