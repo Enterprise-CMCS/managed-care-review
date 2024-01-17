@@ -845,7 +845,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
 })
 
 describe('findContractWithHistory with only contract history', () => {
-    it('findContractWithHistory matches correct rate revision with contract revision', async () => {
+    it('matches correct rate revisions to contract revision with independent rate unlocks and submits', async () => {
         const client = await sharedTestPrismaClient()
 
         const stateUser = await client.user.create({
