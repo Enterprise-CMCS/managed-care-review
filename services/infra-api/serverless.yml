@@ -131,24 +131,22 @@ resources:
                 SSEAlgorithm: AES256
 
     S3FirehoseEventsBucketPolicy:
-      Type: 'AWS::S3::BucketPolicy'
+      Type: AWS::S3::BucketPolicy
+      Condition: CreateNRInfraMonitoring
       Properties:
         Bucket: !Ref S3FirehoseEventsBucket
         PolicyDocument:
           Version: '2012-10-17'
           Statement:
-            - Sid: 'AllowSSLRequestOnly'
-              Effect: Deny
-              Principal: '*'
+            - Effect: Deny
               Action: 's3:*'
-              Resource:
-                - !Join [
-                    '',
-                    ['arn:aws:s3:::', !Ref S3FirehoseEventsBucket, '/*'],
-                  ]
+              Principal: '*'
               Condition:
                 Bool:
                   'aws:SecureTransport': false
+              Resource:
+                - !Sub ${S3FirehoseEventsBucket.Arn}
+              Sid: DenyUnencryptedConnections
 
     FirehoseStreamToNewRelic:
       Type: AWS::KinesisFirehose::DeliveryStream
