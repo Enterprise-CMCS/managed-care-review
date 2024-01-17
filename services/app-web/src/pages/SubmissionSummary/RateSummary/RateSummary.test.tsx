@@ -162,5 +162,29 @@ describe('RateSummary', () => {
                 await screen.findByText('System error')
             ).toBeInTheDocument()
         })
+
+        it('renders back to dashboard link for state users', async () => {
+            renderWithProviders(wrapInRoutes(<RateSummary loggedInUser={mockValidStateUser()}/>), {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidStateUser(),
+                            statusCode: 200,
+                        }),
+                        fetchRateMockSuccess({ rate: { id: '7a' } }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/rates/7a',
+                },
+            })
+    
+            const backLink = await screen.findByRole('link', {
+                name: /Back to dashboard/,
+            })
+            expect(backLink).toBeInTheDocument()
+    
+            expect(backLink).toHaveAttribute('href', '/dashboard')
+        })
     })
 })
