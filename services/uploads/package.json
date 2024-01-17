@@ -33,7 +33,7 @@
         "@opentelemetry/semantic-conventions": "^1.18.1"
     },
     "devDependencies": {
-        "copy-webpack-plugin": "^11.0.0",
+        "copy-webpack-plugin": "^12.0.1",
         "serverless": "^3.26.0",
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
         "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
