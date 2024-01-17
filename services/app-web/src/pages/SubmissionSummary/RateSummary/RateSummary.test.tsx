@@ -24,7 +24,7 @@ describe('RateSummary', () => {
 
     describe('Viewing RateSummary as a CMS user', () => {
         it('renders without errors', async () => {
-            renderWithProviders(wrapInRoutes(<RateSummary />), {
+            renderWithProviders(wrapInRoutes(<RateSummary loggedInUser={mockValidCMSUser()}/>), {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
@@ -58,7 +58,7 @@ describe('RateSummary', () => {
                     return new Error('Error: getBulkDlURL encountered an error')
                 },
             }
-            renderWithProviders(wrapInRoutes(<RateSummary />), {
+            renderWithProviders(wrapInRoutes(<RateSummary loggedInUser={mockValidCMSUser()}/>), {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
@@ -87,7 +87,7 @@ describe('RateSummary', () => {
         })
 
         it('renders back to dashboard link for CMS users', async () => {
-            renderWithProviders(wrapInRoutes(<RateSummary />), {
+            renderWithProviders(wrapInRoutes(<RateSummary loggedInUser={mockValidCMSUser()}/>), {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
@@ -117,7 +117,7 @@ describe('RateSummary', () => {
         })
 
         it('renders without errors', async () => {
-            renderWithProviders(wrapInRoutes(<RateSummary />), {
+            renderWithProviders(wrapInRoutes(<RateSummary loggedInUser={mockValidStateUser()}/>), {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
@@ -142,7 +142,7 @@ describe('RateSummary', () => {
         })
 
         it('renders expected error page when rate ID is invalid', async () => {
-            renderWithProviders(wrapInRoutes(<RateSummary />), {
+            renderWithProviders(wrapInRoutes(<RateSummary loggedInUser={mockValidStateUser()}/>), {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
