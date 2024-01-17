@@ -745,7 +745,7 @@ describe('findRate', () => {
         ).toHaveLength(0)
     })
 
-    it('Matches correct contract revision with rate revision with independent rate submit and unlocks', async () => {
+    it('matches contract revision to rate revision with independent rate submit and unlocks', async () => {
         const client = await sharedTestPrismaClient()
 
         const stateUser = await client.user.create({
