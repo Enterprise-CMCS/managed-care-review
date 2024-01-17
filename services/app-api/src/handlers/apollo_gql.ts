@@ -68,7 +68,7 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
         // that is used to fetch the user
         const fromThirdPartyAuthorizer =
             event.requestContext.path === '/v1/graphql/external'
-
+        console.info(event, 'event here for testing')
         if (authProvider || fromThirdPartyAuthorizer) {
             try {
                 // check if the user is stored in postgres
@@ -93,7 +93,7 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                 let userResult
                 if (authProvider && !fromThirdPartyAuthorizer) {
                     userResult = await userFetcher(authProvider, store)
-                } else if (fromThirdPartyAuthorizer) {
+                } else if (fromThirdPartyAuthorizer && userId) {
                     userResult = await userFromThirdPartyAuthorizer(
                         store,
                         userId
