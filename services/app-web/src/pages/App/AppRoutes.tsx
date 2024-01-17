@@ -38,6 +38,7 @@ import {
 } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 import { RateSummary } from '../SubmissionSummary/RateSummary'
+import { User } from '../../gen/gqlClient'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -67,11 +68,13 @@ const StateUserRoutes = ({
     setAlert,
     showQuestionResponse,
     stageName,
+    loggedInUser,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
     showQuestionResponse: boolean
     stageName?: string
+    loggedInUser: User
 }): React.ReactElement => {
     // feature flag
     const ldClient = useLDClient()
@@ -109,7 +112,7 @@ const StateUserRoutes = ({
                 {showRateSummaryPage && (
                     <Route
                         path={RoutesRecord.RATES_SUMMARY}
-                        element={<RateSummary />}
+                        element={<RateSummary loggedInUser={loggedInUser}/>}
                     />
                 )}
                 <Route element={<SubmissionSideNav />}>
@@ -158,11 +161,13 @@ const CMSUserRoutes = ({
     setAlert,
     showQuestionResponse,
     stageName,
+    loggedInUser
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
     showQuestionResponse: boolean
     stageName?: string
+    loggedInUser: User
 }): React.ReactElement => {
     return (
         <AuthenticatedRouteWrapper authMode={authMode} setAlert={setAlert}>
@@ -213,7 +218,7 @@ const CMSUserRoutes = ({
 
                 <Route
                     path={RoutesRecord.RATES_SUMMARY}
-                    element={<RateSummary />}
+                    element={<RateSummary loggedInUser={loggedInUser}/>}
                 />
 
                 <Route
@@ -383,6 +388,7 @@ export const AppRoutes = ({
                 setAlert={setAlert}
                 showQuestionResponse={showQuestionResponse}
                 stageName={stageName}
+                loggedInUser={loggedInUser}
             />
         )
     } else {
@@ -392,6 +398,7 @@ export const AppRoutes = ({
                 setAlert={setAlert}
                 showQuestionResponse={showQuestionResponse}
                 stageName={stageName}
+                loggedInUser={loggedInUser}
             />
         )
     }
