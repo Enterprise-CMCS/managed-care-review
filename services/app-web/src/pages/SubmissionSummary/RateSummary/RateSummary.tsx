@@ -4,18 +4,20 @@ import { NavLink, useParams } from 'react-router-dom'
 
 import { Loading } from '../../../components'
 import { usePage } from '../../../contexts/PageContext'
-import { User, useFetchRateQuery } from '../../../gen/gqlClient'
+import { useFetchRateQuery } from '../../../gen/gqlClient'
 import styles from '../SubmissionSummary.module.scss'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { RoutesRecord } from '../../../constants'
 import { SingleRateSummarySection } from '../../../components/SubmissionSummarySection/RateDetailsSummarySection/SingleRateSummarySection'
+import { useAuth } from '../../../contexts/AuthContext'
 
 type RouteParams = {
     id: string
 }
 
-export const RateSummary = ({loggedInUser}: {loggedInUser: User}): React.ReactElement => {
+export const RateSummary = (): React.ReactElement => {
     // Page level state
+    const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
     const { id } = useParams<keyof RouteParams>()
@@ -69,7 +71,7 @@ export const RateSummary = ({loggedInUser}: {loggedInUser: User}): React.ReactEl
                         //TODO: Will have to remove this conditional along with associated loggedInUser prop once the rate dashboard
                         //is made available to state users
                         to={{
-                            pathname: loggedInUser.__typename === 'StateUser' ? RoutesRecord.DASHBOARD : RoutesRecord.DASHBOARD_RATES,
+                            pathname: loggedInUser?.__typename === 'StateUser' ? RoutesRecord.DASHBOARD : RoutesRecord.DASHBOARD_RATES,
                         }}
                     >
                         <Icon.ArrowBack />
