@@ -66,9 +66,10 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
         // when called from the 3rd party authorizer the cognito auth provider
         // is not valid for instead the authorizer returns a user ID
         // that is used to fetch the user
-        const fromThirdPartyAuthorizer =
-            event.requestContext.path === '/v1/graphql/external'
-        console.info(event, 'event here for testing')
+        const fromThirdPartyAuthorizer = event.requestContext.path.includes(
+            '/v1/graphql/external'
+        )
+
         if (authProvider || fromThirdPartyAuthorizer) {
             try {
                 // check if the user is stored in postgres
@@ -118,9 +119,7 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                 throw new Error('Log: placing user in gql context failed')
             }
         } else {
-            throw new Error(
-                `Log: no AuthProvider from an internal API user. [Testing only, path: ${event.requestContext.path}]`
-            )
+            throw new Error('Log: no AuthProvider from an internal API user.')
         }
     }
 }
