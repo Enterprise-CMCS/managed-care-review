@@ -16,8 +16,7 @@ import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHel
 // TODO: Enable these tests again after reimplementing rate change history that was in contractWithHistoryToDomainModel
 // eslint-disable-next-line jest/no-disabled-tests
 describe.skip('findContractWithHistory with full contract and rate history', () => {
-    // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('finds a stripped down contract with history', async () => {
+    it('finds a stripped down contract with history', async () => {
         const client = await sharedTestPrismaClient()
 
         const stateUser = await client.user.create({
@@ -357,8 +356,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             'Submitting A.2'
         )
     })
-    // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('finds a full contract', async () => {
+    it('finds a full contract', async () => {
         const client = await sharedTestPrismaClient()
 
         const stateUser = await client.user.create({
@@ -626,8 +624,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             'Submitting A.2'
         )
     })
-    // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('handles drafts correctly', async () => {
+    it('handles drafts correctly', async () => {
         const client = await sharedTestPrismaClient()
 
         const stateUser = await client.user.create({
