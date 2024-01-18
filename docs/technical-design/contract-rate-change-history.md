@@ -52,18 +52,22 @@ At the Postgres Table level, draft revisions and submitted revisions live in the
 The list of revisions returned from prisma is run through [Zod](https://zod.dev/) to return [domain mode types](../../services/app-api/src/domain-models/contractAndRates). This is initiated by the `*WithHistory` database functions. See [parseContractWithHistory](../../services/app-api/src/postgres/contractAndRates/parseContractWithHistory.ts) and [parseRateWithHistory](../../services/app-api/src/postgres/contractAndRates/parseRateWithHistory.ts).
 
 #### Contract History
+- **Below a temporary approach to finding the contract history. The correct way to build the actual contract and rate history will be done in the [Rate Change History epic](https://qmacbis.atlassian.net/browse/MCR-3607)**
 - `parseContractWithHistory` takes our prisma contract data and parses into our domain `ContractType`. In `ContractType` the `revisions` is an array of **contract** **revisions**; this is the contract history.
 - `revisions` differs from `draftRevision` in the `ContractType`. The `draftRevision` is a singular revision that is not submitted and this data has no historical significance until it is submitted. Most of the data in this revision can be updated.
 - Each **contract revision** in `revisions` is submitted and retains data at the time of the submission. These revision's data will never be updated to retain its historical integrity.
 - An important note about the `rateRevisions` field in each contract revision in `revision`.
-   - Like contracts, rates also have **rate revisions** which are used to construct a rate history through submissions, but the purpose of `rateRevisions` on a contract revision is not for rate history.
-   - The purpose of `rateRevisions` is to retain the data of a rate linked to this contract revision at the time of submission.
-   - For that we need the single rate revision that was submitted at the time this contract revision was submitted.
+   - Like contracts, rates also have **rate revisions** which are used to construct a rate history through submissions, **but the purpose of `rateRevisions` on a contract revision is not for rate history**.
+   - The purpose of `rateRevisions` is to retain the latest data of a rate linked to this contract revision before the proceeding contract revision.
+     - For that we need the single rate revision that was submitted before the proceeding contract revision was unlocked.
    - Here are some guidelines for each rate revision in `rateRevisions` of a contract revision.
+      - Rate can be unlocked and resubmitted independently of the contract. This means that for a rate that belongs to a contract, the number of rate revisions on that contract revision is not 1-to-1.
+         - If a contract is submitted with a rate, that rate can be unlocked and resubmitted many times so there would be many revisions.
+         - Each revision would belong to that contract revision up until proceeding contract revision, where it would be a new point in the contract history.
+         - This will retain the latest rate data up until the next point in the contract history and ensure that when fetching a contract, the correct rate data will be returned.
       - Each rate revision in `rateRevisions` is unique by rate id, meaning there will never be two rate revisions with the same rate id in `rateRevisions`
-      - Each rate revision is the latest submitted up till the contract revision submitted time.
-      - Like contract revision, rate revision is read only and cannot be updated to retain its historical integrity.
-
+      - Each rate revision is the latest submitted up till the proceeding contract revision unlocked time.
+      - If the rate revision has a `true` value for the field `isRemoval` then, it is not included in the contract. This field signifies that the rate has been removed from the contract.
 
 *Dev Note*: If the `draftRevision` field has a value and the `revisions` field is an empty array, we know the Contract or Rate we are looking at is an initial draft that has never been submitted.
 

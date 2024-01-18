@@ -52,6 +52,9 @@ async function submitRate(
                         include: includeLatestSubmittedRateRev,
                     },
                 },
+                orderBy: {
+                    createdAt: 'desc',
+                },
             })
             if (!currentRev) {
                 const err = `PRISMA ERROR: Cannot find the current rev to submit with rate id: ${rateID}`
