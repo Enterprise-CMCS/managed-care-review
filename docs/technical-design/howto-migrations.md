@@ -69,12 +69,12 @@ This type of migration is run as standalone lambda that developers must manually
     - Start with DEV. Follow similar steps Step #4 but now using the `main` lambda for your migration.
     - Run the migration DEV > VAL > PROD in order, verifying in the application (or via reporting output) after each run.
 
-## How to dump VAL data for local testing
+## How to dump deployed data for local testing
 
 1. Connect to Aurora Postgres via AWS Jump Box. [Instructions](../../services/postgres/README.md#access-to-aurora-postgres-via-aws-jump-box)
 
-2. Use `./dev jumpbox clone val` to clone the val database to your local machine. This command will log into the jumpbox, dump the db into a file in the format `dbdump-[environment]-[date].sqlfc`, and copy that file locally.
+2. Use `./dev jumpbox clone [environment]` to clone the environment database to your local machine. This command will log into the jumpbox, dump the db into a file in the format `dbdump-[environment]-[date].sqlfc`, and copy that file locally.
 
 2. Load that db dump into your local running postgres instance.
-    - Copy the dump file to the `mc-postgress` docker container by running the command `docker cp dbdump-[env]-[date].sqlfc mc-postgres:/` from where the file is located.
-    - Then run the command `docker exec -it mc-postgres pg_restore -h localhost -p 5432 -U postgres -d postgres --clean dbdump-[env]-[date].sqlfc`. You will be promoted to enter in local db password `shhhsecret`. You will see print out errors but the database has spun up successfully.
+   - Copy the dump file to the `mc-postgress` docker container by running the command `docker cp dbdump-[env]-[date].sqlfc mc-postgres:/` from where the file is located.
+   - Then run the command `docker exec -it mc-postgres pg_restore -h localhost -p 5432 -U postgres -d postgres --clean dbdump-[env]-[date].sqlfc`. You will be promoted to enter in local db password `shhhsecret`. You will see print out errors but the database has spun up successfully.
