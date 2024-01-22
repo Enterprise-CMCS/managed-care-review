@@ -71,7 +71,7 @@ describe('jwtLib', () => {
     it('errors with bad secret', () => {
         const jwtWriter = newJWTLib({
             issuer: 'mctest',
-            signingKey: 'wrong',
+            signingKey: Buffer.from('123af', 'hex'),
             expirationDurationS: 1000,
         })
 
