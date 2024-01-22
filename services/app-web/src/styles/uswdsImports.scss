@@ -1,11 +1,13 @@
-/* Order matters in this file. */
-@import 'uswds/scss/theme/_uswds-theme-general.scss';
-@import 'uswds/scss/theme/_uswds-theme-typography.scss';
-@import 'uswds/scss/theme/_uswds-theme-spacing.scss';
-@import 'uswds/scss/theme/_uswds-theme-color.scss';
-@import 'uswds/scss/theme/_uswds-theme-utilities.scss';
-@import 'uswds/scss/theme/_uswds-theme-components.scss';
+/* Order matters in this file. This file can be deleted when we complete v3 USWDS upgrade. */
 
-@import './uswdsSettings.scss';
+// stylelint-disable scss/load-no-partial-leading-underscore
+@import 'uswds/scss/theme/_uswds-theme-general';
+@import 'uswds/scss/theme/_uswds-theme-typography';
+@import 'uswds/scss/theme/_uswds-theme-spacing';
+@import 'uswds/scss/theme/_uswds-theme-color';
+@import 'uswds/scss/theme/_uswds-theme-utilities';
+@import 'uswds/scss/theme/_uswds-theme-components';
 
-@import 'uswds/scss/packages/_required.scss';
+@import './uswdsSettings';
+
+@import 'uswds/scss/packages/_required';

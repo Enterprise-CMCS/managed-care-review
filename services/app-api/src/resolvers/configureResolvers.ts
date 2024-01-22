@@ -25,17 +25,21 @@ import {
 } from './user'
 import type { EmailParameterStore } from '../parameterStore'
 import type { LDService } from '../launchDarkly/launchDarkly'
+import type { JWTLib } from '../jwt'
 import { fetchEmailSettingsResolver } from './email/fetchEmailSettings'
-import { indexRatesResolver } from './contractAndRates/indexRates'
-import { rateResolver } from './contractAndRates/rateResolver'
-import { fetchRateResolver } from './contractAndRates/fetchRate'
+import { indexRatesResolver } from './rate/indexRates'
+import { rateResolver } from './rate/rateResolver'
+import { fetchRateResolver } from './rate/fetchRate'
 import { updateContract } from './contract/updateContract'
+import { createAPIKeyResolver } from './APIKey'
+import { unlockRate } from './rate/unlockRate'
 
 export function configureResolvers(
     store: Store,
     emailer: Emailer,
     emailParameterStore: EmailParameterStore,
-    launchDarkly: LDService
+    launchDarkly: LDService,
+    jwt: JWTLib
 ): Resolvers {
     const resolvers: Resolvers = {
         Date: GraphQLDate,
@@ -84,6 +88,8 @@ export function configureResolvers(
                 emailer,
                 emailParameterStore
             ),
+            createAPIKey: createAPIKeyResolver(jwt),
+            unlockRate: unlockRate(store),
         },
         User: {
             // resolveType is required to differentiate Unions

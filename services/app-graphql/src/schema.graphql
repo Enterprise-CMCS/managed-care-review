@@ -67,7 +67,7 @@ type Query {
 
     Errors:
     - ForbiddenError: User must be a CMS or Admin type user
-    - NotFoundError: No rates with at least one submitted revision were found 
+    - NotFoundError: No rates with at least one submitted revision were found
     """
     indexRates: IndexRatesPayload!
     """
@@ -269,6 +269,39 @@ type Mutation {
     createQuestionResponse(
         input: CreateQuestionResponseInput!
     ): CreateQuestionResponsePayload!
+
+
+    """
+    createAPIKey creates a valid API key for the logged in user, valid for 90 days
+    """
+    createAPIKey: CreateAPIKeyPayload!
+
+
+ """
+    unlockRate returns a submitted package to the state for additional edits.
+
+    This can only be called by a CMSUser.
+    The rate must be in the SUBMITTED or RESUBMITTED state to be unlocked.
+    Email notifications will be sent to all the relevant parties
+
+    Errors:
+    - ForbiddenError:
+        - A non CMSuser called this
+    - UserInputError
+        - A rate cannot be found with the given `rateID`
+    - INTERNAL_SERVER_ERROR
+        - DB_ERROR
+            - Postgres returns error when attempting to finding rate
+            - Postgres returns error when attempting to update rate
+        - INVALID_PACKAGE_STATUS
+            - Attempted to unlock a rate in the DRAFT or UNLOCKED state
+        - EMAIL_ERROR
+            - Sending state or CMS email failed.
+    """
+    unlockRate(
+        input: UnlockRateInput!
+    ): UnlockRatePayload!
+
 }
 
 input CreateHealthPlanPackageInput {
@@ -462,6 +495,11 @@ input UpdateContractInput {
 
 type UpdateContractPayload {
     pkg: HealthPlanPackage!
+}
+
+type CreateAPIKeyPayload {
+    key: String!
+    expiresAt: DateTime!
 }
 
 "Date is a CalendarDate representing a day without time information"
@@ -764,7 +802,7 @@ enum ManagedCareEntity {
 }
 
 """
-The state plan and/or waiver authorities that allow the 
+The state plan and/or waiver authorities that allow the
 state to run its managed care programs
 """
 enum FederalAuthority {
@@ -803,7 +841,7 @@ type ContractFormData {
     submissionType: SubmissionType!
     """
     Whether or not this contract is risk based
-    Risk-based contracts have specific requirements that 
+    Risk-based contracts have specific requirements that
     non-risk based contracts do not have
     """
     riskBasedContract: Boolean
@@ -826,7 +864,7 @@ type ContractFormData {
     """
     contractType: ContractType
     """
-    Execution status for a contract. 
+    Execution status for a contract.
     Contracts are fully executed or unexecuted by some or all parties
     Status can be either EXECUTED or UNEXECUTED
     """
@@ -851,7 +889,7 @@ type ContractFormData {
     """
     federalAuthorities: [FederalAuthority!]!
     """
-    If contract is in Lieu-of Services and Settings (ILOSs) 
+    If contract is in Lieu-of Services and Settings (ILOSs)
     in accordance with 42 CFR § 438.3(e)(2)
     """
     inLieuServicesAndSettings: Boolean,
@@ -875,7 +913,7 @@ type ContractFormData {
     "If contract includes modifications to the pass-through payments"
     modifiedPassThroughPayments: Boolean,
     """
-    If contract includes modifications to payments to MCOs and PIHPs for enrollees that 
+    If contract includes modifications to payments to MCOs and PIHPs for enrollees that
     are a patient in an institution for mental disease
     """
     modifiedPaymentsForMentalDiseaseInstitutions: Boolean,
@@ -916,7 +954,7 @@ enum RateCapitationType {
 
 """
 State's communication preference for contacting their actuaries. Either:
-- wants CMS to reach out to their actuaries directly or 
+- wants CMS to reach out to their actuaries directly or
 - go through them
 """
 enum ActuaryCommunication {
@@ -945,7 +983,7 @@ type ActuaryContact  {
 }
 
 """
-A package in the system 
+A package in the system
 that shares a rate with another package.
 It's used as a part of RateFormData
 """
@@ -968,11 +1006,11 @@ type RateFormData {
     rateType: RateType
     """
     Can be 'RATE_CELL' or 'RATE_RANGE'
-    These values represent on what basis the capitation rate is actuarially sound 
+    These values represent on what basis the capitation rate is actuarially sound
     """
     rateCapitationType: RateCapitationType
     """
-    Signed certification documents the state uploads 
+    Signed certification documents the state uploads
     Files can be PDF, DOC, or DOCX format
     """
     rateDocuments: [GenericDocument!]!
@@ -982,21 +1020,21 @@ type RateFormData {
     """
     supportingDocuments: [GenericDocument!]!
     """
-    If the rateType is NEW this is the start date of the 
+    If the rateType is NEW this is the start date of the
     rating period for a new certification.
     If the rateType is AMENDMENT this is the start date of the
     rating period for the original rate certification
     """
     rateDateStart: Date
     """
-    If the rateType is NEW this is the end date of the 
+    If the rateType is NEW this is the end date of the
     rating period for a new certification.
     If the rateType is AMENDMENT this is the end date of the
     rating period for the original rate certification
     """
     rateDateEnd: Date
     """
-    The date the rate certification was 
+    The date the rate certification was
     certified/signed by the state's actuary
     """
     rateDateCertified: Date
@@ -1015,31 +1053,31 @@ type RateFormData {
     """
     rateProgramIDs: [String!]!
     """
-    Represents the name of the rate. 
+    Represents the name of the rate.
     This value is auto generated based on rate, package and state program details
     """
     rateCertificationName: String
     """
     An array of ActuaryContacts
-    Each element includes the the name, title/role and email 
+    Each element includes the the name, title/role and email
     of the actuaries who certified the rate
     """
     certifyingActuaryContacts: [ActuaryContact!]!
     """
     An array of additional ActuaryContacts
-    Each element includes the the name, title/role and email 
+    Each element includes the the name, title/role and email
     """
     addtlActuaryContacts: [ActuaryContact!]!
     """
     Is either OACT_TO_ACTUARY or OACT_TO_STATE
-    It specifies whether the state wants CMS to reach out to their actuaries 
+    It specifies whether the state wants CMS to reach out to their actuaries
     directly or go through them
     """
     actuaryCommunicationPreference: ActuaryCommunication
     """
-    An array of PackageWithSameRate elements 
+    An array of PackageWithSameRate elements
     which contain the packageName, packageId, and packageStatus
-    These elements represent other packages in the system 
+    These elements represent other packages in the system
     that are using this rate
     """
     packagesWithSharedRateCerts: [PackageWithSameRate!]!
@@ -1150,4 +1188,14 @@ type FetchRatePayload {
 
 input FetchRateInput{
     rateID: ID!
+}
+
+type UnlockRatePayload {
+    rate: Rate!
+}
+
+input UnlockRateInput{
+    rateID: ID!
+    "User given reason this rate was unlocked"
+    unlockedReason: String!
 }

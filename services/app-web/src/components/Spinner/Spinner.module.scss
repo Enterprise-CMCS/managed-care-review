@@ -1,5 +1,6 @@
-@import '../../styles/uswdsImports.scss';
-@import '../../styles/custom.scss';
+@use 'sass:list';
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
 
 // taken from CMS design system settings
 $multiple: 8px !default;
@@ -15,13 +16,13 @@ $spacers: (
     $multiple * 7
 ) !default;
 
-$spacer-1: nth($spacers, 2) !default; // 8px
-$spacer-2: nth($spacers, 3) !default; // 16px
-$spacer-3: nth($spacers, 4) !default; // 24px
-$spacer-4: nth($spacers, 5) !default; // 32px
-$spacer-5: nth($spacers, 6) !default; // 40px
-$spacer-6: nth($spacers, 7) !default; // 48px
-$spacer-7: nth($spacers, 8) !default; // 56px
+$spacer-1: list.nth($spacers, 2) !default; // 8px
+$spacer-2: list.nth($spacers, 3) !default; // 16px
+$spacer-3: list.nth($spacers, 4) !default; // 24px
+$spacer-4: list.nth($spacers, 5) !default; // 32px
+$spacer-5: list.nth($spacers, 6) !default; // 40px
+$spacer-6: list.nth($spacers, 7) !default; // 48px
+$spacer-7: list.nth($spacers, 8) !default; // 56px
 $spacer-half: $spacer-1 / 2; // 4px
 
 // From CMS _animation
@@ -52,11 +53,11 @@ $animation-speed-4: 0.8s * $speed-base !default;
 // CMS Colors
 
 .ds-u-fill--background-inverse {
-    background-color: $cms-color-primary !important;
+    background-color: custom.$mcr-primary-base !important;
 }
 
 .ds-u-color--base-inverse:not(:focus) {
-    color: $cms-color-white !important;
+    color: custom.$mcr-foundation-white !important;
 }
 
 // Below is all from the CMS Design system for the spinner
@@ -77,7 +78,7 @@ $animation-speed-4: 0.8s * $speed-base !default;
 }
 
 .spinnerBasic {
-    color: red;
+    color: custom.$mcr-error-base;
 }
 
 .ds-c-spinner {
@@ -85,7 +86,7 @@ $animation-speed-4: 0.8s * $speed-base !default;
     box-sizing: border-box;
     display: inline-block;
     position: relative;
-    vertical-align: middle; 
+    vertical-align: middle;
 
     &::before,
     &::after {
@@ -121,9 +122,9 @@ $animation-speed-4: 0.8s * $speed-base !default;
 
 .ds-c-spinner--filled {
     @include spinner-size($spacer-4, $spacer-6);
-    background-color: $cms-color-white; // $color-background;
+    background-color: custom.$mcr-foundation-white;
     border-radius: 50%;
-    color: $cms-color-primary; // $color-base;
+    color: custom.$mcr-primary-base;
     height: $spacer-6;
     width: $spacer-6;
 }

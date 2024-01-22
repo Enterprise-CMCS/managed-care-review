@@ -1,11 +1,11 @@
-@import '../../styles/uswdsImports.scss';
-@import '../../styles/custom.scss';
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
 
 .logosRow {
-    background-color: $theme-footer-logos-background;
+    background-color: custom.$mcr-cmsblue-lightest;
     & img,
     svg {
-        padding-right: units(4);
+        padding-right: uswds.units(4);
         flex-shrink: 0;
         height: 50px;
         width: auto;
@@ -21,7 +21,7 @@
     align-items: center;
     display: flex;
     flex-wrap: wrap;
-    padding: units(2);
+    padding: uswds.units(2);
     justify-content: flex-end;
     > span {
         max-width: 300px;
@@ -29,19 +29,19 @@
 }
 
 .contactRow {
-    background-color: $theme-color-primary;
-    color: $cms-color-white;
-    padding: units(3) 0;
+    background-color: custom.$mcr-cmsblue-base;
+    color: custom.$mcr-foundation-white;
+    padding: uswds.units(3) 0;
     > span {
-        margin: units(1);
+        margin: uswds.units(1);
     }
     a {
-        color: $cms-color-white;
+        color: custom.$mcr-foundation-white;
 
         &:hover,
         &:active,
         &:visited {
-            color: $cms-color-white;
+            color: custom.$mcr-foundation-white;
         }
     }
 }

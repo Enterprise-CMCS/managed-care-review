@@ -1,5 +1,5 @@
 import type { PrismaClient, State } from '@prisma/client'
-import { must } from './errorHelpers'
+import { must } from './assertionHelpers'
 
 async function getStateRecord(
     client: PrismaClient,

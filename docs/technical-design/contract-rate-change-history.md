@@ -9,6 +9,28 @@ Change history is the feature of MC-Review where the application stores full cop
 
  This document details how the change history is calculated for contract and rate data and which database fields are used.
 
+## Diagram
+[Miro link](https://miro.com/app/board/o9J_lS5oLDk=/?moveToWidget=3458764574794469060&cot=14)\
+![contract-and-rate-history-diagram](../../.images/contract-and-rate-history-diagram.png)
+
+In this diagram when a contract or rate is unlocked, a new draft revision version is created from the previous submitted revision. When submitted the draft revision is turned into a submitted revision that is then a part of the revision history.
+
+### Reading history
+[Miro Link](https://miro.com/app/board/o9J_lS5oLDk=/?moveToWidget=3458764574799194467&cot=14)\
+![reading-contract-history](../../.images/read-contract-and-rate-history-diagram.png)
+
+#### Example 1
+In example 1, we are fetching the contract data on 1/20/2024 (pretend that proceeding actions have not occurred yet).
+On this date, the contract has been unlocked and Rate B was removed from the contract.
+When unlocking a contract or rate, a new draft revision is made. Any changes made to the contract or rate is reflected in these draft revisions.
+Until the contract or rate is submitted, the draft revision will remain in the data when we fetch.
+So when fetching on the unlocked contract on 1/20/2024 the data will return with a draft revision for the contract, then the revision history in reverse order.
+
+#### Example 2
+In example 2, we are fetching the contract on 1/21/2024 in a submitted state.
+In this example there are no draft revisions, so the data returned is just the revision history.
+You will notice that in at this date and time the contract, Contract Rev 4, that was in draft state on 1/20/2024 is no longer in draft state and now in the contract history column. When a contract or rate that is unlocked gets resubmitted its drafts are turned into a historical revision.
+
 ## Contraints
 - MC-Review must track version history once a contract or rate is submitted.
     - This includes all actions on contract or a rate (submit, unlock, resubmit) alongside the related form data present at that point in time in the database.
@@ -30,18 +52,22 @@ At the Postgres Table level, draft revisions and submitted revisions live in the
 The list of revisions returned from prisma is run through [Zod](https://zod.dev/) to return [domain mode types](../../services/app-api/src/domain-models/contractAndRates). This is initiated by the `*WithHistory` database functions. See [parseContractWithHistory](../../services/app-api/src/postgres/contractAndRates/parseContractWithHistory.ts) and [parseRateWithHistory](../../services/app-api/src/postgres/contractAndRates/parseRateWithHistory.ts).
 
 #### Contract History
+- **Below a temporary approach to finding the contract history. The correct way to build the actual contract and rate history will be done in the [Rate Change History epic](https://qmacbis.atlassian.net/browse/MCR-3607)**
 - `parseContractWithHistory` takes our prisma contract data and parses into our domain `ContractType`. In `ContractType` the `revisions` is an array of **contract** **revisions**; this is the contract history.
 - `revisions` differs from `draftRevision` in the `ContractType`. The `draftRevision` is a singular revision that is not submitted and this data has no historical significance until it is submitted. Most of the data in this revision can be updated.
 - Each **contract revision** in `revisions` is submitted and retains data at the time of the submission. These revision's data will never be updated to retain its historical integrity.
 - An important note about the `rateRevisions` field in each contract revision in `revision`.
-   - Like contracts, rates also have **rate revisions** which are used to construct a rate history through submissions, but the purpose of `rateRevisions` on a contract revision is not for rate history.
-   - The purpose of `rateRevisions` is to retain the data of a rate linked to this contract revision at the time of submission.
-   - For that we need the single rate revision that was submitted at the time this contract revision was submitted.
+   - Like contracts, rates also have **rate revisions** which are used to construct a rate history through submissions, **but the purpose of `rateRevisions` on a contract revision is not for rate history**.
+   - The purpose of `rateRevisions` is to retain the latest data of a rate linked to this contract revision before the proceeding contract revision.
+     - For that we need the single rate revision that was submitted before the proceeding contract revision was unlocked.
    - Here are some guidelines for each rate revision in `rateRevisions` of a contract revision.
+      - Rate can be unlocked and resubmitted independently of the contract. This means that for a rate that belongs to a contract, the number of rate revisions on that contract revision is not 1-to-1.
+         - If a contract is submitted with a rate, that rate can be unlocked and resubmitted many times so there would be many revisions.
+         - Each revision would belong to that contract revision up until proceeding contract revision, where it would be a new point in the contract history.
+         - This will retain the latest rate data up until the next point in the contract history and ensure that when fetching a contract, the correct rate data will be returned.
       - Each rate revision in `rateRevisions` is unique by rate id, meaning there will never be two rate revisions with the same rate id in `rateRevisions`
-      - Each rate revision is the latest submitted up till the contract revision submitted time.
-      - Like contract revision, rate revision is read only and cannot be updated to retain its historical integrity.
-
+      - Each rate revision is the latest submitted up till the proceeding contract revision unlocked time.
+      - If the rate revision has a `true` value for the field `isRemoval` then, it is not included in the contract. This field signifies that the rate has been removed from the contract.
 
 *Dev Note*: If the `draftRevision` field has a value and the `revisions` field is an empty array, we know the Contract or Rate we are looking at is an initial draft that has never been submitted.
 

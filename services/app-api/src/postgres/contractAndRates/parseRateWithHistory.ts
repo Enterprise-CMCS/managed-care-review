@@ -125,7 +125,7 @@ function rateWithHistoryToDomainModel(
     const rateRevisions = rate.revisions
     let draftRevision: RateRevisionWithContractsType | Error | undefined =
         undefined
-    for (const rateRev of rateRevisions) {
+    for (const [currentRevIndex, rateRev] of rateRevisions.entries()) {
         // We have already set the draft revision aside, all ordered revisions here should be submitted
         if (!rateRev.submitInfo) {
             if (draftRevision) {
@@ -156,30 +156,58 @@ function rateWithHistoryToDomainModel(
 
         allEntries.push(initialEntry)
 
-        // const lastEntry = initialEntry
+        /**
+         * Below a temporary approach to finding the matching rate revision to the contract revision. The correct way
+         * for this is to build the actual contract and rate history. This will be done in the Rate Change History epic
+         * https://qmacbis.atlassian.net/browse/MCR-3607
+         *
+         * The approach to finding the **single** rate revision for the submitted contract revision is to find
+         * the latest contract revision submitted before the next rate revision unlock date. The latest contract revision
+         * and not the one submitted with the rate, because contracts can be unlocked and resubmitted independently of
+         * the rate.
+         *
+         * The idea is that once a rate is unlocked again, the new rate revision created is now the "active"
+         * revision with most up-to-date data and previous submitted rate revision is now historical and changes
+         * should not be reflected on it, including contract changes.
+         **/
 
-        // go through every contract revision with this rate
-        for (const contractRev of rateRev.contractRevisions) {
+        // Next rate revision in the array.
+        const nextRateRev: RateRevisionTableWithFormData | undefined =
+            rateRevisions[currentRevIndex + 1]
+
+        // Reverse contractRevisions so it is in DESC order.
+        const contractRevisions = rateRev.contractRevisions.reverse()
+
+        for (const contractRev of contractRevisions) {
             if (!contractRev.contractRevision.submitInfo) {
                 return new Error(
                     'Programming Error: a rate is associated with an unsubmitted contract'
                 )
             }
 
-            // Finding the single earliest contract rev submitted right after rate rev submission date time.
-            if (
-                contractRev.contractRevision.submitInfo.updatedAt >=
-                rateRev.submitInfo.updatedAt
-            ) {
-                const exists = initialEntry.contractRevs.find(
-                    (cc) =>
-                        cc.contractID ===
-                        contractRev.contractRevision.contractID
-                )
+            // Check if contract revision submitted date is earlier then the proceeding rate revision unlock date.
+            // If nextRateRev does not exist, then there is no date constraint.
+            const isContractSubmittedDateValid = nextRateRev?.unlockInfo
+                ? contractRev.contractRevision.submitInfo.updatedAt.getTime() <
+                  nextRateRev.unlockInfo.updatedAt.getTime()
+                : true
 
-                if (!exists) {
-                    initialEntry.contractRevs.push(contractRev.contractRevision)
-                }
+            // Does initialEntry.contractRevs already include a revision for this contract
+            const isContractIncluded = !!initialEntry.contractRevs.find(
+                (cc) =>
+                    cc.contractID === contractRev.contractRevision.contractID
+            )
+
+            // Contract revision that belong to this rate revision has to be:
+            // - Submitted before the next contract rev unlock date
+            // - Not already in the initial entry. We are looping through this in desc order, so the first contract rev is the latest.
+            // - Not removed from contract
+            if (
+                isContractSubmittedDateValid &&
+                !isContractIncluded &&
+                !contractRev.isRemoval
+            ) {
+                initialEntry.contractRevs.unshift(contractRev.contractRevision)
             }
         }
     }

@@ -1,21 +1,22 @@
-@import '../../styles/uswdsImports.scss';
-@import '../../styles/custom.scss';
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
+
 
 .submissionList {
     padding-left: 0;
 }
 .cardContainer {
-    border: 1px solid $theme-color-base-lighter;
-    padding: units(2);
+    border: 1px solid custom.$mcr-gray-lighter;
+    padding: uswds.units(2);
     display: flex;
     justify-content: space-between;
-    margin-bottom: units(2);
+    margin-bottom: uswds.units(2);
     position: relative;
-    @include u-radius('md');
+    @include uswds.u-radius('md');
     transition: background-color 200ms linear;
 
     &:hover {
-        background-color: $theme-color-base-lightest;
+        background-color: custom.$mcr-gray-lightest
     }
 }
 
@@ -24,7 +25,7 @@
 
     p {
         margin-bottom: 0;
-        line-height: line-height('body', 3);
+        line-height: uswds.line-height('body', 3);
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 3;
@@ -45,16 +46,16 @@
 }
 
 .submissionType {
-    @include u-font('sans', '3xs');
+    @include uswds.u-font('sans', '3xs');
     display: block;
-    margin: units(1) 0;
+    margin: uswds.units(1) 0;
 }
 
 .tagSuccess {
-    background: $theme-color-success;
+    background: custom.$mcr-success-base;
 }
 
 .tagWarning {
-    background: $theme-color-warning-dark;
-    @include u-text('ink');
+    background: custom.$mcr-gold-dark;
+    @include uswds.u-text('ink');
 }

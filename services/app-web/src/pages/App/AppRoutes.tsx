@@ -73,6 +73,12 @@ const StateUserRoutes = ({
     showQuestionResponse: boolean
     stageName?: string
 }): React.ReactElement => {
+    // feature flag
+    const ldClient = useLDClient()
+    const showRateSummaryPage: boolean = ldClient?.variation(
+        featureFlags.RATE_EDIT_UNLOCK.flag,
+        featureFlags.RATE_EDIT_UNLOCK.defaultValue
+    )
     return (
         <AuthenticatedRouteWrapper setAlert={setAlert} authMode={authMode}>
             <Routes>
@@ -92,7 +98,6 @@ const StateUserRoutes = ({
                     path={RoutesRecord.DASHBOARD_SUBMISSIONS}
                     element={<StateDashboard />}
                 />
-
                 <Route
                     path={RoutesRecord.SUBMISSIONS}
                     element={<StateDashboard />}
@@ -101,6 +106,12 @@ const StateUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_NEW}
                     element={<NewStateSubmissionForm />}
                 />
+                {showRateSummaryPage && (
+                    <Route
+                        path={RoutesRecord.RATES_SUMMARY}
+                        element={<RateSummary />}
+                    />
+                )}
                 <Route element={<SubmissionSideNav />}>
                     {showQuestionResponse && (
                         <>
