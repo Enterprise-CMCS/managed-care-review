@@ -102,13 +102,8 @@ functions:
     memorySize: 4096
     ephemeralStorageSize: 1024
     layers:
-<<<<<<< HEAD
-      - !Ref ClamAvLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:2
-=======
       - !Ref ClamDefsLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
->>>>>>> main
     environment:
       stage: ${sls:stage}
       CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
@@ -124,13 +119,8 @@ functions:
     timeout: 300 # 300 seconds = 5 minutes
     memorySize: 1024
     layers:
-<<<<<<< HEAD
-      - !Ref ClamAvLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:2
-=======
       - !Ref ClamDefsLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
->>>>>>> main
     environment:
       stage: ${sls:stage}
       CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
@@ -144,13 +134,8 @@ functions:
     timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
     maximumRetryAttempts: 0
     layers:
-<<<<<<< HEAD
-      - !Ref ClamAvLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:2
-=======
       - !Ref ClamDefsLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
->>>>>>> main
     environment:
       stage: ${sls:stage}
       AUDIT_BUCKET_NAME: !Ref DocumentUploadsBucket
@@ -169,13 +154,8 @@ functions:
     ephemeralStorageSize: 1024
     maximumRetryAttempts: 0
     layers:
-<<<<<<< HEAD
-      - !Ref ClamAvLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:2
-=======
       - !Ref ClamDefsLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
->>>>>>> main
     environment:
       stage: ${sls:stage}
       AUDIT_BUCKET_NAME: !Ref DocumentUploadsBucket
