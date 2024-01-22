@@ -2,9 +2,29 @@ import type { APIKeyType } from '../domain-models'
 import { curry } from 'purify-ts/Function'
 import { sign, verify } from 'jsonwebtoken'
 
+const JSON_SIGNING_KEY = 'jwtsigningkey'
+
+function parseSigningKeyJSON(jsonString?: string): string | Error {
+    if (!jsonString || jsonString === '') {
+        return new Error('Env var for JWT secret is not defined')
+    }
+
+    try {
+        const res = JSON.parse(jsonString)
+
+        if (!res[JSON_SIGNING_KEY]) {
+            return new Error(`Env var for JWT has no key ${JSON_SIGNING_KEY}`)
+        }
+
+        return res[JSON_SIGNING_KEY]
+    } catch (err) {
+        return err
+    }
+}
+
 interface JWTConfig {
     issuer: string
-    signingKey: string
+    signingKey: Buffer
     expirationDurationS: number
 }
 
@@ -13,6 +33,7 @@ function createValidJWT(config: JWTConfig, userID: string): APIKeyType {
         subject: userID,
         issuer: config.issuer,
         expiresIn: config.expirationDurationS,
+        algorithm: 'HS256', // pin the default algo
     })
 
     return {
@@ -25,6 +46,7 @@ function userIDFromToken(config: JWTConfig, token: string): string | Error {
     try {
         const decoded = verify(token, config.signingKey, {
             issuer: config.issuer,
+            algorithms: ['HS256'], // pin the default algo
         })
 
         if (!decoded.sub || typeof decoded === 'string') {
@@ -45,6 +67,8 @@ interface JWTLib {
 
 function newJWTLib(config: JWTConfig): JWTLib {
     return {
+        // this is an experiment, using `curry` here, It seems clean but I'm not sure
+        // exactly what it's getting us yet -wml
         createValidJWT: curry(createValidJWT)(config),
         userIDFromToken: curry(userIDFromToken)(config),
     }
@@ -52,4 +76,4 @@ function newJWTLib(config: JWTConfig): JWTLib {
 
 export type { JWTLib }
 
-export { newJWTLib }
+export { newJWTLib, parseSigningKeyJSON }
