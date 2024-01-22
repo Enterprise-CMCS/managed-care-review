@@ -9,7 +9,7 @@ import { newJWTLib } from '../jwt'
 // Hard coding this for now, next job is to run this config to this app.
 const jwtLib = newJWTLib({
     issuer: 'fakeIssuer',
-    signingKey: 'notrandom',
+    signingKey: Buffer.from('123af', 'hex'),
     expirationDurationS: 90 * 24 * 60 * 60, // 90 days
 })
 

@@ -230,6 +230,7 @@ resources:
         Name: 'api_jwt_secret_${sls:stage}'
         Description: 'Dynamically generated secret for JWT signing/validation'
         GenerateSecretString:
+          SecretStringTemplate: '{}'
           GenerateStringKey: jwtsigningkey
           PasswordLength: 128
           ExcludePunctuation: true
