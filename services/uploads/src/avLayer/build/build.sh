@@ -8,24 +8,15 @@ uname -m
 
 yum update -y
 amazon-linux-extras install epel -y
-yum install -y cpio yum-utils tar gzip systemd-libs rsync
-yum install -y clamav clamav-lib clamav-update json-c pcre2 libxml2 bzip2-libs libtool-ltdl xz-libs libprelude gnutls nettle libcurl libnghttp2 libidn2 libssh2 openldap libffi krb5-libs keyutils-libs libunistring cyrus-sasl-lib nss nspr libselinux openssl-libs libcrypt systemd-libs lz4 libgcrypt libgpg-error elfutils
+yum install -y cpio yum-utils tar.x86_64 gzip zip
 
 # extract binaries for clamav, json-c, pcre
 mkdir -p /tmp/build
 pushd /tmp/build
 
-# Download the clamav package that includes unrar
-curl -L --output clamav.rpm "https://www6.atomicorp.com/channels/atomic/centos/7/x86_64/RPMS/clamav-${VERSION}.el7.art.x86_64.rpm"
-rpm2cpio clamav.rpm | cpio -vimd
-
-# Download required glibc libs
-curl -L --output glibc-2.17-317.el7.x86_64.rpm https://www.rpmfind.net/linux/centos/7.9.2009/os/x86_64/Packages/glibc-2.17-317.el7.x86_64.rpm
-curl -L --output glibc-2.28-127.el8.x86_64.rpm https://www.rpmfind.net/linux/centos/8.3.2011/BaseOS/x86_64/os/Packages/glibc-2.28-127.el8.x86_64.rpm
-rpm2cpio glibc*.rpm | cpio -vimd
-
 # Download other package dependencies
 yumdownloader -x \*i686 --archlist=x86_64 clamav clamav-lib clamav-update json-c pcre2 libxml2 bzip2-libs libtool-ltdl xz-libs libprelude gnutls nettle libcurl libnghttp2 libidn2 libssh2 openldap libffi krb5-libs keyutils-libs libunistring cyrus-sasl-lib nss nspr libselinux openssl-libs libcrypt
+rpm2cpio clamav-0*.rpm | cpio -vimd
 rpm2cpio clamav-lib*.rpm | cpio -vimd
 rpm2cpio clamav-update*.rpm | cpio -vimd
 rpm2cpio json-c*.rpm | cpio -vimd
@@ -61,12 +52,10 @@ popd
 
 mkdir -p bin lib
 
-rsync -L --no-links -av /tmp/build/usr/lib64/ lib
-rsync -L --no-links -av /tmp/build/lib64/ lib
-
-cp -L /tmp/build/usr/bin/clamscan /tmp/build/usr/bin/freshclam bin/.
-#cp -LR /tmp/build/usr/lib64/* lib/.
-#cp -LR /tmp/build/lib64/* lib/.
+cp /tmp/build/usr/bin/clamscan /tmp/build/usr/bin/freshclam bin/.
+cp -R /tmp/build/usr/lib64/* lib/.
+cp -R /tmp/build/lib64/* lib/.
 cp freshclam.conf bin/freshclam.conf
 
-tar -czvf /opt/app/lambda_layer.tar.gz bin lib
+zip -r9 clamav_lambda_layer.zip bin
+zip -r9 clamav_lambda_layer.zip lib
