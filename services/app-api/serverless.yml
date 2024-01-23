@@ -155,7 +155,7 @@ provider:
     AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
     OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
     LD_SDK_KEY: ${self:custom.ldSDKKey}
-    JWT_SECRET: ${self.jwtSecret}
+    JWT_SECRET: ${self:custom.jwtSecret}
 
 layers:
   prismaClientMigration:

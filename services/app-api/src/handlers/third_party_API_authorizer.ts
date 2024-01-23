@@ -4,12 +4,24 @@ import type {
     PolicyDocument,
     APIGatewayTokenAuthorizerHandler,
 } from 'aws-lambda'
-import { newJWTLib } from '../jwt'
+import { newJWTLib, parseSigningKeyJSON } from '../jwt'
 
-// Hard coding this for now, next job is to run this config to this app.
+const stageName = process.env.stage
+const jwtSecretString = process.env.JWT_SECRET
+
+if (stageName === undefined) {
+    throw new Error('Configuration Error: stage is required')
+}
+
+const jwtSecret = parseSigningKeyJSON(jwtSecretString)
+if (jwtSecret instanceof Error) {
+    console.error('JWT_SECRET not configured correctly: ', jwtSecret)
+    throw jwtSecret
+}
+
 const jwtLib = newJWTLib({
-    issuer: 'fakeIssuer',
-    signingKey: Buffer.from('123af', 'hex'),
+    issuer: `mcreview-${stageName}`,
+    signingKey: Buffer.from(jwtSecret, 'hex'),
     expirationDurationS: 90 * 24 * 60 * 60, // 90 days
 })
 
