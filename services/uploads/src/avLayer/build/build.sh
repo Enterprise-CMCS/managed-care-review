@@ -15,10 +15,11 @@ mkdir -p /tmp/build
 pushd /tmp/build
 
 # Download other package dependencies
-yumdownloader -x \*i686 --archlist=x86_64 clamav clamav-lib clamav-update json-c pcre2 libtool-ltdl libxml2 bzip2-libs xz-libs libprelude gnutls nettle 
+yumdownloader -x \*i686 --archlist=x86_64 clamav clamav-lib clamav-update clamd json-c pcre2 libtool-ltdl libxml2 bzip2-libs xz-libs libprelude gnutls nettle 
 rpm2cpio clamav-0*.rpm | cpio -vimd
 rpm2cpio clamav-lib*.rpm | cpio -vimd
 rpm2cpio clamav-update*.rpm | cpio -vimd
+rpm2cpio clamd*.rpm | cpio -vimd
 rpm2cpio json-c*.rpm | cpio -vimd
 rpm2cpio pcre*.rpm | cpio -vimd
 rpm2cpio libtool-ltdl*.rpm | cpio -vimd
