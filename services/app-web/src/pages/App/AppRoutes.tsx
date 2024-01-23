@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import { useNavigate, useLocation, Navigate } from 'react-router'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useParams } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { extendSession, idmRedirectURL } from '../../pages/Auth/cognitoAuth'
 import { assertNever, AuthModeType } from '../../common-code/config'
@@ -61,6 +61,11 @@ const UniversalRoutes = (
         <Route path={RoutesRecord.HELP} element={<Help />} />
     </Fragment>
 )
+//Doing this in order to pass the :id for redirecting '/:id' to ':id/edit' for state users viewing rates
+const RateEditRouteRedirect = () => {
+    const { id } = useParams();
+    return <Navigate to={`/${id}/edit`} />
+}
 
 const StateUserRoutes = ({
     authMode,
@@ -93,6 +98,10 @@ const StateUserRoutes = ({
                     element={
                         <Navigate to={RoutesRecord.DASHBOARD_SUBMISSIONS} />
                     }
+                />
+                <Route 
+                    path="/:id"
+                    element={<RateEditRouteRedirect />} 
                 />
                 <Route
                     path={RoutesRecord.DASHBOARD_SUBMISSIONS}
