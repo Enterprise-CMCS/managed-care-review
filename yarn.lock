@@ -12019,9 +12019,9 @@
   integrity sha512-K5K+yml8LTo9bWJI/rECfIPrGgxdpeNbj+d53lwN4QjW1MCwlkhUms+gtdzigTeUyBr09+u8BwOIY3MXvHdcsA==
 
 "@types/ssh2@^1.11.15", "@types/ssh2@^1.11.9":
-  version "1.11.18"
-  resolved "https://registry.yarnpkg.com/@types/ssh2/-/ssh2-1.11.18.tgz#0766a52a91f85c39768ccdc8dce1498dcbb02d32"
-  integrity sha512-7eH4ppQMFlzvn//zhwD54MWaITR1aSc1oFBye9vb76GZ2Y9PSFYdwVIwOlxRXWs5+1hifntXyt+8a6SUbOD7Hg==
+  version "1.11.19"
+  resolved "https://registry.yarnpkg.com/@types/ssh2/-/ssh2-1.11.19.tgz#4f2ec691b0674ea1590915fe5114a9aeae0eb41d"
+  integrity sha512-ydbQAqEcdNVy2t1w7dMh6eWMr+iOgtEkqM/3K9RMijMaok/ER7L8GW6PwsOypHCN++M+c8S/UR9SgMqNIFstbA==
   dependencies:
     "@types/node" "^18.11.18"
 
