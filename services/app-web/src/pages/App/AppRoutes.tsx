@@ -80,7 +80,7 @@ const StateUserRoutes = ({
 }): React.ReactElement => {
     // feature flag
     const ldClient = useLDClient()
-    const showRateSummaryPage: boolean = ldClient?.variation(
+    const showRateEditPage: boolean = ldClient?.variation(
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
@@ -99,10 +99,12 @@ const StateUserRoutes = ({
                         <Navigate to={RoutesRecord.DASHBOARD_SUBMISSIONS} />
                     }
                 />
-                <Route 
-                    path="/:id"
-                    element={<RateEditRouteRedirect />} 
-                />
+                {showRateEditPage && (
+                    <Route 
+                        path="/:id"
+                        element={<RateEditRouteRedirect />} 
+                    />
+                )}
                 <Route
                     path={RoutesRecord.DASHBOARD_SUBMISSIONS}
                     element={<StateDashboard />}
@@ -115,11 +117,13 @@ const StateUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_NEW}
                     element={<NewStateSubmissionForm />}
                 />
-                <Route 
-                    path={RoutesRecord.RATE_EDIT}
-                    element={<RateSummary />}
+                {showRateEditPage && (
+                    <Route 
+                        path={RoutesRecord.RATE_EDIT}
+                        element={<RateSummary />}
                 />
-                {showRateSummaryPage && (
+                )}
+                {showRateEditPage && (
                     <Route
                         path={RoutesRecord.RATES_SUMMARY}
                         element={<RateSummary />}
