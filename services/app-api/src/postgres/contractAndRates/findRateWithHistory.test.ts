@@ -9,8 +9,12 @@ import { insertDraftRate } from './insertRate'
 import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
-import { must, createInsertContractData } from '../../testHelpers'
-import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHelpers'
+import {
+    must,
+    mockInsertContractArgs,
+    consoleLogFullData,
+} from '../../testHelpers'
+import { mockInsertRateArgs } from '../../testHelpers/contractAndRates/rateHelpers'
 import { findContractWithHistory } from './findContractWithHistory'
 import type { DraftContractType } from '../../domain-models/contractAndRates/contractTypes'
 
@@ -42,7 +46,7 @@ describe('findRate', () => {
         })
 
         // setup a single test rate
-        const draftRateData = createInsertRateData({
+        const draftRateData = mockInsertRateArgs({
             rateCertificationName: 'one contract',
         })
         const rateA = must(await insertDraftRate(client, draftRateData))
@@ -402,7 +406,7 @@ describe('findRate', () => {
         })
 
         // Create 1 contract
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'initial rate two submit',
         })
         const draftContract = must(
@@ -766,7 +770,7 @@ describe('findRate', () => {
         })
 
         // setup a single test contract
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'one contract',
         })
         const draftContract = must(
@@ -778,7 +782,7 @@ describe('findRate', () => {
                 contractID: draftContract.id,
                 formData: {},
                 rateFormDatas: [
-                    createInsertRateData({
+                    mockInsertRateArgs({
                         id: uuidv4(),
                         rateType: 'NEW',
                     }),

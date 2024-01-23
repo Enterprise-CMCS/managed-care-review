@@ -16,7 +16,7 @@ const defaultRateData = () => ({
     stateNumber: 111,
 })
 
-const createInsertRateData = (
+const mockInsertRateArgs = (
     rateArgs?: Partial<InsertRateArgsType>
 ): InsertRateArgsType => {
     return {
@@ -25,7 +25,7 @@ const createInsertRateData = (
     }
 }
 
-const createDraftRateData = (
+const mockDraftRate = (
     rate?: Partial<RateTableFullPayload>
 ): RateTableFullPayload => ({
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
@@ -34,7 +34,7 @@ const createDraftRateData = (
     stateCode: 'MN',
     stateNumber: 111,
     revisions: rate?.revisions ?? [
-        createRateRevision(
+        mockRateRevision(
             rate,
             {
                 contractRevisions: [],
@@ -45,28 +45,7 @@ const createDraftRateData = (
     ],
     ...rate,
 })
-
-const createRateData = (
-    rate?: Partial<RateTableFullPayload>
-): RateTableFullPayload => ({
-    id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    stateCode: 'MN',
-    stateNumber: 111,
-    revisions: rate?.revisions ?? [
-        createRateRevision(
-            rate,
-            {
-                draftContracts: [],
-            },
-            rate?.stateCode as StateCodeType
-        ) as RateRevisionTableWithContracts,
-    ],
-    ...rate,
-})
-
-const createRateRevision = (
+const mockRateRevision = (
     rate?: Partial<RateTableFullPayload>,
     revision?: Partial<RateRevisionTableWithContracts>,
     stateCode: StateCodeType = 'MN'
@@ -156,8 +135,7 @@ const createRateRevision = (
 }
 
 export {
-    createInsertRateData,
-    createRateRevision,
-    createRateData,
-    createDraftRateData,
+    mockInsertRateArgs,
+    mockRateRevision,
+    mockDraftRate,
 }

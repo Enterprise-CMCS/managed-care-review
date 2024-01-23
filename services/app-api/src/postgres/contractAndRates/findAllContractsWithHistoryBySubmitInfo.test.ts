@@ -1,6 +1,6 @@
 import { findAllContractsWithHistoryBySubmitInfo } from './findAllContractsWithHistoryBySubmitInfo'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { createInsertContractData, must } from '../../testHelpers'
+import { mockInsertContractArgs, must } from '../../testHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import { insertDraftContract } from './insertContract'
 import { submitContract } from './submitContract'
@@ -30,7 +30,7 @@ describe('findAllContractsWithHistoryBySubmittedInfo', () => {
             },
         })
 
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'one contract',
         })
 

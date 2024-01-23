@@ -2,8 +2,8 @@ import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import { submitRate } from './submitRate'
 import { NotFoundError } from '../postgresErrors'
-import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHelpers'
-import { createInsertContractData, must } from '../../testHelpers'
+import { mockInsertRateArgs } from '../../testHelpers/contractAndRates/rateHelpers'
+import { mockInsertContractArgs, must } from '../../testHelpers'
 import { insertDraftRate } from './insertRate'
 import { submitContract } from './submitContract'
 import { insertDraftContract } from './insertContract'
@@ -38,7 +38,7 @@ describe('submitRate', () => {
         expect(submitError).toBeInstanceOf(NotFoundError)
 
         // create a draft rate
-        const draftRateData = createInsertRateData({
+        const draftRateData = mockInsertRateArgs({
             rateCertificationName: 'rate-cert-name',
         })
         const rateA = must(await insertDraftRate(client, draftRateData))
@@ -95,7 +95,7 @@ describe('submitRate', () => {
         )
 
         // create a draft rate
-        const draftRateData = createInsertRateData({
+        const draftRateData = mockInsertRateArgs({
             rateCertificationName: 'first rate ',
         })
         const rateA = must(await insertDraftRate(client, draftRateData))
@@ -104,7 +104,7 @@ describe('submitRate', () => {
         const contractA = must(
             await insertDraftContract(
                 client,
-                createInsertContractData({
+                mockInsertContractArgs({
                     submissionDescription: 'first contract',
                 })
             )
@@ -192,7 +192,7 @@ describe('submitRate', () => {
             },
         })
 
-        const draftRateData = createInsertRateData({
+        const draftRateData = mockInsertRateArgs({
             rateCertificationName: 'one contract',
         })
         const rateA = must(await insertDraftRate(client, draftRateData))

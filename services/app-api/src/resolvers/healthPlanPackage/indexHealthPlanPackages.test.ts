@@ -19,7 +19,7 @@ import { NewPostgresStore } from '../../postgres'
 import type { NotFoundError, Store } from '../../postgres'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import type { PrismaTransactionType } from '../../postgres/prismaTypes'
-import { createContractData, createDraftContractData } from '../../testHelpers'
+import { mockContractData } from '../../testHelpers'
 import { parseContractWithHistory } from '../../postgres/contractAndRates/parseContractWithHistory'
 import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates/findAllContractsWithHistoryByState'
 
@@ -378,7 +378,7 @@ describe(`indexHealthPlanPackages`, () => {
 
         // Valid draft contract
         const validParsedDraftContract = parseContractWithHistory(
-            createDraftContractData({
+            mockContractData({
                 stateCode: stateUser.stateCode,
             })
         )
@@ -391,7 +391,7 @@ describe(`indexHealthPlanPackages`, () => {
         // the function to convert submitted contracts we need to figure out how to get this to error, or remove testing
         // conversion errors.
         const validParsedSubmittedContract = parseContractWithHistory(
-            createContractData({
+            mockContractData({
                 stateCode: stateUser.stateCode,
             })
         )

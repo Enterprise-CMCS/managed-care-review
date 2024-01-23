@@ -1,5 +1,5 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { createInsertContractData, must } from '../../testHelpers'
+import { mockInsertContractArgs, must } from '../../testHelpers'
 import { updateMCCRSID } from './updateMCCRSID'
 import { v4 as uuidv4 } from 'uuid'
 import { submitContract } from './submitContract'
@@ -24,7 +24,7 @@ describe('updateContract', () => {
             },
         })
 
-        const contractData = createInsertContractData({})
+        const contractData = mockInsertContractArgs({})
 
         const draftContract = must(
             await insertDraftContract(client, contractData)

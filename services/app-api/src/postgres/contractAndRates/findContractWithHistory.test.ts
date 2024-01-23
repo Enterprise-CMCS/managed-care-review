@@ -10,8 +10,8 @@ import { insertDraftRate } from './insertRate'
 import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
-import { must, createInsertContractData } from '../../testHelpers'
-import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHelpers'
+import { must, mockInsertContractArgs } from '../../testHelpers'
+import { mockInsertRateArgs } from '../../testHelpers/contractAndRates/rateHelpers'
 
 // TODO: Enable these tests again after reimplementing rate change history that was in contractWithHistoryToDomainModel
 // eslint-disable-next-line jest/no-disabled-tests
@@ -41,7 +41,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         })
 
         // setup a single test contract
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'one contract',
         })
         const contractA = must(
@@ -381,7 +381,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         })
 
         // setup a single test contract
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'one contract',
         })
         const contractA = must(
@@ -648,20 +648,20 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             },
         })
 
-        const rate1 = createInsertRateData({
+        const rate1 = mockInsertRateArgs({
             id: uuidv4(),
             stateCode: 'MN',
             rateCertificationName: 'onepoint0',
         })
 
-        const rate2 = createInsertRateData({
+        const rate2 = mockInsertRateArgs({
             id: uuidv4(),
             stateCode: 'MN',
             rateCertificationName: 'twopoint0',
         })
 
         // add a contract that has both of them.
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'one contract',
         })
         const contractA = must(
@@ -867,7 +867,7 @@ describe('findContractWithHistory with only contract history', () => {
         })
 
         // setup a single test contract
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'one contract',
         })
         const draftContract = must(
@@ -879,7 +879,7 @@ describe('findContractWithHistory with only contract history', () => {
                 contractID: draftContract.id,
                 formData: {},
                 rateFormDatas: [
-                    createInsertRateData({
+                    mockInsertRateArgs({
                         id: uuidv4(),
                         rateType: 'NEW',
                         rateCertificationName: 'First rate',
@@ -1072,7 +1072,7 @@ describe('findContractWithHistory with only contract history', () => {
                 rateFormDatas: [
                     // Make sure existing rate is still included. If not it will be removed from the contract
                     unlockedContract.draftRevision.rateRevisions[0].formData,
-                    createInsertRateData({
+                    mockInsertRateArgs({
                         id: uuidv4(),
                         rateType: 'NEW',
                         rateCertificationName: 'Second rate',

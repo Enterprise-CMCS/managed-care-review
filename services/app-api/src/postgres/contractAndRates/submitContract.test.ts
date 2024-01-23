@@ -5,7 +5,7 @@ import { insertDraftContract } from './insertContract'
 import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
 import { updateDraftRate } from './updateDraftRate'
-import { must, createInsertContractData } from '../../testHelpers'
+import { must, mockInsertContractArgs } from '../../testHelpers'
 import { NotFoundError } from '../postgresErrors'
 
 describe('submitContract', () => {
@@ -32,7 +32,7 @@ describe('submitContract', () => {
         expect(submitError).toBeInstanceOf(NotFoundError)
 
         // create a draft contract
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'one contract',
         })
         const contractA = must(
@@ -91,7 +91,7 @@ describe('submitContract', () => {
         )
 
         // create a draft contract
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'first contract',
         })
         const contractA = must(
@@ -193,7 +193,7 @@ describe('submitContract', () => {
             },
         })
 
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'one contract',
         })
         const contractA = must(

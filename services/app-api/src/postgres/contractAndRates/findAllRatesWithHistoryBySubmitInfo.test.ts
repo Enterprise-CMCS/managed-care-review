@@ -1,6 +1,6 @@
 import { findAllRatesWithHistoryBySubmitInfo } from './findAllRatesWithHistoryBySubmitInfo'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { createInsertRateData, must } from '../../testHelpers'
+import { mockInsertRateArgs, must } from '../../testHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
@@ -30,7 +30,7 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
             },
         })
 
-        const draftRateData = createInsertRateData({
+        const draftRateData = mockInsertRateArgs({
             rateCertificationName: 'one rate',
         })
 
@@ -126,7 +126,7 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
         const rateDataForAS = must(
             await insertDraftRate(
                 client,
-                createInsertRateData({
+                mockInsertRateArgs({
                     stateCode: 'AS',
                     rateCertificationName: 'one rate',
                 })

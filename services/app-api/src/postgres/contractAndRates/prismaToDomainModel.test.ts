@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
-import { createContractRevision } from '../../testHelpers'
+import { mockContractRevision} from '../../testHelpers'
 import {
     getContractRateStatus,
     contractFormDataToDomainModel,
@@ -9,7 +9,7 @@ import type { ContractRevisionTableWithFormData } from './prismaSharedContractRa
 describe('prismaToDomainModel', () => {
     describe('contractFormDataToDomainModel', () => {
         it('correctly adds document categories to each document', () => {
-            const contractRevision = createContractRevision()
+            const contractRevision = mockContractRevision()
 
             const domainFormData =
                 contractFormDataToDomainModel(contractRevision)

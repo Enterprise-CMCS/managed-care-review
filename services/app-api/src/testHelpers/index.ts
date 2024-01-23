@@ -7,17 +7,15 @@ export {
 export { must } from './assertionHelpers'
 
 export {
-    createInsertContractData,
-    createContractData,
-    createContractRevision,
-    createDraftContractData,
+    mockInsertContractArgs,
+    mockContractRevision,
+    mockContractData,
 } from './contractAndRates/contractHelpers'
 
 export {
-    createInsertRateData,
-    createRateRevision,
-    createRateData,
-    createDraftRateData,
+    mockInsertRateArgs,
+    mockRateRevision,
+    mockDraftRate,
 } from './contractAndRates/rateHelpers'
 
 export { getStateRecord } from './stateHelpers'
