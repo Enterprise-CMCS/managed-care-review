@@ -130,6 +130,25 @@ resources:
             - ServerSideEncryptionByDefault:
                 SSEAlgorithm: AES256
 
+    S3FirehoseEventsBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Condition: CreateNRInfraMonitoring
+      Properties:
+        Bucket: !Ref S3FirehoseEventsBucket
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Deny
+              Action: 's3:*'
+              Principal: '*'
+              Condition:
+                Bool:
+                  'aws:SecureTransport': false
+              Resource:
+                - !Sub ${S3FirehoseEventsBucket.Arn}
+                - !Sub ${S3FirehoseEventsBucket.Arn}/*
+              Sid: DenyUnencryptedConnections
+
     FirehoseStreamToNewRelic:
       Type: AWS::KinesisFirehose::DeliveryStream
       Condition: CreateNRInfraMonitoring
