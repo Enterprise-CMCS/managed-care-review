@@ -4,7 +4,8 @@ import type {
     RateFormDataType,
     RateType,
 } from '../../domain-models/contractAndRates'
-import type { PrismaClient } from '@prisma/client'
+import type { PrismaTransactionType } from '../prismaTypes'
+import { emptify, nullify } from '../prismaDomainAdaptors'
 
 type RateFormEditable = Partial<RateFormDataType>
 
@@ -26,7 +27,7 @@ type UpdateRateArgsType = {
     - No need for version history, preserving dates on related resources in draft form
 */
 async function updateDraftRate(
-    client: PrismaClient,
+    client: PrismaTransactionType,
     args: UpdateRateArgsType
 ): Promise<RateType | NotFoundError | Error> {
     const { rateID, formData, contractIDs } = args
@@ -48,61 +49,83 @@ async function updateDraftRate(
     } = formData
 
     try {
-        return await client.$transaction(async (tx) => {
-            // Given all the Rates associated with this draft, find the most recent submitted to update.
-            const currentRev = await tx.rateRevisionTable.findFirst({
-                where: {
-                    rateID: rateID,
-                    submitInfoID: null,
-                },
-            })
-            if (!currentRev) {
-                console.error('No Draft Rev!')
-                return new Error('cant find a draft rev to submit')
-            }
-            // Clear all related resources on the revision
-            // Then update resource, adjusting all simple fields and creating new linked resources for fields holding relationships to other day
-            await tx.rateRevisionTable.update({
-                where: {
-                    id: currentRev.id,
-                },
-                data: {
-                    rateType,
-                    rateCapitationType,
-
-                    rateDocuments: {
-                        deleteMany: {},
-                        create: rateDocuments,
-                    },
-                    supportingDocuments: {
-                        deleteMany: {},
-                        create: supportingDocuments,
-                    },
-                    certifyingActuaryContacts: {
-                        deleteMany: {},
-                        create: certifyingActuaryContacts,
-                    },
-                    addtlActuaryContacts: {
-                        deleteMany: {},
-                        create: addtlActuaryContacts,
-                    },
-                    rateDateStart,
-                    rateDateEnd,
-                    rateDateCertified,
-                    amendmentEffectiveDateStart,
-                    amendmentEffectiveDateEnd,
-                    rateProgramIDs,
-                    rateCertificationName,
-                    actuaryCommunicationPreference,
-                    draftContracts: {
-                        set: contractIDs.map((rID) => ({
-                            id: rID,
-                        })),
-                    },
-                },
-            })
-            return findRateWithHistory(tx, rateID)
+        // Given all the Rates associated with this draft, find the most recent submitted to update.
+        const currentRev = await client.rateRevisionTable.findFirst({
+            where: {
+                rateID: rateID,
+                submitInfoID: null,
+            },
         })
+        if (!currentRev) {
+            console.error('No Draft Rev!')
+            return new Error('cant find a draft rev to submit')
+        }
+        // Clear all related resources on the revision
+        // Then update resource, adjusting all simple fields and creating new linked resources for fields holding relationships to other day
+        await client.rateRevisionTable.update({
+            where: {
+                id: currentRev.id,
+            },
+            data: {
+                rateType: nullify(rateType),
+                rateCapitationType: nullify(rateCapitationType),
+
+                rateDocuments: {
+                    deleteMany: {},
+                    create:
+                        rateDocuments &&
+                        rateDocuments.map((d, idx) => ({
+                            position: idx,
+                            ...d,
+                        })),
+                },
+                supportingDocuments: {
+                    deleteMany: {},
+                    create:
+                        supportingDocuments &&
+                        supportingDocuments.map((d, idx) => ({
+                            position: idx,
+                            ...d,
+                        })),
+                },
+                certifyingActuaryContacts: {
+                    deleteMany: {},
+                    create:
+                        certifyingActuaryContacts &&
+                        certifyingActuaryContacts.map((c, idx) => ({
+                            position: idx,
+                            ...c,
+                        })),
+                },
+                addtlActuaryContacts: {
+                    deleteMany: {},
+                    create:
+                        addtlActuaryContacts &&
+                        addtlActuaryContacts.map((c, idx) => ({
+                            position: idx,
+                            ...c,
+                        })),
+                },
+                rateDateStart: nullify(rateDateStart),
+                rateDateEnd: nullify(rateDateEnd),
+                rateDateCertified: nullify(rateDateCertified),
+                amendmentEffectiveDateStart: nullify(
+                    amendmentEffectiveDateStart
+                ),
+                amendmentEffectiveDateEnd: nullify(amendmentEffectiveDateEnd),
+                rateProgramIDs: emptify(rateProgramIDs),
+                rateCertificationName: nullify(rateCertificationName),
+                actuaryCommunicationPreference: nullify(
+                    actuaryCommunicationPreference
+                ),
+                draftContracts: {
+                    set: contractIDs.map((rID) => ({
+                        id: rID,
+                    })),
+                },
+            },
+        })
+        return findRateWithHistory(client, rateID)
     } catch (err) {
         console.error('Prisma error updating rate', err)
         return err

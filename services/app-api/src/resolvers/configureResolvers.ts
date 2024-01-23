@@ -33,6 +33,7 @@ import { fetchRateResolver } from './rate/fetchRate'
 import { updateContract } from './contract/updateContract'
 import { createAPIKeyResolver } from './APIKey'
 import { unlockRate } from './rate/unlockRate'
+import { submitRate } from './rate/submitRate'
 
 export function configureResolvers(
     store: Store,
@@ -90,6 +91,7 @@ export function configureResolvers(
             ),
             createAPIKey: createAPIKeyResolver(jwt),
             unlockRate: unlockRate(store),
+            submitRate: submitRate(store, launchDarkly),
         },
         User: {
             // resolveType is required to differentiate Unions
