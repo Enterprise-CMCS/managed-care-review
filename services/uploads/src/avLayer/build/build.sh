@@ -57,5 +57,5 @@ cp -R /tmp/build/usr/lib64/* lib/.
 cp -R /tmp/build/lib64/* lib/.
 cp freshclam.conf bin/freshclam.conf
 
-zip -r9 clamav_lambda_layer.zip bin
-zip -r9 clamav_lambda_layer.zip lib
+zip -r9 lambda_layer.zip bin
+zip -r9 lambda_layer.zip lib
