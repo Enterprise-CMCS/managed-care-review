@@ -11,7 +11,7 @@ import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
 import { must, mockInsertContractArgs } from '../../testHelpers'
-import { mockInsertRateArgs } from '../../testHelpers/contractAndRates/rateHelpers'
+import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
 
 // TODO: Enable these tests again after reimplementing rate change history that was in contractWithHistoryToDomainModel
 // eslint-disable-next-line jest/no-disabled-tests

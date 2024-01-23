@@ -14,7 +14,7 @@ import {
     mockInsertContractArgs,
     consoleLogFullData,
 } from '../../testHelpers'
-import { mockInsertRateArgs } from '../../testHelpers/contractAndRates/rateHelpers'
+import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
 import { findContractWithHistory } from './findContractWithHistory'
 import type { DraftContractType } from '../../domain-models/contractAndRates/contractTypes'
 

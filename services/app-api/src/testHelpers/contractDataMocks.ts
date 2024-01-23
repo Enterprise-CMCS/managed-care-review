@@ -1,13 +1,13 @@
-import type { InsertContractArgsType } from '../../postgres/contractAndRates/insertContract'
+import type { InsertContractArgsType } from '../postgres/contractAndRates/insertContract'
 import { v4 as uuidv4 } from 'uuid'
 import type {
     ContractRevisionTableWithRates,
     ContractTableFullPayload,
-} from '../../postgres/contractAndRates/prismaSubmittedContractHelpers'
-import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import type { ContractFormDataType } from '../../domain-models/contractAndRates'
-import { findStatePrograms } from '../../postgres'
-import { must } from '../assertionHelpers'
+} from '../postgres/contractAndRates/prismaSubmittedContractHelpers'
+import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { ContractFormDataType } from '../domain-models/contractAndRates'
+import { findStatePrograms } from '../postgres'
+import { must } from './assertionHelpers'
 
 const defaultContractData = () => ({
     id: uuidv4(),
@@ -71,7 +71,7 @@ const mockContractData = (
     return contractData
 }
 
-const mockContractRevision= (
+const mockContractRevision = (
     contract?: Partial<ContractTableFullPayload>,
     revision?: Partial<ContractRevisionTableWithRates>,
     stateCode: StateCodeType = 'MN'
@@ -178,8 +178,4 @@ const mockContractRevision= (
     }
 }
 
-export {
-    mockInsertContractArgs,
-    mockContractRevision,
-    mockContractData,
-}
+export { mockInsertContractArgs, mockContractRevision, mockContractData }

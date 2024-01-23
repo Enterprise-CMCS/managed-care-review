@@ -1,7 +1,7 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { must, getStateRecord } from '../../testHelpers'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
-import { mockInsertRateArgs } from '../../testHelpers/contractAndRates/rateHelpers'
+import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
 import { insertDraftRate } from './insertRate'
 import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 

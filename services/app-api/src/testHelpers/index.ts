@@ -10,13 +10,13 @@ export {
     mockInsertContractArgs,
     mockContractRevision,
     mockContractData,
-} from './contractAndRates/contractHelpers'
+} from './contractDataMocks'
 
 export {
     mockInsertRateArgs,
     mockRateRevision,
     mockDraftRate,
-} from './contractAndRates/rateHelpers'
+} from './rateDataMocks'
 
 export { getStateRecord } from './stateHelpers'
 

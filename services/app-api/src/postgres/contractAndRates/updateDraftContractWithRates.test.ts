@@ -9,7 +9,7 @@ import type {
     ContractFormDataType,
     RateFormDataType,
 } from '../../domain-models/contractAndRates'
-import { mockInsertRateArgs } from '../../testHelpers/contractAndRates/rateHelpers'
+import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
 import { v4 as uuidv4 } from 'uuid'
 import type { RateFormEditable } from './updateDraftRate'
 import { insertDraftRate } from './insertRate'

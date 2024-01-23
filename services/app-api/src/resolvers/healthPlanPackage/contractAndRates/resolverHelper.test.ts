@@ -1,4 +1,4 @@
-import { mockInsertRateArgs } from '../../../testHelpers/contractAndRates/rateHelpers'
+import { mockInsertRateArgs } from '../../../testHelpers/rateDataMocks'
 import {
     isEqualData,
     convertHealthPlanPackageRatesToDomain,
