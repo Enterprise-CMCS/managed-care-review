@@ -108,7 +108,7 @@ const StateUserRoutes = ({
                 />
                 <Route 
                     path={RoutesRecord.RATE_EDIT}
-                    element={<h1>*PLACEHOLDER* You've reached the ':id/edit' url *PLACEHOLDER*</h1>}
+                    element={<RateSummary />}
                 />
                 {showRateSummaryPage && (
                     <Route
