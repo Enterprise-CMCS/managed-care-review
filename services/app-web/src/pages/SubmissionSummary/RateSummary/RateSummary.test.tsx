@@ -116,7 +116,7 @@ describe('RateSummary', () => {
             ldUseClientSpy({'rate-edit-unlock': true})
         })
 
-        it('renders without errors', async () => {
+        it('renders SingleRateSummarySection component without errors for locked rate', async () => {
             renderWithProviders(wrapInRoutes(<RateSummary />), {
                 apolloProvider: {
                     mocks: [
@@ -139,6 +139,27 @@ describe('RateSummary', () => {
             expect(
                 await screen.findByText('Programs this rate certification covers')
             ).toBeInTheDocument()
+        })
+
+        it('renders RateEdit component without errors for unlocked rate', async () => {
+            renderWithProviders(wrapInRoutes(<RateSummary />), {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidStateUser(),
+                            statusCode: 200,
+                        }),
+                        fetchRateMockSuccess({ rate: { id: '1337', status: 'UNLOCKED' } }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/rates/1337'
+                },
+            })
+
+            await waitFor(() => {
+                expect(screen.queryByTestId('rate-edit')).toBeInTheDocument()
+            })
         })
 
         it('renders expected error page when rate ID is invalid', async () => {
