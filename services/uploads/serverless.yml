@@ -102,7 +102,7 @@ functions:
     memorySize: 4096
     ephemeralStorageSize: 1024
     layers:
-      - !Ref ClamDefsLambdaLayer
+      - !Ref ClamAvLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
     environment:
       stage: ${sls:stage}
@@ -119,7 +119,7 @@ functions:
     timeout: 300 # 300 seconds = 5 minutes
     memorySize: 1024
     layers:
-      - !Ref ClamDefsLambdaLayer
+      - !Ref ClamAvLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
     environment:
       stage: ${sls:stage}
@@ -134,7 +134,7 @@ functions:
     timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
     maximumRetryAttempts: 0
     layers:
-      - !Ref ClamDefsLambdaLayer
+      - !Ref ClamAvLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
     environment:
       stage: ${sls:stage}
@@ -154,7 +154,7 @@ functions:
     ephemeralStorageSize: 1024
     maximumRetryAttempts: 0
     layers:
-      - !Ref ClamDefsLambdaLayer
+      - !Ref ClamAvLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
     environment:
       stage: ${sls:stage}
