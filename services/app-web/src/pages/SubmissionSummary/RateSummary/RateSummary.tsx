@@ -9,6 +9,7 @@ import styles from '../SubmissionSummary.module.scss'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { RoutesRecord } from '../../../constants'
 import { SingleRateSummarySection } from '../../../components/SubmissionSummarySection/RateDetailsSummarySection/SingleRateSummarySection'
+import { useAuth } from '../../../contexts/AuthContext'
 
 type RouteParams = {
     id: string
@@ -16,6 +17,7 @@ type RouteParams = {
 
 export const RateSummary = (): React.ReactElement => {
     // Page level state
+    const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
     const { id } = useParams<keyof RouteParams>()
@@ -66,8 +68,10 @@ export const RateSummary = (): React.ReactElement => {
                 <div>
                     <Link
                         asCustom={NavLink}
+                        //TODO: Will have to remove this conditional along with associated loggedInUser prop once the rate dashboard
+                        //is made available to state users
                         to={{
-                            pathname: RoutesRecord.DASHBOARD_RATES,
+                            pathname: loggedInUser?.__typename === 'StateUser' ? RoutesRecord.DASHBOARD : RoutesRecord.DASHBOARD_RATES,
                         }}
                     >
                         <Icon.ArrowBack />

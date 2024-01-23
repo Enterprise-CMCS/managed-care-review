@@ -29,7 +29,7 @@ export const SectionHeader = ({
     })
     return (
         <div className={classes} id={sectionId}>
-            <div>
+            <div className={styles.primaryDiv}>
                 <h2 id={headerId}>{header}</h2>
                 {subHeaderComponent}
             </div>
