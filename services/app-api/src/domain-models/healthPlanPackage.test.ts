@@ -124,7 +124,9 @@ describe('HealthPlanPackage helpers', () => {
                     stateCode: 'FL' as const,
                     revisions: [],
                 },
-                new Error('No revisions on this submission'),
+                new Error(
+                    'No revisions on this submission with contractID: foo'
+                ),
             ],
         ]
 
