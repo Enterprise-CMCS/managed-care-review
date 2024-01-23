@@ -9,11 +9,7 @@ import { insertDraftRate } from './insertRate'
 import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
-import {
-    must,
-    createInsertContractData,
-    consoleLogFullData,
-} from '../../testHelpers'
+import { must, createInsertContractData } from '../../testHelpers'
 import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHelpers'
 import { findContractWithHistory } from './findContractWithHistory'
 import type { DraftContractType } from '../../domain-models/contractAndRates/contractTypes'
@@ -819,7 +815,6 @@ describe('findRate', () => {
         )
 
         let submittedRate = must(await findRateWithHistory(client, rateID))
-        consoleLogFullData(submittedRate)
 
         // Expect rate revision 1.0 to have contract revision 1.0
         expect(submittedRate.revisions[0].submitInfo?.updatedReason).toBe(

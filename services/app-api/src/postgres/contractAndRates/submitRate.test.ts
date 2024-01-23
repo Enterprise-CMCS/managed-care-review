@@ -3,11 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { submitRate } from './submitRate'
 import { NotFoundError } from '../postgresErrors'
 import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHelpers'
-import {
-    consoleLogFullData,
-    createInsertContractData,
-    must,
-} from '../../testHelpers'
+import { createInsertContractData, must } from '../../testHelpers'
 import { insertDraftRate } from './insertRate'
 import { submitContract } from './submitContract'
 import { insertDraftContract } from './insertContract'
@@ -61,8 +57,6 @@ describe('submitRate', () => {
         expect(result.revisions[0].submitInfo?.updatedReason).toBe(
             'initial submit'
         )
-
-        consoleLogFullData(result.revisions[0])
 
         //Expect rate form data to be what was inserted
         expect(result.revisions[0]).toEqual(
