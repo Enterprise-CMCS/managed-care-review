@@ -176,31 +176,32 @@ async function updateDraftContractWithRates(
                 ratesFromDB.push(domainRateRevision)
             }
 
+            // Parsing rates from request for update or create
             const updateRates =
                 rateFormDatas && sortRatesForUpdate(ratesFromDB, rateFormDatas)
 
             if (updateRates) {
                 for (const rateFormData of updateRates.upsertRates) {
-                    // Check if the rate exists
-                    // - We don't know if the rate revision exists in the DB we just know it's not connected to the contract.
-                    // - toProtoBuffer gives every rate revision a UUID if there isn't one, so we cannot rely on revision id.
-                    // - We can use this revision id to check if a rate and revision exists.
+                    // Current rate with the latest revision
+                    let currentRate = undefined
 
-                    // Find the rate of the revision with only one draft revision
-                    const currentRate = await tx.rateTable.findFirst({
-                        where: {
-                            id: rateFormData.id,
-                        },
-                        include: {
-                            // include the single most recent revision that is not submitted
-                            revisions: {
-                                where: {
-                                    submitInfoID: null,
-                                },
-                                take: 1,
+                    // If no rate id is undefined we know this is a new rate that needs to be inserted into the DB.
+                    if (rateFormData.rateID) {
+                        currentRate = await tx.rateTable.findUnique({
+                            where: {
+                                id: rateFormData.id,
                             },
-                        },
-                    })
+                            include: {
+                                // include the single most recent revision that is not submitted
+                                revisions: {
+                                    where: {
+                                        submitInfoID: null,
+                                    },
+                                    take: 1,
+                                },
+                            },
+                        })
+                    }
 
                     const contractsWithSharedRates =
                         rateFormData.packagesWithSharedRateCerts?.map(
