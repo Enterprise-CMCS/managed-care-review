@@ -15,34 +15,19 @@ mkdir -p /tmp/build
 pushd /tmp/build
 
 # Download other package dependencies
-yumdownloader -x \*i686 --archlist=x86_64 clamav clamav-lib clamav-update json-c pcre2 libtool-ltdl libxml2 bzip2-libs  xz-libs libprelude gnutls nettle libcurl libnghttp2 libidn2 libssh2 openldap libffi krb5-libs keyutils-libs libunistring cyrus-sasl-lib nss nspr libselinux openssl-libs libcrypt
+yumdownloader -x \*i686 --archlist=x86_64 clamav clamav-lib clamav-update json-c pcre2 libtool-ltdl libxml2 bzip2-libs xz-libs libprelude gnutls nettle 
 rpm2cpio clamav-0*.rpm | cpio -vimd
 rpm2cpio clamav-lib*.rpm | cpio -vimd
 rpm2cpio clamav-update*.rpm | cpio -vimd
 rpm2cpio json-c*.rpm | cpio -vimd
 rpm2cpio pcre*.rpm | cpio -vimd
+rpm2cpio libtool-ltdl*.rpm | cpio -vimd
 rpm2cpio libxml2*.rpm | cpio -vimd
 rpm2cpio bzip2-libs*.rpm | cpio -vimd
-rpm2cpio libtool-ltdl*.rpm | cpio -vimd
 rpm2cpio xz-libs*.rpm | cpio -vimd
 rpm2cpio libprelude*.rpm | cpio -vimd
 rpm2cpio gnutls*.rpm | cpio -vimd
 rpm2cpio nettle*.rpm | cpio -vimd
-rpm2cpio libcurl*.rpm | cpio -vimd
-rpm2cpio libnghttp2*.rpm | cpio -vimd
-rpm2cpio libidn2*.rpm | cpio -vimd
-rpm2cpio libssh2*.rpm | cpio -vimd
-rpm2cpio openldap*.rpm | cpio -vimd
-rpm2cpio libffi*.rpm | cpio -vimd
-rpm2cpio krb5-libs*.rpm | cpio -vimd
-rpm2cpio keyutils-libs*.rpm | cpio -vimd
-rpm2cpio libunistring*.rpm | cpio -vimd
-rpm2cpio cyrus-sasl-lib*.rpm | cpio -vimd
-rpm2cpio nss*.rpm | cpio -vimd
-rpm2cpio nspr*.rpm | cpio -vimd
-rpm2cpio libselinux*.rpm | cpio -vimd
-rpm2cpio openssl-libs*.rpm | cpio -vimd
-rpm2cpio libcrypt*.rpm | cpio -vimd
 
 # reset the timestamps so that we generate a reproducible zip file where
 # running with the same file contents we get the exact same hash even if we
