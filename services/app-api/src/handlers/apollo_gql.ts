@@ -32,7 +32,7 @@ import {
     ApolloServerPluginLandingPageLocalDefault,
     ApolloServerPluginLandingPageDisabled,
 } from 'apollo-server-core'
-import { newJWTLib, parseSigningKeyJSON } from '../jwt'
+import { newJWTLib } from '../jwt'
 
 const requestSpanKey = 'REQUEST_SPAN'
 let tracer: Tracer
@@ -177,7 +177,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
     const parameterStoreMode = process.env.PARAMETER_STORE_MODE
     const ldSDKKey = process.env.LD_SDK_KEY
-    const jwtSecretString = process.env.JWT_SECRET
+    const jwtSecret = process.env.JWT_SECRET
 
     // START Assert configuration is valid
     if (emailerMode !== 'LOCAL' && emailerMode !== 'SES')
@@ -214,10 +214,10 @@ async function initializeGQLHandler(): Promise<Handler> {
         )
     }
 
-    const jwtSecret = parseSigningKeyJSON(jwtSecretString)
-    if (jwtSecret instanceof Error) {
-        console.error('JWT_SECRET not configured correctly: ', jwtSecret)
-        throw jwtSecret
+    if (jwtSecret === undefined || jwtSecret === '') {
+        throw new Error(
+            'Configuration Error: JWT_SECRET is required to run app-api.'
+        )
     }
 
     // END

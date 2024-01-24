@@ -4,19 +4,19 @@ import type {
     PolicyDocument,
     APIGatewayTokenAuthorizerHandler,
 } from 'aws-lambda'
-import { newJWTLib, parseSigningKeyJSON } from '../jwt'
+import { newJWTLib } from '../jwt'
 
 const stageName = process.env.stage
-const jwtSecretString = process.env.JWT_SECRET
+const jwtSecret = process.env.JWT_SECRET
 
 if (stageName === undefined) {
     throw new Error('Configuration Error: stage is required')
 }
 
-const jwtSecret = parseSigningKeyJSON(jwtSecretString)
-if (jwtSecret instanceof Error) {
-    console.error('JWT_SECRET not configured correctly: ', jwtSecret)
-    throw jwtSecret
+if (jwtSecret === undefined || jwtSecret === '') {
+    throw new Error(
+        'Configuration Error: JWT_SECRET is required to run app-api.'
+    )
 }
 
 const jwtLib = newJWTLib({
