@@ -61,5 +61,6 @@ services/uploads/src/avLayer/build/lambda_layer
 services/uploads/src/avLayer/build/lib
 services/uploads/src/avLayer/build/bin
 services/uploads/src/avLayer/build/*.tar.gz
+services/uploads/src/avLayer/build/*.zip
 
 tests/cypress/fixtures/stores/featureFlagStore.json
