@@ -38,7 +38,7 @@ popd
 
 mkdir -p bin lib
 
-cp /tmp/build/usr/bin/clamscan /tmp/build/usr/bin/freshclam bin/.
+cp /tmp/build/usr/bin/clamscan /tmp/build/usr/bin/freshclam /tmp/build/usr/bin/clamdscan bin/.
 cp -R /tmp/build/usr/lib64/* lib/.
 cp freshclam.conf bin/freshclam.conf
 
