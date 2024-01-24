@@ -26,7 +26,7 @@ export function submitRate(
 
         // throw error if the feature flag is off
         if (!featureFlags?.['rate-edit-unlock']) {
-            const errMessage = `Not authorized to submit rate, the feature is disabled`
+            const errMessage = `Not authorized to edit and submit a rate independently, the feature is disabled`
             logError('submitRate', errMessage)
             throw new ForbiddenError(errMessage, {
                 message: errMessage,

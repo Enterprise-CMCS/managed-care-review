@@ -55,6 +55,9 @@ async function updateDraftRate(
                 rateID: rateID,
                 submitInfoID: null,
             },
+            orderBy: {
+                createdAt: 'desc',
+            },
         })
         if (!currentRev) {
             console.error('No Draft Rev!')

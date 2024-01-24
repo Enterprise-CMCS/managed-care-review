@@ -198,6 +198,9 @@ async function updateDraftContractWithRates(
                                         submitInfoID: null,
                                     },
                                     take: 1,
+                                    orderBy: {
+                                        createdAt: 'desc',
+                                    },
                                 },
                             },
                         })
