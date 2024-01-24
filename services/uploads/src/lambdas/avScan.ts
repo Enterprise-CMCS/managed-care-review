@@ -1,5 +1,4 @@
 import { Context, S3Event } from 'aws-lambda'
-import { spawnSync } from 'child_process'
 import { NewS3UploadsClient } from '../deps/s3'
 import { NewClamAV } from '../deps/clamAV'
 import { scanFile } from '../lib/avScan'
@@ -11,19 +10,6 @@ import {
 } from '../lib/otel'
 
 async function avScan(event: S3Event, _context: Context) {
-    // testing, remove below
-    console.info('-----Test clamdscan exists------')
-    const clamdResult = spawnSync('/opt/bin/clamdscan', ['--stdout', '--help'])
-
-    console.info(
-        'stderror',
-        clamdResult.stderr && clamdResult.stderr.toString()
-    )
-    console.info('stdout', clamdResult.stdout && clamdResult.stdout.toString())
-    console.info('err', clamdResult.error)
-
-    // testing, remove above
-
     console.info('-----Start Antivirus Lambda function-----')
 
     // Check on the values for our required config
