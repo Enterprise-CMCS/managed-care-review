@@ -56,4 +56,4 @@ function newJWTLib(config: JWTConfig): JWTLib {
 
 export type { JWTLib }
 
-export { newJWTLib, parseSigningKeyJSON }
+export { newJWTLib }

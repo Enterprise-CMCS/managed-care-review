@@ -1,2 +1,2 @@
-export { newJWTLib, parseSigningKeyJSON } from './jwt'
+export { newJWTLib } from './jwt'
 export type { JWTLib } from './jwt'
