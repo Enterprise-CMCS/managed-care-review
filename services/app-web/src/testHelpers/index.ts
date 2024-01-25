@@ -11,7 +11,6 @@ export {
     userClickByRole,
     userClickByTestId,
     userClickSignIn,
-    ldUseClientSpy,
     TEST_DOC_FILE,
     TEST_DOCX_FILE,
     TEST_PDF_FILE,

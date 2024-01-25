@@ -18,14 +18,12 @@ import { PageProvider } from '../contexts/PageContext'
 import { S3Provider } from '../contexts/S3Context'
 import { testS3Client } from './s3Helpers'
 import { S3ClientT } from '../s3'
-import * as LaunchDarkly from 'launchdarkly-react-client-sdk'
 import {
-    FeatureFlagLDConstant,
-    FlagValue,
     FeatureFlagSettings,
     featureFlagKeys,
     featureFlags,
 } from '../common-code/featureFlags'
+import { LDProvider, ProviderConfig } from 'launchdarkly-react-client-sdk'
 
 /* Render */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -37,6 +35,7 @@ const renderWithProviders = (
         authProvider?: Partial<AuthProviderProps> // used to pass user authentication state via AuthContext
         s3Provider?: S3ClientT // used to pass AWS S3 related state via  S3Context
         location?: (location: Location) => Location // used to pass a location url for react-router
+        featureFlags?: FeatureFlagSettings
     }
 ) => {
     const {
@@ -45,23 +44,61 @@ const renderWithProviders = (
         authProvider = {},
         s3Provider = undefined,
         location = undefined,
+        featureFlags = undefined,
     } = options || {}
 
     const { route } = routerProvider
     const s3Client: S3ClientT = s3Provider ?? testS3Client()
     const user = userEvent.setup()
 
+    const flags = {
+        ...getDefaultFeatureFlags(),
+        ...featureFlags,
+    }
+
+    /**
+     * For unit testing, we do not want to connect to LD to get flag values instead we are initializing the LDProvider
+     * with a set of flag values that was passed into renderWithProviders. This method will result in console errors and
+     * warnings, but are suppressed in this helper.
+     *
+     * The way LaunchDarkly implements unit tests is not working for our app, so this is the work-around
+     * https://docs.launchdarkly.com/guides/sdk/unit-tests/?q=unit+test
+     */
+    const ldProviderConfig: ProviderConfig = {
+        clientSideID: '',
+        options: {
+            bootstrap: flags,
+        },
+    }
+
+    // Ignoring LaunchDarkly errors and warnings from unit testing due to not fully configuring to connect to LaunchDarkly.
+    jest.spyOn(global.console, 'warn').mockImplementationOnce((message) => {
+        if (!message.includes('LaunchDarkly')) {
+            global.console.warn(message)
+        }
+    })
+
+    jest.spyOn(global.console, 'error').mockImplementationOnce((message) => {
+        if (!message.includes('LaunchDarkly')) {
+            global.console.error(message)
+        }
+    })
+
     const renderResult = render(
-        <MockedProvider {...apolloProvider}>
-            <MemoryRouter initialEntries={[route || '']}>
-                <AuthProvider authMode={'AWS_COGNITO'} {...authProvider}>
-                    <S3Provider client={s3Client}>
-                        {location && <WithLocation setLocation={location} />}
-                        <PageProvider>{ui}</PageProvider>
-                    </S3Provider>
-                </AuthProvider>
-            </MemoryRouter>
-        </MockedProvider>
+        <LDProvider {...ldProviderConfig}>
+            <MockedProvider {...apolloProvider}>
+                <MemoryRouter initialEntries={[route || '']}>
+                    <AuthProvider authMode={'AWS_COGNITO'} {...authProvider}>
+                        <S3Provider client={s3Client}>
+                            {location && (
+                                <WithLocation setLocation={location} />
+                            )}
+                            <PageProvider>{ui}</PageProvider>
+                        </S3Provider>
+                    </AuthProvider>
+                </MemoryRouter>
+            </MockedProvider>
+        </LDProvider>
     )
     return {
         user,
@@ -85,47 +122,6 @@ const getDefaultFeatureFlags = (): FeatureFlagSettings =>
         const defaultValue = featureFlags[c].defaultValue
         return Object.assign(a, { [flag]: defaultValue })
     }, {} as FeatureFlagSettings)
-
-//WARNING: This required tests using this function to clear mocks afterwards.
-const ldUseClientSpy = (featureFlags: FeatureFlagSettings) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    jest.spyOn(LaunchDarkly, 'useLDClient').mockImplementation((): any => {
-        return {
-            // Checks to see if flag passed into useLDClient exists in the featureFlag passed in ldUseClientSpy
-            // If flag passed in useLDClient does not exist, then use defaultValue that was also passed into useLDClient.
-            // If flag does exist the featureFlag value passed into ldUseClientSpy then use the value in featureFlag.
-            //
-            // This is done because testing components may contain more than one instance of useLDClient for a different
-            // flag. We do not want to apply the value passed in featureFlags to each useLDClient especially if the flag
-            // passed in useLDClient does not exist in featureFlags passed into ldUseClientSpy.
-            getUser: jest.fn(),
-            identify: jest.fn(),
-            alias: jest.fn(),
-            variation: (
-                flag: FeatureFlagLDConstant,
-                defaultValue: FlagValue | undefined
-            ) => {
-                if (
-                    featureFlags[flag] === undefined &&
-                    defaultValue === undefined
-                ) {
-                    //ldClient.variation doesn't require a default value, throwing error here if a defaultValue was not provided.
-                    throw new Error(
-                        'ldUseClientSpy returned an invalid value of undefined'
-                    )
-                }
-                return featureFlags[flag] === undefined
-                    ? defaultValue
-                    : featureFlags[flag]
-            },
-            allFlags: () => {
-                const defaultFeatureFlags = getDefaultFeatureFlags()
-                Object.assign(defaultFeatureFlags, featureFlags)
-                return defaultFeatureFlags
-            },
-        }
-    })
-}
 
 const prettyDebug = (label?: string, element?: HTMLElement): void => {
     console.info(
@@ -238,7 +234,6 @@ export {
     userClickByRole,
     userClickByTestId,
     userClickSignIn,
-    ldUseClientSpy,
     selectYesNoRadio,
     TEST_DOC_FILE,
     TEST_DOCX_FILE,
