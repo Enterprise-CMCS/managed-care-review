@@ -30,7 +30,9 @@ function packageStatus(
         return 'UNLOCKED'
     }
 
-    return new Error('No revisions on this submission')
+    return new Error(
+        `No revisions on this submission with contractID: ${pkg.id}`
+    )
 }
 
 // submissionSubmittedAt returns the INITIAL submission date. Even if the

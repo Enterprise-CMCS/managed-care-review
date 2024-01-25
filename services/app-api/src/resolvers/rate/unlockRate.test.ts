@@ -41,7 +41,6 @@ describe(`unlockRate`, () => {
 
         const updatedRate = unlockResult.data?.unlockRate.rate
 
-        console.info(updatedRate)
         expect(updatedRate.status).toBe('UNLOCKED')
         expect(updatedRate.draftRevision).toBeDefined()
         expect(updatedRate.draftRevision.unlockInfo.updatedReason).toEqual(
