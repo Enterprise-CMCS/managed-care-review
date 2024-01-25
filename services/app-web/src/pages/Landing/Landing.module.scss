@@ -1,25 +1,31 @@
-@import '../../styles/uswdsImports.scss';
-@import '../../styles/custom.scss';
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
 
 $details-text-line-height: 1.5;
 
 .detailsSection {
-    background-color: $cms-color-background;
+    background-color: custom.$mcr-foundation-white;
     flex: 1;
-    color: $theme-color-base;
-    padding: units(4) 0;
+    color: custom.$mcr-foundation-ink;
+    padding: uswds.units(4) 0;
     .detailsSectionContent {
         max-width: 65rem;
         h2 {
             line-height: line-height('heading', 3);
         }
+        .detailsList {
+            > li {
+                padding: uswds.units(1);
+                line-height: $details-text-line-height;
+            }
+        }
         .detailsSteps {
-            padding: units(4);
-            border: 1px solid $theme-color-base-lighter;
-            @include u-radius('lg');
+            padding: uswds.units(4);
+            border: 1px solid custom.$mcr-gray-lighter;
+            @include uswds.u-radius('lg');
             h2 {
                 margin-top: 0;
-                margin-bottom: units(4);
+                margin-bottom: uswds.units(4);
             }
             ul {
                 list-style-type: none;
@@ -27,9 +33,9 @@ $details-text-line-height: 1.5;
                 padding: 0;
             }
             ul > li {
-                padding: 0 0 units(7) 0;
-                border-left: 3px solid $theme-color-base-lighter;
-                padding-left: units(4);
+                padding: 0 0 uswds.units(7) 0;
+                border-left: 3px solid custom.$mcr-gray-lighter;
+                padding-left: uswds.units(4);
                 position: relative;
                 line-height: $details-text-line-height;
 
@@ -41,7 +47,7 @@ $details-text-line-height: 1.5;
                     position: absolute;
                     left: -18px;
                     top: -5px;
-                    background-color: $cms-color-white;
+                    background-color: custom.$mcr-foundation-white;
                 }
                 &.login::before {
                     content: url(../../assets/images/login-icon.svg);
@@ -58,13 +64,7 @@ $details-text-line-height: 1.5;
             }
             ul > li span:first-child {
                 font-weight: bold;
-                margin-bottom: units(1);
-            }
-        }
-        .detailsList {
-            > li {
-                padding: units(1);
-                line-height: $details-text-line-height;
+                margin-bottom: uswds.units(1);
             }
         }
     }

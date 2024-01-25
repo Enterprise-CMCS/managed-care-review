@@ -42,7 +42,7 @@ import type { LDService } from '../launchDarkly/launchDarkly'
 import { insertUserToLocalAurora } from '../authn'
 import { testStateUser } from './userHelpers'
 import { findStatePrograms } from '../postgres'
-import { must } from './errorHelpers'
+import { must } from './assertionHelpers'
 import { newJWTLib } from '../jwt'
 import type { JWTLib } from '../jwt'
 

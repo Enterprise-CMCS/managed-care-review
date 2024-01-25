@@ -1,5 +1,5 @@
-@import '../../styles/uswdsImports.scss';
-@import '../../styles/custom.scss';
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
 
 .expandableBlock {
     line-height: initial;
@@ -21,5 +21,5 @@
     background-color: transparent;
     border: none;
     cursor: pointer;
-    margin-top: 0.50rem;
+    margin-top: 0.5rem;
 }

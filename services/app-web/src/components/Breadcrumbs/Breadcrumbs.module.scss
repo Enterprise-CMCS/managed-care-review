@@ -1,4 +1,5 @@
-@import '../../styles/uswdsImports.scss';
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
 
 .crumbContainer {
     margin-top: 1em;
@@ -8,7 +9,7 @@
     [class^='usa-breadcrumb'] {
         li:last-child a {
             text-decoration: none;
-            color: $theme-color-base-ink;
+            color: custom.$mcr-foundation-ink;
         }
     }
 }

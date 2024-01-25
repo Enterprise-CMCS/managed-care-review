@@ -1,12 +1,12 @@
-@import '../../styles/uswdsImports.scss';
-@import '../../styles/custom.scss';
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
 
 .formPage {
     width: 100%;
 }
 
 .stepIndicator {
-    @include grid-container;
+    @include uswds.grid-container;
     width: 100%;
 
     > [class^='usa-step-indicator'] {
@@ -17,12 +17,20 @@
 .formHeader {
     text-align: center;
     width: 100%;
-    padding: units(4) 0;
+    padding: uswds.units(4) 0;
 }
 
 .formContainer {
+    > [class^='usa-fieldset'] {
+        padding: uswds.units(4);
+        margin-bottom: uswds.units(2);
+        margin-top: uswds.units(2);
+        background: custom.$mcr-foundation-white;
+        border: 1px solid custom.$mcr-gray-lighter;
+        @include uswds.u-radius('md');
+    }
     // for supporting documents
-    >& .tableContainer {
+    > & .tableContainer {
         &[class^='usa-form'] {
             max-width: 100%;
             width: 75rem;
@@ -31,7 +39,7 @@
     // the first fieldset of the form sets up form container
     // in cases where form has multiple sub sections using SectionCard - use .withSections class
     > [class^='usa-fieldset']:not([class~='with-sections']) {
-        @include sectionCard
+        @include custom.sectionCard;
     }
 
     > div[class^='usa-form-group']:not(:first-of-type) {
@@ -39,11 +47,10 @@
     }
 
     &[class^='usa-form'] {
-
         min-width: 100%;
         max-width: 100%;
 
-        @include at-media(tablet){
+        @include uswds.at-media(tablet) {
             min-width: 40rem;
             max-width: 20rem;
             margin: 0 auto;
@@ -59,7 +66,7 @@
     justify-content: flex-end;
     margin-right: 0;
     margin-left: 0;
-    margin-bottom: units(3);
+    margin-bottom: uswds.units(3);
 }
 
 .dateRangePicker {
@@ -72,9 +79,9 @@
 }
 
 .nestedOptions {
-    padding-left: units(4);
-    margin: units(2) 0;
-    border-left: 4px solid $theme-color-primary;
+    padding-left: uswds.units(4);
+    margin: uswds.units(2) 0;
+    border-left: 4px solid custom.$mcr-primary-base;
 
     legend,
     label {
@@ -83,18 +90,18 @@
 }
 
 .nestedOptionsError {
-    padding-left: units(4);
-    margin: units(2) 0;
-    border-left: 4px solid $theme-color-error-darker;
+    padding-left: uswds.units(4);
+    margin: uswds.units(2) 0;
+    border-left: 4px solid custom.$mcr-error-base;
 }
 
 .stateContact,
 .actuaryContact {
-    margin-bottom: units(5);
+    margin-bottom: uswds.units(5);
 
     .removeContactBtn {
         margin-top: 0.5rem;
-        @include u-text('secondary');
+        @include uswds.u-text('secondary');
     }
 }
 
@@ -113,7 +120,7 @@
     }
 
     .removeContactBtn {
-        margin-top: units(4);
+        margin-top: uswds.units(4);
     }
 }
 
@@ -126,11 +133,11 @@
 .legendSubHeader {
     font-weight: normal;
     &.requiredOptionalText {
-        margin-bottom: units(2);
+        margin-bottom: uswds.units(2);
     }
 }
 
-.guidanceTextBlock{
+.guidanceTextBlock {
     padding-top: 0;
     display: flex;
     flex-direction: column;
@@ -138,10 +145,10 @@
 
 .requiredOptionalText {
     display: block;
-    color: $theme-color-hint;
+    color: custom.$mcr-foundation-hint;
 }
 
-.guidanceTextBlockNoPadding{
+.guidanceTextBlockNoPadding {
     display: flex;
     flex-direction: column;
 }
@@ -154,7 +161,7 @@
     label {
         max-width: none;
     }
-    div[role=note] {
-        margin-top: units(0);
+    div[role='note'] {
+        margin-top: uswds.units(0);
     }
 }

@@ -8,17 +8,12 @@ import { contractRevisionToDomainModel } from './parseContractWithHistory'
 import {
     convertUpdateInfoToDomainModel,
     includeContractFormData,
-    includeUpdateInfo,
     rateFormDataToDomainModel,
 } from './prismaSharedContractRateHelpers'
 
 const includeDraftContracts = {
     revisions: {
-        include: {
-            ...includeContractFormData,
-            submitInfo: includeUpdateInfo,
-            unlockInfo: includeUpdateInfo,
-        },
+        include: includeContractFormData,
         take: 1,
         orderBy: {
             createdAt: 'desc',

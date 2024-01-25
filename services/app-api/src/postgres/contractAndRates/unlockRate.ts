@@ -73,6 +73,9 @@ async function unlockRate(
                         },
                     },
                 },
+                orderBy: {
+                    createdAt: 'desc',
+                },
             })
             if (!currentRev) {
                 console.error(

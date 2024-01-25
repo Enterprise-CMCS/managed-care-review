@@ -1,0 +1,14 @@
+{
+  "extends": "stylelint-config-recommended-scss",
+  "rules": {
+      "color-no-hex": true
+    },
+    "overrides": [
+      {
+      "files": ["src/styles/**"],
+       "rules": {
+        "color-no-hex": null
+        }
+      }
+    ]
+}

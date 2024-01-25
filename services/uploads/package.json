@@ -20,7 +20,7 @@
         ]
     },
     "dependencies": {
-        "@aws-sdk/client-s3": "^3.262.0",
+        "@aws-sdk/client-s3": "^3.485.0",
         "@opentelemetry/api": "^1.6.0",
         "@opentelemetry/exporter-metrics-otlp-http": "^0.45.1",
         "@opentelemetry/exporter-trace-otlp-http": "^0.45.1",
@@ -33,11 +33,11 @@
         "@opentelemetry/semantic-conventions": "^1.18.1"
     },
     "devDependencies": {
-        "copy-webpack-plugin": "^11.0.0",
+        "copy-webpack-plugin": "^12.0.1",
         "serverless": "^3.26.0",
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
         "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
-        "serverless-offline": "^12.0.4",
+        "serverless-offline": "^13.3.2",
         "serverless-offline-ssm": "^6.2.0",
         "serverless-plugin-scripts": "^1.0.2",
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",

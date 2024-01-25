@@ -1,15 +1,18 @@
 import { findRateWithHistory } from './findRateWithHistory'
+import { updateDraftRate } from './updateDraftRate'
 import type { UpdateInfoType } from '../../domain-models'
 import type { PrismaClient } from '@prisma/client'
 import type { RateType } from '../../domain-models/contractAndRates'
 import { includeLatestSubmittedRateRev } from './prismaSubmittedContractHelpers'
 import { NotFoundError } from '../postgresErrors'
+import type { RateFormDataType } from '../../domain-models'
 
 type SubmitRateArgsType = {
     rateID?: string
     rateRevisionID?: string // this is a hack that should not outlive protobuf. Protobufs only have rate revision IDs
     submittedByUserID: UpdateInfoType['updatedBy']
     submitReason: UpdateInfoType['updatedReason']
+    formData?: RateFormDataType
 }
 // Update the given revision
 // * invalidate relationships of previous revision
@@ -22,8 +25,13 @@ async function submitRate(
 
     try {
         return await client.$transaction(async (tx) => {
-            const { rateID, rateRevisionID, submittedByUserID, submitReason } =
-                args
+            const {
+                rateID,
+                rateRevisionID,
+                submittedByUserID,
+                submitReason,
+                formData,
+            } = args
 
             // this is a hack that should not outlive protobuf. Protobufs only have
             // rate revision IDs in them, so we allow submitting by rate revisionID from our submitHPP resolver
@@ -52,6 +60,9 @@ async function submitRate(
                         include: includeLatestSubmittedRateRev,
                     },
                 },
+                orderBy: {
+                    createdAt: 'desc',
+                },
             })
             if (!currentRev) {
                 const err = `PRISMA ERROR: Cannot find the current rev to submit with rate id: ${rateID}`
@@ -74,6 +85,21 @@ async function submitRate(
                 return new Error(message)
             }
 
+            // update the rate with form data changes except for link/unlinking contracts.
+            if (formData) {
+                const updatedDraftRate = await updateDraftRate(tx, {
+                    rateID: currentRev.rateID,
+                    formData,
+                    contractIDs: relatedContractRevs.map((cr) => cr.contractID),
+                })
+
+                if (updatedDraftRate instanceof Error) {
+                    return updatedDraftRate
+                }
+            }
+
+            // update rate with submit info, remove connected between rateRevision and contract, and making entries
+            // for rate and contract revisions on the RateRevisionsOnContractRevisionsTable.
             const updated = await tx.rateRevisionTable.update({
                 where: {
                     id: currentRev.id,

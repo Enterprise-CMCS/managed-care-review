@@ -1,0 +1,54 @@
+// stylelint-disable selector-pseudo-class-no-unknown
+@use '../../styles/custom.scss' as custom;
+
+:export {
+    mcr: {
+        primary: {
+            lighter: custom.$mcr-primary-lighter;
+            light: custom.$mcr-primary-light;
+            base: custom.$mcr-primary-base;
+            dark: custom.$mcr-primary-dark;
+            darkest: custom.$mcr-primary-darkest;
+        }
+        cmsblue: {
+            lightest: custom.$mcr-cmsblue-lightest;
+            base: custom.$mcr-cmsblue-base;
+            dark: custom.$mcr-cmsblue-dark;
+            darkest: custom.$mcr-cmsblue-darkest;
+        }
+        cyan: {
+            light: custom.$mcr-cyan-light;
+            base: custom.$mcr-cyan-base;
+            dark: custom.$mcr-cyan-dark;
+        }
+        gold: {
+            base: custom.$mcr-gold-base;
+            dark: custom.$mcr-gold-dark;
+            darker: custom.$mcr-gold-darker;
+        }
+        gray: {
+            dark: custom.$mcr-gray-dark;
+            base: custom.$mcr-gray-base;
+            lighter: custom.$mcr-gray-lighter;
+            lightest: custom.$mcr-gray-lightest;
+        }
+        foundation: {
+            white: custom.$mcr-foundation-white;
+            ink: custom.$mcr-foundation-ink;
+            hint: custom.$mcr-foundation-hint;
+            link: custom.$mcr-foundation-link;
+            focus: custom.$mcr-foundation-focus;
+            visited: custom.$mcr-foundation-visited;
+        }
+        success: {
+            base: custom.$mcr-success-base;
+            hover: custom.$mcr-success-hover;
+            dark: custom.$mcr-success-dark;
+        }
+        error: {
+            light: custom.$mcr-error-light;
+            base: custom.$mcr-error-base;
+            dark: custom.$mcr-error-dark;
+        }
+    }
+}

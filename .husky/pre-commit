@@ -1,8 +1,8 @@
 #!/bin/bash
 . "$(dirname "$0")/_/husky.sh"
 
-# In a continuing effort to print errors when they are needed, we check for 
-# all pre-commit dependency requirements here. 
+# In a continuing effort to print errors when they are needed, we check for
+# all pre-commit dependency requirements here.
 requirements=("protolint" "shellcheck" "detect-secrets")
 
 for req in "${requirements[@]}"; do

@@ -1,7 +1,7 @@
-@import '../../../styles/uswdsImports.scss';
-@import '../../../styles/custom.scss';
+@use '../../../styles/custom.scss' as custom;
+@use '../../../styles/uswdsImports.scss' as uswds;
 
 .requiredOptionalText {
     display: block;
-    color: $theme-color-hint;
+    color: custom.$mcr-foundation-hint;
 }

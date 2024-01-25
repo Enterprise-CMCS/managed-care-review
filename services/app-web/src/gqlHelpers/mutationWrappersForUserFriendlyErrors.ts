@@ -29,6 +29,7 @@ type MutationType =
     | 'SUBMIT_HEALTH_PLAN_PACKAGE'
     | 'UNLOCK_HEALTH_PLAN_PACKAGE'
     | 'CREATE_QUESTION'
+    | 'UNLOCK_RATE'
 
 type IndexQuestionDivisions =
     | 'DMCOQuestions'
@@ -40,7 +41,8 @@ const divisionToIndexQuestionDivision = (
 ): IndexQuestionDivisions =>
     `${division.toUpperCase()}Questions` as IndexQuestionDivisions
 
-const handleApolloErrorsAndAddUserFacingMessages = (
+
+export const handleApolloErrorsAndAddUserFacingMessages = (
     apolloError: ApolloError,
     mutation: MutationType
 ) => {

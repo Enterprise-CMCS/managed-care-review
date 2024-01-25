@@ -1,74 +1,22 @@
-/*
-* * * * * ==============================
-* * * * * ==============================
-* * * * * ==============================
-* * * * * ==============================
-========================================
-========================================
-========================================
-----------------------------------------
-Read more about settings and
-USWDS color tokens in the documentation:
-https://v2.designsystem.digital.gov/style-tokens/color
-----------------------------------------
-*/
+@import '../mcrColors';
+// THIS FILE IS FOR REFERENCE OF CMS COLORS ONLY. DO NOT IMPORT IN CODE. Prefer MCRCOLORS.
+// This file can be deleted when we complete v3 USWDS upgrade
 
 // Base colors
-$theme-color-base-family: false;
-$theme-color-base-lightest: $cms-color-gray-lightest;
-$theme-color-base-lighter: $cms-color-gray-lighter;
-$theme-color-base-light: $cms-color-gray-light;
-$theme-color-base: $cms-color-base;
-$theme-color-base-dark: $cms-color-gray-dark;
-$theme-color-base-darker: false;
-$theme-color-base-darkest: false;
-$theme-color-base-ink: #1b1b1b;
+$theme-color-base-lightest: $mcr-gray-lightest;
+$theme-color-base-light: $mcr-gray-lighter;
 
 // Primary colors
-$theme-color-primary-family: 'blue';
-$theme-color-primary-lightest: false;
-$theme-color-primary-lighter: #d9e8f6;
-$theme-color-primary-light: 'blue-30';
-$theme-color-primary: $cms-color-primary;
-$theme-color-primary-vivid: 'blue-warm-60v';
-$theme-color-primary-dark: $cms-color-primary-darker;
-$theme-color-primary-darker: $cms-color-primary-darkest;
-$theme-color-primary-darkest: false;
+$theme-color-primary-lighter: $mcr-primary-lightest;
+$theme-color-primary: $mcr-primary-base;
+$theme-color-primary-dark: $mcr-primary-dark;
+$theme-color-primary-darker: $mcr-primary-darkest;
 
 // Secondary colors
-$theme-color-secondary-family: false;
-$theme-color-secondary-lightest: false;
-$theme-color-secondary-lighter: $cms-color-primary-alt-lightest;
-$theme-color-secondary-light: $cms-color-primary-alt-light;
-$theme-color-secondary: $cms-color-primary-alt;
-$theme-color-secondary-vivid: false;
-$theme-color-secondary-dark: $cms-color-primary-alt-dark;
-$theme-color-secondary-darker: $cms-color-primary-alt-darkest;
-$theme-color-secondary-darkest: false;
 
 // Gradient colors
-$theme-color-gradient-light: #02bfe7;
+$theme-color-gradient-light: $mcr-cyan-base;
 $theme-color-gradient-dark: $theme-color-primary-dark;
-
-// Accent warm colors
-// $theme-color-accent-warm-family: false;
-// $theme-color-accent-warm-lightest: $cms-color-gold-lightest;
-// $theme-color-accent-warm-lighter: $cms-color-gold-lighter;
-// $theme-color-accent-warm-light: $cms-color-gold-light;
-// $theme-color-accent-warm: $cms-color-gold;
-// $theme-color-accent-warm-dark: $cms-color-gold-dark;
-// $theme-color-accent-warm-darker: $cms-color-gold-darker;
-// $theme-color-accent-warm-darkest: $cms-color-gold-darkest;
-
-// // Accent cool colors
-// $theme-color-accent-cool-family: false;
-// $theme-color-accent-cool-lightest: $cms-color-green-lightest;
-// $theme-color-accent-cool-lighter: $cms-color-green-lighter;
-// $theme-color-accent-cool-light: $cms-color-green-light;
-// $theme-color-accent-cool: $cms-color-cool-blue;
-// $theme-color-accent-cool-dark: $cms-color-green-dark;
-// $theme-color-accent-cool-darker: $cms-color-green-darker;
-// $theme-color-accent-cool-darkest: $cms-color-green-darkest;
 
 /*
 ----------------------------------------
@@ -77,45 +25,20 @@ State palette colors
 */
 
 // Error colors
-// $theme-color-error-family: false;
-$theme-color-error-lighter: #f4e3db;
-$theme-color-error-light: $cms-color-error-light;
-$theme-color-error: $cms-color-error;
-$theme-color-error-dark: $cms-color-error-dark;
-$theme-color-error-darker: $cms-color-error-darker;
-
-// Warning colors
-// $theme-color-warning-family: false;
-$theme-color-warning-lighter: $cms-color-warn-lighter;
-$theme-color-warning-light: $cms-color-warn-light;
-$theme-color-warning: $cms-color-warn;
-$theme-color-warning-dark: $cms-color-warn-dark;
-$theme-color-warning-darker: $cms-color-warn-darker;
+$theme-color-error-lighter: $mcr-error-light;
+$theme-color-error-light: $mcr-error-light;
+$theme-color-error: $mcr-error-base;
+$theme-color-error-darker: $mcr-error-dark;
 
 // Success colors
-// $theme-color-success-family: false;
-$theme-color-success-lighter: $cms-color-success-lighter;
-$theme-color-success-light: $cms-color-success-light;
-$theme-color-success: $cms-color-success;
-$theme-color-success-dark: $cms-color-success-dark;
-$theme-color-success-darker: $cms-color-success-darker;
+$theme-color-success: $mcr-success-base;
+$theme-color-success-dark: $mcr-success-dark;
 
 // Info colors
-// $theme-color-info-family: 'cyan';
-// $theme-color-info-lighter: 'cyan-5';
-// $theme-color-info-light: 'cyan-20';
-// $theme-color-info: 'cyan-30v';
-$theme-color-info-dark: #009ec1;
-// $theme-color-info-darker: 'blue-cool-60';
+$theme-color-info-dark: $mcr-cyan-dark;
 
 // Hint colors
-$theme-color-hint: #71767A;
-
-// // Disabled colors
-// $theme-color-disabled-family: 'gray';
-// $theme-color-disabled-light: 'gray-10';
-// $theme-color-disabled: 'gray-20';
-// $theme-color-disabled-dark: 'gray-30';
+$theme-color-hint: $mcr-foundation-hint;
 
 /*
 ----------------------------------------
@@ -124,13 +47,13 @@ General colors
 */
 
 // Links
-$theme-link-color: 'primary';
-$theme-link-visited-color: $cms-color-visited;
-$theme-link-hover-color: 'primary-dark';
-$theme-link-active-color: 'primary-darker';
+$theme-link-color: $mcr-primary-base;
+$theme-link-visited-color: $mcr-foundation-visited;
+$theme-link-hover-color: $mcr-primary-dark;
+$theme-link-active-color: $mcr-primary-darkest;
 
 // Focus
-$theme-focus-color: $cms-focus-color;
+$theme-focus-color: $mcr-foundation-focus;
 
 // Background
-$theme-banner-background-color: $cms-color-background;
+$theme-banner-background-color: $mcr-foundation-white;

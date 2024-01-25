@@ -16,8 +16,8 @@ import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { formatGQLDate } from 'app-web/src/common-code/dateHelpers'
 
+// eslint-disable-next-line jest/no-disabled-tests
 describe.skip('indexRates', () => {
-
     it('returns ForbiddenError for state user', async () => {
         const stateServer = await constructTestPostgresServer()
 
@@ -155,9 +155,8 @@ describe.skip('indexRates', () => {
         })
         const initialRates = initial.data?.indexRates.edges
 
-        const initialDraft = await createAndUpdateTestHealthPlanPackage(
-            stateServer
-        )
+        const initialDraft =
+            await createAndUpdateTestHealthPlanPackage(stateServer)
 
         // turn to CHIP contract only, leave rates for now to emulate form behviavor
         const updatedToContractOnly = await updateTestHealthPlanPackage(
@@ -399,15 +398,12 @@ describe.skip('indexRates', () => {
         })
 
         // First, create new submissions
-        const submittedSubmission = await createAndSubmitTestHealthPlanPackage(
-            server
-        )
-        const unlockedSubmission = await createAndSubmitTestHealthPlanPackage(
-            server
-        )
-        const relockedSubmission = await createAndSubmitTestHealthPlanPackage(
-            server
-        )
+        const submittedSubmission =
+            await createAndSubmitTestHealthPlanPackage(server)
+        const unlockedSubmission =
+            await createAndSubmitTestHealthPlanPackage(server)
+        const relockedSubmission =
+            await createAndSubmitTestHealthPlanPackage(server)
 
         // unlock two
         await unlockTestHealthPlanPackage(
@@ -472,15 +468,12 @@ describe.skip('indexRates', () => {
         })
 
         // First, create new submissions
-        const submittedSubmission = await createAndSubmitTestHealthPlanPackage(
-            server
-        )
-        const unlockedSubmission = await createAndSubmitTestHealthPlanPackage(
-            server
-        )
-        const relockedSubmission = await createAndSubmitTestHealthPlanPackage(
-            server
-        )
+        const submittedSubmission =
+            await createAndSubmitTestHealthPlanPackage(server)
+        const unlockedSubmission =
+            await createAndSubmitTestHealthPlanPackage(server)
+        const relockedSubmission =
+            await createAndSubmitTestHealthPlanPackage(server)
 
         // unlock two
         await unlockTestHealthPlanPackage(
@@ -577,12 +570,10 @@ describe.skip('indexRates', () => {
             },
         })
         // submit packages from two different states
-        const defaultState1 = await createAndSubmitTestHealthPlanPackage(
-            stateServer
-        )
-        const defaultState2 = await createAndSubmitTestHealthPlanPackage(
-            stateServer
-        )
+        const defaultState1 =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
+        const defaultState2 =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
         const draft = await createAndUpdateTestHealthPlanPackage(
             otherStateServer,
             undefined,
