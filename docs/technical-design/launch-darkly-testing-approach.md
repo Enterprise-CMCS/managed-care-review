@@ -23,60 +23,88 @@ export LD_SDK_KEY='Place Launch Darkly SDK key here'
 ## Feature flag unit testing
 
 ### Client side unit testing
-Client side unit testing utilizes `jest.spyOn()` to mock the LaunchDarkly `useLDClient` hook and return default flag values or values specified. This implementation is done in our jest helper function `ldUseClientSpy()` located in `app-web/src/testHelpers/jestHelpers.tsx`.
+Client side unit testing utilizes the `LDProvider` in our [renderWithProviders](../../services/app-web/src/testHelpers/jestHelpers.tsx) function to set up feature flags. We use this method for testing because the official documented [unit testing](https://docs.launchdarkly.com/guides/sdk/unit-tests/?q=unit+test) method by LaunchDarkly does not work with our implementation. Previously we had used `jest.spyOn` to intercept `useLDClient` and mock the `useLDClient.variation()` function with our defined feature flag values. With `launchdarkly-react-client-sdk@3.0.10` that method did not work anymore.
 
-`ldUseClientSpy` takes in an object of feature flags and values as an argument. You can configure multiple flags with the object passed into `ldUseClientSpy`.
+Currently, LaunchDarkly does not provide an actual mock `LDProvider` so if or when they do, then we could update this with that provider.
 
-```javascript
-ldUseClientSpy({
-  'rates-across-submissions': true,
-  'rate-cert-assurance': true,
-})
+#### Configuration
+This method tries to "mock" the `LDProvider` for testing by giving it our predefined flags at initialization so that our tests can be individually configured with feature flags values. This implementation needs to be independent of what the values are set at LaunchDarkly to isolate our tests from any changes from values in LaunchDarkly. Therefore, it is configured to fail when trying to make an API call to LaunchDarkly to retrieve feature flag values.
+
+To configure the provider to initialize with our predefined flag values. The configuration below, in `renderWithProviders`, the `bootstrap` field is how we set the initial flag values. You will also see that, compared to our configuration in [app-web/src/index.tsx](../../services/app-web/src/index.tsx), the config needed to connect to LaunchDarkly is missing, this is how we stop the provider from successfully getting a response from LaunchDarkly.
+```typescript
+const ldProviderConfig: ProviderConfig = {
+  clientSideID: '',
+  options: {
+    bootstrap: flags,
+  },
+}
 ```
 
-To configure feature flags for a single test place `ldUseClientSpy` at the beginning of your test.
+Because we are not fully configuring `LDProvider` it will fail when making an API call to LaunchDarkly. When this happens, there will be console errors and warnings when you run a test. To get around this, there are two `jest.sypOn` functions in `renderWithProviders` to silence all LaunchDarkly errors.
 
-```javascript
-it('cannot continue if no documents are added to the second rate', async () => {
-    ldUseClientSpy({ 'rates-across-submissions': true })
-    const mockUpdateDraftFn = jest.fn()
-    renderWithProviders(
-        <RateDetails
-            draftSubmission={emptyRateDetailsDraft}
-            updateDraft={mockUpdateDraftFn}
-            previousDocuments={[]}
-        />,
-        {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
+```typescript
+    jest.spyOn(global.console, 'warn').mockImplementationOnce((message) => {
+        if (!message.includes('LaunchDarkly')) {
+            global.console.warn(message);
         }
-    )
+    });
 
-    ...
-})
+    jest.spyOn(global.console, 'error').mockImplementationOnce((message) => {
+        if (!message.includes('LaunchDarkly')) {
+            global.console.error(message);
+        }
+    });
 ```
 
-To configure multiple tests inside a `describe` block you can:
-- Follow the method for single test on each test inside the `describe`.
-- If all the tests require the same flag configuration place `ldUseClientSpy` at the top of the block in `beforeEach()`.
+We define our initial feature flag values, `flags` variable in the config above, by combining the default feature flag values with values passed into `renderWithProviders` for each test. Looking at the code snippet below from `renderWithProviders`, we get the default flag values from [flags.ts](../../services/app-web/src/common-code/featureFlags/flags.ts) using `getDefaultFeatureFlags()` then merge that with `option.featureFlags` values passed into `renderWithProviders`. This will allow each test to configure the specific feature flag values for that test and supply default values for flags the test did not define.
+
+```typescript
+const {
+  routerProvider = {},
+  apolloProvider = {},
+  authProvider = {},
+  s3Provider = undefined,
+  location = undefined,
+  featureFlags = undefined
+} = options || {}
+
+const flags = {
+  ...getDefaultFeatureFlags(),
+  ...featureFlags
+}
+
+const ldProviderConfig: ProviderConfig = {
+  clientSideID: '',
+  options: {
+    bootstrap: flags,
+  },
+}
+```
+
+#### Examples
+
+Using this method in our unit tests is simple and similar to how we configure the other providers. When calling `renderWithProdivers` we need to supply the second argument `options` with the `featureFlag` field. 
+
+In the example below we set `featureFlag` with an object that contains two feature flags and their values. When this test is run, the component will be supplied with these two flag values we supplied along with default flag values for feature flags we did not define in the argument. Take note that the `featureFlag` field is type `FeatureFlagSettings` so you will only be allowed to define flags that exists in [flags.ts](../../services/app-web/src/common-code/featureFlags/flags.ts).
 
 ```javascript
-describe('rates across submissions', () => {
-    beforeEach(() =>
-        ldUseClientSpy({
-          'rates-across-submissions': true,
-        })
-    )
-    afterEach(() => {
-        jest.clearAllMocks()
-    })
-
-    ...
-})
+renderWithProviders(
+  <ContractDetails
+          draftSubmission={medicaidAmendmentPackage}
+          updateDraft={jest.fn()}
+          previousDocuments={[]}
+  />,
+  {
+    apolloProvider: {
+      mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+    },
+    featureFlags: {
+      'rate-edit-unlock': false,
+      '438-attestation': true
+    }
+  }
+)
 ```
-
-It's always best to `jest.clearAllMocks()` after each test with either one of these methods, otherwise, preceding tests may have the same flag configured as the previous test.
 
 ### Server side unit testing
 LaunchDarkly server side implementation is done by configuring our resolvers with `ldService` dependency. In our resolver we then can use the method `getFeatureFlag` from `ldService` to get the flag value from LaunchDarkly.
