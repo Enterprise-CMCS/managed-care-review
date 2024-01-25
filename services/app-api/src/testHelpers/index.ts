@@ -21,3 +21,13 @@ export {
 export { getStateRecord } from './stateHelpers'
 
 export { consoleLogFullData } from './debugHelpers'
+
+export {
+    createTestRate,
+    createAndSubmitTestRate,
+    fetchTestRateById,
+    submitTestRate,
+    unlockTestRate,
+    resubmitTestRate,
+    updateTestRate,
+} from './gqlRateHelpers'

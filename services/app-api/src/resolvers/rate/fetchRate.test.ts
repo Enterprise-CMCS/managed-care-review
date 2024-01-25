@@ -9,13 +9,19 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
-import { must } from '../../testHelpers'
+import {
+    createAndSubmitTestRate,
+    must,
+    resubmitTestRate,
+    unlockTestRate,
+    updateTestRate,
+} from '../../testHelpers'
 import { v4 as uuidv4 } from 'uuid'
 
 describe('fetchRate', () => {
     it('returns correct rate revisions on resubmit when existing rate is edited', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer()
 
         const cmsServer = await constructTestPostgresServer({
             context: {
@@ -23,7 +29,7 @@ describe('fetchRate', () => {
             },
         })
 
-        const initialRateInfos = () => ({
+        const initialRate = () => ({
             id: uuidv4(),
             rateType: 'NEW' as const,
             rateDateStart: new Date(Date.UTC(2025, 5, 1)),
@@ -51,61 +57,30 @@ describe('fetchRate', () => {
             packagesWithSharedRateCerts: [],
         })
 
-        // First, create new submission and unlock to edit rate
-        const submittedEditedRates = await createAndSubmitTestHealthPlanPackage(
-            server,
-            {
-                rateInfos: [initialRateInfos()],
-            }
-        )
-        const packageID = submittedEditedRates.id
-
-        // Unlock submission
-        const unlockedHPP = await unlockTestHealthPlanPackage(
+        // First, submit and unlock a rate
+        const submittedRate = await createAndSubmitTestRate(stateServer, {
+            stateCode: 'FL',
+            ...initialRate(),
+        })
+        await unlockTestRate(
             cmsServer,
-            packageID,
+            submittedRate.id,
             'Unlock to edit an existing rate'
         )
 
-        // Decode unlocked submission form data
-        const unlockedHppFormData = latestFormData(unlockedHPP)
-        // Get the data of the first and only rate in the HPP
-        const unlockedRate = unlockedHppFormData.rateInfos[0]
-
-        // edit the same rate
-        await updateTestHealthPlanPackage(server, packageID, {
-            rateInfos: [
-                {
-                    ...unlockedRate,
-                    id: unlockedRate.id, // edit same rate, use same id
-                    rateDateStart: new Date(Date.UTC(2025, 1, 1)),
-                    rateDateEnd: new Date(Date.UTC(2027, 1, 1)),
-                },
-            ],
+        // editrate with new data and resubmit
+        await updateTestRate(submittedRate.id, {
+            rateDateStart: new Date(Date.UTC(2025, 1, 1)),
+            rateDateEnd: new Date(Date.UTC(2027, 1, 1)),
         })
 
-        // Resubmit
-        const resubmittedHPP = await resubmitTestHealthPlanPackage(
-            server,
-            packageID,
+        const resubmitted = await resubmitTestRate(
+            stateServer,
+            submittedRate.id,
             'Resubmit with edited rate description'
         )
 
-        // Decode resubmitted HPP form data
-        const resubmittedHppFormData = latestFormData(resubmittedHPP)
-
-        // fetch and check rate
-        const result = await cmsServer.executeOperation({
-            query: FETCH_RATE,
-            variables: {
-                input: {
-                    rateID: resubmittedHppFormData.rateInfos[0].id,
-                },
-            },
-        })
-
-        const resubmittedRate = result.data?.fetchRate.rate
-        expect(result.errors).toBeUndefined()
+        const resubmittedRate = resubmitted.data?.fetchRate.rate
         expect(resubmittedRate).toBeDefined()
 
         // check that we have two revisions of the same rate

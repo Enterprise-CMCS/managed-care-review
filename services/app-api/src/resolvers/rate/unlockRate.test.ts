@@ -1,11 +1,8 @@
-import {
-    constructTestPostgresServer,
-    createAndSubmitTestHealthPlanPackage,
-} from '../../testHelpers/gqlHelpers'
+import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import UNLOCK_RATE from '../../../../app-graphql/src/mutations/unlockRate.graphql'
 import { testCMSUser } from '../../testHelpers/userHelpers'
-import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
-import { expectToBeDefined } from '../../testHelpers/assertionHelpers'
+import { expectToBeDefined, must } from '../../testHelpers/assertionHelpers'
+import { createAndSubmitTestRate } from '../../testHelpers/gqlRateHelpers'
 
 describe(`unlockRate`, () => {
     const cmsUser = testCMSUser()
@@ -18,31 +15,24 @@ describe(`unlockRate`, () => {
             },
         })
 
-        // Create a rate
-        const submission =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
-        const initialSubmitFormData = latestFormData(submission)
-        const rateID = initialSubmitFormData.rateInfos[0].id
-        expect(rateID).toBeDefined()
-
-        // unlock rate
+        // Create and unlock a rate
+        const rate = await createAndSubmitTestRate(stateServer)
+        const rateID = rate.id
         const unlockedReason = 'Super duper good reason.'
-        const unlockResult = await cmsServer.executeOperation({
-            query: UNLOCK_RATE,
-            variables: {
-                input: {
-                    rateID,
-                    unlockedReason,
+        const unlockResult = must(
+            await cmsServer.executeOperation({
+                query: UNLOCK_RATE,
+                variables: {
+                    input: {
+                        rateID,
+                        unlockedReason,
+                    },
                 },
-            },
-        })
-
-        expect(unlockResult.errors).toBeUndefined()
+            })
+        )
 
         const updatedRate = unlockResult.data?.unlockRate.rate
-
         expect(updatedRate.status).toBe('UNLOCKED')
-        expect(updatedRate.draftRevision).toBeDefined()
         expect(updatedRate.draftRevision.unlockInfo.updatedReason).toEqual(
             unlockedReason
         )
@@ -57,18 +47,14 @@ describe(`unlockRate`, () => {
         })
 
         // Create a rate
-        const submission =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
-        const initialSubmitFormData = latestFormData(submission)
-        const targetRateBeforeUnlock = initialSubmitFormData.rateInfos[0]
-        expectToBeDefined(targetRateBeforeUnlock.id)
+        const rate = await createAndSubmitTestRate(stateServer)
 
         // Unlock the rate once
         const unlockResult1 = await cmsServer.executeOperation({
             query: UNLOCK_RATE,
             variables: {
                 input: {
-                    rateID: targetRateBeforeUnlock.id,
+                    rateID: rate.id,
                     unlockedReason: 'Super duper good reason.',
                 },
             },
@@ -81,7 +67,7 @@ describe(`unlockRate`, () => {
             query: UNLOCK_RATE,
             variables: {
                 input: {
-                    rateID: targetRateBeforeUnlock.id,
+                    rateID: rate.id,
                     unlockedReason: 'Super duper good reason.',
                 },
             },
@@ -96,18 +82,14 @@ describe(`unlockRate`, () => {
     it('returns unauthorized error for state user', async () => {
         const stateServer = await constructTestPostgresServer()
         // Create a rate
-        const submission =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
-        const initialSubmitFormData = latestFormData(submission)
-        const targetRateBeforeUnlock = initialSubmitFormData.rateInfos[0]
-        expect(targetRateBeforeUnlock.id).toBeDefined()
+        const rate = await createAndSubmitTestRate(stateServer)
 
         // Unlock the rate
         const unlockResult = await stateServer.executeOperation({
             query: UNLOCK_RATE,
             variables: {
                 input: {
-                    rateID: targetRateBeforeUnlock.id,
+                    rateID: rate.id,
                     unlockedReason: 'Super duper good reason.',
                 },
             },
