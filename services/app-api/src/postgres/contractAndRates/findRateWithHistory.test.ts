@@ -740,4 +740,379 @@ describe('findRate', () => {
             latestRateTwoResubmit.revisions[0].contractRevisions
         ).toHaveLength(0)
     })
+
+    it('matches contract revision to rate revision with independent rate submit and unlocks', async () => {
+        const client = await sharedTestPrismaClient()
+
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                stateCode: 'NM',
+            },
+        })
+
+        const cmsUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Zuko',
+                familyName: 'Hotman',
+                email: 'zuko@example.com',
+                role: 'CMS_USER',
+            },
+        })
+
+        // setup a single test contract
+        const draftContractData = createInsertContractData({
+            submissionDescription: 'one contract',
+        })
+        const draftContract = must(
+            await insertDraftContract(client, draftContractData)
+        )
+
+        const updatedContract = must(
+            await updateDraftContractWithRates(client, {
+                contractID: draftContract.id,
+                formData: {},
+                rateFormDatas: [
+                    createInsertRateData({
+                        id: uuidv4(),
+                        rateType: 'NEW',
+                    }),
+                ],
+            })
+        )
+
+        const draftRateRevision =
+            updatedContract.draftRevision?.rateRevisions[0]
+
+        if (!draftRateRevision) {
+            throw new Error('Unexpected Error: No rate found in contract')
+        }
+
+        const contractID = updatedContract.id
+        const rateID = draftRateRevision?.rate.id
+
+        // Submit rate
+        must(
+            await submitRate(client, {
+                rateID,
+                submittedByUserID: stateUser.id,
+                submitReason: 'submit rate revision 1.0',
+            })
+        )
+
+        // Submit contract
+        must(
+            await submitContract(client, {
+                contractID: draftContract.id,
+                submittedByUserID: stateUser.id,
+                submitReason: 'submit contract revision 1.0',
+            })
+        )
+
+        let submittedRate = must(await findRateWithHistory(client, rateID))
+
+        // Expect rate revision 1.0 to have contract revision 1.0
+        expect(submittedRate.revisions[0].submitInfo?.updatedReason).toBe(
+            'submit rate revision 1.0'
+        )
+        expect(
+            submittedRate.revisions[0].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('submit contract revision 1.0')
+
+        // Unlock and resubmit contract
+        must(
+            await unlockContract(client, {
+                contractID,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock contract revision 1.0',
+            })
+        )
+        must(
+            await submitContract(client, {
+                contractID,
+                submittedByUserID: stateUser.id,
+                submitReason: 'submit contract revision 1.1',
+            })
+        )
+
+        submittedRate = must(await findRateWithHistory(client, rateID))
+
+        // Expect rate revision 1.0 to have contract revision 1.1
+        expect(submittedRate.revisions[0].submitInfo?.updatedReason).toBe(
+            'submit rate revision 1.0'
+        )
+        expect(
+            submittedRate.revisions[0].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('submit contract revision 1.1')
+
+        // Unlock and resubmit rate
+        must(
+            await unlockRate(client, {
+                rateID,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock rate revision 1.0',
+            })
+        )
+        must(
+            await submitRate(client, {
+                rateID,
+                submittedByUserID: stateUser.id,
+                submitReason: 'submit rate revision 1.1',
+            })
+        )
+
+        // Fetch fresh data
+        submittedRate = must(await findRateWithHistory(client, rateID))
+
+        // Expect latest rate revision to be 1.1 and have contract revision 1.1
+        expect(submittedRate.revisions[0].submitInfo?.updatedReason).toBe(
+            'submit rate revision 1.1'
+        )
+        expect(
+            submittedRate.revisions[0].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('submit contract revision 1.1')
+
+        // Expect earilest rate revision to be 1.0 and have contract revision 1.1
+        expect(submittedRate.revisions[1].submitInfo?.updatedReason).toBe(
+            'submit rate revision 1.0'
+        )
+        expect(
+            submittedRate.revisions[1].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('submit contract revision 1.1')
+
+        // Unlock both contract and rate and resubmit
+        must(
+            await unlockRate(client, {
+                rateID,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock rate revision 1.1',
+            })
+        )
+        must(
+            await unlockContract(client, {
+                contractID,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock contract revision 1.1',
+            })
+        )
+        must(
+            await submitRate(client, {
+                rateID,
+                submittedByUserID: stateUser.id,
+                submitReason: 'submit rate revision 1.2',
+            })
+        )
+        must(
+            await submitContract(client, {
+                contractID,
+                submittedByUserID: stateUser.id,
+                submitReason: 'submit contract revision 1.2',
+            })
+        )
+
+        // Fetch fresh data
+        submittedRate = must(await findRateWithHistory(client, rateID))
+
+        // Expect latest rate revision to be 1.2 and have contract revision 1.2
+        expect(submittedRate.revisions[0].submitInfo?.updatedReason).toBe(
+            'submit rate revision 1.2'
+        )
+        expect(
+            submittedRate.revisions[0].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('submit contract revision 1.2')
+
+        // Expect previous rate revisions to still be connected to the same contract revision
+        expect(submittedRate.revisions[1].submitInfo?.updatedReason).toBe(
+            'submit rate revision 1.1'
+        )
+        expect(
+            submittedRate.revisions[1].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('submit contract revision 1.1')
+        expect(submittedRate.revisions[2].submitInfo?.updatedReason).toBe(
+            'submit rate revision 1.0'
+        )
+        expect(
+            submittedRate.revisions[2].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('submit contract revision 1.1')
+
+        // Multiple contract unlocks and resubmits
+        must(
+            await unlockContract(client, {
+                contractID,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock contract revision 1.2',
+            })
+        )
+        must(
+            await submitContract(client, {
+                contractID,
+                submittedByUserID: stateUser.id,
+                submitReason: 'submit contract revision 1.3',
+            })
+        )
+        must(
+            await unlockContract(client, {
+                contractID,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock contract revision 1.3',
+            })
+        )
+        must(
+            await submitContract(client, {
+                contractID,
+                submittedByUserID: stateUser.id,
+                submitReason: 'submit contract revision 1.4',
+            })
+        )
+        must(
+            await unlockContract(client, {
+                contractID,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock contract revision 1.4',
+            })
+        )
+        must(
+            await submitContract(client, {
+                contractID,
+                submittedByUserID: stateUser.id,
+                submitReason: 'submit contract revision 1.5',
+            })
+        )
+
+        // Fetch fresh data
+        submittedRate = must(await findRateWithHistory(client, rateID))
+
+        // Expect latest rate revision to be 1.2 and have contract revision 1.5
+        expect(submittedRate.revisions[0].submitInfo?.updatedReason).toBe(
+            'submit rate revision 1.2'
+        )
+        expect(
+            submittedRate.revisions[0].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('submit contract revision 1.5')
+
+        // Expect previous rate revisions to still be connected to the same contract revision
+        expect(submittedRate.revisions[1].submitInfo?.updatedReason).toBe(
+            'submit rate revision 1.1'
+        )
+        expect(
+            submittedRate.revisions[1].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('submit contract revision 1.1')
+        expect(submittedRate.revisions[2].submitInfo?.updatedReason).toBe(
+            'submit rate revision 1.0'
+        )
+        expect(
+            submittedRate.revisions[2].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('submit contract revision 1.1')
+
+        // 3 rate unlocks and resubmits
+        must(
+            await unlockRate(client, {
+                rateID,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock rate revision 1.2',
+            })
+        )
+        must(
+            await submitRate(client, {
+                rateID,
+                submittedByUserID: stateUser.id,
+                submitReason: 'submit rate revision 1.3',
+            })
+        )
+        must(
+            await unlockRate(client, {
+                rateID,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock rate revision 1.3',
+            })
+        )
+        must(
+            await submitRate(client, {
+                rateID,
+                submittedByUserID: stateUser.id,
+                submitReason: 'submit rate revision 1.4',
+            })
+        )
+        must(
+            await unlockRate(client, {
+                rateID,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock rate revision 1.4',
+            })
+        )
+        must(
+            await submitRate(client, {
+                rateID,
+                submittedByUserID: stateUser.id,
+                submitReason: 'submit rate revision 1.5',
+            })
+        )
+
+        // Fetch fresh data
+        submittedRate = must(await findRateWithHistory(client, rateID))
+
+        // Expect to have 6 revisions, 3 additional from 3 unlocks and resubmits
+        expect(submittedRate.revisions).toHaveLength(6)
+
+        // Expect three latest revisions to have contract version 1.5
+        expect(submittedRate.revisions[0].submitInfo?.updatedReason).toBe(
+            'submit rate revision 1.5'
+        )
+        expect(
+            submittedRate.revisions[0].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('submit contract revision 1.5')
+        expect(submittedRate.revisions[1].submitInfo?.updatedReason).toBe(
+            'submit rate revision 1.4'
+        )
+        expect(
+            submittedRate.revisions[1].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('submit contract revision 1.5')
+        expect(submittedRate.revisions[2].submitInfo?.updatedReason).toBe(
+            'submit rate revision 1.3'
+        )
+        expect(
+            submittedRate.revisions[2].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('submit contract revision 1.5')
+
+        // Expect earliest 3 rate revisions to have the same contract revision as before.
+        expect(submittedRate.revisions[3].submitInfo?.updatedReason).toBe(
+            'submit rate revision 1.2'
+        )
+        expect(
+            submittedRate.revisions[3].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('submit contract revision 1.5')
+        expect(submittedRate.revisions[4].submitInfo?.updatedReason).toBe(
+            'submit rate revision 1.1'
+        )
+        expect(
+            submittedRate.revisions[4].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('submit contract revision 1.1')
+        expect(submittedRate.revisions[5].submitInfo?.updatedReason).toBe(
+            'submit rate revision 1.0'
+        )
+        expect(
+            submittedRate.revisions[5].contractRevisions[0].submitInfo
+                ?.updatedReason
+        ).toBe('submit contract revision 1.1')
+    })
 })

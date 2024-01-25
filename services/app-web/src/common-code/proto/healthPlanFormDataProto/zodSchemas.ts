@@ -108,7 +108,10 @@ const sharedRateCertDisplay = z.object({
     packageId: z.string(),
 })
 
-const rateTypeSchema = z.union([z.literal('NEW'), z.literal('AMENDMENT')])
+const rateTypeSchema = z.union([
+    z.literal('NEW'),
+    z.literal('AMENDMENT')
+])
 
 const rateCapitationTypeSchema = z.union([
     z.literal('RATE_CELL'),

@@ -10,6 +10,7 @@ import {
     ListObjectVersionsCommand,
     DeleteObjectsCommand,
     PutBucketVersioningCommand,
+    PutBucketVersioningCommandInput,
 } from '@aws-sdk/client-s3'
 
 const AWSConfig = {
@@ -234,7 +235,7 @@ async function turnOffVersioningOnBucket(
         `Turning off bucket versioning on bucket: ${bucket.PhysicalResourceId}`
     )
 
-    const versionParams = {
+    const versionParams: PutBucketVersioningCommandInput = {
         Bucket: bucket.PhysicalResourceId ?? '',
         VersioningConfiguration: { Status: 'Suspended' },
     }
