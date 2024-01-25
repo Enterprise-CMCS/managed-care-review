@@ -91,47 +91,58 @@ export function submitRate(
             rateID,
             submittedByUserID: user.id,
             submitReason,
-            formData: {
-                rateType: (formData?.rateType ??
-                    undefined) as RateFormDataType['rateType'],
-                rateCapitationType: formData?.rateCapitationType ?? undefined,
-                rateDocuments: formData?.rateDocuments ?? [],
-                supportingDocuments: formData?.supportingDocuments ?? [],
-                rateDateStart: formData?.rateDateStart ?? undefined,
-                rateDateEnd: formData?.rateDateEnd ?? undefined,
-                rateDateCertified: formData?.rateDateCertified ?? undefined,
-                amendmentEffectiveDateStart:
-                    formData?.amendmentEffectiveDateStart ?? undefined,
-                amendmentEffectiveDateEnd:
-                    formData?.amendmentEffectiveDateEnd ?? undefined,
-                rateProgramIDs: formData?.rateProgramIDs ?? [],
-                rateCertificationName:
-                    formData?.rateCertificationName ?? undefined,
-                certifyingActuaryContacts: formData?.certifyingActuaryContacts
-                    ? formData?.certifyingActuaryContacts.map((contact) => ({
-                          name: contact.name ?? undefined,
-                          titleRole: contact.titleRole ?? undefined,
-                          email: contact.email ?? undefined,
-                          actuarialFirm: contact.actuarialFirm ?? undefined,
-                          actuarialFirmOther:
-                              contact.actuarialFirmOther ?? undefined,
-                      }))
-                    : [],
-                addtlActuaryContacts: formData?.addtlActuaryContacts
-                    ? formData?.addtlActuaryContacts.map((contact) => ({
-                          name: contact.name ?? undefined,
-                          titleRole: contact.titleRole ?? undefined,
-                          email: contact.email ?? undefined,
-                          actuarialFirm: contact.actuarialFirm ?? undefined,
-                          actuarialFirmOther:
-                              contact.actuarialFirmOther ?? undefined,
-                      }))
-                    : [],
-                actuaryCommunicationPreference:
-                    formData?.actuaryCommunicationPreference ?? undefined,
-                packagesWithSharedRateCerts:
-                    formData?.packagesWithSharedRateCerts ?? [],
-            },
+            formData: formData
+                ? {
+                      rateType: (formData.rateType ??
+                          undefined) as RateFormDataType['rateType'],
+                      rateCapitationType:
+                          formData.rateCapitationType ?? undefined,
+                      rateDocuments: formData.rateDocuments ?? [],
+                      supportingDocuments: formData.supportingDocuments ?? [],
+                      rateDateStart: formData.rateDateStart ?? undefined,
+                      rateDateEnd: formData.rateDateEnd ?? undefined,
+                      rateDateCertified:
+                          formData.rateDateCertified ?? undefined,
+                      amendmentEffectiveDateStart:
+                          formData.amendmentEffectiveDateStart ?? undefined,
+                      amendmentEffectiveDateEnd:
+                          formData.amendmentEffectiveDateEnd ?? undefined,
+                      rateProgramIDs: formData.rateProgramIDs ?? [],
+                      rateCertificationName:
+                          formData.rateCertificationName ?? undefined,
+                      certifyingActuaryContacts:
+                          formData.certifyingActuaryContacts
+                              ? formData.certifyingActuaryContacts.map(
+                                    (contact) => ({
+                                        name: contact.name ?? undefined,
+                                        titleRole:
+                                            contact.titleRole ?? undefined,
+                                        email: contact.email ?? undefined,
+                                        actuarialFirm:
+                                            contact.actuarialFirm ?? undefined,
+                                        actuarialFirmOther:
+                                            contact.actuarialFirmOther ??
+                                            undefined,
+                                    })
+                                )
+                              : [],
+                      addtlActuaryContacts: formData.addtlActuaryContacts
+                          ? formData.addtlActuaryContacts.map((contact) => ({
+                                name: contact.name ?? undefined,
+                                titleRole: contact.titleRole ?? undefined,
+                                email: contact.email ?? undefined,
+                                actuarialFirm:
+                                    contact.actuarialFirm ?? undefined,
+                                actuarialFirmOther:
+                                    contact.actuarialFirmOther ?? undefined,
+                            }))
+                          : [],
+                      actuaryCommunicationPreference:
+                          formData.actuaryCommunicationPreference ?? undefined,
+                      packagesWithSharedRateCerts:
+                          formData.packagesWithSharedRateCerts ?? [],
+                  }
+                : undefined,
         })
 
         if (submittedRate instanceof Error) {

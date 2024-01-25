@@ -1348,5 +1348,5 @@ input SubmitRateInput {
     "User given submission description"
     submitReason: String!
     "Rate related form data to be updated with submission"
-    formData: RateFormDataInput!
+    formData: RateFormDataInput
 }

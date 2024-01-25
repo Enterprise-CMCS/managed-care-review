@@ -123,6 +123,58 @@ describe('submitRate', () => {
         // expect formData to NOT be the same
         expect(submittedRateFormData).not.toEqual(draftFormData)
     })
+    it('can submit rate without formData updates', async () => {
+        const stateUser = testStateUser()
+
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+            ldService,
+        })
+
+        const draftContractWithRate =
+            await createAndUpdateTestHealthPlanPackage(stateServer)
+
+        const rateID = latestFormData(draftContractWithRate).rateInfos[0].id
+
+        const fetchDraftRate = await stateServer.executeOperation({
+            query: FETCH_RATE,
+            variables: {
+                input: { rateID },
+            },
+        })
+
+        const draftFormData =
+            fetchDraftRate.data?.fetchRate.rate.draftRevision.formData
+
+        // expect draft rate created in contract to exist
+        expect(fetchDraftRate.errors).toBeUndefined()
+        expect(draftFormData).toBeDefined()
+
+        // make update to formData in submit
+        const result = await stateServer.executeOperation({
+            query: SUBMIT_RATE,
+            variables: {
+                input: {
+                    rateID: rateID,
+                    submitReason: 'submit rate',
+                },
+            },
+        })
+
+        const submittedRate = result.data?.submitRate.rate
+        const submittedRateFormData = submittedRate.revisions[0].formData
+
+        // expect no errors from submit rate
+        expect(result.errors).toBeUndefined()
+        // expect rate data to be returned
+        expect(submittedRate).toBeDefined()
+        // expect status to be submitted.
+        expect(submittedRate.status).toBe('SUBMITTED')
+        // expect formData to be the same
+        expect(submittedRateFormData).toEqual(draftFormData)
+    })
     it('can unlock and submit rate independent of contract status', async () => {
         const stateUser = testStateUser()
         const cmsUser = testCMSUser()
