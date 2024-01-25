@@ -2,26 +2,6 @@ import type { APIKeyType } from '../domain-models'
 import { curry } from 'purify-ts/Function'
 import { sign, verify } from 'jsonwebtoken'
 
-const JSON_SIGNING_KEY = 'jwtsigningkey'
-
-function parseSigningKeyJSON(jsonString?: string): string | Error {
-    if (!jsonString || jsonString === '') {
-        return new Error('Env var for JWT secret is not defined')
-    }
-
-    try {
-        const res = JSON.parse(jsonString)
-
-        if (!res[JSON_SIGNING_KEY]) {
-            return new Error(`Env var for JWT has no key ${JSON_SIGNING_KEY}`)
-        }
-
-        return res[JSON_SIGNING_KEY]
-    } catch (err) {
-        return err
-    }
-}
-
 interface JWTConfig {
     issuer: string
     signingKey: Buffer
