@@ -34,6 +34,7 @@ custom:
   reactAppOtelCollectorUrl: ${env:REACT_APP_OTEL_COLLECTOR_URL, ssm:/configuration/react_app_otel_collector_url}
   dbURL: ${env:DATABASE_URL}
   ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key_feds}
+  allowedIpAddresses: ${env:ALLOWED_IP_ADDRESSES, ssm:/configuration/allowed_ip_addresses}
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
@@ -154,6 +155,7 @@ provider:
     AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
     OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
     LD_SDK_KEY: ${self:custom.ldSDKKey}
+    ALLOWED_IP_ADDRESSES: ${self:custom.allowedIpAddresses}
 
 layers:
   prismaClientMigration:
@@ -175,7 +177,7 @@ functions:
 
   third_party_api_authorizer:
     handler: src/handlers/third_party_API_authorizer.main
-         
+    
   otel:
     handler: src/handlers/otel_proxy.main
     events:
@@ -186,6 +188,17 @@ functions:
 
   graphql:
     handler: src/handlers/apollo_gql.graphqlHandler
+    resourcePolicy:
+      - Effect: Deny
+        Principal: '*'
+        Action: execute-api:Invoke
+        Resource:
+          - execute-api:/*/*/*
+        Condition:
+          NotIpAddress:
+            aws:SourceIp:
+              - '123.123.123.123'
+
     events:
       - http:
           path: graphql

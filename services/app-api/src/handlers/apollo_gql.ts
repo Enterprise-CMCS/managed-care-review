@@ -72,9 +72,6 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
 
         if (authProvider || fromThirdPartyAuthorizer) {
             try {
-                // check if the user is stored in postgres
-                // going to clean this up, but we need the store in the
-                // userFetcher to query postgres. This code is a duped.
                 const dbURL = process.env.DATABASE_URL ?? ''
                 const secretsManagerSecret =
                     process.env.SECRETS_MANAGER_SECRET ?? ''
@@ -197,6 +194,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
     const parameterStoreMode = process.env.PARAMETER_STORE_MODE
     const ldSDKKey = process.env.LD_SDK_KEY
+    const allowedIpAddresses = process.env.ALLOWED_IP_ADDRESSES
 
     // START Assert configuration is valid
     if (emailerMode !== 'LOCAL' && emailerMode !== 'SES')
@@ -210,6 +208,9 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (stageName === undefined)
         throw new Error('Configuration Error: stage is required')
+
+    if (parameterStoreMode !== 'LOCAL' && allowedIpAddresses === undefined)
+        throw new Error('Configuration Error: allowed IP addresses is required')
 
     if (!dbURL) {
         throw new Error('Init Error: DATABASE_URL is required to run app-api')

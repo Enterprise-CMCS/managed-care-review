@@ -46,6 +46,18 @@ provider:
           Action:
             - '*'
           Resource: !GetAtt FirehoseStreamToNewRelic.Arn
+  apiGateway:
+    resourcePolicy:
+      - Effect: Allow
+        Principal: '*'
+        Action: execute-api:Invoke
+        Resource:
+          - execute-api:/*/*/*
+        Condition:
+          IpAddress:
+            aws:SourceIp:
+              - '123.123.123.123'
+
 
 resources:
   Conditions:
@@ -66,9 +78,9 @@ resources:
   Resources:
     AppApiGateway:
       Type: AWS::ApiGateway::RestApi
-      Properties:
+      Properties: 
         Name: ${self:service}-${sls:stage}-app-api-gateway
-
+ 
     GatewayResponseDefault4XX:
       Type: 'AWS::ApiGateway::GatewayResponse'
       Properties:
@@ -252,6 +264,24 @@ resources:
     #       CloudWatchMetricsEnabled: true
     #       SampledRequestsEnabled: true
     #       MetricName: ${sls:stage}-webacl
+
+    # AppResourcePolicy:
+    #   Type: AWS::IAM::Policy
+    #   Properties:
+    #     Roles: 
+    #       - !Sub "arn:aws:iam::${AWS::AccountId}:role/third_party_API_authorizer"
+    #     PolicyDocument:
+    #       Version: '2012-10-17'
+    #       Statement:
+    #         - Effect: Deny
+    #           Principal: "*"
+    #           Action: execute-api:Invoke
+    #           Resource:
+    #             - execute-api:/*/*/*
+    #           Condition:
+    #             NotIpAddress:
+    #               aws:SourceIp: '123'
+    #     PolicyName: ThirdPartyAPIAuthorizer
 
   Outputs:
     ApiGatewayRestApiId:
