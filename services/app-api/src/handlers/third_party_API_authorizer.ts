@@ -22,16 +22,28 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
         const userId = await jwtLib.userIDFromToken(authToken)
         const parsedEvent = JSON.parse(JSON.stringify(event))
         const host = parsedEvent.headers.Host
-        // host is formatted as ipaddress:port
+        // host is formatted as ipAddress:port
         // the following will remove the :port to leave just the ip address
         const ipAddress = host.slice(0, host.indexOf(':'))
+        // const validIpAddresses = process.env.ALLOWED_IP_ADDRESSES
+        // if validIpAddresses === undefined or length(validIpAddresses) === 0 {
 
+        // }
+        // const validIPAddress =
+        // ipAddress && process.env.ALLOWED_IP_ADDRESSES?.includes(ipAddress)
         if (userId instanceof Error) {
             const msg = 'Invalid auth token'
             console.error(msg)
 
             return generatePolicy(undefined, event, ipAddress)
         }
+
+        // if (ipAddress === undefined || ipAddress === '') {
+        //     const msg = 'Invalid ip address'
+        //     console.error(msg)
+
+        //     return generatePolicy(undefined, event, ipAddress)
+        // }
 
         console.info({
             message: 'third_party_API_authorizer succeeded',
@@ -57,14 +69,13 @@ const generatePolicy = function (
     // If the JWT is verified as valid, and the request comes from an allowed IP address
     // send an Allow policy
     // otherwise a Deny policy is returned which restricts access
-    const validIPAddress =
-        ipAddress && process.env.ALLOWED_IP_ADDRESSES?.includes(ipAddress)
+    console.info(ipAddress, '====== ipaddress ======')
     const policyDocument: PolicyDocument = {
         Version: '2012-10-17', // current version of the policy language
         Statement: [
             {
                 Action: 'execute-api:Invoke',
-                Effect: userId && validIPAddress ? 'Allow' : 'Deny',
+                Effect: userId ? 'Allow' : 'Deny',
                 Resource: event['methodArn'],
             },
         ],
