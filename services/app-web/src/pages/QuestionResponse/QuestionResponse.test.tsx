@@ -2,7 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router-dom'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { QuestionResponse } from './QuestionResponse'
-import { ldUseClientSpy, renderWithProviders } from '../../testHelpers'
+import { renderWithProviders } from '../../testHelpers'
 import { RoutesRecord } from '../../constants/routes'
 
 import {
@@ -15,13 +15,6 @@ import {
 import { IndexQuestionsPayload } from '../../gen/gqlClient'
 
 describe('QuestionResponse', () => {
-    beforeEach(() => {
-        ldUseClientSpy({ 'cms-questions': true })
-    })
-    afterEach(() => {
-        jest.resetAllMocks()
-    })
-
     it('renders expected questions correctly with rounds', async () => {
         const mockQuestions = mockQuestionsPayload('15')
 
@@ -49,6 +42,9 @@ describe('QuestionResponse', () => {
                 },
                 routerProvider: {
                     route: '/submissions/15/question-and-answers',
+                },
+                featureFlags: {
+                    'cms-questions': true,
                 },
             }
         )
@@ -177,6 +173,9 @@ describe('QuestionResponse', () => {
                 routerProvider: {
                     route: '/submissions/15/question-and-answers',
                 },
+                featureFlags: {
+                    'cms-questions': true,
+                },
             }
         )
 
@@ -230,6 +229,9 @@ describe('QuestionResponse', () => {
                 },
                 routerProvider: {
                     route: '/submissions/15/question-and-answers',
+                },
+                featureFlags: {
+                    'cms-questions': true,
                 },
             }
         )
@@ -291,6 +293,9 @@ describe('QuestionResponse', () => {
                 routerProvider: {
                     route: '/submissions/15/question-and-answers',
                 },
+                featureFlags: {
+                    'cms-questions': true,
+                },
             }
         )
 
@@ -338,6 +343,9 @@ describe('QuestionResponse', () => {
                 routerProvider: {
                     route: '/submissions/15/question-and-answers?submit=question',
                 },
+                featureFlags: {
+                    'cms-questions': true,
+                },
             }
         )
 
@@ -372,6 +380,9 @@ describe('QuestionResponse', () => {
                 routerProvider: {
                     route: '/submissions/15/question-and-answers?submit=response',
                 },
+                featureFlags: {
+                    'cms-questions': true,
+                },
             }
         )
 
@@ -403,6 +414,9 @@ describe('QuestionResponse', () => {
                 },
                 routerProvider: {
                     route: '/submissions/15/question-and-answers',
+                },
+                featureFlags: {
+                    'cms-questions': true,
                 },
             }
         )
@@ -437,6 +451,9 @@ describe('QuestionResponse', () => {
                 },
                 routerProvider: {
                     route: '/submissions/15/question-and-answers',
+                },
+                featureFlags: {
+                    'cms-questions': true,
                 },
             }
         )

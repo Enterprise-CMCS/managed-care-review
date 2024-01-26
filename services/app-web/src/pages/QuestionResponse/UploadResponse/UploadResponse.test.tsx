@@ -4,7 +4,6 @@ import { Route, Routes } from 'react-router-dom'
 import { UploadResponse } from './UploadResponse'
 import {
     dragAndDrop,
-    ldUseClientSpy,
     renderWithProviders,
     TEST_DOC_FILE,
     TEST_PDF_FILE,
@@ -24,13 +23,6 @@ import {
 import { SubmissionSideNav } from '../../SubmissionSideNav'
 
 describe('UploadResponse', () => {
-    beforeEach(() => {
-        ldUseClientSpy({ 'cms-questions': true })
-    })
-    afterEach(() => {
-        jest.resetAllMocks()
-    })
-
     const division = 'testDivision'
     const questionID = 'testQuestion'
 
@@ -58,6 +50,9 @@ describe('UploadResponse', () => {
                 },
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/${division}/${questionID}/upload-response`,
+                },
+                featureFlags: {
+                    'cms-questions': true,
                 },
             }
         )
@@ -97,6 +92,9 @@ describe('UploadResponse', () => {
                 },
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
+                },
+                featureFlags: {
+                    'cms-questions': true,
                 },
             }
         )
@@ -145,6 +143,9 @@ describe('UploadResponse', () => {
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
                 },
+                featureFlags: {
+                    'cms-questions': true,
+                },
             }
         )
 
@@ -190,6 +191,9 @@ describe('UploadResponse', () => {
                 },
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
+                },
+                featureFlags: {
+                    'cms-questions': true,
                 },
             }
         )
@@ -240,6 +244,9 @@ describe('UploadResponse', () => {
                 },
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
+                },
+                featureFlags: {
+                    'cms-questions': true,
                 },
             }
         )
@@ -302,6 +309,9 @@ describe('UploadResponse', () => {
                 },
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
+                },
+                featureFlags: {
+                    'cms-questions': true,
                 },
             }
         )

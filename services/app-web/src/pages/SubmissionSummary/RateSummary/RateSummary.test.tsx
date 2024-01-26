@@ -1,9 +1,5 @@
 import { screen, waitFor } from '@testing-library/react'
-import {
-    renderWithProviders,
-    testS3Client,
-    ldUseClientSpy,
-} from '../../../testHelpers'
+import { renderWithProviders, testS3Client } from '../../../testHelpers'
 import {
     fetchCurrentUserMock,
     fetchRateMockSuccess,
@@ -24,8 +20,6 @@ const wrapInRoutes = (children: React.ReactNode) => {
 }
 
 describe('RateSummary', () => {
-    afterAll(() => jest.clearAllMocks())
-
     describe('Viewing RateSummary as a CMS user', () => {
         it('renders without errors', async () => {
             renderWithProviders(wrapInRoutes(<RateSummary />), {
@@ -120,10 +114,6 @@ describe('RateSummary', () => {
     })
 
     describe('Viewing RateSummary as a State user', () => {
-        beforeEach(() => {
-            ldUseClientSpy({ 'rate-edit-unlock': true })
-        })
-
         it('renders without errors', async () => {
             renderWithProviders(wrapInRoutes(<RateSummary />), {
                 apolloProvider: {
@@ -138,6 +128,7 @@ describe('RateSummary', () => {
                 routerProvider: {
                     route: '/rates/1337',
                 },
+                featureFlags: { 'rate-edit-unlock': true },
             })
 
             await waitFor(() => {
@@ -166,6 +157,7 @@ describe('RateSummary', () => {
                 routerProvider: {
                     route: '/rates/133',
                 },
+                featureFlags: { 'rate-edit-unlock': true },
             })
 
             expect(await screen.findByText('System error')).toBeInTheDocument()
@@ -185,6 +177,7 @@ describe('RateSummary', () => {
                 routerProvider: {
                     route: '/rates/7a',
                 },
+                featureFlags: { 'rate-edit-unlock': true },
             })
 
             const backLink = await screen.findByRole('link', {
