@@ -17,15 +17,8 @@ import {
     mockUnlockedHealthPlanPackage,
     mockValidCMSUser,
 } from '../../testHelpers/apolloMocks'
-import { ldUseClientSpy } from '../../testHelpers'
 
 describe('SubmissionSideNav', () => {
-    beforeEach(() => {
-        ldUseClientSpy({ 'cms-questions': true })
-    })
-    afterEach(() => {
-        jest.resetAllMocks()
-    })
     it('loads sidebar nav with expected links', async () => {
         renderWithProviders(
             <Routes>
@@ -55,6 +48,7 @@ describe('SubmissionSideNav', () => {
                 routerProvider: {
                     route: '/submissions/15',
                 },
+                featureFlags: { 'cms-questions': true },
             }
         )
 
@@ -124,6 +118,7 @@ describe('SubmissionSideNav', () => {
                     route: '/submissions/15',
                 },
                 location: (location) => (testLocation = location),
+                featureFlags: { 'cms-questions': true },
             }
         )
 
@@ -230,6 +225,7 @@ describe('SubmissionSideNav', () => {
                 routerProvider: {
                     route: '/submissions/15',
                 },
+                featureFlags: { 'cms-questions': true },
             }
         )
         expect(
@@ -266,6 +262,7 @@ describe('SubmissionSideNav', () => {
                 routerProvider: {
                     route: '/submissions/15',
                 },
+                featureFlags: { 'cms-questions': true },
             }
         )
 
@@ -313,6 +310,7 @@ describe('SubmissionSideNav', () => {
                     routerProvider: {
                         route: '/submissions/15',
                     },
+                    featureFlags: { 'cms-questions': true },
                 }
             )
 
@@ -355,6 +353,7 @@ describe('SubmissionSideNav', () => {
                     routerProvider: {
                         route: '/submissions/15',
                     },
+                    featureFlags: { 'cms-questions': true },
                 }
             )
 
@@ -398,6 +397,7 @@ describe('SubmissionSideNav', () => {
                         route: '/submissions/15',
                     },
                     location: (location) => (testLocation = location),
+                    featureFlags: { 'cms-questions': true },
                 }
             )
 
@@ -443,6 +443,7 @@ describe('SubmissionSideNav', () => {
                         route: '/submissions/15',
                     },
                     location: (location) => (testLocation = location),
+                    featureFlags: { 'cms-questions': true },
                 }
             )
 
@@ -487,6 +488,7 @@ describe('SubmissionSideNav', () => {
                     routerProvider: {
                         route: '/submissions/15',
                     },
+                    featureFlags: { 'cms-questions': true },
                 }
             )
 
@@ -521,6 +523,7 @@ describe('SubmissionSideNav', () => {
                         ],
                     },
                     routerProvider: { route: '/submissions/404' },
+                    featureFlags: { 'cms-questions': true },
                 }
             )
 
@@ -559,6 +562,7 @@ describe('SubmissionSideNav', () => {
                     routerProvider: {
                         route: '/submissions/15/question-and-answers',
                     },
+                    featureFlags: { 'cms-questions': true },
                 }
             )
 
