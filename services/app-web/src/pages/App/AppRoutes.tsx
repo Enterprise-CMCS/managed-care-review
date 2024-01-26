@@ -38,6 +38,7 @@ import {
 } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 import { RateSummary } from '../SubmissionSummary/RateSummary'
+import { RateEdit } from '../RateEdit/RateEdit'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -61,11 +62,6 @@ const UniversalRoutes = (
         <Route path={RoutesRecord.HELP} element={<Help />} />
     </Fragment>
 )
-//Doing this in order to pass the :id for redirecting '/:id' to ':id/edit' for state users viewing rates
-const RateEditRouteRedirect = () => {
-    const { id } = useParams();
-    return <Navigate to={`/${id}/edit`} />
-}
 
 const StateUserRoutes = ({
     authMode,
@@ -99,12 +95,6 @@ const StateUserRoutes = ({
                         <Navigate to={RoutesRecord.DASHBOARD_SUBMISSIONS} />
                     }
                 />
-                {showRatePages && (
-                    <Route 
-                        path="/:id"
-                        element={<RateEditRouteRedirect />} 
-                    />
-                )}
                 <Route
                     path={RoutesRecord.DASHBOARD_SUBMISSIONS}
                     element={<StateDashboard />}
@@ -120,7 +110,7 @@ const StateUserRoutes = ({
                 {showRatePages && (
                     <Route 
                         path={RoutesRecord.RATE_EDIT}
-                        element={<RateSummary />}
+                        element={<RateEdit />}
                     />
                 )}
                 {showRatePages && (
