@@ -19,11 +19,58 @@ import { S3Provider } from '../contexts/S3Context'
 import { testS3Client } from './s3Helpers'
 import { S3ClientT } from '../s3'
 import {
+    FeatureFlagLDConstant,
+    FlagValue,
     FeatureFlagSettings,
     featureFlagKeys,
     featureFlags,
 } from '../common-code/featureFlags'
-import { LDProvider, ProviderConfig } from 'launchdarkly-react-client-sdk'
+import {
+    LDProvider,
+    ProviderConfig,
+    LDClient,
+} from 'launchdarkly-react-client-sdk'
+
+function ldClientMock(featureFlags: FeatureFlagSettings): LDClient {
+    return {
+        track: jest.fn(),
+        identify: jest.fn(),
+        close: jest.fn(),
+        flush: jest.fn(),
+        getContext: jest.fn(),
+        off: jest.fn(),
+        on: jest.fn(),
+        setStreaming: jest.fn(),
+        variationDetail: jest.fn(),
+        waitForInitialization: jest.fn(),
+        waitUntilGoalsReady: jest.fn(),
+        waitUntilReady: jest.fn(),
+        variation: jest.fn(
+            (
+                flag: FeatureFlagLDConstant,
+                defaultValue: FlagValue | undefined
+            ) => {
+                if (
+                    featureFlags[flag] === undefined &&
+                    defaultValue === undefined
+                ) {
+                    //ldClient.variation doesn't require a default value, throwing error here if a defaultValue was not provided.
+                    throw new Error(
+                        'ldUseClientSpy returned an invalid value of undefined'
+                    )
+                }
+                return featureFlags[flag] === undefined
+                    ? defaultValue
+                    : featureFlags[flag]
+            }
+        ),
+        allFlags: jest.fn(() => {
+            const defaultFeatureFlags = getDefaultFeatureFlags()
+            Object.assign(defaultFeatureFlags, featureFlags)
+            return defaultFeatureFlags
+        }),
+    }
+}
 
 /* Render */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -51,38 +98,20 @@ const renderWithProviders = (
     const s3Client: S3ClientT = s3Provider ?? testS3Client()
     const user = userEvent.setup()
 
-    const flags = {
+    const flags: FeatureFlagSettings = {
         ...getDefaultFeatureFlags(),
         ...featureFlags,
     }
 
-    /**
-     * For unit testing, we do not want to connect to LD to get flag values instead we are initializing the LDProvider
-     * with a set of flag values that was passed into renderWithProviders. This method will result in console errors and
-     * warnings, but are suppressed in this helper.
-     *
-     * The way LaunchDarkly implements unit tests is not working for our app, so this is the work-around
-     * https://docs.launchdarkly.com/guides/sdk/unit-tests/?q=unit+test
-     */
     const ldProviderConfig: ProviderConfig = {
-        clientSideID: '',
+        clientSideID: 'test-url',
         options: {
-            bootstrap: flags,
+            baseUrl: 'test-url',
+            streamUrl: 'test-url',
+            eventsUrl: 'test-url',
         },
+        ldClient: ldClientMock(flags),
     }
-
-    // Ignoring LaunchDarkly errors and warnings from unit testing due to not fully configuring to connect to LaunchDarkly.
-    jest.spyOn(global.console, 'warn').mockImplementationOnce((message) => {
-        if (!message.includes('LaunchDarkly')) {
-            global.console.warn(message)
-        }
-    })
-
-    jest.spyOn(global.console, 'error').mockImplementationOnce((message) => {
-        if (!message.includes('LaunchDarkly')) {
-            global.console.error(message)
-        }
-    })
 
     const renderResult = render(
         <LDProvider {...ldProviderConfig}>

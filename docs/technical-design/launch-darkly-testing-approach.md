@@ -23,40 +23,60 @@ export LD_SDK_KEY='Place Launch Darkly SDK key here'
 ## Feature flag unit testing
 
 ### Client side unit testing
-Client side unit testing utilizes the `LDProvider` in our [renderWithProviders](../../services/app-web/src/testHelpers/jestHelpers.tsx) function to set up feature flags. We use this method for testing because the official documented [unit testing](https://docs.launchdarkly.com/guides/sdk/unit-tests/?q=unit+test) method by LaunchDarkly does not work with our implementation. Previously we had used `jest.spyOn` to intercept `useLDClient` and mock the `useLDClient.variation()` function with our defined feature flag values. With `launchdarkly-react-client-sdk@3.0.10` that method did not work anymore.
+Client side unit testing utilizes the `LDProvider`, from `launchdarkly-react-client-sdk`, in our [renderWithProviders](../../services/app-web/src/testHelpers/jestHelpers.tsx) function to set up feature flags for each of the tests. Currently, LaunchDarkly does not provide an actual mock `LDProvider` so if or when they do, then we could update this with that provider.
 
-Currently, LaunchDarkly does not provide an actual mock `LDProvider` so if or when they do, then we could update this with that provider.
+We use this method for testing because the official documented [unit testing](https://docs.launchdarkly.com/guides/sdk/unit-tests/?q=unit+test) method by LaunchDarkly does not work with our LaunchDarkly implementation. Our implementation follow exactly the documentation, so it could be how we are setting up our unit tests. Previously we had used `jest.spyOn` to intercept `useLDClient` and mock the `useLDClient.variation()` function with our defined feature flag values. With `launchdarkly-react-client-sdk@3.0.10` that method did not work anymore.
 
 #### Configuration
-This method tries to "mock" the `LDProvider` for testing by giving it our predefined flags at initialization so that our tests can be individually configured with feature flags values. This implementation needs to be independent of what the values are set at LaunchDarkly to isolate our tests from any changes from values in LaunchDarkly. Therefore, it is configured to fail when trying to make an API call to LaunchDarkly to retrieve feature flag values.
+When using the `LDProvider` we need to pass in a mocked `ldClient` in the configuration. This allows us to initialize `ldClient` outside of the provider, which would have required the provider to perform an API call to LaunchDarkly. Now tha this API call does not happen it isolates our unit tests from the feature flag values on the LaunchDarkly server and only use the values we define in each test.
 
-To configure the provider to initialize with our predefined flag values. The configuration below, in `renderWithProviders`, the `bootstrap` field is how we set the initial flag values. You will also see that, compared to our configuration in [app-web/src/index.tsx](../../services/app-web/src/index.tsx), the config needed to connect to LaunchDarkly is missing, this is how we stop the provider from successfully getting a response from LaunchDarkly.
+The configuration below, in `renderWithProviders`, the `ldClient` field is how we initialize `ldClient` with our defined flag values. We are using the `ldClientMock()` function to generate a mock that matches the type this field requires. 
+
+You will also see that, compared to our configuration in [app-web/src/index.tsx](../../services/app-web/src/index.tsx), the config needed to connect to LaunchDarkly is replaced with `test-url`.
+
 ```typescript
 const ldProviderConfig: ProviderConfig = {
-  clientSideID: '',
+  clientSideID: 'test-url',
   options: {
-    bootstrap: flags,
+    baseUrl: 'test-url',
+    streamUrl: 'test-url',
+    eventsUrl: 'test-url',
   },
+  ldClient: ldClientMock(flags)
 }
 ```
 
-Because we are not fully configuring `LDProvider` it will fail when making an API call to LaunchDarkly. When this happens, there will be console errors and warnings when you run a test. To get around this, there are two `jest.sypOn` functions in `renderWithProviders` to silence all LaunchDarkly errors.
+The two important functions in the `ldCientMock` are `variation` and `allFlags`. These two functions are the ones we use in the app to get feature flags and here we are mocking them with the flag values we define in each test. If we need any other functions in `ldClient` we would just add the mock to `ldClientMock()`.
 
-```typescript
-    jest.spyOn(global.console, 'warn').mockImplementationOnce((message) => {
-        if (!message.includes('LaunchDarkly')) {
-            global.console.warn(message);
-        }
-    });
-
-    jest.spyOn(global.console, 'error').mockImplementationOnce((message) => {
-        if (!message.includes('LaunchDarkly')) {
-            global.console.error(message);
-        }
-    });
+```javascript
+const ldClientMock = (featureFlags: FeatureFlagSettings): LDClient => ({
+  ... other functions,
+  variation: jest.fn((
+          flag: FeatureFlagLDConstant,
+          defaultValue: FlagValue | undefined
+  ) => {
+    if (
+            featureFlags[flag] === undefined &&
+            defaultValue === undefined
+    ) {
+      //ldClient.variation doesn't require a default value, throwing error here if a defaultValue was not provided.
+      throw new Error(
+              'ldUseClientSpy returned an invalid value of undefined'
+      )
+    }
+    return featureFlags[flag] === undefined
+            ? defaultValue
+            : featureFlags[flag]
+  }),
+  allFlags: jest.fn(() => {
+    const defaultFeatureFlags = getDefaultFeatureFlags()
+    Object.assign(defaultFeatureFlags, featureFlags)
+    return defaultFeatureFlags
+  }),
+})
 ```
 
-We define our initial feature flag values, `flags` variable in the config above, by combining the default feature flag values with values passed into `renderWithProviders` for each test. Looking at the code snippet below from `renderWithProviders`, we get the default flag values from [flags.ts](../../services/app-web/src/common-code/featureFlags/flags.ts) using `getDefaultFeatureFlags()` then merge that with `option.featureFlags` values passed into `renderWithProviders`. This will allow each test to configure the specific feature flag values for that test and supply default values for flags the test did not define.
+We define our initial feature flag values in the `flags` variable by combining the default feature flag values with values passed into `renderWithProviders` for each test. Looking at the code snippet below from `renderWithProviders`, we get the default flag values from [flags.ts](../../services/app-web/src/common-code/featureFlags/flags.ts) using `getDefaultFeatureFlags()` then merge that with `option.featureFlags` values passed into `renderWithProviders`. This will allow each test to configure the specific feature flag values for that test and supply default values for flags the test did not define.
 
 ```typescript
 const {
@@ -74,10 +94,13 @@ const flags = {
 }
 
 const ldProviderConfig: ProviderConfig = {
-  clientSideID: '',
+  clientSideID: 'test-url',
   options: {
-    bootstrap: flags,
+    baseUrl: 'test-url',
+    streamUrl: 'test-url',
+    eventsUrl: 'test-url',
   },
+  ldClient: ldClientMock(flags)
 }
 ```
 
