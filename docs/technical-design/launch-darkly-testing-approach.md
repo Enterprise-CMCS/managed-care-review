@@ -28,7 +28,7 @@ Client side unit testing utilizes the `LDProvider`, from `launchdarkly-react-cli
 We use this method for testing because the official documented [unit testing](https://docs.launchdarkly.com/guides/sdk/unit-tests/?q=unit+test) method by LaunchDarkly does not work with our LaunchDarkly implementation. Our implementation follow exactly the documentation, so it could be how we are setting up our unit tests. Previously we had used `jest.spyOn` to intercept `useLDClient` and mock the `useLDClient.variation()` function with our defined feature flag values. With `launchdarkly-react-client-sdk@3.0.10` that method did not work anymore.
 
 #### Configuration
-When using the `LDProvider` we need to pass in a mocked `ldClient` in the configuration. This allows us to initialize `ldClient` outside of the provider, which would have required the provider to perform an API call to LaunchDarkly. Now tha this API call does not happen it isolates our unit tests from the feature flag values on the LaunchDarkly server and only use the values we define in each test.
+When using the `LDProvider` we need to pass in a mocked `ldClient` in the configuration. This allows us to initialize `ldClient` outside of the provider, which would have required the provider to perform an API call to LaunchDarkly. Now that this API call does not happen it isolates our unit tests from the feature flag values on the LaunchDarkly server and only use the values we define in each test.
 
 The configuration below, in `renderWithProviders`, the `ldClient` field is how we initialize `ldClient` with our defined flag values. We are using the `ldClientMock()` function to generate a mock that matches the type this field requires. 
 
@@ -38,6 +38,7 @@ You will also see that, compared to our configuration in [app-web/src/index.tsx]
 const ldProviderConfig: ProviderConfig = {
   clientSideID: 'test-url',
   options: {
+    bootstrap: flags,
     baseUrl: 'test-url',
     streamUrl: 'test-url',
     eventsUrl: 'test-url',
@@ -96,6 +97,7 @@ const flags = {
 const ldProviderConfig: ProviderConfig = {
   clientSideID: 'test-url',
   options: {
+    bootstrap: flags,
     baseUrl: 'test-url',
     streamUrl: 'test-url',
     eventsUrl: 'test-url',
@@ -108,7 +110,7 @@ const ldProviderConfig: ProviderConfig = {
 
 Using this method in our unit tests is simple and similar to how we configure the other providers. When calling `renderWithProdivers` we need to supply the second argument `options` with the `featureFlag` field. 
 
-In the example below we set `featureFlag` with an object that contains two feature flags and their values. When this test is run, the component will be supplied with these two flag values we supplied along with default flag values for feature flags we did not define in the argument. Take note that the `featureFlag` field is type `FeatureFlagSettings` so you will only be allowed to define flags that exists in [flags.ts](../../services/app-web/src/common-code/featureFlags/flags.ts).
+In the example below we set `featureFlag` with an object that contains two feature flags and their values. When this test is run, the component will be supplied with these two flag values along with the other default flag values from [flags.ts](../../services/app-web/src/common-code/featureFlags/flags.ts). Take note that the `featureFlag` field is type `FeatureFlagSettings` so you will only be allowed to define flags that exists in [flags.ts](../../services/app-web/src/common-code/featureFlags/flags.ts).
 
 ```javascript
 renderWithProviders(

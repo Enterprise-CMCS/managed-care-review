@@ -49,26 +49,9 @@ function ldClientMock(featureFlags: FeatureFlagSettings): LDClient {
             (
                 flag: FeatureFlagLDConstant,
                 defaultValue: FlagValue | undefined
-            ) => {
-                if (
-                    featureFlags[flag] === undefined &&
-                    defaultValue === undefined
-                ) {
-                    //ldClient.variation doesn't require a default value, throwing error here if a defaultValue was not provided.
-                    throw new Error(
-                        'ldUseClientSpy returned an invalid value of undefined'
-                    )
-                }
-                return featureFlags[flag] === undefined
-                    ? defaultValue
-                    : featureFlags[flag]
-            }
+            ) => featureFlags[flag] ?? defaultValue
         ),
-        allFlags: jest.fn(() => {
-            const defaultFeatureFlags = getDefaultFeatureFlags()
-            Object.assign(defaultFeatureFlags, featureFlags)
-            return defaultFeatureFlags
-        }),
+        allFlags: jest.fn(() => featureFlags),
     }
 }
 
@@ -106,6 +89,7 @@ const renderWithProviders = (
     const ldProviderConfig: ProviderConfig = {
         clientSideID: 'test-url',
         options: {
+            bootstrap: flags,
             baseUrl: 'test-url',
             streamUrl: 'test-url',
             eventsUrl: 'test-url',
