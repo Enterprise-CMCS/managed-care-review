@@ -2,8 +2,7 @@
 
 set -e
 
-VERSION=${VERSION:-0.104.4-27025}
-echo "prepping clamav (${VERSION})"
+echo "building clamav lambda layer..."
 uname -m
 
 yum update -y
