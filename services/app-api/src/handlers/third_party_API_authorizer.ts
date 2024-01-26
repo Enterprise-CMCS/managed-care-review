@@ -20,12 +20,17 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
     try {
         // authentication step for validating JWT token
         const userId = await jwtLib.userIDFromToken(authToken)
+        const parsedEvent = JSON.parse(JSON.stringify(event))
+        const host = parsedEvent.headers.Host
+        // host is formatted as ipaddress:port
+        // the following will remove the :port to leave just the ip address
+        const ipAddress = host.slice(0, host.indexOf(':'))
 
         if (userId instanceof Error) {
             const msg = 'Invalid auth token'
             console.error(msg)
 
-            return generatePolicy(undefined, event)
+            return generatePolicy(undefined, event, ipAddress)
         }
 
         console.info({
@@ -34,29 +39,32 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
             status: 'SUCCESS',
         })
 
-        return generatePolicy(userId, event)
+        return generatePolicy(userId, event, ipAddress)
     } catch (err) {
         console.error(
             'unexpected exception attempting to validate authorization',
             err
         )
-        return generatePolicy(undefined, event)
+        return generatePolicy(undefined, event, undefined)
     }
 }
 
 const generatePolicy = function (
     userId: string | undefined,
-    event: APIGatewayTokenAuthorizerEvent
+    event: APIGatewayTokenAuthorizerEvent,
+    ipAddress: string | undefined
 ): APIGatewayAuthorizerResult {
-    // If the JWT is verified as valid, send an Allow policy
-    // this will allow the request to go through
+    // If the JWT is verified as valid, and the request comes from an allowed IP address
+    // send an Allow policy
     // otherwise a Deny policy is returned which restricts access
+    const validIPAddress =
+        ipAddress && process.env.ALLOWED_IP_ADDRESSES?.includes(ipAddress)
     const policyDocument: PolicyDocument = {
         Version: '2012-10-17', // current version of the policy language
         Statement: [
             {
                 Action: 'execute-api:Invoke',
-                Effect: userId ? 'Allow' : 'Deny',
+                Effect: userId && validIPAddress ? 'Allow' : 'Deny',
                 Resource: event['methodArn'],
             },
         ],

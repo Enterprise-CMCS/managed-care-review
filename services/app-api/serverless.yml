@@ -188,16 +188,6 @@ functions:
 
   graphql:
     handler: src/handlers/apollo_gql.graphqlHandler
-    resourcePolicy:
-      - Effect: Deny
-        Principal: '*'
-        Action: execute-api:Invoke
-        Resource:
-          - execute-api:/*/*/*
-        Condition:
-          NotIpAddress:
-            aws:SourceIp:
-              - '123.123.123.123'
 
     events:
       - http:

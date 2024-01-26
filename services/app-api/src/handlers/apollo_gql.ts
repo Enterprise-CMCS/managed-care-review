@@ -209,7 +209,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     if (stageName === undefined)
         throw new Error('Configuration Error: stage is required')
 
-    if (parameterStoreMode !== 'LOCAL' && allowedIpAddresses === undefined)
+    if (allowedIpAddresses === undefined)
         throw new Error('Configuration Error: allowed IP addresses is required')
 
     if (!dbURL) {
