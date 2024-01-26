@@ -55,6 +55,7 @@ mkdir -p bin lib
 
 cp /tmp/build/usr/bin/clamscan /tmp/build/usr/bin/freshclam /tmp/build/usr/bin/clamdscan bin/.
 cp -R /tmp/build/usr/lib64/* lib/.
+cp -R /tmp/build/lib64/* lib/.
 cp freshclam.conf bin/freshclam.conf
 
 zip -r9 lambda_layer.zip bin
