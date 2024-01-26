@@ -265,7 +265,7 @@ jobs:
         working-directory: services/uploads/src/avLayer
         run: ./dockerbuild.sh
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: lambda-layers-clamav
           path: ./services/uploads/src/avLayer/build/lambda_layer.zip
