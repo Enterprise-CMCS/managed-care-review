@@ -52,28 +52,13 @@ The two important functions in the `ldCientMock` are `variation` and `allFlags`.
 ```javascript
 const ldClientMock = (featureFlags: FeatureFlagSettings): LDClient => ({
   ... other functions,
-  variation: jest.fn((
-          flag: FeatureFlagLDConstant,
-          defaultValue: FlagValue | undefined
-  ) => {
-    if (
-            featureFlags[flag] === undefined &&
-            defaultValue === undefined
-    ) {
-      //ldClient.variation doesn't require a default value, throwing error here if a defaultValue was not provided.
-      throw new Error(
-              'ldUseClientSpy returned an invalid value of undefined'
-      )
-    }
-    return featureFlags[flag] === undefined
-            ? defaultValue
-            : featureFlags[flag]
-  }),
-  allFlags: jest.fn(() => {
-    const defaultFeatureFlags = getDefaultFeatureFlags()
-    Object.assign(defaultFeatureFlags, featureFlags)
-    return defaultFeatureFlags
-  }),
+  variation: jest.fn(
+    (
+      flag: FeatureFlagLDConstant,
+      defaultValue: FlagValue | undefined
+    ) => featureFlags[flag] ?? defaultValue
+  ),
+  allFlags: jest.fn(() => featureFlags),
 })
 ```
 
