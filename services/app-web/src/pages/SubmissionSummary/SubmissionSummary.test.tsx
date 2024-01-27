@@ -16,21 +16,12 @@ import {
     mockStateSubmission,
     mockSubmittedHealthPlanPackage,
 } from '../../testHelpers/apolloMocks'
-import {
-    ldUseClientSpy,
-    renderWithProviders,
-} from '../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { testS3Client } from '../../testHelpers/s3Helpers'
 
 describe('SubmissionSummary', () => {
-    beforeEach(() => {
-        ldUseClientSpy({ 'cms-questions': false })
-    })
-    afterEach(() => {
-        jest.resetAllMocks()
-    })
     it('renders without errors', async () => {
         renderWithProviders(
             <Routes>

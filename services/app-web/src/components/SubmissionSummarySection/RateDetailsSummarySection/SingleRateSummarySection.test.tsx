@@ -1,7 +1,4 @@
-import {
-    ldUseClientSpy,
-    renderWithProviders,
-} from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SingleRateSummarySection } from './SingleRateSummarySection'
 import {
     fetchCurrentUserMock,
@@ -14,13 +11,6 @@ import { packageName } from '../../../common-code/healthPlanFormDataType'
 import { RateRevision } from '../../../gen/gqlClient'
 
 describe('SingleRateSummarySection', () => {
-    beforeEach(() => {
-        ldUseClientSpy({ 'rate-edit-unlock': true })
-    })
-    afterEach(() => {
-        jest.resetAllMocks()
-    })
-
     it('can render rate details without errors', async () => {
         const rateData = rateDataMock()
         await waitFor(() => {
@@ -39,6 +29,7 @@ describe('SingleRateSummarySection', () => {
                             }),
                         ],
                     },
+                    featureFlags: { 'rate-edit-unlock': true },
                 }
             )
         })
@@ -134,6 +125,7 @@ describe('SingleRateSummarySection', () => {
                             }),
                         ],
                     },
+                    featureFlags: { 'rate-edit-unlock': true },
                 }
             )
         })
@@ -234,6 +226,7 @@ describe('SingleRateSummarySection', () => {
                         }),
                     ],
                 },
+                featureFlags: { 'rate-edit-unlock': true },
             }
         )
 
@@ -273,6 +266,7 @@ describe('SingleRateSummarySection', () => {
                         }),
                     ],
                 },
+                featureFlags: { 'rate-edit-unlock': true },
             }
         )
 
@@ -313,6 +307,7 @@ describe('SingleRateSummarySection', () => {
                             }),
                         ],
                     },
+                    featureFlags: { 'rate-edit-unlock': true },
                 }
             )
             expect(
@@ -345,6 +340,7 @@ describe('SingleRateSummarySection', () => {
                             }),
                         ],
                     },
+                    featureFlags: { 'rate-edit-unlock': true },
                 }
             )
             await waitFor(() => {
@@ -379,6 +375,7 @@ describe('SingleRateSummarySection', () => {
                             }),
                         ],
                     },
+                    featureFlags: { 'rate-edit-unlock': true },
                 }
             )
             expect(
