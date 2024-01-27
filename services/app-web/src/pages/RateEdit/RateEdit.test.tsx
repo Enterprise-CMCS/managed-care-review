@@ -1,5 +1,5 @@
 import { screen, waitFor } from '@testing-library/react'
-import { ldUseClientSpy, renderWithProviders } from "../../testHelpers"
+import { renderWithProviders } from "../../testHelpers"
 import { RateEdit } from "./RateEdit"
 import { fetchCurrentUserMock, fetchRateMockSuccess, mockValidStateUser } from "../../testHelpers/apolloMocks"
 import { RoutesRecord } from '../../constants'
@@ -18,9 +18,6 @@ describe('RateEdit', () => {
   afterAll(() => jest.clearAllMocks())
 
   describe('Viewing RateEdit as a state user', () => {
-    beforeEach(() => {
-      ldUseClientSpy({'rate-edit-unlock': true})
-    })
 
     it('renders without errors', async () => {
       renderWithProviders(wrapInRoutes(<RateEdit />), {
@@ -36,6 +33,9 @@ describe('RateEdit', () => {
         routerProvider: {
           route: '/rates/1337/edit'
         },
+        featureFlags: { 
+          'rate-edit-unlock': true 
+        }
       })
 
       await waitFor(() => {

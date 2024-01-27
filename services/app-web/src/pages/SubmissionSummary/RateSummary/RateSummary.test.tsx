@@ -168,6 +168,9 @@ describe('RateSummary', () => {
                     routerProvider: {
                         route: '/rates/1337'
                     },
+                    featureFlags: { 
+                        'rate-edit-unlock': true 
+                    }
             })
 
             await waitFor(() => {
