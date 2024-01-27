@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import { useNavigate, useLocation, Navigate } from 'react-router'
-import { Route, Routes, useParams } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { extendSession, idmRedirectURL } from '../../pages/Auth/cognitoAuth'
 import { assertNever, AuthModeType } from '../../common-code/config'
@@ -108,7 +108,7 @@ const StateUserRoutes = ({
                     element={<NewStateSubmissionForm />}
                 />
                 {showRatePages && (
-                    <Route 
+                    <Route
                         path={RoutesRecord.RATE_EDIT}
                         element={<RateEdit />}
                     />
