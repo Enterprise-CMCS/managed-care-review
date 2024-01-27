@@ -9,6 +9,7 @@ import {
 import { RateSummary } from './RateSummary'
 import { RoutesRecord } from '../../../constants'
 import { Route, Routes } from 'react-router-dom'
+import { RateEdit } from '../../RateEdit/RateEdit'
 
 // Wrap test component in some top level routes to allow getParams to be tested
 const wrapInRoutes = (children: React.ReactNode) => {
@@ -141,20 +142,31 @@ describe('RateSummary', () => {
             ).toBeInTheDocument()
         })
 
-        it('renders RateEdit component without errors for unlocked rate', async () => {
-            renderWithProviders(wrapInRoutes(<RateSummary />), {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidStateUser(),
-                            statusCode: 200,
-                        }),
-                        fetchRateMockSuccess({ rate: { id: '1337', status: 'UNLOCKED' } }),
-                    ],
-                },
-                routerProvider: {
-                    route: '/rates/1337'
-                },
+        it('redirects to RateEdit component from RateSummary without errors for unlocked rate', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route 
+                        path={RoutesRecord.RATES_SUMMARY} 
+                        element={<RateSummary />} 
+                    />
+                    <Route 
+                        path={RoutesRecord.RATE_EDIT} 
+                        element={<RateEdit />} 
+                    />
+                </Routes>, 
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidStateUser(),
+                                statusCode: 200,
+                            }),
+                            fetchRateMockSuccess({ rate: { id: '1337', status: 'UNLOCKED' } }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/1337'
+                    },
             })
 
             await waitFor(() => {
