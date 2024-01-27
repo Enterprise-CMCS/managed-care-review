@@ -1,6 +1,6 @@
 import { GridContainer, Icon, Link } from '@trussworks/react-uswds'
 import React, { useEffect, useState } from 'react'
-import { NavLink, useParams } from 'react-router-dom'
+import { NavLink, useNavigate, useParams } from 'react-router-dom'
 
 import { Loading } from '../../../components'
 import { usePage } from '../../../contexts/PageContext'
@@ -10,7 +10,6 @@ import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { RoutesRecord } from '../../../constants'
 import { SingleRateSummarySection } from '../../../components/SubmissionSummarySection/RateDetailsSummarySection/SingleRateSummarySection'
 import { useAuth } from '../../../contexts/AuthContext'
-import { RateEdit } from '../../RateEdit/RateEdit'
 
 type RouteParams = {
     id: string
@@ -20,6 +19,7 @@ export const RateSummary = (): React.ReactElement => {
     // Page level state
     const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
+    const navigate = useNavigate()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
     const { id } = useParams<keyof RouteParams>()
     if (!id) {
@@ -53,6 +53,11 @@ export const RateSummary = (): React.ReactElement => {
         return <GenericErrorPage />
     }
 
+    //Redirecting a state user to the edit page if rate is unlocked
+    if (loggedInUser?.role === 'STATE_USER' && rate.status === 'UNLOCKED') {
+        navigate(`/rates/${id}/edit`)
+    }
+
     if (
         rateName !== currentRateRev.formData.rateCertificationName &&
         currentRateRev.formData.rateCertificationName
@@ -78,14 +83,11 @@ export const RateSummary = (): React.ReactElement => {
                         <span>&nbsp;Back to dashboard</span>
                     </Link>
                 </div>
-                {loggedInUser?.__typename === 'StateUser' && rate.status === 'UNLOCKED' ?
-                    <RateEdit /> :
                     <SingleRateSummarySection
                         rate={rate}
                         isSubmitted // can assume isSubmitted because we are building for CMS users
                         statePrograms={rate.state.programs}
                     />
-                }
             </GridContainer>
         </div>
     )
