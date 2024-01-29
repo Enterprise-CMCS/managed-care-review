@@ -1,12 +1,12 @@
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
-.messageBodyText{
-  p {
-    margin: 0
-  }
+.messageBodyText {
+    p {
+        margin: 0;
+    }
 }
 
 .nowrap {
-  white-space: nowrap;
+    white-space: nowrap;
 }

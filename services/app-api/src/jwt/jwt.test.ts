@@ -4,7 +4,7 @@ describe('jwtLib', () => {
     it('works symmetricly', () => {
         const jwt = newJWTLib({
             issuer: 'mctest',
-            signingKey: 'foo', //pragma: allowlist secret
+            signingKey: Buffer.from('123af', 'hex'),
             expirationDurationS: 1000,
         })
 
@@ -27,13 +27,13 @@ describe('jwtLib', () => {
     it('errors with wrong issuer', () => {
         const jwtWriter = newJWTLib({
             issuer: 'wrong',
-            signingKey: 'foo',
+            signingKey: Buffer.from('123af', 'hex'),
             expirationDurationS: 1000,
         })
 
         const jwtReader = newJWTLib({
             issuer: 'mctest',
-            signingKey: 'foo',
+            signingKey: Buffer.from('123af', 'hex'),
             expirationDurationS: 1000,
         })
 
@@ -49,13 +49,13 @@ describe('jwtLib', () => {
     it('errors with bad expiration', () => {
         const jwtWriter = newJWTLib({
             issuer: 'mctest',
-            signingKey: 'foo',
+            signingKey: Buffer.from('123af', 'hex'),
             expirationDurationS: 0,
         })
 
         const jwtReader = newJWTLib({
             issuer: 'mctest',
-            signingKey: 'foo',
+            signingKey: Buffer.from('123af', 'hex'),
             expirationDurationS: 1000,
         })
 
@@ -71,13 +71,13 @@ describe('jwtLib', () => {
     it('errors with bad secret', () => {
         const jwtWriter = newJWTLib({
             issuer: 'mctest',
-            signingKey: 'wrong',
+            signingKey: Buffer.from('deadbeef', 'hex'),
             expirationDurationS: 1000,
         })
 
         const jwtReader = newJWTLib({
             issuer: 'mctest',
-            signingKey: 'foo',
+            signingKey: Buffer.from('123af', 'hex'),
             expirationDurationS: 1000,
         })
 
@@ -93,7 +93,7 @@ describe('jwtLib', () => {
     it('errors with bogus JWT', () => {
         const jwtReader = newJWTLib({
             issuer: 'mctest',
-            signingKey: 'foo',
+            signingKey: Buffer.from('123af', 'hex'),
             expirationDurationS: 1000,
         })
 

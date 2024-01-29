@@ -2,11 +2,11 @@
 @use '../../styles/uswdsImports.scss' as uswds;
 
 .table {
-    h2{
-        font-weight: 300
+    h2 {
+        font-weight: 300;
     }
-   thead {
-        th{
+    thead {
+        th {
             background-color: transparent;
             border-top: 0;
             border-left: 0;
@@ -25,12 +25,12 @@
 .pageContainer {
     padding: 1em 10em;
     width: 100%;
-    background-color: custom.$mcr-foundation-white
+    background-color: custom.$mcr-foundation-white;
 }
 .header {
     text-align: left;
 }
 
 .wrapper {
-   height: 100vh;
+    height: 100vh;
 }

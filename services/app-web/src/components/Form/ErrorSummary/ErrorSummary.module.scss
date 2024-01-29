@@ -8,7 +8,8 @@
         cursor: pointer;
         font-weight: normal;
         text-align: left;
-        &, &:visited {
+        &,
+        &:visited {
             color: custom.$mcr-foundation-ink;
         }
     }

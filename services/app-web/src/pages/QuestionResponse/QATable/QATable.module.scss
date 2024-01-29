@@ -1,22 +1,23 @@
 @use '../../../styles/custom.scss' as custom;
 @use '../../../styles/uswdsImports.scss' as uswds;
-@use '../../../components/SubmissionSummarySection/UploadedDocumentsTable/UploadedDocumentsTable.module.scss' as uploadedDocumentsTable;
+@use '../../../components/SubmissionSummarySection/UploadedDocumentsTable/UploadedDocumentsTable.module.scss'
+    as uploadedDocumentsTable;
 
 .qaDocumentTable {
-  @include uploadedDocumentsTable.docs-table;
-  margin: 0 0 uswds.units(4) 0;
+    @include uploadedDocumentsTable.docs-table;
+    margin: 0 0 uswds.units(4) 0;
 }
 
 .tableHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: uswds.units(3);
-  h4 {
-    padding: 0;
-    margin: 0;
-  }
-  p {
-    margin: 0;
-  }
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: uswds.units(3);
+    h4 {
+        padding: 0;
+        margin: 0;
+    }
+    p {
+        margin: 0;
+    }
 }

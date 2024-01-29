@@ -51,6 +51,7 @@ export const ContactsSummarySection = ({
                             submission.stateContacts.map(
                                 (stateContact, index) => (
                                     <DataDetail
+                                        key={'statecontact_' + index}
                                         id={'statecontact_' + index}
                                         label={`Contact ${index + 1}`}
                                         children={

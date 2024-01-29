@@ -9,13 +9,13 @@
 @forward 'mcrColors'; // Allows access to colors anywhere custom is imported
 
 @use 'mcrColors' as *;
-@use'uswdsImports.scss' as uswds;
+@use 'uswdsImports.scss' as uswds;
 
 /* CONTAINERS */
 // Every page starts with a flex container
 @mixin container {
-  display: flex;
-  flex: 1 0 auto;
+    display: flex;
+    flex: 1 0 auto;
 }
 // We have some established width limits how far page content should stretch laterally. Right now this is controlled by CSS width properties
 $mcr-container-standard-width-fixed: 50rem;
@@ -44,7 +44,8 @@ $mcr-container-max-width-fixed: 75rem;
         $mcr-primary-dark,
         $mcr-cyan-base
     );
-    box-shadow: inset 0 0 1px $mcr-gray-dark,
+    box-shadow:
+        inset 0 0 1px $mcr-gray-dark,
         0px 0px 24px rgb(0 0 0 / 5%);
 }
 

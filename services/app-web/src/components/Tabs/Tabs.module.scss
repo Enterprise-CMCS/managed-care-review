@@ -7,9 +7,7 @@
 
 .easi-tabs {
     overflow: hidden;
-    height: 85%
-
-    &__navigation {
+    height: 85% &__navigation {
         display: flex;
         justify-content: space-between;
         position: relative;
@@ -85,5 +83,4 @@
         padding: 1.5em;
         min-height: 500px;
     }
-
 }

@@ -4,7 +4,6 @@ import { Route, Routes } from 'react-router-dom'
 import { UploadQuestions } from '../../QuestionResponse'
 import {
     dragAndDrop,
-    ldUseClientSpy,
     renderWithProviders,
     TEST_DOC_FILE,
     TEST_PDF_FILE,
@@ -26,13 +25,6 @@ import { SubmissionSideNav } from '../../SubmissionSideNav'
 import { Location } from 'react-router-dom'
 
 describe('UploadQuestions', () => {
-    beforeEach(() => {
-        ldUseClientSpy({ 'cms-questions': true })
-    })
-    afterEach(() => {
-        jest.resetAllMocks()
-    })
-
     it('displays file upload for correct cms division', async () => {
         const division = 'testDivision'
         renderWithProviders(
@@ -58,6 +50,9 @@ describe('UploadQuestions', () => {
                 },
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/${division}/upload-questions`,
+                },
+                featureFlags: {
+                    'cms-questions': true,
                 },
             }
         )
@@ -103,6 +98,9 @@ describe('UploadQuestions', () => {
                 },
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/dmco/upload-questions`,
+                },
+                featureFlags: {
+                    'cms-questions': true,
                 },
             }
         )
@@ -165,6 +163,9 @@ describe('UploadQuestions', () => {
                     route: `/submissions/15/question-and-answers/dmco/upload-questions`,
                 },
                 location: (location) => (testLocation = location),
+                featureFlags: {
+                    'cms-questions': true,
+                },
             }
         )
 
@@ -220,6 +221,9 @@ describe('UploadQuestions', () => {
                         }),
                     ],
                 },
+                featureFlags: {
+                    'cms-questions': true,
+                },
             }
         )
         await screen.findByRole('heading', {
@@ -264,6 +268,9 @@ describe('UploadQuestions', () => {
                             id: '15',
                         }),
                     ],
+                },
+                featureFlags: {
+                    'cms-questions': true,
                 },
             }
         )
@@ -314,6 +321,9 @@ describe('UploadQuestions', () => {
                             id: '15',
                         }),
                     ],
+                },
+                featureFlags: {
+                    'cms-questions': true,
                 },
             }
         )
@@ -384,6 +394,9 @@ describe('UploadQuestions', () => {
                             ],
                         }),
                     ],
+                },
+                featureFlags: {
+                    'cms-questions': true,
                 },
             }
         )
