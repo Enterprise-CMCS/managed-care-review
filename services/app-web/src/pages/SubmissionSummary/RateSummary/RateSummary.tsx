@@ -76,18 +76,21 @@ export const RateSummary = (): React.ReactElement => {
                         asCustom={NavLink}
                         //TODO: Will have to remove this conditional once the rate dashboard is made available to state users
                         to={{
-                            pathname: loggedInUser?.__typename === 'StateUser' ? RoutesRecord.DASHBOARD : RoutesRecord.DASHBOARD_RATES,
+                            pathname:
+                                loggedInUser?.__typename === 'StateUser'
+                                    ? RoutesRecord.DASHBOARD
+                                    : RoutesRecord.DASHBOARD_RATES,
                         }}
                     >
                         <Icon.ArrowBack />
                         <span>&nbsp;Back to dashboard</span>
                     </Link>
                 </div>
-                    <SingleRateSummarySection
-                        rate={rate}
-                        isSubmitted // can assume isSubmitted because we are building for CMS users
-                        statePrograms={rate.state.programs}
-                    />
+                <SingleRateSummarySection
+                    rate={rate}
+                    isSubmitted // can assume isSubmitted because we are building for CMS users
+                    statePrograms={rate.state.programs}
+                />
             </GridContainer>
         </div>
     )
