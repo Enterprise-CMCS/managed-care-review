@@ -21,7 +21,7 @@ export async function userFromThirdPartyAuthorizer(
 
         return ok(auroraUser)
     } catch (e) {
-        console.error('ERROR: failed to look user in postgres')
+        console.error('ERROR: failed to look up user in postgres')
         return err(e)
     }
 }
