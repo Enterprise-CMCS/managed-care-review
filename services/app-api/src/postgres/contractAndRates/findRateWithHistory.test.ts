@@ -114,7 +114,7 @@ describe('findRate', () => {
             await submitRate(client, {
                 rateID: rateA.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'initial rate submit',
+                submittedReason: 'initial rate submit',
             })
         )
 
@@ -123,21 +123,21 @@ describe('findRate', () => {
             await submitContract(client, {
                 contractID: contract1.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Contract Submit',
+                submittedReason: 'Contract Submit',
             })
         )
         must(
             await submitContract(client, {
                 contractID: contract2.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'ContractSubmit 2',
+                submittedReason: 'ContractSubmit 2',
             })
         )
         must(
             await submitContract(client, {
                 contractID: contract3.id,
                 submittedByUserID: stateUser.id,
-                submitReason: '3.0 create',
+                submittedReason: '3.0 create',
             })
         )
 
@@ -176,7 +176,7 @@ describe('findRate', () => {
             await submitContract(client, {
                 contractID: contract2.id,
                 submittedByUserID: stateUser.id,
-                submitReason: '2.1 remove',
+                submittedReason: '2.1 remove',
             })
         )
 
@@ -209,7 +209,7 @@ describe('findRate', () => {
             await submitContract(client, {
                 contractID: contract1.id,
                 submittedByUserID: stateUser.id,
-                submitReason: '1.1 new name',
+                submittedReason: '1.1 new name',
             })
         )
 
@@ -234,7 +234,7 @@ describe('findRate', () => {
             await submitRate(client, {
                 rateID: rateA.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Submitting A.1',
+                submittedReason: 'Submitting A.1',
             })
         )
 
@@ -268,7 +268,7 @@ describe('findRate', () => {
             await submitRate(client, {
                 rateID: rateA.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Submitting A.2',
+                submittedReason: 'Submitting A.2',
             })
         )
 
@@ -450,7 +450,7 @@ describe('findRate', () => {
             await submitRate(client, {
                 rateID: rateIDOne,
                 submittedByUserID: stateUser.id,
-                submitReason: 'initial rate one submit',
+                submittedReason: 'initial rate one submit',
             })
         )
         // Submit rate then contract
@@ -458,14 +458,14 @@ describe('findRate', () => {
             await submitRate(client, {
                 rateID: rateIDTwo,
                 submittedByUserID: stateUser.id,
-                submitReason: 'initial rate two submit',
+                submittedReason: 'initial rate two submit',
             })
         )
         must(
             await submitContract(client, {
                 contractID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'initial contract submit',
+                submittedReason: 'initial contract submit',
             })
         )
 
@@ -528,21 +528,21 @@ describe('findRate', () => {
             await submitRate(client, {
                 rateID: rateIDOne,
                 submittedByUserID: stateUser.id,
-                submitReason: 'resubmit rate one',
+                submittedReason: 'resubmit rate one',
             })
         )
         must(
             await submitRate(client, {
                 rateID: rateIDTwo,
                 submittedByUserID: stateUser.id,
-                submitReason: 'resubmit rate two',
+                submittedReason: 'resubmit rate two',
             })
         )
         must(
             await submitContract(client, {
                 contractID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'resubmit contract',
+                submittedReason: 'resubmit contract',
             })
         )
 
@@ -635,14 +635,14 @@ describe('findRate', () => {
             await submitRate(client, {
                 rateID: rateIDTwo,
                 submittedByUserID: stateUser.id,
-                submitReason: 're-resubmit rate two',
+                submittedReason: 're-resubmit rate two',
             })
         )
         must(
             await submitContract(client, {
                 contractID,
                 submittedByUserID: stateUser.id,
-                submitReason:
+                submittedReason:
                     'resubmit contract removing rate one leaving only rate two',
             })
         )
@@ -709,7 +709,7 @@ describe('findRate', () => {
         const latestRateTwoResubmit = must(
             await submitRate(client, {
                 rateID: rateIDOne,
-                submitReason: 'resubmit without contract',
+                submittedReason: 'resubmit without contract',
                 submittedByUserID: stateUser.id,
             })
         )
@@ -805,7 +805,7 @@ describe('findRate', () => {
             await submitRate(client, {
                 rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit rate revision 1.0',
+                submittedReason: 'submit rate revision 1.0',
             })
         )
 
@@ -814,7 +814,7 @@ describe('findRate', () => {
             await submitContract(client, {
                 contractID: draftContract.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit contract revision 1.0',
+                submittedReason: 'submit contract revision 1.0',
             })
         )
 
@@ -841,7 +841,7 @@ describe('findRate', () => {
             await submitContract(client, {
                 contractID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit contract revision 1.1',
+                submittedReason: 'submit contract revision 1.1',
             })
         )
 
@@ -868,7 +868,7 @@ describe('findRate', () => {
             await submitRate(client, {
                 rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit rate revision 1.1',
+                submittedReason: 'submit rate revision 1.1',
             })
         )
 
@@ -912,14 +912,14 @@ describe('findRate', () => {
             await submitRate(client, {
                 rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit rate revision 1.2',
+                submittedReason: 'submit rate revision 1.2',
             })
         )
         must(
             await submitContract(client, {
                 contractID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit contract revision 1.2',
+                submittedReason: 'submit contract revision 1.2',
             })
         )
 
@@ -963,7 +963,7 @@ describe('findRate', () => {
             await submitContract(client, {
                 contractID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit contract revision 1.3',
+                submittedReason: 'submit contract revision 1.3',
             })
         )
         must(
@@ -977,7 +977,7 @@ describe('findRate', () => {
             await submitContract(client, {
                 contractID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit contract revision 1.4',
+                submittedReason: 'submit contract revision 1.4',
             })
         )
         must(
@@ -991,7 +991,7 @@ describe('findRate', () => {
             await submitContract(client, {
                 contractID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit contract revision 1.5',
+                submittedReason: 'submit contract revision 1.5',
             })
         )
 
@@ -1035,7 +1035,7 @@ describe('findRate', () => {
             await submitRate(client, {
                 rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit rate revision 1.3',
+                submittedReason: 'submit rate revision 1.3',
             })
         )
         must(
@@ -1049,7 +1049,7 @@ describe('findRate', () => {
             await submitRate(client, {
                 rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit rate revision 1.4',
+                submittedReason: 'submit rate revision 1.4',
             })
         )
         must(
@@ -1063,7 +1063,7 @@ describe('findRate', () => {
             await submitRate(client, {
                 rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit rate revision 1.5',
+                submittedReason: 'submit rate revision 1.5',
             })
         )
 

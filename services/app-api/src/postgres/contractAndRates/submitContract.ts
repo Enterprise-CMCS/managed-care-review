@@ -8,7 +8,7 @@ import { includeLatestSubmittedRateRev } from './prismaSubmittedRateHelpers'
 type SubmitContractArgsType = {
     contractID: string // revision ID
     submittedByUserID: UpdateInfoType['updatedBy']
-    submitReason: UpdateInfoType['updatedReason']
+    submittedReason: UpdateInfoType['updatedReason']
 }
 // Update the given revision
 // * invalidate relationships of previous revision by marking as outdated
@@ -17,7 +17,7 @@ async function submitContract(
     client: PrismaClient,
     args: SubmitContractArgsType
 ): Promise<ContractType | NotFoundError | Error> {
-    const { contractID, submittedByUserID, submitReason } = args
+    const { contractID, submittedByUserID, submittedReason } = args
     const currentDateTime = new Date()
 
     try {
@@ -66,7 +66,7 @@ async function submitContract(
                         create: {
                             updatedAt: currentDateTime,
                             updatedByID: submittedByUserID,
-                            updatedReason: submitReason,
+                            updatedReason: submittedReason,
                         },
                     },
                     rateRevisions: {

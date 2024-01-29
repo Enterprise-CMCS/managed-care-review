@@ -376,7 +376,7 @@ export function submitHealthPlanPackageResolver(
                     store.submitRate({
                         rateRevisionID: rateRev.id,
                         submittedByUserID: user.id,
-                        submitReason: updateInfo.updatedReason,
+                        submittedReason: updateInfo.updatedReason,
                     })
                 )
             })
@@ -417,7 +417,7 @@ export function submitHealthPlanPackageResolver(
         const submitContractResult = await store.submitContract({
             contractID: updateResult.id,
             submittedByUserID: user.id,
-            submitReason: updateInfo.updatedReason,
+            submittedReason: updateInfo.updatedReason,
         })
         if (submitContractResult instanceof Error) {
             const errMessage = `Failed to submit contract revision with ID: ${contractRevisionID}; ${submitContractResult.message}`

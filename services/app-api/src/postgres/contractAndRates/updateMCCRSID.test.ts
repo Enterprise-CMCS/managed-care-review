@@ -34,7 +34,7 @@ describe('updateContract', () => {
             await submitContract(client, {
                 contractID: draftContract.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit contract',
+                submittedReason: 'submit contract',
             })
         )
 

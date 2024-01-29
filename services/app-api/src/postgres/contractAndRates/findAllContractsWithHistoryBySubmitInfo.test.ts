@@ -45,14 +45,14 @@ describe('findAllContractsWithHistoryBySubmittedInfo', () => {
             await submitContract(client, {
                 contractID: contractOne.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'contractOne submit',
+                submittedReason: 'contractOne submit',
             })
         )
         const submittedContractTwo = must(
             await submitContract(client, {
                 contractID: contractTwo.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'contractTwo submit',
+                submittedReason: 'contractTwo submit',
             })
         )
 
@@ -72,7 +72,7 @@ describe('findAllContractsWithHistoryBySubmittedInfo', () => {
             await submitContract(client, {
                 contractID: contractThree.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'unlockContractOne submit',
+                submittedReason: 'unlockContractOne submit',
             })
         )
         const unlockedContract = must(

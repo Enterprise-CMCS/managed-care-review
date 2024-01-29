@@ -3,16 +3,21 @@ import UNLOCK_RATE from '../../../../app-graphql/src/mutations/unlockRate.graphq
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import { expectToBeDefined, must } from '../../testHelpers/assertionHelpers'
 import { createAndSubmitTestRate } from '../../testHelpers/gqlRateHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 describe(`unlockRate`, () => {
+    const ldService = testLDService({
+        'rate-edit-unlock': true,
+    })
     const cmsUser = testCMSUser()
 
     it('changes rate status to UNLOCKED and creates a new draft revision with unlock info', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({ ldService})
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
+            ldService,
         })
 
         // Create and unlock a rate
@@ -39,11 +44,12 @@ describe(`unlockRate`, () => {
     })
 
     it('returns status error if rate is actively being edited in draft', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({ ldService,})
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
+            ldService
         })
 
         // Create a rate
@@ -80,7 +86,7 @@ describe(`unlockRate`, () => {
     })
 
     it('returns unauthorized error for state user', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({ ldService,})
         // Create a rate
         const rate = await createAndSubmitTestRate(stateServer)
 

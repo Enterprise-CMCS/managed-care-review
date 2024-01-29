@@ -41,14 +41,14 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
             await submitRate(client, {
                 rateID: rateOne.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'rateOne submit',
+                submittedReason: 'rateOne submit',
             })
         )
         const submittedRateTwo = must(
             await submitRate(client, {
                 rateID: rateTwo.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'rateTwo submit',
+                submittedReason: 'rateTwo submit',
             })
         )
 
@@ -62,7 +62,7 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
             await submitRate(client, {
                 rateID: rateThree.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'unlockRateOne submit',
+                submittedReason: 'unlockRateOne submit',
             })
         )
         const unlockedRate = must(
@@ -136,7 +136,7 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
             await submitRate(client, {
                 rateID: rateDataForAS.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'rateOne submit',
+                submittedReason: 'rateOne submit',
             })
         )
 

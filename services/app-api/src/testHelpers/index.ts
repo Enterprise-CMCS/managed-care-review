@@ -28,6 +28,5 @@ export {
     fetchTestRateById,
     submitTestRate,
     unlockTestRate,
-    resubmitTestRate,
     updateTestRate,
 } from './gqlRateHelpers'

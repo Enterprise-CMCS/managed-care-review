@@ -33,7 +33,7 @@ const fetchTestRateById = async (
         throw new Error('fetchTestRateById returned nothing')
     }
 
-    return result.data.fetchHealthPlanPackage.pkg
+    return result.data.fetchRate.rate
 }
 
 const createAndSubmitTestRate = async (
@@ -41,15 +41,16 @@ const createAndSubmitTestRate = async (
     rateData?: InsertRateArgsType
 ): Promise<RateRevisionType> => {
     const rate = await createTestRate(rateData)
-    return await must(submitTestRate(server, rate.id))
+    return await must(submitTestRate(server, rate.id, 'Initial submission'))
 }
 
-const submitTestRate = async (server: ApolloServer, rateID: string) => {
+const submitTestRate = async (server: ApolloServer, rateID: string, submittedReason: string) => {
     const updateResult = await server.executeOperation({
         query: SUBMIT_RATE,
         variables: {
             input: {
                 rateID,
+                submittedReason,
             },
         },
     })
@@ -65,7 +66,7 @@ const submitTestRate = async (server: ApolloServer, rateID: string) => {
         throw new Error('submitTestRate returned nothing')
     }
 
-    return updateResult.data.submitHealthPlanPackage.pkg
+    return updateResult.data.submitRate.rate
 }
 
 const unlockTestRate = async (
@@ -94,44 +95,19 @@ const unlockTestRate = async (
         throw new Error('unlockTestRate returned nothing')
     }
 
-    return updateResult.data.submitHealthPlanPackage.pkg
-}
-
-const resubmitTestRate = async (
-    server: ApolloServer,
-    rateID: string,
-    submittedReason: string
-) => {
-    const updateResult = await server.executeOperation({
-        query: SUBMIT_RATE,
-        variables: {
-            input: {
-                rateID,
-                submittedReason,
-            },
-        },
-    })
-
-    if (updateResult.errors) {
-        console.info('errors', updateResult.errors)
-        throw new Error(
-            `resubmitTestRate mutation failed with errors ${updateResult.errors}`
-        )
-    }
-
-    if (updateResult.data === undefined || updateResult.data === null) {
-        throw new Error('resubmitTestRate returned nothing')
-    }
-
-    return updateResult.data.submitHealthPlanPackage.pkg
+    return updateResult.data.unlockRate.rate
 }
 
 // USING PRISMA DIRECTLY BELOW ---  we have no createRate or updateRate resolvers yet, but we have integration tests needing the workflows
 const createTestRate = async (
-    rateData?: InsertRateArgsType
+    rateData?: Partial<InsertRateArgsType>
 ): Promise<RateType> => {
     const prismaClient = await sharedTestPrismaClient()
-    const initialData = rateData || mockDraftRate()
+    const defaultRateData = { ...mockDraftRate(), stateCode: 'FL'}
+    const initialData ={
+        ...defaultRateData,
+        ...rateData // override with any new fields passed in
+    }
     const programs = initialData.stateCode
         ? [must(findStatePrograms(initialData.stateCode))[0]]
         : [defaultFloridaRateProgram()]
@@ -141,25 +117,11 @@ const createTestRate = async (
     const draftRateData = mockInsertRateArgs({
         rateProgramIDs: programIDs,
     })
+
     return must(await insertDraftRate(prismaClient, draftRateData))
 }
 
 const updateTestRate = async (
-    rateID: string,
-    rateData: RateFormEditable
-): Promise<RateType> => {
-    const prismaClient = await sharedTestPrismaClient()
-
-    return must(
-        await updateDraftRate(prismaClient, {
-            rateID: rateID,
-            formData: rateData,
-            contractIDs: [],
-        })
-    )
-}
-
-const submitTestRate = async (
     rateID: string,
     rateData: RateFormEditable
 ): Promise<RateType> => {
@@ -180,6 +142,5 @@ export {
     fetchTestRateById,
     submitTestRate,
     unlockTestRate,
-    resubmitTestRate,
     updateTestRate,
 }

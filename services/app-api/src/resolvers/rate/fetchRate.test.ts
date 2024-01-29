@@ -12,7 +12,7 @@ import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import {
     createAndSubmitTestRate,
     must,
-    resubmitTestRate,
+    submitTestRate,
     unlockTestRate,
     updateTestRate,
 } from '../../testHelpers'
@@ -74,7 +74,7 @@ describe('fetchRate', () => {
             rateDateEnd: new Date(Date.UTC(2027, 1, 1)),
         })
 
-        const resubmitted = await resubmitTestRate(
+        const resubmitted = await submitTestRate(
             stateServer,
             submittedRate.id,
             'Resubmit with edited rate description'

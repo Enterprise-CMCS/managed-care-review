@@ -755,7 +755,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
                 await submitContract(client, {
                     contractID: createdDraft.id,
                     submittedByUserID: stateUser.id,
-                    submitReason: 'Submission',
+                    submittedReason: 'Submission',
                 })
             )
         }

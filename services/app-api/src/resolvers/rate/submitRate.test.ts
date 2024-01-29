@@ -9,6 +9,7 @@ import SUBMIT_RATE from '../../../../app-graphql/src/mutations/submitRate.graphq
 import FETCH_RATE from 'app-graphql/src/queries/fetchRate.graphql'
 import SUBMIT_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
 import UNLOCK_RATE from '../../../../app-graphql/src/mutations/unlockRate.graphql'
+import { createTestRate, mockDraftRate, must, updateTestRate } from '../../testHelpers'
 
 describe('submitRate', () => {
     const ldService = testLDService({
@@ -25,36 +26,18 @@ describe('submitRate', () => {
             ldService,
         })
 
-        const draftContractWithRate =
-            await createAndUpdateTestHealthPlanPackage(stateServer)
-
-        const rateID = latestFormData(draftContractWithRate).rateInfos[0].id
-
-        const fetchDraftRate = await stateServer.executeOperation({
-            query: FETCH_RATE,
-            variables: {
-                input: { rateID },
-            },
-        })
-
-        const draftFormData =
-            fetchDraftRate.data?.fetchRate.rate.draftRevision.formData
-
-        // expect draft rate created in contract to exist
-        expect(fetchDraftRate.errors).toBeUndefined()
-        expect(draftFormData).toBeDefined()
-
+        // createRate with full data
+        const draftRate = await createTestRate()
+        // submitRate with no form data updates
         const result = await stateServer.executeOperation({
             query: SUBMIT_RATE,
             variables: {
                 input: {
-                    rateID: rateID,
-                    submitReason: 'submit rate',
-                    formData: draftFormData,
+                    rateID: draftRate.id,
                 },
             },
         })
-
+        expect(result.errors).toBeUndefined()
         const submittedRate = result.data?.submitRate.rate
         const submittedRateFormData = submittedRate.revisions[0].formData
 
@@ -65,7 +48,7 @@ describe('submitRate', () => {
         // expect status to be submitted.
         expect(submittedRate.status).toBe('SUBMITTED')
         // expect formData to be the same
-        expect(submittedRateFormData).toEqual(draftFormData)
+        expect(submittedRateFormData).toEqual(draftRate.draftRevision?.formData)
     })
     it('can submit rate with formData updates', async () => {
         const stateUser = testStateUser()
@@ -77,40 +60,23 @@ describe('submitRate', () => {
             ldService,
         })
 
-        const draftContractWithRate =
-            await createAndUpdateTestHealthPlanPackage(stateServer)
-
-        const rateID = latestFormData(draftContractWithRate).rateInfos[0].id
-
-        const fetchDraftRate = await stateServer.executeOperation({
-            query: FETCH_RATE,
-            variables: {
-                input: { rateID },
-            },
-        })
-
-        const draftFormData =
-            fetchDraftRate.data?.fetchRate.rate.draftRevision.formData
-
-        // expect draft rate created in contract to exist
-        expect(fetchDraftRate.errors).toBeUndefined()
-        expect(draftFormData).toBeDefined()
-
+        const rate = await createTestRate({rateDateStart: new Date('03/03/2013')})
         // make update to formData in submit
         const result = await stateServer.executeOperation({
             query: SUBMIT_RATE,
             variables: {
                 input: {
-                    rateID: rateID,
-                    submitReason: 'submit rate',
+                    rateID: rate.id,
+                    submittedReason: 'submit rate',
                     formData: {
-                        ...draftFormData,
-                        rateType: 'AMENDMENT',
+                        ...rate.draftRevision,
+                        rateDateStart: new Date('01/01/2011')
                     },
                 },
             },
         })
 
+        expect(result.errors).toBeUndefined()
         const submittedRate = result.data?.submitRate.rate
         const submittedRateFormData = submittedRate.revisions[0].formData
 
@@ -121,7 +87,7 @@ describe('submitRate', () => {
         // expect status to be submitted.
         expect(submittedRate.status).toBe('SUBMITTED')
         // expect formData to NOT be the same
-        expect(submittedRateFormData).not.toEqual(draftFormData)
+        expect(submittedRateFormData.rateDateStart).toBe('01/01/2011')
     })
     it('can submit rate without formData updates', async () => {
         const stateUser = testStateUser()
@@ -158,7 +124,7 @@ describe('submitRate', () => {
             variables: {
                 input: {
                     rateID: rateID,
-                    submitReason: 'submit rate',
+                    submittedReason: 'submit rate',
                 },
             },
         })
@@ -242,7 +208,7 @@ describe('submitRate', () => {
             variables: {
                 input: {
                     rateID: rateID,
-                    submitReason: 'submit rate',
+                    submittedReason: 'submit rate',
                     formData: unlockedRate.draftRevision.formData,
                 },
             },
@@ -291,7 +257,7 @@ describe('submitRate', () => {
             variables: {
                 input: {
                     rateID: rateID,
-                    submitReason: 'submit rate',
+                    submittedReason: 'submit rate',
                     formData: {
                         ...draftFormData,
                         rateType: 'AMENDMENT',

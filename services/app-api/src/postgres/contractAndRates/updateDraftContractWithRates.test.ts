@@ -845,7 +845,7 @@ describe('updateDraftContract', () => {
             await submitRate(client, {
                 rateID: newlyCreatedRates[0].formData.rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Rate submit',
+                submittedReason: 'Rate submit',
             })
         )
 
@@ -864,7 +864,7 @@ describe('updateDraftContract', () => {
             await submitRate(client, {
                 rateID: newDraftRate.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Rate 2 submit',
+                submittedReason: 'Rate 2 submit',
             })
         )
 

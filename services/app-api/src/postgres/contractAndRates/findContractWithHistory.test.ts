@@ -51,7 +51,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitContract(client, {
                 contractID: contractA.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'initial submit',
+                submittedReason: 'initial submit',
             })
         )
 
@@ -73,7 +73,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitRate(client, {
                 rateID: rate1.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Rate Submit',
+                submittedReason: 'Rate Submit',
             })
         )
 
@@ -94,7 +94,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitRate(client, {
                 rateID: rate2.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'RateSubmit 2',
+                submittedReason: 'RateSubmit 2',
             })
         )
 
@@ -115,7 +115,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitRate(client, {
                 rateID: rate3.id,
                 submittedByUserID: stateUser.id,
-                submitReason: '3.0 create',
+                submittedReason: '3.0 create',
             })
         )
 
@@ -147,7 +147,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitRate(client, {
                 rateID: rate2.id,
                 submittedByUserID: stateUser.id,
-                submitReason: '2.1 remove',
+                submittedReason: '2.1 remove',
             })
         )
 
@@ -180,7 +180,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitRate(client, {
                 rateID: rate1.id,
                 submittedByUserID: stateUser.id,
-                submitReason: '1.1 new name',
+                submittedReason: '1.1 new name',
             })
         )
 
@@ -205,7 +205,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitContract(client, {
                 contractID: contractA.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Submitting A.1',
+                submittedReason: 'Submitting A.1',
             })
         )
 
@@ -250,7 +250,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitContract(client, {
                 contractID: contractA.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Submitting A.2',
+                submittedReason: 'Submitting A.2',
             })
         )
 
@@ -391,7 +391,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitContract(client, {
                 contractID: contractA.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'initial submit',
+                submittedReason: 'initial submit',
             })
         )
 
@@ -417,7 +417,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitRate(client, {
                 rateID: rate1.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Rate Submit',
+                submittedReason: 'Rate Submit',
             })
         )
 
@@ -438,7 +438,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitRate(client, {
                 rateID: rate2.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'RateSubmit 2',
+                submittedReason: 'RateSubmit 2',
             })
         )
 
@@ -459,7 +459,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitRate(client, {
                 rateID: rate3.id,
                 submittedByUserID: stateUser.id,
-                submitReason: '3.0 create',
+                submittedReason: '3.0 create',
             })
         )
 
@@ -482,7 +482,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitRate(client, {
                 rateID: rate2.id,
                 submittedByUserID: stateUser.id,
-                submitReason: '2.1 remove',
+                submittedReason: '2.1 remove',
             })
         )
 
@@ -505,7 +505,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitRate(client, {
                 rateID: rate1.id,
                 submittedByUserID: stateUser.id,
-                submitReason: '1.1 new name',
+                submittedReason: '1.1 new name',
             })
         )
 
@@ -522,7 +522,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitContract(client, {
                 contractID: contractA.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Submitting A.1',
+                submittedReason: 'Submitting A.1',
             })
         )
 
@@ -560,7 +560,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitContract(client, {
                 contractID: contractA.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Submitting A.2',
+                submittedReason: 'Submitting A.2',
             })
         )
 
@@ -704,7 +704,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitRate(client, {
                 rateID: draftRateRevisionData1.rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Rate Submit',
+                submittedReason: 'Rate Submit',
             })
         )
 
@@ -712,7 +712,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitRate(client, {
                 rateID: draftRateRevisionData2.rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Rate Submit 2',
+                submittedReason: 'Rate Submit 2',
             })
         )
 
@@ -721,7 +721,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitContract(client, {
                 contractID: contractA.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'initial submit',
+                submittedReason: 'initial submit',
             })
         )
 
@@ -777,7 +777,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitRate(client, {
                 rateID: submittedRate2.id,
                 submittedByUserID: stateUser.id,
-                submitReason: '2.1 update',
+                submittedReason: '2.1 update',
             })
         )
 
@@ -797,7 +797,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await submitContract(client, {
                 contractID: contractA.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'third submit',
+                submittedReason: 'third submit',
             })
         )
 
@@ -805,7 +805,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         const contractA_1_Error = await submitContract(client, {
             contractID: contractA.id,
             submittedByUserID: stateUser.id,
-            submitReason: 'third submit',
+            submittedReason: 'third submit',
         })
         if (!(contractA_1_Error instanceof Error)) {
             throw new Error('Should be impossible to submit twice in a row.')
@@ -902,7 +902,7 @@ describe('findContractWithHistory with only contract history', () => {
             await submitRate(client, {
                 rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit rate A revision 1.0',
+                submittedReason: 'submit rate A revision 1.0',
             })
         )
 
@@ -911,7 +911,7 @@ describe('findContractWithHistory with only contract history', () => {
             await submitContract(client, {
                 contractID: draftContract.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit contract revision 1.0',
+                submittedReason: 'submit contract revision 1.0',
             })
         )
 
@@ -927,7 +927,7 @@ describe('findContractWithHistory with only contract history', () => {
             await submitRate(client, {
                 rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit rate A revision 1.1',
+                submittedReason: 'submit rate A revision 1.1',
             })
         )
         must(
@@ -941,7 +941,7 @@ describe('findContractWithHistory with only contract history', () => {
             await submitRate(client, {
                 rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit rate A revision 1.2',
+                submittedReason: 'submit rate A revision 1.2',
             })
         )
         must(
@@ -955,7 +955,7 @@ describe('findContractWithHistory with only contract history', () => {
             await submitRate(client, {
                 rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit rate A revision 1.3',
+                submittedReason: 'submit rate A revision 1.3',
             })
         )
 
@@ -991,7 +991,7 @@ describe('findContractWithHistory with only contract history', () => {
             await submitRate(client, {
                 rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit rate A revision 1.4',
+                submittedReason: 'submit rate A revision 1.4',
             })
         )
 
@@ -999,7 +999,7 @@ describe('findContractWithHistory with only contract history', () => {
         must(
             await submitContract(client, {
                 contractID,
-                submitReason: 'submit contract revision 1.1',
+                submittedReason: 'submit contract revision 1.1',
                 submittedByUserID: stateUser.id,
             })
         )
@@ -1016,7 +1016,7 @@ describe('findContractWithHistory with only contract history', () => {
             await submitRate(client, {
                 rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit rate A revision 1.5',
+                submittedReason: 'submit rate A revision 1.5',
             })
         )
 
@@ -1094,14 +1094,14 @@ describe('findContractWithHistory with only contract history', () => {
             await submitRate(client, {
                 rateID: secondRate.rate.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit rate B revision 1.0',
+                submittedReason: 'submit rate B revision 1.0',
             })
         )
         must(
             await submitContract(client, {
                 contractID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit contract revision 1.2',
+                submittedReason: 'submit contract revision 1.2',
             })
         )
 
@@ -1117,7 +1117,7 @@ describe('findContractWithHistory with only contract history', () => {
             await submitRate(client, {
                 rateID: secondRate.rate.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit rate B revision 1.1',
+                submittedReason: 'submit rate B revision 1.1',
             })
         )
         must(
@@ -1131,7 +1131,7 @@ describe('findContractWithHistory with only contract history', () => {
             await submitRate(client, {
                 rateID: secondRate.rate.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit rate B revision 1.2',
+                submittedReason: 'submit rate B revision 1.2',
             })
         )
 

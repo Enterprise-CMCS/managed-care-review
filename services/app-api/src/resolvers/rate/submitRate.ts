@@ -18,7 +18,7 @@ export function submitRate(
 ): MutationResolvers['submitRate'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
-        const { rateID, submitReason, formData } = input
+        const { rateID, submittedReason, formData } = input
         const featureFlags = await launchDarkly.allFlags(context)
 
         setResolverDetailsOnActiveSpan('submitRate', user, span)
@@ -90,7 +90,7 @@ export function submitRate(
         const submittedRate = await store.submitRate({
             rateID,
             submittedByUserID: user.id,
-            submitReason,
+            submittedReason: submittedReason ?? 'Initial submission',
             formData: formData
                 ? {
                       rateType: (formData.rateType ??
