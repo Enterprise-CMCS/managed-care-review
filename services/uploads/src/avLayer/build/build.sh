@@ -44,10 +44,13 @@ rpm2cpio libselinux*.rpm | cpio -vimd
 rpm2cpio openssl-libs*.rpm | cpio -vimd
 rpm2cpio libcrypt*.rpm | cpio -vimd
 
+# Print out the contents of the /tmp/build directory
+ls -la /tmp/build
+
 # reset the timestamps so that we generate a reproducible zip file where
 # running with the same file contents we get the exact same hash even if we
 # run the same build on different days
-find usr -exec touch -t 200001010000 "{}" \;
+#find usr -exec touch -t 200001010000 "{}" \;
 popd
 
 mkdir -p bin lib
@@ -56,6 +59,10 @@ cp /tmp/build/usr/bin/clamscan /tmp/build/usr/bin/freshclam /tmp/build/usr/bin/c
 cp -R /tmp/build/usr/lib64/* lib/.
 cp -R /tmp/build/lib64/* lib/.
 cp freshclam.conf bin/freshclam.conf
+
+# Print out the contents of the bin and lib directories
+ls -la bin
+ls -la lib
 
 zip -r9 lambda_layer.zip bin
 zip -r9 lambda_layer.zip lib
