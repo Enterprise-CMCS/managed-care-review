@@ -20,11 +20,11 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
     try {
         // authentication step for validating JWT token
         const userId = await jwtLib.userIDFromToken(authToken)
-        const parsedEvent = JSON.parse(JSON.stringify(event))
-        const host = parsedEvent.headers.Host
+        // const parsedEvent = JSON.parse(JSON.stringify(event))
+        // const host = parsedEvent.headers.Host
         // host is formatted as ipAddress:port
         // the following will remove the :port to leave just the ip address
-        const ipAddress = host.slice(0, host.indexOf(':'))
+        // const ipAddress = host.slice(0, host.indexOf(':'))
         // const validIpAddresses = process.env.ALLOWED_IP_ADDRESSES
         // if validIpAddresses === undefined or length(validIpAddresses) === 0 {
 
@@ -35,7 +35,7 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
             const msg = 'Invalid auth token'
             console.error(msg)
 
-            return generatePolicy(undefined, event, ipAddress)
+            return generatePolicy(undefined, event)
         }
 
         // if (ipAddress === undefined || ipAddress === '') {
@@ -51,25 +51,25 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
             status: 'SUCCESS',
         })
 
-        return generatePolicy(userId, event, ipAddress)
+        return generatePolicy(userId, event)
     } catch (err) {
         console.error(
             'unexpected exception attempting to validate authorization',
             err
         )
-        return generatePolicy(undefined, event, undefined)
+        return generatePolicy(undefined, event)
     }
 }
 
 const generatePolicy = function (
     userId: string | undefined,
-    event: APIGatewayTokenAuthorizerEvent,
-    ipAddress: string | undefined
+    event: APIGatewayTokenAuthorizerEvent
+    // ipAddress: string | undefined
 ): APIGatewayAuthorizerResult {
     // If the JWT is verified as valid, and the request comes from an allowed IP address
     // send an Allow policy
     // otherwise a Deny policy is returned which restricts access
-    console.info(ipAddress, '====== ipaddress ======')
+    // console.info(ipAddress, '====== ipaddress ======')
     const policyDocument: PolicyDocument = {
         Version: '2012-10-17', // current version of the policy language
         Statement: [
