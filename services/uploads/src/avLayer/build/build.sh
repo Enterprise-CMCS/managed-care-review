@@ -7,7 +7,7 @@ uname -m
 
 yum update -y
 amazon-linux-extras install epel -y
-yum install -y cpio yum-utils tar.x86_64 gzip zip libxcrypt-compat curl
+yum install -y cpio yum-utils tar.x86_64 gzip zip clamav-update clamav
 
 # extract binaries for clamav, json-c, pcre
 mkdir -p /tmp/build
