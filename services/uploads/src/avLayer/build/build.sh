@@ -4,10 +4,13 @@ set -e
 
 echo "building clamav lambda layer..."
 uname -m
+rm -rf bin
+rm -rf lib
+rm lambda_layer.zip || true
 
 yum update -y
 amazon-linux-extras install epel -y
-yum install -y cpio yum-utils tar.x86_64 gzip zip clamav-update clamav
+yum install -y cpio yum-utils tar.x86_64 gzip zip 
 
 # extract binaries for clamav, json-c, pcre
 mkdir -p /tmp/build
@@ -50,7 +53,7 @@ ls -la /tmp/build
 # reset the timestamps so that we generate a reproducible zip file where
 # running with the same file contents we get the exact same hash even if we
 # run the same build on different days
-#find usr -exec touch -t 200001010000 "{}" \;
+find usr -exec touch -t 200001010000 "{}" \;
 popd
 
 mkdir -p bin lib
