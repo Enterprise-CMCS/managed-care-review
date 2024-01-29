@@ -251,7 +251,7 @@ jobs:
 
   deploy-infra:
     needs: [begin-deployment]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@mt-revert-clamav-pr
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
