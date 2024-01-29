@@ -1,0 +1,18 @@
+@use '../../styles/custom.scss' as custom;
+
+.table {
+    overflow: hidden;
+    color: green;
+}
+
+.wrapKey {
+    word-wrap: break-word;
+    background: white;
+    border: 3px;
+    display: block;
+    padding: 1em;
+}
+
+.container {
+    max-width: custom.$mcr-container-standard-width-fixed;
+}

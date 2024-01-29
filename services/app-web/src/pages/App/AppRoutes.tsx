@@ -38,6 +38,7 @@ import {
 } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 import { RateSummary } from '../SubmissionSummary/RateSummary'
+import { APIAccess } from '../APIAccess/APIAccess'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -147,6 +148,7 @@ const StateUserRoutes = ({
                         element={<GraphQLExplorer />}
                     />
                 )}
+                <Route path={RoutesRecord.API_ACCESS} element={<APIAccess />} />
                 <Route path="*" element={<Error404 />} />
             </Routes>
         </AuthenticatedRouteWrapper>
