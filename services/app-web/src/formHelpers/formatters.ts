@@ -4,6 +4,7 @@ import {
     ActuaryContact,
 } from '../common-code/healthPlanFormDataType'
 import { FileItemT } from '../components'
+import { GenericDocument } from '../gen/gqlClient'
 import { S3ClientT } from '../s3'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -49,7 +50,7 @@ const formatForForm = (
     }
 }
 
-const formatActuaryContactsForForm = (actuaryContacts?: ActuaryContact[]) => {
+const formatActuaryContactsForForm = (actuaryContacts?: ActuaryContact[] | GQLActuaryContact) => {
     return actuaryContacts && actuaryContacts.length > 0
         ? actuaryContacts
         : [
@@ -109,7 +110,7 @@ const formatDocumentsForForm = ({
     documents,
     getKey,
 }: {
-    documents?: SubmissionDocument[]
+    documents?: SubmissionDocument[] | GenericDocument[]
     getKey: S3ClientT['getKey'] // S3 function to call when formatting to double check we have valid documents, probably the backend should be doing this to reduce client async errors handling with bad data
 }): FileItemT[] => {
     if (!documents) return []

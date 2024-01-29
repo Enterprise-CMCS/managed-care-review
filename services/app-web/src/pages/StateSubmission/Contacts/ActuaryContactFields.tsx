@@ -6,12 +6,13 @@ import { FieldRadio, FieldTextInput } from '../../../components/Form'
 import { PoliteErrorMessage } from '../../../components/PoliteErrorMessage'
 import { RateCertFormType } from '../RateDetails/SingleRateCert/SingleRateCert'
 import styles from '../StateSubmissionForm.module.scss'
+import { ActuaryContact as ActuaryContactGQL } from '../../../gen/gqlClient'
 
 type FormError =
     FormikErrors<RateCertFormType>[keyof FormikErrors<RateCertFormType>]
 
 type ActuaryFormPropType = {
-    actuaryContact: ActuaryContact
+    actuaryContact: ActuaryContact | ActuaryContactGQL // GQl type for v2 API
     errors: FormikErrors<FormikValues>
     shouldValidate: boolean
     fieldNamePrefix: string
