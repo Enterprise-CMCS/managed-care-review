@@ -101,12 +101,14 @@ const useTealium = (): {
             logged_in: `${Boolean(loggedInUser) ?? false}`,
         }
         window.utag.view(tagData)
-        console.log('RAN IT')
 
         return () => {
             // document.body.removeChild(loadTagsSnippet)
             document.head.removeChild(initializeTagManagerSnippet)
         }
+
+    // NOTE: Run effect once on component mount, we recheck dependencies if effect is updated in the subsequent page view effect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     // Add page view
