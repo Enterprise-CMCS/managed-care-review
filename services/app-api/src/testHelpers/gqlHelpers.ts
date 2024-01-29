@@ -91,7 +91,7 @@ const constructTestPostgresServer = async (opts?: {
         opts?.jwt ||
         newJWTLib({
             issuer: 'mcreviewtest',
-            signingKey: 'foo',
+            signingKey: Buffer.from('123af', 'hex'),
             expirationDurationS: 1000,
         })
 

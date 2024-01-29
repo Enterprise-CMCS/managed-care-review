@@ -4,7 +4,6 @@
 @mixin docs-table {
     width: 100%;
 
-
     th {
         font-size: uswds.size('body', '2xs');
     }
@@ -22,7 +21,7 @@
     }
 }
 .uploadedDocumentsTable {
-   @include docs-table
+    @include docs-table;
 }
 
 .supportingDocsEmpty {
@@ -38,8 +37,8 @@
     justify-content: space-between;
 }
 
-.inlineLink{
-    display: inline
+.inlineLink {
+    display: inline;
 }
 
 .inlineTag {
@@ -66,4 +65,3 @@ caption {
         margin-right: 5px;
     }
 }
-

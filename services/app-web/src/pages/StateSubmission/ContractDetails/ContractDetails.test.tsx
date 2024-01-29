@@ -17,7 +17,6 @@ import {
     TEST_PNG_FILE,
     dragAndDrop,
     selectYesNoRadio,
-    ldUseClientSpy,
 } from '../../../testHelpers/jestHelpers'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { ContractDetails } from './'
@@ -38,10 +37,6 @@ const scrollIntoViewMock = jest.fn()
 HTMLElement.prototype.scrollIntoView = scrollIntoViewMock
 
 describe('ContractDetails', () => {
-    afterEach(() => {
-        jest.clearAllMocks()
-    })
-
     const emptyContractDetailsDraft = {
         ...mockDraft(),
     }
@@ -1028,7 +1023,6 @@ describe('ContractDetails', () => {
 
     describe('Contract 438 attestation', () => {
         it('renders 438 attestation question without errors', async () => {
-            ldUseClientSpy({ '438-attestation': true })
             const draft = mockBaseContract({
                 statutoryRegulatoryAttestation: true,
             })
@@ -1041,14 +1035,17 @@ describe('ContractDetails', () => {
                     />,
                     {
                         apolloProvider: defaultApolloProvider,
+                        featureFlags: { '438-attestation': true },
                     }
                 )
             })
 
             // expect 438 attestation question to be on the page
-            expect(
-                screen.getByText(StatutoryRegulatoryAttestationQuestion)
-            ).toBeInTheDocument()
+            await waitFor(() => {
+                expect(
+                    screen.getByText(StatutoryRegulatoryAttestationQuestion)
+                ).toBeInTheDocument()
+            })
 
             const yesRadio = screen.getByRole('radio', {
                 name: StatutoryRegulatoryAttestation.YES,
@@ -1073,7 +1070,6 @@ describe('ContractDetails', () => {
             })
         })
         it('errors when continuing without answering 438 attestation question', async () => {
-            ldUseClientSpy({ '438-attestation': true })
             const draft = mockContractAndRatesDraft({
                 contractDateStart: new Date('11-12-2023'),
                 contractDateEnd: new Date('11-12-2024'),
@@ -1090,14 +1086,17 @@ describe('ContractDetails', () => {
                     />,
                     {
                         apolloProvider: defaultApolloProvider,
+                        featureFlags: { '438-attestation': true },
                     }
                 )
             })
 
             // expect 438 attestation question to be on the page
-            expect(
-                screen.getByText(StatutoryRegulatoryAttestationQuestion)
-            ).toBeInTheDocument()
+            await waitFor(() => {
+                expect(
+                    screen.getByText(StatutoryRegulatoryAttestationQuestion)
+                ).toBeInTheDocument()
+            })
 
             const yesRadio = screen.getByRole('radio', {
                 name: StatutoryRegulatoryAttestation.YES,
@@ -1140,7 +1139,6 @@ describe('ContractDetails', () => {
             })
         })
         it('errors when continuing without description for 438 non-compliance', async () => {
-            ldUseClientSpy({ '438-attestation': true })
             const draft = mockContractAndRatesDraft({
                 contractDateStart: new Date('11-12-2023'),
                 contractDateEnd: new Date('11-12-2024'),
@@ -1157,14 +1155,17 @@ describe('ContractDetails', () => {
                     />,
                     {
                         apolloProvider: defaultApolloProvider,
+                        featureFlags: { '438-attestation': true },
                     }
                 )
             })
 
             // expect 438 attestation question to be on the page
-            expect(
-                screen.getByText(StatutoryRegulatoryAttestationQuestion)
-            ).toBeInTheDocument()
+            await waitFor(() => {
+                expect(
+                    screen.getByText(StatutoryRegulatoryAttestationQuestion)
+                ).toBeInTheDocument()
+            })
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',

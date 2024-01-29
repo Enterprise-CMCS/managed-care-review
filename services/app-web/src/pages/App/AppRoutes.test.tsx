@@ -1,9 +1,6 @@
 import { screen, waitFor } from '@testing-library/react'
 
-import {
-    ldUseClientSpy,
-    renderWithProviders,
-} from '../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { AppRoutes } from './AppRoutes'
 import {
     fetchCurrentUserMock,
@@ -22,7 +19,6 @@ describe('AppRoutes', () => {
     })
     describe('/[root]', () => {
         it('state dashboard when state user logged in', async () => {
-            ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
                     mocks: [
@@ -30,6 +26,7 @@ describe('AppRoutes', () => {
                         indexHealthPlanPackagesMockSuccess(),
                     ],
                 },
+                featureFlags: { 'session-expiring-modal': false },
             })
 
             await waitFor(() => {
@@ -46,7 +43,6 @@ describe('AppRoutes', () => {
         })
 
         it('cms dashboard when cms user logged in', async () => {
-            ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
                     mocks: [
@@ -57,6 +53,7 @@ describe('AppRoutes', () => {
                         indexHealthPlanPackagesMockSuccess(),
                     ],
                 },
+                featureFlags: { 'session-expiring-modal': false },
             })
 
             await waitFor(() => {
@@ -73,7 +70,6 @@ describe('AppRoutes', () => {
         })
 
         it('landing page when no user', async () => {
-            ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
                     mocks: [
@@ -82,6 +78,7 @@ describe('AppRoutes', () => {
                         }),
                     ],
                 },
+                featureFlags: { 'session-expiring-modal': false },
             })
             await waitFor(() => {
                 expect(
@@ -102,7 +99,6 @@ describe('AppRoutes', () => {
 
     describe('/auth', () => {
         it('auth header is displayed', async () => {
-            ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/auth' },
                 apolloProvider: {
@@ -112,6 +108,7 @@ describe('AppRoutes', () => {
                         }),
                     ],
                 },
+                featureFlags: { 'session-expiring-modal': false },
             })
 
             await waitFor(() => {
@@ -136,8 +133,13 @@ describe('AppRoutes', () => {
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/help' },
                 apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
                 },
+                featureFlags: { 'session-expiring-modal': false },
             })
 
             await screen.findByTestId('help-authenticated')
@@ -162,6 +164,7 @@ describe('AppRoutes', () => {
                         }),
                     ],
                 },
+                featureFlags: { 'session-expiring-modal': false },
             })
             await screen.findByTestId('help-authenticated')
             await waitFor(() => {
@@ -200,7 +203,6 @@ describe('AppRoutes', () => {
 
     describe('invalid routes', () => {
         it('redirect to landing page when no user', async () => {
-            ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/not-a-real-place' },
                 apolloProvider: {
@@ -210,6 +212,7 @@ describe('AppRoutes', () => {
                         }),
                     ],
                 },
+                featureFlags: { 'session-expiring-modal': false },
             })
 
             await waitFor(() => {
@@ -223,12 +226,12 @@ describe('AppRoutes', () => {
         })
 
         it('redirect to 404 error page when user is logged in', async () => {
-            ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
                 routerProvider: { route: '/not-a-real-place' },
+                featureFlags: { 'session-expiring-modal': false },
             })
 
             await waitFor(() =>

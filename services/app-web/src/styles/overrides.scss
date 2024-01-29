@@ -8,25 +8,25 @@
 @use 'mcrColors' as *;
 
 // FORM FIELDS
-    .usa-label,
-    .usa-legend {
-        font-weight: bold;
-    }
+.usa-label,
+.usa-legend {
+    font-weight: bold;
+}
 
-    .usa-hint span {
-        display: block;
-        margin-top: 1rem;
-    }
+.usa-hint span {
+    display: block;
+    margin-top: 1rem;
+}
 
-    .usa-checkbox__label,
-    .usa-radio__label {
-        margin-top: 1rem;
-    }
+.usa-checkbox__label,
+.usa-radio__label {
+    margin-top: 1rem;
+}
 
 // TOOLTIP
 // This can be removed removed when https://github.com/uswds/uswds/issues/4458 is fixed
 .usa-tooltip__body {
-  opacity: 0;
+    opacity: 0;
 }
 
 // BUTTONS
