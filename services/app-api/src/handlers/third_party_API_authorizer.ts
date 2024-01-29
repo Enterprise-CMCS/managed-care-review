@@ -75,7 +75,7 @@ const generatePolicy = function (
         Statement: [
             {
                 Action: 'execute-api:Invoke',
-                Effect: userId ? 'Allow' : 'Deny',
+                Effect: 'Allow',
                 Resource: event['methodArn'],
             },
         ],
