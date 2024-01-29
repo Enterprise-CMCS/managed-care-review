@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-
 set -e
 
-echo "building clamav lambda layer..."
+VERSION=${VERSION:-1.0.3-30349}
+echo "building clamav (${VERSION}) lambda layer..."
 uname -m
 rm -rf bin
 rm -rf lib
@@ -10,11 +10,15 @@ rm lambda_layer.zip || true
 
 yum update -y
 amazon-linux-extras install epel -y
-yum install -y cpio yum-utils tar.x86_64 gzip zip 
+yum install -y cpio yum-utils zip 
 
 # extract binaries for clamav, json-c, pcre
 mkdir -p /tmp/build
 pushd /tmp/build
+
+# Download the clamav package that includes unrar
+curl -L --output clamav.rpm "https://www6.atomicorp.com/channels/atomic/centos/7/x86_64/RPMS/clamav-${VERSION}.el7.art.x86_64.rpm"
+rpm2cpio clamav.rpm | cpio -vimd
 
 # Download libcrypt.so.1
 curl -L --output glibc-2.17-317.el7.x86_64.rpm http://mirror.centos.org/centos/7/os/x86_64/Packages/glibc-2.17-317.el7.x86_64.rpm
