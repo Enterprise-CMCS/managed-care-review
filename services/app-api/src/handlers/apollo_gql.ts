@@ -177,6 +177,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
     const parameterStoreMode = process.env.PARAMETER_STORE_MODE
     const ldSDKKey = process.env.LD_SDK_KEY
+    const jwtSecret = process.env.JWT_SECRET
 
     // START Assert configuration is valid
     if (emailerMode !== 'LOCAL' && emailerMode !== 'SES')
@@ -212,6 +213,13 @@ async function initializeGQLHandler(): Promise<Handler> {
             'Configuration Error: LD_SDK_KEY is required to run app-api.'
         )
     }
+
+    if (jwtSecret === undefined || jwtSecret === '') {
+        throw new Error(
+            'Configuration Error: JWT_SECRET is required to run app-api.'
+        )
+    }
+
     // END
 
     const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
@@ -310,8 +318,8 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     // Hard coding this for now, next job is to run this config to this app.
     const jwtLib = newJWTLib({
-        issuer: 'fakeIssuer',
-        signingKey: 'notrandom',
+        issuer: `mcreview-${stageName}`,
+        signingKey: Buffer.from(jwtSecret, 'hex'),
         expirationDurationS: 90 * 24 * 60 * 60, // 90 days
     })
 

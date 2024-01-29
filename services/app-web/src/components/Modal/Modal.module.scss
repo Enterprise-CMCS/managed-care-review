@@ -2,10 +2,10 @@
 @use '../../styles/uswdsImports.scss' as uswds;
 
 .modal {
-  max-width: 50rem;
-  div {
+    max-width: 50rem;
     div {
-      margin: 0;
+        div {
+            margin: 0;
+        }
     }
-  }
 }

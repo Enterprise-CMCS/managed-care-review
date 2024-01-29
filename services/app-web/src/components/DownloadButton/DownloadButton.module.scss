@@ -2,14 +2,14 @@
 @use '../../styles/uswdsImports.scss' as uswds;
 
 .disabledCursor {
-  cursor: not-allowed;
+    cursor: not-allowed;
 }
 
 .buttonTextWithIcon {
-  vertical-align: middle;
-  margin-left: .5rem
+    vertical-align: middle;
+    margin-left: 0.5rem;
 }
 
 .buttonTextWithoutIcon {
-  vertical-align: middle;
+    vertical-align: middle;
 }

@@ -7,7 +7,7 @@ describe('createAPIKey', () => {
     it('creates a new API key', async () => {
         const jwt = newJWTLib({
             issuer: 'mctestiss',
-            signingKey: 'foo',
+            signingKey: Buffer.from('123af', 'hex'),
             expirationDurationS: 1000,
         })
 

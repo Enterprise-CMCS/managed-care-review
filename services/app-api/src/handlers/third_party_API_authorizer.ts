@@ -6,10 +6,22 @@ import type {
 } from 'aws-lambda'
 import { newJWTLib } from '../jwt'
 
-// Hard coding this for now, next job is to run this config to this app.
+const stageName = process.env.stage
+const jwtSecret = process.env.JWT_SECRET
+
+if (stageName === undefined) {
+    throw new Error('Configuration Error: stage is required')
+}
+
+if (jwtSecret === undefined || jwtSecret === '') {
+    throw new Error(
+        'Configuration Error: JWT_SECRET is required to run app-api.'
+    )
+}
+
 const jwtLib = newJWTLib({
-    issuer: 'fakeIssuer',
-    signingKey: 'notrandom',
+    issuer: `mcreview-${stageName}`,
+    signingKey: Buffer.from(jwtSecret, 'hex'),
     expirationDurationS: 90 * 24 * 60 * 60, // 90 days
 })
 
@@ -19,7 +31,7 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
     const authToken = event.authorizationToken.replace('Bearer ', '')
     try {
         // authentication step for validating JWT token
-        const userId = await jwtLib.userIDFromToken(authToken)
+        const userId = jwtLib.userIDFromToken(authToken)
 
         if (userId instanceof Error) {
             const msg = 'Invalid auth token'

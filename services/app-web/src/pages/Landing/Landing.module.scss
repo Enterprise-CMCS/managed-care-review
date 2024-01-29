@@ -1,7 +1,6 @@
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
-
 $details-text-line-height: 1.5;
 
 .detailsSection {
@@ -68,6 +67,5 @@ $details-text-line-height: 1.5;
                 margin-bottom: uswds.units(1);
             }
         }
-
     }
 }

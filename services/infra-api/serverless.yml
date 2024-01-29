@@ -224,34 +224,19 @@ resources:
         RoleArn: !GetAtt MetricStreamRole.Arn
         OutputFormat: 'opentelemetry0.7'
 
-    # AppApiGatewayAcl:
-    #   Type: AWS::WAFv2::WebACL
-    #   Properties:
-    #     DefaultAction:
-    #       Block: {}
-    #     Rules:
-    #       - Action:
-    #           Allow: {}
-    #         Name: ${sls:stage}-allow-usa-plus-territories
-    #         Priority: 0
-    #         Statement:
-    #           GeoMatchStatement:
-    #             CountryCodes:
-    #               - GU # Guam
-    #               - PR # Puerto Rico
-    #               - US # USA
-    #               - UM # US Minor Outlying Islands
-    #               - VI # US Virgin Islands
-    #               - MP # Northern Mariana Islands
-    #         VisibilityConfig:
-    #           SampledRequestsEnabled: true
-    #           CloudWatchMetricsEnabled: true
-    #           MetricName: WafWebAcl
-    #     Scope: REGIONAL
-    #     VisibilityConfig:
-    #       CloudWatchMetricsEnabled: true
-    #       SampledRequestsEnabled: true
-    #       MetricName: ${sls:stage}-webacl
+    JWTSecret:
+      Type: AWS::SecretsManager::Secret
+      Properties:
+        Name: 'api_jwt_secret_${sls:stage}'
+        Description: 'Dynamically generated secret for JWT signing/validation'
+        GenerateSecretString:
+          SecretStringTemplate: '{}'
+          GenerateStringKey: jwtsigningkey
+          PasswordLength: 128
+          ExcludePunctuation: true
+          ExcludeUppercase: true
+          ExcludeCharacters: 'ghijklmnopqrstuvwxyz' # we want to be generating a hex string [0-9a-f]
+          RequireEachIncludedType: false
 
   Outputs:
     ApiGatewayRestApiId:
