@@ -4,6 +4,7 @@ import { useFetchRateQuery } from "../../gen/gqlClient";
 import { GridContainer } from "@trussworks/react-uswds";
 import { Loading } from "../../components";
 import { GenericErrorPage } from "../Errors/GenericErrorPage";
+import { RateDetailsV2 } from "../StateSubmission/RateDetails/RateDetailsV2";
 
 type RouteParams = {
   id: string
@@ -44,9 +45,7 @@ export const RateEdit = (): React.ReactElement => {
 
   return (
     <h1 data-testid="rate-edit">
-      You've reached the '/rates/:id/edit' url placeholder for the incoming standalone edit rate form 
-      <br/>
-      Ticket: <a href="https://qmacbis.atlassian.net/browse/MCR-3771">MCR-3771</a>
+     <RateDetailsV2 showValidations={true}/>
     </h1>
   )
 }

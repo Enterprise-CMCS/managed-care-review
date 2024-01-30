@@ -8,7 +8,7 @@ import styles from '../StateSubmissionForm.module.scss'
 
 import { RateInfoType } from '../../../common-code/healthPlanFormDataType'
 
-import { ErrorSummary, GenericApiErrorBanner } from '../../../components'
+import { ErrorSummary, GenericApiErrorBanner, Loading } from '../../../components'
 import { formatFormDateForDomain } from '../../../formHelpers'
 import { RateDetailsFormSchema } from './RateDetailsSchema'
 import { PageActions } from '../PageActions'
@@ -30,6 +30,8 @@ import { isLoadingOrHasFileErrors } from '../../../components/FileUpload'
 import { RoutesRecord } from '../../../constants'
 import { SectionCard } from '../../../components/SectionCard'
 import { Rate, RateRevision, useFetchRateQuery, useSubmitRateMutation } from '../../../gen/gqlClient'
+import { Error404 } from '../../Errors/Error404Page'
+import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
 // This function is used to get initial form values as well return empty form values when we add a new rate or delete a rate
 // We need to include the getKey function in params because there are no guarantees currently file is in s3 even if when we load data from API
@@ -104,20 +106,31 @@ export const RateDetailsV2 = ({
 
     // API handling
     const [submitRate, { loading: submitRateLoading }] = useSubmitRateMutation()
-    const [fetchRate, { loading: fetchRateLoading }] = useFetchRateQuery()
+    const { data: fetchRateQuery, loading: fetchRateLoading, error: fetchRateError } = useFetchRateQuery({
+        variables: {
+            input: {
+                rateID: id
+            }
+        }
+    })
 
-    if () {
-        return <GenericApiErrorBanner message="Cannot use this page to create new standalone rates"/>
+    if (fetchRateLoading){
+        return <Loading />
     }
 
-    let draftRate = {}
+    if( fetchRateError) {
+        return <Error404/>
+    } else if (!fetchRateQuery) {
+        return <GenericErrorPage/>
+    }
+    const rate = fetchRateQuery?.fetchRate.rate
     const previousDocuments: string[] = []
 
     // Form validation
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const rateDetailsFormSchema = RateDetailsFormSchema()
     const rateInfosInitialValues: RateInfoArrayType = {
-        rateInfos: [generateRateCertFormValues(getKey, draftRate?.draftRevision ?? undefined)],
+        rateInfos: [generateRateCertFormValues(getKey, rate.draftRevision ?? undefined)],
     }
 
     // UI focus state management
@@ -212,7 +225,7 @@ export const RateDetailsV2 = ({
                 variables: {
                     input: {
                         rateID: initialRateRevision.id,
-                        formData: initialRateRevision
+                        // formData: initialRateRevision
                     }
                 },
              })
@@ -336,7 +349,7 @@ export const RateDetailsV2 = ({
                                                             shouldValidate
                                                         }
                                                         parentSubmissionID={
-                                                            draftRate.id
+                                                            rate.id
                                                         }
                                                         previousDocuments={
                                                             previousDocuments
@@ -363,8 +376,7 @@ export const RateDetailsV2 = ({
                                                     type="button"
                                                     className={`usa-button usa-button--outline ${styles.addRateBtn}`}
                                                     onClick={() => {
-                                                        const newRate =
-                                                            generateRateCertFormValues()
+                                                        const newRate = generateRateCertFormValues(getKey)
                                                         push(newRate)
                                                         setFocusNewRate(true)
                                                     }}

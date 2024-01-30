@@ -16,7 +16,7 @@
         "test": "services/cypress"
     },
     "scripts": {
-        "clean": "npx lerna clean",
+        "clean": "rm -rfnpx lerna clean",
         "format": "yarn prettier --write",
         "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
         "test:coverage": "npx lerna run test:coverage --scope=app-web --scope=app-api --scope=cypress",
