@@ -1,18 +1,17 @@
 import React, { useEffect } from 'react'
 import { Form as UswdsForm } from '@trussworks/react-uswds'
 import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
 
 import { RateInfoType } from '../../../common-code/healthPlanFormDataType'
 
-import { ErrorSummary } from '../../../components'
+import { ErrorSummary, GenericApiErrorBanner } from '../../../components'
 import { formatFormDateForDomain } from '../../../formHelpers'
 import { RateDetailsFormSchema } from './RateDetailsSchema'
 import { PageActions } from '../PageActions'
-import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { useFocus } from '../../../hooks'
 
 import {
@@ -30,7 +29,7 @@ import { S3ClientT } from '../../../s3'
 import { isLoadingOrHasFileErrors } from '../../../components/FileUpload'
 import { RoutesRecord } from '../../../constants'
 import { SectionCard } from '../../../components/SectionCard'
-import { Rate, RateRevision, useSubmitRateMutation } from '../../../gen/gqlClient'
+import { Rate, RateRevision, useFetchRateQuery, useSubmitRateMutation } from '../../../gen/gqlClient'
 
 // This function is used to get initial form values as well return empty form values when we add a new rate or delete a rate
 // We need to include the getKey function in params because there are no guarantees currently file is in s3 even if when we load data from API
@@ -87,27 +86,54 @@ export const rateErrorHandling = (
 }
 
 type RateDetailsV2Props = {
-    draftRate: Rate
     showValidations?: boolean
-    previousDocuments: string[]
     // updateRate: UpdateRateMutation
 }
 export const RateDetailsV2 = ({
-    draftRate,
     showValidations = false,
-    previousDocuments,
     // updateRate,
 }: RateDetailsV2Props): React.ReactElement => {
     const navigate = useNavigate()
+    const { id } = useParams()
+    if (!id) {
+        throw new Error(
+            'PROGRAMMING ERROR: id param not set in rate edit form.'
+        )
+    }
     const { getKey } = useS3()
 
-    // form validation state management
-    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
-        React.useState(false)
-    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
+    // API handling
+    const [submitRate, { loading: submitRateLoading }] = useSubmitRateMutation()
+    const [fetchRate, { loading: fetchRateLoading }] = useFetchRateQuery()
+
+    if () {
+        return <GenericApiErrorBanner message="Cannot use this page to create new standalone rates"/>
+    }
+
+    let draftRate = {}
+    const previousDocuments: string[] = []
+
+    // Form validation
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const [submitRate, { loading: submitRateLoading }] =
-    useSubmitRateMutation()
+    const rateDetailsFormSchema = RateDetailsFormSchema()
+    const rateInfosInitialValues: RateInfoArrayType = {
+        rateInfos: [generateRateCertFormValues(getKey, draftRate?.draftRevision ?? undefined)],
+    }
+
+    // UI focus state management
+    const [focusNewRate, setFocusNewRate] = React.useState(false)
+    const newRateNameRef = React.useRef<HTMLElement | null>(null)
+    const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
+    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] = React.useState(false)
+    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
+
+    React.useEffect(() => {
+        if (focusNewRate) {
+            newRateNameRef?.current?.focus()
+            setFocusNewRate(false)
+            newRateNameRef.current = null
+        }
+    }, [focusNewRate])
 
     useEffect(() => {
         // Focus the error summary heading only if we are displaying
@@ -118,24 +144,6 @@ export const RateDetailsV2 = ({
         setFocusErrorSummaryHeading(false)
     }, [focusErrorSummaryHeading])
 
-    // multi-rates state management
-    const [focusNewRate, setFocusNewRate] = React.useState(false)
-    const newRateNameRef = React.useRef<HTMLElement | null>(null)
-    const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
-
-    const rateDetailsFormSchema = RateDetailsFormSchema()
-
-    React.useEffect(() => {
-        if (focusNewRate) {
-            newRateNameRef?.current?.focus()
-            setFocusNewRate(false)
-            newRateNameRef.current = null
-        }
-    }, [focusNewRate])
-
-    const rateInfosInitialValues: RateInfoArrayType = {
-        rateInfos: [generateRateCertFormValues(getKey, draftRate?.draftRevision ?? undefined)],
-    }
 
     const handleFormSubmit = async (
         form: RateInfoArrayType,

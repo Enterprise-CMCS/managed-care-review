@@ -109,12 +109,6 @@ const StateUserRoutes = ({
                 />
                 {showRatePages && (
                     <Route
-                        path={RoutesRecord.RATE_EDIT}
-                        element={<RateEdit />}
-                    />
-                )}
-                {showRatePages && (
-                    <Route
                         path={RoutesRecord.RATES_SUMMARY}
                         element={<RateSummary />}
                     />
