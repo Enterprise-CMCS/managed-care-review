@@ -45,7 +45,7 @@ const isRateTypeAmendment = (values: RateCertFormType): boolean =>
     values.rateType === 'AMENDMENT'
 
 export type RateCertFormType = {
-    id?: string
+    id: string
     key: string
     rateType: RateType | undefined
     rateCapitationType: RateCapitationType | undefined

@@ -30,20 +30,21 @@ import { S3ClientT } from '../../../s3'
 import { isLoadingOrHasFileErrors } from '../../../components/FileUpload'
 import { RoutesRecord } from '../../../constants'
 import { SectionCard } from '../../../components/SectionCard'
-import { Rate, RateRevision } from '../../../gen/gqlClient'
+import { Rate, RateRevision, useSubmitRateMutation } from '../../../gen/gqlClient'
 
 // This function is used to get initial form values as well return empty form values when we add a new rate or delete a rate
 // We need to include the getKey function in params because there are no guarantees currently file is in s3 even if when we load data from API
 const generateRateCertFormValues = (
-    rateRev: RateRevision,
-    getKey: S3ClientT['getKey']): RateCertFormType => {
-    const rateInfo = rateRev.formData
+    getKey: S3ClientT['getKey'],
+    rateRev?: RateRevision): RateCertFormType => {
+    const rateInfo = rateRev?.formData
+    const newRateID =  uuidv4();
 
     return {
-        id: rateRev.id,
-        key: uuidv4(),
-        rateType: rateInfo.rateType,
-        rateCapitationType: rateInfo?.rateCapitationType,
+        id: rateRev?.id ?? newRateID,
+        key: rateRev?.id ?? newRateID,
+        rateType: rateInfo?.rateType ?? undefined,
+        rateCapitationType: rateInfo?.rateCapitationType ?? undefined,
         rateDateStart: formatForForm(rateInfo?.rateDateStart),
         rateDateEnd: formatForForm(rateInfo?.rateDateEnd),
         rateDateCertified: formatForForm(rateInfo?.rateDateCertified),
@@ -61,21 +62,14 @@ const generateRateCertFormValues = (
         supportingDocuments:formatDocumentsForForm({
                   documents: rateInfo?.supportingDocuments,
                   getKey: getKey,
-              })
+              }),
         actuaryContacts: formatActuaryContactsForForm(
-            rateInfo.certifyingActuaryContacts
+            rateInfo?.certifyingActuaryContacts
         ),
         actuaryCommunicationPreference:
-            rateInfo?.actuaryCommunicationPreference,
+            rateInfo?.actuaryCommunicationPreference ?? undefined,
         packagesWithSharedRateCerts:
             rateInfo?.packagesWithSharedRateCerts ?? [],
-        hasSharedRateCert:
-            rateInfo?.packagesWithSharedRateCerts === undefined
-                ? undefined
-                : (rateInfo?.packagesWithSharedRateCerts &&
-                        rateInfo?.packagesWithSharedRateCerts.length) >= 1
-                  ? 'YES'
-                  : 'NO',
     }
 }
 
@@ -112,6 +106,8 @@ export const RateDetailsV2 = ({
         React.useState(false)
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
+    const [submitRate, { loading: submitRateLoading }] =
+    useSubmitRateMutation()
 
     useEffect(() => {
         // Focus the error summary heading only if we are displaying
@@ -138,7 +134,7 @@ export const RateDetailsV2 = ({
     }, [focusNewRate])
 
     const rateInfosInitialValues: RateInfoArrayType = {
-        rateInfos: [generateRateCertFormValues()],
+        rateInfos: [generateRateCertFormValues(getKey, draftRate?.draftRevision ?? undefined)],
     }
 
     const handleFormSubmit = async (
@@ -201,10 +197,17 @@ export const RateDetailsV2 = ({
             }
         })
 
-        draftRate.rateInfos = cleanedRateInfos
+        const initialRateRevision = cleanedRateInfos[0] // only submit the first rate revision right now from RateDetailsV2, adapt later for mulit-rate workflow
 
         try {
-            const updatedSubmission = await updateRate(draftRate)
+            const updatedSubmission = await submitRate({
+                variables: {
+                    input: {
+                        rateID: initialRateRevision.id,
+                        formData: initialRateRevision
+                    }
+                },
+             })
             if (updatedSubmission instanceof Error) {
                 setSubmitting(false)
                 console.info(
