@@ -25,18 +25,24 @@ describe('AppBody', () => {
     })
 
     it('App renders without errors', () => {
-        renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
-            featureFlags: { 'session-expiring-modal': false },
-        })
+        renderWithProviders(
+            <AppBody authMode={'AWS_COGNITO'} apiURL="foo.bar" />,
+            {
+                featureFlags: { 'session-expiring-modal': false },
+            }
+        )
         const mainElement = screen.getByRole('main')
         expect(mainElement).toBeInTheDocument()
     })
 
     describe('Sign In buttton click', () => {
         it('displays local login heading when expected', async () => {
-            renderWithProviders(<AppBody authMode={'LOCAL'} />, {
-                featureFlags: { 'session-expiring-modal': false },
-            })
+            renderWithProviders(
+                <AppBody authMode={'LOCAL'} apiURL="foo.bar" />,
+                {
+                    featureFlags: { 'session-expiring-modal': false },
+                }
+            )
 
             await userClickSignIn(screen)
 
@@ -49,9 +55,12 @@ describe('AppBody', () => {
         })
 
         it('displays Cognito login page when expected', async () => {
-            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
-                featureFlags: { 'session-expiring-modal': false },
-            })
+            renderWithProviders(
+                <AppBody authMode={'AWS_COGNITO'} apiURL="foo.bar" />,
+                {
+                    featureFlags: { 'session-expiring-modal': false },
+                }
+            )
             await userClickSignIn(screen)
 
             expect(
@@ -60,9 +69,12 @@ describe('AppBody', () => {
         })
 
         it('displays Cognito signup page when expected', async () => {
-            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
-                featureFlags: { 'session-expiring-modal': false },
-            })
+            renderWithProviders(
+                <AppBody authMode={'AWS_COGNITO'} apiURL="foo.bar" />,
+                {
+                    featureFlags: { 'session-expiring-modal': false },
+                }
+            )
             await userClickSignIn(screen)
 
             expect(
@@ -91,15 +103,18 @@ describe('AppBody', () => {
 
         it('shows test environment banner in val', () => {
             process.env.REACT_APP_STAGE_NAME = 'val'
-            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        indexHealthPlanPackagesMockSuccess(),
-                    ],
-                },
-                featureFlags: { 'session-expiring-modal': false },
-            })
+            renderWithProviders(
+                <AppBody authMode={'AWS_COGNITO'} apiURL="foo.bar" />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            indexHealthPlanPackagesMockSuccess(),
+                        ],
+                    },
+                    featureFlags: { 'session-expiring-modal': false },
+                }
+            )
 
             expect(
                 screen.getByText('THIS IS A TEST ENVIRONMENT')
@@ -108,15 +123,18 @@ describe('AppBody', () => {
 
         it('does not show test environment banner in prod', () => {
             process.env.REACT_APP_STAGE_NAME = 'prod'
-            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        indexHealthPlanPackagesMockSuccess(),
-                    ],
-                },
-                featureFlags: { 'session-expiring-modal': false },
-            })
+            renderWithProviders(
+                <AppBody authMode={'AWS_COGNITO'} apiURL="foo.bar" />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            indexHealthPlanPackagesMockSuccess(),
+                        ],
+                    },
+                    featureFlags: { 'session-expiring-modal': false },
+                }
+            )
 
             expect(screen.queryByText('THIS IS A TEST ENVIRONMENT')).toBeNull()
         })
@@ -124,18 +142,21 @@ describe('AppBody', () => {
 
     describe('Site under maintenance banner', () => {
         it('displays maintenance banner when feature flag is on', async () => {
-            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        indexHealthPlanPackagesMockSuccess(),
-                    ],
-                },
-                featureFlags: {
-                    'site-under-maintenance-banner': 'UNSCHEDULED',
-                    'session-expiring-modal': false,
-                },
-            })
+            renderWithProviders(
+                <AppBody authMode={'AWS_COGNITO'} apiURL="foo.bar" />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            indexHealthPlanPackagesMockSuccess(),
+                        ],
+                    },
+                    featureFlags: {
+                        'site-under-maintenance-banner': 'UNSCHEDULED',
+                        'session-expiring-modal': false,
+                    },
+                }
+            )
             expect(
                 await screen.findByRole('heading', { name: 'Site unavailable' })
             ).toBeInTheDocument()
@@ -147,15 +168,18 @@ describe('AppBody', () => {
         })
 
         it('does not display maintenance banner when flag is off', async () => {
-            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        indexHealthPlanPackagesMockSuccess(),
-                    ],
-                },
-                featureFlags: { 'session-expiring-modal': false },
-            })
+            renderWithProviders(
+                <AppBody authMode={'AWS_COGNITO'} apiURL="foo.bar" />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            indexHealthPlanPackagesMockSuccess(),
+                        ],
+                    },
+                    featureFlags: { 'session-expiring-modal': false },
+                }
+            )
             expect(
                 screen.queryByRole('heading', { name: 'Site Unavailable' })
             ).toBeNull()
@@ -169,7 +193,7 @@ describe('AppBody', () => {
 
     describe('Page scrolling', () => {
         it('scroll top on page load', async () => {
-            renderWithProviders(<AppBody authMode={'LOCAL'} />)
+            renderWithProviders(<AppBody authMode={'LOCAL'} apiURL="foo.bar" />)
             await userClickSignIn(screen)
             expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
         })

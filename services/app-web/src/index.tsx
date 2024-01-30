@@ -16,6 +16,11 @@ import type { S3BucketConfigType } from './s3/s3Amplify'
 
 const gqlSchema = loader('../../app-web/src/gen/schema.graphql')
 
+const apiURL = process.env.REACT_APP_API_URL
+if (!apiURL || apiURL === '') {
+    throw new Error('REACT_APP_API_URL must be set to the url for the API')
+}
+
 // We are using Amplify for communicating with Cognito, for now.
 Amplify.configure({
     Auth: {
@@ -44,7 +49,7 @@ Amplify.configure({
         endpoints: [
             {
                 name: 'api',
-                endpoint: process.env.REACT_APP_API_URL,
+                endpoint: apiURL,
             },
         ],
     },
@@ -136,6 +141,7 @@ if (ldClientId === undefined) {
                     authMode={authMode}
                     apolloClient={apolloClient}
                     s3Client={s3Client}
+                    apiURL={apiURL}
                 />
             </LDProvider>
         </React.StrictMode>

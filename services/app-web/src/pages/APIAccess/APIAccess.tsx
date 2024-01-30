@@ -1,12 +1,13 @@
-import { Button, Grid, GridContainer } from '@trussworks/react-uswds'
+import { Button, Grid, GridContainer, Link } from '@trussworks/react-uswds'
 import { useState } from 'react'
+import { RoutesRecord } from '../../constants'
 import {
     CreateApiKeyPayload,
     useCreateApiKeyMutation,
 } from '../../gen/gqlClient'
 import styles from './APIAccess.module.scss'
 
-function APIAccess(): React.ReactElement {
+function APIAccess({ apiURL }: { apiURL: string }): React.ReactElement {
     const [getAPIKey] = useCreateApiKeyMutation()
     const [apiKey, setAPIKey] = useState<CreateApiKeyPayload | undefined>(
         undefined
@@ -29,7 +30,7 @@ function APIAccess(): React.ReactElement {
     }
 
     return (
-        <GridContainer className={styles.container}>
+        <GridContainer className={styles.pageContainer}>
             <Grid>
                 <h1>API Access</h1>
                 <hr />
@@ -38,31 +39,37 @@ function APIAccess(): React.ReactElement {
                     To interact with the MC-Review API you will need a valid JWT
                 </div>
 
-                <Button type="button" onClick={callAPIKeyMutation}>
-                    Generate API Key
-                </Button>
+                <div className={styles.centerButtonContainer}>
+                    <Button type="button" onClick={callAPIKeyMutation}>
+                        Generate API Key
+                    </Button>
+                </div>
                 {apiKey && (
                     <>
-                        <code className={styles.wrapKey}>{apiKey.key}</code>
-                        <Button type="button" onClick={copyKeyToClipboard}>
-                            copy key to clipboard
-                        </Button>
+                        <code
+                            className={styles.wrapKey}
+                            aria-label="API Key Text"
+                        >
+                            {apiKey.key}
+                        </code>
+                        <div className={styles.centerButtonContainer}>
+                            <Button type="button" onClick={copyKeyToClipboard}>
+                                Copy key to clipboard
+                            </Button>
+                        </div>
                     </>
                 )}
 
                 <h2>Usage</h2>
                 <ul>
-                    <li>
-                        Make GraphQL requests to the URL:
-                        https://api.mcreviewdev.cms.gov
-                    </li>
+                    <li>Make GraphQL requests to the URL: {apiURL}</li>
                     <li>
                         Include the JWT as a Bearer token in the Authorization
                         header. Example:
                         <ul>
                             <li>
                                 <code>
-                                    Authorization: Bearer: eyJhbGciOiJIU...
+                                    Authorization: Bearer eyJhbGciOiJIU...
                                 </code>
                             </li>
                         </ul>
@@ -72,14 +79,25 @@ function APIAccess(): React.ReactElement {
                 <h2>Resources</h2>
                 <ul>
                     <li>
-                        The MC-Review GraphQL Explorer will allow you to format
-                        and run queries against the API in all environments
-                        except production
+                        The MC-Review{' '}
+                        <Link href={RoutesRecord.GRAPHQL_EXPLORER}>
+                            GraphQL Explorer
+                        </Link>{' '}
+                        will allow you to format and run queries against the API
+                        in all environments except production
                     </li>
-                    <li>The official documentation for GraphQL</li>
                     <li>
-                        The MC-Review GraphQL Schema docs for understanding the
-                        shape of data returned by the API
+                        The{' '}
+                        <Link href="https://graphql.org/learn/">
+                            official documentation for GraphQL
+                        </Link>
+                    </li>
+                    <li>
+                        The MC-Review{' '}
+                        <Link href="https://github.com/Enterprise-CMCS/managed-care-review/blob/main/services/app-graphql/src/schema.graphql">
+                            GraphQL Schema
+                        </Link>{' '}
+                        for understanding the shape of data returned by the API
                     </li>
                 </ul>
             </Grid>

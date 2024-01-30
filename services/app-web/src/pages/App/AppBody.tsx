@@ -15,8 +15,10 @@ import { Landing } from '../Landing/Landing'
 
 export function AppBody({
     authMode,
+    apiURL,
 }: {
     authMode: AuthModeType
+    apiURL: string
 }): React.ReactElement {
     const [globalAlert, setGlobalAlert] = React.useState<
         React.ReactElement | undefined
@@ -61,7 +63,11 @@ export function AppBody({
                 ) : loginStatus === 'LOADING' ? (
                     <Loading />
                 ) : (
-                    <AppRoutes authMode={authMode} setAlert={setGlobalAlert} />
+                    <AppRoutes
+                        authMode={authMode}
+                        apiURL={apiURL}
+                        setAlert={setGlobalAlert}
+                    />
                 )}
             </main>
 

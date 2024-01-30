@@ -21,12 +21,14 @@ export type AppProps = {
     authMode: AuthModeType
     apolloClient: ApolloClient<NormalizedCacheObject>
     s3Client: S3ClientT
+    apiURL: string
 }
 
 function App({
     authMode,
     apolloClient,
     s3Client,
+    apiURL,
 }: AppProps): React.ReactElement {
     return (
         <ErrorBoundary FallbackComponent={ErrorBoundaryRoot}>
@@ -36,7 +38,10 @@ function App({
                         <S3Provider client={s3Client}>
                             <AuthProvider authMode={authMode}>
                                 <PageProvider>
-                                    <AppBody authMode={authMode} />
+                                    <AppBody
+                                        authMode={authMode}
+                                        apiURL={apiURL}
+                                    />
                                 </PageProvider>
                             </AuthProvider>
                         </S3Provider>

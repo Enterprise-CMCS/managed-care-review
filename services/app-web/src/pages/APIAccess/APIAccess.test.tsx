@@ -16,7 +16,10 @@ describe('APIAccess', () => {
     it('renders without errors', async () => {
         renderWithProviders(
             <Routes>
-                <Route path={RoutesRecord.API_ACCESS} element={<APIAccess />} />
+                <Route
+                    path={RoutesRecord.API_ACCESS}
+                    element={<APIAccess apiURL="foo.bar" />}
+                />
             </Routes>,
             {
                 apolloProvider: {
