@@ -12,14 +12,7 @@ export async function userFromThirdPartyAuthorizer(
     if (!otelCollectorURL || otelCollectorURL === '') {
         const errMsg =
             'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
-        return {
-            statusCode: 500,
-            body: JSON.stringify(errMsg),
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
-            },
-        }
+        throw errMsg
     }
 
     const serviceName = 'third-party-authorizer'
