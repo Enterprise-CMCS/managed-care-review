@@ -42,7 +42,8 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
     // the following will remove the :port to leave just the ip address
     const ipAddress = host.slice(0, host.indexOf(':'))
     const ipAddressIsValid = allowedIpAddresses.includes(ipAddress)
-
+    console.info(ipAddress, 'IP Address')
+    console.info(allowedIpAddresses, 'Allowed IP Address')
     try {
         // authentication step for validating JWT token
         const userId = jwtLib.userIDFromToken(authToken)
