@@ -1,13 +1,23 @@
-import type { Result } from 'neverthrow'
 import { ok, err } from 'neverthrow'
-import type { UserType } from '../domain-models/index'
 import type { Store } from '../postgres'
 import { lookupUserAurora } from './cognitoAuthn'
+import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 
 export async function userFromThirdPartyAuthorizer(
     store: Store,
     userId: string
-): Promise<Result<UserType, Error | undefined>> {
+) {
+    // setup otel tracing
+    const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
+    if (!otelCollectorURL || otelCollectorURL === '') {
+        const errMsg =
+            'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
+        throw errMsg
+    }
+
+    const serviceName = 'third-party-authorizer'
+    initTracer(serviceName, otelCollectorURL)
+
     try {
         // Lookup user from postgres
         const auroraUser = await lookupUserAurora(store, userId)
@@ -21,7 +31,9 @@ export async function userFromThirdPartyAuthorizer(
 
         return ok(auroraUser)
     } catch (e) {
-        console.error('ERROR: failed to look up user in postgres')
-        return err(e)
+        const err = new Error('ERROR: failed to look up user in postgres')
+
+        recordException(err, serviceName, 'lookupUser')
+        throw err
     }
 }

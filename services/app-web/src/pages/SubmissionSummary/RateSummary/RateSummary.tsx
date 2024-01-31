@@ -1,6 +1,6 @@
 import { GridContainer, Icon, Link } from '@trussworks/react-uswds'
 import React, { useEffect, useState } from 'react'
-import { NavLink, useParams } from 'react-router-dom'
+import { NavLink, useNavigate, useParams } from 'react-router-dom'
 
 import { Loading } from '../../../components'
 import { usePage } from '../../../contexts/PageContext'
@@ -19,6 +19,7 @@ export const RateSummary = (): React.ReactElement => {
     // Page level state
     const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
+    const navigate = useNavigate()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
     const { id } = useParams<keyof RouteParams>()
     if (!id) {
@@ -52,6 +53,11 @@ export const RateSummary = (): React.ReactElement => {
         return <GenericErrorPage />
     }
 
+    //Redirecting a state user to the edit page if rate is unlocked
+    if (loggedInUser?.role === 'STATE_USER' && rate.status === 'UNLOCKED') {
+        navigate(`/rates/${id}/edit`)
+    }
+
     if (
         rateName !== currentRateRev.formData.rateCertificationName &&
         currentRateRev.formData.rateCertificationName
@@ -68,8 +74,7 @@ export const RateSummary = (): React.ReactElement => {
                 <div>
                     <Link
                         asCustom={NavLink}
-                        //TODO: Will have to remove this conditional along with associated loggedInUser prop once the rate dashboard
-                        //is made available to state users
+                        //TODO: Will have to remove this conditional once the rate dashboard is made available to state users
                         to={{
                             pathname:
                                 loggedInUser?.__typename === 'StateUser'
