@@ -1,4 +1,5 @@
 import { Button, Grid, GridContainer, Link } from '@trussworks/react-uswds'
+import path from 'path-browserify'
 import { useState } from 'react'
 import { RoutesRecord } from '../../constants'
 import {
@@ -7,7 +8,14 @@ import {
 } from '../../gen/gqlClient'
 import styles from './APIAccess.module.scss'
 
-function APIAccess({ apiURL }: { apiURL: string }): React.ReactElement {
+function APIAccess(): React.ReactElement {
+    const apiURL = process.env.REACT_APP_API_URL
+    if (!apiURL) {
+        throw new Error('Configuration Error, REACT_APP_API_URL must be set')
+    }
+
+    const thirdPartyAPIURL = path.join(apiURL, '/v1/graphql/external')
+
     const [getAPIKey] = useCreateApiKeyMutation()
     const [apiKey, setAPIKey] = useState<CreateApiKeyPayload | undefined>(
         undefined
@@ -29,6 +37,14 @@ function APIAccess({ apiURL }: { apiURL: string }): React.ReactElement {
         }
     }
 
+    const curlCommand = !apiKey
+        ? undefined
+        : `
+curl -s ${thirdPartyAPIURL} -X POST \\
+-H "Authorization: Bearer ${apiKey.key}" \\
+-H "Content-Type: application/json" \\
+--data '{"query":"query IndexRates { indexRates { totalCount edges { node {  id } } } }"}'
+`
     return (
         <GridContainer className={styles.pageContainer}>
             <Grid>
@@ -39,12 +55,13 @@ function APIAccess({ apiURL }: { apiURL: string }): React.ReactElement {
                     To interact with the MC-Review API you will need a valid JWT
                 </div>
 
-                <div className={styles.centerButtonContainer}>
-                    <Button type="button" onClick={callAPIKeyMutation}>
-                        Generate API Key
-                    </Button>
-                </div>
-                {apiKey && (
+                {!apiKey ? (
+                    <div className={styles.centerButtonContainer}>
+                        <Button type="button" onClick={callAPIKeyMutation}>
+                            Generate API Key
+                        </Button>
+                    </div>
+                ) : (
                     <>
                         <code
                             className={styles.wrapKey}
@@ -53,6 +70,9 @@ function APIAccess({ apiURL }: { apiURL: string }): React.ReactElement {
                             {apiKey.key}
                         </code>
                         <div className={styles.centerButtonContainer}>
+                            <Button type="button" onClick={callAPIKeyMutation}>
+                                Generate API Key
+                            </Button>
                             <Button type="button" onClick={copyKeyToClipboard}>
                                 Copy key to clipboard
                             </Button>
@@ -76,28 +96,36 @@ function APIAccess({ apiURL }: { apiURL: string }): React.ReactElement {
                     </li>
                 </ul>
 
+                {curlCommand && (
+                    <>
+                        Example curl command:
+                        <code className={styles.wrapKey}>{curlCommand}</code>
+                    </>
+                )}
+
                 <h2>Resources</h2>
                 <ul>
                     <li>
-                        The MC-Review{' '}
+                        The MC-Review&nbsp;
                         <Link href={RoutesRecord.GRAPHQL_EXPLORER}>
                             GraphQL Explorer
-                        </Link>{' '}
-                        will allow you to format and run queries against the API
-                        in all environments except production
+                        </Link>
+                        &nbsp; will allow you to format and run queries against
+                        the API in all environments except production
                     </li>
                     <li>
-                        The{' '}
+                        The&nbsp;
                         <Link href="https://graphql.org/learn/">
                             official documentation for GraphQL
                         </Link>
                     </li>
                     <li>
-                        The MC-Review{' '}
+                        The MC-Review&nbsp;
                         <Link href="https://github.com/Enterprise-CMCS/managed-care-review/blob/main/services/app-graphql/src/schema.graphql">
                             GraphQL Schema
-                        </Link>{' '}
-                        for understanding the shape of data returned by the API
+                        </Link>
+                        &nbsp; for understanding the shape of data returned by
+                        the API
                     </li>
                 </ul>
             </Grid>

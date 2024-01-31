@@ -19,18 +19,15 @@ describe('AppRoutes', () => {
     })
     describe('/[root]', () => {
         it('state dashboard when state user logged in', async () => {
-            renderWithProviders(
-                <AppRoutes authMode={'AWS_COGNITO'} apiURL="foo.bar" />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            indexHealthPlanPackagesMockSuccess(),
-                        ],
-                    },
-                    featureFlags: { 'session-expiring-modal': false },
-                }
-            )
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        indexHealthPlanPackagesMockSuccess(),
+                    ],
+                },
+                featureFlags: { 'session-expiring-modal': false },
+            })
 
             await waitFor(() => {
                 expect(
@@ -46,21 +43,18 @@ describe('AppRoutes', () => {
         })
 
         it('cms dashboard when cms user logged in', async () => {
-            renderWithProviders(
-                <AppRoutes authMode={'AWS_COGNITO'} apiURL="foo.bar" />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                                user: mockValidCMSUser(),
-                            }),
-                            indexHealthPlanPackagesMockSuccess(),
-                        ],
-                    },
-                    featureFlags: { 'session-expiring-modal': false },
-                }
-            )
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                        indexHealthPlanPackagesMockSuccess(),
+                    ],
+                },
+                featureFlags: { 'session-expiring-modal': false },
+            })
 
             await waitFor(() => {
                 expect(
@@ -76,19 +70,16 @@ describe('AppRoutes', () => {
         })
 
         it('landing page when no user', async () => {
-            renderWithProviders(
-                <AppRoutes authMode={'AWS_COGNITO'} apiURL="foo.bar" />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 403,
-                            }),
-                        ],
-                    },
-                    featureFlags: { 'session-expiring-modal': false },
-                }
-            )
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 403,
+                        }),
+                    ],
+                },
+                featureFlags: { 'session-expiring-modal': false },
+            })
             await waitFor(() => {
                 expect(
                     screen.getByRole('heading', {
@@ -108,20 +99,17 @@ describe('AppRoutes', () => {
 
     describe('/auth', () => {
         it('auth header is displayed', async () => {
-            renderWithProviders(
-                <AppRoutes authMode={'AWS_COGNITO'} apiURL="foo.bar" />,
-                {
-                    routerProvider: { route: '/auth' },
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                            }),
-                        ],
-                    },
-                    featureFlags: { 'session-expiring-modal': false },
-                }
-            )
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/auth' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+                featureFlags: { 'session-expiring-modal': false },
+            })
 
             await waitFor(() => {
                 expect(
@@ -142,20 +130,17 @@ describe('AppRoutes', () => {
 
     describe('/help', () => {
         it('can be accessed by state user', async () => {
-            renderWithProviders(
-                <AppRoutes authMode={'AWS_COGNITO'} apiURL="foo.bar" />,
-                {
-                    routerProvider: { route: '/help' },
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                            }),
-                        ],
-                    },
-                    featureFlags: { 'session-expiring-modal': false },
-                }
-            )
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/help' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+                featureFlags: { 'session-expiring-modal': false },
+            })
 
             await screen.findByTestId('help-authenticated')
             await waitFor(() => {
@@ -169,21 +154,18 @@ describe('AppRoutes', () => {
         })
 
         it('can be accessed by CMS user', async () => {
-            renderWithProviders(
-                <AppRoutes authMode={'AWS_COGNITO'} apiURL="foo.bar" />,
-                {
-                    routerProvider: { route: '/help' },
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                                user: mockValidCMSUser(),
-                            }),
-                        ],
-                    },
-                    featureFlags: { 'session-expiring-modal': false },
-                }
-            )
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/help' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                    ],
+                },
+                featureFlags: { 'session-expiring-modal': false },
+            })
             await screen.findByTestId('help-authenticated')
             await waitFor(() => {
                 expect(
@@ -196,19 +178,16 @@ describe('AppRoutes', () => {
         })
 
         it('can be accessed by unauthenticated users', async () => {
-            renderWithProviders(
-                <AppRoutes authMode={'AWS_COGNITO'} apiURL="foo.bar" />,
-                {
-                    routerProvider: { route: '/help' },
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 403,
-                            }),
-                        ],
-                    },
-                }
-            )
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/help' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 403,
+                        }),
+                    ],
+                },
+            })
 
             await screen.findByTestId('help-unauthenticated')
             await waitFor(() => {
@@ -224,20 +203,17 @@ describe('AppRoutes', () => {
 
     describe('invalid routes', () => {
         it('redirect to landing page when no user', async () => {
-            renderWithProviders(
-                <AppRoutes authMode={'AWS_COGNITO'} apiURL="foo.bar" />,
-                {
-                    routerProvider: { route: '/not-a-real-place' },
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 403,
-                            }),
-                        ],
-                    },
-                    featureFlags: { 'session-expiring-modal': false },
-                }
-            )
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/not-a-real-place' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 403,
+                        }),
+                    ],
+                },
+                featureFlags: { 'session-expiring-modal': false },
+            })
 
             await waitFor(() => {
                 expect(
@@ -250,16 +226,13 @@ describe('AppRoutes', () => {
         })
 
         it('redirect to 404 error page when user is logged in', async () => {
-            renderWithProviders(
-                <AppRoutes authMode={'AWS_COGNITO'} apiURL="foo.bar" />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                    routerProvider: { route: '/not-a-real-place' },
-                    featureFlags: { 'session-expiring-modal': false },
-                }
-            )
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+                routerProvider: { route: '/not-a-real-place' },
+                featureFlags: { 'session-expiring-modal': false },
+            })
 
             await waitFor(() =>
                 expect(

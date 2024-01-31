@@ -16,10 +16,7 @@ describe('APIAccess', () => {
     it('renders without errors', async () => {
         renderWithProviders(
             <Routes>
-                <Route
-                    path={RoutesRecord.API_ACCESS}
-                    element={<APIAccess apiURL="foo.bar" />}
-                />
+                <Route path={RoutesRecord.API_ACCESS} element={<APIAccess />} />
             </Routes>,
             {
                 apolloProvider: {
@@ -36,9 +33,9 @@ describe('APIAccess', () => {
             }
         )
 
-        const foo = await screen.findByText('foobar')
+        const foo = await screen.findByText(
+            'To interact with the MC-Review API you will need a valid JWT'
+        )
         expect(foo).toBeInTheDocument()
-
-        expect(true).toBeFalsy()
     })
 })

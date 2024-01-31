@@ -68,13 +68,11 @@ const StateUserRoutes = ({
     setAlert,
     showQuestionResponse,
     stageName,
-    apiURL,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
     showQuestionResponse: boolean
     stageName?: string
-    apiURL: string
 }): React.ReactElement => {
     // feature flag
     const ldClient = useLDClient()
@@ -150,10 +148,7 @@ const StateUserRoutes = ({
                         element={<GraphQLExplorer />}
                     />
                 )}
-                <Route
-                    path={RoutesRecord.API_ACCESS}
-                    element={<APIAccess apiURL={apiURL} />}
-                />
+                <Route path={RoutesRecord.API_ACCESS} element={<APIAccess />} />
                 <Route path="*" element={<Error404 />} />
             </Routes>
         </AuthenticatedRouteWrapper>
@@ -165,13 +160,11 @@ const CMSUserRoutes = ({
     setAlert,
     showQuestionResponse,
     stageName,
-    apiURL,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
     showQuestionResponse: boolean
     stageName?: string
-    apiURL: string
 }): React.ReactElement => {
     return (
         <AuthenticatedRouteWrapper authMode={authMode} setAlert={setAlert}>
@@ -241,10 +234,7 @@ const CMSUserRoutes = ({
                     />
                 )}
                 <Route path={RoutesRecord.SETTINGS} element={<Settings />} />
-                <Route
-                    path={RoutesRecord.API_ACCESS}
-                    element={<APIAccess apiURL={apiURL} />}
-                />
+                <Route path={RoutesRecord.API_ACCESS} element={<APIAccess />} />
                 {UniversalRoutes}
                 <Route path="*" element={<Error404 />} />
             </Routes>
@@ -274,11 +264,9 @@ const UnauthenticatedRoutes = ({
 
 export const AppRoutes = ({
     authMode,
-    apiURL,
     setAlert,
 }: {
     authMode: AuthModeType
-    apiURL: string
     setAlert?: React.Dispatch<React.ReactElement>
 }): React.ReactElement => {
     const {
@@ -398,7 +386,6 @@ export const AppRoutes = ({
                 setAlert={setAlert}
                 showQuestionResponse={showQuestionResponse}
                 stageName={stageName}
-                apiURL={apiURL}
             />
         )
     } else {
@@ -408,7 +395,6 @@ export const AppRoutes = ({
                 setAlert={setAlert}
                 showQuestionResponse={showQuestionResponse}
                 stageName={stageName}
-                apiURL={apiURL}
             />
         )
     }

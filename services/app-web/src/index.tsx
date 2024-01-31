@@ -141,7 +141,6 @@ if (ldClientId === undefined) {
                     authMode={authMode}
                     apolloClient={apolloClient}
                     s3Client={s3Client}
-                    apiURL={apiURL}
                 />
             </LDProvider>
         </React.StrictMode>
