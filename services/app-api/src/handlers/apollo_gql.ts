@@ -13,6 +13,7 @@ import type { userFromAuthProvider } from '../authn'
 import {
     userFromCognitoAuthProvider,
     userFromLocalAuthProvider,
+    userFromThirdPartyAuthorizer,
 } from '../authn'
 import { newLocalEmailer, newSESEmailer } from '../emailer'
 import { NewPostgresStore } from '../postgres/postgresStore'
@@ -59,10 +60,17 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const anyContext = context as any
         const requestSpan = anyContext[requestSpanKey]
-
         const authProvider =
             event.requestContext.identity.cognitoAuthenticationProvider
-        if (authProvider) {
+        // This handler is shared with the third_party_API_authorizer
+        // when called from the 3rd party authorizer the cognito auth provider
+        // is not valid for instead the authorizer returns a user ID
+        // that is used to fetch the user
+        const fromThirdPartyAuthorizer = event.requestContext.path.includes(
+            '/v1/graphql/external'
+        )
+
+        if (authProvider || fromThirdPartyAuthorizer) {
             try {
                 // check if the user is stored in postgres
                 // going to clean this up, but we need the store in the
@@ -81,8 +89,21 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                 }
 
                 const store = NewPostgresStore(pgResult)
-                const userResult = await userFetcher(authProvider, store)
+                const userId = event.requestContext.authorizer?.principalId
 
+                let userResult
+                if (authProvider && !fromThirdPartyAuthorizer) {
+                    userResult = await userFetcher(authProvider, store)
+                } else if (fromThirdPartyAuthorizer && userId) {
+                    userResult = await userFromThirdPartyAuthorizer(
+                        store,
+                        userId
+                    )
+                }
+
+                if (userResult === undefined) {
+                    throw new Error(`Log: userResult must be supplied`)
+                }
                 if (!userResult.isErr()) {
                     return {
                         user: userResult.value,
@@ -98,7 +119,7 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                 throw new Error('Log: placing user in gql context failed')
             }
         } else {
-            throw new Error('Log: no AuthProvider')
+            throw new Error('Log: no AuthProvider from an internal API user.')
         }
     }
 }
@@ -132,7 +153,6 @@ function tracingMiddleware(wrapped: Handler): Handler {
     return async function (event, context, completion) {
         // get the parent context from headers
         const ctx = propagation.extract(ROOT_CONTEXT, event.headers)
-
         const span = tracer.startSpan(
             'handleRequest',
             {

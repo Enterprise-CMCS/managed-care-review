@@ -38,6 +38,7 @@ import {
 } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 import { RateSummary } from '../SubmissionSummary/RateSummary'
+import { RateEdit } from '../RateEdit/RateEdit'
 import { APIAccess } from '../APIAccess/APIAccess'
 
 function componentForAuthMode(
@@ -76,7 +77,7 @@ const StateUserRoutes = ({
 }): React.ReactElement => {
     // feature flag
     const ldClient = useLDClient()
-    const showRateSummaryPage: boolean = ldClient?.variation(
+    const showRatePages: boolean = ldClient?.variation(
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
@@ -107,7 +108,13 @@ const StateUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_NEW}
                     element={<NewStateSubmissionForm />}
                 />
-                {showRateSummaryPage && (
+                {showRatePages && (
+                    <Route
+                        path={RoutesRecord.RATE_EDIT}
+                        element={<RateEdit />}
+                    />
+                )}
+                {showRatePages && (
                     <Route
                         path={RoutesRecord.RATES_SUMMARY}
                         element={<RateSummary />}

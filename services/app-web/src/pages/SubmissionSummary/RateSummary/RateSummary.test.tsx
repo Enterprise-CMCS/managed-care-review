@@ -9,6 +9,7 @@ import {
 import { RateSummary } from './RateSummary'
 import { RoutesRecord } from '../../../constants'
 import { Route, Routes } from 'react-router-dom'
+import { RateEdit } from '../../RateEdit/RateEdit'
 
 // Wrap test component in some top level routes to allow getParams to be tested
 const wrapInRoutes = (children: React.ReactNode) => {
@@ -114,7 +115,7 @@ describe('RateSummary', () => {
     })
 
     describe('Viewing RateSummary as a State user', () => {
-        it('renders without errors', async () => {
+        it('renders SingleRateSummarySection component without errors for locked rate', async () => {
             renderWithProviders(wrapInRoutes(<RateSummary />), {
                 apolloProvider: {
                     mocks: [
@@ -140,6 +141,44 @@ describe('RateSummary', () => {
                     'Programs this rate certification covers'
                 )
             ).toBeInTheDocument()
+        })
+
+        it('redirects to RateEdit component from RateSummary without errors for unlocked rate', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.RATES_SUMMARY}
+                        element={<RateSummary />}
+                    />
+                    <Route
+                        path={RoutesRecord.RATE_EDIT}
+                        element={<RateEdit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidStateUser(),
+                                statusCode: 200,
+                            }),
+                            fetchRateMockSuccess({
+                                rate: { id: '1337', status: 'UNLOCKED' },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/1337',
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(screen.queryByTestId('rate-edit')).toBeInTheDocument()
+            })
         })
 
         it('renders expected error page when rate ID is invalid', async () => {

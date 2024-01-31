@@ -39,6 +39,7 @@ const CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     API_ACCESS: 'dev',
     SETTINGS: 'table',
     RATES_SUMMARY: 'summary',
+    RATE_EDIT: 'form',
     SUBMISSIONS: 'form',
     SUBMISSIONS_NEW: 'form',
     SUBMISSIONS_EDIT_TOP_LEVEL: 'form',
