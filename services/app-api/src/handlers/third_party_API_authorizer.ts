@@ -38,7 +38,9 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
     const authToken = event.authorizationToken.replace('Bearer ', '')
     try {
         const parsedEvent = JSON.parse(JSON.stringify(event))
-        const host = parsedEvent.headers.Host
+        // const host = parsedEvent.headers.Host
+        // temp set host
+        const host = '18.67.65.89'
         if (host === undefined) {
             // TODO: remove this log
             // eslint-disable-next-line
