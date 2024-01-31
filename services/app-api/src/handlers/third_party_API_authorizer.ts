@@ -40,6 +40,11 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
         const parsedEvent = JSON.parse(JSON.stringify(event))
         // const host = parsedEvent.headers.Host
         // temp set host
+        console.info({
+            message: `${parsedEvent}`,
+            operation: 'parsed event',
+            status: 'LOGGED',
+        })
         const host = '18.67.65.89'
         if (host === undefined) {
             // TODO: remove this log
