@@ -36,23 +36,23 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
     event
 ): Promise<APIGatewayAuthorizerResult> => {
     const authToken = event.authorizationToken.replace('Bearer ', '')
-    const parsedEvent = JSON.parse(JSON.stringify(event))
-    const host = parsedEvent.headers.Host
-    if (host === undefined) {
-        // TODO: remove this log
-        // eslint-disable-next-line
-        console.log(parsedEvent)
-        console.error('Invalid host on header')
-
-        return generatePolicy(undefined, event, false)
-    }
-    // host is formatted as ipAddress:port
-    // the following will remove the :port to leave just the ip address
-    const ipAddress = host.slice(0, host.indexOf(':'))
-    const ipAddressIsValid = allowedIpAddresses.includes(ipAddress)
-    console.info(ipAddress, 'IP Address')
-    console.info(allowedIpAddresses, 'Allowed IP Address')
     try {
+        const parsedEvent = JSON.parse(JSON.stringify(event))
+        const host = parsedEvent.headers.Host
+        if (host === undefined) {
+            // TODO: remove this log
+            // eslint-disable-next-line
+            console.log(parsedEvent)
+            console.error('Invalid host on header')
+
+            return generatePolicy(undefined, event, false)
+        }
+        // host is formatted as ipAddress:port
+        // the following will remove the :port to leave just the ip address
+        const ipAddress = host.slice(0, host.indexOf(':'))
+        const ipAddressIsValid = allowedIpAddresses.includes(ipAddress)
+        console.info(ipAddress, 'IP Address')
+        console.info(allowedIpAddresses, 'Allowed IP Address')
         // authentication step for validating JWT token
         const userId = jwtLib.userIDFromToken(authToken)
         if (userId instanceof Error) {
@@ -73,7 +73,7 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
             'unexpected exception attempting to validate authorization',
             err
         )
-        return generatePolicy(undefined, event, ipAddressIsValid)
+        return generatePolicy(undefined, event, false)
     }
 }
 
