@@ -1,3 +1,4 @@
+import { ApolloError } from '@apollo/client'
 import { Button, Grid, GridContainer, Link } from '@trussworks/react-uswds'
 import path from 'path-browserify'
 import { useState } from 'react'
@@ -6,17 +7,21 @@ import {
     CreateApiKeyPayload,
     useCreateApiKeyMutation,
 } from '../../gen/gqlClient'
+import { handleApolloError } from '../../gqlHelpers/apolloErrors'
+import { recordJSException } from '../../otelHelpers'
+import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './APIAccess.module.scss'
 
 function APIAccess(): React.ReactElement {
     const apiURL = process.env.REACT_APP_API_URL
-    if (!apiURL) {
-        throw new Error('Configuration Error, REACT_APP_API_URL must be set')
-    }
 
-    const thirdPartyAPIURL = path.join(apiURL, '/v1/graphql/external')
+    const thirdPartyAPIURL = !apiURL
+        ? undefined
+        : path.join(apiURL, '/v1/graphql/external')
 
     const [getAPIKey] = useCreateApiKeyMutation()
+
+    const [displayErrorPage, setDisplayErrorPage] = useState(false)
     const [apiKey, setAPIKey] = useState<CreateApiKeyPayload | undefined>(
         undefined
     )
@@ -24,11 +29,20 @@ function APIAccess(): React.ReactElement {
     const callAPIKeyMutation = async () => {
         try {
             const result = await getAPIKey()
+
             setAPIKey(result.data?.createAPIKey)
         } catch (err) {
-            console.error('failed to generate a new API Key', err)
-            // TODO: call generic error handler
+            console.error('unexpected error generating a new API Key', err)
+            if (err instanceof ApolloError) {
+                handleApolloError(err, true)
+            }
+            recordJSException(err)
+            setDisplayErrorPage(true)
         }
+    }
+
+    if (displayErrorPage) {
+        return <GenericErrorPage />
     }
 
     const copyKeyToClipboard = async () => {
@@ -99,7 +113,12 @@ curl -s ${thirdPartyAPIURL} -X POST \\
                 {curlCommand && (
                     <>
                         Example curl command:
-                        <code className={styles.wrapKey}>{curlCommand}</code>
+                        <code
+                            className={styles.wrapKey}
+                            aria-label="Example Curl Command"
+                        >
+                            {curlCommand}
+                        </code>
                     </>
                 )}
 

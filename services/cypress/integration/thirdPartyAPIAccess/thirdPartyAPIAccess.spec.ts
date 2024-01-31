@@ -55,18 +55,21 @@ describe('thirdPartyAPIAccess', () => {
 
 
         cy.get("[aria-label='API Key Text']").then((codeBlock) => {
-            cy.log(codeBlock.text())
 
-            var apiKey = codeBlock.text()
+            const apiKey = codeBlock.text().trim()
+            const bearer = `Bearer ${apiKey}`
 
             cy.request({
+                method: 'post',
                 url: api_url,
                 headers: {
-                    Authorization: `Bearer ${apiKey}`
+                    'Content-Type': 'application/json',
+                    Authorization: bearer,
                 },
+                body: '{"query":"query IndexRates { indexRates { totalCount edges { node {  id } } } }"}',
                 failOnStatusCode: false,
             }).then(res => {
-                expect(res.status).to.equal(500) // doesn't work right now
+                expect(res.status).to.equal(200)
             })
 
         })        
