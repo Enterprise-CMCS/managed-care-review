@@ -39,6 +39,7 @@ import {
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 import { RateSummary } from '../SubmissionSummary/RateSummary'
 import { RateEdit } from '../RateEdit/RateEdit'
+import { APIAccess } from '../APIAccess/APIAccess'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -154,6 +155,7 @@ const StateUserRoutes = ({
                         element={<GraphQLExplorer />}
                     />
                 )}
+                <Route path={RoutesRecord.API_ACCESS} element={<APIAccess />} />
                 <Route path="*" element={<Error404 />} />
             </Routes>
         </AuthenticatedRouteWrapper>
@@ -239,6 +241,7 @@ const CMSUserRoutes = ({
                     />
                 )}
                 <Route path={RoutesRecord.SETTINGS} element={<Settings />} />
+                <Route path={RoutesRecord.API_ACCESS} element={<APIAccess />} />
                 {UniversalRoutes}
                 <Route path="*" element={<Error404 />} />
             </Routes>

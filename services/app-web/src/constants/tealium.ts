@@ -36,6 +36,7 @@ const CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     DASHBOARD_RATES: 'table',
     HELP: 'glossary',
     GRAPHQL_EXPLORER: 'dev',
+    API_ACCESS: 'dev',
     SETTINGS: 'table',
     RATES_SUMMARY: 'summary',
     RATE_EDIT: 'form',
