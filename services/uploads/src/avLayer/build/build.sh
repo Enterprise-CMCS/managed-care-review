@@ -7,35 +7,25 @@ rm -rf bin
 rm -rf lib
 rm lambda_layer.zip || true
 
-yum update -y
-amazon-linux-extras install epel -y
-yum install -y cpio yum-utils zip
+dnf update -y
+dnf install -y cpio yum-utils zip
 
-# extract binaries for clamav, json-c, pcre
+# extract binaries for clamav
 mkdir -p /tmp/build
 pushd /tmp/build
 
-# Download the clamav package that includes unrar
-curl -L --output clamav-0.103.3-22187.el7.art.x86_64.rpm http://www6.atomicorp.com/channels/atomic/centos/7/x86_64/RPMS/clamav-0.104.4-27025.el7.art.x86_64.rpm
-rpm2cpio clamav-0*.rpm | cpio -vimd
-
-# Download libcrypt.so.1
-curl -L --output glibc-2.17-317.el7.x86_64.rpm http://mirror.centos.org/centos/7/os/x86_64/Packages/glibc-2.17-317.el7.x86_64.rpm
-rpm2cpio glibc*.rpm | cpio -vimd
+# Install latest clamav from clamav.net
+curl -L --output clamav-1.0.4.linux.x86_64.rpm https://www.clamav.net/downloads/production/clamav-1.0.4.linux.x86_64.rpm
+rpm2cpio clamav-*.rpm | cpio -vimd
 
 # Download other package dependencies
-yumdownloader -x \*i686 --archlist=x86_64 clamav clamav-lib clamav-update clamd json-c pcre2 libtool-ltdl libxml2 bzip2-libs xz-libs libprelude gnutls nettle libcurl libnghttp2 libidn2 libssh2 openldap libffi krb5-libs keyutils-libs libunistring cyrus-sasl-lib nss nspr libselinux openssl-libs libcrypt
-rpm2cpio clamav-0*.rpm | cpio -vimd
-rpm2cpio clamav-lib*.rpm | cpio -vimd
-rpm2cpio clamav-update*.rpm | cpio -vimd
-rpm2cpio clamd*.rpm | cpio -vimd
+dnf download -x \*i686 --archlist=x86_64 json-c pcre2 libtool-ltdl libxml2 bzip2-libs xz-libs gnutls nettle libcurl libnghttp2 libidn2 libssh2 openldap libffi krb5-libs keyutils-libs libunistring cyrus-sasl-lib nss nspr libselinux openssl-libs 
 rpm2cpio json-c*.rpm | cpio -vimd
 rpm2cpio pcre*.rpm | cpio -vimd
 rpm2cpio libtool-ltdl*.rpm | cpio -vimd
 rpm2cpio libxml2*.rpm | cpio -vimd
 rpm2cpio bzip2-libs*.rpm | cpio -vimd
 rpm2cpio xz-libs*.rpm | cpio -vimd
-rpm2cpio libprelude*.rpm | cpio -vimd
 rpm2cpio gnutls*.rpm | cpio -vimd
 rpm2cpio nettle*.rpm | cpio -vimd
 rpm2cpio libcurl*.rpm | cpio -vimd
@@ -52,19 +42,14 @@ rpm2cpio nss*.rpm | cpio -vimd
 rpm2cpio nspr*.rpm | cpio -vimd
 rpm2cpio libselinux*.rpm | cpio -vimd
 rpm2cpio openssl-libs*.rpm | cpio -vimd
-rpm2cpio libcrypt*.rpm | cpio -vimd
 
-# reset the timestamps so that we generate a reproducible zip file where
-# running with the same file contents we get the exact same hash even if we
-# run the same build on different days
-find usr -exec touch -t 200001010000 "{}" \;
 popd
 
 mkdir -p bin lib
 
-cp /tmp/build/usr/bin/clamscan /tmp/build/usr/bin/freshclam bin/.
+cp /tmp/build/usr/local/bin/clamscan /tmp/build/usr/local/bin/clamdscan /tmp/build/usr/local/bin/freshclam bin/.
 cp -R /tmp/build/usr/lib64/* lib/.
-cp -R /tmp/build/lib64/* lib/.
+cp -R /tmp/build/usr/local/lib64/* lib/.
 cp freshclam.conf bin/freshclam.conf
 
 zip -r9 lambda_layer.zip bin
