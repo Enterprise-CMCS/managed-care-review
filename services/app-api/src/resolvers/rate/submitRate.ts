@@ -90,7 +90,7 @@ export function submitRate(
         const submittedRate = await store.submitRate({
             rateID,
             submittedByUserID: user.id,
-            submitReason,
+            submitReason: submitReason ?? 'Initial submission',
             formData: formData
                 ? {
                       rateType: (formData.rateType ??

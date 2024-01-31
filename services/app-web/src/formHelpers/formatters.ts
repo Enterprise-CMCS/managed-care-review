@@ -4,7 +4,7 @@ import {
     ActuaryContact,
 } from '../common-code/healthPlanFormDataType'
 import { FileItemT } from '../components'
-import { GenericDocument } from '../gen/gqlClient'
+import { GenericDocument, ActuaryContact as  GQLActuaryContact } from '../gen/gqlClient'
 import { S3ClientT } from '../s3'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -50,7 +50,8 @@ const formatForForm = (
     }
 }
 
-const formatActuaryContactsForForm = (actuaryContacts?: ActuaryContact[] | GQLActuaryContact) => {
+
+const formatActuaryContactsForForm = (actuaryContacts?: ActuaryContact[] | GQLActuaryContact[]) => {
     return actuaryContacts && actuaryContacts.length > 0
         ? actuaryContacts
         : [
