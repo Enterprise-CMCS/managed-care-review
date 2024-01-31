@@ -38,9 +38,10 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
     const authToken = event.authorizationToken.replace('Bearer ', '')
     const parsedEvent = JSON.parse(JSON.stringify(event))
     const host = parsedEvent.headers.Host
+    console.info(host, '========= host ========')
     // host is formatted as ipAddress:port
     // the following will remove the :port to leave just the ip address
-    const ipAddress = host.slice(0, host.indexOf(':'))
+    const ipAddress = host?.slice(0, host.indexOf(':'))
     const ipAddressIsValid = allowedIpAddresses.includes(ipAddress)
     console.info(ipAddress, 'IP Address')
     console.info(allowedIpAddresses, 'Allowed IP Address')
