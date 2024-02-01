@@ -50,10 +50,19 @@ const formatForForm = (
     }
 }
 
-
-const formatActuaryContactsForForm = (actuaryContacts?: ActuaryContact[] | GQLActuaryContact[]) => {
-    return actuaryContacts && actuaryContacts.length > 0
-        ? actuaryContacts
+// This function can be cleaned up when we move off domain types and only use graphql
+const formatActuaryContactsForForm = (actuaryContacts?: ActuaryContact[] | GQLActuaryContact[]) : ActuaryContact[] => {
+    return actuaryContacts &&  actuaryContacts.length > 0
+        ? actuaryContacts.map( (contact) => {
+            const {name, titleRole,email,actuarialFirm, actuarialFirmOther} = contact
+                    return {
+                    name: name ?? '',
+                    titleRole: titleRole ?? '',
+                    email: email ?? '',
+                    actuarialFirmOther: actuarialFirmOther ?? undefined,
+                    actuarialFirm: actuarialFirm ?? undefined,
+                }
+        })
         : [
               {
                   name: '',

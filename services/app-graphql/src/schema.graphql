@@ -1013,6 +1013,7 @@ enum ActuarialFirm {
 
 "Contact information for the certifying or additional state actuary"
 type ActuaryContact {
+  id: ID
   name: String
   titleRole: String
   email: String
