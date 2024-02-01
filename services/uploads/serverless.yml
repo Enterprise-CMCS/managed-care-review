@@ -378,6 +378,7 @@ resources:
       Type: AWS::EC2::SecurityGroup
       Properties:
         GroupDescription: Security group for ClamAV daemon
+        VpcId: ${self:custom.vpcId}
         SecurityGroupIngress:
           - IpProtocol: tcp
             FromPort: 3310
@@ -418,7 +419,6 @@ resources:
       Properties:
         InstanceType: t2.micro
         ImageId: ami-05bfc1ab11bfbf484
-        KeyName: my-key-pair # Replace with your key pair name
         SecurityGroups:
           - !Ref ClamAVSecurityGroup
         IamInstanceProfile: !Ref ClamAVInstanceProfile
