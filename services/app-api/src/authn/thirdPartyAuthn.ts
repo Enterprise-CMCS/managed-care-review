@@ -28,7 +28,7 @@ export async function userFromThirdPartyAuthorizer(
         const ipAddressIsValid = allowedIpAddresses.includes(ipAddress)
         if (!ipAddressIsValid) {
             const errMsg = new Error(
-                `IP address: ${ipAddress} is not in the allowed list ${allowedIpAddresses}`
+                `IP address: ${ipAddress} is not in the allowed list`
             )
             return err(errMsg)
         }
