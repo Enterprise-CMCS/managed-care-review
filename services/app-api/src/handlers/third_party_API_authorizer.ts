@@ -38,9 +38,14 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
     const authToken = event.authorizationToken.replace('Bearer ', '')
     try {
         const parsedEvent = JSON.parse(JSON.stringify(event))
-        const host = parsedEvent.headers[0].Host
+        console.info(
+            parsedEvent?.multiValueHeaders?.Host[0],
+            'Multivalue header host'
+        )
+        const host = parsedEvent?.multiValueHeaders?.Host[0]
+        console.info(parsedEvent, '============ PARSED EVENT =============')
         console.info({
-            message: `${parsedEvent.headers.Host}`,
+            message: `${parsedEvent?.headers}`,
             operation: 'parsed event',
             status: 'LOGGED',
         })
