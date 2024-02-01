@@ -27,7 +27,9 @@ export async function userFromThirdPartyAuthorizer(
     try {
         const ipAddressIsValid = allowedIpAddresses.includes(ipAddress)
         if (!ipAddressIsValid) {
-            const errMsg = new Error('IP address is not in the allowed list')
+            const errMsg = new Error(
+                `IP address: ${ipAddress} is not in the allowed list`
+            )
             return err(errMsg)
         }
         // Lookup user from postgres
