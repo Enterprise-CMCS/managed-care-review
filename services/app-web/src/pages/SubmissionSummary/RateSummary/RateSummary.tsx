@@ -53,8 +53,12 @@ export const RateSummary = (): React.ReactElement => {
         return <GenericErrorPage />
     }
 
-    //Redirecting a state user to the edit page if rate is unlocked
-    if (loggedInUser?.role === 'STATE_USER' && rate.status === 'UNLOCKED') {
+    // Redirecting a state user to the edit page if rate is unlocked
+    if (
+        data &&
+        loggedInUser?.role === 'STATE_USER' &&
+        rate.status === 'UNLOCKED'
+    ) {
         navigate(`/rates/${id}/edit`)
     }
 
