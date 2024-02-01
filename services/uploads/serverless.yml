@@ -66,6 +66,13 @@ custom:
       deploy:finalize: |
         rm lambda_layer.zip
         serverless invoke --stage ${sls:stage} --function avDownloadDefinitions -t Event
+  vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
+  sgId: ${ssm:/configuration/${sls:stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
+  privateSubnets:
+    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/a/id, ssm:/configuration/default/vpc/subnets/private/a/id}
+    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
+    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
+  publicSubnetA: ${ssm:/configuration/${sls:stage}/vpc/subnets/public/a/id, ssm:/configuration/default/vpc/subnets/public/a/id}
   serverless-offline-ssm:
     stages:
       - local
@@ -109,6 +116,9 @@ functions:
     layers:
       - !Ref ClamAvLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
+    vpc:
+      securityGroupIds: ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
     environment:
       stage: ${sls:stage}
       CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
@@ -363,6 +373,67 @@ resources:
                 - !Sub ${QAUploadsBucket.Arn}
                 - !Sub ${QAUploadsBucket.Arn}/*
               Sid: DenyUnencryptedConnections
+
+    ClamAVSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: Security group for ClamAV daemon
+        SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 3310
+            ToPort: 3310
+            SourceSecurityGroupId: ${self:custom.sgId}
+
+    ClamAVInstanceProfile:
+      Type: AWS::IAM::InstanceProfile
+      Properties:
+        Path: /
+        Roles:
+          - !Ref ClamAVInstanceRole
+
+    ClamAVInstanceRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: ClamAVInstancePolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: '*'
+
+    ClamAVInstance:
+      Type: AWS::EC2::Instance
+      Properties:
+        InstanceType: t2.micro
+        ImageId: ami-05bfc1ab11bfbf484
+        KeyName: my-key-pair # Replace with your key pair name
+        SecurityGroups:
+          - !Ref ClamAVSecurityGroup
+        IamInstanceProfile: !Ref ClamAVInstanceProfile
+        Tags:
+          - Key: mcr-vmuse
+            Value: clamavd
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            sudo apt-get update
+            sudo apt-get install -y clamav clamav-daemon
+            sudo systemctl enable clamav-freshclam
+            sudo systemctl start clamav-freshclam
+            sudo systemctl enable clamav-daemon
+            sudo systemctl start clamav-daemon
 
   Outputs:
     DocumentUploadsBucketName:
