@@ -4,7 +4,7 @@ import { NavLink, useNavigate, useParams } from 'react-router-dom'
 
 import { Loading } from '../../../components'
 import { usePage } from '../../../contexts/PageContext'
-import { useFetchRateQuery } from '../../../gen/gqlClient'
+import { StateUser, useFetchRateQuery } from '../../../gen/gqlClient'
 import styles from '../SubmissionSummary.module.scss'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { RoutesRecord } from '../../../constants'
@@ -18,6 +18,7 @@ type RouteParams = {
 export const RateSummary = (): React.ReactElement => {
     // Page level state
     const { loggedInUser } = useAuth()
+    let user: StateUser
     const { updateHeading } = usePage()
     const navigate = useNavigate()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
@@ -53,9 +54,18 @@ export const RateSummary = (): React.ReactElement => {
         return <GenericErrorPage />
     }
 
-    //Redirecting a state user to the edit page if rate is unlocked
-    if (loggedInUser?.role === 'STATE_USER' && rate.status === 'UNLOCKED') {
-        navigate(`/rates/${id}/edit`)
+    if (loggedInUser && loggedInUser.__typename === 'StateUser') {
+        user = loggedInUser
+
+        //Will render a error component if the state user is attempting to access a rate not belonging to their state
+        if (user.state.code !== rate.stateCode) {
+            return <GenericErrorPage />
+        }
+
+        //Redirecting a state user to the edit page if rate is unlocked
+        if (user.role === 'STATE_USER' && rate.status === 'UNLOCKED') {
+            navigate(`/rates/${id}/edit`)
+        }
     }
 
     if (

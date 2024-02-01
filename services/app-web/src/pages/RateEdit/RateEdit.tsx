@@ -1,9 +1,10 @@
 import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useFetchRateQuery } from '../../gen/gqlClient'
+import { StateUser, useFetchRateQuery } from '../../gen/gqlClient'
 import { GridContainer } from '@trussworks/react-uswds'
 import { Loading } from '../../components'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import { useAuth } from '../../contexts/AuthContext'
 
 type RouteParams = {
     id: string
@@ -11,6 +12,8 @@ type RouteParams = {
 
 export const RateEdit = (): React.ReactElement => {
     const navigate = useNavigate()
+    const { loggedInUser } = useAuth()
+    let user: StateUser
     const { id } = useParams<keyof RouteParams>()
     if (!id) {
         throw new Error(
@@ -36,6 +39,15 @@ export const RateEdit = (): React.ReactElement => {
         )
     } else if (error || !rate) {
         return <GenericErrorPage />
+    }
+
+    if (loggedInUser && loggedInUser.__typename === 'StateUser') {
+        user = loggedInUser
+
+        //Will render a error component if the state user is attempting to access a rate not belonging to their state
+        if (user.state.code !== rate.stateCode) {
+            return <GenericErrorPage />
+        }
     }
 
     if (rate.status !== 'UNLOCKED') {
