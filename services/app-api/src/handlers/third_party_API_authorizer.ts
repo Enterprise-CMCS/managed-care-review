@@ -8,7 +8,6 @@ import { newJWTLib } from '../jwt'
 
 const stageName = process.env.stage
 const jwtSecret = process.env.JWT_SECRET
-const allowedIpAddresses = process.env.ALLOWED_IP_ADDRESSES
 
 if (stageName === undefined) {
     throw new Error('Configuration Error: stage is required')
@@ -17,12 +16,6 @@ if (stageName === undefined) {
 if (jwtSecret === undefined || jwtSecret === '') {
     throw new Error(
         'Configuration Error: JWT_SECRET is required to run app-api.'
-    )
-}
-
-if (allowedIpAddresses === undefined || allowedIpAddresses === '') {
-    throw new Error(
-        'Configuration Error: ALLOWD_IP_ADDRESSES is required to run app-api.'
     )
 }
 
@@ -37,38 +30,12 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
 ): Promise<APIGatewayAuthorizerResult> => {
     const authToken = event.authorizationToken.replace('Bearer ', '')
     try {
-        const parsedEvent = JSON.parse(JSON.stringify(event))
-        console.info(
-            parsedEvent?.multiValueHeaders?.Host[0],
-            'Multivalue header host'
-        )
-        const host = parsedEvent?.multiValueHeaders?.Host[0]
-        console.info(parsedEvent, '============ PARSED EVENT =============')
-        console.info({
-            message: `${parsedEvent?.headers}`,
-            operation: 'parsed event',
-            status: 'LOGGED',
-        })
-        if (host === undefined) {
-            // TODO: remove this log
-            // eslint-disable-next-line
-            console.log(parsedEvent)
-            console.error('Invalid host on header')
-
-            return generatePolicy(undefined, event, false)
-        }
-        // host is formatted as ipAddress:port
-        // the following will remove the :port to leave just the ip address
-        const ipAddress = host.slice(0, host.indexOf(':'))
-        const ipAddressIsValid = allowedIpAddresses.includes(ipAddress)
-        console.info(ipAddress, 'IP Address')
-        console.info(allowedIpAddresses, 'Allowed IP Address')
         // authentication step for validating JWT token
         const userId = jwtLib.userIDFromToken(authToken)
         if (userId instanceof Error) {
             console.error('Invalid auth token')
 
-            return generatePolicy(undefined, event, ipAddressIsValid)
+            return generatePolicy(undefined, event)
         }
 
         console.info({
@@ -77,20 +44,19 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
             status: 'SUCCESS',
         })
 
-        return generatePolicy(userId, event, ipAddressIsValid)
+        return generatePolicy(userId, event)
     } catch (err) {
         console.error(
             'unexpected exception attempting to validate authorization',
             err
         )
-        return generatePolicy(undefined, event, false)
+        return generatePolicy(undefined, event)
     }
 }
 
 const generatePolicy = function (
     userId: string | undefined,
-    event: APIGatewayTokenAuthorizerEvent,
-    ipAddressIsValid: boolean
+    event: APIGatewayTokenAuthorizerEvent
 ): APIGatewayAuthorizerResult {
     // If the JWT is verified as valid, and the request comes from an allowed IP address
     // send an Allow policy
@@ -100,7 +66,7 @@ const generatePolicy = function (
         Statement: [
             {
                 Action: 'execute-api:Invoke',
-                Effect: userId && ipAddressIsValid ? 'Allow' : 'Deny',
+                Effect: userId ? 'Allow' : 'Deny',
                 Resource: event['methodArn'],
             },
         ],

@@ -62,6 +62,7 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
         const requestSpan = anyContext[requestSpanKey]
         const authProvider =
             event.requestContext.identity.cognitoAuthenticationProvider
+        const ipAddress = context.requestContext.identity.sourceIp
         // This handler is shared with the third_party_API_authorizer
         // when called from the 3rd party authorizer the cognito auth provider
         // is not valid for instead the authorizer returns a user ID
@@ -94,7 +95,8 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                 } else if (fromThirdPartyAuthorizer && userId) {
                     userResult = await userFromThirdPartyAuthorizer(
                         store,
-                        userId
+                        userId,
+                        ipAddress
                     )
                 }
 
