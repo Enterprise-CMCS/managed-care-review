@@ -21,13 +21,13 @@ export async function userFromThirdPartyAuthorizer(
     const allowedIpAddresses = process.env.ALLOWED_IP_ADDRESSES
     if (allowedIpAddresses === undefined || allowedIpAddresses === '') {
         throw new Error(
-            'Configuration Error: ALLOWD_IP_ADDRESSES is required to run app-api.'
+            'Configuration Error: ALLOWED_IP_ADDRESSES is required to run app-api.'
         )
     }
     try {
         const ipAddressIsValid = allowedIpAddresses.includes(ipAddress)
         if (!ipAddressIsValid) {
-            const errMsg = new Error('bad ip address')
+            const errMsg = new Error('IP address is not in the allowed list')
             return err(errMsg)
         }
         // Lookup user from postgres
