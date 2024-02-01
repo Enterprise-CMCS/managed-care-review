@@ -2,14 +2,14 @@ import { GridContainer, Icon, Link } from '@trussworks/react-uswds'
 import React, { useEffect, useState } from 'react'
 import { NavLink, useNavigate, useParams } from 'react-router-dom'
 
-import { Loading } from '../../../components'
-import { usePage } from '../../../contexts/PageContext'
-import { useFetchRateQuery } from '../../../gen/gqlClient'
+import { Loading } from '../../components'
+import { usePage } from '../../contexts/PageContext'
+import { useFetchRateQuery } from '../../gen/gqlClient'
 import styles from '../SubmissionSummary.module.scss'
-import { GenericErrorPage } from '../../Errors/GenericErrorPage'
-import { RoutesRecord } from '../../../constants'
-import { SingleRateSummarySection } from '../../../components/SubmissionSummarySection/RateDetailsSummarySection/SingleRateSummarySection'
-import { useAuth } from '../../../contexts/AuthContext'
+import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import { RoutesRecord } from '../../constants'
+import { SingleRateSummarySection } from '../../components/SubmissionSummarySection/RateDetailsSummarySection/SingleRateSummarySection'
+import { useAuth } from '../../contexts/AuthContext'
 
 type RouteParams = {
     id: string

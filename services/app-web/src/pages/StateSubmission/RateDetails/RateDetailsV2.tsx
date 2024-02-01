@@ -1,12 +1,10 @@
 import React, { useEffect } from 'react'
 import { Form as UswdsForm } from '@trussworks/react-uswds'
-import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
+import { Formik, FormikErrors } from 'formik'
 import { useNavigate, useParams } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
-
-import { RateInfoType } from '../../../common-code/healthPlanFormDataType'
 
 import { ErrorSummary, GenericApiErrorBanner, Loading } from '../../../components'
 import { formatFormDateForDomain } from '../../../formHelpers'
@@ -20,24 +18,23 @@ import {
     formatDocumentsForForm,
     formatForForm,
 } from '../../../formHelpers/formatters'
-import {
-    RateCertFormType,
-    SingleRateCert,
-} from './SingleRateCert/SingleRateCert'
 import { useS3 } from '../../../contexts/S3Context'
 import { S3ClientT } from '../../../s3'
 import { isLoadingOrHasFileErrors } from '../../../components/FileUpload'
 import { RoutesRecord } from '../../../constants'
-import { SectionCard } from '../../../components/SectionCard'
 import { Rate, RateRevision, useFetchRateQuery, useSubmitRateMutation } from '../../../gen/gqlClient'
 import { Error404 } from '../../Errors/Error404Page'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
+import { SingleRateCertV2 } from './SingleRateCert/SingleRateCertV2'
 
+
+
+export type RateCertForm = {key: string} & RateRevision['formData']
 // This function is used to get initial form values as well return empty form values when we add a new rate or delete a rate
 // We need to include the getKey function in params because there are no guarantees currently file is in s3 even if when we load data from API
 const generateRateCertFormValues = (
     getKey: S3ClientT['getKey'],
-    rateRev?: RateRevision): RateCertFormType => {
+    rateRev?: RateRevision): RateCertForm => {
     const rateInfo = rateRev?.formData
     const newRateID =  uuidv4();
 
@@ -49,12 +46,12 @@ const generateRateCertFormValues = (
         rateDateStart: formatForForm(rateInfo?.rateDateStart),
         rateDateEnd: formatForForm(rateInfo?.rateDateEnd),
         rateDateCertified: formatForForm(rateInfo?.rateDateCertified),
-        effectiveDateStart: formatForForm(
-            rateInfo?.amendmentEffectiveDateStart
-        ),
-        effectiveDateEnd: formatForForm(
-            rateInfo?.amendmentEffectiveDateEnd
-        ),
+            effectiveDateStart: formatForForm(
+                rateInfo?.amendmentEffectiveDateStart
+            ),
+            effectiveDateEnd: formatForForm(
+                rateInfo?.amendmentEffectiveDateEnd
+            ),
         rateProgramIDs: rateInfo?.rateProgramIDs ?? [],
         rateDocuments: formatDocumentsForForm({
                   documents: rateInfo?.rateDocuments,
@@ -69,13 +66,7 @@ const generateRateCertFormValues = (
         ),
         actuaryCommunicationPreference:
             rateInfo?.actuaryCommunicationPreference ?? undefined,
-        packagesWithSharedRateCerts:
-            rateInfo?.packagesWithSharedRateCerts ?? [],
     }
-}
-
-interface RateInfoArrayType {
-    rateInfos: RateCertFormType[]
 }
 
 export const rateErrorHandling = (
@@ -104,34 +95,10 @@ export const RateDetailsV2 = ({
     }
     const { getKey } = useS3()
 
-    // API handling
-    const [submitRate, { loading: submitRateLoading }] = useSubmitRateMutation()
-    const { data: fetchRateQuery, loading: fetchRateLoading, error: fetchRateError } = useFetchRateQuery({
-        variables: {
-            input: {
-                rateID: id
-            }
-        }
-    })
-
-    if (fetchRateLoading){
-        return <Loading />
-    }
-
-    if( fetchRateError) {
-        return <Error404/>
-    } else if (!fetchRateQuery) {
-        return <GenericErrorPage/>
-    }
-    const rate = fetchRateQuery?.fetchRate.rate
-    const previousDocuments: string[] = []
 
     // Form validation
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const rateDetailsFormSchema = RateDetailsFormSchema()
-    const rateInfosInitialValues: RateInfoArrayType = {
-        rateInfos: [generateRateCertFormValues(getKey, rate.draftRevision ?? undefined)],
-    }
+    const rateDetailsFormSchema = RateDetailsFormSchema({'rate-edit-unlock': true})
 
     // UI focus state management
     const [focusNewRate, setFocusNewRate] = React.useState(false)
@@ -158,21 +125,43 @@ export const RateDetailsV2 = ({
     }, [focusErrorSummaryHeading])
 
 
+    // API handling
+    const [submitRate, { loading: submitRateLoading }] = useSubmitRateMutation()
+    const { data: fetchRateQuery, loading: fetchRateLoading, error: fetchRateError } = useFetchRateQuery({
+        variables: {
+            input: {
+                rateID: id
+            }
+        }
+    })
+
+    if (fetchRateLoading){
+        return <Loading />
+    }
+
+    if( fetchRateError) {
+        return <Error404/>
+    } else if (!fetchRateQuery) {
+        return <GenericErrorPage/>
+    }
+    const rate = fetchRateQuery?.fetchRate.rate
+    const previousDocuments: string[] = []
+
+    // Formik setup
+    const initialValues: RateCertForm  = generateRateCertFormValues(getKey, rate.draftRevision ?? undefined)
+
     const handleFormSubmit = async (
-        form: RateInfoArrayType,
+        form: RateCertForm ,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
         options: {
             shouldValidateDocuments: boolean
             redirectPath: string
         }
     ) => {
-        const { rateInfos } = form
         if (options.shouldValidateDocuments) {
-            const fileErrorsNeedAttention = rateInfos.some((rateInfo) =>
-                isLoadingOrHasFileErrors(
-                    rateInfo.supportingDocuments.concat(rateInfo.rateDocuments)
+            const fileErrorsNeedAttention = isLoadingOrHasFileErrors(
+                    initialValues.supportingDocuments.concat(initialValues.rateDocuments)
                 )
-            )
             if (fileErrorsNeedAttention) {
                 // make inline field errors visible so user can correct documents, direct user focus to errors, and manually exit formik submit
                 setShouldValidate(true)
@@ -182,49 +171,41 @@ export const RateDetailsV2 = ({
             }
         }
 
-        const cleanedRateInfos = rateInfos.map((rateInfo) => {
-            return {
-                id: rateInfo.id,
-                rateType: rateInfo.rateType,
-                rateCapitationType: rateInfo.rateCapitationType,
-                rateDocuments: formatDocumentsForDomain(rateInfo.rateDocuments),
+        const cleanedrateCertForms = {
+                id: form.id,
+                rateType: form.rateType,
+                rateCapitationType: form.rateCapitationType,
+                rateDocuments: formatDocumentsForDomain(form.rateDocuments),
                 supportingDocuments: formatDocumentsForDomain(
-                    rateInfo.supportingDocuments
+                    form.supportingDocuments
                 ),
-                rateDateStart: formatFormDateForDomain(rateInfo.rateDateStart),
-                rateDateEnd: formatFormDateForDomain(rateInfo.rateDateEnd),
+                rateDateStart: formatFormDateForDomain(form.rateDateStart),
+                rateDateEnd: formatFormDateForDomain(form.rateDateEnd),
                 rateDateCertified: formatFormDateForDomain(
-                    rateInfo.rateDateCertified
+                    form.rateDateCertified
                 ),
                 rateAmendmentInfo:
-                    rateInfo.rateType === 'AMENDMENT'
+                    form.rateType === 'AMENDMENT'
                         ? {
                               effectiveDateStart: formatFormDateForDomain(
-                                  rateInfo.effectiveDateStart
+                                  form.effectiveDateStart
                               ),
                               effectiveDateEnd: formatFormDateForDomain(
-                                  rateInfo.effectiveDateEnd
+                                  form.effectiveDateEnd
                               ),
                           }
                         : undefined,
-                rateProgramIDs: rateInfo.rateProgramIDs,
-                actuaryContacts: rateInfo.actuaryContacts,
+                rateProgramIDs: form.rateProgramIDs,
+                actuaryContacts: form.actuaryContacts,
                 actuaryCommunicationPreference:
-                    rateInfo.actuaryCommunicationPreference,
-                packagesWithSharedRateCerts:
-                    rateInfo.hasSharedRateCert === 'YES'
-                        ? rateInfo.packagesWithSharedRateCerts
-                        : [],
-            }
-        })
-
-        const initialRateRevision = cleanedRateInfos[0] // only submit the first rate revision right now from RateDetailsV2, adapt later for mulit-rate workflow
+                    form.actuaryCommunicationPreference,
+        }
 
         try {
             const updatedSubmission = await submitRate({
                 variables: {
                     input: {
-                        rateID: initialRateRevision.id,
+                        rateID: rate.id,
                         // formData: initialRateRevision
                     }
                 },
@@ -247,9 +228,9 @@ export const RateDetailsV2 = ({
     // Error summary object keys will be used as DOM focus point from error-summary. Must be valid html selector
     // Error summary object values will be used as messages displays in error summary
     const generateErrorSummaryErrors = (
-        errors: FormikErrors<RateInfoArrayType>
+        errors: FormikErrors<RateCertForm >
     ) => {
-        const rateErrors = errors.rateInfos
+        const rateErrors = errors
         const errorObject: { [field: string]: string } = {}
 
         if (rateErrors && Array.isArray(rateErrors)) {
@@ -258,12 +239,11 @@ export const RateDetailsV2 = ({
 
                 Object.entries(rateError).forEach(([field, value]) => {
                     if (typeof value === 'string') {
+
                         //rateProgramIDs error message needs a # proceeding the key name because this is the only way to be able to link to the Select component element see comments in ErrorSummaryMessage component.
                         const errorKey =
-                            field === 'rateProgramIDs' ||
-                            field === 'packagesWithSharedRateCerts'
-                                ? `#rateInfos.${index}.${field}`
-                                : `rateInfos.${index}.${field}`
+                            field === 'rateProgramIDs'  ? `#rateCertForms.${index}.${field}`
+                                : `rateCertForms.${index}.${field}`
                         errorObject[errorKey] = value
                     }
                     // If the field is actuaryContacts then the value should be an array with at least one object of errors
@@ -277,7 +257,7 @@ export const RateDetailsV2 = ({
                         Object.entries(actuaryContact).forEach(
                             ([contactField, contactValue]) => {
                                 if (typeof contactValue === 'string') {
-                                    const errorKey = `rateInfos.${index}.actuaryContacts.0.${contactField}`
+                                    const errorKey = `rateCertForms.${index}.actuaryContacts.0.${contactField}`
                                     errorObject[errorKey] = contactValue
                                 }
                             }
@@ -292,9 +272,9 @@ export const RateDetailsV2 = ({
 
     return (
         <Formik
-            initialValues={rateInfosInitialValues}
-            onSubmit={({ rateInfos }, { setSubmitting }) => {
-                return handleFormSubmit({ rateInfos }, setSubmitting, {
+            initialValues={initialValues}
+            onSubmit={({ rateCertForm }, { setSubmitting }) => {
+                return handleFormSubmit({ rateCertForm }, setSubmitting, {
                     shouldValidateDocuments: true,
                     redirectPath: `../contacts`,
                 })
@@ -302,7 +282,7 @@ export const RateDetailsV2 = ({
             validationSchema={rateDetailsFormSchema}
         >
             {({
-                values: { rateInfos },
+                values: { rateCertForm },
                 errors,
                 dirty,
                 handleSubmit,
@@ -313,7 +293,7 @@ export const RateDetailsV2 = ({
                     <>
                         <UswdsForm
                             className={styles.formContainer}
-                            id="RateDetailsForm"
+                            id="SingleRateDetailsForm"
                             aria-label="Rate Details Form"
                             aria-describedby="form-guidance"
                             onSubmit={(e) => {
@@ -333,69 +313,25 @@ export const RateDetailsV2 = ({
                                         headingRef={errorSummaryHeadingRef}
                                     />
                                 )}
-                                <FieldArray name="rateInfos">
-                                    {({
-                                        remove,
-                                        push,
-                                    }: FieldArrayRenderProps) => (
-                                        <>
-                                            {rateInfos.map(
-                                                (rateInfo, index) => (
-                                                    <SingleRateCert
-                                                        key={rateInfo.key}
-                                                        rateInfo={rateInfo}
-                                                        index={index}
-                                                        shouldValidate={
-                                                            shouldValidate
-                                                        }
-                                                        parentSubmissionID={
-                                                            rate.id
-                                                        }
-                                                        previousDocuments={
-                                                            previousDocuments
-                                                        }
-                                                        multiRatesConfig={{
-                                                            removeSelf: () => {
-                                                                remove(index)
-                                                                setNewRateButtonFocus()
-                                                            },
-                                                            reassignNewRateRef:
-                                                                (el) =>
-                                                                    (newRateNameRef.current =
-                                                                        el),
-                                                        }}
-                                                    />
-                                                )
-                                            )}
-                                            <SectionCard>
-                                                <h3>
-                                                    Additional rate
-                                                    certification
-                                                </h3>
-                                                <button
-                                                    type="button"
-                                                    className={`usa-button usa-button--outline ${styles.addRateBtn}`}
-                                                    onClick={() => {
-                                                        const newRate = generateRateCertFormValues(getKey)
-                                                        push(newRate)
-                                                        setFocusNewRate(true)
-                                                    }}
-                                                    ref={newRateButtonRef}
-                                                >
-                                                    Add another rate
-                                                    certification
-                                                </button>
-                                            </SectionCard>
-                                        </>
-                                    )}
-                                </FieldArray>
+                                    <SingleRateCertV2
+                                        key={rateInfo.key}
+                                        rate={rateInfo}
+                                        index={index}
+                                        shouldValidate={
+                                            shouldValidate
+                                        }
+                                        previousDocuments={
+                                            previousDocuments
+                                        }
+
+                                    />
                             </fieldset>
                             <PageActions
                                 backOnClick={async () => {
                                     const redirectPath = `../contract-details`
                                     if (dirty) {
                                         await handleFormSubmit(
-                                            { rateInfos },
+                                            { rateCertForms },
                                             setSubmitting,
                                             {
                                                 shouldValidateDocuments: false,
@@ -408,7 +344,7 @@ export const RateDetailsV2 = ({
                                 }}
                                 saveAsDraftOnClick={async () => {
                                     await handleFormSubmit(
-                                        { rateInfos },
+                                        { rateCertForms },
                                         setSubmitting,
                                         {
                                             shouldValidateDocuments: true,

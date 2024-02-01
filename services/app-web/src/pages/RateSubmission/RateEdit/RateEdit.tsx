@@ -1,10 +1,10 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useFetchRateQuery } from "../../gen/gqlClient";
+import { useFetchRateQuery } from "../../../gen/gqlClient";
 import { GridContainer } from "@trussworks/react-uswds";
-import { Loading } from "../../components";
-import { GenericErrorPage } from "../Errors/GenericErrorPage";
-import { RateDetailsV2 } from "../StateSubmission/RateDetails/RateDetailsV2";
+import { Loading } from "../../../components";
+import { GenericErrorPage } from "../../Errors/GenericErrorPage";
+import { RateDetailsV2 } from "../../StateSubmission/RateDetails/RateDetailsV2";
 
 type RouteParams = {
   id: string

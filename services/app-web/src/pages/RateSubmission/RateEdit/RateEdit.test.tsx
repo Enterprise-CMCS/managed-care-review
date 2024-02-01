@@ -1,8 +1,8 @@
 import { screen, waitFor } from '@testing-library/react'
-import { renderWithProviders } from "../../testHelpers"
+import { renderWithProviders } from "../../../testHelpers"
 import { RateEdit } from "./RateEdit"
-import { fetchCurrentUserMock, fetchRateMockSuccess, mockValidStateUser } from "../../testHelpers/apolloMocks"
-import { RoutesRecord } from '../../constants'
+import { fetchCurrentUserMock, fetchRateMockSuccess, mockValidStateUser } from "../../../testHelpers/apolloMocks"
+import { RoutesRecord } from '../../../constants'
 import { Route, Routes } from 'react-router-dom'
 
 // Wrap test component in some top level routes to allow getParams to be tested
@@ -33,8 +33,8 @@ describe('RateEdit', () => {
         routerProvider: {
           route: '/rates/1337/edit'
         },
-        featureFlags: { 
-          'rate-edit-unlock': true 
+        featureFlags: {
+          'rate-edit-unlock': true
         }
       })
 

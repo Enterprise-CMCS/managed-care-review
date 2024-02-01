@@ -14,7 +14,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
         rateDocuments: validateFileItemsListSingleUpload({ required: true }),
         supportingDocuments: validateFileItemsList({ required: false }),
         hasSharedRateCert: Yup.string().defined('You must select yes or no'),
-        packagesWithSharedRateCerts: Yup.array()
+        packagesWithSharedRateCerts: _activeFeatureFlags['rate-edit-unlock']? Yup.array()
             .when('hasSharedRateCert', {
                 is: 'YES',
                 then: Yup.array().min(
@@ -22,7 +22,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
                     'You must select at least one submission'
                 ),
             })
-            .required(),
+            .required(): Yup.array().optional(),
         rateProgramIDs: Yup.array().min(1, 'You must select a program'),
         rateType: Yup.string().defined(
             'You must choose a rate certification type'
