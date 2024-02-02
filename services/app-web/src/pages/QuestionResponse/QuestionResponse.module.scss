@@ -2,42 +2,42 @@
 @use '../../styles/uswdsImports.scss' as uswds;
 
 .background {
-  background-color: custom.$mcr-foundation-white;
-  width: 100%;
+    background-color: custom.$mcr-foundation-white;
+    width: 100%;
 }
 
 .container {
-  max-width: custom.$mcr-container-standard-width-fixed;
-  padding: 2rem 0;
+    max-width: custom.$mcr-container-standard-width-fixed;
+    padding: 2rem 0;
 }
 
 .questionSection {
-  margin:uswds.units(2) auto;
-  background: custom.$mcr-foundation-white;
-  padding:uswds.units(4)uswds.units(4);
-  border: 1px solid custom.$mcr-gray-lighter;
-  line-height:uswds.units(3);
-  width: 100%;
-  @include uswds.u-radius('md');
+    margin: uswds.units(2) auto;
+    background: custom.$mcr-foundation-white;
+    padding: uswds.units(4) uswds.units(4);
+    border: 1px solid custom.$mcr-gray-lighter;
+    line-height: uswds.units(3);
+    width: 100%;
+    @include uswds.u-radius('md');
 
-  h3 {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: uswds.units(2) 0;
-    @include uswds.u-text('normal');
-  }
+    h3 {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: uswds.units(2) 0;
+        @include uswds.u-text('normal');
+    }
 }
 
 .breadcrumbs {
-  background: none;
-  margin:uswds.units(2) auto;
+    background: none;
+    margin: uswds.units(2) auto;
 }
 .formContainer {
     > [class^='usa-fieldset'] {
         padding: uswds.units(4);
-        margin-bottom:uswds.units(2);
-        margin-top:uswds.units(2);
+        margin-bottom: uswds.units(2);
+        margin-top: uswds.units(2);
         background: custom.$mcr-foundation-white;
         border: 1px solid custom.$mcr-gray-lighter;
         @include uswds.u-radius('md');
@@ -52,11 +52,10 @@
     }
 
     &[class^='usa-form'] {
-
         min-width: 100%;
         max-width: 100%;
 
-        @include uswds.at-media(tablet){
+        @include uswds.at-media(tablet) {
             min-width: 40rem;
             max-width: 20rem;
             margin: 0 auto;

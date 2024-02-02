@@ -1,0 +1,22 @@
+@use '../../styles/custom.scss' as custom;
+
+.pageContainer {
+    padding: 1em 5em;
+    max-width: custom.$mcr-container-standard-width-fixed;
+    background-color: custom.$mcr-foundation-white;
+}
+
+.centerButtonContainer {
+    display: flex;
+    margin: 1em;
+    justify-content: center;
+}
+
+.wrapKey {
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    background: custom.$mcr-gray-lighter;
+    display: block;
+    padding: 1em;
+    margin-top: 1em;
+}

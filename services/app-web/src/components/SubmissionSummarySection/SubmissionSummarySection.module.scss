@@ -8,9 +8,9 @@
 .summarySection {
     margin: uswds.units(2) auto;
     background: custom.$mcr-foundation-white;
-    padding: uswds.units(2)uswds.units(4);
+    padding: uswds.units(2) uswds.units(4);
     border: 1px solid custom.$mcr-gray-lighter;
-    line-height:uswds.units(3);
+    line-height: uswds.units(3);
 
     h2 {
         margin: 0;
@@ -28,7 +28,7 @@
         padding: 0;
 
         li {
-            padding:uswds.units(1) 0;
+            padding: uswds.units(1) 0;
         }
     }
 
@@ -37,7 +37,7 @@
         padding: 0;
 
         div {
-            padding-bottom:uswds.units(2);
+            padding-bottom: uswds.units(2);
         }
 
         // dont bottom pad last two grid items
@@ -46,7 +46,7 @@
         }
     }
     table:last-of-type {
-       margin-bottom:uswds.units(2);
+        margin-bottom: uswds.units(2);
     }
 
     // with nested sections, collapse bottom margin/padding for last in list
@@ -57,7 +57,7 @@
 }
 
 .contactInfo p {
-    margin:uswds.units(1) 0;
+    margin: uswds.units(1) 0;
 }
 
 .documentDesc {
@@ -74,11 +74,11 @@
 .rateName {
     display: block;
     font-weight: bold;
-    margin: 0
+    margin: 0;
 }
 
 .certifyingActuaryDetail {
-    margin-bottom:uswds.units(4);
+    margin-bottom: uswds.units(4);
 
     @include uswds.at-media(tablet) {
         margin-bottom: 0;
@@ -98,7 +98,7 @@
 .singleColumnGrid {
     @include uswds.at-media(tablet) {
         > * {
-            margin-bottom:uswds.units(2);
+            margin-bottom: uswds.units(2);
         }
     }
 }

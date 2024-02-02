@@ -1,7 +1,6 @@
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
-
 .submissionList {
     padding-left: 0;
 }
@@ -16,7 +15,7 @@
     transition: background-color 200ms linear;
 
     &:hover {
-        background-color: custom.$mcr-gray-lightest
+        background-color: custom.$mcr-gray-lightest;
     }
 }
 

@@ -3,16 +3,16 @@
 
 // preferred way to show a button that is disabled. avoid cursor: none
 .disabledCursor {
-  cursor: not-allowed;
+    cursor: not-allowed;
 }
 
 .buttonTextWithIcon {
-      vertical-align: middle;
-      margin-left: .5rem
+    vertical-align: middle;
+    margin-left: 0.5rem;
 }
 
 .buttonTextWithoutIcon {
-  vertical-align: middle;
+    vertical-align: middle;
 }
 
 .successButton {
@@ -21,6 +21,6 @@
         background-color: custom.$mcr-success-hover !important;
     }
     &:active {
-       background-color: custom.$mcr-success-hover !important;
+        background-color: custom.$mcr-success-hover !important;
     }
 }

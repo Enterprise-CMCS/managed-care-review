@@ -5,11 +5,10 @@
     max-width: custom.$mcr-container-standard-width-fixed;
 }
 
-
 .submitButton {
     background: custom.$mcr-success-base;
     &:hover {
-      background-color: custom.$mcr-success-hover !important;
+        background-color: custom.$mcr-success-hover !important;
     }
 }
 
