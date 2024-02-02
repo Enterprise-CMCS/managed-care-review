@@ -53,7 +53,7 @@ export const RateSummary = (): React.ReactElement => {
         )
     } else if (error || !rate || !currentRateRev?.formData) {
         //error handling for a state user that tries to access rates for a different state
-        if (error?.graphQLErrors[0].extensions.code === 'FORBIDDEN') {
+        if (error?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
             return (
                 <ErrorForbiddenPage errorMsg={error.graphQLErrors[0].message} />
             )
