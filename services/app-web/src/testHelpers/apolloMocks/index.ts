@@ -57,3 +57,8 @@ export { indexRatesMockSuccess, indexRatesMockFailure } from './rateGQLMocks'
 
 export { updateUserMockError, updateUserMockSuccess } from './updateUserMock'
 export { fetchRateMockSuccess } from './rateGQLMocks'
+
+export {
+    createAPIKeySuccess,
+    createAPIKeyNetworkError,
+} from './apiKeyGQLMocks'
