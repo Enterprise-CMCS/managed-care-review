@@ -45,7 +45,7 @@ const useTealium = (): {
         }
 
         const tealiumEnv = getTealiumEnv(
-          'main'
+            process.env.REACT_APP_STAGE_NAME || 'main'
         )
         const tealiumProfile = 'cms-mcreview'
         if (!tealiumEnv || !tealiumProfile) {
