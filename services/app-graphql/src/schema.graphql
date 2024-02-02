@@ -1038,13 +1038,13 @@ It's used as a part of RateFormData
 type PackageWithSameRate  {
   packageName: String!
   packageId: String!
-  packageStatus: String
+  packageStatus:  HealthPlanPackageStatus
 }
 
 input PackageWithSameRateInput  {
     packageName: String!
     packageId: String!
-    packageStatus: HealthPlanPackageStatus!
+    packageStatus: HealthPlanPackageStatus
 }
 
 """
