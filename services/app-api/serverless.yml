@@ -188,7 +188,7 @@ functions:
           path: otel
           method: post
           cors: true
-
+ 
   graphql:
     handler: src/handlers/apollo_gql.graphqlHandler
     events:
