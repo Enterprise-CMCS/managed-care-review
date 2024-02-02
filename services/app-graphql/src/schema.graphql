@@ -1328,7 +1328,7 @@ input RateFormDataInput {
     An array of additional ActuaryContacts
     Each element includes the the name, title/role and email
     """
-    addtlActuaryContacts: [ActuaryContactInput!]!
+    addtlActuaryContacts: [ActuaryContactInput]!
     """
     Is either OACT_TO_ACTUARY or OACT_TO_STATE
     It specifies whether the state wants CMS to reach out to their actuaries

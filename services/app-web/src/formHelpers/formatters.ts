@@ -81,9 +81,9 @@ const formatFormDateForDomain = (attribute: string): Date | undefined => {
     return dayjs.utc(attribute).toDate()
 }
 
-const formatDocumentsForDomain = (
+const formatDocumentsForGQL = (
     fileItems: FileItemT[]
-): SubmissionDocument[] => {
+): GenericDocument[] => {
     return fileItems.reduce((cleanedFileItems, fileItem) => {
         if (fileItem.status === 'UPLOAD_ERROR') {
             console.info(
@@ -113,7 +113,7 @@ const formatDocumentsForDomain = (
             })
         }
         return cleanedFileItems
-    }, [] as SubmissionDocument[])
+    }, [] as GenericDocument[])
 }
 
 const formatDocumentsForForm = ({
@@ -152,6 +152,45 @@ const formatDocumentsForForm = ({
     )
 }
 
+// DEPREACTED
+// These helpers are for HPP code which we are slowly moving off of
+// deprecated - HPP related
+const formatDocumentsForDomain = (
+    fileItems: FileItemT[]
+): SubmissionDocument[] => {
+    return fileItems.reduce((cleanedFileItems, fileItem) => {
+        if (fileItem.status === 'UPLOAD_ERROR') {
+            console.info(
+                'Attempting to save files that failed upload, discarding invalid files'
+            )
+        } else if (fileItem.status === 'SCANNING_ERROR') {
+            console.info(
+                'Attempting to save files that failed scanning, discarding invalid files'
+            )
+        } else if (fileItem.status === 'DUPLICATE_NAME_ERROR') {
+            console.info(
+                'Attempting to save files that are duplicate names, discarding duplicate'
+            )
+        } else if (!fileItem.s3URL) {
+            console.info(
+                'Attempting to save a seemingly valid file item is not yet uploaded to S3, this should not happen on form submit. Discarding file.'
+            )
+        } else if (!fileItem.sha256) {
+            console.info(
+                'Attempting to save a seemingly valid file item does not have a sha256 yet. this should not happen on form submit. Discarding file.'
+            )
+        } else {
+            cleanedFileItems.push({
+                name: fileItem.name,
+                s3URL: fileItem.s3URL,
+                sha256: fileItem.sha256,
+            })
+        }
+        return cleanedFileItems
+    }, [] as SubmissionDocument[])
+}
+
+
 export {
     formatForApi,
     formatForForm,
@@ -161,4 +200,5 @@ export {
     formatDocumentsForDomain,
     formatDocumentsForForm,
     formatActuaryContactsForForm,
+    formatDocumentsForGQL
 }

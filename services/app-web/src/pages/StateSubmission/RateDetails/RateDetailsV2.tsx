@@ -16,31 +16,43 @@ import {
     formatActuaryContactsForForm,
     formatDocumentsForDomain,
     formatDocumentsForForm,
+    formatDocumentsForGQL,
     formatForForm,
 } from '../../../formHelpers/formatters'
 import { useS3 } from '../../../contexts/S3Context'
 import { S3ClientT } from '../../../s3'
-import { isLoadingOrHasFileErrors } from '../../../components/FileUpload'
+import { FileItemT, isLoadingOrHasFileErrors } from '../../../components/FileUpload'
 import { RoutesRecord } from '../../../constants'
-import { Rate, RateRevision, useFetchRateQuery, useSubmitRateMutation } from '../../../gen/gqlClient'
+import { Rate, RateFormData, RateFormDataInput, RateRevision, useFetchRateQuery, useSubmitRateMutation } from '../../../gen/gqlClient'
 import { Error404 } from '../../Errors/Error404Page'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { SingleRateCertV2 } from './SingleRateCert/SingleRateCertV2'
 
 
+export type RateDetailFormValues ={
+        id: RateRevision['id'],
+        rateType: RateRevision['formData']['rateType'],
+        rateCapitationType: RateRevision['formData']['rateCapitationType'],
+        rateDateStart: RateRevision['formData']['rateDateStart'],
+        rateDateEnd:RateRevision['formData']['rateDateEnd'],
+        rateDateCertified: RateRevision['formData']['rateDateCertified'],
+        effectiveDateStart: RateRevision['formData']['amendmentEffectiveDateStart'],
+        effectiveDateEnd: RateRevision['formData']['amendmentEffectiveDateEnd'],
+        rateProgramIDs: RateRevision['formData']['rateProgramIDs'],
+        rateDocuments: FileItemT[],
+        supportingDocuments: FileItemT[],
+        actuaryContacts: RateRevision['formData']['certifyingActuaryContacts']
+        actuaryCommunicationPreference: RateRevision['formData']['actuaryCommunicationPreference']
+}
 
-export type RateCertForm = {key: string} & RateRevision['formData']
-// This function is used to get initial form values as well return empty form values when we add a new rate or delete a rate
-// We need to include the getKey function in params because there are no guarantees currently file is in s3 even if when we load data from API
-const generateRateCertFormValues = (
+const generateFormValues = (
     getKey: S3ClientT['getKey'],
-    rateRev?: RateRevision): RateCertForm => {
+    rateRev?: RateRevision): RateDetailFormValues => {
     const rateInfo = rateRev?.formData
     const newRateID =  uuidv4();
 
     return {
         id: rateRev?.id ?? newRateID,
-        key: rateRev?.id ?? newRateID,
         rateType: rateInfo?.rateType ?? undefined,
         rateCapitationType: rateInfo?.rateCapitationType ?? undefined,
         rateDateStart: formatForForm(rateInfo?.rateDateStart),
@@ -70,8 +82,8 @@ const generateRateCertFormValues = (
 }
 
 export const rateErrorHandling = (
-    error: string | FormikErrors<RateCertFormType> | undefined
-): FormikErrors<RateCertFormType> | undefined => {
+    error: string | FormikErrors<RateDetailFormValues> | undefined
+): FormikErrors<RateDetailFormValues> | undefined => {
     if (typeof error === 'string') {
         return undefined
     }
@@ -145,13 +157,14 @@ export const RateDetailsV2 = ({
         return <GenericErrorPage/>
     }
     const rate = fetchRateQuery?.fetchRate.rate
+    const draftRevision = rate.draftRevision
     const previousDocuments: string[] = []
 
     // Formik setup
-    const initialValues: RateCertForm  = generateRateCertFormValues(getKey, rate.draftRevision ?? undefined)
+    const initialValues: RateDetailFormValues  = generateFormValues(getKey, draftRevision ?? undefined)
 
     const handleFormSubmit = async (
-        form: RateCertForm ,
+        form: RateDetailFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
         options: {
             shouldValidateDocuments: boolean
@@ -160,7 +173,7 @@ export const RateDetailsV2 = ({
     ) => {
         if (options.shouldValidateDocuments) {
             const fileErrorsNeedAttention = isLoadingOrHasFileErrors(
-                    initialValues.supportingDocuments.concat(initialValues.rateDocuments)
+                    form.supportingDocuments.concat(form.rateDocuments)
                 )
             if (fileErrorsNeedAttention) {
                 // make inline field errors visible so user can correct documents, direct user focus to errors, and manually exit formik submit
@@ -171,12 +184,11 @@ export const RateDetailsV2 = ({
             }
         }
 
-        const cleanedrateCertForms = {
-                id: form.id,
+        const gqlFormData: RateFormDataInput = {
                 rateType: form.rateType,
                 rateCapitationType: form.rateCapitationType,
-                rateDocuments: formatDocumentsForDomain(form.rateDocuments),
-                supportingDocuments: formatDocumentsForDomain(
+                rateDocuments: formatDocumentsForGQL(form.rateDocuments),
+                supportingDocuments: formatDocumentsForGQL(
                     form.supportingDocuments
                 ),
                 rateDateStart: formatFormDateForDomain(form.rateDateStart),
@@ -184,21 +196,20 @@ export const RateDetailsV2 = ({
                 rateDateCertified: formatFormDateForDomain(
                     form.rateDateCertified
                 ),
-                rateAmendmentInfo:
-                    form.rateType === 'AMENDMENT'
-                        ? {
-                              effectiveDateStart: formatFormDateForDomain(
+
+                amendmentEffectiveDateStart: formatFormDateForDomain(
                                   form.effectiveDateStart
                               ),
-                              effectiveDateEnd: formatFormDateForDomain(
+                amendmentEffectiveDateEnd: formatFormDateForDomain(
                                   form.effectiveDateEnd
                               ),
-                          }
-                        : undefined,
+
                 rateProgramIDs: form.rateProgramIDs,
-                actuaryContacts: form.actuaryContacts,
+                certifyingActuaryContacts: form.actuaryContacts,
+                addtlActuaryContacts: draftRevision?.formData.addtlActuaryContacts ?? [], // since this is on a different page just pass through the existing need to figure out
                 actuaryCommunicationPreference:
                     form.actuaryCommunicationPreference,
+                packagesWithSharedRateCerts: draftRevision?.formData.packagesWithSharedRateCerts ?? []
         }
 
         try {
@@ -206,7 +217,7 @@ export const RateDetailsV2 = ({
                 variables: {
                     input: {
                         rateID: rate.id,
-                        // formData: initialRateRevision
+                        formData: gqlFormData
                     }
                 },
              })
@@ -228,7 +239,7 @@ export const RateDetailsV2 = ({
     // Error summary object keys will be used as DOM focus point from error-summary. Must be valid html selector
     // Error summary object values will be used as messages displays in error summary
     const generateErrorSummaryErrors = (
-        errors: FormikErrors<RateCertForm >
+        errors: FormikErrors<RateDetailFormValues >
     ) => {
         const rateErrors = errors
         const errorObject: { [field: string]: string } = {}
@@ -273,8 +284,8 @@ export const RateDetailsV2 = ({
     return (
         <Formik
             initialValues={initialValues}
-            onSubmit={({ rateCertForm }, { setSubmitting }) => {
-                return handleFormSubmit({ rateCertForm }, setSubmitting, {
+            onSubmit={( rateFormValues, { setSubmitting }) => {
+                return handleFormSubmit(rateFormValues, setSubmitting, {
                     shouldValidateDocuments: true,
                     redirectPath: `../contacts`,
                 })
@@ -282,7 +293,7 @@ export const RateDetailsV2 = ({
             validationSchema={rateDetailsFormSchema}
         >
             {({
-                values: { rateCertForm },
+                values: rateFormValues,
                 errors,
                 dirty,
                 handleSubmit,
@@ -314,9 +325,9 @@ export const RateDetailsV2 = ({
                                     />
                                 )}
                                     <SingleRateCertV2
-                                        key={rateInfo.key}
-                                        rate={rateInfo}
-                                        index={index}
+                                        key={rate.id}
+                                        rateForm={rateFormValues}
+                                        index={0}
                                         shouldValidate={
                                             shouldValidate
                                         }
@@ -331,7 +342,7 @@ export const RateDetailsV2 = ({
                                     const redirectPath = `../contract-details`
                                     if (dirty) {
                                         await handleFormSubmit(
-                                            { rateCertForms },
+                                            rateFormValues,
                                             setSubmitting,
                                             {
                                                 shouldValidateDocuments: false,
@@ -344,7 +355,7 @@ export const RateDetailsV2 = ({
                                 }}
                                 saveAsDraftOnClick={async () => {
                                     await handleFormSubmit(
-                                        { rateCertForms },
+                                        rateFormValues,
                                         setSubmitting,
                                         {
                                             shouldValidateDocuments: true,

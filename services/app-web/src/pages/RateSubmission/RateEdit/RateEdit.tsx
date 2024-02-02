@@ -44,8 +44,8 @@ export const RateEdit = (): React.ReactElement => {
   }
 
   return (
-    <h1 data-testid="rate-edit">
-     <RateDetailsV2 showValidations={true}/>
-    </h1>
+    <div id='single-rate-edit'>
+    <RateDetailsV2 showValidations={true}/>
+    </div>
   )
 }
