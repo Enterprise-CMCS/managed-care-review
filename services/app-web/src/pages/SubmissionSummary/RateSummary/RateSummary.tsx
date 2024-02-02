@@ -11,6 +11,7 @@ import { RoutesRecord } from '../../../constants'
 import { SingleRateSummarySection } from '../../../components/SubmissionSummarySection/RateDetailsSummarySection/SingleRateSummarySection'
 import { useAuth } from '../../../contexts/AuthContext'
 import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
+import { Error404 } from '../../Errors/Error404Page'
 
 type RouteParams = {
     id: string
@@ -56,9 +57,11 @@ export const RateSummary = (): React.ReactElement => {
             return (
                 <ErrorForbiddenPage errorMsg={error.graphQLErrors[0].message} />
             )
+        } else if (error?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+            return <Error404 />
+        } else {
+            return <GenericErrorPage />
         }
-
-        return <GenericErrorPage />
     }
 
     //Redirecting a state user to the edit page if rate is unlocked
