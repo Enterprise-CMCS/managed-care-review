@@ -181,7 +181,6 @@ functions:
 
   third_party_api_authorizer:
     handler: src/handlers/third_party_API_authorizer.main
-    
   otel:
     handler: src/handlers/otel_proxy.main
     events:
@@ -192,7 +191,6 @@ functions:
 
   graphql:
     handler: src/handlers/apollo_gql.graphqlHandler
-
     events:
       - http:
           path: graphql

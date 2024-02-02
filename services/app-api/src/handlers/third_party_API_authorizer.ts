@@ -58,8 +58,8 @@ const generatePolicy = function (
     userId: string | undefined,
     event: APIGatewayTokenAuthorizerEvent
 ): APIGatewayAuthorizerResult {
-    // If the JWT is verified as valid, and the request comes from an allowed IP address
-    // send an Allow policy
+    // If the JWT is verified as valid, send an Allow policy
+    // this will allow the request to go through
     // otherwise a Deny policy is returned which restricts access
     const policyDocument: PolicyDocument = {
         Version: '2012-10-17', // current version of the policy language

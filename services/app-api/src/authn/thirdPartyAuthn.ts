@@ -8,7 +8,7 @@ export async function userFromThirdPartyAuthorizer(
     userId: string,
     ipAddress: string
 ) {
-    // // setup otel tracing
+    // setup otel tracing
     const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
     if (!otelCollectorURL || otelCollectorURL === '') {
         const errMsg =
