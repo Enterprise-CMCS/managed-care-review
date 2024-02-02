@@ -43,6 +43,11 @@ const useTealium = (): {
             return
         }
 
+        const waitForUtag = async () => {
+            return new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+
         const tealiumEnv = getTealiumEnv(
             process.env.REACT_APP_STAGE_NAME || 'main'
         )
@@ -90,17 +95,22 @@ const useTealium = (): {
 
         document.body.appendChild(loadTagsSnippet)
 
-        const tagData: TealiumViewDataObject = {
-            content_language: 'en',
-            content_type: `${CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
-            page_name: tealiumPageName,
-            page_path: pathname,
-            site_domain: 'cms.gov',
-            site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
-            site_section: `${currentRoute}`,
-            logged_in: `${Boolean(loggedInUser) ?? false}`,
+        waitForUtag()
+
+        if(window.utag) {
+            const tagData: TealiumViewDataObject = {
+                content_language: 'en',
+                content_type: `${CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
+                page_name: tealiumPageName,
+                page_path: pathname,
+                site_domain: 'cms.gov',
+                site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+                site_section: `${currentRoute}`,
+                logged_in: `${Boolean(loggedInUser) ?? false}`,
+            }
+            window.utag.view(tagData)
         }
-        window.utag.view(tagData)
+
 
         return () => {
             // document.body.removeChild(loadTagsSnippet)
