@@ -429,7 +429,7 @@ resources:
           - AssociatePublicIpAddress: true
             DeviceIndex: '0'
             GroupSet:
-              - !Ref ClamAvSecurityGroup
+              - !Ref ClamAVSecurityGroup
               - ${self:custom.sgId}
             SubnetId: !Sub ${self:custom.publicSubnetA}
         Tags:
