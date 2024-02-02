@@ -388,7 +388,7 @@ resources:
     ClamAVInstanceProfile:
       Type: AWS::IAM::InstanceProfile
       Properties:
-        Path: /
+        Path: '/delegatedadmin/developer/'
         Roles:
           - !Ref ClamAVInstanceRole
 
@@ -403,7 +403,7 @@ resources:
           Statement:
             - Effect: Allow
               Principal:
-                Service: lambda.amazonaws.com
+                Service: ec2.amazonaws.com
               Action: sts:AssumeRole
         Policies:
           - PolicyName: ClamAVInstancePolicy
