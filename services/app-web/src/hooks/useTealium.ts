@@ -14,6 +14,7 @@ import type {
     TealiumViewDataObject,
     TealiumEvent,
 } from '../constants/tealium'
+import { recordJSException } from '../otelHelpers'
 
 /*
 Tealium is the data layer for Google Analytics and other data tracking at CMS
@@ -44,7 +45,7 @@ const useTealium = (): {
         }
 
         const tealiumEnv = getTealiumEnv(
-            process.env.REACT_APP_STAGE_NAME || 'main'
+          'main'
         )
         const tealiumProfile = 'cms-mcreview'
         if (!tealiumEnv || !tealiumProfile) {
@@ -89,7 +90,6 @@ const useTealium = (): {
         loadTagsSnippet.appendChild(inlineScript)
 
         document.body.appendChild(loadTagsSnippet)
-
         return () => {
             // document.body.removeChild(loadTagsSnippet)
             document.head.removeChild(initializeTagManagerSnippet)
@@ -109,27 +109,31 @@ const useTealium = (): {
            return new Promise(resolve => setTimeout(resolve, 1000));
         }
 
-
+        // All of this is a guardrail - protect against trying to call utag before its loaded
         if (!window.utag) {
-            waitForUtag().catch(() => { /* All of this is a guardrail - protect against trying to call utag before its loaded*/ })
+            waitForUtag().then( () =>{
             if (!window.utag) {
+                recordJSException('Analytics did not load in time')
                 return
+            } else {
+                // eslint-disable-next-line @typescript-eslint/no-empty-function
+                const utag = window.utag || { link: () => {}, view: () => {} }
+                const tagData: TealiumViewDataObject = {
+                    content_language: 'en',
+                    content_type: `${CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
+                    page_name: tealiumPageName,
+                    page_path: pathname,
+                    site_domain: 'cms.gov',
+                    site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+                    site_section: `${currentRoute}`,
+                    logged_in: `${Boolean(loggedInUser) ?? false}`,
+                }
+                utag.view(tagData)
+             }
             }
+            ).catch(() => { return })
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const utag = window.utag || { link: () => {}, view: () => {} }
-        const tagData: TealiumViewDataObject = {
-            content_language: 'en',
-            content_type: `${CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
-            page_name: tealiumPageName,
-            page_path: pathname,
-            site_domain: 'cms.gov',
-            site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
-            site_section: `${currentRoute}`,
-            logged_in: `${Boolean(loggedInUser) ?? false}`,
-        }
-        utag.view(tagData)
     }, [currentRoute, loggedInUser, pathname, tealiumPageName])
 
     // Add user event
