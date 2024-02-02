@@ -4,12 +4,13 @@ import { NavLink, useNavigate, useParams } from 'react-router-dom'
 
 import { Loading } from '../../../components'
 import { usePage } from '../../../contexts/PageContext'
-import { StateUser, useFetchRateQuery } from '../../../gen/gqlClient'
+import { useFetchRateQuery } from '../../../gen/gqlClient'
 import styles from '../SubmissionSummary.module.scss'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { RoutesRecord } from '../../../constants'
 import { SingleRateSummarySection } from '../../../components/SubmissionSummarySection/RateDetailsSummarySection/SingleRateSummarySection'
 import { useAuth } from '../../../contexts/AuthContext'
+import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
 
 type RouteParams = {
     id: string
@@ -18,7 +19,6 @@ type RouteParams = {
 export const RateSummary = (): React.ReactElement => {
     // Page level state
     const { loggedInUser } = useAuth()
-    let user: StateUser
     const { updateHeading } = usePage()
     const navigate = useNavigate()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
@@ -51,21 +51,19 @@ export const RateSummary = (): React.ReactElement => {
             </GridContainer>
         )
     } else if (error || !rate || !currentRateRev?.formData) {
+        //error handling for a state user that tries to access rates for a different state
+        if (error?.graphQLErrors[0].extensions.code === 'FORBIDDEN') {
+            return (
+                <ErrorForbiddenPage errorMsg={error.graphQLErrors[0].message} />
+            )
+        }
+
         return <GenericErrorPage />
     }
 
-    if (loggedInUser && loggedInUser.__typename === 'StateUser') {
-        user = loggedInUser
-
-        //Will render a error component if the state user is attempting to access a rate not belonging to their state
-        if (user.state.code !== rate.stateCode) {
-            return <GenericErrorPage />
-        }
-
-        //Redirecting a state user to the edit page if rate is unlocked
-        if (user.role === 'STATE_USER' && rate.status === 'UNLOCKED') {
-            navigate(`/rates/${id}/edit`)
-        }
+    //Redirecting a state user to the edit page if rate is unlocked
+    if (loggedInUser?.role === 'STATE_USER' && rate.status === 'UNLOCKED') {
+        navigate(`/rates/${id}/edit`)
     }
 
     if (
