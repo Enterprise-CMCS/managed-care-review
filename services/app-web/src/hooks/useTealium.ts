@@ -90,39 +90,31 @@ const useTealium = (): {
 
         document.body.appendChild(loadTagsSnippet)
 
-        const tagData: TealiumViewDataObject = {
-            content_language: 'en',
-            content_type: `${CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
-            page_name: tealiumPageName,
-            page_path: pathname,
-            site_domain: 'cms.gov',
-            site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
-            site_section: `${currentRoute}`,
-            logged_in: `${Boolean(loggedInUser) ?? false}`,
-        }
-        window.utag.view(tagData)
-
         return () => {
             // document.body.removeChild(loadTagsSnippet)
             document.head.removeChild(initializeTagManagerSnippet)
         }
-
-    // NOTE: Run effect once on component mount, we recheck dependencies if effect is updated in the subsequent page view effect
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     // Add page view
     // this effect should fire on each page view or if something changes about logged in user
     useEffect(() => {
+
         // Do not add tealium for local dev or review apps
         if (process.env.REACT_APP_AUTH_MODE !== 'IDM') {
-            // console.info(`mock tealium page view: ${tealiumPageName}`)
             return
         }
 
-        // Guardrail - protect against trying to call utag before its loaded.
+        const waitForUtag = async () => {
+           return new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+
         if (!window.utag) {
-            return
+            waitForUtag().catch(() => { /* All of this is a guardrail - protect against trying to call utag before its loaded*/ })
+            if (!window.utag) {
+                return
+            }
         }
 
         // eslint-disable-next-line @typescript-eslint/no-empty-function
