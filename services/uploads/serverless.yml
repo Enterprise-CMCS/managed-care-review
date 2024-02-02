@@ -425,6 +425,13 @@ resources:
         SecurityGroups:
           - !Ref ClamAVSecurityGroup
         IamInstanceProfile: !Ref ClamAVInstanceProfile
+        NetworkInterfaces:
+          - AssociatePublicIpAddress: true
+            DeviceIndex: '0'
+            GroupSet:
+              - !Ref ClamAvSecurityGroup
+              - ${self:custom.sgId}
+            SubnetId: !Sub ${self:custom.publicSubnetA}
         Tags:
           - Key: mcr-vmuse
             Value: clamavd
