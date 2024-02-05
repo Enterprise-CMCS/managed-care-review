@@ -181,7 +181,6 @@ functions:
 
   third_party_api_authorizer:
     handler: src/handlers/third_party_API_authorizer.main
-    condition: IsDevValProd
 
   otel:
     handler: src/handlers/otel_proxy.main
@@ -268,6 +267,7 @@ resources:
       Properties:
         ResourceArn: arn:aws:apigateway:${self:provider.region}::/restapis/${self:custom.appApiGatewayId}/stages/${sls:stage}
         WebACLArn: ${self:custom.appApiWafAclArn}
+        Condition: IsDevValProd
   Outputs:
     ApiAuthMode:
       Value: ${self:custom.reactAppAuthMode}
