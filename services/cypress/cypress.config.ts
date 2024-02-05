@@ -7,7 +7,7 @@ const createBundler = require('@bahmutov/cypress-esbuild-preprocessor')
 
 module.exports = defineConfig({
     e2e: {
-        baseUrl: 'http://127.0.0.1/',
+        baseUrl: 'http://localhost:3000',
         supportFile: 'support/index.ts',
         fixturesFolder: 'fixtures',
         specPattern: 'integration/**/*.spec.ts',
@@ -36,8 +36,6 @@ module.exports = defineConfig({
             newConfig.env.COGNITO_REGION = process.env.COGNITO_REGION
             newConfig.env.COGNITO_IDENTITY_POOL_ID = process.env.COGNITO_IDENTITY_POOL_ID
             newConfig.env.COGNITO_USER_POOL_WEB_CLIENT_ID = process.env.COGNITO_USER_POOL_WEB_CLIENT_ID
-            // configure env for third party API access
-            newConfig.env.ALLOWED_IP_ADDRESSES = process.env.ALLOWED_IP_ADDRESSES
 
             on('before:browser:launch', (browser, launchOptions) => {
                 prepareAudit(launchOptions)
