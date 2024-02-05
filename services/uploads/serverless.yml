@@ -428,9 +428,10 @@ resources:
       Type: AWS::EC2::Instance
       Condition: IsDevValProd
       Properties:
-        InstanceType: t2.micro
+        InstanceType: t3.medium
         ImageId: ami-05bfc1ab11bfbf484
         IamInstanceProfile: !Ref ClamAVInstanceProfile
+        KeyName: mojo # for testing
         NetworkInterfaces:
           - AssociatePublicIpAddress: true
             DeviceIndex: '0'
