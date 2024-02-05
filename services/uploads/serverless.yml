@@ -447,8 +447,20 @@ resources:
         UserData:
           Fn::Base64: !Sub |
             #!/bin/bash
-            sudo apt-get update
-            sudo apt-get install -y clamav clamav-daemon
+            apt-get update
+            apt-get install -y clamav clamav-daemon
+
+            # Install clamav 1.0.4
+            wget https://www.clamav.net/downloads/production/clamav-1.0.4.linux.x86_64.deb
+            dpkg -i clamav-1.0.4.linux.x86_64.deb
+            apt-get install -f
+
+            # Write the freshclam.conf
+            echo "DatabaseMirror database.clamav.net" > /usr/local/etc/freshclam.conf
+            echo "CompressLocalDatabase yes" >> /usr/local/etc/freshclam.conf
+            chmod  644 /usr/local/etc/freshclam.conf
+            chown clamav:clamav /usr/local/etc/freshclam.conf
+
             sudo systemctl enable clamav-freshclam
             sudo systemctl start clamav-freshclam
             sudo systemctl enable clamav-daemon
