@@ -181,6 +181,8 @@ functions:
 
   third_party_api_authorizer:
     handler: src/handlers/third_party_API_authorizer.main
+    condition: IsDevValProd
+
   otel:
     handler: src/handlers/otel_proxy.main
     events:
@@ -254,6 +256,11 @@ functions:
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
 
 resources:
+  Conditions:
+    IsDevValProd: !Or
+      - !Equals ['${sls:stage}', 'main']
+      - !Equals ['${sls:stage}', 'val']
+      - !Equals ['${sls:stage}', 'prod']
   Resources:
     ApiGwWebAclAssociation:
       Type: AWS::WAFv2::WebACLAssociation
