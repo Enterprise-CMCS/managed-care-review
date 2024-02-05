@@ -172,6 +172,16 @@ jobs:
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: lambda-layers-clamav
+          path: ./services/uploads/lambda-layers-clamav
+
+      - name: Unzip clamav layer
+        run: |
+          unzip -d ./services/uploads/lambda-layers-clamav ./services/uploads/lambda-layers-clamav/lambda_layer.zip
+          rm -f ./services/uploads/lambda-layers-clamav/lambda_layer.zip
+
       - name: deploy uploads
         id: deploy-uploads
         env:
