@@ -422,8 +422,6 @@ resources:
       Properties:
         InstanceType: t2.micro
         ImageId: ami-05bfc1ab11bfbf484
-        SecurityGroups:
-          - !Ref ClamAVSecurityGroup
         IamInstanceProfile: !Ref ClamAVInstanceProfile
         NetworkInterfaces:
           - AssociatePublicIpAddress: true
@@ -433,6 +431,8 @@ resources:
               - ${self:custom.sgId}
             SubnetId: !Sub ${self:custom.publicSubnetA}
         Tags:
+          - Key: Name
+            Value: clamavd-${sls:stage}
           - Key: mcr-vmuse
             Value: clamavd
         UserData:
