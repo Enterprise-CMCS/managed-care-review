@@ -181,6 +181,13 @@ functions:
       REACT_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
 
 resources:
+  Conditions:
+    IsDevValProd: !Or
+      - !Equals ['${sls:stage}', 'main']
+      - !Equals ['${sls:stage}', 'val']
+      - !Equals ['${sls:stage}', 'prod']
+      - !Equals ['${sls:stage}', 'mtbuildclamavserver']
+
   Resources:
     DocumentUploadsBucket:
       Type: AWS::S3::Bucket
@@ -419,6 +426,7 @@ resources:
 
     ClamAVInstance:
       Type: AWS::EC2::Instance
+      Condition: IsDevValProd
       Properties:
         InstanceType: t2.micro
         ImageId: ami-05bfc1ab11bfbf484
