@@ -10,13 +10,7 @@ import {
 } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 import {
-    ActuaryContact,
-    RateCapitationType,
-    RateType,
-} from '../../../../common-code/healthPlanFormDataType'
-import {
     FieldRadio,
-    FileItemT,
     FileUpload,
     PoliteErrorMessage,
     ProgramSelect,
@@ -32,56 +26,28 @@ import {
 import { useS3 } from '../../../../contexts/S3Context'
 
 import { FormikErrors, getIn, useFormikContext } from 'formik'
-import {
-    ActuaryCommunicationType,
-    SharedRateCertDisplay,
-} from '../../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { ActuaryContactFields } from '../../Contacts'
-import { PackagesWithSharedRates } from '../PackagesWithSharedRates/PackagesWithSharedRates'
+import { RateDetailFormValues, RateDetailFormConfig } from './RateDetailsV2'
 
-const isRateTypeEmpty = (values: RateCertFormType): boolean =>
-    values.rateType === undefined
-const isRateTypeAmendment = (values: RateCertFormType): boolean =>
-    values.rateType === 'AMENDMENT'
-
-export type RateCertFormType = {
-    id: string
-    key: string
-    rateType: RateType | undefined
-    rateCapitationType: RateCapitationType | undefined
-    rateDateStart: string
-    rateDateEnd: string
-    rateDateCertified: string
-    effectiveDateStart: string
-    effectiveDateEnd: string
-    rateProgramIDs: string[]
-    rateDocuments: FileItemT[]
-    supportingDocuments: FileItemT[]
-    actuaryContacts: ActuaryContact[]
-    actuaryCommunicationPreference?: ActuaryCommunicationType
-    packagesWithSharedRateCerts: SharedRateCertDisplay[]
-    hasSharedRateCert?: 'YES' | 'NO'
-}
-
-export type RateInfoArrayType = {
-    rateInfos: RateCertFormType[]
-}
+const isRateTypeEmpty = (rateForm: RateDetailFormValues): boolean =>
+    rateForm.rateType === undefined
+const isRateTypeAmendment = (rateForm: RateDetailFormValues): boolean =>
+    rateForm.rateType === 'AMENDMENT'
 
 export type SingleRateFormError =
-    FormikErrors<RateInfoArrayType>[keyof FormikErrors<RateInfoArrayType>]
+    FormikErrors<RateDetailFormConfig>[keyof FormikErrors<RateDetailFormConfig>]
 
 type MultiRatesConfig = {
     reassignNewRateRef: ((el: HTMLInputElement) => void) | undefined
     removeSelf: () => void // callback to Formik FieldArray to imperatively remove this rate from overall list and refocus on add new rate button
 }
 
-type SingleRateCertProps = {
-    rateInfo: RateCertFormType
+type SingleRateCertV2Props = {
+    rateForm: RateDetailFormValues
     shouldValidate: boolean
     index: number // defaults to 0
     previousDocuments: string[] // this only passed in to ensure S3 deleteFile doesn't remove valid files for previous revisions
-    parentSubmissionID: string // this is only passed in for PackagesWithShared rates feature.
-    multiRatesConfig?: MultiRatesConfig // this is only passed in to enable displaying this rate within the multi-rates UI
+    multiRatesConfig?: MultiRatesConfig //t his is for use with Linked Rates and multi-rates UI
 }
 
 const RateDatesErrorMessage = ({
@@ -110,24 +76,23 @@ const RateDatesErrorMessage = ({
     return <PoliteErrorMessage>{validationErrorMessage}</PoliteErrorMessage>
 }
 
-export const SingleRateCert = ({
-    rateInfo,
+export const SingleRateCertV2 = ({
+    rateForm,
     shouldValidate,
     multiRatesConfig,
-    parentSubmissionID,
-    previousDocuments,
     index = 0,
-}: SingleRateCertProps): React.ReactElement => {
+    previousDocuments,
+}: SingleRateCertV2Props): React.ReactElement => {
     // page level setup
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
-    const key = rateInfo.key
+    const key = rateForm.id
     const displayAsStandaloneRate = multiRatesConfig === undefined
-    const fieldNamePrefix = `rateInfos.${index}`
+    const fieldNamePrefix = `rates.${index}`
     const rateCertNumber = index + 1
-    const { errors, setFieldValue } = useFormikContext<RateInfoArrayType>()
+    const { errors, setFieldValue } = useFormikContext<RateDetailFormConfig>()
 
     const showFieldErrors = (
-        fieldName: keyof RateCertFormType
+        fieldName: keyof RateDetailFormValues
     ): string | undefined => {
         if (!shouldValidate) return undefined
         return getIn(errors, `${fieldNamePrefix}.${fieldName}`)
@@ -143,7 +108,7 @@ export const SingleRateCert = ({
             <Fieldset
                 data-testid={`rate-certification-form`}
                 key={key}
-                id={`${fieldNamePrefix}.container.${rateInfo.id}`}
+                id={`${fieldNamePrefix}.container.${rateForm.id}`}
             >
                 <FormGroup error={Boolean(showFieldErrors('rateDocuments'))}>
                     <FileUpload
@@ -174,7 +139,7 @@ export const SingleRateCert = ({
                             </span>
                         }
                         accept={ACCEPTED_RATE_CERTIFICATION_FILE_TYPES}
-                        initialItems={rateInfo.rateDocuments}
+                        initialItems={rateForm.rateDocuments}
                         uploadFile={(file) =>
                             handleUploadFile(file, 'HEALTH_PLAN_DOCS')
                         }
@@ -231,7 +196,7 @@ export const SingleRateCert = ({
                             </span>
                         }
                         accept={ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES}
-                        initialItems={rateInfo.supportingDocuments}
+                        initialItems={rateForm.supportingDocuments}
                         uploadFile={(file) =>
                             handleUploadFile(file, 'HEALTH_PLAN_DOCS')
                         }
@@ -253,15 +218,6 @@ export const SingleRateCert = ({
                         }
                     />
                 </FormGroup>
-
-                <PackagesWithSharedRates
-                    index={index}
-                    keyProp={key}
-                    fieldNamePrefix={fieldNamePrefix}
-                    shouldValidate={shouldValidate}
-                    parentSubmissionID={parentSubmissionID}
-                />
-
                 <FormGroup error={Boolean(showFieldErrors('rateProgramIDs'))}>
                     <Label htmlFor={`${fieldNamePrefix}.rateProgramIDs`}>
                         Programs this rate certification covers
@@ -275,7 +231,7 @@ export const SingleRateCert = ({
                     <ProgramSelect
                         name={`${fieldNamePrefix}.rateProgramIDs`}
                         inputId={`${fieldNamePrefix}.rateProgramIDs`}
-                        programIDs={rateInfo.rateProgramIDs}
+                        programIDs={rateForm.rateProgramIDs}
                         aria-label="programs (required)"
                     />
                 </FormGroup>
@@ -367,7 +323,7 @@ export const SingleRateCert = ({
                     </Fieldset>
                 </FormGroup>
 
-                {!isRateTypeEmpty(rateInfo) && (
+                {!isRateTypeEmpty(rateForm) && (
                     <>
                         <FormGroup
                             error={Boolean(
@@ -378,7 +334,7 @@ export const SingleRateCert = ({
                             <Fieldset
                                 aria-required
                                 legend={
-                                    isRateTypeAmendment(rateInfo)
+                                    isRateTypeAmendment(rateForm)
                                         ? 'Rating period of original rate certification'
                                         : 'Rating period'
                                 }
@@ -387,8 +343,8 @@ export const SingleRateCert = ({
                                     Required
                                 </span>
                                 <RateDatesErrorMessage
-                                    startDate={rateInfo.rateDateStart}
-                                    endDate={rateInfo.rateDateEnd}
+                                    startDate={rateForm.rateDateStart}
+                                    endDate={rateForm.rateDateEnd}
                                     startDateError={showFieldErrors(
                                         'rateDateStart'
                                     )}
@@ -407,7 +363,7 @@ export const SingleRateCert = ({
                                         id: `${fieldNamePrefix}.rateDateStart`,
                                         name: `${fieldNamePrefix}.rateDateStart`,
                                         'aria-required': true,
-                                        defaultValue: rateInfo.rateDateStart,
+                                        defaultValue: rateForm.rateDateStart,
                                         onChange: (val) =>
                                             setFieldValue(
                                                 `${fieldNamePrefix}.rateDateStart`,
@@ -421,7 +377,7 @@ export const SingleRateCert = ({
                                         id: `${fieldNamePrefix}.rateDateEnd`,
                                         name: `${fieldNamePrefix}.rateDateEnd`,
                                         'aria-required': true,
-                                        defaultValue: rateInfo.rateDateEnd,
+                                        defaultValue: rateForm.rateDateEnd,
                                         onChange: (val) =>
                                             setFieldValue(
                                                 `${fieldNamePrefix}.rateDateEnd`,
@@ -432,7 +388,7 @@ export const SingleRateCert = ({
                             </Fieldset>
                         </FormGroup>
 
-                        {isRateTypeAmendment(rateInfo) && (
+                        {isRateTypeAmendment(rateForm) && (
                             <>
                                 <FormGroup
                                     error={Boolean(
@@ -453,9 +409,9 @@ export const SingleRateCert = ({
                                         </span>
                                         <RateDatesErrorMessage
                                             startDate={
-                                                rateInfo.effectiveDateStart
+                                                rateForm.effectiveDateStart
                                             }
-                                            endDate={rateInfo.effectiveDateEnd}
+                                            endDate={rateForm.effectiveDateEnd}
                                             startDateError={showFieldErrors(
                                                 'effectiveDateStart'
                                             )}
@@ -475,7 +431,7 @@ export const SingleRateCert = ({
                                                 name: `${fieldNamePrefix}.effectiveDateStart`,
                                                 'aria-required': true,
                                                 defaultValue:
-                                                    rateInfo.effectiveDateStart,
+                                                    rateForm.effectiveDateStart,
                                                 onChange: (val) =>
                                                     setFieldValue(
                                                         `${fieldNamePrefix}.effectiveDateStart`,
@@ -490,7 +446,7 @@ export const SingleRateCert = ({
                                                 name: `${fieldNamePrefix}.effectiveDateEnd`,
                                                 'aria-required': true,
                                                 defaultValue:
-                                                    rateInfo.effectiveDateEnd,
+                                                    rateForm.effectiveDateEnd,
                                                 onChange: (val) =>
                                                     setFieldValue(
                                                         `${fieldNamePrefix}.effectiveDateEnd`,
@@ -511,7 +467,7 @@ export const SingleRateCert = ({
                                 htmlFor={`${fieldNamePrefix}.rateDateCertified`}
                                 id={`rateDateCertifiedLabel.${index}`}
                             >
-                                {isRateTypeAmendment(rateInfo)
+                                {isRateTypeAmendment(rateForm)
                                     ? 'Date certified for rate amendment'
                                     : 'Date certified'}
                             </Label>
@@ -533,7 +489,7 @@ export const SingleRateCert = ({
                                 aria-describedby={`rateDateCertifiedLabel.${index} rateDateCertifiedHint.${index}`}
                                 id={`${fieldNamePrefix}.rateDateCertified`}
                                 name={`${fieldNamePrefix}.rateDateCertified`}
-                                defaultValue={rateInfo.rateDateCertified}
+                                defaultValue={rateForm.rateDateCertified}
                                 onChange={(val) =>
                                     setFieldValue(
                                         `${fieldNamePrefix}.rateDateCertified`,
@@ -547,7 +503,7 @@ export const SingleRateCert = ({
 
                 <FormGroup>
                     <ActuaryContactFields
-                        actuaryContact={rateInfo.actuaryContacts[0]}
+                        actuaryContact={rateForm.actuaryContacts[0]}
                         errors={errors}
                         shouldValidate={shouldValidate}
                         fieldNamePrefix={`${fieldNamePrefix}.actuaryContacts.0`}

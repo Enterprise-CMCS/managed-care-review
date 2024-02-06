@@ -4,7 +4,7 @@ import { Field, FormikErrors, FormikValues, getIn } from 'formik'
 import { Fieldset, FormGroup } from '@trussworks/react-uswds'
 import { FieldRadio, FieldTextInput } from '../../../components/Form'
 import { PoliteErrorMessage } from '../../../components/PoliteErrorMessage'
-import { RateCertFormType } from '../RateDetails/SingleRateCert/SingleRateCert'
+import { RateCertFormType } from '../RateDetails/SingleRateCert'
 import styles from '../StateSubmissionForm.module.scss'
 import { ActuaryContact as ActuaryContactGQL } from '../../../gen/gqlClient'
 

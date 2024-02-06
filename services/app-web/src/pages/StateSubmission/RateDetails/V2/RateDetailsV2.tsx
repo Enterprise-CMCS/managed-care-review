@@ -4,11 +4,11 @@ import { Formik, FormikErrors } from 'formik'
 import { useNavigate, useParams } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
-import styles from '../StateSubmissionForm.module.scss'
+import styles from '../../StateSubmissionForm.module.scss'
 
-import { ErrorSummary } from '../../../components'
-import { RateDetailsFormSchema } from './RateDetailsSchema'
-import { PageActions } from '../PageActions'
+import { ErrorSummary } from '../../../../components'
+import { RateDetailsFormSchema } from '../RateDetailsSchema'
+import { PageActions } from '../../PageActions'
 
 import {
     formatActuaryContactsForForm,
@@ -16,17 +16,21 @@ import {
     formatDocumentsForGQL,
     formatForForm,
     formatFormDateForGQL,
-} from '../../../formHelpers/formatters'
-import { useS3 } from '../../../contexts/S3Context'
-import { S3ClientT } from '../../../s3'
+} from '../../../../formHelpers/formatters'
+import { useS3 } from '../../../../contexts/S3Context'
+import { S3ClientT } from '../../../../s3'
 import {
     FileItemT,
     isLoadingOrHasFileErrors,
-} from '../../../components/FileUpload'
-import { RouteT, RoutesRecord } from '../../../constants'
-import { Rate, RateFormDataInput, RateRevision } from '../../../gen/gqlClient'
-import { SingleRateCertV2 } from './SingleRateCert/SingleRateCertV2'
-import type { SubmitOrUpdateRate } from '../../RateSubmission/RateEdit/RateEdit'
+} from '../../../../components/FileUpload'
+import { RouteT, RoutesRecord } from '../../../../constants'
+import {
+    Rate,
+    RateFormDataInput,
+    RateRevision,
+} from '../../../../gen/gqlClient'
+import { SingleRateCertV2 } from './SingleRateCertV2'
+import type { SubmitOrUpdateRate } from '../../../RateSubmission/RateEdit/RateEdit'
 
 export type RateDetailFormValues = {
     id: Rate['id']

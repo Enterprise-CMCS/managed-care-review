@@ -9,7 +9,7 @@ import {
 import { GridContainer } from '@trussworks/react-uswds'
 import { Loading } from '../../../components'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
-import { RateDetailsV2 } from '../../StateSubmission/RateDetails/RateDetailsV2'
+import { RateDetailsV2 } from '../../StateSubmission/RateDetails/V2/RateDetailsV2'
 import { RouteT, RoutesRecord } from '../../../constants'
 import { PageBannerAlerts } from '../../StateSubmission/StateSubmissionForm'
 import { useAuth } from '../../../contexts/AuthContext'
