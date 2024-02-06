@@ -10,6 +10,8 @@ import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { RoutesRecord } from '../../constants'
 import { SingleRateSummarySection } from '../../components/SubmissionSummarySection/RateDetailsSummarySection/SingleRateSummarySection'
 import { useAuth } from '../../contexts/AuthContext'
+import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
+import { Error404 } from '../Errors/Error404Page'
 
 type RouteParams = {
     id: string
@@ -50,7 +52,16 @@ export const RateSummary = (): React.ReactElement => {
             </GridContainer>
         )
     } else if (error || !rate || !currentRateRev?.formData) {
-        return <GenericErrorPage />
+        //error handling for a state user that tries to access rates for a different state
+        if (error?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
+            return (
+                <ErrorForbiddenPage errorMsg={error.graphQLErrors[0].message} />
+            )
+        } else if (error?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+            return <Error404 />
+        } else {
+            return <GenericErrorPage />
+        }
     }
 
     // Redirecting a state user to the edit page if rate is unlocked

@@ -4,9 +4,12 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { NotFoundError } from '../../postgres'
-import type { QueryResolvers } from '../../gen/gqlServer'
+import type { QueryResolvers, State } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import { GraphQLError } from 'graphql'
+import { isStateUser } from '../../domain-models'
+import { logError } from '../../logger'
+import { ForbiddenError } from 'apollo-server-core'
 
 export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
     return async (_parent, { input }, context) => {
@@ -33,6 +36,23 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
                     cause: 'DB_ERROR',
                 },
             })
+        }
+
+        if (isStateUser(user)) {
+            const stateForCurrentUser: State['code'] = user.stateCode
+            if (rateWithHistory.stateCode !== stateForCurrentUser) {
+                logError(
+                    'fetchRate',
+                    'State users are not authorized to fetch rate data from a different state.'
+                )
+                setErrorAttributesOnActiveSpan(
+                    'State users are not authorized to fetch rate data from a different state.',
+                    span
+                )
+                throw new ForbiddenError(
+                    'State users are not authorized to fetch rate data from a different state.'
+                )
+            }
         }
 
         setSuccessAttributesOnActiveSpan(span)

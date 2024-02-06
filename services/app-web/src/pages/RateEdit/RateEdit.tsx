@@ -14,6 +14,8 @@ import { RouteT, RoutesRecord } from '../../constants'
 import { PageBannerAlerts } from '../StateSubmission/StateSubmissionForm'
 import { useAuth } from '../../contexts/AuthContext'
 import { FormContainer } from '../StateSubmission/FormContainer'
+import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
+import { Error404 } from '../Errors/Error404Page'
 
 export type SubmitOrUpdateRate = (
     rateID: string,
@@ -84,7 +86,20 @@ export const RateEdit = (): React.ReactElement => {
             </GridContainer>
         )
     } else if (fetchError || !rate) {
-        return <GenericErrorPage />
+        //error handling for a state user that tries to access rates for a different state
+        if (fetchError?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
+            return (
+                <ErrorForbiddenPage
+                    errorMsg={fetchError.graphQLErrors[0].message}
+                />
+            )
+        } else if (
+            fetchError?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND'
+        ) {
+            return <Error404 />
+        } else {
+            return <GenericErrorPage />
+        }
     }
 
     if (rate.status !== 'UNLOCKED') {
