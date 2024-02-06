@@ -143,7 +143,6 @@ export const RateDetailsV2 = ({
     const previousDocuments: string[] = []
 
     // Formik setup
-
     const initialValues: RateDetailFormConfig = {
         rates:
             rates.length > 0
