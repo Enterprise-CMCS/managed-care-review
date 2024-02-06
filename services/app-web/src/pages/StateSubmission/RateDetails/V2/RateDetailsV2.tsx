@@ -30,7 +30,7 @@ import {
     RateRevision,
 } from '../../../../gen/gqlClient'
 import { SingleRateCertV2 } from './SingleRateCertV2'
-import type { SubmitOrUpdateRate } from '../../../RateSubmission/RateEdit/RateEdit'
+import type { SubmitOrUpdateRate } from '../../../RateEdit/RateEdit'
 
 export type RateDetailFormValues = {
     id: Rate['id']

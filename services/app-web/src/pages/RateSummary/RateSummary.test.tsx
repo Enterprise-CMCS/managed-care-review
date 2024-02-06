@@ -9,7 +9,7 @@ import {
 import { RateSummary } from './RateSummary'
 import { RoutesRecord } from '../../constants'
 import { Route, Routes } from 'react-router-dom'
-import { RateEdit } from '../RateSubmission/RateEdit/RateEdit'
+import { RateEdit } from '../RateEdit/RateEdit'
 
 // Wrap test component in some top level routes to allow getParams to be tested
 const wrapInRoutes = (children: React.ReactNode) => {
@@ -177,11 +177,17 @@ describe('RateSummary', () => {
             )
 
             await waitFor(() => {
-                expect(screen.queryByTestId('rate-edit')).toBeInTheDocument()
+                expect(
+                    screen.queryByTestId('single-rate-edit')
+                ).toBeInTheDocument()
             })
         })
 
         it('renders expected error page when rate ID is invalid', async () => {
+            const consoleWarnMock = jest
+                .spyOn(console, 'warn')
+                .mockImplementation()
+
             renderWithProviders(wrapInRoutes(<RateSummary />), {
                 apolloProvider: {
                     mocks: [
@@ -198,7 +204,7 @@ describe('RateSummary', () => {
                 },
                 featureFlags: { 'rate-edit-unlock': true },
             })
-
+            expect(consoleWarnMock).toHaveBeenCalled() // apollo testing mocks will console warn that your query is invalid - this is intentional
             expect(await screen.findByText('System error')).toBeInTheDocument()
         })
 

@@ -5,15 +5,15 @@ import {
     UpdateInformation,
     useFetchRateQuery,
     useSubmitRateMutation,
-} from '../../../gen/gqlClient'
+} from '../../gen/gqlClient'
 import { GridContainer } from '@trussworks/react-uswds'
-import { Loading } from '../../../components'
-import { GenericErrorPage } from '../../Errors/GenericErrorPage'
-import { RateDetailsV2 } from '../../StateSubmission/RateDetails/V2/RateDetailsV2'
-import { RouteT, RoutesRecord } from '../../../constants'
-import { PageBannerAlerts } from '../../StateSubmission/StateSubmissionForm'
-import { useAuth } from '../../../contexts/AuthContext'
-import { FormContainer } from '../../StateSubmission/FormContainer'
+import { Loading } from '../../components'
+import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import { RateDetailsV2 } from '../StateSubmission/RateDetails/V2/RateDetailsV2'
+import { RouteT, RoutesRecord } from '../../constants'
+import { PageBannerAlerts } from '../StateSubmission/StateSubmissionForm'
+import { useAuth } from '../../contexts/AuthContext'
+import { FormContainer } from '../StateSubmission/FormContainer'
 
 export type SubmitOrUpdateRate = (
     rateID: string,
