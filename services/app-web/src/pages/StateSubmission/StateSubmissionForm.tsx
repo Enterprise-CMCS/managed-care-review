@@ -24,7 +24,7 @@ import {
 } from '../../constants/routes'
 import { getRelativePath } from '../../routeHelpers'
 import { useFetchHealthPlanPackageWrapper } from '../../gqlHelpers'
-import { StateSubmissionContainer } from './StateSubmissionContainer'
+import { FormContainer } from './FormContainer'
 import { ContractDetails } from './ContractDetails'
 import { RateDetails } from './RateDetails'
 import { Contacts } from './Contacts'
@@ -55,7 +55,7 @@ const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
         targetPath: RoutesRecord[formRouteType],
     })
 
-const PageBannerAlerts = ({
+export const PageBannerAlerts = ({
     showPageErrorMessage,
     loggedInUser,
     unlockedInfo,
@@ -251,7 +251,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     showPageErrorMessage={showPageErrorMessage}
                 />
             </div>
-            <StateSubmissionContainer>
+            <FormContainer id="state-submission-form">
                 <Routes>
                     <Route
                         path={getRelativePathFromNestedRoute(
@@ -332,7 +332,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     />
                     <Route path="*" element={<Error404 />} />
                 </Routes>
-            </StateSubmissionContainer>
+            </FormContainer>
         </>
     )
 }

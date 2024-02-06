@@ -38,7 +38,6 @@ import {
 } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 import { RateSummary } from '../RateSummary'
-import { RateDetailsV2 } from '../StateSubmission/RateDetails/RateDetailsV2'
 import { RateEdit } from '../RateSubmission/RateEdit/RateEdit'
 
 function componentForAuthMode(
@@ -110,15 +109,15 @@ const StateUserRoutes = ({
                 />
                 {showRatePages && (
                     <>
-                    <Route
-                        path={RoutesRecord.RATES_SUMMARY}
-                        element={<RateSummary />}
-                    />
-                    <Route
-                    path={RoutesRecord.RATE_EDIT}
-                    element={<RateEdit />}
-                />
-                </>
+                        <Route
+                            path={RoutesRecord.RATES_SUMMARY}
+                            element={<RateSummary />}
+                        />
+                        <Route
+                            path={RoutesRecord.RATE_EDIT}
+                            element={<RateEdit />}
+                        />
+                    </>
                 )}
                 <Route element={<SubmissionSideNav />}>
                     {showQuestionResponse && (

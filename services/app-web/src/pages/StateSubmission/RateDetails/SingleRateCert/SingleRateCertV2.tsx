@@ -27,21 +27,15 @@ import { useS3 } from '../../../../contexts/S3Context'
 
 import { FormikErrors, getIn, useFormikContext } from 'formik'
 import { ActuaryContactFields } from '../../Contacts'
-import { RateRevision } from '../../../../gen/gqlClient'
-import { formatDocumentsForForm } from '../../../../formHelpers/formatters'
-import { RateDetailFormValues } from '../RateDetailsV2'
+import { RateDetailFormValues, RateDetailFormConfig } from '../RateDetailsV2'
 
-const isRateTypeEmpty = (rateForm:  RateDetailFormValues): boolean =>
+const isRateTypeEmpty = (rateForm: RateDetailFormValues): boolean =>
     rateForm.rateType === undefined
-const isRateTypeAmendment = (rateForm:  RateDetailFormValues): boolean =>
+const isRateTypeAmendment = (rateForm: RateDetailFormValues): boolean =>
     rateForm.rateType === 'AMENDMENT'
 
-export type  RateDetailFormValuesArray = {
-    rates:  RateDetailFormValues[]
-}
-
 export type SingleRateFormError =
-    FormikErrors< RateDetailFormValuesArray>[keyof FormikErrors< RateDetailFormValuesArray>]
+    FormikErrors<RateDetailFormConfig>[keyof FormikErrors<RateDetailFormConfig>]
 
 type MultiRatesConfig = {
     reassignNewRateRef: ((el: HTMLInputElement) => void) | undefined
@@ -53,7 +47,7 @@ type SingleRateCertV2Props = {
     shouldValidate: boolean
     index: number // defaults to 0
     previousDocuments: string[] // this only passed in to ensure S3 deleteFile doesn't remove valid files for previous revisions
-    multiRatesConfig?: MultiRatesConfig // this is only passed in to enable displaying this rate within the multi-rates UI
+    multiRatesConfig?: MultiRatesConfig //t his is for use with Linked Rates and multi-rates UI
 }
 
 const RateDatesErrorMessage = ({
@@ -87,18 +81,18 @@ export const SingleRateCertV2 = ({
     shouldValidate,
     multiRatesConfig,
     index = 0,
-    previousDocuments
+    previousDocuments,
 }: SingleRateCertV2Props): React.ReactElement => {
     // page level setup
-    const { handleDeleteFile, handleUploadFile, handleScanFile, getKey } = useS3()
+    const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
     const key = rateForm.id
     const displayAsStandaloneRate = multiRatesConfig === undefined
     const fieldNamePrefix = `rates.${index}`
     const rateCertNumber = index + 1
-    const { errors, setFieldValue } = useFormikContext<RateRevision['formData']>()
+    const { errors, setFieldValue } = useFormikContext<RateDetailFormConfig>()
 
     const showFieldErrors = (
-        fieldName: keyof RateRevision['formData']
+        fieldName: keyof RateDetailFormValues
     ): string | undefined => {
         if (!shouldValidate) return undefined
         return getIn(errors, `${fieldNamePrefix}.${fieldName}`)
@@ -398,8 +392,8 @@ export const SingleRateCertV2 = ({
                             <>
                                 <FormGroup
                                     error={Boolean(
-                                        showFieldErrors('amendmentEffectiveDateStart') ??
-                                            showFieldErrors('amendmentEffectiveDateEnd')
+                                        showFieldErrors('effectiveDateStart') ??
+                                            showFieldErrors('effectiveDateEnd')
                                     )}
                                 >
                                     <Fieldset
@@ -419,10 +413,10 @@ export const SingleRateCertV2 = ({
                                             }
                                             endDate={rateForm.effectiveDateEnd}
                                             startDateError={showFieldErrors(
-                                                'amendmentEffectiveDateStart'
+                                                'effectiveDateStart'
                                             )}
                                             endDateError={showFieldErrors(
-                                                'amendmentEffectiveDateEnd'
+                                                'effectiveDateEnd'
                                             )}
                                             shouldValidate={shouldValidate}
                                         />
@@ -509,7 +503,7 @@ export const SingleRateCertV2 = ({
 
                 <FormGroup>
                     <ActuaryContactFields
-                        actuaryContact={rateForm.actuaryContacts[0]} // only first because remaining actuaries are supporting actuaries from contact page
+                        actuaryContact={rateForm.actuaryContacts[0]}
                         errors={errors}
                         shouldValidate={shouldValidate}
                         fieldNamePrefix={`${fieldNamePrefix}.actuaryContacts.0`}

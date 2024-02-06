@@ -6,50 +6,57 @@ import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
 
-import { ErrorSummary, GenericApiErrorBanner, Loading } from '../../../components'
-import { formatFormDateForDomain } from '../../../formHelpers'
+import { ErrorSummary } from '../../../components'
 import { RateDetailsFormSchema } from './RateDetailsSchema'
 import { PageActions } from '../PageActions'
-import { useFocus } from '../../../hooks'
 
 import {
     formatActuaryContactsForForm,
-    formatDocumentsForDomain,
     formatDocumentsForForm,
     formatDocumentsForGQL,
     formatForForm,
+    formatFormDateForGQL,
 } from '../../../formHelpers/formatters'
 import { useS3 } from '../../../contexts/S3Context'
 import { S3ClientT } from '../../../s3'
-import { FileItemT, isLoadingOrHasFileErrors } from '../../../components/FileUpload'
-import { RoutesRecord } from '../../../constants'
-import { Rate, RateFormData, RateFormDataInput, RateRevision, useFetchRateQuery, useSubmitRateMutation } from '../../../gen/gqlClient'
-import { Error404 } from '../../Errors/Error404Page'
-import { GenericErrorPage } from '../../Errors/GenericErrorPage'
+import {
+    FileItemT,
+    isLoadingOrHasFileErrors,
+} from '../../../components/FileUpload'
+import { RouteT, RoutesRecord } from '../../../constants'
+import { Rate, RateFormDataInput, RateRevision } from '../../../gen/gqlClient'
 import { SingleRateCertV2 } from './SingleRateCert/SingleRateCertV2'
+import type { SubmitOrUpdateRate } from '../../RateSubmission/RateEdit/RateEdit'
 
+export type RateDetailFormValues = {
+    id: RateRevision['id']
+    rateType: RateRevision['formData']['rateType']
+    rateCapitationType: RateRevision['formData']['rateCapitationType']
+    rateDateStart: RateRevision['formData']['rateDateStart']
+    rateDateEnd: RateRevision['formData']['rateDateEnd']
+    rateDateCertified: RateRevision['formData']['rateDateCertified']
+    effectiveDateStart: RateRevision['formData']['amendmentEffectiveDateStart']
+    effectiveDateEnd: RateRevision['formData']['amendmentEffectiveDateEnd']
+    rateProgramIDs: RateRevision['formData']['rateProgramIDs']
+    rateDocuments: FileItemT[]
+    supportingDocuments: FileItemT[]
+    actuaryContacts: RateRevision['formData']['certifyingActuaryContacts']
+    addtlActuaryContacts: RateRevision['formData']['addtlActuaryContacts']
+    actuaryCommunicationPreference: RateRevision['formData']['actuaryCommunicationPreference']
+    packagesWithSharedRateCerts: RateRevision['formData']['packagesWithSharedRateCerts']
+}
 
-export type RateDetailFormValues ={
-        id: RateRevision['id'],
-        rateType: RateRevision['formData']['rateType'],
-        rateCapitationType: RateRevision['formData']['rateCapitationType'],
-        rateDateStart: RateRevision['formData']['rateDateStart'],
-        rateDateEnd:RateRevision['formData']['rateDateEnd'],
-        rateDateCertified: RateRevision['formData']['rateDateCertified'],
-        effectiveDateStart: RateRevision['formData']['amendmentEffectiveDateStart'],
-        effectiveDateEnd: RateRevision['formData']['amendmentEffectiveDateEnd'],
-        rateProgramIDs: RateRevision['formData']['rateProgramIDs'],
-        rateDocuments: FileItemT[],
-        supportingDocuments: FileItemT[],
-        actuaryContacts: RateRevision['formData']['certifyingActuaryContacts']
-        actuaryCommunicationPreference: RateRevision['formData']['actuaryCommunicationPreference']
+// We have a list of rates to enable multi-rate behavior
+export type RateDetailFormConfig = {
+    rates: RateDetailFormValues[]
 }
 
 const generateFormValues = (
     getKey: S3ClientT['getKey'],
-    rateRev?: RateRevision): RateDetailFormValues => {
+    rateRev?: RateRevision
+): RateDetailFormValues => {
     const rateInfo = rateRev?.formData
-    const newRateID =  uuidv4();
+    const newRateID = uuidv4()
 
     return {
         id: rateRev?.id ?? newRateID,
@@ -58,26 +65,29 @@ const generateFormValues = (
         rateDateStart: formatForForm(rateInfo?.rateDateStart),
         rateDateEnd: formatForForm(rateInfo?.rateDateEnd),
         rateDateCertified: formatForForm(rateInfo?.rateDateCertified),
-            effectiveDateStart: formatForForm(
-                rateInfo?.amendmentEffectiveDateStart
-            ),
-            effectiveDateEnd: formatForForm(
-                rateInfo?.amendmentEffectiveDateEnd
-            ),
+        effectiveDateStart: formatForForm(
+            rateInfo?.amendmentEffectiveDateStart
+        ),
+        effectiveDateEnd: formatForForm(rateInfo?.amendmentEffectiveDateEnd),
         rateProgramIDs: rateInfo?.rateProgramIDs ?? [],
         rateDocuments: formatDocumentsForForm({
-                  documents: rateInfo?.rateDocuments,
-                  getKey: getKey,
+            documents: rateInfo?.rateDocuments,
+            getKey: getKey,
         }),
-        supportingDocuments:formatDocumentsForForm({
-                  documents: rateInfo?.supportingDocuments,
-                  getKey: getKey,
-              }),
+        supportingDocuments: formatDocumentsForForm({
+            documents: rateInfo?.supportingDocuments,
+            getKey: getKey,
+        }),
         actuaryContacts: formatActuaryContactsForForm(
+            rateInfo?.certifyingActuaryContacts
+        ),
+        addtlActuaryContacts: formatActuaryContactsForForm(
             rateInfo?.certifyingActuaryContacts
         ),
         actuaryCommunicationPreference:
             rateInfo?.actuaryCommunicationPreference ?? undefined,
+        packagesWithSharedRateCerts:
+            rateInfo?.packagesWithSharedRateCerts ?? [],
     }
 }
 
@@ -92,11 +102,14 @@ export const rateErrorHandling = (
 
 type RateDetailsV2Props = {
     showValidations?: boolean
-    // updateRate: UpdateRateMutation
+    rates: Rate[]
+    submitRate: SubmitOrUpdateRate
+    // updateRate: SubmitOrUpdateRate  - will be implemented in Link Rates Epic
 }
 export const RateDetailsV2 = ({
     showValidations = false,
-    // updateRate,
+    rates,
+    submitRate,
 }: RateDetailsV2Props): React.ReactElement => {
     const navigate = useNavigate()
     const { id } = useParams()
@@ -107,25 +120,16 @@ export const RateDetailsV2 = ({
     }
     const { getKey } = useS3()
 
-
     // Form validation
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const rateDetailsFormSchema = RateDetailsFormSchema({'rate-edit-unlock': true})
+    const rateDetailsFormSchema = RateDetailsFormSchema({
+        'rate-edit-unlock': true,
+    })
 
     // UI focus state management
-    const [focusNewRate, setFocusNewRate] = React.useState(false)
-    const newRateNameRef = React.useRef<HTMLElement | null>(null)
-    const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
-    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] = React.useState(false)
+    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
+        React.useState(false)
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
-
-    React.useEffect(() => {
-        if (focusNewRate) {
-            newRateNameRef?.current?.focus()
-            setFocusNewRate(false)
-            newRateNameRef.current = null
-        }
-    }, [focusNewRate])
 
     useEffect(() => {
         // Focus the error summary heading only if we are displaying
@@ -136,45 +140,42 @@ export const RateDetailsV2 = ({
         setFocusErrorSummaryHeading(false)
     }, [focusErrorSummaryHeading])
 
-
-    // API handling
-    const [submitRate, { loading: submitRateLoading }] = useSubmitRateMutation()
-    const { data: fetchRateQuery, loading: fetchRateLoading, error: fetchRateError } = useFetchRateQuery({
-        variables: {
-            input: {
-                rateID: id
-            }
-        }
-    })
-
-    if (fetchRateLoading){
-        return <Loading />
-    }
-
-    if( fetchRateError) {
-        return <Error404/>
-    } else if (!fetchRateQuery) {
-        return <GenericErrorPage/>
-    }
-    const rate = fetchRateQuery?.fetchRate.rate
-    const draftRevision = rate.draftRevision
     const previousDocuments: string[] = []
 
     // Formik setup
-    const initialValues: RateDetailFormValues  = generateFormValues(getKey, draftRevision ?? undefined)
 
-    const handleFormSubmit = async (
-        form: RateDetailFormValues,
+    const initialValues: RateDetailFormConfig = {
+        rates:
+            rates.length > 0
+                ? rates.map((rate) =>
+                      generateFormValues(
+                          getKey,
+                          rate.draftRevision ?? undefined
+                      )
+                  )
+                : [
+                      generateFormValues(
+                          getKey,
+                          rates[0].draftRevision ?? undefined
+                      ),
+                  ],
+    }
+
+    const handlePageAction = async (
+        rates: RateDetailFormValues[],
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
         options: {
-            shouldValidateDocuments: boolean
-            redirectPath: string
+            type: 'SAVE_AS_DRAFT' | 'CANCEL' | 'CONTINUE'
+            redirectPath: RouteT
         }
     ) => {
-        if (options.shouldValidateDocuments) {
-            const fileErrorsNeedAttention = isLoadingOrHasFileErrors(
-                    form.supportingDocuments.concat(form.rateDocuments)
+        if (options.type === 'CONTINUE') {
+            const fileErrorsNeedAttention = rates.some((rateForm) =>
+                isLoadingOrHasFileErrors(
+                    rateForm.supportingDocuments.concat(rateForm.rateDocuments)
                 )
+            )
+
             if (fileErrorsNeedAttention) {
                 // make inline field errors visible so user can correct documents, direct user focus to errors, and manually exit formik submit
                 setShouldValidate(true)
@@ -184,64 +185,57 @@ export const RateDetailsV2 = ({
             }
         }
 
-        const gqlFormData: RateFormDataInput = {
-                rateType: form.rateType,
-                rateCapitationType: form.rateCapitationType,
-                rateDocuments: formatDocumentsForGQL(form.rateDocuments),
-                supportingDocuments: formatDocumentsForGQL(
-                    form.supportingDocuments
-                ),
-                rateDateStart: formatFormDateForDomain(form.rateDateStart),
-                rateDateEnd: formatFormDateForDomain(form.rateDateEnd),
-                rateDateCertified: formatFormDateForDomain(
-                    form.rateDateCertified
-                ),
+        const gqlFormDatas: Array<{ id: string } & RateFormDataInput> =
+            rates.map((form) => {
+                return {
+                    id: form.id,
+                    rateType: form.rateType,
+                    rateCapitationType: form.rateCapitationType,
+                    rateDocuments: formatDocumentsForGQL(form.rateDocuments),
+                    supportingDocuments: formatDocumentsForGQL(
+                        form.supportingDocuments
+                    ),
+                    rateDateStart: formatFormDateForGQL(form.rateDateStart),
+                    rateDateEnd: formatFormDateForGQL(form.rateDateEnd),
+                    rateDateCertified: formatFormDateForGQL(
+                        form.rateDateCertified
+                    ),
+                    amendmentEffectiveDateStart: formatFormDateForGQL(
+                        form.effectiveDateStart
+                    ),
+                    amendmentEffectiveDateEnd: formatFormDateForGQL(
+                        form.effectiveDateEnd
+                    ),
+                    rateProgramIDs: form.rateProgramIDs,
+                    certifyingActuaryContacts: form.actuaryContacts,
+                    addtlActuaryContacts: form.addtlActuaryContacts,
+                    actuaryCommunicationPreference:
+                        form.actuaryCommunicationPreference,
+                    packagesWithSharedRateCerts:
+                        form.packagesWithSharedRateCerts,
+                }
+            })
 
-                amendmentEffectiveDateStart: formatFormDateForDomain(
-                                  form.effectiveDateStart
-                              ),
-                amendmentEffectiveDateEnd: formatFormDateForDomain(
-                                  form.effectiveDateEnd
-                              ),
+        const { id, ...formData } = gqlFormDatas[0] // only grab the first rate in the array because multi-rates functionality not added yet. This will be part of Link Rates epic
 
-                rateProgramIDs: form.rateProgramIDs,
-                certifyingActuaryContacts: form.actuaryContacts,
-                addtlActuaryContacts: draftRevision?.formData.addtlActuaryContacts ?? [], // since this is on a different page just pass through the existing need to figure out
-                actuaryCommunicationPreference:
-                    form.actuaryCommunicationPreference,
-                packagesWithSharedRateCerts: draftRevision?.formData.packagesWithSharedRateCerts ?? []
-        }
-
-        try {
-            const updatedSubmission = await submitRate({
-                variables: {
-                    input: {
-                        rateID: rate.id,
-                        formData: gqlFormData
-                    }
-                },
-             })
-            if (updatedSubmission instanceof Error) {
-                setSubmitting(false)
-                console.info(
-                    'Error updating draft submission: ',
-                    updatedSubmission
-                )
-            } else if (updatedSubmission) {
-                navigate(options.redirectPath)
-            }
-        } catch (serverError) {
-            setSubmitting(false)
+        if (options.type === 'CONTINUE') {
+            await submitRate(id, formData, setSubmitting, 'DASHBOARD')
+        } else if (options.type === 'SAVE_AS_DRAFT') {
+            throw new Error(
+                'Rate update is not yet implemented so save as draft is not possible. This will be part of Link Rates epic.'
+            )
+        } else {
+            navigate(RoutesRecord[options.redirectPath])
         }
     }
 
-    // Due to multi-rates we have extra handling around how error summary apperas
+    // Due to multi-rates we have extra handling around how error summary appears
     // Error summary object keys will be used as DOM focus point from error-summary. Must be valid html selector
     // Error summary object values will be used as messages displays in error summary
     const generateErrorSummaryErrors = (
-        errors: FormikErrors<RateDetailFormValues >
+        errors: FormikErrors<RateDetailFormConfig>
     ) => {
-        const rateErrors = errors
+        const rateErrors = errors.rates
         const errorObject: { [field: string]: string } = {}
 
         if (rateErrors && Array.isArray(rateErrors)) {
@@ -250,11 +244,11 @@ export const RateDetailsV2 = ({
 
                 Object.entries(rateError).forEach(([field, value]) => {
                     if (typeof value === 'string') {
-
                         //rateProgramIDs error message needs a # proceeding the key name because this is the only way to be able to link to the Select component element see comments in ErrorSummaryMessage component.
                         const errorKey =
-                            field === 'rateProgramIDs'  ? `#rateCertForms.${index}.${field}`
-                                : `rateCertForms.${index}.${field}`
+                            field === 'rateProgramIDs'
+                                ? `#rates.${index}.${field}`
+                                : `rates.${index}.${field}`
                         errorObject[errorKey] = value
                     }
                     // If the field is actuaryContacts then the value should be an array with at least one object of errors
@@ -263,12 +257,12 @@ export const RateDetailsV2 = ({
                         Array.isArray(value) &&
                         Array.length > 0
                     ) {
-                        //Currently, rate certifications only have 1 actuary contact
+                        // Rate certifications only have 1 certifying actuary contact
                         const actuaryContact = value[0]
                         Object.entries(actuaryContact).forEach(
                             ([contactField, contactValue]) => {
                                 if (typeof contactValue === 'string') {
-                                    const errorKey = `rateCertForms.${index}.actuaryContacts.0.${contactField}`
+                                    const errorKey = `rates.${index}.actuaryContacts.0.${contactField}`
                                     errorObject[errorKey] = contactValue
                                 }
                             }
@@ -284,10 +278,10 @@ export const RateDetailsV2 = ({
     return (
         <Formik
             initialValues={initialValues}
-            onSubmit={( rateFormValues, { setSubmitting }) => {
-                return handleFormSubmit(rateFormValues, setSubmitting, {
-                    shouldValidateDocuments: true,
-                    redirectPath: `../contacts`,
+            onSubmit={(rateFormValues, { setSubmitting }) => {
+                return handlePageAction(rateFormValues.rates, setSubmitting, {
+                    type: 'CONTINUE',
+                    redirectPath: 'DASHBOARD_SUBMISSIONS',
                 })
             }}
             validationSchema={rateDetailsFormSchema}
@@ -315,7 +309,6 @@ export const RateDetailsV2 = ({
                         >
                             <fieldset className="usa-fieldset with-sections">
                                 <legend className="srOnly">Rate Details</legend>
-
                                 {shouldValidate && (
                                     <ErrorSummary
                                         errors={generateErrorSummaryErrors(
@@ -324,43 +317,40 @@ export const RateDetailsV2 = ({
                                         headingRef={errorSummaryHeadingRef}
                                     />
                                 )}
-                                    <SingleRateCertV2
-                                        key={rate.id}
-                                        rateForm={rateFormValues}
-                                        index={0}
-                                        shouldValidate={
-                                            shouldValidate
-                                        }
-                                        previousDocuments={
-                                            previousDocuments
-                                        }
-
-                                    />
+                                <SingleRateCertV2
+                                    key={rateFormValues.rates[0].id}
+                                    rateForm={rateFormValues.rates[0]}
+                                    index={0} // this hard coding will be changed when we implement multi-rates with LinkedRates
+                                    shouldValidate={shouldValidate}
+                                    previousDocuments={previousDocuments}
+                                />
                             </fieldset>
                             <PageActions
                                 backOnClick={async () => {
-                                    const redirectPath = `../contract-details`
                                     if (dirty) {
-                                        await handleFormSubmit(
-                                            rateFormValues,
+                                        await handlePageAction(
+                                            rateFormValues.rates,
                                             setSubmitting,
                                             {
-                                                shouldValidateDocuments: false,
-                                                redirectPath,
+                                                type: 'CANCEL',
+                                                redirectPath:
+                                                    'DASHBOARD_SUBMISSIONS',
                                             }
                                         )
                                     } else {
-                                        navigate(redirectPath)
+                                        navigate(
+                                            RoutesRecord.DASHBOARD_SUBMISSIONS
+                                        )
                                     }
                                 }}
                                 saveAsDraftOnClick={async () => {
-                                    await handleFormSubmit(
-                                        rateFormValues,
+                                    await handlePageAction(
+                                        rateFormValues.rates,
                                         setSubmitting,
                                         {
-                                            shouldValidateDocuments: true,
+                                            type: 'SAVE_AS_DRAFT',
                                             redirectPath:
-                                                RoutesRecord.DASHBOARD_SUBMISSIONS,
+                                                'DASHBOARD_SUBMISSIONS',
                                         }
                                     )
                                 }}

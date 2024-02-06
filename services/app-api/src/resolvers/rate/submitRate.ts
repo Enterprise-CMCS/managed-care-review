@@ -140,7 +140,11 @@ export function submitRate(
                       actuaryCommunicationPreference:
                           formData.actuaryCommunicationPreference ?? undefined,
                       packagesWithSharedRateCerts:
-                          formData.packagesWithSharedRateCerts ?? [],
+                          formData.packagesWithSharedRateCerts.map((pkg) => ({
+                              packageName: pkg.packageName ?? undefined,
+                              packageId: pkg.packageId ?? undefined,
+                              packageStatus: pkg.packageStatus ?? undefined,
+                          })),
                   }
                 : undefined,
         })

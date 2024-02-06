@@ -74,11 +74,10 @@ const formatActuaryContactsForForm = (actuaryContacts?: ActuaryContact[] | GQLAc
           ]
 }
 
-const formatFormDateForDomain = (attribute: string): Date | undefined => {
-    if (attribute === '') {
-        return undefined
-    }
-    return dayjs.utc(attribute).toDate()
+
+
+const formatFormDateForGQL = (attribute: string): string | undefined => {
+    return (attribute === '') ? undefined :  attribute
 }
 
 const formatDocumentsForGQL = (
@@ -155,6 +154,16 @@ const formatDocumentsForForm = ({
 // DEPREACTED
 // These helpers are for HPP code which we are slowly moving off of
 // deprecated - HPP related
+
+const formatFormDateForDomain = (attribute: string): Date | undefined => {
+    if (attribute === '') {
+        return undefined
+    }
+    return dayjs.utc(attribute).toDate()
+}
+
+
+
 const formatDocumentsForDomain = (
     fileItems: FileItemT[]
 ): SubmissionDocument[] => {
@@ -200,5 +209,6 @@ export {
     formatDocumentsForDomain,
     formatDocumentsForForm,
     formatActuaryContactsForForm,
-    formatDocumentsForGQL
+    formatDocumentsForGQL,
+    formatFormDateForGQL
 }
