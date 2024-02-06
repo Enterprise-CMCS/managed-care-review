@@ -29,7 +29,7 @@ import { SingleRateCertV2 } from './SingleRateCert/SingleRateCertV2'
 import type { SubmitOrUpdateRate } from '../../RateSubmission/RateEdit/RateEdit'
 
 export type RateDetailFormValues = {
-    id: RateRevision['id']
+    id: Rate['id']
     rateType: RateRevision['formData']['rateType']
     rateCapitationType: RateRevision['formData']['rateCapitationType']
     rateDateStart: RateRevision['formData']['rateDateStart']
@@ -53,13 +53,14 @@ export type RateDetailFormConfig = {
 
 const generateFormValues = (
     getKey: S3ClientT['getKey'],
-    rateRev?: RateRevision
+    rateRev?: RateRevision,
+    rateID?: string
 ): RateDetailFormValues => {
     const rateInfo = rateRev?.formData
     const newRateID = uuidv4()
 
     return {
-        id: rateRev?.id ?? newRateID,
+        id: rateID ?? newRateID,
         rateType: rateInfo?.rateType ?? undefined,
         rateCapitationType: rateInfo?.rateCapitationType ?? undefined,
         rateDateStart: formatForForm(rateInfo?.rateDateStart),
@@ -149,13 +150,15 @@ export const RateDetailsV2 = ({
                 ? rates.map((rate) =>
                       generateFormValues(
                           getKey,
-                          rate.draftRevision ?? undefined
+                          rate.draftRevision ?? undefined,
+                          rate.id
                       )
                   )
                 : [
                       generateFormValues(
                           getKey,
-                          rates[0].draftRevision ?? undefined
+                          rates[0].draftRevision ?? undefined,
+                          rates[0].id
                       ),
                   ],
     }
