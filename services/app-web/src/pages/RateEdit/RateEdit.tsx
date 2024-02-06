@@ -4,6 +4,8 @@ import { useFetchRateQuery } from '../../gen/gqlClient'
 import { GridContainer } from '@trussworks/react-uswds'
 import { Loading } from '../../components'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
+import { Error404 } from '../Errors/Error404Page'
 
 type RouteParams = {
     id: string
@@ -35,7 +37,16 @@ export const RateEdit = (): React.ReactElement => {
             </GridContainer>
         )
     } else if (error || !rate) {
-        return <GenericErrorPage />
+        //error handling for a state user that tries to access rates for a different state
+        if (error?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
+            return (
+                <ErrorForbiddenPage errorMsg={error.graphQLErrors[0].message} />
+            )
+        } else if (error?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+            return <Error404 />
+        } else {
+            return <GenericErrorPage />
+        }
     }
 
     if (rate.status !== 'UNLOCKED') {
