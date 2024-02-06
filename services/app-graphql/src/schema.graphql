@@ -1023,6 +1023,7 @@ type ActuaryContact {
 
 "Contact information input for the certifying or additional state actuary"
 input ActuaryContactInput  {
+    id: ID
     name: String
     titleRole: String
     email: String

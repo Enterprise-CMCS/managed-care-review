@@ -262,6 +262,7 @@ const createAndUpdateTestHealthPlanPackage = async (
             rateProgramIDs: [ratePrograms.reverse()[0].id],
             actuaryContacts: [
                 {
+                    id: '123-abc',
                     name: 'test name',
                     titleRole: 'test title',
                     email: 'email@example.com',
@@ -275,6 +276,7 @@ const createAndUpdateTestHealthPlanPackage = async (
     ]
     draft.addtlActuaryContacts = [
         {
+            id: '123-addtl-abv',
             name: 'test name',
             titleRole: 'test title',
             email: 'email@example.com',

@@ -70,6 +70,7 @@ message Contact {
   optional string name = 1;
   optional string title_role = 2;
   optional string email = 3;
+  optional string id = 4;
 }
 
 // ContractInfo subtypes
