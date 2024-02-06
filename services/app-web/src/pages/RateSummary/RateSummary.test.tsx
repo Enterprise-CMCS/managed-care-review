@@ -162,16 +162,19 @@ describe('RateSummary', () => {
                                 user: mockValidStateUser(),
                                 statusCode: 200,
                             }),
-                            fetchRateMockSuccess({ rate: { id: '1337', status: 'UNLOCKED' } }),
+                            fetchRateMockSuccess({
+                                rate: { id: '1337', status: 'UNLOCKED' },
+                            }),
                         ],
                     },
                     routerProvider: {
-                        route: '/rates/1337'
+                        route: '/rates/1337',
                     },
                     featureFlags: {
-                        'rate-edit-unlock': true
-                    }
-            })
+                        'rate-edit-unlock': true,
+                    },
+                }
+            )
 
             await waitFor(() => {
                 expect(screen.queryByTestId('rate-edit')).toBeInTheDocument()

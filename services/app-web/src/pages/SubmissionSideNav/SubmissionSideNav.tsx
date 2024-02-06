@@ -1,4 +1,3 @@
-import React from 'react'
 import { Link, SideNav, GridContainer, Icon } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import styles from './SubmissionSideNav.module.scss'

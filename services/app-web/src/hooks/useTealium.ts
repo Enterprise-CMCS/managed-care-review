@@ -99,15 +99,22 @@ const useTealium = (): {
     // Add page view
     // this effect should fire on each page view or if something changes about logged in user
     useEffect(() => {
+
         // Do not add tealium for local dev or review apps
         if (process.env.REACT_APP_AUTH_MODE !== 'IDM') {
-            // console.info(`mock tealium page view: ${tealiumPageName}`)
             return
         }
 
-        // Guardrail - protect against trying to call utag before its loaded.
+        const waitForUtag = async () => {
+           return new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+
         if (!window.utag) {
-            return
+            waitForUtag().catch(() => { /* All of this is a guardrail - protect against trying to call utag before its loaded*/ })
+            if (!window.utag) {
+                return
+            }
         }
 
         // eslint-disable-next-line @typescript-eslint/no-empty-function
