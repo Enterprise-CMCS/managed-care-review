@@ -22,18 +22,6 @@ const formatForApi = (attribute: string): string | null => {
     return attribute
 }
 
-const formatYesNoForProto = (
-    attribute: string | undefined
-): boolean | undefined => {
-    if (attribute === 'YES') {
-        return true
-    }
-    if (attribute === 'NO') {
-        return false
-    }
-    return undefined
-}
-
 // Convert api data for use in form.  Form fields must be a string.
 // Empty values as an empty string, dates in date picker as YYYY-MM-DD, boolean as "Yes" "No" values
 const formatForForm = (
@@ -151,9 +139,8 @@ const formatDocumentsForForm = ({
     )
 }
 
-// DEPREACTED
-// These helpers are for HPP code which we are slowly moving off of
-// deprecated - HPP related
+// DEPRECATED
+// Domain helpers are for HPP code. We are migrating off this in favor of directly using GQL utilities
 
 const formatFormDateForDomain = (attribute: string): Date | undefined => {
     if (attribute === '') {
@@ -199,6 +186,17 @@ const formatDocumentsForDomain = (
     }, [] as SubmissionDocument[])
 }
 
+const formatYesNoForProto = (
+    attribute: string | undefined
+): boolean | undefined => {
+    if (attribute === 'YES') {
+        return true
+    }
+    if (attribute === 'NO') {
+        return false
+    }
+    return undefined
+}
 
 export {
     formatForApi,
