@@ -251,7 +251,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     showPageErrorMessage={showPageErrorMessage}
                 />
             </div>
-            <FormContainer id="state-submission-form">
+            <FormContainer id="state-submission-form-page">
                 <Routes>
                     <Route
                         path={getRelativePathFromNestedRoute(
