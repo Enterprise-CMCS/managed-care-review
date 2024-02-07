@@ -26,8 +26,11 @@ const jwtLib = newJWTLib({
 })
 
 export const main: APIGatewayTokenAuthorizerHandler = async (
-    event
+    event, context
 ): Promise<APIGatewayAuthorizerResult> => {
+    console.log('WHATS COMING IN', JSON.stringify(event))
+    console.log('EVENT', JSON.stringify(context))
+
     const authToken = event.authorizationToken.replace('Bearer ', '')
     try {
         // authentication step for validating JWT token
