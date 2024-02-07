@@ -158,6 +158,7 @@ export const SubmissionSideNav = () => {
             className={
                 showSidebar ? styles.backgroundSidebar : styles.backgroundForm
             }
+            data-testid="submission-side-nav"
         >
             <GridContainer className={styles.container}>
                 {showSidebar && (
