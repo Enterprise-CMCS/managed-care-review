@@ -455,16 +455,15 @@ resources:
             dpkg -i clamav-1.0.4.linux.x86_64.deb
             apt-get install -f
 
-            # Write the freshclam.conf
-            echo "DatabaseMirror database.clamav.net" > /usr/local/etc/freshclam.conf
-            echo "CompressLocalDatabase yes" >> /usr/local/etc/freshclam.conf
-            chmod  644 /usr/local/etc/freshclam.conf
-            chown clamav:clamav /usr/local/etc/freshclam.conf
+            # Write to the clamd.conf
+            echo "TCPSocket 3310" >> /etc/clamav/clamd.conf
+            echo "TCPAddr 0.0.0.0" >> /etc/clamav/clamd.conf 
 
-            sudo systemctl enable clamav-freshclam
-            sudo systemctl start clamav-freshclam
-            sudo systemctl enable clamav-daemon
-            sudo systemctl start clamav-daemon
+            # Start clamd and get defs
+            systemctl enable clamav-freshclam
+            systemctl start clamav-freshclam
+            systemctl enable clamav-daemon
+            systemctl start clamav-daemon
 
   Outputs:
     DocumentUploadsBucketName:
