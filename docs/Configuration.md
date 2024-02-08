@@ -52,6 +52,12 @@ valid values: A URL where a running app-web can be reached
 
 It's used as the redirects for login by app-web when it configures login via IDM.
 
+### `ALLOWED_IP_ADDRESSES`
+
+Read by `app-api` and Cypress
+
+Third party access to the MC-Review API is restricted by IP address. It must be set to a string that contains a comma separated list of IP address OR it can be set to `ALLOW_ALL` for the dev environment and for testing purposes.
+
 ### `APP_VERSION`
 
 Read by `app-api`

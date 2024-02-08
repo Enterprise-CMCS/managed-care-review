@@ -34,6 +34,7 @@ custom:
   reactAppOtelCollectorUrl: ${env:REACT_APP_OTEL_COLLECTOR_URL, ssm:/configuration/react_app_otel_collector_url}
   dbURL: ${env:DATABASE_URL}
   ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key_feds}
+  allowedIpAddresses: ${env:ALLOWED_IP_ADDRESSES, ssm:/configuration/allowed_ip_addresses}
   # because the secret is in JSON in secret manager, we have to pass it into jwtSecret when not running locally
   jwtSecretJSON: ${env:CF_CONFIG_IGNORED_LOCALLY, ssm:/aws/reference/secretsmanager/api_jwt_secret_${sls:stage}}
   jwtSecret: ${env:JWT_SECRET, self:custom.jwtSecretJSON.jwtsigningkey}
@@ -157,6 +158,7 @@ provider:
     AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
     OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
     LD_SDK_KEY: ${self:custom.ldSDKKey}
+    ALLOWED_IP_ADDRESSES: ${self:custom.allowedIpAddresses}
     JWT_SECRET: ${self:custom.jwtSecret}
 
 layers:
@@ -179,7 +181,7 @@ functions:
 
   third_party_api_authorizer:
     handler: src/handlers/third_party_API_authorizer.main
-         
+
   otel:
     handler: src/handlers/otel_proxy.main
     events:
@@ -187,7 +189,7 @@ functions:
           path: otel
           method: post
           cors: true
-
+ 
   graphql:
     handler: src/handlers/apollo_gql.graphqlHandler
     events:
