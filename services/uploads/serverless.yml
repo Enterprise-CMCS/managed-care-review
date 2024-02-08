@@ -95,7 +95,7 @@ custom:
 
 layers:
   clamAv:
-    path: lambda_layer
+    path: lambda-layers-clamav
 
 functions:
   avScan:
