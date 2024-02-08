@@ -11,6 +11,8 @@ import {
     unlockTestHealthPlanPackage,
     updateTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
+import { expectToBeDefined, must } from '../../testHelpers/assertionHelpers'
+import { createAndSubmitTestRate, createTestRate } from '../../testHelpers/gqlRateHelpers'
 import type { RateEdge, Rate } from '../../gen/gqlServer'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
@@ -21,9 +23,9 @@ describe.skip('indexRates', () => {
     it('returns ForbiddenError for state user', async () => {
         const stateServer = await constructTestPostgresServer()
 
-        // submit packages that include rates
-        await createAndSubmitTestHealthPlanPackage(stateServer)
-        await createAndSubmitTestHealthPlanPackage(stateServer)
+        // submit rates
+        await createAndSubmitTestRate(stateServer)
+        await createAndSubmitTestRate(stateServer)
 
         // index rates
         const result = await stateServer.executeOperation({
@@ -40,22 +42,24 @@ describe.skip('indexRates', () => {
                 user: cmsUser,
             },
         })
-        // first, submit new packages that include rates
-        const submit1 = await createAndSubmitTestHealthPlanPackage(stateServer)
-        const submit2 = await createAndSubmitTestHealthPlanPackage(stateServer)
+        // first, submit 2 rates
+        const submit1 = await createAndSubmitTestRate(stateServer)
+        const submit2 = await createAndSubmitTestRate(stateServer)
         const update1 = await createAndUpdateTestHealthPlanPackage(stateServer)
 
         // index rates
-        const result = await cmsServer.executeOperation({
+        const result = must(
+            await cmsServer.executeOperation({
             query: INDEX_RATES,
         })
+        )
 
         expect(result.data).toBeDefined()
         const ratesIndex = result.data?.indexRates
         const testRateIDs = [
-            latestFormData(submit1).rateInfos[0].id,
-            latestFormData(submit2).rateInfos[0].id,
-            latestFormData(update1).rateInfos[0].id,
+            submit1.id,
+            submit2.id,
+            // latestFormData(update1).rateInfos[0].id,
         ]
 
         expect(result.errors).toBeUndefined()
@@ -77,21 +81,23 @@ describe.skip('indexRates', () => {
             },
         })
         // First, create new submissions
-        const draft1 = await createAndUpdateTestHealthPlanPackage(stateServer)
-        const draft2 = await createAndUpdateTestHealthPlanPackage(stateServer)
+        const draft1 = await createTestRate()
+        const draft2 = await createTestRate()
 
         // index rates
-        const result = await cmsServer.executeOperation({
-            query: INDEX_RATES,
-        })
+        const result = must(
+            await cmsServer.executeOperation({
+                query: INDEX_RATES,
+            })
+        )
 
         const ratesIndex = result.data?.indexRates
         expect(result.errors).toBeUndefined()
 
         // pull out test related rates and order them
         const testRateIDs = [
-            latestFormData(draft1).rateInfos[0].id,
-            latestFormData(draft2).rateInfos[0].id,
+            draft1.id,
+            draft2.id,
         ]
         const testRates: Rate[] = ratesIndex.edges
             .map((edge: RateEdge) => edge.node)

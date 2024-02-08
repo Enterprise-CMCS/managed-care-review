@@ -116,6 +116,19 @@ const createTestRate = async (
 
     const draftRateData = mockInsertRateArgs({
         rateProgramIDs: programIDs,
+        actuaryCommunicationPreference: undefined,
+        addtlActuaryContacts: [],
+       amendmentEffectiveDateEnd: undefined,
+       amendmentEffectiveDateStart: undefined,
+        certifyingActuaryContacts: [],
+       id: 'd2404a25-e1b9-4441-92b2-0fb8c8a6ae3b',
+        packagesWithSharedRateCerts: [],
+       rateCapitationType: undefined,
+       rateCertificationName: undefined,
+       rateDateCertified: undefined,
+       rateDateEnd: undefined,
+       rateDateStart: undefined,
+        // ...rateData
     })
 
     return must(await insertDraftRate(prismaClient, draftRateData))

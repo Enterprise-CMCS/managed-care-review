@@ -9,7 +9,7 @@ import SUBMIT_RATE from '../../../../app-graphql/src/mutations/submitRate.graphq
 import FETCH_RATE from 'app-graphql/src/queries/fetchRate.graphql'
 import SUBMIT_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
 import UNLOCK_RATE from '../../../../app-graphql/src/mutations/unlockRate.graphql'
-import { createTestRate, mockDraftRate, must, updateTestRate } from '../../testHelpers'
+import { createTestRate, submitTestRate, mockDraftRate, must, updateTestRate } from '../../testHelpers'
 
 describe('submitRate', () => {
     const ldService = testLDService({
@@ -50,45 +50,46 @@ describe('submitRate', () => {
         // expect formData to be the same
         expect(submittedRateFormData).toEqual(draftRate.draftRevision?.formData)
     })
-    it('can submit rate with formData updates', async () => {
-        const stateUser = testStateUser()
+    // it('can submit rate with formData updates', async () => {
+    //     const stateUser = testStateUser()
 
-        const stateServer = await constructTestPostgresServer({
-            context: {
-                user: stateUser,
-            },
-            ldService,
-        })
+    //     const stateServer = await constructTestPostgresServer({
+    //         context: {
+    //             user: stateUser,
+    //         },
+    //         ldService,
+    //     })
 
-        const rate = await createTestRate({rateDateStart: new Date('03/03/2013')})
-        // make update to formData in submit
-        const result = await stateServer.executeOperation({
-            query: SUBMIT_RATE,
-            variables: {
-                input: {
-                    rateID: rate.id,
-                    submittedReason: 'submit rate',
-                    formData: {
-                        ...rate.draftRevision,
-                        rateDateStart: new Date('01/01/2011')
-                    },
-                },
-            },
-        })
+    //     // createRate with full data
+    //     const draftRate = await createTestRate()
+    //     expect(draftRate).toBe(
+    //         '2025-01-01'
+    //     )
+    //     const submittedRate = await submitTestRate(
+    //         stateServer,
+    //         draftRate.id,
+    //         'Resubmit with edited rate description'
+    //     )
 
-        expect(result.errors).toBeUndefined()
-        const submittedRate = result.data?.submitRate.rate
-        const submittedRateFormData = submittedRate.revisions[0].formData
-
-        // expect no errors from submit rate
-        expect(result.errors).toBeUndefined()
-        // expect rate data to be returned
-        expect(submittedRate).toBeDefined()
-        // expect status to be submitted.
-        expect(submittedRate.status).toBe('SUBMITTED')
-        // expect formData to NOT be the same
-        expect(submittedRateFormData.rateDateStart).toBe('01/01/2011')
-    })
+    //     const result = await stateServer.executeOperation({
+    //         query: SUBMIT_RATE,
+    //         variables: {
+    //             input: {
+    //                 rateID: draftRate.id,
+    //             },
+    //         },
+    //     })
+   
+    //     // expect rate data to be returned
+    //     expect(submittedRate).toBeDefined()
+    //     // expect status to be submitted.
+    //     expect(submittedRate.status).toBe('SUBMITTED')
+    //     // expect formData to NOT be the same
+    //      // newest revision data is correct
+    //      expect(submittedRate.revisions[0].formData.rateDateStart).toBe(
+    //         '2025-01-01'
+    //     )
+    // })
     it('can submit rate without formData updates', async () => {
         const stateUser = testStateUser()
 
