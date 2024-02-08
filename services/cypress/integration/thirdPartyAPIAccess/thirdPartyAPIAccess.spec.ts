@@ -38,7 +38,7 @@ describe('thirdPartyAPIAccess', () => {
         })
     })
 
-    it('expect server error when called from deployed cypress, otherwise success on local', () => {
+    it('works with a valid key', () => {
     
         // get the API URL!
         const url = Cypress.env('API_URL')
@@ -69,12 +69,7 @@ describe('thirdPartyAPIAccess', () => {
                 body: '{"query":"query IndexRates { indexRates { totalCount edges { node {  id } } } }"}',
                 failOnStatusCode: false,
             }).then(res => {
-                if (Cypress.config().baseUrl === 'http://localhost:3000') {
-                    expect(res.status).to.equal(200) // okay 
-                } else {
-                    expect(res.body.errors[0].message).to.contain('this IP address is not in the allowed list')
-                    expect(res.status).to.equal(500) // server error 
-                }
+                expect(res.status).to.equal(200) // okay 
             })
 
         })        

@@ -62,7 +62,6 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
         const requestSpan = anyContext[requestSpanKey]
         const authProvider =
             event.requestContext.identity.cognitoAuthenticationProvider
-        const ipAddress = event.requestContext.identity.sourceIp
         // This handler is shared with the third_party_API_authorizer
         // when called from the 3rd party authorizer the cognito auth provider
         // is not valid for instead the authorizer returns a user ID
@@ -95,8 +94,7 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                 } else if (fromThirdPartyAuthorizer && userId) {
                     userResult = await userFromThirdPartyAuthorizer(
                         store,
-                        userId,
-                        ipAddress
+                        userId
                     )
                 }
 
@@ -146,6 +144,37 @@ function localAuthMiddleware(wrapped: APIGatewayProxyHandler): Handler {
         const result = await wrapped(event, context, completion)
 
         return result
+    }
+}
+
+function ipRestrictionMiddleware(
+    allowedIps: string
+): (wrappedArg: Handler) => Handler {
+    return function (wrapped: Handler): Handler {
+        return async function (event, context, completion) {
+            const ipAddress = event.requestContext.identity.sourceIp
+            const fromThirdPartyAuthorizer = event.requestContext.path.includes(
+                '/v1/graphql/external'
+            )
+
+            if (fromThirdPartyAuthorizer) {
+                const isValidIpAddress =
+                    allowedIps.includes(ipAddress) || allowedIps === 'ALLOW_ALL'
+
+                if (!isValidIpAddress) {
+                    return Promise.resolve({
+                        statusCode: 403,
+                        body: `{ "error": IP Address ${ipAddress} is not in the allowed list }\n`,
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',
+                            'Access-Control-Allow-Credentials': true,
+                        },
+                    })
+                }
+            }
+
+            return await wrapped(event, context, completion)
+        }
     }
 }
 
@@ -424,11 +453,13 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     // init tracer and set the middleware. tracer needs to be global.
     tracer = createTracer('app-api-' + stageName)
-    const tracingHandler = tracingMiddleware(handler)
+    const combinedHandler = ipRestrictionMiddleware(allowedIpAddresses)(
+        tracingMiddleware(handler)
+    )
 
     // Locally, we wrap our handler in a middleware that returns 403 for unauthenticated requests
     const isLocal = authMode === 'LOCAL'
-    return isLocal ? localAuthMiddleware(tracingHandler) : tracingHandler
+    return isLocal ? localAuthMiddleware(combinedHandler) : combinedHandler
 }
 
 const handlerPromise = initializeGQLHandler()

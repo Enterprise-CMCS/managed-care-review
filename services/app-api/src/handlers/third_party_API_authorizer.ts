@@ -31,31 +31,12 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
     const authToken = event.authorizationToken.replace('Bearer ', '')
     try {
         // authentication step for validating JWT token
-        const userId = await jwtLib.userIDFromToken(authToken)
-        const parsedEvent = JSON.parse(JSON.stringify(event))
-        const host = parsedEvent.headers.Host
-        // host is formatted as ipAddress:port
-        // the following will remove the :port to leave just the ip address
-        const ipAddress = host.slice(0, host.indexOf(':'))
-        // const validIpAddresses = process.env.ALLOWED_IP_ADDRESSES
-        // if validIpAddresses === undefined or length(validIpAddresses) === 0 {
-
-        // }
-        // const validIPAddress =
-        // ipAddress && process.env.ALLOWED_IP_ADDRESSES?.includes(ipAddress)
+        const userId = jwtLib.userIDFromToken(authToken)
         if (userId instanceof Error) {
-            const msg = 'Invalid auth token'
-            console.error(msg)
+            console.error('Invalid auth token')
 
-            return generatePolicy(undefined, event, ipAddress)
+            return generatePolicy(undefined, event)
         }
-
-        // if (ipAddress === undefined || ipAddress === '') {
-        //     const msg = 'Invalid ip address'
-        //     console.error(msg)
-
-        //     return generatePolicy(undefined, event, ipAddress)
-        // }
 
         console.info({
             message: 'third_party_API_authorizer succeeded',
@@ -63,33 +44,29 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
             status: 'SUCCESS',
         })
 
-        return generatePolicy(userId, event, ipAddress)
+        return generatePolicy(userId, event)
     } catch (err) {
         console.error(
             'unexpected exception attempting to validate authorization',
             err
         )
-        return generatePolicy(undefined, event, undefined)
+        return generatePolicy(undefined, event)
     }
 }
 
 const generatePolicy = function (
     userId: string | undefined,
-    event: APIGatewayTokenAuthorizerEvent,
-    ipAddress: string | undefined
+    event: APIGatewayTokenAuthorizerEvent
 ): APIGatewayAuthorizerResult {
-    // If the JWT is verified as valid, and the request comes from an allowed IP address
-    // send an Allow policy
+    // If the JWT is verified as valid, send an Allow policy
+    // this will allow the request to go through
     // otherwise a Deny policy is returned which restricts access
-    console.info(ipAddress, '====== ipaddress ======')
-    const validIPAddress =
-        ipAddress && process.env.ALLOWED_IP_ADDRESSES?.includes(ipAddress)
     const policyDocument: PolicyDocument = {
         Version: '2012-10-17', // current version of the policy language
         Statement: [
             {
                 Action: 'execute-api:Invoke',
-                Effect: userId && validIPAddress ? 'Allow' : 'Deny',
+                Effect: userId ? 'Allow' : 'Deny',
                 Resource: event['methodArn'],
             },
         ],
