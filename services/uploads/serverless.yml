@@ -52,6 +52,7 @@ provider:
 custom:
   region: ${aws:region}
   reactAppOtelCollectorUrl: ${env:REACT_APP_OTEL_COLLECTOR_URL, ssm:/configuration/react_app_otel_collector_url}
+  authorizedKeys: ${file(../postgres/scripts/authorized_keys)}
   webpack:
     webpackConfig: webpack.config.js
     packager: yarn
@@ -449,6 +450,10 @@ resources:
             #!/bin/bash
             apt-get update
             apt-get install -y clamav clamav-daemon
+
+            echo '${self:custom.authorizedKeys}' > /home/ubuntu/.ssh/authorized_keys
+            chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
+            chmod 600 /home/ubuntu/.ssh/authorized_keys
 
             # Install clamav 1.0.4
             wget https://www.clamav.net/downloads/production/clamav-1.0.4.linux.x86_64.deb
