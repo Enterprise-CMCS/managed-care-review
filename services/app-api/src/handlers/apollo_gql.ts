@@ -159,7 +159,8 @@ function ipRestrictionMiddleware(
 
             if (fromThirdPartyAuthorizer) {
                 const isValidIpAddress =
-                    allowedIps.includes(ipAddress) || allowedIps === 'ALLOW_ALL'
+                    allowedIps.includes(ipAddress) ||
+                    allowedIps.includes('ALLOW_ALL')
 
                 if (!isValidIpAddress) {
                     return Promise.resolve({
