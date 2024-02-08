@@ -58,15 +58,6 @@ custom:
     packager: yarn
     packagerOptions:
       lockFile: ../../yarn.lock
-  scripts:
-    hooks:
-      # This script is run locally when running 'serverless deploy'
-      package:initialize: |
-        set -e
-        curl -L --output lambda_layer.zip https://github.com/CMSgov/lambda-clamav-layer/releases/download/0.7/lambda_layer.zip
-      deploy:finalize: |
-        rm lambda_layer.zip
-        serverless invoke --stage ${sls:stage} --function avDownloadDefinitions -t Event
   vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
   sgId: ${ssm:/configuration/${sls:stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
   privateSubnets:
@@ -104,8 +95,7 @@ custom:
 
 layers:
   clamAv:
-    package:
-      artifact: lambda_layer.zip
+    path: lambda_layer
 
 functions:
   avScan:
