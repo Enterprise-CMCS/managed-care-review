@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid'
 import INDEX_RATES from '../../../../app-graphql/src/queries/indexRates.graphql'
 import {
     constructTestPostgresServer,
-    createAndSubmitTestHealthPlanPackage,
     createAndUpdateTestHealthPlanPackage,
     defaultFloridaRateProgram,
     resubmitTestHealthPlanPackage,
@@ -11,12 +10,19 @@ import {
     unlockTestHealthPlanPackage,
     updateTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
-import { expectToBeDefined, must } from '../../testHelpers/assertionHelpers'
-import { createAndSubmitTestRate, createTestRate } from '../../testHelpers/gqlRateHelpers'
+import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { must } from '../../testHelpers/assertionHelpers'
 import type { RateEdge, Rate } from '../../gen/gqlServer'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { formatGQLDate } from 'app-web/src/common-code/dateHelpers'
+import {
+    submitTestRate,
+    createAndSubmitTestRate,
+    createTestRate,
+    unlockTestRate,
+    updateTestRate,
+} from '../../testHelpers'
 
 // eslint-disable-next-line jest/no-disabled-tests
 describe.skip('indexRates', () => {
@@ -45,13 +51,12 @@ describe.skip('indexRates', () => {
         // first, submit 2 rates
         const submit1 = await createAndSubmitTestRate(stateServer)
         const submit2 = await createAndSubmitTestRate(stateServer)
-        const update1 = await createAndUpdateTestHealthPlanPackage(stateServer)
 
         // index rates
         const result = must(
             await cmsServer.executeOperation({
-            query: INDEX_RATES,
-        })
+                query: INDEX_RATES,
+            })
         )
 
         expect(result.data).toBeDefined()
@@ -74,7 +79,6 @@ describe.skip('indexRates', () => {
 
     it('does not return rates still in initial draft', async () => {
         const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
@@ -95,10 +99,7 @@ describe.skip('indexRates', () => {
         expect(result.errors).toBeUndefined()
 
         // pull out test related rates and order them
-        const testRateIDs = [
-            draft1.id,
-            draft2.id,
-        ]
+        const testRateIDs = [draft1.id, draft2.id]
         const testRates: Rate[] = ratesIndex.edges
             .map((edge: RateEdge) => edge.node)
             .filter((test: Rate) => {
@@ -214,17 +215,20 @@ describe.skip('indexRates', () => {
         })
 
         // baseline
-        const initial = await cmsServer.executeOperation({
-            query: INDEX_RATES,
-        })
+        const initial = must(
+            await cmsServer.executeOperation({
+                query: INDEX_RATES,
+            })
+        )
         const initialRates = initial.data?.indexRates.edges
-
+        const florida: StateCodeType = 'FL'
         const initialRateInfos = () => ({
             id: uuidv4(),
             rateType: 'NEW' as const,
             rateDateStart: new Date(Date.UTC(2025, 5, 1)),
             rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
             rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+            stateCode: florida,
             rateDocuments: [
                 {
                     name: 'rateDocument.pdf',
@@ -247,62 +251,52 @@ describe.skip('indexRates', () => {
             packagesWithSharedRateCerts: [],
         })
 
-        // First, create new submissions
-        const firstPkg = await createAndSubmitTestHealthPlanPackage(server, {
-            rateInfos: [initialRateInfos()],
+        // First, create and submit new rates
+        const firstRate = await createAndSubmitTestRate(server, {
+            ...initialRateInfos(),
         })
-        const secondPkg = await createAndSubmitTestHealthPlanPackage(server, {
-            rateInfos: [initialRateInfos()],
+        const secondRate = await createAndSubmitTestRate(server, {
+            ...initialRateInfos(),
         })
 
         // Unlock both -  one to be rate edited in place, the other to add new rate
-        const firstPkgUnlocked = await unlockTestHealthPlanPackage(
+        const firstRateUnlocked = await unlockTestRate(
             cmsServer,
-            firstPkg.id,
+            firstRate.id,
             'Unlock to edit an existing rate'
         )
-        const secondPkgUnlocked = await unlockTestHealthPlanPackage(
+        const secondRateUnlocked = await unlockTestRate(
             cmsServer,
-            secondPkg.id,
+            secondRate.id,
             'Unlock to add a new rate'
         )
 
         // update one with a new rate start and end date
-        const existingFormData = latestFormData(firstPkgUnlocked)
+        const existingFormData = latestFormData(firstRateUnlocked)
         expect(existingFormData.rateInfos).toHaveLength(1)
-        await updateTestHealthPlanPackage(server, firstPkg.id, {
-            rateInfos: [
-                {
-                    ...existingFormData.rateInfos[0],
-                    rateDateStart: new Date(Date.UTC(2025, 1, 1)),
-                    rateDateEnd: new Date(Date.UTC(2027, 1, 1)),
-                },
-            ],
+        await updateTestRate(firstRate.id, {
+            rateDateStart: new Date(Date.UTC(2025, 1, 1)),
+            rateDateEnd: new Date(Date.UTC(2027, 1, 1)),
         })
 
         // update the other with additional new rate
-        const existingFormData2 = latestFormData(secondPkgUnlocked)
+        const existingFormData2 = latestFormData(secondRateUnlocked)
         expect(existingFormData2.rateInfos).toHaveLength(1)
-        await updateTestHealthPlanPackage(server, secondPkg.id, {
-            rateInfos: [
-                existingFormData2.rateInfos[0],
-                {
-                    ...initialRateInfos(),
-                    id: uuidv4(), // this is a new rate
-                    rateDateStart: new Date(Date.UTC(2030, 1, 1)),
-                    rateDateEnd: new Date(Date.UTC(2030, 12, 1)),
-                },
-            ],
+        await updateTestRate(secondRate.id, {
+            ...initialRateInfos(),
+            id: uuidv4(), // this is a new rate
+            rateDateStart: new Date(Date.UTC(2030, 1, 1)),
+            rateDateEnd: new Date(Date.UTC(2030, 12, 1)),
         })
         // resubmit both
-        const firstPkgResubmitted = await resubmitTestHealthPlanPackage(
+        const firstPkgResubmitted = await submitTestRate(
             server,
-            firstPkg.id,
+            firstRate.id,
             'Resubmit with edited rate description'
         )
-        const secondPkgResubmitted = await resubmitTestHealthPlanPackage(
+        const secondPkgResubmitted = await submitTestRate(
             server,
-            secondPkg.id,
+            secondRate.id,
             'Resubmit with an additional rate added'
         )
 
@@ -404,46 +398,28 @@ describe.skip('indexRates', () => {
         })
 
         // First, create new submissions
-        const submittedSubmission =
-            await createAndSubmitTestHealthPlanPackage(server)
-        const unlockedSubmission =
-            await createAndSubmitTestHealthPlanPackage(server)
-        const relockedSubmission =
-            await createAndSubmitTestHealthPlanPackage(server)
+        const submittedRate = await createAndSubmitTestRate(server)
+        const unlockedRate = await createAndSubmitTestRate(server)
+        const relockedRate = await createAndSubmitTestRate(server)
 
         // unlock two
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            unlockedSubmission.id,
-            'Test reason'
-        )
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            relockedSubmission.id,
-            'Test reason'
-        )
+        await unlockTestRate(cmsServer, unlockedRate.id, 'Test reason')
+        await unlockTestRate(cmsServer, relockedRate.id, 'Test reason')
 
         // resubmit one
-        await resubmitTestHealthPlanPackage(
-            server,
-            relockedSubmission.id,
-            'Test first resubmission'
-        )
+        await submitTestRate(server, relockedRate.id, 'Test first resubmission')
 
         // index rates
-        const result = await cmsServer.executeOperation({
-            query: INDEX_RATES,
-        })
-
+        const result = must(
+            await cmsServer.executeOperation({
+                query: INDEX_RATES,
+            })
+        )
         const ratesIndex = result.data?.indexRates
         expect(result.errors).toBeUndefined()
 
         // pull out test related rates and order them
-        const testRateIDs = [
-            latestFormData(submittedSubmission).rateInfos[0].id,
-            latestFormData(unlockedSubmission).rateInfos[0].id,
-            latestFormData(relockedSubmission).rateInfos[0].id,
-        ]
+        const testRateIDs = [submittedRate.id, unlockedRate.id, relockedRate.id]
 
         const testRates: Rate[] = ratesIndex.edges
             .map((edge: RateEdge) => edge.node)
@@ -473,47 +449,43 @@ describe.skip('indexRates', () => {
             },
         })
 
-        // First, create new submissions
-        const submittedSubmission =
-            await createAndSubmitTestHealthPlanPackage(server)
-        const unlockedSubmission =
-            await createAndSubmitTestHealthPlanPackage(server)
-        const relockedSubmission =
-            await createAndSubmitTestHealthPlanPackage(server)
+        // First, create new rates
+        const submittedRate2 = await createAndSubmitTestRate(server)
+        const unlockedRate2 = await createAndSubmitTestRate(server)
+        const relockedRate2 = await createAndSubmitTestRate(server)
 
         // unlock two
         await unlockTestHealthPlanPackage(
             cmsServer,
-            unlockedSubmission.id,
+            unlockedRate2.id,
             'Test reason'
         )
         await unlockTestHealthPlanPackage(
             cmsServer,
-            relockedSubmission.id,
+            relockedRate2.id,
             'Test reason'
         )
 
         // resubmit one
         await resubmitTestHealthPlanPackage(
             server,
-            relockedSubmission.id,
+            relockedRate2.id,
             'Test first resubmission'
         )
 
         // index rates
-        const result = await cmsServer.executeOperation({
-            query: INDEX_RATES,
-        })
+        const result = must(
+            await cmsServer.executeOperation({
+                query: INDEX_RATES,
+            })
+        )
 
         const ratesIndex = result.data?.indexRates
         expect(result.errors).toBeUndefined()
 
-        const submittedRateID =
-            latestFormData(submittedSubmission).rateInfos[0].id
-        const unlockedRateID =
-            latestFormData(unlockedSubmission).rateInfos[0].id
-        const resubmittedRateID =
-            latestFormData(relockedSubmission).rateInfos[0].id
+        const submittedRateID = submittedRate2.id
+        const unlockedRateID = unlockedRate2.id
+        const resubmittedRateID = relockedRate2.id
 
         if (!submittedRateID || !unlockedRateID || !resubmittedRateID) {
             throw new Error('Missing Rate ID')
@@ -576,24 +548,22 @@ describe.skip('indexRates', () => {
             },
         })
         // submit packages from two different states
-        const defaultState1 =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
-        const defaultState2 =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
-        const draft = await createAndUpdateTestHealthPlanPackage(
+        const defaultState1 = await createAndSubmitTestRate(stateServer)
+        const defaultState2 = await createAndSubmitTestRate(stateServer)
+        const draft = await createTestRate()
+
+        const otherState1 = await submitTestRate(
             otherStateServer,
-            undefined,
-            'VA' as const
-        )
-        const otherState1 = await submitTestHealthPlanPackage(
-            otherStateServer,
-            draft.id
+            draft.id,
+            'submitted reason'
         )
 
         // index rates
-        const result = await cmsServer.executeOperation({
-            query: INDEX_RATES,
-        })
+        const result = must(
+            await cmsServer.executeOperation({
+                query: INDEX_RATES,
+            })
+        )
 
         const ratesIndex = result.data?.indexRates
         expect(result.errors).toBeUndefined()
@@ -604,12 +574,7 @@ describe.skip('indexRates', () => {
         const defaultStateRates: Rate[] = []
         const otherStateRates: Rate[] = []
         allRates.forEach((rate) => {
-            if (
-                [
-                    latestFormData(defaultState1).rateInfos[0].id,
-                    latestFormData(defaultState2).rateInfos[0].id,
-                ].includes(rate.id)
-            ) {
+            if ([defaultState1.id, defaultState2.id].includes(rate.id)) {
                 defaultStateRates.push(rate)
             } else if (
                 [latestFormData(otherState1).rateInfos[0].id].includes(rate.id)
