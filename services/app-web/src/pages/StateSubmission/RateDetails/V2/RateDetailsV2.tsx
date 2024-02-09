@@ -2,7 +2,6 @@ import React, { useEffect } from 'react'
 import { Form as UswdsForm } from '@trussworks/react-uswds'
 import { Formik, FormikErrors } from 'formik'
 import { useNavigate, useParams } from 'react-router-dom'
-import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../../StateSubmissionForm.module.scss'
 
@@ -33,7 +32,7 @@ import { SingleRateCertV2 } from './SingleRateCertV2'
 import type { SubmitOrUpdateRate } from '../../../RateEdit/RateEdit'
 
 export type RateDetailFormValues = {
-    id: Rate['id']
+    id?: string // no id if its a new rate
     rateType: RateRevision['formData']['rateType']
     rateCapitationType: RateRevision['formData']['rateCapitationType']
     rateDateStart: RateRevision['formData']['rateDateStart']
@@ -61,11 +60,10 @@ const generateFormValues = (
     rateID?: string
 ): RateDetailFormValues => {
     const rateInfo = rateRev?.formData
-    const newRateID = uuidv4()
 
     return {
-        id: rateID ?? newRateID,
-        rateType: rateInfo?.rateType ?? undefined,
+        id: rateID,
+        rateType: rateInfo?.rateType,
         rateCapitationType: rateInfo?.rateCapitationType ?? undefined,
         rateDateStart: formatForForm(rateInfo?.rateDateStart),
         rateDateEnd: formatForForm(rateInfo?.rateDateEnd),
@@ -191,7 +189,7 @@ export const RateDetailsV2 = ({
             }
         }
 
-        const gqlFormDatas: Array<{ id: string } & RateFormDataInput> =
+        const gqlFormDatas: Array<{ id?: string } & RateFormDataInput> =
             rates.map((form) => {
                 return {
                     id: form.id,
@@ -224,11 +222,15 @@ export const RateDetailsV2 = ({
 
         const { id, ...formData } = gqlFormDatas[0] // only grab the first rate in the array because multi-rates functionality not added yet. This will be part of Link Rates epic
 
-        if (options.type === 'CONTINUE') {
+        if (options.type === 'CONTINUE' && id) {
             await submitRate(id, formData, setSubmitting, 'DASHBOARD')
+        } else if (options.type === 'CONTINUE' && !id) {
+            throw new Error(
+                'Rate create and update for a new rate is not yet implemented. This will be part of Link Rates epic.'
+            )
         } else if (options.type === 'SAVE_AS_DRAFT') {
             throw new Error(
-                'Rate update is not yet implemented so save as draft is not possible. This will be part of Link Rates epic.'
+                'Rate save as draft is not possible. This will be part of Link Rates epic.'
             )
         } else {
             navigate(RoutesRecord[options.redirectPath])

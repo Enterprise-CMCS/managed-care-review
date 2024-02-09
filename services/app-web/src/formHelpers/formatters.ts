@@ -132,7 +132,7 @@ const formatDocumentsForForm = ({
                 name: doc.name,
                 key: key,
                 s3URL: doc.s3URL,
-                sha256: doc.sha256 ?? undefined,
+                sha256: doc.sha256,
                 status: 'UPLOAD_COMPLETE',
             }
         }) || []

@@ -61,7 +61,7 @@ export const RateEdit = (): React.ReactElement => {
     ) => {
         setIsSubmitting(true)
         try {
-            const updatedSubmission = await submitRate({
+            await submitRate({
                 variables: {
                     input: {
                         rateID: rateID,
@@ -69,11 +69,8 @@ export const RateEdit = (): React.ReactElement => {
                     },
                 },
             })
-            if (updatedSubmission instanceof Error) {
-                setIsSubmitting(false)
-            } else if (updatedSubmission) {
-                navigate(RoutesRecord[redirect])
-            }
+
+            navigate(RoutesRecord[redirect])
         } catch (serverError) {
             setIsSubmitting(false)
         }
