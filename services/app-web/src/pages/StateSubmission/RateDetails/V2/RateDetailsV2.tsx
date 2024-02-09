@@ -64,7 +64,7 @@ const generateFormValues = (
     return {
         id: rateID,
         rateType: rateInfo?.rateType,
-        rateCapitationType: rateInfo?.rateCapitationType ?? undefined,
+        rateCapitationType: rateInfo?.rateCapitationType,
         rateDateStart: formatForForm(rateInfo?.rateDateStart),
         rateDateEnd: formatForForm(rateInfo?.rateDateEnd),
         rateDateCertified: formatForForm(rateInfo?.rateDateCertified),
@@ -88,7 +88,7 @@ const generateFormValues = (
             rateInfo?.certifyingActuaryContacts
         ),
         actuaryCommunicationPreference:
-            rateInfo?.actuaryCommunicationPreference ?? undefined,
+            rateInfo?.actuaryCommunicationPreference,
         packagesWithSharedRateCerts:
             rateInfo?.packagesWithSharedRateCerts ?? [],
     }
