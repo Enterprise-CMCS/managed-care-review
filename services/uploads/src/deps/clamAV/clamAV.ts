@@ -177,6 +177,16 @@ function scanForInfectedFiles(
     try {
         console.info('Executing clamav')
 
+        // try using clamdscan as a test on this branch
+        const avResult = spawnSync('/opt/bin/clamdscan', [
+            '--stdout',
+            '-v',
+            '--config-file=/opt/bin/clamd.conf',
+            '--stream',
+            pathToScan,
+        ])
+
+        /*
         const avResult = spawnSync(config.pathToClamav, [
             '--stdout',
             '-v',
@@ -184,6 +194,7 @@ function scanForInfectedFiles(
             config.pathToDefintions,
             pathToScan,
         ])
+        */
 
         console.info('stderror', avResult.stderr && avResult.stderr.toString())
         console.info('stdout', avResult.stdout && avResult.stdout.toString())
