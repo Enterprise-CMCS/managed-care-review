@@ -108,6 +108,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             bucket: BucketShortName
         ): Promise<void | S3Error> => {
             try {
+                await waitFor(3000)
                 try {
                     await retryWithBackoff(async () => {
                         await Storage.get(filename, {
