@@ -422,7 +422,6 @@ resources:
         InstanceType: t3.medium
         ImageId: ami-0c7217cdde317cfec # Ubuntu 22.04 LTS
         IamInstanceProfile: !Ref ClamAVInstanceProfile
-        KeyName: mojo # for testing
         NetworkInterfaces:
           - AssociatePublicIpAddress: true
             DeviceIndex: '0'
@@ -459,6 +458,25 @@ resources:
             systemctl start clamav-freshclam
             systemctl enable clamav-daemon
             systemctl start clamav-daemon
+
+  MCRInternalZone:
+    Type: AWS::Route53::HostedZone
+    DependsOn: ClamAVInstance
+    Properties:
+      Name: mc-review.local
+      VPCs:
+        - VPCId: vpc-0b59998530ab3d795 # for now, testing
+          VPCRegion: !Ref AWS::Region
+
+  ClamAVRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref ClamAVInternalZone
+      Name: clamav.mc-review.local
+      Type: A
+      ResourceRecords:
+        - !GetAtt ClamAVInstance.PrivateIp
+      TTL: '300'
 
   Outputs:
     DocumentUploadsBucketName:
