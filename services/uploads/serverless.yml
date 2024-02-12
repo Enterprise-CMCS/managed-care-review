@@ -177,7 +177,7 @@ resources:
       - !Equals ['${sls:stage}', 'main']
       - !Equals ['${sls:stage}', 'val']
       - !Equals ['${sls:stage}', 'prod']
-      - !Equals ['${sls:stage}', 'mtbuildclamavserver']
+      - !Equals ['${sls:stage}', 'mtscanfromlambda']
 
   Resources:
     DocumentUploadsBucket:
@@ -459,24 +459,26 @@ resources:
             systemctl enable clamav-daemon
             systemctl start clamav-daemon
 
-  MCRInternalZone:
-    Type: AWS::Route53::HostedZone
-    DependsOn: ClamAVInstance
-    Properties:
-      Name: mc-review.local
-      VPCs:
-        - VPCId: vpc-0b59998530ab3d795 # for now, testing
-          VPCRegion: !Ref AWS::Region
+    MCRInternalZone:
+      Type: AWS::Route53::HostedZone
+      Condition: IsDevValProd
+      Properties:
+        Name: mc-review.local
+        VPCs:
+          - VPCId: vpc-0b59998530ab3d795 # for now, testing
+            VPCRegion: !Ref AWS::Region
 
-  ClamAVRecordSet:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      HostedZoneId: !Ref ClamAVInternalZone
-      Name: clamav.mc-review.local
-      Type: A
-      ResourceRecords:
-        - !GetAtt ClamAVInstance.PrivateIp
-      TTL: '300'
+    ClamAVRecordSet:
+      Type: AWS::Route53::RecordSet
+      Condition: IsDevValProd
+      DependsOn: ClamAVInstance
+      Properties:
+        HostedZoneId: !Ref MCRInternalZone
+        Name: clamav.mc-review.local
+        Type: A
+        ResourceRecords:
+          - !GetAtt ClamAVInstance.PrivateIp
+        TTL: '300'
 
   Outputs:
     DocumentUploadsBucketName:
