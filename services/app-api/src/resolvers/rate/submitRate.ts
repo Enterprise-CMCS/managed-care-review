@@ -171,11 +171,7 @@ export function submitRate(
                           formData.rateCertificationName ??
                           generatedRateCertName,
                   }
-                : {
-                      rateCertificationName:
-                          draftRateRevision.formData.rateCertificationName ??
-                          generatedRateCertName,
-                  },
+                : undefined,
         })
 
         if (submittedRate instanceof Error) {
