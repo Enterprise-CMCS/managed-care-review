@@ -9,7 +9,7 @@ import { sharedTestPrismaClient } from './storeHelpers'
 import { insertDraftRate } from '../postgres/contractAndRates/insertRate'
 import { updateDraftRate } from '../postgres/contractAndRates/updateDraftRate'
 
-import type { RateType, RateRevisionType } from '../domain-models'
+import type { RateType } from '../domain-models'
 import type { InsertRateArgsType } from '../postgres/contractAndRates/insertRate'
 import type { RateFormEditable } from '../postgres/contractAndRates/updateDraftRate'
 import type { ApolloServer } from 'apollo-server-lambda'
@@ -39,12 +39,16 @@ const fetchTestRateById = async (
 const createAndSubmitTestRate = async (
     server: ApolloServer,
     rateData?: InsertRateArgsType
-): Promise<RateRevisionType> => {
+): Promise<RateType> => {
     const rate = await createTestRate(rateData)
     return await must(submitTestRate(server, rate.id, 'Initial submission'))
 }
 
-const submitTestRate = async (server: ApolloServer, rateID: string, submittedReason: string) => {
+const submitTestRate = async (
+    server: ApolloServer,
+    rateID: string,
+    submittedReason: string
+): Promise<RateType> => {
     const updateResult = await server.executeOperation({
         query: SUBMIT_RATE,
         variables: {
@@ -79,7 +83,7 @@ const unlockTestRate = async (
         variables: {
             input: {
                 rateID,
-                unlockReason,
+                unlockedReason: unlockReason,
             },
         },
     })
@@ -103,10 +107,10 @@ const createTestRate = async (
     rateData?: Partial<InsertRateArgsType>
 ): Promise<RateType> => {
     const prismaClient = await sharedTestPrismaClient()
-    const defaultRateData = { ...mockDraftRate(), stateCode: 'FL'}
-    const initialData ={
+    const defaultRateData = { ...mockDraftRate(), stateCode: 'FL' }
+    const initialData = {
         ...defaultRateData,
-        ...rateData // override with any new fields passed in
+        ...rateData, // override with any new fields passed in
     }
     const programs = initialData.stateCode
         ? [must(findStatePrograms(initialData.stateCode))[0]]
@@ -116,19 +120,7 @@ const createTestRate = async (
 
     const draftRateData = mockInsertRateArgs({
         rateProgramIDs: programIDs,
-        actuaryCommunicationPreference: undefined,
-        addtlActuaryContacts: [],
-       amendmentEffectiveDateEnd: undefined,
-       amendmentEffectiveDateStart: undefined,
-        certifyingActuaryContacts: [],
-       id: 'd2404a25-e1b9-4441-92b2-0fb8c8a6ae3b',
-        packagesWithSharedRateCerts: [],
-       rateCapitationType: undefined,
-       rateCertificationName: undefined,
-       rateDateCertified: undefined,
-       rateDateEnd: undefined,
-       rateDateStart: undefined,
-        // ...rateData
+        ...rateData,
     })
 
     return must(await insertDraftRate(prismaClient, draftRateData))
