@@ -1,4 +1,5 @@
 import { screen, waitFor } from '@testing-library/react'
+
 import { renderWithProviders } from '../../testHelpers'
 import { RateEdit } from './RateEdit'
 import {
@@ -44,7 +45,9 @@ describe('RateEdit', () => {
             })
 
             await waitFor(() => {
-                expect(screen.queryByTestId('rate-edit')).toBeInTheDocument()
+                expect(
+                    screen.queryByTestId('single-rate-edit')
+                ).toBeInTheDocument()
             })
         })
     })

@@ -4,14 +4,20 @@ import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
 } from '../attributeHelper'
-import type { RateFormDataType } from '../../domain-models'
 import { isStateUser } from '../../domain-models'
 import { logError } from '../../logger'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import type { LDService } from '../../launchDarkly/launchDarkly'
+import { generateRateCertificationName } from './generateRateCertificationName'
+import { findStatePrograms } from '../../../../app-web/src/common-code/healthPlanFormDataType/findStatePrograms'
+import { nullsToUndefined } from '../../domain-models/nullstoUndefined'
 
+/*
+    Submit rate will change a draft revision to submitted and generate a rate name if one is missing
+    Also, if form data is passed in (such as on standalone rate edits) the form data itself will be updated
+*/
 export function submitRate(
     store: Store,
     launchDarkly: LDService
@@ -86,15 +92,33 @@ export function submitRate(
             })
         }
 
+        // prepare to generate rate cert name - either use new form data coming down on submit or unsubmitted submission data already in database
+        const stateCode = unsubmittedRate.stateCode
+        const stateNumber = unsubmittedRate.stateNumber
+        const statePrograms = findStatePrograms(stateCode)
+        const generatedRateCertName = formData
+            ? generateRateCertificationName(
+                  nullsToUndefined(formData),
+                  stateCode,
+                  stateNumber,
+                  statePrograms
+              )
+            : generateRateCertificationName(
+                  draftRateRevision.formData,
+                  stateCode,
+                  stateNumber,
+                  statePrograms
+              )
+
+        // combine existing db draft data with any form data added on submit
         // call submit rate handler
         const submittedRate = await store.submitRate({
             rateID,
             submittedByUserID: user.id,
-            submitReason,
+            submitReason: submitReason ?? 'Initial submission',
             formData: formData
                 ? {
-                      rateType: (formData.rateType ??
-                          undefined) as RateFormDataType['rateType'],
+                      rateType: formData.rateType ?? undefined,
                       rateCapitationType:
                           formData.rateCapitationType ?? undefined,
                       rateDocuments: formData.rateDocuments ?? [],
@@ -108,8 +132,6 @@ export function submitRate(
                       amendmentEffectiveDateEnd:
                           formData.amendmentEffectiveDateEnd ?? undefined,
                       rateProgramIDs: formData.rateProgramIDs ?? [],
-                      rateCertificationName:
-                          formData.rateCertificationName ?? undefined,
                       certifyingActuaryContacts:
                           formData.certifyingActuaryContacts
                               ? formData.certifyingActuaryContacts.map(
@@ -140,7 +162,14 @@ export function submitRate(
                       actuaryCommunicationPreference:
                           formData.actuaryCommunicationPreference ?? undefined,
                       packagesWithSharedRateCerts:
-                          formData.packagesWithSharedRateCerts ?? [],
+                          formData.packagesWithSharedRateCerts.map((pkg) => ({
+                              packageName: pkg.packageName ?? undefined,
+                              packageId: pkg.packageId ?? undefined,
+                              packageStatus: pkg.packageStatus ?? undefined,
+                          })),
+                      rateCertificationName:
+                          formData.rateCertificationName ??
+                          generatedRateCertName,
                   }
                 : undefined,
         })

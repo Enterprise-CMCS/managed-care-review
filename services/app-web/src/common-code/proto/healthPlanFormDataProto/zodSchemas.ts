@@ -96,6 +96,7 @@ const stateContactSchema = z.object({
 })
 
 const actuaryContactSchema = z.object({
+    id: z.string().optional(),
     name: z.string().optional(),
     titleRole: z.string().optional(),
     email: z.string().optional(),
