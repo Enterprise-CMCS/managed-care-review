@@ -465,7 +465,7 @@ resources:
       Properties:
         Name: mc-review.local
         VPCs:
-          - VPCId: vpc-0b59998530ab3d795 # for now, testing
+          - VPCId: ${self:custom.vpcId}
             VPCRegion: !Ref AWS::Region
 
     ClamAVRecordSet:
