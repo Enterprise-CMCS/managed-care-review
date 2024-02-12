@@ -187,7 +187,6 @@ resources:
       - !Equals ['${sls:stage}', 'main']
       - !Equals ['${sls:stage}', 'val']
       - !Equals ['${sls:stage}', 'prod']
-      - !Equals ['${sls:stage}', 'mtbuildclamavserver']
 
   Resources:
     DocumentUploadsBucket:
@@ -432,7 +431,6 @@ resources:
         InstanceType: t3.medium
         ImageId: ami-0c7217cdde317cfec # Ubuntu 22.04 LTS
         IamInstanceProfile: !Ref ClamAVInstanceProfile
-        KeyName: mojo # for testing
         NetworkInterfaces:
           - AssociatePublicIpAddress: true
             DeviceIndex: '0'
