@@ -21,6 +21,9 @@ interface ClamAVConfig {
     pathToFreshclam: string
     pathToConfig: string
     pathToDefintions: string
+
+    pathToClamdScan: string
+    pathToClamdConfig: string
 }
 
 function NewClamAV(config: Partial<ClamAVConfig>, s3Client: S3UploadsClient) {
@@ -32,10 +35,13 @@ function NewClamAV(config: Partial<ClamAVConfig>, s3Client: S3UploadsClient) {
         bucketName: config.bucketName,
         definitionsPath: config.definitionsPath,
 
-        pathToClamav: config.pathToClamav || '/opt/bin/clamdscan',
+        pathToClamav: config.pathToClamav || '/opt/bin/clamscan',
         pathToFreshclam: config.pathToFreshclam || '/opt/bin/freshclam',
-        pathToConfig: config.pathToConfig || '/opt/bin/clamd.conf',
+        pathToConfig: config.pathToConfig || '/opt/bin/freshclam.conf',
         pathToDefintions: config.pathToDefintions || '/tmp',
+
+        pathToClamdScan: config.pathToClamdScan || '/opt/bin/clamdscan',
+        pathToClamdConfig: config.pathToClamdConfig || '/opt/bin/clamd.conf',
     }
 
     return {
@@ -178,10 +184,10 @@ function scanForInfectedFiles(
         console.info('Executing clamav')
 
         // use clamdscan to connect to our clamavd server
-        const avResult = spawnSync(config.pathToClamav, [
+        const avResult = spawnSync(config.pathToClamdScan, [
             '--stdout',
             '-v',
-            `--config-file=${config.pathToConfig}`,
+            `--config-file=${config.pathToClamdConfig}`,
             '--stream',
             pathToScan,
         ])
