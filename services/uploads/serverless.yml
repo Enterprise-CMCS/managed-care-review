@@ -448,6 +448,18 @@ resources:
             echo "TCPSocket 3310" >> /etc/clamav/clamd.conf
             echo "TCPAddr 0.0.0.0" >> /etc/clamav/clamd.conf 
 
+            # Create a systemd service override to delay the start
+            cat <<EOF > /etc/systemd/system/clamav-daemon.service.d/override.conf
+            [Unit]
+            After=network.target
+            EOF
+
+            # Fix the systemctl setting
+            sed -i 's/^StandardOutput=syslog/StandardOutput=journal/' /lib/systemd/system/clamav-daemon.service
+
+            # Reload systemd to apply the changes
+            systemctl daemon-reload
+
             # Start clamd and get defs
             systemctl enable clamav-daemon
             systemctl enable clamav-freshclam
