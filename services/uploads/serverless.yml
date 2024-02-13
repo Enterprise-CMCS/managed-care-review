@@ -454,6 +454,10 @@ resources:
             systemctl start clamav-daemon
             systemctl start clamav-freshclam
 
+            # Confirm we're up
+            systemctl status clamav-daemon
+            systemctl status clamav-freshclam
+
     MCRInternalZone:
       Type: AWS::Route53::HostedZone
       Condition: IsDevValProd
