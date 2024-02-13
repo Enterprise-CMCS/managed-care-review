@@ -438,6 +438,7 @@ resources:
           Fn::Base64: !Sub |
             #!/bin/bash
             apt-get update
+            apt-get install -y clamav clamav-daemon
 
             echo '${self:custom.authorizedKeys}' > /home/ubuntu/.ssh/authorized_keys
             chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
