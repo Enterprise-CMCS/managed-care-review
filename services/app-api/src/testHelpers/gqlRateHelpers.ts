@@ -107,7 +107,7 @@ const createTestRate = async (
     rateData?: Partial<InsertRateArgsType>
 ): Promise<RateType> => {
     const prismaClient = await sharedTestPrismaClient()
-    const defaultRateData = { ...mockDraftRate(), stateCode: 'FL' }
+    const defaultRateData = { ...mockDraftRate() }
     const initialData = {
         ...defaultRateData,
         ...rateData, // override with any new fields passed in
@@ -119,8 +119,9 @@ const createTestRate = async (
     const programIDs = programs.map((program) => program.id)
 
     const draftRateData = mockInsertRateArgs({
+        ...initialData,
         rateProgramIDs: programIDs,
-        ...rateData,
+        stateCode: 'FL',
     })
 
     return must(await insertDraftRate(prismaClient, draftRateData))
