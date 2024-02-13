@@ -139,14 +139,14 @@ const StateUserRoutes = ({
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
                         element={<SubmissionSummary />}
                     />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                        element={<StateSubmissionForm />}
+                    />
                 </Route>
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
                     element={<SubmissionRevisionSummary />}
-                />
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                    element={<StateSubmissionForm />}
                 />
                 {UniversalRoutes}
                 {stageName !== 'prod' && (
