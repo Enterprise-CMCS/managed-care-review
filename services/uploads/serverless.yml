@@ -444,20 +444,15 @@ resources:
             chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
             chmod 600 /home/ubuntu/.ssh/authorized_keys
 
-            # Install clamav 1.0.4
-            wget https://www.clamav.net/downloads/production/clamav-1.0.4.linux.x86_64.deb
-            dpkg -i clamav-1.0.4.linux.x86_64.deb
-            apt-get install -f
-
             # Write to the clamd.conf
             echo "TCPSocket 3310" >> /etc/clamav/clamd.conf
             echo "TCPAddr 0.0.0.0" >> /etc/clamav/clamd.conf 
 
             # Start clamd and get defs
-            systemctl enable clamav-freshclam
-            systemctl start clamav-freshclam
             systemctl enable clamav-daemon
+            systemctl enable clamav-freshclam
             systemctl start clamav-daemon
+            systemctl start clamav-freshclam
 
     MCRInternalZone:
       Type: AWS::Route53::HostedZone
