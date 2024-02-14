@@ -30,3 +30,12 @@ export {
     unlockTestRate,
     updateTestRate,
 } from './gqlRateHelpers'
+
+export {
+    createTestContract,
+    createAndSubmitTestContract,
+    // fetchTestContractById,
+    // submitTestContract,
+    // unlockTestContract,
+    // updateTestContract,
+} from './gqlContractHelpers'

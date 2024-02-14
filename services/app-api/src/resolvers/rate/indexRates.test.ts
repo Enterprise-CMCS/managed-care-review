@@ -1,20 +1,15 @@
 import { v4 as uuidv4 } from 'uuid'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 import INDEX_RATES from '../../../../app-graphql/src/queries/indexRates.graphql'
 import {
     constructTestPostgresServer,
-    createAndUpdateTestHealthPlanPackage,
     defaultFloridaRateProgram,
-    resubmitTestHealthPlanPackage,
-    submitTestHealthPlanPackage,
-    unlockTestHealthPlanPackage,
-    updateTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { must } from '../../testHelpers/assertionHelpers'
 import type { RateEdge, Rate } from '../../gen/gqlServer'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
-import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { formatGQLDate } from 'app-web/src/common-code/dateHelpers'
 import {
     submitTestRate,
@@ -22,31 +17,42 @@ import {
     createTestRate,
     unlockTestRate,
     updateTestRate,
+    createAndSubmitTestContract,
 } from '../../testHelpers'
 
-// eslint-disable-next-line jest/no-disabled-tests
-describe.skip('indexRates', () => {
+describe('indexRates', () => {
+    const ldService = testLDService({
+        'rate-edit-unlock': true,
+    })
     it('returns ForbiddenError for state user', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateUser = testStateUser()
 
-        // submit rates
-        await createAndSubmitTestRate(stateServer)
-        await createAndSubmitTestRate(stateServer)
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+            ldService: testLDService({
+                'rate-edit-unlock': false,
+            }),
+        })
 
         // index rates
-        const result = await stateServer.executeOperation({
-            query: INDEX_RATES,
-        })
+        const result = must(
+            await stateServer.executeOperation({
+                query: INDEX_RATES,
+            })
+        )
         expect(result.errors).toBeDefined()
     })
 
     it('returns rate reviews list for cms user with no errors', async () => {
         const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({ldService})
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
+            ldService
         })
         // first, submit 2 rates
         const submit1 = await createAndSubmitTestRate(stateServer)
@@ -64,7 +70,6 @@ describe.skip('indexRates', () => {
         const testRateIDs = [
             submit1.id,
             submit2.id,
-            // latestFormData(update1).rateInfos[0].id,
         ]
 
         expect(result.errors).toBeUndefined()
@@ -109,13 +114,13 @@ describe.skip('indexRates', () => {
         expect(testRates).toHaveLength(0)
     })
 
-    it('does not add rates when contract only packages submitted', async () => {
+    it('does not add rates when contracts without rates are submitted', async () => {
         const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
+            ldService
         })
         // baseline
         const initial = await cmsServer.executeOperation({
@@ -123,17 +128,10 @@ describe.skip('indexRates', () => {
         })
         const initialRates = initial.data?.indexRates.edges
 
-        // create and submit new contract onlysubmissions
-        const package1 = await createAndUpdateTestHealthPlanPackage(
-            stateServer,
-            { rateInfos: [], submissionType: 'CONTRACT_ONLY' }
-        )
-        const package2 = await createAndUpdateTestHealthPlanPackage(
-            stateServer,
-            { rateInfos: [], submissionType: 'CONTRACT_ONLY' }
-        )
-        await submitTestHealthPlanPackage(stateServer, package1.id)
-        await submitTestHealthPlanPackage(stateServer, package2.id)
+        // create and submit new contracts 
+        await createAndSubmitTestContract()
+        await createAndSubmitTestContract()
+        
 
         // index rates
         const result = await cmsServer.executeOperation({
@@ -149,11 +147,12 @@ describe.skip('indexRates', () => {
 
     it('does not add rates a for draft contract and rates package that is submitted later as contract only', async () => {
         const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({ldService})
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
+            ldService
         })
 
         // baseline
@@ -162,35 +161,8 @@ describe.skip('indexRates', () => {
         })
         const initialRates = initial.data?.indexRates.edges
 
-        const initialDraft =
-            await createAndUpdateTestHealthPlanPackage(stateServer)
-
         // turn to CHIP contract only, leave rates for now to emulate form behviavor
-        const updatedToContractOnly = await updateTestHealthPlanPackage(
-            stateServer,
-            initialDraft.id,
-            {
-                submissionType: 'CONTRACT_ONLY',
-                federalAuthorities: ['WAIVER_1115'],
-                populationCovered: 'CHIP',
-                contractAmendmentInfo: {
-                    modifiedProvisions: {
-                        modifiedBenefitsProvided: false,
-                        modifiedGeoAreaServed: false,
-                        modifiedMedicaidBeneficiaries: true,
-                        modifiedMedicalLossRatioStandards: false,
-                        modifiedOtherFinancialPaymentIncentive: false,
-                        modifiedEnrollmentProcess: false,
-                        modifiedGrevienceAndAppeal: false,
-                        modifiedNetworkAdequacyStandards: false,
-                        modifiedLengthOfContract: true,
-                        modifiedNonRiskPaymentArrangements: false,
-                    },
-                },
-            }
-        )
-
-        await submitTestHealthPlanPackage(stateServer, updatedToContractOnly.id)
+        await createAndSubmitTestContract()
 
         // index rates
         const result = await cmsServer.executeOperation({
@@ -206,12 +178,13 @@ describe.skip('indexRates', () => {
 
     it('returns a rate with history with correct data in each revision', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer()
+        const server = await constructTestPostgresServer({ldService})
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
+            ldService
         })
 
         // baseline
@@ -259,49 +232,49 @@ describe.skip('indexRates', () => {
             ...initialRateInfos(),
         })
 
-        // Unlock both -  one to be rate edited in place, the other to add new rate
+        // Unlock one to be rate edited in place
         const firstRateUnlocked = await unlockTestRate(
             cmsServer,
             firstRate.id,
             'Unlock to edit an existing rate'
         )
+
         const secondRateUnlocked = await unlockTestRate(
             cmsServer,
             secondRate.id,
-            'Unlock to add a new rate'
+            'Unlock to edit an existing rate'
         )
 
         // update one with a new rate start and end date
-        const existingFormData = latestFormData(firstRateUnlocked)
-        expect(existingFormData.rateInfos).toHaveLength(1)
+        const existingFormData = firstRateUnlocked.draftRevision?.formData
+        expect(existingFormData).toBeDefined()
         await updateTestRate(firstRate.id, {
             rateDateStart: new Date(Date.UTC(2025, 1, 1)),
             rateDateEnd: new Date(Date.UTC(2027, 1, 1)),
         })
 
         // update the other with additional new rate
-        const existingFormData2 = latestFormData(secondRateUnlocked)
-        expect(existingFormData2.rateInfos).toHaveLength(1)
-        await updateTestRate(secondRate.id, {
+        const existingFormData2 = secondRateUnlocked.draftRevision?.formData
+        expect(existingFormData2).toBeDefined()
+        const newRate = await createAndSubmitTestRate(server, {
             ...initialRateInfos(),
-            id: uuidv4(), // this is a new rate
             rateDateStart: new Date(Date.UTC(2030, 1, 1)),
             rateDateEnd: new Date(Date.UTC(2030, 12, 1)),
         })
-        // resubmit both
-        const firstPkgResubmitted = await submitTestRate(
+
+        // resubmit 
+        const firstRateResubmitted = await submitTestRate(
             server,
             firstRate.id,
             'Resubmit with edited rate description'
         )
-        const secondPkgResubmitted = await submitTestRate(
+        const secondRateResubmitted = await submitTestRate(
             server,
             secondRate.id,
             'Resubmit with an additional rate added'
         )
 
-        // fetch both rates and check that the latest data is correct
-
+        // fetch rates and check that the latest data is correct
         // index rates
         const result = await cmsServer.executeOperation({
             query: INDEX_RATES,
@@ -310,21 +283,21 @@ describe.skip('indexRates', () => {
             (edge: RateEdge) => edge.node
         )
         expect(result.errors).toBeUndefined()
-        expect(rates).toHaveLength(initialRates.length + 3) // we have made three new rates
+        expect(rates).toHaveLength(initialRates.length + 3) // we have made 2 new rates
 
         const resubmittedWithEdits = rates.find((test: Rate) => {
             return (
-                test.id === latestFormData(firstPkgResubmitted).rateInfos[0].id
+                test.id === firstRateResubmitted.id
             )
         })
         const resubmittedUnchanged = rates.find((test: Rate) => {
             return (
-                test.id == latestFormData(secondPkgResubmitted).rateInfos[0].id
+                test.id == secondRateResubmitted.id
             )
         })
         const newlyAdded = rates.find((test: Rate) => {
             return (
-                test.id === latestFormData(secondPkgResubmitted).rateInfos[1].id
+                test.id === newRate.id
             )
         })
 
@@ -389,12 +362,13 @@ describe.skip('indexRates', () => {
 
     it('synthesizes the right statuses as a rate is submitted/unlocked/etc', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer()
+        const server = await constructTestPostgresServer({ldService})
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
+            ldService
         })
 
         // First, create new submissions
@@ -441,12 +415,13 @@ describe.skip('indexRates', () => {
 
     it('returns the right revisions as a rate is submitted/unlocked/etc', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer()
+        const server = await constructTestPostgresServer({ldService})
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
+            ldService
         })
 
         // First, create new rates
@@ -455,19 +430,19 @@ describe.skip('indexRates', () => {
         const relockedRate2 = await createAndSubmitTestRate(server)
 
         // unlock two
-        await unlockTestHealthPlanPackage(
+        await unlockTestRate(
             cmsServer,
             unlockedRate2.id,
             'Test reason'
         )
-        await unlockTestHealthPlanPackage(
+        await unlockTestRate(
             cmsServer,
             relockedRate2.id,
             'Test reason'
         )
 
         // resubmit one
-        await resubmitTestHealthPlanPackage(
+        await submitTestRate(
             server,
             relockedRate2.id,
             'Test first resubmission'
@@ -533,11 +508,12 @@ describe.skip('indexRates', () => {
 
     it('return a list of submitted rates from multiple states', async () => {
         const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({ldService})
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
+            ldService
         })
         const otherStateServer = await constructTestPostgresServer({
             context: {
@@ -546,6 +522,7 @@ describe.skip('indexRates', () => {
                     email: 'aang@mn.gov',
                 }),
             },
+            ldService
         })
         // submit packages from two different states
         const defaultState1 = await createAndSubmitTestRate(stateServer)
@@ -577,7 +554,7 @@ describe.skip('indexRates', () => {
             if ([defaultState1.id, defaultState2.id].includes(rate.id)) {
                 defaultStateRates.push(rate)
             } else if (
-                [latestFormData(otherState1).rateInfos[0].id].includes(rate.id)
+                otherState1.id === rate.id
             ) {
                 otherStateRates.push(rate)
             }
