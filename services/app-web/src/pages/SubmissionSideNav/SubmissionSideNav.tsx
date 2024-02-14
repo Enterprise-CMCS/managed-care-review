@@ -125,11 +125,14 @@ export const SubmissionSideNav = () => {
         return <GenericErrorPage />
     }
 
-    // Current Revision is the last SUBMITTED revision, SubmissionSummary doesn't display data that is currently being edited
-    // Since we've already bounced on DRAFT packages, this _should_ exist.
-    const edge = pkg.revisions.find((rEdge) => rEdge.node.submitInfo)
+    // Current Revision is either the last submitted revision (cms users) or the most recent revision (for state users looking submission form)
+    const edge =
+        (submissionStatus === 'UNLOCKED' || submissionStatus === 'DRAFT') &&
+        loggedInUser.role === 'STATE_USER'
+            ? pkg.revisions[0]
+            : pkg.revisions.find((rEdge) => rEdge.node.submitInfo)
     if (!edge) {
-        const errMsg = `No currently submitted revision for this package: ${pkg.id}, programming error. `
+        const errMsg = `Not able to determine current revision for sidebar: ${pkg.id}, programming error.`
         recordJSException(errMsg)
         return <GenericErrorPage />
     }

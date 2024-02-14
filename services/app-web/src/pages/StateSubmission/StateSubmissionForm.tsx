@@ -239,7 +239,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
         latestRevision.unlockInfo || undefined
 
     return (
-        <>
+        <div>
             <div className={styles.stepIndicator}>
                 <DynamicStepIndicator
                     formPages={activeFormPages(formDataFromLatestRevision)}
@@ -333,6 +333,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     <Route path="*" element={<Error404 />} />
                 </Routes>
             </StateSubmissionContainer>
-        </>
+        </div>
     )
 }
