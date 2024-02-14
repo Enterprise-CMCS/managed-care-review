@@ -29,7 +29,7 @@ permissions:
 jobs:
   # deploy the OIDC service first, as subsequent deploys may depend on updated OIDC permissions
   github-oidc:
-    if: ${{ contains(inputs.changed_services, 'github-oidc') || contains(inputs.changed_services, 'uploads') }}
+    if: ${{ contains(inputs.changed_services, 'github-oidc') }}
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-20.04
     steps:
