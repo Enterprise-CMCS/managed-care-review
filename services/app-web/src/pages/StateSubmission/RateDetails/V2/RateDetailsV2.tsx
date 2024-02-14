@@ -63,8 +63,8 @@ const generateFormValues = (
 
     return {
         id: rateID,
-        rateType: rateInfo?.rateType,
-        rateCapitationType: rateInfo?.rateCapitationType,
+        rateType: rateInfo?.rateType ?? undefined,
+        rateCapitationType: rateInfo?.rateCapitationType ?? undefined,
         rateDateStart: formatForForm(rateInfo?.rateDateStart),
         rateDateEnd: formatForForm(rateInfo?.rateDateEnd),
         rateDateCertified: formatForForm(rateInfo?.rateDateCertified),
@@ -88,7 +88,7 @@ const generateFormValues = (
             rateInfo?.certifyingActuaryContacts
         ),
         actuaryCommunicationPreference:
-            rateInfo?.actuaryCommunicationPreference,
+            rateInfo?.actuaryCommunicationPreference ?? undefined,
         packagesWithSharedRateCerts:
             rateInfo?.packagesWithSharedRateCerts ?? [],
     }
@@ -104,6 +104,7 @@ export const rateErrorHandling = (
 }
 
 type RateDetailsV2Props = {
+    type: 'SINGLE' | 'MULTI'
     showValidations?: boolean
     rates: Rate[]
     submitRate: SubmitOrUpdateRate
@@ -111,6 +112,7 @@ type RateDetailsV2Props = {
 }
 export const RateDetailsV2 = ({
     showValidations = false,
+    type,
     rates,
     submitRate,
 }: RateDetailsV2Props): React.ReactElement => {
@@ -122,7 +124,7 @@ export const RateDetailsV2 = ({
         )
     }
     const { getKey } = useS3()
-
+    const displayAsStandaloneRate = type === 'SINGLE'
     // Form validation
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const rateDetailsFormSchema = RateDetailsFormSchema({
@@ -334,6 +336,11 @@ export const RateDetailsV2 = ({
                                 />
                             </fieldset>
                             <PageActions
+                                pageVariant={
+                                    displayAsStandaloneRate
+                                        ? 'STANDALONE'
+                                        : undefined
+                                }
                                 backOnClick={async () => {
                                     if (dirty) {
                                         await handlePageAction(
@@ -351,17 +358,21 @@ export const RateDetailsV2 = ({
                                         )
                                     }
                                 }}
-                                saveAsDraftOnClick={async () => {
-                                    await handlePageAction(
-                                        rateFormValues.rates,
-                                        setSubmitting,
-                                        {
-                                            type: 'SAVE_AS_DRAFT',
-                                            redirectPath:
-                                                'DASHBOARD_SUBMISSIONS',
-                                        }
-                                    )
-                                }}
+                                saveAsDraftOnClick={
+                                    displayAsStandaloneRate
+                                        ? undefined
+                                        : async () => {
+                                              await handlePageAction(
+                                                  rateFormValues.rates,
+                                                  setSubmitting,
+                                                  {
+                                                      type: 'SAVE_AS_DRAFT',
+                                                      redirectPath:
+                                                          'DASHBOARD_SUBMISSIONS',
+                                                  }
+                                              )
+                                          }
+                                }
                                 disableContinue={
                                     shouldValidate &&
                                     !!Object.keys(errors).length

@@ -19,6 +19,7 @@ describe('RateDetails', () => {
                         path={RoutesRecord.RATE_EDIT}
                         element={
                             <RateDetailsV2
+                                type="SINGLE"
                                 rates={[rate]}
                                 submitRate={mockSubmit}
                             />

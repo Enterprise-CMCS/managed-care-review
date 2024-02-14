@@ -5,9 +5,9 @@ import { PageActionsContainer } from './PageActionsContainer'
 import { ActionButton } from '../../../components/ActionButton'
 import { useTealium } from '../../../hooks'
 
-/*  
+/*
    This is the main call to action element displayed at the bottom of form pages.
-   We have a preference to use buttons even when a link behavior (redirect) is being used. This to ensure unity of the UI and experience across pages, since different pages have different logic. 
+   We have a preference to use buttons even when a link behavior (redirect) is being used. This to ensure unity of the UI and experience across pages, since different pages have different logic.
 */
 type PageActionProps = {
     backOnClick: React.MouseEventHandler<HTMLButtonElement>
@@ -15,7 +15,7 @@ type PageActionProps = {
     continueOnClick?: React.MouseEventHandler<HTMLButtonElement> // the reason this isn't required is the continue button is a type="submit" so is can use the form onsubmit as its event handler.
     actionInProgress?: boolean // disable all buttons e.g. while an async request is taking place
     disableContinue?: boolean // disable continue when errors outside formik have occured (e.g. relating to documents)
-    pageVariant?: 'FIRST' | 'LAST' | 'EDIT_FIRST'
+    pageVariant?: 'FIRST' | 'LAST' | 'EDIT_FIRST' | 'STANDALONE'
 }
 
 export const PageActions = (props: PageActionProps): React.ReactElement => {
@@ -30,6 +30,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
     const isFirstPage = pageVariant === 'FIRST'
     const isLastPage = pageVariant === 'LAST'
     const isFirstPageEditing = pageVariant === 'EDIT_FIRST'
+    const isStandalonePage = pageVariant === 'STANDALONE'
     const { logTealiumEvent } = useTealium()
 
     const saveAsDraftOnClickWithLogging = (
@@ -63,7 +64,9 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                     disabled={actionInProgress}
                     onClick={actionInProgress ? undefined : backOnClick}
                 >
-                    {!isFirstPage && !isFirstPageEditing ? 'Back' : 'Cancel'}
+                    {!isFirstPage && !isFirstPageEditing && !isStandalonePage
+                        ? 'Back'
+                        : 'Cancel'}
                 </ActionButton>
 
                 <ActionButton
@@ -79,7 +82,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                     animationTimeout={1000}
                     loading={actionInProgress && !disableContinue}
                 >
-                    {!isLastPage ? 'Continue' : 'Submit'}
+                    {!isLastPage && !isStandalonePage ? 'Continue' : 'Submit'}
                 </ActionButton>
             </ButtonGroup>
         </PageActionsContainer>
