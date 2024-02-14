@@ -108,7 +108,6 @@ functions:
       - !Ref ClamAvLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
     vpc:
-      securityGroupIds: ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
     environment:
       stage: ${sls:stage}
@@ -427,7 +426,6 @@ resources:
             DeviceIndex: '0'
             GroupSet:
               - !Ref ClamAVSecurityGroup
-              - ${self:custom.sgId}
             SubnetId: !Sub ${self:custom.publicSubnetA}
         Tags:
           - Key: Name
