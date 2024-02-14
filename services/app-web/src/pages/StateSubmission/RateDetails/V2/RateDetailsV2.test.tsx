@@ -44,7 +44,7 @@ describe('RateDetails', () => {
                 screen.getByText('Upload one rate certification document')
             ).toBeInTheDocument()
             expect(
-                screen.getByRole('button', { name: 'Continue' })
+                screen.getByRole('button', { name: 'Submit' })
             ).not.toHaveAttribute('aria-disabled')
         })
 
