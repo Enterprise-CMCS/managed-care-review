@@ -481,7 +481,7 @@ resources:
       Type: AWS::Route53::HostedZone
       Condition: IsDevValProd
       Properties:
-        Name: mc-review.local
+        Name: mc-review-test.local
         VPCs:
           - VPCId: ${self:custom.vpcId}
             VPCRegion: !Ref AWS::Region
@@ -492,7 +492,7 @@ resources:
       DependsOn: ClamAVInstance
       Properties:
         HostedZoneId: !Ref MCRInternalZone
-        Name: clamav-${sls:stage}.mc-review.local
+        Name: clamav-${sls:stage}.mc-review-test.local
         Type: A
         ResourceRecords:
           - !GetAtt ClamAVInstance.PrivateIp
