@@ -76,14 +76,14 @@ const submitTestRate = async (
 const unlockTestRate = async (
     server: ApolloServer,
     rateID: string,
-    unlockReason: string
+    unlockedReason: string
 ) => {
     const updateResult = await server.executeOperation({
         query: UNLOCK_RATE,
         variables: {
             input: {
                 rateID,
-                unlockedReason: unlockReason,
+                unlockedReason,
             },
         },
     })

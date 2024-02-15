@@ -65,35 +65,4 @@ const createTestContract = async (
     return must(await insertDraftContract(prismaClient, draftContractData))
 }
 
-// const updateTestContract = async (
-//     contractID: string,
-//     server: ApolloServer,
-//     contract?: Partial<ContractFormDataType>
-// ): Promise<ContractType> => {
-//     const input = { contractID }
-//     const result = await server.executeOperation({
-//         query: UPDATE_CONTRACT,
-//         variables: {
-//             input
-//         },
-//     })
-
-//     if (result.errors)
-//         throw new Error(
-//             `fetchTestContractById query failed with errors ${result.errors}`
-//         )
-
-//     if (!result.data) {
-//         throw new Error('fetchTestContractById returned nothing')
-//     }
-
-//     return result.data.fetchContract.contract
-// }
-
-export {
-    createTestContract,
-    createAndSubmitTestContract,
-    // submitTestContract,
-    // unlockTestContract,
-    // updateTestContract,
-}
+export { createTestContract, createAndSubmitTestContract }
