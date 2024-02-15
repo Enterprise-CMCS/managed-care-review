@@ -12,14 +12,6 @@ export async function scanFiles(
     bucket: string,
     scanDir: string
 ): Promise<string[] | Error> {
-    // fetch definition files
-    console.info('Download AV Definitions')
-    const defsRes = await clamAV.downloadAVDefinitions()
-    if (defsRes) {
-        console.error('failed to fetch definitions')
-        return defsRes
-    }
-
     // clamScan wants files to be top level in the scanned directory, so we map each key to a UUID
     const filemap: { [filename: string]: string } = {}
     for (const key of keys) {

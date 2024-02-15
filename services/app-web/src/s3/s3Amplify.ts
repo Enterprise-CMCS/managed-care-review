@@ -99,8 +99,8 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
         },
         /*  
             Poll for scanning completion
-            - We start polling after 20s, which is the estimated time it takes scanning to start to resolve.
-            - In total, each file could be up to 40 sec in a loading state (20s wait for scanning + 8s of retries + extra time for uploading and scanning api requests to resolve)
+            - We start polling after 3s, which is the estimated time it takes scanning to start to resolve.
+            - We then retry with an exponential backoff for up to 15s. Most scans take < 1s, plus some additional time for tagging and response, so by 15s a file should be tagged.
             - While the file is scanning, returns 403. When scanning is complete, the resource returns 200
         */
         scanFile: async (
@@ -108,7 +108,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             bucket: BucketShortName
         ): Promise<void | S3Error> => {
             try {
-                await waitFor(20000)
+                await waitFor(3000)
                 try {
                     await retryWithBackoff(async () => {
                         await Storage.get(filename, {
@@ -213,7 +213,7 @@ const waitFor = (delay = 1000) =>
 const retryWithBackoff = async (
     fn: () => Promise<void | S3Error>,
     retryCount = 0,
-    maxRetries = 6,
+    maxRetries = 4,
     err: null | S3Error = null
 ): Promise<void | S3Error> => {
     if (retryCount > maxRetries) {
