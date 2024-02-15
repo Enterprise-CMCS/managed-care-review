@@ -69,7 +69,7 @@ describe('thirdPartyAPIAccess', () => {
                 body: '{"query":"query IndexRates { indexRates { totalCount edges { node {  id } } } }"}',
                 failOnStatusCode: false,
             }).then(res => {
-                expect(res.status).to.equal(200)
+                expect(res.status).to.equal(200) // okay 
             })
 
         })        

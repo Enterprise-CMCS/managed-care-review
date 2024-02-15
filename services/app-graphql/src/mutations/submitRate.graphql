@@ -52,6 +52,7 @@ mutation submitRate($input: SubmitRateInput!) {
                     rateProgramIDs,
                     rateCertificationName,
                     certifyingActuaryContacts {
+                        id
                         name
                         titleRole
                         email
@@ -59,6 +60,7 @@ mutation submitRate($input: SubmitRateInput!) {
                         actuarialFirmOther
                     },
                     addtlActuaryContacts {
+                        id
                         name
                         titleRole
                         email

@@ -37,7 +37,7 @@ import {
     UploadQuestions,
 } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
-import { RateSummary } from '../SubmissionSummary/RateSummary'
+import { RateSummary } from '../RateSummary'
 import { RateEdit } from '../RateEdit/RateEdit'
 import { APIAccess } from '../APIAccess/APIAccess'
 
@@ -109,16 +109,16 @@ const StateUserRoutes = ({
                     element={<NewStateSubmissionForm />}
                 />
                 {showRatePages && (
-                    <Route
-                        path={RoutesRecord.RATE_EDIT}
-                        element={<RateEdit />}
-                    />
-                )}
-                {showRatePages && (
-                    <Route
-                        path={RoutesRecord.RATES_SUMMARY}
-                        element={<RateSummary />}
-                    />
+                    <>
+                        <Route
+                            path={RoutesRecord.RATES_SUMMARY}
+                            element={<RateSummary />}
+                        />
+                        <Route
+                            path={RoutesRecord.RATE_EDIT}
+                            element={<RateEdit />}
+                        />
+                    </>
                 )}
                 <Route element={<SubmissionSideNav />}>
                     {showQuestionResponse && (

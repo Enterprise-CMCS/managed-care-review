@@ -18,6 +18,8 @@ import {
     Loading,
 } from '../../components'
 import { getCurrentRevisionFromHealthPlanPackage } from '../../gqlHelpers'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../common-code/featureFlags'
 
 /**
  * We only pull a subset of data out of the submission and revisions for display in Dashboard
@@ -28,7 +30,18 @@ export const StateDashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
     const location = useLocation()
 
-    const { loading, data, error } = useIndexHealthPlanPackagesQuery()
+    // Force use network until we have all the APIs in use and we can reimplement cacheing
+    const ldClient = useLDClient()
+    const useContractAndRatesAPI: boolean = ldClient?.variation(
+        featureFlags.RATE_EDIT_UNLOCK.flag,
+        featureFlags.RATE_EDIT_UNLOCK.defaultValue
+    )
+
+    const { loading, data, error } = useIndexHealthPlanPackagesQuery({
+        fetchPolicy: useContractAndRatesAPI
+            ? 'network-only'
+            : 'cache-and-network',
+    })
 
     if (error) {
         handleApolloError(error, true)
