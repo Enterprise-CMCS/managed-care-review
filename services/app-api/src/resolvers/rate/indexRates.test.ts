@@ -18,6 +18,7 @@ import {
     unlockTestRate,
     updateTestRate,
     createAndSubmitTestContract,
+    createTestContract,
 } from '../../testHelpers'
 
 describe('indexRates', () => {
@@ -47,12 +48,12 @@ describe('indexRates', () => {
 
     it('returns rate reviews list for cms user with no errors', async () => {
         const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer({ldService})
+        const stateServer = await constructTestPostgresServer({ ldService })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService
+            ldService,
         })
         // first, submit 2 rates
         const submit1 = await createAndSubmitTestRate(stateServer)
@@ -67,10 +68,7 @@ describe('indexRates', () => {
 
         expect(result.data).toBeDefined()
         const ratesIndex = result.data?.indexRates
-        const testRateIDs = [
-            submit1.id,
-            submit2.id,
-        ]
+        const testRateIDs = [submit1.id, submit2.id]
 
         expect(result.errors).toBeUndefined()
         const matchedTestRates: Rate[] = ratesIndex.edges
@@ -120,7 +118,7 @@ describe('indexRates', () => {
             context: {
                 user: cmsUser,
             },
-            ldService
+            ldService,
         })
         // baseline
         const initial = await cmsServer.executeOperation({
@@ -128,10 +126,9 @@ describe('indexRates', () => {
         })
         const initialRates = initial.data?.indexRates.edges
 
-        // create and submit new contracts 
+        // create and submit new contracts
         await createAndSubmitTestContract()
         await createAndSubmitTestContract()
-        
 
         // index rates
         const result = await cmsServer.executeOperation({
@@ -147,12 +144,11 @@ describe('indexRates', () => {
 
     it('does not add rates a for draft contract and rates package that is submitted later as contract only', async () => {
         const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer({ldService})
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService
+            ldService,
         })
 
         // baseline
@@ -162,7 +158,7 @@ describe('indexRates', () => {
         const initialRates = initial.data?.indexRates.edges
 
         // turn to CHIP contract only, leave rates for now to emulate form behviavor
-        await createAndSubmitTestContract()
+        await createTestContract()
 
         // index rates
         const result = await cmsServer.executeOperation({
@@ -178,13 +174,13 @@ describe('indexRates', () => {
 
     it('returns a rate with history with correct data in each revision', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer({ldService})
+        const server = await constructTestPostgresServer({ ldService })
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService
+            ldService,
         })
 
         // baseline
@@ -262,7 +258,7 @@ describe('indexRates', () => {
             rateDateEnd: new Date(Date.UTC(2030, 12, 1)),
         })
 
-        // resubmit 
+        // resubmit
         const firstRateResubmitted = await submitTestRate(
             server,
             firstRate.id,
@@ -286,19 +282,13 @@ describe('indexRates', () => {
         expect(rates).toHaveLength(initialRates.length + 3) // we have made 2 new rates
 
         const resubmittedWithEdits = rates.find((test: Rate) => {
-            return (
-                test.id === firstRateResubmitted.id
-            )
+            return test.id === firstRateResubmitted.id
         })
         const resubmittedUnchanged = rates.find((test: Rate) => {
-            return (
-                test.id == secondRateResubmitted.id
-            )
+            return test.id == secondRateResubmitted.id
         })
         const newlyAdded = rates.find((test: Rate) => {
-            return (
-                test.id === newRate.id
-            )
+            return test.id === newRate.id
         })
 
         if (!resubmittedWithEdits || !resubmittedUnchanged || !newlyAdded) {
@@ -362,13 +352,13 @@ describe('indexRates', () => {
 
     it('synthesizes the right statuses as a rate is submitted/unlocked/etc', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer({ldService})
+        const server = await constructTestPostgresServer({ ldService })
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService
+            ldService,
         })
 
         // First, create new submissions
@@ -415,13 +405,13 @@ describe('indexRates', () => {
 
     it('returns the right revisions as a rate is submitted/unlocked/etc', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer({ldService})
+        const server = await constructTestPostgresServer({ ldService })
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService
+            ldService,
         })
 
         // First, create new rates
@@ -430,16 +420,8 @@ describe('indexRates', () => {
         const relockedRate2 = await createAndSubmitTestRate(server)
 
         // unlock two
-        await unlockTestRate(
-            cmsServer,
-            unlockedRate2.id,
-            'Test reason'
-        )
-        await unlockTestRate(
-            cmsServer,
-            relockedRate2.id,
-            'Test reason'
-        )
+        await unlockTestRate(cmsServer, unlockedRate2.id, 'Test reason')
+        await unlockTestRate(cmsServer, relockedRate2.id, 'Test reason')
 
         // resubmit one
         await submitTestRate(
@@ -508,12 +490,12 @@ describe('indexRates', () => {
 
     it('return a list of submitted rates from multiple states', async () => {
         const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer({ldService})
+        const stateServer = await constructTestPostgresServer({ ldService })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService
+            ldService,
         })
         const otherStateServer = await constructTestPostgresServer({
             context: {
@@ -522,7 +504,7 @@ describe('indexRates', () => {
                     email: 'aang@mn.gov',
                 }),
             },
-            ldService
+            ldService,
         })
         // submit packages from two different states
         const defaultState1 = await createAndSubmitTestRate(stateServer)
@@ -553,9 +535,7 @@ describe('indexRates', () => {
         allRates.forEach((rate) => {
             if ([defaultState1.id, defaultState2.id].includes(rate.id)) {
                 defaultStateRates.push(rate)
-            } else if (
-                otherState1.id === rate.id
-            ) {
+            } else if (otherState1.id === rate.id) {
                 otherStateRates.push(rate)
             }
             return
