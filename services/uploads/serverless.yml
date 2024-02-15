@@ -177,6 +177,7 @@ resources:
       - !Equals ['${sls:stage}', 'main']
       - !Equals ['${sls:stage}', 'val']
       - !Equals ['${sls:stage}', 'prod']
+      - !Equals ['${sls:stage}', 'mtclamavdns']
 
   Resources:
     DocumentUploadsBucket:
