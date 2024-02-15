@@ -34,6 +34,7 @@ Cypress.Commands.add(
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
             if (waitForLoad) {
                 cy.wait('@createHealthPlanPackageMutation', { timeout: 50_000 })
+                cy.wait('@fetchHealthPlanPackageWithQuestionsQuery')
                 cy.wait('@fetchHealthPlanPackageQuery')
             }
             cy.findByTestId('state-submission-form-page').should('exist')
