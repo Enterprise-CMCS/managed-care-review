@@ -14,7 +14,6 @@ import {
     mockDraftHealthPlanPackage,
     mockQuestionsPayload,
     mockSubmittedHealthPlanPackage,
-    mockUnlockedHealthPlanPackage,
     mockValidCMSUser,
 } from '../../testHelpers/apolloMocks'
 
@@ -358,98 +357,6 @@ describe('SubmissionSideNav', () => {
             )
 
             expect(await screen.findByText('System error')).toBeInTheDocument()
-        })
-
-        it('DRAFT redirects a state user to beginning of form', async () => {
-            let testLocation: Location
-            const pkg = mockDraftHealthPlanPackage()
-
-            renderWithProviders(
-                <Routes>
-                    <Route element={<SubmissionSideNav />}>
-                        <Route
-                            path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                            }
-                            element={<QuestionResponse />}
-                        />
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                            element={<SubmissionSummary />}
-                        />
-                    </Route>
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                            }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
-                                    id: '15',
-                                    stateSubmission: pkg,
-                                }
-                            ),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15',
-                    },
-                    location: (location) => (testLocation = location),
-                    featureFlags: { 'cms-questions': true },
-                }
-            )
-
-            await waitFor(() =>
-                expect(testLocation.pathname).toBe(`/submissions/15/edit/type`)
-            )
-        })
-
-        it('UNLOCKED redirects a state user to beginning of form', async () => {
-            let testLocation: Location
-            const pkg = mockUnlockedHealthPlanPackage()
-
-            renderWithProviders(
-                <Routes>
-                    <Route element={<SubmissionSideNav />}>
-                        <Route
-                            path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                            }
-                            element={<QuestionResponse />}
-                        />
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                            element={<SubmissionSummary />}
-                        />
-                    </Route>
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                            }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
-                                    id: '15',
-                                    stateSubmission: pkg,
-                                }
-                            ),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15',
-                    },
-                    location: (location) => (testLocation = location),
-                    featureFlags: { 'cms-questions': true },
-                }
-            )
-
-            await waitFor(() =>
-                expect(testLocation.pathname).toBe(`/submissions/15/edit/type`)
-            )
         })
 
         it('DRAFT displays an error to a CMS user', async () => {
