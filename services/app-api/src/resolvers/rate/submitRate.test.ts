@@ -235,7 +235,7 @@ describe('submitRate', () => {
             variables: {
                 input: {
                     rateID: rateID,
-                    submitReason: 'submit rate',
+                    submittedReason: 'submit rate',
                     formData: unlockedRate.draftRevision.formData,
                 },
             },
