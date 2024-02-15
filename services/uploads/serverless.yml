@@ -453,6 +453,14 @@ resources:
             After=network.target
             EOF
 
+            # Create a systemd service override to delay the start and set restart limits
+            cat <<EOF > /etc/systemd/system/clamav-daemon.service.d/override.conf
+            [Unit]
+            After=network.target
+            StartLimitIntervalSec=1h
+            StartLimitBurst=5
+            EOF
+
             # Fix the systemctl setting
             sed -i 's/^StandardOutput=syslog/StandardOutput=journal/' /lib/systemd/system/clamav-daemon.service
 
