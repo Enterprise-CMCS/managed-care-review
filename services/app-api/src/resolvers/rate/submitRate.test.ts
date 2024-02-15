@@ -7,7 +7,7 @@ import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { testStateUser, testCMSUser } from '../../testHelpers/userHelpers'
 import SUBMIT_RATE from '../../../../app-graphql/src/mutations/submitRate.graphql'
 import FETCH_RATE from '../../../../app-graphql/src/queries/fetchRate.graphql'
-import UNLOCK_RATE from '../../../../app-graphql/src/queries/unlockRate.graphql'
+import UNLOCK_RATE from '../../../../app-graphql/src/mutations/unlockRate.graphql'
 import {
     createTestRate,
     submitTestRate,
@@ -15,6 +15,7 @@ import {
     updateTestRate,
 } from '../../testHelpers'
 import SUBMIT_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
+
 describe('submitRate', () => {
     const ldService = testLDService({
         'rate-edit-unlock': true,
