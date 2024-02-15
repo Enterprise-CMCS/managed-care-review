@@ -62,9 +62,6 @@ export const SubmissionSideNav = () => {
         featureFlags.CMS_QUESTIONS.flag,
         featureFlags.CMS_QUESTIONS.defaultValue
     )
-    const showSidebar =
-        showQuestionResponse &&
-        QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES.includes(routeName)
 
     const isSelectedLink = (route: string | string[]): string => {
         //We pass an array of the form routes in order to display the sideNav on all of the pages
@@ -110,6 +107,13 @@ export const SubmissionSideNav = () => {
     }
 
     const submissionStatus = pkg.status
+
+    //The sideNav should not be visible to a state user if the submission is a draft that has never been submitted
+    const showSidebar =
+        showQuestionResponse &&
+        submissionStatus !== 'DRAFT' &&
+        pkg.initiallySubmittedAt !== null &&
+        QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES.includes(routeName)
 
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
     const isStateUser = loggedInUser?.role === 'STATE_USER'
