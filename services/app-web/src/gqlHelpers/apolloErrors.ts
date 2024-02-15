@@ -37,7 +37,7 @@ const handleNetworkError = (
 }
 
 const handleGQLErrors = (graphQLErrors: GraphQLErrors) => {
-    graphQLErrors.forEach(({ message, locations, path, extensions }) => {
+    graphQLErrors.forEach(({ message, locations, path }) => {
         recordJSException(
             // Graphql errors mean something is wrong inside our api, maybe bad request or errors we return from api for known edge cases
             `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`

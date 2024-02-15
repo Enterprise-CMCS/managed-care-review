@@ -33,6 +33,7 @@ fragment rateRevisionFragment on RateRevision {
         rateProgramIDs,
         rateCertificationName,
         certifyingActuaryContacts {
+            id
             name
             titleRole
             email
@@ -40,6 +41,7 @@ fragment rateRevisionFragment on RateRevision {
             actuarialFirmOther
         },
         addtlActuaryContacts {
+            id
             name
             titleRole
             email

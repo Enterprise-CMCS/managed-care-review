@@ -13,7 +13,7 @@ import {
     ActuaryContact,
     RateCapitationType,
     RateType,
-} from '../../../../common-code/healthPlanFormDataType'
+} from '../../../common-code/healthPlanFormDataType'
 import {
     FieldRadio,
     FileItemT,
@@ -21,23 +21,23 @@ import {
     PoliteErrorMessage,
     ProgramSelect,
     SectionCard,
-} from '../../../../components'
+} from '../../../components'
 
-import styles from '../../StateSubmissionForm.module.scss'
-import { formatUserInputDate, isDateRangeEmpty } from '../../../../formHelpers'
+import styles from '../StateSubmissionForm.module.scss'
+import { formatUserInputDate, isDateRangeEmpty } from '../../../formHelpers'
 import {
     ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES,
     ACCEPTED_RATE_CERTIFICATION_FILE_TYPES,
-} from '../../../../components/FileUpload'
-import { useS3 } from '../../../../contexts/S3Context'
+} from '../../../components/FileUpload'
+import { useS3 } from '../../../contexts/S3Context'
 
 import { FormikErrors, getIn, useFormikContext } from 'formik'
 import {
     ActuaryCommunicationType,
     SharedRateCertDisplay,
-} from '../../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
-import { ActuaryContactFields } from '../../Contacts'
-import { PackagesWithSharedRates } from '../PackagesWithSharedRates/PackagesWithSharedRates'
+} from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
+import { ActuaryContactFields } from '../Contacts'
+import { PackagesWithSharedRates } from './PackagesWithSharedRates'
 
 const isRateTypeEmpty = (values: RateCertFormType): boolean =>
     values.rateType === undefined
@@ -45,7 +45,7 @@ const isRateTypeAmendment = (values: RateCertFormType): boolean =>
     values.rateType === 'AMENDMENT'
 
 export type RateCertFormType = {
-    id?: string
+    id: string
     key: string
     rateType: RateType | undefined
     rateCapitationType: RateCapitationType | undefined

@@ -2,20 +2,20 @@
 @use '../../../styles/uswdsImports.scss' as uswds;
 
 .dateRangePicker {
-  [class='usa-label'] {
-    font-weight: normal;
-  }
-  [class='usa-legend'] {
-    font-weight: normal;
-  }
+    [class='usa-label'] {
+        font-weight: normal;
+    }
+    [class='usa-legend'] {
+        font-weight: normal;
+    }
 
-  [class='usa-form-group'] {
-    margin-top: 0rem;
-    width: 100%;
-  }
+    [class='usa-form-group'] {
+        margin-top: 0rem;
+        width: 100%;
+    }
 
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  column-gap: 32px;
-  align-items: end;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 32px;
+    align-items: end;
 }

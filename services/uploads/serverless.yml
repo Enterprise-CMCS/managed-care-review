@@ -52,20 +52,19 @@ provider:
 custom:
   region: ${aws:region}
   reactAppOtelCollectorUrl: ${env:REACT_APP_OTEL_COLLECTOR_URL, ssm:/configuration/react_app_otel_collector_url}
+  authorizedKeys: ${file(../postgres/scripts/authorized_keys)}
   webpack:
     webpackConfig: webpack.config.js
     packager: yarn
     packagerOptions:
       lockFile: ../../yarn.lock
-  scripts:
-    hooks:
-      # This script is run locally when running 'serverless deploy'
-      package:initialize: |
-        set -e
-        curl -L --output lambda_layer.zip https://github.com/CMSgov/lambda-clamav-layer/releases/download/0.7/lambda_layer.zip
-      deploy:finalize: |
-        rm lambda_layer.zip
-        serverless invoke --stage ${sls:stage} --function avDownloadDefinitions -t Event
+  vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
+  sgId: ${ssm:/configuration/${sls:stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
+  privateSubnets:
+    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/a/id, ssm:/configuration/default/vpc/subnets/private/a/id}
+    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
+    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
+  publicSubnetA: ${ssm:/configuration/${sls:stage}/vpc/subnets/public/a/id, ssm:/configuration/default/vpc/subnets/public/a/id}
   serverless-offline-ssm:
     stages:
       - local
@@ -95,9 +94,8 @@ custom:
       - main
 
 layers:
-  clamDefs:
-    package:
-      artifact: lambda_layer.zip
+  clamAv:
+    path: lambda-layers-clamav
 
 functions:
   avScan:
@@ -107,8 +105,11 @@ functions:
     memorySize: 4096
     ephemeralStorageSize: 1024
     layers:
-      - !Ref ClamDefsLambdaLayer
+      - !Ref ClamAvLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
+    vpc:
+      securityGroupIds: ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
     environment:
       stage: ${sls:stage}
       CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
@@ -124,7 +125,7 @@ functions:
     timeout: 300 # 300 seconds = 5 minutes
     memorySize: 1024
     layers:
-      - !Ref ClamDefsLambdaLayer
+      - !Ref ClamAvLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
     environment:
       stage: ${sls:stage}
@@ -139,7 +140,7 @@ functions:
     timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
     maximumRetryAttempts: 0
     layers:
-      - !Ref ClamDefsLambdaLayer
+      - !Ref ClamAvLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
     environment:
       stage: ${sls:stage}
@@ -159,7 +160,7 @@ functions:
     ephemeralStorageSize: 1024
     maximumRetryAttempts: 0
     layers:
-      - !Ref ClamDefsLambdaLayer
+      - !Ref ClamAvLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
     environment:
       stage: ${sls:stage}
@@ -171,6 +172,13 @@ functions:
       REACT_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
 
 resources:
+  Conditions:
+    IsDevValProd: !Or
+      - !Equals ['${sls:stage}', 'main']
+      - !Equals ['${sls:stage}', 'val']
+      - !Equals ['${sls:stage}', 'prod']
+      - !Equals ['${sls:stage}', 'mtscanfromlambda']
+
   Resources:
     DocumentUploadsBucket:
       Type: AWS::S3::Bucket
@@ -363,6 +371,132 @@ resources:
                 - !Sub ${QAUploadsBucket.Arn}
                 - !Sub ${QAUploadsBucket.Arn}/*
               Sid: DenyUnencryptedConnections
+
+    ClamAVSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: Security group for ClamAV daemon
+        VpcId: ${self:custom.vpcId}
+        SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 3310
+            ToPort: 3310
+            SourceSecurityGroupId: ${self:custom.sgId}
+
+    ClamAVInstanceProfile:
+      Type: AWS::IAM::InstanceProfile
+      Properties:
+        Path: '/delegatedadmin/developer/'
+        Roles:
+          - !Ref ClamAVInstanceRole
+
+    ClamAVInstanceRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: '/delegatedadmin/developer/'
+        PermissionsBoundary: !Sub 'arn:aws:iam::${AWS::AccountId}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy'
+        RoleName: !Sub 'clamavdVm-${sls:stage}-ServiceRole'
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: ec2.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: ClamAVInstancePolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: '*'
+
+    ClamAVInstance:
+      Type: AWS::EC2::Instance
+      Condition: IsDevValProd
+      Properties:
+        InstanceType: t3.medium
+        ImageId: ami-0c7217cdde317cfec # Ubuntu 22.04 LTS
+        IamInstanceProfile: !Ref ClamAVInstanceProfile
+        NetworkInterfaces:
+          - AssociatePublicIpAddress: true
+            DeviceIndex: '0'
+            GroupSet:
+              - !Ref ClamAVSecurityGroup
+            SubnetId: !Sub ${self:custom.publicSubnetA}
+        Tags:
+          - Key: Name
+            Value: clamavd-${sls:stage}
+          - Key: mcr-vmuse
+            Value: clamavd
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            apt-get update
+            apt-get install -y clamav clamav-daemon
+
+            echo '${self:custom.authorizedKeys}' > /home/ubuntu/.ssh/authorized_keys
+            chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
+            chmod 600 /home/ubuntu/.ssh/authorized_keys
+
+            # Write to the clamd.conf
+            echo "TCPSocket 3310" >> /etc/clamav/clamd.conf
+            echo "TCPAddr 0.0.0.0" >> /etc/clamav/clamd.conf 
+
+            # Create a systemd service override to delay the start
+            cat <<EOF > /etc/systemd/system/clamav-daemon.service.d/override.conf
+            [Unit]
+            After=network.target
+            EOF
+
+            # Create a systemd service override to delay the start and set restart limits
+            cat <<EOF > /etc/systemd/system/clamav-daemon.service.d/override.conf
+            [Unit]
+            After=network.target
+            StartLimitIntervalSec=1h
+            StartLimitBurst=5
+            EOF
+
+            # Fix the systemctl setting
+            sed -i 's/^StandardOutput=syslog/StandardOutput=journal/' /lib/systemd/system/clamav-daemon.service
+
+            # Reload systemd to apply the changes
+            systemctl daemon-reload
+
+            # Start clamd and get defs
+            systemctl enable clamav-daemon
+            systemctl enable clamav-freshclam
+            systemctl start clamav-daemon
+            systemctl start clamav-freshclam
+
+            # Confirm we're up
+            systemctl status clamav-daemon
+            systemctl status clamav-freshclam
+
+    MCRInternalZone:
+      Type: AWS::Route53::HostedZone
+      Condition: IsDevValProd
+      Properties:
+        Name: mc-review.local
+        VPCs:
+          - VPCId: ${self:custom.vpcId}
+            VPCRegion: !Ref AWS::Region
+
+    ClamAVRecordSet:
+      Type: AWS::Route53::RecordSet
+      Condition: IsDevValProd
+      DependsOn: ClamAVInstance
+      Properties:
+        HostedZoneId: !Ref MCRInternalZone
+        Name: clamav.mc-review.local
+        Type: A
+        ResourceRecords:
+          - !GetAtt ClamAVInstance.PrivateIp
+        TTL: '300'
 
   Outputs:
     DocumentUploadsBucketName:

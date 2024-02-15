@@ -118,6 +118,7 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
             certifyingActuaryContacts: [
                 {
                     __typename: 'ActuaryContact',
+                    id: '123-cert-actuary',
                     name: 'Actuary Contact Person',
                     titleRole: 'Actuary Contact Title',
                     email: 'actuarycontact@example.com',
@@ -128,6 +129,7 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
             addtlActuaryContacts: [
                 {
                     __typename: 'ActuaryContact',
+                    id: '123-additional-actuary',
                     name: 'Additional actuary name',
                     titleRole: 'Additional actuary title',
                     email: 'additonalactuary@example.com',

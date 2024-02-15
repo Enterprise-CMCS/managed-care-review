@@ -1,4 +1,3 @@
-import React from 'react'
 import { Link, SideNav, GridContainer, Icon } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import styles from './SubmissionSideNav.module.scss'
@@ -64,6 +63,7 @@ export const SubmissionSideNav = () => {
         featureFlags.CMS_QUESTIONS.flag,
         featureFlags.CMS_QUESTIONS.defaultValue
     )
+
     const showSidebar =
         showQuestionResponse &&
         QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES.includes(routeName)

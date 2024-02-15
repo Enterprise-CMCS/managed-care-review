@@ -1,8 +1,5 @@
 import { screen, waitFor, within } from '@testing-library/react'
-import {
-    ldUseClientSpy,
-    renderWithProviders,
-} from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { ContractDetailsSummarySection } from './ContractDetailsSummarySection'
 import {
     fetchCurrentUserMock,
@@ -17,9 +14,6 @@ import {
 } from '../../../constants/statutoryRegulatoryAttestation'
 
 describe('ContractDetailsSummarySection', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    })
     const defaultApolloMocks = {
         mocks: [fetchCurrentUserMock({ statusCode: 200 })],
     }
@@ -110,8 +104,7 @@ describe('ContractDetailsSummarySection', () => {
         })
     })
 
-    it('can render all contract details fields', () => {
-        ldUseClientSpy({ '438-attestation': true })
+    it('can render all contract details fields', async () => {
         const submission = mockContractAndRatesDraft({
             statutoryRegulatoryAttestation: true,
         })
@@ -124,14 +117,18 @@ describe('ContractDetailsSummarySection', () => {
             />,
             {
                 apolloProvider: defaultApolloMocks,
+                featureFlags: { '438-attestation': true },
             }
         )
 
-        expect(
-            screen.getByRole('definition', {
-                name: StatutoryRegulatoryAttestationQuestion,
-            })
-        ).toBeInTheDocument()
+        await waitFor(() => {
+            expect(
+                screen.getByRole('definition', {
+                    name: StatutoryRegulatoryAttestationQuestion,
+                })
+            ).toBeInTheDocument()
+        })
+
         expect(
             screen.getByRole('definition', { name: 'Contract status' })
         ).toBeInTheDocument()
@@ -161,7 +158,6 @@ describe('ContractDetailsSummarySection', () => {
     })
 
     it('displays correct contract 438 attestation yes and no text and description', async () => {
-        ldUseClientSpy({ '438-attestation': true })
         const submission = mockContractAndRatesDraft({
             statutoryRegulatoryAttestation: false,
             statutoryRegulatoryAttestationDescription: 'No compliance',
@@ -175,14 +171,18 @@ describe('ContractDetailsSummarySection', () => {
             />,
             {
                 apolloProvider: defaultApolloMocks,
+                featureFlags: { '438-attestation': true },
             }
         )
 
-        expect(
-            screen.getByRole('definition', {
-                name: StatutoryRegulatoryAttestationQuestion,
-            })
-        ).toBeInTheDocument()
+        await waitFor(() => {
+            expect(
+                screen.getByRole('definition', {
+                    name: StatutoryRegulatoryAttestationQuestion,
+                })
+            ).toBeInTheDocument()
+        })
+
         expect(
             screen.getByRole('definition', {
                 name: 'Non-compliance description',

@@ -13,6 +13,7 @@ tsconfig.tsbuildinfo
 .serverless
 .eslintcache
 /.env
+.nx
 tests_output
 *.log
 coverage/
@@ -56,5 +57,11 @@ services/app-api/healthPlanFormDataMigrations
 services/app-proto/build
 
 services/postgres/scripts/*.js
+
+services/uploads/src/avLayer/build/lambda_layer
+services/uploads/src/avLayer/build/lib
+services/uploads/src/avLayer/build/bin
+services/uploads/src/avLayer/build/*.tar.gz
+services/uploads/src/avLayer/build/*.zip
 
 tests/cypress/fixtures/stores/featureFlagStore.json

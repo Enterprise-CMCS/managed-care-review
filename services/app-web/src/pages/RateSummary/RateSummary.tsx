@@ -1,15 +1,17 @@
 import { GridContainer, Icon, Link } from '@trussworks/react-uswds'
 import React, { useEffect, useState } from 'react'
-import { NavLink, useParams } from 'react-router-dom'
+import { NavLink, useNavigate, useParams } from 'react-router-dom'
 
-import { Loading } from '../../../components'
-import { usePage } from '../../../contexts/PageContext'
-import { useFetchRateQuery } from '../../../gen/gqlClient'
-import styles from '../SubmissionSummary.module.scss'
-import { GenericErrorPage } from '../../Errors/GenericErrorPage'
-import { RoutesRecord } from '../../../constants'
-import { SingleRateSummarySection } from '../../../components/SubmissionSummarySection/RateDetailsSummarySection/SingleRateSummarySection'
-import { useAuth } from '../../../contexts/AuthContext'
+import { Loading } from '../../components'
+import { usePage } from '../../contexts/PageContext'
+import { useFetchRateQuery } from '../../gen/gqlClient'
+import styles from '../SubmissionSummary/SubmissionSummary.module.scss'
+import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import { RoutesRecord } from '../../constants'
+import { SingleRateSummarySection } from '../../components/SubmissionSummarySection/RateDetailsSummarySection/SingleRateSummarySection'
+import { useAuth } from '../../contexts/AuthContext'
+import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
+import { Error404 } from '../Errors/Error404Page'
 
 type RouteParams = {
     id: string
@@ -19,6 +21,7 @@ export const RateSummary = (): React.ReactElement => {
     // Page level state
     const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
+    const navigate = useNavigate()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
     const { id } = useParams<keyof RouteParams>()
     if (!id) {
@@ -49,7 +52,25 @@ export const RateSummary = (): React.ReactElement => {
             </GridContainer>
         )
     } else if (error || !rate || !currentRateRev?.formData) {
-        return <GenericErrorPage />
+        //error handling for a state user that tries to access rates for a different state
+        if (error?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
+            return (
+                <ErrorForbiddenPage errorMsg={error.graphQLErrors[0].message} />
+            )
+        } else if (error?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+            return <Error404 />
+        } else {
+            return <GenericErrorPage />
+        }
+    }
+
+    // Redirecting a state user to the edit page if rate is unlocked
+    if (
+        data &&
+        loggedInUser?.role === 'STATE_USER' &&
+        rate.status === 'UNLOCKED'
+    ) {
+        navigate(`/rates/${id}/edit`)
     }
 
     if (
@@ -68,10 +89,12 @@ export const RateSummary = (): React.ReactElement => {
                 <div>
                     <Link
                         asCustom={NavLink}
-                        //TODO: Will have to remove this conditional along with associated loggedInUser prop once the rate dashboard
-                        //is made available to state users
+                        //TODO: Will have to remove this conditional once the rate dashboard is made available to state users
                         to={{
-                            pathname: loggedInUser?.__typename === 'StateUser' ? RoutesRecord.DASHBOARD : RoutesRecord.DASHBOARD_RATES,
+                            pathname:
+                                loggedInUser?.__typename === 'StateUser'
+                                    ? RoutesRecord.DASHBOARD
+                                    : RoutesRecord.DASHBOARD_RATES,
                         }}
                     >
                         <Icon.ArrowBack />

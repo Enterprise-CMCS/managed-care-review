@@ -37,7 +37,9 @@ import {
     UploadQuestions,
 } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
-import { RateSummary } from '../SubmissionSummary/RateSummary'
+import { RateSummary } from '../RateSummary'
+import { RateEdit } from '../RateEdit/RateEdit'
+import { APIAccess } from '../APIAccess/APIAccess'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -75,7 +77,7 @@ const StateUserRoutes = ({
 }): React.ReactElement => {
     // feature flag
     const ldClient = useLDClient()
-    const showRateSummaryPage: boolean = ldClient?.variation(
+    const showRatePages: boolean = ldClient?.variation(
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
@@ -106,11 +108,17 @@ const StateUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_NEW}
                     element={<NewStateSubmissionForm />}
                 />
-                {showRateSummaryPage && (
-                    <Route
-                        path={RoutesRecord.RATES_SUMMARY}
-                        element={<RateSummary />}
-                    />
+                {showRatePages && (
+                    <>
+                        <Route
+                            path={RoutesRecord.RATES_SUMMARY}
+                            element={<RateSummary />}
+                        />
+                        <Route
+                            path={RoutesRecord.RATE_EDIT}
+                            element={<RateEdit />}
+                        />
+                    </>
                 )}
                 <Route element={<SubmissionSideNav />}>
                     {showQuestionResponse && (
@@ -147,6 +155,7 @@ const StateUserRoutes = ({
                         element={<GraphQLExplorer />}
                     />
                 )}
+                <Route path={RoutesRecord.API_ACCESS} element={<APIAccess />} />
                 <Route path="*" element={<Error404 />} />
             </Routes>
         </AuthenticatedRouteWrapper>
@@ -232,6 +241,7 @@ const CMSUserRoutes = ({
                     />
                 )}
                 <Route path={RoutesRecord.SETTINGS} element={<Settings />} />
+                <Route path={RoutesRecord.API_ACCESS} element={<APIAccess />} />
                 {UniversalRoutes}
                 <Route path="*" element={<Error404 />} />
             </Routes>

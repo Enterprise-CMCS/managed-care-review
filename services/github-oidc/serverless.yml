@@ -53,6 +53,7 @@ params:
       - 'kms:*'
       - 'lambda:*'
       - 'logs:*'
+      - 'route53:*'
       - 'rds:*'
       - 'secretsmanager:*'
       - 'ssm:*'

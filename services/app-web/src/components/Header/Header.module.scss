@@ -6,7 +6,8 @@
     padding: 0 uswds.units(1);
     color: custom.$mcr-foundation-white;
 
-    button, a {
+    button,
+    a {
         color: custom.$mcr-foundation-white;
 
         &:hover,
@@ -20,7 +21,6 @@
 .divider {
     padding: 0 uswds.units(1);
 }
-
 
 .landingPageHeading {
     background-color: custom.$mcr-cmsblue-dark;
@@ -59,7 +59,7 @@
 }
 
 .dashboardHeading {
-    background-color: custom.$mcr-cmsblue-dark;;
+    background-color: custom.$mcr-cmsblue-dark;
     color: custom.$mcr-foundation-white;
     & h1 {
         display: flex;

@@ -13,6 +13,7 @@ import type { userFromAuthProvider } from '../authn'
 import {
     userFromCognitoAuthProvider,
     userFromLocalAuthProvider,
+    userFromThirdPartyAuthorizer,
 } from '../authn'
 import { newLocalEmailer, newSESEmailer } from '../emailer'
 import { NewPostgresStore } from '../postgres/postgresStore'
@@ -59,14 +60,18 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const anyContext = context as any
         const requestSpan = anyContext[requestSpanKey]
-
         const authProvider =
             event.requestContext.identity.cognitoAuthenticationProvider
-        if (authProvider) {
+        // This handler is shared with the third_party_API_authorizer
+        // when called from the 3rd party authorizer the cognito auth provider
+        // is not valid for instead the authorizer returns a user ID
+        // that is used to fetch the user
+        const fromThirdPartyAuthorizer = event.requestContext.path.includes(
+            '/v1/graphql/external'
+        )
+
+        if (authProvider || fromThirdPartyAuthorizer) {
             try {
-                // check if the user is stored in postgres
-                // going to clean this up, but we need the store in the
-                // userFetcher to query postgres. This code is a duped.
                 const dbURL = process.env.DATABASE_URL ?? ''
                 const secretsManagerSecret =
                     process.env.SECRETS_MANAGER_SECRET ?? ''
@@ -81,8 +86,21 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                 }
 
                 const store = NewPostgresStore(pgResult)
-                const userResult = await userFetcher(authProvider, store)
+                const userId = event.requestContext.authorizer?.principalId
 
+                let userResult
+                if (authProvider && !fromThirdPartyAuthorizer) {
+                    userResult = await userFetcher(authProvider, store)
+                } else if (fromThirdPartyAuthorizer && userId) {
+                    userResult = await userFromThirdPartyAuthorizer(
+                        store,
+                        userId
+                    )
+                }
+
+                if (userResult === undefined) {
+                    throw new Error(`Log: userResult must be supplied`)
+                }
                 if (!userResult.isErr()) {
                     return {
                         user: userResult.value,
@@ -95,10 +113,12 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                 }
             } catch (err) {
                 console.error('Error attempting to fetch user: ', err)
-                throw new Error('Log: placing user in gql context failed')
+                throw new Error(
+                    `Log: placing user in gql context failed, ${err}`
+                )
             }
         } else {
-            throw new Error('Log: no AuthProvider')
+            throw new Error('Log: no AuthProvider from an internal API user.')
         }
     }
 }
@@ -127,12 +147,43 @@ function localAuthMiddleware(wrapped: APIGatewayProxyHandler): Handler {
     }
 }
 
+function ipRestrictionMiddleware(
+    allowedIps: string
+): (wrappedArg: Handler) => Handler {
+    return function (wrapped: Handler): Handler {
+        return async function (event, context, completion) {
+            const ipAddress = event.requestContext.identity.sourceIp
+            const fromThirdPartyAuthorizer = event.requestContext.path.includes(
+                '/v1/graphql/external'
+            )
+
+            if (fromThirdPartyAuthorizer) {
+                const isValidIpAddress =
+                    allowedIps.includes(ipAddress) ||
+                    allowedIps.includes('ALLOW_ALL')
+
+                if (!isValidIpAddress) {
+                    return Promise.resolve({
+                        statusCode: 403,
+                        body: `{ "error": IP Address ${ipAddress} is not in the allowed list }\n`,
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',
+                            'Access-Control-Allow-Credentials': true,
+                        },
+                    })
+                }
+            }
+
+            return await wrapped(event, context, completion)
+        }
+    }
+}
+
 // Tracing Middleware
 function tracingMiddleware(wrapped: Handler): Handler {
     return async function (event, context, completion) {
         // get the parent context from headers
         const ctx = propagation.extract(ROOT_CONTEXT, event.headers)
-
         const span = tracer.startSpan(
             'handleRequest',
             {
@@ -177,6 +228,8 @@ async function initializeGQLHandler(): Promise<Handler> {
     const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
     const parameterStoreMode = process.env.PARAMETER_STORE_MODE
     const ldSDKKey = process.env.LD_SDK_KEY
+    const allowedIpAddresses = process.env.ALLOWED_IP_ADDRESSES
+    const jwtSecret = process.env.JWT_SECRET
 
     // START Assert configuration is valid
     if (emailerMode !== 'LOCAL' && emailerMode !== 'SES')
@@ -190,6 +243,9 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (stageName === undefined)
         throw new Error('Configuration Error: stage is required')
+
+    if (allowedIpAddresses === undefined)
+        throw new Error('Configuration Error: allowed IP addresses is required')
 
     if (!dbURL) {
         throw new Error('Init Error: DATABASE_URL is required to run app-api')
@@ -212,6 +268,13 @@ async function initializeGQLHandler(): Promise<Handler> {
             'Configuration Error: LD_SDK_KEY is required to run app-api.'
         )
     }
+
+    if (jwtSecret === undefined || jwtSecret === '') {
+        throw new Error(
+            'Configuration Error: JWT_SECRET is required to run app-api.'
+        )
+    }
+
     // END
 
     const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
@@ -310,8 +373,8 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     // Hard coding this for now, next job is to run this config to this app.
     const jwtLib = newJWTLib({
-        issuer: 'fakeIssuer',
-        signingKey: 'notrandom',
+        issuer: `mcreview-${stageName}`,
+        signingKey: Buffer.from(jwtSecret, 'hex'),
         expirationDurationS: 90 * 24 * 60 * 60, // 90 days
     })
 
@@ -391,11 +454,13 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     // init tracer and set the middleware. tracer needs to be global.
     tracer = createTracer('app-api-' + stageName)
-    const tracingHandler = tracingMiddleware(handler)
+    const combinedHandler = ipRestrictionMiddleware(allowedIpAddresses)(
+        tracingMiddleware(handler)
+    )
 
     // Locally, we wrap our handler in a middleware that returns 403 for unauthenticated requests
     const isLocal = authMode === 'LOCAL'
-    return isLocal ? localAuthMiddleware(tracingHandler) : tracingHandler
+    return isLocal ? localAuthMiddleware(combinedHandler) : combinedHandler
 }
 
 const handlerPromise = initializeGQLHandler()
