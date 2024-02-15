@@ -2,16 +2,16 @@ import { GridContainer, Icon, Link } from '@trussworks/react-uswds'
 import React, { useEffect, useState } from 'react'
 import { NavLink, useNavigate, useParams } from 'react-router-dom'
 
-import { Loading } from '../../../components'
-import { usePage } from '../../../contexts/PageContext'
-import { useFetchRateQuery } from '../../../gen/gqlClient'
-import styles from '../SubmissionSummary.module.scss'
-import { GenericErrorPage } from '../../Errors/GenericErrorPage'
-import { RoutesRecord } from '../../../constants'
-import { SingleRateSummarySection } from '../../../components/SubmissionSummarySection/RateDetailsSummarySection/SingleRateSummarySection'
-import { useAuth } from '../../../contexts/AuthContext'
-import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
-import { Error404 } from '../../Errors/Error404Page'
+import { Loading } from '../../components'
+import { usePage } from '../../contexts/PageContext'
+import { useFetchRateQuery } from '../../gen/gqlClient'
+import styles from '../SubmissionSummary/SubmissionSummary.module.scss'
+import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import { RoutesRecord } from '../../constants'
+import { SingleRateSummarySection } from '../../components/SubmissionSummarySection/RateDetailsSummarySection/SingleRateSummarySection'
+import { useAuth } from '../../contexts/AuthContext'
+import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
+import { Error404 } from '../Errors/Error404Page'
 
 type RouteParams = {
     id: string
@@ -64,8 +64,12 @@ export const RateSummary = (): React.ReactElement => {
         }
     }
 
-    //Redirecting a state user to the edit page if rate is unlocked
-    if (loggedInUser?.role === 'STATE_USER' && rate.status === 'UNLOCKED') {
+    // Redirecting a state user to the edit page if rate is unlocked
+    if (
+        data &&
+        loggedInUser?.role === 'STATE_USER' &&
+        rate.status === 'UNLOCKED'
+    ) {
         navigate(`/rates/${id}/edit`)
     }
 

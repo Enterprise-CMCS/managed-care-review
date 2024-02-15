@@ -1,11 +1,28 @@
 import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useFetchRateQuery } from '../../gen/gqlClient'
+import {
+    RateFormDataInput,
+    UpdateInformation,
+    useFetchRateQuery,
+    useSubmitRateMutation,
+} from '../../gen/gqlClient'
 import { GridContainer } from '@trussworks/react-uswds'
 import { Loading } from '../../components'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import { RateDetailsV2 } from '../StateSubmission/RateDetails/V2/RateDetailsV2'
+import { RouteT, RoutesRecord } from '../../constants'
+import { PageBannerAlerts } from '../StateSubmission/StateSubmissionForm'
+import { useAuth } from '../../contexts/AuthContext'
+import { FormContainer } from '../StateSubmission/FormContainer'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
+
+export type SubmitOrUpdateRate = (
+    rateID: string,
+    formInput: RateFormDataInput,
+    setIsSubmitting: (isSubmitting: boolean) => void,
+    redirect: RouteT
+) => void
 
 type RouteParams = {
     id: string
@@ -14,35 +31,68 @@ type RouteParams = {
 export const RateEdit = (): React.ReactElement => {
     const navigate = useNavigate()
     const { id } = useParams<keyof RouteParams>()
+    const { loggedInUser } = useAuth()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'
         )
     }
 
-    const { data, loading, error } = useFetchRateQuery({
+    // API handling
+    const {
+        data: fetchData,
+        loading: fetchLoading,
+        error: fetchError,
+    } = useFetchRateQuery({
         variables: {
             input: {
                 rateID: id,
             },
         },
     })
+    const rate = fetchData?.fetchRate.rate
 
-    const rate = data?.fetchRate.rate
+    const [submitRate, { error: submitError }] = useSubmitRateMutation()
+    const submitRateHandler: SubmitOrUpdateRate = async (
+        rateID,
+        formInput,
+        setIsSubmitting,
+        redirect
+    ) => {
+        setIsSubmitting(true)
+        try {
+            await submitRate({
+                variables: {
+                    input: {
+                        rateID: rateID,
+                        formData: formInput,
+                    },
+                },
+            })
 
-    if (loading) {
+            navigate(RoutesRecord[redirect])
+        } catch (serverError) {
+            setIsSubmitting(false)
+        }
+    }
+
+    if (fetchLoading) {
         return (
             <GridContainer>
                 <Loading />
             </GridContainer>
         )
-    } else if (error || !rate) {
+    } else if (fetchError || !rate) {
         //error handling for a state user that tries to access rates for a different state
-        if (error?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
+        if (fetchError?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
             return (
-                <ErrorForbiddenPage errorMsg={error.graphQLErrors[0].message} />
+                <ErrorForbiddenPage
+                    errorMsg={fetchError.graphQLErrors[0].message}
+                />
             )
-        } else if (error?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+        } else if (
+            fetchError?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND'
+        ) {
             return <Error404 />
         } else {
             return <GenericErrorPage />
@@ -53,13 +103,18 @@ export const RateEdit = (): React.ReactElement => {
         navigate(`/rates/${id}`)
     }
 
+    // An unlocked revision is defined by having unlockInfo on it, pull it out here if it exists
+    const unlockedInfo: UpdateInformation | undefined =
+        rate.revisions[0].unlockInfo || undefined
+
     return (
-        <h1 data-testid="rate-edit">
-            You've reached the '/rates/:id/edit' url placeholder for the
-            incoming standalone edit rate form
-            <br />
-            Ticket:{' '}
-            <a href="https://qmacbis.atlassian.net/browse/MCR-3771">MCR-3771</a>
-        </h1>
+        <FormContainer id="single-rate-edit">
+            <PageBannerAlerts
+                loggedInUser={loggedInUser}
+                unlockedInfo={unlockedInfo}
+                showPageErrorMessage={Boolean(fetchError || submitError)}
+            />
+            <RateDetailsV2 rates={[rate]} submitRate={submitRateHandler} />
+        </FormContainer>
     )
 }

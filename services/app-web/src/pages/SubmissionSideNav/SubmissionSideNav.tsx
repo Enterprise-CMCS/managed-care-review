@@ -63,6 +63,7 @@ export const SubmissionSideNav = () => {
         featureFlags.CMS_QUESTIONS.flag,
         featureFlags.CMS_QUESTIONS.defaultValue
     )
+
     const showSidebar =
         showQuestionResponse &&
         QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES.includes(routeName)

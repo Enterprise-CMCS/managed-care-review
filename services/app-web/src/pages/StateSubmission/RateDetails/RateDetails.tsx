@@ -21,10 +21,7 @@ import {
     formatDocumentsForForm,
     formatForForm,
 } from '../../../formHelpers/formatters'
-import {
-    RateCertFormType,
-    SingleRateCert,
-} from './SingleRateCert/SingleRateCert'
+import { RateCertFormType, SingleRateCert } from './SingleRateCert'
 import { useS3 } from '../../../contexts/S3Context'
 import { S3ClientT } from '../../../s3'
 import { isLoadingOrHasFileErrors } from '../../../components/FileUpload'

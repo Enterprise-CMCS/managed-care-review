@@ -32,10 +32,8 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
     try {
         // authentication step for validating JWT token
         const userId = jwtLib.userIDFromToken(authToken)
-
         if (userId instanceof Error) {
-            const msg = 'Invalid auth token'
-            console.error(msg)
+            console.error('Invalid auth token')
 
             return generatePolicy(undefined, event)
         }

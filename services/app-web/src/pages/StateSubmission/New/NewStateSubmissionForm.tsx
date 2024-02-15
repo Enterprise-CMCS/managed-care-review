@@ -3,7 +3,7 @@ import React from 'react'
 import { DynamicStepIndicator } from '../../../components/DynamicStepIndicator'
 import { STATE_SUBMISSION_FORM_ROUTES } from '../../../constants/routes'
 import styles from '../StateSubmissionForm.module.scss'
-import { StateSubmissionContainer } from '../StateSubmissionContainer'
+import { FormContainer } from '../FormContainer'
 import { SubmissionType } from '../SubmissionType/SubmissionType'
 
 export const NewStateSubmissionForm = (): React.ReactElement => {
@@ -16,9 +16,9 @@ export const NewStateSubmissionForm = (): React.ReactElement => {
                 />
             </div>
 
-            <StateSubmissionContainer>
+            <FormContainer id="new-submission">
                 <SubmissionType />
-            </StateSubmissionContainer>
+            </FormContainer>
         </>
     )
 }

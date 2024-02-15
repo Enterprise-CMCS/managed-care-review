@@ -975,7 +975,7 @@ type ContractFormData {
 }
 
 "Either new capitation rates (NEW) or updates to previously certified capitation rates (AMENDMENT)"
-enum RateType {
+enum RateAmendmentType {
   NEW
   AMENDMENT
 }
@@ -1013,6 +1013,7 @@ enum ActuarialFirm {
 
 "Contact information for the certifying or additional state actuary"
 type ActuaryContact {
+  id: ID
   name: String
   titleRole: String
   email: String
@@ -1022,6 +1023,7 @@ type ActuaryContact {
 
 "Contact information input for the certifying or additional state actuary"
 input ActuaryContactInput  {
+    id: ID
     name: String
     titleRole: String
     email: String
@@ -1037,13 +1039,13 @@ It's used as a part of RateFormData
 type PackageWithSameRate  {
   packageName: String!
   packageId: String!
-  packageStatus: String
+  packageStatus:  HealthPlanPackageStatus
 }
 
 input PackageWithSameRateInput  {
     packageName: String!
     packageId: String!
-    packageStatus: HealthPlanPackageStatus!
+    packageStatus: HealthPlanPackageStatus
 }
 
 """
@@ -1056,7 +1058,7 @@ type RateFormData {
     Refers to whether the state is submitting a brand new rate certification
     or an amendment to an existing rate certification
     """
-    rateType: RateType
+    rateType: RateAmendmentType
     """
     Can be 'RATE_CELL' or 'RATE_RANGE'
     These values represent on what basis the capitation rate is actuarially sound
@@ -1263,7 +1265,7 @@ input RateFormDataInput {
     Refers to whether the state is submitting a brand new rate certification
     or an amendment to an existing rate certification
     """
-    rateType: RateType
+    rateType: RateAmendmentType
     """
     Can be 'RATE_CELL' or 'RATE_RANGE'
     These values represent on what basis the capitation rate is actuarially sound
@@ -1327,7 +1329,7 @@ input RateFormDataInput {
     An array of additional ActuaryContacts
     Each element includes the the name, title/role and email
     """
-    addtlActuaryContacts: [ActuaryContactInput!]!
+    addtlActuaryContacts: [ActuaryContactInput!]
     """
     Is either OACT_TO_ACTUARY or OACT_TO_STATE
     It specifies whether the state wants CMS to reach out to their actuaries
@@ -1345,8 +1347,8 @@ input RateFormDataInput {
 
 input SubmitRateInput {
     rateID: ID!
-    "User given submission description"
-    submitReason: String!
+    "User given submission description - defaults to Initial submission if left blank"
+    submitReason: String
     "Rate related form data to be updated with submission"
     formData: RateFormDataInput
 }

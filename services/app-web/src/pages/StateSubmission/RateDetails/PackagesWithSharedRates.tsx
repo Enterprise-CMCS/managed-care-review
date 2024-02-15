@@ -1,23 +1,20 @@
 import React from 'react'
 
-import { useIndexHealthPlanPackagesQuery } from '../../../../gen/gqlClient'
-import { recordJSException } from '../../../../otelHelpers'
-import { dayjs } from '../../../../common-code/dateHelpers'
-import { getCurrentRevisionFromHealthPlanPackage } from '../../../../gqlHelpers'
-import type { PackageOptionType } from '../../../../components/Select'
-import { useStatePrograms } from '../../../../hooks'
-import { packageName } from '../../../../common-code/healthPlanFormDataType'
-import { FieldYesNo, PoliteErrorMessage } from '../../../../components'
+import { useIndexHealthPlanPackagesQuery } from '../../../gen/gqlClient'
+import { recordJSException } from '../../../otelHelpers'
+import { dayjs } from '../../../common-code/dateHelpers'
+import { getCurrentRevisionFromHealthPlanPackage } from '../../../gqlHelpers'
+import type { PackageOptionType } from '../../../components/Select'
+import { useStatePrograms } from '../../../hooks'
+import { packageName } from '../../../common-code/healthPlanFormDataType'
+import { FieldYesNo, PoliteErrorMessage } from '../../../components'
 import { FormGroup, Label, Link } from '@trussworks/react-uswds'
-import { PackageSelect } from '../../../../components/Select'
+import { PackageSelect } from '../../../components/Select'
 import { getIn, useFormikContext } from 'formik'
-import {
-    RateCertFormType,
-    RateInfoArrayType,
-} from '../SingleRateCert/SingleRateCert'
+import { RateCertFormType, RateInfoArrayType } from './SingleRateCert'
 
-import styles from '../../StateSubmissionForm.module.scss'
-import { RoutesRecord } from '../../../../constants'
+import styles from '../StateSubmissionForm.module.scss'
+import { RoutesRecord } from '../../../constants'
 
 export type PackagesWithSharedRatesProps = {
     index: number
