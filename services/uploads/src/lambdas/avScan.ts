@@ -47,14 +47,6 @@ async function avScan(event: S3Event, _context: Context) {
         throw err
     }
 
-    // We need to read the clamd config depending on what stage we're in
-    let clamdConfigPath: string
-    if (stageName === 'main' || stageName === 'val' || stageName === 'prod') {
-        clamdConfigPath = `/opt/bin/clamd-${stageName}.conf`
-    } else {
-        clamdConfigPath = '/opt/bin/clamd-main.conf'
-    }
-
     const maxFileSize = parseInt(process.env.MAX_FILE_SIZE || '314572800')
 
     const s3Client = NewS3UploadsClient()
@@ -63,7 +55,6 @@ async function avScan(event: S3Event, _context: Context) {
         {
             bucketName: clamAVBucketName,
             definitionsPath: clamAVDefintionsPath,
-            pathToClamdConfig: clamdConfigPath,
         },
         s3Client
     )

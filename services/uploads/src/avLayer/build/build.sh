@@ -51,9 +51,6 @@ cp /tmp/build/usr/local/bin/clamscan /tmp/build/usr/local/bin/clamdscan /tmp/bui
 cp -R /tmp/build/usr/lib64/* lib/.
 cp -R /tmp/build/usr/local/lib64/* lib/.
 cp freshclam.conf bin/freshclam.conf
-cp clamd-main.conf bin/clamd-main.conf
-cp clamd-val.conf bin/clamd-val.conf
-cp clamd-prod.conf bin/clamd-prod.conf
 
 zip -r9 lambda_layer.zip bin
 zip -r9 lambda_layer.zip lib

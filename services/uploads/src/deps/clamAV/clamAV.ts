@@ -41,7 +41,7 @@ function NewClamAV(config: Partial<ClamAVConfig>, s3Client: S3UploadsClient) {
         pathToDefintions: config.pathToDefintions || '/tmp',
 
         pathToClamdScan: config.pathToClamdScan || '/opt/bin/clamdscan',
-        pathToClamdConfig: config.pathToClamdConfig || '/opt/bin/clamd.conf',
+        pathToClamdConfig: config.pathToClamdConfig || '/opt/clamd.conf',
     }
 
     return {
@@ -191,16 +191,6 @@ function scanForInfectedFiles(
             '--stream',
             pathToScan,
         ])
-
-        /*
-        const avResult = spawnSync(config.pathToClamav, [
-            '--stdout',
-            '-v',
-            '-d',
-            config.pathToDefintions,
-            pathToScan,
-        ])
-        */
 
         console.info('stderror', avResult.stderr && avResult.stderr.toString())
         console.info('stdout', avResult.stdout && avResult.stdout.toString())
