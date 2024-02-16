@@ -11,7 +11,6 @@ import UNLOCK_RATE from '../../../../app-graphql/src/mutations/unlockRate.graphq
 import {
     createTestRate,
     submitTestRate,
-    must,
     updateTestRate,
 } from '../../testHelpers'
 import SUBMIT_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
@@ -33,29 +32,26 @@ describe('submitRate', () => {
 
         // createRate with full data
         const draftRate = await createTestRate()
-        const fetchDraftRate = must(
-            await stateServer.executeOperation({
-                query: FETCH_RATE,
-                variables: {
-                    input: { rateID: draftRate.id },
-                },
-            })
-        )
+        const fetchDraftRate = await stateServer.executeOperation({
+            query: FETCH_RATE,
+            variables: {
+                input: { rateID: draftRate.id },
+            },
+        })
 
         const draftFormData =
             fetchDraftRate.data?.fetchRate.rate.draftRevision.formData
 
         // submitRate with no form data updates
-        const result = must(
-            await stateServer.executeOperation({
-                query: SUBMIT_RATE,
-                variables: {
-                    input: {
-                        rateID: draftRate.id,
-                    },
+        const result = await stateServer.executeOperation({
+            query: SUBMIT_RATE,
+            variables: {
+                input: {
+                    rateID: draftRate.id,
                 },
-            })
-        )
+            },
+        })
+
         expect(result.errors).toBeUndefined()
         const submittedRate = result.data?.submitRate.rate
         const submittedRateFormData = submittedRate.revisions[0].formData
@@ -81,14 +77,12 @@ describe('submitRate', () => {
 
         const draftRate = await createTestRate()
 
-        const fetchDraftRate = must(
-            await stateServer.executeOperation({
-                query: FETCH_RATE,
-                variables: {
-                    input: { rateID: draftRate.id },
-                },
-            })
-        )
+        const fetchDraftRate = await stateServer.executeOperation({
+            query: FETCH_RATE,
+            variables: {
+                input: { rateID: draftRate.id },
+            },
+        })
 
         const draftFormData = draftRate.draftRevision?.formData
 
@@ -130,14 +124,12 @@ describe('submitRate', () => {
 
         const draftRate = await createTestRate()
 
-        const fetchDraftRate = must(
-            await stateServer.executeOperation({
-                query: FETCH_RATE,
-                variables: {
-                    input: { rateID: draftRate.id },
-                },
-            })
-        )
+        const fetchDraftRate = await stateServer.executeOperation({
+            query: FETCH_RATE,
+            variables: {
+                input: { rateID: draftRate.id },
+            },
+        })
 
         const draftFormData =
             fetchDraftRate.data?.fetchRate.rate.draftRevision.formData
@@ -261,14 +253,12 @@ describe('submitRate', () => {
 
         const draftRate = await createTestRate()
 
-        const fetchDraftRate = must(
-            await stateServer.executeOperation({
-                query: FETCH_RATE,
-                variables: {
-                    input: { rateID: draftRate.id },
-                },
-            })
-        )
+        const fetchDraftRate = await stateServer.executeOperation({
+            query: FETCH_RATE,
+            variables: {
+                input: { rateID: draftRate.id },
+            },
+        })
 
         const draftFormData =
             fetchDraftRate.data?.fetchRate.rate.draftRevision.formData

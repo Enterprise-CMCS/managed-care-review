@@ -7,7 +7,6 @@ import {
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import {
     createAndSubmitTestRate,
-    must,
     submitTestRate,
     unlockTestRate,
     updateTestRate,
@@ -179,14 +178,13 @@ describe('fetchRate', () => {
         // fetch and check rate 1 which was resubmitted with no changese
         expect(firstRateID).toBe(resubmittedRate.id) // first rate ID should be unchanged
 
-        const result1 = must(
-            await cmsServer.executeOperation({
-                query: FETCH_RATE,
-                variables: {
-                    input: { rateID: firstRateID },
-                },
-            })
-        )
+        const result1 = await cmsServer.executeOperation({
+            query: FETCH_RATE,
+            variables: {
+                input: { rateID: firstRateID },
+            },
+        })
+
         const resubmittedRate1 = result1.data?.fetchRate.rate
         expect(resubmittedRate1.revisions).toHaveLength(2)
         // dates for first rate should be unchanged
@@ -236,14 +234,12 @@ describe('fetchRate', () => {
         }
 
         // fetch rate
-        const result = must(
-            await cmsServer.executeOperation({
-                query: FETCH_RATE,
-                variables: {
-                    input,
-                },
-            })
-        )
+        const result = await cmsServer.executeOperation({
+            query: FETCH_RATE,
+            variables: {
+                input,
+            },
+        })
 
         const unlockedRate = result.data?.fetchRate.rate
         expect(result.errors).toBeUndefined()

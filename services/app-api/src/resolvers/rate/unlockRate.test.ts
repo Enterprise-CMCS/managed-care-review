@@ -1,7 +1,7 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import UNLOCK_RATE from '../../../../app-graphql/src/mutations/unlockRate.graphql'
 import { testCMSUser } from '../../testHelpers/userHelpers'
-import { expectToBeDefined, must } from '../../testHelpers/assertionHelpers'
+import { expectToBeDefined } from '../../testHelpers/assertionHelpers'
 import { createAndSubmitTestRate } from '../../testHelpers/gqlRateHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
@@ -12,7 +12,7 @@ describe(`unlockRate`, () => {
     const cmsUser = testCMSUser()
 
     it('changes rate status to UNLOCKED and creates a new draft revision with unlock info', async () => {
-        const stateServer = await constructTestPostgresServer({ ldService})
+        const stateServer = await constructTestPostgresServer({ ldService })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
@@ -24,17 +24,15 @@ describe(`unlockRate`, () => {
         const rate = await createAndSubmitTestRate(stateServer)
         const rateID = rate.id
         const unlockedReason = 'Super duper good reason.'
-        const unlockResult = must(
-            await cmsServer.executeOperation({
-                query: UNLOCK_RATE,
-                variables: {
-                    input: {
-                        rateID,
-                        unlockedReason,
-                    },
+        const unlockResult = await cmsServer.executeOperation({
+            query: UNLOCK_RATE,
+            variables: {
+                input: {
+                    rateID,
+                    unlockedReason,
                 },
-            })
-        )
+            },
+        })
 
         const updatedRate = unlockResult.data?.unlockRate.rate
         expect(updatedRate.status).toBe('UNLOCKED')
@@ -44,12 +42,12 @@ describe(`unlockRate`, () => {
     })
 
     it('returns status error if rate is actively being edited in draft', async () => {
-        const stateServer = await constructTestPostgresServer({ ldService,})
+        const stateServer = await constructTestPostgresServer({ ldService })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
-            ldService
+            ldService,
         })
 
         // Create a rate
@@ -86,7 +84,7 @@ describe(`unlockRate`, () => {
     })
 
     it('returns unauthorized error for state user', async () => {
-        const stateServer = await constructTestPostgresServer({ ldService,})
+        const stateServer = await constructTestPostgresServer({ ldService })
         // Create a rate
         const rate = await createAndSubmitTestRate(stateServer)
 

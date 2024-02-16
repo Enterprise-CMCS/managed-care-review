@@ -7,7 +7,6 @@ import {
     defaultFloridaRateProgram,
 } from '../../testHelpers/gqlHelpers'
 import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { must } from '../../testHelpers/assertionHelpers'
 import type { RateEdge, Rate } from '../../gen/gqlServer'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import { formatGQLDate } from 'app-web/src/common-code/dateHelpers'
@@ -38,11 +37,9 @@ describe('indexRates', () => {
         })
 
         // index rates
-        const result = must(
-            await stateServer.executeOperation({
-                query: INDEX_RATES,
-            })
-        )
+        const result = await stateServer.executeOperation({
+            query: INDEX_RATES,
+        })
         expect(result.errors).toBeDefined()
     })
 
@@ -60,11 +57,9 @@ describe('indexRates', () => {
         const submit2 = await createAndSubmitTestRate(stateServer)
 
         // index rates
-        const result = must(
-            await cmsServer.executeOperation({
-                query: INDEX_RATES,
-            })
-        )
+        const result = await cmsServer.executeOperation({
+            query: INDEX_RATES,
+        })
 
         expect(result.data).toBeDefined()
         const ratesIndex = result.data?.indexRates
@@ -92,11 +87,9 @@ describe('indexRates', () => {
         const draft2 = await createTestRate()
 
         // index rates
-        const result = must(
-            await cmsServer.executeOperation({
-                query: INDEX_RATES,
-            })
-        )
+        const result = await cmsServer.executeOperation({
+            query: INDEX_RATES,
+        })
 
         const ratesIndex = result.data?.indexRates
         expect(result.errors).toBeUndefined()
@@ -184,11 +177,10 @@ describe('indexRates', () => {
         })
 
         // baseline
-        const initial = must(
-            await cmsServer.executeOperation({
-                query: INDEX_RATES,
-            })
-        )
+        const initial = await cmsServer.executeOperation({
+            query: INDEX_RATES,
+        })
+
         const initialRates = initial.data?.indexRates.edges
         const florida: StateCodeType = 'FL'
         const initialRateInfos = () => ({
@@ -374,11 +366,9 @@ describe('indexRates', () => {
         await submitTestRate(server, relockedRate.id, 'Test first resubmission')
 
         // index rates
-        const result = must(
-            await cmsServer.executeOperation({
-                query: INDEX_RATES,
-            })
-        )
+        const result = await cmsServer.executeOperation({
+            query: INDEX_RATES,
+        })
         const ratesIndex = result.data?.indexRates
         expect(result.errors).toBeUndefined()
 
@@ -431,11 +421,9 @@ describe('indexRates', () => {
         )
 
         // index rates
-        const result = must(
-            await cmsServer.executeOperation({
-                query: INDEX_RATES,
-            })
-        )
+        const result = await cmsServer.executeOperation({
+            query: INDEX_RATES,
+        })
 
         const ratesIndex = result.data?.indexRates
         expect(result.errors).toBeUndefined()
@@ -518,11 +506,9 @@ describe('indexRates', () => {
         )
 
         // index rates
-        const result = must(
-            await cmsServer.executeOperation({
-                query: INDEX_RATES,
-            })
-        )
+        const result = await cmsServer.executeOperation({
+            query: INDEX_RATES,
+        })
 
         const ratesIndex = result.data?.indexRates
         expect(result.errors).toBeUndefined()
