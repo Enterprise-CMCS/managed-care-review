@@ -201,7 +201,8 @@ export const SubmissionSideNav = () => {
                                             : 'SUBMISSIONS_SUMMARY'
                                     )}
                                 >
-                                    {isStateUser
+                                    {isStateUser &&
+                                    submissionStatus === 'UNLOCKED'
                                         ? 'Submission'
                                         : 'Submission summary'}
                                 </Link>,

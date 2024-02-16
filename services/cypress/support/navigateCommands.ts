@@ -1,5 +1,3 @@
-import { aliasQuery, aliasMutation } from '../utils/graphql-test-utils'
-
 type FormButtonKey =
     | 'CONTINUE_FROM_START_NEW'
     | 'CONTINUE'
@@ -12,8 +10,6 @@ const buttonsWithLabels: FormButtons = {
     SAVE_DRAFT: 'Save as draft',
     BACK: 'Back',
 }
-
-const isSubmissionEditUrl = /submissions\/([0-9a-fA-F-]+)\/edit/
 
 Cypress.Commands.add(
     'navigateFormByButtonClick',
@@ -35,7 +31,6 @@ Cypress.Commands.add(
             if (waitForLoad) {
                 cy.wait('@createHealthPlanPackageMutation', { timeout: 50_000 })
                 cy.wait('@fetchHealthPlanPackageWithQuestionsQuery')
-                cy.wait('@fetchHealthPlanPackageQuery')
             }
             cy.findByTestId('state-submission-form-page').should('exist')
         } else if (buttonKey === 'CONTINUE') {
@@ -55,11 +50,7 @@ Cypress.Commands.add(
     (url: string, waitForLoad = true) => {
         cy.visit(url)
         if (waitForLoad) {
-            if(isSubmissionEditUrl.test(url)) {
-                cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50_000 })
-            } else {
-                cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 50_000 })
-            }
+            cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 50_000 })
         }
     }
 )
