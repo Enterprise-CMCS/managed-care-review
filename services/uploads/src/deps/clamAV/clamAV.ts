@@ -41,7 +41,7 @@ function NewClamAV(config: Partial<ClamAVConfig>, s3Client: S3UploadsClient) {
         pathToDefintions: config.pathToDefintions || '/tmp',
 
         pathToClamdScan: config.pathToClamdScan || '/opt/bin/clamdscan',
-        pathToClamdConfig: config.pathToClamdConfig || '/opt/clamd.conf',
+        pathToClamdConfig: config.pathToClamdConfig || '/var/task/clamd.conf',
     }
 
     return {
