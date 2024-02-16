@@ -492,7 +492,7 @@ resources:
       DependsOn: ClamAVInstance
       Properties:
         HostedZoneId: !Ref MCRInternalZone
-        Name: clamav-${sls:stage}.mc-review-test.local
+        Name: clamav.mc-review-${sls:stage}.local
         Type: A
         ResourceRecords:
           - !GetAtt ClamAVInstance.PrivateIp
