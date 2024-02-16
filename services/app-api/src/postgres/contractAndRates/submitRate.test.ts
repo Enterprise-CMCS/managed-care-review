@@ -2,8 +2,7 @@ import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import { submitRate } from './submitRate'
 import { NotFoundError } from '../postgresErrors'
-import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHelpers'
-import { createInsertContractData, must } from '../../testHelpers'
+import { mockInsertContractArgs, mockInsertRateArgs,  must } from '../../testHelpers'
 import { insertDraftRate } from './insertRate'
 import { submitContract } from './submitContract'
 import { insertDraftContract } from './insertContract'
@@ -33,12 +32,12 @@ describe('submitRate', () => {
         const submitError = await submitRate(client, {
             rateID: '1111',
             submittedByUserID: '1111',
-            submitReason: 'failed submit',
+            submittedReason: 'failed submit',
         })
         expect(submitError).toBeInstanceOf(NotFoundError)
 
         // create a draft rate
-        const draftRateData = createInsertRateData({
+        const draftRateData = mockInsertRateArgs({
             rateCertificationName: 'rate-cert-name',
         })
         const rateA = must(await insertDraftRate(client, draftRateData))
@@ -47,18 +46,20 @@ describe('submitRate', () => {
             await submitRate(client, {
                 rateID: rateA.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'initial submit',
+                submittedReason: 'Initial submission',
                 formData: {
                     ...draftRateData,
                     rateType: 'AMENDMENT',
                 },
             })
         )
+
+        // Expect default submit reason
         expect(result.revisions[0].submitInfo?.updatedReason).toBe(
-            'initial submit'
+            'Initial submission'
         )
 
-        //Expect rate form data to be what was inserted
+        // Expect rate form data to be what was inserted
         expect(result.revisions[0]).toEqual(
             expect.objectContaining({
                 formData: expect.objectContaining({
@@ -71,7 +72,7 @@ describe('submitRate', () => {
         const resubmitStoreError = await submitRate(client, {
             rateID: rateA.id,
             submittedByUserID: stateUser.id,
-            submitReason: 'initial submit',
+            submittedReason: 'Resubmit',
         })
 
         // resubmitting should be a store error
@@ -95,7 +96,7 @@ describe('submitRate', () => {
         )
 
         // create a draft rate
-        const draftRateData = createInsertRateData({
+        const draftRateData = mockInsertRateArgs({
             rateCertificationName: 'first rate ',
         })
         const rateA = must(await insertDraftRate(client, draftRateData))
@@ -104,7 +105,7 @@ describe('submitRate', () => {
         const contractA = must(
             await insertDraftContract(
                 client,
-                createInsertContractData({
+                mockInsertContractArgs({
                     submissionDescription: 'first contract',
                 })
             )
@@ -115,7 +116,7 @@ describe('submitRate', () => {
             await submitRate(client, {
                 rateID: rateA.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'initial submit',
+                submittedReason: 'initial submit',
             })
         )
 
@@ -124,7 +125,7 @@ describe('submitRate', () => {
             await submitContract(client, {
                 contractID: contractA.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'initial rate submit',
+                submittedReason: 'initial rate submit',
             })
         )
         // set up the relation between the submitted contract and the rate
@@ -160,7 +161,7 @@ describe('submitRate', () => {
             await submitRate(client, {
                 rateID: rateASecondRevision.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'second submit',
+                submittedReason: 'second submit',
             })
         )
 
@@ -192,7 +193,7 @@ describe('submitRate', () => {
             },
         })
 
-        const draftRateData = createInsertRateData({
+        const draftRateData = mockInsertRateArgs({
             rateCertificationName: 'one contract',
         })
         const rateA = must(await insertDraftRate(client, draftRateData))
@@ -224,7 +225,7 @@ describe('submitRate', () => {
         const result = await submitContract(client, {
             contractID: contract1.id,
             submittedByUserID: stateUser.id,
-            submitReason: 'Contract Submit',
+            submittedReason: 'Contract Submit',
         })
 
         if (!(result instanceof Error)) {
@@ -252,7 +253,7 @@ describe('submitRate', () => {
         )
 
         // create a draft rate
-        const draftRateData = createInsertRateData({
+        const draftRateData = mockInsertRateArgs({
             rateCertificationName: 'first rate ',
         })
         const draftRate = must(await insertDraftRate(client, draftRateData))
@@ -307,7 +308,7 @@ describe('submitRate', () => {
             await submitRate(client, {
                 rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit and update rate',
+                submittedReason: 'submit and update rate',
                 formData: updateRateData,
             })
         )
@@ -346,7 +347,7 @@ describe('submitRate', () => {
         const draftContract = must(
             await insertDraftContract(
                 client,
-                createInsertContractData({
+                mockInsertContractArgs({
                     submissionDescription: 'first contract',
                 })
             )
@@ -360,7 +361,7 @@ describe('submitRate', () => {
                 contractID,
                 formData: {},
                 rateFormDatas: [
-                    createInsertRateData({
+                    mockInsertRateArgs({
                         rateCertificationName: 'rate revision 1.0',
                         rateType: 'NEW',
                     }),
@@ -382,7 +383,7 @@ describe('submitRate', () => {
             await submitRate(client, {
                 rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit and update rate',
+                submittedReason: 'submit and update rate',
                 formData: {
                     rateCertificationName: 'rate revision 1.1',
                     rateType: 'AMENDMENT',
@@ -417,7 +418,7 @@ describe('submitRate', () => {
             await submitContract(client, {
                 contractID: draftContract.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit first contract',
+                submittedReason: 'submit first contract',
             })
         )
 
@@ -452,7 +453,7 @@ describe('submitRate', () => {
             await submitRate(client, {
                 rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'submit and update rate',
+                submittedReason: 'submit and update rate',
                 formData: {
                     rateCertificationName: 'rate revision 1.2',
                     rateType: 'AMENDMENT',

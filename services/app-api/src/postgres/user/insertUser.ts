@@ -17,7 +17,6 @@ export async function insertUser(
     user: InsertUserArgsType
 ): Promise<UserType | Error> {
     try {
-        console.info('Trying to insert the user to postgres....')
         const val = await client.user.create({
             data: {
                 id: user.userID,
@@ -29,7 +28,6 @@ export async function insertUser(
                 divisionAssignment: user.divisionAssignment ?? null,
             },
         })
-        console.info('insert user return: ' + val)
         return toDomainUser(val)
     } catch (err) {
         return err

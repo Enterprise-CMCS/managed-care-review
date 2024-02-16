@@ -1,7 +1,7 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import {
     must,
-    createInsertContractData,
+    mockInsertContractArgs,
     getStateRecord,
 } from '../../testHelpers'
 import { insertDraftContract } from './insertContract'
@@ -17,7 +17,7 @@ describe('insertContract', () => {
         const client = await sharedTestPrismaClient()
 
         // create a draft contract
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             contractType: 'BASE',
         })
         const draftContract = must(
@@ -53,10 +53,10 @@ describe('insertContract', () => {
         const client = await sharedTestPrismaClient()
         const stateCode = 'OH'
         const initialState = await getStateRecord(client, stateCode)
-        const contractA = createInsertContractData({
+        const contractA = mockInsertContractArgs({
             stateCode,
         })
-        const contractB = createInsertContractData({
+        const contractB = mockInsertContractArgs({
             stateCode,
         })
 
@@ -81,7 +81,7 @@ describe('insertContract', () => {
         jest.spyOn(console, 'error').mockImplementation()
         const client = await sharedTestPrismaClient()
 
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             stateCode: 'MN' as StateCodeType,
             programIDs: [],
         })

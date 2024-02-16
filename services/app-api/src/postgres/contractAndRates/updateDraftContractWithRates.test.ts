@@ -1,6 +1,6 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { insertDraftContract } from './insertContract'
-import { createInsertContractData, must } from '../../testHelpers'
+import { mockInsertContractArgs, must } from '../../testHelpers'
 import type { ContractFormEditable } from './updateDraftContractWithRates'
 import { updateDraftContractWithRates } from './updateDraftContractWithRates'
 import { PrismaClientValidationError } from '@prisma/client/runtime/library'
@@ -9,7 +9,7 @@ import type {
     ContractFormDataType,
     RateFormDataType,
 } from '../../domain-models/contractAndRates'
-import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHelpers'
+import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
 import { v4 as uuidv4 } from 'uuid'
 import type { RateFormEditable } from './updateDraftRate'
 import { insertDraftRate } from './insertRate'
@@ -23,7 +23,7 @@ describe('updateDraftContract', () => {
     it('updates drafts correctly', async () => {
         const client = await sharedTestPrismaClient()
 
-        const draftContractForm1 = createInsertContractData({})
+        const draftContractForm1 = mockInsertContractArgs({})
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { stateCode, ...draftContractFormData } = draftContractForm1
         const contract = must(
@@ -167,7 +167,7 @@ describe('updateDraftContract', () => {
     it('allows for removing all fields', async () => {
         const client = await sharedTestPrismaClient()
 
-        const draftContractForm1 = createInsertContractData({})
+        const draftContractForm1 = mockInsertContractArgs({})
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const contract = must(
             await insertDraftContract(client, {
@@ -267,7 +267,7 @@ describe('updateDraftContract', () => {
         }
 
         const contract = must(
-            await insertDraftContract(client, createInsertContractData({}))
+            await insertDraftContract(client, mockInsertContractArgs({}))
         )
 
         const draft1 = must(
@@ -349,7 +349,7 @@ describe('updateDraftContract', () => {
         }
 
         const contract = must(
-            await insertDraftContract(client, createInsertContractData({}))
+            await insertDraftContract(client, mockInsertContractArgs({}))
         )
 
         const draft1 = must(
@@ -393,7 +393,7 @@ describe('updateDraftContract', () => {
         jest.spyOn(console, 'error').mockImplementation()
 
         const client = await sharedTestPrismaClient()
-        const draftContractInsert = createInsertContractData({})
+        const draftContractInsert = mockInsertContractArgs({})
         const newRate = must(
             await insertDraftContract(client, draftContractInsert)
         )
@@ -430,22 +430,22 @@ describe('updateDraftContract', () => {
     it('create, update, and disconnects many rates', async () => {
         // Make a new contract
         const client = await sharedTestPrismaClient()
-        const draftContractFormData = createInsertContractData({})
+        const draftContractFormData = mockInsertContractArgs({})
         const draftContract = must(
             await insertDraftContract(client, draftContractFormData)
         )
 
         // Array of new rates to create
         const newRates: RateFormDataType[] = [
-            createInsertRateData({
+            mockInsertRateArgs({
                 id: uuidv4(),
                 rateType: 'NEW',
             }),
-            createInsertRateData({
+            mockInsertRateArgs({
                 id: uuidv4(),
                 rateType: 'AMENDMENT',
             }),
-            createInsertRateData({
+            mockInsertRateArgs({
                 id: uuidv4(),
                 rateType: 'AMENDMENT',
                 rateCapitationType: 'RATE_CELL',
@@ -621,7 +621,7 @@ describe('updateDraftContract', () => {
                 formData: {},
                 // create two new rates
                 rateFormDatas: [
-                    createInsertRateData({
+                    mockInsertRateArgs({
                         id: uuidv4(),
                         rateType: 'NEW',
                         certifyingActuaryContacts: [
@@ -633,7 +633,7 @@ describe('updateDraftContract', () => {
                             },
                         ],
                     }),
-                    createInsertRateData({
+                    mockInsertRateArgs({
                         id: uuidv4(),
                         rateType: 'AMENDMENT',
                         certifyingActuaryContacts: [
@@ -728,7 +728,7 @@ describe('updateDraftContract', () => {
     it('connects existing rates to contract', async () => {
         const client = await sharedTestPrismaClient()
 
-        const draftContractFormData = createInsertContractData({})
+        const draftContractFormData = mockInsertContractArgs({})
         const draftContract = must(
             await insertDraftContract(client, draftContractFormData)
         )
@@ -737,7 +737,7 @@ describe('updateDraftContract', () => {
         const draftRate = must(
             await insertDraftRate(
                 client,
-                createInsertRateData({
+                mockInsertRateArgs({
                     rateType: 'NEW',
                     stateCode: 'MN',
                 })
@@ -763,7 +763,7 @@ describe('updateDraftContract', () => {
             throw new Error('Unexpected error: Cannot find state record')
         }
 
-        const createDraftRateData = createInsertRateData({
+        const mockDraftRate = mockInsertRateArgs({
             id: uuidv4(),
             rateType: 'NEW',
             stateCode: 'MN',
@@ -776,7 +776,7 @@ describe('updateDraftContract', () => {
                 formData: {},
                 rateFormDatas: [
                     draftRate.draftRevision?.formData,
-                    createDraftRateData,
+                    mockDraftRate,
                 ],
             })
         )
@@ -801,13 +801,13 @@ describe('updateDraftContract', () => {
             },
         })
 
-        const draftContractFormData = createInsertContractData({})
+        const draftContractFormData = mockInsertContractArgs({})
         const draftContract = must(
             await insertDraftContract(client, draftContractFormData)
         )
 
         // new rate
-        const newRate = createInsertRateData({
+        const newRate = mockInsertRateArgs({
             id: uuidv4(),
             rateType: 'NEW',
         })
@@ -845,7 +845,7 @@ describe('updateDraftContract', () => {
             await submitRate(client, {
                 rateID: newlyCreatedRates[0].formData.rateID,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Rate submit',
+                submittedReason: 'Rate submit',
             })
         )
 
@@ -853,7 +853,7 @@ describe('updateDraftContract', () => {
         const newDraftRate = must(
             await insertDraftRate(
                 client,
-                createInsertRateData({
+                mockInsertRateArgs({
                     id: uuidv4(),
                     rateType: 'AMENDMENT',
                 })
@@ -864,7 +864,7 @@ describe('updateDraftContract', () => {
             await submitRate(client, {
                 rateID: newDraftRate.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Rate 2 submit',
+                submittedReason: 'Rate 2 submit',
             })
         )
 

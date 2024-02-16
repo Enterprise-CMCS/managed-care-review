@@ -1,13 +1,13 @@
-import type { InsertContractArgsType } from '../../postgres/contractAndRates/insertContract'
+import type { InsertContractArgsType } from '../postgres/contractAndRates/insertContract'
 import { v4 as uuidv4 } from 'uuid'
 import type {
     ContractRevisionTableWithRates,
     ContractTableFullPayload,
-} from '../../postgres/contractAndRates/prismaSubmittedContractHelpers'
-import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import type { ContractFormDataType } from '../../domain-models/contractAndRates'
-import { findStatePrograms } from '../../postgres'
-import { must } from '../assertionHelpers'
+} from '../postgres/contractAndRates/prismaSubmittedContractHelpers'
+import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type { ContractFormDataType } from '../domain-models/contractAndRates'
+import { findStatePrograms } from '../postgres'
+import { must } from './assertionHelpers'
 
 const defaultContractData = () => ({
     id: uuidv4(),
@@ -18,7 +18,7 @@ const defaultContractData = () => ({
     stateNumber: 111,
 })
 
-const createInsertContractData = ({
+const mockInsertContractArgs = ({
     stateCode = 'MN',
     ...formData
 }: {
@@ -39,7 +39,7 @@ const createInsertContractData = ({
     }
 }
 
-const createDraftContractData = (
+const mockContractData = (
     contract?: Partial<ContractTableFullPayload>
 ): ContractTableFullPayload => {
     const contractData = {
@@ -55,41 +55,7 @@ const createDraftContractData = (
 
     Object.assign(contractData, {
         revisions: contract?.revisions ?? [
-            createContractRevision(
-                {
-                    ...contractData,
-                    ...contract,
-                },
-                {
-                    draftRates: [],
-                    rateRevisions: [],
-                    submitInfo: null,
-                },
-                contract?.stateCode as StateCodeType
-            ) as ContractRevisionTableWithRates,
-        ],
-    })
-
-    return contractData
-}
-
-const createContractData = (
-    contract?: Partial<ContractTableFullPayload>
-): ContractTableFullPayload => {
-    const contractData = {
-        id: uuidv4(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        mccrsID: null,
-        stateCode: 'MN',
-        stateNumber: 111,
-        revisions: [],
-        ...contract,
-    }
-
-    Object.assign(contractData, {
-        revisions: contract?.revisions ?? [
-            createContractRevision(
+            mockContractRevision(
                 {
                     ...contractData,
                     ...contract,
@@ -105,7 +71,7 @@ const createContractData = (
     return contractData
 }
 
-const createContractRevision = (
+const mockContractRevision = (
     contract?: Partial<ContractTableFullPayload>,
     revision?: Partial<ContractRevisionTableWithRates>,
     stateCode: StateCodeType = 'MN'
@@ -212,9 +178,4 @@ const createContractRevision = (
     }
 }
 
-export {
-    createInsertContractData,
-    createContractRevision,
-    createContractData,
-    createDraftContractData,
-}
+export { mockInsertContractArgs, mockContractRevision, mockContractData }

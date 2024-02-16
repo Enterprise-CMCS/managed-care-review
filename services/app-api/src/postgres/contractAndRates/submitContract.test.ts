@@ -5,7 +5,7 @@ import { insertDraftContract } from './insertContract'
 import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
 import { updateDraftRate } from './updateDraftRate'
-import { must, createInsertContractData } from '../../testHelpers'
+import { must, mockInsertContractArgs } from '../../testHelpers'
 import { NotFoundError } from '../postgresErrors'
 
 describe('submitContract', () => {
@@ -27,12 +27,12 @@ describe('submitContract', () => {
         const submitError = await submitContract(client, {
             contractID: '1111',
             submittedByUserID: '1111',
-            submitReason: 'failed submit',
+            submittedReason: 'failed submit',
         })
         expect(submitError).toBeInstanceOf(NotFoundError)
 
         // create a draft contract
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'one contract',
         })
         const contractA = must(
@@ -43,7 +43,7 @@ describe('submitContract', () => {
             await submitContract(client, {
                 contractID: contractA.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'initial submit',
+                submittedReason: 'initial submit',
             })
         )
         expect(result.revisions[0].submitInfo?.updatedReason).toBe(
@@ -67,7 +67,7 @@ describe('submitContract', () => {
         const resubmitStoreError = await submitContract(client, {
             contractID: contractA.id,
             submittedByUserID: stateUser.id,
-            submitReason: 'initial submit',
+            submittedReason: 'initial submit',
         })
 
         // resubmitting should be a store error
@@ -91,7 +91,7 @@ describe('submitContract', () => {
         )
 
         // create a draft contract
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'first contract',
         })
         const contractA = must(
@@ -111,7 +111,7 @@ describe('submitContract', () => {
             await submitContract(client, {
                 contractID: contractA.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'initial submit',
+                submittedReason: 'initial submit',
             })
         )
 
@@ -120,7 +120,7 @@ describe('submitContract', () => {
             await submitRate(client, {
                 rateID: rateA.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'initial rate submit',
+                submittedReason: 'initial rate submit',
             })
         )
         // set up the relation between the submitted contract and the rate
@@ -161,7 +161,7 @@ describe('submitContract', () => {
             await submitContract(client, {
                 contractID: contractASecondRevision.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'second submit',
+                submittedReason: 'second submit',
             })
         )
 
@@ -193,7 +193,7 @@ describe('submitContract', () => {
             },
         })
 
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'one contract',
         })
         const contractA = must(
@@ -217,7 +217,7 @@ describe('submitContract', () => {
         const result = await submitRate(client, {
             rateID: rate1.id,
             submittedByUserID: stateUser.id,
-            submitReason: 'Rate Submit',
+            submittedReason: 'Rate Submit',
         })
 
         if (!(result instanceof Error)) {

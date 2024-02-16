@@ -1,6 +1,6 @@
 import { findAllContractsWithHistoryBySubmitInfo } from './findAllContractsWithHistoryBySubmitInfo'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { createInsertContractData, must } from '../../testHelpers'
+import { mockInsertContractArgs, must } from '../../testHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import { insertDraftContract } from './insertContract'
 import { submitContract } from './submitContract'
@@ -30,7 +30,7 @@ describe('findAllContractsWithHistoryBySubmittedInfo', () => {
             },
         })
 
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'one contract',
         })
 
@@ -45,14 +45,14 @@ describe('findAllContractsWithHistoryBySubmittedInfo', () => {
             await submitContract(client, {
                 contractID: contractOne.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'contractOne submit',
+                submittedReason: 'contractOne submit',
             })
         )
         const submittedContractTwo = must(
             await submitContract(client, {
                 contractID: contractTwo.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'contractTwo submit',
+                submittedReason: 'contractTwo submit',
             })
         )
 
@@ -72,7 +72,7 @@ describe('findAllContractsWithHistoryBySubmittedInfo', () => {
             await submitContract(client, {
                 contractID: contractThree.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'unlockContractOne submit',
+                submittedReason: 'unlockContractOne submit',
             })
         )
         const unlockedContract = must(

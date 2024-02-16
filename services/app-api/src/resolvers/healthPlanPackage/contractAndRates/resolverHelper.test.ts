@@ -1,4 +1,4 @@
-import { createInsertRateData } from '../../../testHelpers/contractAndRates/rateHelpers'
+import { mockInsertRateArgs } from '../../../testHelpers/rateDataMocks'
 import {
     isEqualData,
     convertHealthPlanPackageRatesToDomain,
@@ -10,7 +10,7 @@ import type { RateFormDataType } from '../../../domain-models/contractAndRates'
 describe('isEqualRateData', () => {
     const rateDataTestCases = [
         {
-            rateDataOne: createInsertRateData({
+            rateDataOne: mockInsertRateArgs({
                 rateCapitationType: 'RATE_RANGE',
                 rateDocuments: [
                     {
@@ -30,7 +30,7 @@ describe('isEqualRateData', () => {
                     },
                 ],
             }),
-            rateDataTwo: createInsertRateData({
+            rateDataTwo: mockInsertRateArgs({
                 rateCapitationType: 'RATE_RANGE',
                 rateDocuments: [
                     {
@@ -53,7 +53,7 @@ describe('isEqualRateData', () => {
             expectedResult: true,
         },
         {
-            rateDataOne: createInsertRateData({
+            rateDataOne: mockInsertRateArgs({
                 rateCapitationType: 'RATE_RANGE',
                 rateDocuments: [
                     {
@@ -66,7 +66,7 @@ describe('isEqualRateData', () => {
                 rateDateEnd: new Date(Date.UTC(2025, 5, 1)),
                 certifyingActuaryContacts: [],
             }),
-            rateDataTwo: createInsertRateData({
+            rateDataTwo: mockInsertRateArgs({
                 rateCapitationType: 'RATE_RANGE',
                 rateDocuments: [
                     {
@@ -89,7 +89,7 @@ describe('isEqualRateData', () => {
             expectedResult: false,
         },
         {
-            rateDataOne: createInsertRateData({
+            rateDataOne: mockInsertRateArgs({
                 rateCapitationType: 'RATE_RANGE',
                 rateDocuments: [
                     {

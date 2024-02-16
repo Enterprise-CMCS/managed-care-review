@@ -9,7 +9,7 @@ import { updateDraftContractWithRates } from './updateDraftContractWithRates'
 import { updateDraftRate } from './updateDraftRate'
 import { submitContract } from './submitContract'
 import { findContractWithHistory } from './findContractWithHistory'
-import { must, createInsertContractData } from '../../testHelpers'
+import { must, mockInsertContractArgs } from '../../testHelpers'
 
 describe('unlockContract', () => {
     it('Unlocks a rate without breaking connected draft contract', async () => {
@@ -36,7 +36,7 @@ describe('unlockContract', () => {
             },
         })
 
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'Contract 1.0',
         })
 
@@ -56,7 +56,7 @@ describe('unlockContract', () => {
             await submitRate(client, {
                 rateID: rate.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Rate A 1.0 submit',
+                submittedReason: 'Rate A 1.0 submit',
             })
         )
 
@@ -111,7 +111,7 @@ describe('unlockContract', () => {
             await submitRate(client, {
                 rateID: rate.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Updated things',
+                submittedReason: 'Updated things',
             })
         )
 
@@ -160,7 +160,7 @@ describe('unlockContract', () => {
             },
         })
 
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'Contract 1.0',
         })
 
@@ -180,7 +180,7 @@ describe('unlockContract', () => {
             await submitRate(client, {
                 rateID: rate.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Rate 1.0 submit',
+                submittedReason: 'Rate 1.0 submit',
             })
         )
 
@@ -205,7 +205,7 @@ describe('unlockContract', () => {
             await submitContract(client, {
                 contractID: contract.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Initial Submit',
+                submittedReason: 'Initial Submit',
             })
         )
         // Latest revision is the last index
@@ -235,7 +235,7 @@ describe('unlockContract', () => {
             await submitRate(client, {
                 rateID: rate.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Rate resubmit',
+                submittedReason: 'Rate resubmit',
             })
         )
 
@@ -276,7 +276,7 @@ describe('unlockContract', () => {
             },
         })
 
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'Contract 1.0',
         })
 
@@ -318,7 +318,7 @@ describe('unlockContract', () => {
             await submitRate(client, {
                 rateID: rate.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Submit rate 1.0',
+                submittedReason: 'Submit rate 1.0',
             })
         )
 
@@ -327,7 +327,7 @@ describe('unlockContract', () => {
             await submitContract(client, {
                 contractID: contract.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Submit contract 1.0',
+                submittedReason: 'Submit contract 1.0',
             })
         )
         const latestContractRev = submittedContract.revisions[0]
@@ -363,7 +363,7 @@ describe('unlockContract', () => {
             await submitContract(client, {
                 contractID: contract.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'Submit contract 2.0',
+                submittedReason: 'Submit contract 2.0',
             })
         )
         const latestResubmittedRev = resubmittedContract.revisions[0]
@@ -387,7 +387,7 @@ describe('unlockContract', () => {
             },
         })
 
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'Contract 1.0',
         })
 
@@ -428,7 +428,7 @@ describe('unlockContract', () => {
         const submittedContract = await submitContract(client, {
             contractID: contract.id,
             submittedByUserID: stateUser.id,
-            submitReason: 'Submit contract 1.0',
+            submittedReason: 'Submit contract 1.0',
         })
         expect(submittedContract).toBeInstanceOf(Error)
     })
@@ -445,7 +445,7 @@ describe('unlockContract', () => {
             },
         })
 
-        const draftContractData = createInsertContractData({
+        const draftContractData = mockInsertContractArgs({
             submissionDescription: 'Contract 1.0',
         })
 

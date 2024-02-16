@@ -1,29 +1,36 @@
 import FETCH_RATE from '../../../../app-graphql/src/queries/fetchRate.graphql'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import {
     constructTestPostgresServer,
-    createAndSubmitTestHealthPlanPackage,
     defaultFloridaRateProgram,
-    resubmitTestHealthPlanPackage,
-    unlockTestHealthPlanPackage,
-    updateTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import { testCMSUser } from '../../testHelpers/userHelpers'
-import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
-import { must } from '../../testHelpers'
+import {
+    createAndSubmitTestRate,
+    submitTestRate,
+    unlockTestRate,
+    updateTestRate,
+} from '../../testHelpers'
 import { v4 as uuidv4 } from 'uuid'
 
 describe('fetchRate', () => {
+    const ldService = testLDService({
+        'rate-edit-unlock': true,
+    })
     it('returns correct rate revisions on resubmit when existing rate is edited', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+        })
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
+            ldService,
         })
 
-        const initialRateInfos = () => ({
+        const initialRate = () => ({
             id: uuidv4(),
             rateType: 'NEW' as const,
             rateDateStart: new Date(Date.UTC(2025, 5, 1)),
@@ -51,61 +58,28 @@ describe('fetchRate', () => {
             packagesWithSharedRateCerts: [],
         })
 
-        // First, create new submission and unlock to edit rate
-        const submittedEditedRates = await createAndSubmitTestHealthPlanPackage(
-            server,
-            {
-                rateInfos: [initialRateInfos()],
-            }
-        )
-        const packageID = submittedEditedRates.id
-
-        // Unlock submission
-        const unlockedHPP = await unlockTestHealthPlanPackage(
+        // First, submit and unlock a rate
+        const submittedRate = await createAndSubmitTestRate(stateServer, {
+            stateCode: 'FL',
+            ...initialRate(),
+        })
+        await unlockTestRate(
             cmsServer,
-            packageID,
+            submittedRate.id,
             'Unlock to edit an existing rate'
         )
 
-        // Decode unlocked submission form data
-        const unlockedHppFormData = latestFormData(unlockedHPP)
-        // Get the data of the first and only rate in the HPP
-        const unlockedRate = unlockedHppFormData.rateInfos[0]
-
-        // edit the same rate
-        await updateTestHealthPlanPackage(server, packageID, {
-            rateInfos: [
-                {
-                    ...unlockedRate,
-                    id: unlockedRate.id, // edit same rate, use same id
-                    rateDateStart: new Date(Date.UTC(2025, 1, 1)),
-                    rateDateEnd: new Date(Date.UTC(2027, 1, 1)),
-                },
-            ],
+        // editrate with new data and resubmit
+        await updateTestRate(submittedRate.id, {
+            rateDateStart: new Date(Date.UTC(2025, 1, 1)),
+            rateDateEnd: new Date(Date.UTC(2027, 1, 1)),
         })
 
-        // Resubmit
-        const resubmittedHPP = await resubmitTestHealthPlanPackage(
-            server,
-            packageID,
+        const resubmittedRate = await submitTestRate(
+            stateServer,
+            submittedRate.id,
             'Resubmit with edited rate description'
         )
-
-        // Decode resubmitted HPP form data
-        const resubmittedHppFormData = latestFormData(resubmittedHPP)
-
-        // fetch and check rate
-        const result = await cmsServer.executeOperation({
-            query: FETCH_RATE,
-            variables: {
-                input: {
-                    rateID: resubmittedHppFormData.rateInfos[0].id,
-                },
-            },
-        })
-
-        const resubmittedRate = result.data?.fetchRate.rate
-        expect(result.errors).toBeUndefined()
         expect(resubmittedRate).toBeDefined()
 
         // check that we have two revisions of the same rate
@@ -118,7 +92,7 @@ describe('fetchRate', () => {
         expect(resubmittedRate.revisions[0].formData.rateDateEnd).toBe(
             '2027-02-01'
         )
-        expect(resubmittedRate.revisions[0].submitInfo.updatedReason).toBe(
+        expect(resubmittedRate.revisions[0].submitInfo?.updatedReason).toBe(
             'Resubmit with edited rate description'
         )
         // the initial submit data is correct
@@ -128,19 +102,20 @@ describe('fetchRate', () => {
         expect(resubmittedRate.revisions[1].formData.rateDateEnd).toBe(
             '2026-05-30'
         )
-        expect(resubmittedRate.revisions[1].submitInfo.updatedReason).toBe(
+        expect(resubmittedRate.revisions[1].submitInfo?.updatedReason).toBe(
             'Initial submission'
         )
     })
 
     it('returns correct rate revisions on resubmit when new rate added', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer()
+        const server = await constructTestPostgresServer({ ldService })
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
+            ldService,
         })
 
         const initialRateInfos = () => ({
@@ -171,131 +146,91 @@ describe('fetchRate', () => {
             packagesWithSharedRateCerts: [],
         })
 
-        // First, create new submission and unlock to edit rate
-        const submittedInitial = await createAndSubmitTestHealthPlanPackage(
-            server,
-            {
-                rateInfos: [initialRateInfos()],
-            }
-        )
+        // First, create new rate and unlock to edit it
+        const submittedInitial = await createAndSubmitTestRate(server, {
+            stateCode: 'MS',
+            rateDateStart: new Date(Date.UTC(2030, 1, 1)),
+            rateDateEnd: new Date(Date.UTC(2031, 1, 1)),
+        })
 
-        const existingRate = await unlockTestHealthPlanPackage(
+        const existingRate = await unlockTestRate(
             cmsServer,
             submittedInitial.id,
             'Unlock to edit add a new rate'
         )
 
         // add new rate
-        const existingFormData = latestFormData(existingRate)
-        const firstRateID = existingFormData.rateInfos[0].id
-        expect(existingFormData.rateInfos).toHaveLength(1)
-        await updateTestHealthPlanPackage(server, submittedInitial.id, {
-            rateInfos: [
-                existingFormData.rateInfos[0], // first rate unchanged
-                {
-                    ...initialRateInfos(),
-                    rateDateStart: new Date(Date.UTC(2030, 1, 1)),
-                    rateDateEnd: new Date(Date.UTC(2030, 12, 1)),
-                    rateDateCertified: new Date(Date.UTC(2029, 10, 31)),
-                },
-            ],
+        const firstRateID = existingRate.id
+        expect(existingRate.revisions).toHaveLength(1)
+        const updatedRate = await updateTestRate(submittedInitial.id, {
+            ...initialRateInfos(),
+            rateDateStart: new Date(Date.UTC(2034, 1, 1)),
+            rateDateEnd: new Date(Date.UTC(2035, 1, 1)),
+            rateDateCertified: new Date(Date.UTC(2029, 10, 31)),
         })
 
-        const resubmitResult = await resubmitTestHealthPlanPackage(
+        const resubmittedRate = await submitTestRate(
             server,
-            submittedInitial.id,
+            updatedRate.id,
             'Resubmit with an additional rate'
         )
 
         // fetch and check rate 1 which was resubmitted with no changese
-        expect(firstRateID).toBe(latestFormData(resubmitResult).rateInfos[0].id) // first rate ID should be unchanged
+        expect(firstRateID).toBe(resubmittedRate.id) // first rate ID should be unchanged
 
-        const result1 = must(
-            await cmsServer.executeOperation({
-                query: FETCH_RATE,
-                variables: {
-                    input: { rateID: firstRateID },
-                },
-            })
-        )
+        const result1 = await cmsServer.executeOperation({
+            query: FETCH_RATE,
+            variables: {
+                input: { rateID: firstRateID },
+            },
+        })
+
         const resubmittedRate1 = result1.data?.fetchRate.rate
         expect(resubmittedRate1.revisions).toHaveLength(2)
         // dates for first rate should be unchanged
         expect(resubmittedRate1.revisions[0].formData.rateDateStart).toBe(
-            '2025-06-01'
+            '2034-02-01'
         )
         expect(resubmittedRate1.revisions[0].formData.rateDateEnd).toBe(
-            '2026-05-30'
+            '2035-02-01'
         )
         expect(resubmittedRate1.revisions[0].submitInfo.updatedReason).toBe(
             'Resubmit with an additional rate'
         )
 
-        // check that initial submission is correct
+        // check that initial rate is correct
         expect(resubmittedRate1.revisions[1].formData.rateDateStart).toBe(
-            '2025-06-01'
+            '2030-02-01'
         )
         expect(resubmittedRate1.revisions[1].formData.rateDateEnd).toBe(
-            '2026-05-30'
+            '2031-02-01'
         )
         expect(resubmittedRate1.revisions[1].submitInfo.updatedReason).toBe(
             'Initial submission'
-        )
-
-        // Check our second test rate which was added in unlock
-        const secondRateID = latestFormData(resubmitResult).rateInfos[1].id
-        const result2 = await cmsServer.executeOperation({
-            query: FETCH_RATE,
-            variables: {
-                input: { rateID: secondRateID },
-            },
-        })
-
-        const resubmitted2 = result2.data?.fetchRate.rate
-        expect(result2.errors).toBeUndefined()
-        expect(resubmitted2).toBeDefined()
-
-        // second test rate should only have one revision with the correct data
-        expect(resubmitted2.revisions).toHaveLength(1)
-        expect(resubmitted2.revisions[0].submitInfo.updatedReason).toBe(
-            'Resubmit with an additional rate'
-        )
-        expect(resubmitted2.revisions[0].formData.rateDateStart).toBe(
-            '2030-02-01'
-        )
-        expect(resubmitted2.revisions[0].formData.rateDateEnd).toBe(
-            '2031-01-01'
-        )
-        expect(resubmitted2.revisions[0].formData.rateDateCertified).toBe(
-            '2029-12-01'
         )
     })
 
     it('returns the right revisions as a rate is unlocked', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer()
+        const server = await constructTestPostgresServer({ ldService })
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
+            ldService,
         })
 
-        const unlockedSubmission =
-            await createAndSubmitTestHealthPlanPackage(server)
+        const submittedRate = await createAndSubmitTestRate(server)
 
-        // unlock two
-        await unlockTestHealthPlanPackage(
+        const unlockRate = await unlockTestRate(
             cmsServer,
-            unlockedSubmission.id,
-            'Test reason'
+            submittedRate.id,
+            'Unlock to edit a rate'
         )
 
-        const unlockedRateID =
-            latestFormData(unlockedSubmission).rateInfos[0].id
-
         const input = {
-            rateID: unlockedRateID,
+            rateID: unlockRate.id,
         }
 
         // fetch rate

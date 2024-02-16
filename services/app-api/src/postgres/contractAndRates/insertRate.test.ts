@@ -1,7 +1,7 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { must, getStateRecord } from '../../testHelpers'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
-import { createInsertRateData } from '../../testHelpers/contractAndRates/rateHelpers'
+import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
 import { insertDraftRate } from './insertRate'
 import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
@@ -14,7 +14,7 @@ describe('insertRate', () => {
         const client = await sharedTestPrismaClient()
 
         // create a draft rate
-        const draftRateData = createInsertRateData({ rateType: 'NEW' })
+        const draftRateData = mockInsertRateArgs({ rateType: 'NEW' })
         const draftRate = must(await insertDraftRate(client, draftRateData))
 
         // Expect a new draft rate to have a draftRevision and no submitted revisions
@@ -42,10 +42,10 @@ describe('insertRate', () => {
         const stateCode = 'VA'
         const initialState = await getStateRecord(client, stateCode)
 
-        const rateA = createInsertRateData({
+        const rateA = mockInsertRateArgs({
             stateCode,
         })
-        const rateB = createInsertRateData({
+        const rateB = mockInsertRateArgs({
             stateCode,
         })
 
@@ -67,7 +67,7 @@ describe('insertRate', () => {
         jest.spyOn(console, 'error').mockImplementation()
         const client = await sharedTestPrismaClient()
 
-        const draftRateData = createInsertRateData({
+        const draftRateData = mockInsertRateArgs({
             stateCode: 'CANADA' as StateCodeType,
         })
         const draftRate = await insertDraftRate(client, draftRateData)

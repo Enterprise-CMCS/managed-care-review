@@ -1,15 +1,14 @@
 import { v4 as uuidv4 } from 'uuid'
 import {
-    createContractData,
-    createContractRevision,
-    createDraftContractData,
+    mockContractRevision,
+    mockContractData,
 } from '../../testHelpers/'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import type { ContractTableFullPayload } from './prismaSubmittedContractHelpers'
 
 describe('parseDomainData', () => {
     describe('parseDraftContract', () => {
-        const draftContract = createDraftContractData()
+        const draftContract = mockContractData()
         it('can parse valid draft domain data with no errors', () => {
             const validatedDraft = parseContractWithHistory(draftContract)
             expect(validatedDraft).not.toBeInstanceOf(Error)
@@ -20,24 +19,24 @@ describe('parseDomainData', () => {
             testDescription: string
         }[] = [
             {
-                contract: createDraftContractData({
+                contract: mockContractData({
                     stateNumber: 0,
-                    revisions: [createContractRevision()],
+                    revisions: [mockContractRevision()],
                 }),
                 testDescription: 'undefined stateNumber',
             },
             {
-                contract: createDraftContractData({
+                contract: mockContractData({
                     stateCode: undefined,
-                    revisions: [createContractRevision()],
+                    revisions: [mockContractRevision()],
                 }),
                 testDescription: 'invalid stateCode',
             },
             {
-                contract: createDraftContractData({
+                contract: mockContractData({
                     stateCode: undefined,
                     revisions: [
-                        createContractRevision(draftContract, {
+                        mockContractRevision(draftContract, {
                             submitInfo: {
                                 id: uuidv4(),
                                 updatedAt: new Date(),
@@ -69,7 +68,7 @@ describe('parseDomainData', () => {
         )
     })
     describe('parseDraftContractRevision', () => {
-        const contract = createContractData()
+        const contract = mockContractData()
 
         it('cant parse valid contract revision with no errors', () => {
             expect(parseContractWithHistory(contract)).not.toBeInstanceOf(Error)
@@ -79,9 +78,9 @@ describe('parseDomainData', () => {
             testDescription: string
         }[] = [
             {
-                contract: createContractData({
+                contract: mockContractData({
                     revisions: [
-                        createContractRevision(contract, {
+                        mockContractRevision(contract, {
                             submissionType: undefined,
                         }),
                     ],
@@ -89,9 +88,9 @@ describe('parseDomainData', () => {
                 testDescription: 'invalid submissionType',
             },
             {
-                contract: createContractData({
+                contract: mockContractData({
                     revisions: [
-                        createContractRevision(contract, {
+                        mockContractRevision(contract, {
                             submissionDescription: undefined,
                         }),
                     ],
@@ -99,9 +98,9 @@ describe('parseDomainData', () => {
                 testDescription: 'invalid submissionDescription',
             },
             {
-                contract: createContractData({
+                contract: mockContractData({
                     revisions: [
-                        createContractRevision(contract, {
+                        mockContractRevision(contract, {
                             contractType: undefined,
                         }),
                     ],
@@ -109,9 +108,9 @@ describe('parseDomainData', () => {
                 testDescription: 'invalid contractType',
             },
             {
-                contract: createContractData({
+                contract: mockContractData({
                     revisions: [
-                        createContractRevision(contract, {
+                        mockContractRevision(contract, {
                             managedCareEntities: undefined,
                         }),
                     ],
@@ -127,7 +126,7 @@ describe('parseDomainData', () => {
         )
     })
     describe('parseContractWithHistory', () => {
-        const contract = createContractData()
+        const contract = mockContractData()
         it('can parse valid contract domain data with no errors', () => {
             const validatedContract = parseContractWithHistory(contract)
             expect(validatedContract).not.toBeInstanceOf(Error)
@@ -138,21 +137,21 @@ describe('parseDomainData', () => {
             testDescription: string
         }[] = [
             {
-                contract: createContractData({
+                contract: mockContractData({
                     stateNumber: 0,
                 }),
                 testDescription: 'invalid stateNumber',
             },
             {
-                contract: createContractData({
+                contract: mockContractData({
                     stateCode: undefined,
                 }),
                 testDescription: 'undefined stateCode',
             },
             {
-                contract: createContractData({
+                contract: mockContractData({
                     revisions: [
-                        createContractRevision(contract, {
+                        mockContractRevision(contract, {
                             rateRevisions: [
                                 {
                                     rateRevisionID: uuidv4(),

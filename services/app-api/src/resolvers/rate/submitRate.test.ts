@@ -3,12 +3,17 @@ import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
-import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
+import { testStateUser, testCMSUser } from '../../testHelpers/userHelpers'
 import SUBMIT_RATE from '../../../../app-graphql/src/mutations/submitRate.graphql'
-import FETCH_RATE from 'app-graphql/src/queries/fetchRate.graphql'
-import SUBMIT_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
+import FETCH_RATE from '../../../../app-graphql/src/queries/fetchRate.graphql'
 import UNLOCK_RATE from '../../../../app-graphql/src/mutations/unlockRate.graphql'
+import {
+    createTestRate,
+    submitTestRate,
+    updateTestRate,
+} from '../../testHelpers'
+import SUBMIT_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
 
 describe('submitRate', () => {
     const ldService = testLDService({
@@ -25,36 +30,29 @@ describe('submitRate', () => {
             ldService,
         })
 
-        const draftContractWithRate =
-            await createAndUpdateTestHealthPlanPackage(stateServer)
-
-        const rateID = latestFormData(draftContractWithRate).rateInfos[0].id
-
+        // createRate with full data
+        const draftRate = await createTestRate()
         const fetchDraftRate = await stateServer.executeOperation({
             query: FETCH_RATE,
             variables: {
-                input: { rateID },
+                input: { rateID: draftRate.id },
             },
         })
 
         const draftFormData =
             fetchDraftRate.data?.fetchRate.rate.draftRevision.formData
 
-        // expect draft rate created in contract to exist
-        expect(fetchDraftRate.errors).toBeUndefined()
-        expect(draftFormData).toBeDefined()
-
+        // submitRate with no form data updates
         const result = await stateServer.executeOperation({
             query: SUBMIT_RATE,
             variables: {
                 input: {
-                    rateID: rateID,
-                    submitReason: 'submit rate',
-                    formData: draftFormData,
+                    rateID: draftRate.id,
                 },
             },
         })
 
+        expect(result.errors).toBeUndefined()
         const submittedRate = result.data?.submitRate.rate
         const submittedRateFormData = submittedRate.revisions[0].formData
 
@@ -77,51 +75,42 @@ describe('submitRate', () => {
             ldService,
         })
 
-        const draftContractWithRate =
-            await createAndUpdateTestHealthPlanPackage(stateServer)
-
-        const rateID = latestFormData(draftContractWithRate).rateInfos[0].id
+        const draftRate = await createTestRate()
 
         const fetchDraftRate = await stateServer.executeOperation({
             query: FETCH_RATE,
             variables: {
-                input: { rateID },
+                input: { rateID: draftRate.id },
             },
         })
 
-        const draftFormData =
-            fetchDraftRate.data?.fetchRate.rate.draftRevision.formData
+        const draftFormData = draftRate.draftRevision?.formData
 
         // expect draft rate created in contract to exist
         expect(fetchDraftRate.errors).toBeUndefined()
         expect(draftFormData).toBeDefined()
 
-        // make update to formData in submit
-        const result = await stateServer.executeOperation({
-            query: SUBMIT_RATE,
-            variables: {
-                input: {
-                    rateID: rateID,
-                    submitReason: 'submit rate',
-                    formData: {
-                        ...draftFormData,
-                        rateType: 'AMENDMENT',
-                    },
-                },
-            },
+        // update rate
+        await updateTestRate(draftRate.id, {
+            rateDateStart: new Date(Date.UTC(2025, 1, 1)),
         })
 
-        const submittedRate = result.data?.submitRate.rate
+        const submittedRate = await submitTestRate(
+            stateServer,
+            draftRate.id,
+            'Submit with edited rate description'
+        )
+
         const submittedRateFormData = submittedRate.revisions[0].formData
 
-        // expect no errors from submit rate
-        expect(result.errors).toBeUndefined()
         // expect rate data to be returned
         expect(submittedRate).toBeDefined()
         // expect status to be submitted.
         expect(submittedRate.status).toBe('SUBMITTED')
         // expect formData to NOT be the same
-        expect(submittedRateFormData).not.toEqual(draftFormData)
+        expect(submittedRateFormData.rateDateStart).not.toEqual(
+            draftFormData?.rateDateStart
+        )
     })
     it('can submit rate without formData updates', async () => {
         const stateUser = testStateUser()
@@ -133,15 +122,12 @@ describe('submitRate', () => {
             ldService,
         })
 
-        const draftContractWithRate =
-            await createAndUpdateTestHealthPlanPackage(stateServer)
-
-        const rateID = latestFormData(draftContractWithRate).rateInfos[0].id
+        const draftRate = await createTestRate()
 
         const fetchDraftRate = await stateServer.executeOperation({
             query: FETCH_RATE,
             variables: {
-                input: { rateID },
+                input: { rateID: draftRate.id },
             },
         })
 
@@ -152,17 +138,15 @@ describe('submitRate', () => {
         expect(fetchDraftRate.errors).toBeUndefined()
         expect(draftFormData).toBeDefined()
 
-        // make update to formData in submit
         const result = await stateServer.executeOperation({
             query: SUBMIT_RATE,
             variables: {
                 input: {
-                    rateID: rateID,
-                    submitReason: 'submit rate',
+                    rateID: draftRate.id,
+                    submittedReason: 'submit rate',
                 },
             },
         })
-
         const submittedRate = result.data?.submitRate.rate
         const submittedRateFormData = submittedRate.revisions[0].formData
 
@@ -175,6 +159,7 @@ describe('submitRate', () => {
         // expect formData to be the same
         expect(submittedRateFormData).toEqual(draftFormData)
     })
+    // TODO: this test needs to be updated to remove references to healthplanpackage
     it('can unlock and submit rate independent of contract status', async () => {
         const stateUser = testStateUser()
         const cmsUser = testCMSUser()
@@ -242,7 +227,7 @@ describe('submitRate', () => {
             variables: {
                 input: {
                     rateID: rateID,
-                    submitReason: 'submit rate',
+                    submittedReason: 'submit rate',
                     formData: unlockedRate.draftRevision.formData,
                 },
             },
@@ -266,15 +251,12 @@ describe('submitRate', () => {
             }),
         })
 
-        const draftContractWithRate =
-            await createAndUpdateTestHealthPlanPackage(stateServer)
-
-        const rateID = latestFormData(draftContractWithRate).rateInfos[0].id
+        const draftRate = await createTestRate()
 
         const fetchDraftRate = await stateServer.executeOperation({
             query: FETCH_RATE,
             variables: {
-                input: { rateID },
+                input: { rateID: draftRate.id },
             },
         })
 
@@ -285,17 +267,17 @@ describe('submitRate', () => {
         expect(fetchDraftRate.errors).toBeUndefined()
         expect(draftFormData).toBeDefined()
 
-        // make update to formData in submit
+        // make update to formData and submit
+        await updateTestRate(draftRate.id, {
+            rateDateStart: new Date(Date.UTC(2025, 1, 1)),
+        })
+
         const result = await stateServer.executeOperation({
             query: SUBMIT_RATE,
             variables: {
                 input: {
-                    rateID: rateID,
-                    submitReason: 'submit rate',
-                    formData: {
-                        ...draftFormData,
-                        rateType: 'AMENDMENT',
-                    },
+                    rateID: draftRate.id,
+                    submittedReason: 'submit rate',
                 },
             },
         })

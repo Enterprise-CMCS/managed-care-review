@@ -1,6 +1,6 @@
 import { findAllRatesWithHistoryBySubmitInfo } from './findAllRatesWithHistoryBySubmitInfo'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { createInsertRateData, must } from '../../testHelpers'
+import { mockInsertRateArgs, must } from '../../testHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
@@ -30,7 +30,7 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
             },
         })
 
-        const draftRateData = createInsertRateData({
+        const draftRateData = mockInsertRateArgs({
             rateCertificationName: 'one rate',
         })
 
@@ -41,14 +41,14 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
             await submitRate(client, {
                 rateID: rateOne.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'rateOne submit',
+                submittedReason: 'rateOne submit',
             })
         )
         const submittedRateTwo = must(
             await submitRate(client, {
                 rateID: rateTwo.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'rateTwo submit',
+                submittedReason: 'rateTwo submit',
             })
         )
 
@@ -62,7 +62,7 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
             await submitRate(client, {
                 rateID: rateThree.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'unlockRateOne submit',
+                submittedReason: 'unlockRateOne submit',
             })
         )
         const unlockedRate = must(
@@ -126,7 +126,7 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
         const rateDataForAS = must(
             await insertDraftRate(
                 client,
-                createInsertRateData({
+                mockInsertRateArgs({
                     stateCode: 'AS',
                     rateCertificationName: 'one rate',
                 })
@@ -136,7 +136,7 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
             await submitRate(client, {
                 rateID: rateDataForAS.id,
                 submittedByUserID: stateUser.id,
-                submitReason: 'rateOne submit',
+                submittedReason: 'rateOne submit',
             })
         )
 

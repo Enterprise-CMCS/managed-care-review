@@ -1,12 +1,12 @@
 import { v4 as uuidv4 } from 'uuid'
-import type { InsertRateArgsType } from '../../postgres/contractAndRates/insertRate'
+import type { InsertRateArgsType } from '../postgres/contractAndRates/insertRate'
 import type {
     RateTableFullPayload,
     RateRevisionTableWithContracts,
-} from '../../postgres/contractAndRates/prismaSubmittedRateHelpers'
-import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { findStatePrograms } from '../../postgres'
-import { must } from '../assertionHelpers'
+} from '../postgres/contractAndRates/prismaSubmittedRateHelpers'
+import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import { findStatePrograms } from '../postgres'
+import { must } from './assertionHelpers'
 
 const defaultRateData = () => ({
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
@@ -16,7 +16,7 @@ const defaultRateData = () => ({
     stateNumber: 111,
 })
 
-const createInsertRateData = (
+const mockInsertRateArgs = (
     rateArgs?: Partial<InsertRateArgsType>
 ): InsertRateArgsType => {
     return {
@@ -25,7 +25,7 @@ const createInsertRateData = (
     }
 }
 
-const createDraftRateData = (
+const mockDraftRate = (
     rate?: Partial<RateTableFullPayload>
 ): RateTableFullPayload => ({
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
@@ -34,7 +34,7 @@ const createDraftRateData = (
     stateCode: 'MN',
     stateNumber: 111,
     revisions: rate?.revisions ?? [
-        createRateRevision(
+        mockRateRevision(
             rate,
             {
                 contractRevisions: [],
@@ -45,28 +45,7 @@ const createDraftRateData = (
     ],
     ...rate,
 })
-
-const createRateData = (
-    rate?: Partial<RateTableFullPayload>
-): RateTableFullPayload => ({
-    id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    stateCode: 'MN',
-    stateNumber: 111,
-    revisions: rate?.revisions ?? [
-        createRateRevision(
-            rate,
-            {
-                draftContracts: [],
-            },
-            rate?.stateCode as StateCodeType
-        ) as RateRevisionTableWithContracts,
-    ],
-    ...rate,
-})
-
-const createRateRevision = (
+const mockRateRevision = (
     rate?: Partial<RateTableFullPayload>,
     revision?: Partial<RateRevisionTableWithContracts>,
     stateCode: StateCodeType = 'MN'
@@ -155,9 +134,4 @@ const createRateRevision = (
     }
 }
 
-export {
-    createInsertRateData,
-    createRateRevision,
-    createRateData,
-    createDraftRateData,
-}
+export { mockInsertRateArgs, mockRateRevision, mockDraftRate }
