@@ -177,7 +177,6 @@ resources:
       - !Equals ['${sls:stage}', 'main']
       - !Equals ['${sls:stage}', 'val']
       - !Equals ['${sls:stage}', 'prod']
-      - !Equals ['${sls:stage}', 'mtscanfromlambda']
 
   Resources:
     DocumentUploadsBucket:
@@ -481,7 +480,7 @@ resources:
       Type: AWS::Route53::HostedZone
       Condition: IsDevValProd
       Properties:
-        Name: mc-review.local
+        Name: mc-review-${sls:stage}.local
         VPCs:
           - VPCId: ${self:custom.vpcId}
             VPCRegion: !Ref AWS::Region
@@ -492,7 +491,7 @@ resources:
       DependsOn: ClamAVInstance
       Properties:
         HostedZoneId: !Ref MCRInternalZone
-        Name: clamav.mc-review.local
+        Name: clamav.mc-review-${sls:stage}.local
         Type: A
         ResourceRecords:
           - !GetAtt ClamAVInstance.PrivateIp
