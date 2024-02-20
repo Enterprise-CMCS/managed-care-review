@@ -114,7 +114,11 @@ export const RateEdit = (): React.ReactElement => {
                 unlockedInfo={unlockedInfo}
                 showPageErrorMessage={Boolean(fetchError || submitError)}
             />
-            <RateDetailsV2 rates={[rate]} submitRate={submitRateHandler} />
+            <RateDetailsV2
+                type="SINGLE"
+                rates={[rate]}
+                submitRate={submitRateHandler}
+            />
         </FormContainer>
     )
 }

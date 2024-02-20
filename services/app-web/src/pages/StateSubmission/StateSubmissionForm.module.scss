@@ -19,6 +19,9 @@
     width: 100%;
     padding: uswds.units(4) 0;
 }
+.banner {
+    margin: uswds.units(2) auto;
+}
 
 .formContainer {
     > [class^='usa-fieldset'] {
@@ -36,6 +39,7 @@
             width: 75rem;
         }
     }
+
     // the first fieldset of the form sets up form container
     // in cases where form has multiple sub sections using SectionCard - use .withSections class
     > [class^='usa-fieldset']:not([class~='with-sections']) {

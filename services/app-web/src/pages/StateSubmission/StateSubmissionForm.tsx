@@ -83,6 +83,7 @@ export const PageBannerAlerts = ({
                     unlockedBy={unlockedInfo?.updatedBy || 'Not available'}
                     unlockedOn={unlockedInfo.updatedAt || 'Not available'}
                     reason={unlockedInfo.updatedReason || 'Not available'}
+                    className={styles.banner}
                 />
             )}
         </>

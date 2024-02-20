@@ -19,6 +19,7 @@ describe('RateDetails', () => {
                         path={RoutesRecord.RATE_EDIT}
                         element={
                             <RateDetailsV2
+                                type="SINGLE"
                                 rates={[rate]}
                                 submitRate={mockSubmit}
                             />
@@ -43,7 +44,7 @@ describe('RateDetails', () => {
                 screen.getByText('Upload one rate certification document')
             ).toBeInTheDocument()
             expect(
-                screen.getByRole('button', { name: 'Continue' })
+                screen.getByRole('button', { name: 'Submit' })
             ).not.toHaveAttribute('aria-disabled')
         })
 
