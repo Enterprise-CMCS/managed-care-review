@@ -480,7 +480,7 @@ resources:
       Type: AWS::Route53::HostedZone
       Condition: IsDevValProd
       Properties:
-        Name: mc-review-${sls:stage}.local
+        Name: mc-review.local
         VPCs:
           - VPCId: ${self:custom.vpcId}
             VPCRegion: !Ref AWS::Region
