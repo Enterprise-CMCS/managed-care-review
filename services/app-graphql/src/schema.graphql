@@ -1263,7 +1263,9 @@ enum EditionReason {
     "A submission of one of the rates related to this contract"
     RATE_SUBMISSION
     "A submission of a rate related to this contract, removing the link between the two"
-    UNLINK
+    RATE_UNLINK
+    "A submission of an unrelated rate, linking it to this contract"
+    RATE_LINK
 }
 
 """
