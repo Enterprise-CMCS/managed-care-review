@@ -158,6 +158,28 @@ type Mutation {
         input: UpdateContractInput!
     ): UpdateContractPayload!
 
+
+    """
+    updateDraftContractRates updates the rates associated with a DRAFT contract revision.
+    It takes in an array of rate inputs, which can be new rates, updated rates, or linked rates. 
+    The API will make the necessary data changes to make the data match the update, including 
+    unlinking removed rates
+        
+    Errors:
+    - ForbiddenError:
+        - A CMSUser called this
+        - A state user from a different state called this.
+    - UserInputError:
+        - any of the linked or update rates' ids don't exist
+        - attempts to update the data of a nibling rate
+        - attempts to simply link a child rate
+        - The package is in the LOCKED or RESUBMITTED status
+        - A package cannot be found with the given `pkgID`
+    """
+    updateDraftContractRates(
+        input: UpdateDraftContractRatesInput!
+    ): UpdateDraftContractRatesPayload!
+
     """
     submitHealthPlanPackage submits the given package for review by CMS.
 
@@ -1151,6 +1173,45 @@ type RateFormData {
     that are using this rate
     """
     packagesWithSharedRateCerts: [PackageWithSameRate!]!
+}
+
+"UpdateContractRateType describes the relationship of the updated rate to this contract"
+enum UpdateContractRateType {
+    "CREATE is going to create a new child rate, never seen before. Future updates of this rate will call UPDATE"
+    CREATE
+    "UPDATE updates the form data for a given child rate, whether previously created for this submission or unlocked"
+    UPDATE
+    "LINK describes a linked nibling to this contract rate"
+    LINK
+}
+
+"""
+UpdateContractRateInput is a swiss army knife for updating rates related to a given contract.
+Because GQL does not support unions in inputs, we will fake one here by setting the type parameter
+on this input and the API will validate that the two optional parameters are set correctly given the type.
+"""
+input UpdateContractRateInput {
+    "type indicates the relationship of this rate to the contract"
+    type: UpdateContractRateType!
+    "rateID is the rateID of the existing rate. This is REQUIRED for LINK and UPDATE types and OMITTED for CREATE"
+    rateID: ID
+    "formData is the rate data for a child rate, REQUIRED for CREATE and UPDATE types, omitted for LINK"
+    formData: RateFormDataInput
+}
+
+input UpdateDraftContractRatesInput {
+    contractID: ID!
+    """
+    updatedRates contains ALL the existing rates associated with this contract.
+    This includes rates that were previously linked or previously created (LINK & UPDATE)
+    as well as newly created rates and newly linked rates (CREATE & LINK)
+    any rates that are no longer associated with this contract should be omitted from the list.
+    """
+    updatedRates: [UpdateContractRateInput!]!
+}
+
+type UpdateDraftContractRatesPayload {
+    contract: Contract!
 }
 
 type ContractOnRevisionType {
