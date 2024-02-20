@@ -32,8 +32,6 @@ import {
     SubmissionType as SubmissionTypeT,
     useCreateHealthPlanPackageMutation,
     CreateHealthPlanPackageInput,
-    IndexHealthPlanPackagesDocument,
-    IndexHealthPlanPackagesQuery,
 } from '../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
@@ -79,45 +77,7 @@ export const SubmissionType = ({
     const isNewSubmission = location.pathname === '/submissions/new'
 
     const [createHealthPlanPackage, { error }] =
-        useCreateHealthPlanPackageMutation({
-            // This function updates the Apollo Client Cache after we create a new DraftSubmission
-            // Without it, we wouldn't show this newly created submission on the dashboard page
-            // without a refresh. Anytime a mutation does more than "modify an existing object"
-            // you'll need to handle the cache.
-            update(cache, { data }) {
-                const pkg = data?.createHealthPlanPackage.pkg
-                if (pkg) {
-                    const result =
-                        cache.readQuery<IndexHealthPlanPackagesQuery>({
-                            query: IndexHealthPlanPackagesDocument,
-                        })
-
-                    const indexHealthPlanPackages = {
-                        totalCount:
-                            result?.indexHealthPlanPackages.totalCount || 0,
-                        edges: result?.indexHealthPlanPackages.edges || [],
-                    }
-
-                    cache.writeQuery({
-                        query: IndexHealthPlanPackagesDocument,
-                        data: {
-                            indexHealthPlanPackages: {
-                                __typename: 'IndexHealthPlanPackagesPayload',
-                                totalCount:
-                                    indexHealthPlanPackages.totalCount + 1,
-                                edges: [
-                                    {
-                                        __typename: 'HealthPlanPackageEdge',
-                                        node: pkg,
-                                    },
-                                    ...indexHealthPlanPackages.edges,
-                                ],
-                            },
-                        },
-                    })
-                }
-            },
-        })
+        useCreateHealthPlanPackageMutation()
 
     useEffect(() => {
         // Focus the error summary heading only if we are displaying

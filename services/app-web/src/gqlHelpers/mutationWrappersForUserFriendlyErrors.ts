@@ -3,13 +3,9 @@ import {
     HealthPlanPackage,
     SubmitHealthPlanPackageMutationFn,
     UnlockHealthPlanPackageMutationFn,
-    FetchHealthPlanPackageWithQuestionsQuery,
-    FetchHealthPlanPackageWithQuestionsDocument,
-    IndexQuestionsPayload,
     CreateQuestionMutation,
     CreateQuestionResponseMutationFn,
     CreateQuestionResponseMutation,
-    Question,
     Division,
     CreateQuestionInput,
     CreateQuestionResponseInput,
@@ -154,80 +150,13 @@ export const submitMutationWrapper = async (
     }
 }
 
-/**
- * Manually updating the cache for Q&A mutations because the Q&A page is in a layout route that is not unmounted during the Q&A
- * workflow. So, when calling Q&A mutations the Q&A page will not refetch the data. The alternative would be to use
- * cache.evict() to force a refetch, but would then cause the loading UI to show.
- **/
 export const createQuestionWrapper = async (
     createQuestion: CreateQuestionMutationFn,
     input: CreateQuestionInput
 ): Promise<CreateQuestionMutation | GraphQLErrors | Error> => {
     try {
         const result = await createQuestion({
-            variables: { input },
-            update(cache, { data }) {
-                if (data) {
-                    const newQuestion = data.createQuestion.question as Question
-                    const result =
-                        cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
-                            {
-                                query: FetchHealthPlanPackageWithQuestionsDocument,
-                                variables: {
-                                    input: {
-                                        pkgID: newQuestion.contractID,
-                                    },
-                                },
-                            }
-                        )
-
-                    const pkg = result?.fetchHealthPlanPackage.pkg
-
-                    if (pkg) {
-                        const indexQuestionDivision =
-                            divisionToIndexQuestionDivision(
-                                newQuestion.division
-                            )
-                        const questions = pkg.questions as IndexQuestionsPayload
-                        const divisionQuestions =
-                            questions[indexQuestionDivision]
-
-                        cache.writeQuery({
-                            query: FetchHealthPlanPackageWithQuestionsDocument,
-                            data: {
-                                fetchHealthPlanPackage: {
-                                    pkg: {
-                                        ...pkg,
-                                        questions: {
-                                            ...pkg.questions,
-                                            [indexQuestionDivision]: {
-                                                totalCount:
-                                                    divisionQuestions.totalCount
-                                                        ? divisionQuestions.totalCount +
-                                                          1
-                                                        : 1,
-                                                edges: [
-                                                    {
-                                                        __typename:
-                                                            'QuestionEdge',
-                                                        node: {
-                                                            ...newQuestion,
-                                                            responses: [],
-                                                        },
-                                                    },
-                                                    ...divisionQuestions.edges,
-                                                ],
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        })
-                    }
-                }
-            },
-            onQueryUpdated: () => true,
-        })
+            variables: { input }})
 
         if (result.data?.createQuestion) {
             return result.data
@@ -250,74 +179,7 @@ export const createResponseWrapper = async (
 ): Promise<CreateQuestionResponseMutation | GraphQLErrors | Error> => {
     try {
         const result = await createResponse({
-            variables: { input },
-            update(cache, { data }) {
-                if (data) {
-                    const newResponse =
-                        data.createQuestionResponse.question.responses[0]
-                    const result =
-                        cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
-                            {
-                                query: FetchHealthPlanPackageWithQuestionsDocument,
-                                variables: {
-                                    input: {
-                                        pkgID: pkgID,
-                                    },
-                                },
-                            }
-                        )
-                    const pkg = result?.fetchHealthPlanPackage.pkg
-
-                    if (pkg) {
-                        const questions = pkg.questions as IndexQuestionsPayload
-                        const indexQuestionDivision =
-                            divisionToIndexQuestionDivision(division)
-                        const divisionQuestions =
-                            questions[indexQuestionDivision]
-
-                        const updatedPkg = {
-                            ...pkg,
-                            questions: {
-                                ...pkg.questions,
-                                [indexQuestionDivision]: {
-                                    ...divisionQuestions,
-                                    edges: divisionQuestions.edges.map(
-                                        (edge) => {
-                                            if (
-                                                edge.node.id ===
-                                                newResponse.questionID
-                                            ) {
-                                                return {
-                                                    __typename: 'QuestionEdge',
-                                                    node: {
-                                                        ...edge.node,
-                                                        responses: [
-                                                            newResponse,
-                                                            ...edge.node
-                                                                .responses,
-                                                        ],
-                                                    },
-                                                }
-                                            }
-                                            return edge
-                                        }
-                                    ),
-                                },
-                            },
-                        }
-
-                        cache.writeQuery({
-                            query: FetchHealthPlanPackageWithQuestionsDocument,
-                            data: {
-                                fetchHealthPlanPackage: {
-                                    pkg: updatedPkg,
-                                },
-                            },
-                        })
-                    }
-                }
-            },
-            onQueryUpdated: () => true,
+            variables: { input }
         })
 
         if (result.data?.createQuestionResponse) {
