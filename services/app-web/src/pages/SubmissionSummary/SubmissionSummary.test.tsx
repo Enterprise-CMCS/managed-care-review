@@ -15,6 +15,7 @@ import {
     mockValidUser,
     mockStateSubmission,
     mockSubmittedHealthPlanPackage,
+    mockValidStateUser,
 } from '../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
@@ -430,6 +431,72 @@ describe('SubmissionSummary', () => {
             await screen.findByRole('link', {
                 name: /Back to dashboard/,
             })
+        ).toBeInTheDocument()
+    })
+
+    it('renders the sidenav for CMS users', async () => {
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: '1337',
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/1337',
+                },
+            }
+        )
+
+        expect(
+            await screen.findByTestId('submission-side-nav')
+        ).toBeInTheDocument()
+    })
+
+    it('renders the sidenav for State users', async () => {
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidStateUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: '1337',
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/1337',
+                },
+            }
+        )
+
+        expect(
+            await screen.findByTestId('submission-side-nav')
         ).toBeInTheDocument()
     })
 

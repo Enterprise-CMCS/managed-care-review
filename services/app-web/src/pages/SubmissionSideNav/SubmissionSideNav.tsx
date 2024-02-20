@@ -1,12 +1,12 @@
 import { Link, SideNav, GridContainer, Icon } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import styles from './SubmissionSideNav.module.scss'
-import { useParams, useLocation, useNavigate, Outlet } from 'react-router-dom'
+import { useParams, useLocation, Outlet } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import {
     QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES,
-    RouteT,
     RoutesRecord,
+    STATE_SUBMISSION_FORM_ROUTES,
 } from '../../constants/routes'
 import { getRouteName } from '../../routeHelpers'
 import { useFetchHealthPlanPackageWithQuestionsWrapper } from '../../gqlHelpers'
@@ -54,7 +54,6 @@ export const SubmissionSideNav = () => {
     }
     const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
-    const navigate = useNavigate()
     const ldClient = useLDClient()
 
     const routeName = getRouteName(pathname)
@@ -64,11 +63,13 @@ export const SubmissionSideNav = () => {
         featureFlags.CMS_QUESTIONS.defaultValue
     )
 
-    const showSidebar =
-        showQuestionResponse &&
-        QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES.includes(routeName)
-    const isSelectedLink = (route: RouteT): string => {
-        return routeName === route ? 'usa-current' : ''
+    const isSelectedLink = (route: string | string[]): string => {
+        //We pass an array of the form routes in order to display the sideNav on all of the pages
+        if (typeof route != 'string') {
+            return route.includes(routeName) ? 'usa-current' : ''
+        } else {
+            return routeName === route ? 'usa-current' : ''
+        }
     }
 
     const { result: fetchResult } =
@@ -107,7 +108,15 @@ export const SubmissionSideNav = () => {
 
     const submissionStatus = pkg.status
 
+    //The sideNav should not be visible to a state user if the submission is a draft that has never been submitted
+    const showSidebar =
+        showQuestionResponse &&
+        submissionStatus !== 'DRAFT' &&
+        pkg.initiallySubmittedAt !== null &&
+        QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES.includes(routeName)
+
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const isHelpdeskUser = loggedInUser?.role === 'HELPDESK_USER'
     const isBusinessOwnerUser = loggedInUser?.role === 'BUSINESSOWNER_USER'
@@ -120,19 +129,14 @@ export const SubmissionSideNav = () => {
         return <GenericErrorPage />
     }
 
-    // State users should not see the submission summary page for DRAFT or UNLOCKED, it should redirect them to the edit flow.
-    if (
-        !(isCMSUser || isAdminUser || isHelpdeskUser || isBusinessOwnerUser) &&
-        (submissionStatus === 'DRAFT' || submissionStatus === 'UNLOCKED')
-    ) {
-        navigate(`/submissions/${id}/edit/type`)
-    }
-
-    // Current Revision is the last SUBMITTED revision, SubmissionSummary doesn't display data that is currently being edited
-    // Since we've already bounced on DRAFT packages, this _should_ exist.
-    const edge = pkg.revisions.find((rEdge) => rEdge.node.submitInfo)
+    // Current Revision is either the last submitted revision (cms users) or the most recent revision (for state users looking submission form)
+    const edge =
+        (submissionStatus === 'UNLOCKED' || submissionStatus === 'DRAFT') &&
+        loggedInUser.role === 'STATE_USER'
+            ? pkg.revisions[0]
+            : pkg.revisions.find((rEdge) => rEdge.node.submitInfo)
     if (!edge) {
-        const errMsg = `No currently submitted revision for this package: ${pkg.id}, programming error. `
+        const errMsg = `Not able to determine current revision for sidebar: ${pkg.id}, programming error.`
         recordJSException(errMsg)
         return <GenericErrorPage />
     }
@@ -159,6 +163,7 @@ export const SubmissionSideNav = () => {
             className={
                 showSidebar ? styles.backgroundSidebar : styles.backgroundForm
             }
+            data-testid="submission-side-nav"
         >
             <GridContainer className={styles.container}>
                 {showSidebar && (
@@ -182,13 +187,24 @@ export const SubmissionSideNav = () => {
                         <SideNav
                             items={[
                                 <Link
-                                    to={`/submissions/${id}`}
+                                    to={
+                                        isStateUser &&
+                                        submissionStatus === 'UNLOCKED'
+                                            ? `/submissions/${id}/edit/review-and-submit`
+                                            : `/submissions/${id}`
+                                    }
                                     asCustom={NavLink}
                                     className={isSelectedLink(
-                                        'SUBMISSIONS_SUMMARY'
+                                        isStateUser &&
+                                            submissionStatus === 'UNLOCKED'
+                                            ? STATE_SUBMISSION_FORM_ROUTES
+                                            : 'SUBMISSIONS_SUMMARY'
                                     )}
                                 >
-                                    Submission summary
+                                    {isStateUser &&
+                                    submissionStatus === 'UNLOCKED'
+                                        ? 'Submission'
+                                        : 'Submission summary'}
                                 </Link>,
                                 <Link
                                     to={`/submissions/${id}/question-and-answers`}
