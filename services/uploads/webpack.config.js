@@ -68,6 +68,9 @@ module.exports = {
                             );
                     },
                 },
+                {
+                    from: path.resolve(__dirname, 'src/avLayer/clamd.conf'),
+                },
             ],
         }),
     ],
