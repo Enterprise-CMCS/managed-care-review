@@ -84,6 +84,21 @@ type Query {
         input: FetchRateInput!
     ): FetchRatePayload!
 
+
+    """
+    fetchContract returns a single contract, linked to revisions and related rates 
+    given a contractID
+
+    It can be called by CMS or State users
+
+    Errors:
+    - ForbiddenError: A State user requests a contract that belongs to another state
+    - NotFoundError: contract for contractID not found in database
+    """
+    fetchContract(
+        input: FetchContractInput!
+    ): FetchContractPayload!
+
 }
 
 type Mutation {
@@ -137,7 +152,7 @@ type Mutation {
 
     """
     updateContract can be used to update fields on the contract
-    as oppossed to an individual revision
+    as opposed to an individual revision
     """
     updateContract(
         input: UpdateContractInput!
@@ -1208,7 +1223,7 @@ type Rate {
     "Fuller state data for the submitting state"
     state: State!
     """
-    The number of contracts this rate relates to.
+    A unique auto-incrementing number generated for this rate
     This value is used to generate the rateName
     """
     stateNumber: Int!
@@ -1219,6 +1234,98 @@ type Rate {
     for the rate and contains the full data from when the rate cert was submitted
     """
     revisions: [RateRevision!]!
+}
+
+"""
+ContractRevision is a single instance of all the contract specific data in a submission
+it contains the unlock and submit info.
+"""
+type ContractRevision {
+    id: ID!
+    createdAt: DateTime
+    updatedAt: DateTime
+    "submitInfo is the who/when/why for this revision being submitted. An Unlocked revision has no submitInfo"
+    submitInfo: UpdateInformation
+    "unlockInfo is the who/when/why for this revision being unlocked. A DRAFT or SUBMITTED revision will not have one"
+    unlockInfo: UpdateInformation
+
+    "formData is all the contract specific info part of this submission"
+    formData: ContractFormData!
+}
+
+"SubmittableRevision is what can appear in a submission"
+union SubmittableRevision = ContractRevision | RateRevision
+
+"SubmissionReason is a hint as to why this PackageSubmission was created"
+enum SubmissionReason {
+    "A submission of this contract and zero or more newly created rates"
+    CONTRACT_SUBMISSION
+    "A submission of one of the rates related to this contract"
+    RATE_SUBMISSION
+    "A submission of a rate related to this contract, removing the link between the two"
+    RATE_UNLINK
+    "A submission of an unrelated rate, linking it to this contract"
+    RATE_LINK
+}
+
+"""
+ContractPackageSubmission is a snapshot of a contract and all its related rates in time 
+a ContractPackageSubmission can be created by the user submitting a contract or a related rate
+"""
+type ContractPackageSubmission {
+    "cause is a hint as to why this submission was created"
+    cause: SubmissionReason!
+    "submitInfo provides the submission reason/date/by for this package submission"
+    submitInfo: UpdateInformation!
+    "submittedRevisions is a list of contract and/or rate revisions that were submitted to create this package submission"
+    submittedRevisions: [SubmittableRevision!]!
+    "contractRevision is the contract revision current at the time of this package submission"
+    contractRevision: ContractRevision!
+    "rateRevisions are the linked rate revisions current at the time of this package submission"
+    rateRevisions: [RateRevision!]!
+}
+
+"""
+Contact is a single contract submission, holding all the form data for a single contract
+and associated with zero or more Rates
+"""
+type Contract {
+    id: ID!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+
+    """
+    Where the contract is in the submission flow.
+    Options are DRAFT, SUBMITTED, RESUBMITTED and UNLOCKED
+    SUBMITTED and RESUBMITTED packages cannot be modified
+    """
+    status: HealthPlanPackageStatus!
+    "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
+    initiallySubmittedAt: Date
+    "stateCode is the state code (e.g. CA or TN) for the submitting state"
+    stateCode: String!
+    "state is fuller state data for the submitting state"
+    state: State!
+    """
+    stateNumber is a unique auto-incrementing number identifying this contract
+    This value is used to generate the contractName
+    """
+    stateNumber: Int!
+    
+    "draftRevision is the currently modifiable revision if the rate is DRAFT or UNLOCKED"
+    draftRevision: ContractRevision
+    """ 
+    draftRates are the Rates that this editable submission are related to. 
+    On submission they are cemented into a new ContractPackageSubmission
+    """ 
+    draftRates: [Rate!]
+
+    """
+    packageSubmissions are a snapshot of the contract and its related rates through time
+    each packageSubmission was created by a submission of this contract and/or its related rates
+    a DRAFT Contract will have no packageSubmissions
+    """
+    packageSubmissions: [ContractPackageSubmission!]!
 }
 
 type RateEdge {
@@ -1243,6 +1350,17 @@ type FetchRatePayload {
 
 input FetchRateInput{
     rateID: ID!
+}
+
+type FetchContractPayload {
+    """
+    A rate that include contract and rate revisions
+    """
+    contract: Contract!
+}
+
+input FetchContractInput{
+    contractID: ID!
 }
 
 type UnlockRatePayload {
