@@ -1250,16 +1250,16 @@ type ContractRevision {
     unlockInfo: UpdateInformation
 
     "formData is all the contract specific info part of this submission"
-    formData: ContractFormData
+    formData: ContractFormData!
 }
 
 "SubmittableRevision is what can appear in a submission"
 union SubmittableRevision = ContractRevision | RateRevision
 
-"ContractEditionReason is a hint as to why this edition was created"
-enum EditionReason {
+"SubmissionReason is a hint as to why this PackageSubmission was created"
+enum SubmissionReason {
     "A submission of this contract and zero or more newly created rates"
-    SUBMISSION
+    CONTRACT_SUBMISSION
     "A submission of one of the rates related to this contract"
     RATE_SUBMISSION
     "A submission of a rate related to this contract, removing the link between the two"
@@ -1269,19 +1269,19 @@ enum EditionReason {
 }
 
 """
-ContractEdition is a snapshot of a contract and all its related rates in time along with 
-information about what submission triggered the new edition.
+ContractPackageSubmission is a snapshot of a contract and all its related rates in time 
+a ContractPackageSubmission can be created by the user submitting a contract or a related rate
 """
-type ContractEdition {
-    "cause is a hint as to why this edition was created"
-    cause: EditionReason!
-    "submitInfo provides the submission reason/date/by for this edition"
+type ContractPackageSubmission {
+    "cause is a hint as to why this submission was created"
+    cause: SubmissionReason!
+    "submitInfo provides the submission reason/date/by for this package submission"
     submitInfo: UpdateInformation!
-    "submittedRevisions is a list of contract and/or rate revisions that were submitted to create this edition"
+    "submittedRevisions is a list of contract and/or rate revisions that were submitted to create this package submission"
     submittedRevisions: [SubmittableRevision!]!
-    "contractRevision is the contract revision current at the time of this edition"
+    "contractRevision is the contract revision current at the time of this package submission"
     contractRevision: ContractRevision!
-    "rateRevisions are the linked rate revisions current at the time of this edition"
+    "rateRevisions are the linked rate revisions current at the time of this package submission"
     rateRevisions: [RateRevision!]!
 }
 
@@ -1316,16 +1316,16 @@ type Contract {
     draftRevision: ContractRevision
     """ 
     draftRates are the Rates that this editable submission are related to. 
-    On submission they are cemented into a new ContractEdition
+    On submission they are cemented into a new ContractPackageSubmission
     """ 
     draftRates: [Rate!]
 
     """
-    editions are a snapshot of the contract and its related rates through time
-    each edition was created by a submission of this contract and/or its related rates
-    a DRAFT Contract will have no editions
+    packageSubmissions are a snapshot of the contract and its related rates through time
+    each packageSubmission was created by a submission of this contract and/or its related rates
+    a DRAFT Contract will have no packageSubmissions
     """
-    editions: [ContractEdition!]!
+    packageSubmissions: [ContractPackageSubmission!]!
 }
 
 type RateEdge {
