@@ -172,6 +172,7 @@ type Mutation {
     - UserInputError:
         - any of the linked or update rates' ids don't exist
         - attempts to update the data of a nibling rate
+        - misuse of rate update type and required id/formData params
         - attempts to simply link a child rate
         - The package is in the LOCKED or RESUBMITTED status
         - A package cannot be found with the given `pkgID`
@@ -1290,6 +1291,8 @@ type Rate {
     stateNumber: Int!
     "The currently modifiable revision if the rate is DRAFT or UNLOCKED"
     draftRevision: RateRevision
+    "draftContracts are the contracts associated with this rate that is DRAFT or UNLOCKED"
+    draftContracts: [Contract!]!
     """
     Array of revisions for this rate. Each revision represents a single submission
     for the rate and contains the full data from when the rate cert was submitted
@@ -1382,11 +1385,12 @@ type Contract {
     draftRates: [Rate!]
 
     """
-    packageSubmissions are a snapshot of the contract and its related rates through time
+    packageSubmissionHistory is an ordered list of snapshots of the contract and its related rates through time
     each packageSubmission was created by a submission of this contract and/or its related rates
-    a DRAFT Contract will have no packageSubmissions
+    a DRAFT Contract will have no packageSubmissionHistory. They are in reverse chronological order, 
+    the first entry in the list is the most recent submission. 
     """
-    packageSubmissions: [ContractPackageSubmission!]!
+    packageSubmissionHistory: [ContractPackageSubmission!]!
 }
 
 type RateEdge {
