@@ -83,7 +83,7 @@
         "danger": "^11.2.6",
         "esbuild": "^0.19.2",
         "husky": "^8.0.1",
-        "lerna": "^7.0.0",
+        "lerna": "^8.1.2",
         "lint-staged": "^14.0.1",
         "prettier": "^3.1.0"
     },
