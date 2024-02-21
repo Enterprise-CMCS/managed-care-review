@@ -1,5 +1,6 @@
 export {
     mockContractAndRatesDraft,
+    mockContractAndRatesDraftV2,
     mockStateSubmission,
     mockBaseContract,
     mockDraft,
