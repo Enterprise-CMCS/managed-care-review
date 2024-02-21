@@ -1,0 +1,7 @@
+query fetchContract($input: FetchContractInput!) {
+    fetchContract(input: $input) {
+        contract {
+            id
+        }
+    }
+}
