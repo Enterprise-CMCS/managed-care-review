@@ -225,7 +225,7 @@ export const RateDetailsV2 = ({
         const { id, ...formData } = gqlFormDatas[0] // only grab the first rate in the array because multi-rates functionality not added yet. This will be part of Link Rates epic
 
         if (options.type === 'CONTINUE' && id) {
-            await submitRate(id, formData, setSubmitting, 'DASHBOARD')
+            submitRate(id, formData, setSubmitting, 'DASHBOARD')
         } else if (options.type === 'CONTINUE' && !id) {
             throw new Error(
                 'Rate create and update for a new rate is not yet implemented. This will be part of Link Rates epic.'
