@@ -7,6 +7,26 @@ import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SubmissionType, SubmissionTypeFormValues } from './'
 import { Formik } from 'formik'
 import { contractOnly } from '../../../common-code/healthPlanFormDataMocks'
+import type { UseHealthPlanPackageForm } from '../../../hooks/useHealthPlanPackageForm'
+import type { UseRouteParams } from '../../../hooks/useRouteParams'
+
+// set up mocks for React Hooks in use
+const mockUseStateSubmissionForm: UseHealthPlanPackageForm = {
+    updateDraft: jest.fn(),
+    draftSubmission: contractOnly(),
+}
+jest.mock('../../../hooks/useHealthPlanPackageForm', () => ({
+    useHealthPlanPackageForm: () => {
+        return mockUseStateSubmissionForm
+    },
+}))
+
+const mockUseRouteParams: UseRouteParams = { id: '123-abc' }
+jest.mock('../../../hooks/useRouteParams', () => ({
+    useRouteParams: () => {
+        return mockUseRouteParams
+    },
+}))
 
 describe('SubmissionType', () => {
     afterEach(() => {
@@ -21,10 +41,9 @@ describe('SubmissionType', () => {
         contractType: '',
         populationCovered: undefined,
     }
-    const updateDraftMock = jest.fn()
 
     it('displays correct form guidance', async () => {
-        renderWithProviders(<SubmissionType updateDraft={updateDraftMock} />, {
+        renderWithProviders(<SubmissionType />, {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
@@ -37,17 +56,11 @@ describe('SubmissionType', () => {
     })
 
     it('displays submission type form when expected', async () => {
-        renderWithProviders(
-            <SubmissionType
-                updateDraft={updateDraftMock}
-                draftSubmission={contractOnly()}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         expect(
             screen.getByRole('form', { name: 'Submission Type Form' })
@@ -70,7 +83,7 @@ describe('SubmissionType', () => {
     })
 
     it('displays new submission form when expected', async () => {
-        renderWithProviders(<SubmissionType updateDraft={updateDraftMock} />, {
+        renderWithProviders(<SubmissionType />, {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
@@ -106,7 +119,7 @@ describe('SubmissionType', () => {
                 initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType updateDraft={updateDraftMock} />
+                <SubmissionType />
             </Formik>,
             {
                 apolloProvider: {
@@ -136,7 +149,7 @@ describe('SubmissionType', () => {
                 initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType updateDraft={updateDraftMock} />
+                <SubmissionType />
             </Formik>,
             {
                 apolloProvider: {
@@ -177,7 +190,7 @@ describe('SubmissionType', () => {
                 initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType updateDraft={updateDraftMock} />
+                <SubmissionType />
             </Formik>,
             {
                 apolloProvider: {
@@ -237,7 +250,7 @@ describe('SubmissionType', () => {
                 initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType updateDraft={updateDraftMock} />
+                <SubmissionType />
             </Formik>,
             {
                 apolloProvider: {
@@ -296,7 +309,7 @@ describe('SubmissionType', () => {
                 initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType updateDraft={updateDraftMock} />
+                <SubmissionType />
             </Formik>,
             {
                 apolloProvider: {
@@ -342,7 +355,7 @@ describe('SubmissionType', () => {
                 initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType updateDraft={updateDraftMock} />
+                <SubmissionType />
             </Formik>,
             {
                 apolloProvider: {
@@ -381,7 +394,7 @@ describe('SubmissionType', () => {
                 initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType updateDraft={updateDraftMock} />
+                <SubmissionType />
             </Formik>,
             {
                 apolloProvider: {
@@ -422,7 +435,7 @@ describe('SubmissionType', () => {
                 initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType updateDraft={updateDraftMock} />
+                <SubmissionType />
             </Formik>,
             {
                 apolloProvider: {
@@ -458,7 +471,7 @@ describe('SubmissionType', () => {
                 initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType updateDraft={updateDraftMock} />
+                <SubmissionType />
             </Formik>,
             {
                 apolloProvider: {
@@ -483,7 +496,7 @@ describe('SubmissionType', () => {
                 initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType updateDraft={updateDraftMock} />
+                <SubmissionType />
             </Formik>,
             {
                 apolloProvider: {
@@ -508,7 +521,7 @@ describe('SubmissionType', () => {
                 initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType updateDraft={updateDraftMock} />
+                <SubmissionType />
             </Formik>,
             {
                 apolloProvider: {
@@ -549,7 +562,7 @@ describe('SubmissionType', () => {
                 initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType updateDraft={updateDraftMock} />
+                <SubmissionType />
             </Formik>,
             {
                 apolloProvider: {
@@ -566,14 +579,11 @@ describe('SubmissionType', () => {
 
     describe('validations', () => {
         it('does not show error validations on initial load', async () => {
-            renderWithProviders(
-                <SubmissionType updateDraft={updateDraftMock} />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<SubmissionType />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             expect(screen.getByRole('textbox')).not.toHaveClass(
                 'usa-input--error'
@@ -590,10 +600,7 @@ describe('SubmissionType', () => {
 
         it('shows error messages when there are validation errors and showValidations is true', async () => {
             renderWithProviders(
-                <SubmissionType
-                    updateDraft={updateDraftMock}
-                    showValidations={true}
-                />,
+                <SubmissionType showValidations={true} />,
 
                 {
                     apolloProvider: {
@@ -621,10 +628,7 @@ describe('SubmissionType', () => {
 
         it('shows error messages when contract type is not selected', async () => {
             renderWithProviders(
-                <SubmissionType
-                    updateDraft={updateDraftMock}
-                    showValidations={true}
-                />,
+                <SubmissionType showValidations={true} />,
 
                 {
                     apolloProvider: {
@@ -656,17 +660,11 @@ describe('SubmissionType', () => {
         })
 
         it('do not show error messages when showValidations is false', async () => {
-            renderWithProviders(
-                <SubmissionType
-                    updateDraft={updateDraftMock}
-                    showValidations={false}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<SubmissionType showValidations={false} />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
             const textarea = screen.getByRole('textbox', {
                 name: 'Submission description',
             })
@@ -685,14 +683,11 @@ describe('SubmissionType', () => {
         })
 
         it('if form fields are invalid, shows validation error messages when continue button is clicked', async () => {
-            renderWithProviders(
-                <SubmissionType updateDraft={updateDraftMock} />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<SubmissionType />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             await userEvent.click(
                 screen.getByRole('button', {
