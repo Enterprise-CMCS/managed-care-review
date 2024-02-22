@@ -18,9 +18,18 @@ import { Documents } from './Documents'
 import { ReviewSubmit } from './ReviewSubmit'
 import { SubmissionType } from './SubmissionType'
 import { UnlockedHealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../common-code/featureFlags'
+import { RateDetailsV2 } from './RateDetails/V2/RateDetailsV2'
 
 // Can move this AppRoutes on future pass - leaving it here now to make diff clear
 export const StateSubmissionForm = (): React.ReactElement => {
+    const ldClient = useLDClient()
+
+    const useLinkedRates = ldClient?.variation(
+        featureFlags.LINK_RATES.flag,
+        featureFlags.LINK_RATES.defaultValue
+    )
     return (
         <div>
             <Routes>
@@ -38,7 +47,13 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     path={getRelativePathFromNestedRoute(
                         'SUBMISSIONS_RATE_DETAILS'
                     )}
-                    element={<RateDetails />}
+                    element={
+                        useLinkedRates ? (
+                            <RateDetailsV2 type="MULTI" rates={[]} />
+                        ) : (
+                            <RateDetails />
+                        )
+                    }
                 />
                 <Route
                     path={getRelativePathFromNestedRoute(
