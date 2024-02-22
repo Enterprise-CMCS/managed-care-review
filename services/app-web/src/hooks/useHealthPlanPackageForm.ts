@@ -54,45 +54,7 @@ useEffect(() => {
 const statePrograms = useStatePrograms()
 
 const { result: fetchResult } = useFetchHealthPlanPackageWrapper(packageID)
-const [createFormData] =useCreateHealthPlanPackageMutation({
-    // This function updates the Apollo Client Cache after we create a new DraftSubmission
-    // Without it, we wouldn't show this newly created submission on the dashboard page
-    // without a refresh. Anytime a mutation does more than "modify an existing object"
-    // you'll need to handle the cache.
-    update(cache, { data }) {
-        const pkg = data?.createHealthPlanPackage.pkg
-        if (pkg) {
-            const result =
-                cache.readQuery<IndexHealthPlanPackagesQuery>({
-                    query: IndexHealthPlanPackagesDocument,
-                })
-
-            const indexHealthPlanPackages = {
-                totalCount:
-                    result?.indexHealthPlanPackages.totalCount || 0,
-                edges: result?.indexHealthPlanPackages.edges || [],
-            }
-
-            cache.writeQuery({
-                query: IndexHealthPlanPackagesDocument,
-                data: {
-                    indexHealthPlanPackages: {
-                        __typename: 'IndexHealthPlanPackagesPayload',
-                        totalCount:
-                            indexHealthPlanPackages.totalCount + 1,
-                        edges: [
-                            {
-                                __typename: 'HealthPlanPackageEdge',
-                                node: pkg,
-                            },
-                            ...indexHealthPlanPackages.edges,
-                        ],
-                    },
-                },
-            })
-        }
-    },
-})
+const [createFormData] = useCreateHealthPlanPackageMutation()
 
 const createDraft: UseHealthPlanPackageForm['createDraft']  = async (
     input: CreateHealthPlanPackageInput
