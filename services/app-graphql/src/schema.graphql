@@ -80,13 +80,10 @@ type Query {
     - ForbiddenError: This API is not available due to feature flags.
     - NotFoundError: rate for rate.ID not found in database
     """
-    fetchRate(
-        input: FetchRateInput!
-    ): FetchRatePayload!
-
+    fetchRate(input: FetchRateInput!): FetchRatePayload!
 
     """
-    fetchContract returns a single contract, linked to revisions and related rates 
+    fetchContract returns a single contract, linked to revisions and related rates
     given a contractID
 
     It can be called by CMS or State users
@@ -95,10 +92,7 @@ type Query {
     - ForbiddenError: A State user requests a contract that belongs to another state
     - NotFoundError: contract for contractID not found in database
     """
-    fetchContract(
-        input: FetchContractInput!
-    ): FetchContractPayload!
-
+    fetchContract(input: FetchContractInput!): FetchContractPayload!
 }
 
 type Mutation {
@@ -154,17 +148,14 @@ type Mutation {
     updateContract can be used to update fields on the contract
     as opposed to an individual revision
     """
-    updateContract(
-        input: UpdateContractInput!
-    ): UpdateContractPayload!
-
+    updateContract(input: UpdateContractInput!): UpdateContractPayload!
 
     """
     updateDraftContractRates updates the rates associated with a DRAFT contract revision.
-    It takes in an array of rate inputs, which can be new rates, updated rates, or linked rates. 
-    The API will make the necessary data changes to make the data match the update, including 
+    It takes in an array of rate inputs, which can be new rates, updated rates, or linked rates.
+    The API will make the necessary data changes to make the data match the update, including
     unlinking removed rates
-        
+
     Errors:
     - ForbiddenError:
         - A CMSUser called this
@@ -307,14 +298,12 @@ type Mutation {
         input: CreateQuestionResponseInput!
     ): CreateQuestionResponsePayload!
 
-
     """
     createAPIKey creates a valid API key for the logged in user, valid for 90 days
     """
     createAPIKey: CreateAPIKeyPayload!
 
-
- """
+    """
     unlockRate returns a submitted package to the state for additional edits.
 
     This can only be called by a CMSUser.
@@ -335,9 +324,7 @@ type Mutation {
         - EMAIL_ERROR
             - Sending state or CMS email failed.
     """
-    unlockRate(
-        input: UnlockRateInput!
-    ): UnlockRatePayload!
+    unlockRate(input: UnlockRateInput!): UnlockRatePayload!
 
     """
     submitRate will submit an unlocked rate and return the submitted rate data.
@@ -360,9 +347,7 @@ type Mutation {
         - INVALID_PACKAGE_STATUS
             - Attempted to unlock a rate in the DRAFT or UNLOCKED state
     """
-    submitRate(
-        input: SubmitRateInput!
-    ): SubmitRatePayload!
+    submitRate(input: SubmitRateInput!): SubmitRatePayload!
 }
 
 input CreateHealthPlanPackageInput {
@@ -477,7 +462,7 @@ input CreateQuestionResponseInput {
     "The ID of the question for which to create a response"
     questionID: ID!
     "A list of documents to attach to the response"
-    documents: [DocumentInput!]!  # should be Generic Document with sha256
+    documents: [DocumentInput!]! # should be Generic Document with sha256
     "A note to attach to the response"
     noteText: String
 }
@@ -836,7 +821,7 @@ type GenericDocument {
     "The S3 URL of the document, generated on the FE currently in the FileUpload component"
     s3URL: String!
     "The sha256 is a unique string representing the file, generated on the FE currently in the FileUpload component"
-    sha256:  String!
+    sha256: String!
 }
 
 """
@@ -850,7 +835,7 @@ input GenericDocumentInput {
     "The S3 URL of the document, generated on the FE currently in the FileUpload component"
     s3URL: String!
     "The sha256 is a unique string representing the file, generated on the FE currently in the FileUpload component"
-    sha256:  String!
+    sha256: String!
 }
 
 "The large overarching population of people that the program covers."
@@ -967,54 +952,54 @@ type ContractFormData {
     If contract is in Lieu-of Services and Settings (ILOSs)
     in accordance with 42 CFR § 438.3(e)(2)
     """
-    inLieuServicesAndSettings: Boolean,
+    inLieuServicesAndSettings: Boolean
     "If contract includes modifications to benefits provided by the managed care plans"
-    modifiedBenefitsProvided: Boolean,
+    modifiedBenefitsProvided: Boolean
     "If contract includes modifications to the geographic areas served by the managed care plans"
-    modifiedGeoAreaServed: Boolean,
+    modifiedGeoAreaServed: Boolean
     """
     If contract includes modifications to the Medicaid beneficiaries served by the managed care
     plans (e.g. eligibility or enrollment criteria)
     """
-    modifiedMedicaidBeneficiaries: Boolean,
+    modifiedMedicaidBeneficiaries: Boolean
     "If contract includes modifications to the risk sharing strategy"
-    modifiedRiskSharingStrategy: Boolean,
+    modifiedRiskSharingStrategy: Boolean
     "If contract includes modifications to incentive arrangements"
-    modifiedIncentiveArrangements: Boolean,
+    modifiedIncentiveArrangements: Boolean
     "If contract includes modifications to the withold agreements"
-    modifiedWitholdAgreements: Boolean,
+    modifiedWitholdAgreements: Boolean
     "If contract includes modifications to the state directed payments"
-    modifiedStateDirectedPayments: Boolean,
+    modifiedStateDirectedPayments: Boolean
     "If contract includes modifications to the pass-through payments"
-    modifiedPassThroughPayments: Boolean,
+    modifiedPassThroughPayments: Boolean
     """
     If contract includes modifications to payments to MCOs and PIHPs for enrollees that
     are a patient in an institution for mental disease
     """
-    modifiedPaymentsForMentalDiseaseInstitutions: Boolean,
+    modifiedPaymentsForMentalDiseaseInstitutions: Boolean
     "If contract includes modifications to the medical loss ratio standards"
-    modifiedMedicalLossRatioStandards: Boolean,
+    modifiedMedicalLossRatioStandards: Boolean
     """
     If contract includes modifications to
     other financial, payment, incentive or related contractual provisions
     """
-    modifiedOtherFinancialPaymentIncentive: Boolean,
+    modifiedOtherFinancialPaymentIncentive: Boolean
     "If contract includes modifications to the enrollment/disenrollment process"
-    modifiedEnrollmentProcess: Boolean,
+    modifiedEnrollmentProcess: Boolean
     "If contract includes modifications to the grevience and appeal system"
-    modifiedGrevienceAndAppeal: Boolean,
+    modifiedGrevienceAndAppeal: Boolean
     "If contract includes modifications to the network adequacy standards"
-    modifiedNetworkAdequacyStandards: Boolean,
+    modifiedNetworkAdequacyStandards: Boolean
     "If contract includes modifications to the length of the contract period"
-    modifiedLengthOfContract: Boolean,
+    modifiedLengthOfContract: Boolean
     "If contract includes modifications to the non-risk payment arrangements"
-    modifiedNonRiskPaymentArrangements: Boolean,
+    modifiedNonRiskPaymentArrangements: Boolean
 }
 
 "Either new capitation rates (NEW) or updates to previously certified capitation rates (AMENDMENT)"
 enum RateAmendmentType {
-  NEW
-  AMENDMENT
+    NEW
+    AMENDMENT
 }
 
 """
@@ -1023,8 +1008,8 @@ With RATE_RANGE the state certifies a range of rates
 from the low to high end of the range as actuarially sound
 """
 enum RateCapitationType {
-  RATE_CELL
-  RATE_RANGE
+    RATE_CELL
+    RATE_RANGE
 }
 
 """
@@ -1033,33 +1018,33 @@ State's communication preference for contacting their actuaries. Either:
 - go through them
 """
 enum ActuaryCommunication {
-  OACT_TO_ACTUARY
-  OACT_TO_STATE
+    OACT_TO_ACTUARY
+    OACT_TO_STATE
 }
 
 "The firm that the certifying actuary works for"
 enum ActuarialFirm {
-  MERCER
-  MILLIMAN
-  OPTUMAS
-  GUIDEHOUSE
-  DELOITTE
-  STATE_IN_HOUSE
-  OTHER
+    MERCER
+    MILLIMAN
+    OPTUMAS
+    GUIDEHOUSE
+    DELOITTE
+    STATE_IN_HOUSE
+    OTHER
 }
 
 "Contact information for the certifying or additional state actuary"
 type ActuaryContact {
-  id: ID
-  name: String
-  titleRole: String
-  email: String
-  actuarialFirm: ActuarialFirm
-  actuarialFirmOther: String
+    id: ID
+    name: String
+    titleRole: String
+    email: String
+    actuarialFirm: ActuarialFirm
+    actuarialFirmOther: String
 }
 
 "Contact information input for the certifying or additional state actuary"
-input ActuaryContactInput  {
+input ActuaryContactInput {
     id: ID
     name: String
     titleRole: String
@@ -1073,13 +1058,13 @@ A package in the system
 that shares a rate with another package.
 It's used as a part of RateFormData
 """
-type PackageWithSameRate  {
-  packageName: String!
-  packageId: String!
-  packageStatus:  HealthPlanPackageStatus
+type PackageWithSameRate {
+    packageName: String!
+    packageId: String!
+    packageStatus: HealthPlanPackageStatus
 }
 
-input PackageWithSameRateInput  {
+input PackageWithSameRateInput {
     packageName: String!
     packageId: String!
     packageStatus: HealthPlanPackageStatus
@@ -1139,7 +1124,7 @@ type RateFormData {
     The end date of the rate amendment
     Only relevant if rate type is AMENDMENT
     """
-    amendmentEffectiveDateEnd:  Date
+    amendmentEffectiveDateEnd: Date
     """
     An array of IDs representing state programs that the rate covers
     """
@@ -1247,20 +1232,20 @@ A rate revision represents a single submission
 for the rate and contains the full data from when the rate cert was submitted
 """
 type RateRevision {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  """
-  Information about who, when, and why this revision was unlocked.
-  Will be blank on the initial revision.
-  """
-  unlockInfo: UpdateInformation
-  "Information on who, when, and why this revision was submitted."
-  submitInfo: UpdateInformation
-  "The rate related form data that was inputed by the state"
-  formData: RateFormData!
-  "Contract revisions related to the rate"
-  contractRevisions: [RelatedContractRevisions!]!
+    id: ID!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    """
+    Information about who, when, and why this revision was unlocked.
+    Will be blank on the initial revision.
+    """
+    unlockInfo: UpdateInformation
+    "Information on who, when, and why this revision was submitted."
+    submitInfo: UpdateInformation
+    "The rate related form data that was inputed by the state"
+    formData: RateFormData!
+    "Contract revisions related to the rate"
+    contractRevisions: [RelatedContractRevisions!]!
 }
 
 """
@@ -1330,7 +1315,7 @@ enum SubmissionReason {
 }
 
 """
-ContractPackageSubmission is a snapshot of a contract and all its related rates in time 
+ContractPackageSubmission is a snapshot of a contract and all its related rates in time
 a ContractPackageSubmission can be created by the user submitting a contract or a related rate
 """
 type ContractPackageSubmission {
@@ -1372,13 +1357,13 @@ type Contract {
     This value is used to generate the contractName
     """
     stateNumber: Int!
-    
+
     "draftRevision is the currently modifiable revision if the rate is DRAFT or UNLOCKED"
     draftRevision: ContractRevision
-    """ 
-    draftRates are the Rates that this editable submission are related to. 
+    """
+    draftRates are the Rates that this editable submission are related to.
     On submission they are cemented into a new ContractPackageSubmission
-    """ 
+    """
     draftRates: [Rate!]
 
     """
@@ -1409,7 +1394,7 @@ type FetchRatePayload {
     rate: Rate!
 }
 
-input FetchRateInput{
+input FetchRateInput {
     rateID: ID!
 }
 
@@ -1420,7 +1405,7 @@ type FetchContractPayload {
     contract: Contract!
 }
 
-input FetchContractInput{
+input FetchContractInput {
     contractID: ID!
 }
 
@@ -1488,7 +1473,7 @@ input RateFormDataInput {
     The end date of the rate amendment
     Only relevant if rate type is AMENDMENT
     """
-    amendmentEffectiveDateEnd:  Date
+    amendmentEffectiveDateEnd: Date
     """
     An array of IDs representing state programs that the rate covers
     """

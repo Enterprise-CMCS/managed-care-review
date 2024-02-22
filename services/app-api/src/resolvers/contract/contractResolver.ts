@@ -5,12 +5,10 @@ import { GraphQLError } from 'graphql'
 
 export function contractResolver(store: Store): Resolvers['Contract'] {
     return {
-        status(parent) {
-            const status = 'UNLOCKED'
-            return status
-        },
         initiallySubmittedAt(parent) {
-            return new Date()
+            // we're only working on drafts for now, this will need to change to
+            // look at the revisions when we expand
+            return parent.draftRevision?.createdAt || null
         },
         state(parent) {
             const packageState = parent.stateCode
@@ -29,9 +27,6 @@ export function contractResolver(store: Store): Resolvers['Contract'] {
                 })
             }
             return state
-        },
-        packageSubmissions() {
-            return []
         },
     }
 }

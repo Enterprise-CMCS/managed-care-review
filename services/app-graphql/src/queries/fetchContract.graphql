@@ -2,6 +2,95 @@ query fetchContract($input: FetchContractInput!) {
     fetchContract(input: $input) {
         contract {
             id
+            status
+            initiallySubmittedAt
+            stateCode
+            state {
+                code
+                name
+                programs {
+                    id
+                    name
+                    fullName
+                }
+            }
+
+            stateNumber
+
+            draftRevision {
+                ...contractRevisionFragment
+            }
         }
+    }
+}
+
+fragment contractRevisionFragment on ContractRevision {
+    id
+    createdAt
+    updatedAt
+
+    submitInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+
+    unlockInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+
+    formData {
+        programIDs
+
+        populationCovered
+        submissionType
+
+        riskBasedContract
+        submissionDescription
+
+        stateContacts {
+            name
+            title
+            email
+        }
+
+        supportingDocuments {
+            name
+            s3URL
+            sha256
+        }
+
+        contractType
+        contractExecutionStatus
+        contractDocuments {
+            name
+            s3URL
+            sha256
+        }
+
+        contractDateStart
+        contractDateEnd
+        managedCareEntities
+        federalAuthorities
+        inLieuServicesAndSettings
+        modifiedBenefitsProvided
+        modifiedGeoAreaServed
+        modifiedMedicaidBeneficiaries
+        modifiedRiskSharingStrategy
+        modifiedIncentiveArrangements
+        modifiedWitholdAgreements
+        modifiedStateDirectedPayments
+        modifiedPassThroughPayments
+        modifiedPaymentsForMentalDiseaseInstitutions
+        modifiedMedicaidBeneficiaries
+        modifiedMedicalLossRatioStandards
+        modifiedOtherFinancialPaymentIncentive
+        modifiedEnrollmentProcess
+        modifiedGrevienceAndAppeal
+        modifiedNetworkAdequacyStandards
+        modifiedLengthOfContract
+        modifiedNonRiskPaymentArrangements
     }
 }

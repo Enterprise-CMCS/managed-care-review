@@ -40,6 +40,7 @@ export function fetchContractResolver(
         }
 
         setSuccessAttributesOnActiveSpan(span)
+        console.info(JSON.stringify(contractWithHistory, null, '  '))
         return { contract: contractWithHistory }
     }
 }
