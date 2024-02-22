@@ -157,7 +157,7 @@ function useFetchHealthPlanPackageWithQuestionsWrapper(
                 },
             },
             onCompleted,
-            fetchPolicy: 'cache-and-network',
+            fetchPolicy: 'network-only',
         })
     )
     const result = results.result
