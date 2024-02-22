@@ -11,13 +11,13 @@ import type { UseHealthPlanPackageForm } from '../../../hooks/useHealthPlanPacka
 import type { UseRouteParams } from '../../../hooks/useRouteParams'
 
 // set up mocks for React Hooks in use
-const mockUseStateSubmissionForm: UseHealthPlanPackageForm = {
+const mockUseHealthPlanPackageForm: UseHealthPlanPackageForm = {
     updateDraft: jest.fn(),
     draftSubmission: contractOnly(),
 }
 jest.mock('../../../hooks/useHealthPlanPackageForm', () => ({
     useHealthPlanPackageForm: () => {
-        return mockUseStateSubmissionForm
+        return mockUseHealthPlanPackageForm
     },
 }))
 

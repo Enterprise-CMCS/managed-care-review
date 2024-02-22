@@ -1,5 +1,5 @@
 import { screen, waitFor, within, fireEvent } from '@testing-library/react'
-
+import * as hooks from '../../../hooks'
 import userEvent from '@testing-library/user-event'
 
 import {
@@ -32,9 +32,32 @@ import {
     StatutoryRegulatoryAttestationDescription,
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../constants/statutoryRegulatoryAttestation'
+import { UseHealthPlanPackageForm } from '../../../hooks/useHealthPlanPackageForm'
+import { contractOnly } from '../../../common-code/healthPlanFormDataMocks'
+import { UseRouteParams } from '../../../hooks/useRouteParams'
+
+// set up mocks for React Hooks in use
+const mockUseHealthPlanPackageForm: UseHealthPlanPackageForm = {
+    updateDraft: jest.fn(),
+    draftSubmission: contractOnly(),
+}
+jest.mock('../../../hooks/useHealthPlanPackageForm', () => ({
+    useHealthPlanPackageForm: () => {
+        return mockUseHealthPlanPackageForm
+    },
+}))
+
+const mockUseRouteParams: UseRouteParams = { id: '123-abc' }
+jest.mock('../../../hooks/useRouteParams', () => ({
+    useRouteParams: () => {
+        return mockUseRouteParams
+    },
+}))
+
 
 const scrollIntoViewMock = jest.fn()
 HTMLElement.prototype.scrollIntoView = scrollIntoViewMock
+
 
 describe('ContractDetails', () => {
     const emptyContractDetailsDraft = {
@@ -48,9 +71,6 @@ describe('ContractDetails', () => {
     it('displays correct form guidance', async () => {
         renderWithProviders(
             <ContractDetails
-                draftSubmission={mockDraft()}
-                updateDraft={jest.fn()}
-                previousDocuments={[]}
             />,
             {
                 apolloProvider: defaultApolloProvider,
@@ -69,9 +89,6 @@ describe('ContractDetails', () => {
         it('renders without errors', async () => {
             renderWithProviders(
                 <ContractDetails
-                    draftSubmission={emptyContractDetailsDraft}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
@@ -104,9 +121,6 @@ describe('ContractDetails', () => {
         it('accepts a new document', async () => {
             renderWithProviders(
                 <ContractDetails
-                    draftSubmission={emptyContractDetailsDraft}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
@@ -125,9 +139,7 @@ describe('ContractDetails', () => {
         it('accepts multiple pdf, word, excel documents', async () => {
             renderWithProviders(
                 <ContractDetails
-                    draftSubmission={emptyContractDetailsDraft}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
+
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
@@ -162,8 +174,6 @@ describe('ContractDetails', () => {
                             ...mockDraft(),
                             populationCovered: 'MEDICAID',
                         }}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
                     />,
                     {
                         apolloProvider: defaultApolloProvider,
@@ -193,8 +203,6 @@ describe('ContractDetails', () => {
                         ...mockDraft(),
                         populationCovered: 'CHIP',
                     }}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
@@ -238,8 +246,7 @@ describe('ContractDetails', () => {
             renderWithProviders(
                 <ContractDetails
                     draftSubmission={medicaidAmendmentPackage}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
+
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
@@ -284,8 +291,7 @@ describe('ContractDetails', () => {
             renderWithProviders(
                 <ContractDetails
                     draftSubmission={medicaidAmendmentPackage}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
+
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
@@ -344,8 +350,7 @@ describe('ContractDetails', () => {
             renderWithProviders(
                 <ContractDetails
                     draftSubmission={medicaidBasePackage}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
+
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
@@ -377,8 +382,7 @@ describe('ContractDetails', () => {
             renderWithProviders(
                 <ContractDetails
                     draftSubmission={medicaidBasePackage}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
+
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
@@ -430,8 +434,7 @@ describe('ContractDetails', () => {
             renderWithProviders(
                 <ContractDetails
                     draftSubmission={chipBasePackage}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
+
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
@@ -452,8 +455,7 @@ describe('ContractDetails', () => {
             renderWithProviders(
                 <ContractDetails
                     draftSubmission={chipAmendmentPackage}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
+
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
@@ -494,8 +496,7 @@ describe('ContractDetails', () => {
             renderWithProviders(
                 <ContractDetails
                     draftSubmission={chipAmendmentPackage}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
+
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
@@ -556,9 +557,7 @@ describe('ContractDetails', () => {
         it('enabled when valid files are present', async () => {
             renderWithProviders(
                 <ContractDetails
-                    draftSubmission={emptyContractDetailsDraft}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
+
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
@@ -580,9 +579,7 @@ describe('ContractDetails', () => {
         it('enabled when invalid files have been dropped but valid files are present', async () => {
             renderWithProviders(
                 <ContractDetails
-                    draftSubmission={emptyContractDetailsDraft}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
+
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
@@ -609,9 +606,7 @@ describe('ContractDetails', () => {
         it('disabled with alert after first attempt to continue with zero files', async () => {
             renderWithProviders(
                 <ContractDetails
-                    draftSubmission={emptyContractDetailsDraft}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
+
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
@@ -637,9 +632,7 @@ describe('ContractDetails', () => {
         it('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
             renderWithProviders(
                 <ContractDetails
-                    draftSubmission={emptyContractDetailsDraft}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
+
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
@@ -672,9 +665,7 @@ describe('ContractDetails', () => {
         it('disabled with alert after first attempt to continue with invalid files', async () => {
             renderWithProviders(
                 <ContractDetails
-                    draftSubmission={emptyContractDetailsDraft}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
+
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
@@ -705,9 +696,7 @@ describe('ContractDetails', () => {
         it('disabled with alert when trying to continue while a file is still uploading', async () => {
             renderWithProviders(
                 <ContractDetails
-                    draftSubmission={emptyContractDetailsDraft}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
+
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
@@ -901,9 +890,7 @@ describe('ContractDetails', () => {
         it('enabled when valid files are present', async () => {
             renderWithProviders(
                 <ContractDetails
-                    draftSubmission={emptyContractDetailsDraft}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
+
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
@@ -925,9 +912,7 @@ describe('ContractDetails', () => {
         it('enabled when invalid files have been dropped but valid files are present', async () => {
             renderWithProviders(
                 <ContractDetails
-                    draftSubmission={emptyContractDetailsDraft}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
+
                 />,
                 {
                     apolloProvider: defaultApolloProvider,
