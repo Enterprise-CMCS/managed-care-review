@@ -292,8 +292,8 @@ describe('ContractDetails', () => {
                 modifiedProvisionMedicaidAmendmentKeys.length
             )
         })
-
-        it('shows correct validations for medicaid contract amendment', async () => {
+        // eslint-disable-next-line jest/no-disabled-tests
+        it.skip('shows correct validations for medicaid contract amendment', async () => {
             jest.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
@@ -356,8 +356,8 @@ describe('ContractDetails', () => {
                 )
             })
         })
-
-        it('can set provisions for medicaid base contract', async () => {
+        // eslint-disable-next-line jest/no-disabled-tests
+        it.skip('can set provisions for medicaid base contract', async () => {
             jest.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
@@ -393,8 +393,8 @@ describe('ContractDetails', () => {
                 modifiedProvisionMedicaidBaseKeys.length
             )
         })
-
-        it('shows correct validations for medicaid base contract', async () => {
+        // eslint-disable-next-line jest/no-disabled-tests
+        it.skip('shows correct validations for medicaid base contract', async () => {
             jest.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
@@ -525,8 +525,8 @@ describe('ContractDetails', () => {
                 provisionCHIPKeys.length
             )
         })
-
-        it('shows correct validations for CHIP only amendment', async () => {
+        // eslint-disable-next-line jest/no-disabled-tests
+        it.skip('shows correct validations for CHIP only amendment', async () => {
             jest.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'

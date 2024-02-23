@@ -107,7 +107,7 @@ export const RateEdit = (): React.ReactElement => {
         rate.revisions[0].unlockInfo || undefined
 
     return (
-        <>
+        <div data-testid="single-rate-edit">
             <PageBannerAlerts
                 loggedInUser={loggedInUser}
                 unlockedInfo={unlockedInfo}
@@ -118,6 +118,6 @@ export const RateEdit = (): React.ReactElement => {
                 rates={[rate]}
                 submitRate={submitRateHandler}
             />
-        </>
+        </div>
     )
 }
