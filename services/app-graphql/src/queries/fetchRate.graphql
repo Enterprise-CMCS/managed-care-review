@@ -122,25 +122,29 @@ fragment rateRevisionFragment on RateRevision {
     }
 }
 
+fragment rateFields on Rate {
+    id
+    createdAt
+    updatedAt
+    stateCode
+    stateNumber
+    state {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+        }
+    }
+    status
+    initiallySubmittedAt
+}
+
 query fetchRate($input: FetchRateInput!) {
     fetchRate(input: $input) {
         rate {
-            id
-            createdAt
-            updatedAt
-            stateCode
-            stateNumber
-            state {
-                code
-                name
-                programs {
-                    id
-                    name
-                    fullName
-                }
-            }
-            status
-            initiallySubmittedAt
+            ...rateFields
 
             draftRevision {
                 ...rateRevisionFragment
