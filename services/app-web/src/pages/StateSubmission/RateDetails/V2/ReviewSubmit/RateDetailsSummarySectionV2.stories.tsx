@@ -7,7 +7,7 @@ import {
 import { mockContractAndRatesDraftV2 } from '../../../../../testHelpers/apolloMocks'
 
 export default {
-    title: 'Components/SubmissionSummary/RateDetailsSummarySection',
+    title: 'Components/SubmissionSummary/RateDetailsSummarySection/V2',
     component: RateDetailsSummarySectionV2,
     parameters: {
         componentSubtitle:
@@ -24,8 +24,7 @@ WithAction.decorators = [(Story) => ProvidersDecorator(Story, {})]
 const contract = mockContractAndRatesDraftV2()
 
 WithAction.args = {
-    contractId: contract.id,
-    draftRates: contract.draftRates,
+    contract: contract,
     editNavigateTo: 'contract-details',
     submissionName: 'StoryBook',
     statePrograms: [],
@@ -34,7 +33,6 @@ WithAction.args = {
 export const WithoutAction = Template.bind({})
 WithoutAction.decorators = [(Story) => ProvidersDecorator(Story, {})]
 WithoutAction.args = {
-    contractId: contract.id,
-    draftRates: contract.draftRates,
+    contract: contract,
     submissionName: 'StoryBook',
 }

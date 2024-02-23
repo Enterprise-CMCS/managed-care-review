@@ -196,7 +196,13 @@ function mockContractAndRatesDraftV2(
                     formData: {
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
-                        rateDocuments: [],
+                        rateDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rate',
+                                sha256: 'fakesha',
+                                name: 'rate',
+                            },
+                        ],
                         supportingDocuments: [],
                         rateDateStart: new Date(),
                         rateDateEnd: new Date(),
@@ -228,6 +234,116 @@ function mockContractAndRatesDraftV2(
             },
         ],
         packageSubmissions: [],
+        ...partial,
+    }
+}
+
+function mockContractAndRatesSubmittedV2(
+    partial?: Partial<Contract>
+): Contract {
+    return {
+        status: 'SUBMITTED',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        id: 'test-abc-123',
+        stateCode: 'MN',
+        state: mockMNState(),
+        stateNumber: 5,
+        packageSubmissions: [{
+            cause: 'CONTRACT_SUBMISSION',
+            submitInfo: {
+                updatedAt: new Date(),
+                updatedBy: 'example@state.com',
+                updatedReason: 'contract submit'
+            },
+            submittedRevisions: [],
+            contractRevision: {
+                id: '123',
+                formData: {
+                    programIDs: ['pmap'],
+                    populationCovered: 'MEDICAID',
+                    submissionType: 'CONTRACT_AND_RATES',
+                    riskBasedContract: true,
+                    submissionDescription: 'A real submission',
+                    supportingDocuments: [],
+                    stateContacts: [],
+                    contractType: 'AMENDMENT',
+                    contractExecutionStatus: 'EXECUTED',
+                    contractDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contract',
+                            sha256: 'fakesha',
+                            name: 'contract',
+                        },
+                    ],
+                    contractDateStart: new Date(),
+                    contractDateEnd: new Date(),
+                    managedCareEntities: ['MCO'],
+                    federalAuthorities: ['STATE_PLAN'],
+                    inLieuServicesAndSettings: true,
+                    modifiedBenefitsProvided: true,
+                    modifiedGeoAreaServed: false,
+                    modifiedMedicaidBeneficiaries: true,
+                    modifiedRiskSharingStrategy: true,
+                    modifiedIncentiveArrangements: false,
+                    modifiedWitholdAgreements: false,
+                    modifiedStateDirectedPayments: true,
+                    modifiedPassThroughPayments: true,
+                    modifiedPaymentsForMentalDiseaseInstitutions: false,
+                    modifiedMedicalLossRatioStandards: true,
+                    modifiedOtherFinancialPaymentIncentive: false,
+                    modifiedEnrollmentProcess: true,
+                    modifiedGrevienceAndAppeal: false,
+                    modifiedNetworkAdequacyStandards: true,
+                    modifiedLengthOfContract: false,
+                    modifiedNonRiskPaymentArrangements: true,
+                }
+            },
+            rateRevisions: [
+                {
+                    id: '1234',
+                    createdAt: new Date('01/01/2023'),
+                    updatedAt: new Date('01/01/2023'),
+                    contractRevisions: [],
+                    formData: {                  
+                        rateType: 'AMENDMENT',
+                        rateCapitationType: 'RATE_CELL',
+                        rateDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rate',
+                                sha256: 'fakesha',
+                                name: 'rate',
+                            },
+                        ],
+                        supportingDocuments: [],
+                        rateDateStart: new Date(),
+                        rateDateEnd: new Date(),
+                        rateDateCertified: new Date(),
+                        amendmentEffectiveDateStart: new Date(),
+                        amendmentEffectiveDateEnd: new Date(),
+                        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        certifyingActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        addtlActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                        packagesWithSharedRateCerts: []      
+                    }
+                },
+            ],
+        }],
         ...partial,
     }
 }
@@ -878,6 +994,7 @@ function mockUnlockedHealthPlanPackageWithDocuments(): HealthPlanPackage {
 export {
     mockContractAndRatesDraft,
     mockContractAndRatesDraftV2,
+    mockContractAndRatesSubmittedV2,
     mockStateSubmission,
     mockBaseContract,
     mockDraft,

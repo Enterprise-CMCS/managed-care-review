@@ -1,48 +1,26 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { DataDetail } from '../../../../../components/DataDetail'
 import { SectionHeader } from '../../../../../components/SectionHeader'
-import { UploadedDocumentsTable } from '../../../../../components/SubmissionSummarySection'
 import { useS3 } from '../../../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../../../common-code/dateHelpers'
 import { DoubleColumnGrid } from '../../../../../components/DoubleColumnGrid'
 import { DownloadButton } from '../../../../../components/DownloadButton'
 import { usePreviousSubmission } from '../../../../../hooks/usePreviousSubmission'
-import styles from '../SubmissionSummarySection.module.scss'
-import {
-    HealthPlanFormDataType,
-    packageName,
-    RateInfoType,
-} from '../../../../../common-code/healthPlanFormDataType'
-import { HealthPlanPackageStatus, Program } from '../../../../../gen/gqlClient'
-import { useIndexHealthPlanPackagesQuery } from '../../../../../gen/gqlClient'
+import styles from './SubmissionSummarySection.module.scss'
 import { recordJSException } from '../../../../../otelHelpers'
-import { getCurrentRevisionFromHealthPlanPackage } from '../../../../../gqlHelpers'
-import { SharedRateCertDisplay } from '../../../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { DataDetailMissingField } from '../../../../../components/DataDetail/DataDetailMissingField'
 import { DataDetailContactField } from '../../../../../components/DataDetail/DataDetailContactField/DataDetailContactField'
 import { DocumentDateLookupTableType } from '../../../../../documentHelpers/makeDocumentDateLookupTable'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../../../../components/DocumentWarning'
 import { SectionCard } from '../../../../../components/SectionCard'
-import { Rate } from '../../../../../gen/gqlClient'
-
-// Used for refreshed packages names keyed by their package id
-// package name includes (Draft) for draft packages.
-type PackageNameType = string
-type PackageNamesLookupType = {
-    [id: string]: {
-        packageName: PackageNameType
-        status: HealthPlanPackageStatus
-    }
-}
+import { Rate, Contract, Program } from '../../../../../gen/gqlClient'
 
 export type RateDetailsSummarySectionV2Props = {
-    draftRates: Rate[]
-    contractId: string,
+    contract: Contract,
     editNavigateTo?: string
     documentDateLookupTable: DocumentDateLookupTableType
     isCMSUser?: boolean
-    isSubmitted?: boolean
     submissionName: string
     statePrograms: Program[]
     onDocumentError?: (error: true) => void
@@ -65,17 +43,16 @@ export function renderDownloadButton(
 }
 
 export const RateDetailsSummarySectionV2 = ({
-    draftRates,
+    contract,
     editNavigateTo,
     documentDateLookupTable,
     isCMSUser,
     submissionName,
     statePrograms,
     onDocumentError,
-    contractId,
-    isSubmitted
 }: RateDetailsSummarySectionV2Props): React.ReactElement => {
-    const isEditing = !isSubmitted && editNavigateTo !== undefined
+    const isSubmitted = contract.status === 'SUBMITTED'
+    // const isEditing = !isSubmitted && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
 
     const { getKey, getBulkDlURL } = useS3()
@@ -91,9 +68,18 @@ export const RateDetailsSummarySectionV2 = ({
             : ''
 
     const ratePrograms = (
-        rate: Rate
+        rate: Rate,
+        contract: Contract
     ) => {
-        const programIDs = rate.draftRevision?.formData.rateProgramIDs
+         /* if we have rateProgramIDs, use them, otherwise use programIDs */
+         let programIDs = [] as string[]
+         const rateFormData = rate.draftRevision?.formData
+         const contractFormData = contract.draftRevision?.formData
+         if (rateFormData?.rateProgramIDs && rateFormData?.rateProgramIDs.length > 0) {
+            programIDs = rateFormData.rateProgramIDs
+         } else if (contractFormData?.programIDs && contractFormData?.programIDs.length > 0) {
+            programIDs = contractFormData.programIDs
+         }
         return programIDs
             ? statePrograms
                   .filter((p) => programIDs.includes(p.id))
@@ -116,29 +102,29 @@ export const RateDetailsSummarySectionV2 = ({
 
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
-            const keysFromDocs = draftRates
+            if (contract.draftRates !== undefined) {
+                const draftContract = contract.draftRates!
+                const keysFromDocs = draftContract
                 .flatMap((rate) => {
-                    if (rate.draftRevision) {
-                        return rate.draftRevision.formData.rateDocuments.concat(rate.draftRevision.formData.supportingDocuments)
-                    }
+                    const draftRateRev = rate.draftRevision!
+                    return draftRateRev.formData.rateDocuments
+                    .concat(draftRateRev.formData.supportingDocuments)
                 })
                 .map((doc) => {
-                    if (doc) {
-                        const key = getKey(doc.s3URL)
-                        if (!key) return ''
-                        return key
-                    }
+                    const key = getKey(doc.s3URL)
+                    if (!key) return ''
+                    return key
                 })
                 .filter((key) => key !== '')
 
             // call the lambda to zip the files and get the url
             const zippedURL = await getBulkDlURL(
-                ['keysFromDocs'],
+                keysFromDocs,
                 submissionName + '-rate-details.zip',
                 'HEALTH_PLAN_DOCS'
             )
             if (zippedURL instanceof Error) {
-                const msg = `ERROR: getBulkDlURL failed to generate supporting document URL. ID: ${contractId} Message: ${zippedURL}`
+                const msg = `ERROR: getBulkDlURL failed to generate supporting document URL. ID: ${contract.id} Message: ${zippedURL}`
                 console.info(msg)
 
                 if (onDocumentError) {
@@ -149,19 +135,21 @@ export const RateDetailsSummarySectionV2 = ({
             }
 
             setZippedFilesURL(zippedURL)
+            }
+            
         }
 
         void fetchZipUrl()
     }, [
         getKey,
         getBulkDlURL,
-        draftRates,
+        contract,
         submissionName,
         isSubmitted,
         isPreviousSubmission,
     ])
 
-    const loading = ''
+    const loading = false
 
     return (
         <SectionCard id="rateDetails" className={styles.summarySection}>
@@ -173,8 +161,8 @@ export const RateDetailsSummarySectionV2 = ({
                     !isPreviousSubmission &&
                     renderDownloadButton(zippedFilesURL)}
             </SectionHeader>
-            {draftRates.length > 0 ? (
-                draftRates.map((rate) => {
+            {contract.draftRates && contract.draftRates?.length > 0 ? (
+                contract.draftRates?.map((rate) => {
                     const rateFormData = rate.draftRevision?.formData
                     return (
                         <SectionCard
@@ -194,7 +182,7 @@ export const RateDetailsSummarySectionV2 = ({
                                             id="ratePrograms"
                                             label="Programs this rate certification covers"
                                             explainMissingData={!isSubmitted}
-                                            children={ratePrograms(rate)}
+                                            children={ratePrograms(rate, contract)}
                                         />
                                     )}
                                     <DataDetail
@@ -273,30 +261,14 @@ export const RateDetailsSummarySectionV2 = ({
                                 </DoubleColumnGrid>
                             </dl>
                             {!loading && rateFormData?.rateDocuments ? (
-                                <UploadedDocumentsTable
-                                    documents={rateFormData.rateDocuments}
-                                    documentDateLookupTable={
-                                        documentDateLookupTable
-                                    }
-                                    multipleDocumentsAllowed={false}
-                                    caption="Rate certification"
-                                    documentCategory="Rate certification"
-                                    isEditing={isEditing}
-                                    isSubmitted={isSubmitted}
-                                />
+                                // TODO: add the Uploads table 
+                                <h2>Document uploads placeholder</h2>
                             ) : (
                                 <span className="srOnly">'LOADING...'</span>
                             )}
                             {!loading && rateFormData?.supportingDocuments? (
-                                <UploadedDocumentsTable
-                                    documents={rateFormData.supportingDocuments}
-                                    documentDateLookupTable={
-                                        documentDateLookupTable
-                                    }
-                                    caption="Rate supporting documents"
-                                    isSupportingDocuments
-                                    documentCategory="Rate-supporting"
-                                />
+                                // TODO: add the Uploads table 
+                                <h2>Supporting document uploads placeholder</h2>
                             ) : (
                                 <span className="srOnly">'LOADING...'</span>
                             )}

@@ -8,9 +8,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { PageActionsContainer } from '../../../PageActions'
 import styles from './ReviewSubmit.module.scss'
-import { UnlockedHealthPlanFormDataType } from '../../../../../common-code/healthPlanFormDataType'
 import { ActionButton } from '../../../../../components/ActionButton'
-import { UnlockSubmitModal } from '../../../../../components/Modal/UnlockSubmitModal'
 import { useStatePrograms } from '../../../../../hooks/useStatePrograms'
 import { DocumentDateLookupTableType } from '../../../../../documentHelpers/makeDocumentDateLookupTable'
 import { RoutesRecord } from '../../../../../constants'
@@ -20,7 +18,6 @@ import { RateDetailsSummarySectionV2 } from './RateDetailsSummarySectionV2'
 export const ReviewSubmit = ({
     contract,
     documentDateLookupTable,
-    unlocked,
     submissionName,
 }: {
     contract: Contract
@@ -56,7 +53,7 @@ export const ReviewSubmit = ({
 
             {isContractActionAndRateCertification && (
                 <RateDetailsSummarySectionV2
-                    rates={contract.draftRates}
+                    contract={contract}
                     editNavigateTo="../rate-details"
                     submissionName={submissionName}
                     documentDateLookupTable={documentDateLookupTable}
@@ -101,7 +98,7 @@ export const ReviewSubmit = ({
                 </ModalToggleButton>
             </PageActionsContainer>
 
-            {
+            {/* {
                 // if the session is expiring, close this modal so the countdown modal can appear
                 <UnlockSubmitModal
                     healthPlanPackage={draftSubmission}
@@ -110,7 +107,7 @@ export const ReviewSubmit = ({
                     modalRef={modalRef}
                     setIsSubmitting={setIsSubmitting}
                 />
-            }
+            } */}
         </GridContainer>
     )
 }
