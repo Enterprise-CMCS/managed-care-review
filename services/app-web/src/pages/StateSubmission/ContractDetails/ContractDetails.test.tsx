@@ -33,38 +33,37 @@ import {
     StatutoryRegulatoryAttestationDescription,
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../constants/statutoryRegulatoryAttestation'
-import { type UseHealthPlanPackageForm } from '../../../hooks/useHealthPlanPackageForm'
-import { contractOnly } from '../../../common-code/healthPlanFormDataMocks'
-import { UseRouteParams } from '../../../hooks/useRouteParams'
+import * as useRouteParams from '../../../hooks/useRouteParams'
+import * as useHealthPlanPackageForm from '../../../hooks/useHealthPlanPackageForm'
 
-// set up mocks for React Hooks in use
 const mockUpdateDraftFn = jest.fn()
-const mockUseHPPForm: UseHealthPlanPackageForm = {
-    updateDraft: mockUpdateDraftFn,
-    createDraft: jest.fn(),
-    showPageErrorMessage: false,
-    draftSubmission: contractOnly(),
-}
-jest.mock('../../../hooks/useHealthPlanPackageForm', () => ({
-    useHealthPlanPackageForm: () => {
-        return mockUseHPPForm
-    },
-}))
-
-const mockUseRouteParams: UseRouteParams = { id: '123-abc' }
-jest.mock('../../../hooks/useRouteParams', () => ({
-    useRouteParams: () => {
-        return mockUseRouteParams
-    },
-}))
-
 const scrollIntoViewMock = jest.fn()
 HTMLElement.prototype.scrollIntoView = scrollIntoViewMock
-const emptyContractDetailsDraft = {
-    ...mockDraft(),
-}
 
 describe('ContractDetails', () => {
+    beforeEach(() => {
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockReturnValue({
+            updateDraft: mockUpdateDraftFn,
+            createDraft: jest.fn(),
+            showPageErrorMessage: false,
+            draftSubmission: mockDraft(),
+        })
+        jest.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
+            id: '123-abc',
+        })
+    })
+    afterEach(() => {
+        jest.clearAllMocks()
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockRestore()
+        jest.spyOn(useRouteParams, 'useRouteParams').mockRestore()
+    })
+
     const defaultApolloProvider = {
         mocks: [fetchCurrentUserMock({ statusCode: 200 })],
     }
@@ -152,10 +151,20 @@ describe('ContractDetails', () => {
 
     describe('Federal authorities', () => {
         it('displays correct form fields for federal authorities with medicaid contract', async () => {
-            mockUseHPPForm.draftSubmission = {
-                ...mockContractAndRatesDraft(),
-                populationCovered: 'MEDICAID',
-            }
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockImplementation(() => {
+                return {
+                    createDraft: jest.fn(),
+                    updateDraft: mockUpdateDraftFn,
+                    showPageErrorMessage: false,
+                    draftSubmission: {
+                        ...mockContractAndRatesDraft(),
+                        populationCovered: 'MEDICAID',
+                    },
+                }
+            })
 
             await waitFor(() => {
                 renderWithProviders(<ContractDetails />, {
@@ -179,10 +188,20 @@ describe('ContractDetails', () => {
         })
 
         it('displays correct form fields for federal authorities with CHIP only contract', async () => {
-            mockUseHPPForm.draftSubmission = {
-                ...mockContractAndRatesDraft(),
-                populationCovered: 'CHIP',
-            }
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockImplementation(() => {
+                return {
+                    createDraft: jest.fn(),
+                    updateDraft: mockUpdateDraftFn,
+                    showPageErrorMessage: false,
+                    draftSubmission: {
+                        ...mockContractAndRatesDraft(),
+                        populationCovered: 'CHIP',
+                    },
+                }
+            })
 
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
@@ -222,7 +241,20 @@ describe('ContractDetails', () => {
         })
 
         it('can set provisions for medicaid contract amendment', async () => {
-            mockUseHPPForm.draftSubmission = medicaidAmendmentPackage
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockImplementation(() => {
+                return {
+                    createDraft: jest.fn(),
+                    updateDraft: mockUpdateDraftFn,
+                    showPageErrorMessage: false,
+                    draftSubmission: {
+                        ...mockContractAndRatesDraft(),
+                        populationCovered: 'MEDICAID',
+                    },
+                }
+            })
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -262,7 +294,17 @@ describe('ContractDetails', () => {
         })
 
         it('shows correct validations for medicaid contract amendment', async () => {
-            mockUseHPPForm.draftSubmission = medicaidAmendmentPackage
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockImplementation(() => {
+                return {
+                    createDraft: jest.fn(),
+                    updateDraft: mockUpdateDraftFn,
+                    showPageErrorMessage: false,
+                    draftSubmission: medicaidAmendmentPackage,
+                }
+            })
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -316,7 +358,17 @@ describe('ContractDetails', () => {
         })
 
         it('can set provisions for medicaid base contract', async () => {
-            mockUseHPPForm.draftSubmission = medicaidBasePackage
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockImplementation(() => {
+                return {
+                    createDraft: jest.fn(),
+                    updateDraft: mockUpdateDraftFn,
+                    showPageErrorMessage: false,
+                    draftSubmission: medicaidBasePackage,
+                }
+            })
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -343,7 +395,20 @@ describe('ContractDetails', () => {
         })
 
         it('shows correct validations for medicaid base contract', async () => {
-            mockUseHPPForm.draftSubmission = medicaidBasePackage
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockImplementation(() => {
+                return {
+                    createDraft: jest.fn(),
+                    updateDraft: mockUpdateDraftFn,
+                    showPageErrorMessage: false,
+                    draftSubmission: {
+                        ...mockContractAndRatesDraft(),
+                        populationCovered: 'MEDICAID',
+                    },
+                }
+            })
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -390,7 +455,17 @@ describe('ContractDetails', () => {
         })
 
         it('cannot set provisions for CHIP only base contract', async () => {
-            mockUseHPPForm.draftSubmission = chipBasePackage
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockImplementation(() => {
+                return {
+                    createDraft: jest.fn(),
+                    updateDraft: mockUpdateDraftFn,
+                    showPageErrorMessage: false,
+                    draftSubmission: chipBasePackage,
+                }
+            })
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -406,7 +481,17 @@ describe('ContractDetails', () => {
         })
 
         it('can set provisions for CHIP only amendment', async () => {
-            mockUseHPPForm.draftSubmission = chipAmendmentPackage
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockImplementation(() => {
+                return {
+                    createDraft: jest.fn(),
+                    updateDraft: mockUpdateDraftFn,
+                    showPageErrorMessage: false,
+                    draftSubmission: chipAmendmentPackage,
+                }
+            })
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -442,7 +527,20 @@ describe('ContractDetails', () => {
         })
 
         it('shows correct validations for CHIP only amendment', async () => {
-            mockUseHPPForm.draftSubmission = chipAmendmentPackage
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockImplementation(() => {
+                return {
+                    createDraft: jest.fn(),
+                    updateDraft: mockUpdateDraftFn,
+                    showPageErrorMessage: false,
+                    draftSubmission: {
+                        ...mockContractAndRatesDraft(),
+                        populationCovered: 'MEDICAID',
+                    },
+                }
+            })
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -651,7 +749,6 @@ describe('ContractDetails', () => {
 
     describe('Save as draft button', () => {
         it('enabled when valid files are present', async () => {
-            mockUseHPPForm.draftSubmission = emptyContractDetailsDraft
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -669,8 +766,6 @@ describe('ContractDetails', () => {
         })
 
         it('enabled when invalid files have been dropped but valid files are present', async () => {
-            mockUseHPPForm.draftSubmission = emptyContractDetailsDraft
-
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -690,7 +785,6 @@ describe('ContractDetails', () => {
         })
 
         it('when zero files present, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
-            mockUseHPPForm.draftSubmission = emptyContractDetailsDraft
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -708,18 +802,26 @@ describe('ContractDetails', () => {
         })
 
         it('when existing file is removed, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
-            const hasDocsDetailsDraft = {
-                ...mockContractAndRatesDraft(),
-                contractDocuments: [
-                    {
-                        name: 'aasdf3423af',
-                        sha256: 'fakesha',
-                        s3URL: 's3://bucketname/key/fileName',
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockImplementation(() => {
+                return {
+                    createDraft: jest.fn(),
+                    updateDraft: mockUpdateDraftFn,
+                    showPageErrorMessage: false,
+                    draftSubmission: {
+                        ...mockContractAndRatesDraft(),
+                        contractDocuments: [
+                            {
+                                name: 'aasdf3423af',
+                                sha256: 'fakesha',
+                                s3URL: 's3://bucketname/key/fileName',
+                            },
+                        ],
                     },
-                ],
-            }
-
-            mockUseHPPForm.draftSubmission = hasDocsDetailsDraft
+                }
+            })
 
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
@@ -738,8 +840,6 @@ describe('ContractDetails', () => {
         })
 
         it('when duplicate files present, triggers error alert on click', async () => {
-            mockUseHPPForm.draftSubmission = emptyContractDetailsDraft
-
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -807,8 +907,6 @@ describe('ContractDetails', () => {
         })
 
         it('when zero files present, does not trigger missing documents alert on click', async () => {
-            mockUseHPPForm.draftSubmission = emptyContractDetailsDraft
-
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -826,8 +924,6 @@ describe('ContractDetails', () => {
         })
 
         it('when duplicate files present, does not trigger duplicate documents alert on click and silently updates submission without the duplicate', async () => {
-            mockUseHPPForm.draftSubmission = emptyContractDetailsDraft
-
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -869,8 +965,18 @@ describe('ContractDetails', () => {
 
     describe('Contract 438 attestation', () => {
         it('renders 438 attestation question without errors', async () => {
-            mockUseHPPForm.draftSubmission = mockBaseContract({
-                statutoryRegulatoryAttestation: true,
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockImplementation(() => {
+                return {
+                    createDraft: jest.fn(),
+                    updateDraft: mockUpdateDraftFn,
+                    showPageErrorMessage: false,
+                    draftSubmission: mockBaseContract({
+                        statutoryRegulatoryAttestation: true,
+                    }),
+                }
             })
 
             await waitFor(() => {
@@ -916,8 +1022,17 @@ describe('ContractDetails', () => {
                 statutoryRegulatoryAttestation: undefined,
                 statutoryRegulatoryAttestationDescription: undefined,
             })
-
-            mockUseHPPForm.draftSubmission = testDraft
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockImplementation(() => {
+                return {
+                    createDraft: jest.fn(),
+                    updateDraft: mockUpdateDraftFn,
+                    showPageErrorMessage: false,
+                    draftSubmission: testDraft,
+                }
+            })
 
             await waitFor(() => {
                 renderWithProviders(<ContractDetails />, {
@@ -980,7 +1095,18 @@ describe('ContractDetails', () => {
                 statutoryRegulatoryAttestation: undefined,
                 statutoryRegulatoryAttestationDescription: undefined,
             })
-            mockUseHPPForm.draftSubmission = draft
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockImplementation(() => {
+                return {
+                    createDraft: jest.fn(),
+                    updateDraft: mockUpdateDraftFn,
+                    showPageErrorMessage: false,
+                    draftSubmission: draft,
+                }
+            })
+
             await waitFor(() => {
                 renderWithProviders(<ContractDetails />, {
                     apolloProvider: defaultApolloProvider,

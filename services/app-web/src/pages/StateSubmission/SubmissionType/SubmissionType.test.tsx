@@ -6,36 +6,35 @@ import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SubmissionType } from './'
 import { contractOnly } from '../../../common-code/healthPlanFormDataMocks'
-import type { UseHealthPlanPackageForm } from '../../../hooks/useHealthPlanPackageForm'
-import type { UseRouteParams } from '../../../hooks/useRouteParams'
+import * as useRouteParams from '../../../hooks/useRouteParams'
+import * as useHealthPlanPackageForm from '../../../hooks/useHealthPlanPackageForm'
 
 // set up mocks for React Hooks in use
 const mockUpdateDraftFn = jest.fn()
 const mockCreateDraftFn = jest.fn()
-const mockUseHealthPlanPackageForm: UseHealthPlanPackageForm = {
-    updateDraft: mockUpdateDraftFn(),
-    createDraft: mockCreateDraftFn(),
-    showPageErrorMessage: false,
-    draftSubmission: contractOnly(),
-}
-jest.mock('../../../hooks/useHealthPlanPackageForm', () => ({
-    useHealthPlanPackageForm: () => {
-        return mockUseHealthPlanPackageForm
-    },
-}))
-
-const mockUseRouteParams: UseRouteParams = { id: '123-abc' }
-jest.mock('../../../hooks/useRouteParams', () => ({
-    useRouteParams: () => {
-        return mockUseRouteParams
-    },
-}))
-
 describe('SubmissionType', () => {
+    beforeEach(() => {
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockReturnValue({
+            updateDraft: mockUpdateDraftFn,
+            createDraft: mockCreateDraftFn,
+            showPageErrorMessage: false,
+            draftSubmission: contractOnly(),
+        })
+        jest.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
+            id: '123-abc',
+        })
+    })
     afterEach(() => {
         jest.clearAllMocks()
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockRestore()
+        jest.spyOn(useRouteParams, 'useRouteParams').mockRestore()
     })
-
     it('displays correct form guidance', async () => {
         renderWithProviders(<SubmissionType />, {
             apolloProvider: {
@@ -215,6 +214,16 @@ describe('SubmissionType', () => {
         ).toBeInTheDocument()
     })
     it('new submissions does not automatically select contract only submission type when selecting CHIP-only coverage', async () => {
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockReturnValue({
+            updateDraft: mockUpdateDraftFn,
+            createDraft: mockCreateDraftFn,
+            showPageErrorMessage: false,
+            draftSubmission: undefined,
+        })
+
         renderWithProviders(<SubmissionType />, {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -308,6 +317,15 @@ describe('SubmissionType', () => {
         expect(contractOnlyRadio).toBeChecked()
     })
     it('shows validation message when population coverage is not selected', async () => {
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockReturnValue({
+            updateDraft: mockUpdateDraftFn,
+            createDraft: mockCreateDraftFn,
+            showPageErrorMessage: false,
+            draftSubmission: undefined,
+        })
         renderWithProviders(<SubmissionType />, {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -434,6 +452,15 @@ describe('SubmissionType', () => {
     })
 
     it('displays risk-based contract radio buttons and validation message', async () => {
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockReturnValue({
+            updateDraft: mockUpdateDraftFn,
+            createDraft: mockCreateDraftFn,
+            showPageErrorMessage: false,
+            draftSubmission: undefined,
+        })
         renderWithProviders(<SubmissionType />, {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -501,6 +528,15 @@ describe('SubmissionType', () => {
         })
 
         it('shows error messages when there are validation errors and showValidations is true', async () => {
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: mockCreateDraftFn,
+                showPageErrorMessage: false,
+                draftSubmission: undefined,
+            })
             renderWithProviders(
                 <SubmissionType showValidations={true} />,
 
@@ -529,6 +565,15 @@ describe('SubmissionType', () => {
         })
 
         it('shows error messages when contract type is not selected', async () => {
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: mockCreateDraftFn,
+                showPageErrorMessage: false,
+                draftSubmission: undefined,
+            })
             renderWithProviders(
                 <SubmissionType showValidations={true} />,
 
@@ -585,6 +630,15 @@ describe('SubmissionType', () => {
         })
 
         it('if form fields are invalid, shows validation error messages when continue button is clicked', async () => {
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: mockCreateDraftFn,
+                showPageErrorMessage: false,
+                draftSubmission: undefined,
+            })
             renderWithProviders(<SubmissionType />, {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
