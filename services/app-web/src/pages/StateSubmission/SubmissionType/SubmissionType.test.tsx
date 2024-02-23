@@ -4,8 +4,7 @@ import { screen, waitFor, within } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
-import { SubmissionType, SubmissionTypeFormValues } from './'
-import { Formik } from 'formik'
+import { SubmissionType } from './'
 import { contractOnly } from '../../../common-code/healthPlanFormDataMocks'
 import type { UseHealthPlanPackageForm } from '../../../hooks/useHealthPlanPackageForm'
 import type { UseRouteParams } from '../../../hooks/useRouteParams'
@@ -32,15 +31,6 @@ describe('SubmissionType', () => {
     afterEach(() => {
         jest.clearAllMocks()
     })
-
-    const SubmissionTypeInitialValues: SubmissionTypeFormValues = {
-        programIDs: ['ccc-plus'],
-        riskBasedContract: '',
-        submissionDescription: '',
-        submissionType: '',
-        contractType: '',
-        populationCovered: undefined,
-    }
 
     it('displays correct form guidance', async () => {
         renderWithProviders(<SubmissionType />, {
@@ -114,19 +104,11 @@ describe('SubmissionType', () => {
     })
 
     it('displays population coverage question', async () => {
-        renderWithProviders(
-            <Formik
-                initialValues={SubmissionTypeInitialValues}
-                onSubmit={jest.fn()}
-            >
-                <SubmissionType />
-            </Formik>,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         expect(
             screen.getByText(
@@ -144,19 +126,11 @@ describe('SubmissionType', () => {
         ).toBeInTheDocument()
     })
     it('disables contract and rates submission type radio and displays hint when CHIP only is selected', async () => {
-        renderWithProviders(
-            <Formik
-                initialValues={SubmissionTypeInitialValues}
-                onSubmit={jest.fn()}
-            >
-                <SubmissionType />
-            </Formik>,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         expect(
             screen.getByText(
@@ -185,19 +159,11 @@ describe('SubmissionType', () => {
         ).toBeInTheDocument()
     })
     it('switches submission type to contract only when changing existing population coverage to CHIP-only', async () => {
-        renderWithProviders(
-            <Formik
-                initialValues={SubmissionTypeInitialValues}
-                onSubmit={jest.fn()}
-            >
-                <SubmissionType />
-            </Formik>,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         expect(
             screen.getByText(
@@ -245,19 +211,11 @@ describe('SubmissionType', () => {
         ).toBeInTheDocument()
     })
     it('new submissions does not automatically select contract only submission type when selecting CHIP-only coverage', async () => {
-        renderWithProviders(
-            <Formik
-                initialValues={SubmissionTypeInitialValues}
-                onSubmit={jest.fn()}
-            >
-                <SubmissionType />
-            </Formik>,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         expect(
             screen.getByText(
@@ -286,15 +244,19 @@ describe('SubmissionType', () => {
         await userEvent.click(medicaidAndChipRadio)
 
         // Expect contract and rates radio to not be selected
-        expect(contractAndRatesRadio).not.toBeChecked()
-        expect(contractOnlyRadio).not.toBeChecked()
+        await waitFor(() => {
+            expect(contractAndRatesRadio).not.toBeChecked()
+            expect(contractOnlyRadio).not.toBeChecked()
+        })
 
         // Change population coverage to Chip only
         await userEvent.click(chipOnlyRadio)
 
         // Expect the submission type radios to still be unselected
-        expect(contractAndRatesRadio).not.toBeChecked()
-        expect(contractOnlyRadio).not.toBeChecked()
+        await waitFor(() => {
+            expect(contractAndRatesRadio).not.toBeChecked()
+            expect(contractOnlyRadio).not.toBeChecked()
+        })
 
         // Shows hint for submission type
         expect(
@@ -304,19 +266,11 @@ describe('SubmissionType', () => {
         ).toBeInTheDocument()
     })
     it('does not clear contract only submission type radio when switching to CHIP-only population coverage', async () => {
-        renderWithProviders(
-            <Formik
-                initialValues={SubmissionTypeInitialValues}
-                onSubmit={jest.fn()}
-            >
-                <SubmissionType />
-            </Formik>,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         expect(
             screen.getByText(
@@ -350,19 +304,11 @@ describe('SubmissionType', () => {
         expect(contractOnlyRadio).toBeChecked()
     })
     it('shows validation message when population coverage is not selected', async () => {
-        renderWithProviders(
-            <Formik
-                initialValues={SubmissionTypeInitialValues}
-                onSubmit={jest.fn()}
-            >
-                <SubmissionType />
-            </Formik>,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         // Expect population coverage question and radios
         expect(
@@ -389,19 +335,11 @@ describe('SubmissionType', () => {
     })
 
     it('displays programs select dropdown', async () => {
-        renderWithProviders(
-            <Formik
-                initialValues={SubmissionTypeInitialValues}
-                onSubmit={jest.fn()}
-            >
-                <SubmissionType />
-            </Formik>,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         expect(
             screen.getByRole('combobox', {
@@ -430,24 +368,16 @@ describe('SubmissionType', () => {
                 ],
             },
         }
-        renderWithProviders(
-            <Formik
-                initialValues={SubmissionTypeInitialValues}
-                onSubmit={jest.fn()}
-            >
-                <SubmissionType />
-            </Formik>,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            statusCode: 200,
-                            user: mockUser,
-                        }),
-                    ],
-                },
-            }
-        )
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        statusCode: 200,
+                        user: mockUser,
+                    }),
+                ],
+            },
+        })
         const combobox = await screen.findByRole('combobox')
 
         selectEvent.openMenu(combobox)
@@ -466,19 +396,11 @@ describe('SubmissionType', () => {
     })
 
     it('displays submission type radio buttons', async () => {
-        renderWithProviders(
-            <Formik
-                initialValues={SubmissionTypeInitialValues}
-                onSubmit={jest.fn()}
-            >
-                <SubmissionType />
-            </Formik>,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         expect(
             screen.getByRole('radio', { name: 'Contract action only' })
@@ -491,19 +413,11 @@ describe('SubmissionType', () => {
     })
 
     it('displays contract type radio buttons', async () => {
-        renderWithProviders(
-            <Formik
-                initialValues={SubmissionTypeInitialValues}
-                onSubmit={jest.fn()}
-            >
-                <SubmissionType />
-            </Formik>,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         expect(
             screen.getByRole('radio', { name: 'Base contract' })
@@ -516,19 +430,11 @@ describe('SubmissionType', () => {
     })
 
     it('displays risk-based contract radio buttons and validation message', async () => {
-        renderWithProviders(
-            <Formik
-                initialValues={SubmissionTypeInitialValues}
-                onSubmit={jest.fn()}
-            >
-                <SubmissionType />
-            </Formik>,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         // setup
         const riskBasedContract = screen.getByText(
@@ -557,19 +463,11 @@ describe('SubmissionType', () => {
     })
 
     it('displays submission description textarea', async () => {
-        renderWithProviders(
-            <Formik
-                initialValues={SubmissionTypeInitialValues}
-                onSubmit={jest.fn()}
-            >
-                <SubmissionType />
-            </Formik>,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
         expect(
             screen.getByRole('textbox', {
                 name: 'Submission description',

@@ -1,6 +1,8 @@
 import { mockMNState } from "../../common-code/healthPlanFormDataMocks/healthPlanFormData";
 import { Contract} from '../../gen/gqlClient'
-function mockContractAndRatesPackage(
+
+// Assemble versions of Contract data (with or without rates) for jest testing. Intended for use with related GQL Moc file.
+function mockContractPackage(
     partial?: Partial<Contract>
 ): Contract {
     return {
@@ -107,3 +109,5 @@ function mockContractAndRatesPackage(
         ...partial,
     }
 }
+
+export {mockContractPackage}

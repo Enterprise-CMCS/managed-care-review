@@ -2,7 +2,7 @@ import { useState, useEffect, ReactNode } from 'react'
 import { usePage } from "../contexts/PageContext"
 import { useStatePrograms } from './useStatePrograms'
 import { useFetchHealthPlanPackageWrapper } from '../gqlHelpers'
-import { CreateHealthPlanPackageInput, HealthPlanPackage, IndexHealthPlanPackagesDocument, IndexHealthPlanPackagesQuery, UpdateInformation, useCreateHealthPlanPackageMutation, useUpdateHealthPlanFormDataMutation } from '../gen/gqlClient'
+import { CreateHealthPlanPackageInput, HealthPlanPackage, UpdateInformation, useCreateHealthPlanPackageMutation, useUpdateHealthPlanFormDataMutation } from '../gen/gqlClient'
 import { UnlockedHealthPlanFormDataType, packageName } from '../common-code/healthPlanFormDataType'
 import { domainToBase64 } from '../common-code/proto/healthPlanFormDataProto'
 import { recordJSException } from '../otelHelpers'
@@ -61,7 +61,7 @@ const createDraft: UseHealthPlanPackageForm['createDraft']  = async (
 ): Promise<HealthPlanPackage | Error> => {
     setShowPageErrorMessage(false)
     const {populationCovered,programIDs,riskBasedContract, submissionType, submissionDescription, contractType} = input
-    if(populationCovered == undefined || contractType == undefined) {
+    if(populationCovered === undefined || contractType === undefined) {
         console.info('wrong')
         return new Error('wrong')
     }

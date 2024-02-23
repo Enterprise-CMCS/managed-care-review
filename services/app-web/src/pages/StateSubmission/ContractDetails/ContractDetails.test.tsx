@@ -1,12 +1,11 @@
 import { screen, waitFor, within, fireEvent } from '@testing-library/react'
-import * as hooks from '../../../hooks'
 import userEvent from '@testing-library/user-event'
 
 import {
-    mockDraft,
-    fetchCurrentUserMock,
-    mockBaseContract,
     mockContractAndRatesDraft,
+    fetchCurrentUserMock,
+    mockDraft,
+    mockBaseContract,
 } from '../../../testHelpers/apolloMocks'
 
 import {
@@ -32,18 +31,19 @@ import {
     StatutoryRegulatoryAttestationDescription,
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../constants/statutoryRegulatoryAttestation'
-import { UseHealthPlanPackageForm } from '../../../hooks/useHealthPlanPackageForm'
+import { type UseHealthPlanPackageForm } from '../../../hooks/useHealthPlanPackageForm'
 import { contractOnly } from '../../../common-code/healthPlanFormDataMocks'
 import { UseRouteParams } from '../../../hooks/useRouteParams'
 
 // set up mocks for React Hooks in use
-const mockUseHealthPlanPackageForm: UseHealthPlanPackageForm = {
-    updateDraft: jest.fn(),
+const mockUpdateDraftFn = jest.fn()
+const mockUseHPPForm: UseHealthPlanPackageForm = {
+    updateDraft: mockUpdateDraftFn(),
     draftSubmission: contractOnly(),
 }
 jest.mock('../../../hooks/useHealthPlanPackageForm', () => ({
     useHealthPlanPackageForm: () => {
-        return mockUseHealthPlanPackageForm
+        return mockUseHPPForm
     },
 }))
 
@@ -54,28 +54,21 @@ jest.mock('../../../hooks/useRouteParams', () => ({
     },
 }))
 
-
 const scrollIntoViewMock = jest.fn()
 HTMLElement.prototype.scrollIntoView = scrollIntoViewMock
-
+const emptyContractDetailsDraft = {
+    ...mockDraft(),
+}
 
 describe('ContractDetails', () => {
-    const emptyContractDetailsDraft = {
-        ...mockDraft(),
-    }
-
     const defaultApolloProvider = {
         mocks: [fetchCurrentUserMock({ statusCode: 200 })],
     }
 
     it('displays correct form guidance', async () => {
-        renderWithProviders(
-            <ContractDetails
-            />,
-            {
-                apolloProvider: defaultApolloProvider,
-            }
-        )
+        renderWithProviders(<ContractDetails />, {
+            apolloProvider: defaultApolloProvider,
+        })
         expect(
             screen.queryByText(/All fields are required/)
         ).not.toBeInTheDocument()
@@ -87,13 +80,9 @@ describe('ContractDetails', () => {
 
     describe('Contract documents file upload', () => {
         it('renders without errors', async () => {
-            renderWithProviders(
-                <ContractDetails
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
 
             // check hint text
             await screen.findByText(
@@ -119,13 +108,9 @@ describe('ContractDetails', () => {
         })
 
         it('accepts a new document', async () => {
-            renderWithProviders(
-                <ContractDetails
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
 
             const input = screen.getByLabelText('Upload contract')
             expect(input).toBeInTheDocument()
@@ -137,14 +122,9 @@ describe('ContractDetails', () => {
         })
 
         it('accepts multiple pdf, word, excel documents', async () => {
-            renderWithProviders(
-                <ContractDetails
-
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
 
             const input = screen.getByLabelText('Upload contract')
             expect(input).toBeInTheDocument()
@@ -167,18 +147,15 @@ describe('ContractDetails', () => {
 
     describe('Federal authorities', () => {
         it('displays correct form fields for federal authorities with medicaid contract', async () => {
+            mockUseHPPForm.draftSubmission = {
+                ...mockContractAndRatesDraft(),
+                populationCovered: 'MEDICAID',
+            }
+
             await waitFor(() => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={{
-                            ...mockDraft(),
-                            populationCovered: 'MEDICAID',
-                        }}
-                    />,
-                    {
-                        apolloProvider: defaultApolloProvider,
-                    }
-                )
+                renderWithProviders(<ContractDetails />, {
+                    apolloProvider: defaultApolloProvider,
+                })
             })
 
             const fedAuthQuestion = screen.getByRole('group', {
@@ -197,17 +174,14 @@ describe('ContractDetails', () => {
         })
 
         it('displays correct form fields for federal authorities with CHIP only contract', async () => {
-            renderWithProviders(
-                <ContractDetails
-                    draftSubmission={{
-                        ...mockDraft(),
-                        populationCovered: 'CHIP',
-                    }}
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            mockUseHPPForm.draftSubmission = {
+                ...mockContractAndRatesDraft(),
+                populationCovered: 'CHIP',
+            }
+
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
             const fedAuthQuestion = await screen.findByRole('group', {
                 name: 'Active federal operating authority',
             })
@@ -224,34 +198,29 @@ describe('ContractDetails', () => {
     })
 
     describe('Contract provisions - yes/nos', () => {
-        const medicaidAmendmentPackage = mockDraft({
+        const medicaidAmendmentPackage = mockContractAndRatesDraft({
             populationCovered: 'MEDICAID',
             contractType: 'AMENDMENT',
         })
-        const medicaidBasePackage = mockDraft({
+        const medicaidBasePackage = mockContractAndRatesDraft({
             populationCovered: 'MEDICAID',
             contractType: 'BASE',
         })
 
-        const chipAmendmentPackage = mockDraft({
+        const chipAmendmentPackage = mockContractAndRatesDraft({
             populationCovered: 'CHIP',
             contractType: 'AMENDMENT',
         })
-        const chipBasePackage = mockDraft({
+        const chipBasePackage = mockContractAndRatesDraft({
             populationCovered: 'CHIP',
             contractType: 'BASE',
         })
 
         it('can set provisions for medicaid contract amendment', async () => {
-            renderWithProviders(
-                <ContractDetails
-                    draftSubmission={medicaidAmendmentPackage}
-
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            mockUseHPPForm.draftSubmission = medicaidAmendmentPackage
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
             await screen.findByRole('form')
             // amendment specific copy is used
             expect(
@@ -288,15 +257,10 @@ describe('ContractDetails', () => {
         })
 
         it('shows correct validations for medicaid contract amendment', async () => {
-            renderWithProviders(
-                <ContractDetails
-                    draftSubmission={medicaidAmendmentPackage}
-
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            mockUseHPPForm.draftSubmission = medicaidAmendmentPackage
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
             // trigger validations
             await userEvent.click(
                 screen.getByRole('button', {
@@ -347,15 +311,10 @@ describe('ContractDetails', () => {
         })
 
         it('can set provisions for medicaid base contract', async () => {
-            renderWithProviders(
-                <ContractDetails
-                    draftSubmission={medicaidBasePackage}
-
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            mockUseHPPForm.draftSubmission = medicaidBasePackage
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
             await screen.findByRole('form')
 
             // risk and payment related provisions should be visible
@@ -379,15 +338,10 @@ describe('ContractDetails', () => {
         })
 
         it('shows correct validations for medicaid base contract', async () => {
-            renderWithProviders(
-                <ContractDetails
-                    draftSubmission={medicaidBasePackage}
-
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            mockUseHPPForm.draftSubmission = medicaidBasePackage
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
 
             // trigger validations
             await userEvent.click(
@@ -431,15 +385,10 @@ describe('ContractDetails', () => {
         })
 
         it('cannot set provisions for CHIP only base contract', async () => {
-            renderWithProviders(
-                <ContractDetails
-                    draftSubmission={chipBasePackage}
-
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            mockUseHPPForm.draftSubmission = chipBasePackage
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
             await screen.findByRole('form')
             expect(
                 screen.queryByText(
@@ -452,15 +401,10 @@ describe('ContractDetails', () => {
         })
 
         it('can set provisions for CHIP only amendment', async () => {
-            renderWithProviders(
-                <ContractDetails
-                    draftSubmission={chipAmendmentPackage}
-
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            mockUseHPPForm.draftSubmission = chipAmendmentPackage
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
             await screen.findByRole('form')
 
             // CHIP specific copy is used
@@ -493,15 +437,10 @@ describe('ContractDetails', () => {
         })
 
         it('shows correct validations for CHIP only amendment', async () => {
-            renderWithProviders(
-                <ContractDetails
-                    draftSubmission={chipAmendmentPackage}
-
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            mockUseHPPForm.draftSubmission = chipAmendmentPackage
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
 
             // trigger validations
             await userEvent.click(
@@ -555,14 +494,9 @@ describe('ContractDetails', () => {
 
     describe('Continue button', () => {
         it('enabled when valid files are present', async () => {
-            renderWithProviders(
-                <ContractDetails
-
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
@@ -577,14 +511,9 @@ describe('ContractDetails', () => {
         })
 
         it('enabled when invalid files have been dropped but valid files are present', async () => {
-            renderWithProviders(
-                <ContractDetails
-
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
@@ -604,14 +533,9 @@ describe('ContractDetails', () => {
         })
 
         it('disabled with alert after first attempt to continue with zero files', async () => {
-            renderWithProviders(
-                <ContractDetails
-
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
@@ -630,14 +554,9 @@ describe('ContractDetails', () => {
         })
 
         it('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
-            renderWithProviders(
-                <ContractDetails
-
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
 
             const input = screen.getByLabelText('Upload contract')
             const continueButton = screen.getByRole('button', {
@@ -663,14 +582,9 @@ describe('ContractDetails', () => {
         })
 
         it('disabled with alert after first attempt to continue with invalid files', async () => {
-            renderWithProviders(
-                <ContractDetails
-
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
@@ -694,14 +608,9 @@ describe('ContractDetails', () => {
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')
         })
         it('disabled with alert when trying to continue while a file is still uploading', async () => {
-            renderWithProviders(
-                <ContractDetails
-
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
@@ -737,17 +646,10 @@ describe('ContractDetails', () => {
 
     describe('Save as draft button', () => {
         it('enabled when valid files are present', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <ContractDetails
-                    draftSubmission={emptyContractDetailsDraft}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            mockUseHPPForm.draftSubmission = emptyContractDetailsDraft
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
 
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -762,17 +664,11 @@ describe('ContractDetails', () => {
         })
 
         it('enabled when invalid files have been dropped but valid files are present', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <ContractDetails
-                    draftSubmission={emptyContractDetailsDraft}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            mockUseHPPForm.draftSubmission = emptyContractDetailsDraft
+
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
 
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -789,17 +685,10 @@ describe('ContractDetails', () => {
         })
 
         it('when zero files present, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <ContractDetails
-                    draftSubmission={emptyContractDetailsDraft}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            mockUseHPPForm.draftSubmission = emptyContractDetailsDraft
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
 
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -814,9 +703,8 @@ describe('ContractDetails', () => {
         })
 
         it('when existing file is removed, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
-            const mockUpdateDraftFn = jest.fn()
             const hasDocsDetailsDraft = {
-                ...mockDraft(),
+                ...mockContractAndRatesDraft(),
                 contractDocuments: [
                     {
                         name: 'aasdf3423af',
@@ -825,16 +713,12 @@ describe('ContractDetails', () => {
                     },
                 ],
             }
-            renderWithProviders(
-                <ContractDetails
-                    draftSubmission={hasDocsDetailsDraft}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+
+            mockUseHPPForm.draftSubmission = hasDocsDetailsDraft
+
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
 
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -849,17 +733,11 @@ describe('ContractDetails', () => {
         })
 
         it('when duplicate files present, triggers error alert on click', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <ContractDetails
-                    draftSubmission={emptyContractDetailsDraft}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            mockUseHPPForm.draftSubmission = emptyContractDetailsDraft
+
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
             const input = screen.getByLabelText('Upload contract')
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -888,14 +766,9 @@ describe('ContractDetails', () => {
 
     describe('Back button', () => {
         it('enabled when valid files are present', async () => {
-            renderWithProviders(
-                <ContractDetails
-
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
 
             const backButton = screen.getByRole('button', {
                 name: 'Back',
@@ -910,14 +783,9 @@ describe('ContractDetails', () => {
         })
 
         it('enabled when invalid files have been dropped but valid files are present', async () => {
-            renderWithProviders(
-                <ContractDetails
-
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
 
             const backButton = screen.getByRole('button', {
                 name: 'Back',
@@ -934,17 +802,11 @@ describe('ContractDetails', () => {
         })
 
         it('when zero files present, does not trigger missing documents alert on click', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <ContractDetails
-                    draftSubmission={emptyContractDetailsDraft}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            mockUseHPPForm.draftSubmission = emptyContractDetailsDraft
+
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
 
             const backButton = screen.getByRole('button', {
                 name: 'Back',
@@ -959,17 +821,11 @@ describe('ContractDetails', () => {
         })
 
         it('when duplicate files present, does not trigger duplicate documents alert on click and silently updates submission without the duplicate', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <ContractDetails
-                    draftSubmission={emptyContractDetailsDraft}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: defaultApolloProvider,
-                }
-            )
+            mockUseHPPForm.draftSubmission = emptyContractDetailsDraft
+
+            renderWithProviders(<ContractDetails />, {
+                apolloProvider: defaultApolloProvider,
+            })
 
             const input = screen.getByLabelText('Upload contract')
             const backButton = screen.getByRole('button', {
@@ -1008,21 +864,15 @@ describe('ContractDetails', () => {
 
     describe('Contract 438 attestation', () => {
         it('renders 438 attestation question without errors', async () => {
-            const draft = mockBaseContract({
+            mockUseHPPForm.draftSubmission = mockBaseContract({
                 statutoryRegulatoryAttestation: true,
             })
+
             await waitFor(() => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={draft}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: defaultApolloProvider,
-                        featureFlags: { '438-attestation': true },
-                    }
-                )
+                renderWithProviders(<ContractDetails />, {
+                    apolloProvider: defaultApolloProvider,
+                    featureFlags: { '438-attestation': true },
+                })
             })
 
             // expect 438 attestation question to be on the page
@@ -1055,25 +905,20 @@ describe('ContractDetails', () => {
             })
         })
         it('errors when continuing without answering 438 attestation question', async () => {
-            const draft = mockContractAndRatesDraft({
+            const testDraft = mockContractAndRatesDraft({
                 contractDateStart: new Date('11-12-2023'),
                 contractDateEnd: new Date('11-12-2024'),
                 statutoryRegulatoryAttestation: undefined,
                 statutoryRegulatoryAttestationDescription: undefined,
             })
-            const mockUpdateDraftFn = jest.fn()
+
+            mockUseHPPForm.draftSubmission = testDraft
+
             await waitFor(() => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={draft}
-                        updateDraft={mockUpdateDraftFn}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: defaultApolloProvider,
-                        featureFlags: { '438-attestation': true },
-                    }
-                )
+                renderWithProviders(<ContractDetails />, {
+                    apolloProvider: defaultApolloProvider,
+                    featureFlags: { '438-attestation': true },
+                })
             })
 
             // expect 438 attestation question to be on the page
@@ -1130,19 +975,12 @@ describe('ContractDetails', () => {
                 statutoryRegulatoryAttestation: undefined,
                 statutoryRegulatoryAttestationDescription: undefined,
             })
-            const mockUpdateDraftFn = jest.fn()
+            mockUseHPPForm.draftSubmission = draft
             await waitFor(() => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={draft}
-                        updateDraft={mockUpdateDraftFn}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: defaultApolloProvider,
-                        featureFlags: { '438-attestation': true },
-                    }
-                )
+                renderWithProviders(<ContractDetails />, {
+                    apolloProvider: defaultApolloProvider,
+                    featureFlags: { '438-attestation': true },
+                })
             })
 
             // expect 438 attestation question to be on the page
