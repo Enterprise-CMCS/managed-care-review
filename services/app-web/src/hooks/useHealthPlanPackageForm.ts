@@ -16,12 +16,12 @@ import type { InterimState } from '../pages/StateSubmission/ErrorOrLoadingPage'
 type  UseHealthPlanPackageForm = {
     draftSubmission?: UnlockedHealthPlanFormDataType
     unlockInfo?: UpdateInformation
-    showPageErrorMessage?: string | boolean
+    showPageErrorMessage: string | boolean
     previousDocuments?: string[]
-    updateDraft?: (
+    updateDraft: (
         input: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackage | Error>
-    createDraft?: (
+    createDraft: (
         input: CreateHealthPlanPackageInput
     ) => Promise<HealthPlanPackage | Error>
     documentDateLookupTable?: DocumentDateLookupTableType
@@ -32,7 +32,7 @@ type  UseHealthPlanPackageForm = {
 // This is intentionally throwaway code that replicates logic formally in StateSubmissionForm
 // PLease delete and remove this file when HealthPlanPackage is fully out of the Form
 
-const useHealthPlanPackageForm = (packageID: string): UseHealthPlanPackageForm => {
+const useHealthPlanPackageForm = (packageID?: string): UseHealthPlanPackageForm => {
      // Set up defaults for the return value for hook
      let interimState: UseHealthPlanPackageForm['interimState'] = undefined // enum to determine what Interim UI should override form page
      let previousDocuments: UseHealthPlanPackageForm['previousDocuments'] = [] // used for document upload tables
@@ -53,7 +53,7 @@ useEffect(() => {
 
 const statePrograms = useStatePrograms()
 
-const { result: fetchResult } = useFetchHealthPlanPackageWrapper(packageID)
+const { result: fetchResult } = useFetchHealthPlanPackageWrapper(packageID ?? 'new-draft', packageID? false: true)
 const [createFormData] = useCreateHealthPlanPackageMutation()
 
 const createDraft: UseHealthPlanPackageForm['createDraft']  = async (
@@ -62,7 +62,6 @@ const createDraft: UseHealthPlanPackageForm['createDraft']  = async (
     setShowPageErrorMessage(false)
     const {populationCovered,programIDs,riskBasedContract, submissionType, submissionDescription, contractType} = input
     if(populationCovered === undefined || contractType === undefined) {
-        console.info('wrong')
         return new Error('wrong')
     }
     try {
@@ -139,24 +138,25 @@ const updateDraft: UseHealthPlanPackageForm['updateDraft']  = async (
 
 if (fetchResult.status === 'LOADING') {
     interimState = 'LOADING'
-    return {interimState }
+    return {interimState, createDraft, updateDraft, showPageErrorMessage }
 }
 
 if (fetchResult.status === 'ERROR') {
     const err = fetchResult.error
-    console.error('Error from API fetch', fetchResult.error)
-
-    if (err instanceof ApolloError) {
+    if (err instanceof ApolloError){
         handleApolloError(err, true)
         if (err.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
-            interimState = 'NOT_FOUND'
-            return {interimState }
+                interimState = 'NOT_FOUND'
+                return {interimState,createDraft, updateDraft,  showPageErrorMessage }
         }
     }
+    if (err.name !== 'SKIPPED') {
+        recordJSException(err)
+        interimState = 'GENERIC_ERROR'// api failure or protobuf decode failure
+        return { interimState,  createDraft, updateDraft,  showPageErrorMessage}
+    }
+    return {interimState: undefined, createDraft, updateDraft,  showPageErrorMessage}
 
-    recordJSException(err)
-    interimState = 'GENERIC_ERROR'// api failure or protobuf decode failure
-    return { interimState }
 }
 
 const { data, revisionsLookup } = fetchResult
@@ -172,7 +172,7 @@ previousDocuments = documentLists.previousDocuments
 // if we've gotten back a submitted revision, it can't be edited
 if (formDataFromLatestRevision.status !== 'DRAFT') {
  interimState = 'INVALID_STATUS'
- return {interimState }
+ return {createDraft, updateDraft,  showPageErrorMessage}
 }
 
 const submissionName = packageName(

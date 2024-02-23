@@ -44,7 +44,7 @@ import {
     yesNoFormValueAsBoolean,
 } from '../../../components/Form/FieldYesNo/FieldYesNo'
 import { SubmissionTypeFormSchema } from './SubmissionTypeSchema'
-import { RoutesRecord } from '../../../constants'
+import { RoutesRecord, STATE_SUBMISSION_FORM_ROUTES } from '../../../constants'
 import { FormContainer } from '../FormContainer'
 import { useHealthPlanPackageForm } from '../../../hooks/useHealthPlanPackageForm'
 import { useCurrentRoute } from '../../../hooks'
@@ -79,6 +79,7 @@ export const SubmissionType = ({
     const isNewSubmission = location.pathname === '/submissions/new'
 
     const { id } = useRouteParams()
+
     const {
         draftSubmission,
         updateDraft,
@@ -110,7 +111,7 @@ export const SubmissionType = ({
         contractType: draftSubmission?.contractType ?? '',
     }
 
-    if (interimState || !draftSubmission)
+    if (interimState)
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
     const handleFormSubmit = async (
         values: SubmissionTypeFormValues,
@@ -166,7 +167,7 @@ export const SubmissionType = ({
                 }
                 if (!createDraft) {
                     console.info(
-                        'ERROR, SubmissionType for does not have props needed to update a draft.'
+                        'PROGRAMMING ERROR, SubmissionType for does have props needed to update a draft.'
                     )
                     return
                 }
@@ -259,7 +260,11 @@ export const SubmissionType = ({
         <>
             <div className={styles.stepIndicator}>
                 <DynamicStepIndicator
-                    formPages={activeFormPages(draftSubmission)}
+                    formPages={
+                        draftSubmission
+                            ? activeFormPages(draftSubmission)
+                            : STATE_SUBMISSION_FORM_ROUTES
+                    }
                     currentFormPage={currentRoute}
                 />
                 <PageBannerAlerts

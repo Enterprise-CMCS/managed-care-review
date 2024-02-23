@@ -200,7 +200,7 @@ export const ContractDetails = ({
         setFocusErrorSummaryHeading(false)
     }, [focusErrorSummaryHeading])
 
-    if (interimState || !draftSubmission || !updateDraft)
+    if (interimState || !draftSubmission)
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&

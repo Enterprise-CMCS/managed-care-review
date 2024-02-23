@@ -13,7 +13,7 @@ import {
     QuerySuccessType,
     WrappedApolloResultType,
 } from './apolloQueryWrapper'
-import { QueryFunctionOptions } from '@apollo/client'
+import { QueryFunctionOptions, QueryHookOptions } from '@apollo/client'
 import { recordJSException } from '../otelHelpers'
 import {
     DocumentDateLookupTableType,
@@ -118,7 +118,7 @@ function parseProtos(
 
 // This wraps our call to useFetchHealthPlanPackageQuery, parsing out the protobuf
 // from the response, returning extra errors in the case that parsing goes wrong
-function useFetchHealthPlanPackageWrapper(id: string): WrappedFetchResultType {
+function useFetchHealthPlanPackageWrapper(id: string, skip?: boolean): WrappedFetchResultType {
     const results = wrapApolloResult(
         useFetchHealthPlanPackageQuery({
             variables: {
@@ -126,6 +126,7 @@ function useFetchHealthPlanPackageWrapper(id: string): WrappedFetchResultType {
                     pkgID: id,
                 },
             },
+            skip: skip ?? false
         })
     )
     const result = results.result

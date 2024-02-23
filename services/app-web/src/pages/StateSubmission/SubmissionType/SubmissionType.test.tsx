@@ -10,8 +10,12 @@ import type { UseHealthPlanPackageForm } from '../../../hooks/useHealthPlanPacka
 import type { UseRouteParams } from '../../../hooks/useRouteParams'
 
 // set up mocks for React Hooks in use
+const mockUpdateDraftFn = jest.fn()
+const mockCreateDraftFn = jest.fn()
 const mockUseHealthPlanPackageForm: UseHealthPlanPackageForm = {
-    updateDraft: jest.fn(),
+    updateDraft: mockUpdateDraftFn(),
+    createDraft: mockCreateDraftFn(),
+    showPageErrorMessage: false,
     draftSubmission: contractOnly(),
 }
 jest.mock('../../../hooks/useHealthPlanPackageForm', () => ({

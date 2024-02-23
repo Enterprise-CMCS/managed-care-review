@@ -1,3 +1,4 @@
+import React from 'react'
 import { screen, waitFor, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
@@ -16,9 +17,10 @@ import {
     TEST_PNG_FILE,
     dragAndDrop,
     selectYesNoRadio,
+    prettyDebug,
 } from '../../../testHelpers/jestHelpers'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
-import { ContractDetails } from './'
+import { ContractDetails } from './ContractDetails'
 import {
     provisionCHIPKeys,
     federalAuthorityKeys,
@@ -38,7 +40,9 @@ import { UseRouteParams } from '../../../hooks/useRouteParams'
 // set up mocks for React Hooks in use
 const mockUpdateDraftFn = jest.fn()
 const mockUseHPPForm: UseHealthPlanPackageForm = {
-    updateDraft: mockUpdateDraftFn(),
+    updateDraft: mockUpdateDraftFn,
+    createDraft: jest.fn(),
+    showPageErrorMessage: false,
     draftSubmission: contractOnly(),
 }
 jest.mock('../../../hooks/useHealthPlanPackageForm', () => ({
@@ -69,6 +73,7 @@ describe('ContractDetails', () => {
         renderWithProviders(<ContractDetails />, {
             apolloProvider: defaultApolloProvider,
         })
+        prettyDebug()
         expect(
             screen.queryByText(/All fields are required/)
         ).not.toBeInTheDocument()
