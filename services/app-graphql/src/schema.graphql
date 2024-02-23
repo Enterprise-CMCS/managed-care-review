@@ -1291,8 +1291,6 @@ type Rate {
     stateNumber: Int!
     "The currently modifiable revision if the rate is DRAFT or UNLOCKED"
     draftRevision: RateRevision
-    "draftContracts are the contracts associated with this rate that is DRAFT or UNLOCKED"
-    draftContracts: [Contract!]!
     """
     Array of revisions for this rate. Each revision represents a single submission
     for the rate and contains the full data from when the rate cert was submitted

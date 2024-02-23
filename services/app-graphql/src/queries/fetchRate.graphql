@@ -145,65 +145,6 @@ query fetchRate($input: FetchRateInput!) {
             draftRevision {
                 ...rateRevisionFragment
             }
-            draftContracts {
-                id
-                createdAt
-                updatedAt
-                status
-                state {
-                    code
-                    name
-                    programs {
-                        id
-                        name
-                        fullName
-                    }
-                }
-                stateCode
-                stateNumber
-
-                packageSubmissionHistory {
-                    cause
-                    submitInfo {
-                        updatedAt
-                        updatedReason
-                        updatedBy
-                    }
-                    submittedRevisions {
-                        ... on ContractRevision {
-                            id
-                        }
-                        ... on RateRevision {
-                            id
-                        }
-                    }
-                    contractRevision {
-                        id
-                        formData {
-                            submissionDescription
-                            federalAuthorities
-                            managedCareEntities
-                            programIDs
-                            submissionType
-                            stateContacts {
-                                name
-                                email
-                            }
-                            contractDocuments {
-                                name
-                                s3URL
-                            }
-                            supportingDocuments {
-                                name
-                                s3URL
-                            }
-                        }
-                    }
-                    rateRevisions {
-                        id
-                    }
-                }
-            }
 
             revisions {
                 ...rateRevisionFragment
