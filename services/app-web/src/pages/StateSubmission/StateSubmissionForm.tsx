@@ -240,7 +240,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
         latestRevision.unlockInfo || undefined
 
     return (
-        <div>
+        <div className={styles.fullWidth}>
             <div className={styles.stepIndicator}>
                 <DynamicStepIndicator
                     formPages={activeFormPages(formDataFromLatestRevision)}
