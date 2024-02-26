@@ -1288,8 +1288,8 @@ it contains the unlock and submit info.
 """
 type ContractRevision {
     id: ID!
-    createdAt: DateTime
-    updatedAt: DateTime
+    createdAt: DateTime!
+    updatedAt: DateTime!
     "submitInfo is the who/when/why for this revision being submitted. An Unlocked revision has no submitInfo"
     submitInfo: UpdateInformation
     "unlockInfo is the who/when/why for this revision being unlocked. A DRAFT or SUBMITTED revision will not have one"

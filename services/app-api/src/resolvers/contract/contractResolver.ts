@@ -69,5 +69,9 @@ export function contractResolver(store: Store): Resolvers['Contract'] {
                 return rateResult
             })
         },
+        // not yet implemented, currently only working on drafts:
+        packageSubmissions() {
+            return []
+        },
     }
 }
