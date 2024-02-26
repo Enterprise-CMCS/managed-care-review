@@ -9,17 +9,21 @@
 }
 .backgroundForm {
     width: 100%;
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .container {
     @include custom.default-page-container;
-    display: flex;
+    flex: 1 0 auto;
     flex-direction: row;
 }
 
 .sideNavContainer {
     padding: 2rem 0;
     width: 20rem;
+    min-width: 18rem;
     max-width: custom.$mcr-container-max-width-fixed;
 }
 

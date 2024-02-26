@@ -2,7 +2,9 @@
 @use '../../styles/uswdsImports.scss' as uswds;
 
 .formPage {
-    width: 100%;
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .stepIndicator {
@@ -168,8 +170,4 @@
     div[role='note'] {
         margin-top: uswds.units(0);
     }
-}
-
-.fullWidth {
-    width: 100%;
 }
