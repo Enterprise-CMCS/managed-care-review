@@ -6,6 +6,7 @@ import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
+import { isStateUser } from '../../domain-models'
 
 export function fetchContractResolver(
     store: Store
@@ -37,6 +38,21 @@ export function fetchContractResolver(
                     cause: 'DB_ERROR',
                 },
             })
+        }
+
+        // A state user cannot access contracts that don't belong to their state
+        if (isStateUser(user)) {
+            if (contractWithHistory.stateCode !== user.stateCode) {
+                const errMessage = `User from state ${user.stateCode} not allowed to access contract from ${contractWithHistory.stateCode}`
+                setErrorAttributesOnActiveSpan(errMessage, span)
+
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'FORBIDDEN',
+                        cause: 'INVALID_STATE_REQUESTER',
+                    },
+                })
+            }
         }
 
         setSuccessAttributesOnActiveSpan(span)
