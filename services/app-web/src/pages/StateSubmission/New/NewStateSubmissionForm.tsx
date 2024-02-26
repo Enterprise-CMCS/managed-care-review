@@ -12,7 +12,7 @@ export const NewStateSubmissionForm = (): React.ReactElement => {
     return (
         <div className={stylesSideNav.backgroundForm}>
             <GridContainer className={stylesSideNav.container}>
-                <div>
+                <div className={stylesForm.formPage}>
                     <div className={stylesForm.stepIndicator}>
                         <DynamicStepIndicator
                             formPages={STATE_SUBMISSION_FORM_ROUTES}
