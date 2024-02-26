@@ -13,7 +13,7 @@ import {
     QuerySuccessType,
     WrappedApolloResultType,
 } from './apolloQueryWrapper'
-import { QueryFunctionOptions, QueryHookOptions } from '@apollo/client'
+import { QueryFunctionOptions } from '@apollo/client'
 import { recordJSException } from '../otelHelpers'
 import {
     DocumentDateLookupTableType,

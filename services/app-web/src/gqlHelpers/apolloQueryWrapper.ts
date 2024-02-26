@@ -1,5 +1,3 @@
-import { ApolloError } from "@apollo/client"
-
 type QueryLoadingType = {
     status: 'LOADING'
 }
