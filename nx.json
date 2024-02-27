@@ -1,18 +1,4 @@
 {
-    "tasksRunnerOptions": {
-        "default": {
-            "runner": "nx/tasks-runners/default",
-            "options": {
-                "cacheableOperations": [
-                    "lint",
-                    "build",
-                    "prettier",
-                    "test",
-                    "generate"
-                ]
-            }
-        }
-    },
     "targetDefaults": {
         "build": {
             "dependsOn": ["generate", "^build"],
@@ -20,7 +6,8 @@
                 "{projectRoot}/services/app-api/.webpack",
                 "{projectRoot}/services/app-web/build",
                 "{projectRoot}/dev_tool/build"
-            ]
+            ],
+            "cache": true
         },
         "generate": {
             "dependsOn": ["^generate"],
@@ -28,7 +15,22 @@
                 "{projectRoot}/services/app-web/src/gen",
                 "{projectRoot}/services/app-api/src/gen",
                 "{projectRoot}/node_modules/@prisma/client"
-            ]
+            ],
+            "cache": true
+        },
+        "lint": {
+            "cache": true
+        },
+        "prettier": {
+            "cache": true
+        },
+        "test": {
+            "cache": true
         }
+    },
+    "namedInputs": {
+        "default": ["{projectRoot}/**/*", "sharedGlobals"],
+        "sharedGlobals": [],
+        "production": ["default"]
     }
 }
