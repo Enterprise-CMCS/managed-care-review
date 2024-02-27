@@ -23,9 +23,10 @@ describe('s3URLEncoding', () => {
         )
 
         test.each(invalidURLs)(
-            'given %p as the potential url, throws error',
+            'given %p as the potential url, returns error',
             (firstArg) => {
-                expect(() => parseKey(firstArg)).toThrow('Not valid S3URL')
+                const result = parseKey(firstArg)
+                expect(result).toBeInstanceOf(Error)
             }
         )
     })
@@ -45,9 +46,10 @@ describe('s3URLEncoding', () => {
         )
 
         test.each(invalidURLs)(
-            'given %p as the potential url, throws error',
+            'given %p as the potential url, returns error',
             (firstArg) => {
-                expect(() => parseKey(firstArg)).toThrow('Not valid S3URL')
+                const result = parseKey(firstArg)
+                expect(result).toBeInstanceOf(Error)
             }
         )
     })
