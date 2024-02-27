@@ -1009,6 +1009,8 @@ type ContractFormData {
     modifiedLengthOfContract: Boolean,
     "If contract includes modifications to the non-risk payment arrangements"
     modifiedNonRiskPaymentArrangements: Boolean,
+    statutoryRegulatoryAttestation: Boolean,
+    statutoryRegulatoryAttestationDescription: String
 }
 
 "Either new capitation rates (NEW) or updates to previously certified capitation rates (AMENDMENT)"
