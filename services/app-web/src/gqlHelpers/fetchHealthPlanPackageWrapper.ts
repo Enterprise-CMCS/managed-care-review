@@ -118,7 +118,7 @@ function parseProtos(
 
 // This wraps our call to useFetchHealthPlanPackageQuery, parsing out the protobuf
 // from the response, returning extra errors in the case that parsing goes wrong
-function useFetchHealthPlanPackageWrapper(id: string): WrappedFetchResultType {
+function useFetchHealthPlanPackageWrapper(id: string, skip?: boolean): WrappedFetchResultType {
     const results = wrapApolloResult(
         useFetchHealthPlanPackageQuery({
             variables: {
@@ -126,6 +126,7 @@ function useFetchHealthPlanPackageWrapper(id: string): WrappedFetchResultType {
                     pkgID: id,
                 },
             },
+            skip: skip ?? false
         })
     )
     const result = results.result
@@ -157,7 +158,7 @@ function useFetchHealthPlanPackageWithQuestionsWrapper(
                 },
             },
             onCompleted,
-            fetchPolicy: 'cache-and-network',
+            fetchPolicy: 'network-only',
         })
     )
     const result = results.result

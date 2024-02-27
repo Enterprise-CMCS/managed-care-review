@@ -29,7 +29,7 @@ import {
     RateRevision,
 } from '../../../../gen/gqlClient'
 import { SingleRateCertV2 } from './SingleRateCertV2'
-import type { SubmitOrUpdateRate } from '../../../RateEdit/RateEdit'
+import type { SubmitRateHandler } from '../../../RateEdit/RateEdit'
 
 export type RateDetailFormValues = {
     id?: string // no id if its a new rate
@@ -107,10 +107,10 @@ type RateDetailsV2Props = {
     type: 'SINGLE' | 'MULTI'
     showValidations?: boolean
     rates: Rate[]
-    submitRate: SubmitOrUpdateRate
-    // updateRate: SubmitOrUpdateRate  - will be implemented in Link Rates Epic
+    submitRate?: SubmitRateHandler
+    // updateRate: SubmitRateHandler  - will be implemented in Link Rates Epic
 }
-export const RateDetailsV2 = ({
+const RateDetailsV2 = ({
     showValidations = false,
     type,
     rates,
@@ -224,7 +224,7 @@ export const RateDetailsV2 = ({
 
         const { id, ...formData } = gqlFormDatas[0] // only grab the first rate in the array because multi-rates functionality not added yet. This will be part of Link Rates epic
 
-        if (options.type === 'CONTINUE' && id) {
+        if (options.type === 'CONTINUE' && id && submitRate) {
             await submitRate(id, formData, setSubmitting, 'DASHBOARD')
         } else if (options.type === 'CONTINUE' && !id) {
             throw new Error(
@@ -386,3 +386,4 @@ export const RateDetailsV2 = ({
         </Formik>
     )
 }
+export { RateDetailsV2 }
