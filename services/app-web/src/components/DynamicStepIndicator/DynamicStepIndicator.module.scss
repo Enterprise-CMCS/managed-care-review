@@ -6,7 +6,7 @@
     text-align: center;
     > [class^='usa-step-indicator'] {
         max-width: 66rem;
-        min-width: 60rem;
+        min-width: 50rem;
     }
     ol {
         justify-content: center;
@@ -14,5 +14,10 @@
 
     [class^='usa-step-indicator__header'] {
         display: inline;
+    }
+    @media (min-width: 40em) {
+        [class^='usa-step-indicator__segment-label'] {
+            padding-right: 1rem;
+        }
     }
 }
