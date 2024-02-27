@@ -16,22 +16,42 @@ import {
 } from '../../../testHelpers/apolloMocks'
 import { Documents } from './Documents'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
+import * as useRouteParams from '../../../hooks/useRouteParams'
+import * as useHealthPlanPackageForm from '../../../hooks/useHealthPlanPackageForm'
 
 describe('Documents', () => {
+    const mockUpdateDraftFn = jest.fn()
+
+    beforeEach(() => {
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockReturnValue({
+            updateDraft: mockUpdateDraftFn,
+            createDraft: jest.fn(),
+            showPageErrorMessage: false,
+            draftSubmission: mockDraft(),
+        })
+        jest.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
+            id: '123-abc',
+        })
+    })
+
+    afterEach(() => {
+        jest.clearAllMocks()
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockRestore()
+        jest.spyOn(useRouteParams, 'useRouteParams').mockRestore()
+    })
+
     it('renders without errors', async () => {
-        const mockUpdateDraftFn = jest.fn()
-        renderWithProviders(
-            <Documents
-                draftSubmission={mockDraft()}
-                updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<Documents />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         await waitFor(() => {
             expect(screen.getByTestId('file-input')).toBeInTheDocument()
@@ -46,20 +66,11 @@ describe('Documents', () => {
     })
 
     it('accepts a new document', async () => {
-        const mockUpdateDraftFn = jest.fn()
-
-        renderWithProviders(
-            <Documents
-                draftSubmission={mockDraft()}
-                updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<Documents />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         const input = screen.getByLabelText(
             'Upload contract-supporting documents'
@@ -71,19 +82,11 @@ describe('Documents', () => {
     })
 
     it('accepts multiple pdf, word, excel documents', async () => {
-        const mockUpdateDraftFn = jest.fn()
-        renderWithProviders(
-            <Documents
-                draftSubmission={mockDraft()}
-                updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<Documents />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         const input = screen.getByLabelText(
             'Upload contract-supporting documents'
@@ -103,19 +106,11 @@ describe('Documents', () => {
     })
 
     it('does not accept image files', async () => {
-        const mockUpdateDraftFn = jest.fn()
-        renderWithProviders(
-            <Documents
-                draftSubmission={mockDraft()}
-                updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<Documents />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         // drop documents because accept (used for userEvent.upload) not allow invalid documents to upload in the first place
         const targetEl = screen.getByTestId('file-input-droptarget')
@@ -142,21 +137,11 @@ describe('Documents', () => {
 
     describe('inline errors', () => {
         it('shown in input when invalid file types dropped', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const inputEl = screen.getByTestId('file-input-input')
             expect(inputEl).not.toHaveAttribute('accept', 'image/*')
@@ -176,21 +161,11 @@ describe('Documents', () => {
         })
 
         it('shown in file items list when duplicate files added', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
             const input = screen.getByLabelText(
                 'Upload contract-supporting documents'
             )
@@ -212,21 +187,11 @@ describe('Documents', () => {
         })
 
         it('shown in file items list when duplicate files are added one at a time', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
             const input = screen.getByLabelText(
                 'Upload contract-supporting documents'
             )
@@ -270,21 +235,11 @@ describe('Documents', () => {
         })
 
         it('not shown in file items list when duplicate file is removed', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
             const input = screen.getByLabelText(
                 'Upload contract-supporting documents'
             )
@@ -315,22 +270,11 @@ describe('Documents', () => {
 
     describe('error summary at top of page', () => {
         it('displayed as expected', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const input = screen.getByLabelText(
                 'Upload contract-supporting documents'
@@ -362,22 +306,11 @@ describe('Documents', () => {
 
     describe('Continue button', () => {
         it('enabled when valid files are present', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
@@ -394,22 +327,11 @@ describe('Documents', () => {
         })
 
         it('enabled when invalid file types have been dropped', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
@@ -431,22 +353,11 @@ describe('Documents', () => {
         })
 
         it('when duplicate files present, triggers error alert on continue click', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
             const input = screen.getByLabelText(
                 'Upload contract-supporting documents'
             )
@@ -479,22 +390,11 @@ describe('Documents', () => {
         })
 
         it('when zero files present, does not trigger alert on click to continue', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
@@ -509,22 +409,11 @@ describe('Documents', () => {
         })
 
         it('when invalid file type files present, does not trigger alert on click to continue', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_ONLY',
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
@@ -554,20 +443,11 @@ describe('Documents', () => {
         })
 
         it('disabled with alert when trying to continue while a file is still uploading', async () => {
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                    }}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
@@ -600,22 +480,11 @@ describe('Documents', () => {
 
     describe('Save as draft button', () => {
         it('enabled when valid files are present', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -632,22 +501,11 @@ describe('Documents', () => {
         })
 
         it('enabled when invalid files have been dropped but valid files are present', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -666,22 +524,11 @@ describe('Documents', () => {
         })
 
         it('when zero files present, does not trigger missing documents alert on click', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -695,22 +542,11 @@ describe('Documents', () => {
             ).toBeNull()
         })
         it('when duplicate files present, triggers error alert on click', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
             const input = screen.getByLabelText(
                 'Upload contract-supporting documents'
             )
@@ -744,22 +580,11 @@ describe('Documents', () => {
 
     describe('Back button', () => {
         it('enabled when valid files are present', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const backButton = screen.getByRole('button', {
                 name: 'Back',
@@ -776,22 +601,11 @@ describe('Documents', () => {
         })
 
         it('enabled when invalid files have been dropped but valid files are present', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const backButton = screen.getByRole('button', {
                 name: 'Back',
@@ -810,22 +624,11 @@ describe('Documents', () => {
         })
 
         it('when zero files present, does not trigger alert on click', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const backButton = screen.getByRole('button', {
                 name: 'Back',
@@ -840,22 +643,11 @@ describe('Documents', () => {
         })
 
         it('when duplicate files present, does not trigger alert on click', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Documents />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
             const input = screen.getByLabelText(
                 'Upload contract-supporting documents'
             )
@@ -876,158 +668,5 @@ describe('Documents', () => {
             expect(screen.queryByText('Remove files with errors')).toBeNull()
             expect(mockUpdateDraftFn).toHaveBeenCalled()
         })
-    })
-
-    it('checkboxes not present on contract and rates submission', async () => {
-        const mockDraftSubmission = {
-            ...mockDraft(),
-            submissionType: 'CONTRACT_AND_RATES' as const,
-            documents: [
-                {
-                    s3URL: 's3://bucketname/key/supporting-documents',
-                    name: 'supporting documents',
-                    sha256: 'fakesha',
-                },
-            ],
-        }
-        const mockUpdateDraftFn = jest.fn()
-        renderWithProviders(
-            <Documents
-                draftSubmission={mockDraftSubmission}
-                updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
-
-        await waitFor(() => {
-            expect(screen.getByText('supporting documents')).toBeInTheDocument()
-        })
-
-        expect(screen.queryByText('Contract-supporting')).toBeNull()
-        expect(screen.queryByText('Rate-supporting')).toBeNull()
-
-        jest.clearAllMocks()
-    })
-
-    it('documents are always categorized as CONTRACT_RELATED', async () => {
-        const mockUpdateDraftFn = jest.fn()
-
-        renderWithProviders(
-            <Documents
-                draftSubmission={{
-                    ...mockDraft(),
-                    submissionType: 'CONTRACT_AND_RATES' as const,
-                }}
-                updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
-
-        const continueButton = screen.getByRole('button', {
-            name: 'Continue',
-        })
-        const input = screen.getByLabelText(
-            'Upload contract-supporting documents'
-        )
-
-        expect(input).toBeInTheDocument()
-
-        await userEvent.upload(input, [TEST_DOC_FILE])
-
-        await waitFor(() => {
-            expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
-            expect(continueButton).toBeInTheDocument()
-            continueButton.click()
-            expect(mockUpdateDraftFn).toHaveBeenCalled()
-        })
-
-        const updatedDraft = mockUpdateDraftFn.mock.calls[0][0]
-
-        expect(updatedDraft.documents).toHaveLength(1)
-        expect(updatedDraft.documents).toEqual(
-            expect.arrayContaining([
-                expect.objectContaining({
-                    name: 'testFile.doc',
-                    s3URL: expect.anything(),
-                    sha256: expect.anything(),
-                }),
-            ])
-        )
-
-        jest.clearAllMocks()
-    })
-
-    it('existing documents categories are not overwritten', async () => {
-        const mockUpdateDraftFn = jest.fn()
-
-        renderWithProviders(
-            <Documents
-                draftSubmission={{
-                    ...mockDraft(),
-                    submissionType: 'CONTRACT_AND_RATES' as const,
-                    documents: [
-                        {
-                            s3URL: 's3://bucketname/key/supporting-documents',
-                            name: 'supporting documents',
-                            sha256: 'fakesha2',
-                        },
-                    ],
-                }}
-                updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
-
-        const continueButton = screen.getByRole('button', {
-            name: 'Continue',
-        })
-        const input = screen.getByLabelText(
-            'Upload contract-supporting documents'
-        )
-        expect(input).toBeInTheDocument()
-        await userEvent.upload(input, [TEST_DOC_FILE])
-
-        await waitFor(() => {
-            expect(screen.getByText('supporting documents')).toBeInTheDocument()
-            expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
-            expect(continueButton).toBeInTheDocument()
-            continueButton.click()
-            expect(mockUpdateDraftFn).toHaveBeenCalled()
-        })
-
-        const updatedDraft = mockUpdateDraftFn.mock.calls[0][0]
-
-        expect(updatedDraft.documents).toHaveLength(2)
-        expect(updatedDraft.documents).toEqual(
-            expect.arrayContaining([
-                expect.objectContaining({
-                    name: 'supporting documents',
-                    s3URL: expect.anything(),
-                    sha256: expect.anything(),
-                }),
-                expect.objectContaining({
-                    name: 'testFile.doc',
-                    s3URL: expect.anything(),
-                    sha256: expect.anything(),
-                }),
-            ])
-        )
-
-        jest.clearAllMocks()
     })
 })

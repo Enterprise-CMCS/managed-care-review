@@ -11,13 +11,12 @@ import { Loading } from '../../components'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { RateDetailsV2 } from '../StateSubmission/RateDetails/V2/RateDetailsV2'
 import { RouteT, RoutesRecord } from '../../constants'
-import { PageBannerAlerts } from '../StateSubmission/StateSubmissionForm'
 import { useAuth } from '../../contexts/AuthContext'
-import { FormContainer } from '../StateSubmission/FormContainer'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
+import { PageBannerAlerts } from '../StateSubmission'
 
-export type SubmitOrUpdateRate = (
+export type SubmitRateHandler = (
     rateID: string,
     formInput: RateFormDataInput,
     setIsSubmitting: (isSubmitting: boolean) => void,
@@ -53,7 +52,7 @@ export const RateEdit = (): React.ReactElement => {
     const rate = fetchData?.fetchRate.rate
 
     const [submitRate, { error: submitError }] = useSubmitRateMutation()
-    const submitRateHandler: SubmitOrUpdateRate = async (
+    const submitRateHandler: SubmitRateHandler = async (
         rateID,
         formInput,
         setIsSubmitting,
@@ -108,7 +107,7 @@ export const RateEdit = (): React.ReactElement => {
         rate.revisions[0].unlockInfo || undefined
 
     return (
-        <FormContainer id="single-rate-edit">
+        <div data-testid="single-rate-edit">
             <PageBannerAlerts
                 loggedInUser={loggedInUser}
                 unlockedInfo={unlockedInfo}
@@ -119,6 +118,6 @@ export const RateEdit = (): React.ReactElement => {
                 rates={[rate]}
                 submitRate={submitRateHandler}
             />
-        </FormContainer>
+        </div>
     )
 }
