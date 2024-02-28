@@ -12,7 +12,8 @@ import { formatCalendarDate } from '../../../../../common-code/dateHelpers'
 import { DoubleColumnGrid } from '../../../../../components/DoubleColumnGrid'
 import { DownloadButton } from '../../../../../components/DownloadButton'
 import { usePreviousSubmission } from '../../../../../hooks/usePreviousSubmission'
-import styles from '../SubmissionSummarySection.module.scss'
+import styles from './SubmissionSummarySection.module.scss'
+
 import {
     sortModifiedProvisions,
     isMissingProvisions,
@@ -83,15 +84,17 @@ export const ContractDetailsSummarySectionV2 = ({
     >(undefined)
     const ldClient = useLDClient()
 
-    const contractFormData = contract.draftRevision?.formData || contract.packageSubmissions[0].contractRevision.formData
+    const contractFormData =
+        contract.draftRevision?.formData ||
+        contract.packageSubmissions[0].contractRevision.formData
     const contract438Attestation = ldClient?.variation(
         featureFlags.CONTRACT_438_ATTESTATION.flag,
         featureFlags.CONTRACT_438_ATTESTATION.defaultValue
     )
 
-    const attestationYesNo = contractFormData.statutoryRegulatoryAttestation !== null && booleanAsYesNoFormValue(
-        contractFormData.statutoryRegulatoryAttestation
-    )
+    const attestationYesNo =
+        contractFormData.statutoryRegulatoryAttestation !== null &&
+        booleanAsYesNoFormValue(contractFormData.statutoryRegulatoryAttestation)
 
     const contractSupportingDocuments = contractFormData?.supportingDocuments
     const isEditing = !isSubmitted(contract) && editNavigateTo !== undefined
@@ -176,7 +179,8 @@ export const ContractDetailsSummarySectionV2 = ({
                                 label={StatutoryRegulatoryAttestationQuestion}
                                 explainMissingData={!isSubmitted(contract)}
                                 children={
-                                    attestationYesNo !== undefined && typeof attestationYesNo === "string" &&
+                                    attestationYesNo !== undefined &&
+                                    typeof attestationYesNo === 'string' &&
                                     StatutoryRegulatoryAttestation[
                                         attestationYesNo
                                     ]
@@ -208,7 +212,7 @@ export const ContractDetailsSummarySectionV2 = ({
                         children={
                             contractFormData?.contractExecutionStatus
                                 ? ContractExecutionStatusRecord[
-                                    contractFormData?.contractExecutionStatus
+                                      contractFormData?.contractExecutionStatus
                                   ]
                                 : undefined
                         }
@@ -236,22 +240,26 @@ export const ContractDetailsSummarySectionV2 = ({
                         id="managedCareEntities"
                         label="Managed care entities"
                         explainMissingData={!isSubmitted(contract)}
-                        children={contractFormData?.managedCareEntities &&
-                            <DataDetailCheckboxList
-                                list={contractFormData?.managedCareEntities}
-                                dict={ManagedCareEntityRecord}
-                            />
+                        children={
+                            contractFormData?.managedCareEntities && (
+                                <DataDetailCheckboxList
+                                    list={contractFormData?.managedCareEntities}
+                                    dict={ManagedCareEntityRecord}
+                                />
+                            )
                         }
                     />
                     <DataDetail
                         id="federalAuthorities"
                         label="Active federal operating authority"
                         explainMissingData={!isSubmitted(contract)}
-                        children={applicableFederalAuthorities &&
-                            <DataDetailCheckboxList
-                                list={applicableFederalAuthorities}
-                                dict={FederalAuthorityRecord}
-                            />
+                        children={
+                            applicableFederalAuthorities && (
+                                <DataDetailCheckboxList
+                                    list={applicableFederalAuthorities}
+                                    dict={FederalAuthorityRecord}
+                                />
+                            )
                         }
                     />
                 </DoubleColumnGrid>
@@ -301,12 +309,12 @@ export const ContractDetailsSummarySectionV2 = ({
             </dl>
             {contractFormData?.contractDocuments && (
                 <UploadedDocumentsTable
-                documents={contractFormData.contractDocuments}
-                documentDateLookupTable={documentDateLookupTable}
-                caption="Contract"
-                documentCategory="Contract"
-                isEditing={isEditing}
-            />
+                    documents={contractFormData.contractDocuments}
+                    documentDateLookupTable={documentDateLookupTable}
+                    caption="Contract"
+                    documentCategory="Contract"
+                    isEditing={isEditing}
+                />
             )}
             {contractSupportingDocuments && (
                 <UploadedDocumentsTable
