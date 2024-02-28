@@ -13,6 +13,7 @@ import {
 } from '../../../components/SubmissionSummarySection'
 import { PageActionsContainer } from '../PageActions'
 import styles from './ReviewSubmit.module.scss'
+import stylesSubmissionForm from '../StateSubmissionForm.module.scss'
 import { ActionButton } from '../../../components/ActionButton'
 import { UnlockSubmitModal } from '../../../components/Modal/UnlockSubmitModal'
 import { useStatePrograms } from '../../../hooks/useStatePrograms'
@@ -62,7 +63,7 @@ export const ReviewSubmit = (): React.ReactElement => {
 
     return (
         <>
-            <div className={styles.stepIndicator}>
+            <div className={stylesSubmissionForm.stepIndicator}>
                 <DynamicStepIndicator
                     formPages={activeFormPages(draftSubmission)}
                     currentFormPage={currentRoute}
