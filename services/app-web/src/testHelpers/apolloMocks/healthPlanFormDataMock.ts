@@ -149,9 +149,9 @@ function mockContractAndRatesDraftV2(
                 contractExecutionStatus: 'EXECUTED',
                 contractDocuments: [
                     {
-                        s3URL: 's3://bucketname/key/contract',
+                        s3URL: 's3://bucketname/one-two/one-two.png',
                         sha256: 'fakesha',
-                        name: 'contract',
+                        name: 'one two',
                     },
                 ],
                 contractDateStart: new Date('01/01/2023'),

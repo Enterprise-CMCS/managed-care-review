@@ -99,7 +99,7 @@ export const ContractDetailsSummarySectionV2 = ({
     const contractSupportingDocuments = contractFormData?.supportingDocuments
     const isEditing = !isSubmitted(contract) && editNavigateTo !== undefined
     const applicableFederalAuthorities = isCHIPOnly(contract)
-        ? contractFormData?.federalAuthorities.filter((authority) =>
+        ? contractFormData.federalAuthorities.filter((authority) =>
               federalAuthorityKeysForCHIP.includes(
                   authority as CHIPFederalAuthority
               )
@@ -115,7 +115,7 @@ export const ContractDetailsSummarySectionV2 = ({
 
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
-            const keysFromDocs = contractFormData?.contractDocuments
+            const keysFromDocs = contractFormData.contractDocuments
                 .concat(contractSupportingDocuments)
                 .map((doc) => {
                     const key = getKey(doc.s3URL)
@@ -307,7 +307,7 @@ export const ContractDetailsSummarySectionV2 = ({
                     </DoubleColumnGrid>
                 )}
             </dl>
-            {contractFormData?.contractDocuments && (
+            {contractFormData.contractDocuments && (
                 <UploadedDocumentsTable
                     documents={contractFormData.contractDocuments}
                     documentDateLookupTable={documentDateLookupTable}
