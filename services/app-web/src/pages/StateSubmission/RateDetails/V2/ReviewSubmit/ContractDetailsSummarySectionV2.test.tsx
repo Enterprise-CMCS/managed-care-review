@@ -4,8 +4,7 @@ import { ContractDetailsSummarySectionV2 as ContractDetailsSummarySection } from
 import {
     fetchCurrentUserMock,
     mockContractAndRatesDraftV2,
-    mockMNState,
-    mockStateSubmission,
+    mockContractAndRatesSubmittedV2,
 } from '../../../../../testHelpers/apolloMocks'
 import { testS3Client } from '../../../../../testHelpers/s3Helpers'
 import {
@@ -68,41 +67,41 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeNull()
     })
 
-    // it('can render state submission on summary page without errors (submission summary behavior)', async () => {
-    //     renderWithProviders(
-    //         <ContractDetailsSummarySection
-    //             documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-    //             submission={{
-    //                 ...mockStateSubmission(),
-    //                 status: 'SUBMITTED',
-    //             }}
-    //             submissionName="MN-PMAP-0001"
-    //         />,
-    //         {
-    //             apolloProvider: defaultApolloMocks,
-    //         }
-    //     )
+    it('can render state submission on summary page without errors (submission summary behavior)', async () => {
+        renderWithProviders(
+            <ContractDetailsSummarySection
+                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
+                contract={{
+                    ...mockContractAndRatesSubmittedV2(),
+                    status: 'SUBMITTED',
+                }}
+                submissionName="MN-PMAP-0001"
+            />,
+            {
+                apolloProvider: defaultApolloMocks,
+            }
+        )
 
-    //     expect(
-    //         screen.getByRole('heading', {
-    //             level: 2,
-    //             name: 'Contract details',
-    //         })
-    //     ).toBeInTheDocument()
-    //     expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+        expect(
+            screen.getByRole('heading', {
+                level: 2,
+                name: 'Contract details',
+            })
+        ).toBeInTheDocument()
+        expect(screen.queryByText('Edit')).not.toBeInTheDocument()
 
-    //     //expects loading button on component load
-    //     expect(screen.getByText('Loading')).toBeInTheDocument()
+        //expects loading button on component load
+        expect(screen.getByText('Loading')).toBeInTheDocument()
 
-    //     // expects download all button after loading has completed
-    //     await waitFor(() => {
-    //         expect(
-    //             screen.getByRole('link', {
-    //                 name: 'Download all contract documents',
-    //             })
-    //         ).toBeInTheDocument()
-    //     })
-    // })
+        // expects download all button after loading has completed
+        await waitFor(() => {
+            expect(
+                screen.getByRole('link', {
+                    name: 'Download all contract documents',
+                })
+            ).toBeInTheDocument()
+        })
+    })
 
     it('can render all contract details fields', async () => {
         const contract = mockContractAndRatesDraftV2()
@@ -185,35 +184,41 @@ describe('ContractDetailsSummarySection', () => {
             ).toBeInTheDocument()
         })
 
-        // expect(
-        //     screen.getByRole('definition', {
-        //         name: 'Non-compliance description',
-        //     })
-        // ).toBeInTheDocument()
-        // expect(
-        //     await screen.findByText(StatutoryRegulatoryAttestation.NO)
-        // ).toBeInTheDocument()
-        // expect(await screen.findByText('No compliance')).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: 'Non-compliance description',
+            })
+        ).toBeInTheDocument()
+        expect(
+            await screen.findByText(StatutoryRegulatoryAttestation.NO)
+        ).toBeInTheDocument()
+        expect(await screen.findByText('No compliance')).toBeInTheDocument()
     })
 
-    // it('displays correct effective dates text for base contract', async () => {
-    //     await waitFor(() => {
-    //         renderWithProviders(
-    //             <ContractDetailsSummarySection
-    //                 documentDateLookupTable={{
-    //                     previousSubmissionDate: '01/01/01',
-    //                 }}
-    //                 submission={mockStateSubmission()}
-    //                 submissionName="MN-PMAP-0001"
-    //             />,
-    //             {
-    //                 apolloProvider: defaultApolloMocks,
-    //             }
-    //         )
-    //     })
+    it('displays correct effective dates text for base contract', async () => {
+        await waitFor(() => {
+            const contract = mockContractAndRatesDraftV2()
+            contract.draftRevision!.formData = {
+                ...contract.draftRevision!.formData,
+                contractType: 'BASE',
+            }
 
-    //     expect(screen.getByText('Contract effective dates')).toBeInTheDocument()
-    // })
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    documentDateLookupTable={{
+                        previousSubmissionDate: '01/01/01',
+                    }}
+                    contract={contract}
+                    submissionName="MN-PMAP-0001"
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                }
+            )
+        })
+
+        expect(screen.getByText('Contract effective dates')).toBeInTheDocument()
+    })
 
     it('displays correct effective dates text for contract amendment', () => {
         renderWithProviders(
@@ -428,37 +433,38 @@ describe('ContractDetailsSummarySection', () => {
         ).not.toBeInTheDocument()
     })
 
-    // it('renders inline error when bulk URL is unavailable', async () => {
-    //     const s3Provider = {
-    //         ...testS3Client(),
-    //         getBulkDlURL: async (
-    //             _keys: string[],
-    //             _fileName: string
-    //         ): Promise<string | Error> => {
-    //             return new Error('Error: getBulkDlURL encountered an error')
-    //         },
-    //     }
-    //     renderWithProviders(
-    //         <ContractDetailsSummarySection
-    //             documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-    //             submission={{
-    //                 ...mockStateSubmission(),
-    //                 status: 'SUBMITTED',
-    //             }}
-    //             submissionName="MN-PMAP-0001"
-    //         />,
-    //         {
-    //             apolloProvider: defaultApolloMocks,
-    //             s3Provider,
-    //         }
-    //     )
+    it('renders inline error when bulk URL is unavailable', async () => {
+        const s3Provider = {
+            ...testS3Client(),
+            getBulkDlURL: async (
+                _keys: string[],
+                _fileName: string
+            ): Promise<string | Error> => {
+                return new Error('Error: getBulkDlURL encountered an error')
+            },
+        }
+        renderWithProviders(
+            <ContractDetailsSummarySection
+                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
+                contract={{
+                    ...mockContractAndRatesSubmittedV2(),
+                    status: 'SUBMITTED',
+                }}
+                submissionName="MN-PMAP-0001"
+            />,
+            {
+                apolloProvider: defaultApolloMocks,
+                s3Provider,
+            }
+        )
 
-    //     await waitFor(() => {
-    //         expect(
-    //             screen.getByText('Contract document download is unavailable')
-    //         ).toBeInTheDocument()
-    //     })
-    // })
+        await waitFor(() => {
+            expect(
+                screen.getByText('Contract document download is unavailable')
+            ).toBeInTheDocument()
+        })
+    })
+
     describe('contract provisions', () => {
         it('renders provisions and MLR references for a medicaid amendment', () => {
             renderWithProviders(
@@ -691,247 +697,252 @@ describe('ContractDetailsSummarySection', () => {
             ).toBeNull()
         })
 
-        // it('shows missing field error when provisions list is empty and section is in edit mode', () => {
-        //     const contractWithUnansweredProvisions: UnlockedHealthPlanFormDataType =
-        //         {
-        //             ...mockContractAndRatesDraft(),
-        //             contractAmendmentInfo: undefined,
-        //         }
-        //     renderWithProviders(
-        //         <ContractDetailsSummarySection
-        //             documentDateLookupTable={{
-        //                 previousSubmissionDate: '01/01/01',
-        //             }}
-        //             submission={contractWithUnansweredProvisions}
-        //             submissionName="MN-PMAP-0001"
-        //             editNavigateTo="contract-details"
-        //         />,
-        //         {
-        //             apolloProvider: defaultApolloMocks,
-        //         }
-        //     )
+        it('shows missing field error when provisions list is empty and section is in edit mode', () => {
+            const contract = mockContractAndRatesDraftV2()
+            contract.draftRevision!.formData = {
+                ...contract.draftRevision!.formData,
+                inLieuServicesAndSettings: undefined,
+                modifiedBenefitsProvided: undefined,
+                modifiedGeoAreaServed: undefined,
+                modifiedMedicaidBeneficiaries: undefined,
+                modifiedRiskSharingStrategy: undefined,
+                modifiedIncentiveArrangements: undefined,
+                modifiedWitholdAgreements: undefined,
+                modifiedStateDirectedPayments: undefined,
+                modifiedPassThroughPayments: undefined,
+                modifiedPaymentsForMentalDiseaseInstitutions: undefined,
+                modifiedMedicalLossRatioStandards: undefined,
+                modifiedOtherFinancialPaymentIncentive: undefined,
+                modifiedEnrollmentProcess: undefined,
+                modifiedGrevienceAndAppeal: undefined,
+                modifiedNetworkAdequacyStandards: undefined,
+                modifiedLengthOfContract: undefined,
+                modifiedNonRiskPaymentArrangements: undefined,
+                statutoryRegulatoryAttestation: undefined,
+                statutoryRegulatoryAttestationDescription: undefined
+            }
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    documentDateLookupTable={{
+                        previousSubmissionDate: '01/01/01',
+                    }}
+                    contract={contract}
+                    submissionName="MN-PMAP-0001"
+                    editNavigateTo="contract-details"
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                }
+            )
 
-        //     const modifiedProvisions = screen.getByLabelText(
-        //         'This contract action includes new or modified provisions related to the following'
-        //     )
-        //     expect(
-        //         within(modifiedProvisions).queryByText(
-        //             /You must provide this information/
-        //         )
-        //     ).toBeInTheDocument()
+            const modifiedProvisions = screen.getByLabelText(
+                'This contract action includes new or modified provisions related to the following'
+            )
+            expect(
+                within(modifiedProvisions).queryByText(
+                    /You must provide this information/
+                )
+            ).toBeInTheDocument()
 
-        //     const unmodifiedProvisions = screen.getByLabelText(
-        //         'This contract action does NOT include new or modified provisions related to the following'
-        //     )
-        //     expect(
-        //         within(unmodifiedProvisions).queryByText(
-        //             /You must provide this information/
-        //         )
-        //     ).toBeInTheDocument()
-        // })
+            const unmodifiedProvisions = screen.getByLabelText(
+                'This contract action does NOT include new or modified provisions related to the following'
+            )
+            expect(
+                within(unmodifiedProvisions).queryByText(
+                    /You must provide this information/
+                )
+            ).toBeInTheDocument()
+        })
 
-        // it('shows missing field error when provisions list is incomplete and summary section is in edit mode', () => {
-        //     const contract = mockContractAndRatesDraftV2()
-        //     contract.draftRevision!.formData = {
-        //         ...contract.draftRevision!.formData,
-        //         modifiedBenefitsProvided: false,
-        //         modifiedGrevienceAndAppeal: false,
-        //         modifiedNetworkAdequacyStandards: false,
-        //         modifiedLengthOfContract: true,
-        //         modifiedNonRiskPaymentArrangements: false,
-        //     }
+        it('shows missing field error when provisions list is incomplete and summary section is in edit mode', () => {
+            const contract = mockContractAndRatesDraftV2()
+            contract.draftRevision!.formData = {
+                ...contract.draftRevision!.formData,
+                modifiedBenefitsProvided: false,
+                modifiedGrevienceAndAppeal: false,
+                modifiedNetworkAdequacyStandards: false,
+                modifiedLengthOfContract: true,
+                modifiedNonRiskPaymentArrangements: false,
+            }
             
-        //     renderWithProviders(
-        //         <ContractDetailsSummarySection
-        //             documentDateLookupTable={{
-        //                 previousSubmissionDate: '01/01/01',
-        //             }}
-        //             contract={contract}
-        //             submissionName="MN-PMAP-0001"
-        //             editNavigateTo="contract-details"
-        //         />,
-        //         {
-        //             apolloProvider: defaultApolloMocks,
-        //         }
-        //     )
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    documentDateLookupTable={{
+                        previousSubmissionDate: '01/01/01',
+                    }}
+                    contract={contract}
+                    submissionName="MN-PMAP-0001"
+                    editNavigateTo="contract-details"
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                }
+            )
 
-        //     const modifiedProvisions = screen.getByLabelText(
-        //         'This contract action includes new or modified provisions related to the following'
-        //     )
-        //     expect(
-        //         within(modifiedProvisions).queryByText(
-        //             /You must provide this information/
-        //         )
-        //     ).toBeInTheDocument()
+            const modifiedProvisions = screen.getByLabelText(
+                'This contract action includes new or modified provisions related to the following'
+            )
+            expect(
+                within(modifiedProvisions).queryByText(
+                    /You must provide this information/
+                )
+            ).toBeInTheDocument()
 
-        //     const unmodifiedProvisions = screen.getByLabelText(
-        //         'This contract action does NOT include new or modified provisions related to the following'
-        //     )
-        //     expect(
-        //         within(unmodifiedProvisions).queryByText(
-        //             /You must provide this information/
-        //         )
-        //     ).toBeInTheDocument()
-        // })
+            const unmodifiedProvisions = screen.getByLabelText(
+                'This contract action does NOT include new or modified provisions related to the following'
+            )
+            expect(
+                within(unmodifiedProvisions).queryByText(
+                    /You must provide this information/
+                )
+            ).toBeInTheDocument()
+        })
 
-    //     it('does not show missing field error when provisions list is incomplete and summary section is in view only mode', () => {
-    //         const contractWithUnansweredProvisions: UnlockedHealthPlanFormDataType =
-    //             {
-    //                 ...mockContractAndRatesDraft(),
-    //                 populationCovered: 'MEDICAID',
-    //                 contractAmendmentInfo: {
-    //                     // intentionally putting CHIP population provisions here instead of what Medicaid contract amendment requires
-    //                     modifiedProvisions: {
-    //                         modifiedBenefitsProvided: false,
-    //                         modifiedGrevienceAndAppeal: false,
-    //                         modifiedNetworkAdequacyStandards: false,
-    //                         modifiedLengthOfContract: true,
-    //                         modifiedNonRiskPaymentArrangements: false,
-    //                     },
-    //                 },
-    //             }
-    //         renderWithProviders(
-    //             <ContractDetailsSummarySection
-    //                 documentDateLookupTable={{
-    //                     previousSubmissionDate: '01/01/01',
-    //                 }}
-    //                 submission={contractWithUnansweredProvisions}
-    //                 submissionName="MN-PMAP-0001"
-    //             />,
-    //             {
-    //                 apolloProvider: defaultApolloMocks,
-    //             }
-    //         )
+        it('does not show missing field error when provisions list is incomplete and summary section is in view only mode', () => {
+            const contract = mockContractAndRatesDraftV2()
+            contract.draftRevision!.formData = {
+                ...contract.draftRevision!.formData,
+                modifiedBenefitsProvided: false,
+                modifiedGrevienceAndAppeal: false,
+                modifiedNetworkAdequacyStandards: false,
+                modifiedLengthOfContract: true,
+                modifiedNonRiskPaymentArrangements: false,
+            }
+        
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    documentDateLookupTable={{
+                        previousSubmissionDate: '01/01/01',
+                    }}
+                    contract={contract}
+                    submissionName="MN-PMAP-0001"
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                }
+            )
 
-    //         const modifiedProvisions = screen.getByLabelText(
-    //             'This contract action includes new or modified provisions related to the following'
-    //         )
-    //         expect(
-    //             within(modifiedProvisions).queryByText(
-    //                 /You must provide this information/
-    //             )
-    //         ).toBeNull()
+            const modifiedProvisions = screen.getByLabelText(
+                'This contract action includes new or modified provisions related to the following'
+            )
+            expect(
+                within(modifiedProvisions).queryByText(
+                    /You must provide this information/
+                )
+            ).toBeNull()
 
-    //         const unmodifiedProvisions = screen.getByLabelText(
-    //             'This contract action does NOT include new or modified provisions related to the following'
-    //         )
-    //         expect(
-    //             within(unmodifiedProvisions).queryByText(
-    //                 /You must provide this information/
-    //             )
-    //         ).toBeNull()
-    //     })
+            const unmodifiedProvisions = screen.getByLabelText(
+                'This contract action does NOT include new or modified provisions related to the following'
+            )
+            expect(
+                within(unmodifiedProvisions).queryByText(
+                    /You must provide this information/
+                )
+            ).toBeNull()
+        })
 
-    //     it('does not show missing field error for CHIP amendment when all provisions required are valid', () => {
-    //         const contractWithAllUnmodifiedProvisions: UnlockedHealthPlanFormDataType =
-    //             {
-    //                 ...mockContractAndRatesDraft(),
-    //                 populationCovered: 'CHIP',
-    //                 contractAmendmentInfo: {
-    //                     modifiedProvisions: {
-    //                         modifiedBenefitsProvided: false,
-    //                         modifiedGeoAreaServed: false,
-    //                         modifiedMedicaidBeneficiaries: true,
-    //                         modifiedMedicalLossRatioStandards: false,
-    //                         modifiedOtherFinancialPaymentIncentive: false,
-    //                         modifiedEnrollmentProcess: false,
-    //                         modifiedGrevienceAndAppeal: false,
-    //                         modifiedNetworkAdequacyStandards: false,
-    //                         modifiedLengthOfContract: true,
-    //                         modifiedNonRiskPaymentArrangements: false,
-    //                     },
-    //                 },
-    //             }
-    //         renderWithProviders(
-    //             <ContractDetailsSummarySection
-    //                 documentDateLookupTable={{
-    //                     previousSubmissionDate: '01/01/01',
-    //                 }}
-    //                 submission={contractWithAllUnmodifiedProvisions}
-    //                 submissionName="MN-PMAP-0001"
-    //                 editNavigateTo="contract-details"
-    //             />,
-    //             {
-    //                 apolloProvider: defaultApolloMocks,
-    //             }
-    //         )
+        it('does not show missing field error for CHIP amendment when all provisions required are valid', () => {
+            const contract = mockContractAndRatesDraftV2()
+            contract.draftRevision!.formData = {
+                ...contract.draftRevision!.formData,
+                modifiedBenefitsProvided: false,
+                modifiedGeoAreaServed: false,
+                modifiedMedicaidBeneficiaries: true,
+                modifiedMedicalLossRatioStandards: false,
+                modifiedOtherFinancialPaymentIncentive: false,
+                modifiedEnrollmentProcess: false,
+                modifiedGrevienceAndAppeal: false,
+                modifiedNetworkAdequacyStandards: false,
+                modifiedLengthOfContract: true,
+                modifiedNonRiskPaymentArrangements: false,
+            }
+           
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    documentDateLookupTable={{
+                        previousSubmissionDate: '01/01/01',
+                    }}
+                    contract={contract}
+                    submissionName="MN-PMAP-0001"
+                    editNavigateTo="contract-details"
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                }
+            )
 
-    //         const modifiedProvisions = screen.getByLabelText(
-    //             'This contract action includes new or modified provisions related to the following'
-    //         )
-    //         expect(
-    //             within(modifiedProvisions).queryByText(
-    //                 /You must provide this information/
-    //             )
-    //         ).toBeNull()
+            const modifiedProvisions = screen.getByLabelText(
+                'This contract action includes new or modified provisions related to the following'
+            )
+            expect(
+                within(modifiedProvisions).queryByText(
+                    /You must provide this information/
+                )
+            ).toBeNull()
 
-    //         const unmodifiedProvisions = screen.getByLabelText(
-    //             'This contract action does NOT include new or modified provisions related to the following'
-    //         )
-    //         expect(
-    //             within(unmodifiedProvisions).queryByText(
-    //                 /You must provide this information/
-    //             )
-    //         ).toBeNull()
-    //     })
+            const unmodifiedProvisions = screen.getByLabelText(
+                'This contract action does NOT include new or modified provisions related to the following'
+            )
+            expect(
+                within(unmodifiedProvisions).queryByText(
+                    /You must provide this information/
+                )
+            ).toBeNull()
+        })
 
-    //     it('does not show missing field error for Medicaid amendment when all provisions required are valid', () => {
-    //         const contractWithAllUnmodifiedProvisions: UnlockedHealthPlanFormDataType =
-    //             {
-    //                 ...mockContractAndRatesDraft(),
-    //                 populationCovered: 'MEDICAID',
-    //                 contractAmendmentInfo: {
-    //                     modifiedProvisions: {
-    //                         inLieuServicesAndSettings: true,
-    //                         modifiedBenefitsProvided: false,
-    //                         modifiedGeoAreaServed: false,
-    //                         modifiedMedicaidBeneficiaries: false,
-    //                         modifiedRiskSharingStrategy: false,
-    //                         modifiedIncentiveArrangements: false,
-    //                         modifiedWitholdAgreements: false,
-    //                         modifiedStateDirectedPayments: false,
-    //                         modifiedPassThroughPayments: false,
-    //                         modifiedPaymentsForMentalDiseaseInstitutions: false,
-    //                         modifiedMedicalLossRatioStandards: false,
-    //                         modifiedOtherFinancialPaymentIncentive: false,
-    //                         modifiedEnrollmentProcess: false,
-    //                         modifiedGrevienceAndAppeal: false,
-    //                         modifiedNetworkAdequacyStandards: false,
-    //                         modifiedLengthOfContract: false,
-    //                         modifiedNonRiskPaymentArrangements: false,
-    //                     },
-    //                 },
-    //             }
-    //         renderWithProviders(
-    //             <ContractDetailsSummarySection
-    //                 documentDateLookupTable={{
-    //                     previousSubmissionDate: '01/01/01',
-    //                 }}
-    //                 submission={contractWithAllUnmodifiedProvisions}
-    //                 submissionName="MN-PMAP-0001"
-    //             />,
-    //             {
-    //                 apolloProvider: defaultApolloMocks,
-    //             }
-    //         )
+        it('does not show missing field error for Medicaid amendment when all provisions required are valid', () => {
+            const contract = mockContractAndRatesDraftV2()
+            contract.draftRevision!.formData = {
+                ...contract.draftRevision!.formData,
+                inLieuServicesAndSettings: true,
+                modifiedBenefitsProvided: false,
+                modifiedGeoAreaServed: false,
+                modifiedMedicaidBeneficiaries: false,
+                modifiedRiskSharingStrategy: false,
+                modifiedIncentiveArrangements: false,
+                modifiedWitholdAgreements: false,
+                modifiedStateDirectedPayments: false,
+                modifiedPassThroughPayments: false,
+                modifiedPaymentsForMentalDiseaseInstitutions: false,
+                modifiedMedicalLossRatioStandards: false,
+                modifiedOtherFinancialPaymentIncentive: false,
+                modifiedEnrollmentProcess: false,
+                modifiedGrevienceAndAppeal: false,
+                modifiedNetworkAdequacyStandards: false,
+                modifiedLengthOfContract: false,
+                modifiedNonRiskPaymentArrangements: false,
+            }
+            
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    documentDateLookupTable={{
+                        previousSubmissionDate: '01/01/01',
+                    }}
+                    contract={contract}
+                    submissionName="MN-PMAP-0001"
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                }
+            )
 
-    //         const modifiedProvisions = screen.getByLabelText(
-    //             'This contract action includes new or modified provisions related to the following'
-    //         )
-    //         expect(
-    //             within(modifiedProvisions).queryByText(
-    //                 /You must provide this information/
-    //             )
-    //         ).toBeNull()
+            const modifiedProvisions = screen.getByLabelText(
+                'This contract action includes new or modified provisions related to the following'
+            )
+            expect(
+                within(modifiedProvisions).queryByText(
+                    /You must provide this information/
+                )
+            ).toBeNull()
 
-    //         const unmodifiedProvisions = screen.getByLabelText(
-    //             'This contract action does NOT include new or modified provisions related to the following'
-    //         )
-    //         expect(
-    //             within(unmodifiedProvisions).queryByText(
-    //                 /You must provide this information/
-    //             )
-    //         ).toBeNull()
-    //     })
+            const unmodifiedProvisions = screen.getByLabelText(
+                'This contract action does NOT include new or modified provisions related to the following'
+            )
+            expect(
+                within(unmodifiedProvisions).queryByText(
+                    /You must provide this information/
+                )
+            ).toBeNull()
+        })
     })
 })

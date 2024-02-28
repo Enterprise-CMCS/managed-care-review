@@ -106,7 +106,7 @@ const sortModifiedProvisions = (
         statutoryRegulatoryAttestation: contractFormData.statutoryRegulatoryAttestation,
         statutoryRegulatoryAttestationDescription: contractFormData.statutoryRegulatoryAttestationDescription
     }
-    const hasInitialProvisions = Object.values(initialProvisions).some((val) => val !== undefined && val !== null)
+    const hasInitialProvisions = Object.values(initialProvisions).some((val) => val !== undefined)
     const modifiedProvisions: GeneralizedProvisionType[] = []
     const unmodifiedProvisions: GeneralizedProvisionType[] = []
 

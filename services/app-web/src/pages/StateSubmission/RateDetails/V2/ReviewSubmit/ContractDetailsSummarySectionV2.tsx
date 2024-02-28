@@ -89,7 +89,7 @@ export const ContractDetailsSummarySectionV2 = ({
         featureFlags.CONTRACT_438_ATTESTATION.defaultValue
     )
 
-    const attestationYesNo = contractFormData.statutoryRegulatoryAttestation && booleanAsYesNoFormValue(
+    const attestationYesNo = contractFormData.statutoryRegulatoryAttestation !== null && booleanAsYesNoFormValue(
         contractFormData.statutoryRegulatoryAttestation
     )
 
