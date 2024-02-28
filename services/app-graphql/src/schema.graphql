@@ -83,7 +83,7 @@ type Query {
     fetchRate(input: FetchRateInput!): FetchRatePayload!
 
     """
-    fetchContract returns a single contract, linked to revisions and related rates
+    fetchContractWithRates returns a single contract, linked to revisions and related rates
     given a contractID
 
     It can be called by CMS or State users
@@ -92,7 +92,9 @@ type Query {
     - ForbiddenError: A State user requests a contract that belongs to another state
     - NotFoundError: contract for contractID not found in database
     """
-    fetchContract(input: FetchContractInput!): FetchContractPayload!
+    fetchContractWithRates(
+        input: FetchContractWithRatesInput!
+    ): FetchContractWithRatesPayload!
 }
 
 type Mutation {
@@ -1398,14 +1400,14 @@ input FetchRateInput {
     rateID: ID!
 }
 
-type FetchContractPayload {
+type FetchContractWithRatesPayload {
     """
     A rate that include contract and rate revisions
     """
     contract: Contract!
 }
 
-input FetchContractInput {
+input FetchContractWithRatesInput {
     contractID: ID!
 }
 
