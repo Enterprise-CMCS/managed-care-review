@@ -10,7 +10,7 @@ export function contractResolver(store: Store): Resolvers['Contract'] {
         initiallySubmittedAt(parent) {
             // we're only working on drafts for now, this will need to change to
             // look at the revisions when we expand
-            return parent.draftRevision?.createdAt || null
+            return null
         },
         state(parent) {
             const packageState = parent.stateCode
