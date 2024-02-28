@@ -35,7 +35,7 @@ import { createAPIKeyResolver } from './APIKey'
 import { unlockRate } from './rate/unlockRate'
 import { submitRate } from './rate/submitRate'
 import { contractResolver } from './contract/contractResolver'
-import { fetchContractWithRatesResolver } from './contract/fetchContractWithRates'
+import { fetchContractResolver } from './contract/fetchContract'
 
 export function configureResolvers(
     store: Store,
@@ -61,7 +61,7 @@ export function configureResolvers(
             // Rates refactor
             indexRates: indexRatesResolver(store),
             fetchRate: fetchRateResolver(store),
-            fetchContractWithRates: fetchContractWithRatesResolver(store),
+            fetchContract: fetchContractResolver(store),
         },
         Mutation: {
             createHealthPlanPackage: createHealthPlanPackageResolver(store),
