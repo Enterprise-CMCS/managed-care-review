@@ -82,7 +82,7 @@ fragment rateRevisionFragment on RateRevision {
             submissionDescription
             stateContacts {
                 name,
-                title
+                titleRole
                 email
             }
             supportingDocuments {

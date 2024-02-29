@@ -5,9 +5,9 @@ import {
 } from '../../../common-code/healthPlanFormDataType'
 import { getActuaryFirm } from '../../SubmissionSummarySection'
 import { DataDetailMissingField } from '../DataDetailMissingField'
-import { ActuaryContact as GQLActuaryContact } from '../../../gen/gqlClient'
+import { ActuaryContact as GQLActuaryContact, StateContact as GQLStateContact } from '../../../gen/gqlClient'
 
-type Contact = ActuaryContact | StateContact | GQLActuaryContact
+type Contact = ActuaryContact | GQLActuaryContact | StateContact | GQLStateContact
 function isCertainActuaryContact(contact: Contact): contact is ActuaryContact {
     return (contact as ActuaryContact).actuarialFirm !== undefined
 }

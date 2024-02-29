@@ -144,7 +144,13 @@ function mockContractAndRatesDraftV2(
                 riskBasedContract: true,
                 submissionDescription: 'A real submission',
                 supportingDocuments: [],
-                stateContacts: [],
+                stateContacts: [
+                    {
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@test.com',
+                    },
+                ],
                 contractType: 'AMENDMENT',
                 contractExecutionStatus: 'EXECUTED',
                 contractDocuments: [
@@ -223,7 +229,7 @@ function mockContractAndRatesDraftV2(
                                 actuarialFirm: 'DELOITTE',
                                 name: 'Actuary Contact 1',
                                 titleRole: 'Test Actuary Contact 1',
-                                email: 'actuarycontact1@test.com',
+                                email: 'additionalactuarycontact1@test.com',
                             },
                         ],
                         actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
