@@ -52,6 +52,8 @@ import type { UnlockContractArgsType } from './contractAndRates/unlockContract'
 import { unlockRate } from './contractAndRates/unlockRate'
 import type { UnlockRateArgsType } from './contractAndRates/unlockRate'
 import { findRateWithHistory } from './contractAndRates/findRateWithHistory'
+import { updateDraftContractRates } from './contractAndRates/updateDraftContractRates'
+import type { UpdateDraftContractRatesArgsType } from './contractAndRates/updateDraftContractRates'
 
 type Store = {
     findPrograms: (
@@ -108,6 +110,10 @@ type Store = {
 
     updateDraftContractWithRates: (
         args: UpdateContractArgsType
+    ) => Promise<ContractType | Error>
+
+    updateDraftContractRates: (
+        args: UpdateDraftContractRatesArgsType
     ) => Promise<ContractType | Error>
 
     findAllContractsWithHistoryByState: (
@@ -173,6 +179,8 @@ function NewPostgresStore(client: PrismaClient): Store {
         updateDraftContractWithRates: (args) =>
             updateDraftContractWithRates(client, args),
         updateContract: (args) => updateMCCRSID(client, args),
+        updateDraftContractRates: (args) =>
+            updateDraftContractRates(client, args),
         findAllContractsWithHistoryByState: (args) =>
             findAllContractsWithHistoryByState(client, args),
         findAllContractsWithHistoryBySubmitInfo: () =>

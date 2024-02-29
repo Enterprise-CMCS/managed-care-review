@@ -235,4 +235,5 @@ export {
     parseRateWithHistory,
     rateRevisionToDomainModel,
     rateRevisionsToDomainModels,
+    rateWithHistoryToDomainModel,
 }

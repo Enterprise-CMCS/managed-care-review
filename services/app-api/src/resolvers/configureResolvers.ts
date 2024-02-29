@@ -34,6 +34,7 @@ import { updateContract } from './contract/updateContract'
 import { createAPIKeyResolver } from './APIKey'
 import { unlockRate } from './rate/unlockRate'
 import { submitRate } from './rate/submitRate'
+import { updateDraftContractRates } from './contract/updateDraftContractRates'
 
 export function configureResolvers(
     store: Store,
@@ -78,6 +79,7 @@ export function configureResolvers(
                 emailParameterStore
             ),
             updateContract: updateContract(store),
+            updateDraftContractRates: updateDraftContractRates(store),
             updateCMSUser: updateCMSUserResolver(store),
             createQuestion: createQuestionResolver(
                 store,

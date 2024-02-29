@@ -1,0 +1,94 @@
+mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
+    updateDraftContractRates(input: $input) {
+        
+        contract {
+            id
+            createdAt
+            updatedAt
+
+            status
+            initiallySubmittedAt
+            stateCode
+
+            stateNumber
+
+            draftRevision {
+                id
+                createdAt
+                updatedAt
+
+                unlockInfo {
+                    updatedAt
+                    updatedBy
+                    updatedReason
+                }
+
+                formData {
+                    programIDs
+                    populationCovered
+                    submissionType
+                    submissionDescription
+
+                    contractType
+                    riskBasedContract
+                    stateContacts {
+                        name
+                        email
+                    }
+                    contractDocuments {
+                        name
+                        s3URL
+                        sha256
+                    }
+                    supportingDocuments {
+                        name
+                        s3URL
+                        sha256
+                    }
+                    contractExecutionStatus
+                    contractDateStart
+                    contractDateEnd
+                    managedCareEntities
+                    federalAuthorities
+
+                    inLieuServicesAndSettings
+                    modifiedNonRiskPaymentArrangements
+                }
+            }
+
+            draftRates {
+                id
+                createdAt
+                updatedAt
+                status
+
+                draftRevision {
+                    id
+                    createdAt
+                    updatedAt
+                    unlockInfo {
+                        updatedAt
+                        updatedBy
+                        updatedReason
+                    }
+
+                    formData {
+                        rateType
+                        rateCapitationType
+                        rateDateStart
+                        rateDateEnd
+                        rateDateCertified
+                        amendmentEffectiveDateStart
+                        amendmentEffectiveDateEnd
+                        rateProgramIDs
+                        rateCertificationName
+                        actuaryCommunicationPreference
+                    }
+                }
+
+            }
+
+        }
+
+    }
+}
