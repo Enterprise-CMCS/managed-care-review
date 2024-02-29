@@ -1,11 +1,16 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Form as UswdsForm } from '@trussworks/react-uswds'
-import { Formik, FormikErrors } from 'formik'
+import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import styles from '../../StateSubmissionForm.module.scss'
+import { v4 as uuidv4 } from 'uuid'
 
-import { ErrorSummary } from '../../../../components'
+import {
+    DynamicStepIndicator,
+    ErrorSummary,
+    SectionCard,
+} from '../../../../components'
 import { RateDetailsFormSchema } from '../RateDetailsSchema'
 import { PageActions } from '../../PageActions'
 
@@ -22,7 +27,11 @@ import {
     FileItemT,
     isLoadingOrHasFileErrors,
 } from '../../../../components/FileUpload'
-import { RouteT, RoutesRecord } from '../../../../constants'
+import {
+    RouteT,
+    RoutesRecord,
+    STATE_SUBMISSION_FORM_ROUTES,
+} from '../../../../constants'
 import {
     Rate,
     RateFormDataInput,
@@ -30,6 +39,8 @@ import {
 } from '../../../../gen/gqlClient'
 import { SingleRateCertV2 } from './SingleRateCertV2'
 import type { SubmitRateHandler } from '../../../RateEdit/RateEdit'
+import { useCurrentRoute, useFocus } from '../../../../hooks'
+import { useErrorSummary } from '../../../../hooks/useErrorSummary'
 
 export type RateDetailFormValues = {
     id?: string // no id if its a new rate
@@ -108,7 +119,6 @@ type RateDetailsV2Props = {
     showValidations?: boolean
     rates: Rate[]
     submitRate?: SubmitRateHandler
-    // updateRate: SubmitRateHandler  - will be implemented in Link Rates Epic
 }
 const RateDetailsV2 = ({
     showValidations = false,
@@ -118,6 +128,7 @@ const RateDetailsV2 = ({
 }: RateDetailsV2Props): React.ReactElement => {
     const navigate = useNavigate()
     const { id } = useParams()
+    const { currentRoute } = useCurrentRoute()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in rate edit form.'
@@ -125,25 +136,30 @@ const RateDetailsV2 = ({
     }
     const { getKey } = useS3()
     const displayAsStandaloneRate = type === 'SINGLE'
+
     // Form validation
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const rateDetailsFormSchema = RateDetailsFormSchema({
         'rate-edit-unlock': true,
     })
+    const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
+        useErrorSummary()
 
-    // UI focus state management
-    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
-        React.useState(false)
-    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
+    // Multi-rates state management
+    const [focusNewRate, setFocusNewRate] = React.useState(false)
+    const newRateNameRef = React.useRef<HTMLElement | null>(null)
+    const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
 
-    useEffect(() => {
-        // Focus the error summary heading only if we are displaying
-        // validation errors and the heading element exists
-        if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
-            errorSummaryHeadingRef.current.focus()
+    // API requests
+    //  const {data as fetchData, loading as fetchLoading, error: fetchError} = useFetchCotnract
+
+    React.useEffect(() => {
+        if (focusNewRate) {
+            newRateNameRef?.current?.focus()
+            setFocusNewRate(false)
+            newRateNameRef.current = null
         }
-        setFocusErrorSummaryHeading(false)
-    }, [focusErrorSummaryHeading])
+    }, [focusNewRate])
 
     const previousDocuments: string[] = []
 
@@ -161,8 +177,8 @@ const RateDetailsV2 = ({
                 : [
                       generateFormValues(
                           getKey,
-                          rates[0].draftRevision ?? undefined,
-                          rates[0].id
+                          rates[0]?.draftRevision ?? undefined,
+                          rates[0]?.id
                       ),
                   ],
     }
@@ -286,104 +302,173 @@ const RateDetailsV2 = ({
     }
 
     return (
-        <Formik
-            initialValues={initialValues}
-            onSubmit={(rateFormValues, { setSubmitting }) => {
-                return handlePageAction(rateFormValues.rates, setSubmitting, {
-                    type: 'CONTINUE',
-                    redirectPath: 'DASHBOARD_SUBMISSIONS',
-                })
-            }}
-            validationSchema={rateDetailsFormSchema}
-        >
-            {({
-                values: rateFormValues,
-                errors,
-                dirty,
-                handleSubmit,
-                isSubmitting,
-                setSubmitting,
-            }) => {
-                return (
-                    <>
-                        <UswdsForm
-                            className={styles.formContainer}
-                            id="SingleRateDetailsForm"
-                            aria-label="Rate Details Form"
-                            aria-describedby="form-guidance"
-                            onSubmit={(e) => {
-                                setShouldValidate(true)
-                                setFocusErrorSummaryHeading(true)
-                                handleSubmit(e)
-                            }}
-                        >
-                            <fieldset className="usa-fieldset with-sections">
-                                <legend className="srOnly">Rate Details</legend>
-                                {shouldValidate && (
-                                    <ErrorSummary
-                                        errors={generateErrorSummaryErrors(
-                                            errors
-                                        )}
-                                        headingRef={errorSummaryHeadingRef}
-                                    />
-                                )}
-                                <SingleRateCertV2
-                                    key={rateFormValues.rates[0].id}
-                                    rateForm={rateFormValues.rates[0]}
-                                    index={0} // this hard coding will be changed when we implement multi-rates with LinkedRates
-                                    shouldValidate={shouldValidate}
-                                    previousDocuments={previousDocuments}
-                                />
-                            </fieldset>
-                            <PageActions
-                                pageVariant={
-                                    displayAsStandaloneRate
-                                        ? 'STANDALONE'
-                                        : undefined
-                                }
-                                backOnClick={async () => {
-                                    if (dirty) {
-                                        await handlePageAction(
-                                            rateFormValues.rates,
-                                            setSubmitting,
-                                            {
-                                                type: 'CANCEL',
-                                                redirectPath:
-                                                    'DASHBOARD_SUBMISSIONS',
-                                            }
-                                        )
-                                    } else {
-                                        navigate(
-                                            RoutesRecord.DASHBOARD_SUBMISSIONS
-                                        )
-                                    }
+        <>
+            <div className={styles.stepIndicator}>
+                <DynamicStepIndicator
+                    formPages={STATE_SUBMISSION_FORM_ROUTES}
+                    currentFormPage={currentRoute}
+                />
+                {/* <PageBannerAlerts
+                    loggedInUser={getLoggedInUser}
+                    unlockedInfo={rateunlockInfo}
+                    showPageErrorMessage={showPageErrorMessage ?? false}
+                /> */}
+            </div>
+            <Formik
+                initialValues={initialValues}
+                onSubmit={(rateFormValues, { setSubmitting }) => {
+                    return handlePageAction(
+                        rateFormValues.rates,
+                        setSubmitting,
+                        {
+                            type: 'CONTINUE',
+                            redirectPath: 'DASHBOARD_SUBMISSIONS',
+                        }
+                    )
+                }}
+                validationSchema={rateDetailsFormSchema}
+            >
+                {({
+                    values: { rates },
+                    errors,
+                    dirty,
+                    handleSubmit,
+                    isSubmitting,
+                    setSubmitting,
+                }) => {
+                    return (
+                        <>
+                            <UswdsForm
+                                className={styles.formContainer}
+                                id="SingleRateDetailsForm"
+                                aria-label="Rate Details Form"
+                                aria-describedby="form-guidance"
+                                onSubmit={(e) => {
+                                    setShouldValidate(true)
+                                    setFocusErrorSummaryHeading(true)
+                                    handleSubmit(e)
                                 }}
-                                saveAsDraftOnClick={
-                                    displayAsStandaloneRate
-                                        ? undefined
-                                        : async () => {
-                                              await handlePageAction(
-                                                  rateFormValues.rates,
-                                                  setSubmitting,
-                                                  {
-                                                      type: 'SAVE_AS_DRAFT',
-                                                      redirectPath:
-                                                          'DASHBOARD_SUBMISSIONS',
-                                                  }
-                                              )
-                                          }
-                                }
-                                disableContinue={
-                                    shouldValidate &&
-                                    !!Object.keys(errors).length
-                                }
-                                actionInProgress={isSubmitting}
-                            />
-                        </UswdsForm>
-                    </>
-                )
-            }}
-        </Formik>
+                            >
+                                <fieldset className="usa-fieldset with-sections">
+                                    <legend className="srOnly">
+                                        Rate Details
+                                    </legend>
+                                    {shouldValidate && (
+                                        <ErrorSummary
+                                            errors={generateErrorSummaryErrors(
+                                                errors
+                                            )}
+                                            headingRef={errorSummaryHeadingRef}
+                                        />
+                                    )}
+                                    <FieldArray name="rates">
+                                        {({
+                                            remove,
+                                            push,
+                                        }: FieldArrayRenderProps) => (
+                                            <>
+                                                {rates.map((rate, index) => (
+                                                    <SingleRateCertV2
+                                                        key={uuidv4()}
+                                                        rateForm={rate}
+                                                        index={index}
+                                                        shouldValidate={
+                                                            shouldValidate
+                                                        }
+                                                        previousDocuments={
+                                                            previousDocuments
+                                                        }
+                                                        multiRatesConfig={{
+                                                            removeSelf: () => {
+                                                                remove(index)
+                                                                setNewRateButtonFocus()
+                                                            },
+                                                            reassignNewRateRef:
+                                                                (el) =>
+                                                                    (newRateNameRef.current =
+                                                                        el),
+                                                        }}
+                                                    />
+                                                ))}
+                                                <SectionCard>
+                                                    <h3>
+                                                        Additional rate
+                                                        certification
+                                                    </h3>
+                                                    <button
+                                                        type="button"
+                                                        className={`usa-button usa-button--outline ${styles.addRateBtn}`}
+                                                        onClick={() => {
+                                                            const newRate =
+                                                                generateFormValues(
+                                                                    getKey
+                                                                )
+
+                                                            push(newRate)
+                                                            setFocusNewRate(
+                                                                true
+                                                            )
+                                                        }}
+                                                        ref={newRateButtonRef}
+                                                    >
+                                                        Add another rate
+                                                        certification
+                                                    </button>
+                                                </SectionCard>
+                                            </>
+                                        )}
+                                    </FieldArray>
+                                </fieldset>
+                                <PageActions
+                                    pageVariant={
+                                        displayAsStandaloneRate
+                                            ? 'STANDALONE'
+                                            : undefined
+                                    }
+                                    backOnClick={async () => {
+                                        if (dirty) {
+                                            await handlePageAction(
+                                                rates,
+                                                setSubmitting,
+                                                {
+                                                    type: 'CANCEL',
+                                                    redirectPath:
+                                                        'DASHBOARD_SUBMISSIONS',
+                                                }
+                                            )
+                                        } else {
+                                            navigate(
+                                                RoutesRecord.DASHBOARD_SUBMISSIONS
+                                            )
+                                        }
+                                    }}
+                                    saveAsDraftOnClick={
+                                        displayAsStandaloneRate
+                                            ? undefined
+                                            : async () => {
+                                                  await handlePageAction(
+                                                      rates,
+                                                      setSubmitting,
+                                                      {
+                                                          type: 'SAVE_AS_DRAFT',
+                                                          redirectPath:
+                                                              'DASHBOARD_SUBMISSIONS',
+                                                      }
+                                                  )
+                                              }
+                                    }
+                                    disableContinue={
+                                        shouldValidate &&
+                                        !!Object.keys(errors).length
+                                    }
+                                    actionInProgress={isSubmitting}
+                                />
+                            </UswdsForm>
+                        </>
+                    )
+                }}
+            </Formik>
+        </>
     )
 }
 export { RateDetailsV2 }

@@ -11,7 +11,7 @@ import {
 import classnames from 'classnames'
 import {
     FieldRadio,
-    FileUpload,
+    // FileUpload,
     PoliteErrorMessage,
     ProgramSelect,
     SectionCard,
@@ -19,11 +19,11 @@ import {
 
 import styles from '../../StateSubmissionForm.module.scss'
 import { formatUserInputDate, isDateRangeEmpty } from '../../../../formHelpers'
-import {
-    ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES,
-    ACCEPTED_RATE_CERTIFICATION_FILE_TYPES,
-} from '../../../../components/FileUpload'
-import { useS3 } from '../../../../contexts/S3Context'
+// import {
+//     ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES,
+//     ACCEPTED_RATE_CERTIFICATION_FILE_TYPES,
+// } from '../../../../components/FileUpload'
+// import { useS3 } from '../../../../contexts/S3Context'
 
 import { FormikErrors, getIn, useFormikContext } from 'formik'
 import { ActuaryContactFields } from '../../Contacts'
@@ -47,7 +47,7 @@ type SingleRateCertV2Props = {
     shouldValidate: boolean
     index: number // defaults to 0
     previousDocuments: string[] // this only passed in to ensure S3 deleteFile doesn't remove valid files for previous revisions
-    multiRatesConfig?: MultiRatesConfig //t his is for use with Linked Rates and multi-rates UI
+    multiRatesConfig?: MultiRatesConfig // this is for use with multi-rates UI
 }
 
 const RateDatesErrorMessage = ({
@@ -81,10 +81,10 @@ export const SingleRateCertV2 = ({
     shouldValidate,
     multiRatesConfig,
     index = 0,
-    previousDocuments,
+    // previousDocuments,
 }: SingleRateCertV2Props): React.ReactElement => {
     // page level setup
-    const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
+    // const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
     const key = rateForm.id
     const displayAsStandaloneRate = multiRatesConfig === undefined
     const fieldNamePrefix = `rates.${index}`
@@ -110,7 +110,7 @@ export const SingleRateCertV2 = ({
                 key={key}
                 id={`${fieldNamePrefix}.container.${rateForm.id}`}
             >
-                <FormGroup error={Boolean(showFieldErrors('rateDocuments'))}>
+                {/* <FormGroup error={Boolean(showFieldErrors('rateDocuments'))}>
                     <FileUpload
                         id={`${fieldNamePrefix}.rateDocuments`}
                         name={`${fieldNamePrefix}.rateDocuments`}
@@ -161,9 +161,9 @@ export const SingleRateCertV2 = ({
                             )
                         }
                     />
-                </FormGroup>
+                </FormGroup> */}
 
-                <FormGroup
+                {/* <FormGroup
                     error={Boolean(showFieldErrors('supportingDocuments'))}
                 >
                     <FileUpload
@@ -217,7 +217,7 @@ export const SingleRateCertV2 = ({
                             )
                         }
                     />
-                </FormGroup>
+                </FormGroup> */}
                 <FormGroup error={Boolean(showFieldErrors('rateProgramIDs'))}>
                     <Label htmlFor={`${fieldNamePrefix}.rateProgramIDs`}>
                         Programs this rate certification covers

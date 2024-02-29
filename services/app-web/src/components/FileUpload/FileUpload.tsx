@@ -71,6 +71,7 @@ export const FileUpload = ({
     const inputRequired = inputProps['aria-required'] || inputProps.required
 
     React.useEffect(() => {
+        console.info('effect1')
         if (JSON.stringify(fileItems) !== JSON.stringify(previousFileItems)) {
             onFileItemsUpdate({ fileItems })
         }
@@ -78,6 +79,7 @@ export const FileUpload = ({
 
     //Pass input ref to parent when innerInputRef prop exists.
     React.useEffect(() => {
+        console.info('effect2')
         if (innerInputRef && fileInputRef?.current?.input) {
             innerInputRef(fileInputRef.current.input)
         }
