@@ -67,12 +67,18 @@ function wrapApolloResult<ResultType extends WrappableApolloResultsType>(
             },
         }
     }
+    class SkipError extends Error {
+        constructor(message: string) {
+          super(message);
+          this.name = "SKIPPED";
+        }
+      }
 
     return {
         ...queryResult,
         result: {
             status: 'ERROR',
-            error: new Error('UNEXPECTED APOLLO BEHAVIOR, NO DATA'),
+            error: new SkipError('Skipped query'),    //this happens when  uery is skipped, not unexpected behavior
         },
     }
 }

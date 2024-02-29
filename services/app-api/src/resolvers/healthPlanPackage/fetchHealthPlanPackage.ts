@@ -34,7 +34,6 @@ export function fetchHealthPlanPackageResolver(
         if (contractWithHistory instanceof Error) {
             const errMessage = `Issue finding a contract with history with id ${input.pkgID}. Message: ${contractWithHistory.message}`
             logError('fetchHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
 
             if (contractWithHistory instanceof NotFoundError) {
                 throw new GraphQLError(errMessage, {
