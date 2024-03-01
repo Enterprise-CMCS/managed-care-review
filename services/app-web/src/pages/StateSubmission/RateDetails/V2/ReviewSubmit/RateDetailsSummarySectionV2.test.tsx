@@ -10,6 +10,7 @@ import {
 import { renderWithProviders } from '../../../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySectionV2 as RateDetailsSummarySection } from './RateDetailsSummarySectionV2'
 import { Rate } from '../../../../../gen/gqlClient'
+import { testS3Client } from '../../../../../testHelpers/s3Helpers'
 
 describe('RateDetailsSummarySection', () => {
     const draftContract = mockContractAndRatesDraftV2()
@@ -81,7 +82,7 @@ describe('RateDetailsSummarySection', () => {
                     rateDocuments: [
                         {
                             s3URL: 's3://foo/bar/rate',
-                            name: 'rate docs test 1',
+                            name: 'rate docs test 2',
                             sha256: 'fakesha',
                         },
                     ],
@@ -171,13 +172,13 @@ describe('RateDetailsSummarySection', () => {
         expect(screen.getByText('Loading')).toBeInTheDocument()
 
         // expects download all button after loading has completed
-        // await waitFor(() => {
-        //     expect(
-        //         screen.getByRole('link', {
-        //             name: 'Download all rate documents',
-        //         })
-        //     ).toBeInTheDocument()
-        // })
+        await waitFor(() => {
+            expect(
+                screen.getByRole('link', {
+                    name: 'Download all rate documents',
+                })
+            ).toBeInTheDocument()
+        })
     })
 
     it('can render all rate details fields for amendment to prior rate certification submission', () => {
@@ -218,6 +219,32 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
     })
 
+    it('can render correct rate name for new rate submission', async () => {
+        const contract = mockContractAndRatesSubmittedV2()
+        contract.packageSubmissions[0].rateRevisions[0].formData.rateCertificationName =
+            'MCR-MN-0005-SNBC-RATE-20221013-20221013-CERTIFICATION-20221013'
+
+        const statePrograms = mockMNState().programs
+        await waitFor(() => {
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    documentDateLookupTable={{
+                        previousSubmissionDate: '01/01/01',
+                    }}
+                    contract={contract}
+                    editNavigateTo="rate-details"
+                    submissionName="MN-MSHO-0003"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider,
+                }
+            )
+        })
+        const rateName =
+            'MCR-MN-0005-SNBC-RATE-20221013-20221013-CERTIFICATION-20221013'
+        expect(screen.getByText(rateName)).toBeInTheDocument()
+    })
 
     it('can render correct rate name for AMENDMENT rate submission', () => {
         const submission = {
@@ -252,6 +279,184 @@ describe('RateDetailsSummarySection', () => {
             'MCR-MN-0005-SNBC-RATE-20221013-20221013-CERTIFICATION-20221013'
 
         expect(screen.getByText(rateName)).toBeInTheDocument()
+    })
+
+    it('can render all rate details fields for new rate certification submission', async () => {
+        const statePrograms = mockMNState().programs
+        const contract = mockContractAndRatesSubmittedV2()
+        contract.packageSubmissions[0].rateRevisions[0].formData.rateCertificationName =
+           'MCR-MN-0005-SNBC-RATE-20221014-20221014-CERTIFICATION-20221014'
+        contract.packageSubmissions[0].rateRevisions[0].formData.rateType = 'NEW'
+        contract.packageSubmissions[0].rateRevisions[0].formData.amendmentEffectiveDateStart = null
+        await waitFor(() => {
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    documentDateLookupTable={{
+                        previousSubmissionDate: '01/01/01',
+                    }}
+                    contract={contract}
+                    submissionName="MN-MSHO-0003"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider,
+                }
+            )
+        })
+
+        const rateName =
+            'MCR-MN-0005-SNBC-RATE-20221014-20221014-CERTIFICATION-20221014'
+
+        expect(screen.getByText(rateName)).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Rate certification type' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Rating period' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Date certified' })
+        ).toBeInTheDocument()
+    })
+
+    it('renders supporting rates docs when they exist', async () => {
+        if (draftContract.draftRates && draftContract.draftRates[0].draftRevision) {
+            const contractWithRateDocsFormData = {
+                ...draftContract.draftRates[0].draftRevision.formData,
+                rateDocuments: [
+                    {
+                        s3URL: 's3://foo/bar/rate',
+                        name: 'rate docs test 1',
+                        sha256: 'fakesha',
+                    },
+                ],
+                supportingDocuments: [
+                    {
+                        s3URL: 's3://foo/bar/test-2',
+                        name: 'supporting docs test 2',
+                        sha256: 'fakesha',
+                    },
+                    {
+                        s3URL: 's3://foo/bar/test-3',
+                        name: 'supporting docs test 3',
+                        sha256: 'fakesha',
+                    },
+                ],
+            }
+            const contractWithRateDocs = {
+                ...draftContract,
+            }
+            contractWithRateDocs.draftRates![0].draftRevision!.formData = contractWithRateDocsFormData
+
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
+                    contract={contractWithRateDocs}
+                    editNavigateTo="/rate-details'"
+                    submissionName="MN-PMAP-0001"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider,
+                }
+            )
+
+            await waitFor(() => {
+                const supportingDocsTable = screen.getByRole('table', {
+                    name: /Rate supporting documents/,
+                })
+                const rateDocsTable = screen.getByRole('table', {
+                    name: /Rate certification/,
+                })
+
+                expect(rateDocsTable).toBeInTheDocument()
+                expect(supportingDocsTable).toBeInTheDocument()
+
+                const supportingDocsTableRows =
+                    within(supportingDocsTable).getAllByRole('rowgroup')
+                expect(supportingDocsTableRows).toHaveLength(2)
+
+                // check row content
+                expect(
+                    within(rateDocsTable).getByRole('row', {
+                        name: /rate docs test 1/,
+                    })
+                ).toBeInTheDocument()
+                expect(
+                    within(supportingDocsTable).getByText('supporting docs test 2')
+                ).toBeInTheDocument()
+                expect(
+                    within(supportingDocsTable).getByText('supporting docs test 3')
+                ).toBeInTheDocument()
+
+                // check correct category on supporting docs
+                expect(
+                    within(supportingDocsTable).getAllByText('Rate-supporting')
+                ).toHaveLength(2)
+            })
+        }
+    })
+
+    it('does not render supporting rate documents when they do not exist', () => {
+        if (draftContract.draftRates && draftContract.draftRates[0].draftRevision) {
+            const contractWithRateDocsFormData = {
+                ...draftContract.draftRates[0].draftRevision.formData,
+                rateDocuments: [
+                    {
+                        s3URL: 's3://foo/bar/rate',
+                        name: 'rate docs test 1',
+                        sha256: 'fakesha',
+                    },
+                ],
+                supportingDocuments: [],
+            }
+            const contractWithRateDocs = {
+                ...draftContract,
+            }
+            contractWithRateDocs.draftRates![0].draftRevision!.formData = contractWithRateDocsFormData
+
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
+                    contract={draftContract}
+                    submissionName="MN-PMAP-0001"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider,
+                }
+            )
+
+            expect(
+                screen.queryByRole('table', {
+                    name: /Rate supporting documents/,
+                })
+            ).toBeNull()
+        }
+    })
+
+    it('does not render download all button when on previous submission', async () => {
+        await waitFor(() =>
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    documentDateLookupTable={{
+                        previousSubmissionDate: '01/01/01',
+                    }}
+                    contract={draftContract}
+                    submissionName="MN-PMAP-0001"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider,
+                }
+            )
+        )
+
+        expect(
+            screen.queryByRole('button', {
+                name: 'Download all rate documents',
+            })
+        ).toBeNull()
     })
 
     it('renders rate cell capitation type', () => {
@@ -406,6 +611,39 @@ describe('RateDetailsSummarySection', () => {
         expect(certType[1]).toHaveTextContent('Amendment')
     })
 
+    it('renders multiple rate certifications with documents', async () => {
+        const draftSubmission = mockContractAndRatesDraftV2()
+        draftSubmission.draftRates = mockRateInfos
+        renderWithProviders(
+            <RateDetailsSummarySection
+                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
+                contract={draftSubmission}
+                editNavigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+            />,
+            {
+                apolloProvider,
+            }
+        )
+        await waitFor(() => {
+            const rateDocsTables = screen.getAllByRole('table', {
+                name: /Rate certification/,
+            })
+            expect(rateDocsTables).toHaveLength(2)
+            expect(
+                within(rateDocsTables[0]).getByRole('row', {
+                    name: /rate docs test 1/,
+                })
+            ).toBeInTheDocument()
+            expect(
+                within(rateDocsTables[1]).getByRole('row', {
+                    name: /rate docs test 2/,
+                })
+            ).toBeInTheDocument()
+        })
+    })
+
     it('renders multiple rate certifications with certifying actuary', async () => {
         const draftContract = mockContractAndRatesDraftV2()
         draftContract.draftRates = mockRateInfos
@@ -435,6 +673,57 @@ describe('RateDetailsSummarySection', () => {
                 within(certifyingActuary[1]).queryByRole('link', {
                     name: 'tt.actuary@test.com',
                 })
+            ).toBeInTheDocument()
+        })
+    })
+
+    it('renders submitted package without errors', () => {
+        renderWithProviders(
+            <RateDetailsSummarySection
+                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
+                contract={submittedContract}
+                editNavigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+            />,
+            {
+                apolloProvider,
+            }
+        )
+
+        expect(screen.queryByRole('link', { name: 'Edit' })).toBeNull()
+        // We should never display missing field text on submission summary for submitted packages
+        expect(
+            screen.queryByText(/You must provide this information/)
+        ).toBeNull()
+    })
+
+    it('renders inline error when bulk URL is unavailable', async () => {
+        const s3Provider = {
+            ...testS3Client(),
+            getBulkDlURL: async (
+                _keys: string[],
+                _fileName: string
+            ): Promise<string | Error> => {
+                return new Error('Error: getBulkDlURL encountered an error')
+            },
+        }
+        renderWithProviders(
+            <RateDetailsSummarySection
+                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
+                contract={submittedContract}
+                submissionName="MN-MSHO-0003"
+                statePrograms={statePrograms}
+            />,
+            {
+                s3Provider,
+                apolloProvider,
+            }
+        )
+
+        await waitFor(() => {
+            expect(
+                screen.getByText('Rate document download is unavailable')
             ).toBeInTheDocument()
         })
     })

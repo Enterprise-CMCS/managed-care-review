@@ -5,6 +5,7 @@ import { useS3 } from '../../../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../../../common-code/dateHelpers'
 import { DoubleColumnGrid } from '../../../../../components/DoubleColumnGrid'
 import { DownloadButton } from '../../../../../components/DownloadButton'
+import { UploadedDocumentsTable } from '../../../../../components/SubmissionSummarySection'
 import { usePreviousSubmission } from '../../../../../hooks/usePreviousSubmission'
 import styles from './SubmissionSummarySection.module.scss'
 import { recordJSException } from '../../../../../otelHelpers'
@@ -14,7 +15,7 @@ import { DocumentDateLookupTableType } from '../../../../../documentHelpers/make
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../../../../components/DocumentWarning'
 import { SectionCard } from '../../../../../components/SectionCard'
-import { Rate, Contract, Program } from '../../../../../gen/gqlClient'
+import { Rate, Contract, Program, RateRevision } from '../../../../../gen/gqlClient'
 
 export type RateDetailsSummarySectionV2Props = {
     contract: Contract,
@@ -52,34 +53,38 @@ export const RateDetailsSummarySectionV2 = ({
     onDocumentError,
 }: RateDetailsSummarySectionV2Props): React.ReactElement => {
     const isSubmitted = contract.status === 'SUBMITTED'
-    // const isEditing = !isSubmitted && editNavigateTo !== undefined
+    const isEditing = !isSubmitted && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
-
+    const contractFormData =
+        contract.draftRevision?.formData ||
+        contract.packageSubmissions[0].contractRevision.formData
+    const rates = contract.draftRates || contract.packageSubmissions[0].rateRevisions
     const { getKey, getBulkDlURL } = useS3()
     const [zippedFilesURL, setZippedFilesURL] = useState<
         string | undefined | Error
     >(undefined)
 
-    const rateCapitationType = (rate: Rate) =>
-        rate.draftRevision?.formData.rateCapitationType
-            ? rate.draftRevision?.formData.rateCapitationType === 'RATE_CELL'
+    const rateCapitationType = (rate: Rate | RateRevision) => {
+        const rateFormData = getRateFormData(rate)
+        return rateFormData?.rateCapitationType
+            ? rateFormData.rateCapitationType === 'RATE_CELL'
                 ? 'Certification of capitation rates specific to each rate cell'
                 : 'Certification of rate ranges of capitation rates per rate cell'
             : ''
+    }
 
     const ratePrograms = (
-        rate: Rate,
-        contract: Contract
+        rate: Rate | RateRevision
     ) => {
-         /* if we have rateProgramIDs, use them, otherwise use programIDs */
-         let programIDs = [] as string[]
-         const rateFormData = rate.draftRevision?.formData
-         const contractFormData = contract.draftRevision?.formData
-         if (rateFormData?.rateProgramIDs && rateFormData?.rateProgramIDs.length > 0) {
+        /* if we have rateProgramIDs, use them, otherwise use programIDs */
+        let programIDs = [] as string[]
+        const rateFormData = getRateFormData(rate)
+        
+        if (rateFormData?.rateProgramIDs && rateFormData?.rateProgramIDs.length > 0) {
             programIDs = rateFormData.rateProgramIDs
-         } else if (contractFormData?.programIDs && contractFormData?.programIDs.length > 0) {
+        } else if (contractFormData?.programIDs && contractFormData?.programIDs.length > 0) {
             programIDs = contractFormData.programIDs
-         }
+        }
         return programIDs
             ? statePrograms
                   .filter((p) => programIDs.includes(p.id))
@@ -87,12 +92,23 @@ export const RateDetailsSummarySectionV2 = ({
             : undefined
     }
 
-    const rateCertificationType = (rate: Rate) => {
-        if (rate.draftRevision?.formData.rateType === 'AMENDMENT') {
+    const rateCertificationType = (rate: Rate | RateRevision) => {
+        const rateFormData = getRateFormData(rate)
+        if (rateFormData?.rateType === 'AMENDMENT') {
             return 'Amendment to prior rate certification'
         }
-        if (rate.draftRevision?.formData.rateType === 'NEW') {
+        if (rateFormData?.rateType === 'NEW') {
             return 'New rate certification'
+        }
+    }
+
+    const getRateFormData = (rate: Rate | RateRevision) => {
+        const isDraftRate = 'draftRevision' in rate
+        const isRateRev = 'formData' in rate
+        if (isDraftRate) {
+            return rate.draftRevision?.formData
+        } else if (isRateRev) {
+            return rate.formData
         }
     }
 
@@ -102,14 +118,12 @@ export const RateDetailsSummarySectionV2 = ({
 
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
-            if (contract.draftRates !== undefined) {
-                const draftContract = contract.draftRates!
-                const keysFromDocs = draftContract
-                .flatMap((rate) => {
-                    const draftRateRev = rate.draftRevision!
-                    return draftRateRev.formData.rateDocuments
-                    .concat(draftRateRev.formData.supportingDocuments)
-                })
+            const submittedRates = contract.packageSubmissions[0].rateRevisions
+            if (submittedRates !== undefined) {
+                const keysFromDocs = submittedRates
+                .flatMap((rateInfo) =>
+                    rateInfo.formData.rateDocuments.concat(rateInfo.formData.supportingDocuments)
+                )
                 .map((doc) => {
                     const key = getKey(doc.s3URL)
                     if (!key) return ''
@@ -149,8 +163,6 @@ export const RateDetailsSummarySectionV2 = ({
         isPreviousSubmission,
     ])
 
-    const loading = false
-
     return (
         <SectionCard id="rateDetails" className={styles.summarySection}>
             <SectionHeader
@@ -161,9 +173,9 @@ export const RateDetailsSummarySectionV2 = ({
                     !isPreviousSubmission &&
                     renderDownloadButton(zippedFilesURL)}
             </SectionHeader>
-            {contract.draftRates && contract.draftRates?.length > 0 ? (
-                contract.draftRates?.map((rate) => {
-                    const rateFormData = rate.draftRevision?.formData
+            {rates.length > 0 ? (
+                rates.map((rate) => {
+                    const rateFormData = getRateFormData(rate)
                     return (
                         <SectionCard
                             id={`rate-details-${rate.id}`}
@@ -182,7 +194,7 @@ export const RateDetailsSummarySectionV2 = ({
                                             id="ratePrograms"
                                             label="Programs this rate certification covers"
                                             explainMissingData={!isSubmitted}
-                                            children={ratePrograms(rate, contract)}
+                                            children={ratePrograms(rate)}
                                         />
                                     )}
                                     <DataDetail
@@ -260,17 +272,29 @@ export const RateDetailsSummarySectionV2 = ({
                                     />
                                 </DoubleColumnGrid>
                             </dl>
-                            {!loading && rateFormData?.rateDocuments ? (
-                                // TODO: add the Uploads table 
-                                <h2>Document uploads placeholder</h2>
-                            ) : (
-                                <span className="srOnly">'LOADING...'</span>
+                            {rateFormData?.rateDocuments && (
+                                <UploadedDocumentsTable
+                                    documents={rateFormData.rateDocuments}
+                                    documentDateLookupTable={
+                                        documentDateLookupTable
+                                    }
+                                    multipleDocumentsAllowed={false}
+                                    caption="Rate certification"
+                                    documentCategory="Rate certification"
+                                    isEditing={isEditing}
+                                    isSubmitted={isSubmitted}
+                                />
                             )}
-                            {!loading && rateFormData?.supportingDocuments? (
-                                // TODO: add the Uploads table 
-                                <h2>Supporting document uploads placeholder</h2>
-                            ) : (
-                                <span className="srOnly">'LOADING...'</span>
+                            {rateFormData?.supportingDocuments && (
+                                <UploadedDocumentsTable
+                                    documents={rateFormData.supportingDocuments}
+                                    documentDateLookupTable={
+                                        documentDateLookupTable
+                                    }
+                                    caption="Rate supporting documents"
+                                    isSupportingDocuments
+                                    documentCategory="Rate-supporting"
+                                />
                             )}
                         </SectionCard>
                     )
