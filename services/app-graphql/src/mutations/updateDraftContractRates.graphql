@@ -33,6 +33,7 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                     riskBasedContract
                     stateContacts {
                         name
+                        title
                         email
                     }
                     contractDocuments {
@@ -83,6 +84,70 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                         rateProgramIDs
                         rateCertificationName
                         actuaryCommunicationPreference
+                        certifyingActuaryContacts {
+                            name
+                            email
+                            titleRole
+                        }
+                        addtlActuaryContacts {
+                            name
+                            email
+                            titleRole
+                        }
+                        rateDocuments {
+                            name
+                            s3URL
+                            sha256
+                        }
+                        supportingDocuments {
+                            name
+                            s3URL
+                            sha256
+                        }
+                    }
+                }
+
+                revisions {
+                    id
+                    createdAt
+                    updatedAt
+                    unlockInfo {
+                        updatedAt
+                        updatedBy
+                        updatedReason
+                    }
+
+                    formData {
+                        rateType
+                        rateCapitationType
+                        rateDateStart
+                        rateDateEnd
+                        rateDateCertified
+                        amendmentEffectiveDateStart
+                        amendmentEffectiveDateEnd
+                        rateProgramIDs
+                        rateCertificationName
+                        actuaryCommunicationPreference
+                        certifyingActuaryContacts {
+                            name
+                            email
+                            titleRole
+                        }
+                        addtlActuaryContacts {
+                            name
+                            email
+                            titleRole
+                        }
+                        rateDocuments {
+                            name
+                            s3URL
+                            sha256
+                        }
+                        supportingDocuments {
+                            name
+                            s3URL
+                            sha256
+                        }
                     }
                 }
 

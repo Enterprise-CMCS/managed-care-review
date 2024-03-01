@@ -131,23 +131,71 @@ function updateDraftContractRates(
 
         // The Request is Valid!
         // Deal with new rates, matching to old rates
-
-        // Create gets passed through
-
-        // Updated rates need to exist
-        // linked rates need to be submitted
-        // unlinked rates need to exist
+        const draftRates = contract.draftRates || []
 
         const rateUpdates: UpdateDraftContractRatesArgsType['rateUpdates'] = {
             create: [],
             update: [],
             link: [],
             unlink: [],
+            delete: [],
         }
 
+        // walk through the new rate list one by one
+        // TODO set the position in the list correctly
+        // any rates that aren't in this list are unlinked (or deleted?)
+        const knownRateIDs = draftRates.map((r) => r.id)
         for (const rateUpdate of parsedUpdates) {
             if (rateUpdate.type === 'CREATE') {
                 rateUpdates.create.push({ formData: rateUpdate.formData })
+            }
+
+            if (rateUpdate.type === 'UPDATE') {
+                const knownRateIDX = knownRateIDs.indexOf(rateUpdate.rateID)
+                if (knownRateIDX === -1) {
+                    const errmsg =
+                        'Attempted to update a rate not associated with this contract: ' +
+                        rateUpdate.rateID
+                    logError('updateDraftContractRates', errmsg)
+                    setErrorAttributesOnActiveSpan(errmsg, span)
+                    throw new UserInputError(errmsg)
+                }
+                knownRateIDs.splice(knownRateIDX, 1)
+
+                rateUpdates.update.push({
+                    rateID: rateUpdate.rateID,
+                    formData: rateUpdate.formData,
+                })
+            }
+
+            if (rateUpdate.type === 'LINK') {
+                const knownRateIDX = knownRateIDs.indexOf(rateUpdate.rateID)
+                if (knownRateIDX !== -1) {
+                    knownRateIDs.splice(knownRateIDX, 1)
+                    continue
+                }
+
+                // this is a new link, actually link them.
+                rateUpdates.link.push({ rateID: rateUpdate.rateID })
+            }
+        }
+
+        // we've gone through the existing rates, anything we didn't see we should remove
+        for (const removedRateID of knownRateIDs) {
+            const removedRate = draftRates.find((r) => r.id === removedRateID)
+
+            if (!removedRate) {
+                throw new Error(
+                    'Programming Error this should be impossible, these IDs came from the draft rates'
+                )
+            }
+
+            // if removedRate is a draft, mark for deletion
+            if (removedRate.status === 'DRAFT') {
+                rateUpdates.delete.push({ rateID: removedRateID })
+            } else {
+                // unlink all other omitted rates
+                rateUpdates.unlink.push({ rateID: removedRateID })
             }
         }
 
@@ -157,12 +205,12 @@ function updateDraftContractRates(
         })
 
         if (result instanceof Error) {
+            logError('updateDraftContractRates', result.message)
+            setErrorAttributesOnActiveSpan(result.message, span)
             throw result
         }
-        // any omitted rates are deleted
 
         // return result.
-
         return { contract: result }
     }
 }
