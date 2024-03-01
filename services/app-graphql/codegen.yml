@@ -22,6 +22,7 @@ generates:
         HealthPlanPackage: ../domain-models#HealthPlanPackageType
         Rate: ../domain-models#RateType
         RateRevision: ../domain-models#RateRevisionType
+        Contract: ../domain-models#ContractType as ContractDomainType
   ../app-web/src/gen/gqlClient.tsx:
     documents:
       - src/queries/*.graphql

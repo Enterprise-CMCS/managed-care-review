@@ -1,10 +1,7 @@
 /*
-    Mock different health plan form data that match frontend types.
-    These helper functions allow us to compose together different proto form data to serialize and then attach in our health plan package GQL queries/ mutations
-    See HealthPlanPackageGQLMock` file for usage
+    DEPRECATED - Remove after Wave 2
 
-    Future refactors - it seems like we are starting to also add these types of mocks in common-code/healthPlanFormDataMocks.
-    We may be able to move these mocks in that file as well.
+    Mock different health plan form data that match frontend types.
 */
 
 import dayjs from 'dayjs'

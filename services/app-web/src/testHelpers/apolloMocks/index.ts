@@ -53,9 +53,7 @@ export { mockQuestionsPayload } from './questionResponseDataMocks'
 export { fetchEmailSettings } from './emailGQLMock'
 export { mockMNState } from './stateMock'
 
-export { rateDataMock } from './rateDataMock'
 
-export { indexRatesMockSuccess, indexRatesMockFailure } from './rateGQLMocks'
 
 export { updateUserMockError, updateUserMockSuccess } from './updateUserMock'
 export { fetchRateMockSuccess } from './rateGQLMocks'
@@ -64,3 +62,9 @@ export {
     createAPIKeySuccess,
     createAPIKeyNetworkError,
 } from './apiKeyGQLMocks'
+
+// NEW APIS
+export {mockContractPackage} from './contractPackageDataMock'
+export { rateDataMock } from './rateDataMock'
+
+export { indexRatesMockSuccess, indexRatesMockFailure } from './rateGQLMocks'

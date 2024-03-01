@@ -11,8 +11,35 @@ import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { Contacts } from './'
 import userEvent from '@testing-library/user-event'
 import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import * as useRouteParams from '../../../hooks/useRouteParams'
+import * as useHealthPlanPackageForm from '../../../hooks/useHealthPlanPackageForm'
 
 describe('Contacts', () => {
+    const mockUpdateDraftFn = jest.fn()
+    beforeEach(() => {
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockReturnValue({
+            updateDraft: mockUpdateDraftFn,
+            createDraft: jest.fn(),
+            showPageErrorMessage: false,
+            draftSubmission: mockDraft(),
+        })
+        jest.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
+            id: '123-abc',
+        })
+    })
+
+    afterEach(() => {
+        jest.clearAllMocks()
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockRestore()
+        jest.spyOn(useRouteParams, 'useRouteParams').mockRestore()
+    })
+
     const contractAndRatesWithEmptyContacts =
         (): UnlockedHealthPlanFormDataType => {
             const draft = {
@@ -22,22 +49,13 @@ describe('Contacts', () => {
             }
             return draft
         }
-    afterEach(() => jest.clearAllMocks())
 
     it('renders without errors', async () => {
-        const mockUpdateDraftFn = jest.fn()
-
-        renderWithProviders(
-            <Contacts
-                draftSubmission={mockDraft()}
-                updateDraft={mockUpdateDraftFn}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<Contacts />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         await waitFor(() => {
             expect(screen.getByTestId('state-contacts')).toBeInTheDocument()
@@ -49,14 +67,11 @@ describe('Contacts', () => {
     })
 
     it('displays correct form guidance for contract only submission', async () => {
-        renderWithProviders(
-            <Contacts draftSubmission={mockDraft()} updateDraft={jest.fn()} />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<Contacts />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         const requiredLabels = await screen.findAllByText('Required')
         expect(requiredLabels).toHaveLength(1)
@@ -65,17 +80,23 @@ describe('Contacts', () => {
     })
 
     it('displays correct form guidance for contract and rates submission', async () => {
-        renderWithProviders(
-            <Contacts
-                draftSubmission={contractAndRatesWithEmptyContacts()}
-                updateDraft={jest.fn()}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockImplementation(() => {
+            return {
+                createDraft: jest.fn(),
+                updateDraft: mockUpdateDraftFn,
+                showPageErrorMessage: false,
+                draftSubmission: contractAndRatesWithEmptyContacts(),
             }
-        )
+        })
+
+        renderWithProviders(<Contacts />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         const requiredLabels = await screen.findAllByText('Required')
         expect(requiredLabels).toHaveLength(2)
@@ -111,19 +132,23 @@ describe('Contacts', () => {
     })
 
     it('checks saved mocked state contacts correctly', async () => {
-        const mockUpdateDraftFn = jest.fn()
-
-        renderWithProviders(
-            <Contacts
-                draftSubmission={mockBaseContract()}
-                updateDraft={mockUpdateDraftFn}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockImplementation(() => {
+            return {
+                createDraft: jest.fn(),
+                updateDraft: mockUpdateDraftFn,
+                showPageErrorMessage: false,
+                draftSubmission: mockBaseContract(),
             }
-        )
+        })
+
+        renderWithProviders(<Contacts />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         // checks the submission values in apollohelper mock
         expect(screen.getByLabelText('Name')).toHaveValue('Test Person')
@@ -132,17 +157,11 @@ describe('Contacts', () => {
     })
 
     it('should not error if whitespace added to email addresses', async () => {
-        const mock = mockDraft()
-        const mockUpdateDraftFn = jest.fn()
-
-        renderWithProviders(
-            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<Contacts />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         screen.getAllByLabelText('Name')[0].focus()
         await userEvent.paste('State Contact Person')
@@ -182,7 +201,6 @@ describe('Contacts', () => {
 
     it('should error and not continue if state contacts are not filled out', async () => {
         const mock = mockDraft()
-        const mockUpdateDraftFn = jest.fn()
         const emptyContactsDraft = {
             ...mock,
             stateContacts: [
@@ -193,18 +211,23 @@ describe('Contacts', () => {
                 },
             ],
         }
-
-        renderWithProviders(
-            <Contacts
-                draftSubmission={emptyContactsDraft}
-                updateDraft={mockUpdateDraftFn}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockImplementation(() => {
+            return {
+                createDraft: jest.fn(),
+                updateDraft: mockUpdateDraftFn,
+                showPageErrorMessage: false,
+                draftSubmission: emptyContactsDraft,
             }
-        )
+        })
+
+        renderWithProviders(<Contacts />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         const continueButton = screen.getByRole('button', { name: 'Continue' })
 
@@ -224,17 +247,11 @@ describe('Contacts', () => {
     })
 
     it('after "Add state contact" button click, should focus on the field name of the new contact', async () => {
-        const mock = mockDraft()
-        const mockUpdateDraftFn = jest.fn()
-
-        renderWithProviders(
-            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<Contacts />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
         const addStateContactButton = screen.getByRole('button', {
             name: 'Add another state contact',
         })
@@ -258,16 +275,23 @@ describe('Contacts', () => {
 
     it('after "Add actuary contact" button click, it should focus on the field name of the new actuary contact', async () => {
         const mock = contractAndRatesWithEmptyContacts()
-        const mockUpdateDraftFn = jest.fn()
-
-        renderWithProviders(
-            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockImplementation(() => {
+            return {
+                createDraft: jest.fn(),
+                updateDraft: mockUpdateDraftFn,
+                showPageErrorMessage: false,
+                draftSubmission: mock,
             }
-        )
+        })
+
+        renderWithProviders(<Contacts />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         const addActuaryContactButton = screen.getByRole('button', {
             name: 'Add actuary contact',
@@ -288,17 +312,11 @@ describe('Contacts', () => {
     })
 
     it('after state contact "Remove contact" button click, should focus on add new contact button', async () => {
-        const mock = mockDraft()
-        const mockUpdateDraftFn = jest.fn()
-
-        renderWithProviders(
-            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<Contacts />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
         const addStateContactButton = screen.getByRole('button', {
             name: 'Add another state contact',
         })
@@ -317,17 +335,23 @@ describe('Contacts', () => {
     })
 
     it('after actuary contact "Remove contact" button click, should focus on add new actuary contact button', async () => {
-        const mock = contractAndRatesWithEmptyContacts()
-        const mockUpdateDraftFn = jest.fn()
-
-        renderWithProviders(
-            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockImplementation(() => {
+            return {
+                createDraft: jest.fn(),
+                updateDraft: mockUpdateDraftFn,
+                showPageErrorMessage: false,
+                draftSubmission: contractAndRatesWithEmptyContacts(),
             }
-        )
+        })
+
+        renderWithProviders(<Contacts />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
         const addActuaryContactButton = screen.getByRole('button', {
             name: 'Add actuary contact',
         })
@@ -345,17 +369,23 @@ describe('Contacts', () => {
     })
 
     it('when there are multiple state contacts, they should numbered', async () => {
-        const mock = contractAndRatesWithEmptyContacts()
-        const mockUpdateDraftFn = jest.fn()
-
-        renderWithProviders(
-            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockImplementation(() => {
+            return {
+                createDraft: jest.fn(),
+                updateDraft: mockUpdateDraftFn,
+                showPageErrorMessage: false,
+                draftSubmission: contractAndRatesWithEmptyContacts(),
             }
-        )
+        })
+
+        renderWithProviders(<Contacts />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
         const addStateContactButton = screen.getByRole('button', {
             name: 'Add another state contact',
         })
@@ -368,17 +398,23 @@ describe('Contacts', () => {
     })
 
     it('when there are multiple actuary contacts, they should numbered', async () => {
-        const mock = contractAndRatesWithEmptyContacts()
-        const mockUpdateDraftFn = jest.fn()
-
-        renderWithProviders(
-            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockImplementation(() => {
+            return {
+                createDraft: jest.fn(),
+                updateDraft: mockUpdateDraftFn,
+                showPageErrorMessage: false,
+                draftSubmission: contractAndRatesWithEmptyContacts(),
             }
-        )
+        })
+
+        renderWithProviders(<Contacts />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
         const addActuaryContactButton = screen.getByRole('button', {
             name: 'Add actuary contact',
         })
@@ -396,17 +432,23 @@ describe('Contacts', () => {
 
     /* This test is likely to time out if we use userEvent.type().  Converted to .paste() */
     it('when there are multiple state and actuary contacts, remove button works as expected', async () => {
-        const mock = contractAndRatesWithEmptyContacts()
-        const mockUpdateDraftFn = jest.fn()
-
-        renderWithProviders(
-            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockImplementation(() => {
+            return {
+                createDraft: jest.fn(),
+                updateDraft: mockUpdateDraftFn,
+                showPageErrorMessage: false,
+                draftSubmission: contractAndRatesWithEmptyContacts(),
             }
-        )
+        })
+
+        renderWithProviders(<Contacts />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         screen.getAllByLabelText('Name')[0].focus()
         await userEvent.paste('State Contact Person')

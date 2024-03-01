@@ -56,9 +56,11 @@ const StateUserRow = ({
                         <StateIcon
                             code={user.state.code as StateIconProps['code']}
                         />
+                        <span>{user.state.name}&nbsp;</span>
                     </div>
                     <PageHeading>
-                        <span>{user.state.name}&nbsp;</span>
+                        {/* Have to have state name here but screen reader only to make page heading announce as expected */}
+                        <span className="srOnly">{user.state.name}&nbsp;</span>
                         {heading && (
                             <span
                                 className="font-heading-lg text-light"
