@@ -120,7 +120,9 @@ export const SubmissionSideNav = () => {
     const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const isHelpdeskUser = loggedInUser?.role === 'HELPDESK_USER'
     const isBusinessOwnerUser = loggedInUser?.role === 'BUSINESSOWNER_USER'
-
+    const isFormPage =
+        (submissionStatus === 'UNLOCKED' || submissionStatus === 'DRAFT') &&
+        isStateUser
     // CMS Users can't see DRAFT, it's an error
     if (
         submissionStatus === 'DRAFT' &&
@@ -161,7 +163,7 @@ export const SubmissionSideNav = () => {
     return (
         <div
             className={
-                showSidebar ? styles.backgroundSidebar : styles.backgroundForm
+                isFormPage ? styles.backgroundForm : styles.backgroundSidebar
             }
             data-testid="submission-side-nav"
         >

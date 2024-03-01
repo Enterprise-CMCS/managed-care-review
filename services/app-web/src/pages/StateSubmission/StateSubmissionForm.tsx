@@ -21,6 +21,7 @@ import { UnlockedHealthPlanFormDataType } from '../../common-code/healthPlanForm
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
 import { RateDetailsV2 } from './RateDetails/V2/RateDetailsV2'
+import styles from './StateSubmissionForm.module.scss'
 
 // Can move this AppRoutes on future pass - leaving it here now to make diff clear
 export const StateSubmissionForm = (): React.ReactElement => {
@@ -31,7 +32,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
         featureFlags.LINK_RATES.defaultValue
     )
     return (
-        <div>
+        <div className={styles.formPage}>
             <Routes>
                 <Route
                     path={getRelativePathFromNestedRoute('SUBMISSIONS_TYPE')}
