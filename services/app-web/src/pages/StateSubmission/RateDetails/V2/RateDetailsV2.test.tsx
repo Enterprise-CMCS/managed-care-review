@@ -3,16 +3,16 @@ import { RateDetailsV2 } from './RateDetailsV2'
 import { renderWithProviders } from '../../../../testHelpers'
 import {
     fetchCurrentUserMock,
-    rateDataMock,
+    fetchRateMockSuccess,
 } from '../../../../testHelpers/apolloMocks'
 import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '../../../../constants'
 
 describe('RateDetails', () => {
-    describe('handles a single rate', () => {
+    describe('handles editing a single rate', () => {
         it('renders without errors', async () => {
             const mockSubmit = jest.fn()
-            const rate = rateDataMock()
+            const rateID = 'test-abc-123'
             renderWithProviders(
                 <Routes>
                     <Route
@@ -27,10 +27,13 @@ describe('RateDetails', () => {
                 </Routes>,
                 {
                     apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchRateMockSuccess({ id: rateID }),
+                        ],
                     },
                     routerProvider: {
-                        route: `/rates/${rate.id}/edit`,
+                        route: `/rates/${rateID}/edit`,
                     },
                 }
             )

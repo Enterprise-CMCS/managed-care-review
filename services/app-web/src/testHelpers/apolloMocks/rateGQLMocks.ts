@@ -10,13 +10,10 @@ import { MockedResponse } from '@apollo/client/testing'
 import { rateDataMock } from './rateDataMock'
 import { GraphQLError } from 'graphql/index'
 
-const fetchRateMockSuccess = ({
-    revision,
-    rate,
-}: {
+const fetchRateMockSuccess = (
+    rate?: Partial<Rate>,
     revision?: Partial<RateRevision>
-    rate?: Partial<Rate>
-}): MockedResponse<FetchRateQuery> => {
+): MockedResponse<FetchRateQuery> => {
     const rateData = rateDataMock(revision, rate)
 
     return {

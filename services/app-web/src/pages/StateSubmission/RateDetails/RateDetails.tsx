@@ -126,7 +126,6 @@ export const RateDetails = ({
     } = useHealthPlanPackageForm(id)
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
-    console.info('original rate details page')
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
 
     // multi-rates state management

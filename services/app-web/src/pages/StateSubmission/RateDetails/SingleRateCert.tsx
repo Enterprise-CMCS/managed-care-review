@@ -556,7 +556,7 @@ export const SingleRateCert = ({
                         type="button"
                         unstyled
                         className={styles.removeContactBtn}
-                        onClick={() => multiRatesConfig.removeSelf}
+                        onClick={multiRatesConfig.removeSelf}
                     >
                         Remove rate certification
                     </Button>

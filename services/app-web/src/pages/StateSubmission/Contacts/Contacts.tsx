@@ -149,7 +149,7 @@ const flattenErrors = (
     return flattened
 }
 
-export const Contacts = ({
+const Contacts = ({
     showValidations = false,
 }: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
@@ -692,3 +692,4 @@ export const Contacts = ({
         </>
     )
 }
+export { Contacts }

@@ -32,10 +32,16 @@ const isRateTypeEmpty = (rateForm: RateDetailFormValues): boolean =>
 const isRateTypeAmendment = (rateForm: RateDetailFormValues): boolean =>
     rateForm.rateType === 'AMENDMENT'
 
+/**
+ * This component renders rate certification related form fields with their labels and error messages
+ *
+ * It relies on useFormikContext hook to work inside of a Formik form with matching field name values
+ */
+
 export type SingleRateFormError =
     FormikErrors<RateDetailFormConfig>[keyof FormikErrors<RateDetailFormConfig>]
 
-type SingleRateCertV2Props = {
+type SingleRateFormFieldsProps = {
     rateForm: RateDetailFormValues
     shouldValidate: boolean
     index: number // defaults to 0
@@ -68,12 +74,12 @@ const RateDatesErrorMessage = ({
     return <PoliteErrorMessage>{validationErrorMessage}</PoliteErrorMessage>
 }
 
-export const SingleRateCertV2 = ({
+export const SingleRateFormFields = ({
     rateForm,
     shouldValidate,
     index = 0,
     previousDocuments,
-}: SingleRateCertV2Props): React.ReactElement => {
+}: SingleRateFormFieldsProps): React.ReactElement => {
     // page level setup
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
     const fieldNamePrefix = `rates.${index}`

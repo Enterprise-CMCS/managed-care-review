@@ -37,7 +37,7 @@ import {
     useFetchContractQuery,
     useFetchRateQuery,
 } from '../../../../gen/gqlClient'
-import { SingleRateCertV2 } from './SingleRateCertV2'
+import { SingleRateFormFields } from './SingleRateFormFields'
 import type { SubmitRateHandler } from '../../../RateEdit/RateEdit'
 import { useFocus, useRouteParams } from '../../../../hooks'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
@@ -436,7 +436,7 @@ const RateDetailsV2 = ({
                                                             <Fieldset
                                                                 data-testid={`rate-certification-form`}
                                                             >
-                                                                <SingleRateCertV2
+                                                                <SingleRateFormFields
                                                                     rateForm={
                                                                         rate
                                                                     }

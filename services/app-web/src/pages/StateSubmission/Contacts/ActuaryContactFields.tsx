@@ -6,6 +6,12 @@ import { PoliteErrorMessage } from '../../../components/PoliteErrorMessage'
 import { RateCertFormType } from '../RateDetails/SingleRateCert'
 import styles from '../StateSubmissionForm.module.scss'
 
+/**
+ * This component renders actuary contact related form fields with their labels and error messages
+ *
+ * It relies on useFormikContext hook to work inside of a Formik form with matching field name values
+ */
+
 type FormError =
     FormikErrors<RateCertFormType>[keyof FormikErrors<RateCertFormType>]
 
