@@ -37,7 +37,6 @@ export type FileUploadProps = {
     scanFile?: (key: string) => Promise<void | Error> // optional function to be called after uploading (used for scanning)
     deleteFile: (key: string) => Promise<void>
     onFileItemsUpdate: ({ fileItems }: { fileItems: FileItemT[] }) => void
-    innerInputRef?: (el: HTMLInputElement) => void
 } & JSX.IntrinsicElements['input']
 
 /*
@@ -60,7 +59,6 @@ export const FileUpload = ({
     deleteFile,
     onFileItemsUpdate,
     allowMultipleUploads = true,
-    innerInputRef,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
     const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
@@ -71,19 +69,10 @@ export const FileUpload = ({
     const inputRequired = inputProps['aria-required'] || inputProps.required
 
     React.useEffect(() => {
-        console.info('effect1')
         if (JSON.stringify(fileItems) !== JSON.stringify(previousFileItems)) {
             onFileItemsUpdate({ fileItems })
         }
     }, [fileItems, previousFileItems, onFileItemsUpdate])
-
-    //Pass input ref to parent when innerInputRef prop exists.
-    React.useEffect(() => {
-        console.info('effect2')
-        if (innerInputRef && fileInputRef?.current?.input) {
-            innerInputRef(fileInputRef.current.input)
-        }
-    }, [fileInputRef, innerInputRef])
 
     const isDuplicateItem = (
         existingList: FileItemT[],

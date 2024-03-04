@@ -20,7 +20,6 @@ describe('RateDetails', () => {
                         element={
                             <RateDetailsV2
                                 type="SINGLE"
-                                rates={[rate]}
                                 submitRate={mockSubmit}
                             />
                         }

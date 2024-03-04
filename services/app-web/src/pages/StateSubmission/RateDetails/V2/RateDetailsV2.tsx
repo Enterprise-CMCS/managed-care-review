@@ -1,11 +1,9 @@
 import React from 'react'
-import { Form as UswdsForm } from '@trussworks/react-uswds'
+import { Button, Fieldset, Form as UswdsForm } from '@trussworks/react-uswds'
 import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import styles from '../../StateSubmissionForm.module.scss'
-import { v4 as uuidv4 } from 'uuid'
-
 import {
     DynamicStepIndicator,
     ErrorSummary,
@@ -36,11 +34,19 @@ import {
     Rate,
     RateFormDataInput,
     RateRevision,
+    useFetchContractQuery,
+    useFetchRateQuery,
 } from '../../../../gen/gqlClient'
 import { SingleRateCertV2 } from './SingleRateCertV2'
 import type { SubmitRateHandler } from '../../../RateEdit/RateEdit'
-import { useCurrentRoute, useFocus } from '../../../../hooks'
+import { useFocus, useRouteParams } from '../../../../hooks'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
+import { PageBannerAlerts } from '../../PageBannerAlerts'
+import { useAuth } from '../../../../contexts/AuthContext'
+import {
+    ErrorOrLoadingPage,
+    handleAndReturnErrorState,
+} from '../../ErrorOrLoadingPage'
 
 export type RateDetailFormValues = {
     id?: string // no id if its a new rate
@@ -117,30 +123,22 @@ export const rateErrorHandling = (
 type RateDetailsV2Props = {
     type: 'SINGLE' | 'MULTI'
     showValidations?: boolean
-    rates: Rate[]
     submitRate?: SubmitRateHandler
 }
 const RateDetailsV2 = ({
     showValidations = false,
     type,
-    rates,
     submitRate,
 }: RateDetailsV2Props): React.ReactElement => {
     const navigate = useNavigate()
-    const { id } = useParams()
-    const { currentRoute } = useCurrentRoute()
-    if (!id) {
-        throw new Error(
-            'PROGRAMMING ERROR: id param not set in rate edit form.'
-        )
-    }
     const { getKey } = useS3()
     const displayAsStandaloneRate = type === 'SINGLE'
-
+    const { loggedInUser } = useAuth()
     // Form validation
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const rateDetailsFormSchema = RateDetailsFormSchema({
         'rate-edit-unlock': true,
+        // Add linked rates logic
     })
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
@@ -149,9 +147,39 @@ const RateDetailsV2 = ({
     const [focusNewRate, setFocusNewRate] = React.useState(false)
     const newRateNameRef = React.useRef<HTMLElement | null>(null)
     const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
+    const { id } = useRouteParams()
 
     // API requests
-    //  const {data as fetchData, loading as fetchLoading, error: fetchError} = useFetchCotnract
+    const {
+        data: fetchContractData,
+        loading: fetchContractLoading,
+        error: fetchContractError,
+    } = useFetchContractQuery({
+        variables: {
+            input: {
+                contractID: id ?? 'unknown-contract',
+            },
+        },
+        skip: displayAsStandaloneRate,
+    })
+
+    const {
+        data: fetchRateData,
+        loading: fetchRateLoading,
+        error: fetchRateError,
+    } = useFetchRateQuery({
+        variables: {
+            input: {
+                rateID: id ?? 'unknown-rate',
+            },
+        },
+        skip: !displayAsStandaloneRate,
+    })
+    const ratesFromContract =
+        fetchContractData?.fetchContract.contract.draftRates
+    const initialRequestLoading = fetchContractLoading || fetchRateLoading
+    const initialRequestError = fetchContractError || fetchRateError
+    const previousDocuments: string[] = []
 
     React.useEffect(() => {
         if (focusNewRate) {
@@ -161,9 +189,21 @@ const RateDetailsV2 = ({
         }
     }, [focusNewRate])
 
-    const previousDocuments: string[] = []
-
-    // Formik setup
+    /*
+    Set up initial rate form values for Formik
+        if contract rates exist, use those (relevant for multi rate forms on contract package submission form)
+        if standalone rates exist, use those (for a standalone rate edits)
+        otherwise, generate a new  list of empty rate form values
+    */
+    const rates: Rate[] = React.useMemo(
+        () =>
+            ratesFromContract ??
+            (fetchRateData?.fetchRate.rate && [
+                fetchRateData?.fetchRate.rate,
+            ]) ??
+            [],
+        [ratesFromContract, fetchRateData]
+    )
     const initialValues: RateDetailFormConfig = {
         rates:
             rates.length > 0
@@ -171,16 +211,22 @@ const RateDetailsV2 = ({
                       generateFormValues(
                           getKey,
                           rate.draftRevision ?? undefined,
-                          rate.id
+                          rate?.id
                       )
                   )
-                : [
-                      generateFormValues(
-                          getKey,
-                          rates[0]?.draftRevision ?? undefined,
-                          rates[0]?.id
-                      ),
-                  ],
+                : [generateFormValues(getKey)],
+    }
+
+    // Display any full page interim state resulting from the initial fetch API requests
+    if (initialRequestLoading) {
+        return <ErrorOrLoadingPage state="LOADING" />
+    }
+    if (initialRequestError) {
+        return (
+            <ErrorOrLoadingPage
+                state={handleAndReturnErrorState(initialRequestError)}
+            />
+        )
     }
 
     const handlePageAction = async (
@@ -263,7 +309,6 @@ const RateDetailsV2 = ({
     ) => {
         const rateErrors = errors.rates
         const errorObject: { [field: string]: string } = {}
-
         if (rateErrors && Array.isArray(rateErrors)) {
             rateErrors.forEach((rateError, index) => {
                 if (!rateError) return
@@ -304,15 +349,22 @@ const RateDetailsV2 = ({
     return (
         <>
             <div className={styles.stepIndicator}>
-                <DynamicStepIndicator
-                    formPages={STATE_SUBMISSION_FORM_ROUTES}
-                    currentFormPage={currentRoute}
-                />
-                {/* <PageBannerAlerts
-                    loggedInUser={getLoggedInUser}
-                    unlockedInfo={rateunlockInfo}
-                    showPageErrorMessage={showPageErrorMessage ?? false}
-                /> */}
+                {!displayAsStandaloneRate && (
+                    <DynamicStepIndicator
+                        formPages={STATE_SUBMISSION_FORM_ROUTES}
+                        currentFormPage="SUBMISSIONS_RATE_DETAILS"
+                    />
+                )}
+                {!displayAsStandaloneRate && (
+                    <PageBannerAlerts
+                        loggedInUser={loggedInUser}
+                        unlockedInfo={
+                            fetchContractData?.fetchContract.contract
+                                .draftRevision?.unlockInfo
+                        }
+                        showPageErrorMessage={false} // TODO FIGURE OUT ERROR BANNER FOR BOTH MULTI AND STANDALONE USE CASE
+                    />
+                )}
             </div>
             <Formik
                 initialValues={initialValues}
@@ -367,29 +419,61 @@ const RateDetailsV2 = ({
                                             push,
                                         }: FieldArrayRenderProps) => (
                                             <>
-                                                {rates.map((rate, index) => (
-                                                    <SingleRateCertV2
-                                                        key={uuidv4()}
-                                                        rateForm={rate}
-                                                        index={index}
-                                                        shouldValidate={
-                                                            shouldValidate
-                                                        }
-                                                        previousDocuments={
-                                                            previousDocuments
-                                                        }
-                                                        multiRatesConfig={{
-                                                            removeSelf: () => {
-                                                                remove(index)
-                                                                setNewRateButtonFocus()
-                                                            },
-                                                            reassignNewRateRef:
-                                                                (el) =>
-                                                                    (newRateNameRef.current =
-                                                                        el),
-                                                        }}
-                                                    />
-                                                ))}
+                                                {rates.map(
+                                                    (rate, index = 0) => (
+                                                        <SectionCard
+                                                            key={index}
+                                                        >
+                                                            <h3
+                                                                className={
+                                                                    styles.rateName
+                                                                }
+                                                            >
+                                                                {displayAsStandaloneRate
+                                                                    ? `Rate certification`
+                                                                    : `Rate certification ${index + 1}`}
+                                                            </h3>
+                                                            <Fieldset
+                                                                data-testid={`rate-certification-form`}
+                                                            >
+                                                                <SingleRateCertV2
+                                                                    rateForm={
+                                                                        rate
+                                                                    }
+                                                                    index={
+                                                                        index
+                                                                    }
+                                                                    shouldValidate={
+                                                                        shouldValidate
+                                                                    }
+                                                                    previousDocuments={
+                                                                        previousDocuments
+                                                                    }
+                                                                />
+                                                                {index >= 1 &&
+                                                                    !displayAsStandaloneRate && (
+                                                                        <Button
+                                                                            type="button"
+                                                                            unstyled
+                                                                            className={
+                                                                                styles.removeContactBtn
+                                                                            }
+                                                                            onClick={() => {
+                                                                                remove(
+                                                                                    index
+                                                                                )
+                                                                                setNewRateButtonFocus()
+                                                                            }}
+                                                                        >
+                                                                            Remove
+                                                                            rate
+                                                                            certification
+                                                                        </Button>
+                                                                    )}
+                                                            </Fieldset>
+                                                        </SectionCard>
+                                                    )
+                                                )}
                                                 <SectionCard>
                                                     <h3>
                                                         Additional rate
@@ -444,7 +528,7 @@ const RateDetailsV2 = ({
                                     }}
                                     saveAsDraftOnClick={
                                         displayAsStandaloneRate
-                                            ? undefined
+                                            ? () => undefined
                                             : async () => {
                                                   await handlePageAction(
                                                       rates,

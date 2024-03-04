@@ -50,7 +50,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     )}
                     element={
                         useLinkedRates ? (
-                            <RateDetailsV2 type="MULTI" rates={[]} />
+                            <RateDetailsV2 type="MULTI" />
                         ) : (
                             <RateDetails />
                         )

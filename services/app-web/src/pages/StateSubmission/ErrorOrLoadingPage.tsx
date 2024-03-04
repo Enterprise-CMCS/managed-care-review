@@ -4,12 +4,30 @@ import { GridContainer } from '@trussworks/react-uswds'
 import { Loading } from '../../components'
 import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionStatusPage'
 import { Error404 } from '../Errors/Error404Page'
+import { handleApolloError } from '../../gqlHelpers/apolloErrors'
+import { ApolloError } from '@apollo/client'
+import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 
-type InterimState = 'LOADING' | 'GENERIC_ERROR' | 'NOT_FOUND' | 'INVALID_STATUS'
+type InterimState =
+    | 'LOADING'
+    | 'GENERIC_ERROR'
+    | 'NOT_FOUND'
+    | 'INVALID_STATUS'
+    | 'FORBIDDEN'
 type ErrorOrLoadingPageProps = {
-    state: 'LOADING' | 'GENERIC_ERROR' | 'NOT_FOUND' | 'INVALID_STATUS'
+    state?: InterimState
 }
 
+const handleAndReturnErrorState = (error: ApolloError): InterimState => {
+    handleApolloError(error, true)
+    if (error.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+        return 'NOT_FOUND'
+    } else if (error.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN_ERROR') {
+        return 'FORBIDDEN'
+    } else {
+        return 'GENERIC_ERROR'
+    }
+}
 const ErrorOrLoadingPage = ({
     state,
 }: ErrorOrLoadingPageProps): React.ReactElement => {
@@ -24,6 +42,8 @@ const ErrorOrLoadingPage = ({
             return <GenericErrorPage />
         case 'NOT_FOUND':
             return <Error404 />
+        case 'FORBIDDEN':
+            return <ErrorForbiddenPage />
         case 'INVALID_STATUS':
             return <ErrorInvalidSubmissionStatus />
         default:
@@ -31,5 +51,5 @@ const ErrorOrLoadingPage = ({
     }
 }
 
-export { ErrorOrLoadingPage }
+export { ErrorOrLoadingPage, handleAndReturnErrorState }
 export type { InterimState, ErrorOrLoadingPageProps }
