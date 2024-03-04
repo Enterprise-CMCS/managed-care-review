@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import * as Yup from 'yup'
 import {
     Form as UswdsForm,
@@ -539,12 +539,6 @@ export const Contacts = ({
                                                                             data-testid="actuary-contact"
                                                                         >
                                                                             <ActuaryContactFields
-                                                                                actuaryContact={
-                                                                                    _actuaryContact
-                                                                                }
-                                                                                errors={
-                                                                                    errors
-                                                                                }
                                                                                 shouldValidate={
                                                                                     shouldValidate
                                                                                 }

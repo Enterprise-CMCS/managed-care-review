@@ -547,8 +547,6 @@ export const SingleRateCert = ({
 
                 <FormGroup>
                     <ActuaryContactFields
-                        actuaryContact={rateInfo.actuaryContacts[0]}
-                        errors={errors}
                         shouldValidate={shouldValidate}
                         fieldNamePrefix={`${fieldNamePrefix}.actuaryContacts.0`}
                         fieldSetLegend="Certifying Actuary"
@@ -559,7 +557,7 @@ export const SingleRateCert = ({
                         type="button"
                         unstyled
                         className={styles.removeContactBtn}
-                        onClick={multiRatesConfig.removeSelf}
+                        onClick={() => multiRatesConfig.removeSelf}
                     >
                         Remove rate certification
                     </Button>
