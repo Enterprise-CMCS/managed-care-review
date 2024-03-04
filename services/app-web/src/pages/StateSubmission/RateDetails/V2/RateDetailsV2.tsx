@@ -47,6 +47,8 @@ import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
 } from '../../ErrorOrLoadingPage'
+import { featureFlags } from '../../../../common-code/featureFlags'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 export type RateDetailFormValues = {
     id?: string // no id if its a new rate
@@ -134,11 +136,21 @@ const RateDetailsV2 = ({
     const { getKey } = useS3()
     const displayAsStandaloneRate = type === 'SINGLE'
     const { loggedInUser } = useAuth()
+    const ldClient = useLDClient()
+    const useLinkedRates = ldClient?.variation(
+        featureFlags.LINK_RATES.flag,
+        featureFlags.LINK_RATES.defaultValue
+    )
+
+    const useEditUnlockRate = ldClient?.variation(
+        featureFlags.RATE_EDIT_UNLOCK.flag,
+        featureFlags.RATE_EDIT_UNLOCK.defaultValue
+    )
     // Form validation
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const rateDetailsFormSchema = RateDetailsFormSchema({
-        'rate-edit-unlock': true,
-        // Add linked rates logic
+        'rate-edit-unlock': useEditUnlockRate,
+        'link-rates': useLinkedRates,
     })
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
