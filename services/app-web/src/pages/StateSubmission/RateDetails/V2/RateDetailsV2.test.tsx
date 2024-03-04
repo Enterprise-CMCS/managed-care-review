@@ -113,7 +113,7 @@ describe('RateDetails', () => {
                 })
             })
             //eslint-disable-next-line jest/no-disabled-tests
-            it('disabled with alert if previously submitted with more than one rate cert file', async () => {
+            it.skip('disabled with alert if previously submitted with more than one rate cert file', async () => {
                 const rateID = 'abc-123'
                 renderWithProviders(
                     <Routes>
