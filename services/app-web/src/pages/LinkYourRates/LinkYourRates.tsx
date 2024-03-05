@@ -13,14 +13,12 @@ import { LinkRateSelect } from './LinkRateSelect'
 
 export const LinkYourRates = (): React.ReactElement | null => {
     const { values } = useFormikContext()
+    // console.log(values)
 
     return (
-        <FormGroup test-id="linkYourRates">
+        <FormGroup data-testid="linkYourRates">
             <div role="note">
-                <span
-                    className={styles.requiredOptionalText}
-                    style={{ color: 'red' }}
-                >
+                <span className={styles.requiredOptionalText}>
                     All fields are required
                 </span>
             </div>
