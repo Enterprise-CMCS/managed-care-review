@@ -13,25 +13,25 @@ fragment rateRevisionFragment on RateRevision {
         updatedReason
     }
     formData {
-        rateType,
-        rateCapitationType,
+        rateType
+        rateCapitationType
         rateDocuments {
             name
             s3URL
             sha256
-        },
+        }
         supportingDocuments {
             name
             s3URL
             sha256
-        },
-        rateDateStart,
-        rateDateEnd,
-        rateDateCertified,
-        amendmentEffectiveDateStart,
-        amendmentEffectiveDateEnd,
-        rateProgramIDs,
-        rateCertificationName,
+        }
+        rateDateStart
+        rateDateEnd
+        rateDateCertified
+        amendmentEffectiveDateStart
+        amendmentEffectiveDateEnd
+        rateProgramIDs
+        rateCertificationName
         certifyingActuaryContacts {
             id
             name
@@ -39,7 +39,7 @@ fragment rateRevisionFragment on RateRevision {
             email
             actuarialFirm
             actuarialFirmOther
-        },
+        }
         addtlActuaryContacts {
             id
             name
@@ -47,7 +47,7 @@ fragment rateRevisionFragment on RateRevision {
             email
             actuarialFirm
             actuarialFirmOther
-        },
+        }
         actuaryCommunicationPreference
         packagesWithSharedRateCerts {
             packageName
@@ -81,7 +81,7 @@ fragment rateRevisionFragment on RateRevision {
             riskBasedContract
             submissionDescription
             stateContacts {
-                name,
+                name
                 title
                 email
             }
@@ -122,25 +122,29 @@ fragment rateRevisionFragment on RateRevision {
     }
 }
 
+fragment rateFields on Rate {
+    id
+    createdAt
+    updatedAt
+    stateCode
+    stateNumber
+    state {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+        }
+    }
+    status
+    initiallySubmittedAt
+}
+
 query fetchRate($input: FetchRateInput!) {
     fetchRate(input: $input) {
         rate {
-            id
-            createdAt
-            updatedAt
-            stateCode
-            stateNumber
-            state {
-                code
-                name
-                programs {
-                    id
-                    name
-                    fullName
-                }
-            }
-            status
-            initiallySubmittedAt
+            ...rateFields
 
             draftRevision {
                 ...rateRevisionFragment

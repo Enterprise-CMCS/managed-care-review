@@ -1,10 +1,8 @@
-import { mockMNState } from "../../common-code/healthPlanFormDataMocks/healthPlanFormData";
-import { Contract} from '../../gen/gqlClient'
+import { mockMNState } from '../../common-code/healthPlanFormDataMocks/healthPlanFormData'
+import { Contract } from '../../gen/gqlClient'
 
 // Assemble versions of Contract data (with or without rates) for jest testing. Intended for use with related GQL Moc file.
-function mockContractPackage(
-    partial?: Partial<Contract>
-): Contract {
+function mockContractPackage(partial?: Partial<Contract>): Contract {
     return {
         status: 'DRAFT',
         createdAt: new Date(),
@@ -15,6 +13,8 @@ function mockContractPackage(
         stateNumber: 5,
         draftRevision: {
             id: '123',
+            createdAt: new Date(),
+            updatedAt: new Date(),
             formData: {
                 programIDs: ['pmap'],
                 populationCovered: 'MEDICAID',
@@ -53,7 +53,7 @@ function mockContractPackage(
                 modifiedNetworkAdequacyStandards: true,
                 modifiedLengthOfContract: false,
                 modifiedNonRiskPaymentArrangements: true,
-            }
+            },
         },
 
         draftRates: [
@@ -81,7 +81,9 @@ function mockContractPackage(
                         rateDateCertified: new Date(),
                         amendmentEffectiveDateStart: new Date(),
                         amendmentEffectiveDateEnd: new Date(),
-                        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        rateProgramIDs: [
+                            'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                        ],
                         certifyingActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
@@ -100,9 +102,8 @@ function mockContractPackage(
                         ],
                         actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
                         packagesWithSharedRateCerts: [],
-                    }
-                }
-
+                    },
+                },
             },
         ],
         packageSubmissions: [],
@@ -110,4 +111,4 @@ function mockContractPackage(
     }
 }
 
-export {mockContractPackage}
+export { mockContractPackage }
