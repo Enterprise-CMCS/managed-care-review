@@ -242,50 +242,6 @@ fragment contractFormDataFragment on ContractFormData {
     modifiedNonRiskPaymentArrangements
 }
 
-fragment rateFormDataFragment on RateFormData {
-    rateType
-    rateCapitationType
-    rateDocuments {
-        name
-        s3URL
-        sha256
-    }
-    supportingDocuments {
-        name
-        s3URL
-        sha256
-    }
-    rateDateStart
-    rateDateEnd
-    rateDateCertified
-    amendmentEffectiveDateStart
-    amendmentEffectiveDateEnd
-    rateProgramIDs
-    rateCertificationName
-    certifyingActuaryContacts {
-        id
-        name
-        titleRole
-        email
-        actuarialFirm
-        actuarialFirmOther
-    }
-    addtlActuaryContacts {
-        id
-        name
-        titleRole
-        email
-        actuarialFirm
-        actuarialFirmOther
-    }
-    actuaryCommunicationPreference
-    packagesWithSharedRateCerts {
-        packageName
-        packageId
-        packageStatus
-    }
-}
-
 fragment contractRevisionFragment on ContractRevision {
     id
     createdAt

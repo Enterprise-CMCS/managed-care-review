@@ -324,7 +324,7 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('renders supporting rates docs when they exist', async () => {
-        const draftContract = mockContractPackageSubmitted()
+        const draftContract = mockContractPackageDraft()
         if (
             draftContract.draftRates &&
             draftContract.draftRates[0].draftRevision
