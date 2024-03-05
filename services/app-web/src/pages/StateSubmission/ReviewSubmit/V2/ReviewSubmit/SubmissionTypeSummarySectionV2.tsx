@@ -12,7 +12,7 @@ import { Program, Contract } from '../../../../../gen/gqlClient'
 import { usePreviousSubmission } from '../../../../../hooks/usePreviousSubmission'
 import { booleanAsYesNoUserValue } from '../../../../../components/Form/FieldYesNo/FieldYesNo'
 import { SectionCard } from '../../../../../components/SectionCard'
-import styles from './SubmissionSummarySection.module.scss'
+import styles from '../../../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
 
 export type SubmissionTypeSummarySectionV2Props = {
     contract: Contract
