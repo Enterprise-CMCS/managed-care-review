@@ -1,4 +1,4 @@
-fragment rateRevisionFragment on RateRevision {
+fragment rateRevisionFragmentForFetchRate on RateRevision {
     id
     createdAt
     updatedAt
@@ -147,11 +147,11 @@ query fetchRate($input: FetchRateInput!) {
             ...rateFields
 
             draftRevision {
-                ...rateRevisionFragment
+                ...rateRevisionFragmentForFetchRate
             }
 
             revisions {
-                ...rateRevisionFragment
+                ...rateRevisionFragmentForFetchRate
             }
         }
     }

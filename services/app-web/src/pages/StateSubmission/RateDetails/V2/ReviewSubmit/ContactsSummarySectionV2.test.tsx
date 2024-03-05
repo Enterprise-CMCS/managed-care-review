@@ -2,13 +2,13 @@ import { screen } from '@testing-library/react'
 import { renderWithProviders } from '../../../../../testHelpers/jestHelpers'
 import { ContactsSummarySection } from './ContactsSummarySectionV2'
 import {
-    mockContractAndRatesDraftV2,
-    mockContractAndRatesSubmittedV2
+    mockContractPackageDraft,
+    mockContractPackageSubmitted
 } from '../../../../../testHelpers/apolloMocks'
 
 describe('ContactsSummarySection', () => {
-    const draftSubmission = mockContractAndRatesDraftV2()
-    const stateSubmission = mockContractAndRatesSubmittedV2()
+    const draftSubmission = mockContractPackageDraft()
+    const stateSubmission = mockContractPackageSubmitted()
     afterEach(() => jest.clearAllMocks())
 
     it('can render draft submission without errors', () => {

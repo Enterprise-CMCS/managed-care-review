@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import {
-    mockContractAndRatesDraftV2,
-    mockContractAndRatesSubmittedV2,
+    mockContractPackageDraft,
+    mockContractPackageSubmitted,
     mockMNState,
     fetchCurrentUserMock,
     mockValidCMSUser,
@@ -13,8 +13,8 @@ import { Rate } from '../../../../../gen/gqlClient'
 import { testS3Client } from '../../../../../testHelpers/s3Helpers'
 
 describe('RateDetailsSummarySection', () => {
-    const draftContract = mockContractAndRatesDraftV2()
-    const submittedContract = mockContractAndRatesSubmittedV2()
+    const draftContract = mockContractPackageDraft()
+    const submittedContract = mockContractPackageSubmitted()
     const statePrograms = mockMNState().programs
     const mockRateInfos: Rate[] = [
         {
@@ -220,7 +220,7 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('can render correct rate name for new rate submission', async () => {
-        const contract = mockContractAndRatesSubmittedV2()
+        const contract = mockContractPackageSubmitted()
         contract.packageSubmissions[0].rateRevisions[0].formData.rateCertificationName =
             'MCR-MN-0005-SNBC-RATE-20221013-20221013-CERTIFICATION-20221013'
 
@@ -248,7 +248,7 @@ describe('RateDetailsSummarySection', () => {
 
     it('can render correct rate name for AMENDMENT rate submission', () => {
         const submission = {
-            ...mockContractAndRatesDraftV2(),
+            ...mockContractPackageDraft(),
             rateDateStart: new Date('2022-01-25'),
             rateDateEnd: new Date('2023-01-25'),
             rateDateCertified: new Date('2022-01-26'),
@@ -283,7 +283,7 @@ describe('RateDetailsSummarySection', () => {
 
     it('can render all rate details fields for new rate certification submission', async () => {
         const statePrograms = mockMNState().programs
-        const contract = mockContractAndRatesSubmittedV2()
+        const contract = mockContractPackageSubmitted()
         contract.packageSubmissions[0].rateRevisions[0].formData.rateCertificationName =
            'MCR-MN-0005-SNBC-RATE-20221014-20221014-CERTIFICATION-20221014'
         contract.packageSubmissions[0].rateRevisions[0].formData.rateType = 'NEW'
@@ -485,7 +485,7 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('renders rate range capitation type', () => {
-        const draftContract = mockContractAndRatesDraftV2()
+        const draftContract = mockContractPackageDraft()
         draftContract.draftRates![0].draftRevision!.formData.rateCapitationType = 'RATE_RANGE'
         renderWithProviders(
             <RateDetailsSummarySection
@@ -512,7 +512,7 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('renders programs that apply to rate certification', async () => {
-        const draftContract = mockContractAndRatesDraftV2()
+        const draftContract = mockContractPackageDraft()
         draftContract.draftRates![0].draftRevision!.formData.rateProgramIDs = [
             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
             'd95394e5-44d1-45df-8151-1cc1ee66f100',
@@ -538,7 +538,7 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('renders rate program names even when rate program ids are missing', async () => {
-        const draftContract = mockContractAndRatesDraftV2()
+        const draftContract = mockContractPackageDraft()
         draftContract.draftRates![0].draftRevision!.formData.rateProgramIDs = []
         draftContract.draftRevision!.formData.programIDs = [
             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
@@ -565,7 +565,7 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('renders multiple rate certifications with program names', async () => {
-        const draftContract = mockContractAndRatesDraftV2()
+        const draftContract = mockContractPackageDraft()
         draftContract.draftRates = mockRateInfos
         renderWithProviders(
             <RateDetailsSummarySection
@@ -588,7 +588,7 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('renders multiple rate certifications with rate type', async () => {
-        const draftContract = mockContractAndRatesDraftV2()
+        const draftContract = mockContractPackageDraft()
         draftContract.draftRates = mockRateInfos
 
         renderWithProviders(
@@ -612,7 +612,7 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('renders multiple rate certifications with documents', async () => {
-        const draftSubmission = mockContractAndRatesDraftV2()
+        const draftSubmission = mockContractPackageDraft()
         draftSubmission.draftRates = mockRateInfos
         renderWithProviders(
             <RateDetailsSummarySection
@@ -645,7 +645,7 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('renders multiple rate certifications with certifying actuary', async () => {
-        const draftContract = mockContractAndRatesDraftV2()
+        const draftContract = mockContractPackageDraft()
         draftContract.draftRates = mockRateInfos
         renderWithProviders(
             <RateDetailsSummarySection

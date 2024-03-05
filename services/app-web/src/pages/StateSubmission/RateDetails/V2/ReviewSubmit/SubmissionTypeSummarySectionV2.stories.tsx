@@ -4,7 +4,7 @@ import {
     SubmissionTypeSummarySectionV2Props,
     SubmissionTypeSummarySectionV2,
 } from './SubmissionTypeSummarySectionV2'
-import { mockContractAndRatesDraftV2 } from '../../../../../testHelpers/apolloMocks'
+import { mockContractPackageDraft } from '../../../../../testHelpers/apolloMocks'
 
 export default {
     title: 'Components/SubmissionSummary/SubmissionTypeSummarySection/V2',
@@ -23,7 +23,7 @@ export const WithAction = Template.bind({})
 WithAction.decorators = [(Story) => ProvidersDecorator(Story, {})]
 
 WithAction.args = {
-    contract: mockContractAndRatesDraftV2(),
+    contract: mockContractPackageDraft(),
     //TODO: Use better mock program data
     statePrograms: [],
     editNavigateTo: 'submission-type',
@@ -33,6 +33,6 @@ export const WithoutAction = Template.bind({})
 WithoutAction.decorators = [(Story) => ProvidersDecorator(Story, {})]
 
 WithoutAction.args = {
-    contract: mockContractAndRatesDraftV2(),
+    contract: mockContractPackageDraft(),
     statePrograms: [],
 }

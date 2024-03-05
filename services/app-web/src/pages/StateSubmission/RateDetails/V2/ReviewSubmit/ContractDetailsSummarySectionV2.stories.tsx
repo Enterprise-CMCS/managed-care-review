@@ -4,7 +4,7 @@ import {
     ContractDetailsSummarySectionV2Props,
     ContractDetailsSummarySectionV2 as ContractDetailsSummarySection,
 } from './ContractDetailsSummarySectionV2'
-import { mockContractAndRatesDraftV2 } from '../../../../../testHelpers/apolloMocks'
+import { mockContractPackageDraft } from '../../../../../testHelpers/apolloMocks'
 
 export default {
     title: 'Components/SubmissionSummary/ContractDetailsSummarySection/V2',
@@ -23,7 +23,7 @@ export const WithAction = Template.bind({})
 WithAction.decorators = [(Story) => ProvidersDecorator(Story, {})]
 
 WithAction.args = {
-    contract: mockContractAndRatesDraftV2(),
+    contract: mockContractPackageDraft(),
     documentDateLookupTable: {
         fakesha: 'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
         previousSubmissionDate: '01/01/01'
@@ -35,7 +35,7 @@ export const WithoutAction = Template.bind({})
 WithoutAction.decorators = [(Story) => ProvidersDecorator(Story, {})]
 
 WithoutAction.args = {
-    contract: mockContractAndRatesDraftV2(),
+    contract: mockContractPackageDraft(),
     documentDateLookupTable: {
         fakesha: 'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
         previousSubmissionDate: '01/01/01'

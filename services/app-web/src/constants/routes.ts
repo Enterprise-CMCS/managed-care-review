@@ -23,6 +23,7 @@ const ROUTES = [
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_DOCUMENTS',
     'SUBMISSIONS_REVIEW_SUBMIT',
+    'SUBMISSIONS_REVIEW_SUBMIT_V2',
     'SUBMISSIONS_REVISION',
     'SUBMISSIONS_SUMMARY',
     'SUBMISSIONS_MCCRSID',
@@ -60,6 +61,7 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_CONTACTS: '/submissions/:id/edit/contacts',
     SUBMISSIONS_DOCUMENTS: '/submissions/:id/edit/documents',
     SUBMISSIONS_REVIEW_SUBMIT: '/submissions/:id/edit/review-and-submit',
+    SUBMISSIONS_REVIEW_SUBMIT_V2: '/submissions/:id/edit/review-and-submit-v2',
     SUBMISSIONS_SUMMARY: '/submissions/:id',
     SUBMISSIONS_MCCRSID: '/submissions/:id/mccrs-record-number',
     SUBMISSIONS_REVISION: '/submissions/:id/revisions/:revisionVersion',
@@ -83,6 +85,7 @@ const STATE_SUBMISSION_FORM_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_DOCUMENTS',
     'SUBMISSIONS_REVIEW_SUBMIT',
+    'SUBMISSIONS_REVIEW_SUBMIT_V2',
 ]
 
 const STATE_SUBMISSION_SUMMARY_ROUTES: RouteTWithUnknown[] = [
@@ -99,6 +102,7 @@ const QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_DOCUMENTS',
     'SUBMISSIONS_REVIEW_SUBMIT',
+    'SUBMISSIONS_REVIEW_SUBMIT_V2',
 ]
 
 /*
@@ -144,6 +148,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_DOCUMENTS: 'Supporting documents',
     SUBMISSIONS_MCCRSID: 'Add MC-CRS record number',
     SUBMISSIONS_REVIEW_SUBMIT: 'Review and submit',
+    SUBMISSIONS_REVIEW_SUBMIT_V2: 'Review and submit V2',
     SUBMISSIONS_REVISION: 'Submission revision',
     SUBMISSIONS_SUMMARY: 'Submission summary',
     SUBMISSIONS_QUESTIONS_AND_ANSWERS: 'Q&A',

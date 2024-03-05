@@ -37,7 +37,7 @@ const contractRevisionOnRateDataMock = (
             {
                 __typename: 'StateContact',
                 name: 'Name',
-                title: null,
+                titleRole: null,
                 email: 'example@example.com',
             },
         ],

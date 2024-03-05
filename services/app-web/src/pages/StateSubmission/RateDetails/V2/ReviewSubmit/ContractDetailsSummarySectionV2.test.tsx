@@ -3,8 +3,8 @@ import { renderWithProviders } from '../../../../../testHelpers/jestHelpers'
 import { ContractDetailsSummarySectionV2 as ContractDetailsSummarySection } from './ContractDetailsSummarySectionV2'
 import {
     fetchCurrentUserMock,
-    mockContractAndRatesDraftV2,
-    mockContractAndRatesSubmittedV2,
+    mockContractPackageDraft,
+    mockContractPackageSubmitted,
 } from '../../../../../testHelpers/apolloMocks'
 import { testS3Client } from '../../../../../testHelpers/s3Helpers'
 import {
@@ -19,7 +19,7 @@ describe('ContractDetailsSummarySection', () => {
 
     it('can render draft submission without errors (review and submit behavior)', async () => {
         const testContract = {
-            ...mockContractAndRatesDraftV2(),
+            ...mockContractPackageDraft(),
             documents: [
                 {
                     s3URL: 's3://bucketname/key/test1',
@@ -72,7 +72,7 @@ describe('ContractDetailsSummarySection', () => {
             <ContractDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={{
-                    ...mockContractAndRatesSubmittedV2(),
+                    ...mockContractPackageSubmitted(),
                     status: 'SUBMITTED',
                 }}
                 submissionName="MN-PMAP-0001"
@@ -104,7 +104,7 @@ describe('ContractDetailsSummarySection', () => {
     })
 
     it('can render all contract details fields', async () => {
-        const contract = mockContractAndRatesDraftV2()
+        const contract = mockContractPackageDraft()
        
         renderWithProviders(
             <ContractDetailsSummarySection
@@ -156,7 +156,7 @@ describe('ContractDetailsSummarySection', () => {
     })
 
     it('displays correct contract 438 attestation yes and no text and description', async () => {
-        const contract = mockContractAndRatesDraftV2()
+        const contract = mockContractPackageDraft()
         contract.draftRevision!.formData = {
             ...contract.draftRevision!.formData,
             statutoryRegulatoryAttestation: false,
@@ -197,7 +197,7 @@ describe('ContractDetailsSummarySection', () => {
 
     it('displays correct effective dates text for base contract', async () => {
         await waitFor(() => {
-            const contract = mockContractAndRatesDraftV2()
+            const contract = mockContractPackageDraft()
             contract.draftRevision!.formData = {
                 ...contract.draftRevision!.formData,
                 contractType: 'BASE',
@@ -224,7 +224,7 @@ describe('ContractDetailsSummarySection', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                contract={mockContractAndRatesDraftV2()}
+                contract={mockContractPackageDraft()}
                 submissionName="MN-PMAP-0001"
             />,
             {
@@ -237,7 +237,7 @@ describe('ContractDetailsSummarySection', () => {
     })
 
     it('render supporting contract docs when they exist', async () => {
-        const contract = mockContractAndRatesDraftV2()
+        const contract = mockContractPackageDraft()
         contract.draftRevision!.formData = {
             ...contract.draftRevision!.formData,
             contractDocuments: [
@@ -317,7 +317,7 @@ describe('ContractDetailsSummarySection', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                contract={mockContractAndRatesDraftV2()}
+                contract={mockContractPackageDraft()}
                 submissionName="MN-PMAP-0001"
             />,
             {
@@ -336,7 +336,7 @@ describe('ContractDetailsSummarySection', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                contract={mockContractAndRatesDraftV2()}
+                contract={mockContractPackageDraft()}
                 submissionName="MN-PMAP-0001"
             />,
             {
@@ -351,7 +351,7 @@ describe('ContractDetailsSummarySection', () => {
     })
 
     it('renders federal authorities for a medicaid contract', async () => {
-        const contract = mockContractAndRatesDraftV2()
+        const contract = mockContractPackageDraft()
         contract.draftRevision!.formData = {
             ...contract.draftRevision!.formData,
             // Add all medicaid federal authorities, as if medicaid contract being unlocked
@@ -392,7 +392,7 @@ describe('ContractDetailsSummarySection', () => {
     })
 
     it('renders federal authorities for a CHIP contract as expected, removing invalid authorities', async () => {
-        const contract = mockContractAndRatesDraftV2()
+        const contract = mockContractPackageDraft()
         contract.draftRevision!.formData = {
             ...contract.draftRevision!.formData,
             populationCovered: 'CHIP',
@@ -447,7 +447,7 @@ describe('ContractDetailsSummarySection', () => {
             <ContractDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={{
-                    ...mockContractAndRatesSubmittedV2(),
+                    ...mockContractPackageSubmitted(),
                     status: 'SUBMITTED',
                 }}
                 submissionName="MN-PMAP-0001"
@@ -472,7 +472,7 @@ describe('ContractDetailsSummarySection', () => {
                     documentDateLookupTable={{
                         previousSubmissionDate: '01/01/01',
                     }}
-                    contract={mockContractAndRatesDraftV2()}
+                    contract={mockContractPackageDraft()}
                     submissionName="MN-PMAP-0001"
                 />,
                 {
@@ -566,7 +566,7 @@ describe('ContractDetailsSummarySection', () => {
         })
 
         it('renders provisions and MLR references for a medicaid base contract', () => {
-            const contract = mockContractAndRatesDraftV2()
+            const contract = mockContractPackageDraft()
             contract.draftRevision!.formData = {
                 ...contract.draftRevision!.formData,
                 contractType: 'BASE',
@@ -623,7 +623,7 @@ describe('ContractDetailsSummarySection', () => {
         })
 
         it('renders provisions with correct MLR references for CHIP amendment', () => {
-            const contract = mockContractAndRatesDraftV2()
+            const contract = mockContractPackageDraft()
             contract.draftRevision!.formData = {
                 ...contract.draftRevision!.formData,
                 populationCovered: 'CHIP',
@@ -698,7 +698,7 @@ describe('ContractDetailsSummarySection', () => {
         })
 
         it('shows missing field error when provisions list is empty and section is in edit mode', () => {
-            const contract = mockContractAndRatesDraftV2()
+            const contract = mockContractPackageDraft()
             contract.draftRevision!.formData = {
                 ...contract.draftRevision!.formData,
                 inLieuServicesAndSettings: undefined,
@@ -755,7 +755,7 @@ describe('ContractDetailsSummarySection', () => {
         })
 
         it('shows missing field error when provisions list is incomplete and summary section is in edit mode', () => {
-            const contract = mockContractAndRatesDraftV2()
+            const contract = mockContractPackageDraft()
             contract.draftRevision!.formData = {
                 ...contract.draftRevision!.formData,
                 modifiedBenefitsProvided: false,
@@ -799,7 +799,7 @@ describe('ContractDetailsSummarySection', () => {
         })
 
         it('does not show missing field error when provisions list is incomplete and summary section is in view only mode', () => {
-            const contract = mockContractAndRatesDraftV2()
+            const contract = mockContractPackageDraft()
             contract.draftRevision!.formData = {
                 ...contract.draftRevision!.formData,
                 modifiedBenefitsProvided: false,
@@ -842,7 +842,7 @@ describe('ContractDetailsSummarySection', () => {
         })
 
         it('does not show missing field error for CHIP amendment when all provisions required are valid', () => {
-            const contract = mockContractAndRatesDraftV2()
+            const contract = mockContractPackageDraft()
             contract.draftRevision!.formData = {
                 ...contract.draftRevision!.formData,
                 modifiedBenefitsProvided: false,
@@ -891,7 +891,7 @@ describe('ContractDetailsSummarySection', () => {
         })
 
         it('does not show missing field error for Medicaid amendment when all provisions required are valid', () => {
-            const contract = mockContractAndRatesDraftV2()
+            const contract = mockContractPackageDraft()
             contract.draftRevision!.formData = {
                 ...contract.draftRevision!.formData,
                 inLieuServicesAndSettings: true,

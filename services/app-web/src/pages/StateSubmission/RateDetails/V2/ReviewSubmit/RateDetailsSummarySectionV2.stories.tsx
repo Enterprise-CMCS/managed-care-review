@@ -4,7 +4,7 @@ import {
     RateDetailsSummarySectionV2Props,
     RateDetailsSummarySectionV2,
 } from './RateDetailsSummarySectionV2'
-import { mockContractAndRatesDraftV2 } from '../../../../../testHelpers/apolloMocks'
+import { mockContractPackageDraft } from '../../../../../testHelpers/apolloMocks'
 
 export default {
     title: 'Components/SubmissionSummary/RateDetailsSummarySection/V2',
@@ -21,7 +21,7 @@ const Template: Story<RateDetailsSummarySectionV2Props> = (args) => (
 
 export const WithAction = Template.bind({})
 WithAction.decorators = [(Story) => ProvidersDecorator(Story, {})]
-const contract = mockContractAndRatesDraftV2()
+const contract = mockContractPackageDraft()
 
 WithAction.args = {
     contract: contract,

@@ -4,7 +4,7 @@ import {
     ModalToggleButton,
 } from '@trussworks/react-uswds'
 import React, { useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import { PageActionsContainer } from '../../../PageActions'
 import styles from './ReviewSubmit.module.scss'
@@ -14,42 +14,89 @@ import { DocumentDateLookupTableType } from '../../../../../documentHelpers/make
 import { RoutesRecord } from '../../../../../constants'
 import { Contract } from '../../../../../gen/gqlClient'
 import { RateDetailsSummarySectionV2 } from './RateDetailsSummarySectionV2'
+import { ContactsSummarySection } from './ContactsSummarySectionV2'
+import { ContractDetailsSummarySectionV2 } from './ContractDetailsSummarySectionV2'
+import { SubmissionTypeSummarySectionV2 } from './SubmissionTypeSummarySectionV2'
+import { useFetchContractQuery } from '../../../../../gen/gqlClient'
+import { ErrorForbiddenPage } from '../../../../Errors/ErrorForbiddenPage'
+import { Error404 } from '../../../../Errors/Error404Page'
+import { GenericErrorPage } from '../../../../Errors/GenericErrorPage'
+import { Loading } from '../../../../../components'
 
-export const ReviewSubmit = ({
-    contract,
-    documentDateLookupTable,
-    submissionName,
-}: {
-    contract: Contract
-    documentDateLookupTable: DocumentDateLookupTableType
-    unlocked: boolean
-    submissionName: string
-}): React.ReactElement => {
+
+type RouteParams = {
+    id: string
+}
+export const ReviewSubmitV2 = (): React.ReactElement => {
+
     const navigate = useNavigate()
     const modalRef = useRef<ModalRef>(null)
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+     // pull the programs off the user
+     const statePrograms = useStatePrograms()
+    const { id } = useParams<keyof RouteParams>()
+    if (!id) {
+        throw new Error(
+            'PROGRAMMING ERROR: id param not set in state submission form.'
+        )
+    }
 
-    // pull the programs off the user
-    const statePrograms = useStatePrograms()
+    const { data, loading, error } = useFetchContractQuery({
+        variables: {
+            input: {
+                contractID: id,
+            },
+        },
+    })
 
+    const contract = data?.fetchContract.contract
+    // if (!contract) {
+    //     throw new Error(
+    //         'PROGRAMMING ERROR: Contract is not found'
+    //     )
+    // }
+  
+    if (loading) {
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
+    } else if (error || !contract) {
+        //error handling for a state user that tries to access rates for a different state
+        if (error?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
+            return (
+                <ErrorForbiddenPage errorMsg={error.graphQLErrors[0].message} />
+            )
+        } else if (error?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+            return <Error404 />
+        } else {
+            return <GenericErrorPage />
+        }
+    }
+
+    const submissionName = 'hello'
+    const documentDateLookupTable = {
+        fakesha: 'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
+        previousSubmissionDate: '01/01/01'
+    }
     const isContractActionAndRateCertification =
     contract.draftRates && contract.draftRates.length > 0
-
     return (
         <GridContainer className={styles.reviewSectionWrapper}>
-            {/* <SubmissionTypeSummarySection
-                submission={draftSubmission}
+            <SubmissionTypeSummarySectionV2
+                contract={contract}
                 submissionName={submissionName}
                 editNavigateTo="../type"
                 statePrograms={statePrograms}
-            /> */}
+            />
 
-            {/* <ContractDetailsSummarySection
-                submission={draftSubmission}
+            <ContractDetailsSummarySectionV2
+                contract={contract}
                 editNavigateTo="../contract-details"
                 submissionName={submissionName}
                 documentDateLookupTable={documentDateLookupTable}
-            /> */}
+            />
 
             {isContractActionAndRateCertification && (
                 <RateDetailsSummarySectionV2
@@ -61,10 +108,10 @@ export const ReviewSubmit = ({
                 />
             )}
 
-            {/* <ContactsSummarySection
-                submission={draftSubmission}
+            <ContactsSummarySection
+                contract={contract}
                 editNavigateTo="../contacts"
-            /> */}
+            />
 
             <PageActionsContainer
                 left={
@@ -98,16 +145,14 @@ export const ReviewSubmit = ({
                 </ModalToggleButton>
             </PageActionsContainer>
 
-            {/* {
-                // if the session is expiring, close this modal so the countdown modal can appear
-                <UnlockSubmitModal
-                    healthPlanPackage={draftSubmission}
-                    submissionName={submissionName}
-                    modalType={unlocked ? 'RESUBMIT' : 'SUBMIT'}
-                    modalRef={modalRef}
-                    setIsSubmitting={setIsSubmitting}
-                />
-            } */}
+            {/* // if the session is expiring, close this modal so the countdown modal can appear
+            <UnlockSubmitModal
+                healthPlanPackage={draftSubmission}
+                submissionName={submissionName}
+                modalType={unlocked ? 'RESUBMIT' : 'SUBMIT'}
+                modalRef={modalRef}
+                setIsSubmitting={setIsSubmitting}
+            /> */}
         </GridContainer>
     )
 }

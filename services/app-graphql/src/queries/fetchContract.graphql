@@ -1,21 +1,7 @@
 query fetchContract($input: FetchContractInput!) {
     fetchContract(input: $input) {
         contract {
-            id
-            status
-            initiallySubmittedAt
-            stateCode
-            state {
-                code
-                name
-                programs {
-                    id
-                    name
-                    fullName
-                }
-            }
-
-            stateNumber
+            ...contractFields
 
             draftRevision {
                 ...contractRevisionFragment
@@ -25,11 +11,11 @@ query fetchContract($input: FetchContractInput!) {
                 ...rateFields
 
                 draftRevision {
-                    ...rateRevisionFragment
+                    ...rateRevisionFragmentForFetchContract
                 }
 
                 revisions {
-                    ...rateRevisionFragment
+                    ...rateRevisionFragmentForFetchContract
                 }
             }
 
@@ -38,6 +24,26 @@ query fetchContract($input: FetchContractInput!) {
             }
         }
     }
+}
+
+fragment contractFields on Contract {
+    id
+    status
+    updatedAt
+    createdAt
+    initiallySubmittedAt
+    stateCode
+    state {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+        }
+    }
+
+    stateNumber
 }
 
 fragment rateFields on Rate {
@@ -59,7 +65,7 @@ fragment rateFields on Rate {
     initiallySubmittedAt
 }
 
-fragment rateRevisionFragment on RateRevision {
+fragment rateRevisionFragmentForFetchContract on RateRevision {
     id
     createdAt
     updatedAt
@@ -143,7 +149,7 @@ fragment rateRevisionFragment on RateRevision {
             submissionDescription
             stateContacts {
                 name
-                title
+                titleRole
                 email
             }
             supportingDocuments {
@@ -194,7 +200,7 @@ fragment contractFormDataFragment on ContractFormData {
 
     stateContacts {
         name
-        title
+        titleRole
         email
     }
 
@@ -316,38 +322,16 @@ fragment packageSubmissionsFragment on ContractPackageSubmission {
         ...contractRevisionFragment
     }
     rateRevisions {
-        ...rateRevisionFragment
+        ...rateRevisionFragmentForFetchContract
     }
 }
 
 fragment submittableRevisionsFields on SubmittableRevision {
     ... on ContractRevision {
-        id
-        createdAt
-        updatedAt
-        submitInfo {
-            ...updateInformationFields
-        }
-        unlockInfo {
-            ...updateInformationFields
-        }
-        formData {
-            ...contractFormDataFragment
-        }
+        ...contractRevisionFragment
     }
     ... on RateRevision {
-        id
-        createdAt
-        updatedAt
-        unlockInfo {
-            ...updateInformationFields
-        }
-        submitInfo {
-            ...updateInformationFields
-        }
-        formData {
-            ...rateFormDataFragment
-        }
+        ...rateRevisionFragmentForFetchContract
     }
 }
 
