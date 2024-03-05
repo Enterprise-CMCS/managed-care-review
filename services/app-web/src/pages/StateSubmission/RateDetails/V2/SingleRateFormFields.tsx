@@ -91,6 +91,9 @@ export const SingleRateFormFields = ({
         if (!shouldValidate) return undefined
         return getIn(errors, `${fieldNamePrefix}.${fieldName}`)
     }
+    if (rateForm.status === 'SUBMITTED' || rateForm.status === 'RESUBMITTED') {
+        return <div>This is a Linked Rate. UI forthcoming</div>
+    }
 
     return (
         <>

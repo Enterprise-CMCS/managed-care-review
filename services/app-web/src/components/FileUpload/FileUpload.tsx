@@ -116,7 +116,6 @@ export const FileUpload = ({
 
             items.push(newItem)
         }
-        console.log(items)
 
         return items
     }

@@ -31,6 +31,7 @@ import {
     STATE_SUBMISSION_FORM_ROUTES,
 } from '../../../../constants'
 import {
+    HealthPlanPackageStatus,
     Rate,
     RateFormDataInput,
     RateRevision,
@@ -52,6 +53,7 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 export type RateDetailFormValues = {
     id?: string // no id if its a new rate
+    status?: HealthPlanPackageStatus
     rateType: RateRevision['formData']['rateType']
     rateCapitationType: RateRevision['formData']['rateCapitationType']
     rateDateStart: RateRevision['formData']['rateDateStart']
@@ -76,12 +78,14 @@ export type RateDetailFormConfig = {
 const generateFormValues = (
     getKey: S3ClientT['getKey'],
     rateRev?: RateRevision,
-    rateID?: string
+    rateID?: string,
+    rateStatus?: HealthPlanPackageStatus
 ): RateDetailFormValues => {
     const rateInfo = rateRev?.formData
 
     return {
         id: rateID,
+        status: rateStatus,
         rateType: rateInfo?.rateType ?? undefined,
         rateCapitationType: rateInfo?.rateCapitationType ?? undefined,
         rateDateStart: formatForForm(rateInfo?.rateDateStart),
@@ -249,8 +253,6 @@ const RateDetailsV2 = ({
             redirectPath: RouteT
         }
     ) => {
-        console.log(setSubmitting)
-        console.log('THIS', options.type, rates[0].rateDocuments)
         if (options.type === 'CONTINUE') {
             const fileErrorsNeedAttention = rates.some((rateForm) =>
                 isLoadingOrHasFileErrors(
@@ -300,7 +302,12 @@ const RateDetailsV2 = ({
 
         const { id, ...formData } = gqlFormDatas[0] // only grab the first rate in the array because multi-rates functionality not added yet. This will be part of Link Rates epic
 
-        if (options.type === 'CONTINUE' && id && displayAsStandaloneRate && submitRate) {
+        if (
+            options.type === 'CONTINUE' &&
+            id &&
+            displayAsStandaloneRate &&
+            submitRate
+        ) {
             await submitRate(id, formData, setSubmitting, 'DASHBOARD')
         } else if (options.type === 'CONTINUE' && !displayAsStandaloneRate) {
             throw new Error(
@@ -374,11 +381,16 @@ const RateDetailsV2 = ({
                         loggedInUser={loggedInUser}
                         unlockedInfo={
                             fetchContractData?.fetchContract.contract
-                                .draftRevision?.unlockInfo || fetchRateData?.fetchRate.rate.draftRevision?.unlockInfo
+                                .draftRevision?.unlockInfo ||
+                            fetchRateData?.fetchRate.rate.draftRevision
+                                ?.unlockInfo
                         }
                         showPageErrorMessage={false} // TODO WHEN WE IMPLEMENT UDPATE API -  FIGURE OUT ERROR BANNER FOR BOTH MULTI AND STANDALONE USE CASE
                     />
                 )}
+            </div>
+            <div style={{ textAlign: 'center' }}>
+                This is the V2 version of the Rate Details Page
             </div>
             <Formik
                 initialValues={initialValues}
@@ -388,7 +400,9 @@ const RateDetailsV2 = ({
                         setSubmitting,
                         {
                             type: 'CONTINUE',
-                            redirectPath: displayAsStandaloneRate?  'DASHBOARD_SUBMISSIONS':  'SUBMISSIONS_CONTACTS',
+                            redirectPath: displayAsStandaloneRate
+                                ? 'DASHBOARD_SUBMISSIONS'
+                                : 'SUBMISSIONS_CONTACTS',
                         }
                     )
                 }}
