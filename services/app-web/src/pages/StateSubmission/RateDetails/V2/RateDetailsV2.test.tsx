@@ -15,6 +15,7 @@ import { RoutesRecord } from '../../../../constants'
 import userEvent from '@testing-library/user-event'
 import { rateRevisionDataMock } from '../../../../testHelpers/apolloMocks/rateDataMock'
 import { fetchDraftRateMockSuccess } from '../../../../testHelpers/apolloMocks/rateGQLMocks'
+import { clickAddNewRate, fillOutFirstRate, rateCertifications } from '../../../../testHelpers/jestRateHelpers'
 
 describe('RateDetails', () => {
     describe('handles edit  of a single rate', () => {
@@ -112,8 +113,8 @@ describe('RateDetails', () => {
                     expect(submitButton).not.toHaveAttribute('aria-disabled')
                 })
             })
-            //eslint-disable-next-line jest/no-disabled-tests
-            it.skip('disabled with alert if previously submitted with more than one rate cert file', async () => {
+
+            it('disabled with alert if previously submitted with more than one rate cert file', async () => {
                 const rateID = 'abc-123'
                 renderWithProviders(
                     <Routes>
@@ -209,32 +210,65 @@ describe('RateDetails', () => {
 
     describe('handles editing multiple rates', () => {
         it.todo('handles multiple rates')
-        it.todo(
-            'renders add another rate button, which adds another set of rate certification fields to the form'
+        it(
+            'add rate button will increase number of rate certification fields on the', async () => {
+                const rateID = '123-dfg'
+                renderWithProviders(
+                    <Routes>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                            element={<RateDetailsV2 type="MULTI" />}
+                        />
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({ statusCode: 200 }),
+                                // fetchContractMockSuccess({ id: rateID }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: `/submissions/${rateID}/edit`,
+                        },
+                    }
+                )
+
+                const rateCertsOnLoad = rateCertifications(screen)
+                expect(rateCertsOnLoad).toHaveLength(1)
+
+                await fillOutFirstRate(screen)
+
+                await clickAddNewRate(screen)
+
+                await waitFor(() => {
+                    const rateCertsAfterAddAnother = rateCertifications(screen)
+                    expect(rateCertsAfterAddAnother).toHaveLength(2)
+                })
+            }
         )
-        //eslint-disable-next-line jest/no-disabled-tests
-        it.skip('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
-            const rateID = '123-dfg'
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
-                        element={<RateDetailsV2 type="MULTI" />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            // fetchContractMockSuccess({ id: rateID }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: `/submissions/${rateID}/edit`,
-                    },
-                }
-            )
-            await screen.findByText('Rate certification type')
+
+        it('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
+                const rateID = '123-dfg'
+                renderWithProviders(
+                    <Routes>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                            element={<RateDetailsV2 type="MULTI" />}
+                        />
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({ statusCode: 200 }),
+                                // fetchContractMockSuccess({ id: rateID }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: `/submissions/${rateID}/edit`,
+                        },
+                    }
+                )
+                await screen.findByText('Rate certification type')
             const input = screen.getByLabelText(
                 'Upload one rate certification document'
             )
@@ -262,3 +296,5 @@ describe('RateDetails', () => {
         it.todo('cannot continue with partially filled out second rate')
     })
 })
+
+

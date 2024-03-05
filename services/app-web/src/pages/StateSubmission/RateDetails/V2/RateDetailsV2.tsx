@@ -188,7 +188,7 @@ const RateDetailsV2 = ({
         skip: !displayAsStandaloneRate,
     })
     const ratesFromContract =
-        fetchContractData?.fetchContract.contract.draftRates
+        fetchContractData?.fetchContract.contract.draftRates // TODO WHEN WE IMPLEMENT UDPATE API, THIS SHOULD ALSO LOAD FROM ANY LINKED RATES
     const initialRequestLoading = fetchContractLoading || fetchRateLoading
     const initialRequestError = fetchContractError || fetchRateError
     const previousDocuments: string[] = []
@@ -249,6 +249,8 @@ const RateDetailsV2 = ({
             redirectPath: RouteT
         }
     ) => {
+        console.log(setSubmitting)
+        console.log('THIS', options.type, rates[0].rateDocuments)
         if (options.type === 'CONTINUE') {
             const fileErrorsNeedAttention = rates.some((rateForm) =>
                 isLoadingOrHasFileErrors(
@@ -298,9 +300,9 @@ const RateDetailsV2 = ({
 
         const { id, ...formData } = gqlFormDatas[0] // only grab the first rate in the array because multi-rates functionality not added yet. This will be part of Link Rates epic
 
-        if (options.type === 'CONTINUE' && id && submitRate) {
+        if (options.type === 'CONTINUE' && id && displayAsStandaloneRate && submitRate) {
             await submitRate(id, formData, setSubmitting, 'DASHBOARD')
-        } else if (options.type === 'CONTINUE' && !id) {
+        } else if (options.type === 'CONTINUE' && !displayAsStandaloneRate) {
             throw new Error(
                 'Rate create and update for a new rate is not yet implemented. This will be part of Link Rates epic.'
             )
@@ -372,9 +374,9 @@ const RateDetailsV2 = ({
                         loggedInUser={loggedInUser}
                         unlockedInfo={
                             fetchContractData?.fetchContract.contract
-                                .draftRevision?.unlockInfo
+                                .draftRevision?.unlockInfo || fetchRateData?.fetchRate.rate.draftRevision?.unlockInfo
                         }
-                        showPageErrorMessage={false} // TODO FIGURE OUT ERROR BANNER FOR BOTH MULTI AND STANDALONE USE CASE
+                        showPageErrorMessage={false} // TODO WHEN WE IMPLEMENT UDPATE API -  FIGURE OUT ERROR BANNER FOR BOTH MULTI AND STANDALONE USE CASE
                     />
                 )}
             </div>
@@ -386,7 +388,7 @@ const RateDetailsV2 = ({
                         setSubmitting,
                         {
                             type: 'CONTINUE',
-                            redirectPath: 'DASHBOARD_SUBMISSIONS',
+                            redirectPath: displayAsStandaloneRate?  'DASHBOARD_SUBMISSIONS':  'SUBMISSIONS_CONTACTS',
                         }
                     )
                 }}
