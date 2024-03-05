@@ -12,7 +12,8 @@ import { formatCalendarDate } from '../../../../../common-code/dateHelpers'
 import { DoubleColumnGrid } from '../../../../../components/DoubleColumnGrid'
 import { DownloadButton } from '../../../../../components/DownloadButton'
 import { usePreviousSubmission } from '../../../../../hooks/usePreviousSubmission'
-import styles from './SubmissionSummarySection.module.scss'
+// import styles from './SubmissionSummarySection.module.scss'
+import styles from '../../../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
 
 import {
     sortModifiedProvisions,

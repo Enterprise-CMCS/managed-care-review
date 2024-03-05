@@ -9,6 +9,8 @@ import { pruneDuplicateEmails } from '../../emailer/formatters'
 const contractSchema = z.object({
     id: z.string().uuid(),
     status: statusSchema,
+    createdAt: z.date(),
+    updatedAt: z.date(),
     stateCode: z.string(),
     mccrsID: z.string().optional(),
     stateNumber: z.number().min(1),

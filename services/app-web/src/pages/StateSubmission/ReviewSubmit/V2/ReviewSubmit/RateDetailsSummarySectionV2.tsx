@@ -7,7 +7,9 @@ import { DoubleColumnGrid } from '../../../../../components/DoubleColumnGrid'
 import { DownloadButton } from '../../../../../components/DownloadButton'
 import { UploadedDocumentsTable } from '../../../../../components/SubmissionSummarySection'
 import { usePreviousSubmission } from '../../../../../hooks/usePreviousSubmission'
-import styles from './SubmissionSummarySection.module.scss'
+// import styles from '../../../ReviewSubmiSubmissionSummarySection.module.scss'
+import styles from '../../../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
+
 import { recordJSException } from '../../../../../otelHelpers'
 import { DataDetailMissingField } from '../../../../../components/DataDetail/DataDetailMissingField'
 import { DataDetailContactField } from '../../../../../components/DataDetail/DataDetailContactField/DataDetailContactField'
@@ -15,10 +17,15 @@ import { DocumentDateLookupTableType } from '../../../../../documentHelpers/make
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../../../../components/DocumentWarning'
 import { SectionCard } from '../../../../../components/SectionCard'
-import { Rate, Contract, Program, RateRevision } from '../../../../../gen/gqlClient'
+import {
+    Rate,
+    Contract,
+    Program,
+    RateRevision,
+} from '../../../../../gen/gqlClient'
 
 export type RateDetailsSummarySectionV2Props = {
-    contract: Contract,
+    contract: Contract
     editNavigateTo?: string
     documentDateLookupTable: DocumentDateLookupTableType
     isCMSUser?: boolean
@@ -58,7 +65,8 @@ export const RateDetailsSummarySectionV2 = ({
     const contractFormData =
         contract.draftRevision?.formData ||
         contract.packageSubmissions[0].contractRevision.formData
-    const rates = contract.draftRates || contract.packageSubmissions[0].rateRevisions
+    const rates =
+        contract.draftRates || contract.packageSubmissions[0].rateRevisions
     const { getKey, getBulkDlURL } = useS3()
     const [zippedFilesURL, setZippedFilesURL] = useState<
         string | undefined | Error
@@ -73,16 +81,20 @@ export const RateDetailsSummarySectionV2 = ({
             : ''
     }
 
-    const ratePrograms = (
-        rate: Rate | RateRevision
-    ) => {
+    const ratePrograms = (rate: Rate | RateRevision) => {
         /* if we have rateProgramIDs, use them, otherwise use programIDs */
         let programIDs = [] as string[]
         const rateFormData = getRateFormData(rate)
-        
-        if (rateFormData?.rateProgramIDs && rateFormData?.rateProgramIDs.length > 0) {
+
+        if (
+            rateFormData?.rateProgramIDs &&
+            rateFormData?.rateProgramIDs.length > 0
+        ) {
             programIDs = rateFormData.rateProgramIDs
-        } else if (contractFormData?.programIDs && contractFormData?.programIDs.length > 0) {
+        } else if (
+            contractFormData?.programIDs &&
+            contractFormData?.programIDs.length > 0
+        ) {
             programIDs = contractFormData.programIDs
         }
         return programIDs
@@ -121,36 +133,37 @@ export const RateDetailsSummarySectionV2 = ({
             const submittedRates = contract.packageSubmissions[0].rateRevisions
             if (submittedRates !== undefined) {
                 const keysFromDocs = submittedRates
-                .flatMap((rateInfo) =>
-                    rateInfo.formData.rateDocuments.concat(rateInfo.formData.supportingDocuments)
+                    .flatMap((rateInfo) =>
+                        rateInfo.formData.rateDocuments.concat(
+                            rateInfo.formData.supportingDocuments
+                        )
+                    )
+                    .map((doc) => {
+                        const key = getKey(doc.s3URL)
+                        if (!key) return ''
+                        return key
+                    })
+                    .filter((key) => key !== '')
+
+                // call the lambda to zip the files and get the url
+                const zippedURL = await getBulkDlURL(
+                    keysFromDocs,
+                    submissionName + '-rate-details.zip',
+                    'HEALTH_PLAN_DOCS'
                 )
-                .map((doc) => {
-                    const key = getKey(doc.s3URL)
-                    if (!key) return ''
-                    return key
-                })
-                .filter((key) => key !== '')
+                if (zippedURL instanceof Error) {
+                    const msg = `ERROR: getBulkDlURL failed to generate supporting document URL. ID: ${contract.id} Message: ${zippedURL}`
+                    console.info(msg)
 
-            // call the lambda to zip the files and get the url
-            const zippedURL = await getBulkDlURL(
-                keysFromDocs,
-                submissionName + '-rate-details.zip',
-                'HEALTH_PLAN_DOCS'
-            )
-            if (zippedURL instanceof Error) {
-                const msg = `ERROR: getBulkDlURL failed to generate supporting document URL. ID: ${contract.id} Message: ${zippedURL}`
-                console.info(msg)
+                    if (onDocumentError) {
+                        onDocumentError(true)
+                    }
 
-                if (onDocumentError) {
-                    onDocumentError(true)
+                    recordJSException(msg)
                 }
 
-                recordJSException(msg)
+                setZippedFilesURL(zippedURL)
             }
-
-            setZippedFilesURL(zippedURL)
-            }
-            
         }
 
         void fetchZipUrl()
@@ -201,14 +214,13 @@ export const RateDetailsSummarySectionV2 = ({
                                         id="rateType"
                                         label="Rate certification type"
                                         explainMissingData={!isSubmitted}
-                                        children={rateCertificationType(
-                                            rate
-                                        )}
+                                        children={rateCertificationType(rate)}
                                     />
                                     <DataDetail
                                         id="ratingPeriod"
                                         label={
-                                            rateFormData?.rateType === 'AMENDMENT'
+                                            rateFormData?.rateType ===
+                                            'AMENDMENT'
                                                 ? 'Rating period of original rate certification'
                                                 : 'Rating period'
                                         }
@@ -250,7 +262,8 @@ export const RateDetailsSummarySectionV2 = ({
                                             )}`}
                                         />
                                     ) : null}
-                                    {rateFormData?.certifyingActuaryContacts[0] && (
+                                    {rateFormData
+                                        ?.certifyingActuaryContacts[0] && (
                                         <DataDetail
                                             id="certifyingActuary"
                                             label="Certifying actuary"
@@ -258,7 +271,8 @@ export const RateDetailsSummarySectionV2 = ({
                                             children={
                                                 <DataDetailContactField
                                                     contact={
-                                                        rateFormData?.certifyingActuaryContacts[0]
+                                                        rateFormData
+                                                            ?.certifyingActuaryContacts[0]
                                                     }
                                                 />
                                             }

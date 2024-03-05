@@ -994,7 +994,9 @@ type ContractFormData {
     modifiedLengthOfContract: Boolean
     "If contract includes modifications to the non-risk payment arrangements"
     modifiedNonRiskPaymentArrangements: Boolean,
+    "If contract has statutory regulatory attestation"
     statutoryRegulatoryAttestation: Boolean,
+    "Description provided for if contract has statutory regulatory attestation"
     statutoryRegulatoryAttestationDescription: String
 }
 

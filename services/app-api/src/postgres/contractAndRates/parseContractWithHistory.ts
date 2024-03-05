@@ -261,6 +261,8 @@ function contractWithHistoryToDomainModel(
 
     return {
         id: contract.id,
+        createdAt: contract.createdAt,
+        updatedAt: contract.updatedAt,
         mccrsID: contract.mccrsID || undefined,
         status: getContractRateStatus(contract.revisions),
         stateCode: contract.stateCode,

@@ -1,12 +1,17 @@
 import { Grid, GridContainer } from '@trussworks/react-uswds'
-import styles from './SubmissionSummarySection.module.scss'
+// import styles from './SubmissionSummarySection.module.scss'
+import styles from '../../../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
+
 import { SectionHeader } from '../../../../../components/SectionHeader'
 import {
     ActuaryFirmsRecord,
     ActuaryCommunicationRecord,
 } from '../../../../../constants/healthPlanPackages'
 import { ActuaryContact } from '../../../../../common-code/healthPlanFormDataType'
-import { DataDetail, DataDetailContactField } from '../../../../../components/DataDetail'
+import {
+    DataDetail,
+    DataDetailContactField,
+} from '../../../../../components/DataDetail'
 import { SectionCard } from '../../../../../components/SectionCard'
 import { Contract } from '../../../../../gen/gqlClient'
 
@@ -39,7 +44,9 @@ export const ContactsSummarySection = ({
     const contractFormData =
         contract.draftRevision?.formData ||
         contract.packageSubmissions[0].contractRevision.formData
-    const rateRev = contract.draftRates ? contract.draftRates[0].draftRevision : contract.packageSubmissions[0].rateRevisions[0] 
+    const rateRev = contract.draftRates
+        ? contract.draftRates[0].draftRevision
+        : contract.packageSubmissions[0].rateRevisions[0]
     return (
         <SectionCard id="stateContacts" className={styles.summarySection}>
             <SectionHeader
@@ -79,48 +86,53 @@ export const ContactsSummarySection = ({
 
             {contractFormData.submissionType === 'CONTRACT_AND_RATES' && (
                 <>
-                    {rateRev?.formData?.addtlActuaryContacts !== undefined && 
-                    rateRev.formData.addtlActuaryContacts.length > 0 && (
-                        <dl>
-                            <SectionHeader header="Additional actuary contacts" />
-                            <GridContainer>
-                                <Grid row>
-                                    {rateRev.formData?.addtlActuaryContacts.map(
-                                        (actuaryContact, index) => (
-                                            <Grid
-                                                col={6}
-                                                key={'actuarycontact_' + index}
-                                            >
-                                                <DataDetail
-                                                    id={
+                    {rateRev?.formData?.addtlActuaryContacts !== undefined &&
+                        rateRev.formData.addtlActuaryContacts.length > 0 && (
+                            <dl>
+                                <SectionHeader header="Additional actuary contacts" />
+                                <GridContainer>
+                                    <Grid row>
+                                        {rateRev.formData?.addtlActuaryContacts.map(
+                                            (actuaryContact, index) => (
+                                                <Grid
+                                                    col={6}
+                                                    key={
                                                         'actuarycontact_' +
                                                         index
                                                     }
-                                                    label="Additional actuary contact"
-                                                    children={
-                                                        <DataDetailContactField
-                                                            contact={
-                                                                actuaryContact
-                                                            }
-                                                        />
-                                                    }
-                                                />
-                                            </Grid>
-                                        )
-                                    )}
-                                </Grid>
-                            </GridContainer>
-                        </dl>
-                    )}
+                                                >
+                                                    <DataDetail
+                                                        id={
+                                                            'actuarycontact_' +
+                                                            index
+                                                        }
+                                                        label="Additional actuary contact"
+                                                        children={
+                                                            <DataDetailContactField
+                                                                contact={
+                                                                    actuaryContact
+                                                                }
+                                                            />
+                                                        }
+                                                    />
+                                                </Grid>
+                                            )
+                                        )}
+                                    </Grid>
+                                </GridContainer>
+                            </dl>
+                        )}
                     <dl>
                         <GridContainer>
                             <DataDetail
                                 id="communicationPreference"
                                 label="Actuaries’ communication preference"
                                 children={
-                                    rateRev?.formData?.actuaryCommunicationPreference &&
+                                    rateRev?.formData
+                                        ?.actuaryCommunicationPreference &&
                                     ActuaryCommunicationRecord[
-                                        rateRev.formData.actuaryCommunicationPreference
+                                        rateRev.formData
+                                            .actuaryCommunicationPreference
                                     ]
                                 }
                                 explainMissingData={!isSubmitted}

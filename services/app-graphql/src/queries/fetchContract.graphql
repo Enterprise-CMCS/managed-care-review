@@ -29,6 +29,8 @@ query fetchContract($input: FetchContractInput!) {
 fragment contractFields on Contract {
     id
     status
+    createdAt
+    updatedAt
     initiallySubmittedAt
     stateCode
     state {
