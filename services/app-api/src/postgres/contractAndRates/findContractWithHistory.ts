@@ -24,7 +24,6 @@ async function findContractWithHistory(
             const err = `PRISMA ERROR: Cannot find contract with id: ${contractID}`
             return new NotFoundError(err)
         }
-        console.info(contract, '============== contract =========')
 
         return parseContractWithHistory(contract)
     } catch (err) {

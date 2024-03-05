@@ -129,7 +129,6 @@ async function insertDraftContract(
                 },
                 include: includeFullContract,
             })
-            console.info(contract, '============== contract =========')
 
             return parseContractWithHistory(contract)
         })
