@@ -34,10 +34,10 @@ export const SubmissionTypeSummarySectionV2 = ({
     submissionName,
 }: SubmissionTypeSummarySectionV2Props): React.ReactElement => {
     const isPreviousSubmission = usePreviousSubmission()
-    const contractFormData = contract.draftRevision?.formData
-    if (!contractFormData) {
-        return <></>
-    }
+    const contractFormData =
+        contract.draftRevision?.formData ||
+        contract.packageSubmissions[0].contractRevision.formData
+
     const programNames = statePrograms
         .filter((p) => contractFormData.programIDs.includes(p.id))
         .map((p) => p.name)
@@ -86,7 +86,9 @@ export const SubmissionTypeSummarySectionV2 = ({
                         label="Submission type"
                         explainMissingData={!isSubmitted}
                         children={
-                            SubmissionTypeRecord[contractFormData.submissionType]
+                            SubmissionTypeRecord[
+                                contractFormData.submissionType
+                            ]
                         }
                     />
                     <DataDetail
@@ -95,7 +97,9 @@ export const SubmissionTypeSummarySectionV2 = ({
                         explainMissingData={!isSubmitted}
                         children={
                             contractFormData.contractType
-                                ? ContractTypeRecord[contractFormData.contractType]
+                                ? ContractTypeRecord[
+                                      contractFormData.contractType
+                                  ]
                                 : ''
                         }
                     />

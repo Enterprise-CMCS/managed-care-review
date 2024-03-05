@@ -12,6 +12,7 @@ describe('SubmissionTypeSummarySection', () => {
         jest.clearAllMocks()
     })
     const draftContract = mockContractPackageDraft()
+    const stateSubmission = mockContractPackageSubmitted()
     const statePrograms = mockMNState().programs
 
     it('can render draft package without errors', () => {
@@ -41,27 +42,27 @@ describe('SubmissionTypeSummarySection', () => {
         ).toBeNull()
     })
 
-    // it('can render submitted package without errors', () => {
-    //     renderWithProviders(
-    //         <SubmissionTypeSummarySection
-    //             contract={stateSubmission}
-    //             statePrograms={statePrograms}
-    //             submissionName="MN-MSHO-0003"
-    //         />
-    //     )
+    it('can render submitted package without errors', () => {
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                contract={stateSubmission}
+                statePrograms={statePrograms}
+                submissionName="MN-MSHO-0003"
+            />
+        )
 
-    //     expect(
-    //         screen.getByRole('heading', {
-    //             level: 2,
-    //             name: 'MN-MSHO-0003',
-    //         })
-    //     ).toBeInTheDocument()
-    //     expect(screen.queryByRole('link', { name: 'Edit' })).toBeNull()
-    //     // We should never display missing field text on submission summary for submitted packages
-    //     expect(
-    //         screen.queryByText(/You must provide this information/)
-    //     ).toBeNull()
-    // })
+        expect(
+            screen.getByRole('heading', {
+                level: 2,
+                name: 'MN-MSHO-0003',
+            })
+        ).toBeInTheDocument()
+        expect(screen.queryByRole('link', { name: 'Edit' })).toBeNull()
+        // We should never display missing field text on submission summary for submitted packages
+        expect(
+            screen.queryByText(/You must provide this information/)
+        ).toBeNull()
+    })
 
     it('renders expected fields for draft package on review and submit', () => {
         renderWithProviders(
@@ -98,19 +99,19 @@ describe('SubmissionTypeSummarySection', () => {
     })
 
     it('renders missing field message for population coverage question when expected', () => {
-        // if (!draftContract.draftRevision) {
-        //     expect
-        // }
-        draftContract.draftRevision!.formData.populationCovered = undefined
-        renderWithProviders(
-            <SubmissionTypeSummarySection
-                contract={draftContract}
-                statePrograms={statePrograms}
-                editNavigateTo="submission-type"
-                submissionName="MN-PMAP-0001"
-            />
-        )
+        const draftContract = mockContractPackageDraft()
+        if (draftContract.draftRevision) {
+            draftContract.draftRevision.formData.populationCovered = undefined
 
+            renderWithProviders(
+                <SubmissionTypeSummarySection
+                    contract={draftContract}
+                    statePrograms={statePrograms}
+                    editNavigateTo="submission-type"
+                    submissionName="MN-PMAP-0001"
+                />
+            )
+        }
         expect(
             screen.getByRole('definition', {
                 name: /Which populations does this contract action cover\?/,
@@ -126,17 +127,19 @@ describe('SubmissionTypeSummarySection', () => {
     })
 
     it('renders missing field message for risk based contract when expected', () => {
-        draftContract.draftRevision!.formData.riskBasedContract = undefined
-        
-        renderWithProviders(
-            <SubmissionTypeSummarySection
-                contract={draftContract}
-                statePrograms={statePrograms}
-                editNavigateTo="submission-type"
-                submissionName="MN-PMAP-0001"
-            />
-        )
+        const draftContract = mockContractPackageDraft()
+        if (draftContract.draftRevision) {
+            draftContract.draftRevision.formData.riskBasedContract = undefined
 
+            renderWithProviders(
+                <SubmissionTypeSummarySection
+                    contract={draftContract}
+                    statePrograms={statePrograms}
+                    editNavigateTo="submission-type"
+                    submissionName="MN-PMAP-0001"
+                />
+            )
+        }
         expect(
             screen.getByRole('definition', { name: 'Program(s)' })
         ).toBeInTheDocument()
@@ -154,41 +157,43 @@ describe('SubmissionTypeSummarySection', () => {
         )
     })
 
-    // it('renders expected fields for submitted package on submission summary', () => {
-    //     renderWithProviders(
-    //         <SubmissionTypeSummarySection
-    //             submission={{ ...stateSubmission, status: 'SUBMITTED' }}
-    //             statePrograms={statePrograms}
-    //             editNavigateTo="submission-type"
-    //             submissionName="MN-MSHO-0003"
-    //         />
-    //     )
-    //     expect(
-    //         screen.getByRole('definition', { name: 'Program(s)' })
-    //     ).toBeInTheDocument()
-    //     expect(
-    //         screen.getByRole('definition', { name: 'Submission type' })
-    //     ).toBeInTheDocument()
-    //     expect(
-    //         screen.getByRole('definition', { name: 'Submission description' })
-    //     ).toBeInTheDocument()
-    //     expect(
-    //         screen.queryByRole('definition', { name: 'Submitted' })
-    //     ).toBeInTheDocument()
-    // })
-    // it('does not render Submitted at field', () => {
-    //     renderWithProviders(
-    //         <SubmissionTypeSummarySection
-    //             submission={draftContract}
-    //             statePrograms={statePrograms}
-    //             editNavigateTo="submission-type"
-    //             submissionName="MN-PMAP-0001"
-    //         />
-    //     )
-    //     expect(
-    //         screen.queryByRole('definition', { name: 'Submitted' })
-    //     ).not.toBeInTheDocument()
-    // })
+    it('renders expected fields for submitted package on submission summary', () => {
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                contract={{ ...stateSubmission, status: 'SUBMITTED' }}
+                statePrograms={statePrograms}
+                editNavigateTo="submission-type"
+                submissionName="MN-MSHO-0003"
+            />
+        )
+        expect(
+            screen.getByRole('definition', { name: 'Program(s)' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Submission type' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Submission description' })
+        ).toBeInTheDocument()
+        expect(
+            screen.queryByRole('definition', { name: 'Submitted' })
+        ).toBeInTheDocument()
+    })
+
+    it('does not render Submitted at field', () => {
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                contract={draftContract}
+                statePrograms={statePrograms}
+                editNavigateTo="submission-type"
+                submissionName="MN-PMAP-0001"
+            />
+        )
+        expect(
+            screen.queryByRole('definition', { name: 'Submitted' })
+        ).not.toBeInTheDocument()
+    })
+
     it('renders headerChildComponent component', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection

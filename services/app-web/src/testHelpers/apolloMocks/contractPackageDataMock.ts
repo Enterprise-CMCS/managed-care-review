@@ -18,7 +18,7 @@ function mockContractPackageDraft(
             createdAt: new Date('01/01/2024'),
             updatedAt: new Date('12/31/2024'),
             formData: {
-                programIDs: ['pmap'],
+                programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                 populationCovered: 'MEDICAID',
                 submissionType: 'CONTRACT_AND_RATES',
                 riskBasedContract: true,
@@ -26,8 +26,8 @@ function mockContractPackageDraft(
                 supportingDocuments: [],
                 stateContacts: [
                     {
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
+                        name: 'State Contact 1',
+                        titleRole: 'Test State Contact 1',
                         email: 'actuarycontact1@test.com',
                     },
                 ],
@@ -148,7 +148,7 @@ function mockContractPackageSubmitted(
                 updatedAt: new Date('12/31/2024'),
                 id: '123',
                 formData: {
-                    programIDs: ['pmap'],
+                    programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                     populationCovered: 'MEDICAID',
                     submissionType: 'CONTRACT_AND_RATES',
                     riskBasedContract: true,

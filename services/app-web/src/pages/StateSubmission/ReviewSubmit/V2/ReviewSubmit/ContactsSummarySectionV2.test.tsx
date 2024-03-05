@@ -3,7 +3,7 @@ import { renderWithProviders } from '../../../../../testHelpers/jestHelpers'
 import { ContactsSummarySection } from './ContactsSummarySectionV2'
 import {
     mockContractPackageDraft,
-    mockContractPackageSubmitted
+    mockContractPackageSubmitted,
 } from '../../../../../testHelpers/apolloMocks'
 
 describe('ContactsSummarySection', () => {
@@ -92,14 +92,13 @@ describe('ContactsSummarySection', () => {
     })
 
     it('can render only state contacts for contract only submission', () => {
+        const stateSubmission = mockContractPackageSubmitted()
         stateSubmission.packageSubmissions[0].contractRevision.formData = {
             ...stateSubmission.packageSubmissions[0].contractRevision.formData,
             submissionType: 'CONTRACT_ONLY',
         }
         renderWithProviders(
-            <ContactsSummarySection
-                contract={stateSubmission}
-            />
+            <ContactsSummarySection contract={stateSubmission} />
         )
 
         expect(
@@ -124,13 +123,19 @@ describe('ContactsSummarySection', () => {
     })
 
     it('does not include additional actuary contacts heading when this optional field is not provided', () => {
-        draftSubmission.draftRates![0].draftRevision!.formData = {
-            ...draftSubmission.draftRates![0].draftRevision!.formData,
-            addtlActuaryContacts: [],
+        const draftSubmission = mockContractPackageDraft()
+        if (
+            draftSubmission.draftRates &&
+            draftSubmission.draftRates[0].draftRevision
+        ) {
+            draftSubmission.draftRates[0].draftRevision.formData = {
+                ...draftSubmission.draftRates[0].draftRevision.formData,
+                addtlActuaryContacts: [],
+            }
+            renderWithProviders(
+                <ContactsSummarySection contract={draftSubmission} />
+            )
         }
-        renderWithProviders(
-            <ContactsSummarySection contract={draftSubmission} />
-        )
         expect(screen.queryByText(/Additional actuary contacts/)).toBeNull()
     })
 })
