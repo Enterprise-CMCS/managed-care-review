@@ -2,16 +2,20 @@ import React from 'react'
 import { useStringConstants } from '../../hooks/useStringConstants'
 import styles from './Errors.module.scss'
 
-import { PageHeading } from '../../components/PageHeading'
 import { GridContainer } from '@trussworks/react-uswds'
+import { usePage } from '../../contexts/PageContext'
 
 export const GenericErrorPage = (): React.ReactElement => {
     const stringConstants = useStringConstants()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
+
+    const { updateHeading } = usePage()
+    updateHeading({ customHeading: 'Error' })
+
     return (
         <section className={styles.errorsContainer}>
             <GridContainer>
-                <PageHeading>System error</PageHeading>
+                <h1>System error </h1>
                 <p>
                     <span>
                         We're having trouble loading this page. Please refresh

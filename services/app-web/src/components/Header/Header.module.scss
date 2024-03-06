@@ -25,13 +25,13 @@
 .landingPageHeading {
     background-color: custom.$mcr-cmsblue-dark;
     color: custom.$mcr-foundation-white;
-    padding: uswds.units(2) 0;
+    padding: 1rem 0;
     & h1 {
         display: flex;
         flex-flow: column;
         text-align: center;
         font-weight: uswds.font-weight('light');
-        line-height: 1.5rem;
+        line-height: 1.5;
     }
 }
 
@@ -47,12 +47,11 @@
 
     .logoImg {
         border-right: 2px solid custom.$mcr-foundation-white;
-        padding-right: 2rem;
+        padding-right: 1rem;
     }
 
     span {
-        margin-left: 2rem;
-        font-size: size('body', 'lg');
+        margin-left: 1rem;
         color: custom.$mcr-foundation-white;
         height: 100%;
     }
@@ -68,7 +67,7 @@
         flex-wrap: wrap;
         align-items: center;
         font-size: 2rem;
-        line-height: 1.5rem;
+        line-height: 1.5;
         font-weight: bold;
         > span {
             padding: 0 1rem;
