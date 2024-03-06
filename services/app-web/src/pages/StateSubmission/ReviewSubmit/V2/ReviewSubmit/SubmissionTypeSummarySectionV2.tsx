@@ -42,7 +42,7 @@ export const SubmissionTypeSummarySectionV2 = ({
         .filter((p) => contractFormData.programIDs.includes(p.id))
         .map((p) => p.name)
     const isSubmitted = contract.status === 'SUBMITTED'
-
+    // const isRiskBasedContract = contractFormData.riskBasedContract ===
     return (
         <SectionCard
             id="submissionTypeSection"
@@ -103,14 +103,16 @@ export const SubmissionTypeSummarySectionV2 = ({
                                 : ''
                         }
                     />
-                    <DataDetail
-                        id="riskBasedContract"
-                        label="Is this a risk based contract"
-                        explainMissingData={!isSubmitted}
-                        children={booleanAsYesNoUserValue(
-                            contractFormData.riskBasedContract || undefined
-                        )}
-                    />
+                    {contractFormData.riskBasedContract !== null && (
+                        <DataDetail
+                            id="riskBasedContract"
+                            label="Is this a risk based contract"
+                            explainMissingData={!isSubmitted}
+                            children={booleanAsYesNoUserValue(
+                                contractFormData.riskBasedContract
+                            )}
+                        />
+                    )}
                     <DataDetail
                         id="populationCoverage"
                         label="Which populations does this contract action cover?"

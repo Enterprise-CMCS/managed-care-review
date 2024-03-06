@@ -7,7 +7,6 @@ import { DoubleColumnGrid } from '../../../../../components/DoubleColumnGrid'
 import { DownloadButton } from '../../../../../components/DownloadButton'
 import { UploadedDocumentsTable } from '../../../../../components/SubmissionSummarySection'
 import { usePreviousSubmission } from '../../../../../hooks/usePreviousSubmission'
-// import styles from '../../../ReviewSubmiSubmissionSummarySection.module.scss'
 import styles from '../../../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
 
 import { recordJSException } from '../../../../../otelHelpers'
@@ -54,7 +53,6 @@ export const RateDetailsSummarySectionV2 = ({
     contract,
     editNavigateTo,
     documentDateLookupTable,
-    isCMSUser,
     submissionName,
     statePrograms,
     onDocumentError,

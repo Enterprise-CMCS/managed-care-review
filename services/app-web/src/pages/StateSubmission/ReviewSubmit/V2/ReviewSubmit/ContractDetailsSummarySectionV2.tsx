@@ -12,7 +12,6 @@ import { formatCalendarDate } from '../../../../../common-code/dateHelpers'
 import { DoubleColumnGrid } from '../../../../../components/DoubleColumnGrid'
 import { DownloadButton } from '../../../../../components/DownloadButton'
 import { usePreviousSubmission } from '../../../../../hooks/usePreviousSubmission'
-// import styles from './SubmissionSummarySection.module.scss'
 import styles from '../../../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
 
 import {
@@ -175,18 +174,18 @@ export const ContractDetailsSummarySectionV2 = ({
                             tablet={{ col: 12 }}
                             key="statutoryRegulatoryAttestation"
                         >
-                            <DataDetail
-                                id="statutoryRegulatoryAttestation"
-                                label={StatutoryRegulatoryAttestationQuestion}
-                                explainMissingData={!isSubmitted(contract)}
-                                children={
-                                    attestationYesNo !== undefined &&
-                                    typeof attestationYesNo === 'string' &&
-                                    StatutoryRegulatoryAttestation[
-                                        attestationYesNo
-                                    ]
-                                }
-                            />
+                            {attestationYesNo && (
+                                <DataDetail
+                                    id="statutoryRegulatoryAttestation"
+                                    label={StatutoryRegulatoryAttestationQuestion}
+                                    explainMissingData={!isSubmitted(contract)}
+                                    children={
+                                        StatutoryRegulatoryAttestation[
+                                            attestationYesNo
+                                        ]
+                                    }
+                                />
+                            )}
                         </Grid>
                         {attestationYesNo === 'NO' && (
                             <Grid

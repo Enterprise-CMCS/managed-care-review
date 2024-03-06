@@ -51,6 +51,7 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                 contractID: id,
             },
         },
+        fetchPolicy: 'network-only',
     })
 
     const contract = data?.fetchContract.contract
