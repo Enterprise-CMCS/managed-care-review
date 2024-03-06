@@ -93,7 +93,7 @@ export const ContractDetailsSummarySectionV2 = ({
     )
 
     const attestationYesNo =
-        contractFormData.statutoryRegulatoryAttestation !== null &&
+        contractFormData.statutoryRegulatoryAttestation != null &&
         booleanAsYesNoFormValue(contractFormData.statutoryRegulatoryAttestation)
 
     const contractSupportingDocuments = contractFormData?.supportingDocuments
@@ -174,18 +174,23 @@ export const ContractDetailsSummarySectionV2 = ({
                             tablet={{ col: 12 }}
                             key="statutoryRegulatoryAttestation"
                         >
-                            {attestationYesNo && (
-                                <DataDetail
-                                    id="statutoryRegulatoryAttestation"
-                                    label={StatutoryRegulatoryAttestationQuestion}
-                                    explainMissingData={!isSubmitted(contract)}
-                                    children={
-                                        StatutoryRegulatoryAttestation[
-                                            attestationYesNo
-                                        ]
-                                    }
-                                />
-                            )}
+                            {attestationYesNo !== false &&
+                                attestationYesNo !== undefined && (
+                                    <DataDetail
+                                        id="statutoryRegulatoryAttestation"
+                                        label={
+                                            StatutoryRegulatoryAttestationQuestion
+                                        }
+                                        explainMissingData={
+                                            !isSubmitted(contract)
+                                        }
+                                        children={
+                                            StatutoryRegulatoryAttestation[
+                                                attestationYesNo
+                                            ]
+                                        }
+                                    />
+                                )}
                         </Grid>
                         {attestationYesNo === 'NO' && (
                             <Grid

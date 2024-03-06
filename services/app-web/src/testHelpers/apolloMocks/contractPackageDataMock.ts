@@ -61,6 +61,8 @@ function mockContractPackageDraft(
                 modifiedNetworkAdequacyStandards: true,
                 modifiedLengthOfContract: false,
                 modifiedNonRiskPaymentArrangements: true,
+                statutoryRegulatoryAttestation: true,
+                statutoryRegulatoryAttestationDescription: "everything meets regulatory attestation"
             }
         },
         
@@ -185,6 +187,8 @@ function mockContractPackageSubmitted(
                     modifiedNetworkAdequacyStandards: true,
                     modifiedLengthOfContract: false,
                     modifiedNonRiskPaymentArrangements: true,
+                    statutoryRegulatoryAttestation: true,
+                    statutoryRegulatoryAttestationDescription: "everything meets regulatory attestation"
                 }
             },
             rateRevisions: [
