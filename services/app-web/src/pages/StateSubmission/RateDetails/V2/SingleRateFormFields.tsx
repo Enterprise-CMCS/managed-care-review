@@ -26,6 +26,7 @@ import { useS3 } from '../../../../contexts/S3Context'
 import { FormikErrors, getIn, useFormikContext } from 'formik'
 import { ActuaryContactFields } from '../../Contacts'
 import { RateDetailFormValues, RateDetailFormConfig } from './RateDetailsV2'
+import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
 
 const isRateTypeEmpty = (rateForm: RateDetailFormValues): boolean =>
     rateForm.rateType === undefined
@@ -98,6 +99,7 @@ export const SingleRateFormFields = ({
     return (
         <>
             <FormGroup error={Boolean(showFieldErrors('rateDocuments'))}>
+                <LinkYourRates />
                 <FileUpload
                     id={`${fieldNamePrefix}.rateDocuments`}
                     name={`${fieldNamePrefix}.rateDocuments`}

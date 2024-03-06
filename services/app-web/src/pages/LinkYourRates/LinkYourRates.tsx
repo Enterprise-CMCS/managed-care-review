@@ -13,16 +13,9 @@ import { LinkRateSelect } from './LinkRateSelect'
 
 export const LinkYourRates = (): React.ReactElement | null => {
     const { values } = useFormikContext()
-    // console.log(values)
 
     return (
         <FormGroup data-testid="link-your-rates">
-            <div role="note">
-                <span className={styles.requiredOptionalText}>
-                    All fields are required
-                </span>
-            </div>
-            <h2> Rate Certification 1 </h2>
             <Fieldset
                 role="radiogroup"
                 aria-required
