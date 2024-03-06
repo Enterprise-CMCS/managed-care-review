@@ -14,6 +14,23 @@ export interface LinkRateOptionType {
 export const LinkRateSelect = () => {
     const { data, loading, error } = useIndexRatesQuery()
 
+    const rateNames: LinkRateOptionType[] = []
+    data?.indexRates.edges
+        .map((edge) => edge.node)
+        .forEach((rate) => {
+            if (rate.revisions.length > 0) {
+                rate.revisions.forEach((revision) => {
+                    if (revision.formData.rateCertificationName) {
+                        rateNames.push({
+                            value: revision.formData.rateCertificationName,
+                            label: revision.formData.rateCertificationName,
+                        })
+                    }
+                })
+            }
+            return rateNames
+        })
+
     const onFocus: AriaOnFocus<LinkRateOptionType> = ({
         focused,
         isDisabled,
@@ -45,7 +62,7 @@ export const LinkRateSelect = () => {
             <span className={styles.requiredOptionalText}>Required</span>
             <Select
                 className={styles.multiSelect}
-                // options={error || loading ? undefined : data}
+                options={error || loading ? undefined : rateNames}
                 isSearchable
                 isMulti
                 maxMenuHeight={200}
@@ -54,6 +71,7 @@ export const LinkRateSelect = () => {
                 }}
                 noOptionsMessage={() => noOptionsMessage()}
             />
+            <br />
         </Fieldset>
     )
 }
