@@ -1,14 +1,86 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { v4 as uuidv4 } from 'uuid'
-import { submitContract } from './submitContract'
+import {
+    submitContract,
+    submitContractSubmitInfosFirst,
+} from './submitContract'
 import { insertDraftContract } from './insertContract'
 import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
 import { updateDraftRate } from './updateDraftRate'
-import { must, mockInsertContractArgs } from '../../testHelpers'
+import {
+    must,
+    mockInsertContractArgs,
+    mockInsertRateArgs,
+} from '../../testHelpers'
 import { NotFoundError } from '../postgresErrors'
+import { updateDraftContractWithRates } from './updateDraftContractWithRates'
 
 describe('submitContract', () => {
+    it('has the same submit infos', async () => {
+        const client = await sharedTestPrismaClient()
+
+        // setup the state user
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                stateCode: 'NM',
+            },
+        })
+
+        // create the draft contract
+        const draftContractForm1 = mockInsertContractArgs({})
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { stateCode, ...draftContractFormData } = draftContractForm1
+        const contract = must(
+            await insertDraftContract(client, {
+                ...draftContractForm1,
+            })
+        )
+
+        // another contract form for an update
+        const draftContractForm2 = {
+            ...draftContractFormData,
+            submissionDescription: 'something else',
+        }
+
+        // create a draft rate
+        const draftRateData = mockInsertRateArgs({
+            rateCertificationName: 'rate-cert-name',
+        })
+
+        const draftContractWithRates = must(
+            await updateDraftContractWithRates(client, {
+                contractID: contract.id,
+                formData: draftContractForm2,
+                rateFormDatas: [draftRateData],
+            })
+        )
+
+        // submit the draft contract and connect submitInfos
+        const result = must(
+            await submitContractSubmitInfosFirst(client, {
+                contractID: draftContractWithRates.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'initial submit',
+            })
+        )
+        //console.info(JSON.stringify(result, null, '  '))
+
+        expect(result.status).toBe('SUBMITTED')
+
+        // check that they have the same submitInfos
+        const contractSubmitInfo = result.revisions[0].submitInfo
+        const rateSubmitInfo = result.revisions[0].rateRevisions[0].submitInfo
+        expect(contractSubmitInfo).toBeDefined()
+        expect(rateSubmitInfo).toBeDefined()
+        expect(contractSubmitInfo).toEqual(rateSubmitInfo)
+    })
+
     it('creates a submission from a draft', async () => {
         const client = await sharedTestPrismaClient()
 
@@ -46,6 +118,7 @@ describe('submitContract', () => {
                 submittedReason: 'initial submit',
             })
         )
+        console.info(JSON.stringify(result, null, '  '))
         expect(result.revisions[0].submitInfo?.updatedReason).toBe(
             'initial submit'
         )
