@@ -118,7 +118,6 @@ describe('submitContract', () => {
                 submittedReason: 'initial submit',
             })
         )
-        console.info(JSON.stringify(result, null, '  '))
         expect(result.revisions[0].submitInfo?.updatedReason).toBe(
             'initial submit'
         )
