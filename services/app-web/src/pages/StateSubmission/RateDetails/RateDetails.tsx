@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Form as UswdsForm } from '@trussworks/react-uswds'
 import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
 import { useNavigate } from 'react-router-dom'
@@ -39,6 +39,7 @@ import { FormContainer } from '../FormContainer'
 import { useAuth } from '../../../contexts/AuthContext'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
 import { PageBannerAlerts } from '../PageBannerAlerts'
+import { useErrorSummary } from '../../../hooks/useErrorSummary'
 
 // This function is used to get initial form values as well return empty form values when we add a new rate or delete a rate
 // We need to include the getKey function in params because there are no guarantees currently file is in s3 even if when we load data from API
@@ -123,21 +124,9 @@ export const RateDetails = ({
         showPageErrorMessage,
         unlockInfo,
     } = useHealthPlanPackageForm(id)
-
-    // form validation state management
-    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
-        React.useState(false)
-    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
+    const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
+        useErrorSummary()
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-
-    useEffect(() => {
-        // Focus the error summary heading only if we are displaying
-        // validation errors and the heading element exists
-        if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
-            errorSummaryHeadingRef.current.focus()
-        }
-        setFocusErrorSummaryHeading(false)
-    }, [focusErrorSummaryHeading])
 
     // multi-rates state management
     const [focusNewRate, setFocusNewRate] = React.useState(false)

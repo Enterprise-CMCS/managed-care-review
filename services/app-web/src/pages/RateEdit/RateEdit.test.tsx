@@ -32,7 +32,8 @@ describe('RateEdit', () => {
                             statusCode: 200,
                         }),
                         fetchRateMockSuccess({
-                            rate: { id: '1337', status: 'UNLOCKED' },
+                            id: '1337',
+                            status: 'UNLOCKED',
                         }),
                     ],
                 },

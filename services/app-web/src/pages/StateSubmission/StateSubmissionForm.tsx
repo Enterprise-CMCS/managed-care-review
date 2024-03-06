@@ -20,7 +20,7 @@ import { SubmissionType } from './SubmissionType'
 import { UnlockedHealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
-// import { RateDetailsV2 } from './RateDetails/V2/RateDetailsV2'
+import { RateDetailsV2 } from './RateDetails/V2/RateDetailsV2'
 import { ReviewSubmitV2 } from './ReviewSubmit/V2/ReviewSubmit/ReviewSubmitV2'
 import styles from './StateSubmissionForm.module.scss'
 
@@ -49,7 +49,13 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     path={getRelativePathFromNestedRoute(
                         'SUBMISSIONS_RATE_DETAILS'
                     )}
-                    element={<RateDetails />}
+                    element={
+                        useLinkedRates ? (
+                            <RateDetailsV2 type="MULTI" />
+                        ) : (
+                            <RateDetails />
+                        )
+                    }
                 />
                 <Route
                     path={getRelativePathFromNestedRoute(
