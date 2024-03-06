@@ -92,7 +92,7 @@ export const UploadedDocumentsTable = ({
                 <Link
                     variant="unstyled"
                     asCustom={NavLink}
-                    className="usa-button usa-button--outline"
+                    className="usa-button usa-button--outline edit-btn"
                     to="../documents"
                 >
                     Edit <span className="srOnly">{caption}</span>
@@ -119,7 +119,7 @@ export const UploadedDocumentsTable = ({
     if (refreshedDocs.length === 0) {
         return (
             <div className={supportingDocsTopMarginStyles}>
-                <b className={styles.captionContainer}>{tableCaptionJSX}</b>
+                <div className={styles.captionContainer}>{tableCaptionJSX}</div>
                 <p
                     className={`${borderTopGradientStyles} ${styles.supportingDocsEmpty}`}
                 >
@@ -137,7 +137,9 @@ export const UploadedDocumentsTable = ({
                 className={`${borderTopGradientStyles} ${supportingDocsTopMarginStyles}`}
             >
                 <caption>
-                    {tableCaptionJSX}
+                    <div className={styles.captionContainer}>
+                        {tableCaptionJSX}
+                    </div>
                     {!multipleDocumentsAllowed &&
                         documents.length > 1 &&
                         !isSubmitted && (
