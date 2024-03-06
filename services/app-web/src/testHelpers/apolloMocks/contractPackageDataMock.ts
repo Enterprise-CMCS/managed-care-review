@@ -15,6 +15,7 @@ function mockContractPackage(partial?: Partial<Contract>): Contract {
             id: '123',
             createdAt: new Date(),
             updatedAt: new Date(),
+            contractName: 'MCR-0005-alvhalfhdsalf',
             formData: {
                 programIDs: ['pmap'],
                 populationCovered: 'MEDICAID',

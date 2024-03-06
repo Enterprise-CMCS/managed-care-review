@@ -4,6 +4,7 @@ import { logError } from '../../logger'
 import type { Store } from '../../postgres'
 import { GraphQLError } from 'graphql'
 import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
+import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 export function contractResolver(store: Store): Resolvers['Contract'] {
     return {
@@ -32,7 +33,22 @@ export function contractResolver(store: Store): Resolvers['Contract'] {
         },
 
         draftRevision(parent) {
-            return parent.draftRevision || {}
+            const programsForContractState = statePrograms.states
+                .find((state) => state.code === parent.stateCode)
+                ?.programs.filter((program) => program !== undefined)
+            const contractName = packageName(
+                parent.stateCode,
+                parent.stateNumber,
+                parent.draftRevision?.formData.programIDs ?? [],
+                programsForContractState ?? []
+            )
+
+            return (
+                {
+                    ...parent.draftRevision,
+                    contractName,
+                } || {}
+            )
         },
         draftRates: async (parent, _args, context) => {
             const { span } = context

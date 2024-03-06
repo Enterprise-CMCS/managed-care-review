@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Button, Fieldset, Form as UswdsForm } from '@trussworks/react-uswds'
 import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
 import { useNavigate } from 'react-router-dom'
@@ -50,6 +50,7 @@ import {
 } from '../../ErrorOrLoadingPage'
 import { featureFlags } from '../../../../common-code/featureFlags'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { usePage } from '../../../../contexts/PageContext'
 
 export type RateDetailFormValues = {
     id?: string // no id if its a new rate
@@ -141,6 +142,8 @@ const RateDetailsV2 = ({
     const displayAsStandaloneRate = type === 'SINGLE'
     const { loggedInUser } = useAuth()
     const ldClient = useLDClient()
+    const { updateHeading } = usePage()
+
     const useLinkedRates = ldClient?.variation(
         featureFlags.LINK_RATES.flag,
         featureFlags.LINK_RATES.defaultValue
@@ -196,8 +199,17 @@ const RateDetailsV2 = ({
     const initialRequestLoading = fetchContractLoading || fetchRateLoading
     const initialRequestError = fetchContractError || fetchRateError
     const previousDocuments: string[] = []
+    const submissionIDForHeading =
+        fetchContractData?.fetchContract.contract?.draftRevision
+            ?.contractName ||
+        fetchRateData?.fetchRate.rate?.draftRevision?.formData
+            .rateCertificationName
 
-    React.useEffect(() => {
+    useEffect(() => {
+        updateHeading({ customHeading: submissionIDForHeading ?? undefined })
+    }, [submissionIDForHeading, updateHeading])
+
+    useEffect(() => {
         if (focusNewRate) {
             newRateNameRef?.current?.focus()
             setFocusNewRate(false)
