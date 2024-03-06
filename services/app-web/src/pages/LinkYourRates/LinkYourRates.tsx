@@ -16,15 +16,13 @@ export const LinkYourRates = (): React.ReactElement | null => {
     // console.log(values)
 
     return (
-        <FormGroup data-testid="linkYourRates">
+        <FormGroup data-testid="link-your-rates">
             <div role="note">
                 <span className={styles.requiredOptionalText}>
                     All fields are required
                 </span>
             </div>
-            <p>
-                <strong>Rate Certification 1</strong>
-            </p>
+            <h2> Rate Certification 1 </h2>
             <Fieldset
                 role="radiogroup"
                 aria-required
