@@ -1,9 +1,6 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { v4 as uuidv4 } from 'uuid'
-import {
-    submitContract,
-    submitContractSubmitInfosFirst,
-} from './submitContract'
+import { submitContract } from './submitContract'
 import { insertDraftContract } from './insertContract'
 import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
@@ -49,36 +46,43 @@ describe('submitContract', () => {
         }
 
         // create a draft rate
-        const draftRateData = mockInsertRateArgs({
+        const draftRateDataA = mockInsertRateArgs({
             rateCertificationName: 'rate-cert-name',
+        })
+
+        const draftRateDataB = mockInsertRateArgs({
+            rateCertificationName: 'rate-cert-number-two',
         })
 
         const draftContractWithRates = must(
             await updateDraftContractWithRates(client, {
                 contractID: contract.id,
                 formData: draftContractForm2,
-                rateFormDatas: [draftRateData],
+                rateFormDatas: [draftRateDataA, draftRateDataB],
             })
         )
 
         // submit the draft contract and connect submitInfos
         const result = must(
-            await submitContractSubmitInfosFirst(client, {
+            await submitContract(client, {
                 contractID: draftContractWithRates.id,
                 submittedByUserID: stateUser.id,
                 submittedReason: 'initial submit',
             })
         )
-        //console.info(JSON.stringify(result, null, '  '))
 
         expect(result.status).toBe('SUBMITTED')
 
         // check that they have the same submitInfos
         const contractSubmitInfo = result.revisions[0].submitInfo
-        const rateSubmitInfo = result.revisions[0].rateRevisions[0].submitInfo
+        const rateSubmitInfoA = result.revisions[0].rateRevisions[0].submitInfo
+        const rateSubmitInfoB = result.revisions[0].rateRevisions[1].submitInfo
         expect(contractSubmitInfo).toBeDefined()
-        expect(rateSubmitInfo).toBeDefined()
-        expect(contractSubmitInfo).toEqual(rateSubmitInfo)
+        expect(rateSubmitInfoA).toBeDefined()
+        expect(rateSubmitInfoB).toBeDefined()
+        expect(contractSubmitInfo).toEqual(rateSubmitInfoA)
+        expect(contractSubmitInfo).toEqual(rateSubmitInfoB)
+        expect(rateSubmitInfoA).toEqual(rateSubmitInfoB)
     })
 
     it('creates a submission from a draft', async () => {
