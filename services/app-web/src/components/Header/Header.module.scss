@@ -3,7 +3,7 @@
 
 .userInfo {
     font-weight: uswds.font-weight('light');
-    padding: 0 uswds.units(1);
+    padding: 0 1rem;
     color: custom.$mcr-foundation-white;
 
     button,
@@ -19,7 +19,7 @@
 }
 
 .divider {
-    padding: 0 uswds.units(1);
+    padding: 0 1rem;
 }
 
 .landingPageHeading {
@@ -31,7 +31,7 @@
         flex-flow: column;
         text-align: center;
         font-weight: uswds.font-weight('light');
-        line-height: 1.5;
+        line-height: 1.5rem;
     }
 }
 
@@ -47,11 +47,11 @@
 
     .logoImg {
         border-right: 2px solid custom.$mcr-foundation-white;
-        padding-right: uswds.units(2);
+        padding-right: 2rem;
     }
 
     span {
-        margin-left: uswds.units(2);
+        margin-left: 2rem;
         font-size: size('body', 'lg');
         color: custom.$mcr-foundation-white;
         height: 100%;
@@ -67,11 +67,14 @@
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        font-size: 32px;
-        line-height: 36.8px;
+        font-size: 2rem;
+        line-height: 1.5rem;
         font-weight: bold;
         > span {
-            padding: 0 uswds.units(1);
+            padding: 0 1rem;
         }
+    }
+    div {
+        min-height: 5rem; // this ensures we don't collapse page heading when no text present
     }
 }
