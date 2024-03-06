@@ -49,6 +49,7 @@ import {
 import { useAuth } from '../../../contexts/AuthContext'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
 import { PageBannerAlerts } from '../PageBannerAlerts'
+import { useErrorSummary } from '../../../hooks/useErrorSummary'
 
 export interface ContactsFormValues {
     stateContacts: StateContact[]
@@ -147,13 +148,16 @@ const flattenErrors = (
 
     return flattened
 }
-export const Contacts = ({
+
+const Contacts = ({
     showValidations = false,
 }: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const [focusNewContact, setFocusNewContact] = React.useState(false)
     const [focusNewActuaryContact, setFocusNewActuaryContact] =
         React.useState(false)
+    const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
+        useErrorSummary()
 
     // set up API handling and HPP data
     const { loggedInUser } = useAuth()
@@ -177,15 +181,11 @@ export const Contacts = ({
 
     const navigate = useNavigate()
 
-    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
-    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
-        React.useState(false)
-
     /*
      Set focus to contact name field when adding new contacts.
      Clears ref and focusNewContact component state immediately after. The reset allows additional contacts to be added and preserves expected focus behavior.
     */
-    React.useEffect(() => {
+    useEffect(() => {
         if (focusNewContact) {
             newStateContactNameRef.current &&
                 newStateContactNameRef.current.focus()
@@ -199,15 +199,6 @@ export const Contacts = ({
             newActuaryContactNameRef.current = null
         }
     }, [focusNewContact, focusNewActuaryContact])
-
-    useEffect(() => {
-        // Focus the error summary heading only if we are displaying
-        // validation errors and the heading element exists
-        if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
-            errorSummaryHeadingRef.current.focus()
-        }
-        setFocusErrorSummaryHeading(false)
-    }, [focusErrorSummaryHeading])
 
     // TODO: refactor this into reusable component that is more understandable
     const showFieldErrors = (error?: FormError): boolean | undefined =>
@@ -548,12 +539,6 @@ export const Contacts = ({
                                                                             data-testid="actuary-contact"
                                                                         >
                                                                             <ActuaryContactFields
-                                                                                actuaryContact={
-                                                                                    _actuaryContact
-                                                                                }
-                                                                                errors={
-                                                                                    errors
-                                                                                }
                                                                                 shouldValidate={
                                                                                     shouldValidate
                                                                                 }
@@ -707,3 +692,4 @@ export const Contacts = ({
         </>
     )
 }
+export { Contacts }

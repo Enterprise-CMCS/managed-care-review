@@ -28,10 +28,13 @@ import {
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
 import { DynamicStepIndicator } from '../../../components'
 import { PageBannerAlerts } from '../PageBannerAlerts'
+import { useErrorSummary } from '../../../hooks/useErrorSummary'
 
 export const Documents = (): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(false)
     const navigate = useNavigate()
+    const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
+        useErrorSummary()
 
     // set up API handling and HPP data
     const { loggedInUser } = useAuth()
@@ -83,20 +86,6 @@ export const Documents = (): React.ReactElement => {
             : showFileUploadError && !hasValidFiles
               ? 'You must remove all documents with error messages before continuing'
               : undefined
-
-    // Error summary state management
-    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
-    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
-        React.useState(false)
-
-    React.useEffect(() => {
-        // Focus the error summary heading only if we are displaying
-        // validation errors and the heading element exists
-        if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
-            errorSummaryHeadingRef.current.focus()
-        }
-        setFocusErrorSummaryHeading(false)
-    }, [focusErrorSummaryHeading])
 
     if (interimState || !draftSubmission || !updateDraft)
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
