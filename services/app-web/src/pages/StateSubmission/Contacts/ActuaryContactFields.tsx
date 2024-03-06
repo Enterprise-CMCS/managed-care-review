@@ -1,19 +1,21 @@
 import React from 'react'
-import { ActuaryContact } from '../../../common-code/healthPlanFormDataType'
-import { Field, FormikErrors, FormikValues, getIn } from 'formik'
+import { Field, FormikErrors, getIn, useFormikContext } from 'formik'
 import { Fieldset, FormGroup } from '@trussworks/react-uswds'
 import { FieldRadio, FieldTextInput } from '../../../components/Form'
 import { PoliteErrorMessage } from '../../../components/PoliteErrorMessage'
 import { RateCertFormType } from '../RateDetails/SingleRateCert'
 import styles from '../StateSubmissionForm.module.scss'
-import { ActuaryContact as ActuaryContactGQL } from '../../../gen/gqlClient'
+
+/**
+ * This component renders actuary contact related form fields with their labels and error messages
+ *
+ * It relies on useFormikContext hook to work inside of a Formik form with matching field name values
+ */
 
 type FormError =
     FormikErrors<RateCertFormType>[keyof FormikErrors<RateCertFormType>]
 
 type ActuaryFormPropType = {
-    actuaryContact: ActuaryContact | ActuaryContactGQL // GQl type for v2 API
-    errors: FormikErrors<FormikValues>
     shouldValidate: boolean
     fieldNamePrefix: string
     fieldSetLegend?: string
@@ -21,19 +23,14 @@ type ActuaryFormPropType = {
 }
 
 export const ActuaryContactFields = ({
-    actuaryContact,
-    errors,
     shouldValidate,
     fieldNamePrefix,
     fieldSetLegend = 'Actuary Contact',
     inputRef,
 }: ActuaryFormPropType) => {
+    const { values, errors } = useFormikContext()
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
-
-    if (!actuaryContact) {
-        return null
-    }
 
     return (
         <Fieldset legend={fieldSetLegend}>
@@ -143,7 +140,8 @@ export const ActuaryContactFields = ({
                     aria-required
                 />
 
-                {actuaryContact.actuarialFirm === 'OTHER' && (
+                {getIn(values, `${fieldNamePrefix}.actuarialFirm`) ===
+                    'OTHER' && (
                     <FormGroup
                         error={showFieldErrors(
                             getIn(
