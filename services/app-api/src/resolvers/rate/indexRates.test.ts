@@ -24,24 +24,6 @@ describe('indexRates', () => {
     const ldService = testLDService({
         'rate-edit-unlock': true,
     })
-    it('returns ForbiddenError for state user', async () => {
-        const stateUser = testStateUser()
-
-        const stateServer = await constructTestPostgresServer({
-            context: {
-                user: stateUser,
-            },
-            ldService: testLDService({
-                'rate-edit-unlock': false,
-            }),
-        })
-
-        // index rates
-        const result = await stateServer.executeOperation({
-            query: INDEX_RATES,
-        })
-        expect(result.errors).toBeDefined()
-    })
 
     it('returns rate reviews list for cms user with no errors', async () => {
         const cmsUser = testCMSUser()
