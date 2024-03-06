@@ -13,8 +13,8 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
     Yup.object().shape({
         rateDocuments: validateFileItemsListSingleUpload({ required: true }),
         supportingDocuments: validateFileItemsList({ required: false }),
-        hasSharedRateCert:  _activeFeatureFlags['rate-edit-unlock']?  Yup.string(): Yup.string().defined('You must select yes or no'),
-        packagesWithSharedRateCerts: _activeFeatureFlags['rate-edit-unlock']? Yup.array().optional():  Yup.array()
+        hasSharedRateCert:  _activeFeatureFlags['rate-edit-unlock'] || _activeFeatureFlags['link-rates']?  Yup.string(): Yup.string().defined('You must select yes or no'),
+        packagesWithSharedRateCerts: _activeFeatureFlags['rate-edit-unlock'] || _activeFeatureFlags['link-rates']? Yup.array().optional():  Yup.array()
         .when('hasSharedRateCert', {
             is: 'YES',
             then: Yup.array().min(

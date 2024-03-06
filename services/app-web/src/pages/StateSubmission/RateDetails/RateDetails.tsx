@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Form as UswdsForm } from '@trussworks/react-uswds'
 import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
 import { useNavigate } from 'react-router-dom'
@@ -8,12 +8,20 @@ import styles from '../StateSubmissionForm.module.scss'
 
 import { RateInfoType } from '../../../common-code/healthPlanFormDataType'
 
-import { ErrorSummary } from '../../../components'
+import { DynamicStepIndicator, ErrorSummary } from '../../../components'
 import { formatFormDateForDomain } from '../../../formHelpers'
 import { RateDetailsFormSchema } from './RateDetailsSchema'
 import { PageActions } from '../PageActions'
-import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
-import { useFocus } from '../../../hooks'
+import {
+    activeFormPages,
+    type HealthPlanFormPageProps,
+} from '../StateSubmissionForm'
+import {
+    useCurrentRoute,
+    useFocus,
+    useHealthPlanPackageForm,
+    useRouteParams,
+} from '../../../hooks'
 
 import {
     formatActuaryContactsForForm,
@@ -27,6 +35,11 @@ import { S3ClientT } from '../../../s3'
 import { isLoadingOrHasFileErrors } from '../../../components/FileUpload'
 import { RoutesRecord } from '../../../constants'
 import { SectionCard } from '../../../components/SectionCard'
+import { FormContainer } from '../FormContainer'
+import { useAuth } from '../../../contexts/AuthContext'
+import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
+import { PageBannerAlerts } from '../PageBannerAlerts'
+import { useErrorSummary } from '../../../hooks/useErrorSummary'
 
 // This function is used to get initial form values as well return empty form values when we add a new rate or delete a rate
 // We need to include the getKey function in params because there are no guarantees currently file is in s3 even if when we load data from API
@@ -94,28 +107,26 @@ export const rateErrorHandling = (
 }
 
 export const RateDetails = ({
-    draftSubmission,
     showValidations = false,
-    previousDocuments,
-    updateDraft,
 }: HealthPlanFormPageProps): React.ReactElement => {
     const navigate = useNavigate()
     const { getKey } = useS3()
 
-    // form validation state management
-    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
-        React.useState(false)
-    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
+    // set up API handling and HPP data
+    const { loggedInUser } = useAuth()
+    const { currentRoute } = useCurrentRoute()
+    const { id } = useRouteParams()
+    const {
+        draftSubmission,
+        interimState,
+        updateDraft,
+        previousDocuments = [],
+        showPageErrorMessage,
+        unlockInfo,
+    } = useHealthPlanPackageForm(id)
+    const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
+        useErrorSummary()
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-
-    useEffect(() => {
-        // Focus the error summary heading only if we are displaying
-        // validation errors and the heading element exists
-        if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
-            errorSummaryHeadingRef.current.focus()
-        }
-        setFocusErrorSummaryHeading(false)
-    }, [focusErrorSummaryHeading])
 
     // multi-rates state management
     const [focusNewRate, setFocusNewRate] = React.useState(false)
@@ -132,6 +143,8 @@ export const RateDetails = ({
         }
     }, [focusNewRate])
 
+    if (interimState || !draftSubmission || !updateDraft)
+        return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
     const rateInfosInitialValues: RateInfoArrayType = {
         rateInfos:
             draftSubmission.rateInfos.length > 0
@@ -267,143 +280,175 @@ export const RateDetails = ({
     }
 
     return (
-        <Formik
-            initialValues={rateInfosInitialValues}
-            onSubmit={({ rateInfos }, { setSubmitting }) => {
-                return handleFormSubmit({ rateInfos }, setSubmitting, {
-                    shouldValidateDocuments: true,
-                    redirectPath: `../contacts`,
-                })
-            }}
-            validationSchema={rateDetailsFormSchema}
-        >
-            {({
-                values: { rateInfos },
-                errors,
-                dirty,
-                handleSubmit,
-                isSubmitting,
-                setSubmitting,
-            }) => {
-                return (
-                    <>
-                        <UswdsForm
-                            className={styles.formContainer}
-                            id="RateDetailsForm"
-                            aria-label="Rate Details Form"
-                            aria-describedby="form-guidance"
-                            onSubmit={(e) => {
-                                setShouldValidate(true)
-                                setFocusErrorSummaryHeading(true)
-                                handleSubmit(e)
-                            }}
-                        >
-                            <fieldset className="usa-fieldset with-sections">
-                                <legend className="srOnly">Rate Details</legend>
+        <>
+            <div className={styles.stepIndicator}>
+                <DynamicStepIndicator
+                    formPages={activeFormPages(draftSubmission)}
+                    currentFormPage={currentRoute}
+                />
+                <PageBannerAlerts
+                    loggedInUser={loggedInUser}
+                    unlockedInfo={unlockInfo}
+                    showPageErrorMessage={showPageErrorMessage ?? false}
+                />
+            </div>
+            <FormContainer id="state-submission-form-page">
+                <Formik
+                    initialValues={rateInfosInitialValues}
+                    onSubmit={({ rateInfos }, { setSubmitting }) => {
+                        return handleFormSubmit({ rateInfos }, setSubmitting, {
+                            shouldValidateDocuments: true,
+                            redirectPath: `../contacts`,
+                        })
+                    }}
+                    validationSchema={rateDetailsFormSchema}
+                >
+                    {({
+                        values: { rateInfos },
+                        errors,
+                        dirty,
+                        handleSubmit,
+                        isSubmitting,
+                        setSubmitting,
+                    }) => {
+                        return (
+                            <>
+                                <UswdsForm
+                                    className={styles.formContainer}
+                                    id="RateDetailsForm"
+                                    aria-label="Rate Details Form"
+                                    aria-describedby="form-guidance"
+                                    onSubmit={(e) => {
+                                        setShouldValidate(true)
+                                        setFocusErrorSummaryHeading(true)
+                                        handleSubmit(e)
+                                    }}
+                                >
+                                    <fieldset className="usa-fieldset with-sections">
+                                        <legend className="srOnly">
+                                            Rate Details
+                                        </legend>
 
-                                {shouldValidate && (
-                                    <ErrorSummary
-                                        errors={generateErrorSummaryErrors(
-                                            errors
+                                        {shouldValidate && (
+                                            <ErrorSummary
+                                                errors={generateErrorSummaryErrors(
+                                                    errors
+                                                )}
+                                                headingRef={
+                                                    errorSummaryHeadingRef
+                                                }
+                                            />
                                         )}
-                                        headingRef={errorSummaryHeadingRef}
-                                    />
-                                )}
-                                <FieldArray name="rateInfos">
-                                    {({
-                                        remove,
-                                        push,
-                                    }: FieldArrayRenderProps) => (
-                                        <>
-                                            {rateInfos.map(
-                                                (rateInfo, index) => (
-                                                    <SingleRateCert
-                                                        key={rateInfo.key}
-                                                        rateInfo={rateInfo}
-                                                        index={index}
-                                                        shouldValidate={
-                                                            shouldValidate
-                                                        }
-                                                        parentSubmissionID={
-                                                            draftSubmission.id
-                                                        }
-                                                        previousDocuments={
-                                                            previousDocuments
-                                                        }
-                                                        multiRatesConfig={{
-                                                            removeSelf: () => {
-                                                                remove(index)
-                                                                setNewRateButtonFocus()
-                                                            },
-                                                            reassignNewRateRef:
-                                                                (el) =>
-                                                                    (newRateNameRef.current =
-                                                                        el),
-                                                        }}
-                                                    />
-                                                )
+                                        <FieldArray name="rateInfos">
+                                            {({
+                                                remove,
+                                                push,
+                                            }: FieldArrayRenderProps) => (
+                                                <>
+                                                    {rateInfos.map(
+                                                        (rateInfo, index) => (
+                                                            <SingleRateCert
+                                                                key={
+                                                                    rateInfo.key
+                                                                }
+                                                                rateInfo={
+                                                                    rateInfo
+                                                                }
+                                                                index={index}
+                                                                shouldValidate={
+                                                                    shouldValidate
+                                                                }
+                                                                parentSubmissionID={
+                                                                    draftSubmission.id
+                                                                }
+                                                                previousDocuments={
+                                                                    previousDocuments
+                                                                }
+                                                                multiRatesConfig={{
+                                                                    removeSelf:
+                                                                        () => {
+                                                                            remove(
+                                                                                index
+                                                                            )
+                                                                            setNewRateButtonFocus()
+                                                                        },
+                                                                    reassignNewRateRef:
+                                                                        (el) =>
+                                                                            (newRateNameRef.current =
+                                                                                el),
+                                                                }}
+                                                            />
+                                                        )
+                                                    )}
+                                                    <SectionCard>
+                                                        <h3>
+                                                            Additional rate
+                                                            certification
+                                                        </h3>
+                                                        <button
+                                                            type="button"
+                                                            className={`usa-button usa-button--outline ${styles.addRateBtn}`}
+                                                            onClick={() => {
+                                                                const newRate =
+                                                                    generateRateCertFormValues()
+                                                                push(newRate)
+                                                                setFocusNewRate(
+                                                                    true
+                                                                )
+                                                            }}
+                                                            ref={
+                                                                newRateButtonRef
+                                                            }
+                                                        >
+                                                            Add another rate
+                                                            certification
+                                                        </button>
+                                                    </SectionCard>
+                                                </>
                                             )}
-                                            <SectionCard>
-                                                <h3>
-                                                    Additional rate
-                                                    certification
-                                                </h3>
-                                                <button
-                                                    type="button"
-                                                    className={`usa-button usa-button--outline ${styles.addRateBtn}`}
-                                                    onClick={() => {
-                                                        const newRate =
-                                                            generateRateCertFormValues()
-                                                        push(newRate)
-                                                        setFocusNewRate(true)
-                                                    }}
-                                                    ref={newRateButtonRef}
-                                                >
-                                                    Add another rate
-                                                    certification
-                                                </button>
-                                            </SectionCard>
-                                        </>
-                                    )}
-                                </FieldArray>
-                            </fieldset>
-                            <PageActions
-                                backOnClick={async () => {
-                                    const redirectPath = `../contract-details`
-                                    if (dirty) {
-                                        await handleFormSubmit(
-                                            { rateInfos },
-                                            setSubmitting,
-                                            {
-                                                shouldValidateDocuments: false,
-                                                redirectPath,
+                                        </FieldArray>
+                                    </fieldset>
+                                    <PageActions
+                                        backOnClick={async () => {
+                                            const redirectPath = `../contract-details`
+                                            if (dirty) {
+                                                await handleFormSubmit(
+                                                    { rateInfos },
+                                                    setSubmitting,
+                                                    {
+                                                        shouldValidateDocuments:
+                                                            false,
+                                                        redirectPath,
+                                                    }
+                                                )
+                                            } else {
+                                                navigate(redirectPath)
                                             }
-                                        )
-                                    } else {
-                                        navigate(redirectPath)
-                                    }
-                                }}
-                                saveAsDraftOnClick={async () => {
-                                    await handleFormSubmit(
-                                        { rateInfos },
-                                        setSubmitting,
-                                        {
-                                            shouldValidateDocuments: true,
-                                            redirectPath:
-                                                RoutesRecord.DASHBOARD_SUBMISSIONS,
+                                        }}
+                                        saveAsDraftOnClick={async () => {
+                                            await handleFormSubmit(
+                                                { rateInfos },
+                                                setSubmitting,
+                                                {
+                                                    shouldValidateDocuments:
+                                                        true,
+                                                    redirectPath:
+                                                        RoutesRecord.DASHBOARD_SUBMISSIONS,
+                                                }
+                                            )
+                                        }}
+                                        disableContinue={
+                                            shouldValidate &&
+                                            !!Object.keys(errors).length
                                         }
-                                    )
-                                }}
-                                disableContinue={
-                                    shouldValidate &&
-                                    !!Object.keys(errors).length
-                                }
-                                actionInProgress={isSubmitting}
-                            />
-                        </UswdsForm>
-                    </>
-                )
-            }}
-        </Formik>
+                                        actionInProgress={isSubmitting}
+                                    />
+                                </UswdsForm>
+                            </>
+                        )
+                    }}
+                </Formik>
+            </FormContainer>
+        </>
     )
 }

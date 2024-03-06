@@ -1,14 +1,23 @@
+@use '../../styles/custom.scss' as custom;
+
 .stepIndicator {
     background-color: transparent;
-    width: 66rem;
     margin: 1.25rem auto;
     text-align: center;
-
+    > [class^='usa-step-indicator'] {
+        max-width: 66rem;
+        min-width: 50rem;
+    }
     ol {
         justify-content: center;
     }
 
     [class^='usa-step-indicator__header'] {
         display: inline;
+    }
+    @media (min-width: 40em) {
+        [class^='usa-step-indicator__segment-label'] {
+            padding-right: 1rem;
+        }
     }
 }

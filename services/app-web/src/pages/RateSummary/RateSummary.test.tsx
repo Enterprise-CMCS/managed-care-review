@@ -30,7 +30,7 @@ describe('RateSummary', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess({ rate: { id: '7a' } }),
+                        fetchRateMockSuccess({ id: '7a' }),
                     ],
                 },
                 routerProvider: {
@@ -68,7 +68,7 @@ describe('RateSummary', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess({ rate: { id: '7a' } }),
+                        fetchRateMockSuccess({ id: '7a' }),
                     ],
                 },
                 routerProvider: {
@@ -97,7 +97,7 @@ describe('RateSummary', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess({ rate: { id: '7a' } }),
+                        fetchRateMockSuccess({ id: '7a' }),
                     ],
                 },
                 routerProvider: {
@@ -123,7 +123,7 @@ describe('RateSummary', () => {
                             user: mockValidStateUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess({ rate: { id: '1337' } }),
+                        fetchRateMockSuccess({ id: '1337' }),
                     ],
                 },
                 routerProvider: {
@@ -163,7 +163,8 @@ describe('RateSummary', () => {
                                 statusCode: 200,
                             }),
                             fetchRateMockSuccess({
-                                rate: { id: '1337', status: 'UNLOCKED' },
+                                id: '1337',
+                                status: 'UNLOCKED',
                             }),
                         ],
                     },
@@ -195,7 +196,7 @@ describe('RateSummary', () => {
                             user: mockValidStateUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess({ rate: { id: '1337' } }),
+                        fetchRateMockSuccess({ id: '1337' }),
                     ],
                 },
                 //purposefully attaching invalid id to url here
@@ -216,7 +217,7 @@ describe('RateSummary', () => {
                             user: mockValidStateUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess({ rate: { id: '7a' } }),
+                        fetchRateMockSuccess({ id: '7a' }),
                     ],
                 },
                 routerProvider: {

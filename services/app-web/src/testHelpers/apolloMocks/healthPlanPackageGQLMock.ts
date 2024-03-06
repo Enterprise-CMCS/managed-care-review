@@ -34,6 +34,12 @@ import {
     GraphQLErrorCodeTypes,
 } from './apolloErrorCodeMocks'
 
+/*
+    DEPRECATED - Remove after Wave 2
+
+    Mock different health plan form data that match frontend types.
+*/
+
 type fetchHealthPlanPackageMockProps = {
     submission?: HealthPlanPackage
     id: string

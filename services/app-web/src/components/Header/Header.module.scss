@@ -61,10 +61,15 @@
 .dashboardHeading {
     background-color: custom.$mcr-cmsblue-dark;
     color: custom.$mcr-foundation-white;
-    & h1 {
+    padding-left: 0.5rem;
+    & h1,
+    div {
         display: flex;
         flex-wrap: wrap;
-        align-items: baseline;
+        align-items: center;
+        font-size: 32px;
+        line-height: 36.8px;
+        font-weight: bold;
         > span {
             padding: 0 uswds.units(1);
         }

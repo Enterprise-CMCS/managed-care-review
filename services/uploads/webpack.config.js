@@ -70,18 +70,6 @@ module.exports = {
                 },
                 {
                     from: path.resolve(__dirname, 'src/avLayer/clamd.conf'),
-                    transform(content) {
-                        const stage = slsw.lib.options.stage;
-                        const stageHostname = ['main', 'val', 'prod'].includes(
-                            stage
-                        )
-                            ? `clamav.mc-review-${stage}.local`
-                            : 'clamav.mc-review-main.local';
-
-                        return content
-                            .toString()
-                            .replace('HOSTNAME', stageHostname);
-                    },
                 },
             ],
         }),

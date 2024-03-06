@@ -5,41 +5,54 @@ import {
 } from '../../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { ReviewSubmit } from './ReviewSubmit'
+import * as useRouteParams from '../../../hooks/useRouteParams'
+import * as useHealthPlanPackageForm from '../../../hooks/useHealthPlanPackageForm'
 
 describe('ReviewSubmit', () => {
+    const mockUpdateDraftFn = jest.fn()
+    beforeEach(() => {
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockReturnValue({
+            updateDraft: mockUpdateDraftFn,
+            createDraft: jest.fn(),
+            showPageErrorMessage: false,
+            draftSubmission: mockBaseContract(),
+            documentDateLookupTable: { previousSubmissionDate: '01/01/01' },
+            submissionName: 'MN-PMAP-0001',
+        })
+        jest.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
+            id: '123-abc',
+        })
+    })
+
+    afterEach(() => {
+        jest.clearAllMocks()
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockRestore()
+        jest.spyOn(useRouteParams, 'useRouteParams').mockRestore()
+    })
+
     it('renders without errors', async () => {
-        renderWithProviders(
-            <ReviewSubmit
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                draftSubmission={mockBaseContract()}
-                unlocked={false}
-                submissionName="MN-PMAP-0001"
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<ReviewSubmit />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
         expect(
             screen.getByRole('heading', { name: 'Contract details' })
         ).toBeInTheDocument()
     })
 
     it('displays edit buttons for every section', async () => {
-        renderWithProviders(
-            <ReviewSubmit
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                draftSubmission={mockBaseContract()}
-                unlocked={false}
-                submissionName="MN-PMAP-0001"
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<ReviewSubmit />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         await waitFor(() => {
             const sectionHeadings = screen.queryAllByRole('heading', {
@@ -55,19 +68,11 @@ describe('ReviewSubmit', () => {
     })
 
     it('does not display zip download buttons', async () => {
-        renderWithProviders(
-            <ReviewSubmit
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                draftSubmission={mockBaseContract()}
-                unlocked={false}
-                submissionName="MN-PMAP-0001"
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<ReviewSubmit />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         await waitFor(() => {
             const bulkDownloadButtons = screen.queryAllByRole('button', {
@@ -78,19 +83,11 @@ describe('ReviewSubmit', () => {
     })
 
     it('renders info from a DraftSubmission', async () => {
-        renderWithProviders(
-            <ReviewSubmit
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                draftSubmission={mockBaseContract()}
-                unlocked={false}
-                submissionName="MN-PMAP-0001"
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<ReviewSubmit />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         await waitFor(() => {
             expect(
@@ -118,19 +115,11 @@ describe('ReviewSubmit', () => {
     })
 
     it('displays back and save as draft buttons', async () => {
-        renderWithProviders(
-            <ReviewSubmit
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                draftSubmission={mockBaseContract()}
-                unlocked={false}
-                submissionName="MN-PMAP-0001"
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<ReviewSubmit />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         await waitFor(() =>
             expect(
@@ -149,19 +138,11 @@ describe('ReviewSubmit', () => {
     })
 
     it('displays submit button', async () => {
-        renderWithProviders(
-            <ReviewSubmit
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                draftSubmission={mockBaseContract()}
-                unlocked={false}
-                submissionName="MN-PMAP-0001"
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<ReviewSubmit />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         await waitFor(() =>
             expect(screen.getByTestId('form-submit')).toBeDefined()

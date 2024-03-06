@@ -16,16 +16,38 @@ import {
 import { PageActions } from '../PageActions'
 import classNames from 'classnames'
 import { ErrorSummary } from '../../../components/Form'
-import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
+import { activeFormPages } from '../StateSubmissionForm'
 import { RoutesRecord } from '../../../constants'
+import { FormContainer } from '../FormContainer'
+import { useAuth } from '../../../contexts/AuthContext'
+import {
+    useCurrentRoute,
+    useHealthPlanPackageForm,
+    useRouteParams,
+} from '../../../hooks'
+import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
+import { DynamicStepIndicator } from '../../../components'
+import { PageBannerAlerts } from '../PageBannerAlerts'
+import { useErrorSummary } from '../../../hooks/useErrorSummary'
 
-export const Documents = ({
-    draftSubmission,
-    previousDocuments,
-    updateDraft,
-}: HealthPlanFormPageProps): React.ReactElement => {
+export const Documents = (): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(false)
     const navigate = useNavigate()
+    const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
+        useErrorSummary()
+
+    // set up API handling and HPP data
+    const { loggedInUser } = useAuth()
+    const { currentRoute } = useCurrentRoute()
+    const { id } = useRouteParams()
+    const {
+        draftSubmission,
+        interimState,
+        updateDraft,
+        previousDocuments,
+        showPageErrorMessage,
+        unlockInfo,
+    } = useHealthPlanPackageForm(id)
 
     // Documents state management
     const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
@@ -65,19 +87,8 @@ export const Documents = ({
               ? 'You must remove all documents with error messages before continuing'
               : undefined
 
-    // Error summary state management
-    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
-    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
-        React.useState(false)
-
-    React.useEffect(() => {
-        // Focus the error summary heading only if we are displaying
-        // validation errors and the heading element exists
-        if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
-            errorSummaryHeadingRef.current.focus()
-        }
-        setFocusErrorSummaryHeading(false)
-    }, [focusErrorSummaryHeading])
+    if (interimState || !draftSubmission || !updateDraft)
+        return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
@@ -238,86 +249,100 @@ export const Documents = ({
 
     return (
         <>
-            <UswdsForm
-                className={classNames(
-                    styles.tableContainer,
-                    styles.formContainer
-                )}
-                id="DocumentsForm"
-                aria-label="Documents Form"
-                onSubmit={async (e) => {
-                    await handleFormSubmit({
-                        shouldValidateDocuments: true,
-                        redirectPath: `../review-and-submit`,
-                    })(e)
-                }}
-            >
-                <fieldset className="usa-fieldset">
-                    <legend className="srOnly">Supporting Documents</legend>
-
-                    <ErrorSummary
-                        errors={
-                            Object.keys(documentsErrorMessages()).length > 0 &&
-                            shouldValidate
-                                ? {
-                                      ...documentsErrorMessages(),
-                                  }
-                                : {}
-                        }
-                        headingRef={errorSummaryHeadingRef}
-                    />
-                    <FileUpload
-                        id="documents"
-                        name="documents"
-                        label="Upload contract-supporting documents"
-                        hint={
-                            <>
-                                <Link
-                                    aria-label="Document definitions and requirements (opens in new window)"
-                                    href={'/help#supporting-documents'}
-                                    variant="external"
-                                    target="_blank"
-                                >
-                                    Document definitions and requirements
-                                </Link>
-                                <span className="padding-top-05">
-                                    Upload any supporting documents related to
-                                    the contract.
-                                </span>
-                                <span className="padding-top-1">
-                                    This input only accepts PDF, CSV, DOC, DOCX,
-                                    XLS, XLSX files.
-                                </span>
-                            </>
-                        }
-                        error={errorSummary}
-                        accept={ACCEPTED_SUBMISSION_FILE_TYPES}
-                        initialItems={fileItemsFromDraftSubmission}
-                        uploadFile={handleUploadFile}
-                        scanFile={handleScanFile}
-                        deleteFile={handleDeleteFile}
-                        onFileItemsUpdate={onFileItemsUpdate}
-                    />
-                </fieldset>
-                <PageActions
-                    saveAsDraftOnClick={async (e) => {
+            <div className={styles.stepIndicator}>
+                <DynamicStepIndicator
+                    formPages={activeFormPages(draftSubmission)}
+                    currentFormPage={currentRoute}
+                />
+                <PageBannerAlerts
+                    loggedInUser={loggedInUser}
+                    unlockedInfo={unlockInfo}
+                    showPageErrorMessage={showPageErrorMessage ?? false}
+                />
+            </div>
+            <FormContainer id="state-submission-form-page">
+                <UswdsForm
+                    className={classNames(
+                        styles.tableContainer,
+                        styles.formContainer
+                    )}
+                    id="DocumentsForm"
+                    aria-label="Documents Form"
+                    onSubmit={async (e) => {
                         await handleFormSubmit({
                             shouldValidateDocuments: true,
-                            redirectPath: RoutesRecord.DASHBOARD_SUBMISSIONS,
+                            redirectPath: `../review-and-submit`,
                         })(e)
                     }}
-                    backOnClick={async (e) => {
-                        await handleFormSubmit({
-                            shouldValidateDocuments: false,
-                            redirectPath: `../contacts`,
-                        })(e)
-                    }}
-                    disableContinue={
-                        showFileUploadError && fileItems.length > 0
-                    }
-                    actionInProgress={isSubmitting}
-                />
-            </UswdsForm>
+                >
+                    <fieldset className="usa-fieldset">
+                        <legend className="srOnly">Supporting Documents</legend>
+
+                        <ErrorSummary
+                            errors={
+                                Object.keys(documentsErrorMessages()).length >
+                                    0 && shouldValidate
+                                    ? {
+                                          ...documentsErrorMessages(),
+                                      }
+                                    : {}
+                            }
+                            headingRef={errorSummaryHeadingRef}
+                        />
+                        <FileUpload
+                            id="documents"
+                            name="documents"
+                            label="Upload contract-supporting documents"
+                            hint={
+                                <>
+                                    <Link
+                                        aria-label="Document definitions and requirements (opens in new window)"
+                                        href={'/help#supporting-documents'}
+                                        variant="external"
+                                        target="_blank"
+                                    >
+                                        Document definitions and requirements
+                                    </Link>
+                                    <span className="padding-top-05">
+                                        Upload any supporting documents related
+                                        to the contract.
+                                    </span>
+                                    <span className="padding-top-1">
+                                        This input only accepts PDF, CSV, DOC,
+                                        DOCX, XLS, XLSX files.
+                                    </span>
+                                </>
+                            }
+                            error={errorSummary}
+                            accept={ACCEPTED_SUBMISSION_FILE_TYPES}
+                            initialItems={fileItemsFromDraftSubmission}
+                            uploadFile={handleUploadFile}
+                            scanFile={handleScanFile}
+                            deleteFile={handleDeleteFile}
+                            onFileItemsUpdate={onFileItemsUpdate}
+                        />
+                    </fieldset>
+                    <PageActions
+                        saveAsDraftOnClick={async (e) => {
+                            await handleFormSubmit({
+                                shouldValidateDocuments: true,
+                                redirectPath:
+                                    RoutesRecord.DASHBOARD_SUBMISSIONS,
+                            })(e)
+                        }}
+                        backOnClick={async (e) => {
+                            await handleFormSubmit({
+                                shouldValidateDocuments: false,
+                                redirectPath: `../contacts`,
+                            })(e)
+                        }}
+                        disableContinue={
+                            showFileUploadError && fileItems.length > 0
+                        }
+                        actionInProgress={isSubmitting}
+                    />
+                </UswdsForm>
+            </FormContainer>
         </>
     )
 }

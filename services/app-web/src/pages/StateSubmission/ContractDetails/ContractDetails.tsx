@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import dayjs from 'dayjs'
 import {
     Form as UswdsForm,
@@ -23,6 +23,7 @@ import {
     PoliteErrorMessage,
     FieldYesNo,
     FieldTextarea,
+    DynamicStepIndicator,
 } from '../../../components'
 import {
     formatForForm,
@@ -39,7 +40,10 @@ import {
     FederalAuthorityRecord,
 } from '../../../constants/healthPlanPackages'
 import { PageActions } from '../PageActions'
-import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
+import {
+    activeFormPages,
+    type HealthPlanFormPageProps,
+} from '../StateSubmissionForm'
 import { formatYesNoForProto } from '../../../formHelpers/formatters'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import {
@@ -70,6 +74,16 @@ import {
     StatutoryRegulatoryAttestationDescription,
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../constants/statutoryRegulatoryAttestation'
+import { FormContainer } from '../FormContainer'
+import {
+    useCurrentRoute,
+    useHealthPlanPackageForm,
+    useRouteParams,
+} from '../../../hooks'
+import { useAuth } from '../../../contexts/AuthContext'
+import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
+import { PageBannerAlerts } from '../PageBannerAlerts'
+import { useErrorSummary } from '../../../hooks/useErrorSummary'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -128,14 +142,26 @@ type FormError =
     FormikErrors<ContractDetailsFormValues>[keyof FormikErrors<ContractDetailsFormValues>]
 
 export const ContractDetails = ({
-    draftSubmission,
     showValidations = false,
-    previousDocuments,
-    updateDraft,
 }: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const navigate = useNavigate()
     const ldClient = useLDClient()
+    const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
+        useErrorSummary()
+
+    // set up API handling and HPP data
+    const { loggedInUser } = useAuth()
+    const { currentRoute } = useCurrentRoute()
+    const { id } = useRouteParams()
+    const {
+        draftSubmission,
+        interimState,
+        updateDraft,
+        previousDocuments,
+        showPageErrorMessage,
+        unlockInfo,
+    } = useHealthPlanPackageForm(id)
 
     const contract438Attestation = ldClient?.variation(
         featureFlags.CONTRACT_438_ATTESTATION.flag,
@@ -163,20 +189,8 @@ export const ContractDetails = ({
     const documentsErrorKey =
         fileItems.length === 0 ? 'documents' : '#file-items-list'
 
-    // Error summary state management
-    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
-    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
-        React.useState(false)
-
-    useEffect(() => {
-        // Focus the error summary heading only if we are displaying
-        // validation errors and the heading element exists
-        if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
-            errorSummaryHeadingRef.current.focus()
-        }
-        setFocusErrorSummaryHeading(false)
-    }, [focusErrorSummaryHeading])
-
+    if (interimState || !draftSubmission)
+        return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
         draftSubmission.contractDocuments.map((doc) => {
@@ -494,581 +508,643 @@ export const ContractDetails = ({
         }
     }
     return (
-        <Formik
-            initialValues={contractDetailsInitialValues}
-            onSubmit={(values, { setSubmitting }) => {
-                return handleFormSubmit(values, setSubmitting, {
-                    shouldValidateDocuments: true,
-                    redirectPath:
-                        draftSubmission.submissionType === 'CONTRACT_ONLY'
-                            ? `../contacts`
-                            : `../rate-details`,
-                })
-            }}
-            validationSchema={() =>
-                ContractDetailsFormSchema(draftSubmission, ldClient?.allFlags())
-            }
-        >
-            {({
-                values,
-                errors,
-                handleSubmit,
-                setSubmitting,
-                isSubmitting,
-                setFieldValue,
-            }) => (
-                <>
-                    <UswdsForm
-                        className={styles.formContainer}
-                        id="ContractDetailsForm"
-                        aria-label="Contract Details Form"
-                        aria-describedby="form-guidance"
-                        onSubmit={(e) => {
-                            setShouldValidate(true)
-                            setFocusErrorSummaryHeading(true)
-                            handleSubmit(e)
-                        }}
-                    >
-                        <fieldset className="usa-fieldset">
-                            <legend className="srOnly">Contract Details</legend>
-
-                            {shouldValidate && (
-                                <ErrorSummary
-                                    errors={
-                                        documentsErrorMessage
-                                            ? {
-                                                  [documentsErrorKey]:
-                                                      documentsErrorMessage,
-                                                  ...errors,
-                                              }
-                                            : errors
-                                    }
-                                    headingRef={errorSummaryHeadingRef}
-                                />
-                            )}
-
-                            <FormGroup
-                                error={showFileUploadError}
-                                className="margin-top-0"
+        <>
+            <div className={styles.stepIndicator}>
+                <DynamicStepIndicator
+                    formPages={activeFormPages(draftSubmission)}
+                    currentFormPage={currentRoute}
+                />
+                <PageBannerAlerts
+                    loggedInUser={loggedInUser}
+                    unlockedInfo={unlockInfo}
+                    showPageErrorMessage={showPageErrorMessage ?? false}
+                />
+            </div>
+            <FormContainer id="state-submission-form-page">
+                <Formik
+                    initialValues={contractDetailsInitialValues}
+                    onSubmit={(values, { setSubmitting }) => {
+                        return handleFormSubmit(values, setSubmitting, {
+                            shouldValidateDocuments: true,
+                            redirectPath:
+                                draftSubmission.submissionType ===
+                                'CONTRACT_ONLY'
+                                    ? `../contacts`
+                                    : `../rate-details`,
+                        })
+                    }}
+                    validationSchema={() =>
+                        ContractDetailsFormSchema(
+                            draftSubmission,
+                            ldClient?.allFlags()
+                        )
+                    }
+                >
+                    {({
+                        values,
+                        errors,
+                        handleSubmit,
+                        setSubmitting,
+                        isSubmitting,
+                        setFieldValue,
+                    }) => (
+                        <>
+                            <UswdsForm
+                                className={styles.formContainer}
+                                id="ContractDetailsForm"
+                                aria-label="Contract Details Form"
+                                aria-describedby="form-guidance"
+                                onSubmit={(e) => {
+                                    setShouldValidate(true)
+                                    setFocusErrorSummaryHeading(true)
+                                    handleSubmit(e)
+                                }}
                             >
-                                <FileUpload
-                                    id="documents"
-                                    name="documents"
-                                    label="Upload contract"
-                                    aria-required
-                                    error={documentsErrorMessage}
-                                    hint={
-                                        <span
-                                            className={styles.guidanceTextBlock}
-                                        >
-                                            <Link
-                                                aria-label="Document definitions and requirements (opens in new window)"
-                                                href={'/help#key-documents'}
-                                                variant="external"
-                                                target="_blank"
-                                            >
-                                                Document definitions and
-                                                requirements
-                                            </Link>
-                                            <span className="padding-top-05">
-                                                Supporting documents can be
-                                                added later. If you have
-                                                additional contract actions, you
-                                                must submit them in a separate
-                                                submission.
-                                            </span>
-                                            <span className="padding-top-1">
-                                                This input only accepts PDF,
-                                                CSV, DOC, DOCX, XLS, XLSX files.
-                                            </span>
-                                        </span>
-                                    }
-                                    accept={ACCEPTED_SUBMISSION_FILE_TYPES}
-                                    initialItems={fileItemsFromDraftSubmission}
-                                    uploadFile={handleUploadFile}
-                                    scanFile={handleScanFile}
-                                    deleteFile={handleDeleteFile}
-                                    onFileItemsUpdate={onFileItemsUpdate}
-                                />
-                            </FormGroup>
-                            {contract438Attestation && (
-                                <FormGroup
-                                    error={showFieldErrors(
-                                        errors.statutoryRegulatoryAttestation
+                                <fieldset className="usa-fieldset">
+                                    <legend className="srOnly">
+                                        Contract Details
+                                    </legend>
+
+                                    {shouldValidate && (
+                                        <ErrorSummary
+                                            errors={
+                                                documentsErrorMessage
+                                                    ? {
+                                                          [documentsErrorKey]:
+                                                              documentsErrorMessage,
+                                                          ...errors,
+                                                      }
+                                                    : errors
+                                            }
+                                            headingRef={errorSummaryHeadingRef}
+                                        />
                                     )}
-                                >
-                                    <Fieldset
-                                        role="radiogroup"
-                                        aria-required
-                                        className={styles.contractAttestation}
-                                        legend={
-                                            StatutoryRegulatoryAttestationQuestion
-                                        }
+
+                                    <FormGroup
+                                        error={showFileUploadError}
+                                        className="margin-top-0"
                                     >
-                                        <div role="note">
-                                            <span
-                                                className={
-                                                    styles.requiredOptionalText
-                                                }
-                                            >
-                                                Required
-                                            </span>
-                                            <span>
-                                                <Link
-                                                    aria-label="Managed Care Contract Review and Approval State Guide (opens in new window)"
-                                                    href={
-                                                        'https://www.medicaid.gov/sites/default/files/2022-01/mce-checklist-state-user-guide.pdf'
-                                                    }
-                                                    variant="external"
-                                                    target="_blank"
-                                                >
-                                                    Managed Care Contract Review
-                                                    and Approval State Guide
-                                                </Link>
-                                                <Link
-                                                    aria-label="CHIP Managed Care Contract Review and Approval State Guide (opens in new window)"
-                                                    href={
-                                                        'https://www.medicaid.gov/sites/default/files/2022-04/chip-managed-care-contract-guide_0.pdf'
-                                                    }
-                                                    variant="external"
-                                                    target="_blank"
-                                                >
-                                                    CHIP Managed Care Contract
-                                                    Review and Approval State
-                                                    Guide
-                                                </Link>
-                                            </span>
-                                        </div>
-                                        {showFieldErrors(
-                                            errors.statutoryRegulatoryAttestation
-                                        ) && (
-                                            <PoliteErrorMessage>
-                                                {
-                                                    errors.statutoryRegulatoryAttestation
-                                                }
-                                            </PoliteErrorMessage>
-                                        )}
-                                        <FieldRadio
-                                            name="statutoryRegulatoryAttestation"
-                                            label={
-                                                StatutoryRegulatoryAttestation.YES
-                                            }
-                                            id="statutoryRegulatoryAttestationYes"
-                                            value={'YES'}
+                                        <FileUpload
+                                            id="documents"
+                                            name="documents"
+                                            label="Upload contract"
                                             aria-required
-                                        />
-                                        <FieldRadio
-                                            name="statutoryRegulatoryAttestation"
-                                            label={
-                                                StatutoryRegulatoryAttestation.NO
-                                            }
-                                            id="statutoryRegulatoryAttestationNo"
-                                            value={'NO'}
-                                            aria-required
-                                        />
-                                    </Fieldset>
-                                </FormGroup>
-                            )}
-                            {contract438Attestation &&
-                                values.statutoryRegulatoryAttestation ===
-                                    'NO' && (
-                                    <div className={styles.contractAttestation}>
-                                        <FieldTextarea
-                                            label={
-                                                StatutoryRegulatoryAttestationDescription
-                                            }
-                                            id="statutoryRegulatoryAttestationDescription"
-                                            name="statutoryRegulatoryAttestationDescription"
-                                            aria-required
-                                            showError={showFieldErrors(
-                                                errors.statutoryRegulatoryAttestationDescription
-                                            )}
+                                            error={documentsErrorMessage}
                                             hint={
-                                                <Link
-                                                    variant="external"
-                                                    asCustom={ReactRouterLink}
-                                                    className={
-                                                        'margin-bottom-1'
-                                                    }
-                                                    to={{
-                                                        pathname: '/help',
-                                                        hash: '#non-compliance-guidance',
-                                                    }}
-                                                    target="_blank"
-                                                >
-                                                    Non-compliance definitions
-                                                    and examples
-                                                </Link>
-                                            }
-                                        />
-                                    </div>
-                                )}
-                            <FormGroup
-                                error={showFieldErrors(
-                                    errors.contractExecutionStatus
-                                )}
-                            >
-                                <Fieldset
-                                    role="radiogroup"
-                                    aria-required
-                                    className={styles.radioGroup}
-                                    legend="Contract status"
-                                >
-                                    <span
-                                        className={styles.requiredOptionalText}
-                                    >
-                                        Required
-                                    </span>
-                                    {showFieldErrors(
-                                        errors.contractExecutionStatus
-                                    ) && (
-                                        <PoliteErrorMessage>
-                                            {errors.contractExecutionStatus}
-                                        </PoliteErrorMessage>
-                                    )}
-                                    <FieldRadio
-                                        id="executedContract"
-                                        name="contractExecutionStatus"
-                                        label="Fully executed"
-                                        aria-required
-                                        value={'EXECUTED'}
-                                    />
-                                    <FieldRadio
-                                        id="unexecutedContract"
-                                        name="contractExecutionStatus"
-                                        label="Unexecuted by some or all parties"
-                                        aria-required
-                                        value={'UNEXECUTED'}
-                                    />
-                                </Fieldset>
-                            </FormGroup>
-                            {
-                                <>
-                                    <FormGroup
-                                        error={
-                                            showFieldErrors(
-                                                errors.contractDateStart
-                                            ) ||
-                                            showFieldErrors(
-                                                errors.contractDateEnd
-                                            )
-                                        }
-                                    >
-                                        <Fieldset
-                                            aria-required
-                                            legend={
-                                                isContractAmendment(
-                                                    draftSubmission
-                                                )
-                                                    ? 'Amendment effective dates'
-                                                    : 'Contract effective dates'
-                                            }
-                                        >
-                                            <span
-                                                className={
-                                                    styles.requiredOptionalText
-                                                }
-                                            >
-                                                Required
-                                            </span>
-                                            {showFieldErrors(
-                                                errors.contractDateStart ||
-                                                    errors.contractDateEnd
-                                            ) && (
-                                                <ContractDatesErrorMessage
-                                                    values={values}
-                                                    validationErrorMessage={
-                                                        errors.contractDateStart ||
-                                                        errors.contractDateEnd ||
-                                                        'Invalid date'
-                                                    }
-                                                />
-                                            )}
-                                            <Link
-                                                aria-label="Effective date guidance (opens in new window)"
-                                                href={
-                                                    '/help#effective-date-guidance'
-                                                }
-                                                variant="external"
-                                                target="_blank"
-                                            >
-                                                Effective date guidance
-                                            </Link>
-                                            <DateRangePicker
-                                                className={
-                                                    styles.dateRangePicker
-                                                }
-                                                startDateHint="mm/dd/yyyy"
-                                                startDateLabel="Start date"
-                                                startDatePickerProps={{
-                                                    id: 'contractDateStart',
-                                                    name: 'contractDateStart',
-                                                    'aria-required': true,
-                                                    disabled: false,
-                                                    defaultValue:
-                                                        values.contractDateStart,
-                                                    maxDate:
-                                                        formattedDateMinusOneDay(
-                                                            values.contractDateEnd
-                                                        ),
-                                                    onChange: (val) =>
-                                                        setFieldValue(
-                                                            'contractDateStart',
-                                                            formatUserInputDate(
-                                                                val
-                                                            )
-                                                        ),
-                                                }}
-                                                endDateHint="mm/dd/yyyy"
-                                                endDateLabel="End date"
-                                                endDatePickerProps={{
-                                                    disabled: false,
-                                                    id: 'contractDateEnd',
-                                                    name: 'contractDateEnd',
-                                                    'aria-required': true,
-                                                    defaultValue:
-                                                        values.contractDateEnd,
-                                                    minDate:
-                                                        formattedDatePlusOneDay(
-                                                            values.contractDateStart
-                                                        ),
-                                                    onChange: (val) =>
-                                                        setFieldValue(
-                                                            'contractDateEnd',
-                                                            formatUserInputDate(
-                                                                val
-                                                            )
-                                                        ),
-                                                }}
-                                            />
-                                        </Fieldset>
-                                    </FormGroup>
-                                    <FormGroup
-                                        error={showFieldErrors(
-                                            errors.managedCareEntities
-                                        )}
-                                    >
-                                        <Fieldset
-                                            aria-required
-                                            legend="Managed Care entities"
-                                        >
-                                            <span
-                                                className={
-                                                    styles.requiredOptionalText
-                                                }
-                                            >
-                                                Required
-                                            </span>
-                                            <Link
-                                                variant="external"
-                                                href={
-                                                    'https://www.medicaid.gov/medicaid/managed-care/managed-care-entities/index.html'
-                                                }
-                                                target="_blank"
-                                            >
-                                                Managed Care entity definitions
-                                            </Link>
-                                            <div className="usa-hint">
-                                                <span>
-                                                    Check all that apply
-                                                </span>
-                                            </div>
-                                            {showFieldErrors(
-                                                errors.managedCareEntities
-                                            ) && (
-                                                <PoliteErrorMessage>
-                                                    {errors.managedCareEntities}
-                                                </PoliteErrorMessage>
-                                            )}
-                                            <FieldCheckbox
-                                                id="managedCareOrganization"
-                                                name="managedCareEntities"
-                                                label={
-                                                    ManagedCareEntityRecord.MCO
-                                                }
-                                                value="MCO"
-                                            />
-                                            <FieldCheckbox
-                                                id="prepaidInpatientHealthPlan"
-                                                name="managedCareEntities"
-                                                label={
-                                                    ManagedCareEntityRecord.PIHP
-                                                }
-                                                value="PIHP"
-                                            />
-                                            <FieldCheckbox
-                                                id="prepaidAmbulatoryHealthPlans"
-                                                name="managedCareEntities"
-                                                label={
-                                                    ManagedCareEntityRecord.PAHP
-                                                }
-                                                value="PAHP"
-                                            />
-                                            <FieldCheckbox
-                                                id="primaryCareCaseManagementEntity"
-                                                name="managedCareEntities"
-                                                label={
-                                                    ManagedCareEntityRecord.PCCM
-                                                }
-                                                value="PCCM"
-                                            />
-                                        </Fieldset>
-                                    </FormGroup>
-
-                                    <FormGroup
-                                        error={showFieldErrors(
-                                            errors.federalAuthorities
-                                        )}
-                                    >
-                                        <Fieldset
-                                            aria-required
-                                            legend="Active federal operating authority"
-                                        >
-                                            <span
-                                                className={
-                                                    styles.requiredOptionalText
-                                                }
-                                            >
-                                                Required
-                                            </span>
-                                            <Link
-                                                variant="external"
-                                                href={
-                                                    'https://www.medicaid.gov/medicaid/managed-care/managed-care-authorities/index.html'
-                                                }
-                                                target="_blank"
-                                            >
-                                                Managed Care authority
-                                                definitions
-                                            </Link>
-                                            <div className="usa-hint">
-                                                <span>
-                                                    Check all that apply
-                                                </span>
-                                            </div>
-                                            {showFieldErrors(
-                                                errors.federalAuthorities
-                                            ) && (
-                                                <PoliteErrorMessage>
-                                                    {errors.federalAuthorities}
-                                                </PoliteErrorMessage>
-                                            )}
-                                            {applicableFederalAuthorities.map(
-                                                (federalAuthority) => (
-                                                    <FieldCheckbox
-                                                        id={federalAuthority.toLowerCase()}
-                                                        key={federalAuthority.toLowerCase()}
-                                                        name="federalAuthorities"
-                                                        label={
-                                                            FederalAuthorityRecord[
-                                                                federalAuthority
-                                                            ]
-                                                        }
-                                                        value={federalAuthority}
-                                                    />
-                                                )
-                                            )}
-                                        </Fieldset>
-                                    </FormGroup>
-                                    {isContractWithProvisions(
-                                        draftSubmission
-                                    ) && (
-                                        <FormGroup data-testid="yes-no-group">
-                                            <Fieldset
-                                                aria-required
-                                                legend={
-                                                    isBaseContract(
-                                                        draftSubmission
-                                                    )
-                                                        ? 'Does this contract action include provisions related to any of the following'
-                                                        : 'Does this contract action include new or modified provisions related to any of the following'
-                                                }
-                                            >
                                                 <span
                                                     className={
-                                                        styles.requiredOptionalText
+                                                        styles.guidanceTextBlock
                                                     }
                                                 >
-                                                    Required
+                                                    <Link
+                                                        aria-label="Document definitions and requirements (opens in new window)"
+                                                        href={
+                                                            '/help#key-documents'
+                                                        }
+                                                        variant="external"
+                                                        target="_blank"
+                                                    >
+                                                        Document definitions and
+                                                        requirements
+                                                    </Link>
+                                                    <span className="padding-top-05">
+                                                        Supporting documents can
+                                                        be added later. If you
+                                                        have additional contract
+                                                        actions, you must submit
+                                                        them in a separate
+                                                        submission.
+                                                    </span>
+                                                    <span className="padding-top-1">
+                                                        This input only accepts
+                                                        PDF, CSV, DOC, DOCX,
+                                                        XLS, XLSX files.
+                                                    </span>
                                                 </span>
-                                                {applicableProvisions.map(
-                                                    (modifiedProvisionName) => (
-                                                        <FieldYesNo
-                                                            id={
-                                                                modifiedProvisionName
+                                            }
+                                            accept={
+                                                ACCEPTED_SUBMISSION_FILE_TYPES
+                                            }
+                                            initialItems={
+                                                fileItemsFromDraftSubmission
+                                            }
+                                            uploadFile={handleUploadFile}
+                                            scanFile={handleScanFile}
+                                            deleteFile={handleDeleteFile}
+                                            onFileItemsUpdate={
+                                                onFileItemsUpdate
+                                            }
+                                        />
+                                    </FormGroup>
+                                    {contract438Attestation && (
+                                        <FormGroup
+                                            error={showFieldErrors(
+                                                errors.statutoryRegulatoryAttestation
+                                            )}
+                                        >
+                                            <Fieldset
+                                                role="radiogroup"
+                                                aria-required
+                                                className={
+                                                    styles.contractAttestation
+                                                }
+                                                legend={
+                                                    StatutoryRegulatoryAttestationQuestion
+                                                }
+                                            >
+                                                <div role="note">
+                                                    <span
+                                                        className={
+                                                            styles.requiredOptionalText
+                                                        }
+                                                    >
+                                                        Required
+                                                    </span>
+                                                    <span>
+                                                        <Link
+                                                            aria-label="Managed Care Contract Review and Approval State Guide (opens in new window)"
+                                                            href={
+                                                                'https://www.medicaid.gov/sites/default/files/2022-01/mce-checklist-state-user-guide.pdf'
                                                             }
-                                                            key={
-                                                                modifiedProvisionName
+                                                            variant="external"
+                                                            target="_blank"
+                                                        >
+                                                            Managed Care
+                                                            Contract Review and
+                                                            Approval State Guide
+                                                        </Link>
+                                                        <Link
+                                                            aria-label="CHIP Managed Care Contract Review and Approval State Guide (opens in new window)"
+                                                            href={
+                                                                'https://www.medicaid.gov/sites/default/files/2022-04/chip-managed-care-contract-guide_0.pdf'
                                                             }
-                                                            name={
-                                                                modifiedProvisionName
-                                                            }
-                                                            label={generateProvisionLabel(
-                                                                draftSubmission,
-                                                                modifiedProvisionName
-                                                            )}
-                                                            showError={showFieldErrors(
-                                                                errors[
-                                                                    modifiedProvisionName
-                                                                ]
-                                                            )}
-                                                            variant="SUBHEAD"
-                                                        />
-                                                    )
+                                                            variant="external"
+                                                            target="_blank"
+                                                        >
+                                                            CHIP Managed Care
+                                                            Contract Review and
+                                                            Approval State Guide
+                                                        </Link>
+                                                    </span>
+                                                </div>
+                                                {showFieldErrors(
+                                                    errors.statutoryRegulatoryAttestation
+                                                ) && (
+                                                    <PoliteErrorMessage>
+                                                        {
+                                                            errors.statutoryRegulatoryAttestation
+                                                        }
+                                                    </PoliteErrorMessage>
                                                 )}
+                                                <FieldRadio
+                                                    name="statutoryRegulatoryAttestation"
+                                                    label={
+                                                        StatutoryRegulatoryAttestation.YES
+                                                    }
+                                                    id="statutoryRegulatoryAttestationYes"
+                                                    value={'YES'}
+                                                    aria-required
+                                                />
+                                                <FieldRadio
+                                                    name="statutoryRegulatoryAttestation"
+                                                    label={
+                                                        StatutoryRegulatoryAttestation.NO
+                                                    }
+                                                    id="statutoryRegulatoryAttestationNo"
+                                                    value={'NO'}
+                                                    aria-required
+                                                />
                                             </Fieldset>
                                         </FormGroup>
                                     )}
-                                </>
-                            }
-                        </fieldset>
+                                    {contract438Attestation &&
+                                        values.statutoryRegulatoryAttestation ===
+                                            'NO' && (
+                                            <div
+                                                className={
+                                                    styles.contractAttestation
+                                                }
+                                            >
+                                                <FieldTextarea
+                                                    label={
+                                                        StatutoryRegulatoryAttestationDescription
+                                                    }
+                                                    id="statutoryRegulatoryAttestationDescription"
+                                                    name="statutoryRegulatoryAttestationDescription"
+                                                    aria-required
+                                                    showError={showFieldErrors(
+                                                        errors.statutoryRegulatoryAttestationDescription
+                                                    )}
+                                                    hint={
+                                                        <Link
+                                                            variant="external"
+                                                            asCustom={
+                                                                ReactRouterLink
+                                                            }
+                                                            className={
+                                                                'margin-bottom-1'
+                                                            }
+                                                            to={{
+                                                                pathname:
+                                                                    '/help',
+                                                                hash: '#non-compliance-guidance',
+                                                            }}
+                                                            target="_blank"
+                                                        >
+                                                            Non-compliance
+                                                            definitions and
+                                                            examples
+                                                        </Link>
+                                                    }
+                                                />
+                                            </div>
+                                        )}
+                                    <FormGroup
+                                        error={showFieldErrors(
+                                            errors.contractExecutionStatus
+                                        )}
+                                    >
+                                        <Fieldset
+                                            role="radiogroup"
+                                            aria-required
+                                            className={styles.radioGroup}
+                                            legend="Contract status"
+                                        >
+                                            <span
+                                                className={
+                                                    styles.requiredOptionalText
+                                                }
+                                            >
+                                                Required
+                                            </span>
+                                            {showFieldErrors(
+                                                errors.contractExecutionStatus
+                                            ) && (
+                                                <PoliteErrorMessage>
+                                                    {
+                                                        errors.contractExecutionStatus
+                                                    }
+                                                </PoliteErrorMessage>
+                                            )}
+                                            <FieldRadio
+                                                id="executedContract"
+                                                name="contractExecutionStatus"
+                                                label="Fully executed"
+                                                aria-required
+                                                value={'EXECUTED'}
+                                            />
+                                            <FieldRadio
+                                                id="unexecutedContract"
+                                                name="contractExecutionStatus"
+                                                label="Unexecuted by some or all parties"
+                                                aria-required
+                                                value={'UNEXECUTED'}
+                                            />
+                                        </Fieldset>
+                                    </FormGroup>
+                                    {
+                                        <>
+                                            <FormGroup
+                                                error={
+                                                    showFieldErrors(
+                                                        errors.contractDateStart
+                                                    ) ||
+                                                    showFieldErrors(
+                                                        errors.contractDateEnd
+                                                    )
+                                                }
+                                            >
+                                                <Fieldset
+                                                    aria-required
+                                                    legend={
+                                                        isContractAmendment(
+                                                            draftSubmission
+                                                        )
+                                                            ? 'Amendment effective dates'
+                                                            : 'Contract effective dates'
+                                                    }
+                                                >
+                                                    <span
+                                                        className={
+                                                            styles.requiredOptionalText
+                                                        }
+                                                    >
+                                                        Required
+                                                    </span>
+                                                    {showFieldErrors(
+                                                        errors.contractDateStart ||
+                                                            errors.contractDateEnd
+                                                    ) && (
+                                                        <ContractDatesErrorMessage
+                                                            values={values}
+                                                            validationErrorMessage={
+                                                                errors.contractDateStart ||
+                                                                errors.contractDateEnd ||
+                                                                'Invalid date'
+                                                            }
+                                                        />
+                                                    )}
+                                                    <Link
+                                                        aria-label="Effective date guidance (opens in new window)"
+                                                        href={
+                                                            '/help#effective-date-guidance'
+                                                        }
+                                                        variant="external"
+                                                        target="_blank"
+                                                    >
+                                                        Effective date guidance
+                                                    </Link>
+                                                    <DateRangePicker
+                                                        className={
+                                                            styles.dateRangePicker
+                                                        }
+                                                        startDateHint="mm/dd/yyyy"
+                                                        startDateLabel="Start date"
+                                                        startDatePickerProps={{
+                                                            id: 'contractDateStart',
+                                                            name: 'contractDateStart',
+                                                            'aria-required':
+                                                                true,
+                                                            disabled: false,
+                                                            defaultValue:
+                                                                values.contractDateStart,
+                                                            maxDate:
+                                                                formattedDateMinusOneDay(
+                                                                    values.contractDateEnd
+                                                                ),
+                                                            onChange: (val) =>
+                                                                setFieldValue(
+                                                                    'contractDateStart',
+                                                                    formatUserInputDate(
+                                                                        val
+                                                                    )
+                                                                ),
+                                                        }}
+                                                        endDateHint="mm/dd/yyyy"
+                                                        endDateLabel="End date"
+                                                        endDatePickerProps={{
+                                                            disabled: false,
+                                                            id: 'contractDateEnd',
+                                                            name: 'contractDateEnd',
+                                                            'aria-required':
+                                                                true,
+                                                            defaultValue:
+                                                                values.contractDateEnd,
+                                                            minDate:
+                                                                formattedDatePlusOneDay(
+                                                                    values.contractDateStart
+                                                                ),
+                                                            onChange: (val) =>
+                                                                setFieldValue(
+                                                                    'contractDateEnd',
+                                                                    formatUserInputDate(
+                                                                        val
+                                                                    )
+                                                                ),
+                                                        }}
+                                                    />
+                                                </Fieldset>
+                                            </FormGroup>
+                                            <FormGroup
+                                                error={showFieldErrors(
+                                                    errors.managedCareEntities
+                                                )}
+                                            >
+                                                <Fieldset
+                                                    aria-required
+                                                    legend="Managed Care entities"
+                                                >
+                                                    <span
+                                                        className={
+                                                            styles.requiredOptionalText
+                                                        }
+                                                    >
+                                                        Required
+                                                    </span>
+                                                    <Link
+                                                        variant="external"
+                                                        href={
+                                                            'https://www.medicaid.gov/medicaid/managed-care/managed-care-entities/index.html'
+                                                        }
+                                                        target="_blank"
+                                                    >
+                                                        Managed Care entity
+                                                        definitions
+                                                    </Link>
+                                                    <div className="usa-hint">
+                                                        <span>
+                                                            Check all that apply
+                                                        </span>
+                                                    </div>
+                                                    {showFieldErrors(
+                                                        errors.managedCareEntities
+                                                    ) && (
+                                                        <PoliteErrorMessage>
+                                                            {
+                                                                errors.managedCareEntities
+                                                            }
+                                                        </PoliteErrorMessage>
+                                                    )}
+                                                    <FieldCheckbox
+                                                        id="managedCareOrganization"
+                                                        name="managedCareEntities"
+                                                        label={
+                                                            ManagedCareEntityRecord.MCO
+                                                        }
+                                                        value="MCO"
+                                                    />
+                                                    <FieldCheckbox
+                                                        id="prepaidInpatientHealthPlan"
+                                                        name="managedCareEntities"
+                                                        label={
+                                                            ManagedCareEntityRecord.PIHP
+                                                        }
+                                                        value="PIHP"
+                                                    />
+                                                    <FieldCheckbox
+                                                        id="prepaidAmbulatoryHealthPlans"
+                                                        name="managedCareEntities"
+                                                        label={
+                                                            ManagedCareEntityRecord.PAHP
+                                                        }
+                                                        value="PAHP"
+                                                    />
+                                                    <FieldCheckbox
+                                                        id="primaryCareCaseManagementEntity"
+                                                        name="managedCareEntities"
+                                                        label={
+                                                            ManagedCareEntityRecord.PCCM
+                                                        }
+                                                        value="PCCM"
+                                                    />
+                                                </Fieldset>
+                                            </FormGroup>
 
-                        <PageActions
-                            saveAsDraftOnClick={async () => {
-                                // do not need to trigger validations if file list is empty
-                                if (fileItems.length === 0) {
-                                    await handleFormSubmit(
-                                        values,
-                                        setSubmitting,
-                                        {
-                                            shouldValidateDocuments: false,
-                                            redirectPath:
-                                                RoutesRecord.DASHBOARD_SUBMISSIONS,
+                                            <FormGroup
+                                                error={showFieldErrors(
+                                                    errors.federalAuthorities
+                                                )}
+                                            >
+                                                <Fieldset
+                                                    aria-required
+                                                    legend="Active federal operating authority"
+                                                >
+                                                    <span
+                                                        className={
+                                                            styles.requiredOptionalText
+                                                        }
+                                                    >
+                                                        Required
+                                                    </span>
+                                                    <Link
+                                                        variant="external"
+                                                        href={
+                                                            'https://www.medicaid.gov/medicaid/managed-care/managed-care-authorities/index.html'
+                                                        }
+                                                        target="_blank"
+                                                    >
+                                                        Managed Care authority
+                                                        definitions
+                                                    </Link>
+                                                    <div className="usa-hint">
+                                                        <span>
+                                                            Check all that apply
+                                                        </span>
+                                                    </div>
+                                                    {showFieldErrors(
+                                                        errors.federalAuthorities
+                                                    ) && (
+                                                        <PoliteErrorMessage>
+                                                            {
+                                                                errors.federalAuthorities
+                                                            }
+                                                        </PoliteErrorMessage>
+                                                    )}
+                                                    {applicableFederalAuthorities.map(
+                                                        (federalAuthority) => (
+                                                            <FieldCheckbox
+                                                                id={federalAuthority.toLowerCase()}
+                                                                key={federalAuthority.toLowerCase()}
+                                                                name="federalAuthorities"
+                                                                label={
+                                                                    FederalAuthorityRecord[
+                                                                        federalAuthority
+                                                                    ]
+                                                                }
+                                                                value={
+                                                                    federalAuthority
+                                                                }
+                                                            />
+                                                        )
+                                                    )}
+                                                </Fieldset>
+                                            </FormGroup>
+                                            {isContractWithProvisions(
+                                                draftSubmission
+                                            ) && (
+                                                <FormGroup data-testid="yes-no-group">
+                                                    <Fieldset
+                                                        aria-required
+                                                        legend={
+                                                            isBaseContract(
+                                                                draftSubmission
+                                                            )
+                                                                ? 'Does this contract action include provisions related to any of the following'
+                                                                : 'Does this contract action include new or modified provisions related to any of the following'
+                                                        }
+                                                    >
+                                                        <span
+                                                            className={
+                                                                styles.requiredOptionalText
+                                                            }
+                                                        >
+                                                            Required
+                                                        </span>
+                                                        {applicableProvisions.map(
+                                                            (
+                                                                modifiedProvisionName
+                                                            ) => (
+                                                                <FieldYesNo
+                                                                    id={
+                                                                        modifiedProvisionName
+                                                                    }
+                                                                    key={
+                                                                        modifiedProvisionName
+                                                                    }
+                                                                    name={
+                                                                        modifiedProvisionName
+                                                                    }
+                                                                    label={generateProvisionLabel(
+                                                                        draftSubmission,
+                                                                        modifiedProvisionName
+                                                                    )}
+                                                                    showError={showFieldErrors(
+                                                                        errors[
+                                                                            modifiedProvisionName
+                                                                        ]
+                                                                    )}
+                                                                    variant="SUBHEAD"
+                                                                />
+                                                            )
+                                                        )}
+                                                    </Fieldset>
+                                                </FormGroup>
+                                            )}
+                                        </>
+                                    }
+                                </fieldset>
+
+                                <PageActions
+                                    saveAsDraftOnClick={async () => {
+                                        // do not need to trigger validations if file list is empty
+                                        if (fileItems.length === 0) {
+                                            await handleFormSubmit(
+                                                values,
+                                                setSubmitting,
+                                                {
+                                                    shouldValidateDocuments:
+                                                        false,
+                                                    redirectPath:
+                                                        RoutesRecord.DASHBOARD_SUBMISSIONS,
+                                                }
+                                            )
+                                        } else {
+                                            await handleFormSubmit(
+                                                values,
+                                                setSubmitting,
+                                                {
+                                                    shouldValidateDocuments:
+                                                        true,
+                                                    redirectPath:
+                                                        RoutesRecord.DASHBOARD_SUBMISSIONS,
+                                                }
+                                            )
                                         }
-                                    )
-                                } else {
-                                    await handleFormSubmit(
-                                        values,
-                                        setSubmitting,
-                                        {
-                                            shouldValidateDocuments: true,
-                                            redirectPath:
-                                                RoutesRecord.DASHBOARD_SUBMISSIONS,
+                                    }}
+                                    backOnClick={async () => {
+                                        // do not need to validate or resubmit if no documents are uploaded
+                                        if (fileItems.length === 0) {
+                                            navigate('../type')
+                                        } else {
+                                            await handleFormSubmit(
+                                                values,
+                                                setSubmitting,
+                                                {
+                                                    shouldValidateDocuments:
+                                                        false,
+                                                    redirectPath: '../type',
+                                                }
+                                            )
                                         }
-                                    )
-                                }
-                            }}
-                            backOnClick={async () => {
-                                // do not need to validate or resubmit if no documents are uploaded
-                                if (fileItems.length === 0) {
-                                    navigate('../type')
-                                } else {
-                                    await handleFormSubmit(
-                                        values,
-                                        setSubmitting,
-                                        {
-                                            shouldValidateDocuments: false,
-                                            redirectPath: '../type',
-                                        }
-                                    )
-                                }
-                            }}
-                            disableContinue={showFileUploadError}
-                            actionInProgress={isSubmitting}
-                        />
-                    </UswdsForm>
-                </>
-            )}
-        </Formik>
+                                    }}
+                                    disableContinue={showFileUploadError}
+                                    actionInProgress={isSubmitting}
+                                />
+                            </UswdsForm>
+                        </>
+                    )}
+                </Formik>
+            </FormContainer>
+        </>
     )
 }

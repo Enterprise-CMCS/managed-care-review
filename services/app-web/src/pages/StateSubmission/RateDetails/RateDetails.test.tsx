@@ -17,7 +17,6 @@ import {
     mockSubmittedHealthPlanPackage,
     mockMNState,
 } from '../../../testHelpers/apolloMocks'
-import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
 
 import {
     renderWithProviders,
@@ -36,7 +35,19 @@ import {
 } from '../../../components/FileUpload'
 import selectEvent from 'react-select-event'
 import * as useStatePrograms from '../../../hooks/useStatePrograms'
+import * as useRouteParams from '../../../hooks/useRouteParams'
+import * as useHealthPlanPackageForm from '../../../hooks/useHealthPlanPackageForm'
 import { unlockedWithALittleBitOfEverything } from '../../../common-code/healthPlanFormDataMocks'
+
+const emptyRateDetailsDraft = () => ({
+    ...mockDraft(),
+    rateInfos: [],
+    rateType: undefined,
+    rateDateStart: undefined,
+    rateDateEnd: undefined,
+    rateDateCertified: undefined,
+    actuaryContacts: [],
+})
 
 describe('RateDetails', () => {
     beforeAll(() => {
@@ -44,40 +55,42 @@ describe('RateDetails', () => {
         // TODO: These tests are too long and need to be fully refactored. They are starting to flake in recent versions of RTL, particularly the multi-rate and contract amendment tests
         // See this guidance for waitFor and getBy Role: https://github.com/testing-library/dom-testing-library/issues/820
     })
-
+    const mockUpdateDraftFn = jest.fn()
+    beforeEach(() => {
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockReturnValue({
+            updateDraft: mockUpdateDraftFn,
+            createDraft: jest.fn(),
+            showPageErrorMessage: false,
+            draftSubmission: emptyRateDetailsDraft(),
+        })
+        jest.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
+            id: '123-abc',
+        })
+    })
     afterEach(() => {
         jest.clearAllMocks()
         jest.spyOn(useStatePrograms, 'useStatePrograms').mockRestore()
+        jest.spyOn(
+            useHealthPlanPackageForm,
+            'useHealthPlanPackageForm'
+        ).mockRestore()
+        jest.spyOn(useRouteParams, 'useRouteParams').mockRestore()
     })
 
-    const emptyRateDetailsDraft = () => ({
-        ...mockDraft(),
-        rateInfos: [],
-        rateType: undefined,
-        rateDateStart: undefined,
-        rateDateEnd: undefined,
-        rateDateCertified: undefined,
-        actuaryContacts: [],
-    })
     describe('handles a single rate', () => {
         afterEach(() => {
             jest.clearAllMocks()
         })
-        it('renders without errors', async () => {
-            const mockUpdateDraftFn = jest.fn()
 
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+        it('renders without errors', async () => {
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             expect(
                 screen.getByText('Rate certification type')
@@ -91,18 +104,11 @@ describe('RateDetails', () => {
         })
 
         it('displays correct form guidance', async () => {
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
             expect(
                 screen.queryByText(/All fields are required/)
             ).not.toBeInTheDocument()
@@ -113,20 +119,11 @@ describe('RateDetails', () => {
         })
 
         it('loads with empty rate type and document upload fields visible', async () => {
-            const mockUpdateDraftFn = jest.fn()
-
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             expect(
                 screen.getByRole('radio', {
@@ -164,20 +161,11 @@ describe('RateDetails', () => {
         })
 
         it('cannot continue without selecting rate type', async () => {
-            const mockUpdateDraftFn = jest.fn()
-
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
@@ -193,20 +181,11 @@ describe('RateDetails', () => {
         })
 
         it('cannot continue without selecting rate capitation type', async () => {
-            const mockUpdateDraftFn = jest.fn()
-
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
@@ -222,19 +201,11 @@ describe('RateDetails', () => {
         })
 
         it('cannot continue if no documents are added', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
@@ -251,22 +222,15 @@ describe('RateDetails', () => {
         })
 
         it('progressively disclose new rate form fields as expected', async () => {
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                            }),
-                        ],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            })
 
             expect(
                 screen.getByText('Programs this rate certification covers')
@@ -381,23 +345,16 @@ describe('RateDetails', () => {
                 },
             }
 
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                user: mockUser,
-                                statusCode: 200,
-                            }),
-                        ],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockUser,
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            })
             const combobox = await screen.findByRole('combobox')
 
             selectEvent.openMenu(combobox)
@@ -422,18 +379,11 @@ describe('RateDetails', () => {
 
     describe('handles documents and file upload', () => {
         it('renders file upload', async () => {
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             await waitFor(() => {
                 const textInputs = screen.getAllByTestId('file-input')
@@ -451,18 +401,11 @@ describe('RateDetails', () => {
             })
         })
         it('accepts documents on new rate', async () => {
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const input = screen.getByLabelText(
                 'Upload one rate certification document'
@@ -476,20 +419,13 @@ describe('RateDetails', () => {
         })
 
         it('accepts a single file for rate cert', async () => {
-            // const mockUpdateDraftFn = jest.fn()
+            //
 
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const input = screen.getByLabelText(
                 'Upload one rate certification document'
@@ -519,18 +455,11 @@ describe('RateDetails', () => {
         })
 
         it('accepts multiple pdf, word, excel documents for supporting documents', async () => {
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const input = screen.getByLabelText('Upload supporting documents')
 
@@ -556,22 +485,15 @@ describe('RateDetails', () => {
 
     describe('handles multiple rates', () => {
         it('renders add another rate button, which adds another set of rate certification fields to the form', async () => {
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                            }),
-                        ],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            })
             const rateCertsOnLoad = rateCertifications(screen)
             expect(rateCertsOnLoad).toHaveLength(1)
 
@@ -586,22 +508,15 @@ describe('RateDetails', () => {
         })
 
         it('renders remove rate certification button, which removes set of rate certification fields from the form', async () => {
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                            }),
-                        ],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            })
             const rateCertsOnLoad = rateCertifications(screen)
             expect(rateCertsOnLoad).toHaveLength(1)
 
@@ -621,18 +536,11 @@ describe('RateDetails', () => {
         })
 
         it('accepts documents on second rate', async () => {
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             await fillOutFirstRate(screen)
 
@@ -653,20 +561,11 @@ describe('RateDetails', () => {
         })
 
         it('cannot continue without selecting rate type for a second rate', async () => {
-            const mockUpdateDraftFn = jest.fn()
-
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
             await fillOutFirstRate(screen)
             await clickAddNewRate(screen)
 
@@ -685,19 +584,11 @@ describe('RateDetails', () => {
         })
 
         it('cannot continue if no documents are added to the second rate', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
             await fillOutFirstRate(screen)
             await clickAddNewRate(screen)
 
@@ -771,23 +662,28 @@ describe('RateDetails', () => {
                 },
             ]
 
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={currentSubmission}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                            }),
-                            indexHealthPlanPackagesMockSuccess(mockSubmissions),
-                        ],
-                    },
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockImplementation(() => {
+                return {
+                    createDraft: jest.fn(),
+                    updateDraft: mockUpdateDraftFn,
+                    showPageErrorMessage: false,
+                    draftSubmission: currentSubmission,
                 }
-            )
+            })
+
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                        indexHealthPlanPackagesMockSuccess(mockSubmissions),
+                    ],
+                },
+            })
 
             const rateCertsOnLoad = rateCertifications(screen)
             expect(rateCertsOnLoad).toHaveLength(1)
@@ -1001,23 +897,28 @@ describe('RateDetails', () => {
                 },
             ]
 
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={currentSubmission}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                            }),
-                            indexHealthPlanPackagesMockSuccess(mockSubmissions),
-                        ],
-                    },
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockImplementation(() => {
+                return {
+                    createDraft: jest.fn(),
+                    updateDraft: mockUpdateDraftFn,
+                    showPageErrorMessage: false,
+                    draftSubmission: currentSubmission,
                 }
-            )
+            })
+
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                        indexHealthPlanPackagesMockSuccess(mockSubmissions),
+                    ],
+                },
+            })
             const rateCertsOnLoad = rateCertifications(screen)
             expect(rateCertsOnLoad).toHaveLength(1)
 
@@ -1129,24 +1030,27 @@ describe('RateDetails', () => {
                     id: 'test-shared-rate',
                 },
             ]
-
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={currentSubmission}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                            }),
-                            indexHealthPlanPackagesMockSuccess(mockSubmissions),
-                        ],
-                    },
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockImplementation(() => {
+                return {
+                    createDraft: jest.fn(),
+                    updateDraft: mockUpdateDraftFn,
+                    showPageErrorMessage: false,
+                    draftSubmission: currentSubmission,
                 }
-            )
+            })
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                        indexHealthPlanPackagesMockSuccess(mockSubmissions),
+                    ],
+                },
+            })
             const rateCertsOnLoad = rateCertifications(screen)
             expect(rateCertsOnLoad).toHaveLength(1)
 
@@ -1225,18 +1129,11 @@ describe('RateDetails', () => {
 
     describe('Continue button', () => {
         it('enabled when valid files are present', async () => {
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
@@ -1253,18 +1150,11 @@ describe('RateDetails', () => {
         })
 
         it('enabled when invalid files have been dropped but valid files are present', async () => {
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
@@ -1286,18 +1176,11 @@ describe('RateDetails', () => {
         })
 
         it('disabled with alert after first attempt to continue with zero files', async () => {
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
@@ -1316,30 +1199,35 @@ describe('RateDetails', () => {
         })
 
         it('disabled with alert if previously submitted with more than one rate cert file', async () => {
-            const docs: SubmissionDocument[] = [
-                {
-                    s3URL: 's3://bucketname/one-one/one-one.png',
-                    name: 'one one',
-                    sha256: 'fakeSha1',
-                },
-                {
-                    s3URL: 's3://bucketname/one-two/one-two.png',
-                    name: 'one two',
-                    sha256: 'fakeSha2',
-                },
-                {
-                    s3URL: 's3://bucketname/one-three/one-three.png',
-                    name: 'one three',
-                    sha256: 'fakeSha3',
-                },
-            ]
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={mockContractAndRatesDraft({
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockImplementation(() => {
+                return {
+                    createDraft: jest.fn(),
+                    updateDraft: mockUpdateDraftFn,
+                    showPageErrorMessage: false,
+                    draftSubmission: mockContractAndRatesDraft({
                         rateInfos: [
                             {
                                 supportingDocuments: [],
-                                rateDocuments: docs,
+                                rateDocuments: [
+                                    {
+                                        s3URL: 's3://bucketname/one-one/one-one.png',
+                                        name: 'one one',
+                                        sha256: 'fakeSha1',
+                                    },
+                                    {
+                                        s3URL: 's3://bucketname/one-two/one-two.png',
+                                        name: 'one two',
+                                        sha256: 'fakeSha2',
+                                    },
+                                    {
+                                        s3URL: 's3://bucketname/one-three/one-three.png',
+                                        name: 'one three',
+                                        sha256: 'fakeSha3',
+                                    },
+                                ],
                                 actuaryContacts: [
                                     {
                                         actuarialFirm: 'DELOITTE',
@@ -1350,16 +1238,16 @@ describe('RateDetails', () => {
                                 ],
                             },
                         ],
-                    })}
-                    updateDraft={jest.fn()}
-                    previousDocuments={['testFile.docx', 'testFile.pdf']}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+                    }),
+                    previousDocuments: ['testFile.docx', 'testFile.pdf'],
                 }
-            )
+            })
+
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
@@ -1380,18 +1268,11 @@ describe('RateDetails', () => {
         })
 
         it('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const input = screen.getByLabelText(
                 'Upload one rate certification document'
@@ -1419,18 +1300,11 @@ describe('RateDetails', () => {
         })
 
         it('disabled with alert after first attempt to continue with invalid files', async () => {
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
@@ -1455,18 +1329,11 @@ describe('RateDetails', () => {
         })
         // eslint-disable-next-line jest/no-disabled-tests
         it('disabled with alert when trying to continue while a file is still uploading', async () => {
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
@@ -1506,19 +1373,11 @@ describe('RateDetails', () => {
 
     describe('Save as draft button', () => {
         it('enabled when valid files are present', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -1535,19 +1394,11 @@ describe('RateDetails', () => {
         })
 
         it('enabled when invalid files have been dropped but valid files are present', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -1566,19 +1417,11 @@ describe('RateDetails', () => {
         })
 
         it('when zero files present, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -1593,7 +1436,6 @@ describe('RateDetails', () => {
         })
 
         it('when existing file is removed, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
-            const mockUpdateDraftFn = jest.fn()
             const hasDocsDetailsDraft = {
                 ...mockDraft(),
                 rateDocuments: [
@@ -1608,18 +1450,23 @@ describe('RateDetails', () => {
                 rateDateEnd: undefined,
                 rateDateCertified: undefined,
             }
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={hasDocsDetailsDraft}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
+            jest.spyOn(
+                useHealthPlanPackageForm,
+                'useHealthPlanPackageForm'
+            ).mockImplementation(() => {
+                return {
+                    createDraft: jest.fn(),
+                    updateDraft: mockUpdateDraftFn,
+                    showPageErrorMessage: false,
+                    draftSubmission: hasDocsDetailsDraft,
                 }
-            )
+            })
+
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -1634,19 +1481,11 @@ describe('RateDetails', () => {
         })
 
         it('when duplicate files present, triggers error alert on click', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const input = screen.getByLabelText('Upload supporting documents')
             const saveAsDraftButton = screen.getByRole('button', {
@@ -1676,18 +1515,11 @@ describe('RateDetails', () => {
 
     describe('Back button', () => {
         it('enabled when valid files are present', async () => {
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const backButton = screen.getByRole('button', {
                 name: 'Back',
@@ -1704,18 +1536,11 @@ describe('RateDetails', () => {
         })
 
         it('enabled when invalid files have been dropped but valid files are present', async () => {
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const backButton = screen.getByRole('button', {
                 name: 'Back',
@@ -1734,19 +1559,11 @@ describe('RateDetails', () => {
         })
 
         it('when zero files present, does not trigger missing documents alert on click', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
 
             const backButton = screen.getByRole('button', {
                 name: 'Back',
@@ -1761,26 +1578,18 @@ describe('RateDetails', () => {
         })
 
         it('when duplicate files present, does not trigger duplicate documents alert on click and silently updates rate and supporting documents lists without duplicates', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft()}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            indexHealthPlanPackagesMockSuccess([
-                                {
-                                    ...mockSubmittedHealthPlanPackage(),
-                                    id: 'test-abc-123',
-                                },
-                            ]),
-                        ],
-                    },
-                }
-            )
+            renderWithProviders(<RateDetails />, {
+                apolloProvider: {
+                    mocks: [
+                        indexHealthPlanPackagesMockSuccess([
+                            {
+                                ...mockSubmittedHealthPlanPackage(),
+                                id: 'test-abc-123',
+                            },
+                        ]),
+                    ],
+                },
+            })
 
             const rateCertInput = screen.getByLabelText(
                 'Upload one rate certification document'
