@@ -5,7 +5,11 @@ import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import { hasAdminPermissions, isCMSUser } from '../../domain-models/user'
+import {
+    hasAdminPermissions,
+    isCMSUser,
+    isStateUser,
+} from '../../domain-models/user'
 import { NotFoundError } from '../../postgres'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
@@ -45,7 +49,7 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
         const { user, span } = context
         setResolverDetailsOnActiveSpan('indexRates', user, span)
 
-        if (hasAdminPermissions(user) || isCMSUser(user)) {
+        if (hasAdminPermissions(user) || isCMSUser(user) || isStateUser(user)) {
             const ratesWithHistory =
                 await store.findAllRatesWithHistoryBySubmitInfo()
             if (ratesWithHistory instanceof Error) {
