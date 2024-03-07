@@ -42,12 +42,9 @@ export async function submitContract(
 
         // get the related rate revisions and any unsubmitted rates
         const relatedRateRevs = currentRev.draftRates.map((c) => c.revisions[0])
-        console.info(`currentRev: ${JSON.stringify(currentRev, null, '  ')}`)
         const unsubmittedRates = relatedRateRevs.filter(
             (rev) => rev.submitInfo === null
         )
-
-        console.info(unsubmittedRates)
 
         return await client.$transaction(async (tx) => {
             // Create the submitInfo record in the updateInfoTable
