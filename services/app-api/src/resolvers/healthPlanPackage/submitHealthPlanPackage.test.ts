@@ -49,8 +49,6 @@ describe(`Tests $testName`, () => {
         const draft = latestFormData(initialPkg)
         const draftID = draft.id
 
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-
         // submit
         const submitResult = await server.executeOperation({
             query: SUBMIT_HEALTH_PLAN_PACKAGE,

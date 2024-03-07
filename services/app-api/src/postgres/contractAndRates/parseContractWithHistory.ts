@@ -2,6 +2,7 @@ import type {
     ContractType,
     ContractRevisionWithRatesType,
     ContractRevisionType,
+    RateType,
 } from '../../domain-models/contractAndRates'
 import { contractSchema } from '../../domain-models/contractAndRates'
 import { draftContractRevToDomainModel } from './prismaDraftContractHelpers'
@@ -111,6 +112,7 @@ function contractWithHistoryToDomainModel(
     const contractRevisions = contract.revisions
     let draftRevision: ContractRevisionWithRatesType | Error | undefined =
         undefined
+    let draftRates: RateType[] | Error | undefined = undefined
 
     for (const [contractRevIndex, contractRev] of contractRevisions.entries()) {
         // We set the draft revision aside, all ordered revisions are submitted
@@ -130,6 +132,19 @@ function contractWithHistoryToDomainModel(
                 )
             }
 
+            const draftPrismaRates = contractRev.draftRates
+
+            draftRates = draftPrismaRates.map((r) => {
+                return {
+                    id: r.id,
+                    createdAt: r.createdAt,
+                    updatedAt: r.updatedAt,
+                    status: getContractRateStatus(r.revisions),
+                    stateCode: r.stateCode,
+                    stateNumber: r.stateNumber,
+                    revisions: [],
+                }
+            })
             // skip the rest of the processing
             continue
         }
@@ -261,11 +276,14 @@ function contractWithHistoryToDomainModel(
 
     return {
         id: contract.id,
+        createdAt: contract.createdAt,
+        updatedAt: contract.updatedAt,
         mccrsID: contract.mccrsID || undefined,
         status: getContractRateStatus(contract.revisions),
         stateCode: contract.stateCode,
         stateNumber: contract.stateNumber,
         draftRevision,
+        draftRates,
         revisions: revisions.reverse(),
     }
 }
