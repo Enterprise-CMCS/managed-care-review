@@ -7,10 +7,6 @@ import { FieldRadio } from '../../components'
 import { getIn, useFormikContext } from 'formik'
 import { LinkRateSelect } from './LinkRateSelect'
 
-// export type LinkYourRatesProps = {
-
-// }
-
 export const LinkYourRates = (): React.ReactElement | null => {
     const { values } = useFormikContext()
 
