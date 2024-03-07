@@ -42,7 +42,7 @@ describe('LinkYourRates', () => {
     })
 
     it('does not display dropdown menu if no is selected', async () => {
-        renderWithProviders(
+        const { user } = renderWithProviders(
             <Formik
                 initialValues={{ ratePreviouslySubmitted: '' }}
                 onSubmit={(values) => console.info('submitted', values)}
@@ -64,11 +64,10 @@ describe('LinkYourRates', () => {
             }
         )
 
-        screen
-            .getByLabelText(
-                'No, this rate certification was not included with any other submissions'
-            )
-            .click()
+        const noRadioButton = await screen.getByLabelText(
+            'No, this rate certification was not included with any other submissions'
+        )
+        await user.click(noRadioButton)
 
         await waitFor(() => {
             expect(
@@ -78,7 +77,7 @@ describe('LinkYourRates', () => {
     })
 
     it('displays dropdown menu if yes is selected', async () => {
-        renderWithProviders(
+        const { user } = renderWithProviders(
             <Formik
                 initialValues={{ ratePreviouslySubmitted: '' }}
                 onSubmit={(values) => console.info('submitted', values)}
@@ -100,11 +99,10 @@ describe('LinkYourRates', () => {
             }
         )
 
-        screen
-            .getByLabelText(
-                'Yes, this rate certification is part of another submission'
-            )
-            .click()
+        const noRadioButton = await screen.getByLabelText(
+            'No, this rate certification was not included with any other submissions'
+        )
+        await user.click(noRadioButton)
 
         await waitFor(() => {
             expect(
