@@ -101,7 +101,7 @@ mutation submitRate($input: SubmitRateInput!) {
                         submissionDescription
                         stateContacts {
                             name,
-                            title
+                            titleRole
                             email
                         }
                         supportingDocuments {

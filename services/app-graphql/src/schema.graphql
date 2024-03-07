@@ -876,7 +876,7 @@ enum FederalAuthority {
 "Contact information for contacting states regarding their submission"
 type StateContact {
     name: String
-    title: String
+    titleRole: String
     email: String
 }
 
@@ -993,7 +993,11 @@ type ContractFormData {
     "If contract includes modifications to the length of the contract period"
     modifiedLengthOfContract: Boolean
     "If contract includes modifications to the non-risk payment arrangements"
-    modifiedNonRiskPaymentArrangements: Boolean
+    modifiedNonRiskPaymentArrangements: Boolean,
+    "If contract has statutory regulatory attestation"
+    statutoryRegulatoryAttestation: Boolean,
+    "Description provided for if contract has statutory regulatory attestation"
+    statutoryRegulatoryAttestationDescription: String
 }
 
 "Either new capitation rates (NEW) or updates to previously certified capitation rates (AMENDMENT)"
