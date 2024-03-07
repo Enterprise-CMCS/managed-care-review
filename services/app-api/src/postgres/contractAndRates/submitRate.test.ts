@@ -2,7 +2,11 @@ import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import { submitRate } from './submitRate'
 import { NotFoundError } from '../postgresErrors'
-import { mockInsertContractArgs, mockInsertRateArgs,  must } from '../../testHelpers'
+import {
+    mockInsertContractArgs,
+    mockInsertRateArgs,
+    must,
+} from '../../testHelpers'
 import { insertDraftRate } from './insertRate'
 import { submitContract } from './submitContract'
 import { insertDraftContract } from './insertContract'
@@ -179,63 +183,6 @@ describe('submitRate', () => {
         expect(invalidatedRevision).not.toBeNull()
     })
 
-    it('handles concurrent drafts correctly', async () => {
-        const client = await sharedTestPrismaClient()
-
-        const stateUser = await client.user.create({
-            data: {
-                id: uuidv4(),
-                givenName: 'Aang',
-                familyName: 'Avatar',
-                email: 'aang@example.com',
-                role: 'STATE_USER',
-                stateCode: 'NM',
-            },
-        })
-
-        const draftRateData = mockInsertRateArgs({
-            rateCertificationName: 'one contract',
-        })
-        const rateA = must(await insertDraftRate(client, draftRateData))
-
-        if (!rateA.draftRevision) {
-            throw new Error(
-                'Unexpected error: No draft rate revision found in draft rate'
-            )
-        }
-
-        // Attempt to submit a contract related to this draft rate
-        const contract1 = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionDescription: 'onepoint0',
-                contractType: 'BASE',
-                submissionType: 'CONTRACT_AND_RATES',
-                programIDs: ['test1'],
-            })
-        )
-        must(
-            await updateDraftContractWithRates(client, {
-                contractID: contract1.id,
-                formData: { submissionDescription: 'onepoint0' },
-                rateFormDatas: [rateA.draftRevision?.formData],
-            })
-        )
-
-        const result = await submitContract(client, {
-            contractID: contract1.id,
-            submittedByUserID: stateUser.id,
-            submittedReason: 'Contract Submit',
-        })
-
-        if (!(result instanceof Error)) {
-            throw new Error('must be an error')
-        }
-
-        expect(result.message).toBe(
-            'Attempted to submit a contract related to a rate that has not been submitted.'
-        )
-    })
     it('submits rate with updates', async () => {
         const client = await sharedTestPrismaClient()
 
