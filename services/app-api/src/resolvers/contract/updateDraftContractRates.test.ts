@@ -5,6 +5,7 @@ import {
     createAndSubmitTestHealthPlanPackage,
     createAndUpdateTestHealthPlanPackage,
     createTestHealthPlanPackage,
+    unlockTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import {
     createTestDraftRateOnContract,
@@ -401,7 +402,82 @@ describe('updateDraftContractRates', () => {
         expect(draftFormData.rateDocuments[0].name).toBe('updatedratedoc1.doc')
     })
 
-    it('doesnt allow updating a non-linked rate', async () => {
+    it('doesnt allow updating a non-existent rate', async () => {
+        const stateServer = await constructTestPostgresServer()
+
+        const draft = await createAndUpdateTestHealthPlanPackage(stateServer)
+
+        const result = await stateServer.executeOperation({
+            query: UPDATE_DRAFT_CONTRACT_RATES,
+            variables: {
+                input: {
+                    contractID: draft.id,
+                    updatedRates: [
+                        {
+                            type: 'UPDATE',
+                            rateID: 'foo-bar',
+                            formData: {
+                                rateType: 'AMENDMENT',
+                                rateCapitationType: 'RATE_CELL',
+                                rateDateStart: '2024-01-01',
+                                rateDateEnd: '2025-01-01',
+                                amendmentEffectiveDateStart: '2024-02-01',
+                                amendmentEffectiveDateEnd: '2025-02-01',
+                                rateProgramIDs: ['foo'],
+
+                                rateDocuments: [
+                                    {
+                                        s3URL: 'foo://bar',
+                                        name: 'updatedratedoc1.doc',
+                                        sha256: 'foobar',
+                                    },
+                                ],
+                                supportingDocuments: [
+                                    {
+                                        s3URL: 'foo://bar1',
+                                        name: 'ratesupdoc1.doc',
+                                        sha256: 'foobar1',
+                                    },
+                                    {
+                                        s3URL: 'foo://bar2',
+                                        name: 'ratesupdoc2.doc',
+                                        sha256: 'foobar2',
+                                    },
+                                ],
+                                certifyingActuaryContacts: [
+                                    {
+                                        name: 'Foo Person',
+                                        titleRole: 'Bar Job',
+                                        email: 'foo@example.com',
+                                        actuarialFirm: 'GUIDEHOUSE',
+                                    },
+                                ],
+                                addtlActuaryContacts: [
+                                    {
+                                        name: 'Bar Person',
+                                        titleRole: 'Baz Job',
+                                        email: 'bar@example.com',
+                                        actuarialFirm: 'OTHER',
+                                        actuarialFirmOther: 'Some Firm',
+                                    },
+                                ],
+                                actuaryCommunicationPreference:
+                                    'OACT_TO_ACTUARY',
+                                packagesWithSharedRateCerts: [],
+                            },
+                        },
+                    ],
+                },
+            },
+        })
+        expect(result.errors).toBeDefined()
+        expect(result.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(result.errors?.[0].message).toBe(
+            'Attempted to update a rate not associated with this contract: foo-bar'
+        )
+    })
+
+    it('doesnt allow updating an unassociated rate', async () => {
         const stateServer = await constructTestPostgresServer()
 
         const draft = await createAndUpdateTestHealthPlanPackage(stateServer)
@@ -474,6 +550,9 @@ describe('updateDraftContractRates', () => {
         })
         expect(result.errors).toBeDefined()
         expect(result.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(result.errors?.[0].message).toContain(
+            'Attempted to update a rate not associated with this contract'
+        )
     })
 
     it('allows creating and updating a partial rate', async () => {
@@ -574,6 +653,267 @@ describe('updateDraftContractRates', () => {
         expect(rateFormData.rateType).toBe('NEW')
         expect(rateFormData.rateDocuments).toHaveLength(1)
         expect(rateFormData.rateDocuments[0].name).toBe('rateDocument.pdf')
+    })
+
+    it('doesnt allow updating a linked rate', async () => {
+        const stateServer = await constructTestPostgresServer()
+
+        const otherPackage =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
+
+        const otherFD = latestFormData(otherPackage)
+        const foreignRateID = otherFD.rateInfos[0].id
+
+        const contractDraft = await createTestHealthPlanPackage(stateServer)
+
+        const result = await stateServer.executeOperation({
+            query: UPDATE_DRAFT_CONTRACT_RATES,
+            variables: {
+                input: {
+                    contractID: contractDraft.id,
+                    updatedRates: [
+                        {
+                            type: 'LINK',
+                            rateID: foreignRateID,
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(result.errors).toBeUndefined()
+        if (!result.data) {
+            throw new Error('no result')
+        }
+
+        const draftRates =
+            result.data.updateDraftContractRates.contract.draftRates
+
+        expect(draftRates).toHaveLength(1)
+
+        const rateID = draftRates[0].id
+
+        const updateResult = await stateServer.executeOperation({
+            query: UPDATE_DRAFT_CONTRACT_RATES,
+            variables: {
+                input: {
+                    contractID: contractDraft.id,
+                    updatedRates: [
+                        {
+                            type: 'UPDATE',
+                            rateID: rateID,
+                            formData: {
+                                rateType: 'AMENDMENT',
+                                rateCapitationType: 'RATE_CELL',
+                                rateDateStart: '2024-01-01',
+                                rateDateEnd: '2025-01-01',
+                                amendmentEffectiveDateStart: '2024-02-01',
+                                amendmentEffectiveDateEnd: '2025-02-01',
+                                rateProgramIDs: ['foo'],
+
+                                rateDocuments: [
+                                    {
+                                        s3URL: 'foo://bar',
+                                        name: 'updatedratedoc1.doc',
+                                        sha256: 'foobar',
+                                    },
+                                ],
+                                supportingDocuments: [
+                                    {
+                                        s3URL: 'foo://bar1',
+                                        name: 'ratesupdoc1.doc',
+                                        sha256: 'foobar1',
+                                    },
+                                    {
+                                        s3URL: 'foo://bar2',
+                                        name: 'ratesupdoc2.doc',
+                                        sha256: 'foobar2',
+                                    },
+                                ],
+                                certifyingActuaryContacts: [
+                                    {
+                                        name: 'Foo Person',
+                                        titleRole: 'Bar Job',
+                                        email: 'foo@example.com',
+                                        actuarialFirm: 'GUIDEHOUSE',
+                                    },
+                                ],
+                                addtlActuaryContacts: [
+                                    {
+                                        name: 'Bar Person',
+                                        titleRole: 'Baz Job',
+                                        email: 'bar@example.com',
+                                        actuarialFirm: 'OTHER',
+                                        actuarialFirmOther: 'Some Firm',
+                                    },
+                                ],
+                                actuaryCommunicationPreference:
+                                    'OACT_TO_ACTUARY',
+                                packagesWithSharedRateCerts: [],
+                            },
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(updateResult.errors).toBeDefined()
+        if (!updateResult.errors) {
+            throw new Error('no result')
+        }
+
+        expect(updateResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
+    })
+
+    it('doesnt allow linking a DRAFT rate', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const otherPackage =
+            await createAndUpdateTestHealthPlanPackage(stateServer)
+
+        const otherFD = latestFormData(otherPackage)
+        const foreignRateID = otherFD.rateInfos[0].id
+
+        const contractDraft = await createTestHealthPlanPackage(stateServer)
+
+        const result = await stateServer.executeOperation({
+            query: UPDATE_DRAFT_CONTRACT_RATES,
+            variables: {
+                input: {
+                    contractID: contractDraft.id,
+                    updatedRates: [
+                        {
+                            type: 'LINK',
+                            rateID: foreignRateID,
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(result.errors).toBeDefined()
+        if (!result.errors) {
+            throw new Error('no result')
+        }
+
+        expect(result.errors[0].message).toContain(
+            'Attempted to link a rate that has never been submitted'
+        )
+        expect(result.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
+    })
+
+    it('doesnt allow updating a non-child rate', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const otherPackage =
+            await createAndSubmitTestHealthPlanPackage(stateServer)
+
+        await unlockTestHealthPlanPackage(
+            cmsServer,
+            otherPackage.id,
+            'unlock to not update'
+        )
+
+        const otherFD = latestFormData(otherPackage)
+        const foreignRateID = otherFD.rateInfos[0].id
+
+        const contractDraft = await createTestHealthPlanPackage(stateServer)
+
+        const linkResult = await stateServer.executeOperation({
+            query: UPDATE_DRAFT_CONTRACT_RATES,
+            variables: {
+                input: {
+                    contractID: contractDraft.id,
+                    updatedRates: [
+                        {
+                            type: 'LINK',
+                            rateID: foreignRateID,
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(linkResult.errors).toBeUndefined()
+
+        const result = await stateServer.executeOperation({
+            query: UPDATE_DRAFT_CONTRACT_RATES,
+            variables: {
+                input: {
+                    contractID: contractDraft.id,
+                    updatedRates: [
+                        {
+                            type: 'UPDATE',
+                            rateID: foreignRateID,
+                            formData: {
+                                rateType: 'AMENDMENT',
+                                rateCapitationType: 'RATE_CELL',
+                                rateDateStart: '2024-01-01',
+                                rateDateEnd: '2025-01-01',
+                                amendmentEffectiveDateStart: '2024-02-01',
+                                amendmentEffectiveDateEnd: '2025-02-01',
+                                rateProgramIDs: ['foo'],
+
+                                rateDocuments: [
+                                    {
+                                        s3URL: 'foo://bar',
+                                        name: 'updatedratedoc1.doc',
+                                        sha256: 'foobar',
+                                    },
+                                ],
+                                supportingDocuments: [
+                                    {
+                                        s3URL: 'foo://bar1',
+                                        name: 'ratesupdoc1.doc',
+                                        sha256: 'foobar1',
+                                    },
+                                    {
+                                        s3URL: 'foo://bar2',
+                                        name: 'ratesupdoc2.doc',
+                                        sha256: 'foobar2',
+                                    },
+                                ],
+                                certifyingActuaryContacts: [
+                                    {
+                                        name: 'Foo Person',
+                                        titleRole: 'Bar Job',
+                                        email: 'foo@example.com',
+                                        actuarialFirm: 'GUIDEHOUSE',
+                                    },
+                                ],
+                                addtlActuaryContacts: [
+                                    {
+                                        name: 'Bar Person',
+                                        titleRole: 'Baz Job',
+                                        email: 'bar@example.com',
+                                        actuarialFirm: 'OTHER',
+                                        actuarialFirmOther: 'Some Firm',
+                                    },
+                                ],
+                                actuaryCommunicationPreference:
+                                    'OACT_TO_ACTUARY',
+                                packagesWithSharedRateCerts: [],
+                            },
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(result.errors).toBeDefined()
+        if (!result.errors) {
+            throw new Error('no result')
+        }
+
+        expect(result.errors[0].message).toContain(
+            'Attempted to update a rate that is not a DRAFT'
+        )
+        expect(result.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
+        // TODO: This test must be updated to account for CHILDREN
     })
 
     it('allows unlinking another submitted rate', async () => {
@@ -681,6 +1021,5 @@ describe('updateDraftContractRates', () => {
         )
     })
 
-    it.todo('doesnt allow updating a non-child')
-    it.todo('doesnt allow updating a submitted  rate')
+    it.todo('allows updating a child unlocked rate')
 })

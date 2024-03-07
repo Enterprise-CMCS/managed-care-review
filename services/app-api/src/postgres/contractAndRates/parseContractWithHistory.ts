@@ -134,15 +134,17 @@ function contractWithHistoryToDomainModel(
 
             const draftPrismaRates = contractRev.draftRates
 
-            draftRates = draftPrismaRates.map((r) => ({
-                id: r.id,
-                createdAt: r.createdAt,
-                updatedAt: r.updatedAt,
-                status: getContractRateStatus(r.revisions),
-                stateCode: r.stateCode,
-                stateNumber: r.stateNumber,
-                revisions: [],
-            }))
+            draftRates = draftPrismaRates.map((r) => {
+                return {
+                    id: r.id,
+                    createdAt: r.createdAt,
+                    updatedAt: r.updatedAt,
+                    status: getContractRateStatus(r.revisions),
+                    stateCode: r.stateCode,
+                    stateNumber: r.stateNumber,
+                    revisions: [],
+                }
+            })
             // skip the rest of the processing
             continue
         }

@@ -151,6 +151,7 @@ function updateDraftContractRates(
             }
 
             if (rateUpdate.type === 'UPDATE') {
+                // rate must be in list of associated rates
                 const knownRateIDX = knownRateIDs.indexOf(rateUpdate.rateID)
                 if (knownRateIDX === -1) {
                     const errmsg =
@@ -161,6 +162,52 @@ function updateDraftContractRates(
                     throw new UserInputError(errmsg)
                 }
                 knownRateIDs.splice(knownRateIDX, 1)
+
+                // rate must be an editable child
+                const rateToUpdate = draftRates.find(
+                    (r) => r.id === rateUpdate.rateID
+                )
+                if (!rateToUpdate) {
+                    const errmsg =
+                        'Programming Error: this rate should exist, we had its ID: ' +
+                        rateUpdate.rateID
+                    logError('updateDraftContractRates', errmsg)
+                    setErrorAttributesOnActiveSpan(errmsg, span)
+                    throw new Error(errmsg)
+                }
+
+                if (rateToUpdate.status !== 'DRAFT') {
+                    // eventually, this will be enough to cancel this. But until we have unlock-rate, you can edit UNLOCKED children of this contract.
+                    const errmsg =
+                        'Attempted to update a rate that is not a DRAFT: ' +
+                        rateUpdate.rateID
+                    logError('updateDraftContractRates', errmsg)
+                    setErrorAttributesOnActiveSpan(errmsg, span)
+                    throw new UserInputError(errmsg)
+
+                    // TODO: reenable this check once we figure out how to make the types returned by contractWithHistory express parenthood
+                    // if (rateToUpdate.status !== 'UNLOCKED') {
+                    //     const errmsg =
+                    //         'Attempted to update a rate that is not editable: ' +
+                    //         rateUpdate.rateID
+                    //     logError('updateDraftContractRates', errmsg)
+                    //     setErrorAttributesOnActiveSpan(errmsg, span)
+                    //     throw new UserInputError(errmsg)
+                    // }
+
+                    // // determine if this rate is a child of this contract, in which case it's ok.
+                    // const firstRevision = rateToUpdate.revisions[rateToUpdate.revisions.length - 1]
+                    // const parentContractRev = firstRevision.contractRevisions[0] // not possible to submit a rate with multiple contracts in first go
+
+                    // if (parentContractRev.contract.id !== contract.id) {
+                    //     const errmsg =
+                    //         'Attempted to update a rate that is not a child of this contract: ' +
+                    //         rateUpdate.rateID
+                    //     logError('updateDraftContractRates', errmsg)
+                    //     setErrorAttributesOnActiveSpan(errmsg, span)
+                    //     throw new UserInputError(errmsg)
+                    // }
+                }
 
                 rateUpdates.update.push({
                     rateID: rateUpdate.rateID,
@@ -173,6 +220,37 @@ function updateDraftContractRates(
                 if (knownRateIDX !== -1) {
                     knownRateIDs.splice(knownRateIDX, 1)
                     continue
+                }
+
+                // linked rates must exist and not be DRAFT
+                const rateToLink = await store.findRateWithHistory(
+                    rateUpdate.rateID
+                )
+                if (rateToLink instanceof Error) {
+                    if (rateToLink instanceof NotFoundError) {
+                        const errmsg =
+                            'Attempting to link a rate that does not exist: ' +
+                            rateUpdate.rateID
+                        logError('updateDraftContractRates', errmsg)
+                        setErrorAttributesOnActiveSpan(errmsg, span)
+                        throw new UserInputError(errmsg)
+                    }
+
+                    const errmsg =
+                        'Unexpected Error: couldnt fetch the linking rate: ' +
+                        rateUpdate.rateID
+                    logError('updateDraftContractRates', errmsg)
+                    setErrorAttributesOnActiveSpan(errmsg, span)
+                    throw new Error(errmsg)
+                }
+
+                if (rateToLink.status === 'DRAFT') {
+                    const errmsg =
+                        'Attempted to link a rate that has never been submitted: ' +
+                        rateUpdate.rateID
+                    logError('updateDraftContractRates', errmsg)
+                    setErrorAttributesOnActiveSpan(errmsg, span)
+                    throw new UserInputError(errmsg)
                 }
 
                 // this is a new link, actually link them.
