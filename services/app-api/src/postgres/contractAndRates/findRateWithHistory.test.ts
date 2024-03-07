@@ -546,7 +546,6 @@ describe('findRate', () => {
         const fetchResubmittedRateOne = must(
             await findRateWithHistory(client, rateIDOne)
         )
-        //console.info(JSON.stringify(fetchResubmittedRateOne, null, '  '))
         expect(fetchResubmittedRateOne.revisions).toHaveLength(2)
         // Expect the earliest submission contract revision to be attached to first submission rate revision
         expect(

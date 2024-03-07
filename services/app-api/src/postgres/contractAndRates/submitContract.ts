@@ -3,7 +3,7 @@ import type { ContractType } from '../../domain-models/contractAndRates'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
 import type { UpdateInfoType } from '../../domain-models'
-import { includeFullRate } from './prismaSubmittedRateHelpers'
+import { includeDraftRates } from './prismaDraftContractHelpers'
 
 export type SubmitContractArgsType = {
     contractID: string // revision ID
@@ -29,7 +29,7 @@ export async function submitContract(
             },
             include: {
                 draftRates: {
-                    include: includeFullRate,
+                    include: includeDraftRates,
                 },
             },
         })
@@ -42,9 +42,12 @@ export async function submitContract(
 
         // get the related rate revisions and any unsubmitted rates
         const relatedRateRevs = currentRev.draftRates.map((c) => c.revisions[0])
+        console.info(`currentRev: ${JSON.stringify(currentRev, null, '  ')}`)
         const unsubmittedRates = relatedRateRevs.filter(
             (rev) => rev.submitInfo === null
         )
+
+        console.info(unsubmittedRates)
 
         return await client.$transaction(async (tx) => {
             // Create the submitInfo record in the updateInfoTable
