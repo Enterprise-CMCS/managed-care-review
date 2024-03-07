@@ -39,9 +39,12 @@ export async function submitContract(
             console.error(err)
             return new NotFoundError(err)
         }
-        //console.info(`current rev : ${JSON.stringify(currentRev, null, '  ')}`)
 
+        // get the related rate revisions and any unsubmitted rates
         const relatedRateRevs = currentRev.draftRates.map((c) => c.revisions[0])
+        const unsubmittedRates = relatedRateRevs.filter(
+            (rev) => rev.submitInfo === null
+        )
 
         return await client.$transaction(async (tx) => {
             // Create the submitInfo record in the updateInfoTable
@@ -91,7 +94,8 @@ export async function submitContract(
                 },
             })
 
-            for (const rev of relatedRateRevs) {
+            // we only want to update the rateRevision's submit info if it has not already been submitted
+            for (const rev of unsubmittedRates) {
                 await tx.rateRevisionTable.update({
                     where: {
                         id: rev.id,
