@@ -1,6 +1,11 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
+import {
+    ApolloClient,
+    InMemoryCache,
+    HttpLink,
+    DefaultOptions,
+} from '@apollo/client'
 import { Amplify } from 'aws-amplify'
 import { loader } from 'graphql.macro'
 
@@ -57,17 +62,23 @@ Amplify.configure({
 
 const authMode = process.env.REACT_APP_AUTH_MODE
 assertIsAuthMode(authMode)
+const cache = new InMemoryCache()
+const defaultOptions: DefaultOptions = {
+    watchQuery: {
+        fetchPolicy: 'network-only',
+    },
+    query: {
+        fetchPolicy: 'network-only',
+    },
+}
 
 const apolloClient = new ApolloClient({
     link: new HttpLink({
         uri: '/graphql',
         fetch: authMode === 'LOCAL' ? localGQLFetch : fakeAmplifyFetch,
     }),
-    cache: new InMemoryCache({
-        possibleTypes: {
-            Submission: ['DraftSubmission', 'StateSubmission'],
-        },
-    }),
+    cache,
+    defaultOptions,
     typeDefs: gqlSchema,
 })
 

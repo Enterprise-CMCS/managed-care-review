@@ -62,7 +62,10 @@ export {
 } from './apiKeyGQLMocks'
 
 // NEW APIS
-export {mockContractPackage} from './contractPackageDataMock'
+export {
+    mockContractPackageDraft,
+    mockContractPackageSubmitted,
+} from './contractPackageDataMock'
 export { rateDataMock } from './rateDataMock'
-
+export { fetchContractMockSuccess } from './contractGQLMock'
 export { indexRatesMockSuccess, indexRatesMockFailure } from './rateGQLMocks'

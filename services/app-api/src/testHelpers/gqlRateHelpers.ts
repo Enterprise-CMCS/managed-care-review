@@ -1,14 +1,20 @@
 import SUBMIT_RATE from 'app-graphql/src/mutations/submitRate.graphql'
 import FETCH_RATE from 'app-graphql/src/queries/fetchRate.graphql'
 import UNLOCK_RATE from 'app-graphql/src/mutations/unlockRate.graphql'
+import UPDATE_DRAFT_CONTRACT_RATES from 'app-graphql/src/mutations/updateDraftContractRates.graphql'
 import { findStatePrograms } from '../postgres'
 import { must } from './assertionHelpers'
 import { defaultFloridaRateProgram } from './gqlHelpers'
-import { mockDraftRate, mockInsertRateArgs } from './rateDataMocks'
+import {
+    mockDraftRate,
+    mockInsertRateArgs,
+    mockRateFormDataInput,
+} from './rateDataMocks'
 import { sharedTestPrismaClient } from './storeHelpers'
 import { insertDraftRate } from '../postgres/contractAndRates/insertRate'
 import { updateDraftRate } from '../postgres/contractAndRates/updateDraftRate'
 
+import type { Contract, RateFormDataInput } from '../gen/gqlServer'
 import type { RateType } from '../domain-models'
 import type { InsertRateArgsType } from '../postgres/contractAndRates/insertRate'
 import type { RateFormEditable } from '../postgres/contractAndRates/updateDraftRate'
@@ -24,10 +30,11 @@ const fetchTestRateById = async (
         variables: { input },
     })
 
-    if (result.errors)
+    if (result.errors) {
         throw new Error(
             `fetchTestRateById query failed with errors ${result.errors}`
         )
+    }
 
     if (!result.data) {
         throw new Error('fetchTestRateById returned nothing')
@@ -127,6 +134,76 @@ const createTestRate = async (
     return must(await insertDraftRate(prismaClient, draftRateData))
 }
 
+const createTestDraftRateOnContract = async (
+    server: ApolloServer,
+    contractID: string,
+    rateData?: RateFormDataInput
+): Promise<Contract> => {
+    if (!rateData) {
+        rateData = mockRateFormDataInput()
+    }
+
+    const updateResult = await server.executeOperation({
+        query: UPDATE_DRAFT_CONTRACT_RATES,
+        variables: {
+            input: {
+                contractID,
+                updatedRates: [
+                    {
+                        type: 'CREATE',
+                        formData: rateData,
+                    },
+                ],
+            },
+        },
+    })
+
+    if (updateResult.errors || !updateResult.data) {
+        console.info('errors', updateResult.errors)
+        throw new Error(
+            `updateDraftContractRates mutation failed with errors ${updateResult.errors}`
+        )
+    }
+
+    return updateResult.data.updateDraftContractRates.contract
+}
+
+const updateTestDraftRateOnContract = async (
+    server: ApolloServer,
+    contractID: string,
+    rateID: string,
+    rateData?: RateFormDataInput
+): Promise<Contract> => {
+    if (!rateData) {
+        rateData = mockRateFormDataInput()
+    }
+
+    const updateResult = await server.executeOperation({
+        query: UPDATE_DRAFT_CONTRACT_RATES,
+        variables: {
+            input: {
+                contractID,
+                updatedRates: [
+                    {
+                        type: 'UPDATE',
+                        rateID,
+                        formData: rateData,
+                    },
+                ],
+            },
+        },
+    })
+
+    if (updateResult.errors || !updateResult.data) {
+        console.info('errors', updateResult.errors)
+        throw new Error(
+            `updateDraftContractRates mutation failed with errors ${updateResult.errors}`
+        )
+    }
+
+    return updateResult.data.updateDraftContractRates.contract
+}
+
 const updateTestRate = async (
     rateID: string,
     rateData: RateFormEditable
@@ -145,6 +222,8 @@ const updateTestRate = async (
 export {
     createTestRate,
     createAndSubmitTestRate,
+    createTestDraftRateOnContract,
+    updateTestDraftRateOnContract,
     fetchTestRateById,
     submitTestRate,
     unlockTestRate,

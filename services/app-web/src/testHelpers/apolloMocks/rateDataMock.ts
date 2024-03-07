@@ -37,7 +37,7 @@ const contractRevisionOnRateDataMock = (
             {
                 __typename: 'StateContact',
                 name: 'Name',
-                title: null,
+                titleRole: null,
                 email: 'example@example.com',
             },
         ],
@@ -160,6 +160,30 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
     }
 }
 
+const draftRateDataMock =  (
+    rate?: Partial<Rate>,
+    draftRevision?: Partial<RateRevision>
+): Rate => {
+    const rateID = rate?.id ?? uuidv4()
+    return {
+        __typename: 'Rate',
+        createdAt: '2023-10-16T19:01:21.389Z',
+        updatedAt: '2023-10-16T19:01:21.389Z',
+        stateCode: 'MN',
+        stateNumber: 10,
+        state: mockMNState(),
+        status: 'DRAFT',
+        initiallySubmittedAt: '2023-10-16',
+        draftRevision: {
+           ...rateRevisionDataMock({submitInfo: null,  ...draftRevision}),
+        },
+        revisions: [],
+        ...rate,
+        id: rateID,
+
+    }
+}
+
 const rateDataMock = (
     revision?: Partial<RateRevision>,
     rate?: Partial<Rate>
@@ -214,4 +238,4 @@ const rateDataMock = (
     }
 }
 
-export { rateDataMock, rateRevisionDataMock }
+export { rateDataMock, rateRevisionDataMock,draftRateDataMock,   }

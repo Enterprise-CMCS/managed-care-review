@@ -21,6 +21,7 @@ import { UnlockedHealthPlanFormDataType } from '../../common-code/healthPlanForm
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
 import { RateDetailsV2 } from './RateDetails/V2/RateDetailsV2'
+import { ReviewSubmitV2 } from './ReviewSubmit/V2/ReviewSubmit/ReviewSubmitV2'
 import styles from './StateSubmissionForm.module.scss'
 
 // Can move this AppRoutes on future pass - leaving it here now to make diff clear
@@ -50,7 +51,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     )}
                     element={
                         useLinkedRates ? (
-                            <RateDetailsV2 type="MULTI" rates={[]} />
+                            <RateDetailsV2 type="MULTI" />
                         ) : (
                             <RateDetails />
                         )
@@ -72,7 +73,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     path={getRelativePathFromNestedRoute(
                         'SUBMISSIONS_REVIEW_SUBMIT'
                     )}
-                    element={<ReviewSubmit />}
+                    element={
+                        useLinkedRates ? <ReviewSubmitV2 /> : <ReviewSubmit />
+                    }
                 />
                 <Route path="*" element={<Error404 />} />
             </Routes>

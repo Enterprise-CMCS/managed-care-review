@@ -2,18 +2,24 @@ import { z } from 'zod'
 import { contractRevisionWithRatesSchema } from './revisionTypes'
 import { statusSchema } from './statusType'
 import { pruneDuplicateEmails } from '../../emailer/formatters'
+import { rateSchema } from './rateTypes'
 
 // Contract represents the contract specific information in a submission package
 // All that data is contained in revisions, each revision represents the data in a single submission
 // submissions are kept intact here across time
 const contractSchema = z.object({
     id: z.string().uuid(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
     status: statusSchema,
+    createdAt: z.date(),
+    updatedAt: z.date(),
     stateCode: z.string(),
     mccrsID: z.string().optional(),
     stateNumber: z.number().min(1),
-    // If this contract is in a DRAFT or UNLOCKED status, there will be a draftRevision
+    // If this contract is in a DRAFT or UNLOCKED status, there will be a draftRevision and draftRates
     draftRevision: contractRevisionWithRatesSchema.optional(),
+    draftRates: z.array(rateSchema).optional(),
     // All revisions are submitted and in reverse chronological order
     revisions: z.array(contractRevisionWithRatesSchema),
 })

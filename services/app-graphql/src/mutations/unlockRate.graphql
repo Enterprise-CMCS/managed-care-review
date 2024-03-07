@@ -1,4 +1,4 @@
-fragment rateRevisionFragment on RateRevision {
+fragment rateRevisionFragmentForUnlock on RateRevision {
     id
     createdAt
     updatedAt
@@ -82,7 +82,7 @@ fragment rateRevisionFragment on RateRevision {
             submissionDescription
             stateContacts {
                 name,
-                title
+                titleRole
                 email
             }
             supportingDocuments {
@@ -143,11 +143,11 @@ mutation unlockRate($input: UnlockRateInput!) {
             initiallySubmittedAt
 
             draftRevision {
-                ...rateRevisionFragment
+                ...rateRevisionFragmentForUnlock
             }
 
             revisions {
-                ...rateRevisionFragment
+                ...rateRevisionFragmentForUnlock
             }
         }
     }

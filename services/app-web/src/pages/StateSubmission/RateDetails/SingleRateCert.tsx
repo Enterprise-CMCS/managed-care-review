@@ -188,7 +188,6 @@ export const SingleRateCert = ({
                                 previousDocuments
                             )
                         }
-                        innerInputRef={multiRatesConfig?.reassignNewRateRef}
                         onFileItemsUpdate={({ fileItems }) =>
                             setFieldValue(
                                 `${fieldNamePrefix}.rateDocuments`,
@@ -547,8 +546,6 @@ export const SingleRateCert = ({
 
                 <FormGroup>
                     <ActuaryContactFields
-                        actuaryContact={rateInfo.actuaryContacts[0]}
-                        errors={errors}
                         shouldValidate={shouldValidate}
                         fieldNamePrefix={`${fieldNamePrefix}.actuaryContacts.0`}
                         fieldSetLegend="Certifying Actuary"

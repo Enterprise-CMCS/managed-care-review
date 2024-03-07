@@ -14,7 +14,6 @@ import type { ContractRevisionTableWithRates } from './prismaSubmittedContractHe
 const includeDraftRates = {
     revisions: {
         include: includeRateFormData,
-        take: 1,
         orderBy: {
             createdAt: 'desc',
         },
