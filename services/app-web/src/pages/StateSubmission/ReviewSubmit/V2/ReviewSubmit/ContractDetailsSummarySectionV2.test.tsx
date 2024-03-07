@@ -199,28 +199,26 @@ describe('ContractDetailsSummarySection', () => {
     })
 
     it('displays correct effective dates text for base contract', async () => {
-        await waitFor(() => {
-            const contract = mockContractPackageDraft()
-            if (contract.draftRevision) {
-                contract.draftRevision.formData = {
-                    ...contract.draftRevision.formData,
-                    contractType: 'BASE',
-                }
-
-                renderWithProviders(
-                    <ContractDetailsSummarySection
-                        documentDateLookupTable={{
-                            previousSubmissionDate: '01/01/01',
-                        }}
-                        contract={contract}
-                        submissionName="MN-PMAP-0001"
-                    />,
-                    {
-                        apolloProvider: defaultApolloMocks,
-                    }
-                )
+        const contract = mockContractPackageDraft()
+        if (contract.draftRevision) {
+            contract.draftRevision.formData = {
+                ...contract.draftRevision.formData,
+                contractType: 'BASE',
             }
-        })
+
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    documentDateLookupTable={{
+                        previousSubmissionDate: '01/01/01',
+                    }}
+                    contract={contract}
+                    submissionName="MN-PMAP-0001"
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                }
+            )
+        }
 
         expect(screen.getByText('Contract effective dates')).toBeInTheDocument()
     })

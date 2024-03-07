@@ -21,6 +21,7 @@ import {
     Contract,
     Program,
     RateRevision,
+    RateFormData,
 } from '../../../../../gen/gqlClient'
 
 export type RateDetailsSummarySectionV2Props = {
@@ -72,7 +73,7 @@ export const RateDetailsSummarySectionV2 = ({
 
     const rateCapitationType = (rate: Rate | RateRevision) => {
         const rateFormData = getRateFormData(rate)
-        return rateFormData?.rateCapitationType
+        return rateFormData.rateCapitationType
             ? rateFormData.rateCapitationType === 'RATE_CELL'
                 ? 'Certification of capitation rates specific to each rate cell'
                 : 'Certification of rate ranges of capitation rates per rate cell'
@@ -85,8 +86,8 @@ export const RateDetailsSummarySectionV2 = ({
         const rateFormData = getRateFormData(rate)
 
         if (
-            rateFormData?.rateProgramIDs &&
-            rateFormData?.rateProgramIDs.length > 0
+            rateFormData.rateProgramIDs &&
+            rateFormData.rateProgramIDs.length > 0
         ) {
             programIDs = rateFormData.rateProgramIDs
         } else if (
@@ -104,20 +105,20 @@ export const RateDetailsSummarySectionV2 = ({
 
     const rateCertificationType = (rate: Rate | RateRevision) => {
         const rateFormData = getRateFormData(rate)
-        if (rateFormData?.rateType === 'AMENDMENT') {
+        if (rateFormData.rateType === 'AMENDMENT') {
             return 'Amendment to prior rate certification'
         }
-        if (rateFormData?.rateType === 'NEW') {
+        if (rateFormData.rateType === 'NEW') {
             return 'New rate certification'
         }
     }
 
-    const getRateFormData = (rate: Rate | RateRevision) => {
-        const isDraftRate = 'draftRevision' in rate
+    const getRateFormData = (rate: Rate | RateRevision): RateFormData => {
         const isRateRev = 'formData' in rate
-        if (isDraftRate) {
-            return rate.draftRevision?.formData
-        } else if (isRateRev) {
+        if (!isRateRev) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            return rate.draftRevision!.formData
+        } else {
             return rate.formData
         }
     }
@@ -196,7 +197,7 @@ export const RateDetailsSummarySectionV2 = ({
                                 aria-label={`Rate ID: ${rateFormData?.rateCertificationName}`}
                                 className={styles.rateName}
                             >
-                                {rateFormData?.rateCertificationName}
+                                {rateFormData.rateCertificationName}
                             </h3>
                             <dl>
                                 <DoubleColumnGrid>
@@ -217,15 +218,15 @@ export const RateDetailsSummarySectionV2 = ({
                                     <DataDetail
                                         id="ratingPeriod"
                                         label={
-                                            rateFormData?.rateType ===
+                                            rateFormData.rateType ===
                                             'AMENDMENT'
                                                 ? 'Rating period of original rate certification'
                                                 : 'Rating period'
                                         }
                                         explainMissingData={!isSubmitted}
                                         children={
-                                            rateFormData?.rateDateStart &&
-                                            rateFormData?.rateDateEnd ? (
+                                            rateFormData.rateDateStart &&
+                                            rateFormData.rateDateEnd ? (
                                                 `${formatCalendarDate(
                                                     rateFormData?.rateDateStart
                                                 )} to ${formatCalendarDate(
@@ -239,13 +240,13 @@ export const RateDetailsSummarySectionV2 = ({
                                     <DataDetail
                                         id="dateCertified"
                                         label={
-                                            rateFormData?.amendmentEffectiveDateStart
+                                            rateFormData.amendmentEffectiveDateStart
                                                 ? 'Date certified for rate amendment'
                                                 : 'Date certified'
                                         }
                                         explainMissingData={!isSubmitted}
                                         children={formatCalendarDate(
-                                            rateFormData?.rateDateCertified
+                                            rateFormData.rateDateCertified
                                         )}
                                     />
                                     {rateFormData?.amendmentEffectiveDateStart ? (
@@ -254,14 +255,14 @@ export const RateDetailsSummarySectionV2 = ({
                                             label="Rate amendment effective dates"
                                             explainMissingData={!isSubmitted}
                                             children={`${formatCalendarDate(
-                                                rateFormData?.amendmentEffectiveDateStart
+                                                rateFormData.amendmentEffectiveDateStart
                                             )} to ${formatCalendarDate(
-                                                rateFormData?.amendmentEffectiveDateEnd
+                                                rateFormData.amendmentEffectiveDateEnd
                                             )}`}
                                         />
                                     ) : null}
                                     {rateFormData
-                                        ?.certifyingActuaryContacts[0] && (
+                                        .certifyingActuaryContacts[0] && (
                                         <DataDetail
                                             id="certifyingActuary"
                                             label="Certifying actuary"
@@ -270,7 +271,7 @@ export const RateDetailsSummarySectionV2 = ({
                                                 <DataDetailContactField
                                                     contact={
                                                         rateFormData
-                                                            ?.certifyingActuaryContacts[0]
+                                                            .certifyingActuaryContacts[0]
                                                     }
                                                 />
                                             }

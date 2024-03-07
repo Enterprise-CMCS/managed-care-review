@@ -1,6 +1,11 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { ApolloClient, InMemoryCache, HttpLink, DefaultOptions } from '@apollo/client'
+import {
+    ApolloClient,
+    InMemoryCache,
+    HttpLink,
+    DefaultOptions,
+} from '@apollo/client'
 import { Amplify } from 'aws-amplify'
 import { loader } from 'graphql.macro'
 
@@ -60,12 +65,10 @@ assertIsAuthMode(authMode)
 const cache = new InMemoryCache()
 const defaultOptions: DefaultOptions = {
     watchQuery: {
-      fetchPolicy: 'network-only',
-      errorPolicy: 'ignore',
+        fetchPolicy: 'network-only',
     },
     query: {
-      fetchPolicy: 'network-only',
-      errorPolicy: 'all',
+        fetchPolicy: 'network-only',
     },
 }
 

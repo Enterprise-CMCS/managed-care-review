@@ -5,7 +5,6 @@ import {
     mockMNState,
     fetchCurrentUserMock,
     mockValidCMSUser,
-    indexHealthPlanPackagesMockSuccess,
 } from '../../../../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySectionV2 as RateDetailsSummarySection } from './RateDetailsSummarySectionV2'
@@ -16,96 +15,102 @@ describe('RateDetailsSummarySection', () => {
     const draftContract = mockContractPackageDraft()
     const submittedContract = mockContractPackageSubmitted()
     const statePrograms = mockMNState().programs
-    const mockRateInfos: Rate[] = [
-        {
-            id: '1234',
-            createdAt: new Date('01/01/2021'),
-            updatedAt: new Date('01/01/2021'),
-            status: 'DRAFT',
-            state: mockMNState(),
-            stateCode: 'MN',
-            stateNumber: 5,
-            revisions: [],
-            draftRevision: {
+    const makeMockRateInfos = (): Rate[] => {
+        return [
+            {
                 id: '1234',
                 createdAt: new Date('01/01/2021'),
                 updatedAt: new Date('01/01/2021'),
-                contractRevisions: [],
-                formData: {
-                    rateType: 'NEW',
-                    rateCapitationType: 'RATE_CELL',
-                    rateDocuments: [
-                        {
-                            s3URL: 's3://foo/bar/rate',
-                            name: 'rate docs test 1',
-                            sha256: 'fakesha',
-                        },
-                    ],
-                    supportingDocuments: [],
-                    rateDateStart: new Date('01/01/2021'),
-                    rateDateEnd: new Date('12/31/2021'),
-                    rateDateCertified: new Date('12/31/2020'),
-                    amendmentEffectiveDateStart: new Date('01/01/2021'),
-                    amendmentEffectiveDateEnd: new Date('12/31/2021'),
-                    rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                    certifyingActuaryContacts: [
-                        {
-                            actuarialFirm: 'DELOITTE',
-                            name: 'Jimmy Jimerson',
-                            titleRole: 'Certifying Actuary',
-                            email: 'jj.actuary@test.com',
-                        },
-                    ],
-                    addtlActuaryContacts: [],
-                    packagesWithSharedRateCerts: [],
+                status: 'DRAFT',
+                state: mockMNState(),
+                stateCode: 'MN',
+                stateNumber: 5,
+                revisions: [],
+                draftRevision: {
+                    id: '1234',
+                    createdAt: new Date('01/01/2021'),
+                    updatedAt: new Date('01/01/2021'),
+                    contractRevisions: [],
+                    formData: {
+                        rateType: 'NEW',
+                        rateCapitationType: 'RATE_CELL',
+                        rateDocuments: [
+                            {
+                                s3URL: 's3://foo/bar/rate',
+                                name: 'rate docs test 1',
+                                sha256: 'fakesha',
+                            },
+                        ],
+                        supportingDocuments: [],
+                        rateDateStart: new Date('01/01/2021'),
+                        rateDateEnd: new Date('12/31/2021'),
+                        rateDateCertified: new Date('12/31/2020'),
+                        amendmentEffectiveDateStart: new Date('01/01/2021'),
+                        amendmentEffectiveDateEnd: new Date('12/31/2021'),
+                        rateProgramIDs: [
+                            'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                        ],
+                        certifyingActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Jimmy Jimerson',
+                                titleRole: 'Certifying Actuary',
+                                email: 'jj.actuary@test.com',
+                            },
+                        ],
+                        addtlActuaryContacts: [],
+                        packagesWithSharedRateCerts: [],
+                    },
                 },
             },
-        },
-        {
-            id: '5678',
-            createdAt: new Date('01/01/2021'),
-            updatedAt: new Date('01/01/2021'),
-            status: 'DRAFT',
-            state: mockMNState(),
-            stateCode: 'MN',
-            stateNumber: 5,
-            revisions: [],
-            draftRevision: {
-                id: '1234',
+            {
+                id: '5678',
                 createdAt: new Date('01/01/2021'),
                 updatedAt: new Date('01/01/2021'),
-                contractRevisions: [],
-                formData: {
-                    rateType: 'AMENDMENT',
-                    rateCapitationType: 'RATE_CELL',
-                    rateDocuments: [
-                        {
-                            s3URL: 's3://foo/bar/rate',
-                            name: 'rate docs test 2',
-                            sha256: 'fakesha',
-                        },
-                    ],
-                    supportingDocuments: [],
-                    rateDateStart: new Date('01/01/2021'),
-                    rateDateEnd: new Date('12/31/2021'),
-                    rateDateCertified: new Date('12/31/2020'),
-                    amendmentEffectiveDateStart: new Date('01/01/2021'),
-                    amendmentEffectiveDateEnd: new Date('12/31/2021'),
-                    rateProgramIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
-                    certifyingActuaryContacts: [
-                        {
-                            actuarialFirm: 'DELOITTE',
-                            name: 'Timmy Timerson',
-                            titleRole: 'Certifying Actuary',
-                            email: 'tt.actuary@test.com',
-                        },
-                    ],
-                    addtlActuaryContacts: [],
-                    packagesWithSharedRateCerts: [],
+                status: 'DRAFT',
+                state: mockMNState(),
+                stateCode: 'MN',
+                stateNumber: 5,
+                revisions: [],
+                draftRevision: {
+                    id: '1234',
+                    createdAt: new Date('01/01/2021'),
+                    updatedAt: new Date('01/01/2021'),
+                    contractRevisions: [],
+                    formData: {
+                        rateType: 'AMENDMENT',
+                        rateCapitationType: 'RATE_CELL',
+                        rateDocuments: [
+                            {
+                                s3URL: 's3://foo/bar/rate',
+                                name: 'rate docs test 2',
+                                sha256: 'fakesha',
+                            },
+                        ],
+                        supportingDocuments: [],
+                        rateDateStart: new Date('01/01/2021'),
+                        rateDateEnd: new Date('12/31/2021'),
+                        rateDateCertified: new Date('12/31/2020'),
+                        amendmentEffectiveDateStart: new Date('01/01/2021'),
+                        amendmentEffectiveDateEnd: new Date('12/31/2021'),
+                        rateProgramIDs: [
+                            'd95394e5-44d1-45df-8151-1cc1ee66f100',
+                        ],
+                        certifyingActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Timmy Timerson',
+                                titleRole: 'Certifying Actuary',
+                                email: 'tt.actuary@test.com',
+                            },
+                        ],
+                        addtlActuaryContacts: [],
+                        packagesWithSharedRateCerts: [],
+                    },
                 },
             },
-        },
-    ]
+        ]
+    }
 
     const apolloProvider = {
         mocks: [
@@ -113,7 +118,6 @@ describe('RateDetailsSummarySection', () => {
                 statusCode: 200,
                 user: mockValidCMSUser(),
             }),
-            indexHealthPlanPackagesMockSuccess(),
         ],
     }
 
@@ -618,7 +622,7 @@ describe('RateDetailsSummarySection', () => {
 
     it('renders multiple rate certifications with program names', async () => {
         const draftContract = mockContractPackageDraft()
-        draftContract.draftRates = mockRateInfos
+        draftContract.draftRates = makeMockRateInfos()
         renderWithProviders(
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
@@ -641,7 +645,7 @@ describe('RateDetailsSummarySection', () => {
 
     it('renders multiple rate certifications with rate type', async () => {
         const draftContract = mockContractPackageDraft()
-        draftContract.draftRates = mockRateInfos
+        draftContract.draftRates = makeMockRateInfos()
 
         renderWithProviders(
             <RateDetailsSummarySection
@@ -665,7 +669,7 @@ describe('RateDetailsSummarySection', () => {
 
     it('renders multiple rate certifications with documents', async () => {
         const draftSubmission = mockContractPackageDraft()
-        draftSubmission.draftRates = mockRateInfos
+        draftSubmission.draftRates = makeMockRateInfos()
         renderWithProviders(
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
@@ -698,7 +702,7 @@ describe('RateDetailsSummarySection', () => {
 
     it('renders multiple rate certifications with certifying actuary', async () => {
         const draftContract = mockContractPackageDraft()
-        draftContract.draftRates = mockRateInfos
+        draftContract.draftRates = makeMockRateInfos()
         renderWithProviders(
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
