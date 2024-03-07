@@ -49,7 +49,11 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
         const { user, span } = context
         setResolverDetailsOnActiveSpan('indexRates', user, span)
 
-        if (hasAdminPermissions(user) || isCMSUser(user) || isStateUser(user)) {
+        const adminPermissions = hasAdminPermissions(user)
+        const cmsUser = isCMSUser(user)
+        const stateUser = isStateUser(user)
+
+        if (adminPermissions || cmsUser || stateUser) {
             const ratesWithHistory =
                 await store.findAllRatesWithHistoryBySubmitInfo()
             if (ratesWithHistory instanceof Error) {
@@ -76,13 +80,26 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
                 ratesWithHistory,
                 span
             )
-            const edges = rates.map((rate) => {
-                return {
-                    node: {
-                        ...rate,
-                    },
-                }
-            })
+            const edges: object[] = []
+            if (stateUser) {
+                rates.forEach((rate) => {
+                    if (user.stateCode === rate.stateCode) {
+                        edges.push({
+                            node: {
+                                ...rate,
+                            },
+                        })
+                    }
+                })
+            } else {
+                rates.forEach((rate) => {
+                    edges.push({
+                        node: {
+                            ...rate,
+                        },
+                    })
+                })
+            }
             setSuccessAttributesOnActiveSpan(span)
             return { totalCount: edges.length, edges }
         } else {
