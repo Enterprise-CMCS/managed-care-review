@@ -62,7 +62,7 @@ describe('RateDetails', () => {
                 screen.getByRole('button', { name: 'Submit' })
             ).not.toHaveAttribute('aria-disabled')
             const requiredLabels = await screen.findAllByText('Required')
-            expect(requiredLabels).toHaveLength(6)
+            expect(requiredLabels).toHaveLength(7)
             const optionalLabels = screen.queryAllByText('Optional')
             expect(optionalLabels).toHaveLength(1)
         })
