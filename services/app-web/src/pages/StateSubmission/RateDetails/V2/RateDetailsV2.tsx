@@ -66,11 +66,18 @@ export type FormikRateForm = {
     addtlActuaryContacts: RateRevision['formData']['addtlActuaryContacts']
     actuaryCommunicationPreference: RateRevision['formData']['actuaryCommunicationPreference']
     packagesWithSharedRateCerts: RateRevision['formData']['packagesWithSharedRateCerts']
+    linkedRates: linkedRatesDisplay[]
+    ratePreviouslySubmitted?: 'YES' | 'NO'
+}
+
+export type linkedRatesDisplay = {
+    rateId?: string
+    rateName?: string
 }
 
 // We have a list of rates to enable multi-rate behavior
 export type RateDetailFormConfig = {
-    rates: FormikRateForm[]
+    rateForms: FormikRateForm[]
 }
 
 type RateDetailsV2Props = {
@@ -174,7 +181,7 @@ const RateDetailsV2 = ({
         [ratesFromContract, fetchRateData]
     )
     const initialValues: RateDetailFormConfig = {
-        rates:
+        rateForms:
             initialRates.length > 0
                 ? initialRates.map((rate) =>
                       convertGQLRateToRateForm(getKey, rate)
@@ -279,7 +286,7 @@ const RateDetailsV2 = ({
     const generateErrorSummaryErrors = (
         errors: FormikErrors<RateDetailFormConfig>
     ) => {
-        const rateErrors = errors.rates
+        const rateErrors = errors.rateForms
         const errorObject: { [field: string]: string } = {}
         if (rateErrors && Array.isArray(rateErrors)) {
             rateErrors.forEach((rateError, index) => {
@@ -290,8 +297,8 @@ const RateDetailsV2 = ({
                         //rateProgramIDs error message needs a # proceeding the key name because this is the only way to be able to link to the Select component element see comments in ErrorSummaryMessage component.
                         const errorKey =
                             field === 'rateProgramIDs'
-                                ? `#rates.${index}.${field}`
-                                : `rates.${index}.${field}`
+                                ? `#rateForms.${index}.${field}`
+                                : `rateForms.${index}.${field}`
                         errorObject[errorKey] = value
                     }
                     // If the field is actuaryContacts then the value should be an array with at least one object of errors
@@ -305,7 +312,7 @@ const RateDetailsV2 = ({
                         Object.entries(actuaryContact).forEach(
                             ([contactField, contactValue]) => {
                                 if (typeof contactValue === 'string') {
-                                    const errorKey = `rates.${index}.actuaryContacts.0.${contactField}`
+                                    const errorKey = `rateForms.${index}.actuaryContacts.0.${contactField}`
                                     errorObject[errorKey] = contactValue
                                 }
                             }
@@ -347,7 +354,7 @@ const RateDetailsV2 = ({
                 initialValues={initialValues}
                 onSubmit={(rateFormValues, { setSubmitting }) => {
                     return handlePageAction(
-                        rateFormValues.rates,
+                        rateFormValues.rateForms,
                         setSubmitting,
                         {
                             type: 'CONTINUE',
@@ -360,7 +367,7 @@ const RateDetailsV2 = ({
                 validationSchema={rateDetailsFormSchema}
             >
                 {({
-                    values: { rates },
+                    values: { rateForms },
                     errors,
                     dirty,
                     handleSubmit,
@@ -392,13 +399,13 @@ const RateDetailsV2 = ({
                                             headingRef={errorSummaryHeadingRef}
                                         />
                                     )}
-                                    <FieldArray name="rates">
+                                    <FieldArray name="rateForms">
                                         {({
                                             remove,
                                             push,
                                         }: FieldArrayRenderProps) => (
                                             <>
-                                                {rates.map(
+                                                {rateForms.map(
                                                     (rate, index = 0) => (
                                                         <SectionCard
                                                             key={index}
@@ -491,7 +498,7 @@ const RateDetailsV2 = ({
                                     backOnClick={async () => {
                                         if (dirty) {
                                             await handlePageAction(
-                                                rates,
+                                                rateForms,
                                                 setSubmitting,
                                                 {
                                                     type: 'CANCEL',
@@ -510,7 +517,7 @@ const RateDetailsV2 = ({
                                             ? () => undefined
                                             : async () => {
                                                   await handlePageAction(
-                                                      rates,
+                                                      rateForms,
                                                       setSubmitting,
                                                       {
                                                           type: 'SAVE_AS_DRAFT',

@@ -24,18 +24,12 @@ import {
 describe('RateDetails', () => {
     describe('handles edit  of a single rate', () => {
         it('renders without errors', async () => {
-            const mockSubmit = jest.fn()
             const rateID = 'test-abc-123'
             renderWithProviders(
                 <Routes>
                     <Route
                         path={RoutesRecord.RATE_EDIT}
-                        element={
-                            <RateDetailsV2
-                                type="SINGLE"
-                                submitRate={mockSubmit}
-                            />
-                        }
+                        element={<RateDetailsV2 type="SINGLE" />}
                     />
                 </Routes>,
                 {
@@ -62,7 +56,7 @@ describe('RateDetails', () => {
                 screen.getByRole('button', { name: 'Submit' })
             ).not.toHaveAttribute('aria-disabled')
             const requiredLabels = await screen.findAllByText('Required')
-            expect(requiredLabels).toHaveLength(6)
+            expect(requiredLabels).toHaveLength(7)
             const optionalLabels = screen.queryAllByText('Optional')
             expect(optionalLabels).toHaveLength(1)
         })
@@ -74,12 +68,7 @@ describe('RateDetails', () => {
                     <Routes>
                         <Route
                             path={RoutesRecord.RATE_EDIT}
-                            element={
-                                <RateDetailsV2
-                                    type="SINGLE"
-                                    submitRate={jest.fn()}
-                                />
-                            }
+                            element={<RateDetailsV2 type="SINGLE" />}
                         />
                     </Routes>,
                     {
@@ -124,12 +113,7 @@ describe('RateDetails', () => {
                     <Routes>
                         <Route
                             path={RoutesRecord.RATE_EDIT}
-                            element={
-                                <RateDetailsV2
-                                    type="SINGLE"
-                                    submitRate={jest.fn()}
-                                />
-                            }
+                            element={<RateDetailsV2 type="SINGLE" />}
                         />
                     </Routes>,
                     {

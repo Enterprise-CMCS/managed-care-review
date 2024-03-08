@@ -6,12 +6,16 @@ import {
     formatFormDateForGQL,
 } from '../../../../formHelpers/formatters'
 import {
+    HealthPlanPackageStatus,
     Rate,
     RateFormData,
     UpdateContractRateInput,
 } from '../../../../gen/gqlClient'
 import { S3ClientT } from '../../../../s3'
 import { type FormikRateForm } from './RateDetailsV2'
+
+// Right now we figure out if this is a linked rate by referencing the status. We know a rate is linked when its locked.
+const isLinkedRate = (status?: HealthPlanPackageStatus): boolean =>  status && (status === 'SUBMITTED' || status === 'RESUBMITTED')? true: false
 
 // generateUpdatedRates takes the Formik RateForm list used for multi-rates and prepares for contract with rates update mutation
 // ensure we link, create, and update the proper rates
@@ -20,13 +24,12 @@ const generateUpdatedRates = (
 ): UpdateContractRateInput[] => {
     const updatedRates: UpdateContractRateInput[] = newRateForms.map((form) => {
         const { id, status, ...rateFormData } = form
-        const isLinkedRate = status === 'SUBMITTED' || status === 'RESUBMITTED' // we know a rate is linked and coming from outside the parent form when its not in draft form
         return {
-            formData: isLinkedRate
+            formData: isLinkedRate(status)
                 ? undefined
                 : convertRateFormToGQLRateFormData(rateFormData),
             rateID: id,
-            type: isLinkedRate ? 'LINK' : !id ? 'CREATE' : 'UPDATE',
+            type: isLinkedRate(status) ? 'LINK' : !id ? 'CREATE' : 'UPDATE',
         }
     })
 
@@ -62,10 +65,10 @@ const convertRateFormToGQLRateFormData = (
 }
 // Convert from GQL Rate to FormikRateForm object used in the form
 // if rate is not passed in, return an empty RateForm // we need to pass in the  s3 handler because 3 urls generated client-side
-const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate) => {
+const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate): FormikRateForm => {
     const rateRev = rate?.draftRevision ?? undefined
     const rateForm = rateRev?.formData
-
+    const handleAsLinkedRate = rate?.id && isLinkedRate(rate.status)
     return {
         id: rate?.id,
         status: rate?.status,
@@ -97,6 +100,11 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate) => {
             rateForm?.actuaryCommunicationPreference,
         packagesWithSharedRateCerts:
             rateForm?.packagesWithSharedRateCerts ?? [],
+        linkedRates: handleAsLinkedRate? [{
+            rateId: rate.id,
+            rateName: rateForm?.rateCertificationName ?? 'Unknown Rate'
+        }]:[],
+        ratePreviouslySubmitted: handleAsLinkedRate? 'YES' : 'NO'
     }
 }
 

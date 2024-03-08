@@ -12,8 +12,6 @@ const contractSchema = z.object({
     createdAt: z.date(),
     updatedAt: z.date(),
     status: statusSchema,
-    createdAt: z.date(),
-    updatedAt: z.date(),
     stateCode: z.string(),
     mccrsID: z.string().optional(),
     stateNumber: z.number().min(1),
