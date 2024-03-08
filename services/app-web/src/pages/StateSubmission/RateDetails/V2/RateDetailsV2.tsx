@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, Fieldset, Form as UswdsForm } from '@trussworks/react-uswds'
 import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
 import { useNavigate } from 'react-router-dom'
@@ -12,15 +12,7 @@ import {
 import { RateDetailsFormSchema } from '../RateDetailsSchema'
 import { PageActions } from '../../PageActions'
 
-import {
-    formatActuaryContactsForForm,
-    formatDocumentsForForm,
-    formatDocumentsForGQL,
-    formatForForm,
-    formatFormDateForGQL,
-} from '../../../../formHelpers/formatters'
 import { useS3 } from '../../../../contexts/S3Context'
-import { S3ClientT } from '../../../../s3'
 import {
     FileItemT,
     isLoadingOrHasFileErrors,
@@ -33,13 +25,13 @@ import {
 import {
     HealthPlanPackageStatus,
     Rate,
-    RateFormDataInput,
     RateRevision,
     useFetchContractQuery,
     useFetchRateQuery,
+    useSubmitRateMutation,
+    useUpdateDraftContractRatesMutation,
 } from '../../../../gen/gqlClient'
 import { SingleRateFormFields } from './SingleRateFormFields'
-import type { SubmitRateHandler } from '../../../RateEdit/RateEdit'
 import { useFocus, useRouteParams } from '../../../../hooks'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
 import { PageBannerAlerts } from '../../PageBannerAlerts'
@@ -50,10 +42,16 @@ import {
 } from '../../ErrorOrLoadingPage'
 import { featureFlags } from '../../../../common-code/featureFlags'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { recordJSException } from '../../../../otelHelpers'
+import {
+    convertGQLRateToRateForm,
+    convertRateFormToGQLRateFormData,
+    generateUpdatedRates,
+} from './rateDetailsHelpers'
 
-export type RateDetailFormValues = {
+export type FormikRateForm = {
     id?: string // no id if its a new rate
-    status?: HealthPlanPackageStatus
+    status?: HealthPlanPackageStatus // need to track status to know if this is a direct child or linked rate
     rateType: RateRevision['formData']['rateType']
     rateCapitationType: RateRevision['formData']['rateCapitationType']
     rateDateStart: RateRevision['formData']['rateDateStart']
@@ -72,69 +70,16 @@ export type RateDetailFormValues = {
 
 // We have a list of rates to enable multi-rate behavior
 export type RateDetailFormConfig = {
-    rates: RateDetailFormValues[]
-}
-
-const generateFormValues = (
-    getKey: S3ClientT['getKey'],
-    rateRev?: RateRevision,
-    rateID?: string,
-    rateStatus?: HealthPlanPackageStatus
-): RateDetailFormValues => {
-    const rateInfo = rateRev?.formData
-
-    return {
-        id: rateID,
-        status: rateStatus,
-        rateType: rateInfo?.rateType ?? undefined,
-        rateCapitationType: rateInfo?.rateCapitationType ?? undefined,
-        rateDateStart: formatForForm(rateInfo?.rateDateStart),
-        rateDateEnd: formatForForm(rateInfo?.rateDateEnd),
-        rateDateCertified: formatForForm(rateInfo?.rateDateCertified),
-        effectiveDateStart: formatForForm(
-            rateInfo?.amendmentEffectiveDateStart
-        ),
-        effectiveDateEnd: formatForForm(rateInfo?.amendmentEffectiveDateEnd),
-        rateProgramIDs: rateInfo?.rateProgramIDs ?? [],
-        rateDocuments: formatDocumentsForForm({
-            documents: rateInfo?.rateDocuments,
-            getKey: getKey,
-        }),
-        supportingDocuments: formatDocumentsForForm({
-            documents: rateInfo?.supportingDocuments,
-            getKey: getKey,
-        }),
-        actuaryContacts: formatActuaryContactsForForm(
-            rateInfo?.certifyingActuaryContacts
-        ),
-        addtlActuaryContacts: formatActuaryContactsForForm(
-            rateInfo?.certifyingActuaryContacts
-        ),
-        actuaryCommunicationPreference:
-            rateInfo?.actuaryCommunicationPreference ?? undefined,
-        packagesWithSharedRateCerts:
-            rateInfo?.packagesWithSharedRateCerts ?? [],
-    }
-}
-
-export const rateErrorHandling = (
-    error: string | FormikErrors<RateDetailFormValues> | undefined
-): FormikErrors<RateDetailFormValues> | undefined => {
-    if (typeof error === 'string') {
-        return undefined
-    }
-    return error
+    rates: FormikRateForm[]
 }
 
 type RateDetailsV2Props = {
     type: 'SINGLE' | 'MULTI'
     showValidations?: boolean
-    submitRate?: SubmitRateHandler
 }
 const RateDetailsV2 = ({
     showValidations = false,
     type,
-    submitRate,
 }: RateDetailsV2Props): React.ReactElement => {
     const navigate = useNavigate()
     const { getKey } = useS3()
@@ -145,11 +90,14 @@ const RateDetailsV2 = ({
         featureFlags.LINK_RATES.flag,
         featureFlags.LINK_RATES.defaultValue
     )
-
     const useEditUnlockRate = ldClient?.variation(
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
+    const [showAPIErrorBanner, setShowAPIErrorBanner] = useState<
+        boolean | string
+    >(false) // string is a custom error message, defaults to generic message when true
+
     // Form validation
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const rateDetailsFormSchema = RateDetailsFormSchema({
@@ -191,13 +139,7 @@ const RateDetailsV2 = ({
         },
         skip: !displayAsStandaloneRate,
     })
-    const ratesFromContract =
-        fetchContractData?.fetchContract.contract.draftRates // TODO WHEN WE IMPLEMENT UDPATE API, THIS SHOULD ALSO LOAD FROM ANY LINKED RATES
-    const initialRequestLoading = fetchContractLoading || fetchRateLoading
-    const initialRequestError = fetchContractError || fetchRateError
-    const previousDocuments: string[] = []
-
-    React.useEffect(() => {
+    useEffect(() => {
         if (focusNewRate) {
             newRateNameRef?.current?.focus()
             setFocusNewRate(false)
@@ -205,15 +147,26 @@ const RateDetailsV2 = ({
         }
     }, [focusNewRate])
 
-    /*
-    Set up initial rate form values for Formik
-        if contract rates exist, use those (relevant for multi rate forms on contract package submission form)
-        if standalone rates exist, use those (for a standalone rate edits)
-        otherwise, generate a new  list of empty rate form values
-    */
-    const rates: Rate[] = React.useMemo(
+    const [updateDraftContractRates, { error: updateContractError }] =
+        useUpdateDraftContractRatesMutation()
+    const [submitRate, { error: submitRateError }] = useSubmitRateMutation()
+
+    // Set up data for form. Either based on contract API (for multi rate) or rates API (for edit and submit of standalone rate)
+    const ratesFromContract =
+        fetchContractData?.fetchContract.contract.draftRates // TODO WHEN WE IMPLEMENT UPDATE API, THIS SHOULD ALSO LOAD FROM ANY LINKED RATES
+    const initialRequestLoading = fetchContractLoading || fetchRateLoading
+    const initialRequestError = fetchContractError || fetchRateError
+    // const submitRequestLoading = updateContractLoading
+    const submitRequestError = updateContractError || submitRateError
+    const apiError = initialRequestError || submitRequestError
+    const previousDocuments: string[] = []
+
+    // Set up initial rate form values for Formik
+    const initialRates: Rate[] = React.useMemo(
         () =>
+            // if contract rates exist, use those (relevant for multi rate forms)
             ratesFromContract ??
+            // if standalone rates exist, use those (for a standalone rate edits)
             (fetchRateData?.fetchRate.rate && [
                 fetchRateData?.fetchRate.rate,
             ]) ??
@@ -222,39 +175,39 @@ const RateDetailsV2 = ({
     )
     const initialValues: RateDetailFormConfig = {
         rates:
-            rates.length > 0
-                ? rates.map((rate) =>
-                      generateFormValues(
-                          getKey,
-                          rate.draftRevision ?? undefined,
-                          rate?.id
-                      )
+            initialRates.length > 0
+                ? initialRates.map((rate) =>
+                      convertGQLRateToRateForm(getKey, rate)
                   )
-                : [generateFormValues(getKey)],
+                : [convertGQLRateToRateForm(getKey)],
     }
 
     // Display any full page interim state resulting from the initial fetch API requests
     if (initialRequestLoading) {
         return <ErrorOrLoadingPage state="LOADING" />
     }
-    if (initialRequestError) {
+
+    if (apiError) {
         return (
-            <ErrorOrLoadingPage
-                state={handleAndReturnErrorState(initialRequestError)}
-            />
+            <ErrorOrLoadingPage state={handleAndReturnErrorState(apiError)} />
         )
+    }
+    // Redirect if in standalone rate workflow and rate not editable
+    if (displayAsStandaloneRate && initialRates[0].status !== 'UNLOCKED') {
+        navigate(`/rates/${id}`)
     }
 
     const handlePageAction = async (
-        rates: RateDetailFormValues[],
+        rateForms: FormikRateForm[],
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
         options: {
             type: 'SAVE_AS_DRAFT' | 'CANCEL' | 'CONTINUE'
             redirectPath: RouteT
         }
     ) => {
+        setShowAPIErrorBanner(false)
         if (options.type === 'CONTINUE') {
-            const fileErrorsNeedAttention = rates.some((rateForm) =>
+            const fileErrorsNeedAttention = rateForms.some((rateForm) =>
                 isLoadingOrHasFileErrors(
                     rateForm.supportingDocuments.concat(rateForm.rateDocuments)
                 )
@@ -269,54 +222,52 @@ const RateDetailsV2 = ({
             }
         }
 
-        const gqlFormDatas: Array<{ id?: string } & RateFormDataInput> =
-            rates.map((form) => {
-                return {
-                    id: form.id,
-                    rateType: form.rateType,
-                    rateCapitationType: form.rateCapitationType,
-                    rateDocuments: formatDocumentsForGQL(form.rateDocuments),
-                    supportingDocuments: formatDocumentsForGQL(
-                        form.supportingDocuments
-                    ),
-                    rateDateStart: formatFormDateForGQL(form.rateDateStart),
-                    rateDateEnd: formatFormDateForGQL(form.rateDateEnd),
-                    rateDateCertified: formatFormDateForGQL(
-                        form.rateDateCertified
-                    ),
-                    amendmentEffectiveDateStart: formatFormDateForGQL(
-                        form.effectiveDateStart
-                    ),
-                    amendmentEffectiveDateEnd: formatFormDateForGQL(
-                        form.effectiveDateEnd
-                    ),
-                    rateProgramIDs: form.rateProgramIDs,
-                    certifyingActuaryContacts: form.actuaryContacts,
-                    addtlActuaryContacts: form.addtlActuaryContacts,
-                    actuaryCommunicationPreference:
-                        form.actuaryCommunicationPreference,
-                    packagesWithSharedRateCerts:
-                        form.packagesWithSharedRateCerts,
-                }
-            })
-
-        const { id, ...formData } = gqlFormDatas[0] // only grab the first rate in the array because multi-rates functionality not added yet. This will be part of Link Rates epic
-
-        if (
-            options.type === 'CONTINUE' &&
-            id &&
-            displayAsStandaloneRate &&
-            submitRate
+        if (displayAsStandaloneRate && options.type === 'CONTINUE') {
+            try {
+                await submitRate({
+                    variables: {
+                        input: {
+                            rateID: id ?? 'no-id',
+                            formData: convertRateFormToGQLRateFormData(
+                                rateForms[0]
+                            ), // only grab the first rate in the array for standalone rate submissiob
+                        },
+                    },
+                })
+                navigate(options.redirectPath)
+            } catch (err) {
+                recordJSException(
+                    `RateDetails: Apollo error reported. Error message: Failed to create form data ${err}`
+                )
+                setShowAPIErrorBanner(true)
+            } finally {
+                setSubmitting(false)
+            }
+        } else if (
+            !displayAsStandaloneRate &&
+            (options.type === 'CONTINUE' || options.type === 'SAVE_AS_DRAFT')
         ) {
-            await submitRate(id, formData, setSubmitting, 'DASHBOARD')
-        } else if (options.type === 'CONTINUE' && !displayAsStandaloneRate) {
-            throw new Error(
-                'Rate create and update for a new rate is not yet implemented. This will be part of Link Rates epic.'
-            )
-        } else if (options.type === 'SAVE_AS_DRAFT') {
-            throw new Error(
-                'Rate save as draft is not possible. This will be part of Link Rates epic.'
-            )
+            try {
+                const updatedRates = generateUpdatedRates(rateForms)
+
+                await updateDraftContractRates({
+                    variables: {
+                        input: {
+                            contractID: id ?? 'no-id',
+                            updatedRates,
+                        },
+                    },
+                })
+                navigate(options.redirectPath)
+            } catch (err) {
+                recordJSException(
+                    `RateDetails: Apollo error reported. Error message: Failed to create form data ${err}`
+                )
+                setShowAPIErrorBanner(true)
+            } finally {
+                setSubmitting(false)
+            }
+            // At this point know there was a back or cancel page action - we are just redirecting
         } else {
             navigate(RoutesRecord[options.redirectPath])
         }
@@ -385,7 +336,7 @@ const RateDetailsV2 = ({
                             fetchRateData?.fetchRate.rate.draftRevision
                                 ?.unlockInfo
                         }
-                        showPageErrorMessage={false} // TODO WHEN WE IMPLEMENT UDPATE API -  FIGURE OUT ERROR BANNER FOR BOTH MULTI AND STANDALONE USE CASE
+                        showPageErrorMessage={showAPIErrorBanner} // TODO WHEN WE IMPLEMENT UDPATE API -  FIGURE OUT ERROR BANNER FOR BOTH MULTI AND STANDALONE USE CASE
                     />
                 )}
             </div>
@@ -420,7 +371,7 @@ const RateDetailsV2 = ({
                         <>
                             <UswdsForm
                                 className={styles.formContainer}
-                                id="SingleRateDetailsForm"
+                                id="RateDetailsForm"
                                 aria-label="Rate Details Form"
                                 aria-describedby="form-guidance"
                                 onSubmit={(e) => {
@@ -512,9 +463,9 @@ const RateDetailsV2 = ({
                                                         className={`usa-button usa-button--outline ${styles.addRateBtn}`}
                                                         onClick={() => {
                                                             const newRate =
-                                                                generateFormValues(
+                                                                convertGQLRateToRateForm(
                                                                     getKey
-                                                                )
+                                                                ) // empty rate
 
                                                             push(newRate)
                                                             setFocusNewRate(
