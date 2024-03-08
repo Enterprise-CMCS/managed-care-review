@@ -33,7 +33,7 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                     riskBasedContract
                     stateContacts {
                         name
-                        title
+                        titleRole
                         email
                     }
                     contractDocuments {
