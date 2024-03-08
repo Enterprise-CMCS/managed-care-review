@@ -1,8 +1,8 @@
 import React from 'react'
-import Select, { AriaOnFocus } from 'react-select'
+import Select, { AriaOnFocus, Props } from 'react-select'
 import styles from '../../components/Select/Select.module.scss'
 import { useIndexRatesQuery } from '../../gen/gqlClient'
-import { Fieldset } from '@trussworks/react-uswds'
+import { useField } from 'formik'
 
 export interface LinkRateOptionType {
     readonly value: string
@@ -11,7 +11,17 @@ export interface LinkRateOptionType {
     readonly isDisabled?: boolean
 }
 
-export const LinkRateSelect = () => {
+export type LinkRateSelectPropType = {
+    name: string
+    initialValues: string[]
+}
+
+export const LinkRateSelect = ({
+    name,
+    initialValues,
+    ...selectProps
+}: LinkRateSelectPropType & Props<LinkRateOptionType, true>) => {
+    const [_field, _meta, helpers] = useField({ name })
     const { data, loading, error } = useIndexRatesQuery()
 
     const rateNames: LinkRateOptionType[] = []
@@ -22,13 +32,12 @@ export const LinkRateSelect = () => {
                 rate.revisions.forEach((revision) => {
                     if (revision.formData.rateCertificationName) {
                         rateNames.push({
-                            value: revision.formData.rateCertificationName,
+                            value: revision.id,
                             label: revision.formData.rateCertificationName,
                         })
                     }
                 })
             }
-            return rateNames
         })
 
     const onFocus: AriaOnFocus<LinkRateOptionType> = ({
@@ -39,6 +48,27 @@ export const LinkRateSelect = () => {
             isDisabled ? ', disabled' : ''
         }`
     }
+
+    const defaultValues =
+        initialValues.length && rateNames.length
+            ? initialValues.map((rateId) => {
+                  const rateName = rateNames.find(
+                      (names) => names.value === rateId
+                  )?.label
+
+                  if (!rateName) {
+                      return {
+                          value: rateId,
+                          label: 'Unknown rate',
+                      }
+                  }
+
+                  return {
+                      value: rateId,
+                      label: rateName,
+                  }
+              })
+            : []
 
     const noOptionsMessage = () => {
         if (loading) {
@@ -53,25 +83,36 @@ export const LinkRateSelect = () => {
     }
 
     return (
-        <Fieldset
-            data-testid="linkRateSelect"
-            role="dropdown"
-            aria-required
-            legend={'Which rate certification was it?'}
-        >
-            <span className={styles.requiredOptionalText}>Required</span>
+        <>
             <Select
+                value={defaultValues}
                 className={styles.multiSelect}
                 options={error || loading ? undefined : rateNames}
                 isSearchable
                 isMulti
-                maxMenuHeight={200}
+                maxMenuHeight={169}
+                aria-label="linked rates (required)"
                 ariaLiveMessages={{
                     onFocus,
                 }}
                 noOptionsMessage={() => noOptionsMessage()}
+                classNamePrefix="select"
+                id={`${name}-linkRateSelect`}
+                inputId=""
+                placeholder={
+                    loading ? 'Loading rate certifications...' : 'Select...'
+                }
+                loadingMessage={() => 'Loading rate certifications...'}
+                name={name}
+                onChange={(selectedOptions) =>
+                    helpers.setValue(
+                        selectedOptions.map(
+                            (item: { value: string }) => item.value
+                        )
+                    )
+                }
+                {...selectProps}
             />
-            <br />
-        </Fieldset>
+        </>
     )
 }

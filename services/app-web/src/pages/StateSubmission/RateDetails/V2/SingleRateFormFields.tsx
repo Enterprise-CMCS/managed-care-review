@@ -99,7 +99,10 @@ export const SingleRateFormFields = ({
     return (
         <>
             <FormGroup error={Boolean(showFieldErrors('rateDocuments'))}>
-                <LinkYourRates />
+                <LinkYourRates
+                    fieldNamePrefix={fieldNamePrefix}
+                    index={index}
+                />
                 <FileUpload
                     id={`${fieldNamePrefix}.rateDocuments`}
                     name={`${fieldNamePrefix}.rateDocuments`}
