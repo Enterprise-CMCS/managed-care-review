@@ -21,32 +21,34 @@ export async function submitContract(
     const currentDateTime = new Date()
 
     try {
-        // find the current contract with related rates
-        const currentRev = await client.contractRevisionTable.findFirst({
-            where: {
-                contractID: contractID,
-                submitInfoID: null,
-            },
-            include: {
-                draftRates: {
-                    include: includeDraftRates,
-                },
-            },
-        })
-
-        if (!currentRev) {
-            const err = `PRISMA ERROR: Cannot find the current rev to submit with contract id: ${contractID}`
-            console.error(err)
-            return new NotFoundError(err)
-        }
-
-        // get the related rate revisions and any unsubmitted rates
-        const relatedRateRevs = currentRev.draftRates.map((c) => c.revisions[0])
-        const unsubmittedRates = relatedRateRevs.filter(
-            (rev) => rev.submitInfo === null
-        )
-
         return await client.$transaction(async (tx) => {
+            // find the current contract with related rates
+            const currentRev = await client.contractRevisionTable.findFirst({
+                where: {
+                    contractID: contractID,
+                    submitInfoID: null,
+                },
+                include: {
+                    draftRates: {
+                        include: includeDraftRates,
+                    },
+                },
+            })
+
+            if (!currentRev) {
+                const err = `PRISMA ERROR: Cannot find the current rev to submit with contract id: ${contractID}`
+                console.error(err)
+                return new NotFoundError(err)
+            }
+
+            // get the related rate revisions and any unsubmitted rates
+            const relatedRateRevs = currentRev.draftRates.map(
+                (c) => c.revisions[0]
+            )
+            const unsubmittedRates = relatedRateRevs.filter(
+                (rev) => rev.submitInfo === null
+            )
+
             // Create the submitInfo record in the updateInfoTable
             const submitInfo = await tx.updateInfoTable.create({
                 data: {
