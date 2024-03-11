@@ -26,7 +26,6 @@ import { useS3 } from '../../../../contexts/S3Context'
 import { FormikErrors, getIn, useFormikContext } from 'formik'
 import { ActuaryContactFields } from '../../Contacts'
 import { FormikRateForm, RateDetailFormConfig } from './RateDetailsV2'
-import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
 
 const isRateTypeEmpty = (rateForm: FormikRateForm): boolean =>
     rateForm.rateType === undefined
@@ -46,6 +45,7 @@ type SingleRateFormFieldsProps = {
     rateForm: FormikRateForm
     shouldValidate: boolean
     index: number // defaults to 0
+    fieldNamePrefix: string // formik field name prefix - used for looking up values and errors in Formik FieldArray
     previousDocuments: string[] // this only passed in to ensure S3 deleteFile doesn't remove valid files for previous revision
 }
 
@@ -99,10 +99,6 @@ export const SingleRateFormFields = ({
     return (
         <>
             <FormGroup error={Boolean(showFieldErrors('rateDocuments'))}>
-                <LinkYourRates
-                    fieldNamePrefix={fieldNamePrefix}
-                    index={index}
-                />
                 <FileUpload
                     id={`${fieldNamePrefix}.rateDocuments`}
                     name={`${fieldNamePrefix}.rateDocuments`}

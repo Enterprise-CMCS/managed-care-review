@@ -72,8 +72,8 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate): For
     return {
         id: rate?.id,
         status: rate?.status,
-        rateType: rateForm?.rateType,
-        rateCapitationType: rateForm?.rateCapitationType,
+        rateType: rateForm?.rateType ?? undefined, // keep null collaescing types for radio buttons to ensure error messages work properly
+        rateCapitationType: rateForm?.rateCapitationType ?? undefined, // keep null collaescing types for radio buttons to ensure error messages work properly
         rateDateStart: formatForForm(rateForm?.rateDateStart),
         rateDateEnd: formatForForm(rateForm?.rateDateEnd),
         rateDateCertified: formatForForm(rateForm?.rateDateCertified),

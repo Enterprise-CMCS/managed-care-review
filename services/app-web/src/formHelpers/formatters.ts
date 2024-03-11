@@ -24,9 +24,9 @@ const formatForApi = (attribute: string): string | null => {
 
 // Convert api data for use in form.  Form fields must be a string.
 // Empty values as an empty string, dates in date picker as YYYY-MM-DD, boolean as "Yes" "No" values
-const formatForForm = (
-    attribute: boolean | Date | string | null | undefined
-): string => {
+function formatForForm<T> (
+    attribute: T
+): string {
     if (attribute === null || attribute === undefined) {
         return ''
     } else if (attribute instanceof Date) {
@@ -34,7 +34,7 @@ const formatForForm = (
     } else if (typeof attribute === 'boolean') {
         return attribute ? 'YES' : 'NO'
     } else {
-        return attribute
+        return attribute.toString()
     }
 }
 

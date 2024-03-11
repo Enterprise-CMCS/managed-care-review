@@ -48,6 +48,7 @@ import {
     convertRateFormToGQLRateFormData,
     generateUpdatedRates,
 } from './rateDetailsHelpers'
+import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
 
 export type FormikRateForm = {
     id?: string // no id if its a new rate
@@ -330,7 +331,7 @@ const RateDetailsV2 = ({
 
         return errorObject
     }
-
+    const fieldNamePrefix = (idx: number) => `rateForms.${idx}`
     return (
         <>
             <div className={styles.stepIndicator}>
@@ -428,6 +429,17 @@ const RateDetailsV2 = ({
                                                             <Fieldset
                                                                 data-testid={`rate-certification-form`}
                                                             >
+                                                                {!displayAsStandaloneRate && (
+                                                                    <LinkYourRates
+                                                                        fieldNamePrefix={fieldNamePrefix(
+                                                                            index
+                                                                        )}
+                                                                        index={
+                                                                            index
+                                                                        }
+                                                                    />
+                                                                )}
+
                                                                 <SingleRateFormFields
                                                                     rateForm={
                                                                         rate
@@ -441,6 +453,9 @@ const RateDetailsV2 = ({
                                                                     previousDocuments={
                                                                         previousDocuments
                                                                     }
+                                                                    fieldNamePrefix={fieldNamePrefix(
+                                                                        index
+                                                                    )}
                                                                 />
                                                                 {index >= 1 &&
                                                                     !displayAsStandaloneRate && (
