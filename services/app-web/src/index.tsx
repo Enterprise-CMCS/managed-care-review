@@ -62,7 +62,17 @@ Amplify.configure({
 
 const authMode = process.env.REACT_APP_AUTH_MODE
 assertIsAuthMode(authMode)
-const cache = new InMemoryCache()
+const cache = new InMemoryCache({
+    typePolicies: {
+        Query: {
+            fields: {
+                fetchDraftContractRate: {
+                    merge: true,
+                },
+            },
+        },
+    },
+})
 const defaultOptions: DefaultOptions = {
     watchQuery: {
         fetchPolicy: 'network-only',
