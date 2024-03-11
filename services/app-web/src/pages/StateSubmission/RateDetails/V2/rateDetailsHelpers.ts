@@ -59,7 +59,7 @@ const convertRateFormToGQLRateFormData = (
         rateProgramIDs: rateForm.rateProgramIDs,
         certifyingActuaryContacts: rateForm.actuaryContacts,
         addtlActuaryContacts: rateForm.addtlActuaryContacts,
-        actuaryCommunicationPreference: rateForm.actuaryCommunicationPreference,
+        actuaryCommunicationPreference: rateForm.actuaryCommunicationPreference ?? undefined,
         packagesWithSharedRateCerts: rateForm.packagesWithSharedRateCerts,
     }
 }
@@ -97,7 +97,7 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate): For
             rateForm?.certifyingActuaryContacts
         ),
         actuaryCommunicationPreference:
-            rateForm?.actuaryCommunicationPreference,
+            rateForm?.actuaryCommunicationPreference?? undefined,
         packagesWithSharedRateCerts:
             rateForm?.packagesWithSharedRateCerts ?? [],
         linkedRates: handleAsLinkedRate? [{

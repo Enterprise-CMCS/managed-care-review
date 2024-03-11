@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Button, Fieldset, Form as UswdsForm } from '@trussworks/react-uswds'
 import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
-import { useNavigate } from 'react-router-dom'
+import { generatePath, useNavigate } from 'react-router-dom'
 
 import styles from '../../StateSubmissionForm.module.scss'
 import {
@@ -240,8 +240,11 @@ const RateDetailsV2 = ({
                             ), // only grab the first rate in the array for standalone rate submissiob
                         },
                     },
+                    fetchPolicy: 'network-only',
                 })
-                navigate(options.redirectPath)
+                navigate(
+                    generatePath(RoutesRecord[options.redirectPath], { id: id })
+                )
             } catch (err) {
                 recordJSException(
                     `RateDetails: Apollo error reported. Error message: Failed to create form data ${err}`
@@ -264,8 +267,11 @@ const RateDetailsV2 = ({
                             updatedRates,
                         },
                     },
+                    fetchPolicy: 'network-only',
                 })
-                navigate(options.redirectPath)
+                navigate(
+                    generatePath(RoutesRecord[options.redirectPath], { id })
+                )
             } catch (err) {
                 recordJSException(
                     `RateDetails: Apollo error reported. Error message: Failed to create form data ${err}`
@@ -276,7 +282,7 @@ const RateDetailsV2 = ({
             }
             // At this point know there was a back or cancel page action - we are just redirecting
         } else {
-            navigate(RoutesRecord[options.redirectPath])
+            navigate(generatePath(RoutesRecord[options.redirectPath], { id }))
         }
     }
 
