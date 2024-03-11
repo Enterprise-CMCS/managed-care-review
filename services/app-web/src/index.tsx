@@ -64,9 +64,16 @@ const authMode = process.env.REACT_APP_AUTH_MODE
 assertIsAuthMode(authMode)
 const cache = new InMemoryCache({
     typePolicies: {
-        Query: {
+        ContractRevision: {
             fields: {
-                fetchDraftContractRate: {
+                formData: {
+                    merge: true,
+                },
+            },
+        },
+        RateRevision: {
+            fields: {
+                formData: {
                     merge: true,
                 },
             },
