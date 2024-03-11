@@ -85,7 +85,7 @@ package:
 
 functions:
   rotator:
-    runtime: python3.12
+    runtime: python3.11
     handler: lambda_function.lambda_handler
     description: Conducts an AWS SecretsManager secret rotation for RDS PostgreSQL using single user rotation scheme
     timeout: 30

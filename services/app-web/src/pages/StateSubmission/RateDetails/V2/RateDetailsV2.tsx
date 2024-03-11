@@ -69,6 +69,13 @@ export type RateDetailFormValues = {
     addtlActuaryContacts: RateRevision['formData']['addtlActuaryContacts']
     actuaryCommunicationPreference: RateRevision['formData']['actuaryCommunicationPreference']
     packagesWithSharedRateCerts: RateRevision['formData']['packagesWithSharedRateCerts']
+    linkedRates: linkedRatesDisplay[]
+    ratePreviouslySubmitted?: 'YES' | 'NO'
+}
+
+export type linkedRatesDisplay = {
+    rateId?: string
+    rateName?: string
 }
 
 // We have a list of rates to enable multi-rate behavior
@@ -115,6 +122,7 @@ const generateFormValues = (
             rateInfo?.actuaryCommunicationPreference ?? undefined,
         packagesWithSharedRateCerts:
             rateInfo?.packagesWithSharedRateCerts ?? [],
+        linkedRates: [],
     }
 }
 

@@ -1,15 +1,7 @@
-import {
-    waitFor,
-    within,
-    fireEvent,
-    type Screen,
-} from '@testing-library/react'
+import { waitFor, within, fireEvent, type Screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import selectEvent from 'react-select-event'
-import {
-    TEST_PDF_FILE,
-    updateDateRange,
-} from '../testHelpers'
+import { TEST_PDF_FILE, updateDateRange } from '../testHelpers'
 
 const fillOutIndexRate = async (screen: Screen, index: number) => {
     const targetRateCert = rateCertifications(screen)[index]
@@ -119,7 +111,6 @@ const lastRateCertificationFromList = (screen: Screen) => {
     return rateCertifications(screen).pop()
 }
 
-
 const fillOutFirstRate = async (screen: Screen) => {
     // trigger errors (used later to confirm we filled out every field)
     fireEvent.click(
@@ -186,7 +177,7 @@ const clickRemoveIndexRate = async (
     })
 }
 
-export{
+export {
     clickAddNewRate,
     clickRemoveIndexRate,
     fillOutFirstRate,

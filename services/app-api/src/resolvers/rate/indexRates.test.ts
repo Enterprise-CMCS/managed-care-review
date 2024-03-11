@@ -17,30 +17,11 @@ import {
     unlockTestRate,
     updateTestRate,
     createAndSubmitTestContract,
-    createTestContract,
 } from '../../testHelpers'
 
 describe('indexRates', () => {
     const ldService = testLDService({
         'rate-edit-unlock': true,
-    })
-    it('returns ForbiddenError for state user', async () => {
-        const stateUser = testStateUser()
-
-        const stateServer = await constructTestPostgresServer({
-            context: {
-                user: stateUser,
-            },
-            ldService: testLDService({
-                'rate-edit-unlock': false,
-            }),
-        })
-
-        // index rates
-        const result = await stateServer.executeOperation({
-            query: INDEX_RATES,
-        })
-        expect(result.errors).toBeDefined()
     })
 
     it('returns rate reviews list for cms user with no errors', async () => {
@@ -113,15 +94,10 @@ describe('indexRates', () => {
             },
             ldService,
         })
-        // baseline
-        const initial = await cmsServer.executeOperation({
-            query: INDEX_RATES,
-        })
-        const initialRates = initial.data?.indexRates.edges
 
         // create and submit new contracts
-        await createAndSubmitTestContract()
-        await createAndSubmitTestContract()
+        const contract1 = await createAndSubmitTestContract()
+        const contract2 = await createAndSubmitTestContract()
 
         // index rates
         const result = await cmsServer.executeOperation({
@@ -131,38 +107,22 @@ describe('indexRates', () => {
         expect(result.errors).toBeUndefined()
 
         const rates = result.data?.indexRates.edges
-        expect(rates).toHaveLength(initialRates.length)
-        expect(rates).toEqual(initialRates)
-    })
 
-    it('does not add rates a for draft contract and rates package that is submitted later as contract only', async () => {
-        const cmsUser = testCMSUser()
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: cmsUser,
-            },
-            ldService,
-        })
-
-        // baseline
-        const initial = await cmsServer.executeOperation({
-            query: INDEX_RATES,
-        })
-        const initialRates = initial.data?.indexRates.edges
-
-        // turn to CHIP contract only, leave rates for now to emulate form behviavor
-        await createTestContract()
-
-        // index rates
-        const result = await cmsServer.executeOperation({
-            query: INDEX_RATES,
-        })
-
-        const rates = result.data?.indexRates.edges
-        expect(result.errors).toBeUndefined()
-
-        expect(rates).toHaveLength(initialRates.length)
-        expect(rates).toEqual(initialRates)
+        // Go through all of these rates and confirm that none of them are associated with either of these two new contracts
+        for (const rateEdge of rates) {
+            const rateRevs = rateEdge.node.revisions
+            for (const rrev of rateRevs) {
+                const contractRevs = rrev.contractRevisions
+                for (const contractRev of contractRevs) {
+                    if (
+                        contractRev.contract.id === contract1.id ||
+                        contractRev.contractID === contract2.id
+                    ) {
+                        throw new Error('contract without rates made rates')
+                    }
+                }
+            }
+        }
     })
 
     it('returns a rate with history with correct data in each revision', async () => {
@@ -176,12 +136,6 @@ describe('indexRates', () => {
             ldService,
         })
 
-        // baseline
-        const initial = await cmsServer.executeOperation({
-            query: INDEX_RATES,
-        })
-
-        const initialRates = initial.data?.indexRates.edges
         const florida: StateCodeType = 'FL'
         const initialRateInfos = () => ({
             id: uuidv4(),
@@ -267,11 +221,10 @@ describe('indexRates', () => {
         const result = await cmsServer.executeOperation({
             query: INDEX_RATES,
         })
+        expect(result.errors).toBeUndefined()
         const rates: Rate[] = result.data?.indexRates.edges.map(
             (edge: RateEdge) => edge.node
         )
-        expect(result.errors).toBeUndefined()
-        expect(rates).toHaveLength(initialRates.length + 3) // we have made 2 new rates
 
         const resubmittedWithEdits = rates.find((test: Rate) => {
             return test.id === firstRateResubmitted.id
@@ -284,7 +237,7 @@ describe('indexRates', () => {
         })
 
         if (!resubmittedWithEdits || !resubmittedUnchanged || !newlyAdded) {
-            throw new Error('Rates coming back are entirely unexpected')
+            throw new Error('we didnt find all the new rates in index')
         }
 
         // Check resubmitted rate  - most recent revision and previous

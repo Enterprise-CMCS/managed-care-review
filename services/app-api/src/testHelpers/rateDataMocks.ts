@@ -7,6 +7,7 @@ import type {
 import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 import { findStatePrograms } from '../postgres'
 import { must } from './assertionHelpers'
+import type { RateFormDataInput } from '../gen/gqlServer'
 
 const defaultRateData = () => ({
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
@@ -134,4 +135,60 @@ const mockRateRevision = (
     }
 }
 
-export { mockInsertRateArgs, mockRateRevision, mockDraftRate }
+function mockRateFormDataInput(): RateFormDataInput {
+    return {
+        rateType: 'AMENDMENT',
+        rateCapitationType: 'RATE_CELL',
+        rateDateStart: '2024-01-01',
+        rateDateEnd: '2025-01-01',
+        amendmentEffectiveDateStart: '2024-02-01',
+        amendmentEffectiveDateEnd: '2025-02-01',
+        rateProgramIDs: ['foo'],
+
+        rateDocuments: [
+            {
+                s3URL: 'foo://bar',
+                name: 'updatedratedoc1.doc',
+                sha256: 'foobar',
+            },
+        ],
+        supportingDocuments: [
+            {
+                s3URL: 'foo://bar1',
+                name: 'ratesupdoc1.doc',
+                sha256: 'foobar1',
+            },
+            {
+                s3URL: 'foo://bar2',
+                name: 'ratesupdoc2.doc',
+                sha256: 'foobar2',
+            },
+        ],
+        certifyingActuaryContacts: [
+            {
+                name: 'Foo Person',
+                titleRole: 'Bar Job',
+                email: 'foo@example.com',
+                actuarialFirm: 'GUIDEHOUSE',
+            },
+        ],
+        addtlActuaryContacts: [
+            {
+                name: 'Bar Person',
+                titleRole: 'Baz Job',
+                email: 'bar@example.com',
+                actuarialFirm: 'OTHER',
+                actuarialFirmOther: 'Some Firm',
+            },
+        ],
+        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        packagesWithSharedRateCerts: [],
+    }
+}
+
+export {
+    mockInsertRateArgs,
+    mockRateRevision,
+    mockDraftRate,
+    mockRateFormDataInput,
+}
