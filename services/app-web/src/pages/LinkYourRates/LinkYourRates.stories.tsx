@@ -13,7 +13,7 @@ export const LinkRates = (): React.ReactElement => {
             onSubmit={(values) => console.info('submitted', values)}
         >
             <form>
-                <LinkYourRates fieldNamePrefix="rates.1" index={1} />
+                <LinkYourRates fieldNamePrefix="rateForms.1" index={1} />
             </form>
         </Formik>
     )

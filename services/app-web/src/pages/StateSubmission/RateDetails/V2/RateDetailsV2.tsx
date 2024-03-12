@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, Fieldset, Form as UswdsForm } from '@trussworks/react-uswds'
 import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
-import { useNavigate } from 'react-router-dom'
+import { generatePath, useNavigate } from 'react-router-dom'
 
 import styles from '../../StateSubmissionForm.module.scss'
 import {
@@ -12,15 +12,7 @@ import {
 import { RateDetailsFormSchema } from '../RateDetailsSchema'
 import { PageActions } from '../../PageActions'
 
-import {
-    formatActuaryContactsForForm,
-    formatDocumentsForForm,
-    formatDocumentsForGQL,
-    formatForForm,
-    formatFormDateForGQL,
-} from '../../../../formHelpers/formatters'
 import { useS3 } from '../../../../contexts/S3Context'
-import { S3ClientT } from '../../../../s3'
 import {
     FileItemT,
     isLoadingOrHasFileErrors,
@@ -33,13 +25,13 @@ import {
 import {
     HealthPlanPackageStatus,
     Rate,
-    RateFormDataInput,
     RateRevision,
     useFetchContractQuery,
     useFetchRateQuery,
+    useSubmitRateMutation,
+    useUpdateDraftContractRatesMutation,
 } from '../../../../gen/gqlClient'
 import { SingleRateFormFields } from './SingleRateFormFields'
-import type { SubmitRateHandler } from '../../../RateEdit/RateEdit'
 import { useFocus, useRouteParams } from '../../../../hooks'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
 import { PageBannerAlerts } from '../../PageBannerAlerts'
@@ -50,10 +42,17 @@ import {
 } from '../../ErrorOrLoadingPage'
 import { featureFlags } from '../../../../common-code/featureFlags'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { recordJSException } from '../../../../otelHelpers'
+import {
+    convertGQLRateToRateForm,
+    convertRateFormToGQLRateFormData,
+    generateUpdatedRates,
+} from './rateDetailsHelpers'
+import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
 
-export type RateDetailFormValues = {
+export type FormikRateForm = {
     id?: string // no id if its a new rate
-    status?: HealthPlanPackageStatus
+    status?: HealthPlanPackageStatus // need to track status to know if this is a direct child or linked rate
     rateType: RateRevision['formData']['rateType']
     rateCapitationType: RateRevision['formData']['rateCapitationType']
     rateDateStart: RateRevision['formData']['rateDateStart']
@@ -79,73 +78,16 @@ export type linkedRatesDisplay = {
 
 // We have a list of rates to enable multi-rate behavior
 export type RateDetailFormConfig = {
-    rates: RateDetailFormValues[]
-}
-
-const generateFormValues = (
-    getKey: S3ClientT['getKey'],
-    rateRev?: RateRevision,
-    rateID?: string,
-    rateStatus?: HealthPlanPackageStatus
-): RateDetailFormValues => {
-    const rateInfo = rateRev?.formData
-
-    return {
-        id: rateID,
-        status: rateStatus,
-        rateType: rateInfo?.rateType ?? undefined,
-        rateCapitationType: rateInfo?.rateCapitationType ?? undefined,
-        rateDateStart: formatForForm(rateInfo?.rateDateStart),
-        rateDateEnd: formatForForm(rateInfo?.rateDateEnd),
-        rateDateCertified: formatForForm(rateInfo?.rateDateCertified),
-        effectiveDateStart: formatForForm(
-            rateInfo?.amendmentEffectiveDateStart
-        ),
-        effectiveDateEnd: formatForForm(rateInfo?.amendmentEffectiveDateEnd),
-        rateProgramIDs: rateInfo?.rateProgramIDs ?? [],
-        rateDocuments: formatDocumentsForForm({
-            documents: rateInfo?.rateDocuments,
-            getKey: getKey,
-        }),
-        supportingDocuments: formatDocumentsForForm({
-            documents: rateInfo?.supportingDocuments,
-            getKey: getKey,
-        }),
-        actuaryContacts: formatActuaryContactsForForm(
-            rateInfo?.certifyingActuaryContacts
-        ),
-        addtlActuaryContacts: formatActuaryContactsForForm(
-            rateInfo?.certifyingActuaryContacts
-        ),
-        actuaryCommunicationPreference:
-            rateInfo?.actuaryCommunicationPreference ?? undefined,
-        packagesWithSharedRateCerts:
-            rateInfo?.packagesWithSharedRateCerts ?? [],
-        linkedRates: [],
-        ratePreviouslySubmitted: rateInfo
-            ? formatForForm(rateInfo.ratePreviouslySubmitted)
-            : '',
-    }
-}
-
-export const rateErrorHandling = (
-    error: string | FormikErrors<RateDetailFormValues> | undefined
-): FormikErrors<RateDetailFormValues> | undefined => {
-    if (typeof error === 'string') {
-        return undefined
-    }
-    return error
+    rateForms: FormikRateForm[]
 }
 
 type RateDetailsV2Props = {
     type: 'SINGLE' | 'MULTI'
     showValidations?: boolean
-    submitRate?: SubmitRateHandler
 }
 const RateDetailsV2 = ({
     showValidations = false,
     type,
-    submitRate,
 }: RateDetailsV2Props): React.ReactElement => {
     const navigate = useNavigate()
     const { getKey } = useS3()
@@ -156,11 +98,14 @@ const RateDetailsV2 = ({
         featureFlags.LINK_RATES.flag,
         featureFlags.LINK_RATES.defaultValue
     )
-
     const useEditUnlockRate = ldClient?.variation(
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
+    const [showAPIErrorBanner, setShowAPIErrorBanner] = useState<
+        boolean | string
+    >(false) // string is a custom error message, defaults to generic message when true
+
     // Form validation
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const rateDetailsFormSchema = RateDetailsFormSchema({
@@ -202,13 +147,7 @@ const RateDetailsV2 = ({
         },
         skip: !displayAsStandaloneRate,
     })
-    const ratesFromContract =
-        fetchContractData?.fetchContract.contract.draftRates // TODO WHEN WE IMPLEMENT UDPATE API, THIS SHOULD ALSO LOAD FROM ANY LINKED RATES
-    const initialRequestLoading = fetchContractLoading || fetchRateLoading
-    const initialRequestError = fetchContractError || fetchRateError
-    const previousDocuments: string[] = []
-
-    React.useEffect(() => {
+    useEffect(() => {
         if (focusNewRate) {
             newRateNameRef?.current?.focus()
             setFocusNewRate(false)
@@ -216,15 +155,26 @@ const RateDetailsV2 = ({
         }
     }, [focusNewRate])
 
-    /*
-    Set up initial rate form values for Formik
-        if contract rates exist, use those (relevant for multi rate forms on contract package submission form)
-        if standalone rates exist, use those (for a standalone rate edits)
-        otherwise, generate a new  list of empty rate form values
-    */
-    const rates: Rate[] = React.useMemo(
+    const [updateDraftContractRates, { error: updateContractError }] =
+        useUpdateDraftContractRatesMutation()
+    const [submitRate, { error: submitRateError }] = useSubmitRateMutation()
+
+    // Set up data for form. Either based on contract API (for multi rate) or rates API (for edit and submit of standalone rate)
+    const ratesFromContract =
+        fetchContractData?.fetchContract.contract.draftRates // TODO WHEN WE IMPLEMENT UPDATE API, THIS SHOULD ALSO LOAD FROM ANY LINKED RATES
+    const initialRequestLoading = fetchContractLoading || fetchRateLoading
+    const initialRequestError = fetchContractError || fetchRateError
+    // const submitRequestLoading = updateContractLoading
+    const submitRequestError = updateContractError || submitRateError
+    const apiError = initialRequestError || submitRequestError
+    const previousDocuments: string[] = []
+
+    // Set up initial rate form values for Formik
+    const initialRates: Rate[] = React.useMemo(
         () =>
+            // if contract rates exist, use those (relevant for multi rate forms)
             ratesFromContract ??
+            // if standalone rates exist, use those (for a standalone rate edits)
             (fetchRateData?.fetchRate.rate && [
                 fetchRateData?.fetchRate.rate,
             ]) ??
@@ -232,40 +182,40 @@ const RateDetailsV2 = ({
         [ratesFromContract, fetchRateData]
     )
     const initialValues: RateDetailFormConfig = {
-        rates:
-            rates.length > 0
-                ? rates.map((rate) =>
-                      generateFormValues(
-                          getKey,
-                          rate.draftRevision ?? undefined,
-                          rate?.id
-                      )
+        rateForms:
+            initialRates.length > 0
+                ? initialRates.map((rate) =>
+                      convertGQLRateToRateForm(getKey, rate)
                   )
-                : [generateFormValues(getKey)],
+                : [convertGQLRateToRateForm(getKey)],
     }
 
     // Display any full page interim state resulting from the initial fetch API requests
     if (initialRequestLoading) {
         return <ErrorOrLoadingPage state="LOADING" />
     }
-    if (initialRequestError) {
+
+    if (apiError) {
         return (
-            <ErrorOrLoadingPage
-                state={handleAndReturnErrorState(initialRequestError)}
-            />
+            <ErrorOrLoadingPage state={handleAndReturnErrorState(apiError)} />
         )
+    }
+    // Redirect if in standalone rate workflow and rate not editable
+    if (displayAsStandaloneRate && initialRates[0].status !== 'UNLOCKED') {
+        navigate(`/rates/${id}`)
     }
 
     const handlePageAction = async (
-        rates: RateDetailFormValues[],
+        rateForms: FormikRateForm[],
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
         options: {
             type: 'SAVE_AS_DRAFT' | 'CANCEL' | 'CONTINUE'
             redirectPath: RouteT
         }
     ) => {
+        setShowAPIErrorBanner(false)
         if (options.type === 'CONTINUE') {
-            const fileErrorsNeedAttention = rates.some((rateForm) =>
+            const fileErrorsNeedAttention = rateForms.some((rateForm) =>
                 isLoadingOrHasFileErrors(
                     rateForm.supportingDocuments.concat(rateForm.rateDocuments)
                 )
@@ -280,56 +230,60 @@ const RateDetailsV2 = ({
             }
         }
 
-        const gqlFormDatas: Array<{ id?: string } & RateFormDataInput> =
-            rates.map((form) => {
-                return {
-                    id: form.id,
-                    rateType: form.rateType,
-                    rateCapitationType: form.rateCapitationType,
-                    rateDocuments: formatDocumentsForGQL(form.rateDocuments),
-                    supportingDocuments: formatDocumentsForGQL(
-                        form.supportingDocuments
-                    ),
-                    rateDateStart: formatFormDateForGQL(form.rateDateStart),
-                    rateDateEnd: formatFormDateForGQL(form.rateDateEnd),
-                    rateDateCertified: formatFormDateForGQL(
-                        form.rateDateCertified
-                    ),
-                    amendmentEffectiveDateStart: formatFormDateForGQL(
-                        form.effectiveDateStart
-                    ),
-                    amendmentEffectiveDateEnd: formatFormDateForGQL(
-                        form.effectiveDateEnd
-                    ),
-                    rateProgramIDs: form.rateProgramIDs,
-                    certifyingActuaryContacts: form.actuaryContacts,
-                    addtlActuaryContacts: form.addtlActuaryContacts,
-                    actuaryCommunicationPreference:
-                        form.actuaryCommunicationPreference,
-                    packagesWithSharedRateCerts:
-                        form.packagesWithSharedRateCerts,
-                }
-            })
-
-        const { id, ...formData } = gqlFormDatas[0] // only grab the first rate in the array because multi-rates functionality not added yet. This will be part of Link Rates epic
-
-        if (
-            options.type === 'CONTINUE' &&
-            id &&
-            displayAsStandaloneRate &&
-            submitRate
+        if (displayAsStandaloneRate && options.type === 'CONTINUE') {
+            try {
+                await submitRate({
+                    variables: {
+                        input: {
+                            rateID: id ?? 'no-id',
+                            formData: convertRateFormToGQLRateFormData(
+                                rateForms[0]
+                            ), // only grab the first rate in the array for standalone rate submissiob
+                        },
+                    },
+                    fetchPolicy: 'network-only',
+                })
+                navigate(
+                    generatePath(RoutesRecord[options.redirectPath], { id: id })
+                )
+            } catch (err) {
+                recordJSException(
+                    `RateDetails: Apollo error reported. Error message: Failed to create form data ${err}`
+                )
+                setShowAPIErrorBanner(true)
+            } finally {
+                setSubmitting(false)
+            }
+        } else if (
+            !displayAsStandaloneRate &&
+            (options.type === 'CONTINUE' || options.type === 'SAVE_AS_DRAFT')
         ) {
-            await submitRate(id, formData, setSubmitting, 'DASHBOARD')
-        } else if (options.type === 'CONTINUE' && !displayAsStandaloneRate) {
-            throw new Error(
-                'Rate create and update for a new rate is not yet implemented. This will be part of Link Rates epic.'
-            )
-        } else if (options.type === 'SAVE_AS_DRAFT') {
-            throw new Error(
-                'Rate save as draft is not possible. This will be part of Link Rates epic.'
-            )
+            try {
+                const updatedRates = generateUpdatedRates(rateForms)
+
+                await updateDraftContractRates({
+                    variables: {
+                        input: {
+                            contractID: id ?? 'no-id',
+                            updatedRates,
+                        },
+                    },
+                    fetchPolicy: 'network-only',
+                })
+                navigate(
+                    generatePath(RoutesRecord[options.redirectPath], { id })
+                )
+            } catch (err) {
+                recordJSException(
+                    `RateDetails: Apollo error reported. Error message: Failed to create form data ${err}`
+                )
+                setShowAPIErrorBanner(true)
+            } finally {
+                setSubmitting(false)
+            }
+            // At this point know there was a back or cancel page action - we are just redirecting
         } else {
-            navigate(RoutesRecord[options.redirectPath])
+            navigate(generatePath(RoutesRecord[options.redirectPath], { id }))
         }
     }
 
@@ -339,7 +293,7 @@ const RateDetailsV2 = ({
     const generateErrorSummaryErrors = (
         errors: FormikErrors<RateDetailFormConfig>
     ) => {
-        const rateErrors = errors.rates
+        const rateErrors = errors.rateForms
         const errorObject: { [field: string]: string } = {}
         if (rateErrors && Array.isArray(rateErrors)) {
             rateErrors.forEach((rateError, index) => {
@@ -355,8 +309,8 @@ const RateDetailsV2 = ({
                         //rateProgramIDs error message needs a # proceeding the key name because this is the only way to be able to link to the Select component element see comments in ErrorSummaryMessage component.
                         const errorKey =
                             field === 'rateProgramIDs'
-                                ? `#rates.${index}.${field}`
-                                : `rates.${index}.${field}`
+                                ? `#rateForms.${index}.${field}`
+                                : `rateForms.${index}.${field}`
                         errorObject[errorKey] = value
                     }
                     // If the field is actuaryContacts then the value should be an array with at least one object of errors
@@ -370,7 +324,7 @@ const RateDetailsV2 = ({
                         Object.entries(actuaryContact).forEach(
                             ([contactField, contactValue]) => {
                                 if (typeof contactValue === 'string') {
-                                    const errorKey = `rates.${index}.actuaryContacts.0.${contactField}`
+                                    const errorKey = `rateForms.${index}.actuaryContacts.0.${contactField}`
                                     errorObject[errorKey] = contactValue
                                 }
                             }
@@ -382,7 +336,7 @@ const RateDetailsV2 = ({
 
         return errorObject
     }
-
+    const fieldNamePrefix = (idx: number) => `rateForms.${idx}`
     return (
         <>
             <div className={styles.stepIndicator}>
@@ -401,7 +355,7 @@ const RateDetailsV2 = ({
                             fetchRateData?.fetchRate.rate.draftRevision
                                 ?.unlockInfo
                         }
-                        showPageErrorMessage={false} // TODO WHEN WE IMPLEMENT UDPATE API -  FIGURE OUT ERROR BANNER FOR BOTH MULTI AND STANDALONE USE CASE
+                        showPageErrorMessage={showAPIErrorBanner} // TODO WHEN WE IMPLEMENT UDPATE API -  FIGURE OUT ERROR BANNER FOR BOTH MULTI AND STANDALONE USE CASE
                     />
                 )}
             </div>
@@ -412,7 +366,7 @@ const RateDetailsV2 = ({
                 initialValues={initialValues}
                 onSubmit={(rateFormValues, { setSubmitting }) => {
                     return handlePageAction(
-                        rateFormValues.rates,
+                        rateFormValues.rateForms,
                         setSubmitting,
                         {
                             type: 'CONTINUE',
@@ -425,7 +379,7 @@ const RateDetailsV2 = ({
                 validationSchema={rateDetailsFormSchema}
             >
                 {({
-                    values: { rates },
+                    values: { rateForms },
                     errors,
                     dirty,
                     handleSubmit,
@@ -436,7 +390,7 @@ const RateDetailsV2 = ({
                         <>
                             <UswdsForm
                                 className={styles.formContainer}
-                                id="SingleRateDetailsForm"
+                                id="RateDetailsForm"
                                 aria-label="Rate Details Form"
                                 aria-describedby="form-guidance"
                                 onSubmit={(e) => {
@@ -457,13 +411,13 @@ const RateDetailsV2 = ({
                                             headingRef={errorSummaryHeadingRef}
                                         />
                                     )}
-                                    <FieldArray name="rates">
+                                    <FieldArray name="rateForms">
                                         {({
                                             remove,
                                             push,
                                         }: FieldArrayRenderProps) => (
                                             <>
-                                                {rates.map(
+                                                {rateForms.map(
                                                     (rate, index = 0) => (
                                                         <SectionCard
                                                             key={index}
@@ -480,6 +434,17 @@ const RateDetailsV2 = ({
                                                             <Fieldset
                                                                 data-testid={`rate-certification-form`}
                                                             >
+                                                                {!displayAsStandaloneRate && (
+                                                                    <LinkYourRates
+                                                                        fieldNamePrefix={fieldNamePrefix(
+                                                                            index
+                                                                        )}
+                                                                        index={
+                                                                            index
+                                                                        }
+                                                                    />
+                                                                )}
+
                                                                 <SingleRateFormFields
                                                                     rateForm={
                                                                         rate
@@ -493,6 +458,9 @@ const RateDetailsV2 = ({
                                                                     previousDocuments={
                                                                         previousDocuments
                                                                     }
+                                                                    fieldNamePrefix={fieldNamePrefix(
+                                                                        index
+                                                                    )}
                                                                 />
                                                                 {index >= 1 &&
                                                                     !displayAsStandaloneRate && (
@@ -528,9 +496,9 @@ const RateDetailsV2 = ({
                                                         className={`usa-button usa-button--outline ${styles.addRateBtn}`}
                                                         onClick={() => {
                                                             const newRate =
-                                                                generateFormValues(
+                                                                convertGQLRateToRateForm(
                                                                     getKey
-                                                                )
+                                                                ) // empty rate
 
                                                             push(newRate)
                                                             setFocusNewRate(
@@ -556,7 +524,7 @@ const RateDetailsV2 = ({
                                     backOnClick={async () => {
                                         if (dirty) {
                                             await handlePageAction(
-                                                rates,
+                                                rateForms,
                                                 setSubmitting,
                                                 {
                                                     type: 'CANCEL',
@@ -575,7 +543,7 @@ const RateDetailsV2 = ({
                                             ? () => undefined
                                             : async () => {
                                                   await handlePageAction(
-                                                      rates,
+                                                      rateForms,
                                                       setSubmitting,
                                                       {
                                                           type: 'SAVE_AS_DRAFT',

@@ -181,11 +181,11 @@ async function updateDraftContractRates(
                 )
             }
 
-            let nextRateNumber = state.latestStateRateCertNumber
+            let nextRateNumber = state.latestStateRateCertNumber + 1
 
             // create new rates with new revisions
             const ratesToCreate = args.rateUpdates.create.map((ru) => {
-                const rateFormDataem = ru.formData
+                const rateFormData = ru.formData
                 const thisRateNumber = nextRateNumber
                 nextRateNumber++
                 return {
@@ -193,7 +193,7 @@ async function updateDraftContractRates(
                     stateNumber: thisRateNumber,
                     revisions: {
                         create: prismaRateCreateFormDataFromDomain(
-                            rateFormDataem
+                            rateFormData
                         ),
                     },
                 }

@@ -5,7 +5,6 @@ import {
 } from '../../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
 import { mockContractPackageDraft } from './contractPackageDataMock'
-import { GraphQLError } from 'graphql/index'
 
 const fetchContractMockSuccess = ({
     contract,
