@@ -34,7 +34,7 @@ export const LinkRateSelect = ({
     data?.indexRates.edges
         .map((edge) => edge.node)
         .forEach((rate) => {
-            if (rate.revisions.length > 0.5) {
+            if (rate.revisions.length > 0) {
                 rate.revisions.forEach((revision) => {
                     if (revision.formData.rateCertificationName) {
                         rateNames.push({
