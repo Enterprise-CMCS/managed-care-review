@@ -110,7 +110,7 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate): For
     }
 }
 
-const isLinkedRateForm = (rateForm: FormikRateForm): boolean => rateForm.status === "SUBMITTED" || rateForm.status === "RESUBMITTED"
+const isLinkedRateForm = (rateForm: FormikRateForm): boolean => isStatusSubmitted(rateForm.status)
 
 export {
     convertGQLRateToRateForm,
