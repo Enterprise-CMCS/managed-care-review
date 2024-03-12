@@ -130,6 +130,7 @@ async function unlockRate(
                     rateDateStart: currentRev.rateDateStart,
                     rateDateEnd: currentRev.rateDateEnd,
                     rateDateCertified: currentRev.rateDateCertified,
+                    ratePreviouslySubmitted: currentRev.ratePreviouslySubmitted,
                     amendmentEffectiveDateEnd:
                         currentRev.amendmentEffectiveDateEnd,
                     amendmentEffectiveDateStart:

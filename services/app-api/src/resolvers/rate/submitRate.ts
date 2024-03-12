@@ -125,6 +125,8 @@ export function submitRate(
                       supportingDocuments: formData.supportingDocuments ?? [],
                       rateDateStart: formData.rateDateStart ?? undefined,
                       rateDateEnd: formData.rateDateEnd ?? undefined,
+                      ratePreviouslySubmitted:
+                          formData.ratePreviouslySubmitted ?? undefined,
                       rateDateCertified:
                           formData.rateDateCertified ?? undefined,
                       amendmentEffectiveDateStart:

@@ -98,284 +98,249 @@ export const SingleRateFormFields = ({
 
     return (
         <>
-            <FormGroup error={Boolean(showFieldErrors('rateDocuments'))}>
-                <LinkYourRates
-                    fieldNamePrefix={fieldNamePrefix}
-                    index={index}
-                />
-                <FileUpload
-                    id={`${fieldNamePrefix}.rateDocuments`}
-                    name={`${fieldNamePrefix}.rateDocuments`}
-                    label="Upload one rate certification document"
-                    aria-required
-                    allowMultipleUploads={false}
-                    error={showFieldErrors('rateDocuments')}
-                    hint={
-                        <span className={styles.guidanceTextBlockNoPadding}>
-                            <Link
-                                aria-label="Document definitions and requirements (opens in new window)"
-                                href={'/help#key-documents'}
-                                variant="external"
-                                target="_blank"
-                            >
-                                Document definitions and requirements
-                            </Link>
-                            <span className="padding-top-2">
-                                {`Upload only one rate certification document. Additional rates can be added later.`}
-                            </span>
-
-                            <span className="padding-top-1">
-                                This input only accepts one file in PDF, DOC, or
-                                DOCX format.
-                            </span>
-                        </span>
-                    }
-                    accept={ACCEPTED_RATE_CERTIFICATION_FILE_TYPES}
-                    initialItems={rateForm.rateDocuments}
-                    uploadFile={(file) =>
-                        handleUploadFile(file, 'HEALTH_PLAN_DOCS')
-                    }
-                    scanFile={(key) => handleScanFile(key, 'HEALTH_PLAN_DOCS')}
-                    deleteFile={(key) =>
-                        handleDeleteFile(
-                            key,
-                            'HEALTH_PLAN_DOCS',
-                            previousDocuments
-                        )
-                    }
-                    onFileItemsUpdate={({ fileItems }) =>
-                        setFieldValue(
-                            `${fieldNamePrefix}.rateDocuments`,
-                            fileItems
-                        )
-                    }
-                />
-            </FormGroup>
-
-            <FormGroup error={Boolean(showFieldErrors('supportingDocuments'))}>
-                <FileUpload
-                    id={`${fieldNamePrefix}.supportingDocuments`}
-                    name={`${fieldNamePrefix}.supportingDocuments`}
-                    label="Upload supporting documents"
-                    aria-required={false}
-                    error={showFieldErrors('supportingDocuments')}
-                    hint={
-                        <span className={styles.guidanceTextBlockNoPadding}>
-                            <Link
-                                aria-label="Document definitions and requirements (opens in new window)"
-                                href={'/help#key-documents'}
-                                variant="external"
-                                target="_blank"
-                            >
-                                Document definitions and requirements
-                            </Link>
-                            <span className="padding-top-1">
-                                {`Upload any supporting documents for Rate certification ${index + 1}`}
-                            </span>
-                            <span>Additional rates can be added later.</span>
-
-                            <span className="padding-top-1">
-                                This input only accepts PDF, CSV, DOC, DOCX,
-                                XLS, XLSX files.
-                            </span>
-                        </span>
-                    }
-                    accept={ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES}
-                    initialItems={rateForm.supportingDocuments}
-                    uploadFile={(file) =>
-                        handleUploadFile(file, 'HEALTH_PLAN_DOCS')
-                    }
-                    scanFile={(key) => handleScanFile(key, 'HEALTH_PLAN_DOCS')}
-                    deleteFile={(key) =>
-                        handleDeleteFile(
-                            key,
-                            'HEALTH_PLAN_DOCS',
-                            previousDocuments
-                        )
-                    }
-                    onFileItemsUpdate={({ fileItems }) =>
-                        setFieldValue(
-                            `${fieldNamePrefix}.supportingDocuments`,
-                            fileItems
-                        )
-                    }
-                />
-            </FormGroup>
-            <FormGroup error={Boolean(showFieldErrors('rateProgramIDs'))}>
-                <Label htmlFor={`${fieldNamePrefix}.rateProgramIDs`}>
-                    Programs this rate certification covers
-                </Label>
-                <span className={styles.requiredOptionalText}>Required</span>
-                <PoliteErrorMessage>
-                    {showFieldErrors('rateProgramIDs')}
-                </PoliteErrorMessage>
-                <ProgramSelect
-                    name={`${fieldNamePrefix}.rateProgramIDs`}
-                    inputId={`${fieldNamePrefix}.rateProgramIDs`}
-                    programIDs={rateForm.rateProgramIDs}
-                    aria-label="programs (required)"
-                />
-            </FormGroup>
-
-            <FormGroup error={Boolean(showFieldErrors('rateType'))}>
-                <Fieldset
-                    className={styles.radioGroup}
-                    legend="Rate certification type"
-                    role="radiogroup"
-                    aria-required
-                >
-                    <span className={styles.requiredOptionalText}>
-                        Required
-                    </span>
-                    <PoliteErrorMessage>
-                        {showFieldErrors('rateType')}
-                    </PoliteErrorMessage>
-
-                    <Link
-                        aria-label="Rate certification type definitions (opens in new window)"
-                        href={'/help#rate-cert-type-definitions'}
-                        variant="external"
-                        target="_blank"
-                    >
-                        Rate certification type definitions
-                    </Link>
-                    <FieldRadio
-                        id={`newRate-${index}`}
-                        name={`${fieldNamePrefix}.rateType`}
-                        label="New rate certification"
-                        value={'NEW'}
-                    />
-                    <FieldRadio
-                        id={`amendmentRate-${index}`}
-                        name={`${fieldNamePrefix}.rateType`}
-                        label="Amendment to prior rate certification"
-                        value={'AMENDMENT'}
-                    />
-                </Fieldset>
-            </FormGroup>
-
-            <FormGroup error={Boolean(showFieldErrors('rateCapitationType'))}>
-                <Fieldset
-                    className={styles.radioGroup}
-                    legend={
-                        <div className={styles.capitationLegend}>
-                            <p className="margin-bottom-0">
-                                Does the actuary certify capitation rates
-                                specific to each rate cell or a rate range?
-                            </p>
-                            <span
-                                className={classnames(
-                                    styles.legendSubHeader,
-                                    styles.requiredOptionalText
-                                )}
-                            >
-                                Required
-                            </span>
-                            <p
-                                className={classnames(
-                                    'margin-bottom-0',
-                                    styles.legendSubHeader
-                                )}
-                            >
-                                See 42 CFR §§ 438.4(b) and 438.4(c)
-                            </p>
-                        </div>
-                    }
-                    role="radiogroup"
-                    aria-required
-                >
-                    <PoliteErrorMessage>
-                        {showFieldErrors('rateCapitationType')}
-                    </PoliteErrorMessage>
-                    <FieldRadio
-                        id={`rateCell-${index}`}
-                        name={`${fieldNamePrefix}.rateCapitationType`}
-                        label="Certification of capitation rates specific to each rate cell"
-                        value={'RATE_CELL'}
-                    />
-                    <FieldRadio
-                        id={`rateRange-${index}`}
-                        name={`${fieldNamePrefix}.rateCapitationType`}
-                        label="Certification of rate ranges of capitation rates per rate cell"
-                        value={'RATE_RANGE'}
-                    />
-                </Fieldset>
-            </FormGroup>
-
-            {!isRateTypeEmpty(rateForm) && (
+            <LinkYourRates fieldNamePrefix={fieldNamePrefix} index={index} />
+            {rateForm.ratePreviouslySubmitted && (
                 <>
                     <FormGroup
-                        error={Boolean(
-                            showFieldErrors('rateDateStart') ??
-                                showFieldErrors('rateDateEnd')
-                        )}
+                        error={Boolean(showFieldErrors('rateDocuments'))}
                     >
-                        <Fieldset
+                        <FileUpload
+                            id={`${fieldNamePrefix}.rateDocuments`}
+                            name={`${fieldNamePrefix}.rateDocuments`}
+                            label="Upload one rate certification document"
                             aria-required
-                            legend={
-                                isRateTypeAmendment(rateForm)
-                                    ? 'Rating period of original rate certification'
-                                    : 'Rating period'
+                            allowMultipleUploads={false}
+                            error={showFieldErrors('rateDocuments')}
+                            hint={
+                                <span
+                                    className={
+                                        styles.guidanceTextBlockNoPadding
+                                    }
+                                >
+                                    <Link
+                                        aria-label="Document definitions and requirements (opens in new window)"
+                                        href={'/help#key-documents'}
+                                        variant="external"
+                                        target="_blank"
+                                    >
+                                        Document definitions and requirements
+                                    </Link>
+                                    <span className="padding-top-2">
+                                        {`Upload only one rate certification document. Additional rates can be added later.`}
+                                    </span>
+
+                                    <span className="padding-top-1">
+                                        This input only accepts one file in PDF,
+                                        DOC, or DOCX format.
+                                    </span>
+                                </span>
                             }
+                            accept={ACCEPTED_RATE_CERTIFICATION_FILE_TYPES}
+                            initialItems={rateForm.rateDocuments}
+                            uploadFile={(file) =>
+                                handleUploadFile(file, 'HEALTH_PLAN_DOCS')
+                            }
+                            scanFile={(key) =>
+                                handleScanFile(key, 'HEALTH_PLAN_DOCS')
+                            }
+                            deleteFile={(key) =>
+                                handleDeleteFile(
+                                    key,
+                                    'HEALTH_PLAN_DOCS',
+                                    previousDocuments
+                                )
+                            }
+                            onFileItemsUpdate={({ fileItems }) =>
+                                setFieldValue(
+                                    `${fieldNamePrefix}.rateDocuments`,
+                                    fileItems
+                                )
+                            }
+                        />
+                    </FormGroup>
+
+                    <FormGroup
+                        error={Boolean(showFieldErrors('supportingDocuments'))}
+                    >
+                        <FileUpload
+                            id={`${fieldNamePrefix}.supportingDocuments`}
+                            name={`${fieldNamePrefix}.supportingDocuments`}
+                            label="Upload supporting documents"
+                            aria-required={false}
+                            error={showFieldErrors('supportingDocuments')}
+                            hint={
+                                <span
+                                    className={
+                                        styles.guidanceTextBlockNoPadding
+                                    }
+                                >
+                                    <Link
+                                        aria-label="Document definitions and requirements (opens in new window)"
+                                        href={'/help#key-documents'}
+                                        variant="external"
+                                        target="_blank"
+                                    >
+                                        Document definitions and requirements
+                                    </Link>
+                                    <span className="padding-top-1">
+                                        {`Upload any supporting documents for Rate certification ${index + 1}`}
+                                    </span>
+                                    <span>
+                                        Additional rates can be added later.
+                                    </span>
+
+                                    <span className="padding-top-1">
+                                        This input only accepts PDF, CSV, DOC,
+                                        DOCX, XLS, XLSX files.
+                                    </span>
+                                </span>
+                            }
+                            accept={ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES}
+                            initialItems={rateForm.supportingDocuments}
+                            uploadFile={(file) =>
+                                handleUploadFile(file, 'HEALTH_PLAN_DOCS')
+                            }
+                            scanFile={(key) =>
+                                handleScanFile(key, 'HEALTH_PLAN_DOCS')
+                            }
+                            deleteFile={(key) =>
+                                handleDeleteFile(
+                                    key,
+                                    'HEALTH_PLAN_DOCS',
+                                    previousDocuments
+                                )
+                            }
+                            onFileItemsUpdate={({ fileItems }) =>
+                                setFieldValue(
+                                    `${fieldNamePrefix}.supportingDocuments`,
+                                    fileItems
+                                )
+                            }
+                        />
+                    </FormGroup>
+                    <FormGroup
+                        error={Boolean(showFieldErrors('rateProgramIDs'))}
+                    >
+                        <Label htmlFor={`${fieldNamePrefix}.rateProgramIDs`}>
+                            Programs this rate certification covers
+                        </Label>
+                        <span className={styles.requiredOptionalText}>
+                            Required
+                        </span>
+                        <PoliteErrorMessage>
+                            {showFieldErrors('rateProgramIDs')}
+                        </PoliteErrorMessage>
+                        <ProgramSelect
+                            name={`${fieldNamePrefix}.rateProgramIDs`}
+                            inputId={`${fieldNamePrefix}.rateProgramIDs`}
+                            programIDs={rateForm.rateProgramIDs}
+                            aria-label="programs (required)"
+                        />
+                    </FormGroup>
+
+                    <FormGroup error={Boolean(showFieldErrors('rateType'))}>
+                        <Fieldset
+                            className={styles.radioGroup}
+                            legend="Rate certification type"
+                            role="radiogroup"
+                            aria-required
                         >
                             <span className={styles.requiredOptionalText}>
                                 Required
                             </span>
-                            <RateDatesErrorMessage
-                                startDate={rateForm.rateDateStart}
-                                endDate={rateForm.rateDateEnd}
-                                startDateError={showFieldErrors(
-                                    'rateDateStart'
-                                )}
-                                endDateError={showFieldErrors('rateDateEnd')}
-                                shouldValidate={shouldValidate}
-                            />
+                            <PoliteErrorMessage>
+                                {showFieldErrors('rateType')}
+                            </PoliteErrorMessage>
 
-                            <DateRangePicker
-                                className={styles.dateRangePicker}
-                                startDateHint="mm/dd/yyyy"
-                                startDateLabel="Start date"
-                                startDatePickerProps={{
-                                    disabled: false,
-                                    id: `${fieldNamePrefix}.rateDateStart`,
-                                    name: `${fieldNamePrefix}.rateDateStart`,
-                                    'aria-required': true,
-                                    defaultValue: rateForm.rateDateStart,
-                                    onChange: (val) =>
-                                        setFieldValue(
-                                            `${fieldNamePrefix}.rateDateStart`,
-                                            formatUserInputDate(val)
-                                        ),
-                                }}
-                                endDateHint="mm/dd/yyyy"
-                                endDateLabel="End date"
-                                endDatePickerProps={{
-                                    disabled: false,
-                                    id: `${fieldNamePrefix}.rateDateEnd`,
-                                    name: `${fieldNamePrefix}.rateDateEnd`,
-                                    'aria-required': true,
-                                    defaultValue: rateForm.rateDateEnd,
-                                    onChange: (val) =>
-                                        setFieldValue(
-                                            `${fieldNamePrefix}.rateDateEnd`,
-                                            formatUserInputDate(val)
-                                        ),
-                                }}
+                            <Link
+                                aria-label="Rate certification type definitions (opens in new window)"
+                                href={'/help#rate-cert-type-definitions'}
+                                variant="external"
+                                target="_blank"
+                            >
+                                Rate certification type definitions
+                            </Link>
+                            <FieldRadio
+                                id={`newRate-${index}`}
+                                name={`${fieldNamePrefix}.rateType`}
+                                label="New rate certification"
+                                value={'NEW'}
+                            />
+                            <FieldRadio
+                                id={`amendmentRate-${index}`}
+                                name={`${fieldNamePrefix}.rateType`}
+                                label="Amendment to prior rate certification"
+                                value={'AMENDMENT'}
                             />
                         </Fieldset>
                     </FormGroup>
 
-                    {isRateTypeAmendment(rateForm) && (
+                    <FormGroup
+                        error={Boolean(showFieldErrors('rateCapitationType'))}
+                    >
+                        <Fieldset
+                            className={styles.radioGroup}
+                            legend={
+                                <div className={styles.capitationLegend}>
+                                    <p className="margin-bottom-0">
+                                        Does the actuary certify capitation
+                                        rates specific to each rate cell or a
+                                        rate range?
+                                    </p>
+                                    <span
+                                        className={classnames(
+                                            styles.legendSubHeader,
+                                            styles.requiredOptionalText
+                                        )}
+                                    >
+                                        Required
+                                    </span>
+                                    <p
+                                        className={classnames(
+                                            'margin-bottom-0',
+                                            styles.legendSubHeader
+                                        )}
+                                    >
+                                        See 42 CFR §§ 438.4(b) and 438.4(c)
+                                    </p>
+                                </div>
+                            }
+                            role="radiogroup"
+                            aria-required
+                        >
+                            <PoliteErrorMessage>
+                                {showFieldErrors('rateCapitationType')}
+                            </PoliteErrorMessage>
+                            <FieldRadio
+                                id={`rateCell-${index}`}
+                                name={`${fieldNamePrefix}.rateCapitationType`}
+                                label="Certification of capitation rates specific to each rate cell"
+                                value={'RATE_CELL'}
+                            />
+                            <FieldRadio
+                                id={`rateRange-${index}`}
+                                name={`${fieldNamePrefix}.rateCapitationType`}
+                                label="Certification of rate ranges of capitation rates per rate cell"
+                                value={'RATE_RANGE'}
+                            />
+                        </Fieldset>
+                    </FormGroup>
+
+                    {!isRateTypeEmpty(rateForm) && (
                         <>
                             <FormGroup
                                 error={Boolean(
-                                    showFieldErrors('effectiveDateStart') ??
-                                        showFieldErrors('effectiveDateEnd')
+                                    showFieldErrors('rateDateStart') ??
+                                        showFieldErrors('rateDateEnd')
                                 )}
                             >
                                 <Fieldset
                                     aria-required
-                                    legend="Effective dates of rate amendment"
+                                    legend={
+                                        isRateTypeAmendment(rateForm)
+                                            ? 'Rating period of original rate certification'
+                                            : 'Rating period'
+                                    }
                                 >
                                     <span
                                         className={styles.requiredOptionalText}
@@ -383,13 +348,13 @@ export const SingleRateFormFields = ({
                                         Required
                                     </span>
                                     <RateDatesErrorMessage
-                                        startDate={rateForm.effectiveDateStart}
-                                        endDate={rateForm.effectiveDateEnd}
+                                        startDate={rateForm.rateDateStart}
+                                        endDate={rateForm.rateDateEnd}
                                         startDateError={showFieldErrors(
-                                            'effectiveDateStart'
+                                            'rateDateStart'
                                         )}
                                         endDateError={showFieldErrors(
-                                            'effectiveDateEnd'
+                                            'rateDateEnd'
                                         )}
                                         shouldValidate={shouldValidate}
                                     />
@@ -400,14 +365,14 @@ export const SingleRateFormFields = ({
                                         startDateLabel="Start date"
                                         startDatePickerProps={{
                                             disabled: false,
-                                            id: `${fieldNamePrefix}.effectiveDateStart`,
-                                            name: `${fieldNamePrefix}.effectiveDateStart`,
+                                            id: `${fieldNamePrefix}.rateDateStart`,
+                                            name: `${fieldNamePrefix}.rateDateStart`,
                                             'aria-required': true,
                                             defaultValue:
-                                                rateForm.effectiveDateStart,
+                                                rateForm.rateDateStart,
                                             onChange: (val) =>
                                                 setFieldValue(
-                                                    `${fieldNamePrefix}.effectiveDateStart`,
+                                                    `${fieldNamePrefix}.rateDateStart`,
                                                     formatUserInputDate(val)
                                                 ),
                                         }}
@@ -415,69 +380,153 @@ export const SingleRateFormFields = ({
                                         endDateLabel="End date"
                                         endDatePickerProps={{
                                             disabled: false,
-                                            id: `${fieldNamePrefix}.effectiveDateEnd`,
-                                            name: `${fieldNamePrefix}.effectiveDateEnd`,
+                                            id: `${fieldNamePrefix}.rateDateEnd`,
+                                            name: `${fieldNamePrefix}.rateDateEnd`,
                                             'aria-required': true,
-                                            defaultValue:
-                                                rateForm.effectiveDateEnd,
+                                            defaultValue: rateForm.rateDateEnd,
                                             onChange: (val) =>
                                                 setFieldValue(
-                                                    `${fieldNamePrefix}.effectiveDateEnd`,
+                                                    `${fieldNamePrefix}.rateDateEnd`,
                                                     formatUserInputDate(val)
                                                 ),
                                         }}
                                     />
                                 </Fieldset>
                             </FormGroup>
+
+                            {isRateTypeAmendment(rateForm) && (
+                                <>
+                                    <FormGroup
+                                        error={Boolean(
+                                            showFieldErrors(
+                                                'effectiveDateStart'
+                                            ) ??
+                                                showFieldErrors(
+                                                    'effectiveDateEnd'
+                                                )
+                                        )}
+                                    >
+                                        <Fieldset
+                                            aria-required
+                                            legend="Effective dates of rate amendment"
+                                        >
+                                            <span
+                                                className={
+                                                    styles.requiredOptionalText
+                                                }
+                                            >
+                                                Required
+                                            </span>
+                                            <RateDatesErrorMessage
+                                                startDate={
+                                                    rateForm.effectiveDateStart
+                                                }
+                                                endDate={
+                                                    rateForm.effectiveDateEnd
+                                                }
+                                                startDateError={showFieldErrors(
+                                                    'effectiveDateStart'
+                                                )}
+                                                endDateError={showFieldErrors(
+                                                    'effectiveDateEnd'
+                                                )}
+                                                shouldValidate={shouldValidate}
+                                            />
+
+                                            <DateRangePicker
+                                                className={
+                                                    styles.dateRangePicker
+                                                }
+                                                startDateHint="mm/dd/yyyy"
+                                                startDateLabel="Start date"
+                                                startDatePickerProps={{
+                                                    disabled: false,
+                                                    id: `${fieldNamePrefix}.effectiveDateStart`,
+                                                    name: `${fieldNamePrefix}.effectiveDateStart`,
+                                                    'aria-required': true,
+                                                    defaultValue:
+                                                        rateForm.effectiveDateStart,
+                                                    onChange: (val) =>
+                                                        setFieldValue(
+                                                            `${fieldNamePrefix}.effectiveDateStart`,
+                                                            formatUserInputDate(
+                                                                val
+                                                            )
+                                                        ),
+                                                }}
+                                                endDateHint="mm/dd/yyyy"
+                                                endDateLabel="End date"
+                                                endDatePickerProps={{
+                                                    disabled: false,
+                                                    id: `${fieldNamePrefix}.effectiveDateEnd`,
+                                                    name: `${fieldNamePrefix}.effectiveDateEnd`,
+                                                    'aria-required': true,
+                                                    defaultValue:
+                                                        rateForm.effectiveDateEnd,
+                                                    onChange: (val) =>
+                                                        setFieldValue(
+                                                            `${fieldNamePrefix}.effectiveDateEnd`,
+                                                            formatUserInputDate(
+                                                                val
+                                                            )
+                                                        ),
+                                                }}
+                                            />
+                                        </Fieldset>
+                                    </FormGroup>
+                                </>
+                            )}
+                            <FormGroup
+                                error={Boolean(
+                                    showFieldErrors('rateDateCertified')
+                                )}
+                            >
+                                <Label
+                                    htmlFor={`${fieldNamePrefix}.rateDateCertified`}
+                                    id={`rateDateCertifiedLabel.${index}`}
+                                >
+                                    {isRateTypeAmendment(rateForm)
+                                        ? 'Date certified for rate amendment'
+                                        : 'Date certified'}
+                                </Label>
+                                <span className={styles.requiredOptionalText}>
+                                    Required
+                                </span>
+                                <div
+                                    className="usa-hint"
+                                    id={`rateDateCertifiedHint.${index}`}
+                                >
+                                    mm/dd/yyyy
+                                </div>
+                                <PoliteErrorMessage>
+                                    {showFieldErrors('rateDateCertified')}
+                                </PoliteErrorMessage>
+
+                                <DatePicker
+                                    aria-required
+                                    aria-describedby={`rateDateCertifiedLabel.${index} rateDateCertifiedHint.${index}`}
+                                    id={`${fieldNamePrefix}.rateDateCertified`}
+                                    name={`${fieldNamePrefix}.rateDateCertified`}
+                                    defaultValue={rateForm.rateDateCertified}
+                                    onChange={(val) =>
+                                        setFieldValue(
+                                            `${fieldNamePrefix}.rateDateCertified`,
+                                            formatUserInputDate(val)
+                                        )
+                                    }
+                                />
+                            </FormGroup>
                         </>
                     )}
-                    <FormGroup
-                        error={Boolean(showFieldErrors('rateDateCertified'))}
-                    >
-                        <Label
-                            htmlFor={`${fieldNamePrefix}.rateDateCertified`}
-                            id={`rateDateCertifiedLabel.${index}`}
-                        >
-                            {isRateTypeAmendment(rateForm)
-                                ? 'Date certified for rate amendment'
-                                : 'Date certified'}
-                        </Label>
-                        <span className={styles.requiredOptionalText}>
-                            Required
-                        </span>
-                        <div
-                            className="usa-hint"
-                            id={`rateDateCertifiedHint.${index}`}
-                        >
-                            mm/dd/yyyy
-                        </div>
-                        <PoliteErrorMessage>
-                            {showFieldErrors('rateDateCertified')}
-                        </PoliteErrorMessage>
-
-                        <DatePicker
-                            aria-required
-                            aria-describedby={`rateDateCertifiedLabel.${index} rateDateCertifiedHint.${index}`}
-                            id={`${fieldNamePrefix}.rateDateCertified`}
-                            name={`${fieldNamePrefix}.rateDateCertified`}
-                            defaultValue={rateForm.rateDateCertified}
-                            onChange={(val) =>
-                                setFieldValue(
-                                    `${fieldNamePrefix}.rateDateCertified`,
-                                    formatUserInputDate(val)
-                                )
-                            }
+                    <FormGroup>
+                        <ActuaryContactFields
+                            shouldValidate={shouldValidate}
+                            fieldNamePrefix={`${fieldNamePrefix}.actuaryContacts.0`}
+                            fieldSetLegend="Certifying Actuary"
                         />
                     </FormGroup>
                 </>
             )}
-            <FormGroup>
-                <ActuaryContactFields
-                    shouldValidate={shouldValidate}
-                    fieldNamePrefix={`${fieldNamePrefix}.actuaryContacts.0`}
-                    fieldSetLegend="Certifying Actuary"
-                />
-            </FormGroup>
         </>
     )
 }

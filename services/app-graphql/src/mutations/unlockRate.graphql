@@ -28,6 +28,7 @@ fragment rateRevisionFragmentForUnlock on RateRevision {
         rateDateStart,
         rateDateEnd,
         rateDateCertified,
+        ratePreviouslySubmitted,
         amendmentEffectiveDateStart,
         amendmentEffectiveDateEnd,
         rateProgramIDs,

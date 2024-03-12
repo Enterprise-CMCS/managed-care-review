@@ -95,6 +95,7 @@ fragment rateRevisionFragmentForFetchContract on RateRevision {
         rateDateStart
         rateDateEnd
         rateDateCertified
+        ratePreviouslySubmitted
         amendmentEffectiveDateStart
         amendmentEffectiveDateEnd
         rateProgramIDs

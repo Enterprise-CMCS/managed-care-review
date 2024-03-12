@@ -246,6 +246,8 @@ async function updateDraftContractWithRates(
                                             rateFormData.amendmentEffectiveDateStart,
                                         amendmentEffectiveDateEnd:
                                             rateFormData.amendmentEffectiveDateEnd,
+                                        ratePreviouslySubmitted:
+                                            rateFormData.ratePreviouslySubmitted,
                                         rateProgramIDs:
                                             rateFormData.rateProgramIDs,
                                         rateCertificationName:
@@ -336,6 +338,10 @@ async function updateDraftContractWithRates(
                                                   rateDateEnd: nullify(
                                                       rateFormData.rateDateEnd
                                                   ),
+                                                  ratePreviouslySubmitted:
+                                                      nullify(
+                                                          rateFormData.ratePreviouslySubmitted
+                                                      ),
                                                   rateDateCertified: nullify(
                                                       rateFormData.rateDateCertified
                                                   ),

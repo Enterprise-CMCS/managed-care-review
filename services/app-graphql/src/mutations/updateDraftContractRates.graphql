@@ -33,7 +33,7 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                     riskBasedContract
                     stateContacts {
                         name
-                        title
+                        titleRole
                         email
                     }
                     contractDocuments {
@@ -79,6 +79,7 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                         rateDateStart
                         rateDateEnd
                         rateDateCertified
+                        ratePreviouslySubmitted
                         amendmentEffectiveDateStart
                         amendmentEffectiveDateEnd
                         rateProgramIDs
@@ -123,6 +124,7 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                         rateDateStart
                         rateDateEnd
                         rateDateCertified
+                        ratePreviouslySubmitted
                         amendmentEffectiveDateStart
                         amendmentEffectiveDateEnd
                         rateProgramIDs

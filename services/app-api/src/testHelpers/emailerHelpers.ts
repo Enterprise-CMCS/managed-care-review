@@ -215,6 +215,7 @@ const mockContractRev = (
                             sha256: 'fakesha',
                         },
                     ],
+                    ratePreviouslySubmitted: false,
                     supportingDocuments: [],
                     rateDateStart: new Date('01/01/2024'),
                     rateDateEnd: new Date('01/01/2025'),

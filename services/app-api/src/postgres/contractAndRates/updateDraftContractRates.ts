@@ -35,6 +35,7 @@ function prismaRateCreateFormDataFromDomain(rateFormData: RateFormEditable) {
         rateCapitationType: rateFormData.rateCapitationType,
         rateDateStart: rateFormData.rateDateStart,
         rateDateEnd: rateFormData.rateDateEnd,
+        ratePreviouslySubmitted: rateFormData.ratePreviouslySubmitted,
         rateDateCertified: rateFormData.rateDateCertified,
         amendmentEffectiveDateStart: rateFormData.amendmentEffectiveDateStart,
         amendmentEffectiveDateEnd: rateFormData.amendmentEffectiveDateEnd,
@@ -83,6 +84,7 @@ function prismaUpdateRateFormDataFromDomain(rateFormData: RateFormEditable) {
         rateCapitationType: nullify(rateFormData.rateCapitationType),
         rateDateStart: nullify(rateFormData.rateDateStart),
         rateDateEnd: nullify(rateFormData.rateDateEnd),
+        ratePreviouslySubmitted: nullify(rateFormData.ratePreviouslySubmitted),
         rateDateCertified: nullify(rateFormData.rateDateCertified),
         amendmentEffectiveDateStart: nullify(
             rateFormData.amendmentEffectiveDateStart

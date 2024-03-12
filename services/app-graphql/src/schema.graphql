@@ -1162,6 +1162,8 @@ type RateFormData {
     that are using this rate
     """
     packagesWithSharedRateCerts: [PackageWithSameRate!]!
+    "Specifies if this rate certification has been included with another submission"
+    ratePreviouslySubmitted: Boolean
 }
 
 "UpdateContractRateType describes the relationship of the updated rate to this contract"
@@ -1511,6 +1513,8 @@ input RateFormDataInput {
     that are using this rate
     """
     packagesWithSharedRateCerts: [PackageWithSameRateInput!]!
+    "Specifies if this rate certification has been included with another submission"
+    ratePreviouslySubmitted: Boolean
 }
 
 input SubmitRateInput {
