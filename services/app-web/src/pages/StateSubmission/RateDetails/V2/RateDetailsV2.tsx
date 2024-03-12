@@ -49,10 +49,12 @@ import {
     generateUpdatedRates,
 } from './rateDetailsHelpers'
 import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
+import { LinkedRateSummary } from './LinkedRateSummary'
 
 export type FormikRateForm = {
     id?: string // no id if its a new rate
     status?: HealthPlanPackageStatus // need to track status to know if this is a direct child or linked rate
+    rateCertificationName?: string // need to know rate name if this rate is a linked rate
     rateType: RateRevision['formData']['rateType']
     rateCapitationType: RateRevision['formData']['rateCapitationType']
     rateDateStart: RateRevision['formData']['rateDateStart']
@@ -410,10 +412,11 @@ const RateDetailsV2 = ({
                                         {({
                                             remove,
                                             push,
+                                            replace,
                                         }: FieldArrayRenderProps) => (
                                             <>
                                                 {rateForms.map(
-                                                    (rate, index = 0) => (
+                                                    (rateForm, index = 0) => (
                                                         <SectionCard
                                                             key={index}
                                                         >
@@ -437,26 +440,45 @@ const RateDetailsV2 = ({
                                                                         index={
                                                                             index
                                                                         }
+                                                                        autofill={(
+                                                                            rateForm: FormikRateForm
+                                                                        ) =>
+                                                                            replace(
+                                                                                index,
+                                                                                rateForm
+                                                                            )
+                                                                        }
                                                                     />
                                                                 )}
 
-                                                                <SingleRateFormFields
-                                                                    rateForm={
-                                                                        rate
-                                                                    }
-                                                                    index={
-                                                                        index
-                                                                    }
-                                                                    shouldValidate={
-                                                                        shouldValidate
-                                                                    }
-                                                                    previousDocuments={
-                                                                        previousDocuments
-                                                                    }
-                                                                    fieldNamePrefix={fieldNamePrefix(
-                                                                        index
-                                                                    )}
-                                                                />
+                                                                {rateForm.status ===
+                                                                    'SUBMITTED' ||
+                                                                rateForm.status ===
+                                                                    'RESUBMITTED' ? (
+                                                                    <LinkedRateSummary
+                                                                        rateForm={
+                                                                            rateForm
+                                                                        }
+                                                                    />
+                                                                ) : (
+                                                                    <SingleRateFormFields
+                                                                        rateForm={
+                                                                            rateForm
+                                                                        }
+                                                                        index={
+                                                                            index
+                                                                        }
+                                                                        fieldNamePrefix={fieldNamePrefix(
+                                                                            index
+                                                                        )}
+                                                                        shouldValidate={
+                                                                            shouldValidate
+                                                                        }
+                                                                        previousDocuments={
+                                                                            previousDocuments
+                                                                        }
+                                                                    />
+                                                                )}
                                                                 {index >= 1 &&
                                                                     !displayAsStandaloneRate && (
                                                                         <Button

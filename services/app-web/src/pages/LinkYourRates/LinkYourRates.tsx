@@ -6,15 +6,18 @@ import styles from '../StateSubmission/StateSubmissionForm.module.scss'
 import { FieldRadio } from '../../components'
 import { getIn, useFormikContext } from 'formik'
 import { LinkRateOptionType, LinkRateSelect } from './LinkRateSelect'
+import { FormikRateForm } from '../StateSubmission/RateDetails/V2/RateDetailsV2'
 
 export type LinkYourRatesProps = {
     fieldNamePrefix: string
     index: number
+    autofill: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
 }
 
 export const LinkYourRates = ({
     fieldNamePrefix,
     index,
+    autofill,
 }: LinkYourRatesProps): React.ReactElement | null => {
     const { values, setFieldValue } = useFormikContext()
 
@@ -62,6 +65,7 @@ export const LinkYourRates = ({
                         ).map((item: { rateId: string; rateName: string }) =>
                             item.rateId ? item.rateId : ''
                         )}
+                        autofill={autofill}
                         onChange={(selectedOptions) =>
                             setFieldValue(
                                 `${fieldNamePrefix}.linkedRates`,

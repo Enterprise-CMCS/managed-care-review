@@ -41,6 +41,7 @@ const convertRateFormToGQLRateFormData = (
     rateForm: FormikRateForm
 ): RateFormData => {
     return {
+        // intentionally do not map backend calculated fields on submit such status and rateCertificationName
         rateType: rateForm.rateType,
         rateCapitationType: rateForm.rateCapitationType,
         rateDocuments: formatDocumentsForGQL(rateForm.rateDocuments),
@@ -72,8 +73,9 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate): For
     return {
         id: rate?.id,
         status: rate?.status,
-        rateType: rateForm?.rateType ?? undefined, // keep null collaescing types for radio buttons to ensure error messages work properly
-        rateCapitationType: rateForm?.rateCapitationType ?? undefined, // keep null collaescing types for radio buttons to ensure error messages work properly
+        rateCertificationName: rateForm?.rateCertificationName ?? undefined,
+        rateType: rateForm?.rateType,
+        rateCapitationType: rateForm?.rateCapitationType,
         rateDateStart: formatForForm(rateForm?.rateDateStart),
         rateDateEnd: formatForForm(rateForm?.rateDateEnd),
         rateDateCertified: formatForForm(rateForm?.rateDateCertified),

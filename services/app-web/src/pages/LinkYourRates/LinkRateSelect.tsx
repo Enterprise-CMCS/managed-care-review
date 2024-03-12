@@ -3,6 +3,10 @@ import Select, { AriaOnFocus, Props } from 'react-select'
 import styles from '../../components/Select/Select.module.scss'
 import { useIndexRatesQuery } from '../../gen/gqlClient'
 import { useField } from 'formik'
+import { FormikRateForm } from '../StateSubmission/RateDetails/V2/RateDetailsV2'
+import { recordJSException } from '../../otelHelpers'
+import { convertGQLRateToRateForm } from '../StateSubmission/RateDetails/V2/rateDetailsHelpers'
+import { useS3 } from '../../contexts/S3Context'
 
 export interface LinkRateOptionType {
     readonly value: string
@@ -14,31 +18,33 @@ export interface LinkRateOptionType {
 export type LinkRateSelectPropType = {
     name: string
     initialValues: string[]
+    autofill: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
 }
 
 export const LinkRateSelect = ({
     name,
     initialValues,
+    autofill,
     ...selectProps
 }: LinkRateSelectPropType & Props<LinkRateOptionType, true>) => {
     const [_field, _meta, helpers] = useField({ name })
     const { data, loading, error } = useIndexRatesQuery()
-
+    const { getKey } = useS3()
     const rateNames: LinkRateOptionType[] = []
-    data?.indexRates.edges
-        .map((edge) => edge.node)
-        .forEach((rate) => {
-            if (rate.revisions.length > 0) {
-                rate.revisions.forEach((revision) => {
-                    if (revision.formData.rateCertificationName) {
-                        rateNames.push({
-                            value: revision.id,
-                            label: revision.formData.rateCertificationName,
-                        })
-                    }
-                })
-            }
-        })
+    const rates = data?.indexRates.edges.map((edge) => edge.node)
+
+    rates?.forEach((rate) => {
+        if (rate.revisions.length > 0) {
+            rate.revisions.forEach((revision) => {
+                if (revision.formData.rateCertificationName) {
+                    rateNames.push({
+                        value: revision.id,
+                        label: revision.formData.rateCertificationName,
+                    })
+                }
+            })
+        }
+    })
 
     const onFocus: AriaOnFocus<LinkRateOptionType> = ({
         focused,
@@ -82,6 +88,19 @@ export const LinkRateSelect = ({
         }
     }
 
+    const handleAutofillRate = (linkedRateID: string) => {
+        if (!rates)
+            recordJSException(
+                'user selected linked rate before rates query loaded'
+            )
+        const linkedRate = rates?.find((rate) => rate.id === linkedRateID)
+        const linkedRateForm: FormikRateForm = convertGQLRateToRateForm(
+            getKey,
+            linkedRate
+        )
+        autofill(linkedRateForm)
+    }
+
     return (
         <>
             <Select
@@ -104,13 +123,16 @@ export const LinkRateSelect = ({
                 }
                 loadingMessage={() => 'Loading rate certifications...'}
                 name={name}
-                onChange={(selectedOptions) =>
-                    helpers.setValue(
+                onChange={async (selectedOptions) => {
+                    await helpers.setValue(
                         selectedOptions.map(
                             (item: { value: string }) => item.value
                         )
                     )
-                }
+                    if (selectedOptions.length > 0) {
+                        handleAutofillRate(selectedOptions[0].value)
+                    }
+                }}
                 {...selectProps}
             />
         </>

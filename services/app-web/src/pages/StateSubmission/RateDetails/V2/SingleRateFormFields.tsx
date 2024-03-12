@@ -26,7 +26,6 @@ import { useS3 } from '../../../../contexts/S3Context'
 import { FormikErrors, getIn, useFormikContext } from 'formik'
 import { ActuaryContactFields } from '../../Contacts'
 import { FormikRateForm, RateDetailFormConfig } from './RateDetailsV2'
-
 const isRateTypeEmpty = (rateForm: FormikRateForm): boolean =>
     rateForm.rateType === undefined
 const isRateTypeAmendment = (rateForm: FormikRateForm): boolean =>
@@ -47,6 +46,7 @@ type SingleRateFormFieldsProps = {
     index: number // defaults to 0
     fieldNamePrefix: string // formik field name prefix - used for looking up values and errors in Formik FieldArray
     previousDocuments: string[] // this only passed in to ensure S3 deleteFile doesn't remove valid files for previous revision
+    autofill?: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
 }
 
 const RateDatesErrorMessage = ({
@@ -80,10 +80,10 @@ export const SingleRateFormFields = ({
     shouldValidate,
     index = 0,
     previousDocuments,
+    fieldNamePrefix,
 }: SingleRateFormFieldsProps): React.ReactElement => {
     // page level setup
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
-    const fieldNamePrefix = `rateForms.${index}`
     const { errors, setFieldValue } = useFormikContext<RateDetailFormConfig>()
 
     const showFieldErrors = (
@@ -91,9 +91,6 @@ export const SingleRateFormFields = ({
     ): string | undefined => {
         if (!shouldValidate) return undefined
         return getIn(errors, `${fieldNamePrefix}.${fieldName}`)
-    }
-    if (rateForm.status === 'SUBMITTED' || rateForm.status === 'RESUBMITTED') {
-        return <div>This is a Linked Rate. UI forthcoming</div>
     }
 
     return (
