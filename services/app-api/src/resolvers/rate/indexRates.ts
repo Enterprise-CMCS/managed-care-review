@@ -54,8 +54,16 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
         const stateUser = isStateUser(user)
 
         if (adminPermissions || cmsUser || stateUser) {
-            const ratesWithHistory =
-                await store.findAllRatesWithHistoryBySubmitInfo()
+            let ratesWithHistory
+            if (stateUser) {
+                ratesWithHistory =
+                    await store.findAllRatesWithHistoryBySubmitInfo(
+                        user.stateCode
+                    )
+            } else {
+                ratesWithHistory =
+                    await store.findAllRatesWithHistoryBySubmitInfo()
+            }
             if (ratesWithHistory instanceof Error) {
                 const errMessage = `Issue finding rates with history Message: ${ratesWithHistory.message}`
                 setErrorAttributesOnActiveSpan(errMessage, span)
