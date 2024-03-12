@@ -68,7 +68,8 @@ export type FormikRateForm = {
     actuaryCommunicationPreference: RateRevision['formData']['actuaryCommunicationPreference']
     packagesWithSharedRateCerts: RateRevision['formData']['packagesWithSharedRateCerts']
     linkedRates: linkedRatesDisplay[]
-    ratePreviouslySubmitted: string
+    ratePreviouslySubmitted: string | undefined | false
+    // ratePreviouslySubmitted: RateRevision['formData']['ratePreviouslySubmitted']
 }
 
 export type linkedRatesDisplay = {

@@ -28,7 +28,6 @@ fragment rateRevisionFragmentForFetchRate on RateRevision {
         rateDateStart
         rateDateEnd
         rateDateCertified
-        ratePreviouslySubmitted
         amendmentEffectiveDateStart
         amendmentEffectiveDateEnd
         rateProgramIDs

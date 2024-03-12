@@ -175,7 +175,6 @@ describe('parseDomainData', () => {
                                         unlockInfoID: null,
                                         rateType: null,
                                         rateCapitationType: null,
-                                        ratePreviouslySubmitted: null,
                                         rateDateStart: null,
                                         rateDateEnd: null,
                                         rateDateCertified: null,

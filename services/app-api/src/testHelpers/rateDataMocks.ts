@@ -86,7 +86,6 @@ const mockRateRevision = (
         rateCertificationName: 'testState-123',
         rateProgramIDs: [statePrograms[0].id],
         rateCapitationType: 'RATE_CELL',
-        ratePreviouslySubmitted: false,
         rateDateStart: new Date(),
         rateDateEnd: new Date(),
         rateDateCertified: new Date(),
@@ -140,7 +139,6 @@ function mockRateFormDataInput(): RateFormDataInput {
     return {
         rateType: 'AMENDMENT',
         rateCapitationType: 'RATE_CELL',
-        ratePreviouslySubmitted: false,
         rateDateStart: '2024-01-01',
         rateDateEnd: '2025-01-01',
         amendmentEffectiveDateStart: '2024-02-01',

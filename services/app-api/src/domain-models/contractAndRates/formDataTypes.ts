@@ -72,7 +72,6 @@ const rateFormDataSchema = z.object({
     id: z.string().optional(), // 10.4.23 eng pairing - we discussed future reactor that would delete this from the rate revision form data schema all together.
     rateID: z.string().optional(), // 10.4.23 eng pairing - we discussed future refactor to move this up to rate revision schema.
     rateType: rateTypeSchema.optional(),
-    ratePreviouslySubmitted: z.boolean().optional(),
     rateCapitationType: rateCapitationTypeSchema.optional(),
     rateDocuments: z.array(documentSchema).optional(),
     supportingDocuments: z.array(documentSchema).optional(),

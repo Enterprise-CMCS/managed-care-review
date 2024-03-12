@@ -176,8 +176,6 @@ function rateFormDataToDomainModel(
                   sha256: doc.sha256,
               }))
             : [],
-        ratePreviouslySubmitted:
-            rateRevision.ratePreviouslySubmitted ?? undefined,
         rateDateStart: rateRevision.rateDateStart ?? undefined,
         rateDateEnd: rateRevision.rateDateEnd ?? undefined,
         rateDateCertified: rateRevision.rateDateCertified ?? undefined,

@@ -43,7 +43,6 @@ async function updateDraftRate(
         amendmentEffectiveDateEnd,
         rateProgramIDs,
         rateCertificationName,
-        ratePreviouslySubmitted,
         certifyingActuaryContacts,
         addtlActuaryContacts,
         actuaryCommunicationPreference,
@@ -113,7 +112,6 @@ async function updateDraftRate(
                 rateDateStart: nullify(rateDateStart),
                 rateDateEnd: nullify(rateDateEnd),
                 rateDateCertified: nullify(rateDateCertified),
-                ratePreviouslySubmitted: nullify(ratePreviouslySubmitted),
                 amendmentEffectiveDateStart: nullify(
                     amendmentEffectiveDateStart
                 ),

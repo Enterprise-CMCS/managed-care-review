@@ -79,7 +79,6 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                         rateDateStart
                         rateDateEnd
                         rateDateCertified
-                        ratePreviouslySubmitted
                         amendmentEffectiveDateStart
                         amendmentEffectiveDateEnd
                         rateProgramIDs
@@ -124,7 +123,6 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                         rateDateStart
                         rateDateEnd
                         rateDateCertified
-                        ratePreviouslySubmitted
                         amendmentEffectiveDateStart
                         amendmentEffectiveDateEnd
                         rateProgramIDs
