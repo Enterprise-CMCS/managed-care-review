@@ -52,7 +52,7 @@ const convertRateFormToGQLRateFormData = (
         rateDateCertified: formatFormDateForGQL(rateForm.rateDateCertified),
         amendmentEffectiveDateStart: formatFormDateForGQL(
             rateForm.effectiveDateStart
-        ),
+        ), 
         amendmentEffectiveDateEnd: formatFormDateForGQL(
             rateForm.effectiveDateEnd
         ),
@@ -104,7 +104,7 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate): For
             rateId: rate.id,
             rateName: rateForm?.rateCertificationName ?? 'Unknown Rate'
         }]:[],
-        ratePreviouslySubmitted: handleAsLinkedRate && formatForForm(rateForm?.ratePreviouslySubmitted) 
+        ratePreviouslySubmitted: handleAsLinkedRate ? 'YES' : rateForm ? 'NO' : undefined
     }
 }
 

@@ -68,8 +68,7 @@ export type FormikRateForm = {
     actuaryCommunicationPreference: RateRevision['formData']['actuaryCommunicationPreference']
     packagesWithSharedRateCerts: RateRevision['formData']['packagesWithSharedRateCerts']
     linkedRates: linkedRatesDisplay[]
-    ratePreviouslySubmitted: string | undefined | false
-    // ratePreviouslySubmitted: RateRevision['formData']['ratePreviouslySubmitted']
+    ratePreviouslySubmitted?: 'YES' | 'NO'
 }
 
 export type linkedRatesDisplay = {
@@ -446,23 +445,25 @@ const RateDetailsV2 = ({
                                                                     />
                                                                 )}
 
-                                                                <SingleRateFormFields
-                                                                    rateForm={
-                                                                        rate
-                                                                    }
-                                                                    index={
-                                                                        index
-                                                                    }
-                                                                    shouldValidate={
-                                                                        shouldValidate
-                                                                    }
-                                                                    previousDocuments={
-                                                                        previousDocuments
-                                                                    }
-                                                                    fieldNamePrefix={fieldNamePrefix(
-                                                                        index
-                                                                    )}
-                                                                />
+                                                                {rate.ratePreviouslySubmitted && (
+                                                                    <SingleRateFormFields
+                                                                        rateForm={
+                                                                            rate
+                                                                        }
+                                                                        index={
+                                                                            index
+                                                                        }
+                                                                        shouldValidate={
+                                                                            shouldValidate
+                                                                        }
+                                                                        previousDocuments={
+                                                                            previousDocuments
+                                                                        }
+                                                                        fieldNamePrefix={fieldNamePrefix(
+                                                                            index
+                                                                        )}
+                                                                    />
+                                                                )}
                                                                 {index >= 1 &&
                                                                     !displayAsStandaloneRate && (
                                                                         <Button
