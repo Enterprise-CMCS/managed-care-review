@@ -9,6 +9,7 @@ import {
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
+// TODO - make the schema ignore linked rates for validation - needs a creative use of yup.when  - maybe Yup.addMethod whenChildRate or something like that
 const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
     Yup.object().shape({
         rateDocuments: validateFileItemsListSingleUpload({ required: true }),

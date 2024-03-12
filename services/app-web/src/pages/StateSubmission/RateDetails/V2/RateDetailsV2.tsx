@@ -47,6 +47,7 @@ import {
     convertGQLRateToRateForm,
     convertRateFormToGQLRateFormData,
     generateUpdatedRates,
+    isLinkedRateForm,
 } from './rateDetailsHelpers'
 import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
 import { LinkedRateSummary } from './LinkedRateSummary'
@@ -442,19 +443,18 @@ const RateDetailsV2 = ({
                                                                         }
                                                                         autofill={(
                                                                             rateForm: FormikRateForm
-                                                                        ) =>
-                                                                            replace(
+                                                                        ) => {
+                                                                            return replace(
                                                                                 index,
                                                                                 rateForm
                                                                             )
-                                                                        }
+                                                                        }}
                                                                     />
                                                                 )}
 
-                                                                {rateForm.status ===
-                                                                    'SUBMITTED' ||
-                                                                rateForm.status ===
-                                                                    'RESUBMITTED' ? (
+                                                                {isLinkedRateForm(
+                                                                    rateForm
+                                                                ) ? (
                                                                     <LinkedRateSummary
                                                                         rateForm={
                                                                             rateForm

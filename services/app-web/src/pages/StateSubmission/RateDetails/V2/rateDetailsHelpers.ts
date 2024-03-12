@@ -15,7 +15,7 @@ import { S3ClientT } from '../../../../s3'
 import { type FormikRateForm } from './RateDetailsV2'
 
 // Right now we figure out if this is a linked rate by referencing the status. We know a rate is linked when its locked.
-const isLinkedRate = (status?: HealthPlanPackageStatus): boolean =>  status && (status === 'SUBMITTED' || status === 'RESUBMITTED')? true: false
+const isStatusSubmitted = (status?: HealthPlanPackageStatus): boolean =>  status && (status === 'SUBMITTED' || status === 'RESUBMITTED')? true: false
 
 // generateUpdatedRates takes the Formik RateForm list used for multi-rates and prepares for contract with rates update mutation
 // ensure we link, create, and update the proper rates
@@ -23,13 +23,13 @@ const generateUpdatedRates = (
     newRateForms: FormikRateForm[]
 ): UpdateContractRateInput[] => {
     const updatedRates: UpdateContractRateInput[] = newRateForms.map((form) => {
-        const { id, status, ...rateFormData } = form
+        const { id, ...rateFormData } = form
         return {
-            formData: isLinkedRate(status)
+            formData: isLinkedRateForm(form)
                 ? undefined
                 : convertRateFormToGQLRateFormData(rateFormData),
             rateID: id,
-            type: isLinkedRate(status) ? 'LINK' : !id ? 'CREATE' : 'UPDATE',
+            type: isLinkedRateForm(form) ? 'LINK' : !id ? 'CREATE' : 'UPDATE',
         }
     })
 
@@ -69,7 +69,7 @@ const convertRateFormToGQLRateFormData = (
 const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate): FormikRateForm => {
     const rateRev = rate?.draftRevision ?? undefined
     const rateForm = rateRev?.formData
-    const handleAsLinkedRate = rate?.id && isLinkedRate(rate.status)
+    const handleAsLinkedRate = rate?.id && isStatusSubmitted(rate.status)
     return {
         id: rate?.id,
         status: rate?.status,
@@ -110,8 +110,11 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate): For
     }
 }
 
+const isLinkedRateForm = (rateForm: FormikRateForm): boolean => rateForm.status === "SUBMITTED" || rateForm.status === "RESUBMITTED"
+
 export {
     convertGQLRateToRateForm,
     convertRateFormToGQLRateFormData,
     generateUpdatedRates,
+    isLinkedRateForm
 }

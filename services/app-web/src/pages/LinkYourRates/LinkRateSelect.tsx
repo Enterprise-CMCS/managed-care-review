@@ -1,10 +1,8 @@
 import React from 'react'
-import Select, { AriaOnFocus, Props } from 'react-select'
+import Select, { ActionMeta, AriaOnFocus, Props } from 'react-select'
 import styles from '../../components/Select/Select.module.scss'
 import { useIndexRatesQuery } from '../../gen/gqlClient'
-import { useField } from 'formik'
 import { FormikRateForm } from '../StateSubmission/RateDetails/V2/RateDetailsV2'
-import { recordJSException } from '../../otelHelpers'
 import { convertGQLRateToRateForm } from '../StateSubmission/RateDetails/V2/rateDetailsHelpers'
 import { useS3 } from '../../contexts/S3Context'
 
@@ -27,21 +25,17 @@ export const LinkRateSelect = ({
     autofill,
     ...selectProps
 }: LinkRateSelectPropType & Props<LinkRateOptionType, true>) => {
-    const [_field, _meta, helpers] = useField({ name })
     const { data, loading, error } = useIndexRatesQuery()
     const { getKey } = useS3()
     const rateNames: LinkRateOptionType[] = []
     const rates = data?.indexRates.edges.map((edge) => edge.node)
 
     rates?.forEach((rate) => {
-        if (rate.revisions.length > 0) {
-            rate.revisions.forEach((revision) => {
-                if (revision.formData.rateCertificationName) {
-                    rateNames.push({
-                        value: revision.id,
-                        label: revision.formData.rateCertificationName,
-                    })
-                }
+        const lastSubmitted = rate.revisions[0]
+        if (lastSubmitted && lastSubmitted.formData.rateCertificationName) {
+            rateNames.push({
+                value: rate.id,
+                label: lastSubmitted.formData.rateCertificationName,
             })
         }
     })
@@ -88,17 +82,36 @@ export const LinkRateSelect = ({
         }
     }
 
-    const handleAutofillRate = (linkedRateID: string) => {
-        if (!rates)
-            recordJSException(
-                'user selected linked rate before rates query loaded'
+    const onInputChange = (
+        newValue: LinkRateOptionType,
+        { action }: ActionMeta<LinkRateOptionType>
+    ) => {
+        if (action === 'select-option') {
+            const linkedRateID = newValue.value
+            const linkedRateName = newValue.label
+            const linkedRate = rates?.find((rate) => rate.id === linkedRateID)
+            const linkedRateForm: FormikRateForm = convertGQLRateToRateForm(
+                getKey,
+                linkedRate
             )
-        const linkedRate = rates?.find((rate) => rate.id === linkedRateID)
-        const linkedRateForm: FormikRateForm = convertGQLRateToRateForm(
-            getKey,
-            linkedRate
-        )
-        autofill(linkedRateForm)
+            // put already selected fields back in place
+            linkedRateForm.ratePreviouslySubmitted = 'YES'
+            linkedRateForm.linkedRates = [
+                {
+                    rateId: linkedRateID,
+                    rateName: linkedRateName,
+                },
+            ]
+
+            autofill(linkedRateForm)
+        } else if (action === 'clear') {
+            const emptyRateForm = convertGQLRateToRateForm(getKey)
+
+            // put already selected fields back in place
+            emptyRateForm.ratePreviouslySubmitted = 'YES'
+
+            autofill(emptyRateForm)
+        }
     }
 
     return (
@@ -108,12 +121,12 @@ export const LinkRateSelect = ({
                 className={styles.multiSelect}
                 options={error || loading ? undefined : rateNames}
                 isSearchable
-                isMulti
                 maxMenuHeight={169}
                 aria-label="linked rates (required)"
                 ariaLiveMessages={{
                     onFocus,
                 }}
+                isClearable
                 noOptionsMessage={() => noOptionsMessage()}
                 classNamePrefix="select"
                 id={`${name}-linkRateSelect`}
@@ -123,17 +136,9 @@ export const LinkRateSelect = ({
                 }
                 loadingMessage={() => 'Loading rate certifications...'}
                 name={name}
-                onChange={async (selectedOptions) => {
-                    await helpers.setValue(
-                        selectedOptions.map(
-                            (item: { value: string }) => item.value
-                        )
-                    )
-                    if (selectedOptions.length > 0) {
-                        handleAutofillRate(selectedOptions[0].value)
-                    }
-                }}
                 {...selectProps}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                onChange={onInputChange as any} // TODO see why the types definitions are messed up for react-select "single" (not multi) onChange - may need to upgrade dep if this bug was fixed
             />
         </>
     )
