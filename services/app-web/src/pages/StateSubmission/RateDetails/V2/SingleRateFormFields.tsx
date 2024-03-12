@@ -25,12 +25,11 @@ import { useS3 } from '../../../../contexts/S3Context'
 
 import { FormikErrors, getIn, useFormikContext } from 'formik'
 import { ActuaryContactFields } from '../../Contacts'
-import { RateDetailFormValues, RateDetailFormConfig } from './RateDetailsV2'
-import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
+import { FormikRateForm, RateDetailFormConfig } from './RateDetailsV2'
 
-const isRateTypeEmpty = (rateForm: RateDetailFormValues): boolean =>
+const isRateTypeEmpty = (rateForm: FormikRateForm): boolean =>
     rateForm.rateType === undefined
-const isRateTypeAmendment = (rateForm: RateDetailFormValues): boolean =>
+const isRateTypeAmendment = (rateForm: FormikRateForm): boolean =>
     rateForm.rateType === 'AMENDMENT'
 
 /**
@@ -43,9 +42,10 @@ export type SingleRateFormError =
     FormikErrors<RateDetailFormConfig>[keyof FormikErrors<RateDetailFormConfig>]
 
 type SingleRateFormFieldsProps = {
-    rateForm: RateDetailFormValues
+    rateForm: FormikRateForm
     shouldValidate: boolean
     index: number // defaults to 0
+    fieldNamePrefix: string // formik field name prefix - used for looking up values and errors in Formik FieldArray
     previousDocuments: string[] // this only passed in to ensure S3 deleteFile doesn't remove valid files for previous revision
 }
 
@@ -83,11 +83,11 @@ export const SingleRateFormFields = ({
 }: SingleRateFormFieldsProps): React.ReactElement => {
     // page level setup
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
-    const fieldNamePrefix = `rates.${index}`
+    const fieldNamePrefix = `rateForms.${index}`
     const { errors, setFieldValue } = useFormikContext<RateDetailFormConfig>()
 
     const showFieldErrors = (
-        fieldName: keyof RateDetailFormValues
+        fieldName: keyof FormikRateForm
     ): string | undefined => {
         if (!shouldValidate) return undefined
         return getIn(errors, `${fieldNamePrefix}.${fieldName}`)
@@ -99,10 +99,6 @@ export const SingleRateFormFields = ({
     return (
         <>
             <FormGroup error={Boolean(showFieldErrors('rateDocuments'))}>
-                <LinkYourRates
-                    fieldNamePrefix={fieldNamePrefix}
-                    index={index}
-                />
                 <FileUpload
                     id={`${fieldNamePrefix}.rateDocuments`}
                     name={`${fieldNamePrefix}.rateDocuments`}
