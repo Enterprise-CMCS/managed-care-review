@@ -97,20 +97,16 @@ export async function submitContract(
             })
 
             // we only want to update the rateRevision's submit info if it has not already been submitted
-            for (const rev of unsubmittedRates) {
-                await tx.rateRevisionTable.update({
-                    where: {
-                        id: rev.id,
+            await tx.rateRevisionTable.updateMany({
+                where: {
+                    id: {
+                        in: unsubmittedRates.map((rev) => rev.id),
                     },
-                    data: {
-                        submitInfo: {
-                            connect: {
-                                id: submitInfo.id,
-                            },
-                        },
-                    },
-                })
-            }
+                },
+                data: {
+                    submitInfoID: submitInfo.id,
+                },
+            })
 
             // oldRev is the previously submitted revision of this contract (the one just superseded by the update)
             // on an initial submission, there won't be an oldRev
