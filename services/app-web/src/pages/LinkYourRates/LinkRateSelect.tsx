@@ -123,7 +123,6 @@ export const LinkRateSelect = ({
     return (
         <>
             <Select
-                menuIsOpen={true}
                 value={defaultValues}
                 className={styles.multiSelect}
                 options={error || loading ? undefined : rateNames}
