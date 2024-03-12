@@ -1,12 +1,15 @@
 import React from 'react'
 import Select, { AriaOnFocus, Props } from 'react-select'
 import styles from '../../components/Select/Select.module.scss'
-import { useIndexRatesQuery } from '../../gen/gqlClient'
+import { StateUser, useIndexRatesQuery } from '../../gen/gqlClient'
 import { useField } from 'formik'
+import { useAuth } from '../../contexts/AuthContext'
+import { programNames } from '../../common-code/healthPlanFormDataType'
+import { formatCalendarDate } from '../../common-code/dateHelpers'
 
 export interface LinkRateOptionType {
     readonly value: string
-    readonly label: string
+    readonly label: React.ReactElement
     readonly isFixed?: boolean
     readonly isDisabled?: boolean
 }
@@ -23,17 +26,52 @@ export const LinkRateSelect = ({
 }: LinkRateSelectPropType & Props<LinkRateOptionType, true>) => {
     const [_field, _meta, helpers] = useField({ name })
     const { data, loading, error } = useIndexRatesQuery()
+    const { loggedInUser } = useAuth()
+    const user = loggedInUser as StateUser
+    const statePrograms = user.state.programs
 
     const rateNames: LinkRateOptionType[] = []
     data?.indexRates.edges
         .map((edge) => edge.node)
         .forEach((rate) => {
-            if (rate.revisions.length > 0) {
+            if (rate.revisions.length > 0.5) {
                 rate.revisions.forEach((revision) => {
                     if (revision.formData.rateCertificationName) {
                         rateNames.push({
                             value: revision.id,
-                            label: revision.formData.rateCertificationName,
+                            label: (
+                                <div style={{ lineHeight: '50%' }}>
+                                    <h4>
+                                        {
+                                            revision.formData
+                                                .rateCertificationName
+                                        }
+                                    </h4>
+                                    <p>
+                                        Programs:{' '}
+                                        {programNames(
+                                            statePrograms,
+                                            revision.formData.rateProgramIDs
+                                        ).join(', ')}
+                                    </p>
+                                    <p>
+                                        Rating period:{' '}
+                                        {formatCalendarDate(
+                                            revision.formData.rateDateStart
+                                        )}{' '}
+                                        -{' '}
+                                        {formatCalendarDate(
+                                            revision.formData.rateDateEnd
+                                        )}
+                                    </p>
+                                    <p>
+                                        Certification date:{' '}
+                                        {formatCalendarDate(
+                                            revision.formData.rateDateCertified
+                                        )}
+                                    </p>
+                                </div>
+                            ),
                         })
                     }
                 })
@@ -54,7 +92,7 @@ export const LinkRateSelect = ({
             ? initialValues.map((rateId) => {
                   const rateName = rateNames.find(
                       (names) => names.value === rateId
-                  )?.label
+                  )?.label.props.children[0].props.children
 
                   if (!rateName) {
                       return {
@@ -85,6 +123,7 @@ export const LinkRateSelect = ({
     return (
         <>
             <Select
+                menuIsOpen={true}
                 value={defaultValues}
                 className={styles.multiSelect}
                 options={error || loading ? undefined : rateNames}
