@@ -38,19 +38,19 @@ export const LinkRateSelect = ({
                 <div style={{ lineHeight: '50%' }}>
                     <h4>{revision.formData.rateCertificationName}</h4>
                     <p>
-                        Programs:
+                        Programs:{' '}
                         {programNames(
                             statePrograms,
                             revision.formData.rateProgramIDs
                         ).join(', ')}
                     </p>
                     <p>
-                        Rating period:
-                        {formatCalendarDate(revision.formData.rateDateStart)} -
+                        Rating period:{' '}
+                        {formatCalendarDate(revision.formData.rateDateStart)} -{' '}
                         {formatCalendarDate(revision.formData.rateDateEnd)}
                     </p>
                     <p>
-                        Certification date:
+                        Certification date:{' '}
                         {formatCalendarDate(
                             revision.formData.rateDateCertified
                         )}
