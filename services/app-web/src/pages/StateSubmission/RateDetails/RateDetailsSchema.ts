@@ -11,9 +11,9 @@ Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
     Yup.object().shape({
-        // ratePreviouslySubmitted: _activeFeatureFlags['rate-edit-unlock'] || _activeFeatureFlags['link-rates']? Yup.string().defined(
-        //     "You must select yes or no "
-        // ) : Yup.string(),
+        ratePreviouslySubmitted: _activeFeatureFlags['rate-edit-unlock'] || _activeFeatureFlags['link-rates']? Yup.string().defined(
+            "You must select yes or no "
+        ) : Yup.string(),
         rateDocuments: validateFileItemsListSingleUpload({ required: true }),
         supportingDocuments: validateFileItemsList({ required: false }),
         hasSharedRateCert:  _activeFeatureFlags['rate-edit-unlock'] || _activeFeatureFlags['link-rates']?  Yup.string(): Yup.string().defined('You must select yes or no'),
