@@ -46,7 +46,7 @@ export const LinkRateSelect = ({
                     </p>
                     <p>
                         Rating period:
-                        {formatCalendarDate(revision.formData.rateDateStart)} -{' '}
+                        {formatCalendarDate(revision.formData.rateDateStart)} -
                         {formatCalendarDate(revision.formData.rateDateEnd)}
                     </p>
                     <p>
