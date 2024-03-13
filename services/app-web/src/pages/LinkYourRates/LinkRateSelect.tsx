@@ -1,14 +1,17 @@
 import React from 'react'
 import Select, { ActionMeta, AriaOnFocus, Props } from 'react-select'
 import styles from '../../components/Select/Select.module.scss'
-import { useIndexRatesQuery } from '../../gen/gqlClient'
+import { StateUser, useIndexRatesQuery } from '../../gen/gqlClient'
+import { useAuth } from '../../contexts/AuthContext'
+import { programNames } from '../../common-code/healthPlanFormDataType'
+import { formatCalendarDate } from '../../common-code/dateHelpers'
 import { FormikRateForm } from '../StateSubmission/RateDetails/V2/RateDetailsV2'
 import { convertGQLRateToRateForm } from '../StateSubmission/RateDetails/V2/rateDetailsHelpers'
 import { useS3 } from '../../contexts/S3Context'
 
 export interface LinkRateOptionType {
     readonly value: string
-    readonly label: string
+    readonly label: React.ReactElement
     readonly isFixed?: boolean
     readonly isDisabled?: boolean
 }
@@ -27,16 +30,39 @@ export const LinkRateSelect = ({
 }: LinkRateSelectPropType & Props<LinkRateOptionType, true>) => {
     const { data, loading, error } = useIndexRatesQuery()
     const { getKey } = useS3()
-    const rateNames: LinkRateOptionType[] = []
-    const rates = data?.indexRates.edges.map((edge) => edge.node)
+    const { loggedInUser } = useAuth()
+    const user = loggedInUser as StateUser
+    const statePrograms = user.state.programs
 
-    rates?.forEach((rate) => {
-        const lastSubmitted = rate.revisions[0]
-        if (lastSubmitted && lastSubmitted.formData.rateCertificationName) {
-            rateNames.push({
-                value: rate.id,
-                label: lastSubmitted.formData.rateCertificationName,
-            })
+    const rates = data?.indexRates.edges.map((e) => e.node) || []
+
+    const rateNames = rates.map((rate) => {
+        const revision = rate.revisions[0]
+        return {
+            value: revision.id,
+            label: (
+                <div style={{ lineHeight: '50%' }}>
+                    <h4>{revision.formData.rateCertificationName}</h4>
+                    <p>
+                        Programs:{' '}
+                        {programNames(
+                            statePrograms,
+                            revision.formData.rateProgramIDs
+                        ).join(', ')}
+                    </p>
+                    <p>
+                        Rating period:{' '}
+                        {formatCalendarDate(revision.formData.rateDateStart)} -{' '}
+                        {formatCalendarDate(revision.formData.rateDateEnd)}
+                    </p>
+                    <p>
+                        Certification date:{' '}
+                        {formatCalendarDate(
+                            revision.formData.rateDateCertified
+                        )}
+                    </p>
+                </div>
+            ),
         }
     })
 
@@ -50,11 +76,11 @@ export const LinkRateSelect = ({
     }
 
     const defaultValues =
-        initialValues.length && rateNames.length
+        initialValues.length && rateNames?.length
             ? initialValues.map((rateId) => {
-                  const rateName = rateNames.find(
+                  const rateName = rateNames?.find(
                       (names) => names.value === rateId
-                  )?.label
+                  )?.label.props.children[0].props.children
 
                   if (!rateName) {
                       return {
@@ -88,7 +114,7 @@ export const LinkRateSelect = ({
     ) => {
         if (action === 'select-option') {
             const linkedRateID = newValue.value
-            const linkedRateName = newValue.label
+            // const linkedRateName = newValue.label
             const linkedRate = rates?.find((rate) => rate.id === linkedRateID)
             const linkedRateForm: FormikRateForm = convertGQLRateToRateForm(
                 getKey,
@@ -99,7 +125,7 @@ export const LinkRateSelect = ({
             linkedRateForm.linkedRates = [
                 {
                     rateId: linkedRateID,
-                    rateName: linkedRateName,
+                    rateName: 'LOOK_FOR_ME', // linkedRateName,
                 },
             ]
 
