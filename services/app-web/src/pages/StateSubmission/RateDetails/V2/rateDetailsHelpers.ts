@@ -52,7 +52,7 @@ const convertRateFormToGQLRateFormData = (
         rateDateCertified: formatFormDateForGQL(rateForm.rateDateCertified),
         amendmentEffectiveDateStart: formatFormDateForGQL(
             rateForm.effectiveDateStart
-        ), 
+        ),
         amendmentEffectiveDateEnd: formatFormDateForGQL(
             rateForm.effectiveDateEnd
         ),
