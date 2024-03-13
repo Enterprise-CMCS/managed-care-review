@@ -69,7 +69,9 @@ export const LinkYourRates = ({
                                     (item: LinkRateOptionType) => {
                                         return {
                                             rateId: item.value,
-                                            rateName: item.label,
+                                            rateName:
+                                                item.label.props.children[0]
+                                                    .props.children,
                                         }
                                     }
                                 )
