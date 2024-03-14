@@ -6,7 +6,10 @@ import {
     dragAndDrop,
     renderWithProviders,
 } from '../../../../testHelpers'
-import { fetchCurrentUserMock } from '../../../../testHelpers/apolloMocks'
+import {
+    fetchCurrentUserMock,
+    fetchContractMockSuccess,
+} from '../../../../testHelpers/apolloMocks'
 import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '../../../../constants'
 import userEvent from '@testing-library/user-event'
@@ -17,6 +20,53 @@ import {
     fillOutFirstRate,
     rateCertifications,
 } from '../../../../testHelpers/jestRateHelpers'
+
+describe('handles edit  of a multi rate', () => {
+    // TODO move into the existing multi rate test suite
+    // when no longer being skipped
+    it('renders without errors', async () => {
+        const rateID = 'test-abc-123'
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                    element={<RateDetailsV2 type="MULTI" />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchDraftRateMockSuccess({ id: rateID }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                id: 'test-abc-123',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/submissions/test-abc-123/edit/rate-details`,
+                },
+                featureFlags: {
+                    'link-rates': true,
+                    'rate-edit-unlock': false,
+                },
+            }
+        )
+
+        await screen.findByText('Rate Details')
+        expect(
+            screen.getByText(
+                'Was this rate certification included with another submission?'
+            )
+        ).toBeInTheDocument()
+        expect(
+            screen.queryByText('Upload one rate certification document')
+        ).not.toBeInTheDocument()
+    })
+})
+
 //eslint-disable-next-line
 describe.skip('RateDetailsv2', () => {
     describe('handles edit  of a single rate', () => {

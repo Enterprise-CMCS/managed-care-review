@@ -298,7 +298,12 @@ const RateDetailsV2 = ({
         if (rateErrors && Array.isArray(rateErrors)) {
             rateErrors.forEach((rateError, index) => {
                 if (!rateError) return
-
+                if (
+                    Object.keys(rateError).includes('ratePreviouslySubmitted')
+                ) {
+                    return (errorObject['ratePreviouslySubmitted'] =
+                        'You must select yes or no')
+                }
                 Object.entries(rateError).forEach(([field, value]) => {
                     if (typeof value === 'string') {
                         //rateProgramIDs error message needs a # proceeding the key name because this is the only way to be able to link to the Select component element see comments in ErrorSummaryMessage component.
@@ -440,23 +445,25 @@ const RateDetailsV2 = ({
                                                                     />
                                                                 )}
 
-                                                                <SingleRateFormFields
-                                                                    rateForm={
-                                                                        rate
-                                                                    }
-                                                                    index={
-                                                                        index
-                                                                    }
-                                                                    shouldValidate={
-                                                                        shouldValidate
-                                                                    }
-                                                                    previousDocuments={
-                                                                        previousDocuments
-                                                                    }
-                                                                    fieldNamePrefix={fieldNamePrefix(
-                                                                        index
-                                                                    )}
-                                                                />
+                                                                {rate.ratePreviouslySubmitted && (
+                                                                    <SingleRateFormFields
+                                                                        rateForm={
+                                                                            rate
+                                                                        }
+                                                                        index={
+                                                                            index
+                                                                        }
+                                                                        shouldValidate={
+                                                                            shouldValidate
+                                                                        }
+                                                                        previousDocuments={
+                                                                            previousDocuments
+                                                                        }
+                                                                        fieldNamePrefix={fieldNamePrefix(
+                                                                            index
+                                                                        )}
+                                                                    />
+                                                                )}
                                                                 {index >= 1 &&
                                                                     !displayAsStandaloneRate && (
                                                                         <Button
