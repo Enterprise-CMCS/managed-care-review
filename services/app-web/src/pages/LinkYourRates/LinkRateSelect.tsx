@@ -41,27 +41,31 @@ export const LinkRateSelect = ({
         return {
             value: revision.id,
             label: (
-                <div style={{ lineHeight: '50%' }}>
+                <>
                     <h4>{revision.formData.rateCertificationName}</h4>
-                    <p>
-                        Programs:{' '}
-                        {programNames(
-                            statePrograms,
-                            revision.formData.rateProgramIDs
-                        ).join(', ')}
-                    </p>
-                    <p>
-                        Rating period:{' '}
-                        {formatCalendarDate(revision.formData.rateDateStart)} -{' '}
-                        {formatCalendarDate(revision.formData.rateDateEnd)}
-                    </p>
-                    <p>
-                        Certification date:{' '}
-                        {formatCalendarDate(
-                            revision.formData.rateDateCertified
-                        )}
-                    </p>
-                </div>
+                    <div style={{ lineHeight: '50%' }}>
+                        <p>
+                            Programs:&nbsp;
+                            {programNames(
+                                statePrograms,
+                                revision.formData.rateProgramIDs
+                            ).join(', ')}
+                        </p>
+                        <p>
+                            Rating period:&nbsp;
+                            {formatCalendarDate(
+                                revision.formData.rateDateStart
+                            )}
+                            -{formatCalendarDate(revision.formData.rateDateEnd)}
+                        </p>
+                        <p>
+                            Certification date:&nbsp;
+                            {formatCalendarDate(
+                                revision.formData.rateDateCertified
+                            )}
+                        </p>
+                    </div>
+                </>
             ),
         }
     })

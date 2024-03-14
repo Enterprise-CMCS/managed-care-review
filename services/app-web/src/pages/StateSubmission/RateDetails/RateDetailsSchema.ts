@@ -12,6 +12,9 @@ Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 // TODO - make the schema ignore linked rates for validation - needs a creative use of yup.when  - maybe Yup.addMethod whenChildRate or something like that
 const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
     Yup.object().shape({
+        ratePreviouslySubmitted: _activeFeatureFlags['rate-edit-unlock'] || _activeFeatureFlags['link-rates']? Yup.string().defined(
+            "You must select yes or no "
+        ) : Yup.string(),
         rateDocuments: validateFileItemsListSingleUpload({ required: true }),
         supportingDocuments: validateFileItemsList({ required: false }),
         hasSharedRateCert:  _activeFeatureFlags['rate-edit-unlock'] || _activeFeatureFlags['link-rates']?  Yup.string(): Yup.string().defined('You must select yes or no'),
@@ -24,7 +27,8 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
             ),
         })
         .required(),
-        rateProgramIDs: Yup.array().min(1, 'You must select a program'),
+        rateProgramIDs: Yup.array(
+        ).min(1, 'You must select a program'),
         rateType: Yup.string().defined(
             'You must choose a rate certification type'
         ),
@@ -134,6 +138,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
         ),
         actuaryCommunicationPreference: Yup.string().optional(),
     })
+
 
 const RateDetailsFormSchema = (activeFeatureFlags?: FeatureFlagSettings) => {
     return activeFeatureFlags?.['rate-edit-unlock'] ||  activeFeatureFlags?.['link-rates'] ?

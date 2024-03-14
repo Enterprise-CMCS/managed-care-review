@@ -301,7 +301,12 @@ const RateDetailsV2 = ({
         if (rateErrors && Array.isArray(rateErrors)) {
             rateErrors.forEach((rateError, index) => {
                 if (!rateError) return
-
+                if (
+                    Object.keys(rateError).includes('ratePreviouslySubmitted')
+                ) {
+                    return (errorObject['ratePreviouslySubmitted'] =
+                        'You must select yes or no')
+                }
                 Object.entries(rateError).forEach(([field, value]) => {
                     if (typeof value === 'string') {
                         //rateProgramIDs error message needs a # proceeding the key name because this is the only way to be able to link to the Select component element see comments in ErrorSummaryMessage component.

@@ -7,7 +7,7 @@ import { includeLatestSubmittedRateRev } from './prismaSubmittedContractHelpers'
 import { NotFoundError } from '../postgresErrors'
 import type { RateFormDataType } from '../../domain-models'
 
-type SubmitRateArgsType =  {
+type SubmitRateArgsType = {
     rateID?: string
     rateRevisionID?: string // this is a hack that should not outlive protobuf. rateID should be there and be required after we remove protos
     formData?: RateFormDataType
@@ -26,14 +26,9 @@ async function submitRate(
 
     try {
         return await client.$transaction(async (tx) => {
-            const {
-                rateID,
-                rateRevisionID,
-                submittedByUserID,
-                formData,
-            } = args
+            const { rateID, rateRevisionID, submittedByUserID, formData } = args
 
-            const submittedReason =  args.submittedReason ?? 'Initial submission' // all subsequent submissions will have a submit reason due to unlock submit modal
+            const submittedReason = args.submittedReason ?? 'Initial submission' // all subsequent submissions will have a submit reason due to unlock submit modal
 
             // this is a hack that should not outlive protobuf. Protobufs only have
             // rate revision IDs in them, so we allow submitting by rate revisionID from our submitHPP resolver
@@ -111,7 +106,7 @@ async function submitRate(
                         create: {
                             updatedAt: currentDateTime,
                             updatedByID: submittedByUserID,
-                            updatedReason: submittedReason
+                            updatedReason: submittedReason,
                         },
                     },
                     contractRevisions: {
