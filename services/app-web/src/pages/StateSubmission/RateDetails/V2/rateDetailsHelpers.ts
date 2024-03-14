@@ -20,12 +20,13 @@ const generateUpdatedRates = (
 ): UpdateContractRateInput[] => {
     const updatedRates: UpdateContractRateInput[] = newRateForms.map((form) => {
         const { id, ...rateFormData } = form
+        const isLinkedRate = form.ratePreviouslySubmitted === 'YES'
         return {
-            formData: form.ratePreviouslySubmitted
+            formData: isLinkedRate
                 ? undefined
                 : convertRateFormToGQLRateFormData(rateFormData),
             rateID: id,
-            type: form.ratePreviouslySubmitted ? 'LINK' : !id ? 'CREATE' : 'UPDATE',
+            type: isLinkedRate ? 'LINK' : !id ? 'CREATE' : 'UPDATE',
         }
     })
 
