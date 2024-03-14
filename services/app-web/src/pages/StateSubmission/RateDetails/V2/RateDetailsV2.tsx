@@ -47,7 +47,6 @@ import {
     convertGQLRateToRateForm,
     convertRateFormToGQLRateFormData,
     generateUpdatedRates,
-    isLinkedRateForm,
 } from './rateDetailsHelpers'
 import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
 import { LinkedRateSummary } from './LinkedRateSummary'
@@ -457,15 +456,18 @@ const RateDetailsV2 = ({
                                                                     />
                                                                 )}
 
-                                                                {isLinkedRateForm(
-                                                                    rateForm
-                                                                ) ? (
-                                                                    <LinkedRateSummary
-                                                                        rateForm={
-                                                                            rateForm
-                                                                        }
-                                                                    />
-                                                                ) : (
+                                                                {rateForm.ratePreviouslySubmitted ===
+                                                                    'YES' &&
+                                                                    rateForm.id && (
+                                                                        <LinkedRateSummary
+                                                                            rateForm={
+                                                                                rateForm
+                                                                            }
+                                                                        />
+                                                                    )}
+
+                                                                {rateForm.ratePreviouslySubmitted ===
+                                                                    'NO' && (
                                                                     <SingleRateFormFields
                                                                         rateForm={
                                                                             rateForm

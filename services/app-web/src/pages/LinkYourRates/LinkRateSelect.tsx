@@ -39,7 +39,7 @@ export const LinkRateSelect = ({
     const rateNames = rates.map((rate) => {
         const revision = rate.revisions[0]
         return {
-            value: revision.id,
+            value: rate.id,
             label: (
                 <>
                     <h4>{revision.formData.rateCertificationName}</h4>
@@ -119,7 +119,7 @@ export const LinkRateSelect = ({
         if (action === 'select-option') {
             const linkedRateID = newValue.value
             // const linkedRateName = newValue.label
-            const linkedRate = rates?.find((rate) => rate.id === linkedRateID)
+            const linkedRate = rates.find((rate) => rate.id === linkedRateID)
             const linkedRateForm: FormikRateForm = convertGQLRateToRateForm(
                 getKey,
                 linkedRate
