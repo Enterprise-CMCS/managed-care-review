@@ -116,8 +116,13 @@ export const RateDetailsSummarySectionV2 = ({
     const getRateFormData = (rate: Rate | RateRevision): RateFormData => {
         const isRateRev = 'formData' in rate
         if (!isRateRev) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            return rate.draftRevision!.formData
+            // TODO: make this support an unlocked child rate.
+            if (rate.status === 'DRAFT') {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                return rate.draftRevision!.formData
+            } else {
+                return rate.revisions[0].formData
+            }
         } else {
             return rate.formData
         }
