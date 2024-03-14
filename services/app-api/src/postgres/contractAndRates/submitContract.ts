@@ -3,9 +3,9 @@ import type { ContractType } from '../../domain-models/contractAndRates'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
 import type { UpdateInfoType } from '../../domain-models'
-import { includeLatestSubmittedRateRev } from './prismaSubmittedRateHelpers'
+import { includeDraftRates } from './prismaDraftContractHelpers'
 
-type SubmitContractArgsType = {
+export type SubmitContractArgsType = {
     contractID: string // revision ID
     submittedByUserID: UpdateInfoType['updatedBy']
     submittedReason: UpdateInfoType['updatedReason']
@@ -13,7 +13,7 @@ type SubmitContractArgsType = {
 // Update the given revision
 // * invalidate relationships of previous revision by marking as outdated
 // * set the UpdateInfo
-async function submitContract(
+export async function submitContract(
     client: PrismaClient,
     args: SubmitContractArgsType
 ): Promise<ContractType | NotFoundError | Error> {
@@ -21,17 +21,16 @@ async function submitContract(
     const currentDateTime = new Date()
 
     try {
-        // Find current contract revision with related rates
-        // query only the submitted revisions on the related rates
         return await client.$transaction(async (tx) => {
-            const currentRev = await tx.contractRevisionTable.findFirst({
+            // find the current contract with related rates
+            const currentRev = await client.contractRevisionTable.findFirst({
                 where: {
                     contractID: contractID,
                     submitInfoID: null,
                 },
                 include: {
                     draftRates: {
-                        include: includeLatestSubmittedRateRev,
+                        include: includeDraftRates,
                     },
                 },
             })
@@ -42,31 +41,32 @@ async function submitContract(
                 return new NotFoundError(err)
             }
 
-            // Given related rates, confirm rates valid by submitted by checking for revisions
-            // If rates have no revisions, we know it is invalid and can throw error
+            // get the related rate revisions and any unsubmitted rates
             const relatedRateRevs = currentRev.draftRates.map(
                 (c) => c.revisions[0]
             )
-            const everyRelatedRateIsSubmitted = relatedRateRevs.every(
-                (rev) => rev !== undefined
+            const unsubmittedRates = relatedRateRevs.filter(
+                (rev) => rev.submitInfo === null
             )
-            if (!everyRelatedRateIsSubmitted) {
-                const message =
-                    'Attempted to submit a contract related to a rate that has not been submitted.'
-                console.error(message)
-                return new Error(message)
-            }
 
+            // Create the submitInfo record in the updateInfoTable
+            const submitInfo = await tx.updateInfoTable.create({
+                data: {
+                    updatedAt: currentDateTime,
+                    updatedByID: submittedByUserID,
+                    updatedReason: submittedReason,
+                },
+            })
+
+            // Update the contract to include the submitInfo ID
             const updated = await tx.contractRevisionTable.update({
                 where: {
                     id: currentRev.id,
                 },
                 data: {
                     submitInfo: {
-                        create: {
-                            updatedAt: currentDateTime,
-                            updatedByID: submittedByUserID,
-                            updatedReason: submittedReason,
+                        connect: {
+                            id: submitInfo.id,
                         },
                     },
                     rateRevisions: {
@@ -93,6 +93,18 @@ async function submitContract(
                             rateRevision: true,
                         },
                     },
+                },
+            })
+
+            // we only want to update the rateRevision's submit info if it has not already been submitted
+            await tx.rateRevisionTable.updateMany({
+                where: {
+                    id: {
+                        in: unsubmittedRates.map((rev) => rev.id),
+                    },
+                },
+                data: {
+                    submitInfoID: submitInfo.id,
                 },
             })
 
@@ -159,10 +171,7 @@ async function submitContract(
             return await findContractWithHistory(tx, contractID)
         })
     } catch (err) {
-        console.error('Prisma error submitting contract', err)
-        return err
+        const error = new Error(`Error submitting contract ${err}`)
+        return error
     }
 }
-
-export { submitContract }
-export type { SubmitContractArgsType }

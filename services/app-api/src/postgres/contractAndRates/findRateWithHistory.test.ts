@@ -9,11 +9,7 @@ import { insertDraftRate } from './insertRate'
 import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
-import {
-    must,
-    mockInsertContractArgs,
-    consoleLogFullData,
-} from '../../testHelpers'
+import { must, mockInsertContractArgs } from '../../testHelpers'
 import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
 import { findContractWithHistory } from './findContractWithHistory'
 import type { DraftContractType } from '../../domain-models/contractAndRates/contractTypes'
