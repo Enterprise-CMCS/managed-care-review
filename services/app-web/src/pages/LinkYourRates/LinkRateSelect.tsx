@@ -36,8 +36,8 @@ export const LinkRateSelect = ({
             value: revision.id,
             label: (
                 <>
-                    <h4>{revision.formData.rateCertificationName}</h4>
-                    <div style={{ lineHeight: '50%' }}>
+                    <strong>{revision.formData.rateCertificationName}</strong>
+                    <div style={{ lineHeight: '50%', fontSize: '14px' }}>
                         <p>
                             Programs:&nbsp;
                             {programNames(
@@ -106,15 +106,23 @@ export const LinkRateSelect = ({
         }
     }
 
+    //Need this to make the label searchable since it's buried in a react element
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const filterOptions = ({ label }: any, input: string) =>
+        label.props.children[0].props.children
+            ?.toLowerCase()
+            .includes(input.toLowerCase())
+
     return (
         <>
             <Select
+                defaultMenuIsOpen
                 value={defaultValues}
                 className={styles.multiSelect}
                 options={error || loading ? undefined : rateNames}
                 isSearchable
                 isMulti
-                maxMenuHeight={169}
+                maxMenuHeight={405}
                 aria-label="linked rates (required)"
                 ariaLiveMessages={{
                     onFocus,
@@ -135,6 +143,7 @@ export const LinkRateSelect = ({
                         )
                     )
                 }
+                filterOption={filterOptions}
                 {...selectProps}
             />
         </>
