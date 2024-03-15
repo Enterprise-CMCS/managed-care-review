@@ -127,7 +127,7 @@
         "@aws-sdk/client-amplify": "^3.529.1",
         "@aws-sdk/client-s3": "^3.529.1",
         "@aws-sdk/s3-request-presigner": "^3.529.1",
-        "@storybook/addon-a11y": "^6.5.15",
+        "@storybook/addon-a11y": "^8.0.0",
         "@storybook/addon-essentials": "^6.5.15",
         "@storybook/addon-links": "^6.5.15",
         "@storybook/builder-webpack5": "^6.5.4",
