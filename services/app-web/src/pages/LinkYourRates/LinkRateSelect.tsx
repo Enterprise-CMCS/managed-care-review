@@ -30,39 +30,46 @@ export const LinkRateSelect = ({
     const user = loggedInUser as StateUser
     const statePrograms = user.state.programs
 
-    const rateNames = data?.indexRates.edges.map((edge) => {
-        const revision = edge.node.revisions[0]
-        return {
-            value: revision.id,
-            label: (
-                <>
-                    <strong>{revision.formData.rateCertificationName}</strong>
-                    <div style={{ lineHeight: '50%', fontSize: '14px' }}>
-                        <p>
-                            Programs:&nbsp;
-                            {programNames(
-                                statePrograms,
-                                revision.formData.rateProgramIDs
-                            ).join(', ')}
-                        </p>
-                        <p>
-                            Rating period:&nbsp;
-                            {formatCalendarDate(
-                                revision.formData.rateDateStart
-                            )}
-                            -{formatCalendarDate(revision.formData.rateDateEnd)}
-                        </p>
-                        <p>
-                            Certification date:&nbsp;
-                            {formatCalendarDate(
-                                revision.formData.rateDateCertified
-                            )}
-                        </p>
-                    </div>
-                </>
-            ),
-        }
-    })
+    const rateNames = data?.indexRates.edges
+        .map((edge) => {
+            const revision = edge.node.revisions[0]
+            return {
+                value: revision.id,
+                label: (
+                    <>
+                        <strong>
+                            {revision.formData.rateCertificationName}
+                        </strong>
+                        <div style={{ lineHeight: '50%', fontSize: '14px' }}>
+                            <p>
+                                Programs:&nbsp;
+                                {programNames(
+                                    statePrograms,
+                                    revision.formData.rateProgramIDs
+                                ).join(', ')}
+                            </p>
+                            <p>
+                                Rating period:&nbsp;
+                                {formatCalendarDate(
+                                    revision.formData.rateDateStart
+                                )}
+                                -
+                                {formatCalendarDate(
+                                    revision.formData.rateDateEnd
+                                )}
+                            </p>
+                            <p>
+                                Certification date:&nbsp;
+                                {formatCalendarDate(
+                                    revision.formData.rateDateCertified
+                                )}
+                            </p>
+                        </div>
+                    </>
+                ),
+            }
+        })
+        .reverse()
 
     const onFocus: AriaOnFocus<LinkRateOptionType> = ({
         focused,
