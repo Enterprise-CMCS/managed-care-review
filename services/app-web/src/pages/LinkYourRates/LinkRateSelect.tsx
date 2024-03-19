@@ -18,13 +18,13 @@ export interface LinkRateOptionType {
 
 export type LinkRateSelectPropType = {
     name: string
-    initialValues: string[]
+    initialValue: string | undefined
     autofill: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
 }
 
 export const LinkRateSelect = ({
     name,
-    initialValues,
+    initialValue,
     autofill,
     ...selectProps
 }: LinkRateSelectPropType & Props<LinkRateOptionType, true>) => {
@@ -36,7 +36,7 @@ export const LinkRateSelect = ({
 
     const rates = data?.indexRates.edges.map((e) => e.node) || []
 
-    const rateNames = rates.map((rate) => {
+    const rateNames: LinkRateOptionType[] = rates.map((rate) => {
         const revision = rate.revisions[0]
         return {
             value: rate.id,
@@ -79,26 +79,9 @@ export const LinkRateSelect = ({
         }`
     }
 
-    const defaultValues =
-        initialValues.length && rateNames?.length
-            ? initialValues.map((rateId) => {
-                  const rateName = rateNames?.find(
-                      (names) => names.value === rateId
-                  )?.label.props.children[0].props.children
-
-                  if (!rateName) {
-                      return {
-                          value: rateId,
-                          label: 'Unknown rate',
-                      }
-                  }
-
-                  return {
-                      value: rateId,
-                      label: rateName,
-                  }
-              })
-            : []
+    const defaultValue: LinkRateOptionType | undefined = rateNames.find(
+        (rateOption) => rateOption.value === initialValue
+    )
 
     const noOptionsMessage = () => {
         if (loading) {
@@ -126,12 +109,6 @@ export const LinkRateSelect = ({
             )
             // put already selected fields back in place
             linkedRateForm.ratePreviouslySubmitted = 'YES'
-            linkedRateForm.linkedRates = [
-                {
-                    rateId: linkedRateID,
-                    rateName: 'LOOK_FOR_ME', // linkedRateName,
-                },
-            ]
 
             autofill(linkedRateForm)
         } else if (action === 'clear') {
@@ -147,7 +124,7 @@ export const LinkRateSelect = ({
     return (
         <>
             <Select
-                value={defaultValues}
+                value={defaultValue}
                 className={styles.multiSelect}
                 options={error || loading ? undefined : rateNames}
                 isSearchable

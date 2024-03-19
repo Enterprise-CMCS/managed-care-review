@@ -5,7 +5,7 @@ import { Fieldset, FormGroup, Label } from '@trussworks/react-uswds'
 import styles from '../StateSubmission/StateSubmissionForm.module.scss'
 import { FieldRadio } from '../../components'
 import { getIn, useFormikContext } from 'formik'
-import { LinkRateOptionType, LinkRateSelect } from './LinkRateSelect'
+import { LinkRateSelect } from './LinkRateSelect'
 import { FormikRateForm } from '../StateSubmission/RateDetails/V2/RateDetailsV2'
 import { convertGQLRateToRateForm } from '../StateSubmission/RateDetails/V2/rateDetailsHelpers'
 import { useS3 } from '../../contexts/S3Context'
@@ -21,7 +21,7 @@ export const LinkYourRates = ({
     index,
     autofill,
 }: LinkYourRatesProps): React.ReactElement | null => {
-    const { values, setFieldValue } = useFormikContext()
+    const { values } = useFormikContext()
     const { getKey } = useS3()
 
     return (
@@ -74,28 +74,8 @@ export const LinkYourRates = ({
                         key={`rateOptions-${index}`}
                         inputId={`${fieldNamePrefix}.linkedRates`}
                         name={`${fieldNamePrefix}.linkedRates`}
-                        initialValues={getIn(
-                            values,
-                            `${fieldNamePrefix}.linkedRates`
-                        ).map((item: { rateId: string; rateName: string }) =>
-                            item.rateId ? item.rateId : ''
-                        )}
+                        initialValue={getIn(values, `${fieldNamePrefix}.id`)}
                         autofill={autofill}
-                        onChange={(selectedOptions) =>
-                            setFieldValue(
-                                `${fieldNamePrefix}.linkedRates`,
-                                selectedOptions.map(
-                                    (item: LinkRateOptionType) => {
-                                        return {
-                                            rateId: item.value,
-                                            rateName:
-                                                item.label.props.children[0]
-                                                    .props.children,
-                                        }
-                                    }
-                                )
-                            )
-                        }
                     />
                 </>
             )}
