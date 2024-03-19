@@ -138,6 +138,8 @@ query indexRates {
                             modifiedNetworkAdequacyStandards
                             modifiedLengthOfContract
                             modifiedNonRiskPaymentArrangements
+                            statutoryRegulatoryAttestation
+                            statutoryRegulatoryAttestationDescription
                         }
                     }
                 }
