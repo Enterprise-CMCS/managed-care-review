@@ -101,8 +101,8 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate): For
         packagesWithSharedRateCerts:
             rateForm?.packagesWithSharedRateCerts ?? [],
         linkedRates: handleAsLinkedRate? [{
-            rateId: rate.id,
-            rateName: rateForm?.rateCertificationName ?? 'Unknown Rate'
+            rateId: rate.revisions[0].id,
+            rateName: rate.revisions[0].formData.rateCertificationName ?? 'Unknown Rate'
         }]:[],
         ratePreviouslySubmitted: handleAsLinkedRate? 'YES' : rateForm ? 'NO' : undefined
     }

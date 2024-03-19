@@ -38,7 +38,9 @@ export const LinkRateSelect = ({
                 label: (
                     <>
                         <strong>
-                            {revision.formData.rateCertificationName}
+                            {revision.formData.rateCertificationName
+                                ? revision.formData.rateCertificationName
+                                : 'Unknown rate'}
                         </strong>
                         <div style={{ lineHeight: '50%', fontSize: '14px' }}>
                             <p>

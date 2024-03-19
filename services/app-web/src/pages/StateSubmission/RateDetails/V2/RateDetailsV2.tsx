@@ -238,7 +238,7 @@ const RateDetailsV2 = ({
                             rateID: id ?? 'no-id',
                             formData: convertRateFormToGQLRateFormData(
                                 rateForms[0]
-                            ), // only grab the first rate in the array for standalone rate submissiob
+                            ), // only grab the first rate in the array for standalone rate submission
                         },
                     },
                     fetchPolicy: 'network-only',

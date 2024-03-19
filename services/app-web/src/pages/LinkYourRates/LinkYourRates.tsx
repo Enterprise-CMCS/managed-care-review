@@ -70,8 +70,11 @@ export const LinkYourRates = ({
                                         return {
                                             rateId: item.value,
                                             rateName:
-                                                item.label.props.children[0]
-                                                    .props.children,
+                                                typeof item.label === 'string'
+                                                    ? item.label
+                                                    : item.label.props
+                                                          .children[0].props
+                                                          .children,
                                         }
                                     }
                                 )
