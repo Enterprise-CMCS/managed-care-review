@@ -11,7 +11,8 @@ type RateOrErrorType = {
 type RateOrErrorArrayType = RateOrErrorType[]
 
 async function findAllRatesWithHistoryBySubmitInfo(
-    client: PrismaTransactionType
+    client: PrismaTransactionType,
+    stateCode?: string
 ): Promise<RateOrErrorArrayType | Error> {
     try {
         const rates = await client.rateTable.findMany({
@@ -23,9 +24,13 @@ async function findAllRatesWithHistoryBySubmitInfo(
                         },
                     },
                 },
-                stateCode: {
-                    not: 'AS', // exclude test state as per ADR 019
-                },
+                stateCode: stateCode
+                    ? {
+                          equals: stateCode,
+                      }
+                    : {
+                          not: 'AS', // exclude test state as per ADR 019
+                      },
             },
             include: {
                 ...includeFullRate,

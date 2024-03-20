@@ -8,8 +8,8 @@ describe('generateUpdatedRates', () => {
         {
             testValue:  [{
                 ...emptyRateForm(),
-                status: 'DRAFT'
-
+                status: 'DRAFT',
+                ratePreviouslySubmitted: 'NO',
             }] as FormikRateForm[],
             testName: 'create brand new rate',
             expectedResult: {type:'CREATE', formData: emptyRateForm(), rateID: undefined}},
@@ -17,23 +17,29 @@ describe('generateUpdatedRates', () => {
             testValue:  [{
                 ...emptyRateForm(),
                 id: 'new-child-rate-being-edited',
-                status: 'DRAFT'}]  as FormikRateForm[],
-                testName: 'edit unsubmitted child rate',
-                expectedResult: {type:'UPDATE', formData: emptyRateForm(), rateID: 'new-child-rate-being-edited',} ,
+                status: 'DRAFT',
+                ratePreviouslySubmitted: 'NO',
+            }]  as FormikRateForm[],
+            testName: 'edit unsubmitted child rate',
+            expectedResult: {type:'UPDATE', formData: emptyRateForm(), rateID: 'new-child-rate-being-edited',} ,
         } ,
         {
             testValue:  [{
                 ...emptyRateForm(),
                 id: 'existing-child-rate',
-                status: 'UNLOCKED'}]  as FormikRateForm[],
-                testName: 'edit unlocked child rate',
+                status: 'UNLOCKED',
+                ratePreviouslySubmitted: 'NO',
+            }]  as FormikRateForm[],
+            testName: 'edit unlocked child rate',
             expectedResult: {type:'UPDATE', formData: emptyRateForm(), rateID: 'existing-child-rate' } ,
         },
         {
             testValue: [{
                 ...emptyRateForm(),
                 id: 'existing-linked-rate1',
-                status: 'SUBMITTED'}]  as FormikRateForm[],
+                status: 'SUBMITTED',
+                ratePreviouslySubmitted: 'YES',
+            }]  as FormikRateForm[],
             testName: 'link submitted rate',
             expectedResult: {type:'LINK', rateID:'existing-linked-rate1', formData: undefined } ,
         },
@@ -41,8 +47,10 @@ describe('generateUpdatedRates', () => {
             testValue: [{
                 ...emptyRateForm(),
                 id: 'existing-linked-rate2',
-                status: 'RESUBMITTED'}]  as FormikRateForm[],
-                testName: 'link resubmitted rate',
+                status: 'RESUBMITTED',
+                ratePreviouslySubmitted: 'YES',
+            }]  as FormikRateForm[],
+            testName: 'link resubmitted rate',
             expectedResult: {type:'LINK', rateID: 'existing-linked-rate2', formData: undefined} ,
         },
     ]

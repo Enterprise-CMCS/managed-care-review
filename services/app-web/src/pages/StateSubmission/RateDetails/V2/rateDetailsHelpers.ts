@@ -6,7 +6,6 @@ import {
     formatFormDateForGQL,
 } from '../../../../formHelpers/formatters'
 import {
-    HealthPlanPackageStatus,
     Rate,
     RateFormData,
     UpdateContractRateInput,
@@ -14,22 +13,20 @@ import {
 import { S3ClientT } from '../../../../s3'
 import { type FormikRateForm } from './RateDetailsV2'
 
-// Right now we figure out if this is a linked rate by referencing the status. We know a rate is linked when its locked.
-const isLinkedRate = (status?: HealthPlanPackageStatus): boolean =>  status && (status === 'SUBMITTED' || status === 'RESUBMITTED')? true: false
-
 // generateUpdatedRates takes the Formik RateForm list used for multi-rates and prepares for contract with rates update mutation
 // ensure we link, create, and update the proper rates
 const generateUpdatedRates = (
     newRateForms: FormikRateForm[]
 ): UpdateContractRateInput[] => {
     const updatedRates: UpdateContractRateInput[] = newRateForms.map((form) => {
-        const { id, status, ...rateFormData } = form
+        const { id, ...rateFormData } = form
+        const isLinkedRate = form.ratePreviouslySubmitted === 'YES'
         return {
-            formData: isLinkedRate(status)
+            formData: isLinkedRate
                 ? undefined
                 : convertRateFormToGQLRateFormData(rateFormData),
             rateID: id,
-            type: isLinkedRate(status) ? 'LINK' : !id ? 'CREATE' : 'UPDATE',
+            type: isLinkedRate ? 'LINK' : !id ? 'CREATE' : 'UPDATE',
         }
     })
 
@@ -41,6 +38,7 @@ const convertRateFormToGQLRateFormData = (
     rateForm: FormikRateForm
 ): RateFormData => {
     return {
+        // intentionally do not map backend calculated fields on submit such status and rateCertificationName
         rateType: rateForm.rateType,
         rateCapitationType: rateForm.rateCapitationType,
         rateDocuments: formatDocumentsForGQL(rateForm.rateDocuments),
@@ -65,15 +63,17 @@ const convertRateFormToGQLRateFormData = (
 }
 // Convert from GQL Rate to FormikRateForm object used in the form
 // if rate is not passed in, return an empty RateForm // we need to pass in the  s3 handler because 3 urls generated client-side
+// useLatestSubmission means to pull the latest submitted info rather than the draft info
 const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate): FormikRateForm => {
-    const rateRev = rate?.draftRevision ?? undefined
+    const handleAsLinkedRate = rate?.status && rate.status !== 'DRAFT' // TODO: Make this a more sophisticated check for child-rates
+    const rateRev = handleAsLinkedRate ? rate?.revisions[0] : rate?.draftRevision
     const rateForm = rateRev?.formData
-    const handleAsLinkedRate = rate?.id && isLinkedRate(rate.status)
     return {
         id: rate?.id,
         status: rate?.status,
-        rateType: rateForm?.rateType ?? undefined, // keep null collaescing types for radio buttons to ensure error messages work properly
-        rateCapitationType: rateForm?.rateCapitationType ?? undefined, // keep null collaescing types for radio buttons to ensure error messages work properly
+        rateCertificationName: rateForm?.rateCertificationName ?? undefined,
+        rateType: rateForm?.rateType,
+        rateCapitationType: rateForm?.rateCapitationType,
         rateDateStart: formatForForm(rateForm?.rateDateStart),
         rateDateEnd: formatForForm(rateForm?.rateDateEnd),
         rateDateCertified: formatForForm(rateForm?.rateDateCertified),
@@ -100,10 +100,6 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate): For
             rateForm?.actuaryCommunicationPreference?? undefined,
         packagesWithSharedRateCerts:
             rateForm?.packagesWithSharedRateCerts ?? [],
-        linkedRates: handleAsLinkedRate? [{
-            rateId: rate.id,
-            rateName: rateForm?.rateCertificationName ?? 'Unknown Rate'
-        }]:[],
         ratePreviouslySubmitted: handleAsLinkedRate? 'YES' : rateForm ? 'NO' : undefined
     }
 }
@@ -111,5 +107,5 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate): For
 export {
     convertGQLRateToRateForm,
     convertRateFormToGQLRateFormData,
-    generateUpdatedRates,
+    generateUpdatedRates
 }
