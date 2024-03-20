@@ -16,7 +16,11 @@ describe('LinkYourRates', () => {
                 onSubmit={(values) => console.info('submitted', values)}
             >
                 <form>
-                    <LinkYourRates fieldNamePrefix="rateForms.1" index={1} />
+                    <LinkYourRates
+                        fieldNamePrefix="rateForms.1"
+                        index={1}
+                        autofill={jest.fn()}
+                    />
                 </form>
             </Formik>,
             {
@@ -48,7 +52,11 @@ describe('LinkYourRates', () => {
                 onSubmit={(values) => console.info('submitted', values)}
             >
                 <form>
-                    <LinkYourRates fieldNamePrefix="rateForms.1" index={1} />
+                    <LinkYourRates
+                        fieldNamePrefix="rateForms.1"
+                        index={1}
+                        autofill={jest.fn()}
+                    />
                 </form>
             </Formik>,
             {
@@ -83,7 +91,11 @@ describe('LinkYourRates', () => {
                 onSubmit={(values) => console.info('submitted', values)}
             >
                 <form>
-                    <LinkYourRates fieldNamePrefix="rateForms.1" index={1} />
+                    <LinkYourRates
+                        fieldNamePrefix="rateForms.1"
+                        index={1}
+                        autofill={jest.fn()}
+                    />
                 </form>
             </Formik>,
             {

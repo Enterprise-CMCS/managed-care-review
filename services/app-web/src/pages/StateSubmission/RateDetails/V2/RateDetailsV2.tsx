@@ -49,10 +49,12 @@ import {
     generateUpdatedRates,
 } from './rateDetailsHelpers'
 import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
+import { LinkedRateSummary } from './LinkedRateSummary'
 
 export type FormikRateForm = {
     id?: string // no id if its a new rate
     status?: HealthPlanPackageStatus // need to track status to know if this is a direct child or linked rate
+    rateCertificationName?: string // need to know rate name if this rate is a linked rate
     rateType: RateRevision['formData']['rateType']
     rateCapitationType: RateRevision['formData']['rateCapitationType']
     rateDateStart: RateRevision['formData']['rateDateStart']
@@ -67,13 +69,7 @@ export type FormikRateForm = {
     addtlActuaryContacts: RateRevision['formData']['addtlActuaryContacts']
     actuaryCommunicationPreference: RateRevision['formData']['actuaryCommunicationPreference']
     packagesWithSharedRateCerts: RateRevision['formData']['packagesWithSharedRateCerts']
-    linkedRates: linkedRatesDisplay[]
     ratePreviouslySubmitted?: 'YES' | 'NO'
-}
-
-export type linkedRatesDisplay = {
-    rateId?: string
-    rateName?: string
 }
 
 // We have a list of rates to enable multi-rate behavior
@@ -415,10 +411,11 @@ const RateDetailsV2 = ({
                                         {({
                                             remove,
                                             push,
+                                            replace,
                                         }: FieldArrayRenderProps) => (
                                             <>
                                                 {rateForms.map(
-                                                    (rate, index = 0) => (
+                                                    (rateForm, index = 0) => (
                                                         <SectionCard
                                                             key={index}
                                                         >
@@ -442,26 +439,45 @@ const RateDetailsV2 = ({
                                                                         index={
                                                                             index
                                                                         }
+                                                                        autofill={(
+                                                                            rateForm: FormikRateForm
+                                                                        ) => {
+                                                                            return replace(
+                                                                                index,
+                                                                                rateForm
+                                                                            )
+                                                                        }}
                                                                     />
                                                                 )}
 
-                                                                {rate.ratePreviouslySubmitted && (
+                                                                {rateForm.ratePreviouslySubmitted ===
+                                                                    'YES' &&
+                                                                    rateForm.id && (
+                                                                        <LinkedRateSummary
+                                                                            rateForm={
+                                                                                rateForm
+                                                                            }
+                                                                        />
+                                                                    )}
+
+                                                                {rateForm.ratePreviouslySubmitted ===
+                                                                    'NO' && (
                                                                     <SingleRateFormFields
                                                                         rateForm={
-                                                                            rate
+                                                                            rateForm
                                                                         }
                                                                         index={
                                                                             index
                                                                         }
+                                                                        fieldNamePrefix={fieldNamePrefix(
+                                                                            index
+                                                                        )}
                                                                         shouldValidate={
                                                                             shouldValidate
                                                                         }
                                                                         previousDocuments={
                                                                             previousDocuments
                                                                         }
-                                                                        fieldNamePrefix={fieldNamePrefix(
-                                                                            index
-                                                                        )}
                                                                     />
                                                                 )}
                                                                 {index >= 1 &&
