@@ -55,10 +55,9 @@ const useTealium = (): {
     // Add Tealium setup
     // this effect should only fire on initial app load
     useEffect(() => {
-        // Do not add tealium for local dev or review apps
-            // if (process.env.REACT_APP_AUTH_MODE !== 'IDM') {
-            //     return
-            // }
+        if (process.env.REACT_APP_STAGE_NAME === 'local') {
+            return
+        }
 
         const tealiumEnv = getTealiumEnv(
             process.env.REACT_APP_STAGE_NAME || 'main'
@@ -115,11 +114,9 @@ const useTealium = (): {
     // Add page view
     // this effect should fire on each page view or if something changes about logged in user
     useEffect(() => {
-
-        // Do not add tealium for local dev or review apps
-        // if (process.env.REACT_APP_AUTH_MODE !== 'IDM') {
-        //     return
-        // }
+        if (process.env.REACT_APP_STAGE_NAME === 'local') {
+            return
+        }
 
         const waitForUtag = async () => {
            return new Promise(resolve => setTimeout(resolve, 1000));
@@ -148,18 +145,10 @@ const useTealium = (): {
         tealium_event: TealiumEvent
         content_type?: string
     }) => {
-        // Do not add events on local dev
         if (process.env.REACT_APP_STAGE_NAME === 'local') {
-            // console.info(`mock tealium event: ${JSON.stringify(linkData)}`)
             return
         }
 
-        // Guardrail - protect against trying to call utag before its loaded.
-        if (!window.utag) {
-            console.error(
-                'PROGRAMMING ERROR: tried to use tealium utag before it was loaded'
-            )
-        }
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const utag = window.utag || { link: () => {}, view: () => {} }
 
