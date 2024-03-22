@@ -128,7 +128,7 @@ export const LinkRateSelect = ({
         }
     }
 
-    //Need this to make the label searchable since it's buried in a react element
+    //Need this to make the label searchable since the rate name is buried in a react element
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filterOptions = ({ label }: any, input: string) =>
         label.props.children[0].props.children
@@ -143,7 +143,7 @@ export const LinkRateSelect = ({
                 className={styles.multiSelect}
                 options={error || loading ? undefined : rateNames}
                 isSearchable
-                maxMenuHeight={405}
+                maxMenuHeight={400}
                 aria-label="linked rates (required)"
                 ariaLiveMessages={{
                     onFocus,
