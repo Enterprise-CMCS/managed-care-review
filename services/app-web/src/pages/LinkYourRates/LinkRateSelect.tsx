@@ -36,39 +36,46 @@ export const LinkRateSelect = ({
 
     const rates = data?.indexRates.edges.map((e) => e.node) || []
 
-    const rateNames: LinkRateOptionType[] = rates.map((rate) => {
-        const revision = rate.revisions[0]
-        return {
-            value: rate.id,
-            label: (
-                <>
-                    <h4>{revision.formData.rateCertificationName}</h4>
-                    <div style={{ lineHeight: '50%' }}>
-                        <p>
-                            Programs:&nbsp;
-                            {programNames(
-                                statePrograms,
-                                revision.formData.rateProgramIDs
-                            ).join(', ')}
-                        </p>
-                        <p>
-                            Rating period:&nbsp;
-                            {formatCalendarDate(
-                                revision.formData.rateDateStart
-                            )}
-                            -{formatCalendarDate(revision.formData.rateDateEnd)}
-                        </p>
-                        <p>
-                            Certification date:&nbsp;
-                            {formatCalendarDate(
-                                revision.formData.rateDateCertified
-                            )}
-                        </p>
-                    </div>
-                </>
-            ),
-        }
-    })
+    const rateNames: LinkRateOptionType[] = rates
+        .map((rate) => {
+            const revision = rate.revisions[0]
+            return {
+                value: rate.id,
+                label: (
+                    <>
+                        <strong>
+                            {revision.formData.rateCertificationName}
+                        </strong>
+                        <div style={{ lineHeight: '50%', fontSize: '14px' }}>
+                            <p>
+                                Programs:&nbsp;
+                                {programNames(
+                                    statePrograms,
+                                    revision.formData.rateProgramIDs
+                                ).join(', ')}
+                            </p>
+                            <p>
+                                Rating period:&nbsp;
+                                {formatCalendarDate(
+                                    revision.formData.rateDateStart
+                                )}
+                                -
+                                {formatCalendarDate(
+                                    revision.formData.rateDateEnd
+                                )}
+                            </p>
+                            <p>
+                                Certification date:&nbsp;
+                                {formatCalendarDate(
+                                    revision.formData.rateDateCertified
+                                )}
+                            </p>
+                        </div>
+                    </>
+                ),
+            }
+        })
+        .reverse()
 
     const onFocus: AriaOnFocus<LinkRateOptionType> = ({
         focused,
@@ -121,14 +128,22 @@ export const LinkRateSelect = ({
         }
     }
 
+    //Need this to make the label searchable since the rate name is buried in a react element
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const filterOptions = ({ label }: any, input: string) =>
+        label.props.children[0].props.children
+            ?.toLowerCase()
+            .includes(input.toLowerCase())
+
     return (
         <>
             <Select
+                defaultMenuIsOpen
                 value={defaultValue}
                 className={styles.multiSelect}
                 options={error || loading ? undefined : rateNames}
                 isSearchable
-                maxMenuHeight={169}
+                maxMenuHeight={400}
                 aria-label="linked rates (required)"
                 ariaLiveMessages={{
                     onFocus,
@@ -143,6 +158,7 @@ export const LinkRateSelect = ({
                 }
                 loadingMessage={() => 'Loading rate certifications...'}
                 name={name}
+                filterOption={filterOptions}
                 {...selectProps}
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onChange={onInputChange as any} // TODO see why the types definitions are messed up for react-select "single" (not multi) onChange - may need to upgrade dep if this bug was fixed
