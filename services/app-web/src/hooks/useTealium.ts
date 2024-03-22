@@ -36,13 +36,29 @@ const useTealium = (): {
         user: loggedInUser,
     })
 
+     const callUTagView = () => {
+         // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const utag = window.utag || { link: () => {}, view: () => {} }
+        const tagData: TealiumViewDataObject = {
+            content_language: 'en',
+            content_type: `${CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
+            page_name: tealiumPageName,
+            page_path: pathname,
+            site_domain: 'cms.gov',
+            site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+            site_section: `${currentRoute}`,
+            logged_in: `${Boolean(loggedInUser) ?? false}`,
+        }
+        utag.view(tagData)
+     }
+
     // Add Tealium setup
     // this effect should only fire on initial app load
     useEffect(() => {
         // Do not add tealium for local dev or review apps
-        // if (process.env.REACT_APP_AUTH_MODE !== 'IDM') {
-        //     return
-        // }
+            // if (process.env.REACT_APP_AUTH_MODE !== 'IDM') {
+            //     return
+            // }
 
         const tealiumEnv = getTealiumEnv(
             process.env.REACT_APP_STAGE_NAME || 'main'
@@ -116,22 +132,12 @@ const useTealium = (): {
                 recordJSException('Analytics did not load in time')
                 return
             } else {
-                // eslint-disable-next-line @typescript-eslint/no-empty-function
-                const utag = window.utag || { link: () => {}, view: () => {} }
-                const tagData: TealiumViewDataObject = {
-                    content_language: 'en',
-                    content_type: `${CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
-                    page_name: tealiumPageName,
-                    page_path: pathname,
-                    site_domain: 'cms.gov',
-                    site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
-                    site_section: `${currentRoute}`,
-                    logged_in: `${Boolean(loggedInUser) ?? false}`,
-                }
-                utag.view(tagData)
+                callUTagView()
              }
             }
             ).catch(() => { return })
+        } else {
+            callUTagView()
         }
 
     }, [currentRoute, loggedInUser, pathname, tealiumPageName])
