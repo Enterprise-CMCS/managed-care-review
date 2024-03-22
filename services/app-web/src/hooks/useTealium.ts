@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { usePage } from '../contexts/PageContext'
 import { useCurrentRoute } from './useCurrentRoute'
 import { createScript } from './useScript'
@@ -36,7 +36,7 @@ const useTealium = (): {
         user: loggedInUser,
     })
 
-     const callUTagView = () => {
+     const callUTagView = useCallback(() => {
          // eslint-disable-next-line @typescript-eslint/no-empty-function
         const utag = window.utag || { link: () => {}, view: () => {} }
         const tagData: TealiumViewDataObject = {
@@ -50,7 +50,7 @@ const useTealium = (): {
             logged_in: `${Boolean(loggedInUser) ?? false}`,
         }
         utag.view(tagData)
-     }
+     },[currentRoute,tealiumPageName, pathname, loggedInUser])
 
     // Add Tealium setup
     // this effect should only fire on initial app load
@@ -125,22 +125,23 @@ const useTealium = (): {
            return new Promise(resolve => setTimeout(resolve, 1000));
         }
 
-        // All of this is a guardrail - protect against trying to call utag before its loaded
+
         if (!window.utag) {
-            waitForUtag().then( () =>{
+            // All of this is a guardrail - protect against trying to call utag before its loaded on initial load
+            waitForUtag().finally( () =>{
             if (!window.utag) {
                 recordJSException('Analytics did not load in time')
                 return
             } else {
                 callUTagView()
              }
-            }
-            ).catch(() => { return })
+            })
         } else {
+            // We are in a SPA page route change after initial load
             callUTagView()
         }
 
-    }, [currentRoute, loggedInUser, pathname, tealiumPageName])
+    }, [currentRoute, loggedInUser, pathname, tealiumPageName, callUTagView])
 
     // Add user event
     const logTealiumEvent = (linkData: {
