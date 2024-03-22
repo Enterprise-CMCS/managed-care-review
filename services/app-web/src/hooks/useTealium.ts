@@ -40,9 +40,9 @@ const useTealium = (): {
     // this effect should only fire on initial app load
     useEffect(() => {
         // Do not add tealium for local dev or review apps
-        if (process.env.REACT_APP_AUTH_MODE !== 'IDM') {
-            return
-        }
+        // if (process.env.REACT_APP_AUTH_MODE !== 'IDM') {
+        //     return
+        // }
 
         const tealiumEnv = getTealiumEnv(
             process.env.REACT_APP_STAGE_NAME || 'main'
@@ -101,9 +101,9 @@ const useTealium = (): {
     useEffect(() => {
 
         // Do not add tealium for local dev or review apps
-        if (process.env.REACT_APP_AUTH_MODE !== 'IDM') {
-            return
-        }
+        // if (process.env.REACT_APP_AUTH_MODE !== 'IDM') {
+        //     return
+        // }
 
         const waitForUtag = async () => {
            return new Promise(resolve => setTimeout(resolve, 1000));
