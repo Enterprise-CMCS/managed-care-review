@@ -152,4 +152,49 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
             ])
         )
     })
+
+    it('can return rates only for a specific state if stateCode passed in', async () => {
+        const client = await sharedTestPrismaClient()
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                stateCode: 'NM',
+            },
+        })
+
+        const rateDataForMN = must(
+            await insertDraftRate(
+                client,
+                mockInsertRateArgs({
+                    stateCode: 'MN',
+                    rateCertificationName: 'one rate',
+                })
+            )
+        )
+        const submittedRateMinnesota = must(
+            await submitRate(client, {
+                rateID: rateDataForMN.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'rateOne submit',
+            })
+        )
+
+        // call the find by submit info function
+        const rates = must(
+            await findAllRatesWithHistoryBySubmitInfo(client, 'MN')
+        )
+
+        // expect our MN rate to not be in the results
+        expect(rates).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    rateID: submittedRateMinnesota.id,
+                }),
+            ])
+        )
+    })
 })

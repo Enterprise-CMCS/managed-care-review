@@ -123,9 +123,9 @@ type Store = {
     findAllContractsWithHistoryBySubmitInfo: () => Promise<
         ContractOrErrorArrayType | Error
     >
-    findAllRatesWithHistoryBySubmitInfo: () => Promise<
-        RateOrErrorArrayType | Error
-    >
+    findAllRatesWithHistoryBySubmitInfo: (
+        stateCode?: string
+    ) => Promise<RateOrErrorArrayType | Error>
 
     submitContract: (
         args: SubmitContractArgsType

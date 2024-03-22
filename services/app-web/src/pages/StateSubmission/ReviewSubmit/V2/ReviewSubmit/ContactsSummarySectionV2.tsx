@@ -12,7 +12,7 @@ import {
     DataDetailContactField,
 } from '../../../../../components/DataDetail'
 import { SectionCard } from '../../../../../components/SectionCard'
-import { Contract } from '../../../../../gen/gqlClient'
+import { Contract, RateRevision } from '../../../../../gen/gqlClient'
 
 export type ContactsSummarySectionProps = {
     contract: Contract
@@ -43,9 +43,14 @@ export const ContactsSummarySection = ({
     const contractFormData =
         contract.draftRevision?.formData ||
         contract.packageSubmissions[0].contractRevision.formData
-    const rateRev = contract.draftRates
-        ? contract.draftRates[0].draftRevision
-        : contract.packageSubmissions[0].rateRevisions[0]
+
+    let rateRev: RateRevision | undefined = undefined
+    if (contractFormData.submissionType === 'CONTRACT_AND_RATES') {
+        rateRev =
+            (contract.draftRates
+                ? contract.draftRates[0].draftRevision
+                : contract.packageSubmissions[0].rateRevisions[0]) || undefined
+    }
     return (
         <SectionCard id="stateContacts" className={styles.summarySection}>
             <SectionHeader
