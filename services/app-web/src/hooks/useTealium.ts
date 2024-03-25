@@ -30,13 +30,17 @@ const useTealium = (): {
     const { currentRoute, pathname } = useCurrentRoute()
     const { heading } = usePage()
     const { loggedInUser } = useAuth()
-    const tealiumPageName = getTealiumPageName({
-        heading,
-        route: currentRoute,
-        user: loggedInUser,
-    })
+
+    const waitForUtag = async () => {
+        return new Promise(resolve => setTimeout(resolve, 1000));
+     }
 
      const callUTagView = useCallback(() => {
+        const tealiumPageName = getTealiumPageName({
+            heading,
+            route: currentRoute,
+            user: loggedInUser,
+        })
          // eslint-disable-next-line @typescript-eslint/no-empty-function
         const utag = window.utag || { link: () => {}, view: () => {} }
         const tagData: TealiumViewDataObject = {
@@ -50,14 +54,15 @@ const useTealium = (): {
             logged_in: `${Boolean(loggedInUser) ?? false}`,
         }
         utag.view(tagData)
-     },[currentRoute,tealiumPageName, pathname, loggedInUser])
+        console.log('utag view', tagData)
+     },[currentRoute, heading, pathname, loggedInUser])
 
     // Add Tealium setup
     // this effect should only fire on initial app load
     useEffect(() => {
-        if (process.env.REACT_APP_STAGE_NAME === 'local') {
-            return
-        }
+        // if (process.env.REACT_APP_STAGE_NAME === 'local') {
+        //     return
+        // }
 
         const tealiumEnv = getTealiumEnv(
             process.env.REACT_APP_STAGE_NAME || 'main'
@@ -105,25 +110,10 @@ const useTealium = (): {
         loadTagsSnippet.appendChild(inlineScript)
 
         document.body.appendChild(loadTagsSnippet)
-        return () => {
-            // document.body.removeChild(loadTagsSnippet)
-            document.head.removeChild(initializeTagManagerSnippet)
-        }
-    }, [])
-
-    // Add page view
-    // this effect should fire on each page view or if something changes about logged in user
-    useEffect(() => {
-        if (process.env.REACT_APP_STAGE_NAME === 'local') {
-            return
-        }
-
-        const waitForUtag = async () => {
-           return new Promise(resolve => setTimeout(resolve, 1000));
-        }
 
 
         if (!window.utag) {
+            console.log('initial load')
             // All of this is a guardrail - protect against trying to call utag before its loaded on initial load
             waitForUtag().finally( () =>{
             if (!window.utag) {
@@ -134,11 +124,32 @@ const useTealium = (): {
              }
             })
         } else {
-            // We are in a SPA page route change after initial load
+            console.log('initial load')
             callUTagView()
         }
 
-    }, [currentRoute, loggedInUser, pathname, tealiumPageName, callUTagView])
+        return () => {
+            // document.body.removeChild(loadTagsSnippet)
+            document.head.removeChild(initializeTagManagerSnippet)
+        }
+    }, [])
+
+    // Add page view
+    // this effect should fire on each page view or if something changes about logged in user
+    useEffect(() => {
+        // if (process.env.REACT_APP_STAGE_NAME === 'local') {
+        //     return
+        // }
+
+        // We are in a SPA page route change after initial load
+        console.log(currentRoute, loggedInUser)
+        if (window.utag && loggedInUser !== undefined) {
+            console.log('page view')
+            // callUTagView()
+        }
+
+
+    }, [currentRoute, loggedInUser])
 
     // Add user event
     const logTealiumEvent = (linkData: {
