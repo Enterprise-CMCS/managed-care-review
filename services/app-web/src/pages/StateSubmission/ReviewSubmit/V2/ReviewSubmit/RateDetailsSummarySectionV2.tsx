@@ -88,6 +88,8 @@ export const RateDetailsSummarySectionV2 = ({
         null
     )
 
+    // For V2 we only call this function and show deprecated shared rates across packages when the submission for historical data
+    // if submission is being edited, don't show this UI
     const refreshPackagesWithSharedRateCert = (
         rateFormData: RateFormData
     ): SharedRateCertDisplay[] | undefined => {
@@ -333,9 +335,13 @@ export const RateDetailsSummarySectionV2 = ({
                                     documentDateLookupTable={
                                         documentDateLookupTable
                                     }
-                                    packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
-                                        rateFormData
-                                    )}
+                                    packagesWithSharedRateCerts={
+                                        isEditing
+                                            ? undefined
+                                            : refreshPackagesWithSharedRateCert(
+                                                  rateFormData
+                                              )
+                                    }
                                     multipleDocumentsAllowed={false}
                                     caption="Rate certification"
                                     documentCategory="Rate certification"
@@ -349,9 +355,13 @@ export const RateDetailsSummarySectionV2 = ({
                                     documentDateLookupTable={
                                         documentDateLookupTable
                                     }
-                                    packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
-                                        rateFormData
-                                    )}
+                                    packagesWithSharedRateCerts={
+                                        isEditing
+                                            ? undefined
+                                            : refreshPackagesWithSharedRateCert(
+                                                  rateFormData
+                                              )
+                                    }
                                     caption="Rate supporting documents"
                                     isSupportingDocuments
                                     documentCategory="Rate-supporting"
