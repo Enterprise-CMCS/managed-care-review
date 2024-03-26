@@ -373,65 +373,6 @@ describe('unlockContract', () => {
             submittedRate.revisions[0].id
         )
     })
-    it('errors when submitting a contract that has a draft rate', async () => {
-        const client = await sharedTestPrismaClient()
-
-        const stateUser = await client.user.create({
-            data: {
-                id: uuidv4(),
-                givenName: 'Aang',
-                familyName: 'Avatar',
-                email: 'aang@example.com',
-                role: 'STATE_USER',
-                stateCode: 'NM',
-            },
-        })
-
-        const draftContractData = mockInsertContractArgs({
-            submissionDescription: 'Contract 1.0',
-        })
-
-        //Creat a draft contract and draft rate
-        const contract = must(
-            await insertDraftContract(client, draftContractData)
-        )
-        const rate = must(
-            await insertDraftRate(client, {
-                stateCode: 'MN',
-                rateCertificationName: 'rate 1.0',
-            })
-        )
-
-        if (!rate.draftRevision) {
-            throw new Error(
-                'Unexpected error: draft rate is missing a draftRevision.'
-            )
-        }
-
-        // Connect draft contract to submitted rate
-        must(
-            await updateDraftContractWithRates(client, {
-                contractID: contract.id,
-                formData: {
-                    submissionType: 'CONTRACT_AND_RATES',
-                    submissionDescription: 'contract 1.0',
-                    contractType: 'BASE',
-                    programIDs: ['PMAP'],
-                    populationCovered: 'MEDICAID',
-                    riskBasedContract: false,
-                },
-                rateFormDatas: [rate.draftRevision?.formData],
-            })
-        )
-
-        // Submit contract
-        const submittedContract = await submitContract(client, {
-            contractID: contract.id,
-            submittedByUserID: stateUser.id,
-            submittedReason: 'Submit contract 1.0',
-        })
-        expect(submittedContract).toBeInstanceOf(Error)
-    })
     it('errors when unlocking a draft contract or rate', async () => {
         const client = await sharedTestPrismaClient()
 

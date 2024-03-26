@@ -1,8 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
-import {
-    mockContractRevision,
-    mockContractData,
-} from '../../testHelpers/'
+import { mockContractRevision, mockContractData } from '../../testHelpers/'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import type { ContractTableFullPayload } from './prismaSubmittedContractHelpers'
 

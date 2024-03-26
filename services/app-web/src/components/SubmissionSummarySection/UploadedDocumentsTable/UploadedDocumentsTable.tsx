@@ -17,7 +17,7 @@ export type UploadedDocumentsTableProps = {
     documents: SubmissionDocument[] | GenericDocument[]
     caption: string | null
     packagesWithSharedRateCerts?: SharedRateCertDisplay[] // revisit field after rates refactor
-    documentDateLookupTable: DocumentDateLookupTableType
+    documentDateLookupTable?: DocumentDateLookupTableType
     isSupportingDocuments?: boolean // delete after rates refactor
     multipleDocumentsAllowed?: boolean
     documentCategory?: string // if this prop is not included, do not show category column - delete after rates refactor
@@ -52,7 +52,11 @@ export const UploadedDocumentsTable = ({
     // dates will be undefined in lookup table we are dealing with a new initial submission
     const canDisplayDateAddedForDocument = (doc: DocumentWithS3Data) => {
         const documentLookupKey = doc.sha256
-        return documentLookupKey && documentDateLookupTable[documentLookupKey]
+        return (
+            documentLookupKey &&
+            documentDateLookupTable &&
+            documentDateLookupTable[documentLookupKey]
+        )
     }
 
     const shouldHaveNewTag = (doc: DocumentWithS3Data) => {
@@ -190,7 +194,8 @@ export const UploadedDocumentsTable = ({
                                 </td>
                             )}
                             <td>
-                                {canDisplayDateAddedForDocument(doc) ? (
+                                {canDisplayDateAddedForDocument(doc) &&
+                                documentDateLookupTable ? (
                                     dayjs(
                                         documentDateLookupTable[doc.sha256]
                                     ).format('M/D/YY')

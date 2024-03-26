@@ -22,6 +22,7 @@ import {
     Program,
     RateRevision,
     RateFormData,
+    HealthPlanPackageStatus,
 } from '../../../../../gen/gqlClient'
 
 export type RateDetailsSummarySectionV2Props = {
@@ -32,6 +33,18 @@ export type RateDetailsSummarySectionV2Props = {
     submissionName: string
     statePrograms: Program[]
     onDocumentError?: (error: true) => void
+}
+
+type SharedRateCertDisplay = {
+    packageId?: string
+    packageName?: string
+}
+type PackageNameType = string
+type PackageNamesLookupType = {
+    [id: string]: {
+        packageName: PackageNameType
+        status: HealthPlanPackageStatus
+    }
 }
 
 export function renderDownloadButton(
@@ -57,6 +70,7 @@ export const RateDetailsSummarySectionV2 = ({
     submissionName,
     statePrograms,
     onDocumentError,
+    isCMSUser,
 }: RateDetailsSummarySectionV2Props): React.ReactElement => {
     const isSubmitted = contract.status === 'SUBMITTED'
     const isEditing = !isSubmitted && editNavigateTo !== undefined
@@ -70,6 +84,29 @@ export const RateDetailsSummarySectionV2 = ({
     const [zippedFilesURL, setZippedFilesURL] = useState<
         string | undefined | Error
     >(undefined)
+    const [packageNamesLookup] = React.useState<PackageNamesLookupType | null>(
+        null
+    )
+
+    const refreshPackagesWithSharedRateCert = (
+        rateFormData: RateFormData
+    ): SharedRateCertDisplay[] | undefined => {
+        return rateFormData.packagesWithSharedRateCerts?.map(
+            ({ packageId, packageName }) => {
+                const refreshedName =
+                    packageId &&
+                    packageNamesLookup &&
+                    packageNamesLookup[packageId]?.packageName
+                const isDraftText =
+                    isCMSUser && !refreshedName ? ' (Draft)' : ''
+                return {
+                    packageId,
+                    packageName:
+                        refreshedName ?? `${packageName}${isDraftText}`,
+                }
+            }
+        )
+    }
 
     const rateCapitationType = (rate: Rate | RateRevision) => {
         const rateFormData = getRateFormData(rate)
@@ -116,8 +153,13 @@ export const RateDetailsSummarySectionV2 = ({
     const getRateFormData = (rate: Rate | RateRevision): RateFormData => {
         const isRateRev = 'formData' in rate
         if (!isRateRev) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            return rate.draftRevision!.formData
+            // TODO: make this support an unlocked child rate.
+            if (rate.status === 'DRAFT') {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                return rate.draftRevision!.formData
+            } else {
+                return rate.revisions[0].formData
+            }
         } else {
             return rate.formData
         }
@@ -291,6 +333,9 @@ export const RateDetailsSummarySectionV2 = ({
                                     documentDateLookupTable={
                                         documentDateLookupTable
                                     }
+                                    packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
+                                        rateFormData
+                                    )}
                                     multipleDocumentsAllowed={false}
                                     caption="Rate certification"
                                     documentCategory="Rate certification"
@@ -304,6 +349,9 @@ export const RateDetailsSummarySectionV2 = ({
                                     documentDateLookupTable={
                                         documentDateLookupTable
                                     }
+                                    packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
+                                        rateFormData
+                                    )}
                                     caption="Rate supporting documents"
                                     isSupportingDocuments
                                     documentCategory="Rate-supporting"

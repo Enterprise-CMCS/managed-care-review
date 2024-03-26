@@ -21,7 +21,7 @@ import {
     domainToBase64,
     protoToBase64,
 } from '../../common-code/proto/healthPlanFormDataProto'
-import { HealthPlanPackage, UpdateInformation, Contract, Rate } from '../../gen/gqlClient'
+import { HealthPlanPackage, UpdateInformation} from '../../gen/gqlClient'
 import { mockMNState } from './stateMock'
 
 function mockDraft(

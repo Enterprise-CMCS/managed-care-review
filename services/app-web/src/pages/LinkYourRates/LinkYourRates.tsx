@@ -5,18 +5,24 @@ import { Fieldset, FormGroup, Label } from '@trussworks/react-uswds'
 import styles from '../StateSubmission/StateSubmissionForm.module.scss'
 import { FieldRadio } from '../../components'
 import { getIn, useFormikContext } from 'formik'
-import { LinkRateOptionType, LinkRateSelect } from './LinkRateSelect'
+import { LinkRateSelect } from './LinkRateSelect'
+import { FormikRateForm } from '../StateSubmission/RateDetails/V2/RateDetailsV2'
+import { convertGQLRateToRateForm } from '../StateSubmission/RateDetails/V2/rateDetailsHelpers'
+import { useS3 } from '../../contexts/S3Context'
 
 export type LinkYourRatesProps = {
     fieldNamePrefix: string
     index: number
+    autofill: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
 }
 
 export const LinkYourRates = ({
     fieldNamePrefix,
     index,
+    autofill,
 }: LinkYourRatesProps): React.ReactElement | null => {
-    const { values, setFieldValue } = useFormikContext()
+    const { values } = useFormikContext()
+    const { getKey } = useS3()
 
     return (
         <FormGroup data-testid="link-your-rates">
@@ -33,6 +39,12 @@ export const LinkYourRates = ({
                     name={`${fieldNamePrefix}.ratePreviouslySubmitted`}
                     label="No, this rate certification was not included with any other submissions"
                     value={'NO'}
+                    onChange={() => {
+                        // when someone picks an option, reset the form
+                        const emptyRateForm = convertGQLRateToRateForm(getKey)
+                        emptyRateForm.ratePreviouslySubmitted = 'NO'
+                        autofill(emptyRateForm)
+                    }}
                     aria-required
                 />
                 <FieldRadio
@@ -40,6 +52,12 @@ export const LinkYourRates = ({
                     name={`${fieldNamePrefix}.ratePreviouslySubmitted`}
                     label="Yes, this rate certification is part of another submission"
                     value={'YES'}
+                    onChange={() => {
+                        // when someone picks an option, reset the form
+                        const emptyRateForm = convertGQLRateToRateForm(getKey)
+                        emptyRateForm.ratePreviouslySubmitted = 'YES'
+                        autofill(emptyRateForm)
+                    }}
                     aria-required
                 />
             </Fieldset>
@@ -56,25 +74,8 @@ export const LinkYourRates = ({
                         key={`rateOptions-${index}`}
                         inputId={`${fieldNamePrefix}.linkedRates`}
                         name={`${fieldNamePrefix}.linkedRates`}
-                        initialValues={getIn(
-                            values,
-                            `${fieldNamePrefix}.linkedRates`
-                        ).map((item: { rateId: string; rateName: string }) =>
-                            item.rateId ? item.rateId : ''
-                        )}
-                        onChange={(selectedOptions) =>
-                            setFieldValue(
-                                `${fieldNamePrefix}.linkedRates`,
-                                selectedOptions.map(
-                                    (item: LinkRateOptionType) => {
-                                        return {
-                                            rateId: item.value,
-                                            rateName: item.label,
-                                        }
-                                    }
-                                )
-                            )
-                        }
+                        initialValue={getIn(values, `${fieldNamePrefix}.id`)}
+                        autofill={autofill}
                     />
                 </>
             )}
