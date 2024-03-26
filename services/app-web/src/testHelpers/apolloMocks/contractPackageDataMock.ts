@@ -147,6 +147,7 @@ function mockContractPackageSubmitted(
             },
             submittedRevisions: [],
             contractRevision: {
+                contractName: 'MCR-MN-0005-SNBC',
                 createdAt: new Date('01/01/2024'),
                 updatedAt: new Date('12/31/2024'),
                 id: '123',
