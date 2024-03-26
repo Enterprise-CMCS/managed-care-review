@@ -154,16 +154,20 @@ const RateDetailsV2 = ({
         }
     }, [focusNewRate])
 
+    const pageHeading = displayAsStandaloneRate
+        ? fetchRateData?.fetchRate.rate.draftRevision?.formData
+              .rateCertificationName
+        : fetchContractData?.fetchContract.contract?.draftRevision?.contractName
+    if (pageHeading) updateHeading({ customHeading: pageHeading })
     const [updateDraftContractRates, { error: updateContractError }] =
         useUpdateDraftContractRatesMutation()
     const [submitRate, { error: submitRateError }] = useSubmitRateMutation()
 
     // Set up data for form. Either based on contract API (for multi rate) or rates API (for edit and submit of standalone rate)
     const ratesFromContract =
-        fetchContractData?.fetchContract.contract.draftRates // TODO WHEN WE IMPLEMENT UPDATE API, THIS SHOULD ALSO LOAD FROM ANY LINKED RATES
+        fetchContractData?.fetchContract.contract.draftRates
     const initialRequestLoading = fetchContractLoading || fetchRateLoading
     const initialRequestError = fetchContractError || fetchRateError
-    // const submitRequestLoading = updateContractLoading
     const submitRequestError = updateContractError || submitRateError
     const apiError = initialRequestError || submitRequestError
     const previousDocuments: string[] = []
