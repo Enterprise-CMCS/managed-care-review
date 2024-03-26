@@ -246,6 +246,7 @@ fragment contractRevisionFragment on ContractRevision {
     id
     createdAt
     updatedAt
+    contractName
 
     submitInfo {
         updatedAt

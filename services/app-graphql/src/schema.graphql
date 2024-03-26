@@ -1301,6 +1301,11 @@ type ContractRevision {
 
     "formData is all the contract specific info part of this submission"
     formData: ContractFormData!
+    """
+    Represents the name of the contract pacakge.
+    This value is auto generated based on contract state number, contract type, dates, and state program details"\
+    """
+    contractName: String!
 }
 
 "SubmittableRevision is what can appear in a submission"

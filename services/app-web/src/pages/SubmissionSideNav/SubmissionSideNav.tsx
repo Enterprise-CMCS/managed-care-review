@@ -169,7 +169,7 @@ export const SubmissionSideNav = () => {
         >
             <GridContainer className={styles.container}>
                 {showSidebar && (
-                    <div className={styles.sideNavContainer}>
+                    <div className={styles.verticalNavContainer}>
                         <div className={styles.backLinkContainer}>
                             <Link
                                 asCustom={NavLink}

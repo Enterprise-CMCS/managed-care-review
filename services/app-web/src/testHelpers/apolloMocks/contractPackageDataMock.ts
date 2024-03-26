@@ -15,8 +15,9 @@ function mockContractPackageDraft(
         stateNumber: 5,
         draftRevision: {
             id: '123',
-            createdAt: new Date('01/01/2024'),
-            updatedAt: new Date('12/31/2024'),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            contractName: 'MCR-0005-alvhalfhdsalf',
             formData: {
                 programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                 populationCovered: 'MEDICAID',
@@ -65,7 +66,7 @@ function mockContractPackageDraft(
                 statutoryRegulatoryAttestationDescription: "everything meets regulatory attestation"
             }
         },
-        
+
         draftRates: [
             {
                 id: '123',
@@ -118,7 +119,7 @@ function mockContractPackageDraft(
                         packagesWithSharedRateCerts: [],
                     }
                 }
-                
+
             },
         ],
         packageSubmissions: [],
@@ -146,6 +147,7 @@ function mockContractPackageSubmitted(
             },
             submittedRevisions: [],
             contractRevision: {
+                contractName: 'MCR-MN-0005-SNBC',
                 createdAt: new Date('01/01/2024'),
                 updatedAt: new Date('12/31/2024'),
                 id: '123',
@@ -197,7 +199,7 @@ function mockContractPackageSubmitted(
                     createdAt: new Date('01/01/2023'),
                     updatedAt: new Date('01/01/2023'),
                     contractRevisions: [],
-                    formData: {                  
+                    formData: {
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
                         rateDocuments: [
@@ -231,7 +233,7 @@ function mockContractPackageSubmitted(
                             },
                         ],
                         actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                        packagesWithSharedRateCerts: []      
+                        packagesWithSharedRateCerts: []
                     }
                 },
             ],
