@@ -754,30 +754,25 @@ describe('RateDetailsSummarySection', () => {
         ).toBeNull()
     })
 
-    it('renders all necessary information for documents with shared rate certifications', async () => {
-        const draftContract = mockContractPackageDraft()
-        if (
-            draftContract.draftRevision &&
-            draftContract.draftRates &&
-            draftContract.draftRates[0].draftRevision
-        ) {
-            draftContract.draftRates[0].draftRevision.formData.packagesWithSharedRateCerts =
-                [
-                    {
-                        packageId: '333b4225-5b49-4e82-aa71-be0d33d7418d',
-                        packageName: 'MCR-MN-0001-SNBC',
-                    },
-                    {
-                        packageId: '21467dba-6ae8-11ed-a1eb-0242ac120002',
-                        packageName: 'MCR-MN-0002-PMAP',
-                    },
-                ]
-        }
+    it('renders shared rate certifications when submission is locked', async () => {
+        const submittedContract = mockContractPackageSubmitted()
+
+        submittedContract.packageSubmissions[0].rateRevisions[0].formData.packagesWithSharedRateCerts =
+            [
+                {
+                    packageId: '333b4225-5b49-4e82-aa71-be0d33d7418d',
+                    packageName: 'MCR-MN-0001-SNBC',
+                },
+                {
+                    packageId: '21467dba-6ae8-11ed-a1eb-0242ac120002',
+                    packageName: 'MCR-MN-0002-PMAP',
+                },
+            ]
 
         renderWithProviders(
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                contract={draftContract}
+                contract={submittedContract}
                 editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
@@ -826,6 +821,51 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('does not render shared rate cert info if none are present', async () => {
+        renderWithProviders(
+            <RateDetailsSummarySection
+                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
+                contract={draftContract}
+                editNavigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+            />,
+            {
+                apolloProvider,
+            }
+        )
+        await waitFor(() => {
+            const rateDocsTable = screen.getByRole('table', {
+                name: /Rate certification/,
+            })
+            expect(
+                within(rateDocsTable).queryByTestId('tag')
+            ).not.toBeInTheDocument()
+            expect(
+                within(rateDocsTable).queryByText('Linked submissions')
+            ).not.toBeInTheDocument()
+        })
+    })
+
+    it('does not render shared rate cert info if submission is being unlocked and being edited', async () => {
+        const draftContract = mockContractPackageDraft()
+        if (
+            draftContract.draftRevision &&
+            draftContract.draftRates &&
+            draftContract.draftRates[0].draftRevision
+        ) {
+            draftContract.draftRates[0].draftRevision.formData.packagesWithSharedRateCerts =
+                [
+                    {
+                        packageId: '333b4225-5b49-4e82-aa71-be0d33d7418d',
+                        packageName: 'MCR-MN-0001-SNBC',
+                    },
+                    {
+                        packageId: '21467dba-6ae8-11ed-a1eb-0242ac120002',
+                        packageName: 'MCR-MN-0002-PMAP',
+                    },
+                ]
+        }
+
         renderWithProviders(
             <RateDetailsSummarySection
                 documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
