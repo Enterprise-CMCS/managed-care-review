@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { RateDetailsV2 } from './RateDetailsV2'
 import {
     TEST_DOC_FILE,
@@ -290,10 +290,10 @@ describe('RateDetailsv2', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchDraftRateMockSuccess({ id: rateID }),
                             fetchContractMockSuccess({
                                 contract: {
                                     id: 'test-abc-123',
+                                    draftRates: []
                                 },
                             }),
                         ],
@@ -305,8 +305,11 @@ describe('RateDetailsv2', () => {
             )
             await screen.findByText('Rate Details')
 
-            const notLinked = screen.getByLabelText('No, this rate certification was not included with any other submissions')
-            await userEvent.click(notLinked)
+            const notLinked = screen.getByText('Was this rate certification included with another submission?').parentElement
+            if (!(notLinked)) {
+                throw new Error('these parents should all exist')
+            }
+            await userEvent.click(within(notLinked).getByLabelText('No, this rate certification was not included with any other submissions'))
             screen.findByText('Rate certification 1')
             const input = screen.getByLabelText(
                 'Upload one rate certification document'
@@ -315,22 +318,27 @@ describe('RateDetailsv2', () => {
                 name: 'Continue',
             })
 
+
             expect(input).toBeInTheDocument()
             await userEvent.upload(input, TEST_DOC_FILE)
-            await userEvent.upload(input, [])
-            await userEvent.upload(input, TEST_DOC_FILE)
-            expect(submitButton).not.toHaveAttribute('aria-disabled')
-            // await waitFor(() => {
-            //     // expect(notLinked).toBe('')
-            //     // screen.findAllByText('notLinked')
-            // })
-            await userEvent.click(submitButton)
-            expect(submitButton).toHaveAttribute('aria-disabled', 'true')
+            // await userEvent.upload(input, [])
+            // await userEvent.upload(input, TEST_DOC_FILE)
+            await screen.findByText(TEST_DOC_FILE.name)
+            
+            // trigger validations
+            await waitFor(() => {
+                screen.findByText(/1 complete/)
+                screen.debug()
+                userEvent.click(submitButton)
+                screen.getByText('hello')
 
-            // expect(submitButton).toHaveAttribute('aria-disabled')
+                expect(screen.getByText('hello')).toBe('h')
+                expect(submitButton).toHaveAttribute('aria-disabled', 'true')
+            })
+
             await screen.findAllByText(
-                'You must remove all documents with error messages before continuing'
-            )
+                'There are 8 errors on this page'
+            ) 
             // expect(submitButton).toHaveAttribute('aria-disabled', 'true')
         })
 
