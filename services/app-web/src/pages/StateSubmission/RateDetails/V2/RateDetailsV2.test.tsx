@@ -325,8 +325,8 @@ describe('RateDetailsv2', () => {
             screen.findByText(/1 complete/)
             
             // trigger validations
+            await userEvent.click(submitButton)
             await waitFor(() => {
-                userEvent.click(submitButton)
 
                 expect(submitButton).toHaveAttribute('aria-disabled', 'true')
             })
