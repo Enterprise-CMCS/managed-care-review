@@ -1,7 +1,6 @@
 import React from 'react'
 import styles from './Errors.module.scss'
 
-import { PageHeading } from '../../components/PageHeading'
 import { GridContainer } from '@trussworks/react-uswds'
 import { ApolloError } from '@apollo/client'
 import {
@@ -10,6 +9,7 @@ import {
 } from '../../gqlHelpers/apolloErrors'
 import { ErrorAlertFailedRequest, ErrorAlertSignIn } from '../../components'
 import { useAuth } from '../../contexts/AuthContext'
+import { usePage } from '../../contexts/PageContext'
 
 /*
     For use with an unknown ApolloError coming back from API requests
@@ -28,11 +28,12 @@ export const ErrorFailedRequestPage = ({
     const { loginStatus } = useAuth()
     const isAuthenticated = loginStatus === 'LOGGED_IN'
     handleApolloError(error, isAuthenticated)
-
+    const { updateHeading } = usePage()
+    updateHeading({ customHeading: 'Error' })
     return (
         <section data-testid={testID} className={styles.errorsContainer}>
             <GridContainer>
-                <PageHeading> Error </PageHeading>
+                <h1> Error</h1>
                 {isLikelyUserAuthError(error, isAuthenticated) ? (
                     <ErrorAlertSignIn />
                 ) : (

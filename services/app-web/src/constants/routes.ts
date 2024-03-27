@@ -114,7 +114,6 @@ const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
     DASHBOARD_SUBMISSIONS: 'Submissions dashboard',
     DASHBOARD_RATES: 'Rate reviews dashboard',
     SUBMISSIONS_NEW: 'New submission',
-    UNKNOWN_ROUTE: '404',
 }
 
 /*

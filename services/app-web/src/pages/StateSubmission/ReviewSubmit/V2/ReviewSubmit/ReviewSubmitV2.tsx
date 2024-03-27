@@ -26,6 +26,7 @@ import { GenericErrorPage } from '../../../../Errors/GenericErrorPage'
 import { Loading } from '../../../../../components'
 import { PageBannerAlerts } from '../../../PageBannerAlerts'
 import { packageName } from '../../../../../common-code/healthPlanFormDataType'
+import { usePage } from '../../../../../contexts/PageContext'
 
 type RouteParams = {
     id: string
@@ -37,6 +38,7 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
     // pull the programs off the user
     const statePrograms = useStatePrograms()
     const { loggedInUser } = useAuth()
+    const { updateHeading } = usePage()
 
     const { id } = useParams<keyof RouteParams>()
     if (!id) {
@@ -74,6 +76,11 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
             return <GenericErrorPage />
         }
     }
+    updateHeading({
+        customHeading:
+            data?.fetchContract.contract?.draftRevision?.contractName ??
+            undefined,
+    })
 
     // TODO to be removed once makeDocumentDateTable is updated to not rely on HPP and protos
     const documentDateLookupTable = {

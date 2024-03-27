@@ -3,7 +3,7 @@
 
 .userInfo {
     font-weight: uswds.font-weight('light');
-    padding: 0 uswds.units(1);
+    padding: 0 1rem;
     color: custom.$mcr-foundation-white;
 
     button,
@@ -19,13 +19,13 @@
 }
 
 .divider {
-    padding: 0 uswds.units(1);
+    padding: 0 1rem;
 }
 
 .landingPageHeading {
     background-color: custom.$mcr-cmsblue-dark;
     color: custom.$mcr-foundation-white;
-    padding: uswds.units(2) 0;
+    padding: 1rem 0;
     & h1 {
         display: flex;
         flex-flow: column;
@@ -47,12 +47,11 @@
 
     .logoImg {
         border-right: 2px solid custom.$mcr-foundation-white;
-        padding-right: uswds.units(2);
+        padding-right: 1rem;
     }
 
     span {
-        margin-left: uswds.units(2);
-        font-size: size('body', 'lg');
+        margin-left: 1rem;
         color: custom.$mcr-foundation-white;
         height: 100%;
     }
@@ -67,11 +66,14 @@
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        font-size: 32px;
-        line-height: 36.8px;
+        font-size: 2rem;
+        line-height: 1.5;
         font-weight: bold;
         > span {
-            padding: 0 uswds.units(1);
+            padding: 0 1rem;
         }
+    }
+    div {
+        min-height: 5rem; // this ensures we don't collapse page heading when no text present
     }
 }

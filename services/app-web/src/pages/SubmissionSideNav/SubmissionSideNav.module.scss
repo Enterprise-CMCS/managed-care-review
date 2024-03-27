@@ -17,12 +17,11 @@
 
 .container {
     @include custom.default-page-container;
-    flex: 1 0 auto;
-    flex-direction: row;
+    padding: 0 !important; // override GridContainer to make sure our sidenav background alwaysmatches the content inside it
 }
 
-.sideNavContainer {
-    padding: 2rem 0;
+.verticalNavContainer {
+    padding: 2rem;
     width: 20rem;
     min-width: 18rem;
     max-width: custom.$mcr-container-max-width-fixed;
