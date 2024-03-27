@@ -307,7 +307,7 @@ describe('RateDetailsv2', () => {
 
             const notLinked = screen.getByText('Was this rate certification included with another submission?').parentElement
             if (!(notLinked)) {
-                throw new Error('these parents should all exist')
+                throw new Error('should exist')
             }
             await userEvent.click(within(notLinked).getByLabelText('No, this rate certification was not included with any other submissions'))
             screen.findByText('Rate certification 1')
@@ -321,18 +321,13 @@ describe('RateDetailsv2', () => {
 
             expect(input).toBeInTheDocument()
             await userEvent.upload(input, TEST_DOC_FILE)
-            // await userEvent.upload(input, [])
-            // await userEvent.upload(input, TEST_DOC_FILE)
             await screen.findByText(TEST_DOC_FILE.name)
+            screen.findByText(/1 complete/)
             
             // trigger validations
             await waitFor(() => {
-                screen.findByText(/1 complete/)
-                screen.debug()
                 userEvent.click(submitButton)
-                screen.getByText('hello')
 
-                expect(screen.getByText('hello')).toBe('h')
                 expect(submitButton).toHaveAttribute('aria-disabled', 'true')
             })
 
