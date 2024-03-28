@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { usePage } from '../contexts/PageContext'
-import { createScript } from './useScript'
 import { PageTitlesRecord, RouteT } from '../constants/routes'
 import { useAuth } from '../contexts/AuthContext'
 import {
@@ -13,9 +12,10 @@ import type {
     TealiumViewDataObject,
     TealiumEvent,
 } from '../constants/tealium'
-import { recordJSException } from '../otelHelpers'
 import { useLocation } from 'react-router-dom'
 import { getRouteName } from '../routeHelpers'
+import { recordJSException } from '../otelHelpers'
+import { createScript } from './useScript'
 
 /*
 Tealium is the data layer for Google Analytics and other data tracking at CMS
@@ -25,49 +25,22 @@ Tealium is the data layer for Google Analytics and other data tracking at CMS
 
     In addition, useTealium returns a function for tracking user events. See Tealium docs on tracking: https://docs.tealium.com/platforms/javascript/track/
 */
+
 const useTealium = (): {
-    logUserEvent: (linkData: TealiumLinkDataObject) => void
+    logUserEvent: (linkData: TealiumLinkDataObject) => void,
+    logPageView: () => void
 } => {
     const { pathname } = useLocation()
-    const currentRoute = getRouteName(pathname)
     const { heading } = usePage()
     const { loggedInUser } = useAuth()
+    const currentRoute = getRouteName(pathname)
     const lastLoggedRoute = useRef<RouteT | 'UNKNOWN_ROUTE' | undefined>(
         currentRoute
     )
-    const logPageView = () => {
-        const tealiumPageName = getTealiumPageName({
-            heading,
-            route: currentRoute,
-            user: loggedInUser,
-        })
-         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const utag = window.utag || { link: () => {}, view: () => {} }
-        const tagData: TealiumViewDataObject = {
-            content_language: 'en',
-            content_type: `${CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
-            page_name: tealiumPageName,
-            page_path: pathname,
-            site_domain: 'cms.gov',
-            site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
-            site_section: `${currentRoute}`,
-            logged_in: `${Boolean(loggedInUser) ?? false}`,
-        }
-        utag.view(tagData)
-        lastLoggedRoute.current = currentRoute
-     }
 
     // Add Tealium setup
     // this effect should only fire on initial app load
     useEffect(() => {
-        if (process.env.REACT_APP_STAGE_NAME === 'local') {
-            return
-        }
-
-        const waitForUtag = async () => {
-            return new Promise(resolve => setTimeout(resolve, 1000));
-        }
-
         const tealiumEnv = getTealiumEnv(
             process.env.REACT_APP_STAGE_NAME || 'main'
         )
@@ -77,7 +50,6 @@ const useTealium = (): {
                 `Missing key configuration for Tealium. tealiumEnv: ${tealiumEnv} tealiumProfile: ${tealiumProfile}`
             )
         }
-
         // Suppress automatic page views for SPA
         window.utag_cfg_ovrd = window.utag_cfg_ovrd || {}
         window.utag_cfg_ovrd.noview = true
@@ -115,8 +87,23 @@ const useTealium = (): {
 
         document.body.appendChild(loadTagsSnippet)
 
+        return () => {
+            document.head.removeChild(initializeTagManagerSnippet)
+        }
+    }, [])
+
+    // Add page view
+    // this effect should fire on each page view
+    useEffect(() => {
+        const waitForUtag = async () => {
+            return new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+        if (window.utag && lastLoggedRoute.current !== currentRoute) {
+            logPageView()
+        }
         if (!window.utag) {
-            // All of this is a guardrail on initial load - protect against trying to call utag before its loaded
+            // Guardrail on initial load - protect against trying to call utag before its loaded
             waitForUtag().finally( () =>{
             if (!window.utag) {
                 recordJSException('Analytics did not load in time')
@@ -126,31 +113,40 @@ const useTealium = (): {
              }
             })
         }
-        return () => {
-            // document.body.removeChild(loadTagsSnippet)
-            document.head.removeChild(initializeTagManagerSnippet)
-        }
-    }, [])
-
-    // Add page view
-    // this effect should fire on each page view
-    useEffect(() => {
-        if (process.env.REACT_APP_STAGE_NAME === 'local') {
-            return
-        }
-
-        if (window.utag && lastLoggedRoute.current !== currentRoute) {
-            logPageView()
-        }
     }, [currentRoute])
+
+    const logPageView = () => {
+        // if (process.env.REACT_APP_STAGE_NAME === 'local') {
+        //     return
+        // }
+        const tealiumPageName = getTealiumPageName({
+            heading,
+            route: currentRoute,
+            user: loggedInUser,
+        })
+         // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const utag = window.utag || { link: () => {}, view: () => {} }
+        const tagData: TealiumViewDataObject = {
+            content_language: 'en',
+            content_type: `${CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
+            page_name: tealiumPageName,
+            page_path: pathname,
+            site_domain: 'cms.gov',
+            site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+            site_section: `${currentRoute}`,
+            logged_in: `${Boolean(loggedInUser) ?? false}`,
+        }
+        utag.view(tagData)
+        lastLoggedRoute.current = currentRoute
+     }
 
     const logUserEvent = (linkData: {
         tealium_event: TealiumEvent
         content_type?: string
     }) => {
-        if (process.env.REACT_APP_STAGE_NAME === 'local') {
-            return
-        }
+        // if (process.env.REACT_APP_STAGE_NAME === 'local') {
+        //     return
+        // }
 
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const utag = window.utag || { link: () => {}, view: () => {} }
@@ -168,8 +164,7 @@ const useTealium = (): {
         }
         utag.link(tagData)
     }
-
-    return { logUserEvent }
+    return { logUserEvent, logPageView }
 }
 
 export { useTealium }
