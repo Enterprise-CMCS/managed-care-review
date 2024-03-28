@@ -37,6 +37,56 @@ const useTealium = (): {
     const lastLoggedRoute = useRef<RouteT | 'UNKNOWN_ROUTE' | undefined>(
         currentRoute
     )
+    const logPageView = () => {
+        if (process.env.REACT_APP_STAGE_NAME === 'local') {
+            return
+        }
+        const tealiumPageName = getTealiumPageName({
+            heading,
+            route: currentRoute,
+            user: loggedInUser,
+        })
+         // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const utag = window.utag || { link: () => {}, view: () => {} }
+        const tagData: TealiumViewDataObject = {
+            content_language: 'en',
+            content_type: `${CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
+            page_name: tealiumPageName,
+            page_path: pathname,
+            site_domain: 'cms.gov',
+            site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+            site_section: `${currentRoute}`,
+            logged_in: `${Boolean(loggedInUser) ?? false}`,
+        }
+        utag.view(tagData)
+        lastLoggedRoute.current = currentRoute
+     }
+
+    const logUserEvent = (linkData: {
+        tealium_event: TealiumEvent
+        content_type?: string
+    }) => {
+        if (process.env.REACT_APP_STAGE_NAME === 'local') {
+            return
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const utag = window.utag || { link: () => {}, view: () => {} }
+
+        const tagData: TealiumLinkDataObject = {
+            content_language: 'en',
+            page_name: `${heading}: ${PageTitlesRecord[currentRoute]}`,
+            page_path: pathname,
+            site_domain: 'cms.gov',
+            site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+            site_section: `${currentRoute}`,
+            logged_in: `${Boolean(loggedInUser) ?? false}`,
+            userId: loggedInUser?.email,
+            ...linkData,
+        }
+        utag.link(tagData)
+    }
+
 
     // Add Tealium setup
     // this effect should only fire on initial app load
@@ -113,57 +163,8 @@ const useTealium = (): {
              }
             })
         }
-    }, [currentRoute])
+    }, [currentRoute, logPageView])
 
-    const logPageView = () => {
-        // if (process.env.REACT_APP_STAGE_NAME === 'local') {
-        //     return
-        // }
-        const tealiumPageName = getTealiumPageName({
-            heading,
-            route: currentRoute,
-            user: loggedInUser,
-        })
-         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const utag = window.utag || { link: () => {}, view: () => {} }
-        const tagData: TealiumViewDataObject = {
-            content_language: 'en',
-            content_type: `${CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
-            page_name: tealiumPageName,
-            page_path: pathname,
-            site_domain: 'cms.gov',
-            site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
-            site_section: `${currentRoute}`,
-            logged_in: `${Boolean(loggedInUser) ?? false}`,
-        }
-        utag.view(tagData)
-        lastLoggedRoute.current = currentRoute
-     }
-
-    const logUserEvent = (linkData: {
-        tealium_event: TealiumEvent
-        content_type?: string
-    }) => {
-        // if (process.env.REACT_APP_STAGE_NAME === 'local') {
-        //     return
-        // }
-
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const utag = window.utag || { link: () => {}, view: () => {} }
-
-        const tagData: TealiumLinkDataObject = {
-            content_language: 'en',
-            page_name: `${heading}: ${PageTitlesRecord[currentRoute]}`,
-            page_path: pathname,
-            site_domain: 'cms.gov',
-            site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
-            site_section: `${currentRoute}`,
-            logged_in: `${Boolean(loggedInUser) ?? false}`,
-            userId: loggedInUser?.email,
-            ...linkData,
-        }
-        utag.link(tagData)
-    }
     return { logUserEvent, logPageView }
 }
 
