@@ -59,6 +59,7 @@ const useTealium = (): {
             logged_in: `${Boolean(loggedInUser) ?? false}`,
         }
         utag.view(tagData)
+
         lastLoggedRoute.current = currentRoute
      },[heading, pathname, loggedInUser])
 
@@ -86,11 +87,11 @@ const useTealium = (): {
             ...linkData,
         }
         utag.link(tagData)
+
     },[heading, pathname, loggedInUser])
 
-
     // Add Tealium setup
-    // this effect should only fire on initial app load
+    // This effect should only fire on initial app load
     useEffect(() => {
         const tealiumEnv = getTealiumEnv(
             process.env.REACT_APP_STAGE_NAME || 'main'
@@ -137,13 +138,17 @@ const useTealium = (): {
         loadTagsSnippet.appendChild(inlineScript)
 
         document.body.appendChild(loadTagsSnippet)
-        const waitForUtag = async () => {
-            return new Promise(resolve => setTimeout(resolve, 1000));
+        return () => {
+            document.head.removeChild(initializeTagManagerSnippet)
         }
+    }, [])
 
+    // This effect should only fire each time the url changes
+    useEffect(() => {
         // Guardrail on initial load - protect against trying to call utag page view before its loaded
-        if (!window.utag) {
-            waitForUtag().finally( () =>{
+      if (!window.utag) {
+        console.log('initial')
+            new Promise(resolve => setTimeout(resolve, 1000)).finally( () =>{
             if (!window.utag) {
                 recordJSException('Analytics did not load in time')
                 return
@@ -151,18 +156,11 @@ const useTealium = (): {
                 logPageView()
              }
             })
-        }
-        return () => {
-            document.head.removeChild(initializeTagManagerSnippet)
-        }
-    }, [])
-
-    // this effect should only fire each time the url changes
-    useEffect(() => {
-        // Guardrail against multiple subsequent page view calls when route seems similar
-        if (window.utag && lastLoggedRoute.current && lastLoggedRoute.current !== getRouteName(pathname)) {
+        // Guardrail on subsequent page view  - protect against multiple calls when route seems similar
+        } else if (window.utag && lastLoggedRoute.current &&  lastLoggedRoute.current !== getRouteName(pathname)) {
             logPageView()
         }
+
     }, [pathname, logPageView])
 
     return { logUserEvent, logPageView }
