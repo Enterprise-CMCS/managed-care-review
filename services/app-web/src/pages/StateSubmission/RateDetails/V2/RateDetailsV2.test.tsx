@@ -308,12 +308,15 @@ describe('RateDetailsv2', () => {
                     routerProvider: {
                         route: `/submissions/test-abc-123/edit/rate-details`,
                     },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
                 }
             )
             await screen.findByText('Rate Details')
 
             await userEvent.click(screen.getByLabelText('No, this rate certification was not included with any other submissions'))
-            await screen.findByText('Rate certification 1')
             const input = screen.getByLabelText(
                 'Upload one rate certification document'
             )
@@ -326,9 +329,8 @@ describe('RateDetailsv2', () => {
             await submitButton.click()
             await waitFor(() => {
                 expect(screen.getByText('Rate certification 1')).toBeInTheDocument()
-                // screen.debug()
                 expect(submitButton).toHaveAttribute('aria-disabled', 'true')
-                expect(screen.findByText('There are 8 errors on this page'))
+                expect(screen.getByText('There are 8 errors on this page')).toBeInTheDocument()
             })
         })
 
