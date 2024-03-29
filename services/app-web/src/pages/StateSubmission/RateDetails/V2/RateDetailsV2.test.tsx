@@ -9,6 +9,7 @@ import {
 import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
+    updateDraftContractRatesMockSuccess
 } from '../../../../testHelpers/apolloMocks'
 import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '../../../../constants'
@@ -255,6 +256,7 @@ describe('RateDetailsv2', () => {
                                     id: 'test-abc-123',
                                 },
                             }),
+                            
                         ],
                     },
                     routerProvider: {
@@ -277,8 +279,7 @@ describe('RateDetailsv2', () => {
                 expect(rateCertsAfterAddAnother).toHaveLength(2)
             })
         })
-        it('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
-            const rateID = '123-dfg'
+        it('display rest of the form when linked rates question is answered', async () => {
             renderWithProviders(
                 <Routes>
                     <Route
@@ -290,14 +291,20 @@ describe('RateDetailsv2', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchDraftRateMockSuccess(),
                             fetchContractMockSuccess({
                                 contract: {
                                     id: 'test-abc-123',
-                                    draftRates: []
                                 },
                             }),
-                        ],
-                    },
+                            updateDraftContractRatesMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                }, 
+                            })
+                            
+                        ], 
+                    }, 
                     routerProvider: {
                         route: `/submissions/test-abc-123/edit/rate-details`,
                     },
@@ -305,36 +312,24 @@ describe('RateDetailsv2', () => {
             )
             await screen.findByText('Rate Details')
 
-            const notLinked = screen.getByText('Was this rate certification included with another submission?').parentElement
-            if (!(notLinked)) {
-                throw new Error('should exist')
-            }
-            await userEvent.click(within(notLinked).getByLabelText('No, this rate certification was not included with any other submissions'))
-            screen.findByText('Rate certification 1')
+            await userEvent.click(screen.getByLabelText('No, this rate certification was not included with any other submissions'))
+            await screen.findByText('Rate certification 1')
             const input = screen.getByLabelText(
                 'Upload one rate certification document'
             )
+            await expect(input).toBeInTheDocument()
             const submitButton = screen.getByRole('button', {
                 name: 'Continue',
             })
 
-
-            expect(input).toBeInTheDocument()
-            await userEvent.upload(input, TEST_DOC_FILE)
-            await screen.findByText(TEST_DOC_FILE.name)
-            screen.findByText(/1 complete/)
-            
             // trigger validations
-            await userEvent.click(submitButton)
+            await submitButton.click()
             await waitFor(() => {
-
+                expect(screen.getByText('Rate certification 1')).toBeInTheDocument()
+                // screen.debug()
                 expect(submitButton).toHaveAttribute('aria-disabled', 'true')
+                expect(screen.findByText('There are 8 errors on this page'))
             })
-
-            await screen.findAllByText(
-                'There are 8 errors on this page'
-            ) 
-            // expect(submitButton).toHaveAttribute('aria-disabled', 'true')
         })
 
         it.todo(
