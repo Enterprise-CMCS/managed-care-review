@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { usePage } from '../contexts/PageContext'
 import { PageTitlesRecord, RouteT } from '../constants/routes'
 import { useAuth } from '../contexts/AuthContext'
@@ -33,14 +33,14 @@ const useTealium = (): {
     const { pathname } = useLocation()
     const { heading } = usePage()
     const { loggedInUser } = useAuth()
-    const currentRoute = getRouteName(pathname)
     const lastLoggedRoute = useRef<RouteT | 'UNKNOWN_ROUTE' | undefined>(
-        currentRoute
+       undefined
     )
-    const logPageView = () => {
+    const logPageView = useCallback(() => {
         if (process.env.REACT_APP_STAGE_NAME === 'local') {
             return
         }
+        const currentRoute = getRouteName(pathname)
         const tealiumPageName = getTealiumPageName({
             heading,
             route: currentRoute,
@@ -60,15 +60,16 @@ const useTealium = (): {
         }
         utag.view(tagData)
         lastLoggedRoute.current = currentRoute
-     }
+     },[heading, pathname, loggedInUser])
 
-    const logUserEvent = (linkData: {
+    const logUserEvent = useCallback((linkData: {
         tealium_event: TealiumEvent
         content_type?: string
     }) => {
         if (process.env.REACT_APP_STAGE_NAME === 'local') {
             return
         }
+        const currentRoute = getRouteName(pathname)
 
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const utag = window.utag || { link: () => {}, view: () => {} }
@@ -85,7 +86,7 @@ const useTealium = (): {
             ...linkData,
         }
         utag.link(tagData)
-    }
+    },[heading, pathname, loggedInUser])
 
 
     // Add Tealium setup
@@ -136,24 +137,12 @@ const useTealium = (): {
         loadTagsSnippet.appendChild(inlineScript)
 
         document.body.appendChild(loadTagsSnippet)
-
-        return () => {
-            document.head.removeChild(initializeTagManagerSnippet)
-        }
-    }, [])
-
-    // Add page view
-    // this effect should fire on each page view
-    useEffect(() => {
         const waitForUtag = async () => {
             return new Promise(resolve => setTimeout(resolve, 1000));
         }
 
-        if (window.utag && lastLoggedRoute.current !== currentRoute) {
-            logPageView()
-        }
+        // Guardrail on initial load - protect against trying to call utag page view before its loaded
         if (!window.utag) {
-            // Guardrail on initial load - protect against trying to call utag before its loaded
             waitForUtag().finally( () =>{
             if (!window.utag) {
                 recordJSException('Analytics did not load in time')
@@ -163,7 +152,18 @@ const useTealium = (): {
              }
             })
         }
-    }, [currentRoute, logPageView])
+        return () => {
+            document.head.removeChild(initializeTagManagerSnippet)
+        }
+    }, [])
+
+    // this effect should only fire each time the url changes
+    useEffect(() => {
+        // Guardrail against multiple subsequent page view calls when route seems similar
+        if (window.utag && lastLoggedRoute.current && lastLoggedRoute.current !== getRouteName(pathname)) {
+            logPageView()
+        }
+    }, [pathname, logPageView])
 
     return { logUserEvent, logPageView }
 }
