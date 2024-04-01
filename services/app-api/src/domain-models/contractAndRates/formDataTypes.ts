@@ -17,6 +17,7 @@ const documentSchema = z.object({
     name: z.string(),
     s3URL: z.string(),
     sha256: z.string(),
+    dateAdded: z.date(), //  date added to an initial submission (if this is an initial draft - will be the last updated date)
 })
 
 const managedCareEntitiesSchema = z.union([

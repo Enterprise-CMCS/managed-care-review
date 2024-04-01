@@ -822,6 +822,8 @@ type GenericDocument {
     s3URL: String!
     "The sha256 is a unique string representing the file, generated on the FE currently in the FileUpload component"
     sha256: String!
+    "The first date this document was added to submitted packcage - if still an initial draft, this date is last updated, otherwise it is the submitInfo lastUpdated"
+    dateAdded: Date!
 }
 
 """
