@@ -249,6 +249,7 @@ describe('ContractDetailsSummarySection', () => {
                         s3URL: 's3://foo/bar/contract',
                         name: 'contract test 1',
                         sha256: 'fakesha',
+                        dateAdded: new Date(),
                     },
                 ],
                 supportingDocuments: [
@@ -256,16 +257,19 @@ describe('ContractDetailsSummarySection', () => {
                         s3URL: 's3://bucketname/key/test1',
                         name: 'supporting docs test 1',
                         sha256: 'fakesha',
+                        dateAdded: new Date(),
                     },
                     {
                         s3URL: 's3://bucketname/key/test2',
                         name: 'supporting docs test 2',
                         sha256: 'fakesha',
+                        dateAdded: new Date(),
                     },
                     {
                         s3URL: 's3://bucketname/key/test3',
                         name: 'supporting docs test 3',
                         sha256: 'fakesha',
+                        dateAdded: new Date(),
                     },
                 ],
             }

@@ -11,12 +11,10 @@ import {
     Program,
     Rate,
     RateFormData,
-    RateRevision,
     RelatedContractRevisions,
     useUnlockRateMutation,
 } from '../../../gen/gqlClient'
 import { UploadedDocumentsTable } from '../UploadedDocumentsTable'
-import type { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 import { SectionHeader } from '../../SectionHeader'
 import { renderDownloadButton } from './RateDetailsSummarySection'
 import { DocumentWarningBanner } from '../../Banner'
@@ -34,37 +32,6 @@ import { ERROR_MESSAGES } from '../../../constants'
 import { handleApolloErrorsAndAddUserFacingMessages } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
-
-// This rate summary pages assumes we are using contract and rates API.
-// Eventually RateDetailsSummarySection should share code with this code
-// shipping with copypasta for now to demo rates refactor
-
-function makeRateDocumentDateTable(
-    revisions: RateRevision[]
-): DocumentDateLookupTableType {
-    const lookupTable: DocumentDateLookupTableType = {
-        previousSubmissionDate: null,
-    }
-    revisions.forEach((revision: RateRevision, index: number) => {
-        if (index === 1) {
-            // second most recent revision
-            const previousSubmission = revision.submitInfo?.updatedAt // used in UploadedDocumentsTable to determine if we should show NEW tag
-            if (previousSubmission)
-                lookupTable['previousSubmissionDate'] = previousSubmission
-        }
-
-        const allDocuments =
-            revision.formData?.supportingDocuments.concat(
-                revision.formData?.rateDocuments
-            ) || []
-        allDocuments.forEach((doc) => {
-            const documentKey = doc.sha256
-            const dateAdded = revision.submitInfo?.updatedAt
-            if (dateAdded) lookupTable[documentKey] = dateAdded
-        })
-    })
-    return lookupTable
-}
 
 const rateCapitationType = (formData: RateFormData) =>
     formData.rateCapitationType
@@ -131,7 +98,7 @@ export const SingleRateSummarySection = ({
     const { loggedInUser } = useAuth()
     const rateRevision = rate.revisions[0]
     const formData: RateFormData = rateRevision?.formData
-    const documentDateLookupTable = makeRateDocumentDateTable(rate.revisions)
+    const lastSubmittedDate = rate.revisions[0]?.submitInfo?.updatedAt
     const isRateAmendment = formData.rateType === 'AMENDMENT'
     const isUnlocked = rate.status === 'UNLOCKED'
     const explainMissingData =
@@ -357,13 +324,13 @@ export const SingleRateSummarySection = ({
                     documents={formData.rateDocuments}
                     packagesWithSharedRateCerts={appendDraftToSharedPackages}
                     multipleDocumentsAllowed={false}
-                    documentDateLookupTable={documentDateLookupTable}
+                    previousSubmissionDate={lastSubmittedDate}
                     caption="Rate certification"
                 />
                 <UploadedDocumentsTable
                     documents={formData.supportingDocuments}
                     packagesWithSharedRateCerts={appendDraftToSharedPackages}
-                    documentDateLookupTable={documentDateLookupTable}
+                    previousSubmissionDate={lastSubmittedDate}
                     caption="Rate supporting documents"
                 />
             </SectionCard>

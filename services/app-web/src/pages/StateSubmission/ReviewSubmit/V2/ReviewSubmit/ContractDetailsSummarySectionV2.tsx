@@ -153,7 +153,8 @@ export const ContractDetailsSummarySectionV2 = ({
         submissionName,
         isPreviousSubmission,
     ])
-
+    const lastSubmittedDate =
+        contract.packageSubmissions[0].submitInfo.updatedAt
     return (
         <SectionCard
             id="contractDetailsSection"
@@ -315,7 +316,7 @@ export const ContractDetailsSummarySectionV2 = ({
             {contractFormData.contractDocuments && (
                 <UploadedDocumentsTable
                     documents={contractFormData.contractDocuments}
-                    documentDateLookupTable={documentDateLookupTable}
+                    previousSubmissionDate={lastSubmittedDate}
                     caption="Contract"
                     documentCategory="Contract"
                     isEditing={isEditing}
@@ -324,7 +325,7 @@ export const ContractDetailsSummarySectionV2 = ({
             {contractSupportingDocuments && (
                 <UploadedDocumentsTable
                     documents={contractSupportingDocuments}
-                    documentDateLookupTable={documentDateLookupTable}
+                    previousSubmissionDate={lastSubmittedDate}
                     caption="Contract supporting documents"
                     documentCategory="Contract-supporting"
                     isSupportingDocuments

@@ -2,23 +2,37 @@ import React, { useEffect, useState } from 'react'
 import { Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
-import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
 import styles from './UploadedDocumentsTable.module.scss'
-import { usePreviousSubmission } from '../../../hooks'
-import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
+import {
+    SharedRateCertDisplay,
+    SubmissionDocument,
+} from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { DocumentTag } from './DocumentTag'
 import { useDocument } from '../../../hooks/useDocument'
-import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 import { useAuth } from '../../../contexts/AuthContext'
 import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 import { GenericDocument } from '../../../gen/gqlClient'
+import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 
+// Try to avoid creating v2 version of this entire file for a few lines of code
+// This is used to convert from deprecated FE domain types from protos to GQL GenericDocuments
+export const convertToGenericDocuments = (
+    deprecatedDocs: SubmissionDocument[],
+    dateTableLookup: DocumentDateLookupTableType
+): GenericDocument[] => {
+    return deprecatedDocs.map((doc) => {
+        return {
+            ...doc,
+            dateAdded: dateTableLookup[doc.sha256],
+        }
+    })
+}
 export type UploadedDocumentsTableProps = {
-    documents: SubmissionDocument[] | GenericDocument[]
+    documents: GenericDocument[]
     caption: string | null
-    packagesWithSharedRateCerts?: SharedRateCertDisplay[] // revisit field after rates refactor
-    documentDateLookupTable?: DocumentDateLookupTableType
-    isSupportingDocuments?: boolean // delete after rates refactor
+    packagesWithSharedRateCerts?: SharedRateCertDisplay[]
+    previousSubmissionDate?: Date
+    isSupportingDocuments?: boolean // delete after moving supporting contract supporting docs to contract page
     multipleDocumentsAllowed?: boolean
     documentCategory?: string // if this prop is not included, do not show category column - delete after rates refactor
     isEditing?: boolean // by default assume we are on summary page, if true, assume review and submit page
@@ -30,9 +44,9 @@ export const UploadedDocumentsTable = ({
     caption,
     documentCategory,
     packagesWithSharedRateCerts,
+    previousSubmissionDate,
     isSupportingDocuments = false,
     multipleDocumentsAllowed = true,
-    documentDateLookupTable,
     isEditing = false,
     isSubmitted = true,
 }: UploadedDocumentsTableProps): React.ReactElement => {
@@ -51,39 +65,29 @@ export const UploadedDocumentsTable = ({
     // canDisplayDateAddedForDocument -  guards against passing in null or undefined to dayjs
     // dates will be undefined in lookup table we are dealing with a new initial submission
     const canDisplayDateAddedForDocument = (doc: DocumentWithS3Data) => {
-        const documentLookupKey = doc.sha256
-        return (
-            documentLookupKey &&
-            documentDateLookupTable &&
-            documentDateLookupTable[documentLookupKey]
-        )
+        return Boolean(doc.dateAdded)
     }
 
     const shouldHaveNewTag = (doc: DocumentWithS3Data) => {
-        const documentLookupKey = doc.sha256
         if (!isCMSUser) {
             return false // design requirement, don't show new tag to state users  on review submit
         }
 
-        if (!documentDateLookupTable || !doc || !doc.s3Key) {
+        if (!doc || !doc.s3Key) {
             return false // this is a document with bad s3 data
         }
-        const documentDate = documentDateLookupTable?.[documentLookupKey]
-        const previousSubmissionDate =
-            documentDateLookupTable.previousSubmissionDate
 
-        if (!documentDate || !previousSubmissionDate) {
+        if (!previousSubmissionDate) {
             return false // this document is on an initial submission or not submitted yet
         }
-        return documentDate > previousSubmissionDate
+        return doc.dateAdded > previousSubmissionDate
     }
 
     const hasSharedRateCert =
         (packagesWithSharedRateCerts &&
             packagesWithSharedRateCerts.length > 0) ||
         false
-    const isPreviousSubmission = usePreviousSubmission()
-    const showSharedInfo = hasSharedRateCert && !isPreviousSubmission
+    const showSharedInfo = hasSharedRateCert && !isEditing
     const borderTopGradientStyles = `borderTopLinearGradient ${styles.uploadedDocumentsTable}`
     const supportingDocsTopMarginStyles = isSupportingDocuments
         ? styles.withMarginTop
@@ -194,11 +198,8 @@ export const UploadedDocumentsTable = ({
                                 </td>
                             )}
                             <td>
-                                {canDisplayDateAddedForDocument(doc) &&
-                                documentDateLookupTable ? (
-                                    dayjs(
-                                        documentDateLookupTable[doc.sha256]
-                                    ).format('M/D/YY')
+                                {canDisplayDateAddedForDocument(doc) ? (
+                                    dayjs(doc.dateAdded).format('M/D/YY')
                                 ) : (
                                     <span className="srOnly">N/A</span>
                                 )}
@@ -227,7 +228,7 @@ export const UploadedDocumentsTable = ({
 type DocumentWithS3Data = {
     url: string | null
     s3Key: string | null
-} & (SubmissionDocument | GenericDocument)
+} & GenericDocument
 
 type LinkedPackagesListProps = {
     unlinkDrafts: boolean

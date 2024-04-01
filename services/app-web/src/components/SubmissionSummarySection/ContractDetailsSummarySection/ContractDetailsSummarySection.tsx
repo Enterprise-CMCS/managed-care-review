@@ -43,6 +43,7 @@ import {
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../constants/statutoryRegulatoryAttestation'
 import { SectionCard } from '../../SectionCard'
+import { convertToGenericDocuments } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -299,15 +300,19 @@ export const ContractDetailsSummarySection = ({
                 )}
             </dl>
             <UploadedDocumentsTable
-                documents={submission.contractDocuments}
-                documentDateLookupTable={documentDateLookupTable}
+                documents={convertToGenericDocuments(
+                    submission.contractDocuments,
+                    documentDateLookupTable
+                )}
                 caption="Contract"
                 documentCategory="Contract"
                 isEditing={isEditing}
             />
             <UploadedDocumentsTable
-                documents={contractSupportingDocuments}
-                documentDateLookupTable={documentDateLookupTable}
+                documents={convertToGenericDocuments(
+                    contractSupportingDocuments,
+                    documentDateLookupTable
+                )}
                 caption="Contract supporting documents"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments

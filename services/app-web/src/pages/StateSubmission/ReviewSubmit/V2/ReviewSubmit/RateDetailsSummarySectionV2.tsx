@@ -80,6 +80,9 @@ export const RateDetailsSummarySectionV2 = ({
         contract.packageSubmissions[0].contractRevision.formData
     const rates =
         contract.draftRates || contract.packageSubmissions[0].rateRevisions
+    const lastSubmittedDate =
+        contract.packageSubmissions[0].submitInfo.updatedAt
+
     const { getKey, getBulkDlURL } = useS3()
     const [zippedFilesURL, setZippedFilesURL] = useState<
         string | undefined | Error
@@ -218,7 +221,6 @@ export const RateDetailsSummarySectionV2 = ({
         isSubmitted,
         isPreviousSubmission,
     ])
-
     return (
         <SectionCard id="rateDetails" className={styles.summarySection}>
             <SectionHeader
@@ -332,9 +334,6 @@ export const RateDetailsSummarySectionV2 = ({
                             {rateFormData?.rateDocuments && (
                                 <UploadedDocumentsTable
                                     documents={rateFormData.rateDocuments}
-                                    documentDateLookupTable={
-                                        documentDateLookupTable
-                                    }
                                     packagesWithSharedRateCerts={
                                         isEditing
                                             ? undefined
@@ -345,6 +344,7 @@ export const RateDetailsSummarySectionV2 = ({
                                     multipleDocumentsAllowed={false}
                                     caption="Rate certification"
                                     documentCategory="Rate certification"
+                                    previousSubmissionDate={lastSubmittedDate}
                                     isEditing={isEditing}
                                     isSubmitted={isSubmitted}
                                 />
@@ -352,9 +352,7 @@ export const RateDetailsSummarySectionV2 = ({
                             {rateFormData?.supportingDocuments && (
                                 <UploadedDocumentsTable
                                     documents={rateFormData.supportingDocuments}
-                                    documentDateLookupTable={
-                                        documentDateLookupTable
-                                    }
+                                    previousSubmissionDate={lastSubmittedDate}
                                     packagesWithSharedRateCerts={
                                         isEditing
                                             ? undefined

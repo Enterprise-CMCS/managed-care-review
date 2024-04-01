@@ -24,6 +24,7 @@ import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocume
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../DocumentWarning'
 import { SectionCard } from '../../SectionCard'
+import { convertToGenericDocuments } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 // Used for refreshed packages names keyed by their package id
 // package name includes (Draft) for draft packages.
 type PackageNameType = string
@@ -351,13 +352,13 @@ export const RateDetailsSummarySection = ({
                             </dl>
                             {!loading ? (
                                 <UploadedDocumentsTable
-                                    documents={rateInfo.rateDocuments}
+                                    documents={convertToGenericDocuments(
+                                        rateInfo.rateDocuments,
+                                        documentDateLookupTable
+                                    )}
                                     packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
                                         rateInfo
                                     )}
-                                    documentDateLookupTable={
-                                        documentDateLookupTable
-                                    }
                                     multipleDocumentsAllowed={false}
                                     caption="Rate certification"
                                     documentCategory="Rate certification"
@@ -369,13 +370,13 @@ export const RateDetailsSummarySection = ({
                             )}
                             {!loading ? (
                                 <UploadedDocumentsTable
-                                    documents={rateInfo.supportingDocuments}
+                                    documents={convertToGenericDocuments(
+                                        rateInfo.supportingDocuments,
+                                        documentDateLookupTable
+                                    )}
                                     packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
                                         rateInfo
                                     )}
-                                    documentDateLookupTable={
-                                        documentDateLookupTable
-                                    }
                                     caption="Rate supporting documents"
                                     isSupportingDocuments
                                     documentCategory="Rate-supporting"
