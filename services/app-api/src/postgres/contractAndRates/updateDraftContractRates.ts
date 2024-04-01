@@ -1,17 +1,19 @@
 import type { PrismaClient } from '@prisma/client'
-import type { ContractType } from '../../domain-models/contractAndRates'
+import type {
+    ContractType,
+    RateFormEditableType,
+} from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../postgresErrors'
 import { emptify, nullify } from '../prismaDomainAdaptors'
 import { findContractWithHistory } from './findContractWithHistory'
-import type { RateFormEditable } from './updateDraftRate'
 
 interface UpdatedRatesType {
     create: {
-        formData: RateFormEditable
+        formData: RateFormEditableType
     }[]
     update: {
         rateID: string
-        formData: RateFormEditable
+        formData: RateFormEditableType
     }[]
     link: {
         rateID: string
@@ -29,7 +31,9 @@ interface UpdateDraftContractRatesArgsType {
     rateUpdates: UpdatedRatesType
 }
 
-function prismaRateCreateFormDataFromDomain(rateFormData: RateFormEditable) {
+function prismaRateCreateFormDataFromDomain(
+    rateFormData: RateFormEditableType
+) {
     return {
         rateType: rateFormData.rateType,
         rateCapitationType: rateFormData.rateCapitationType,
@@ -77,7 +81,9 @@ function prismaRateCreateFormDataFromDomain(rateFormData: RateFormEditable) {
     }
 }
 
-function prismaUpdateRateFormDataFromDomain(rateFormData: RateFormEditable) {
+function prismaUpdateRateFormDataFromDomain(
+    rateFormData: RateFormEditableType
+) {
     return {
         rateType: nullify(rateFormData.rateType),
         rateCapitationType: nullify(rateFormData.rateCapitationType),

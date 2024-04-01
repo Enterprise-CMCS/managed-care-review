@@ -5,7 +5,7 @@ import {
 } from './resolverHelpers'
 import type { UnlockedHealthPlanFormDataType } from '../../../../../app-web/src/common-code/healthPlanFormDataType'
 import { must } from '../../../testHelpers'
-import type { RateFormDataType } from '../../../domain-models/contractAndRates'
+import type { RateFormDataType } from '../../../domain-models'
 
 describe('isEqualRateData', () => {
     const rateDataTestCases = [
@@ -17,6 +17,7 @@ describe('isEqualRateData', () => {
                         name: 'Rate 1 Doc',
                         s3URL: 'fakeS3URL1',
                         sha256: 'someShaForRateDoc1',
+                        dateAdded: new Date(),
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 5, 1)),
@@ -37,6 +38,7 @@ describe('isEqualRateData', () => {
                         name: 'Rate 1 Doc',
                         s3URL: 'fakeS3URL1',
                         sha256: 'someShaForRateDoc1',
+                        dateAdded: new Date(),
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 5, 1)),
@@ -60,6 +62,7 @@ describe('isEqualRateData', () => {
                         name: 'Rate 1 Doc',
                         s3URL: 'fakeS3URL1',
                         sha256: 'someShaForRateDoc1',
+                        dateAdded: new Date(),
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 5, 1)),
@@ -73,6 +76,7 @@ describe('isEqualRateData', () => {
                         name: 'Rate 1 Doc',
                         s3URL: 'fakeS3URL1----2',
                         sha256: 'someShaForRateDoc1',
+                        dateAdded: new Date(),
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 5, 1)),
@@ -96,6 +100,7 @@ describe('isEqualRateData', () => {
                         name: 'Rate 1 Doc',
                         s3URL: 'fakeS3URL1',
                         sha256: 'someShaForRateDoc1',
+                        dateAdded: new Date(),
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 5, 1)),
@@ -239,6 +244,7 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                         s3URL: 's3://bucketname/key/rate',
                         name: 'rate',
                         sha256: 'fakesha',
+                        dateAdded: new Date(),
                     },
                 ],
                 supportingDocuments: [],
@@ -277,6 +283,7 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                         s3URL: 's3://bucketname/key/supporting-documents',
                         name: 'supporting documents',
                         sha256: 'supportingDocsSha',
+                        dateAdded: new Date(0),
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 5, 1)),

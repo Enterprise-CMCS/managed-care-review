@@ -1,17 +1,16 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { insertDraftContract } from './insertContract'
 import { mockInsertContractArgs, must } from '../../testHelpers'
-import type { ContractFormEditable } from './updateDraftContractWithRates'
 import { updateDraftContractWithRates } from './updateDraftContractWithRates'
 import { PrismaClientValidationError } from '@prisma/client/runtime/library'
 import type { ContractType } from '@prisma/client'
 import type {
     ContractFormDataType,
-    RateFormDataType,
+    RateFormEditableType,
+    ContractFormEditableType,
 } from '../../domain-models/contractAndRates'
 import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
 import { v4 as uuidv4 } from 'uuid'
-import type { RateFormEditable } from './updateDraftRate'
 import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
 
@@ -49,7 +48,7 @@ describe('updateDraftContract', () => {
         )
     })
 
-    function completeTestContract(): ContractFormDataType {
+    function completeTestContract(): ContractFormEditableType {
         return {
             programIDs: ['5904a736-4422-4b78-abef-f3df3d0ae21d'],
             populationCovered: 'MEDICAID' as const,
@@ -68,11 +67,13 @@ describe('updateDraftContract', () => {
                     name: 'contract supporting doc',
                     s3URL: 'fakeS3URL',
                     sha256: '2342fwlkdmwvw',
+                    dateAdded: new Date(),
                 },
                 {
                     name: 'contract supporting doc 2',
                     s3URL: 'fakeS3URL',
                     sha256: '45662342fwlkdmwvw',
+                    dateAdded: new Date(),
                 },
             ],
             contractType: 'BASE',
@@ -82,6 +83,7 @@ describe('updateDraftContract', () => {
                     name: 'contract doc',
                     s3URL: 'fakeS3URL',
                     sha256: '8984234fwlkdmwvw',
+                    dateAdded: new Date(),
                 },
             ],
             contractDateStart: new Date(Date.UTC(2025, 5, 1)),
@@ -120,7 +122,7 @@ describe('updateDraftContract', () => {
         }
     }
 
-    function completeTestRate(): RateFormDataType {
+    function completeTestRate(): RateFormEditableType {
         return {
             rateType: 'AMENDMENT',
             rateCapitationType: 'RATE_CELL',
@@ -129,6 +131,7 @@ describe('updateDraftContract', () => {
                     name: 'rate doc',
                     s3URL: 'fakeS3URL',
                     sha256: '8984234fwlkdmwvw',
+                    dateAdded: new Date(),
                 },
             ],
             supportingDocuments: [
@@ -136,6 +139,7 @@ describe('updateDraftContract', () => {
                     name: 'rate sup doc',
                     s3URL: 'fakeS3URL',
                     sha256: '8984234fwlkdmwvw',
+                    dateAdded: new Date(),
                 },
             ],
             rateDateStart: new Date(Date.UTC(2025, 5, 1)),
@@ -218,13 +222,14 @@ describe('updateDraftContract', () => {
     it('updates linked documents as expected in multiple requests', async () => {
         const client = await sharedTestPrismaClient()
 
-        const draftContractForm1: ContractFormEditable = {
+        const draftContractForm1: ContractFormEditableType = {
             submissionDescription: 'draftData1',
             contractDocuments: [
                 {
                     s3URL: 's3://bucketname/key/contract1',
                     name: 'Rate cert 1',
                     sha256: 'shaS56',
+                    dateAdded: new Date(),
                 },
             ],
             supportingDocuments: [
@@ -232,17 +237,19 @@ describe('updateDraftContract', () => {
                     s3URL: 's3://bucketname/key/contractsupporting1-1',
                     name: 'supporting documents 1-1',
                     sha256: 'shaS56',
+                    dateAdded: new Date(),
                 },
             ],
         }
         // documents all replaced, additional supporting docs added
-        const draftContractForm2: ContractFormEditable = {
+        const draftContractForm2: ContractFormEditableType = {
             submissionDescription: 'draftData2',
             contractDocuments: [
                 {
                     s3URL: 's3://bucketname/key/contract2',
                     name: 'Rate cert 2',
                     sha256: 'shaS56',
+                    dateAdded: new Date(),
                 },
             ],
             supportingDocuments: [
@@ -250,17 +257,19 @@ describe('updateDraftContract', () => {
                     s3URL: 's3://bucketname/key/contractsupporting2-1',
                     name: 'supporting documents 2-1',
                     sha256: 'shaS56',
+                    dateAdded: new Date(),
                 },
                 {
                     s3URL: 's3://bucketname/key/contractsupporting2-2',
                     name: 'supporting documents2-2',
                     sha256: 'shaS56',
+                    dateAdded: new Date(),
                 },
             ],
         }
 
         // documents unchanged
-        const draftContractForm3: ContractFormEditable = {
+        const draftContractForm3: ContractFormEditableType = {
             submissionDescription: 'draftData3',
             contractDocuments: draftContractForm2.contractDocuments,
             supportingDocuments: draftContractForm1.supportingDocuments,
@@ -320,7 +329,7 @@ describe('updateDraftContract', () => {
 
     it('updates linked contacts as expected in multiple requests', async () => {
         const client = await sharedTestPrismaClient()
-        const draftContractForm1: ContractFormEditable = {
+        const draftContractForm1: ContractFormEditableType = {
             submissionDescription: 'draftData1',
             stateContacts: [
                 {
@@ -331,7 +340,7 @@ describe('updateDraftContract', () => {
             ],
         }
         // all contacts replaced
-        const draftContractForm2: ContractFormEditable = {
+        const draftContractForm2: ContractFormEditableType = {
             submissionDescription: 'draftData2',
             stateContacts: [
                 {
@@ -343,7 +352,7 @@ describe('updateDraftContract', () => {
         }
 
         // contacts values unchanged
-        const draftContractForm3: ContractFormEditable = {
+        const draftContractForm3: ContractFormEditableType = {
             submissionDescription: 'draftData3',
             stateContacts: draftContractForm2.stateContacts,
         }
@@ -436,7 +445,7 @@ describe('updateDraftContract', () => {
         )
 
         // Array of new rates to create
-        const newRates: RateFormDataType[] = [
+        const newRates: RateFormEditableType[] = [
             mockInsertRateArgs({
                 id: uuidv4(),
                 rateType: 'NEW',
@@ -472,7 +481,7 @@ describe('updateDraftContract', () => {
         expect(newlyCreatedRates).toHaveLength(3)
 
         // Array of the current rates, but now with updates
-        const updateRateRevisionData: RateFormEditable[] = [
+        const updateRateRevisionData: RateFormEditableType[] = [
             {
                 ...newlyCreatedRates[0].formData,
                 rateCapitationType: 'RATE_RANGE',
@@ -481,6 +490,7 @@ describe('updateDraftContract', () => {
                         name: 'Rate 1 Doc',
                         s3URL: 'fakeS3URL1',
                         sha256: 'someShaForRateDoc1',
+                        dateAdded: new Date(),
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 5, 1)),
@@ -502,6 +512,7 @@ describe('updateDraftContract', () => {
                         name: 'Rate 2 Doc',
                         s3URL: 'fakeS3URL2',
                         sha256: 'someShaForRateDoc2',
+                        dateAdded: new Date(),
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 8, 1)),
@@ -522,6 +533,7 @@ describe('updateDraftContract', () => {
                         name: 'Rate 3 Doc',
                         s3URL: 'fakeS3URL3',
                         sha256: 'someShaForRateDoc3',
+                        dateAdded: new Date(),
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 3, 1)),

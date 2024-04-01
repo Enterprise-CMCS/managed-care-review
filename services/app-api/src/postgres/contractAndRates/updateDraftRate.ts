@@ -1,17 +1,15 @@
 import { findRateWithHistory } from './findRateWithHistory'
 import type { NotFoundError } from '../postgresErrors'
 import type {
-    RateFormDataType,
     RateType,
+    RateFormEditableType,
 } from '../../domain-models/contractAndRates'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { emptify, nullify } from '../prismaDomainAdaptors'
 
-type RateFormEditable = Partial<RateFormDataType>
-
 type UpdateRateArgsType = {
     rateID: string
-    formData: RateFormEditable
+    formData: RateFormEditableType
     contractIDs: string[]
 }
 
@@ -136,4 +134,4 @@ async function updateDraftRate(
 }
 
 export { updateDraftRate }
-export type { RateFormEditable, UpdateRateArgsType }
+export type { UpdateRateArgsType }

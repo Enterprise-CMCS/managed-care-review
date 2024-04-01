@@ -11,11 +11,11 @@ import { insertDraftRate } from './insertRate'
 import { submitContract } from './submitContract'
 import { insertDraftContract } from './insertContract'
 import { updateDraftContractWithRates } from './updateDraftContractWithRates'
-import type { RateFormEditable } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findContractWithHistory } from './findContractWithHistory'
 import { findStatePrograms } from '../state'
 import { unlockContract } from './unlockContract'
+import type { RateFormEditableType } from '../../domain-models/contractAndRates'
 
 describe('submitRate', () => {
     it('creates a standalone rate submission from a draft', async () => {
@@ -215,7 +215,7 @@ describe('submitRate', () => {
 
         const statePrograms = must(findStatePrograms(draftRate.stateCode))
 
-        const updateRateData: RateFormEditable = {
+        const updateRateData: RateFormEditableType = {
             ...draftRate.draftRevision.formData,
             rateType: 'NEW',
             rateID,
@@ -235,11 +235,13 @@ describe('submitRate', () => {
                     name: 'rate supporting doc',
                     s3URL: 'fakeS3URL',
                     sha256: '2342fwlkdmwvw',
+                    dateAdded: new Date(),
                 },
                 {
                     name: 'rate supporting doc 2',
                     s3URL: 'fakeS3URL',
                     sha256: '45662342fwlkdmwvw',
+                    dateAdded: new Date(),
                 },
             ],
             rateDocuments: [
@@ -247,6 +249,7 @@ describe('submitRate', () => {
                     name: 'contract doc',
                     s3URL: 'fakeS3URL',
                     sha256: '8984234fwlkdmwvw',
+                    dateAdded: new Date(),
                 },
             ],
         }

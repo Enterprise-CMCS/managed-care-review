@@ -75,6 +75,7 @@ const convertHPPDocsToDomain = async (docs: SubmissionDocument[]) =>
                 name,
                 s3URL,
                 sha256,
+                dateAdded: new Date(), // this is throwaway data since we only read form this field in v2
             }
         })
     )

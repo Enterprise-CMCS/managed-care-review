@@ -17,8 +17,8 @@ import { updateDraftRate } from '../postgres/contractAndRates/updateDraftRate'
 import type { Contract, RateFormDataInput } from '../gen/gqlServer'
 import type { RateType } from '../domain-models'
 import type { InsertRateArgsType } from '../postgres/contractAndRates/insertRate'
-import type { RateFormEditable } from '../postgres/contractAndRates/updateDraftRate'
 import type { ApolloServer } from 'apollo-server-lambda'
+import type { RateFormEditableType } from '../domain-models/contractAndRates'
 
 const fetchTestRateById = async (
     server: ApolloServer,
@@ -206,7 +206,7 @@ const updateTestDraftRateOnContract = async (
 
 const updateTestRate = async (
     rateID: string,
-    rateData: RateFormEditable
+    rateData: RateFormEditableType
 ): Promise<RateType> => {
     const prismaClient = await sharedTestPrismaClient()
 

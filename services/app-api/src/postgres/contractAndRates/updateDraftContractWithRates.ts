@@ -2,31 +2,28 @@ import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
 import type { PrismaClient } from '@prisma/client'
 import type {
-    ContractFormDataType,
-    RateFormDataType,
     RateRevisionType,
     ContractType,
+    RateFormEditableType,
+    ContractFormEditableType,
 } from '../../domain-models/contractAndRates'
 import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { includeDraftRates } from './prismaDraftContractHelpers'
 import { rateRevisionToDomainModel } from './prismaSharedContractRateHelpers'
-import type { RateFormEditable } from './updateDraftRate'
 import { isEqualData } from '../../resolvers/healthPlanPackage/contractAndRates/resolverHelpers'
 import { emptify, nullify } from '../prismaDomainAdaptors'
 
-type ContractFormEditable = Partial<ContractFormDataType>
-
 type UpdateContractArgsType = {
     contractID: string
-    formData: ContractFormEditable
-    rateFormDatas?: RateFormEditable[]
+    formData: ContractFormEditableType
+    rateFormDatas?: RateFormEditableType[]
 }
 
 const sortRatesForUpdate = (
     ratesFromDB: RateRevisionType[],
-    ratesFromClient: RateFormDataType[]
+    ratesFromClient: RateFormEditableType[]
 ): {
-    upsertRates: RateFormEditable[]
+    upsertRates: RateFormEditableType[]
     disconnectRates: {
         rateID: string
         revisionID: string
@@ -548,4 +545,4 @@ async function updateDraftContractWithRates(
 }
 
 export { updateDraftContractWithRates }
-export type { UpdateContractArgsType, ContractFormEditable }
+export type { UpdateContractArgsType }
