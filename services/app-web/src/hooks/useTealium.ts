@@ -147,7 +147,7 @@ const useTealium = (): {
     useEffect(() => {
         // Guardrail on initial load - protect against trying to call utag page view before its loaded
       if (!window.utag) {
-        console.log('initial')
+
             new Promise(resolve => setTimeout(resolve, 1000)).finally( () =>{
             if (!window.utag) {
                 recordJSException('Analytics did not load in time')
