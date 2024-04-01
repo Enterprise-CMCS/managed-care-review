@@ -85,7 +85,7 @@ describe('LinkYourRates', () => {
     })
     //eslint-disable-next-line
     it.skip('displays dropdown menu if yes is selected', async () => {
-        const { user } = renderWithProviders(
+        const { user } = await renderWithProviders(
             <Formik
                 initialValues={{ ratePreviouslySubmitted: '' }}
                 onSubmit={(values) => console.info('submitted', values)}
@@ -111,14 +111,16 @@ describe('LinkYourRates', () => {
             }
         )
 
-        const yesRadioButton = await screen.getByLabelText(
-            'Yes, this rate certification is part of another submission'
-        )
+        const yesRadioButton = screen.getByRole('radio', {
+            name: 'Yes, this rate certification is part of another submission',
+        })
+        expect(yesRadioButton).toBeInTheDocument()
         await user.click(yesRadioButton)
+        expect(yesRadioButton).toBeChecked()
 
         await waitFor(() => {
             expect(
-                screen.queryByText('Which rate certification was it?')
+                screen.getByText('Which rate certification was it?')
             ).toBeInTheDocument()
         })
     })

@@ -5,9 +5,13 @@ import { StateUser, useIndexRatesQuery } from '../../gen/gqlClient'
 import { useAuth } from '../../contexts/AuthContext'
 import { programNames } from '../../common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../common-code/dateHelpers'
-import { FormikRateForm } from '../StateSubmission/RateDetails/V2/RateDetailsV2'
+import {
+    FormikRateForm,
+    RateDetailFormConfig,
+} from '../StateSubmission/RateDetails/V2/RateDetailsV2'
 import { convertGQLRateToRateForm } from '../StateSubmission/RateDetails/V2/rateDetailsHelpers'
 import { useS3 } from '../../contexts/S3Context'
+import { useFormikContext } from 'formik'
 
 export interface LinkRateOptionType {
     readonly value: string
@@ -28,6 +32,7 @@ export const LinkRateSelect = ({
     autofill,
     ...selectProps
 }: LinkRateSelectPropType & Props<LinkRateOptionType, true>) => {
+    const { values }: { values: RateDetailFormConfig } = useFormikContext()
     const { data, loading, error } = useIndexRatesQuery()
     const { getKey } = useS3()
     const { loggedInUser } = useAuth()
@@ -135,13 +140,22 @@ export const LinkRateSelect = ({
             ?.toLowerCase()
             .includes(input.toLowerCase())
 
+    //We track rates that have already been selected to remove them from the dropdown
+    const selectedRates = values.rateForms.map((rate) => rate.id && rate.id)
+
     return (
         <>
             <Select
                 defaultMenuIsOpen
                 value={defaultValue}
                 className={styles.multiSelect}
-                options={error || loading ? undefined : rateNames}
+                options={
+                    error || loading
+                        ? undefined
+                        : rateNames.filter(
+                              (rate) => !selectedRates.includes(rate.value)
+                          )
+                }
                 isSearchable
                 maxMenuHeight={400}
                 aria-label="linked rates (required)"
