@@ -444,7 +444,7 @@ describe('RateDetailsv2', () => {
             await fillOutIndexRate(screen, 1)
 
             await waitFor(() => {
-                expect(screen.findAllByText(/1 complete/)).toHaveLength(2)
+                expect(screen.getAllByText(/1 complete/)).toHaveLength(2)
             })
         })
 
