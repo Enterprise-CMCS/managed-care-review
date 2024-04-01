@@ -4,6 +4,8 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import UPDATE_DRAFT_CONTRACT_RATES from '../../../../app-graphql/src/mutations/updateDraftContractRates.graphql'
 import SUBMIT_CONTRACT from '../../../../app-graphql/src/mutations/submitContract.graphql'
+import { testCMSUser } from '../../testHelpers/userHelpers'
+import type { SubmitContractInput } from '../../gen/gqlServer'
 
 describe('submitContract', () => {
     it('submits a contract', async () => {
@@ -107,5 +109,28 @@ describe('submitContract', () => {
         expect(contract.packageSubmissionHistory).toHaveLength(1)
 
         throw new Error('INCOMEONWE')
+    })
+
+    it('returns an error if a CMS user attempts to call submitContract', async () => {
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const input: SubmitContractInput = {
+            contractID: 'fake-id-12345',
+            submittedReason: 'Test cms user calling state user func',
+        }
+
+        const res = await cmsServer.executeOperation({
+            query: SUBMIT_CONTRACT,
+            variables: { input },
+        })
+
+        expect(res.errors).toBeDefined()
+        expect(res.errors && res.errors[0].message).toBe(
+            'user not authorized to create state data'
+        )
     })
 })
