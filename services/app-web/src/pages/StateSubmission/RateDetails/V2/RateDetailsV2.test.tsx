@@ -501,7 +501,7 @@ describe('RateDetailsv2', () => {
                 ).toBeInTheDocument()
                 expect(submitButton).toHaveAttribute('aria-disabled', 'true')
                 expect(
-                    screen.getByText('There are 1 error on this page')
+                    screen.getByText('There is 1 error on this page')
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText('You must select yes or no')
