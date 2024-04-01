@@ -348,6 +348,39 @@ type Mutation {
             - Attempted to unlock a rate in the DRAFT or UNLOCKED state
     """
     submitRate(input: SubmitRateInput!): SubmitRatePayload!
+
+    """
+    submitContract submits the given package for review by CMS.
+
+    This can only be called by a StateUser from the state the package is for.
+    The package must be either in DRAFT or UNLOCKED state to be submitted
+    On resubmit the `submittedReason` field must be filled out.
+    The submission must be complete for this mutation to succeed. All required fields
+    in the healthPlanFormData must be filled out correctly.
+    Email notifications will be sent to all the relevant parties
+
+    Errors:
+    - ForbiddenError:
+        - A CMSUser called this
+        - A state user from a different state called this.
+    - UserInputError
+        - A package cannot be found with the given `pkgID`
+        - The healthPlanFormData does not have all required field filled out
+    - INTERNAL_SERVER_ERROR
+        - DB_ERROR
+            - Postgres returns error when attempting to find a package
+            - Postgres returns error when attempting to update a package
+            - Attempt to find state programs from json file returns an error
+        - INVALID_PACKAGE_STATUS
+            - Attempted to submit a package in the SUBMITTED or RESUBMITTED state
+        - PROTO_DECODE_ERROR
+            - Failed to decode draft proto
+        - EMAIL_ERROR
+            - Sending state or CMS email failed.
+    """
+    submitContract(
+        input: SubmitContractInput!
+    ): SubmitContractPayload!
 }
 
 input CreateHealthPlanPackageInput {
@@ -489,6 +522,16 @@ input SubmitHealthPlanPackageInput {
 
 type SubmitHealthPlanPackagePayload {
     pkg: HealthPlanPackage!
+}
+
+input SubmitContractInput {
+    contractID: ID!
+    "User given reason this package was re-submitted. Left blank on initial submit."
+    submittedReason: String
+}
+
+type SubmitContractPayload {
+    contract: Contract!
 }
 
 input UnlockHealthPlanPackageInput {

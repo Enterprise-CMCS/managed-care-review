@@ -36,7 +36,9 @@ import { unlockRate } from './rate/unlockRate'
 import { submitRate } from './rate/submitRate'
 import { updateDraftContractRates } from './contract/updateDraftContractRates'
 import { contractResolver } from './contract/contractResolver'
+import { contractRevisionResolver } from './contract/contractRevisionResolver'
 import { fetchContractResolver } from './contract/fetchContract'
+import { submitContract } from './contract/submitContract'
 
 export function configureResolvers(
     store: Store,
@@ -76,6 +78,7 @@ export function configureResolvers(
                 emailParameterStore,
                 launchDarkly
             ),
+            submitContract: submitContract(store),
             unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
                 store,
                 emailer,
@@ -121,6 +124,7 @@ export function configureResolvers(
         HealthPlanPackage: healthPlanPackageResolver(store),
         Rate: rateResolver,
         Contract: contractResolver(store),
+        ContractRevision: contractRevisionResolver(store),
     }
 
     return resolvers
