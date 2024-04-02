@@ -25,6 +25,7 @@ import { Landing } from '../Landing/Landing'
 import { MccrsId } from '../MccrsId/MccrsId'
 import { NewStateSubmissionForm, StateSubmissionForm } from '../StateSubmission'
 import { SubmissionSummary } from '../SubmissionSummary'
+import { SubmissionSummaryV2 } from '../SubmissionSummary/V2/SubmissionSummaryV2'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
 import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
 import { featureFlags } from '../../common-code/featureFlags'
@@ -80,6 +81,10 @@ const StateUserRoutes = ({
     const showRatePages: boolean = ldClient?.variation(
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
+    )
+    const useLinkedRates = ldClient?.variation(
+        featureFlags.LINK_RATES.flag,
+        featureFlags.LINK_RATES.defaultValue
     )
     return (
         <AuthenticatedRouteWrapper setAlert={setAlert} authMode={authMode}>
@@ -137,8 +142,14 @@ const StateUserRoutes = ({
                     )}
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<SubmissionSummary />}
-                    />
+                        element={
+                            useLinkedRates ? (
+                                <SubmissionSummaryV2 />
+                            ) : (
+                                <SubmissionSummary />
+                            )
+                        }
+                />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
