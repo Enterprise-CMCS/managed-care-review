@@ -149,7 +149,6 @@ describe('indexRates', () => {
                     name: 'rateDocument.pdf',
                     s3URL: 'fakeS3URL',
                     sha256: 'fakesha',
-                    dateAdded: new Date(),
                 },
             ],
             supportingDocuments: [],

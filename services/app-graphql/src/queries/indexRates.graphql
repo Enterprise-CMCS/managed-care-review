@@ -41,11 +41,14 @@ query indexRates {
                             name
                             s3URL
                             sha256
+                            dateAdded
+
                         },
                         supportingDocuments {
                             name
                             s3URL
                             sha256
+                            dateAdded
                         },
                         rateDateStart,
                         rateDateEnd,
@@ -109,6 +112,7 @@ query indexRates {
                                 name
                                 s3URL
                                 sha256
+                                dateAdded
                             }
                             contractType
                             contractExecutionStatus
@@ -116,6 +120,7 @@ query indexRates {
                                 name
                                 s3URL
                                 sha256
+                                dateAdded
                             }
                             contractDateStart
                             contractDateEnd
@@ -165,11 +170,13 @@ query indexRates {
                             name
                             s3URL
                             sha256
+                            dateAdded
                         },
                         supportingDocuments {
                             name
                             s3URL
                             sha256
+                            dateAdded
                         },
                         rateDateStart,
                         rateDateEnd,
@@ -233,6 +240,7 @@ query indexRates {
                                 name
                                 s3URL
                                 sha256
+                                dateAdded
                             }
                             contractType
                             contractExecutionStatus
@@ -240,6 +248,7 @@ query indexRates {
                                 name
                                 s3URL
                                 sha256
+                                dateAdded
                             }
                             contractDateStart
                             contractDateEnd

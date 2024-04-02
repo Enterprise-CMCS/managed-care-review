@@ -335,7 +335,6 @@ export function submitHealthPlanPackageResolver(
                         s3URL: doc.s3URL,
                         sha256: doc.sha256,
                         id: doc.id,
-                        dateAdded: new Date(),
                     }
                 }),
                 contractDocuments: maybeLocked.contractDocuments.map((doc) => {
@@ -344,7 +343,6 @@ export function submitHealthPlanPackageResolver(
                         s3URL: doc.s3URL,
                         sha256: doc.sha256,
                         id: doc.id,
-                        dateAdded: new Date(),
                     }
                 }),
             },

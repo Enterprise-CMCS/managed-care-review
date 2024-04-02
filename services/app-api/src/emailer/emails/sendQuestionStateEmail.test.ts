@@ -60,7 +60,6 @@ const formData: ContractFormDataType = {
             s3URL: 'bar',
             name: 'foo',
             sha256: 'fakesha',
-            dateAdded: new Date(),
         },
     ],
     contractDateStart: new Date('01/01/2024'),

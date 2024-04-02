@@ -4,8 +4,11 @@ import type {
     RateFormEditableType,
 } from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../postgresErrors'
-import { emptify, nullify } from '../prismaDomainAdaptors'
 import { findContractWithHistory } from './findContractWithHistory'
+import {
+    prismaRateCreateFormDataFromDomain,
+    prismaUpdateRateFormDataFromDomain,
+} from './prismaContractRateAdaptors'
 
 interface UpdatedRatesType {
     create: {
@@ -29,114 +32,6 @@ interface UpdatedRatesType {
 interface UpdateDraftContractRatesArgsType {
     contractID: string
     rateUpdates: UpdatedRatesType
-}
-
-function prismaRateCreateFormDataFromDomain(
-    rateFormData: RateFormEditableType
-) {
-    return {
-        rateType: rateFormData.rateType,
-        rateCapitationType: rateFormData.rateCapitationType,
-        rateDateStart: rateFormData.rateDateStart,
-        rateDateEnd: rateFormData.rateDateEnd,
-        rateDateCertified: rateFormData.rateDateCertified,
-        amendmentEffectiveDateStart: rateFormData.amendmentEffectiveDateStart,
-        amendmentEffectiveDateEnd: rateFormData.amendmentEffectiveDateEnd,
-        rateProgramIDs: rateFormData.rateProgramIDs,
-        rateCertificationName: rateFormData.rateCertificationName,
-        rateDocuments: {
-            create:
-                rateFormData.rateDocuments &&
-                rateFormData.rateDocuments.map((d, idx) => ({
-                    position: idx,
-                    ...d,
-                })),
-        },
-        supportingDocuments: {
-            create:
-                rateFormData.supportingDocuments &&
-                rateFormData.supportingDocuments.map((d, idx) => ({
-                    position: idx,
-                    ...d,
-                })),
-        },
-        certifyingActuaryContacts: {
-            create:
-                rateFormData.certifyingActuaryContacts &&
-                rateFormData.certifyingActuaryContacts.map((c, idx) => ({
-                    position: idx,
-                    ...c,
-                })),
-        },
-        addtlActuaryContacts: {
-            create:
-                rateFormData.addtlActuaryContacts &&
-                rateFormData.addtlActuaryContacts.map((c, idx) => ({
-                    position: idx,
-                    ...c,
-                })),
-        },
-        actuaryCommunicationPreference:
-            rateFormData.actuaryCommunicationPreference,
-    }
-}
-
-function prismaUpdateRateFormDataFromDomain(
-    rateFormData: RateFormEditableType
-) {
-    return {
-        rateType: nullify(rateFormData.rateType),
-        rateCapitationType: nullify(rateFormData.rateCapitationType),
-        rateDateStart: nullify(rateFormData.rateDateStart),
-        rateDateEnd: nullify(rateFormData.rateDateEnd),
-        rateDateCertified: nullify(rateFormData.rateDateCertified),
-        amendmentEffectiveDateStart: nullify(
-            rateFormData.amendmentEffectiveDateStart
-        ),
-        amendmentEffectiveDateEnd: nullify(
-            rateFormData.amendmentEffectiveDateEnd
-        ),
-        rateProgramIDs: emptify(rateFormData.rateProgramIDs),
-        rateCertificationName: nullify(rateFormData.rateCertificationName),
-        rateDocuments: {
-            deleteMany: {},
-            create:
-                rateFormData.rateDocuments &&
-                rateFormData.rateDocuments.map((d, idx) => ({
-                    position: idx,
-                    ...d,
-                })),
-        },
-        supportingDocuments: {
-            deleteMany: {},
-            create:
-                rateFormData.supportingDocuments &&
-                rateFormData.supportingDocuments.map((d, idx) => ({
-                    position: idx,
-                    ...d,
-                })),
-        },
-        certifyingActuaryContacts: {
-            deleteMany: {},
-            create:
-                rateFormData.certifyingActuaryContacts &&
-                rateFormData.certifyingActuaryContacts.map((c, idx) => ({
-                    position: idx,
-                    ...c,
-                })),
-        },
-        addtlActuaryContacts: {
-            deleteMany: {},
-            create:
-                rateFormData.addtlActuaryContacts &&
-                rateFormData.addtlActuaryContacts.map((c, idx) => ({
-                    position: idx,
-                    ...c,
-                })),
-        },
-        actuaryCommunicationPreference:
-            rateFormData.actuaryCommunicationPreference,
-    }
 }
 
 async function updateDraftContractRates(

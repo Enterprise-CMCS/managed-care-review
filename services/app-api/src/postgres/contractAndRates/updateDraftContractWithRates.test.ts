@@ -1,6 +1,10 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { insertDraftContract } from './insertContract'
-import { mockInsertContractArgs, must } from '../../testHelpers'
+import {
+    clearDocMetadata,
+    mockInsertContractArgs,
+    must,
+} from '../../testHelpers'
 import { updateDraftContractWithRates } from './updateDraftContractWithRates'
 import { PrismaClientValidationError } from '@prisma/client/runtime/library'
 import type { ContractType } from '@prisma/client'
@@ -14,7 +18,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
 
-describe('updateDraftContract', () => {
+describe('updateDraftContractWithRates postgres', () => {
     afterEach(() => {
         jest.clearAllMocks()
     })
@@ -67,13 +71,11 @@ describe('updateDraftContract', () => {
                     name: 'contract supporting doc',
                     s3URL: 'fakeS3URL',
                     sha256: '2342fwlkdmwvw',
-                    dateAdded: new Date(),
                 },
                 {
                     name: 'contract supporting doc 2',
                     s3URL: 'fakeS3URL',
                     sha256: '45662342fwlkdmwvw',
-                    dateAdded: new Date(),
                 },
             ],
             contractType: 'BASE',
@@ -83,7 +85,6 @@ describe('updateDraftContract', () => {
                     name: 'contract doc',
                     s3URL: 'fakeS3URL',
                     sha256: '8984234fwlkdmwvw',
-                    dateAdded: new Date(),
                 },
             ],
             contractDateStart: new Date(Date.UTC(2025, 5, 1)),
@@ -131,7 +132,6 @@ describe('updateDraftContract', () => {
                     name: 'rate doc',
                     s3URL: 'fakeS3URL',
                     sha256: '8984234fwlkdmwvw',
-                    dateAdded: new Date(),
                 },
             ],
             supportingDocuments: [
@@ -139,7 +139,6 @@ describe('updateDraftContract', () => {
                     name: 'rate sup doc',
                     s3URL: 'fakeS3URL',
                     sha256: '8984234fwlkdmwvw',
-                    dateAdded: new Date(),
                 },
             ],
             rateDateStart: new Date(Date.UTC(2025, 5, 1)),
@@ -229,7 +228,6 @@ describe('updateDraftContract', () => {
                     s3URL: 's3://bucketname/key/contract1',
                     name: 'Rate cert 1',
                     sha256: 'shaS56',
-                    dateAdded: new Date(),
                 },
             ],
             supportingDocuments: [
@@ -237,7 +235,6 @@ describe('updateDraftContract', () => {
                     s3URL: 's3://bucketname/key/contractsupporting1-1',
                     name: 'supporting documents 1-1',
                     sha256: 'shaS56',
-                    dateAdded: new Date(),
                 },
             ],
         }
@@ -249,7 +246,6 @@ describe('updateDraftContract', () => {
                     s3URL: 's3://bucketname/key/contract2',
                     name: 'Rate cert 2',
                     sha256: 'shaS56',
-                    dateAdded: new Date(),
                 },
             ],
             supportingDocuments: [
@@ -257,13 +253,11 @@ describe('updateDraftContract', () => {
                     s3URL: 's3://bucketname/key/contractsupporting2-1',
                     name: 'supporting documents 2-1',
                     sha256: 'shaS56',
-                    dateAdded: new Date(),
                 },
                 {
                     s3URL: 's3://bucketname/key/contractsupporting2-2',
                     name: 'supporting documents2-2',
                     sha256: 'shaS56',
-                    dateAdded: new Date(),
                 },
             ],
         }
@@ -300,12 +294,12 @@ describe('updateDraftContract', () => {
             'draftData2'
         )
 
-        expect(draft2.draftRevision?.formData.contractDocuments).toEqual(
-            draftContractForm2.contractDocuments
-        )
-        expect(draft2.draftRevision?.formData.supportingDocuments).toEqual(
-            draftContractForm2.supportingDocuments
-        )
+        expect(
+            clearDocMetadata(draft2.draftRevision?.formData.contractDocuments)
+        ).toEqual(draftContractForm2.contractDocuments)
+        expect(
+            clearDocMetadata(draft2.draftRevision?.formData.supportingDocuments)
+        ).toEqual(draftContractForm2.supportingDocuments)
 
         const draft3 = must(
             await updateDraftContractWithRates(client, {
@@ -316,15 +310,15 @@ describe('updateDraftContract', () => {
         expect(draft3.draftRevision?.formData.submissionDescription).toBe(
             'draftData3'
         )
-        expect(draft3.draftRevision?.formData.supportingDocuments).toHaveLength(
-            1
-        )
-        expect(draft3.draftRevision?.formData.contractDocuments).toEqual(
-            draftContractForm3.contractDocuments
-        )
-        expect(draft3.draftRevision?.formData.supportingDocuments).toEqual(
-            draftContractForm3.supportingDocuments
-        )
+        expect(
+            clearDocMetadata(draft3.draftRevision?.formData.supportingDocuments)
+        ).toHaveLength(1)
+        expect(
+            clearDocMetadata(draft3.draftRevision?.formData.contractDocuments)
+        ).toEqual(draftContractForm3.contractDocuments)
+        expect(
+            clearDocMetadata(draft3.draftRevision?.formData.supportingDocuments)
+        ).toEqual(draftContractForm3.supportingDocuments)
     })
 
     it('updates linked contacts as expected in multiple requests', async () => {
@@ -490,7 +484,6 @@ describe('updateDraftContract', () => {
                         name: 'Rate 1 Doc',
                         s3URL: 'fakeS3URL1',
                         sha256: 'someShaForRateDoc1',
-                        dateAdded: new Date(),
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 5, 1)),
@@ -512,7 +505,6 @@ describe('updateDraftContract', () => {
                         name: 'Rate 2 Doc',
                         s3URL: 'fakeS3URL2',
                         sha256: 'someShaForRateDoc2',
-                        dateAdded: new Date(),
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 8, 1)),
@@ -533,7 +525,6 @@ describe('updateDraftContract', () => {
                         name: 'Rate 3 Doc',
                         s3URL: 'fakeS3URL3',
                         sha256: 'someShaForRateDoc3',
-                        dateAdded: new Date(),
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 3, 1)),
@@ -577,6 +568,12 @@ describe('updateDraftContract', () => {
                     formData: expect.objectContaining({
                         ...updatedRateRevisions[0].formData,
                         ...updateRateRevisionData[0],
+                        rateDocuments: clearDocMetadata(
+                            updatedRateRevisions[0].formData.rateDocuments
+                        ),
+                        supportingDocuments: clearDocMetadata(
+                            updatedRateRevisions[0].formData.supportingDocuments
+                        ),
                     }),
                 }),
                 expect.objectContaining({
@@ -584,6 +581,12 @@ describe('updateDraftContract', () => {
                     formData: expect.objectContaining({
                         ...updatedRateRevisions[1].formData,
                         ...updateRateRevisionData[1],
+                        rateDocuments: clearDocMetadata(
+                            updatedRateRevisions[1].formData.rateDocuments
+                        ),
+                        supportingDocuments: clearDocMetadata(
+                            updatedRateRevisions[1].formData.supportingDocuments
+                        ),
                     }),
                 }),
                 expect.objectContaining({
@@ -591,6 +594,12 @@ describe('updateDraftContract', () => {
                     formData: expect.objectContaining({
                         ...updatedRateRevisions[2].formData,
                         ...updateRateRevisionData[2],
+                        rateDocuments: clearDocMetadata(
+                            updatedRateRevisions[2].formData.rateDocuments
+                        ),
+                        supportingDocuments: clearDocMetadata(
+                            updatedRateRevisions[2].formData.supportingDocuments
+                        ),
                     }),
                 }),
             ])

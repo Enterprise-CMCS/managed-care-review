@@ -39,3 +39,5 @@ export {
     // unlockTestContract,
     // updateTestContract,
 } from './gqlContractHelpers'
+
+export { clearDocMetadata } from './documentHelpers'

@@ -17,15 +17,9 @@ const documentSchema = z.object({
     name: z.string(),
     s3URL: z.string(),
     sha256: z.string(),
-    dateAdded: z.date(), //  date added to an initial submission (if this is an initial draft - will be the last updated date)
+    dateAdded: z.date().optional(), //  date added to the first submission to CMS
 })
 
-const editableDocumentSchema = z.object({
-    name: z.string(),
-    s3URL: z.string(),
-    sha256: z.string(),
-    dateAdded: z.date().optional(), //  date added to an initial submission (if this is an initial draft - will be the last updated date)
-})
 const managedCareEntitiesSchema = z.union([
     z.literal('MCO'),
     z.literal('PIHP'),
@@ -97,18 +91,12 @@ const rateFormDataSchema = z.object({
         .optional(),
 })
 
-// Editable types are input types, handle in progress form data
-type DocumentEditableType = z.infer<typeof editableDocumentSchema>
-type ContractFormDataType = z.infer<typeof contractFormDataSchema>
-type ContractFormEditableType = Partial<ContractFormDataType>
-type RateFormDataType = z.infer<typeof rateFormDataSchema>
-type RateFormEditableType = Partial<
-    RateFormDataType & {
-        rateDocuments: DocumentEditableType[]
-        supportingDocuments: DocumentEditableType[]
-    }
->
 type DocumentType = z.infer<typeof documentSchema>
+type ContractFormDataType = z.infer<typeof contractFormDataSchema>
+type RateFormDataType = z.infer<typeof rateFormDataSchema>
+
+type ContractFormEditableType = Partial<ContractFormDataType>
+type RateFormEditableType = Partial<RateFormDataType>
 
 export { contractFormDataSchema, rateFormDataSchema }
 

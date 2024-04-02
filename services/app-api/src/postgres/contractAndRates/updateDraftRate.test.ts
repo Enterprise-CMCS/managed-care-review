@@ -1,6 +1,6 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { insertDraftRate } from './insertRate'
-import { must } from '../../testHelpers'
+import { clearDocMetadata, must } from '../../testHelpers'
 import { updateDraftRate } from './updateDraftRate'
 import { PrismaClientValidationError } from '@prisma/client/runtime/library'
 
@@ -49,7 +49,6 @@ describe('updateDraftRate', () => {
                     s3URL: 's3://bucketname/key/rate1',
                     name: 'Rate cert 1',
                     sha256: 'shaS56',
-                    dateAdded: new Date(),
                 },
             ],
             supportingDocuments: [
@@ -57,7 +56,6 @@ describe('updateDraftRate', () => {
                     s3URL: 's3://bucketname/key/ratesupporting1-1',
                     name: 'supporting documents 1-1',
                     sha256: 'shaS56',
-                    dateAdded: new Date(),
                 },
             ],
         }
@@ -69,7 +67,6 @@ describe('updateDraftRate', () => {
                     s3URL: 's3://bucketname/key/rate2',
                     name: 'Rate cert 2',
                     sha256: 'shaS56',
-                    dateAdded: new Date(),
                 },
             ],
             supportingDocuments: [
@@ -77,13 +74,11 @@ describe('updateDraftRate', () => {
                     s3URL: 's3://bucketname/key/ratesupporting2-1',
                     name: 'supporting documents 2-1',
                     sha256: 'shaS56',
-                    dateAdded: new Date(),
                 },
                 {
                     s3URL: 's3://bucketname/key/ratesupporting2-2',
                     name: 'supporting documents2-2',
                     sha256: 'shaS56',
-                    dateAdded: new Date(),
                 },
             ],
         }
@@ -124,12 +119,12 @@ describe('updateDraftRate', () => {
             'draftData2'
         )
 
-        expect(draft2.draftRevision?.formData.rateDocuments).toEqual(
-            draftRateForm2.rateDocuments
-        )
-        expect(draft2.draftRevision?.formData.supportingDocuments).toEqual(
-            draftRateForm2.supportingDocuments
-        )
+        expect(
+            clearDocMetadata(draft2.draftRevision?.formData.rateDocuments)
+        ).toEqual(draftRateForm2.rateDocuments)
+        expect(
+            clearDocMetadata(draft2.draftRevision?.formData.supportingDocuments)
+        ).toEqual(draftRateForm2.supportingDocuments)
 
         const draft3 = must(
             await updateDraftRate(client, {
@@ -144,12 +139,12 @@ describe('updateDraftRate', () => {
         expect(draft3.draftRevision?.formData.supportingDocuments).toHaveLength(
             1
         )
-        expect(draft3.draftRevision?.formData.rateDocuments).toEqual(
-            draftRateForm3.rateDocuments
-        )
-        expect(draft3.draftRevision?.formData.supportingDocuments).toEqual(
-            draftRateForm3.supportingDocuments
-        )
+        expect(
+            clearDocMetadata(draft3.draftRevision?.formData.rateDocuments)
+        ).toEqual(draftRateForm3.rateDocuments)
+        expect(
+            clearDocMetadata(draft3.draftRevision?.formData.supportingDocuments)
+        ).toEqual(draftRateForm3.supportingDocuments)
     })
 
     it('updates linked contacts as expected in multiple requests', async () => {

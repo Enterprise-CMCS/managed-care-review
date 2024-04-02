@@ -235,13 +235,11 @@ describe('submitRate', () => {
                     name: 'rate supporting doc',
                     s3URL: 'fakeS3URL',
                     sha256: '2342fwlkdmwvw',
-                    dateAdded: new Date(),
                 },
                 {
                     name: 'rate supporting doc 2',
                     s3URL: 'fakeS3URL',
                     sha256: '45662342fwlkdmwvw',
-                    dateAdded: new Date(),
                 },
             ],
             rateDocuments: [
@@ -249,7 +247,6 @@ describe('submitRate', () => {
                     name: 'contract doc',
                     s3URL: 'fakeS3URL',
                     sha256: '8984234fwlkdmwvw',
-                    dateAdded: new Date(),
                 },
             ],
         }
