@@ -8,9 +8,6 @@ import {
 import React, { useEffect, useRef, useState } from 'react'
 import { NavLink, useOutletContext } from 'react-router-dom'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
-import {
-    ContractDetailsSummarySection,
-} from '../../../components/SubmissionSummarySection'
 import { ContactsSummarySection } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/ContactsSummarySectionV2'
 import { RateDetailsSummarySectionV2 } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/RateDetailsSummarySectionV2'
 import { SubmissionTypeSummarySectionV2 } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/SubmissionTypeSummarySectionV2'
@@ -19,6 +16,11 @@ import {
     SubmissionUpdatedBanner,
     DocumentWarningBanner,
 } from '../../../components'
+import {
+    ErrorOrLoadingPage,
+    handleAndReturnErrorState,
+} from '../../StateSubmission/ErrorOrLoadingPage'
+import { ContractDetailsSummarySectionV2 } from './ContractDetailsSummarySectionV2'
 import { usePage } from '../../../contexts/PageContext'
 import { UpdateInformation, useFetchContractQuery } from '../../../gen/gqlClient'
 import styles from '../SubmissionSummary.module.scss'
@@ -122,6 +124,17 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
         : 'Add MC-CRS record number'
 
     const contract = fetchContractData?.fetchContract.contract
+
+     // Display any full page interim state resulting from the initial fetch API requests
+     if (fetchContractLoading) {
+        return <ErrorOrLoadingPage state="LOADING" />
+    }
+
+    if (fetchContractError) {
+        return (
+            <ErrorOrLoadingPage state={handleAndReturnErrorState(fetchContractError)} />
+        )
+    }
     return (
         <div className={styles.background}>
             <div>This is the V2 page of the SubmissionSummary</div>
@@ -215,13 +228,15 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                     />
                 )}
 
-                <ContractDetailsSummarySection
-                    documentDateLookupTable={documentDates}
-                    submission={packageData}
-                    isCMSUser={isCMSUser}
-                    submissionName={name}
-                    onDocumentError={handleDocumentDownloadError}
-                />
+                {contract && (
+                    <ContractDetailsSummarySectionV2
+                        documentDateLookupTable={documentDates}
+                        contract={contract}
+                        isCMSUser={isCMSUser}
+                        submissionName={name}
+                        onDocumentError={handleDocumentDownloadError}
+                    />
+                )}
 
                 {contract && isContractActionAndRateCertification && (
                     <RateDetailsSummarySectionV2

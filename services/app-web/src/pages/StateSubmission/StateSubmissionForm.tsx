@@ -74,7 +74,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         'SUBMISSIONS_REVIEW_SUBMIT'
                     )}
                     element={
-                        useLinkedRates ? <ReviewSubmitV2 /> : <ReviewSubmit />
+                         <ReviewSubmit />
+                        // useLinkedRates ? <ReviewSubmitV2 /> : <ReviewSubmit />
                     }
                 />
                 <Route path="*" element={<Error404 />} />
