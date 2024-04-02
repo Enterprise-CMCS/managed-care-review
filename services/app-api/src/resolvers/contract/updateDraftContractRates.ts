@@ -145,9 +145,13 @@ function updateDraftContractRates(
         // TODO set the position in the list correctly
         // any rates that aren't in this list are unlinked (or deleted?)
         const knownRateIDs = draftRates.map((r) => r.id)
+        let thisPosition = 1
         for (const rateUpdate of parsedUpdates) {
             if (rateUpdate.type === 'CREATE') {
-                rateUpdates.create.push({ formData: rateUpdate.formData })
+                rateUpdates.create.push({
+                    formData: rateUpdate.formData,
+                    ratePosition: thisPosition,
+                })
             }
 
             if (rateUpdate.type === 'UPDATE') {
@@ -212,6 +216,7 @@ function updateDraftContractRates(
                 rateUpdates.update.push({
                     rateID: rateUpdate.rateID,
                     formData: rateUpdate.formData,
+                    ratePosition: thisPosition,
                 })
             }
 
@@ -254,8 +259,13 @@ function updateDraftContractRates(
                 }
 
                 // this is a new link, actually link them.
-                rateUpdates.link.push({ rateID: rateUpdate.rateID })
+                rateUpdates.link.push({
+                    rateID: rateUpdate.rateID,
+                    ratePosition: thisPosition,
+                })
             }
+
+            thisPosition++
         }
 
         // we've gone through the existing rates, anything we didn't see we should remove

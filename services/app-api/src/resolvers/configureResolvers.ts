@@ -119,6 +119,15 @@ export function configureResolvers(
                 }
             },
         },
+        SubmittableRevision: {
+            __resolveType(obj) {
+                if ('contract' in obj) {
+                    return 'ContractRevision'
+                } else {
+                    return 'RateRevision'
+                }
+            },
+        },
         StateUser: stateUserResolver,
         CMSUser: cmsUserResolver,
         HealthPlanPackage: healthPlanPackageResolver(store),

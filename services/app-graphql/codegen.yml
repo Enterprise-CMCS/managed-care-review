@@ -24,6 +24,7 @@ generates:
         RateRevision: ../domain-models#RateRevisionType
         Contract: ../domain-models#ContractType as ContractDomainType
         ContractRevision: ../domain-models#ContractRevisionType
+        ContractPackageSubmission: ../domain-models#ContractPackageSubmissionWithCauseType
   ../app-web/src/gen/gqlClient.tsx:
     documents:
       - src/queries/*.graphql

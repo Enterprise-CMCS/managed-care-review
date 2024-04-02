@@ -5,12 +5,15 @@ import type {
     RateType,
 } from '../../domain-models/contractAndRates'
 import { contractSchema } from '../../domain-models/contractAndRates'
+import type { ContractPackageSubmissionType } from '../../domain-models/contractAndRates/packageSubmissions'
+import { rateWithHistoryToDomainModel } from './parseRateWithHistory'
 import { draftContractRevToDomainModel } from './prismaDraftContractHelpers'
 import type {
     RateRevisionTableWithFormData,
     ContractRevisionTableWithFormData,
     UpdateInfoTableWithUpdater,
 } from './prismaSharedContractRateHelpers'
+import { rateRevisionToDomainModel } from './prismaSharedContractRateHelpers'
 import {
     contractFormDataToDomainModel,
     convertUpdateInfoToDomainModel,
@@ -112,7 +115,7 @@ function contractWithHistoryToDomainModel(
     const contractRevisions = contract.revisions
     let draftRevision: ContractRevisionWithRatesType | Error | undefined =
         undefined
-    let draftRates: RateType[] | Error | undefined = undefined
+    let draftRates: RateType[] | undefined = undefined
 
     for (const [contractRevIndex, contractRev] of contractRevisions.entries()) {
         // We set the draft revision aside, all ordered revisions are submitted
@@ -132,19 +135,40 @@ function contractWithHistoryToDomainModel(
                 )
             }
 
-            const draftPrismaRates = contractRev.draftRates
+            // if we have a draft revision, we should set draftRates
+            const draftRatesOrError = contract.draftRates.map((dr) =>
+                rateWithHistoryToDomainModel(dr.rate)
+            )
+            const firstError: Error | undefined = draftRatesOrError.find(
+                (dr): dr is Error => dr instanceof Error
+            )
+            if (firstError) {
+                return firstError
+            } else {
+                const allDraftRates: RateType[] =
+                    draftRatesOrError as RateType[]
+                draftRates = allDraftRates
+            }
 
-            draftRates = draftPrismaRates.map((r) => {
-                return {
-                    id: r.id,
-                    createdAt: r.createdAt,
-                    updatedAt: r.updatedAt,
-                    status: getContractRateStatus(r.revisions),
-                    stateCode: r.stateCode,
-                    stateNumber: r.stateNumber,
-                    revisions: [],
-                }
-            })
+            if (draftRates.length === 0) {
+                console.info(
+                    'Checking for old style draft rates, this code should go when migrated to new draft-rates table.'
+                )
+                // This code works for pre-migrated stuff.
+                const draftPrismaRates = contractRev.draftRates
+                draftRates = draftPrismaRates.map((r) => {
+                    return {
+                        id: r.id,
+                        createdAt: r.createdAt,
+                        updatedAt: r.updatedAt,
+                        status: getContractRateStatus(r.revisions),
+                        stateCode: r.stateCode,
+                        stateNumber: r.stateNumber,
+                        revisions: [],
+                    }
+                })
+            }
+
             // skip the rest of the processing
             continue
         }
@@ -274,6 +298,55 @@ function contractWithHistoryToDomainModel(
         )
     }
 
+    // New C+R package history code
+    // Every revision has a set of submissions it was part of.
+    const packageSubmissions: ContractPackageSubmissionType[] = []
+    for (const revision of contract.revisions) {
+        for (const submission of revision.relatedSubmisions) {
+            // submittedThings
+            const submittedContract = submission.submittedContracts.map((c) =>
+                contractRevisionToDomainModel(c)
+            )
+            const submittedRates = submission.submittedRates.map((r) =>
+                rateRevisionToDomainModel(r)
+            )
+
+            const submitedRevs: ContractPackageSubmissionType['submittedRevisions'] =
+                []
+            for (const contractRev of submittedContract) {
+                submitedRevs.push(contractRev)
+            }
+            for (const rateRev of submittedRates) {
+                if (rateRev instanceof Error) {
+                    return rateRev
+                }
+                submitedRevs.push(rateRev)
+            }
+
+            const relatedRateRevisions = submission.submissionPackages
+                .filter((p) => p.contractRevisionID === revision.id)
+                .map((p) => p.rateRevision)
+
+            const rateRevisions =
+                ratesRevisionsToDomainModel(relatedRateRevisions)
+
+            if (rateRevisions instanceof Error) {
+                return rateRevisions
+            }
+
+            packageSubmissions.push({
+                submitInfo: {
+                    updatedAt: submission.updatedAt,
+                    updatedBy: submission.updatedBy.email,
+                    updatedReason: submission.updatedReason,
+                },
+                submittedRevisions: submitedRevs,
+                contractRevision: contractRevisionToDomainModel(revision),
+                rateRevisions: rateRevisions,
+            })
+        }
+    }
+
     return {
         id: contract.id,
         createdAt: contract.createdAt,
@@ -285,6 +358,7 @@ function contractWithHistoryToDomainModel(
         draftRevision,
         draftRates,
         revisions: revisions.reverse(),
+        packageSubmissions: packageSubmissions,
     }
 }
 

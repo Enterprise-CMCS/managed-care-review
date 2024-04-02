@@ -4,6 +4,7 @@ import {
     includeContractFormData,
     includeRateFormData,
 } from './prismaSharedContractRateHelpers'
+import { includeFullRate } from './prismaSubmittedRateHelpers'
 
 // Generated Types
 
@@ -21,12 +22,41 @@ const includeLatestSubmittedRateRev = {
 
 // The include parameters for everything in a Contract.
 const includeFullContract = {
+    draftRates: {
+        orderBy: {
+            ratePosition: 'asc',
+        },
+        include: {
+            rate: {
+                include: includeFullRate,
+            },
+        },
+    },
     revisions: {
         orderBy: {
             createdAt: 'asc',
         },
         include: {
             ...includeContractFormData,
+
+            relatedSubmisions: {
+                include: {
+                    submittedContracts: {
+                        include: includeContractFormData,
+                    },
+                    submittedRates: {
+                        include: includeRateFormData,
+                    },
+                    updatedBy: true,
+                    submissionPackages: {
+                        include: {
+                            rateRevision: {
+                                include: includeRateFormData,
+                            },
+                        },
+                    },
+                },
+            },
 
             draftRates: {
                 include: includeDraftRates,

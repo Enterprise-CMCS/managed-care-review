@@ -8,13 +8,16 @@ import type { RateFormEditable } from './updateDraftRate'
 interface UpdatedRatesType {
     create: {
         formData: RateFormEditable
+        ratePosition: number
     }[]
     update: {
         rateID: string
         formData: RateFormEditable
+        ratePosition: number
     }[]
     link: {
         rateID: string
+        ratePosition: number
     }[]
     unlink: {
         rateID: string
@@ -182,11 +185,14 @@ async function updateDraftContractRates(
             let nextRateNumber = state.latestStateRateCertNumber + 1
 
             // create new rates with new revisions
-            const ratesToCreate = args.rateUpdates.create.map((ru) => {
-                const rateFormData = ru.formData
+            const createdRateJoins: { rateID: string; ratePosition: number }[] =
+                []
+            for (const createRateArg of args.rateUpdates.create) {
+                const rateFormData = createRateArg.formData
                 const thisRateNumber = nextRateNumber
                 nextRateNumber++
-                return {
+
+                const rateToCreate = {
                     stateCode: contract.stateCode,
                     stateNumber: thisRateNumber,
                     revisions: {
@@ -195,7 +201,19 @@ async function updateDraftContractRates(
                         ),
                     },
                 }
-            })
+
+                const createdRate = await tx.rateTable.create({
+                    data: rateToCreate,
+                    include: {
+                        revisions: true,
+                    },
+                })
+
+                createdRateJoins.push({
+                    rateID: createdRate.id,
+                    ratePosition: createRateArg.ratePosition,
+                })
+            }
 
             // to delete draft rates, we need to delete their revisions first
             await tx.rateRevisionTable.deleteMany({
@@ -206,14 +224,19 @@ async function updateDraftContractRates(
                 },
             })
 
+            const oldLinksToCreate = [
+                ...createdRateJoins.map((lr) => lr.rateID),
+                ...args.rateUpdates.link.map((ru) => ru.rateID),
+            ]
+
             // create new rates and link and unlink others
             await tx.contractRevisionTable.update({
                 where: { id: draftRevision.id },
                 data: {
                     draftRates: {
-                        create: ratesToCreate,
-                        connect: args.rateUpdates.link.map((ru) => ({
-                            id: ru.rateID,
+                        // create: ratesToCreate,
+                        connect: oldLinksToCreate.map((rID) => ({
+                            id: rID,
                         })),
                         disconnect: args.rateUpdates.unlink.map((ru) => ({
                             id: ru.rateID,
@@ -227,6 +250,53 @@ async function updateDraftContractRates(
                     draftRates: true,
                 },
             })
+
+            // new rate + contract Linking tables
+
+            // for each of the links, we have to get the order right
+            // all the newly valid links are from create/update/link
+            const links: { rateID: string; ratePosition: number }[] = [
+                ...createdRateJoins.map((rj) => ({
+                    rateID: rj.rateID,
+                    ratePosition: rj.ratePosition,
+                })),
+                ...args.rateUpdates.update.map((ru) => ({
+                    rateID: ru.rateID,
+                    ratePosition: ru.ratePosition,
+                })),
+                ...args.rateUpdates.link.map((ru) => ({
+                    rateID: ru.rateID,
+                    ratePosition: ru.ratePosition,
+                })),
+            ]
+
+            // Check our work, these should be an incrementing list of ratePositions.
+            const ratePositions = links.map((l) => l.ratePosition).sort()
+            let lastPosition = 0
+            for (const ratePosition of ratePositions) {
+                if (ratePosition !== lastPosition + 1) {
+                    console.error(
+                        'Updated Rate ratePositions Are Not Ordered',
+                        ratePositions
+                    )
+                    return new Error(
+                        'updateDraftContractRates called with discontinuous order ratePositions'
+                    )
+                }
+                lastPosition++
+            }
+
+            await tx.contractTable.update({
+                where: { id: args.contractID },
+                data: {
+                    draftRates: {
+                        deleteMany: {},
+                        create: links,
+                    },
+                },
+            })
+
+            // end new R+C Contract Linking Tables
 
             // update existing rates
             for (const ru of args.rateUpdates.update) {

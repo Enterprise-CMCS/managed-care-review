@@ -106,7 +106,7 @@ describe('submitContract', () => {
 
         expect(contract.draftContact).toBeUndefined()
 
-        expect(contract.packageSubmissionHistory).toHaveLength(1)
+        expect(contract.packageSubmissions).toHaveLength(1)
 
         throw new Error('INCOMEONWE')
     })
