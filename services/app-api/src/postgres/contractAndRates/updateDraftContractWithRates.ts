@@ -203,6 +203,9 @@ async function updateDraftContractWithRates(
                                         ...prismaRateCreateFormDataFromDomain(
                                             rateFormData
                                         ),
+                                        contractsWithSharedRateRevision: {
+                                            connect: contractsWithSharedRates,
+                                        },
                                     },
                                 },
                                 draftContractRevisions: {

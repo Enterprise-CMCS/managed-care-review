@@ -5,6 +5,9 @@ import type {
 import type { GenericDocument } from '../../gen/gqlServer'
 import { emptify, nullify } from '../prismaDomainAdaptors'
 
+// ADD RETURN TYPES FROM PRISMA SEE "includes" "satifies"
+// contractTableFullPayload - contractTableCreateArgs / contract
+
 // Generic helpers
 const formatDocsForPrisma = (docs: GenericDocument[]) => {
     return docs.map((d, idx) => {
@@ -109,7 +112,6 @@ function prismaUpdateRateFormDataFromDomain(
         },
         actuaryCommunicationPreference:
             rateFormData.actuaryCommunicationPreference,
-        packagesWithShared,
     }
 }
 
