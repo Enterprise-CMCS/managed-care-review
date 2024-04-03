@@ -97,7 +97,6 @@ const formatDocumentsForGQL = (
                 name: fileItem.name,
                 s3URL: fileItem.s3URL,
                 sha256: fileItem.sha256,
-                dateAdded: new Date() // The API will disregard the input and return the real date added based on previous submissions - this is a filler value
             })
         }
         return cleanedFileItems

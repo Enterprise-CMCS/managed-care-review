@@ -44,6 +44,7 @@ import {
 } from '../../../../../constants/statutoryRegulatoryAttestation'
 import { SectionCard } from '../../../../../components/SectionCard'
 import { Contract } from '../../../../../gen/gqlClient'
+import { getLastContractSubmission } from '../../../../../gqlHelpers/contractsAndRates'
 
 export type ContractDetailsSummarySectionV2Props = {
     contract: Contract
@@ -154,7 +155,7 @@ export const ContractDetailsSummarySectionV2 = ({
         isPreviousSubmission,
     ])
     const lastSubmittedDate =
-        contract.packageSubmissions[0].submitInfo.updatedAt
+        getLastContractSubmission(contract)?.submitInfo.updatedAt
     return (
         <SectionCard
             id="contractDetailsSection"
