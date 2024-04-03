@@ -1280,6 +1280,7 @@ for the rate and contains the full data from when the rate cert was submitted
 """
 type RateRevision {
     id: ID!
+    rate: Rate
     createdAt: DateTime!
     updatedAt: DateTime!
     """

@@ -68,6 +68,9 @@ fragment rateFields on Rate {
 
 fragment rateRevisionFragmentForFetchContract on RateRevision {
     id
+    rate {
+        id
+    }
     createdAt
     updatedAt
     unlockInfo {

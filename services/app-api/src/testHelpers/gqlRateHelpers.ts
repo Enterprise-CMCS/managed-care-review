@@ -14,7 +14,11 @@ import { sharedTestPrismaClient } from './storeHelpers'
 import { insertDraftRate } from '../postgres/contractAndRates/insertRate'
 import { updateDraftRate } from '../postgres/contractAndRates/updateDraftRate'
 
-import type { Contract, RateFormDataInput } from '../gen/gqlServer'
+import type {
+    Contract,
+    RateFormDataInput,
+    UpdateDraftContractRatesInput,
+} from '../gen/gqlServer'
 import type { RateType } from '../domain-models'
 import type { InsertRateArgsType } from '../postgres/contractAndRates/insertRate'
 import type { RateFormEditable } from '../postgres/contractAndRates/updateDraftRate'
@@ -134,6 +138,166 @@ const createTestRate = async (
     return must(await insertDraftRate(prismaClient, draftRateData))
 }
 
+async function updateDraftRatesOnContract(
+    server: ApolloServer,
+    input: UpdateDraftContractRatesInput
+): Promise<Contract> {
+    const updateResult = await server.executeOperation({
+        query: UPDATE_DRAFT_CONTRACT_RATES,
+        variables: {
+            input,
+        },
+    })
+
+    if (updateResult.errors || !updateResult.data) {
+        throw new Error(
+            `updateDraftContractRates mutation failed with errors ${updateResult.errors}`
+        )
+    }
+
+    return updateResult.data.updateDraftContractRates.contract
+}
+
+async function addNewRateToTestContract(
+    server: ApolloServer,
+    contract: Contract
+): Promise<Contract> {
+    const rateUpdateInput = updateRatesInputFromDraftContract(contract)
+
+    const addedInput = addNewRateToRateInput(rateUpdateInput)
+
+    return await updateDraftRatesOnContract(server, addedInput)
+}
+
+function addNewRateToRateInput(
+    input: UpdateDraftContractRatesInput
+): UpdateDraftContractRatesInput {
+    return {
+        contractID: input.contractID,
+        updatedRates: [
+            ...input.updatedRates,
+            {
+                type: 'CREATE' as const,
+                formData: {
+                    rateType: 'AMENDMENT',
+                    rateCapitationType: 'RATE_CELL',
+                    rateDateStart: '2024-01-01',
+                    rateDateEnd: '2025-01-01',
+                    rateDateCertified: '2024-01-02',
+                    amendmentEffectiveDateStart: '2024-02-01',
+                    amendmentEffectiveDateEnd: '2025-02-01',
+                    rateProgramIDs: [defaultFloridaRateProgram().id],
+
+                    rateDocuments: [
+                        {
+                            s3URL: 'foo://bar',
+                            name: 'ratedoc1.doc',
+                            sha256: 'foobar',
+                        },
+                    ],
+                    supportingDocuments: [
+                        {
+                            s3URL: 'foo://bar1',
+                            name: 'ratesupdoc1.doc',
+                            sha256: 'foobar1',
+                        },
+                        {
+                            s3URL: 'foo://bar2',
+                            name: 'ratesupdoc2.doc',
+                            sha256: 'foobar2',
+                        },
+                    ],
+                    certifyingActuaryContacts: [
+                        {
+                            name: 'Foo Person',
+                            titleRole: 'Bar Job',
+                            email: 'foo@example.com',
+                            actuarialFirm: 'GUIDEHOUSE',
+                        },
+                    ],
+                    addtlActuaryContacts: [
+                        {
+                            name: 'Bar Person',
+                            titleRole: 'Baz Job',
+                            email: 'bar@example.com',
+                            actuarialFirm: 'OTHER',
+                            actuarialFirmOther: 'Some Firm',
+                        },
+                    ],
+                    actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                    packagesWithSharedRateCerts: [],
+                },
+            },
+        ],
+    }
+}
+
+async function addLinkedRateToTestContract(
+    server: ApolloServer,
+    contract: Contract,
+    rateID: string
+): Promise<Contract> {
+    const rateUpdateInput = updateRatesInputFromDraftContract(contract)
+
+    const addedInput = addLinkedRateToRateInput(rateUpdateInput, rateID)
+
+    return await updateDraftRatesOnContract(server, addedInput)
+}
+
+function addLinkedRateToRateInput(
+    input: UpdateDraftContractRatesInput,
+    rateID: string
+): UpdateDraftContractRatesInput {
+    return {
+        contractID: input.contractID,
+        updatedRates: [
+            ...input.updatedRates,
+            {
+                type: 'LINK' as const,
+                rateID,
+            },
+        ],
+    }
+}
+
+function updateRatesInputFromDraftContract(
+    contract: Contract
+): UpdateDraftContractRatesInput {
+    const draftRates = contract.draftRates
+    if (!draftRates) {
+        throw new Error('attempted to grab rate input from non-draft contract')
+    }
+
+    const rateInputs = draftRates.map((rate) => {
+        if (rate.revisions.length > 0) {
+            // this is a linked rate TODO: Fix for proper parentage. (the rate will have been submitted initially with this contract)
+            return {
+                type: 'LINK' as const,
+                rateID: rate.id,
+            }
+        } else {
+            const revision = rate.draftRevision
+            if (!revision) {
+                console.error(
+                    'programming error no revision found for rate',
+                    rate
+                )
+                throw new Error('No revision found for rate')
+            }
+            return {
+                type: 'UPDATE' as const,
+                rateID: rate.id,
+                formData: revision.formData,
+            }
+        }
+    })
+
+    return {
+        contractID: contract.id,
+        updatedRates: rateInputs,
+    }
+}
+
 const createTestDraftRateOnContract = async (
     server: ApolloServer,
     contractID: string,
@@ -224,6 +388,9 @@ export {
     createAndSubmitTestRate,
     createTestDraftRateOnContract,
     updateTestDraftRateOnContract,
+    updateRatesInputFromDraftContract,
+    addNewRateToTestContract,
+    addLinkedRateToTestContract,
     fetchTestRateById,
     submitTestRate,
     unlockTestRate,

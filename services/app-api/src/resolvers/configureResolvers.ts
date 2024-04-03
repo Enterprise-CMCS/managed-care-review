@@ -78,7 +78,12 @@ export function configureResolvers(
                 emailParameterStore,
                 launchDarkly
             ),
-            submitContract: submitContract(store),
+            submitContract: submitContract(
+                store,
+                emailer,
+                emailParameterStore,
+                launchDarkly
+            ),
             unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
                 store,
                 emailer,

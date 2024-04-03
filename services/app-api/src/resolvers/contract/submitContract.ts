@@ -1,34 +1,33 @@
-import { ForbiddenError } from 'apollo-server-core'
-import { isStateUser } from '../../domain-models'
+import type { Emailer } from '../../emailer'
 import type { MutationResolvers } from '../../gen/gqlServer'
+import type { LDService } from '../../launchDarkly/launchDarkly'
+import type { EmailParameterStore } from '../../parameterStore'
 import type { Store } from '../../postgres'
-import {
-    setErrorAttributesOnActiveSpan,
-    setResolverDetailsOnActiveSpan,
-} from '../attributeHelper'
+import { submitHealthPlanPackageResolver } from '../healthPlanPackage'
 
 export function submitContract(
-    store: Store
+    store: Store,
+    emailer: Emailer,
+    emailParameterStore: EmailParameterStore,
+    launchDarkly: LDService
 ): MutationResolvers['submitContract'] {
-    return async (_parent, { input }, context) => {
-        const { user, span } = context
-        setResolverDetailsOnActiveSpan('submitContract', user, span)
+    return async (parent, { input }, context) => {
+        // For some reason the types for resolvers are not actually callable?
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const submitHPPResolver = submitHealthPlanPackageResolver(
+            store,
+            emailer,
+            emailParameterStore,
+            launchDarkly
+        ) as any
 
-        // This resolver is only callable by state users
-        if (!isStateUser(user)) {
-            const errMsg =
-                'submitContract: user not authorized to create state data'
-            setErrorAttributesOnActiveSpan(errMsg, span)
-            throw new ForbiddenError('user not authorized to create state data')
-        }
+        await submitHPPResolver(
+            parent,
+            { input: { pkgID: input.contractID } },
+            context
+        )
 
-        const realSubmitReason = input.submittedReason || 'Initial Submit'
-
-        const contract = await store.submitContract({
-            contractID: input.contractID,
-            submittedReason: realSubmitReason,
-            submittedByUserID: context.user.id,
-        })
+        const contract = await store.findContractWithHistory(input.contractID)
 
         if (contract instanceof Error) {
             throw contract

@@ -1,114 +1,78 @@
-import {
-    constructTestPostgresServer,
-    createTestHealthPlanPackage,
-} from '../../testHelpers/gqlHelpers'
-import UPDATE_DRAFT_CONTRACT_RATES from '../../../../app-graphql/src/mutations/updateDraftContractRates.graphql'
+import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import SUBMIT_CONTRACT from '../../../../app-graphql/src/mutations/submitContract.graphql'
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import type { SubmitContractInput } from '../../gen/gqlServer'
+import {
+    createAndSubmitTestContractWithRate,
+    createAndUpdateTestContractWithoutRates,
+    submitTestContract,
+} from '../../testHelpers/gqlContractHelpers'
+import {
+    addLinkedRateToTestContract,
+    addNewRateToTestContract,
+    fetchTestRateById,
+} from '../../testHelpers/gqlRateHelpers'
 
 describe('submitContract', () => {
     it('submits a contract', async () => {
         const stateServer = await constructTestPostgresServer()
 
-        const draft = await createTestHealthPlanPackage(stateServer)
+        const draft = await createAndUpdateTestContractWithoutRates(stateServer)
+        const draftWithRates = await addNewRateToTestContract(
+            stateServer,
+            draft
+        )
 
-        const result = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
-            variables: {
-                input: {
-                    contractID: draft.id,
-                    updatedRates: [
-                        {
-                            type: 'CREATE',
-                            formData: {
-                                rateType: 'AMENDMENT',
-                                rateCapitationType: 'RATE_CELL',
-                                rateDateStart: '2024-01-01',
-                                rateDateEnd: '2025-01-01',
-                                amendmentEffectiveDateStart: '2024-02-01',
-                                amendmentEffectiveDateEnd: '2025-02-01',
-                                rateProgramIDs: ['foo'],
-
-                                rateDocuments: [
-                                    {
-                                        s3URL: 'foo://bar',
-                                        name: 'ratedoc1.doc',
-                                        sha256: 'foobar',
-                                    },
-                                ],
-                                supportingDocuments: [
-                                    {
-                                        s3URL: 'foo://bar1',
-                                        name: 'ratesupdoc1.doc',
-                                        sha256: 'foobar1',
-                                    },
-                                    {
-                                        s3URL: 'foo://bar2',
-                                        name: 'ratesupdoc2.doc',
-                                        sha256: 'foobar2',
-                                    },
-                                ],
-                                certifyingActuaryContacts: [
-                                    {
-                                        name: 'Foo Person',
-                                        titleRole: 'Bar Job',
-                                        email: 'foo@example.com',
-                                        actuarialFirm: 'GUIDEHOUSE',
-                                    },
-                                ],
-                                addtlActuaryContacts: [
-                                    {
-                                        name: 'Bar Person',
-                                        titleRole: 'Baz Job',
-                                        email: 'bar@example.com',
-                                        actuarialFirm: 'OTHER',
-                                        actuarialFirmOther: 'Some Firm',
-                                    },
-                                ],
-                                actuaryCommunicationPreference:
-                                    'OACT_TO_ACTUARY',
-                                packagesWithSharedRateCerts: [],
-                            },
-                        },
-                    ],
-                },
-            },
-        })
-
-        expect(result.errors).toBeUndefined()
-        if (!result.data) {
-            throw new Error('No data returned')
-        }
-
-        const draftRates =
-            result.data.updateDraftContractRates.contract.draftRates
+        const draftRates = draftWithRates.draftRates
 
         expect(draftRates).toHaveLength(1)
 
-        // SUBMIT
-        const submitResult = await stateServer.executeOperation({
-            query: SUBMIT_CONTRACT,
-            variables: {
-                input: {
-                    contractID: draft.id,
-                    submittedReason: 'FIRST POST',
-                },
-            },
-        })
+        const contract = await submitTestContract(stateServer, draft.id)
 
-        expect(submitResult.errors).toBeUndefined()
-        if (!submitResult.data) {
-            throw new Error('no data')
-        }
-
-        const contract = submitResult.data.submitContract.contract
-
-        expect(contract.draftContact).toBeUndefined()
+        expect(contract.draftRevision).toBeNull()
 
         expect(contract.packageSubmissions).toHaveLength(1)
 
-        throw new Error('INCOMEONWE')
+        const sub = contract.packageSubmissions[0]
+        expect(sub.cause).toBe('CONTRACT_SUBMISSION')
+        expect(sub.submitInfo.updatedReason).toBe('Initial submission')
+        expect(sub.submittedRevisions).toHaveLength(2)
+        expect(sub.contractRevision.formData.submissionDescription).toBe(
+            'An updated submission'
+        )
+
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const rateID = sub.rateRevisions[0].rate!.id
+        const rate = await fetchTestRateById(stateServer, rateID)
+        expect(rate.status).toBe('SUBMITTED')
+    })
+
+    it('handles a submission with multiple connections', async () => {
+        const stateServer = await constructTestPostgresServer()
+
+        const contract1 = await createAndSubmitTestContractWithRate(stateServer)
+        const rate1 = contract1.packageSubmissions[0].rateRevisions[0].rate
+        if (!rate1) {
+            throw new Error('NO RATE')
+        }
+
+        const draft2 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        await addLinkedRateToTestContract(stateServer, draft2, rate1.id)
+        const contract2 = await submitTestContract(stateServer, draft2.id)
+
+        expect(contract2.draftRevision).toBeNull()
+
+        expect(contract2.packageSubmissions).toHaveLength(1)
+
+        const sub = contract2.packageSubmissions[0]
+        expect(sub.cause).toBe('CONTRACT_SUBMISSION')
+        expect(sub.submitInfo.updatedReason).toBe('Initial submission')
+        expect(sub.submittedRevisions).toHaveLength(1)
+        expect(sub.contractRevision.formData.submissionDescription).toBe(
+            'An updated submission'
+        )
+        expect(sub.rateRevisions).toHaveLength(1)
     })
 
     it('returns an error if a CMS user attempts to call submitContract', async () => {
