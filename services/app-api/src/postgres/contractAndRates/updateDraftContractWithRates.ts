@@ -11,7 +11,11 @@ import type { StateCodeType } from '../../../../app-web/src/common-code/healthPl
 import { includeDraftRates } from './prismaDraftContractHelpers'
 import { rateRevisionToDomainModel } from './prismaSharedContractRateHelpers'
 import { isEqualData } from '../../resolvers/healthPlanPackage/contractAndRates/resolverHelpers'
-import { emptify, nullify } from '../prismaDomainAdaptors'
+import {
+    prismaUpdateRateFormDataFromDomain,
+    prismaUpdateContractFormDataFromDomain,
+    prismaRateCreateFormDataFromDomain,
+} from './prismaContractRateAdaptors'
 
 type UpdateContractArgsType = {
     contractID: string
@@ -95,41 +99,6 @@ async function updateDraftContractWithRates(
     args: UpdateContractArgsType
 ): Promise<ContractType | NotFoundError | Error> {
     const { contractID, formData, rateFormDatas } = args
-    const {
-        submissionType,
-        submissionDescription,
-        programIDs,
-        populationCovered,
-        riskBasedContract,
-        stateContacts,
-        supportingDocuments,
-        contractType,
-        contractExecutionStatus,
-        contractDocuments,
-        contractDateStart,
-        contractDateEnd,
-        managedCareEntities,
-        federalAuthorities,
-        modifiedBenefitsProvided,
-        modifiedGeoAreaServed,
-        modifiedMedicaidBeneficiaries,
-        modifiedRiskSharingStrategy,
-        modifiedIncentiveArrangements,
-        modifiedWitholdAgreements,
-        modifiedStateDirectedPayments,
-        modifiedPassThroughPayments,
-        modifiedPaymentsForMentalDiseaseInstitutions,
-        modifiedMedicalLossRatioStandards,
-        modifiedOtherFinancialPaymentIncentive,
-        modifiedEnrollmentProcess,
-        modifiedGrevienceAndAppeal,
-        modifiedNetworkAdequacyStandards,
-        modifiedLengthOfContract,
-        modifiedNonRiskPaymentArrangements,
-        inLieuServicesAndSettings,
-        statutoryRegulatoryAttestation,
-        statutoryRegulatoryAttestationDescription,
-    } = formData
 
     try {
         return await client.$transaction(async (tx) => {
@@ -231,67 +200,9 @@ async function updateDraftContractWithRates(
                                 stateNumber: latestStateRateCertNumber,
                                 revisions: {
                                     create: {
-                                        rateType: rateFormData.rateType,
-                                        rateCapitationType:
-                                            rateFormData.rateCapitationType,
-                                        rateDateStart:
-                                            rateFormData.rateDateStart,
-                                        rateDateEnd: rateFormData.rateDateEnd,
-                                        rateDateCertified:
-                                            rateFormData.rateDateCertified,
-                                        amendmentEffectiveDateStart:
-                                            rateFormData.amendmentEffectiveDateStart,
-                                        amendmentEffectiveDateEnd:
-                                            rateFormData.amendmentEffectiveDateEnd,
-                                        rateProgramIDs:
-                                            rateFormData.rateProgramIDs,
-                                        rateCertificationName:
-                                            rateFormData.rateCertificationName,
-                                        rateDocuments: {
-                                            create:
-                                                rateFormData.rateDocuments &&
-                                                rateFormData.rateDocuments.map(
-                                                    (d, idx) => ({
-                                                        position: idx,
-                                                        ...d,
-                                                    })
-                                                ),
-                                        },
-                                        supportingDocuments: {
-                                            create:
-                                                rateFormData.supportingDocuments &&
-                                                rateFormData.supportingDocuments.map(
-                                                    (d, idx) => ({
-                                                        position: idx,
-                                                        ...d,
-                                                    })
-                                                ),
-                                        },
-                                        certifyingActuaryContacts: {
-                                            create:
-                                                rateFormData.certifyingActuaryContacts &&
-                                                rateFormData.certifyingActuaryContacts.map(
-                                                    (c, idx) => ({
-                                                        position: idx,
-                                                        ...c,
-                                                    })
-                                                ),
-                                        },
-                                        addtlActuaryContacts: {
-                                            create:
-                                                rateFormData.addtlActuaryContacts &&
-                                                rateFormData.addtlActuaryContacts.map(
-                                                    (c, idx) => ({
-                                                        position: idx,
-                                                        ...c,
-                                                    })
-                                                ),
-                                        },
-                                        actuaryCommunicationPreference:
-                                            rateFormData.actuaryCommunicationPreference,
-                                        contractsWithSharedRateRevision: {
-                                            connect: contractsWithSharedRates,
-                                        },
+                                        ...prismaRateCreateFormDataFromDomain(
+                                            rateFormData
+                                        ),
                                     },
                                 },
                                 draftContractRevisions: {
@@ -321,84 +232,9 @@ async function updateDraftContractWithRates(
                                                       .id,
                                               },
                                               data: {
-                                                  rateType: nullify(
-                                                      rateFormData.rateType
+                                                  ...prismaUpdateRateFormDataFromDomain(
+                                                      rateFormData
                                                   ),
-                                                  rateCapitationType: nullify(
-                                                      rateFormData.rateCapitationType
-                                                  ),
-                                                  rateDateStart: nullify(
-                                                      rateFormData.rateDateStart
-                                                  ),
-                                                  rateDateEnd: nullify(
-                                                      rateFormData.rateDateEnd
-                                                  ),
-                                                  rateDateCertified: nullify(
-                                                      rateFormData.rateDateCertified
-                                                  ),
-                                                  amendmentEffectiveDateStart:
-                                                      nullify(
-                                                          rateFormData.amendmentEffectiveDateStart
-                                                      ),
-                                                  amendmentEffectiveDateEnd:
-                                                      nullify(
-                                                          rateFormData.amendmentEffectiveDateEnd
-                                                      ),
-                                                  rateProgramIDs: emptify(
-                                                      rateFormData.rateProgramIDs
-                                                  ),
-                                                  rateCertificationName:
-                                                      nullify(
-                                                          rateFormData.rateCertificationName
-                                                      ),
-                                                  rateDocuments: {
-                                                      deleteMany: {},
-                                                      create:
-                                                          rateFormData.rateDocuments &&
-                                                          rateFormData.rateDocuments.map(
-                                                              (d, idx) => ({
-                                                                  position: idx,
-                                                                  ...d,
-                                                              })
-                                                          ),
-                                                  },
-                                                  supportingDocuments: {
-                                                      deleteMany: {},
-                                                      create:
-                                                          rateFormData.supportingDocuments &&
-                                                          rateFormData.supportingDocuments.map(
-                                                              (d, idx) => ({
-                                                                  position: idx,
-                                                                  ...d,
-                                                              })
-                                                          ),
-                                                  },
-                                                  certifyingActuaryContacts: {
-                                                      deleteMany: {},
-                                                      create:
-                                                          rateFormData.certifyingActuaryContacts &&
-                                                          rateFormData.certifyingActuaryContacts.map(
-                                                              (c, idx) => ({
-                                                                  position: idx,
-                                                                  ...c,
-                                                              })
-                                                          ),
-                                                  },
-                                                  addtlActuaryContacts: {
-                                                      deleteMany: {},
-                                                      create:
-                                                          rateFormData.addtlActuaryContacts &&
-                                                          rateFormData.addtlActuaryContacts.map(
-                                                              (c, idx) => ({
-                                                                  position: idx,
-                                                                  ...c,
-                                                              })
-                                                          ),
-                                                  },
-                                                  actuaryCommunicationPreference:
-                                                      nullify(
-                                                          rateFormData.actuaryCommunicationPreference
-                                                      ),
                                                   contractsWithSharedRateRevision:
                                                       {
                                                           set: contractsWithSharedRates,
@@ -424,95 +260,7 @@ async function updateDraftContractWithRates(
                     id: currentContractRev.id,
                 },
                 data: {
-                    populationCovered: nullify(populationCovered),
-                    programIDs: emptify(programIDs),
-                    riskBasedContract: nullify(riskBasedContract),
-                    submissionType: submissionType,
-                    submissionDescription: submissionDescription,
-                    contractType: contractType,
-                    contractExecutionStatus: nullify(contractExecutionStatus),
-                    contractDocuments: {
-                        deleteMany: {},
-                        create:
-                            contractDocuments &&
-                            contractDocuments.map((d, idx) => ({
-                                position: idx,
-                                ...d,
-                            })),
-                    },
-                    supportingDocuments: {
-                        deleteMany: {},
-                        create:
-                            supportingDocuments &&
-                            supportingDocuments.map((d, idx) => ({
-                                position: idx,
-                                ...d,
-                            })),
-                    },
-                    stateContacts: {
-                        deleteMany: {},
-                        create:
-                            stateContacts &&
-                            stateContacts.map((c, idx) => ({
-                                position: idx,
-                                ...c,
-                            })),
-                    },
-                    contractDateStart: nullify(contractDateStart),
-                    contractDateEnd: nullify(contractDateEnd),
-                    managedCareEntities: emptify(managedCareEntities),
-                    federalAuthorities: emptify(federalAuthorities),
-                    inLieuServicesAndSettings: nullify(
-                        inLieuServicesAndSettings
-                    ),
-                    modifiedBenefitsProvided: nullify(modifiedBenefitsProvided),
-                    modifiedGeoAreaServed: nullify(modifiedGeoAreaServed),
-                    modifiedMedicaidBeneficiaries: nullify(
-                        modifiedMedicaidBeneficiaries
-                    ),
-                    modifiedRiskSharingStrategy: nullify(
-                        modifiedRiskSharingStrategy
-                    ),
-                    modifiedIncentiveArrangements: nullify(
-                        modifiedIncentiveArrangements
-                    ),
-                    modifiedWitholdAgreements: nullify(
-                        modifiedWitholdAgreements
-                    ),
-                    modifiedStateDirectedPayments: nullify(
-                        modifiedStateDirectedPayments
-                    ),
-                    modifiedPassThroughPayments: nullify(
-                        modifiedPassThroughPayments
-                    ),
-                    modifiedPaymentsForMentalDiseaseInstitutions: nullify(
-                        modifiedPaymentsForMentalDiseaseInstitutions
-                    ),
-                    modifiedMedicalLossRatioStandards: nullify(
-                        modifiedMedicalLossRatioStandards
-                    ),
-                    modifiedOtherFinancialPaymentIncentive: nullify(
-                        modifiedOtherFinancialPaymentIncentive
-                    ),
-                    modifiedEnrollmentProcess: nullify(
-                        modifiedEnrollmentProcess
-                    ),
-                    modifiedGrevienceAndAppeal: nullify(
-                        modifiedGrevienceAndAppeal
-                    ),
-                    modifiedNetworkAdequacyStandards: nullify(
-                        modifiedNetworkAdequacyStandards
-                    ),
-                    modifiedLengthOfContract: nullify(modifiedLengthOfContract),
-                    modifiedNonRiskPaymentArrangements: nullify(
-                        modifiedNonRiskPaymentArrangements
-                    ),
-                    statutoryRegulatoryAttestation: nullify(
-                        statutoryRegulatoryAttestation
-                    ),
-                    statutoryRegulatoryAttestationDescription: nullify(
-                        statutoryRegulatoryAttestationDescription
-                    ),
+                    ...prismaUpdateContractFormDataFromDomain(formData),
                     draftRates: {
                         disconnect: updateRates?.disconnectRates
                             ? updateRates.disconnectRates.map((rate) => ({

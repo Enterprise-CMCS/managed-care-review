@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { submitRate } from './submitRate'
 import { NotFoundError } from '../postgresErrors'
 import {
+    clearDocMetadata,
     mockInsertContractArgs,
     mockInsertRateArgs,
     must,
@@ -260,9 +261,15 @@ describe('submitRate', () => {
             })
         )
 
-        expect(submittedRate.revisions[0].formData).toEqual(
-            expect.objectContaining(updateRateData)
-        )
+        expect({
+            ...submittedRate.revisions[0].formData,
+            rateDocuments: clearDocMetadata(
+                submittedRate.revisions[0].formData.rateDocuments
+            ),
+            supportingDocuments: clearDocMetadata(
+                submittedRate.revisions[0].formData.supportingDocuments
+            ),
+        }).toEqual(expect.objectContaining(updateRateData))
     })
     it('submits rate independent of contract status', async () => {
         const client = await sharedTestPrismaClient()

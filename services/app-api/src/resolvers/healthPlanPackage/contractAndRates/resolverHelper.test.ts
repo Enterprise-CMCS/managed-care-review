@@ -277,7 +277,6 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                         s3URL: 's3://bucketname/key/supporting-documents',
                         name: 'supporting documents',
                         sha256: 'supportingDocsSha',
-                        dateAdded: new Date(0),
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 5, 1)),
