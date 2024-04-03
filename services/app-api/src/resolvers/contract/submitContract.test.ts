@@ -94,7 +94,7 @@ describe('submitContract', () => {
 
         expect(res.errors).toBeDefined()
         expect(res.errors && res.errors[0].message).toBe(
-            'user not authorized to create state data'
+            'user not authorized to fetch state data'
         )
     })
 })

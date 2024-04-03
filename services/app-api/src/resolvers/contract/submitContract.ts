@@ -13,12 +13,12 @@ export function submitContract(
 ): MutationResolvers['submitContract'] {
     return async (parent, { input }, context) => {
         // For some reason the types for resolvers are not actually callable?
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const submitHPPResolver = submitHealthPlanPackageResolver(
             store,
             emailer,
             emailParameterStore,
             launchDarkly
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ) as any
 
         await submitHPPResolver(
