@@ -184,16 +184,16 @@ describe('LinkYourRates', () => {
             expect(screen.getByRole('combobox')).toBeInTheDocument()
         })
 
-        // Checking the options menu is open
-        const dropdownMenu = document.querySelector('.select__menu')
+        // Assert the options menu is open
+        const dropdownMenu = screen.getByRole('listbox')
         expect(dropdownMenu).toBeInTheDocument()
 
-        // Checking options are present
+        // Assert options are present
         const dropdownOptions = screen.getAllByRole('option')
         expect(dropdownOptions).toHaveLength(3)
     })
 
-    it('removes the selected option from the dropdown menu', async () => {
+    it('removes the selected option from the dropdown list', async () => {
         const rateID = 'test-abc-123'
         const { user } = renderWithProviders(
             <Routes>
@@ -265,20 +265,16 @@ describe('LinkYourRates', () => {
         })
         await user.click(yesRadioButton)
 
-        // Assert the dropdown has rendered
-        await waitFor(() => {
-            expect(
-                screen.getByText('Which rate certification was it?')
-            ).toBeInTheDocument()
-            expect(screen.getByRole('combobox')).toBeInTheDocument()
-        })
+        // Assert that the selected value is removed from the list of options
+        const option = screen
+            .getByRole('listbox')
+            .querySelector('#react-select-2-option-0')
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        await user.click(option!)
 
-        // Checking that the selected value is removed from the list of options
-        const dropdownOptions = screen.getAllByRole('option')
-        expect(dropdownOptions).toHaveLength(3)
-        await user.click(dropdownOptions[0])
         await waitFor(() => {
-            expect(screen.getAllByRole('option')).toHaveLength(2)
+            expect(screen.getByRole('listbox')).toBeInTheDocument()
+            expect(option).not.toBeInTheDocument()
         })
     })
 
@@ -354,30 +350,24 @@ describe('LinkYourRates', () => {
         })
         await user.click(yesRadioButton)
 
-        // Assert the dropdown has rendered
-        await waitFor(() => {
-            expect(
-                screen.getByText('Which rate certification was it?')
-            ).toBeInTheDocument()
-            expect(screen.getByRole('combobox')).toBeInTheDocument()
-        })
-
         // Checking that the selected value is removed from the list of options
-        const dropdownOptions = screen.getAllByRole('option')
-        await user.click(dropdownOptions[0])
-        await waitFor(() => {
-            expect(screen.getAllByRole('option')).toHaveLength(2)
-        })
+        const option = screen
+            .getByRole('listbox')
+            .querySelector('#react-select-2-option-0')
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        await user.click(option!)
 
-        // Checking that the unselected option is added back to the list
-        const clearSelectionButton = document.querySelector(
-            '.select__clear-indicator'
-        )
-        expect(clearSelectionButton).toBeInTheDocument()
+        const clearSelectionButton = screen
+            .getByRole('combobox')
+            .querySelector('.select__clear-indicator')
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         await user.click(clearSelectionButton!)
+
         await waitFor(() => {
-            expect(screen.getAllByRole('option')).toHaveLength(3)
+            const option = screen
+                .getByRole('listbox')
+                .querySelector('#react-select-5-option-0')
+            expect(option).toBeInTheDocument()
         })
     })
 })
