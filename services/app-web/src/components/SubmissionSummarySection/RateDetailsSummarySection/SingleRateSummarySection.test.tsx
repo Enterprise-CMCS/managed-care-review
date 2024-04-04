@@ -436,6 +436,12 @@ describe('SingleRateSummarySection', () => {
                     featureFlags: { 'rate-edit-unlock': true },
                 }
             )
+            // ensure page fully loaded
+            await screen.findByRole('link', {
+                name: 'Download all rate documents',
+            })
+
+            // no unlock rate button present
             expect(
                 await screen.queryByRole('button', {
                     name: 'Unlock rate',
