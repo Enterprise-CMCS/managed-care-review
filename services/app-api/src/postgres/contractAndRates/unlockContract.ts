@@ -2,6 +2,7 @@ import type { PrismaClient } from '@prisma/client'
 import type { ContractType } from '../../domain-models/contractAndRates'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
+import { unlockRateInDB } from './unlockRate'
 
 type UnlockContractArgsType = {
     contractID: string
@@ -10,18 +11,57 @@ type UnlockContractArgsType = {
 }
 
 // Unlock the given contract
+// * unlock child rates
 // * copy form data
 // * set relationships based on last submission
 async function unlockContract(
     client: PrismaClient,
     args: UnlockContractArgsType
 ): Promise<ContractType | NotFoundError | Error> {
-    const groupTime = new Date()
-
     const { contractID, unlockedByUserID, unlockReason } = args
 
     try {
         return await client.$transaction(async (tx) => {
+
+            // This finds the child rates for this submission. 
+            // A child rate is a rate that shares a submit info with this contract.
+            // technically only a rate that is _initially_ submitted with a contract
+            // is a child rate, but we should never allow re-submission so this simpler 
+            // query that doesn't try to filter to initial revisions works. 
+            const childRates = await tx.rateTable.findMany({
+                where: {
+                    revisions: {
+                        some: {
+                            submitInfo: {
+                                submittedContracts: {
+                                    some: {
+                                        contractID: contractID
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            })
+
+            const currentDateTime = new Date()
+            // create the unlock info to be shared across all submissions. 
+            const unlockInfo = await tx.updateInfoTable.create({
+                data: {
+                    updatedAt: currentDateTime,
+                    updatedByID: unlockedByUserID,
+                    updatedReason: unlockReason,
+                },
+            })
+
+            // unlock child rates with that unlock info
+            for (const childRate of childRates) {
+                const unlockRate = await unlockRateInDB(tx, childRate.id, unlockInfo.id)
+                if (unlockRate instanceof Error) {
+                    throw unlockRate
+                }
+            }
+
             // Given all the Rates associated with this draft, find the most recent submitted
             // rateRevision to attach to this contract on submit.
             const currentRev = await tx.contractRevisionTable.findFirst({
@@ -46,6 +86,23 @@ async function unlockContract(
                         orderBy: {
                             position: 'asc',
                         },
+                    },
+
+                    relatedSubmisions: {
+                        orderBy: {
+                            updatedAt: 'desc',
+                        },
+                        take: 1,
+                        include: {
+                            submissionPackages: {
+                                include: {
+                                    rateRevision: true
+                                },
+                                orderBy: {
+                                    ratePosition: 'asc'
+                                }
+                            }
+                        }
                     },
 
                     rateRevisions: {
@@ -77,6 +134,10 @@ async function unlockContract(
                 (c) => c.rateRevision.rateID
             )
 
+            // find the rates in the last submission package:
+            const lastSubmission = currentRev.relatedSubmisions[0]
+            const thisContractsRatePackages = lastSubmission.submissionPackages.filter((p) => p.contractRevisionID === currentRev.id)
+            const relatedRateIDs = thisContractsRatePackages.map((p) => p.rateRevision.rateID)
             await tx.contractRevisionTable.create({
                 data: {
                     contract: {
@@ -85,11 +146,7 @@ async function unlockContract(
                         },
                     },
                     unlockInfo: {
-                        create: {
-                            updatedAt: groupTime,
-                            updatedByID: unlockedByUserID,
-                            updatedReason: unlockReason,
-                        },
+                        connect: { id: unlockInfo.id },
                     },
                     draftRates: {
                         connect: previouslySubmittedRateIDs.map((cID) => ({
@@ -178,6 +235,21 @@ async function unlockContract(
                         },
                     },
                 },
+            })
+
+            // connect draftRates
+            let position = 1
+            const joins = relatedRateIDs.map((id) => {
+                const thisPosition = position
+                position++
+                return {
+                    contractID: currentRev.contractID,
+                    rateID: id,
+                    ratePosition: thisPosition,
+                }
+            })
+            await tx.draftRateJoinTable.createMany({
+                data: joins
             })
 
             return findContractWithHistory(tx, contractID)

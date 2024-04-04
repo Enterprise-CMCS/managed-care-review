@@ -330,6 +330,11 @@ export async function submitContract(
                 })),
             })
 
+            // delete Contract.draftRates
+            await tx.draftRateJoinTable.deleteMany({
+                where: { contractID: contractID }
+            })
+
             return await findContractWithHistory(tx, contractID)
         })
     } catch (err) {

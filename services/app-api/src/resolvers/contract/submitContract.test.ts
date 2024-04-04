@@ -1,6 +1,7 @@
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
+    unlockTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import SUBMIT_CONTRACT from '../../../../app-graphql/src/mutations/submitContract.graphql'
 import { testCMSUser } from '../../testHelpers/userHelpers'
@@ -145,12 +146,62 @@ describe('submitContract', () => {
                 addtlActuaryCommunicationPreference: undefined,
             }
         )
-
         const contractD0 = await submitTestContract(stateServer, draftD0.id)
 
         console.info(ThreeID, FourID, contractD0)
 
-        throw new Error('NO Dice')
+    })
+
+    it('handles unlock and editing rates', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser()
+            }
+        })
+
+        console.log('1.')
+        // 1. Submit A0 with Rate1 and Rate2
+        const draftA0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const AID = draftA0.id
+        const draftA010 = await addNewRateToTestContract(stateServer, draftA0)
+
+        await addNewRateToTestContract(stateServer, draftA010)
+
+        const contractA0 = await submitTestContract(stateServer, AID)
+        const subA0 = contractA0.packageSubmissions[0]
+        const rate10 = subA0.rateRevisions[0]
+        const OneID = rate10.rate!.id
+
+        console.log('2.')
+        // 2. Submit B0 with Rate1 and Rate3
+        const draftB0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const draftB010 = await addLinkedRateToTestContract(stateServer, draftB0, OneID)    
+        await addNewRateToTestContract(stateServer, draftB010)
+
+        const contractB0 = await submitTestContract(stateServer, draftB0.id)
+        const subB0 = contractB0.packageSubmissions[0]
+
+        expect(subB0.rateRevisions[0].rate!.id).toBe(OneID)
+
+        // unlock B, rate 3 should unlock, rate 1 should not. 
+        await unlockTestHealthPlanPackage(cmsServer, contractB0.id, 'test unlock')
+
+        const unlockedB = await fetchTestContract(stateServer, contractB0.id)
+        if (!unlockedB.draftRates) {
+            throw new Error('no draft rates')
+        }
+
+        expect(unlockedB.draftRates?.length).toBe(2) // this feels like it shouldnt work, probably pulling from the old rev.
+
+        const rate1 = unlockedB.draftRates[0]
+        const rate3 = unlockedB.draftRates[1]
+
+        expect(rate1.status).toBe('SUBMITTED')
+        expect(rate3.status).toBe('UNLOCKED')
+
     })
 
     it('returns an error if a CMS user attempts to call submitContract', async () => {
