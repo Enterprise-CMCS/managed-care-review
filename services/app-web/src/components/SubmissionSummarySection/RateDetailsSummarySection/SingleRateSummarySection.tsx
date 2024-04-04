@@ -231,7 +231,9 @@ export const SingleRateSummarySection = ({
         }
     }
     const parentContractSubmissionID =
-        rate.revisions[0].contractRevisions[0].contract.id
+        rate.revisions[0].contractRevisions[
+            rate.revisions[0].contractRevisions.length - 1
+        ].contract.id
     return (
         <React.Fragment key={rate.id}>
             <SectionCard
