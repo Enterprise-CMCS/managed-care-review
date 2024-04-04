@@ -156,7 +156,8 @@ export const ContractDetailsSummarySectionV2 = ({
             id="contractDetailsSection"
             className={styles.summarySection}
         >
-            <SectionHeader
+            <h2>HELOOOOOOOO</h2>
+            {/* <SectionHeader
                 header="Contract details"
                 editNavigateTo={editNavigateTo}
             >
@@ -201,7 +202,7 @@ export const ContractDetailsSummarySectionV2 = ({
                             </Grid>
                         )}
                     </Grid>
-                )}
+                )} 
                 <DoubleColumnGrid>
                     <DataDetail
                         id="contractExecutionStatus"
@@ -315,7 +316,7 @@ export const ContractDetailsSummarySectionV2 = ({
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
                 isEditing={isEditing}
-            />
+            /> */}
         </SectionCard>
     )
 }

@@ -13,6 +13,9 @@ import {
     Division,
     CreateQuestionInput,
     CreateQuestionResponseInput,
+    SubmitContractMutationFn,
+    Contract,
+    ContractFormData,
 } from '../gen/gqlClient'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
@@ -147,6 +150,54 @@ export const submitMutationWrapper = async (
             return new Error(ERROR_MESSAGES.submit_error_generic)
         }
     } catch (error) {
+        return handleApolloErrorsAndAddUserFacingMessages(
+            error,
+            'SUBMIT_HEALTH_PLAN_PACKAGE'
+        )
+    }
+}
+
+export const submitMutationWrapperV2 = async (
+    submitDraftSubmission: SubmitContractMutationFn,
+    id: string,
+    submittedReason?: string,
+    formData?: ContractFormData 
+): Promise<Partial<Contract> | GraphQLErrors | Error> => {
+    const input = { 
+        contractID: id,
+    }
+
+    if (submittedReason) {
+        Object.assign(input, {
+            submittedReason,
+        })
+    }
+
+    if (formData) {
+        Object.assign(input, {
+            formData,
+        })
+    }
+    console.log(input, 'input')
+    try {
+        console.log('before try')
+        const { data } = await submitDraftSubmission({
+            variables: {
+                input,
+            },
+        })
+        console.log(data, 'data')
+        if (data?.submitContract.contract) {
+            return data.submitContract.contract
+        } else {
+            console.log('else')
+            recordJSException(
+                `[UNEXPECTED]: Error attempting to submit, no data present but returning 200.`
+            )
+            return new Error(ERROR_MESSAGES.submit_error_generic)
+        }
+    } catch (error) {
+        console.log('error')
         return handleApolloErrorsAndAddUserFacingMessages(
             error,
             'SUBMIT_HEALTH_PLAN_PACKAGE'
