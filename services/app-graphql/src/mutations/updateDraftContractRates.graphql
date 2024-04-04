@@ -89,11 +89,13 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                             name
                             email
                             titleRole
+                            actuarialFirm
                         }
                         addtlActuaryContacts {
                             name
                             email
                             titleRole
+                            actuarialFirm
                         }
                         rateDocuments {
                             name
@@ -138,11 +140,13 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                             name
                             email
                             titleRole
+                            actuarialFirm
                         }
                         addtlActuaryContacts {
                             name
                             email
                             titleRole
+                            actuarialFirm
                         }
                         rateDocuments {
                             name

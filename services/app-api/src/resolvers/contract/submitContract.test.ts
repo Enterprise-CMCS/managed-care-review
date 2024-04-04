@@ -106,35 +106,34 @@ describe('submitContract', () => {
         const contractA0 = await submitTestContract(stateServer, AID)
         const subA0 = contractA0.packageSubmissions[0]
         const rate10 = subA0.rateRevisions[0]
-        const OneID = rate10.id
+        const OneID = rate10.rate!.id
         const rate20 = subA0.rateRevisions[1]
-        const TwoID = rate20.id
+        const TwoID = rate20.rate!.id
 
         // 2. Submit B0 with Rate1 and Rate3
         const draftB0 =
             await createAndUpdateTestContractWithoutRates(stateServer)
-        await addLinkedRateToTestContract(stateServer, draftB0, OneID)
-        await addNewRateToTestContract(stateServer, draftB0)
+        const draftB010 = await addLinkedRateToTestContract(stateServer, draftB0, OneID)    
+        await addNewRateToTestContract(stateServer, draftB010)
 
         const contractB0 = await submitTestContract(stateServer, draftB0.id)
         const subB0 = contractB0.packageSubmissions[0]
         const rate30 = subB0.rateRevisions[1]
-        const ThreeID = rate30.id
+        const ThreeID = rate30.rate!.id
 
-        expect(subB0.rateRevisions[0].id).toBe(OneID)
+        expect(subB0.rateRevisions[0].rate!.id).toBe(OneID)
 
         // 3. Submit C0 with Rate20 and Rate40
         const draftC0 =
             await createAndUpdateTestContractWithoutRates(stateServer)
-        await addLinkedRateToTestContract(stateServer, draftC0, TwoID)
-        await addNewRateToTestContract(stateServer, draftC0)
+        const draftC020 = await addLinkedRateToTestContract(stateServer, draftC0, TwoID)
+        await addNewRateToTestContract(stateServer, draftC020)
 
         const contractC0 = await submitTestContract(stateServer, draftC0.id)
         const subC0 = contractC0.packageSubmissions[0]
         const rate40 = subC0.rateRevisions[1]
-        const FourID = rate40.id
-
-        expect(subC0.rateRevisions[0].id).toBe(TwoID)
+        const FourID = rate40.rate!.id
+        expect(subC0.rateRevisions[0].rate!.id).toBe(TwoID)
 
         // 4. Submit D0, contract only
         const draftD0 = await createAndUpdateTestHealthPlanPackage(

@@ -232,7 +232,9 @@ export async function submitContract(
                 }
             }
 
-            // previously connected contracts
+            // get previously connected contracts
+            // get the related rates, all of their previously connected contracts need to 
+            // get links.
             const allRelatedRateRevisionsBefore =
                 await tx.rateRevisionTable.findMany({
                     where: {
@@ -258,7 +260,7 @@ export async function submitContract(
                     },
                 })
 
-            // now that we've fetched their current packages, write them to the newly related table.
+            // all related rates get an entry in the relatedRates connection 
             await tx.updateInfoTable.update({
                 where: {
                     id: submitInfo.id,
@@ -287,11 +289,11 @@ export async function submitContract(
 
                 if (
                     rateRev.relatedSubmissions &&
-                    rateRev.relatedSubmissions.length > 0
+                    rateRev.relatedSubmissions.length > 1
                 ) {
-                    const latestSub = rateRev.relatedSubmissions[0]
+                    const previousSub = rateRev.relatedSubmissions[1]
 
-                    for (const contractConnection of latestSub.submissionPackages) {
+                    for (const contractConnection of previousSub.submissionPackages) {
                         if (
                             contractConnection.contractRevision.contractID !==
                             currentContract.id

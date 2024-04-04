@@ -12,6 +12,7 @@ import { rateFormDataSchema } from '../../domain-models/contractAndRates'
 import { ForbiddenError, UserInputError } from 'apollo-server-core'
 import { z } from 'zod'
 import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
+import { generateRateCertificationName } from '../rate/generateRateCertificationName'
 
 // Zod schemas to parse the updatedRates param since the types are not fully defined in GQL
 // CREATE / UPDATE / LINK
@@ -88,6 +89,20 @@ function updateDraftContractRates(
             })
         }
 
+        const statePrograms = store.findStatePrograms(contract.stateCode)
+        if (statePrograms instanceof Error) {
+            const errMessage = `Couldn't find programs for state ${contract.stateCode}. Message: ${statePrograms.message}`
+            logError('updateDraftContractRates', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
+        }
+
         // AUTHORIZATION
         // Only callable by a state user from this state
         if (isStateUser(user)) {
@@ -147,8 +162,20 @@ function updateDraftContractRates(
         let thisPosition = 1
         for (const rateUpdate of parsedUpdates) {
             if (rateUpdate.type === 'CREATE') {
+
+                // set rateName for now https://jiraent.cms.gov/browse/MCR-4012
+                const rateName = generateRateCertificationName(
+                    rateUpdate.formData,
+                    contract.stateCode,
+                    contract.stateNumber,
+                    statePrograms,
+                )
+
                 rateUpdates.create.push({
-                    formData: rateUpdate.formData,
+                    formData: {
+                        ...rateUpdate.formData,
+                        rateCertificationName: rateName,
+                    },
                     ratePosition: thisPosition,
                 })
             }
@@ -212,9 +239,20 @@ function updateDraftContractRates(
                     // }
                 }
 
+                // set rateName for now https://jiraent.cms.gov/browse/MCR-4012
+                const rateName = generateRateCertificationName(
+                    rateUpdate.formData,
+                    contract.stateCode,
+                    contract.stateNumber,
+                    statePrograms,
+                )
+
                 rateUpdates.update.push({
                     rateID: rateUpdate.rateID,
-                    formData: rateUpdate.formData,
+                    formData: {
+                        ...rateUpdate.formData,
+                        rateCertificationName: rateName,
+                    },
                     ratePosition: thisPosition,
                 })
             }
@@ -223,45 +261,50 @@ function updateDraftContractRates(
                 const knownRateIDX = knownRateIDs.indexOf(rateUpdate.rateID)
                 if (knownRateIDX !== -1) {
                     knownRateIDs.splice(knownRateIDX, 1)
-                    continue
-                }
+                    // we still pass all links down to the db, position might have changed?
+                    rateUpdates.link.push({
+                        rateID: rateUpdate.rateID,
+                        ratePosition: thisPosition,
+                    })
+                } else {
 
-                // linked rates must exist and not be DRAFT
-                const rateToLink = await store.findRateWithHistory(
-                    rateUpdate.rateID
-                )
-                if (rateToLink instanceof Error) {
-                    if (rateToLink instanceof NotFoundError) {
+                    // linked rates must exist and not be DRAFT
+                    const rateToLink = await store.findRateWithHistory(
+                        rateUpdate.rateID
+                    )
+                    if (rateToLink instanceof Error) {
+                        if (rateToLink instanceof NotFoundError) {
+                            const errmsg =
+                                'Attempting to link a rate that does not exist: ' +
+                                rateUpdate.rateID
+                            logError('updateDraftContractRates', errmsg)
+                            setErrorAttributesOnActiveSpan(errmsg, span)
+                            throw new UserInputError(errmsg)
+                        }
+
                         const errmsg =
-                            'Attempting to link a rate that does not exist: ' +
+                            'Unexpected Error: couldnt fetch the linking rate: ' +
+                            rateUpdate.rateID
+                        logError('updateDraftContractRates', errmsg)
+                        setErrorAttributesOnActiveSpan(errmsg, span)
+                        throw new Error(errmsg)
+                    }
+
+                    if (rateToLink.status === 'DRAFT') {
+                        const errmsg =
+                            'Attempted to link a rate that has never been submitted: ' +
                             rateUpdate.rateID
                         logError('updateDraftContractRates', errmsg)
                         setErrorAttributesOnActiveSpan(errmsg, span)
                         throw new UserInputError(errmsg)
                     }
 
-                    const errmsg =
-                        'Unexpected Error: couldnt fetch the linking rate: ' +
-                        rateUpdate.rateID
-                    logError('updateDraftContractRates', errmsg)
-                    setErrorAttributesOnActiveSpan(errmsg, span)
-                    throw new Error(errmsg)
+                    // this is a new link, actually link them.
+                    rateUpdates.link.push({
+                        rateID: rateUpdate.rateID,
+                        ratePosition: thisPosition,
+                    })
                 }
-
-                if (rateToLink.status === 'DRAFT') {
-                    const errmsg =
-                        'Attempted to link a rate that has never been submitted: ' +
-                        rateUpdate.rateID
-                    logError('updateDraftContractRates', errmsg)
-                    setErrorAttributesOnActiveSpan(errmsg, span)
-                    throw new UserInputError(errmsg)
-                }
-
-                // this is a new link, actually link them.
-                rateUpdates.link.push({
-                    rateID: rateUpdate.rateID,
-                    ratePosition: thisPosition,
-                })
             }
 
             thisPosition++

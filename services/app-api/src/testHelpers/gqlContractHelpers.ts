@@ -66,12 +66,12 @@ async function submitTestContract(
 
     if (result.errors) {
         throw new Error(
-            `fetchTestRateById query failed with errors ${result.errors}`
+            `submitTestContract query failed with errors ${result.errors}`
         )
     }
 
     if (!result.data) {
-        throw new Error('fetchTestRateById returned nothing')
+        throw new Error('submitTestContract returned nothing')
     }
 
     return result.data.submitContract.contract
@@ -97,12 +97,12 @@ async function fetchTestContract(
 
     if (result.errors) {
         throw new Error(
-            `fetchTestRateById query failed with errors ${result.errors}`
+            `fetchTestContract query failed with errors ${result.errors}`
         )
     }
 
     if (!result.data) {
-        throw new Error('fetchTestRateById returned nothing')
+        throw new Error('fetchTestContract returned nothing')
     }
 
     return result.data.fetchContract.contract

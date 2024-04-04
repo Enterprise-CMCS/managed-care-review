@@ -54,6 +54,9 @@ const includeFullContract = {
                                 include: includeRateFormData,
                             },
                         },
+                        orderBy: {
+                            ratePosition: 'asc',
+                        }
                     },
                 },
             },
