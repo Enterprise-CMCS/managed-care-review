@@ -223,6 +223,13 @@ async function updateDraftContractRates(
                     },
                 },
             })
+            await tx.rateTable.deleteMany({
+                where: {
+                    id: {
+                        in: args.rateUpdates.delete.map((ru) => ru.rateID),
+                    },
+                },
+            })
 
             const oldLinksToCreate = [
                 ...createdRateJoins.map((lr) => lr.rateID),
@@ -234,14 +241,10 @@ async function updateDraftContractRates(
                 where: { id: draftRevision.id },
                 data: {
                     draftRates: {
-                        // create: ratesToCreate,
                         connect: oldLinksToCreate.map((rID) => ({
                             id: rID,
                         })),
                         disconnect: args.rateUpdates.unlink.map((ru) => ({
-                            id: ru.rateID,
-                        })),
-                        delete: args.rateUpdates.delete.map((ru) => ({
                             id: ru.rateID,
                         })),
                     },

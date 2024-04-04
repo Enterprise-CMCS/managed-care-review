@@ -77,7 +77,7 @@ model DraftRateJoinTable {
   contractID String
   contract ContractTable @relation(fields: [contractID], references: [id])
   rateID String
-  rate RateTable @relation(fields: [rateID], references: [id])
+  rate RateTable @relation(fields: [rateID], references: [id], onDelete: Cascade)
   ratePosition Int
 
   @@id([contractID, rateID])

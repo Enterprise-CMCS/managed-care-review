@@ -78,6 +78,7 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                         rateCapitationType
                         rateDateStart
                         rateDateEnd
+                        rateCertificationName
                         rateDateCertified
                         amendmentEffectiveDateStart
                         amendmentEffectiveDateEnd
@@ -103,6 +104,11 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                             name
                             s3URL
                             sha256
+                        }
+                        packagesWithSharedRateCerts {
+                            packageName
+                            packageId
+                            packageStatus
                         }
                     }
                 }

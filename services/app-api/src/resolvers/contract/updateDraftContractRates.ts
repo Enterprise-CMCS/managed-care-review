@@ -142,7 +142,6 @@ function updateDraftContractRates(
         }
 
         // walk through the new rate list one by one
-        // TODO set the position in the list correctly
         // any rates that aren't in this list are unlinked (or deleted?)
         const knownRateIDs = draftRates.map((r) => r.id)
         let thisPosition = 1

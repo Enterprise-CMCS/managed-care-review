@@ -1,10 +1,14 @@
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    createAndUpdateTestHealthPlanPackage,
+} from '../../testHelpers/gqlHelpers'
 import SUBMIT_CONTRACT from '../../../../app-graphql/src/mutations/submitContract.graphql'
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import type { SubmitContractInput } from '../../gen/gqlServer'
 import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
+    fetchTestContract,
     submitTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import {
@@ -47,7 +51,7 @@ describe('submitContract', () => {
         expect(rate.status).toBe('SUBMITTED')
     })
 
-    it('handles a submission with multiple connections', async () => {
+    it('handles a submission with a link', async () => {
         const stateServer = await constructTestPostgresServer()
 
         const contract1 = await createAndSubmitTestContractWithRate(stateServer)
@@ -73,6 +77,81 @@ describe('submitContract', () => {
             'An updated submission'
         )
         expect(sub.rateRevisions).toHaveLength(1)
+    })
+
+    it('calls create twice in a row', async () => {
+        const stateServer = await constructTestPostgresServer()
+
+        const draftA0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const AID = draftA0.id
+        await addNewRateToTestContract(stateServer, draftA0)
+        await addNewRateToTestContract(stateServer, draftA0)
+
+        const final = await fetchTestContract(stateServer, AID)
+        expect(final.draftRates).toHaveLength(1)
+    })
+
+    it('handles the first miro scenario', async () => {
+        const stateServer = await constructTestPostgresServer()
+
+        // 1. Submit A0 with Rate1 and Rate2
+        const draftA0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const AID = draftA0.id
+        const draftA010 = await addNewRateToTestContract(stateServer, draftA0)
+
+        await addNewRateToTestContract(stateServer, draftA010)
+
+        const contractA0 = await submitTestContract(stateServer, AID)
+        const subA0 = contractA0.packageSubmissions[0]
+        const rate10 = subA0.rateRevisions[0]
+        const OneID = rate10.id
+        const rate20 = subA0.rateRevisions[1]
+        const TwoID = rate20.id
+
+        // 2. Submit B0 with Rate1 and Rate3
+        const draftB0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        await addLinkedRateToTestContract(stateServer, draftB0, OneID)
+        await addNewRateToTestContract(stateServer, draftB0)
+
+        const contractB0 = await submitTestContract(stateServer, draftB0.id)
+        const subB0 = contractB0.packageSubmissions[0]
+        const rate30 = subB0.rateRevisions[1]
+        const ThreeID = rate30.id
+
+        expect(subB0.rateRevisions[0].id).toBe(OneID)
+
+        // 3. Submit C0 with Rate20 and Rate40
+        const draftC0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        await addLinkedRateToTestContract(stateServer, draftC0, TwoID)
+        await addNewRateToTestContract(stateServer, draftC0)
+
+        const contractC0 = await submitTestContract(stateServer, draftC0.id)
+        const subC0 = contractC0.packageSubmissions[0]
+        const rate40 = subC0.rateRevisions[1]
+        const FourID = rate40.id
+
+        expect(subC0.rateRevisions[0].id).toBe(TwoID)
+
+        // 4. Submit D0, contract only
+        const draftD0 = await createAndUpdateTestHealthPlanPackage(
+            stateServer,
+            {
+                rateInfos: [],
+                submissionType: 'CONTRACT_ONLY',
+                addtlActuaryContacts: [],
+                addtlActuaryCommunicationPreference: undefined,
+            }
+        )
+
+        const contractD0 = await submitTestContract(stateServer, draftD0.id)
+
+        console.info(ThreeID, FourID, contractD0)
+
+        throw new Error('NO Dice')
     })
 
     it('returns an error if a CMS user attempts to call submitContract', async () => {
