@@ -40,7 +40,7 @@ const contractFormDataSchema = z.object({
     submissionDescription: z.string(),
     stateContacts: z.array(stateContactSchema),
     supportingDocuments: z.array(documentSchema),
-    contractType: contractTypeSchema.optional(),
+    contractType: contractTypeSchema,
     contractExecutionStatus: contractExecutionStatusSchema.optional(),
     contractDocuments: z.array(documentSchema),
     contractDateStart: z.date().optional(),

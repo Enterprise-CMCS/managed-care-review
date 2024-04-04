@@ -933,7 +933,7 @@ input ContractFormDataInput {
     Type of contract the state is submitting
     Options are: BASE, AMENDMENT
     """
-    contractType: ContractType
+    contractType: ContractType!
     """
     Execution status for a contract.
     Contracts are fully executed or unexecuted by some or all parties

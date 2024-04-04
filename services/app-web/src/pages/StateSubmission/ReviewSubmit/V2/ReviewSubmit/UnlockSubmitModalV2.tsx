@@ -115,7 +115,7 @@ export const UnlockSubmitModalV2 = ({
             submitContract,
             contract.id,
             unlockSubmitModalInput,
-            contract.draftRevision?.formData
+            // contract.draftRevision?.formData
         )
 
         console.log(result, 'result')

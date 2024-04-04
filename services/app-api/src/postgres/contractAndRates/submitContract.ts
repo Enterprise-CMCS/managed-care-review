@@ -7,7 +7,7 @@ import { includeDraftRates } from './prismaDraftContractHelpers'
 import type { ContractFormDataType } from '../../domain-models'
 
 export type SubmitContractArgsType = {
-    contractID: string // revision ID
+    contractID?: string // revision ID
     contractRevisionID?: string // this is a hack that should not outlive protobuf. rateID should be there and be required after we remove protos
     formData?: ContractFormDataType
     submittedByUserID: UpdateInfoType['updatedBy']
@@ -184,7 +184,7 @@ export async function submitContract(
                 })
             }
 
-            return await findContractWithHistory(tx, contractID)
+            return await findContractWithHistory(tx, updated.contractID)
         })
     } catch (err) {
         console.log('ultimate error', err)
