@@ -22,7 +22,6 @@ export async function submitContract(
 ): Promise<ContractType | NotFoundError | Error> {
     const { contractID, submittedByUserID, contractRevisionID, submittedReason } = args
     const currentDateTime = new Date()
-    console.log('in postgress', args)
     try {
         return await client.$transaction(async (tx) => {
             if (!contractID && !contractRevisionID) {
@@ -40,7 +39,6 @@ export async function submitContract(
                 contractID,
                 submitInfoID: null,
             }
-            console.log(findWhere, 'findwhere')
             const currentRev = await client.contractRevisionTable.findFirst({
                 where: findWhere,
                 include: {
@@ -53,7 +51,6 @@ export async function submitContract(
             if (!currentRev) {
                 const err = `PRISMA ERROR: Cannot find the current rev to submit with contract id: ${contractID}`
                 console.error(err)
-                console.log(err, 'err')
                 return new NotFoundError(err)
             }
 
@@ -187,7 +184,6 @@ export async function submitContract(
             return await findContractWithHistory(tx, updated.contractID)
         })
     } catch (err) {
-        console.log('ultimate error', err)
         const error = new Error(`Error submitting contract ${err}`)
         return error
     }

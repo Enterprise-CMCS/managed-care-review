@@ -23,7 +23,6 @@ export function submitContract(
     launchDarkly: LDService
 ): MutationResolvers['submitContract'] {
     return async (_parent, { input }, context) => {
-        console.log('in resolver')
         const { user, span } = context
         const { contractID, submittedReason, formData } = input
         const featureFlags = await launchDarkly.allFlags(context)
@@ -49,12 +48,10 @@ export function submitContract(
 
         // find the contract to submit
         const unsubmittedContract = await store.findContractWithHistory(contractID)
-        console.log(unsubmittedContract, 'contract to submit')
         if (unsubmittedContract instanceof Error) {
             if (unsubmittedContract instanceof NotFoundError) {
                 const errMessage = `A rate must exist to be submitted: ${contractID}`
                 logError('submitContract', errMessage)
-                console.log(errMessage, 'errMessage')
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new UserInputError(errMessage, {
                     argumentName: 'contractID',
@@ -160,8 +157,6 @@ export function submitContract(
                     statutoryRegulatoryAttestationDescription: formData.statutoryRegulatoryAttestationDescription ?? undefined,
                 } : undefined,
         })
-
-        console.log(submittedContract, 'submitted contract in resolver')
 
         if (submittedContract instanceof Error) {
             const errMessage = `Failed to submit rate with ID: ${contractID}; ${submittedContract.message}`

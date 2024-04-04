@@ -65,7 +65,6 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
         updateHeading({ customHeading: pkgName })
     }, [pkgName, updateHeading])
     const { id } = useRouteParams()
-    console.log(id, 'id')
     // API requests
     const {
         data: fetchContractData,
@@ -78,7 +77,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
             },
         },
     })
-    console.log(fetchContractError, 'error')
+
     const ldClient = useLDClient()
     const showQuestionResponse = ldClient?.variation(
         featureFlags.CMS_QUESTIONS.flag,

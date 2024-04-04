@@ -178,26 +178,23 @@ export const submitMutationWrapperV2 = async (
             formData,
         })
     }
-    console.log(input, 'input')
+
     try {
-        console.log('before try')
         const { data } = await submitDraftSubmission({
             variables: {
                 input,
             },
         })
-        console.log(data, 'data')
+
         if (data?.submitContract.contract) {
             return data.submitContract.contract
         } else {
-            console.log('else')
             recordJSException(
                 `[UNEXPECTED]: Error attempting to submit, no data present but returning 200.`
             )
             return new Error(ERROR_MESSAGES.submit_error_generic)
         }
     } catch (error) {
-        console.log('error')
         return handleApolloErrorsAndAddUserFacingMessages(
             error,
             'SUBMIT_HEALTH_PLAN_PACKAGE'
