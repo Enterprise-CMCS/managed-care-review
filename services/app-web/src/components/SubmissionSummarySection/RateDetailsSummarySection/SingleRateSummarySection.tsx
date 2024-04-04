@@ -230,7 +230,8 @@ export const SingleRateSummarySection = ({
             )
         }
     }
-
+    const parentContractSubmissionID =
+        rate.revisions[0].contractRevisions[0].contract.id
     return (
         <React.Fragment key={rate.id}>
             <SectionCard
@@ -257,7 +258,7 @@ export const SingleRateSummarySection = ({
                             disabled={isUnlocked || unlockLoading}
                             onClick={() => {
                                 navigate(
-                                    `/submissions/${rate.revisions[0].contractRevisions[0].contract.id}`
+                                    `/submissions/${parentContractSubmissionID}`
                                 )
                             }}
                         >
