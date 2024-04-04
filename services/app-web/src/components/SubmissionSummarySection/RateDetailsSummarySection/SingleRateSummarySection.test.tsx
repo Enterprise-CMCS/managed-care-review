@@ -322,7 +322,7 @@ describe('SingleRateSummarySection', () => {
             ).toBeInTheDocument()
         })
 
-        it('renders unlock button that redirects to contract submission page when standalone rate edit and unlock is disabled', async () => {
+        it('renders unlock button that redirects to contract submission page when linked rates on but standalone rate edit and unlock is still disabled', async () => {
             let testLocation: Location // set up location to track URL changes
 
             const rateData = rateDataMock()
@@ -355,7 +355,10 @@ describe('SingleRateSummarySection', () => {
                     routerProvider: {
                         route: `/rates/${rateData.id}`,
                     },
-                    featureFlags: { 'rate-edit-unlock': false },
+                    featureFlags: {
+                        'rate-edit-unlock': false,
+                        'link-rates': true,
+                    },
                     location: (location) => (testLocation = location),
                 }
             )

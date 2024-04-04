@@ -145,6 +145,10 @@ export const SingleRateSummarySection = ({
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
+    const showLinkedRates: boolean = ldClient?.variation(
+        featureFlags.LINK_RATES.flag,
+        featureFlags.LINK_RATES.defaultValue
+    )
 
     // TODO BULK DOWNLOAD
     // needs to be wrap in a standalone hook
@@ -247,8 +251,8 @@ export const SingleRateSummarySection = ({
                             Unlock rate
                         </UnlockRateButton>
                     )}
-                    {/* This second option is an interim state for  for unlock rate button and once rate unlock edit is shipped we don't need this anymore */}
-                    {isCMSUser && !showRateUnlock && (
+                    {/* This second option is an interim state for unlock rate button (when linked rates is turned on but unlock and edit rate is not available yet). Remove when rate unlock is permanently on. */}
+                    {isCMSUser && showLinkedRates && !showRateUnlock && (
                         <UnlockRateButton
                             disabled={isUnlocked || unlockLoading}
                             onClick={() => {
