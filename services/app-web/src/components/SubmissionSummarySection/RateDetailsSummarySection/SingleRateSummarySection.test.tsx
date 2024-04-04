@@ -1,4 +1,7 @@
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import {
+    renderWithProviders,
+    userClickByRole,
+} from '../../../testHelpers/jestHelpers'
 import { SingleRateSummarySection } from './SingleRateSummarySection'
 import {
     fetchCurrentUserMock,
@@ -9,6 +12,8 @@ import {
 import { screen, waitFor, within } from '@testing-library/react'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
 import { RateRevision } from '../../../gen/gqlClient'
+import { type Location, Route, Routes } from 'react-router-dom'
+import { RoutesRecord } from '../../../constants'
 
 describe('SingleRateSummarySection', () => {
     it('can render rate details without errors', async () => {
@@ -284,7 +289,7 @@ describe('SingleRateSummarySection', () => {
     })
 
     describe('Unlock rate', () => {
-        it('renders the unlock button to CMS users', async () => {
+        it('renders the unlock button to CMS users when rate edit and unlock is enabled', async () => {
             const rateData = rateDataMock(
                 {
                     rateType: undefined,
@@ -315,6 +320,59 @@ describe('SingleRateSummarySection', () => {
                     name: 'Unlock rate',
                 })
             ).toBeInTheDocument()
+        })
+
+        it('renders unlock button that redirects to contract submission page when standalone rate edit and unlock is disabled', async () => {
+            let testLocation: Location // set up location to track URL changes
+
+            const rateData = rateDataMock()
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<div>Summary page placeholder</div>}
+                    />
+                    <Route
+                        path={`/rates/${rateData.id}`}
+                        element={
+                            <SingleRateSummarySection
+                                rate={rateData}
+                                isSubmitted={false}
+                                statePrograms={rateData.state.programs}
+                            />
+                        }
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidCMSUser(),
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/rates/${rateData.id}`,
+                    },
+                    featureFlags: { 'rate-edit-unlock': false },
+                    location: (location) => (testLocation = location),
+                }
+            )
+            await screen.findByRole('button', {
+                name: 'Unlock rate',
+            })
+
+            await userClickByRole(screen, 'button', {
+                name: 'Unlock rate',
+            })
+            await waitFor(() => {
+                const firstRelatedContractSubmissionID =
+                    rateData.revisions[0].contractRevisions[0].contract.id
+                expect(testLocation.pathname).toBe(
+                    `/submissions/${firstRelatedContractSubmissionID}`
+                )
+            })
         })
 
         it('disables the unlock button for CMS users when rate already unlocked', async () => {

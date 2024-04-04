@@ -24,7 +24,7 @@ import { useS3 } from '../../../contexts/S3Context'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { recordJSException } from '../../../otelHelpers'
 import { Link } from '@trussworks/react-uswds'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
 import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -129,6 +129,7 @@ export const SingleRateSummarySection = ({
     statePrograms: Program[]
 }): React.ReactElement | null => {
     const { loggedInUser } = useAuth()
+    const navigate = useNavigate()
     const rateRevision = rate.revisions[0]
     const formData: RateFormData = rateRevision?.formData
     const documentDateLookupTable = makeRateDocumentDateTable(rate.revisions)
@@ -238,14 +239,27 @@ export const SingleRateSummarySection = ({
                         'Unknown rate name'
                     }
                 >
-                    {showRateUnlock && isCMSUser ? (
+                    {isCMSUser && showRateUnlock && (
                         <UnlockRateButton
                             disabled={isUnlocked || unlockLoading}
                             onClick={handleUnlockRate}
                         >
                             Unlock rate
                         </UnlockRateButton>
-                    ) : null}
+                    )}
+                    {/* This second option is an interim state for  for unlock rate button and once rate unlock edit is shipped we don't need this anymore */}
+                    {isCMSUser && !showRateUnlock && (
+                        <UnlockRateButton
+                            disabled={isUnlocked || unlockLoading}
+                            onClick={() => {
+                                navigate(
+                                    `/submissions/${rate.revisions[0].contractRevisions[0].contract.id}`
+                                )
+                            }}
+                        >
+                            Unlock rate
+                        </UnlockRateButton>
+                    )}
                 </SectionHeader>
                 {documentError && (
                     <DocumentWarningBanner className={styles.banner} />
