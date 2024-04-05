@@ -515,7 +515,7 @@ describe('RateDetailsv2', () => {
         })
     })
 
-    describe('can link esisting rate', () => {
+    describe('can link existing rate', () => {
         it('renders without errors', async () => {
             renderWithProviders(
                 <Formik
@@ -864,10 +864,15 @@ describe('RateDetailsv2', () => {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             await user.click(clearSelectionButton!)
 
+            const open = document.querySelector('.select__dropdown-indicator')
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            await user.click(open!)
+            expect(screen.getByRole('listbox')).toBeInTheDocument()
+
             await waitFor(() => {
                 const option = screen
                     .getByRole('listbox')
-                    .querySelector('#react-select-5-option-0')
+                    .querySelector('#react-select-2-option-0')
                 expect(option).toBeInTheDocument()
             })
         })
