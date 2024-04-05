@@ -31,12 +31,12 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
     const isLastPage = pageVariant === 'LAST'
     const isFirstPageEditing = pageVariant === 'EDIT_FIRST'
     const isStandalonePage = pageVariant === 'STANDALONE'
-    const { logTealiumEvent } = useTealium()
+    const { logUserEvent } = useTealium()
 
     const saveAsDraftOnClickWithLogging = (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>
     ) => {
-        logTealiumEvent({ tealium_event: 'save_draft' })
+        logUserEvent({ tealium_event: 'save_draft' })
         if (saveAsDraftOnClick) saveAsDraftOnClick(e)
     }
     const leftElement =
