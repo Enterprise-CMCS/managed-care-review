@@ -43,7 +43,7 @@ import {
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../constants/statutoryRegulatoryAttestation'
 import { SectionCard } from '../../SectionCard'
-import { convertToGenericDocuments } from '../UploadedDocumentsTable/UploadedDocumentsTable'
+import { convertFromSubmissionDocumentsToGenericDocuments } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -300,19 +300,33 @@ export const ContractDetailsSummarySection = ({
                 )}
             </dl>
             <UploadedDocumentsTable
-                documents={convertToGenericDocuments(
+                documents={convertFromSubmissionDocumentsToGenericDocuments(
                     submission.contractDocuments,
                     documentDateLookupTable
                 )}
+                previousSubmissionDate={
+                    documentDateLookupTable.previousSubmissionDate
+                        ? new Date(
+                              documentDateLookupTable.previousSubmissionDate
+                          )
+                        : undefined
+                }
                 caption="Contract"
                 documentCategory="Contract"
                 isEditing={isEditing}
             />
             <UploadedDocumentsTable
-                documents={convertToGenericDocuments(
+                documents={convertFromSubmissionDocumentsToGenericDocuments(
                     contractSupportingDocuments,
                     documentDateLookupTable
                 )}
+                previousSubmissionDate={
+                    documentDateLookupTable.previousSubmissionDate
+                        ? new Date(
+                              documentDateLookupTable.previousSubmissionDate
+                          )
+                        : undefined
+                }
                 caption="Contract supporting documents"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments

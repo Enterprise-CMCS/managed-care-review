@@ -631,9 +631,9 @@ describe('RateDetailsSummarySection', () => {
             ).toBeInTheDocument()
         })
     })
-    it('renders all necessary information for documents with shared rate certifications', async () => {
+    it('renders all necessary information for documents with shared rate certifications on submitted packages', async () => {
         const testSubmission = {
-            ...draftSubmission,
+            ...mockStateSubmission(),
             rateInfos: [
                 {
                     ...draftSubmission.rateInfos[0],
@@ -641,7 +641,7 @@ describe('RateDetailsSummarySection', () => {
                         {
                             s3URL: 's3://foo/bar/rate',
                             name: 'rate docs test 1',
-                            sha256: 'fakesha',
+                            sha256: 'fakesha11',
                         },
                     ],
                 },
@@ -650,17 +650,17 @@ describe('RateDetailsSummarySection', () => {
                 {
                     s3URL: 's3://foo/bar/test-1',
                     name: 'supporting docs test 1',
-                    sha256: 'fakesha',
+                    sha256: 'fakesha1',
                 },
                 {
                     s3URL: 's3://foo/bar/test-2',
                     name: 'supporting docs test 2',
-                    sha256: 'fakesha',
+                    sha256: 'fakesha2',
                 },
                 {
                     s3URL: 's3://foo/bar/test-3',
                     name: 'supporting docs test 3',
-                    sha256: 'fakesha',
+                    sha256: 'fakesha3',
                 },
             ],
         }

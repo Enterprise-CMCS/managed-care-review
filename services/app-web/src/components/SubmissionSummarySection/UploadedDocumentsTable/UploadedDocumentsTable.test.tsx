@@ -4,6 +4,7 @@ import { UploadedDocumentsTable } from './UploadedDocumentsTable'
 import {
     fetchCurrentUserMock,
     mockValidCMSUser,
+    mockValidStateUser,
 } from '../../../testHelpers/apolloMocks'
 import type { GenericDocument } from '../../../gen/gqlClient'
 
@@ -91,7 +92,7 @@ describe('UploadedDocumentsTable', () => {
         })
     })
 
-    it('renders date added when supplied with a date lookup table and is CMS user viewing submission', async () => {
+    it('renders date added as expected for CMS user viewing submission', async () => {
         const testDocuments: GenericDocument[] = [
             {
                 s3URL: 's3://foo/bar/test-1',
@@ -141,13 +142,13 @@ describe('UploadedDocumentsTable', () => {
         })
     })
 
-    it('renders date added when supplied with a date lookup table and is State user', async () => {
+    it('renders date added for State user viewing submission', async () => {
         const testDocuments: GenericDocument[] = [
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
-                dateAdded: new Date('03/24/2022'),
+                dateAdded: new Date('03/25/2022'),
             },
             {
                 s3URL: 's3://foo/bar/test-2',
@@ -174,7 +175,7 @@ describe('UploadedDocumentsTable', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
-                            user: mockValidCMSUser(),
+                            user: mockValidStateUser(),
                             statusCode: 200,
                         }),
                     ],
@@ -316,7 +317,6 @@ describe('UploadedDocumentsTable', () => {
                 caption="Contract"
                 documentCategory="Contract"
                 multipleDocumentsAllowed={false}
-                isSubmitted={false}
             />,
             {
                 apolloProvider: {

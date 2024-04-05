@@ -14,9 +14,11 @@ import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 import { GenericDocument } from '../../../gen/gqlClient'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 
-// Try to avoid creating v2 version of this entire file for a few lines of code
-// This is used to convert from deprecated FE domain types from protos to GQL GenericDocuments
-export const convertToGenericDocuments = (
+// V2 API migration note: intentionally trying to avoid making V2 version of this reuseable sub component since it has such a contained focus (on displaying documents only).
+// Use props to pass needed information and seek to make content as domain agnostic as possible.
+
+// This is used to convert from deprecated FE domain types from protos to GQL GenericDocuments by added in a dateAdded
+export const convertFromSubmissionDocumentsToGenericDocuments = (
     deprecatedDocs: SubmissionDocument[],
     dateTableLookup: DocumentDateLookupTableType
 ): GenericDocument[] => {
@@ -30,13 +32,12 @@ export const convertToGenericDocuments = (
 export type UploadedDocumentsTableProps = {
     documents: GenericDocument[]
     caption: string | null
-    packagesWithSharedRateCerts?: SharedRateCertDisplay[]
-    previousSubmissionDate?: Date
-    isSupportingDocuments?: boolean // delete after moving supporting contract supporting docs to contract page
-    multipleDocumentsAllowed?: boolean
-    documentCategory?: string // if this prop is not included, do not show category column - delete after rates refactor
-    isEditing?: boolean // by default assume we are on summary page, if true, assume review and submit page
-    isSubmitted?: boolean // by default assume we are on summary page, if true, assume review and submit page
+    packagesWithSharedRateCerts?: SharedRateCertDisplay[] // deprecated - could be deleted after we resolve all historical data linked rates
+    previousSubmissionDate?: Date // used to calculate NEW tag based on doc dateAdded
+    isSupportingDocuments?: boolean // used to calculate empty state and styles around the secondary supporting docs tables - would be nice to remove this in favor of more domain agnostic prop such as 'emptyStateText'
+    multipleDocumentsAllowed?: boolean // used to determined if we display validations based on doc list length
+    documentCategory?: string // used to determine if we display document category column
+    isEditing?: boolean // default false, used to determine if we display validations for state users (or else extra context for CMS reviewers)
 }
 
 export const UploadedDocumentsTable = ({
@@ -48,7 +49,6 @@ export const UploadedDocumentsTable = ({
     isSupportingDocuments = false,
     multipleDocumentsAllowed = true,
     isEditing = false,
-    isSubmitted = true,
 }: UploadedDocumentsTableProps): React.ReactElement => {
     const initialDocState = documents.map((doc) => ({
         ...doc,
@@ -60,12 +60,12 @@ export const UploadedDocumentsTable = ({
     const { getDocumentsWithS3KeyAndUrl } = useDocument()
     const [refreshedDocs, setRefreshedDocs] =
         useState<DocumentWithS3Data[]>(initialDocState)
-    const shouldShowEditButton = isEditing && isSupportingDocuments
+    const shouldShowEditButton = isEditing && isSupportingDocuments // at this point only contract supporting documents need the inline EDIT button - this can be deleted when we move supporting docs to ContractDetails page
 
     // canDisplayDateAddedForDocument -  guards against passing in null or undefined to dayjs
-    // dates will be undefined in lookup table we are dealing with a new initial submission
+    // don't display on new initial submission
     const canDisplayDateAddedForDocument = (doc: DocumentWithS3Data) => {
-        return Boolean(doc.dateAdded)
+        return doc.dateAdded && previousSubmissionDate
     }
 
     const shouldHaveNewTag = (doc: DocumentWithS3Data) => {
@@ -87,6 +87,7 @@ export const UploadedDocumentsTable = ({
         (packagesWithSharedRateCerts &&
             packagesWithSharedRateCerts.length > 0) ||
         false
+
     const showSharedInfo = hasSharedRateCert && !isEditing
     const borderTopGradientStyles = `borderTopLinearGradient ${styles.uploadedDocumentsTable}`
     const supportingDocsTopMarginStyles = isSupportingDocuments
@@ -150,7 +151,7 @@ export const UploadedDocumentsTable = ({
                     </div>
                     {!multipleDocumentsAllowed &&
                         documents.length > 1 &&
-                        !isSubmitted && (
+                        !isEditing && (
                             <DataDetailMissingField
                                 classname={styles.missingInfo}
                                 requiredText="Only one document is allowed for a rate

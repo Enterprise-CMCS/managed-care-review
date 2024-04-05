@@ -81,7 +81,8 @@ export const RateDetailsSummarySectionV2 = ({
         getLastContractSubmission(contract)?.contractRevision.formData
     const rates =
         contract.draftRates ||
-        getLastContractSubmission(contract)?.rateRevisions
+        getLastContractSubmission(contract)?.rateRevisions ||
+        []
     const lastSubmittedDate =
         getLastContractSubmission(contract)?.submitInfo.updatedAt
 
@@ -348,7 +349,6 @@ export const RateDetailsSummarySectionV2 = ({
                                     documentCategory="Rate certification"
                                     previousSubmissionDate={lastSubmittedDate}
                                     isEditing={isEditing}
-                                    isSubmitted={isSubmitted}
                                 />
                             )}
                             {rateFormData?.supportingDocuments && (

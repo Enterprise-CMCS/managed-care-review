@@ -11,7 +11,7 @@ const useDocument = () => {
     const { getKey, getURL } = useS3()
     const getDocumentsWithS3KeyAndUrl = useCallback(
         async <T = Record<string, unknown>,>(
-            documents: Array<(T & GenericDocument) | GenericDocument>,
+            documents: Array<(T & Document) | GenericDocument>,
             bucket: BucketShortName
         ): Promise<Array<T & ParsedDocumentWithLinkType>> => {
             return await Promise.all(
