@@ -8,12 +8,7 @@ import {
 import React, { useEffect, useRef, useState } from 'react'
 import { NavLink, useOutletContext } from 'react-router-dom'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
-import {
-    ContractDetailsSummarySection,
-} from '../../../components/SubmissionSummarySection'
-import {
-    ContractDetailsSummarySectionV2,
-} from './ContractDetailsSummarySectionV2'
+import { ContractDetailsSummarySectionV2 } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/ContractDetailsSummarySectionV2'
 import { ContactsSummarySection } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/ContactsSummarySectionV2'
 import { RateDetailsSummarySectionV2 } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/RateDetailsSummarySectionV2'
 import { SubmissionTypeSummarySectionV2 } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/SubmissionTypeSummarySectionV2'
@@ -23,7 +18,10 @@ import {
     DocumentWarningBanner,
 } from '../../../components'
 import { usePage } from '../../../contexts/PageContext'
-import { useFetchContractQuery, UpdateInformation } from '../../../gen/gqlClient'
+import {
+    useFetchContractQuery,
+    UpdateInformation,
+} from '../../../gen/gqlClient'
 import styles from '../SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../../components/ChangeHistory/ChangeHistory'
 import { UnlockSubmitModal } from '../../../components/Modal/UnlockSubmitModal'
@@ -68,8 +66,8 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
     // API requests
     const {
         data: fetchContractData,
-        loading: fetchContractLoading,
-        error: fetchContractError,
+        // loading: fetchContractLoading,
+        // error: fetchContractError,
     } = useFetchContractQuery({
         variables: {
             input: {
@@ -220,12 +218,12 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
 
                 {contract && (
                     <ContractDetailsSummarySectionV2
-                    documentDateLookupTable={documentDates}
-                    contract={contract}
-                    isCMSUser={isCMSUser}
-                    submissionName={name}
-                    onDocumentError={handleDocumentDownloadError}
-                />
+                        documentDateLookupTable={documentDates}
+                        contract={contract}
+                        isCMSUser={isCMSUser}
+                        submissionName={name}
+                        onDocumentError={handleDocumentDownloadError}
+                    />
                 )}
 
                 {contract && isContractActionAndRateCertification && (
@@ -239,9 +237,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                     />
                 )}
 
-                {contract && (
-                    <ContactsSummarySection contract={contract} />
-                )}
+                {contract && <ContactsSummarySection contract={contract} />}
 
                 <ChangeHistory submission={pkg} />
                 {

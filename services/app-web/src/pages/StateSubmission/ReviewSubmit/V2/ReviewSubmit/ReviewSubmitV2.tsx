@@ -181,14 +181,15 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                     </ModalToggleButton>
                 </PageActionsContainer>
 
-                // if the session is expiring, close this modal so the countdown modal can appear
-                {contract && (<UnlockSubmitModalV2
-                    contract={contract}
-                    submissionName={submissionName}
-                    modalType={'SUBMIT'} // TODO handle unlock w resubmit
-                    modalRef={modalRef}
-                    setIsSubmitting={setIsSubmitting}
-                />
+                {/* if the session is expiring, close this modal so the countdown modal can appear */}
+                {contract && (
+                    <UnlockSubmitModalV2
+                        contract={contract}
+                        submissionName={submissionName}
+                        modalType={'SUBMIT'} // TODO handle unlock w resubmit
+                        modalRef={modalRef}
+                        setIsSubmitting={setIsSubmitting}
+                    />
                 )}
             </GridContainer>
         </>
