@@ -138,7 +138,7 @@ const createTestRate = async (
     return must(await insertDraftRate(prismaClient, draftRateData))
 }
 
-async function updateDraftRatesOnContract(
+export async function updateDraftRatesOnContract(
     server: ApolloServer,
     input: UpdateDraftContractRatesInput
 ): Promise<Contract> {

@@ -23,7 +23,12 @@ export function submitContract(
 
         await submitHPPResolver(
             parent,
-            { input: { pkgID: input.contractID } },
+            {
+                input: {
+                    pkgID: input.contractID,
+                    submittedReason: input.submittedReason,
+                },
+            },
             context
         )
 
