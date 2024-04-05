@@ -9,17 +9,23 @@ import {
 import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
+    mockValidStateUser,
 } from '../../../../testHelpers/apolloMocks'
 import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '../../../../constants'
 import userEvent from '@testing-library/user-event'
 import { rateRevisionDataMock } from '../../../../testHelpers/apolloMocks/rateDataMock'
-import { fetchDraftRateMockSuccess } from '../../../../testHelpers/apolloMocks/rateGQLMocks'
+import {
+    fetchDraftRateMockSuccess,
+    indexRatesMockSuccess,
+} from '../../../../testHelpers/apolloMocks/rateGQLMocks'
 import {
     clickAddNewRate,
     fillOutFirstRate,
     rateCertifications,
 } from '../../../../testHelpers/jestRateHelpers'
+import { Formik } from 'formik'
+import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
 
 describe('handles edit  of a multi rate', () => {
     // TODO move into the existing multi rate test suite
@@ -325,5 +331,363 @@ describe.skip('RateDetailsv2', () => {
         )
         it.todo('accepts documents on second rate')
         it.todo('cannot continue with partially filled out second rate')
+    })
+
+    describe('can link esisting rate', () => {
+        it('renders without errors', async () => {
+            renderWithProviders(
+                <Formik
+                    initialValues={{ ratePreviouslySubmitted: '' }}
+                    onSubmit={(values) => console.info('submitted', values)}
+                >
+                    <form>
+                        <LinkYourRates
+                            fieldNamePrefix="rateForms.1"
+                            index={1}
+                            autofill={jest.fn()}
+                        />
+                    </form>
+                </Formik>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidStateUser(),
+                            }),
+                            indexRatesMockSuccess(),
+                        ],
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.queryByText(
+                        'Was this rate certification included with another submission?'
+                    )
+                ).toBeInTheDocument()
+            })
+        })
+
+        it('does not display dropdown menu if no is selected', async () => {
+            const rateID = 'test-abc-123'
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchDraftRateMockSuccess({ id: rateID }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+
+            //Making sure page loads
+            await screen.findByText('Rate Details')
+            expect(
+                screen.getByText(
+                    'Was this rate certification included with another submission?'
+                )
+            ).toBeInTheDocument()
+
+            //Click the no button and assert the dropdown does not appear
+            const noRadioButton = screen.getByLabelText(
+                'No, this rate certification was not included with any other submissions'
+            )
+            await user.click(noRadioButton)
+            await waitFor(() => {
+                expect(
+                    screen.queryByText('Which rate certification was it?')
+                ).not.toBeInTheDocument()
+            })
+        })
+
+        it('displays dropdown menu if yes is selected', async () => {
+            const rateID = 'test-abc-123'
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            indexRatesMockSuccess(),
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchDraftRateMockSuccess({ id: rateID }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                            fetchDraftRateMockSuccess({
+                                id: rateID,
+                                draftRevision: {
+                                    ...rateRevisionDataMock(),
+                                    formData: {
+                                        ...rateRevisionDataMock().formData,
+                                        rateDocuments: [
+                                            {
+                                                s3URL: 's3://bucketname/one-one/one-one.png',
+                                                name: 'one one',
+                                                sha256: 'fakeSha1',
+                                            },
+                                            {
+                                                s3URL: 's3://bucketname/one-two/one-two.png',
+                                                name: 'one two',
+                                                sha256: 'fakeSha2',
+                                            },
+                                            {
+                                                s3URL: 's3://bucketname/one-three/one-three.png',
+                                                name: 'one three',
+                                                sha256: 'fakeSha3',
+                                            },
+                                        ],
+                                    },
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+
+            //Making sure page loads
+            await screen.findByText('Rate Details')
+            expect(
+                screen.getByText(
+                    'Was this rate certification included with another submission?'
+                )
+            ).toBeInTheDocument()
+
+            //Click the yes button and assert it's clickable and checked
+            const yesRadioButton = screen.getByRole('radio', {
+                name: 'Yes, this rate certification is part of another submission',
+            })
+            expect(yesRadioButton).toBeInTheDocument()
+            await user.click(yesRadioButton)
+            expect(yesRadioButton).toBeChecked()
+
+            // Assert the dropdown has rendered
+            await waitFor(() => {
+                expect(
+                    screen.getByText('Which rate certification was it?')
+                ).toBeInTheDocument()
+                expect(screen.getByRole('combobox')).toBeInTheDocument()
+            })
+
+            // Assert the options menu is open
+            const dropdownMenu = screen.getByRole('listbox')
+            expect(dropdownMenu).toBeInTheDocument()
+
+            // Assert options are present
+            const dropdownOptions = screen.getAllByRole('option')
+            expect(dropdownOptions).toHaveLength(3)
+        })
+
+        it('removes the selected option from the dropdown list', async () => {
+            const rateID = 'test-abc-123'
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            indexRatesMockSuccess(),
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchDraftRateMockSuccess({ id: rateID }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                            fetchDraftRateMockSuccess({
+                                id: rateID,
+                                draftRevision: {
+                                    ...rateRevisionDataMock(),
+                                    formData: {
+                                        ...rateRevisionDataMock().formData,
+                                        rateDocuments: [
+                                            {
+                                                s3URL: 's3://bucketname/one-one/one-one.png',
+                                                name: 'one one',
+                                                sha256: 'fakeSha1',
+                                            },
+                                            {
+                                                s3URL: 's3://bucketname/one-two/one-two.png',
+                                                name: 'one two',
+                                                sha256: 'fakeSha2',
+                                            },
+                                            {
+                                                s3URL: 's3://bucketname/one-three/one-three.png',
+                                                name: 'one three',
+                                                sha256: 'fakeSha3',
+                                            },
+                                        ],
+                                    },
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+
+            //Making sure page loads
+            await screen.findByText('Rate Details')
+            expect(
+                screen.getByText(
+                    'Was this rate certification included with another submission?'
+                )
+            ).toBeInTheDocument()
+
+            //Click the yes button to trigger dropdown
+            const yesRadioButton = screen.getByRole('radio', {
+                name: 'Yes, this rate certification is part of another submission',
+            })
+            await user.click(yesRadioButton)
+
+            // Assert that the selected value is removed from the list of options
+            const option = screen
+                .getByRole('listbox')
+                .querySelector('#react-select-2-option-0')
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            await user.click(option!)
+
+            await waitFor(() => {
+                expect(screen.getByRole('listbox')).toBeInTheDocument()
+                expect(option).not.toBeInTheDocument()
+            })
+        })
+
+        it('returns the unselected option to the dropdown list', async () => {
+            const rateID = 'test-abc-123'
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            indexRatesMockSuccess(),
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchDraftRateMockSuccess({ id: rateID }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                            fetchDraftRateMockSuccess({
+                                id: rateID,
+                                draftRevision: {
+                                    ...rateRevisionDataMock(),
+                                    formData: {
+                                        ...rateRevisionDataMock().formData,
+                                        rateDocuments: [
+                                            {
+                                                s3URL: 's3://bucketname/one-one/one-one.png',
+                                                name: 'one one',
+                                                sha256: 'fakeSha1',
+                                            },
+                                            {
+                                                s3URL: 's3://bucketname/one-two/one-two.png',
+                                                name: 'one two',
+                                                sha256: 'fakeSha2',
+                                            },
+                                            {
+                                                s3URL: 's3://bucketname/one-three/one-three.png',
+                                                name: 'one three',
+                                                sha256: 'fakeSha3',
+                                            },
+                                        ],
+                                    },
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+
+            //Making sure page loads
+            await screen.findByText('Rate Details')
+            expect(
+                screen.getByText(
+                    'Was this rate certification included with another submission?'
+                )
+            ).toBeInTheDocument()
+
+            //Click the yes button to trigger dropdown
+            const yesRadioButton = screen.getByRole('radio', {
+                name: 'Yes, this rate certification is part of another submission',
+            })
+            await user.click(yesRadioButton)
+
+            // Checking that the selected value is removed from the list of options
+            const option = screen
+                .getByRole('listbox')
+                .querySelector('#react-select-2-option-0')
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            await user.click(option!)
+
+            const clearSelectionButton = screen
+                .getByRole('combobox')
+                .querySelector('.select__clear-indicator')
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            await user.click(clearSelectionButton!)
+
+            await waitFor(() => {
+                const option = screen
+                    .getByRole('listbox')
+                    .querySelector('#react-select-5-option-0')
+                expect(option).toBeInTheDocument()
+            })
+        })
     })
 })
