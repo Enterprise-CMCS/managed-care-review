@@ -12316,9 +12316,9 @@
   integrity sha512-Abq9fBviLV93OiXMu+f6r0elxCzRwc0RC5f99cU892uBITL44pTvgvEqlRlPRi8EGcO1z7Cp8A4d0s/p3J/+Nw==
 
 "@types/node@^16.18.39":
-  version "16.18.91"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.91.tgz#3e7b3b3d28f740e3e2d4ceb7ad9d16e6b9277c91"
-  integrity sha512-h8Q4klc8xzc9kJKr7UYNtJde5TU2qEePVyH3WyzJaUC+3ptyc5kPQbWOIUcn8ZsG5+KSkq+P0py0kC0VqxgAXw==
+  version "16.18.93"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.93.tgz#ed4950d2f13afafb2baed1bd098ddf162a4c7b81"
+  integrity sha512-epWuohp6c0bQt0j3RYCiP9x52axHVn+CjS1Rx1VjPwF+ySg8lrigH3yXGs88XqnA+jGM2qnSMuFTsBxft+hO1Q==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
@@ -23164,9 +23164,9 @@ jotai-location@^0.5.1:
   integrity sha512-4S9hDh1wYp4SG4Laq3+Xd0GdW7jwnWlbEuL8U22kv3wUZW892n6gXlNhwU0LaoXnWoGG0gtjSLBuFm5iodFKLg==
 
 jotai@^2.2.1:
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/jotai/-/jotai-2.6.0.tgz#68b5d634f78a9ea55adfb8d92206ef59304b5dd5"
-  integrity sha512-Vt6hsc04Km4j03l+Ax+Sc+FVft5cRJhqgxt6GTz6GM2eM3DyX3CdBdzcG0z2FrlZToL1/0OAkqDghIyARWnSuQ==
+  version "2.7.2"
+  resolved "https://registry.yarnpkg.com/jotai/-/jotai-2.7.2.tgz#bfc49d76a93831f8e6b21e46662c3de7f15ae3d9"
+  integrity sha512-6Ft5kpNu8p93Ssf1Faoza3hYQZRIYp7rioK8MwTTFnbQKwUyZElwquPwl1h6U0uo9hC0jr+ghO3gcSjc6P35/Q==
 
 js-cookie@^2.2.1:
   version "2.2.1"
