@@ -1,0 +1,30 @@
+@use 'sass:color';
+@use '../../../styles/custom.scss' as custom;
+@use '../../../styles/uswdsImports.scss' as uswds;
+
+// react-select draws the chips in two parts, so we round the outer and square in the inner corners
+.rateMultiSelect {
+    z-index: 5;
+    padding-top: 12px;
+    [class*='select__multi-value'] {
+        border-radius: 99rem 99rem 99rem 99rem;
+    }
+    [class*='select__multi-value__label'] {
+        background: custom.$mcr-primary-lighter;
+        color: custom.$mcr-foundation-ink;
+        border-radius: 99rem 0rem 0rem 99rem;
+    }
+    [class*='select__multi-value__remove'] {
+        background: custom.$mcr-primary-lighter;
+        color: custom.$mcr-foundation-ink;
+        border-radius: 0rem 99rem 99rem 0rem;
+
+        &:hover {
+            background: color.adjust(
+                custom.$mcr-primary-lighter,
+                $lightness: -5
+            );
+            color: custom.$mcr-foundation-ink;
+        }
+    }
+}

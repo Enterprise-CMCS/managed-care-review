@@ -1,6 +1,6 @@
 import React from 'react'
 import Select, { ActionMeta, AriaOnFocus, Props } from 'react-select'
-import styles from '../../components/Select/Select.module.scss'
+import styles from '../../components/Select/RateSelect/RateSelect.module.scss'
 import { StateUser, useIndexRatesQuery } from '../../gen/gqlClient'
 import { useAuth } from '../../contexts/AuthContext'
 import { programNames } from '../../common-code/healthPlanFormDataType'
@@ -148,7 +148,7 @@ export const LinkRateSelect = ({
             <Select
                 defaultMenuIsOpen
                 value={defaultValue}
-                className={styles.multiSelect}
+                className={styles.rateMultiSelect}
                 options={
                     error || loading
                         ? undefined
