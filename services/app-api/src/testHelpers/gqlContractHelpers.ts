@@ -53,13 +53,15 @@ const submitTestContractWithDB = async (
 
 async function submitTestContract(
     server: ApolloServer,
-    contractID: string
+    contractID: string,
+    submittedReason?: string
 ): Promise<Contract> {
     const result = await server.executeOperation({
         query: SUBMIT_CONTRACT,
         variables: {
             input: {
                 contractID: contractID,
+                submittedReason: submittedReason,
             },
         },
     })

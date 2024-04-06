@@ -3,10 +3,14 @@ import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
     unlockTestHealthPlanPackage,
+    updateTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import SUBMIT_CONTRACT from '../../../../app-graphql/src/mutations/submitContract.graphql'
-import { testCMSUser } from '../../testHelpers/userHelpers'
-import type { SubmitContractInput } from '../../gen/gqlServer'
+import SUBMIT_RATE from '../../../../app-graphql/src/mutations/submitRate.graphql'
+import UNLOCK_RATE from '../../../../app-graphql/src/mutations/unlockRate.graphql'
+
+import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import type { Contract, Rate, SubmitContractInput } from '../../gen/gqlServer'
 import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
@@ -19,7 +23,9 @@ import {
     fetchTestRateById,
     updateRatesInputFromDraftContract,
     updateTestDraftRatesOnContract,
+    updateTestRate,
 } from '../../testHelpers/gqlRateHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 describe('submitContract', () => {
     it('submits a contract', async () => {
@@ -117,7 +123,11 @@ describe('submitContract', () => {
         // 2. Submit B0 with Rate1 and Rate3
         const draftB0 =
             await createAndUpdateTestContractWithoutRates(stateServer)
-        const draftB010 = await addLinkedRateToTestContract(stateServer, draftB0, OneID)    
+        const draftB010 = await addLinkedRateToTestContract(
+            stateServer,
+            draftB0,
+            OneID
+        )
         await addNewRateToTestContract(stateServer, draftB010)
 
         const contractB0 = await submitTestContract(stateServer, draftB0.id)
@@ -130,7 +140,11 @@ describe('submitContract', () => {
         // 3. Submit C0 with Rate20 and Rate40
         const draftC0 =
             await createAndUpdateTestContractWithoutRates(stateServer)
-        const draftC020 = await addLinkedRateToTestContract(stateServer, draftC0, TwoID)
+        const draftC020 = await addLinkedRateToTestContract(
+            stateServer,
+            draftC0,
+            TwoID
+        )
         await addNewRateToTestContract(stateServer, draftC020)
 
         const contractC0 = await submitTestContract(stateServer, draftC0.id)
@@ -152,15 +166,14 @@ describe('submitContract', () => {
         const contractD0 = await submitTestContract(stateServer, draftD0.id)
 
         console.info(ThreeID, FourID, contractD0)
-
     })
 
     it('handles unlock and editing rates', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser()
-            }
+                user: testCMSUser(),
+            },
         })
 
         console.log('1.')
@@ -181,7 +194,11 @@ describe('submitContract', () => {
         // 2. Submit B0 with Rate1 and Rate3
         const draftB0 =
             await createAndUpdateTestContractWithoutRates(stateServer)
-        const draftB010 = await addLinkedRateToTestContract(stateServer, draftB0, OneID)    
+        const draftB010 = await addLinkedRateToTestContract(
+            stateServer,
+            draftB0,
+            OneID
+        )
         await addNewRateToTestContract(stateServer, draftB010)
 
         const contractB0 = await submitTestContract(stateServer, draftB0.id)
@@ -189,8 +206,12 @@ describe('submitContract', () => {
 
         expect(subB0.rateRevisions[0].rate!.id).toBe(OneID)
 
-        // unlock B, rate 3 should unlock, rate 1 should not. 
-        await unlockTestHealthPlanPackage(cmsServer, contractB0.id, 'test unlock')
+        // unlock B, rate 3 should unlock, rate 1 should not.
+        await unlockTestHealthPlanPackage(
+            cmsServer,
+            contractB0.id,
+            'test unlock'
+        )
 
         const unlockedB = await fetchTestContract(stateServer, contractB0.id)
         if (!unlockedB.draftRates) {
@@ -323,5 +344,132 @@ describe('submitContract', () => {
         expect(res.errors && res.errors[0].message).toBe(
             'user not authorized to fetch state data'
         )
+    })
+
+    it('tests actions from the diagram that Jason made', async () => {
+        const ldService = testLDService({
+            'rate-edit-unlock': true,
+        })
+        const stateUser = testStateUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+            ldService,
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        // make draft contract 1.1 with rate A.1 and submit
+        const S1 = await createAndSubmitTestContractWithRate(stateServer)
+        expect(S1.status).toBe('SUBMITTED')
+
+        // unlock S1 so state can add Rate B
+        // TODO: validate on package submissions not revs
+        const unlockS1Res = await unlockTestHealthPlanPackage(
+            cmsServer,
+            S1.id,
+            'You are missing a rate'
+        )
+        const S1initSubmit = unlockS1Res.revisions[1].node
+
+        expect(unlockS1Res.status).toBe('UNLOCKED')
+        expect(unlockS1Res.revisions).toHaveLength(2)
+        // test the ordering
+        expect(S1initSubmit.submitInfo?.updatedReason).toBe(
+            'Initial submission'
+        )
+
+        // add rateB and submit
+        const S2draft = await fetchTestContract(stateServer, unlockS1Res.id)
+        const S2draftWithRateB = await addNewRateToTestContract(
+            stateServer,
+            S2draft
+        )
+
+        const S2Submitted = await stateServer.executeOperation({
+            query: SUBMIT_CONTRACT,
+            variables: {
+                input: {
+                    contractID: S2draftWithRateB.id,
+                    submittedReason: 'Added rate B to the submission',
+                },
+            },
+        })
+        const S2data = S2Submitted.data?.submitContract.contract as Contract
+
+        expect(S2Submitted.errors).toBeUndefined()
+        expect(S2data.status).toBe('RESUBMITTED')
+        expect(S2data.packageSubmissions).toHaveLength(2)
+
+        // We now have contract 1.2 with A.1 and B.1
+
+        // unlock rate A and update it
+        const rateA = S2data.packageSubmissions[0].rateRevisions[0].rate as Rate
+        const unlockRateARes = await cmsServer.executeOperation({
+            query: UNLOCK_RATE,
+            variables: {
+                input: {
+                    rateID: rateA.id,
+                    unlockedReason: 'Unlocking Rate A for update',
+                },
+            },
+        })
+
+        const rateAUnlockData = unlockRateARes.data?.unlockRate.rate as Rate
+        expect(unlockRateARes.errors).toBeUndefined()
+        expect(rateAUnlockData.status).toBe('UNLOCKED')
+        expect(rateAUnlockData.draftRevision?.unlockInfo?.updatedReason).toBe(
+            'Unlocking Rate A for update'
+        )
+
+        // make changes to Rate A and re-submit for Rate A.2
+        // TODO: this uses Prisma directly, we want to use updateRate resolver
+        // once we have one
+        const updateRateA2res = await updateTestRate(rateA.id, {
+            rateDateStart: new Date(Date.UTC(2024, 2, 1)),
+            rateDateEnd: new Date(Date.UTC(2025, 1, 31)),
+            rateDateCertified: new Date(Date.UTC(2024, 1, 31)),
+        })
+        const S3 = await stateServer.executeOperation({
+            query: SUBMIT_RATE,
+            variables: {
+                input: {
+                    rateID: updateRateA2res.id,
+                },
+            },
+        })
+        expect(S3.errors).toBeUndefined()
+
+        // Unlock contract and update it
+        await unlockTestHealthPlanPackage(
+            cmsServer,
+            S2data.id,
+            'Unlocking to update contract to give us rev 3'
+        )
+
+        const unlockedS3 = await fetchTestContract(stateServer, S2data.id)
+
+        await updateTestHealthPlanPackage(stateServer, unlockedS3.id, {
+            contractDocuments: [
+                {
+                    name: 'new-doc-to-support',
+                    s3URL: 'testS3URL',
+                    sha256: 'fakesha12345',
+                },
+            ],
+        })
+
+        await submitTestContract(
+            stateServer,
+            unlockedS3.id,
+            'Added the new document'
+        )
+        // TODO: Unlock RateB and unlink RateA
+        // TODO: Update & Resubmit Rate B.2
     })
 })
