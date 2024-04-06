@@ -61,6 +61,7 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                 id
                 createdAt
                 updatedAt
+                parentContractID
                 status
 
                 draftRevision {
@@ -90,12 +91,14 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                             email
                             titleRole
                             actuarialFirm
+                            actuarialFirmOther
                         }
                         addtlActuaryContacts {
                             name
                             email
                             titleRole
                             actuarialFirm
+                            actuarialFirmOther
                         }
                         rateDocuments {
                             name

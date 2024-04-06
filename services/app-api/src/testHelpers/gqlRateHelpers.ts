@@ -16,6 +16,9 @@ import { updateDraftRate } from '../postgres/contractAndRates/updateDraftRate'
 
 import type {
     Contract,
+    RateFormData,
+    ActuaryContact,
+    ActuaryContactInput,
     RateFormDataInput,
     UpdateDraftContractRatesInput,
 } from '../gen/gqlServer'
@@ -138,7 +141,7 @@ const createTestRate = async (
     return must(await insertDraftRate(prismaClient, draftRateData))
 }
 
-async function updateDraftRatesOnContract(
+async function updateTestDraftRatesOnContract(
     server: ApolloServer,
     input: UpdateDraftContractRatesInput
 ): Promise<Contract> {
@@ -166,7 +169,7 @@ async function addNewRateToTestContract(
 
     const addedInput = addNewRateToRateInput(rateUpdateInput)
 
-    return await updateDraftRatesOnContract(server, addedInput)
+    return await updateTestDraftRatesOnContract(server, addedInput)
 }
 
 function addNewRateToRateInput(
@@ -241,7 +244,7 @@ async function addLinkedRateToTestContract(
 
     const addedInput = addLinkedRateToRateInput(rateUpdateInput, rateID)
 
-    return await updateDraftRatesOnContract(server, addedInput)
+    return await updateTestDraftRatesOnContract(server, addedInput)
 }
 
 function addLinkedRateToRateInput(
@@ -260,6 +263,23 @@ function addLinkedRateToRateInput(
     }
 }
 
+function formatGQLRateContractForSending(contact: ActuaryContact): ActuaryContactInput {
+    return {
+        ...contact,
+        id: contact.id || undefined,
+        actuarialFirmOther: contact.actuarialFirmOther || undefined
+    }
+}
+
+function formatRateDataForSending(rateFormData: RateFormData): RateFormDataInput {
+    return {
+        ...rateFormData,
+        certifyingActuaryContacts: rateFormData.certifyingActuaryContacts.map(formatGQLRateContractForSending),
+        addtlActuaryContacts: rateFormData.addtlActuaryContacts ? rateFormData.addtlActuaryContacts.map(formatGQLRateContractForSending) : undefined,
+    }
+}
+
+
 function updateRatesInputFromDraftContract(
     contract: Contract
 ): UpdateDraftContractRatesInput {
@@ -269,17 +289,12 @@ function updateRatesInputFromDraftContract(
     }
 
     const rateInputs = draftRates.map((rate) => {
-        if (rate.revisions.length > 0) {
-            // this is a linked rate TODO: Fix for proper parentage. (the rate will have been submitted initially with this contract)
-            return {
-                type: 'LINK' as const,
-                rateID: rate.id,
-            }
-        } else {
+        if (rate.status === 'DRAFT' || (rate.status === 'UNLOCKED' && rate.parentContractID === contract.id)) {
+            // this is an editable child rate
             const revision = rate.draftRevision
             if (!revision) {
                 console.error(
-                    'programming error no revision found for rate',
+                    'programming error no draft revision found for rate',
                     rate
                 )
                 throw new Error('No revision found for rate')
@@ -287,7 +302,13 @@ function updateRatesInputFromDraftContract(
             return {
                 type: 'UPDATE' as const,
                 rateID: rate.id,
-                formData: revision.formData,
+                formData: formatRateDataForSending(revision.formData),
+            }
+        } else {
+            // this is a linked rate. 
+            return {
+                type: 'LINK' as const,
+                rateID: rate.id,
             }
         }
     })
@@ -388,6 +409,7 @@ export {
     createAndSubmitTestRate,
     createTestDraftRateOnContract,
     updateTestDraftRateOnContract,
+    updateTestDraftRatesOnContract,
     updateRatesInputFromDraftContract,
     addNewRateToTestContract,
     addLinkedRateToTestContract,

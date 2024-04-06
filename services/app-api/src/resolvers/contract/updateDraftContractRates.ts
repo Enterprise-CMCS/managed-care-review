@@ -206,37 +206,23 @@ function updateDraftContractRates(
                     throw new Error(errmsg)
                 }
 
-                if (rateToUpdate.status !== 'DRAFT') {
+                if (!(rateToUpdate.status === 'DRAFT' || rateToUpdate.status === 'UNLOCKED')) {
                     // eventually, this will be enough to cancel this. But until we have unlock-rate, you can edit UNLOCKED children of this contract.
                     const errmsg =
-                        'Attempted to update a rate that is not a DRAFT: ' +
+                        'Attempted to update a rate that is not editable: ' +
                         rateUpdate.rateID
                     logError('updateDraftContractRates', errmsg)
                     setErrorAttributesOnActiveSpan(errmsg, span)
                     throw new UserInputError(errmsg)
+                }
 
-                    // TODO: reenable this check once we figure out how to make the types returned by contractWithHistory express parenthood
-                    // if (rateToUpdate.status !== 'UNLOCKED') {
-                    //     const errmsg =
-                    //         'Attempted to update a rate that is not editable: ' +
-                    //         rateUpdate.rateID
-                    //     logError('updateDraftContractRates', errmsg)
-                    //     setErrorAttributesOnActiveSpan(errmsg, span)
-                    //     throw new UserInputError(errmsg)
-                    // }
-
-                    // // determine if this rate is a child of this contract, in which case it's ok.
-                    // const firstRevision = rateToUpdate.revisions[rateToUpdate.revisions.length - 1]
-                    // const parentContractRev = firstRevision.contractRevisions[0] // not possible to submit a rate with multiple contracts in first go
-
-                    // if (parentContractRev.contract.id !== contract.id) {
-                    //     const errmsg =
-                    //         'Attempted to update a rate that is not a child of this contract: ' +
-                    //         rateUpdate.rateID
-                    //     logError('updateDraftContractRates', errmsg)
-                    //     setErrorAttributesOnActiveSpan(errmsg, span)
-                    //     throw new UserInputError(errmsg)
-                    // }
+                if (rateToUpdate.parentContractID !== contract.id) {
+                    const errmsg =
+                        'Attempted to update a rate that is not a child of this contract: ' +
+                        rateUpdate.rateID
+                    logError('updateDraftContractRates', errmsg)
+                    setErrorAttributesOnActiveSpan(errmsg, span)
+                    throw new UserInputError(errmsg)
                 }
 
                 // set rateName for now https://jiraent.cms.gov/browse/MCR-4012

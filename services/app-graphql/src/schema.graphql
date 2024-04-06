@@ -1321,6 +1321,8 @@ type Rate {
     This value is used to generate the rateName
     """
     stateNumber: Int!
+    "parentContractID is the ID of the contract that initially submitted this rate"
+    parentContractID: ID!
     "The currently modifiable revision if the rate is DRAFT or UNLOCKED"
     draftRevision: RateRevision
     """

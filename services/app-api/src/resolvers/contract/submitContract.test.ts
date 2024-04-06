@@ -1,3 +1,4 @@
+import UPDATE_DRAFT_CONTRACT_RATES from 'app-graphql/src/mutations/updateDraftContractRates.graphql'
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
@@ -16,6 +17,8 @@ import {
     addLinkedRateToTestContract,
     addNewRateToTestContract,
     fetchTestRateById,
+    updateRatesInputFromDraftContract,
+    updateTestDraftRatesOnContract,
 } from '../../testHelpers/gqlRateHelpers'
 
 describe('submitContract', () => {
@@ -201,6 +204,101 @@ describe('submitContract', () => {
 
         expect(rate1.status).toBe('SUBMITTED')
         expect(rate3.status).toBe('UNLOCKED')
+
+        const rateUpdateInput = updateRatesInputFromDraftContract(unlockedB)
+        expect(rateUpdateInput.updatedRates).toHaveLength(2)
+        expect(rateUpdateInput.updatedRates[0].type).toBe('LINK')
+        expect(rateUpdateInput.updatedRates[1].type).toBe('UPDATE')
+        if (!rateUpdateInput.updatedRates[1].formData) {
+            throw new Error('should be set')
+        }
+
+        rateUpdateInput.updatedRates[1].formData.rateDateCertified = '2000-01-22'
+
+        const updatedB = await updateTestDraftRatesOnContract(stateServer, rateUpdateInput)
+        expect(updatedB.draftRates![1].draftRevision?.formData.rateDateCertified).toBe('2000-01-22')
+
+    })
+
+    it('checks parent rates on update', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser()
+            }
+        })
+
+        console.log('1.')
+        // 1. Submit A0 with Rate1 and Rate2
+        const draftA0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const AID = draftA0.id
+        const draftA010 = await addNewRateToTestContract(stateServer, draftA0)
+
+        await addNewRateToTestContract(stateServer, draftA010)
+
+        const contractA0 = await submitTestContract(stateServer, AID)
+        const subA0 = contractA0.packageSubmissions[0]
+        const rate10 = subA0.rateRevisions[0]
+        const OneID = rate10.rate!.id
+
+        console.log('2.')
+        // 2. Submit B0 with Rate1 and Rate3
+        const draftB0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const draftB010 = await addLinkedRateToTestContract(stateServer, draftB0, OneID)    
+        await addNewRateToTestContract(stateServer, draftB010)
+
+        const contractB0 = await submitTestContract(stateServer, draftB0.id)
+        const subB0 = contractB0.packageSubmissions[0]
+
+        expect(subB0.rateRevisions[0].rate!.id).toBe(OneID)
+
+        // unlock A
+        await unlockTestHealthPlanPackage(cmsServer, contractA0.id, 'unlock a')
+        // unlock B, rate 3 should unlock, rate 1 should not. 
+        await unlockTestHealthPlanPackage(cmsServer, contractB0.id, 'test unlock')
+
+        const unlockedB = await fetchTestContract(stateServer, contractB0.id)
+        if (!unlockedB.draftRates) {
+            throw new Error('no draft rates')
+        }
+
+        expect(unlockedB.draftRates?.length).toBe(2) // this feels like it shouldnt work, probably pulling from the old rev.
+
+        const rate1 = unlockedB.draftRates[0]
+        const rate3 = unlockedB.draftRates[1]
+
+        expect(rate1.status).toBe('UNLOCKED')
+        expect(rate3.status).toBe('UNLOCKED')
+
+        const rateUpdateInput = updateRatesInputFromDraftContract(unlockedB)
+        expect(rateUpdateInput.updatedRates).toHaveLength(2)
+        expect(rateUpdateInput.updatedRates[0].type).toBe('LINK')
+        expect(rateUpdateInput.updatedRates[1].type).toBe('UPDATE')
+        if (!rateUpdateInput.updatedRates[1].formData) {
+            throw new Error('should be set')
+        }
+
+        // attempt to update a link
+        rateUpdateInput.updatedRates[0].type = 'UPDATE'
+        rateUpdateInput.updatedRates[0].formData = rateUpdateInput.updatedRates[1].formData
+
+        rateUpdateInput.updatedRates[1].formData.rateDateCertified = '2000-01-22'
+
+        const updateResult = await stateServer.executeOperation({
+            query: UPDATE_DRAFT_CONTRACT_RATES,
+            variables: {
+                input: rateUpdateInput,
+            },
+        })
+
+        expect(updateResult.errors).toBeDefined()
+        if (!updateResult.errors) {
+            throw new Error('must be defined')
+        }
+
+        expect(updateResult.errors[0].message).toMatch(/^Attempted to update a rate that is not a child of this contract/)
 
     })
 

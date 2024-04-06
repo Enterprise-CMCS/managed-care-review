@@ -163,6 +163,7 @@ function contractWithHistoryToDomainModel(
                         updatedAt: r.updatedAt,
                         status: getContractRateStatus(r.revisions),
                         stateCode: r.stateCode,
+                        parentContractID: 'old-style-rate-pull',
                         stateNumber: r.stateNumber,
                         revisions: [],
                     }
