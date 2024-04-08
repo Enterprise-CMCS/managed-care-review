@@ -477,25 +477,15 @@ describe('submitContract', () => {
             ],
         })
 
-        await submitTestContract(
+        const S4 = await submitTestContract(
             stateServer,
             unlockedS3.id,
             'Added the new document'
         )
+
+        expect(S4.packageSubmissions).toHaveLength(3) // we have contract revision 3
+
         // TODO: Unlock RateB and unlink RateA
-        /*
-        const rateB = S4.packageSubmissions
-        console.info(JSON.stringify(rateB))
-        const unlockRateBRes = await cmsServer.executeOperation({
-            query: UNLOCK_RATE,
-            variables: {
-                input: {
-                    rateID: rateB.id,
-                    unlockedReason: 'Unlocking Rate A for update',
-                },
-            },
-        })
-        */
         // TODO: Update & Resubmit Rate B.2
     })
 })
