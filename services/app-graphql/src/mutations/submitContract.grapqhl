@@ -1,0 +1,282 @@
+mutation submitContract($input: SubmitContractInput!) {
+    submitContract(input: $input) {      
+        contract {
+            ...contractFieldsForSubmitContract
+
+            packageSubmissions {
+                ...packageSubmissionsFragmentForSubmitContract
+            }
+        }
+    }
+}
+
+fragment contractFieldsForSubmitContract on Contract {
+    id
+    status
+    createdAt
+    updatedAt
+    initiallySubmittedAt
+    stateCode
+    state {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+        }
+    }
+    stateNumber
+}
+
+fragment rateFieldsForSubmitContract on Rate {
+    id
+    createdAt
+    updatedAt
+    stateCode
+    stateNumber
+    state {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+        }
+    }
+    status
+    initiallySubmittedAt
+}
+
+fragment rateRevisionFragmentForSubmitContract on RateRevision {
+    id
+    createdAt
+    updatedAt
+    unlockInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+    submitInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+    formData {
+        rateType
+        rateCapitationType
+        rateDocuments {
+            name
+            s3URL
+            sha256
+        }
+        supportingDocuments {
+            name
+            s3URL
+            sha256
+        }
+        rateDateStart
+        rateDateEnd
+        rateDateCertified
+        amendmentEffectiveDateStart
+        amendmentEffectiveDateEnd
+        rateProgramIDs
+        rateCertificationName
+        certifyingActuaryContacts {
+            id
+            name
+            titleRole
+            email
+            actuarialFirm
+            actuarialFirmOther
+        }
+        addtlActuaryContacts {
+            id
+            name
+            titleRole
+            email
+            actuarialFirm
+            actuarialFirmOther
+        }
+        actuaryCommunicationPreference
+        packagesWithSharedRateCerts {
+            packageName
+            packageId
+            packageStatus
+        }
+    }
+    contractRevisions {
+        id
+        contract {
+            id
+            stateCode
+            stateNumber
+        }
+        createdAt
+        updatedAt
+        submitInfo {
+            updatedAt
+            updatedBy
+            updatedReason
+        }
+        unlockInfo {
+            updatedAt
+            updatedBy
+            updatedReason
+        }
+        formData {
+            programIDs
+            populationCovered
+            submissionType
+            riskBasedContract
+            submissionDescription
+            stateContacts {
+                name
+                titleRole
+                email
+            }
+            supportingDocuments {
+                name
+                s3URL
+                sha256
+            }
+            contractType
+            contractExecutionStatus
+            contractDocuments {
+                name
+                s3URL
+                sha256
+            }
+            contractDateStart
+            contractDateEnd
+            managedCareEntities
+            federalAuthorities
+            inLieuServicesAndSettings
+            modifiedBenefitsProvided
+            modifiedGeoAreaServed
+            modifiedMedicaidBeneficiaries
+            modifiedRiskSharingStrategy
+            modifiedIncentiveArrangements
+            modifiedWitholdAgreements
+            modifiedStateDirectedPayments
+            modifiedPassThroughPayments
+            modifiedPaymentsForMentalDiseaseInstitutions
+            modifiedMedicalLossRatioStandards
+            modifiedOtherFinancialPaymentIncentive
+            modifiedEnrollmentProcess
+            modifiedGrevienceAndAppeal
+            modifiedNetworkAdequacyStandards
+            modifiedLengthOfContract
+            modifiedNonRiskPaymentArrangements
+        }
+    }
+}
+
+fragment contractFormDataFragmentForSubmitContract on ContractFormData {
+    programIDs
+
+    populationCovered
+    submissionType
+
+    riskBasedContract
+    submissionDescription
+
+    stateContacts {
+        name
+        titleRole
+        email
+    }
+
+    supportingDocuments {
+        name
+        s3URL
+        sha256
+    }
+
+    contractType
+    contractExecutionStatus
+    contractDocuments {
+        name
+        s3URL
+        sha256
+    }
+
+    contractDateStart
+    contractDateEnd
+    managedCareEntities
+    federalAuthorities
+    inLieuServicesAndSettings
+    modifiedBenefitsProvided
+    modifiedGeoAreaServed
+    modifiedMedicaidBeneficiaries
+    modifiedRiskSharingStrategy
+    modifiedIncentiveArrangements
+    modifiedWitholdAgreements
+    modifiedStateDirectedPayments
+    modifiedPassThroughPayments
+    modifiedPaymentsForMentalDiseaseInstitutions
+    modifiedMedicaidBeneficiaries
+    modifiedMedicalLossRatioStandards
+    modifiedOtherFinancialPaymentIncentive
+    modifiedEnrollmentProcess
+    modifiedGrevienceAndAppeal
+    modifiedNetworkAdequacyStandards
+    modifiedLengthOfContract
+    modifiedNonRiskPaymentArrangements
+}
+
+fragment contractRevisionFragmentForSubmitContract on ContractRevision {
+    id
+    createdAt
+    updatedAt
+    contractName
+
+    submitInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+
+    unlockInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+
+    formData {
+        ...contractFormDataFragmentForSubmitContract
+    }
+}
+
+fragment packageSubmissionsFragmentForSubmitContract on ContractPackageSubmission {
+    cause
+    submitInfo {
+        ...updateInformationFieldsForSubmitContract
+    }
+
+    submittedRevisions {
+        ...submittableRevisionsFieldsForSubmitContract
+    }
+
+    contractRevision {
+        ...contractRevisionFragmentForSubmitContract
+    }
+    rateRevisions {
+        ...rateRevisionFragmentForSubmitContract
+    }
+}
+
+fragment submittableRevisionsFieldsForSubmitContract on SubmittableRevision {
+    ... on ContractRevision {
+        ...contractRevisionFragmentForSubmitContract
+    }
+    ... on RateRevision {
+        ...rateRevisionFragmentForSubmitContract
+    }
+}
+
+fragment updateInformationFieldsForSubmitContract on UpdateInformation {
+    updatedAt
+    updatedBy
+    updatedReason
+}
