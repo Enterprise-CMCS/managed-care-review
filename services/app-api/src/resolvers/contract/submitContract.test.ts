@@ -1,3 +1,5 @@
+/* eslint-disable  @typescript-eslint/no-non-null-assertion */
+
 import UPDATE_DRAFT_CONTRACT_RATES from 'app-graphql/src/mutations/updateDraftContractRates.graphql'
 import {
     constructTestPostgresServer,
@@ -10,7 +12,7 @@ import SUBMIT_RATE from '../../../../app-graphql/src/mutations/submitRate.graphq
 import UNLOCK_RATE from '../../../../app-graphql/src/mutations/unlockRate.graphql'
 
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
-import type { Contract, Rate, SubmitContractInput } from '../../gen/gqlServer'
+import type { Rate, SubmitContractInput } from '../../gen/gqlServer'
 import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
@@ -176,7 +178,7 @@ describe('submitContract', () => {
             },
         })
 
-        console.log('1.')
+        console.info('1.')
         // 1. Submit A0 with Rate1 and Rate2
         const draftA0 =
             await createAndUpdateTestContractWithoutRates(stateServer)
@@ -190,7 +192,7 @@ describe('submitContract', () => {
         const rate10 = subA0.rateRevisions[0]
         const OneID = rate10.rate!.id
 
-        console.log('2.')
+        console.info('2.')
         // 2. Submit B0 with Rate1 and Rate3
         const draftB0 =
             await createAndUpdateTestContractWithoutRates(stateServer)
@@ -234,22 +236,27 @@ describe('submitContract', () => {
             throw new Error('should be set')
         }
 
-        rateUpdateInput.updatedRates[1].formData.rateDateCertified = '2000-01-22'
+        rateUpdateInput.updatedRates[1].formData.rateDateCertified =
+            '2000-01-22'
 
-        const updatedB = await updateTestDraftRatesOnContract(stateServer, rateUpdateInput)
-        expect(updatedB.draftRates![1].draftRevision?.formData.rateDateCertified).toBe('2000-01-22')
-
+        const updatedB = await updateTestDraftRatesOnContract(
+            stateServer,
+            rateUpdateInput
+        )
+        expect(
+            updatedB.draftRates![1].draftRevision?.formData.rateDateCertified
+        ).toBe('2000-01-22')
     })
 
     it('checks parent rates on update', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser()
-            }
+                user: testCMSUser(),
+            },
         })
 
-        console.log('1.')
+        console.info('1.')
         // 1. Submit A0 with Rate1 and Rate2
         const draftA0 =
             await createAndUpdateTestContractWithoutRates(stateServer)
@@ -263,11 +270,15 @@ describe('submitContract', () => {
         const rate10 = subA0.rateRevisions[0]
         const OneID = rate10.rate!.id
 
-        console.log('2.')
+        console.info('2.')
         // 2. Submit B0 with Rate1 and Rate3
         const draftB0 =
             await createAndUpdateTestContractWithoutRates(stateServer)
-        const draftB010 = await addLinkedRateToTestContract(stateServer, draftB0, OneID)    
+        const draftB010 = await addLinkedRateToTestContract(
+            stateServer,
+            draftB0,
+            OneID
+        )
         await addNewRateToTestContract(stateServer, draftB010)
 
         const contractB0 = await submitTestContract(stateServer, draftB0.id)
@@ -277,8 +288,12 @@ describe('submitContract', () => {
 
         // unlock A
         await unlockTestHealthPlanPackage(cmsServer, contractA0.id, 'unlock a')
-        // unlock B, rate 3 should unlock, rate 1 should not. 
-        await unlockTestHealthPlanPackage(cmsServer, contractB0.id, 'test unlock')
+        // unlock B, rate 3 should unlock, rate 1 should not.
+        await unlockTestHealthPlanPackage(
+            cmsServer,
+            contractB0.id,
+            'test unlock'
+        )
 
         const unlockedB = await fetchTestContract(stateServer, contractB0.id)
         if (!unlockedB.draftRates) {
@@ -303,9 +318,11 @@ describe('submitContract', () => {
 
         // attempt to update a link
         rateUpdateInput.updatedRates[0].type = 'UPDATE'
-        rateUpdateInput.updatedRates[0].formData = rateUpdateInput.updatedRates[1].formData
+        rateUpdateInput.updatedRates[0].formData =
+            rateUpdateInput.updatedRates[1].formData
 
-        rateUpdateInput.updatedRates[1].formData.rateDateCertified = '2000-01-22'
+        rateUpdateInput.updatedRates[1].formData.rateDateCertified =
+            '2000-01-22'
 
         const updateResult = await stateServer.executeOperation({
             query: UPDATE_DRAFT_CONTRACT_RATES,
@@ -319,8 +336,9 @@ describe('submitContract', () => {
             throw new Error('must be defined')
         }
 
-        expect(updateResult.errors[0].message).toMatch(/^Attempted to update a rate that is not a child of this contract/)
-
+        expect(updateResult.errors[0].message).toMatch(
+            /^Attempted to update a rate that is not a child of this contract/
+        )
     })
 
     it('returns an error if a CMS user attempts to call submitContract', async () => {
@@ -391,25 +409,20 @@ describe('submitContract', () => {
             S2draft
         )
 
-        const S2Submitted = await stateServer.executeOperation({
-            query: SUBMIT_CONTRACT,
-            variables: {
-                input: {
-                    contractID: S2draftWithRateB.id,
-                    submittedReason: 'Added rate B to the submission',
-                },
-            },
-        })
-        const S2data = S2Submitted.data?.submitContract.contract as Contract
+        const S2 = await submitTestContract(
+            stateServer,
+            S2draftWithRateB.id,
+            'Added rate B to the submission'
+        )
 
-        expect(S2Submitted.errors).toBeUndefined()
-        expect(S2data.status).toBe('RESUBMITTED')
-        expect(S2data.packageSubmissions).toHaveLength(2)
+        expect(S2.status).toBe('RESUBMITTED')
+        expect(S2.packageSubmissions).toHaveLength(2)
 
         // We now have contract 1.2 with A.1 and B.1
 
         // unlock rate A and update it
-        const rateA = S2data.packageSubmissions[0].rateRevisions[0].rate as Rate
+        const rateA = S2.packageSubmissions[0].rateRevisions[0].rate as Rate
+        console.info(`unlocking rate ${rateA.id}`)
         const unlockRateARes = await cmsServer.executeOperation({
             query: UNLOCK_RATE,
             variables: {
@@ -448,11 +461,11 @@ describe('submitContract', () => {
         // Unlock contract and update it
         await unlockTestHealthPlanPackage(
             cmsServer,
-            S2data.id,
+            S2.id,
             'Unlocking to update contract to give us rev 3'
         )
 
-        const unlockedS3 = await fetchTestContract(stateServer, S2data.id)
+        const unlockedS3 = await fetchTestContract(stateServer, S2.id)
 
         await updateTestHealthPlanPackage(stateServer, unlockedS3.id, {
             contractDocuments: [
@@ -470,6 +483,19 @@ describe('submitContract', () => {
             'Added the new document'
         )
         // TODO: Unlock RateB and unlink RateA
+        /*
+        const rateB = S4.packageSubmissions
+        console.info(JSON.stringify(rateB))
+        const unlockRateBRes = await cmsServer.executeOperation({
+            query: UNLOCK_RATE,
+            variables: {
+                input: {
+                    rateID: rateB.id,
+                    unlockedReason: 'Unlocking Rate A for update',
+                },
+            },
+        })
+        */
         // TODO: Update & Resubmit Rate B.2
     })
 })
