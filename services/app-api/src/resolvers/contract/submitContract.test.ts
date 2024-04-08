@@ -393,13 +393,10 @@ describe('submitContract', () => {
             S1.id,
             'You are missing a rate'
         )
-        const S1initSubmit = unlockS1Res.revisions[1].node
-
-        expect(unlockS1Res.status).toBe('UNLOCKED')
-        expect(unlockS1Res.revisions).toHaveLength(2)
-        // test the ordering
-        expect(S1initSubmit.submitInfo?.updatedReason).toBe(
-            'Initial submission'
+        const S1Unlocked = await fetchTestContract(stateServer, unlockS1Res.id)
+        expect(S1Unlocked.status).toBe('UNLOCKED')
+        expect(S1Unlocked.draftRevision?.unlockInfo?.updatedReason).toBe(
+            'You are missing a rate'
         )
 
         // add rateB and submit
@@ -417,6 +414,9 @@ describe('submitContract', () => {
 
         expect(S2.status).toBe('RESUBMITTED')
         expect(S2.packageSubmissions).toHaveLength(2)
+        expect(
+            S2.packageSubmissions[1].contractRevision.submitInfo?.updatedReason
+        ).toBe('Added rate B to the submission')
 
         // We now have contract 1.2 with A.1 and B.1
 
@@ -448,7 +448,7 @@ describe('submitContract', () => {
             rateDateEnd: new Date(Date.UTC(2025, 1, 31)),
             rateDateCertified: new Date(Date.UTC(2024, 1, 31)),
         })
-        const S3 = await stateServer.executeOperation({
+        const S3Res = await stateServer.executeOperation({
             query: SUBMIT_RATE,
             variables: {
                 input: {
@@ -456,7 +456,10 @@ describe('submitContract', () => {
                 },
             },
         })
-        expect(S3.errors).toBeUndefined()
+        expect(S3Res.errors).toBeUndefined()
+
+        const S3 = await fetchTestContract(stateServer, S2.id)
+        expect(S3.packageSubmissions).toHaveLength(2) // we have contract revision 2
 
         // Unlock contract and update it
         await unlockTestHealthPlanPackage(
@@ -465,7 +468,8 @@ describe('submitContract', () => {
             'Unlocking to update contract to give us rev 3'
         )
 
-        const unlockedS3 = await fetchTestContract(stateServer, S2.id)
+        const unlockedS3 = await fetchTestContract(stateServer, S3.id)
+        expect(unlockedS3.status).toBe('UNLOCKED')
 
         await updateTestHealthPlanPackage(stateServer, unlockedS3.id, {
             contractDocuments: [
