@@ -93,6 +93,18 @@ type Query {
     - NotFoundError: contract for contractID not found in database
     """
     fetchContract(input: FetchContractInput!): FetchContractPayload!
+
+       """
+    fetchContract returns a single contract, linked to revisions and related rates
+    given a contractID
+
+    It can be called by CMS or State users
+
+    Errors:
+    - ForbiddenError: A State user requests a contract that belongs to another state
+    - NotFoundError: contract for contractID not found in database
+    """
+    fetchSubmittedContract(input: FetchSubmittedContractInput!): FetchSubmittedContractPayload!
 }
 
 type Mutation {
@@ -1526,6 +1538,41 @@ type Contract {
     packageSubmissions: [ContractPackageSubmission!]!
 }
 
+"""
+SubmittedContact is a single contract submission, holding all the form data for a single contract
+and associated with zero or more Rates
+"""
+type SubmittedContract {
+    id: ID!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+
+    """
+    Where the contract is in the submission flow.
+    Options are DRAFT, SUBMITTED, RESUBMITTED and UNLOCKED
+    SUBMITTED and RESUBMITTED packages cannot be modified
+    """
+    status: HealthPlanPackageStatus!
+    "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
+    initiallySubmittedAt: Date
+    "stateCode is the state code (e.g. CA or TN) for the submitting state"
+    stateCode: String!
+    "state is fuller state data for the submitting state"
+    state: State!
+    """
+    stateNumber is a unique auto-incrementing number identifying this contract
+    This value is used to generate the contractName
+    """
+    stateNumber: Int!
+
+    """
+    packageSubmissions are a snapshot of the contract and its related rates through time
+    each packageSubmission was created by a submission of this contract and/or its related rates
+    a DRAFT Contract will have no packageSubmissions
+    """
+    packageSubmissions: [ContractPackageSubmission!]!
+}
+
 type RateEdge {
     node: Rate!
 }
@@ -1558,6 +1605,17 @@ type FetchContractPayload {
 }
 
 input FetchContractInput {
+    contractID: ID!
+}
+
+type FetchSubmittedContractPayload {
+    """
+    A rate that include contract and rate revisions
+    """
+    contract: Contract!
+}
+
+input FetchSubmittedContractInput {
     contractID: ID!
 }
 

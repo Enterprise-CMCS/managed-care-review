@@ -1,16 +1,32 @@
-mutation submitContract($input: SubmitContractInput!) {
-    submitContract(input: $input) {      
+query fetchSubmittedContract($input: FetchSubmittedContractInput!) {
+    fetchSubmittedContract(input: $input) {
         contract {
-            ...contractFieldsForSubmitContract
+            id
+            status
+            createdAt
+            updatedAt
+            initiallySubmittedAt
+            stateCode
+            state {
+                code
+                name
+                programs {
+                    id
+                    name
+                    fullName
+                }
+            }
 
+            stateNumber
+            
             packageSubmissions {
-                ...packageSubmissionsFragmentForSubmitContract
+                ...packageSubmissionsFragment
             }
         }
     }
 }
 
-fragment contractFieldsForSubmitContract on Contract {
+fragment contractFields on Contract {
     id
     status
     createdAt
@@ -26,10 +42,11 @@ fragment contractFieldsForSubmitContract on Contract {
             fullName
         }
     }
+
     stateNumber
 }
 
-fragment rateFieldsForSubmitContract on Rate {
+fragment rateFields on Rate {
     id
     createdAt
     updatedAt
@@ -48,7 +65,7 @@ fragment rateFieldsForSubmitContract on Rate {
     initiallySubmittedAt
 }
 
-fragment rateRevisionFragmentForSubmitContract on RateRevision {
+fragment rateRevisionFragmentForFetchContract on RateRevision {
     id
     createdAt
     updatedAt
@@ -172,7 +189,7 @@ fragment rateRevisionFragmentForSubmitContract on RateRevision {
     }
 }
 
-fragment contractFormDataFragmentForSubmitContract on ContractFormData {
+fragment contractFormDataFragment on ContractFormData {
     programIDs
 
     populationCovered
@@ -225,7 +242,7 @@ fragment contractFormDataFragmentForSubmitContract on ContractFormData {
     modifiedNonRiskPaymentArrangements
 }
 
-fragment contractRevisionFragmentForSubmitContract on ContractRevision {
+fragment contractRevisionFragment on ContractRevision {
     id
     createdAt
     updatedAt
@@ -244,38 +261,38 @@ fragment contractRevisionFragmentForSubmitContract on ContractRevision {
     }
 
     formData {
-        ...contractFormDataFragmentForSubmitContract
+        ...contractFormDataFragment
     }
 }
 
-fragment packageSubmissionsFragmentForSubmitContract on ContractPackageSubmission {
+fragment packageSubmissionsFragment on ContractPackageSubmission {
     cause
     submitInfo {
-        ...updateInformationFieldsForSubmitContract
+        ...updateInformationFields
     }
 
     submittedRevisions {
-        ...submittableRevisionsFieldsForSubmitContract
+        ...submittableRevisionsFields
     }
 
     contractRevision {
-        ...contractRevisionFragmentForSubmitContract
+        ...contractRevisionFragment
     }
     rateRevisions {
-        ...rateRevisionFragmentForSubmitContract
+        ...rateRevisionFragmentForFetchContract
     }
 }
 
-fragment submittableRevisionsFieldsForSubmitContract on SubmittableRevision {
+fragment submittableRevisionsFields on SubmittableRevision {
     ... on ContractRevision {
-        ...contractRevisionFragmentForSubmitContract
+        ...contractRevisionFragment
     }
     ... on RateRevision {
-        ...rateRevisionFragmentForSubmitContract
+        ...rateRevisionFragmentForFetchContract
     }
 }
 
-fragment updateInformationFieldsForSubmitContract on UpdateInformation {
+fragment updateInformationFields on UpdateInformation {
     updatedAt
     updatedBy
     updatedReason

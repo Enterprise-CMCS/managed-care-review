@@ -31,13 +31,13 @@ import { indexRatesResolver } from './rate/indexRates'
 import { rateResolver } from './rate/rateResolver'
 import { fetchRateResolver } from './rate/fetchRate'
 import { updateContract } from './contract/updateContract'
-import { submitContract } from './contract/submitContract'
 import { createAPIKeyResolver } from './APIKey'
 import { unlockRate } from './rate/unlockRate'
 import { submitRate } from './rate/submitRate'
 import { updateDraftContractRates } from './contract/updateDraftContractRates'
 import { contractResolver } from './contract/contractResolver'
 import { fetchContractResolver } from './contract/fetchContract'
+import { fetchSubmittedContractResolver } from './contract/fetchSubmittedContract'
 
 export function configureResolvers(
     store: Store,
@@ -64,6 +64,7 @@ export function configureResolvers(
             indexRates: indexRatesResolver(store),
             fetchRate: fetchRateResolver(store),
             fetchContract: fetchContractResolver(store),
+            fetchSubmittedContract: fetchSubmittedContractResolver(store),
         },
         Mutation: {
             createHealthPlanPackage: createHealthPlanPackageResolver(store),
@@ -98,7 +99,6 @@ export function configureResolvers(
             createAPIKey: createAPIKeyResolver(jwt),
             unlockRate: unlockRate(store),
             submitRate: submitRate(store, launchDarkly),
-            submitContract: submitContract(store, launchDarkly),
         },
         User: {
             // resolveType is required to differentiate Unions

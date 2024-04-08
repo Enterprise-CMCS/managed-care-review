@@ -19,7 +19,7 @@ import {
 } from '../../../components'
 import { usePage } from '../../../contexts/PageContext'
 import {
-    useFetchContractQuery,
+    useFetchSubmittedContractQuery,
     UpdateInformation,
 } from '../../../gen/gqlClient'
 import styles from '../SubmissionSummary.module.scss'
@@ -68,7 +68,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
         data: fetchContractData,
         // loading: fetchContractLoading,
         // error: fetchContractError,
-    } = useFetchContractQuery({
+    } = useFetchSubmittedContractQuery({
         variables: {
             input: {
                 contractID: id ?? 'unknown-contract',
@@ -122,7 +122,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
         ? 'Edit MC-CRS number'
         : 'Add MC-CRS record number'
 
-    const contract = fetchContractData?.fetchContract.contract
+    const contract = fetchContractData?.fetchSubmittedContract.contract
     return (
         <div className={styles.background}>
             <div>This is the V2 page of the SubmissionSummary</div>
@@ -229,7 +229,9 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                 {contract && isContractActionAndRateCertification && (
                     <RateDetailsSummarySectionV2
                         documentDateLookupTable={documentDates}
-                        contract={fetchContractData?.fetchContract.contract}
+                        contract={
+                            fetchContractData?.fetchSubmittedContract.contract
+                        }
                         submissionName={name}
                         isCMSUser={isCMSUser}
                         statePrograms={statePrograms}
