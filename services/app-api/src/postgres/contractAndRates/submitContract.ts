@@ -4,12 +4,9 @@ import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
 import type { UpdateInfoType } from '../../domain-models'
 import { includeDraftRates } from './prismaDraftContractHelpers'
-import type { ContractFormDataType } from '../../domain-models'
 
 export type SubmitContractArgsType = {
-    contractID?: string // revision ID
-    contractRevisionID?: string // this is a hack that should not outlive protobuf. rateID should be there and be required after we remove protos
-    formData?: ContractFormDataType
+    contractID: string // revision ID
     submittedByUserID: UpdateInfoType['updatedBy']
     submittedReason: UpdateInfoType['updatedReason']
 }
@@ -20,27 +17,17 @@ export async function submitContract(
     client: PrismaClient,
     args: SubmitContractArgsType
 ): Promise<ContractType | NotFoundError | Error> {
-    const { contractID, submittedByUserID, contractRevisionID, submittedReason } = args
+    const { contractID, submittedByUserID, submittedReason } = args
     const currentDateTime = new Date()
+
     try {
         return await client.$transaction(async (tx) => {
-            if (!contractID && !contractRevisionID) {
-                return new Error(
-                    'Either contractID or contractRevisionID must be supplied. both are blank'
-                )
-            }
             // find the current contract with related rates
-            const findWhere = contractRevisionID
-            ? {
-                id: contractRevisionID,
-                submitInfoID: null,
-            }
-            : {
-                contractID,
-                submitInfoID: null,
-            }
             const currentRev = await client.contractRevisionTable.findFirst({
-                where: findWhere,
+                where: {
+                    contractID: contractID,
+                    submitInfoID: null,
+                },
                 include: {
                     draftRates: {
                         include: includeDraftRates,
@@ -181,7 +168,7 @@ export async function submitContract(
                 })
             }
 
-            return await findContractWithHistory(tx, updated.contractID)
+            return await findContractWithHistory(tx, contractID)
         })
     } catch (err) {
         const error = new Error(`Error submitting contract ${err}`)
