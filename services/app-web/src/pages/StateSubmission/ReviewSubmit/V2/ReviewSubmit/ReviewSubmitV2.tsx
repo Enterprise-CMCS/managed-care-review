@@ -27,7 +27,6 @@ import { Loading } from '../../../../../components'
 import { PageBannerAlerts } from '../../../PageBannerAlerts'
 import { packageName } from '../../../../../common-code/healthPlanFormDataType'
 import { usePage } from '../../../../../contexts/PageContext'
-import { UnlockSubmitModalV2 } from './UnlockSubmitModalV2'
 
 type RouteParams = {
     id: string
@@ -35,11 +34,11 @@ type RouteParams = {
 export const ReviewSubmitV2 = (): React.ReactElement => {
     const navigate = useNavigate()
     const modalRef = useRef<ModalRef>(null)
+    const [isSubmitting] = useState<boolean>(false)
     // pull the programs off the user
     const statePrograms = useStatePrograms()
     const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
-    const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
     const { id } = useParams<keyof RouteParams>()
     if (!id) {
@@ -181,16 +180,14 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                     </ModalToggleButton>
                 </PageActionsContainer>
 
-                {/* if the session is expiring, close this modal so the countdown modal can appear */}
-                {contract && (
-                    <UnlockSubmitModalV2
-                        contract={contract}
-                        submissionName={submissionName}
-                        modalType={'SUBMIT'} // TODO handle unlock w resubmit
-                        modalRef={modalRef}
-                        setIsSubmitting={setIsSubmitting}
-                    />
-                )}
+                {/* // if the session is expiring, close this modal so the countdown modal can appear
+                <UnlockSubmitModal
+                    healthPlanPackage={draftSubmission}
+                    submissionName={submissionName}
+                    modalType={unlocked ? 'RESUBMIT' : 'SUBMIT'}
+                    modalRef={modalRef}
+                    setIsSubmitting={setIsSubmitting}
+                /> */}
             </GridContainer>
         </>
     )
