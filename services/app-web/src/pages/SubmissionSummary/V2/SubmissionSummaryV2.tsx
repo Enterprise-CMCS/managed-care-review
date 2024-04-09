@@ -17,6 +17,10 @@ import {
     SubmissionUpdatedBanner,
     DocumentWarningBanner,
 } from '../../../components'
+import {
+    ErrorOrLoadingPage,
+    handleAndReturnErrorState,
+} from '../../StateSubmission/ErrorOrLoadingPage'
 import { usePage } from '../../../contexts/PageContext'
 import {
     useFetchContractQuery,
@@ -66,8 +70,8 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
     // API requests
     const {
         data: fetchContractData,
-        // loading: fetchContractLoading,
-        // error: fetchContractError,
+        loading: fetchContractLoading,
+        error: fetchContractError,
     } = useFetchContractQuery({
         variables: {
             input: {
@@ -98,6 +102,19 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
     )
     if (pkgName !== name) {
         setPkgName(name)
+    }
+
+    // Display any full page interim state resulting from the initial fetch API requests
+    if (fetchContractLoading) {
+        return <ErrorOrLoadingPage state="LOADING" />
+    }
+
+    if (fetchContractError) {
+        return (
+            <ErrorOrLoadingPage
+                state={handleAndReturnErrorState(fetchContractError)}
+            />
+        )
     }
 
     // Get the correct update info depending on the submission status
@@ -229,7 +246,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                 {contract && isContractActionAndRateCertification && (
                     <RateDetailsSummarySectionV2
                         documentDateLookupTable={documentDates}
-                        contract={fetchContractData?.fetchContract.contract}
+                        contract={contract}
                         submissionName={name}
                         isCMSUser={isCMSUser}
                         statePrograms={statePrograms}
