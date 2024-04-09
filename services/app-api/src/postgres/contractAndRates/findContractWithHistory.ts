@@ -13,7 +13,7 @@ async function findContractWithHistory(
     contractID: string
 ): Promise<ContractType | NotFoundError | Error> {
     try {
-        const contract = await client.contractTable.findFirst({
+        const contract = await client.contractTable.findUnique({
             where: {
                 id: contractID,
             },

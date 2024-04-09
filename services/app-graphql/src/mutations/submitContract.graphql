@@ -1,5 +1,5 @@
-query fetchContract($input: FetchContractInput!) {
-    fetchContract(input: $input) {
+mutation submitContract($input: SubmitContractInput!) {
+    submitContract(input: $input) {
         contract {
             ...contractFields
 
@@ -25,6 +25,7 @@ query fetchContract($input: FetchContractInput!) {
         }
     }
 }
+
 
 fragment contractFields on Contract {
     id

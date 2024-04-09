@@ -40,3 +40,8 @@ export type {
     RateRevisionWithContractsType,
     ContractRevisionWithRatesType,
 } from './revisionTypes'
+
+export type {
+    ContractPackageSubmissionType,
+    ContractPackageSubmissionWithCauseType,
+} from './packageSubmissions'

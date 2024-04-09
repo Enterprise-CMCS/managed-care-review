@@ -34,6 +34,29 @@ describe('fetchContract', () => {
         expect(draftRate[0].stateCode).toBe('FL')
     })
 
+    it('gets the right contract name', async () => {
+        const stateServer = await constructTestPostgresServer()
+
+        const stateSubmission =
+            await createAndUpdateTestHealthPlanPackage(stateServer)
+
+        const fetchDraftContractResult = await stateServer.executeOperation({
+            query: FETCH_CONTRACT,
+            variables: {
+                input: {
+                    contractID: stateSubmission.id,
+                },
+            },
+        })
+
+        expect(fetchDraftContractResult.errors).toBeUndefined()
+
+        const draftContract =
+            fetchDraftContractResult.data?.fetchContract.contract.draftRevision
+
+        expect(draftContract.contractName).toMatch(/MCR-FL-\d{4}-MMA/)
+    })
+
     it('errors if the wrong state user calls it', async () => {
         const stateServerFL = await constructTestPostgresServer()
 

@@ -3,6 +3,7 @@ import { contractRevisionWithRatesSchema } from './revisionTypes'
 import { statusSchema } from './statusType'
 import { pruneDuplicateEmails } from '../../emailer/formatters'
 import { rateSchema } from './rateTypes'
+import { contractPackageSubmissionSchema } from './packageSubmissions'
 
 // Contract represents the contract specific information in a submission package
 // All that data is contained in revisions, each revision represents the data in a single submission
@@ -20,6 +21,8 @@ const contractSchema = z.object({
     draftRates: z.array(rateSchema).optional(),
     // All revisions are submitted and in reverse chronological order
     revisions: z.array(contractRevisionWithRatesSchema),
+
+    packageSubmissions: z.array(contractPackageSubmissionSchema),
 })
 
 const draftContractSchema = contractSchema.extend({

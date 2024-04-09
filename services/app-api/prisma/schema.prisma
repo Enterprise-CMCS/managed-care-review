@@ -45,6 +45,8 @@ model ContractTable {
 
   questions Question[]
 
+  draftRates DraftRateJoinTable[]
+
   revisions          ContractRevisionTable[]
   // This relationship is a scam. We never call it in our code but Prisma
   // requires that there be an inverse to RateRevision.draftContracts which we do use
@@ -62,10 +64,23 @@ model RateTable {
   state       State  @relation(fields: [stateCode], references: [stateCode])
   stateNumber Int
 
+  draftContracts DraftRateJoinTable[]
+
   revisions              RateRevisionTable[]
   // This relationship is a scam. We never call it in our code but Prisma
   // requires that there be an inverse to ContractRevision.draftRates which we do use
   draftContractRevisions ContractRevisionTable[]
+}
+
+// DraftRateJoinTable links a draft contract to a set of rates, draft or submitted. 
+model DraftRateJoinTable {
+  contractID String
+  contract ContractTable @relation(fields: [contractID], references: [id])
+  rateID String
+  rate RateTable @relation(fields: [rateID], references: [id], onDelete: Cascade)
+  ratePosition Int
+
+  @@id([contractID, rateID])
 }
 
 model ContractRevisionTable {
@@ -80,6 +95,9 @@ model ContractRevisionTable {
   unlockInfo   UpdateInfoTable? @relation("unlockContractInfo", fields: [unlockInfoID], references: [id])
   submitInfoID String?
   submitInfo   UpdateInfoTable? @relation("submitContractInfo", fields: [submitInfoID], references: [id])
+
+  relatedSubmisions UpdateInfoTable[]
+  submissionPackages SubmissionPackageJoinTable[] @relation("contractRevision")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -133,6 +151,9 @@ model RateRevisionTable {
   submitInfoID String?
   submitInfo   UpdateInfoTable? @relation("submitRateInfo", fields: [submitInfoID], references: [id], onDelete: Cascade)
 
+  relatedSubmissions UpdateInfoTable[]
+  submissionPackages SubmissionPackageJoinTable[] @relation("rateRevision")
+
   rateType                        RateType?
   rateCapitationType              RateCapitationType?
   rateDocuments                   RateDocument[]
@@ -169,10 +190,33 @@ model UpdateInfoTable {
   updatedByID        String
   updatedBy          User                    @relation(fields: [updatedByID], references: [id])
   updatedReason      String
-  unlockedContracts  ContractRevisionTable[] @relation("unlockContractInfo")
+  
+  // the actually submitted contract/rates for this submission
   submittedContracts ContractRevisionTable[] @relation("submitContractInfo")
-  unlockedRates      RateRevisionTable[]     @relation("unlockRateInfo")
   submittedRates     RateRevisionTable[]     @relation("submitRateInfo")
+
+  // These relations are inverse 1:1 relations that are not really used. 
+  unlockedContracts  ContractRevisionTable[] @relation("unlockContractInfo")
+  unlockedRates      RateRevisionTable[]     @relation("unlockRateInfo")
+  submissionPackages SubmissionPackageJoinTable[] @relation("submission")
+
+  // these get ALL related contracts + revisions for given update. 
+  relatedContracts ContractRevisionTable[]
+  relatedRates RateRevisionTable[]
+}
+
+// SubmissionPackageJoinTable records the set of related rate and contracts for a given submission.
+model SubmissionPackageJoinTable {
+  submissionID String
+  submission UpdateInfoTable @relation("submission", fields: [submissionID], references: [id])
+  contractRevisionID String
+  contractRevision ContractRevisionTable @relation("contractRevision", fields: [contractRevisionID], references: [id])
+  rateRevisionID String
+  rateRevision RateRevisionTable @relation("rateRevision", fields: [rateRevisionID], references: [id])
+  // this number indicates the position of the rate in this contract
+  ratePosition Int
+
+  @@id([submissionID, contractRevisionID, rateRevisionID])
 }
 
 model ActuaryContact {

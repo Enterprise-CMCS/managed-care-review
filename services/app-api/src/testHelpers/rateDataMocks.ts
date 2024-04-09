@@ -34,6 +34,7 @@ const mockDraftRate = (
     updatedAt: new Date(),
     stateCode: 'MN',
     stateNumber: 111,
+    draftContracts: [],
     revisions: rate?.revisions ?? [
         mockRateRevision(
             rate,
@@ -66,6 +67,7 @@ const mockRateRevision = (
             updatedAt: new Date(),
             updatedByID: 'someone',
             updatedReason: 'submit',
+            submittedContracts: [],
             updatedBy: {
                 id: 'someone',
                 createdAt: new Date(),

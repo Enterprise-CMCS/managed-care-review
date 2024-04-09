@@ -61,6 +61,7 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                 id
                 createdAt
                 updatedAt
+                parentContractID
                 status
 
                 draftRevision {
@@ -78,6 +79,7 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                         rateCapitationType
                         rateDateStart
                         rateDateEnd
+                        rateCertificationName
                         rateDateCertified
                         amendmentEffectiveDateStart
                         amendmentEffectiveDateEnd
@@ -88,11 +90,15 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                             name
                             email
                             titleRole
+                            actuarialFirm
+                            actuarialFirmOther
                         }
                         addtlActuaryContacts {
                             name
                             email
                             titleRole
+                            actuarialFirm
+                            actuarialFirmOther
                         }
                         rateDocuments {
                             name
@@ -103,6 +109,11 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                             name
                             s3URL
                             sha256
+                        }
+                        packagesWithSharedRateCerts {
+                            packageName
+                            packageId
+                            packageStatus
                         }
                     }
                 }
@@ -132,11 +143,13 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                             name
                             email
                             titleRole
+                            actuarialFirm
                         }
                         addtlActuaryContacts {
                             name
                             email
                             titleRole
+                            actuarialFirm
                         }
                         rateDocuments {
                             name
