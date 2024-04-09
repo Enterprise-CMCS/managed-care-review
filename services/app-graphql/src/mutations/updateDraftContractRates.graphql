@@ -1,6 +1,6 @@
 mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
     updateDraftContractRates(input: $input) {
-        
+
         contract {
             id
             createdAt
@@ -40,11 +40,13 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                         name
                         s3URL
                         sha256
+                        dateAdded
                     }
                     supportingDocuments {
                         name
                         s3URL
                         sha256
+                        dateAdded
                     }
                     contractExecutionStatus
                     contractDateStart
@@ -98,11 +100,13 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                             name
                             s3URL
                             sha256
+                            dateAdded
                         }
                         supportingDocuments {
                             name
                             s3URL
                             sha256
+                            dateAdded
                         }
                     }
                 }
@@ -142,11 +146,13 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                             name
                             s3URL
                             sha256
+                            dateAdded
                         }
                         supportingDocuments {
                             name
                             s3URL
                             sha256
+                            dateAdded
                         }
                     }
                 }

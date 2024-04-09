@@ -45,9 +45,9 @@ import {
 import type { Span } from '@opentelemetry/api'
 import type {
     PackageStatusType,
+    RateFormEditableType,
     RateType,
 } from '../../domain-models/contractAndRates'
-import type { RateFormEditable } from '../../postgres/contractAndRates/updateDraftRate'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = (typeof SubmissionErrorCodes)[number] // iterable union type
@@ -316,7 +316,7 @@ export function submitHealthPlanPackageResolver(
 
         // Since submit can change the form data, we have to save it again.
         // if the rates were removed, we remove them.
-        let removeRateInfos: RateFormEditable[] | undefined = undefined
+        let removeRateInfos: RateFormEditableType[] | undefined = undefined
         if (maybeLocked.rateInfos.length === 0) {
             // undefined means ignore rates in updaterDraftContractWithRates, empty array means empty them.
             removeRateInfos = []

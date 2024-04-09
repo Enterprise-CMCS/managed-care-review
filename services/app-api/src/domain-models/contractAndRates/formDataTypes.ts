@@ -17,6 +17,7 @@ const documentSchema = z.object({
     name: z.string(),
     s3URL: z.string(),
     sha256: z.string(),
+    dateAdded: z.date().optional(), //  date added to the first submission to CMS
 })
 
 const managedCareEntitiesSchema = z.union([
@@ -90,10 +91,19 @@ const rateFormDataSchema = z.object({
         .optional(),
 })
 
+type DocumentType = z.infer<typeof documentSchema>
 type ContractFormDataType = z.infer<typeof contractFormDataSchema>
 type RateFormDataType = z.infer<typeof rateFormDataSchema>
-type DocumentType = z.infer<typeof documentSchema>
+
+type ContractFormEditableType = Partial<ContractFormDataType>
+type RateFormEditableType = Partial<RateFormDataType>
 
 export { contractFormDataSchema, rateFormDataSchema }
 
-export type { ContractFormDataType, RateFormDataType, DocumentType }
+export type {
+    ContractFormDataType,
+    RateFormDataType,
+    DocumentType,
+    RateFormEditableType,
+    ContractFormEditableType,
+}

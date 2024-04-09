@@ -24,6 +24,7 @@ import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocume
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../DocumentWarning'
 import { SectionCard } from '../../SectionCard'
+import { convertFromSubmissionDocumentsToGenericDocuments } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 // Used for refreshed packages names keyed by their package id
 // package name includes (Draft) for draft packages.
 type PackageNameType = string
@@ -351,34 +352,48 @@ export const RateDetailsSummarySection = ({
                             </dl>
                             {!loading ? (
                                 <UploadedDocumentsTable
-                                    documents={rateInfo.rateDocuments}
+                                    documents={convertFromSubmissionDocumentsToGenericDocuments(
+                                        rateInfo.rateDocuments,
+                                        documentDateLookupTable
+                                    )}
                                     packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
                                         rateInfo
                                     )}
-                                    documentDateLookupTable={
-                                        documentDateLookupTable
+                                    previousSubmissionDate={
+                                        documentDateLookupTable.previousSubmissionDate
+                                            ? new Date(
+                                                  documentDateLookupTable.previousSubmissionDate
+                                              )
+                                            : undefined
                                     }
                                     multipleDocumentsAllowed={false}
                                     caption="Rate certification"
                                     documentCategory="Rate certification"
                                     isEditing={isEditing}
-                                    isSubmitted={isSubmitted}
                                 />
                             ) : (
                                 <span className="srOnly">'LOADING...'</span>
                             )}
                             {!loading ? (
                                 <UploadedDocumentsTable
-                                    documents={rateInfo.supportingDocuments}
+                                    documents={convertFromSubmissionDocumentsToGenericDocuments(
+                                        rateInfo.supportingDocuments,
+                                        documentDateLookupTable
+                                    )}
                                     packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
                                         rateInfo
                                     )}
-                                    documentDateLookupTable={
-                                        documentDateLookupTable
+                                    previousSubmissionDate={
+                                        documentDateLookupTable.previousSubmissionDate
+                                            ? new Date(
+                                                  documentDateLookupTable.previousSubmissionDate
+                                              )
+                                            : undefined
                                     }
                                     caption="Rate supporting documents"
                                     isSupportingDocuments
                                     documentCategory="Rate-supporting"
+                                    isEditing={isEditing}
                                 />
                             ) : (
                                 <span className="srOnly">'LOADING...'</span>

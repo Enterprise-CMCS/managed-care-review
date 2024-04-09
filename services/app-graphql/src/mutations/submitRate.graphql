@@ -38,11 +38,13 @@ mutation submitRate($input: SubmitRateInput!) {
                         name
                         s3URL
                         sha256
+                        dateAdded
                     },
                     supportingDocuments {
                         name
                         s3URL
                         sha256
+                        dateAdded
                     },
                     rateDateStart,
                     rateDateEnd,
@@ -108,6 +110,7 @@ mutation submitRate($input: SubmitRateInput!) {
                             name
                             s3URL
                             sha256
+                            dateAdded
                         }
                         contractType
                         contractExecutionStatus
@@ -115,6 +118,7 @@ mutation submitRate($input: SubmitRateInput!) {
                             name
                             s3URL
                             sha256
+                            dateAdded
                         }
                         contractDateStart
                         contractDateEnd

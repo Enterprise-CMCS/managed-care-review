@@ -13,6 +13,10 @@ import {
 } from '../../../../../components/DataDetail'
 import { SectionCard } from '../../../../../components/SectionCard'
 import { Contract, RateRevision } from '../../../../../gen/gqlClient'
+import {
+    getDraftRates,
+    getLastContractSubmission,
+} from '../../../../../gqlHelpers/contractsAndRates'
 
 export type ContactsSummarySectionProps = {
     contract: Contract
@@ -45,11 +49,14 @@ export const ContactsSummarySection = ({
         contract.packageSubmissions[0].contractRevision.formData
 
     let rateRev: RateRevision | undefined = undefined
+
     if (contractFormData.submissionType === 'CONTRACT_AND_RATES') {
+        // Find first rate associated with the contract to deal with rates info on contacts page
+        // TODO move the fields using this data to rate details
+        const draftRates = getDraftRates(contract)
         rateRev =
-            (contract.draftRates
-                ? contract.draftRates[0].draftRevision
-                : contract.packageSubmissions[0].rateRevisions[0]) || undefined
+            (draftRates && draftRates[0]?.draftRevision) ||
+            getLastContractSubmission(contract)?.rateRevisions[0]
     }
     return (
         <SectionCard id="stateContacts" className={styles.summarySection}>

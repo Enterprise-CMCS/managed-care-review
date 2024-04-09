@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { submitRate } from './submitRate'
 import { NotFoundError } from '../postgresErrors'
 import {
+    clearDocMetadata,
     mockInsertContractArgs,
     mockInsertRateArgs,
     must,
@@ -11,11 +12,11 @@ import { insertDraftRate } from './insertRate'
 import { submitContract } from './submitContract'
 import { insertDraftContract } from './insertContract'
 import { updateDraftContractWithRates } from './updateDraftContractWithRates'
-import type { RateFormEditable } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findContractWithHistory } from './findContractWithHistory'
 import { findStatePrograms } from '../state'
 import { unlockContract } from './unlockContract'
+import type { RateFormEditableType } from '../../domain-models/contractAndRates'
 
 describe('submitRate', () => {
     it('creates a standalone rate submission from a draft', async () => {
@@ -215,7 +216,7 @@ describe('submitRate', () => {
 
         const statePrograms = must(findStatePrograms(draftRate.stateCode))
 
-        const updateRateData: RateFormEditable = {
+        const updateRateData: RateFormEditableType = {
             ...draftRate.draftRevision.formData,
             rateType: 'NEW',
             rateID,
@@ -260,9 +261,15 @@ describe('submitRate', () => {
             })
         )
 
-        expect(submittedRate.revisions[0].formData).toEqual(
-            expect.objectContaining(updateRateData)
-        )
+        expect({
+            ...submittedRate.revisions[0].formData,
+            rateDocuments: clearDocMetadata(
+                submittedRate.revisions[0].formData.rateDocuments
+            ),
+            supportingDocuments: clearDocMetadata(
+                submittedRate.revisions[0].formData.supportingDocuments
+            ),
+        }).toEqual(expect.objectContaining(updateRateData))
     })
     it('submits rate independent of contract status', async () => {
         const client = await sharedTestPrismaClient()
