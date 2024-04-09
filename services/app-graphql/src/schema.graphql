@@ -93,19 +93,6 @@ type Query {
     - NotFoundError: contract for contractID not found in database
     """
     fetchContract(input: FetchContractInput!): FetchContractPayload!
-
-    """
-    fetchSubmittedContract returns a single contract, linked to revisions and related rates
-    without any of the draftRevision or draftRates fields
-    given a contractID
-
-    It can be called by CMS or State users
-
-    Errors:
-    - ForbiddenError: A State user requests a contract that belongs to another state
-    - NotFoundError: contract for contractID not found in database
-    """
-    fetchSubmittedContract(input: FetchSubmittedContractInput!): FetchSubmittedContractPayload!
 }
 
 type Mutation {
@@ -1463,17 +1450,6 @@ type FetchContractPayload {
 }
 
 input FetchContractInput {
-    contractID: ID!
-}
-
-type FetchSubmittedContractPayload {
-    """
-    A rate that include contract and rate revisions
-    """
-    contract: Contract!
-}
-
-input FetchSubmittedContractInput {
     contractID: ID!
 }
 

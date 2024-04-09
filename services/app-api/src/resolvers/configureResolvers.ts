@@ -37,7 +37,6 @@ import { submitRate } from './rate/submitRate'
 import { updateDraftContractRates } from './contract/updateDraftContractRates'
 import { contractResolver } from './contract/contractResolver'
 import { fetchContractResolver } from './contract/fetchContract'
-import { fetchSubmittedContractResolver } from './contract/fetchSubmittedContract'
 
 export function configureResolvers(
     store: Store,
@@ -64,7 +63,6 @@ export function configureResolvers(
             indexRates: indexRatesResolver(store),
             fetchRate: fetchRateResolver(store),
             fetchContract: fetchContractResolver(store),
-            fetchSubmittedContract: fetchSubmittedContractResolver(store),
         },
         Mutation: {
             createHealthPlanPackage: createHealthPlanPackageResolver(store),
