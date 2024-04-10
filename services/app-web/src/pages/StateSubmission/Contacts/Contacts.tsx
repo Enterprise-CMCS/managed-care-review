@@ -1,17 +1,11 @@
 import React, { useEffect } from 'react'
 import * as Yup from 'yup'
-import {
-    Form as UswdsForm,
-    FormGroup,
-    Fieldset,
-    Button,
-} from '@trussworks/react-uswds'
+import { Form as UswdsForm, Fieldset, Button } from '@trussworks/react-uswds'
 import {
     Formik,
     FormikErrors,
     FormikHelpers,
     FieldArray,
-    ErrorMessage,
     getIn,
     FieldArrayRenderProps,
 } from 'formik'
@@ -25,11 +19,7 @@ import {
     StateContact,
 } from '../../../common-code/healthPlanFormDataType'
 
-import {
-    ErrorSummary,
-    FieldRadio,
-    FieldTextInput,
-} from '../../../components/Form'
+import { ErrorSummary, FieldTextInput } from '../../../components/Form'
 
 import { useFocus } from '../../../hooks/useFocus'
 import { PageActions } from '../PageActions'
@@ -592,67 +582,6 @@ const Contacts = ({
                                                         </div>
                                                     )}
                                                 </FieldArray>
-                                            </fieldset>
-                                        </SectionCard>
-
-                                        <SectionCard>
-                                            <fieldset className="usa-fieldset with-sections">
-                                                <h3>
-                                                    Actuaries' communication
-                                                    preference
-                                                </h3>
-
-                                                <legend className="srOnly">
-                                                    Actuarial communication
-                                                    preference
-                                                </legend>
-                                                <FormGroup
-                                                    error={showFieldErrors(
-                                                        errors.actuaryCommunicationPreference
-                                                    )}
-                                                >
-                                                    <Fieldset
-                                                        className={
-                                                            styles.radioGroup
-                                                        }
-                                                        legend="Communication preference between CMS Office of the Actuary (OACT) and all state’s actuaries (i.e. certifying actuaries and additional actuary contacts)"
-                                                    >
-                                                        <span
-                                                            className={
-                                                                styles.requiredOptionalText
-                                                            }
-                                                        >
-                                                            Required
-                                                        </span>
-                                                        {showFieldErrors(
-                                                            `True`
-                                                        ) && (
-                                                            <ErrorMessage
-                                                                name={`actuaryCommunicationPreference`}
-                                                                component="div"
-                                                                className="usa-error-message"
-                                                            />
-                                                        )}
-                                                        <FieldRadio
-                                                            id="OACTtoActuary"
-                                                            name="actuaryCommunicationPreference"
-                                                            label={`OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`}
-                                                            value={
-                                                                'OACT_TO_ACTUARY'
-                                                            }
-                                                            aria-required
-                                                        />
-                                                        <FieldRadio
-                                                            id="OACTtoState"
-                                                            name="actuaryCommunicationPreference"
-                                                            label={`OACT can communicate directly with the state, and the state will relay all written communication to their actuaries and set up time for any potential verbal discussions.`}
-                                                            value={
-                                                                'OACT_TO_STATE'
-                                                            }
-                                                            aria-required
-                                                        />
-                                                    </Fieldset>
-                                                </FormGroup>
                                             </fieldset>
                                         </SectionCard>
                                     </>
