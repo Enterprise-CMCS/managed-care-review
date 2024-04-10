@@ -9,67 +9,30 @@ import {
 import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
+    updateDraftContractRatesMockSuccess,
+    mockValidStateUser,
 } from '../../../../testHelpers/apolloMocks'
 import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '../../../../constants'
 import userEvent from '@testing-library/user-event'
 import { rateRevisionDataMock } from '../../../../testHelpers/apolloMocks/rateDataMock'
-import { fetchDraftRateMockSuccess } from '../../../../testHelpers/apolloMocks/rateGQLMocks'
+import {
+    fetchDraftRateMockSuccess,
+    indexRatesMockSuccess,
+} from '../../../../testHelpers/apolloMocks/rateGQLMocks'
 import {
     clickAddNewRate,
     fillOutFirstRate,
     rateCertifications,
+    clickRemoveIndexRate,
+    fillOutIndexRate,
 } from '../../../../testHelpers/jestRateHelpers'
+import { Formik } from 'formik'
+import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
 
-describe('handles edit  of a multi rate', () => {
-    // TODO move into the existing multi rate test suite
-    // when no longer being skipped
-    it('renders without errors', async () => {
-        const rateID = 'test-abc-123'
-        renderWithProviders(
-            <Routes>
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
-                    element={<RateDetailsV2 type="MULTI" />}
-                />
-            </Routes>,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        fetchDraftRateMockSuccess({ id: rateID }),
-                        fetchContractMockSuccess({
-                            contract: {
-                                id: 'test-abc-123',
-                            },
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: `/submissions/test-abc-123/edit/rate-details`,
-                },
-                featureFlags: {
-                    'link-rates': true,
-                    'rate-edit-unlock': false,
-                },
-            }
-        )
-
-        await screen.findByText('Rate Details')
-        expect(
-            screen.getByText(
-                'Was this rate certification included with another submission?'
-            )
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByText('Upload one rate certification document')
-        ).not.toBeInTheDocument()
-    })
-})
-
-//eslint-disable-next-line
-describe.skip('RateDetailsv2', () => {
-    describe('handles edit  of a single rate', () => {
+describe('RateDetailsv2', () => {
+    /* eslint-disable jest/no-disabled-tests, jest/expect-expect */
+    describe.skip('handles edit  of a single rate', () => {
         it('renders without errors', async () => {
             const rateID = 'test-abc-123'
             renderWithProviders(
@@ -174,16 +137,19 @@ describe.skip('RateDetailsv2', () => {
                                                     s3URL: 's3://bucketname/one-one/one-one.png',
                                                     name: 'one one',
                                                     sha256: 'fakeSha1',
+                                                    dateAdded: new Date(),
                                                 },
                                                 {
                                                     s3URL: 's3://bucketname/one-two/one-two.png',
                                                     name: 'one two',
                                                     sha256: 'fakeSha2',
+                                                    dateAdded: new Date(),
                                                 },
                                                 {
                                                     s3URL: 's3://bucketname/one-three/one-three.png',
                                                     name: 'one three',
                                                     sha256: 'fakeSha3',
+                                                    dateAdded: new Date(),
                                                 },
                                             ],
                                         },
@@ -241,10 +207,8 @@ describe.skip('RateDetailsv2', () => {
     })
 
     describe('handles editing multiple rates', () => {
-        it.todo('handles multiple rates')
-        //eslint-disable-next-line
-        it.skip('add rate button will increase number of rate certification fields on the', async () => {
-            const rateID = '123-dfg'
+        it('renders linked rates without errors', async () => {
+            const rateID = 'test-abc-123'
             renderWithProviders(
                 <Routes>
                     <Route
@@ -256,18 +220,73 @@ describe.skip('RateDetailsv2', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            // fetchContractMockSuccess({ id: rateID }),
+                            fetchDraftRateMockSuccess({ id: rateID }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/${rateID}/edit`,
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
                     },
                 }
             )
 
+            await screen.findByText('Rate Details')
+            expect(
+                screen.getByText(
+                    'Was this rate certification included with another submission?'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText('Upload one rate certification document')
+            ).not.toBeInTheDocument()
+        })
+
+        it('add rate button will increase number of rate certification fields on the', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchDraftRateMockSuccess(),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                            updateDraftContractRatesMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+
+            await screen.findByText('Rate Details')
             const rateCertsOnLoad = rateCertifications(screen)
             expect(rateCertsOnLoad).toHaveLength(1)
-
             await fillOutFirstRate(screen)
 
             await clickAddNewRate(screen)
@@ -277,9 +296,8 @@ describe.skip('RateDetailsv2', () => {
                 expect(rateCertsAfterAddAnother).toHaveLength(2)
             })
         })
-        //eslint-disable-next-line
-        it.skip('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
-            const rateID = '123-dfg'
+
+        it('display rest of the form when linked rates question is answered', async () => {
             renderWithProviders(
                 <Routes>
                     <Route
@@ -291,39 +309,575 @@ describe.skip('RateDetailsv2', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            // fetchContractMockSuccess({ id: rateID }),
+                            fetchDraftRateMockSuccess(),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                            updateDraftContractRatesMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/${rateID}/edit`,
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
                     },
                 }
             )
-            await screen.findByText('Rate certification')
+            await screen.findByText('Rate Details')
+
+            await userEvent.click(
+                screen.getByLabelText(
+                    'No, this rate certification was not included with any other submissions'
+                )
+            )
             const input = screen.getByLabelText(
                 'Upload one rate certification document'
             )
+            await expect(input).toBeInTheDocument()
             const submitButton = screen.getByRole('button', {
-                name: 'Submit',
+                name: 'Continue',
             })
 
-            await userEvent.upload(input, TEST_DOC_FILE)
-            await userEvent.upload(input, [])
-            await userEvent.upload(input, TEST_DOC_FILE)
-            expect(submitButton).not.toHaveAttribute('aria-disabled')
-
-            submitButton.click()
-
-            await screen.findAllByText(
-                'You must remove all documents with error messages before continuing'
-            )
-            expect(submitButton).toHaveAttribute('aria-disabled', 'true')
+            // trigger validations
+            await submitButton.click()
+            await waitFor(() => {
+                expect(
+                    screen.getByText('Rate certification 1')
+                ).toBeInTheDocument()
+                expect(submitButton).toHaveAttribute('aria-disabled', 'true')
+                expect(
+                    screen.getByText('There are 8 errors on this page')
+                ).toBeInTheDocument()
+            })
         })
 
-        it.todo(
-            'renders remove rate certification button, which removes set of rate certification fields from the form'
-        )
-        it.todo('accepts documents on second rate')
-        it.todo('cannot continue with partially filled out second rate')
+        it('renders remove rate certification button, which removes set of rate certification fields from the form', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchDraftRateMockSuccess(),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                            updateDraftContractRatesMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+
+            await screen.findByText('Rate Details')
+            const rateCertsOnLoad = rateCertifications(screen)
+            expect(rateCertsOnLoad).toHaveLength(1)
+            await fillOutFirstRate(screen)
+
+            await clickAddNewRate(screen)
+            await fillOutIndexRate(screen, 1)
+            await clickRemoveIndexRate(screen, 1)
+
+            await waitFor(() => {
+                const rateCertsAfterAddAnother = rateCertifications(screen)
+                expect(rateCertsAfterAddAnother).toHaveLength(1)
+            })
+        })
+
+        it('accepts documents on second rate', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchDraftRateMockSuccess(),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                            updateDraftContractRatesMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+
+            await screen.findByText('Rate Details')
+            const rateCertsOnLoad = rateCertifications(screen)
+            expect(rateCertsOnLoad).toHaveLength(1)
+            await fillOutIndexRate(screen, 0)
+
+            await clickAddNewRate(screen)
+            await fillOutIndexRate(screen, 1)
+
+            await waitFor(() => {
+                expect(screen.getAllByText(/1 complete/)).toHaveLength(2)
+            })
+        })
+        it('cannot continue with partially filled out second rate', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchDraftRateMockSuccess(),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                            updateDraftContractRatesMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+
+            await screen.findByText('Rate Details')
+            const rateCertsOnLoad = rateCertifications(screen)
+            expect(rateCertsOnLoad).toHaveLength(1)
+            await fillOutIndexRate(screen, 0)
+
+            await clickAddNewRate(screen)
+            const submitButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+
+            // trigger validations
+            await submitButton.click()
+            await waitFor(() => {
+                expect(
+                    screen.getByText('Rate certification 1')
+                ).toBeInTheDocument()
+                expect(submitButton).toHaveAttribute('aria-disabled', 'true')
+                expect(
+                    screen.getByText('There is 1 error on this page')
+                ).toBeInTheDocument()
+                expect(
+                    screen.getByText('You must select yes or no')
+                ).toBeInTheDocument()
+            })
+        })
+    })
+
+    describe('can link existing rate', () => {
+        it('renders without errors', async () => {
+            renderWithProviders(
+                <Formik
+                    initialValues={{ ratePreviouslySubmitted: '' }}
+                    onSubmit={(values) => console.info('submitted', values)}
+                >
+                    <form>
+                        <LinkYourRates
+                            fieldNamePrefix="rateForms.1"
+                            index={1}
+                            autofill={jest.fn()}
+                        />
+                    </form>
+                </Formik>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidStateUser(),
+                            }),
+                            indexRatesMockSuccess(),
+                        ],
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.queryByText(
+                        'Was this rate certification included with another submission?'
+                    )
+                ).toBeInTheDocument()
+            })
+        })
+
+        it('does not display dropdown menu if no is selected', async () => {
+            const rateID = 'test-abc-123'
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchDraftRateMockSuccess({ id: rateID }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+
+            //Making sure page loads
+            await screen.findByText('Rate Details')
+            expect(
+                screen.getByText(
+                    'Was this rate certification included with another submission?'
+                )
+            ).toBeInTheDocument()
+
+            //Click the no button and assert the dropdown does not appear
+            const noRadioButton = screen.getByLabelText(
+                'No, this rate certification was not included with any other submissions'
+            )
+            await user.click(noRadioButton)
+            await waitFor(() => {
+                expect(
+                    screen.queryByText('Which rate certification was it?')
+                ).not.toBeInTheDocument()
+            })
+        })
+
+        it('displays dropdown menu if yes is selected', async () => {
+            const rateID = 'test-abc-123'
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            indexRatesMockSuccess(),
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchDraftRateMockSuccess({ id: rateID }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                            fetchDraftRateMockSuccess({
+                                id: rateID,
+                                draftRevision: {
+                                    ...rateRevisionDataMock(),
+                                    formData: {
+                                        ...rateRevisionDataMock().formData,
+                                        rateDocuments: [
+                                            {
+                                                s3URL: 's3://bucketname/one-one/one-one.png',
+                                                name: 'one one',
+                                                sha256: 'fakeSha1',
+                                            },
+                                            {
+                                                s3URL: 's3://bucketname/one-two/one-two.png',
+                                                name: 'one two',
+                                                sha256: 'fakeSha2',
+                                            },
+                                            {
+                                                s3URL: 's3://bucketname/one-three/one-three.png',
+                                                name: 'one three',
+                                                sha256: 'fakeSha3',
+                                            },
+                                        ],
+                                    },
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+
+            //Making sure page loads
+            await screen.findByText('Rate Details')
+            expect(
+                screen.getByText(
+                    'Was this rate certification included with another submission?'
+                )
+            ).toBeInTheDocument()
+
+            //Click the yes button and assert it's clickable and checked
+            const yesRadioButton = screen.getByRole('radio', {
+                name: 'Yes, this rate certification is part of another submission',
+            })
+            expect(yesRadioButton).toBeInTheDocument()
+            await user.click(yesRadioButton)
+            expect(yesRadioButton).toBeChecked()
+
+            // Assert the dropdown has rendered
+            await waitFor(() => {
+                expect(
+                    screen.getByText('Which rate certification was it?')
+                ).toBeInTheDocument()
+                expect(screen.getByRole('combobox')).toBeInTheDocument()
+            })
+
+            // Assert the options menu is open
+            const dropdownMenu = screen.getByRole('listbox')
+            expect(dropdownMenu).toBeInTheDocument()
+
+            // Assert options are present
+            const dropdownOptions = screen.getAllByRole('option')
+            expect(dropdownOptions).toHaveLength(3)
+        })
+
+        it('removes the selected option from the dropdown list', async () => {
+            const rateID = 'test-abc-123'
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            indexRatesMockSuccess(),
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchDraftRateMockSuccess({ id: rateID }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                            fetchDraftRateMockSuccess({
+                                id: rateID,
+                                draftRevision: {
+                                    ...rateRevisionDataMock(),
+                                    formData: {
+                                        ...rateRevisionDataMock().formData,
+                                        rateDocuments: [
+                                            {
+                                                s3URL: 's3://bucketname/one-one/one-one.png',
+                                                name: 'one one',
+                                                sha256: 'fakeSha1',
+                                            },
+                                            {
+                                                s3URL: 's3://bucketname/one-two/one-two.png',
+                                                name: 'one two',
+                                                sha256: 'fakeSha2',
+                                            },
+                                            {
+                                                s3URL: 's3://bucketname/one-three/one-three.png',
+                                                name: 'one three',
+                                                sha256: 'fakeSha3',
+                                            },
+                                        ],
+                                    },
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+
+            //Making sure page loads
+            await screen.findByText('Rate Details')
+            expect(
+                screen.getByText(
+                    'Was this rate certification included with another submission?'
+                )
+            ).toBeInTheDocument()
+
+            //Click the yes button to trigger dropdown
+            const yesRadioButton = screen.getByRole('radio', {
+                name: 'Yes, this rate certification is part of another submission',
+            })
+            await user.click(yesRadioButton)
+
+            // Assert that the selected value is removed from the list of options
+            const option = screen
+                .getByRole('listbox')
+                .querySelector('#react-select-2-option-0')
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            await user.click(option!)
+
+            await waitFor(() => {
+                expect(screen.getByRole('listbox')).toBeInTheDocument()
+                expect(option).not.toBeInTheDocument()
+            })
+        })
+
+        it('returns the unselected option to the dropdown list', async () => {
+            const rateID = 'test-abc-123'
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            indexRatesMockSuccess(),
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchDraftRateMockSuccess({ id: rateID }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                            fetchDraftRateMockSuccess({
+                                id: rateID,
+                                draftRevision: {
+                                    ...rateRevisionDataMock(),
+                                    formData: {
+                                        ...rateRevisionDataMock().formData,
+                                        rateDocuments: [
+                                            {
+                                                s3URL: 's3://bucketname/one-one/one-one.png',
+                                                name: 'one one',
+                                                sha256: 'fakeSha1',
+                                            },
+                                            {
+                                                s3URL: 's3://bucketname/one-two/one-two.png',
+                                                name: 'one two',
+                                                sha256: 'fakeSha2',
+                                            },
+                                            {
+                                                s3URL: 's3://bucketname/one-three/one-three.png',
+                                                name: 'one three',
+                                                sha256: 'fakeSha3',
+                                            },
+                                        ],
+                                    },
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+
+            //Making sure page loads
+            await screen.findByText('Rate Details')
+            expect(
+                screen.getByText(
+                    'Was this rate certification included with another submission?'
+                )
+            ).toBeInTheDocument()
+
+            //Click the yes button to trigger dropdown
+            const yesRadioButton = screen.getByRole('radio', {
+                name: 'Yes, this rate certification is part of another submission',
+            })
+            await user.click(yesRadioButton)
+
+            // Checking that the selected value is removed from the list of options
+            const option = screen
+                .getByRole('listbox')
+                .querySelector('#react-select-2-option-0')
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            await user.click(option!)
+
+            const clearSelectionButton = screen
+                .getByRole('combobox')
+                .querySelector('.select__clear-indicator')
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            await user.click(clearSelectionButton!)
+
+            const open = screen
+                .getByRole('combobox')
+                .querySelector('.select__dropdown-indicator')
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            await user.click(open!)
+            expect(screen.getByRole('listbox')).toBeInTheDocument()
+
+            await waitFor(() => {
+                const options = screen.getAllByRole('option')
+                expect(options).toHaveLength(3)
+            })
+        })
     })
 })

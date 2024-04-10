@@ -63,7 +63,7 @@ export const LinkedRateSummary = ({
                 multipleDocumentsAllowed={false}
                 caption="Rate certification"
                 documentCategory="Rate certification"
-                isSubmitted={true}
+                isEditing={false}
             />
         </SectionCard>
     )

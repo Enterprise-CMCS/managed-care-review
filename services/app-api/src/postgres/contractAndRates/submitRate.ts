@@ -2,15 +2,17 @@ import { findRateWithHistory } from './findRateWithHistory'
 import { updateDraftRate } from './updateDraftRate'
 import type { UpdateInfoType } from '../../domain-models'
 import type { PrismaClient } from '@prisma/client'
-import type { RateType } from '../../domain-models/contractAndRates'
+import type {
+    RateFormEditableType,
+    RateType,
+} from '../../domain-models/contractAndRates'
 import { includeLatestSubmittedRateRev } from './prismaSubmittedContractHelpers'
 import { NotFoundError } from '../postgresErrors'
-import type { RateFormDataType } from '../../domain-models'
 
 type SubmitRateArgsType = {
     rateID?: string
     rateRevisionID?: string // this is a hack that should not outlive protobuf. rateID should be there and be required after we remove protos
-    formData?: RateFormDataType
+    formData?: RateFormEditableType
     submittedByUserID: UpdateInfoType['updatedBy']
     submittedReason: UpdateInfoType['updatedReason']
 }

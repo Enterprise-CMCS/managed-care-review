@@ -4,28 +4,26 @@ import { UploadedDocumentsTable } from './UploadedDocumentsTable'
 import {
     fetchCurrentUserMock,
     mockValidCMSUser,
+    mockValidStateUser,
 } from '../../../testHelpers/apolloMocks'
-import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
-import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
+import type { GenericDocument } from '../../../gen/gqlClient'
 
 describe('UploadedDocumentsTable', () => {
-    const emptyDocumentsTable = () => {
-        return { previousSubmissionDate: '01/01/01' }
-    }
     it('renders documents without errors', async () => {
         const testDocuments = [
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
+                dateAdded: new Date(),
             },
         ]
         renderWithProviders(
             <UploadedDocumentsTable
-                documentDateLookupTable={emptyDocumentsTable()}
                 documents={testDocuments}
                 caption="Contract"
                 documentCategory="Contract"
+                previousSubmissionDate={new Date('01/01/01')}
             />,
             {
                 apolloProvider: {
@@ -57,17 +55,18 @@ describe('UploadedDocumentsTable', () => {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
+                dateAdded: new Date(),
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
                 sha256: 'fakesha',
+                dateAdded: new Date(),
             },
         ]
 
         renderWithProviders(
             <UploadedDocumentsTable
-                documentDateLookupTable={emptyDocumentsTable()}
                 documents={testDocuments}
                 caption="Contract supporting"
                 documentCategory="Contract-supporting"
@@ -93,41 +92,34 @@ describe('UploadedDocumentsTable', () => {
         })
     })
 
-    it('renders date added when supplied with a date lookup table and is CMS user viewing submission', async () => {
-        const testDocuments: SubmissionDocument[] = [
+    it('renders date added as expected for CMS user viewing submission', async () => {
+        const testDocuments: GenericDocument[] = [
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
+                dateAdded: new Date('03/25/2022'),
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
                 sha256: 'fakesha1',
+                dateAdded: new Date('03/26/2022'),
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
                 sha256: 'fakesha2',
+                dateAdded: new Date('03/27/2022'),
             },
         ]
-        const dateLookupTable: DocumentDateLookupTableType = {
-            fakesha:
-                'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            fakesha1:
-                'Sat Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            fakesha2:
-                'Sun Mar 27 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            previousSubmissionDate:
-                'Sun Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-        }
         renderWithProviders(
             <UploadedDocumentsTable
                 documents={testDocuments}
                 caption="Contract supporting"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
-                documentDateLookupTable={dateLookupTable}
+                previousSubmissionDate={new Date('03/26/2022')}
             />,
             {
                 apolloProvider: {
@@ -150,47 +142,40 @@ describe('UploadedDocumentsTable', () => {
         })
     })
 
-    it('renders date added when supplied with a date lookup table and is State user', async () => {
-        const testDocuments: SubmissionDocument[] = [
+    it('renders date added for State user viewing submission', async () => {
+        const testDocuments: GenericDocument[] = [
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
+                dateAdded: new Date('03/25/2022'),
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
                 sha256: 'fakesha1',
+                dateAdded: new Date('03/26/2022'),
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
                 sha256: 'fakesha2',
+                dateAdded: new Date('03/27/2022'),
             },
         ]
-        const dateLookupTable: DocumentDateLookupTableType = {
-            fakesha:
-                'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            fakesha1:
-                'Sat Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            fakesha2:
-                'Sun Mar 27 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            previousSubmissionDate:
-                'Sun Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-        }
         renderWithProviders(
             <UploadedDocumentsTable
                 documents={testDocuments}
+                previousSubmissionDate={new Date('03/26/2022')}
                 caption="Contract supporting"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
-                documentDateLookupTable={dateLookupTable}
             />,
             {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
-                            user: mockValidCMSUser(),
+                            user: mockValidStateUser(),
                             statusCode: 200,
                         }),
                     ],
@@ -207,34 +192,34 @@ describe('UploadedDocumentsTable', () => {
         })
     })
 
-    it('does not render a date added when supplied with empty date lookup table (this happens with new draft submissions)', async () => {
-        const testDocuments: SubmissionDocument[] = [
+    it('does not render a date added when supplied a new draft submissions)', async () => {
+        const testDocuments: GenericDocument[] = [
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
+                dateAdded: new Date(),
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
                 sha256: 'fakesha1',
+                dateAdded: new Date(),
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
                 sha256: 'fakesha2',
+                dateAdded: new Date(),
             },
         ]
-        const dateLookupTable: DocumentDateLookupTableType = {
-            previousSubmissionDate: null,
-        }
+
         renderWithProviders(
             <UploadedDocumentsTable
                 documents={testDocuments}
                 caption="Contract supporting"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
-                documentDateLookupTable={dateLookupTable}
             />,
             {
                 apolloProvider: {
@@ -265,40 +250,33 @@ describe('UploadedDocumentsTable', () => {
         })
     })
     it('shows the NEW tag when a document is submitted after the last submission', async () => {
-        const testDocuments: SubmissionDocument[] = [
+        const testDocuments: GenericDocument[] = [
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
+                dateAdded: new Date('03/25/2022'),
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
                 sha256: 'fakesha1',
+                dateAdded: new Date('03/26/2022'),
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
                 sha256: 'fakesha2',
+                dateAdded: new Date('03/27/2022'),
             },
         ]
-        const dateLookupTable: DocumentDateLookupTableType = {
-            fakesha:
-                'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            fakesha1:
-                'Sat Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            fakesha2:
-                'Sun Mar 27 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            previousSubmissionDate:
-                'Sun Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-        }
         renderWithProviders(
             <UploadedDocumentsTable
                 documents={testDocuments}
+                previousSubmissionDate={new Date('03/26/2022')}
                 caption="Contract supporting"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
-                documentDateLookupTable={dateLookupTable}
             />,
             {
                 apolloProvider: {
@@ -316,28 +294,29 @@ describe('UploadedDocumentsTable', () => {
         })
     })
 
-    it('renders error when multiple documents supplied when not allowed', async () => {
+    it('renders error when multiple documents supplied when not allowed (to address historical submissions before doc limit constraints)', async () => {
         const testDocuments = [
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakeSha1',
+                dateAdded: new Date('03/25/2022'),
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
                 sha256: 'fakeSha2',
+                dateAdded: new Date('03/25/2022'),
             },
         ]
 
         renderWithProviders(
             <UploadedDocumentsTable
-                documentDateLookupTable={emptyDocumentsTable()}
                 documents={testDocuments}
+                previousSubmissionDate={new Date('01/01/01')}
                 caption="Contract"
                 documentCategory="Contract"
                 multipleDocumentsAllowed={false}
-                isSubmitted={false}
             />,
             {
                 apolloProvider: {
@@ -363,35 +342,28 @@ describe('UploadedDocumentsTable', () => {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
+                dateAdded: new Date('03/25/2022'),
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
                 sha256: 'fakesha1',
+                dateAdded: new Date('03/25/2022'),
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
                 sha256: 'fakesha2',
+                dateAdded: new Date('03/27/2022'),
             },
         ]
-        const dateLookupTable = {
-            fakesha:
-                'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            fakesha1:
-                'Sat Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            fakesha2:
-                'Sun Mar 27 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            previousSubmissionDate:
-                'Sun Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-        }
         renderWithProviders(
             <UploadedDocumentsTable
                 documents={testDocuments}
+                previousSubmissionDate={new Date('03/27/2022')}
                 caption="Contract supporting"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
-                documentDateLookupTable={dateLookupTable}
             />,
             {
                 apolloProvider: {

@@ -50,6 +50,7 @@ const contractRevisionOnRateDataMock = (
                 name: 'contract-document.pdf',
                 s3URL: 's3://bucketname/key/contract-document',
                 sha256: 'fakeSha',
+                dateAdded: new Date()
             },
         ],
         contractDateStart: '2024-04-01',
@@ -97,6 +98,7 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
                     name: 'rate-document.pdf',
                     s3URL: 's3://bucketname/key/rate-document',
                     sha256: 'fakeSha',
+                    dateAdded: new Date()
                 },
             ],
             supportingDocuments: [
@@ -105,6 +107,7 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
                     name: 'rate-supporting-document.pdf',
                     s3URL: 's3://bucketname/key/rate-supporting-document',
                     sha256: 'fakeSha',
+                    dateAdded: new Date()
                 },
             ],
             rateDateStart: '2023-02-01',
@@ -171,6 +174,7 @@ const draftRateDataMock =  (
         updatedAt: '2023-10-16T19:01:21.389Z',
         stateCode: 'MN',
         stateNumber: 10,
+        parentContractID: 'foo-bar',
         state: mockMNState(),
         status: 'DRAFT',
         initiallySubmittedAt: '2023-10-16',
@@ -199,6 +203,7 @@ const rateDataMock = (
         status: 'RESUBMITTED',
         initiallySubmittedAt: '2023-10-16',
         draftRevision: null,
+        parentContractID: 'foo-bar',
         ...rate,
         id: rateID,
         revisions: [

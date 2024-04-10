@@ -44,6 +44,7 @@ import {
 } from '../../../../../constants/statutoryRegulatoryAttestation'
 import { SectionCard } from '../../../../../components/SectionCard'
 import { Contract } from '../../../../../gen/gqlClient'
+import { getLastContractSubmission } from '../../../../../gqlHelpers/contractsAndRates'
 
 export type ContractDetailsSummarySectionV2Props = {
     contract: Contract
@@ -153,7 +154,8 @@ export const ContractDetailsSummarySectionV2 = ({
         submissionName,
         isPreviousSubmission,
     ])
-
+    const lastSubmittedDate =
+        getLastContractSubmission(contract)?.submitInfo.updatedAt
     return (
         <SectionCard
             id="contractDetailsSection"
@@ -315,7 +317,7 @@ export const ContractDetailsSummarySectionV2 = ({
             {contractFormData.contractDocuments && (
                 <UploadedDocumentsTable
                     documents={contractFormData.contractDocuments}
-                    documentDateLookupTable={documentDateLookupTable}
+                    previousSubmissionDate={lastSubmittedDate}
                     caption="Contract"
                     documentCategory="Contract"
                     isEditing={isEditing}
@@ -324,7 +326,7 @@ export const ContractDetailsSummarySectionV2 = ({
             {contractSupportingDocuments && (
                 <UploadedDocumentsTable
                     documents={contractSupportingDocuments}
-                    documentDateLookupTable={documentDateLookupTable}
+                    previousSubmissionDate={lastSubmittedDate}
                     caption="Contract supporting documents"
                     documentCategory="Contract-supporting"
                     isSupportingDocuments

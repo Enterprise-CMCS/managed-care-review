@@ -32,6 +32,8 @@ export type {
     ContractFormDataType,
     RateFormDataType,
     DocumentType,
+    RateFormEditableType,
+    ContractFormEditableType,
 } from './formDataTypes'
 
 export type {

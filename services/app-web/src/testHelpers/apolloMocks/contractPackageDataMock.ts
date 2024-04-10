@@ -39,6 +39,7 @@ function mockContractPackageDraft(
                         s3URL: 's3://bucketname/one-two/one-two.png',
                         sha256: 'fakesha',
                         name: 'one two',
+                        dateAdded: new Date()
                     },
                 ],
                 contractDateStart: new Date('01/01/2023'),
@@ -77,6 +78,7 @@ function mockContractPackageDraft(
                 revisions: [],
                 state: mockMNState(),
                 stateNumber: 5,
+                parentContractID: 'foo-baz',
                 draftRevision: {
                     id: '123',
                     contractRevisions: [],
@@ -90,6 +92,7 @@ function mockContractPackageDraft(
                                 s3URL: 's3://bucketname/key/rate',
                                 sha256: 'fakesha',
                                 name: 'rate',
+                                dateAdded: new Date()
                             },
                         ],
                         supportingDocuments: [],
@@ -166,6 +169,7 @@ function mockContractPackageSubmitted(
                             s3URL: 's3://bucketname/key/contract',
                             sha256: 'fakesha',
                             name: 'contract',
+                            dateAdded: new Date()
                         },
                     ],
                     contractDateStart: new Date(),
@@ -207,6 +211,7 @@ function mockContractPackageSubmitted(
                                 s3URL: 's3://bucketname/key/rate',
                                 sha256: 'fakesha',
                                 name: 'rate',
+                                dateAdded: new Date()
                             },
                         ],
                         supportingDocuments: [],

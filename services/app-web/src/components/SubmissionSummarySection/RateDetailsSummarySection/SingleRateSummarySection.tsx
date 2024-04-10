@@ -11,12 +11,10 @@ import {
     Program,
     Rate,
     RateFormData,
-    RateRevision,
     RelatedContractRevisions,
     useUnlockRateMutation,
 } from '../../../gen/gqlClient'
 import { UploadedDocumentsTable } from '../UploadedDocumentsTable'
-import type { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 import { SectionHeader } from '../../SectionHeader'
 import { renderDownloadButton } from './RateDetailsSummarySection'
 import { DocumentWarningBanner } from '../../Banner'
@@ -24,7 +22,7 @@ import { useS3 } from '../../../contexts/S3Context'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { recordJSException } from '../../../otelHelpers'
 import { Link } from '@trussworks/react-uswds'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
 import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -34,37 +32,6 @@ import { ERROR_MESSAGES } from '../../../constants'
 import { handleApolloErrorsAndAddUserFacingMessages } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
-
-// This rate summary pages assumes we are using contract and rates API.
-// Eventually RateDetailsSummarySection should share code with this code
-// shipping with copypasta for now to demo rates refactor
-
-function makeRateDocumentDateTable(
-    revisions: RateRevision[]
-): DocumentDateLookupTableType {
-    const lookupTable: DocumentDateLookupTableType = {
-        previousSubmissionDate: null,
-    }
-    revisions.forEach((revision: RateRevision, index: number) => {
-        if (index === 1) {
-            // second most recent revision
-            const previousSubmission = revision.submitInfo?.updatedAt // used in UploadedDocumentsTable to determine if we should show NEW tag
-            if (previousSubmission)
-                lookupTable['previousSubmissionDate'] = previousSubmission
-        }
-
-        const allDocuments =
-            revision.formData?.supportingDocuments.concat(
-                revision.formData?.rateDocuments
-            ) || []
-        allDocuments.forEach((doc) => {
-            const documentKey = doc.sha256
-            const dateAdded = revision.submitInfo?.updatedAt
-            if (dateAdded) lookupTable[documentKey] = dateAdded
-        })
-    })
-    return lookupTable
-}
 
 const rateCapitationType = (formData: RateFormData) =>
     formData.rateCapitationType
@@ -129,9 +96,10 @@ export const SingleRateSummarySection = ({
     statePrograms: Program[]
 }): React.ReactElement | null => {
     const { loggedInUser } = useAuth()
+    const navigate = useNavigate()
     const rateRevision = rate.revisions[0]
     const formData: RateFormData = rateRevision?.formData
-    const documentDateLookupTable = makeRateDocumentDateTable(rate.revisions)
+    const lastSubmittedDate = rate.revisions[0]?.submitInfo?.updatedAt
     const isRateAmendment = formData.rateType === 'AMENDMENT'
     const isUnlocked = rate.status === 'UNLOCKED'
     const explainMissingData =
@@ -143,6 +111,10 @@ export const SingleRateSummarySection = ({
     const showRateUnlock: boolean = ldClient?.variation(
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
+    )
+    const showLinkedRates: boolean = ldClient?.variation(
+        featureFlags.LINK_RATES.flag,
+        featureFlags.LINK_RATES.defaultValue
     )
 
     // TODO BULK DOWNLOAD
@@ -225,7 +197,10 @@ export const SingleRateSummarySection = ({
             )
         }
     }
-
+    const parentContractSubmissionID =
+        rate.revisions[0].contractRevisions[
+            rate.revisions[0].contractRevisions.length - 1
+        ].contract.id
     return (
         <React.Fragment key={rate.id}>
             <SectionCard
@@ -238,14 +213,27 @@ export const SingleRateSummarySection = ({
                         'Unknown rate name'
                     }
                 >
-                    {showRateUnlock && isCMSUser ? (
+                    {isCMSUser && showRateUnlock && (
                         <UnlockRateButton
                             disabled={isUnlocked || unlockLoading}
                             onClick={handleUnlockRate}
                         >
                             Unlock rate
                         </UnlockRateButton>
-                    ) : null}
+                    )}
+                    {/* This second option is an interim state for unlock rate button (when linked rates is turned on but unlock and edit rate is not available yet). Remove when rate unlock is permanently on. */}
+                    {isCMSUser && showLinkedRates && !showRateUnlock && (
+                        <UnlockRateButton
+                            disabled={isUnlocked || unlockLoading}
+                            onClick={() => {
+                                navigate(
+                                    `/submissions/${parentContractSubmissionID}`
+                                )
+                            }}
+                        >
+                            Unlock rate
+                        </UnlockRateButton>
+                    )}
                 </SectionHeader>
                 {documentError && (
                     <DocumentWarningBanner className={styles.banner} />
@@ -357,13 +345,13 @@ export const SingleRateSummarySection = ({
                     documents={formData.rateDocuments}
                     packagesWithSharedRateCerts={appendDraftToSharedPackages}
                     multipleDocumentsAllowed={false}
-                    documentDateLookupTable={documentDateLookupTable}
+                    previousSubmissionDate={lastSubmittedDate}
                     caption="Rate certification"
                 />
                 <UploadedDocumentsTable
                     documents={formData.supportingDocuments}
                     packagesWithSharedRateCerts={appendDraftToSharedPackages}
-                    documentDateLookupTable={documentDateLookupTable}
+                    previousSubmissionDate={lastSubmittedDate}
                     caption="Rate supporting documents"
                 />
             </SectionCard>

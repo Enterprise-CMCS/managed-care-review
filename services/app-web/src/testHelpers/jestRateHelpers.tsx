@@ -7,7 +7,19 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
     const targetRateCert = rateCertifications(screen)[index]
     expect(targetRateCert).toBeDefined()
     const withinTargetRateCert = within(targetRateCert)
-
+    //Rates across submission
+    const sharedRates = withinTargetRateCert.queryByText(
+        /Was this rate certification included with another submission?/
+    )
+    //if rates across submission UI exists then fill out section
+    if (sharedRates) {
+        expect(sharedRates).toBeInTheDocument()
+        withinTargetRateCert
+            .getByLabelText(
+                'No, this rate certification was not included with any other submissions'
+            )
+            .click()
+    }
     // assert proper initial fields are present
     expect(
         withinTargetRateCert.getByText('Upload one rate certification document')
@@ -25,16 +37,6 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
             'Does the actuary certify capitation rates specific to each rate cell or a rate range?'
         )
     ).toBeInTheDocument()
-
-    //Rates across submission
-    const sharedRates = withinTargetRateCert.queryByText(
-        /Was this rate certification uploaded to any other submissions/
-    )
-    //if rates across submission UI exists then fill out section
-    if (sharedRates) {
-        expect(sharedRates).toBeInTheDocument()
-        withinTargetRateCert.getByLabelText('No').click()
-    }
 
     // add 1 doc
     const input = withinTargetRateCert.getByLabelText(
@@ -165,12 +167,13 @@ const clickRemoveIndexRate = async (
 
     await waitFor(() => {
         // Confirm that there is one less rate certification on the page
+        expect(rateCertifications(screen)).toHaveLength(1)
         expect(rateCertifications(screen)).toHaveLength(
             rateCertsBeforeRemoving.length - 1
         )
         // Confirm that there is one less rate removal button (might even be zero buttons on page if all additional rates removed)
         expect(
-            screen.getAllByRole('button', {
+            screen.queryAllByRole('button', {
                 name: /Remove rate certification/,
             })
         ).toHaveLength(removeRateButtonsBeforeClick.length - 1)

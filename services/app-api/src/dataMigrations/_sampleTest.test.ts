@@ -1,5 +1,5 @@
 import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
-import { migrate } from './migrations/20231106200334_fix_empty_rates'
+import { migrate } from './migrations/20231026123042_test_migrator_works'
 
 /*
     Demo of how to test a data migration - can run and test locally with this test.
