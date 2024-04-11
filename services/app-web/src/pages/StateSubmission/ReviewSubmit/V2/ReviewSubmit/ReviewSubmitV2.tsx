@@ -14,9 +14,7 @@ import {
     RoutesRecord,
     STATE_SUBMISSION_FORM_ROUTES,
 } from '../../../../../constants'
-import {
-    getLastContractSubmission,
-} from '../../../../../gqlHelpers/contractsAndRates'
+import { getLastContractSubmission } from '../../../../../gqlHelpers/contractsAndRates'
 import { useAuth } from '../../../../../contexts/AuthContext'
 import { RateDetailsSummarySectionV2 } from './RateDetailsSummarySectionV2'
 import { ContactsSummarySection } from './ContactsSummarySectionV2'
@@ -49,7 +47,7 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
             'PROGRAMMING ERROR: id param not set in state submission form.'
         )
     }
-    
+
     const { data, loading, error } = useFetchContractQuery({
         variables: {
             input: {
@@ -60,6 +58,11 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
     })
 
     const contract = data?.fetchContract.contract
+    const contractFormData =
+        contract &&
+        (contract?.draftRevision?.formData ||
+            getLastContractSubmission(contract)?.contractRevision.formData)
+
     useEffect(() => {
         updateHeading({
             customHeading: contract?.draftRevision?.contractName,
@@ -72,7 +75,7 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                 <Loading />
             </GridContainer>
         )
-    } else if (error || !contract) {
+    } else if (error || !contract || !contractFormData) {
         //error handling for a state user that tries to access rates for a different state
         if (error?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
             return (
@@ -93,20 +96,18 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
 
     const isContractActionAndRateCertification =
         contract.draftRates && contract.draftRates.length > 0
-    const contractFormData =
-        contract.draftRevision?.formData ||
-        getLastContractSubmission(contract)?.contractRevision.formData
     const programIDs = contractFormData?.programIDs
     const programs = statePrograms.filter((program) =>
         programIDs?.includes(program.id)
     )
 
-    const submissionName = contractFormData && packageName(
-        contract.stateCode,
-        contract.stateNumber,
-        contractFormData.programIDs,
-        programs
-    ) || ''
+    const submissionName =
+        packageName(
+            contract.stateCode,
+            contract.stateNumber,
+            contractFormData.programIDs,
+            programs
+        ) || ''
     return (
         <>
             <div className={styles.stepIndicator}>
@@ -122,14 +123,12 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
             </div>
             <GridContainer className={styles.reviewSectionWrapper}>
                 <div>This is the V2 version of the Review Submit Page</div>
-                {contract && (
-                    <SubmissionTypeSummarySectionV2
+                <SubmissionTypeSummarySectionV2
                     contract={contract}
                     submissionName={submissionName}
                     editNavigateTo="../type"
                     statePrograms={statePrograms}
                 />
-                )}
                 <ContractDetailsSummarySectionV2
                     contract={contract}
                     editNavigateTo="../contract-details"
