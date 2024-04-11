@@ -22,6 +22,7 @@ import {
     isContractAmendment,
     isContractWithProvisions,
 } from './ContractType'
+import { getLastContractSubmission } from '../gqlHelpers/contractsAndRates'
 
 /*
     Each provision key represents a Yes/No question asked on Contract Details. 
@@ -84,27 +85,27 @@ const generateProvisionLabel = (
 const sortModifiedProvisions = (
     contract: Contract
 ): [GeneralizedProvisionType[], GeneralizedProvisionType[]] => {
-    const contractFormData = contract.draftRevision?.formData || contract.packageSubmissions[0].contractRevision.formData
+    const contractFormData = contract.draftRevision?.formData || getLastContractSubmission(contract)?.contractRevision.formData
     const initialProvisions = {
-        inLieuServicesAndSettings: contractFormData.inLieuServicesAndSettings,
-        modifiedBenefitsProvided: contractFormData.modifiedBenefitsProvided,
-        modifiedGeoAreaServed: contractFormData.modifiedGeoAreaServed,
-        modifiedMedicaidBeneficiaries: contractFormData.modifiedMedicaidBeneficiaries,
-        modifiedRiskSharingStrategy: contractFormData.modifiedRiskSharingStrategy,
-        modifiedIncentiveArrangements: contractFormData.modifiedIncentiveArrangements,
-        modifiedWitholdAgreements: contractFormData.modifiedWitholdAgreements,
-        modifiedStateDirectedPayments: contractFormData.modifiedStateDirectedPayments,
-        modifiedPassThroughPayments: contractFormData.modifiedPassThroughPayments,
-        modifiedPaymentsForMentalDiseaseInstitutions: contractFormData.modifiedPaymentsForMentalDiseaseInstitutions,
-        modifiedMedicalLossRatioStandards: contractFormData.modifiedMedicalLossRatioStandards,
-        modifiedOtherFinancialPaymentIncentive: contractFormData.modifiedOtherFinancialPaymentIncentive,
-        modifiedEnrollmentProcess: contractFormData.modifiedEnrollmentProcess,
-        modifiedGrevienceAndAppeal: contractFormData.modifiedGrevienceAndAppeal,
-        modifiedNetworkAdequacyStandards: contractFormData.modifiedNetworkAdequacyStandards,
-        modifiedLengthOfContract: contractFormData.modifiedLengthOfContract,
-        modifiedNonRiskPaymentArrangements: contractFormData.modifiedNonRiskPaymentArrangements,
-        statutoryRegulatoryAttestation: contractFormData.statutoryRegulatoryAttestation,
-        statutoryRegulatoryAttestationDescription: contractFormData.statutoryRegulatoryAttestationDescription
+        inLieuServicesAndSettings: contractFormData?.inLieuServicesAndSettings,
+        modifiedBenefitsProvided: contractFormData?.modifiedBenefitsProvided,
+        modifiedGeoAreaServed: contractFormData?.modifiedGeoAreaServed,
+        modifiedMedicaidBeneficiaries: contractFormData?.modifiedMedicaidBeneficiaries,
+        modifiedRiskSharingStrategy: contractFormData?.modifiedRiskSharingStrategy,
+        modifiedIncentiveArrangements: contractFormData?.modifiedIncentiveArrangements,
+        modifiedWitholdAgreements: contractFormData?.modifiedWitholdAgreements,
+        modifiedStateDirectedPayments: contractFormData?.modifiedStateDirectedPayments,
+        modifiedPassThroughPayments: contractFormData?.modifiedPassThroughPayments,
+        modifiedPaymentsForMentalDiseaseInstitutions: contractFormData?.modifiedPaymentsForMentalDiseaseInstitutions,
+        modifiedMedicalLossRatioStandards: contractFormData?.modifiedMedicalLossRatioStandards,
+        modifiedOtherFinancialPaymentIncentive: contractFormData?.modifiedOtherFinancialPaymentIncentive,
+        modifiedEnrollmentProcess: contractFormData?.modifiedEnrollmentProcess,
+        modifiedGrevienceAndAppeal: contractFormData?.modifiedGrevienceAndAppeal,
+        modifiedNetworkAdequacyStandards: contractFormData?.modifiedNetworkAdequacyStandards,
+        modifiedLengthOfContract: contractFormData?.modifiedLengthOfContract,
+        modifiedNonRiskPaymentArrangements: contractFormData?.modifiedNonRiskPaymentArrangements,
+        statutoryRegulatoryAttestation: contractFormData?.statutoryRegulatoryAttestation,
+        statutoryRegulatoryAttestationDescription: contractFormData?.statutoryRegulatoryAttestationDescription
     }
     const hasInitialProvisions = Object.values(initialProvisions).some((val) => val !== undefined)
     const modifiedProvisions: GeneralizedProvisionType[] = []

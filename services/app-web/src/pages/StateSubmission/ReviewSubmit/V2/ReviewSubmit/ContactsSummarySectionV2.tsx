@@ -46,11 +46,11 @@ export const ContactsSummarySection = ({
     const isSubmitted = contract.status === 'SUBMITTED'
     const contractFormData =
         contract.draftRevision?.formData ||
-        contract.packageSubmissions[0].contractRevision.formData
+        getLastContractSubmission(contract)?.contractRevision.formData
 
     let rateRev: RateRevision | undefined = undefined
 
-    if (contractFormData.submissionType === 'CONTRACT_AND_RATES') {
+    if (contractFormData?.submissionType === 'CONTRACT_AND_RATES') {
         // Find first rate associated with the contract to deal with rates info on contacts page
         // TODO move the fields using this data to rate details
         const draftRates = getDraftRates(contract)
@@ -68,8 +68,8 @@ export const ContactsSummarySection = ({
             <GridContainer className="padding-left-0">
                 <Grid row>
                     <dl>
-                        {contractFormData.stateContacts.length > 0 ? (
-                            contractFormData.stateContacts.map(
+                        {contractFormData && contractFormData.stateContacts.length > 0 ? (
+                            contractFormData?.stateContacts.map(
                                 (stateContact, index) => (
                                     <DataDetail
                                         key={'statecontact_' + index}
@@ -95,7 +95,7 @@ export const ContactsSummarySection = ({
                 </Grid>
             </GridContainer>
 
-            {contractFormData.submissionType === 'CONTRACT_AND_RATES' && (
+            {contractFormData?.submissionType === 'CONTRACT_AND_RATES' && (
                 <>
                     {rateRev?.formData?.addtlActuaryContacts !== undefined &&
                         rateRev.formData.addtlActuaryContacts.length > 0 && (

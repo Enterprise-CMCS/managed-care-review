@@ -87,20 +87,20 @@ export const ContractDetailsSummarySectionV2 = ({
 
     const contractFormData =
         contract.draftRevision?.formData ||
-        contract.packageSubmissions[0].contractRevision.formData
+        getLastContractSubmission(contract)?.contractRevision.formData
     const contract438Attestation = ldClient?.variation(
         featureFlags.CONTRACT_438_ATTESTATION.flag,
         featureFlags.CONTRACT_438_ATTESTATION.defaultValue
     )
 
     const attestationYesNo =
-        contractFormData.statutoryRegulatoryAttestation != null &&
+        contractFormData?.statutoryRegulatoryAttestation != null &&
         booleanAsYesNoFormValue(contractFormData.statutoryRegulatoryAttestation)
 
     const contractSupportingDocuments = contractFormData?.supportingDocuments
     const isEditing = !isSubmitted(contract) && editNavigateTo !== undefined
     const applicableFederalAuthorities = isCHIPOnly(contract)
-        ? contractFormData.federalAuthorities.filter((authority) =>
+        ? contractFormData?.federalAuthorities.filter((authority) =>
               federalAuthorityKeysForCHIP.includes(
                   authority as CHIPFederalAuthority
               )
@@ -116,7 +116,7 @@ export const ContractDetailsSummarySectionV2 = ({
 
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
-            const keysFromDocs = contractFormData.contractDocuments
+            const keysFromDocs = contractSupportingDocuments && contractFormData?.contractDocuments
                 .concat(contractSupportingDocuments)
                 .map((doc) => {
                     const key = getKey(doc.s3URL)
@@ -126,7 +126,7 @@ export const ContractDetailsSummarySectionV2 = ({
                 .filter((key) => key !== '')
 
             // call the lambda to zip the files and get the url
-            const zippedURL = await getBulkDlURL(
+            const zippedURL = keysFromDocs && await getBulkDlURL(
                 keysFromDocs,
                 submissionName + '-contract-details.zip',
                 'HEALTH_PLAN_DOCS'
@@ -204,7 +204,7 @@ export const ContractDetailsSummarySectionV2 = ({
                                     label="Non-compliance description"
                                     explainMissingData={!isSubmitted}
                                     children={
-                                        contractFormData.statutoryRegulatoryAttestationDescription
+                                        contractFormData?.statutoryRegulatoryAttestationDescription
                                     }
                                 />
                             </Grid>
@@ -314,7 +314,7 @@ export const ContractDetailsSummarySectionV2 = ({
                     </DoubleColumnGrid>
                 )}
             </dl>
-            {contractFormData.contractDocuments && (
+            {contractFormData?.contractDocuments && (
                 <UploadedDocumentsTable
                     documents={contractFormData.contractDocuments}
                     previousSubmissionDate={lastSubmittedDate}

@@ -99,7 +99,7 @@ export const RateDetailsSummarySectionV2 = ({
     const refreshPackagesWithSharedRateCert = (
         rateFormData: RateFormData
     ): SharedRateCertDisplay[] | undefined => {
-        return rateFormData.packagesWithSharedRateCerts?.map(
+        return rateFormData?.packagesWithSharedRateCerts?.map(
             ({ packageId, packageName }) => {
                 const refreshedName =
                     packageId &&
@@ -118,8 +118,8 @@ export const RateDetailsSummarySectionV2 = ({
 
     const rateCapitationType = (rate: Rate | RateRevision) => {
         const rateFormData = getRateFormData(rate)
-        return rateFormData.rateCapitationType
-            ? rateFormData.rateCapitationType === 'RATE_CELL'
+        return rateFormData?.rateCapitationType
+            ? rateFormData?.rateCapitationType === 'RATE_CELL'
                 ? 'Certification of capitation rates specific to each rate cell'
                 : 'Certification of rate ranges of capitation rates per rate cell'
             : ''
@@ -131,10 +131,10 @@ export const RateDetailsSummarySectionV2 = ({
         const rateFormData = getRateFormData(rate)
 
         if (
-            rateFormData.rateProgramIDs &&
-            rateFormData.rateProgramIDs.length > 0
+            rateFormData?.rateProgramIDs &&
+            rateFormData?.rateProgramIDs.length > 0
         ) {
-            programIDs = rateFormData.rateProgramIDs
+            programIDs = rateFormData?.rateProgramIDs
         } else if (
             contractFormData?.programIDs &&
             contractFormData?.programIDs.length > 0
@@ -150,10 +150,10 @@ export const RateDetailsSummarySectionV2 = ({
 
     const rateCertificationType = (rate: Rate | RateRevision) => {
         const rateFormData = getRateFormData(rate)
-        if (rateFormData.rateType === 'AMENDMENT') {
+        if (rateFormData?.rateType === 'AMENDMENT') {
             return 'Amendment to prior rate certification'
         }
-        if (rateFormData.rateType === 'NEW') {
+        if (rateFormData?.rateType === 'NEW') {
             return 'New rate certification'
         }
     }
@@ -166,7 +166,7 @@ export const RateDetailsSummarySectionV2 = ({
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 return rate.draftRevision!.formData
             } else {
-                return rate.revisions[0].formData
+                return rate.revisions[0]?.formData
             }
         } else {
             return rate.formData
@@ -179,7 +179,7 @@ export const RateDetailsSummarySectionV2 = ({
 
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
-            const submittedRates = contract.packageSubmissions[0].rateRevisions
+            const submittedRates = getLastContractSubmission(contract)?.rateRevisions
             if (submittedRates !== undefined) {
                 const keysFromDocs = submittedRates
                     .flatMap((rateInfo) =>
@@ -246,7 +246,7 @@ export const RateDetailsSummarySectionV2 = ({
                                 aria-label={`Rate ID: ${rateFormData?.rateCertificationName}`}
                                 className={styles.rateName}
                             >
-                                {rateFormData.rateCertificationName}
+                                {rateFormData?.rateCertificationName}
                             </h3>
                             <dl>
                                 <DoubleColumnGrid>
@@ -267,15 +267,15 @@ export const RateDetailsSummarySectionV2 = ({
                                     <DataDetail
                                         id="ratingPeriod"
                                         label={
-                                            rateFormData.rateType ===
+                                            rateFormData?.rateType ===
                                             'AMENDMENT'
                                                 ? 'Rating period of original rate certification'
                                                 : 'Rating period'
                                         }
                                         explainMissingData={!isSubmitted}
                                         children={
-                                            rateFormData.rateDateStart &&
-                                            rateFormData.rateDateEnd ? (
+                                            rateFormData?.rateDateStart &&
+                                            rateFormData?.rateDateEnd ? (
                                                 `${formatCalendarDate(
                                                     rateFormData?.rateDateStart
                                                 )} to ${formatCalendarDate(
@@ -289,13 +289,13 @@ export const RateDetailsSummarySectionV2 = ({
                                     <DataDetail
                                         id="dateCertified"
                                         label={
-                                            rateFormData.amendmentEffectiveDateStart
+                                            rateFormData?.amendmentEffectiveDateStart
                                                 ? 'Date certified for rate amendment'
                                                 : 'Date certified'
                                         }
                                         explainMissingData={!isSubmitted}
                                         children={formatCalendarDate(
-                                            rateFormData.rateDateCertified
+                                            rateFormData?.rateDateCertified
                                         )}
                                     />
                                     {rateFormData?.amendmentEffectiveDateStart ? (
@@ -304,14 +304,14 @@ export const RateDetailsSummarySectionV2 = ({
                                             label="Rate amendment effective dates"
                                             explainMissingData={!isSubmitted}
                                             children={`${formatCalendarDate(
-                                                rateFormData.amendmentEffectiveDateStart
+                                                rateFormData?.amendmentEffectiveDateStart
                                             )} to ${formatCalendarDate(
-                                                rateFormData.amendmentEffectiveDateEnd
+                                                rateFormData?.amendmentEffectiveDateEnd
                                             )}`}
                                         />
                                     ) : null}
                                     {rateFormData
-                                        .certifyingActuaryContacts[0] && (
+                                        ?.certifyingActuaryContacts[0] && (
                                         <DataDetail
                                             id="certifyingActuary"
                                             label="Certifying actuary"
@@ -336,7 +336,7 @@ export const RateDetailsSummarySectionV2 = ({
                             </dl>
                             {rateFormData?.rateDocuments && (
                                 <UploadedDocumentsTable
-                                    documents={rateFormData.rateDocuments}
+                                    documents={rateFormData?.rateDocuments}
                                     packagesWithSharedRateCerts={
                                         isEditing
                                             ? undefined
@@ -353,7 +353,7 @@ export const RateDetailsSummarySectionV2 = ({
                             )}
                             {rateFormData?.supportingDocuments && (
                                 <UploadedDocumentsTable
-                                    documents={rateFormData.supportingDocuments}
+                                    documents={rateFormData?.supportingDocuments}
                                     previousSubmissionDate={lastSubmittedDate}
                                     packagesWithSharedRateCerts={
                                         isEditing

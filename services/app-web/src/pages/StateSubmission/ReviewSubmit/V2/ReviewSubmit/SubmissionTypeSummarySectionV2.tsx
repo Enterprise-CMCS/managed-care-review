@@ -8,6 +8,9 @@ import {
     ContractTypeRecord,
     PopulationCoveredRecord,
 } from '../../../../../constants/healthPlanPackages'
+import {
+    getLastContractSubmission,
+} from '../../../../../gqlHelpers/contractsAndRates'
 import { Program, Contract } from '../../../../../gen/gqlClient'
 import { usePreviousSubmission } from '../../../../../hooks/usePreviousSubmission'
 import { booleanAsYesNoUserValue } from '../../../../../components/Form/FieldYesNo/FieldYesNo'
@@ -36,10 +39,10 @@ export const SubmissionTypeSummarySectionV2 = ({
     const isPreviousSubmission = usePreviousSubmission()
     const contractFormData =
         contract.draftRevision?.formData ||
-        contract.packageSubmissions[0].contractRevision.formData
+        getLastContractSubmission(contract)?.contractRevision.formData
 
     const programNames = statePrograms
-        .filter((p) => contractFormData.programIDs.includes(p.id))
+        .filter((p) => contractFormData?.programIDs.includes(p.id))
         .map((p) => p.name)
     const isSubmitted = contract.status === 'SUBMITTED'
     // const isRiskBasedContract = contractFormData.riskBasedContract ===
@@ -56,7 +59,6 @@ export const SubmissionTypeSummarySectionV2 = ({
             >
                 {headerChildComponent && headerChildComponent}
             </SectionHeader>
-
             <dl>
                 {isSubmitted && !isPreviousSubmission && (
                     <DoubleColumnGrid>
@@ -71,7 +73,6 @@ export const SubmissionTypeSummarySectionV2 = ({
                                 </span>
                             }
                         />
-                        <></>
                     </DoubleColumnGrid>
                 )}
                 <DoubleColumnGrid>
@@ -81,7 +82,8 @@ export const SubmissionTypeSummarySectionV2 = ({
                         explainMissingData={!isSubmitted}
                         children={programNames}
                     />
-                    <DataDetail
+                    {contractFormData && (
+                        <DataDetail
                         id="submissionType"
                         label="Submission type"
                         explainMissingData={!isSubmitted}
@@ -91,19 +93,22 @@ export const SubmissionTypeSummarySectionV2 = ({
                             ]
                         }
                     />
-                    <DataDetail
+                    )}
+                    {(
+                        <DataDetail
                         id="contractType"
                         label="Contract action type"
                         explainMissingData={!isSubmitted}
                         children={
-                            contractFormData.contractType
+                            contractFormData?.contractType
                                 ? ContractTypeRecord[
                                       contractFormData.contractType
                                   ]
                                 : ''
                         }
                     />
-                    {contractFormData.riskBasedContract !== null && (
+                    )}
+                    {contractFormData && contractFormData?.riskBasedContract !== null && (
                         <DataDetail
                             id="riskBasedContract"
                             label="Is this a risk based contract"
@@ -113,7 +118,8 @@ export const SubmissionTypeSummarySectionV2 = ({
                             )}
                         />
                     )}
-                    <DataDetail
+                    {contractFormData && (
+                        <DataDetail
                         id="populationCoverage"
                         label="Which populations does this contract action cover?"
                         explainMissingData={!isSubmitted}
@@ -124,16 +130,19 @@ export const SubmissionTypeSummarySectionV2 = ({
                             ]
                         }
                     />
+                    )}
                 </DoubleColumnGrid>
 
                 <Grid row gap className={styles.reviewDataRow}>
                     <Grid col={12}>
-                        <DataDetail
+                        {contractFormData && (
+                            <DataDetail
                             id="submissionDescription"
                             label="Submission description"
                             explainMissingData={!isSubmitted}
                             children={contractFormData.submissionDescription}
                         />
+                        )}
                     </Grid>
                 </Grid>
             </dl>

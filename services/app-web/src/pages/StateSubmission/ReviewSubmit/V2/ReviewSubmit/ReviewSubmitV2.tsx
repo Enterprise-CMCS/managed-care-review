@@ -9,11 +9,14 @@ import { DynamicStepIndicator } from '../../../../../components'
 import { PageActionsContainer } from '../../../PageActions'
 import styles from '../../../ReviewSubmit/ReviewSubmit.module.scss'
 import { ActionButton } from '../../../../../components/ActionButton'
-import { useStatePrograms } from '../../../../../hooks/useStatePrograms'
+import { useStatePrograms } from '../../../../../hooks'
 import {
     RoutesRecord,
     STATE_SUBMISSION_FORM_ROUTES,
 } from '../../../../../constants'
+import {
+    getLastContractSubmission,
+} from '../../../../../gqlHelpers/contractsAndRates'
 import { useAuth } from '../../../../../contexts/AuthContext'
 import { RateDetailsSummarySectionV2 } from './RateDetailsSummarySectionV2'
 import { ContactsSummarySection } from './ContactsSummarySectionV2'
@@ -46,7 +49,7 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
             'PROGRAMMING ERROR: id param not set in state submission form.'
         )
     }
-
+    
     const { data, loading, error } = useFetchContractQuery({
         variables: {
             input: {
@@ -57,7 +60,6 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
     })
 
     const contract = data?.fetchContract.contract
-
     useEffect(() => {
         updateHeading({
             customHeading: contract?.draftRevision?.contractName,
@@ -93,18 +95,18 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
         contract.draftRates && contract.draftRates.length > 0
     const contractFormData =
         contract.draftRevision?.formData ||
-        contract.packageSubmissions[0].contractRevision.formData
-    const programIDs = contractFormData.programIDs
+        getLastContractSubmission(contract)?.contractRevision.formData
+    const programIDs = contractFormData?.programIDs
     const programs = statePrograms.filter((program) =>
-        programIDs.includes(program.id)
+        programIDs?.includes(program.id)
     )
 
-    const submissionName = packageName(
+    const submissionName = contractFormData && packageName(
         contract.stateCode,
         contract.stateNumber,
         contractFormData.programIDs,
         programs
-    )
+    ) || ''
     return (
         <>
             <div className={styles.stepIndicator}>
@@ -120,13 +122,14 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
             </div>
             <GridContainer className={styles.reviewSectionWrapper}>
                 <div>This is the V2 version of the Review Submit Page</div>
-                <SubmissionTypeSummarySectionV2
+                {contract && (
+                    <SubmissionTypeSummarySectionV2
                     contract={contract}
                     submissionName={submissionName}
                     editNavigateTo="../type"
                     statePrograms={statePrograms}
                 />
-
+                )}
                 <ContractDetailsSummarySectionV2
                     contract={contract}
                     editNavigateTo="../contract-details"
