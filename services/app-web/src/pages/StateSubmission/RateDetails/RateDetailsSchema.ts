@@ -138,6 +138,47 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
                         .nullable(),
                 })
             ),
+            //The following code explained: https://github.com/jquense/yup/issues/176
+            addtlActuaryContacts: Yup.array().of(
+                Yup.object().shape({
+                    name: Yup.string().when(['titleRole', 'email', 'actuarialFirm', 'actuarialFirmOther'], {
+                        is: (titleRole: string, email: string, actuarialFirm: string, actuarialFirmOther: string) => titleRole || email || actuarialFirm || actuarialFirmOther,
+                        then: Yup.string().required('You must provide a name')
+                    }),
+                    titleRole: Yup.string().when(['name', 'email', 'actuarialFirm', 'actuarialFirmOther'], {
+                        is: (name: string, email: string, actuarialFirm: string, actuarialFirmOther: string) => name || email || actuarialFirm || actuarialFirmOther,
+                        then: Yup.string().required('You must provide a title/role'),
+                    }),
+                    email: Yup.string().when(['name', 'titleRole', 'actuarialFirm', 'actuarialFirmOther'], {
+                        is: (name: string, titleRole: string, actuarialFirm: string, actuarialFirmOther: string) => name || titleRole || actuarialFirm || actuarialFirmOther,
+                        then: Yup.string()
+                            .email('You must enter a valid email address')
+                            .required('You must provide an email address'),
+                    }),
+                    actuarialFirm: Yup.string().when(['name', 'titleRole', 'email', 'actuarialFirmOther'], {
+                        is: (name: string, titleRole: string, email: string, actuarialFirmOther: string) => name || titleRole || email || actuarialFirmOther,
+                        then: Yup.string()
+                            .required('You must select an actuarial firm')
+                            .nullable(),
+                    }),
+                    actuarialFirmOther: Yup.string().when(['name', 'titleRole', 'email', 'actuarialFirm'], {
+                        is: (name: string, titleRole: string, email: string, actuarialFirm: string) => name || titleRole || email || actuarialFirm,
+                        then: Yup.string()
+                            .when('actuarialFirm', {
+                                is: 'OTHER',
+                                then: Yup.string()
+                                    .required('You must enter a description')
+                                    .nullable()
+                            })
+                            .nullable()
+                    }),
+                }, [
+                    ['name', 'titleRole'], ['name', 'email'], ['name', 'actuarialFirm'], ['name', 'actuarialFirmOther'],
+                    ['titleRole', 'email'], ['titleRole', 'actuarialFirm'], ['titleRole', 'actuarialFirmOther'],
+                    ['email', 'actuarialFirm'], ['email', 'actuarialFirmOther'],
+                    ['actuarialFirm', 'actuarialFirmOther'],
+                ])
+            ),
             actuaryCommunicationPreference: Yup.string().optional(),
         })
     })
