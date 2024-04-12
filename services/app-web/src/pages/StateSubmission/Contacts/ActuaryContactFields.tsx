@@ -19,6 +19,7 @@ type ActuaryFormPropType = {
     shouldValidate: boolean
     fieldNamePrefix: string
     fieldSetLegend?: string
+    electivity?: string
     inputRef?: React.MutableRefObject<HTMLInputElement | null>
 }
 
@@ -26,6 +27,7 @@ export const ActuaryContactFields = ({
     shouldValidate,
     fieldNamePrefix,
     fieldSetLegend = 'Actuary Contact',
+    electivity = 'Required',
     inputRef,
 }: ActuaryFormPropType) => {
     const { values, errors } = useFormikContext()
@@ -34,7 +36,7 @@ export const ActuaryContactFields = ({
 
     return (
         <Fieldset legend={fieldSetLegend}>
-            <span className={styles.requiredOptionalText}>Required</span>
+            <span className={styles.requiredOptionalText}>{electivity}</span>
             <FieldTextInput
                 name={`${fieldNamePrefix}.name`}
                 id={`${fieldNamePrefix}.name`}
@@ -82,7 +84,9 @@ export const ActuaryContactFields = ({
                 <label htmlFor={`${fieldNamePrefix}.actuarialFirm`}>
                     Actuarial firm
                 </label>
-                <span className={styles.requiredOptionalText}>Required</span>
+                <span className={styles.requiredOptionalText}>
+                    {electivity}
+                </span>
                 {showFieldErrors(
                     getIn(errors, `${fieldNamePrefix}.actuarialFirm`)
                 ) && (
