@@ -23,7 +23,7 @@ import {
 } from '../../../../components/FileUpload'
 import { useS3 } from '../../../../contexts/S3Context'
 
-import { FormikErrors, getIn, useFormikContext } from 'formik'
+import { FieldArray, FormikErrors, getIn, useFormikContext } from 'formik'
 import { ActuaryContactFields } from '../../Contacts'
 import { FormikRateForm, RateDetailFormConfig } from './RateDetailsV2'
 const isRateTypeEmpty = (rateForm: FormikRateForm): boolean =>
@@ -467,9 +467,36 @@ export const SingleRateFormFields = ({
             <FormGroup>
                 <ActuaryContactFields
                     shouldValidate={shouldValidate}
-                    fieldNamePrefix={`${fieldNamePrefix}.actuaryContacts.0`}
+                    fieldNamePrefix={`${fieldNamePrefix}.actuaryContacts.${index}`}
                     fieldSetLegend="Certifying Actuary"
                 />
+                <FieldArray name={`${fieldNamePrefix}.addtlActuaryContacts`}>
+                    {() => (
+                        <div
+                            style={{ marginTop: '40px' }}
+                            className={styles.actuaryContacts}
+                            data-testid="state-contacts"
+                        >
+                            {rateForm.addtlActuaryContacts.length > 0 &&
+                                rateForm.addtlActuaryContacts.map(
+                                    (_actuaryContact, index) => (
+                                        <div
+                                            className={styles.actuaryContact}
+                                            key={index}
+                                            data-testid="actuary-contact"
+                                        >
+                                            <ActuaryContactFields
+                                                shouldValidate={shouldValidate}
+                                                fieldNamePrefix={`${fieldNamePrefix}.addtlActuaryContacts.${index}`}
+                                                fieldSetLegend="Additional Actuary Contract"
+                                                electivity="Optional"
+                                            />
+                                        </div>
+                                    )
+                                )}
+                        </div>
+                    )}
+                </FieldArray>
             </FormGroup>
             <FormGroup
                 error={Boolean(
