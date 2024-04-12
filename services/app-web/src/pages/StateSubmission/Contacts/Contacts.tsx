@@ -27,7 +27,6 @@ import {
     activeFormPages,
     type HealthPlanFormPageProps,
 } from '../StateSubmissionForm'
-import { ActuaryContactFields } from './ActuaryContactFields'
 import { RoutesRecord } from '../../../constants'
 import { DynamicStepIndicator, SectionCard } from '../../../components'
 import { FormContainer } from '../FormContainer'
@@ -166,8 +165,6 @@ const Contacts = ({
     const [newStateContactButtonRef, setNewStateContactButtonFocus] = useFocus() // This ref.current is always the same element
 
     const newActuaryContactNameRef = React.useRef<HTMLInputElement | null>(null)
-    const [newActuaryContactButtonRef, setNewActuaryContactButtonFocus] =
-        useFocus()
 
     const navigate = useNavigate()
 
@@ -206,14 +203,6 @@ const Contacts = ({
         name: '',
         titleRole: '',
         email: '',
-    }
-
-    const emptyActuaryContact = {
-        name: '',
-        titleRole: '',
-        email: '',
-        actuarialFirm: undefined,
-        actuarialFirmOther: '',
     }
 
     if (stateContacts.length === 0) {
@@ -481,112 +470,6 @@ const Contacts = ({
                                         </FieldArray>
                                     </fieldset>
                                 </SectionCard>
-
-                                {includeActuaryContacts && (
-                                    <>
-                                        <SectionCard>
-                                            <fieldset className="usa-fieldset with-sections">
-                                                <h3>
-                                                    Additional Actuary Contacts
-                                                </h3>
-
-                                                <p>
-                                                    Provide contact information
-                                                    for any additional actuaries
-                                                    who worked directly on this
-                                                    submission.
-                                                </p>
-                                                <legend className="srOnly">
-                                                    Actuary contacts
-                                                </legend>
-
-                                                <FieldArray name="addtlActuaryContacts">
-                                                    {({
-                                                        remove,
-                                                        push,
-                                                    }: FieldArrayRenderProps) => (
-                                                        <div
-                                                            className={
-                                                                styles.actuaryContacts
-                                                            }
-                                                            data-testid="state-contacts"
-                                                        >
-                                                            {values
-                                                                .addtlActuaryContacts
-                                                                .length > 0 &&
-                                                                values.addtlActuaryContacts.map(
-                                                                    (
-                                                                        _actuaryContact,
-                                                                        index
-                                                                    ) => (
-                                                                        <div
-                                                                            className={
-                                                                                styles.actuaryContact
-                                                                            }
-                                                                            key={
-                                                                                index
-                                                                            }
-                                                                            data-testid="actuary-contact"
-                                                                        >
-                                                                            <ActuaryContactFields
-                                                                                shouldValidate={
-                                                                                    shouldValidate
-                                                                                }
-                                                                                fieldNamePrefix={`addtlActuaryContacts.${index}`}
-                                                                                fieldSetLegend={handleContactLegend(
-                                                                                    index,
-                                                                                    'Actuary'
-                                                                                )}
-                                                                                inputRef={
-                                                                                    newActuaryContactNameRef
-                                                                                }
-                                                                            />
-                                                                            <Button
-                                                                                type="button"
-                                                                                unstyled
-                                                                                className={
-                                                                                    styles.removeContactBtn
-                                                                                }
-                                                                                onClick={() => {
-                                                                                    remove(
-                                                                                        index
-                                                                                    )
-                                                                                    setNewActuaryContactButtonFocus()
-                                                                                }}
-                                                                            >
-                                                                                Remove
-                                                                                contact
-                                                                            </Button>
-                                                                        </div>
-                                                                    )
-                                                                )}
-
-                                                            <button
-                                                                type="button"
-                                                                className={`usa-button usa-button--outline ${styles.addContactBtn}`}
-                                                                onClick={() => {
-                                                                    push(
-                                                                        emptyActuaryContact
-                                                                    )
-                                                                    setFocusNewActuaryContact(
-                                                                        true
-                                                                    )
-                                                                }}
-                                                                ref={
-                                                                    newActuaryContactButtonRef
-                                                                }
-                                                            >
-                                                                Add actuary
-                                                                contact
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </FieldArray>
-                                            </fieldset>
-                                        </SectionCard>
-                                    </>
-                                )}
-
                                 <PageActions
                                     saveAsDraftOnClick={() => {
                                         if (!dirty) {
