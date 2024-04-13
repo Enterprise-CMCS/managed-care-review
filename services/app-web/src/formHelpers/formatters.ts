@@ -51,15 +51,7 @@ const formatActuaryContactsForForm = (actuaryContacts?: ActuaryContact[] | GQLAc
                     actuarialFirm: actuarialFirm ?? undefined,
                 }
         })
-        : [
-              {
-                  name: '',
-                  titleRole: '',
-                  email: '',
-                  actuarialFirm: undefined,
-                  actuarialFirmOther: '',
-              },
-          ]
+        : []
 }
 
 
