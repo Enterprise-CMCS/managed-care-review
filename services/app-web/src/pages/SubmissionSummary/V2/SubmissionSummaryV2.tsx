@@ -142,7 +142,9 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
     const contract = fetchContractData?.fetchContract.contract
     return (
         <div className={styles.background}>
-            <div>This is the V2 page of the SubmissionSummary</div>
+            <div style={{ textAlign: 'center' }}>
+                This is the V2 page of the SubmissionSummary
+            </div>
             <GridContainer
                 data-testid="submission-summary"
                 className={styles.container}

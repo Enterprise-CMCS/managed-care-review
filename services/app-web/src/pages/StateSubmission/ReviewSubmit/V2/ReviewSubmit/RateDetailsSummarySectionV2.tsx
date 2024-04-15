@@ -80,8 +80,8 @@ export const RateDetailsSummarySectionV2 = ({
         contract.draftRevision?.formData ||
         getLastContractSubmission(contract)?.contractRevision.formData
     const rates =
-        contract.draftRates ||
         getLastContractSubmission(contract)?.rateRevisions ||
+        contract.draftRates ||
         []
     const lastSubmittedDate =
         getLastContractSubmission(contract)?.submitInfo.updatedAt
@@ -234,7 +234,7 @@ export const RateDetailsSummarySectionV2 = ({
                     !isPreviousSubmission &&
                     renderDownloadButton(zippedFilesURL)}
             </SectionHeader>
-            {rates.length > 0 ? (
+            {rates && rates.length > 0 ? (
                 rates.map((rate) => {
                     const rateFormData = getRateFormData(rate)
                     return (
