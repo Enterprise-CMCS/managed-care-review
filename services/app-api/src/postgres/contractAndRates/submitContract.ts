@@ -1,5 +1,9 @@
 import type { PrismaClient } from '@prisma/client'
-import type { ContractType } from '../../domain-models/contractAndRates'
+import type {
+    ContractType,
+    RateRevisionType,
+    RateRevisionWithContractsType,
+} from '../../domain-models/contractAndRates'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
 import type { UpdateInfoType } from '../../domain-models'
@@ -57,12 +61,16 @@ export async function submitContract(
             }
 
             // get the related rate revisions and any unsubmitted rates
-            const relatedRateRevs = currentRev.draftRates.map(
-                (c) => c.revisions[0]
-            )
-            const unsubmittedRates = relatedRateRevs.filter(
-                (rev) => rev.submitInfo === null
-            )
+            const relatedRates = currentContract.draftRates
+            const relatedRateRevs = relatedRates
+                ? relatedRates.map((r) => r.draftRevision || r.revisions[0])
+                : []
+
+            const unsubmittedRateRevs: RateRevisionType[] = relatedRates
+                ? relatedRates
+                      .map((r) => r.draftRevision)
+                      .filter((rr): rr is RateRevisionWithContractsType => !!rr)
+                : []
 
             // Create the submitInfo record in the updateInfoTable
             const submitInfo = await tx.updateInfoTable.create({
@@ -115,7 +123,7 @@ export async function submitContract(
             await tx.rateRevisionTable.updateMany({
                 where: {
                     id: {
-                        in: unsubmittedRates.map((rev) => rev.id),
+                        in: unsubmittedRateRevs.map((rev) => rev.id),
                     },
                 },
                 data: {
@@ -198,7 +206,7 @@ export async function submitContract(
                 },
             })
 
-            const relatedRateRevisionsIDs: {
+            const draftRateRevisionIDs: {
                 rateID: string
                 revisionID: string
             }[] = currentContract.draftRates.map((r) => {
@@ -219,29 +227,33 @@ export async function submitContract(
                 const previousRateRevisions = pastSubmission.rateRevisions
                 for (const previousRateRevision of previousRateRevisions) {
                     if (
-                        !relatedRateRevisionsIDs.find(
-                            (r) => r.rateID === previousRateRevision.rate.id
+                        !draftRateRevisionIDs.find(
+                            (r) => r.rateID === previousRateRevision.rateID
                         )
                     ) {
-                        relatedRateRevisionsIDs.push({
-                            rateID: previousRateRevision.rate.id,
-                            revisionID: previousRateRevision.id,
-                        })
+                        // draftRateRevisionIDs.push({
+                        //     rateID: previousRateRevision.rate.id,
+                        //     revisionID: previousRateRevision.id,
+                        // })
                         disconnectedRateRevs.push(previousRateRevision)
                     }
                 }
             }
 
-            // get previously connected contracts
-            // get the related rates, all of their previously connected contracts need to 
+            // submitted contract+rates all get the submission pointed at them.
+            // submitted contract+rates + related rates get a related revision
+            // everything that gets a related revision, gets links to the current state of the world
+
+            // all currently draft rates and disconnected rates have all their connections to old
+            // contract revisions that are not this contract revision copied, in addition to the connection
+            // (or disconnection) from the new contract revision.
+            // get the related rates, all of their previously connected contracts need to
             // get links.
             const allRelatedRateRevisionsBefore =
                 await tx.rateRevisionTable.findMany({
                     where: {
                         id: {
-                            in: relatedRateRevisionsIDs.map(
-                                (rr) => rr.revisionID
-                            ),
+                            in: draftRateRevisionIDs.map((rr) => rr.revisionID),
                         },
                     },
                     include: {
@@ -260,14 +272,14 @@ export async function submitContract(
                     },
                 })
 
-            // all related rates get an entry in the relatedRates connection 
+            // all related rates get an entry in the relatedRates connection
             await tx.updateInfoTable.update({
                 where: {
                     id: submitInfo.id,
                 },
                 data: {
                     relatedRates: {
-                        connect: relatedRateRevisionsIDs.map((rr) => ({
+                        connect: draftRateRevisionIDs.map((rr) => ({
                             id: rr.revisionID,
                         })),
                     },
@@ -310,7 +322,7 @@ export async function submitContract(
             }
 
             let ratePosition = 0
-            const newLinks = relatedRateRevisionsIDs.map((rr) => {
+            const newLinks = draftRateRevisionIDs.map((rr) => {
                 ratePosition++
                 return {
                     rateRevID: rr.revisionID,
@@ -332,7 +344,7 @@ export async function submitContract(
 
             // delete Contract.draftRates
             await tx.draftRateJoinTable.deleteMany({
-                where: { contractID: contractID }
+                where: { contractID: contractID },
             })
 
             return await findContractWithHistory(tx, contractID)

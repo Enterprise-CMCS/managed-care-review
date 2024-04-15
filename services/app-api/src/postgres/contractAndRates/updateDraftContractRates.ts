@@ -4,6 +4,7 @@ import type {
     RateFormEditableType,
 } from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../postgresErrors'
+import type { PrismaTransactionType } from '../prismaTypes'
 import { findContractWithHistory } from './findContractWithHistory'
 import {
     prismaRateCreateFormDataFromDomain,
@@ -37,194 +38,227 @@ interface UpdateDraftContractRatesArgsType {
     rateUpdates: UpdatedRatesType
 }
 
+async function updateDraftContractRatesInTransaction(
+    tx: PrismaTransactionType,
+    args: UpdateDraftContractRatesArgsType
+): Promise<ContractType | Error> {
+    // for now, get the latest contract revision, eventually we'll have rate revisions directly on this
+    const contract = await tx.contractTable.findUnique({
+        where: {
+            id: args.contractID,
+        },
+        include: {
+            revisions: {
+                take: 1,
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            },
+        },
+    })
+
+    if (!contract) {
+        return new NotFoundError(
+            'contract not found with ID: ' + args.contractID
+        )
+    }
+
+    const draftRevision = contract.revisions[0]
+    if (!draftRevision) {
+        return new Error(
+            'PROGRAMMER ERROR: This draft contract has no draft revision'
+        )
+    }
+
+    // figure out the rate number range for created rates.
+    const state = await tx.state.findUnique({
+        where: { stateCode: contract.stateCode },
+    })
+
+    if (!state) {
+        return new Error(
+            'PROGRAMER ERROR: No state found with code: ' + contract.stateCode
+        )
+    }
+
+    let nextRateNumber = state.latestStateRateCertNumber + 1
+
+    // create new rates with new revisions
+    const createdRateJoins: { rateID: string; ratePosition: number }[] = []
+    for (const createRateArg of args.rateUpdates.create) {
+        const rateFormData = createRateArg.formData
+        const thisRateNumber = nextRateNumber
+        nextRateNumber++
+
+        const rateToCreate = {
+            stateCode: contract.stateCode,
+            stateNumber: thisRateNumber,
+            revisions: {
+                create: prismaRateCreateFormDataFromDomain(rateFormData),
+            },
+        }
+
+        const createdRate = await tx.rateTable.create({
+            data: rateToCreate,
+            include: {
+                revisions: true,
+            },
+        })
+
+        createdRateJoins.push({
+            rateID: createdRate.id,
+            ratePosition: createRateArg.ratePosition,
+        })
+    }
+
+    // to delete draft rates, we need to delete their revisions first
+    await tx.rateRevisionTable.deleteMany({
+        where: {
+            rateID: {
+                in: args.rateUpdates.delete.map((ru) => ru.rateID),
+            },
+        },
+    })
+    await tx.rateTable.deleteMany({
+        where: {
+            id: {
+                in: args.rateUpdates.delete.map((ru) => ru.rateID),
+            },
+        },
+    })
+
+    const oldLinksToCreate = [
+        ...createdRateJoins.map((lr) => lr.rateID),
+        ...args.rateUpdates.link.map((ru) => ru.rateID),
+    ]
+
+    // create new rates and link and unlink others
+    await tx.contractRevisionTable.update({
+        where: { id: draftRevision.id },
+        data: {
+            draftRates: {
+                connect: oldLinksToCreate.map((rID) => ({
+                    id: rID,
+                })),
+                disconnect: args.rateUpdates.unlink.map((ru) => ({
+                    id: ru.rateID,
+                })),
+            },
+        },
+        include: {
+            draftRates: true,
+        },
+    })
+
+    // new rate + contract Linking tables
+
+    // for each of the links, we have to get the order right
+    // all the newly valid links are from create/update/link
+    const links: { rateID: string; ratePosition: number }[] = [
+        ...createdRateJoins.map((rj) => ({
+            rateID: rj.rateID,
+            ratePosition: rj.ratePosition,
+        })),
+        ...args.rateUpdates.update.map((ru) => ({
+            rateID: ru.rateID,
+            ratePosition: ru.ratePosition,
+        })),
+        ...args.rateUpdates.link.map((ru) => ({
+            rateID: ru.rateID,
+            ratePosition: ru.ratePosition,
+        })),
+    ]
+
+    // Check our work, these should be an incrementing list of ratePositions.
+    const ratePositions = links.map((l) => l.ratePosition).sort()
+    let lastPosition = 0
+    for (const ratePosition of ratePositions) {
+        if (ratePosition !== lastPosition + 1) {
+            console.error(
+                'Updated Rate ratePositions Are Not Ordered',
+                ratePositions
+            )
+            return new Error(
+                'updateDraftContractRates called with discontinuous order ratePositions'
+            )
+        }
+        lastPosition++
+    }
+
+    await tx.contractTable.update({
+        where: { id: args.contractID },
+        data: {
+            draftRates: {
+                deleteMany: {},
+                create: links,
+            },
+        },
+    })
+
+    // end new R+C Contract Linking Tables
+
+    // update existing rates
+    for (const ru of args.rateUpdates.update) {
+        const draftRev = await tx.rateRevisionTable.findFirst({
+            where: {
+                rateID: ru.rateID,
+                submitInfoID: null,
+            },
+        })
+
+        if (!draftRev) {
+            return new Error(
+                'attempting to update a rate that is not editable: ' + ru.rateID
+            )
+        }
+
+        await tx.rateRevisionTable.update({
+            where: { id: draftRev.id },
+            data: prismaUpdateRateFormDataFromDomain(ru.formData),
+        })
+    }
+
+    // unlink old data from disconnected rates
+    for (const ru of args.rateUpdates.unlink) {
+        const draftRev = await tx.rateRevisionTable.findFirst({
+            where: {
+                rateID: ru.rateID,
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+        })
+
+        if (!draftRev) {
+            return new Error(
+                'attempting to unlink a rate with no revision: ' + ru.rateID
+            )
+        }
+
+        await tx.rateRevisionTable.update({
+            where: { id: draftRev.id },
+            data: {
+                draftContracts: {
+                    disconnect: {
+                        id: args.contractID,
+                    },
+                },
+            },
+        })
+    }
+
+    return findContractWithHistory(tx, args.contractID)
+}
+
 async function updateDraftContractRates(
     client: PrismaClient,
     args: UpdateDraftContractRatesArgsType
 ): Promise<ContractType | Error> {
     try {
         return await client.$transaction(async (tx) => {
-            // for now, get the latest contract revision, eventually we'll have rate revisions directly on this
-            const contract = await tx.contractTable.findUnique({
-                where: {
-                    id: args.contractID,
-                },
-                include: {
-                    revisions: {
-                        take: 1,
-                        orderBy: {
-                            createdAt: 'desc',
-                        },
-                    },
-                },
-            })
+            const result = await updateDraftContractRatesInTransaction(tx, args)
 
-            if (!contract) {
-                return new NotFoundError(
-                    'contract not found with ID: ' + args.contractID
-                )
-            }
-
-            const draftRevision = contract.revisions[0]
-            if (!draftRevision) {
-                return new Error(
-                    'PROGRAMMER ERROR: This draft contract has no draft revision'
-                )
-            }
-
-            // figure out the rate number range for created rates.
-            const state = await tx.state.findUnique({
-                where: { stateCode: contract.stateCode },
-            })
-
-            if (!state) {
-                return new Error(
-                    'PROGRAMER ERROR: No state found with code: ' +
-                        contract.stateCode
-                )
-            }
-
-            let nextRateNumber = state.latestStateRateCertNumber + 1
-
-            // create new rates with new revisions
-            const createdRateJoins: { rateID: string; ratePosition: number }[] =
-                []
-            for (const createRateArg of args.rateUpdates.create) {
-                const rateFormData = createRateArg.formData
-                const thisRateNumber = nextRateNumber
-                nextRateNumber++
-
-                const rateToCreate = {
-                    stateCode: contract.stateCode,
-                    stateNumber: thisRateNumber,
-                    revisions: {
-                        create: prismaRateCreateFormDataFromDomain(
-                            rateFormData
-                        ),
-                    },
-                }
-
-                const createdRate = await tx.rateTable.create({
-                    data: rateToCreate,
-                    include: {
-                        revisions: true,
-                    },
-                })
-
-                createdRateJoins.push({
-                    rateID: createdRate.id,
-                    ratePosition: createRateArg.ratePosition,
-                })
-            }
-
-            // to delete draft rates, we need to delete their revisions first
-            await tx.rateRevisionTable.deleteMany({
-                where: {
-                    rateID: {
-                        in: args.rateUpdates.delete.map((ru) => ru.rateID),
-                    },
-                },
-            })
-            await tx.rateTable.deleteMany({
-                where: {
-                    id: {
-                        in: args.rateUpdates.delete.map((ru) => ru.rateID),
-                    },
-                },
-            })
-
-            const oldLinksToCreate = [
-                ...createdRateJoins.map((lr) => lr.rateID),
-                ...args.rateUpdates.link.map((ru) => ru.rateID),
-            ]
-
-            // create new rates and link and unlink others
-            await tx.contractRevisionTable.update({
-                where: { id: draftRevision.id },
-                data: {
-                    draftRates: {
-                        connect: oldLinksToCreate.map((rID) => ({
-                            id: rID,
-                        })),
-                        disconnect: args.rateUpdates.unlink.map((ru) => ({
-                            id: ru.rateID,
-                        })),
-                    },
-                },
-                include: {
-                    draftRates: true,
-                },
-            })
-
-            // new rate + contract Linking tables
-
-            // for each of the links, we have to get the order right
-            // all the newly valid links are from create/update/link
-            const links: { rateID: string; ratePosition: number }[] = [
-                ...createdRateJoins.map((rj) => ({
-                    rateID: rj.rateID,
-                    ratePosition: rj.ratePosition,
-                })),
-                ...args.rateUpdates.update.map((ru) => ({
-                    rateID: ru.rateID,
-                    ratePosition: ru.ratePosition,
-                })),
-                ...args.rateUpdates.link.map((ru) => ({
-                    rateID: ru.rateID,
-                    ratePosition: ru.ratePosition,
-                })),
-            ]
-
-            // Check our work, these should be an incrementing list of ratePositions.
-            const ratePositions = links.map((l) => l.ratePosition).sort()
-            let lastPosition = 0
-            for (const ratePosition of ratePositions) {
-                if (ratePosition !== lastPosition + 1) {
-                    console.error(
-                        'Updated Rate ratePositions Are Not Ordered',
-                        ratePositions
-                    )
-                    return new Error(
-                        'updateDraftContractRates called with discontinuous order ratePositions'
-                    )
-                }
-                lastPosition++
-            }
-
-            await tx.contractTable.update({
-                where: { id: args.contractID },
-                data: {
-                    draftRates: {
-                        deleteMany: {},
-                        create: links,
-                    },
-                },
-            })
-
-            // end new R+C Contract Linking Tables
-
-            // update existing rates
-            for (const ru of args.rateUpdates.update) {
-                const draftRev = await tx.rateRevisionTable.findFirst({
-                    where: {
-                        rateID: ru.rateID,
-                        submitInfoID: null,
-                    },
-                })
-
-                if (!draftRev) {
-                    return new Error(
-                        'attempting to update a rate that is not editable: ' +
-                            ru.rateID
-                    )
-                }
-
-                await tx.rateRevisionTable.update({
-                    where: { id: draftRev.id },
-                    data: prismaUpdateRateFormDataFromDomain(ru.formData),
-                })
-            }
-
-            return findContractWithHistory(tx, args.contractID)
+            return result
         })
     } catch (err) {
         console.error('PRISMA ERR', err)
@@ -234,4 +268,4 @@ async function updateDraftContractRates(
 
 export type { UpdateDraftContractRatesArgsType }
 
-export { updateDraftContractRates }
+export { updateDraftContractRates, updateDraftContractRatesInTransaction }

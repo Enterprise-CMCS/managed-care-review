@@ -1,11 +1,16 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { insertDraftRate } from './insertRate'
-import { clearDocMetadata, must } from '../../testHelpers'
+import {
+    clearDocMetadata,
+    mockInsertContractArgs,
+    must,
+} from '../../testHelpers'
 import { updateDraftRate } from './updateDraftRate'
 import { PrismaClientValidationError } from '@prisma/client/runtime/library'
 
 import type { RateType } from '@prisma/client'
 import type { RateFormEditableType } from '../../domain-models/contractAndRates'
+import { insertDraftContract } from './insertContract'
 
 describe('updateDraftRate', () => {
     afterEach(() => {
@@ -17,8 +22,15 @@ describe('updateDraftRate', () => {
 
         const draftRateForm1 = { rateCertificationName: 'draftData' }
 
+        const draftContractData = mockInsertContractArgs({
+            submissionDescription: 'one contract',
+        })
+        const contract = must(
+            await insertDraftContract(client, draftContractData)
+        )
+
         const rate = must(
-            await insertDraftRate(client, {
+            await insertDraftRate(client, contract.id, {
                 stateCode: 'MN',
                 ...draftRateForm1,
             })
@@ -90,8 +102,15 @@ describe('updateDraftRate', () => {
             supportingDocuments: draftRateForm1.supportingDocuments,
         }
 
+        const draftContractData = mockInsertContractArgs({
+            submissionDescription: 'one contract',
+        })
+        const contract = must(
+            await insertDraftContract(client, draftContractData)
+        )
+
         const rate = must(
-            await insertDraftRate(client, {
+            await insertDraftRate(client, contract.id, {
                 stateCode: 'MN',
             })
         )
@@ -196,8 +215,15 @@ describe('updateDraftRate', () => {
             addtlActuaryContacts: draftRateForm1.addtlActuaryContacts,
         }
 
+        const draftContractData = mockInsertContractArgs({
+            submissionDescription: 'one contract',
+        })
+        const contract = must(
+            await insertDraftContract(client, draftContractData)
+        )
+
         const rate = must(
-            await insertDraftRate(client, {
+            await insertDraftRate(client, contract.id, {
                 stateCode: 'MN',
             })
         )
@@ -256,8 +282,15 @@ describe('updateDraftRate', () => {
     it('returns an error when invalid form data for rate type provided', async () => {
         jest.spyOn(console, 'error').mockImplementation()
         const client = await sharedTestPrismaClient()
+        const draftContractData = mockInsertContractArgs({
+            submissionDescription: 'one contract',
+        })
+        const contract = must(
+            await insertDraftContract(client, draftContractData)
+        )
+
         const newRate = must(
-            await insertDraftRate(client, {
+            await insertDraftRate(client, contract.id, {
                 stateCode: 'MN',
             })
         )

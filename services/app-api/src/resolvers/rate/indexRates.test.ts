@@ -1,23 +1,24 @@
-import { v4 as uuidv4 } from 'uuid'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 import INDEX_RATES from '../../../../app-graphql/src/queries/indexRates.graphql'
 import {
     constructTestPostgresServer,
-    defaultFloridaRateProgram,
+    createAndUpdateTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
-import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type { RateEdge, Rate } from '../../gen/gqlServer'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import { formatGQLDate } from 'app-web/src/common-code/dateHelpers'
 import {
     submitTestRate,
-    createAndSubmitTestRate,
-    createTestRate,
     unlockTestRate,
     updateTestRate,
     createAndSubmitTestContract,
 } from '../../testHelpers'
+import {
+    createAndSubmitTestContractWithRate,
+    submitTestContract,
+    createAndUpdateTestContractWithRate,
+} from '../../testHelpers/gqlContractHelpers'
 
 describe('indexRates', () => {
     const ldService = testLDService({
@@ -33,9 +34,14 @@ describe('indexRates', () => {
             },
             ldService,
         })
-        // first, submit 2 rates
-        const submit1 = await createAndSubmitTestRate(stateServer)
-        const submit2 = await createAndSubmitTestRate(stateServer)
+
+        const contract1 = await createAndSubmitTestContractWithRate(stateServer)
+        const contract2 = await createAndSubmitTestContractWithRate(stateServer)
+
+        const submit1ID =
+            contract1.packageSubmissions[0].rateRevisions[0].rateID
+        const submit2ID =
+            contract2.packageSubmissions[0].rateRevisions[0].rateID
 
         // index rates
         const result = await cmsServer.executeOperation({
@@ -44,7 +50,7 @@ describe('indexRates', () => {
 
         expect(result.data).toBeDefined()
         const ratesIndex = result.data?.indexRates
-        const testRateIDs = [submit1.id, submit2.id]
+        const testRateIDs = [submit1ID, submit2ID]
 
         expect(result.errors).toBeUndefined()
         const matchedTestRates: Rate[] = ratesIndex.edges
@@ -58,14 +64,23 @@ describe('indexRates', () => {
 
     it('does not return rates still in initial draft', async () => {
         const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer({ ldService })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
         })
+
+        const contract1 = await createAndUpdateTestContractWithRate(stateServer)
+        const contract2 = await createAndUpdateTestContractWithRate(stateServer)
+
+        if (!contract1.draftRates || !contract2.draftRates) {
+            throw new Error('no draft rates')
+        }
+
         // First, create new submissions
-        const draft1 = await createTestRate()
-        const draft2 = await createTestRate()
+        const draft1 = contract1.draftRates[0]
+        const draft2 = contract2.draftRates[0]
 
         // index rates
         const result = await cmsServer.executeOperation({
@@ -136,61 +151,31 @@ describe('indexRates', () => {
             ldService,
         })
 
-        const florida: StateCodeType = 'FL'
-        const initialRateInfos = () => ({
-            id: uuidv4(),
-            rateType: 'NEW' as const,
-            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
-            rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
-            rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
-            stateCode: florida,
-            rateDocuments: [
-                {
-                    name: 'rateDocument.pdf',
-                    s3URL: 'fakeS3URL',
-                    sha256: 'fakesha',
-                },
-            ],
-            supportingDocuments: [],
-            rateProgramIDs: [defaultFloridaRateProgram().id],
-            actuaryContacts: [
-                {
-                    name: 'test name',
-                    titleRole: 'test title',
-                    email: 'email@example.com',
-                    actuarialFirm: 'MERCER' as const,
-                    actuarialFirmOther: '',
-                },
-            ],
-            actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
-            packagesWithSharedRateCerts: [],
-        })
+        const contract1 = await createAndSubmitTestContractWithRate(server)
+        const contract2 = await createAndSubmitTestContractWithRate(server)
 
-        // First, create and submit new rates
-        const firstRate = await createAndSubmitTestRate(server, {
-            ...initialRateInfos(),
-        })
-        const secondRate = await createAndSubmitTestRate(server, {
-            ...initialRateInfos(),
-        })
+        const firstRateID =
+            contract1.packageSubmissions[0].rateRevisions[0].rateID
+        const secondRateID =
+            contract2.packageSubmissions[0].rateRevisions[0].rateID
 
         // Unlock one to be rate edited in place
         const firstRateUnlocked = await unlockTestRate(
             cmsServer,
-            firstRate.id,
+            firstRateID,
             'Unlock to edit an existing rate'
         )
 
         const secondRateUnlocked = await unlockTestRate(
             cmsServer,
-            secondRate.id,
+            secondRateID,
             'Unlock to edit an existing rate'
         )
 
         // update one with a new rate start and end date
         const existingFormData = firstRateUnlocked.draftRevision?.formData
         expect(existingFormData).toBeDefined()
-        await updateTestRate(firstRate.id, {
+        await updateTestRate(firstRateID, {
             rateDateStart: new Date(Date.UTC(2025, 1, 1)),
             rateDateEnd: new Date(Date.UTC(2027, 1, 1)),
         })
@@ -198,21 +183,20 @@ describe('indexRates', () => {
         // update the other with additional new rate
         const existingFormData2 = secondRateUnlocked.draftRevision?.formData
         expect(existingFormData2).toBeDefined()
-        const newRate = await createAndSubmitTestRate(server, {
-            ...initialRateInfos(),
-            rateDateStart: new Date(Date.UTC(2030, 1, 1)),
-            rateDateEnd: new Date(Date.UTC(2030, 12, 1)),
-        })
+
+        const contract3 = await createAndSubmitTestContractWithRate(server)
+        const newRateID =
+            contract3.packageSubmissions[0].rateRevisions[0].rateID
 
         // resubmit
         const firstRateResubmitted = await submitTestRate(
             server,
-            firstRate.id,
+            firstRateID,
             'Resubmit with edited rate description'
         )
         const secondRateResubmitted = await submitTestRate(
             server,
-            secondRate.id,
+            secondRateID,
             'Resubmit with an additional rate added'
         )
 
@@ -233,7 +217,7 @@ describe('indexRates', () => {
             return test.id == secondRateResubmitted.id
         })
         const newlyAdded = rates.find((test: Rate) => {
-            return test.id === newRate.id
+            return test.id === newRateID
         })
 
         if (!resubmittedWithEdits || !resubmittedUnchanged || !newlyAdded) {
@@ -253,10 +237,10 @@ describe('indexRates', () => {
             resubmittedWithEdits.revisions[0].submitInfo?.updatedReason
         ).toBe('Resubmit with edited rate description')
         expect(resubmittedWithEdits.revisions[1].formData.rateDateStart).toBe(
-            formatGQLDate(initialRateInfos().rateDateStart)
+            '2024-01-01'
         )
         expect(resubmittedWithEdits.revisions[1].formData.rateDateEnd).toBe(
-            formatGQLDate(initialRateInfos().rateDateEnd)
+            '2025-01-01'
         )
         expect(
             resubmittedWithEdits.revisions[1].submitInfo?.updatedReason
@@ -265,10 +249,10 @@ describe('indexRates', () => {
         // check unchanged rate most recent revision and previous
         expect(resubmittedUnchanged.revisions).toHaveLength(2)
         expect(resubmittedUnchanged.revisions[0].formData.rateDateStart).toBe(
-            formatGQLDate(initialRateInfos().rateDateStart)
+            '2024-01-01'
         )
         expect(resubmittedUnchanged.revisions[0].formData.rateDateEnd).toBe(
-            formatGQLDate(initialRateInfos().rateDateEnd)
+            '2025-01-01'
         )
         expect(
             resubmittedUnchanged.revisions[0].submitInfo?.updatedReason
@@ -279,20 +263,18 @@ describe('indexRates', () => {
         ).toBe('Initial submission')
 
         expect(resubmittedUnchanged.revisions[1].formData.rateDateStart).toBe(
-            formatGQLDate(initialRateInfos().rateDateStart)
+            '2024-01-01'
         )
         expect(resubmittedUnchanged.revisions[1].formData.rateDateEnd).toBe(
-            formatGQLDate(initialRateInfos().rateDateEnd)
+            '2025-01-01'
         )
 
         // check newly added rate
         expect(newlyAdded.revisions).toHaveLength(1)
         expect(newlyAdded.revisions[0].formData.rateDateStart).toBe(
-            formatGQLDate(new Date(Date.UTC(2030, 1, 1)))
+            '2024-01-01'
         )
-        expect(newlyAdded.revisions[0].formData.rateDateEnd).toBe(
-            formatGQLDate(new Date(Date.UTC(2030, 12, 1)))
-        )
+        expect(newlyAdded.revisions[0].formData.rateDateEnd).toBe('2025-01-01')
     })
 
     it('synthesizes the right statuses as a rate is submitted/unlocked/etc', async () => {
@@ -307,16 +289,23 @@ describe('indexRates', () => {
         })
 
         // First, create new submissions
-        const submittedRate = await createAndSubmitTestRate(server)
-        const unlockedRate = await createAndSubmitTestRate(server)
-        const relockedRate = await createAndSubmitTestRate(server)
+        const contract1 = await createAndSubmitTestContractWithRate(server)
+        const contract2 = await createAndSubmitTestContractWithRate(server)
+        const contract3 = await createAndSubmitTestContractWithRate(server)
+
+        const submittedRateID =
+            contract1.packageSubmissions[0].rateRevisions[0].rateID
+        const unlockedRateID =
+            contract2.packageSubmissions[0].rateRevisions[0].rateID
+        const relockedRateID =
+            contract3.packageSubmissions[0].rateRevisions[0].rateID
 
         // unlock two
-        await unlockTestRate(cmsServer, unlockedRate.id, 'Test reason')
-        await unlockTestRate(cmsServer, relockedRate.id, 'Test reason')
+        await unlockTestRate(cmsServer, unlockedRateID, 'Test reason')
+        await unlockTestRate(cmsServer, relockedRateID, 'Test reason')
 
         // resubmit one
-        await submitTestRate(server, relockedRate.id, 'Test first resubmission')
+        await submitTestRate(server, relockedRateID, 'Test first resubmission')
 
         // index rates
         const result = await cmsServer.executeOperation({
@@ -326,7 +315,7 @@ describe('indexRates', () => {
         expect(result.errors).toBeUndefined()
 
         // pull out test related rates and order them
-        const testRateIDs = [submittedRate.id, unlockedRate.id, relockedRate.id]
+        const testRateIDs = [submittedRateID, unlockedRateID, relockedRateID]
 
         const testRates: Rate[] = ratesIndex.edges
             .map((edge: RateEdge) => edge.node)
@@ -358,18 +347,22 @@ describe('indexRates', () => {
         })
 
         // First, create new rates
-        const submittedRate2 = await createAndSubmitTestRate(server)
-        const unlockedRate2 = await createAndSubmitTestRate(server)
-        const relockedRate2 = await createAndSubmitTestRate(server)
+        const contract1 = await createAndSubmitTestContractWithRate(server)
+        const contract2 = await createAndSubmitTestContractWithRate(server)
+        const contract3 = await createAndSubmitTestContractWithRate(server)
+
+        const submittedRate2 = contract1.packageSubmissions[0].rateRevisions[0]
+        const unlockedRate2 = contract2.packageSubmissions[0].rateRevisions[0]
+        const relockedRate2 = contract3.packageSubmissions[0].rateRevisions[0]
 
         // unlock two
-        await unlockTestRate(cmsServer, unlockedRate2.id, 'Test reason')
-        await unlockTestRate(cmsServer, relockedRate2.id, 'Test reason')
+        await unlockTestRate(cmsServer, unlockedRate2.rateID, 'Test reason')
+        await unlockTestRate(cmsServer, relockedRate2.rateID, 'Test reason')
 
         // resubmit one
         await submitTestRate(
             server,
-            relockedRate2.id,
+            relockedRate2.rateID,
             'Test first resubmission'
         )
 
@@ -381,9 +374,9 @@ describe('indexRates', () => {
         const ratesIndex = result.data?.indexRates
         expect(result.errors).toBeUndefined()
 
-        const submittedRateID = submittedRate2.id
-        const unlockedRateID = unlockedRate2.id
-        const resubmittedRateID = relockedRate2.id
+        const submittedRateID = submittedRate2.rateID
+        const unlockedRateID = unlockedRate2.rateID
+        const resubmittedRateID = relockedRate2.rateID
 
         if (!submittedRateID || !unlockedRateID || !resubmittedRateID) {
             throw new Error('Missing Rate ID')
@@ -447,16 +440,21 @@ describe('indexRates', () => {
             },
             ldService,
         })
-        // submit packages from two different states
-        const defaultState1 = await createAndSubmitTestRate(stateServer)
-        const defaultState2 = await createAndSubmitTestRate(stateServer)
-        const draft = await createTestRate()
 
-        const otherState1 = await submitTestRate(
+        // submit packages from two different states
+        const contract1 = await createAndSubmitTestContractWithRate(stateServer)
+        const contract2 = await createAndSubmitTestContractWithRate(stateServer)
+
+        const pkg3 = await createAndUpdateTestHealthPlanPackage(
             otherStateServer,
-            draft.id,
-            'submitted reason'
+            {},
+            'VA'
         )
+        const contract3 = await submitTestContract(otherStateServer, pkg3.id)
+
+        const defaultState1 = contract1.packageSubmissions[0].rateRevisions[0]
+        const defaultState2 = contract2.packageSubmissions[0].rateRevisions[0]
+        const otherState1 = contract3.packageSubmissions[0].rateRevisions[0]
 
         // index rates
         const result = await cmsServer.executeOperation({
@@ -472,9 +470,11 @@ describe('indexRates', () => {
         const defaultStateRates: Rate[] = []
         const otherStateRates: Rate[] = []
         allRates.forEach((rate) => {
-            if ([defaultState1.id, defaultState2.id].includes(rate.id)) {
+            if (
+                [defaultState1.rateID, defaultState2.rateID].includes(rate.id)
+            ) {
                 defaultStateRates.push(rate)
-            } else if (otherState1.id === rate.id) {
+            } else if (otherState1.rateID === rate.id) {
                 otherStateRates.push(rate)
             }
             return

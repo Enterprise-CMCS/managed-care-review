@@ -2,16 +2,10 @@ import SUBMIT_RATE from 'app-graphql/src/mutations/submitRate.graphql'
 import FETCH_RATE from 'app-graphql/src/queries/fetchRate.graphql'
 import UNLOCK_RATE from 'app-graphql/src/mutations/unlockRate.graphql'
 import UPDATE_DRAFT_CONTRACT_RATES from 'app-graphql/src/mutations/updateDraftContractRates.graphql'
-import { findStatePrograms } from '../postgres'
 import { must } from './assertionHelpers'
 import { defaultFloridaRateProgram } from './gqlHelpers'
-import {
-    mockDraftRate,
-    mockInsertRateArgs,
-    mockRateFormDataInput,
-} from './rateDataMocks'
+import { mockRateFormDataInput } from './rateDataMocks'
 import { sharedTestPrismaClient } from './storeHelpers'
-import { insertDraftRate } from '../postgres/contractAndRates/insertRate'
 import { updateDraftRate } from '../postgres/contractAndRates/updateDraftRate'
 
 import type {
@@ -21,11 +15,12 @@ import type {
     ActuaryContactInput,
     RateFormDataInput,
     UpdateDraftContractRatesInput,
+    Rate,
 } from '../gen/gqlServer'
 import type { RateType } from '../domain-models'
-import type { InsertRateArgsType } from '../postgres/contractAndRates/insertRate'
 import type { ApolloServer } from 'apollo-server-lambda'
 import type { RateFormEditableType } from '../domain-models/contractAndRates'
+import { createAndSubmitTestContractWithRate } from './gqlContractHelpers'
 
 const fetchTestRateById = async (
     server: ApolloServer,
@@ -50,12 +45,18 @@ const fetchTestRateById = async (
     return result.data.fetchRate.rate
 }
 
-const createAndSubmitTestRate = async (
-    server: ApolloServer,
-    rateData?: InsertRateArgsType
-): Promise<RateType> => {
-    const rate = await createTestRate(rateData)
-    return await must(submitTestRate(server, rate.id, 'Initial submission'))
+// rates must be initially submitted with a contract before they can be unlocked and submitted on their own.
+async function createSubmitAndUnlockTestRate(
+    stateServer: ApolloServer,
+    cmsServer: ApolloServer
+): Promise<Rate> {
+    const contract = await createAndSubmitTestContractWithRate(stateServer)
+    const rateRevision = contract.packageSubmissions[0].rateRevisions[0]
+    const rateID = rateRevision.rateID
+
+    const unlockedRate = await unlockTestRate(cmsServer, rateID, 'test unlock')
+
+    return unlockedRate
 }
 
 const submitTestRate = async (
@@ -116,31 +117,6 @@ const unlockTestRate = async (
     return updateResult.data.unlockRate.rate
 }
 
-// USING PRISMA DIRECTLY BELOW ---  we have no createRate or updateRate resolvers yet, but we have integration tests needing the workflows
-const createTestRate = async (
-    rateData?: Partial<InsertRateArgsType>
-): Promise<RateType> => {
-    const prismaClient = await sharedTestPrismaClient()
-    const defaultRateData = { ...mockDraftRate() }
-    const initialData = {
-        ...defaultRateData,
-        ...rateData, // override with any new fields passed in
-    }
-    const programs = initialData.stateCode
-        ? [must(findStatePrograms(initialData.stateCode))[0]]
-        : [defaultFloridaRateProgram()]
-
-    const programIDs = programs.map((program) => program.id)
-
-    const draftRateData = mockInsertRateArgs({
-        ...initialData,
-        rateProgramIDs: programIDs,
-        stateCode: 'FL',
-    })
-
-    return must(await insertDraftRate(prismaClient, draftRateData))
-}
-
 async function updateTestDraftRatesOnContract(
     server: ApolloServer,
     input: UpdateDraftContractRatesInput
@@ -163,73 +139,82 @@ async function updateTestDraftRatesOnContract(
 
 async function addNewRateToTestContract(
     server: ApolloServer,
-    contract: Contract
+    contract: Contract,
+    rateFormDataOverrides?: Partial<RateFormDataInput>
 ): Promise<Contract> {
     const rateUpdateInput = updateRatesInputFromDraftContract(contract)
 
-    const addedInput = addNewRateToRateInput(rateUpdateInput)
+    const addedInput = addNewRateToRateInput(
+        rateUpdateInput,
+        rateFormDataOverrides
+    )
 
     return await updateTestDraftRatesOnContract(server, addedInput)
 }
 
 function addNewRateToRateInput(
-    input: UpdateDraftContractRatesInput
+    input: UpdateDraftContractRatesInput,
+    rateFormDataOverrides?: Partial<RateFormDataInput>
 ): UpdateDraftContractRatesInput {
+    const newFormData: RateFormDataInput = {
+        rateType: 'AMENDMENT',
+        rateCapitationType: 'RATE_CELL',
+        rateDateStart: '2024-01-01',
+        rateDateEnd: '2025-01-01',
+        rateDateCertified: '2024-01-02',
+        amendmentEffectiveDateStart: '2024-02-01',
+        amendmentEffectiveDateEnd: '2025-02-01',
+        rateProgramIDs: [defaultFloridaRateProgram().id],
+
+        rateDocuments: [
+            {
+                s3URL: 'foo://bar',
+                name: 'ratedoc1.doc',
+                sha256: 'foobar',
+            },
+        ],
+        supportingDocuments: [
+            {
+                s3URL: 'foo://bar1',
+                name: 'ratesupdoc1.doc',
+                sha256: 'foobar1',
+            },
+            {
+                s3URL: 'foo://bar2',
+                name: 'ratesupdoc2.doc',
+                sha256: 'foobar2',
+            },
+        ],
+        certifyingActuaryContacts: [
+            {
+                name: 'Foo Person',
+                titleRole: 'Bar Job',
+                email: 'foo@example.com',
+                actuarialFirm: 'GUIDEHOUSE',
+            },
+        ],
+        addtlActuaryContacts: [
+            {
+                name: 'Bar Person',
+                titleRole: 'Baz Job',
+                email: 'bar@example.com',
+                actuarialFirm: 'OTHER',
+                actuarialFirmOther: 'Some Firm',
+            },
+        ],
+        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        packagesWithSharedRateCerts: [],
+
+        ...rateFormDataOverrides,
+    }
+
     return {
         contractID: input.contractID,
         updatedRates: [
             ...input.updatedRates,
             {
                 type: 'CREATE' as const,
-                formData: {
-                    rateType: 'AMENDMENT',
-                    rateCapitationType: 'RATE_CELL',
-                    rateDateStart: '2024-01-01',
-                    rateDateEnd: '2025-01-01',
-                    rateDateCertified: '2024-01-02',
-                    amendmentEffectiveDateStart: '2024-02-01',
-                    amendmentEffectiveDateEnd: '2025-02-01',
-                    rateProgramIDs: [defaultFloridaRateProgram().id],
-
-                    rateDocuments: [
-                        {
-                            s3URL: 'foo://bar',
-                            name: 'ratedoc1.doc',
-                            sha256: 'foobar',
-                        },
-                    ],
-                    supportingDocuments: [
-                        {
-                            s3URL: 'foo://bar1',
-                            name: 'ratesupdoc1.doc',
-                            sha256: 'foobar1',
-                        },
-                        {
-                            s3URL: 'foo://bar2',
-                            name: 'ratesupdoc2.doc',
-                            sha256: 'foobar2',
-                        },
-                    ],
-                    certifyingActuaryContacts: [
-                        {
-                            name: 'Foo Person',
-                            titleRole: 'Bar Job',
-                            email: 'foo@example.com',
-                            actuarialFirm: 'GUIDEHOUSE',
-                        },
-                    ],
-                    addtlActuaryContacts: [
-                        {
-                            name: 'Bar Person',
-                            titleRole: 'Baz Job',
-                            email: 'bar@example.com',
-                            actuarialFirm: 'OTHER',
-                            actuarialFirmOther: 'Some Firm',
-                        },
-                    ],
-                    actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                    packagesWithSharedRateCerts: [],
-                },
+                formData: newFormData,
             },
         ],
     }
@@ -418,9 +403,8 @@ const updateTestRate = async (
 }
 
 export {
-    createTestRate,
-    createAndSubmitTestRate,
     createTestDraftRateOnContract,
+    createSubmitAndUnlockTestRate,
     updateTestDraftRateOnContract,
     updateTestDraftRatesOnContract,
     updateRatesInputFromDraftContract,

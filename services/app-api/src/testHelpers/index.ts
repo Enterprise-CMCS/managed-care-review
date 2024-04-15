@@ -23,8 +23,6 @@ export { getStateRecord } from './stateHelpers'
 export { consoleLogFullData } from './debugHelpers'
 
 export {
-    createTestRate,
-    createAndSubmitTestRate,
     fetchTestRateById,
     submitTestRate,
     unlockTestRate,

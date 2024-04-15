@@ -57,7 +57,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
 
         // Add 3 rates 1, 2, 3 pointing to contract A
         const rate1 = must(
-            await insertDraftRate(client, {
+            await insertDraftRate(client, contractA.id, {
                 stateCode: 'MN',
                 rateCertificationName: 'someurle.en',
             })
@@ -78,7 +78,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         )
 
         const rate2 = must(
-            await insertDraftRate(client, {
+            await insertDraftRate(client, contractA.id, {
                 stateCode: 'MN',
                 rateCertificationName: 'twopointo',
             })
@@ -99,7 +99,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         )
 
         const rate3 = must(
-            await insertDraftRate(client, {
+            await insertDraftRate(client, contractA.id, {
                 stateCode: 'MN',
                 rateCertificationName: 'threepointo',
             })
@@ -397,7 +397,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
 
         // Add 3 rates 1, 2, 3 pointing to contract A
         const rate1 = must(
-            await insertDraftRate(client, {
+            await insertDraftRate(client, contractA.id, {
                 stateCode: 'MN',
                 rateCertificationName: 'someurle.en',
             })
@@ -422,7 +422,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         )
 
         const rate2 = must(
-            await insertDraftRate(client, {
+            await insertDraftRate(client, contractA.id, {
                 stateCode: 'MN',
                 rateCertificationName: 'twopointo',
             })
@@ -443,7 +443,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         )
 
         const rate3 = must(
-            await insertDraftRate(client, {
+            await insertDraftRate(client, contractA.id, {
                 stateCode: 'MN',
                 rateCertificationName: 'threepointo',
             })
@@ -895,16 +895,7 @@ describe('findContractWithHistory with only contract history', () => {
         }
 
         const contractID = updatedContract.id
-        const rateID = updatedContract.draftRevision.rateRevisions[0].rate.id
-
-        // Submit rate
-        must(
-            await submitRate(client, {
-                rateID,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'submit rate A revision 1.0',
-            })
-        )
+        const rateID = updatedContract.draftRevision.rateRevisions[0].rateID
 
         // Submit contract
         must(
@@ -976,22 +967,6 @@ describe('findContractWithHistory with only contract history', () => {
                 contractID,
                 unlockReason: 'unlock contract revision 1.0',
                 unlockedByUserID: cmsUser.id,
-            })
-        )
-
-        // Unlock and resubmit rate again
-        must(
-            await unlockRate(client, {
-                rateID,
-                unlockReason: 'unlock rate A revision 1.3',
-                unlockedByUserID: cmsUser.id,
-            })
-        )
-        must(
-            await submitRate(client, {
-                rateID,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'submit rate A revision 1.4',
             })
         )
 
@@ -1091,13 +1066,6 @@ describe('findContractWithHistory with only contract history', () => {
         }
 
         must(
-            await submitRate(client, {
-                rateID: secondRate.rate.id,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'submit rate B revision 1.0',
-            })
-        )
-        must(
             await submitContract(client, {
                 contractID,
                 submittedByUserID: stateUser.id,
@@ -1108,28 +1076,28 @@ describe('findContractWithHistory with only contract history', () => {
         // Unlock and resubmit rate B twice
         must(
             await unlockRate(client, {
-                rateID: secondRate.rate.id,
+                rateID: secondRate.rateID,
                 unlockedByUserID: cmsUser.id,
                 unlockReason: 'unlock rate B revision 1.0',
             })
         )
         must(
             await submitRate(client, {
-                rateID: secondRate.rate.id,
+                rateID: secondRate.rateID,
                 submittedByUserID: stateUser.id,
                 submittedReason: 'submit rate B revision 1.1',
             })
         )
         must(
             await unlockRate(client, {
-                rateID: secondRate.rate.id,
+                rateID: secondRate.rateID,
                 unlockedByUserID: cmsUser.id,
                 unlockReason: 'unlock rate B revision 1.1',
             })
         )
         must(
             await submitRate(client, {
-                rateID: secondRate.rate.id,
+                rateID: secondRate.rateID,
                 submittedByUserID: stateUser.id,
                 submittedReason: 'submit rate B revision 1.2',
             })
@@ -1150,7 +1118,7 @@ describe('findContractWithHistory with only contract history', () => {
         expect(
             submittedContract.revisions[0].rateRevisions[0].submitInfo
                 ?.updatedReason
-        ).toBe('submit rate A revision 1.5')
+        ).toBe('submit contract revision 1.2')
         expect(
             submittedContract.revisions[0].rateRevisions[1].submitInfo
                 ?.updatedReason

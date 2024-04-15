@@ -18,12 +18,7 @@ const contractRevisionSchema = z.object({
 
 const rateRevisionSchema = z.object({
     id: z.string().uuid(),
-    rate: z.object({
-        id: z.string().uuid(),
-        stateCode: z.string(),
-        stateNumber: z.number().min(1),
-        createdAt: z.date(),
-    }),
+    rateID: z.string().uuid(),
     submitInfo: updateInfoSchema.optional(),
     unlockInfo: updateInfoSchema.optional(),
     createdAt: z.date(),
