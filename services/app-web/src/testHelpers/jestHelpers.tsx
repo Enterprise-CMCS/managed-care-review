@@ -1,4 +1,4 @@
-import { MockedProvider, MockedProviderProps } from '@apollo/client/testing'
+import { MockedProviderProps, MockedProvider } from '@apollo/client/testing'
 import { Location, MemoryRouter, useLocation } from 'react-router-dom'
 import {
     fireEvent,

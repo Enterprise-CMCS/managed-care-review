@@ -28,10 +28,6 @@ WithAction.args = {
     editNavigateTo: 'contract-details',
     submissionName: 'StoryBook',
     statePrograms: [],
-    documentDateLookupTable: {
-        fakesha: 'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-        previousSubmissionDate: '01/01/01'
-    },
 }
 
 export const WithoutAction = Template.bind({})
@@ -39,8 +35,4 @@ WithoutAction.decorators = [(Story) => ProvidersDecorator(Story, {})]
 WithoutAction.args = {
     contract: contract,
     submissionName: 'StoryBook',
-    documentDateLookupTable: {
-        fakesha: 'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-        previousSubmissionDate: '01/01/01'
-    },
 }

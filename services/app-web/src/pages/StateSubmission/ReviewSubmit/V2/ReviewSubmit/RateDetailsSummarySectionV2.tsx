@@ -12,7 +12,6 @@ import styles from '../../../../../components/SubmissionSummarySection/Submissio
 import { recordJSException } from '../../../../../otelHelpers'
 import { DataDetailMissingField } from '../../../../../components/DataDetail/DataDetailMissingField'
 import { DataDetailContactField } from '../../../../../components/DataDetail/DataDetailContactField/DataDetailContactField'
-import { DocumentDateLookupTableType } from '../../../../../documentHelpers/makeDocumentDateLookupTable'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../../../../components/DocumentWarning'
 import { SectionCard } from '../../../../../components/SectionCard'
@@ -29,7 +28,6 @@ import { getLastContractSubmission } from '../../../../../gqlHelpers/contractsAn
 export type RateDetailsSummarySectionV2Props = {
     contract: Contract
     editNavigateTo?: string
-    documentDateLookupTable: DocumentDateLookupTableType
     isCMSUser?: boolean
     submissionName: string
     statePrograms: Program[]
@@ -67,7 +65,6 @@ export function renderDownloadButton(
 export const RateDetailsSummarySectionV2 = ({
     contract,
     editNavigateTo,
-    documentDateLookupTable,
     submissionName,
     statePrograms,
     onDocumentError,
@@ -179,7 +176,8 @@ export const RateDetailsSummarySectionV2 = ({
 
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
-            const submittedRates = getLastContractSubmission(contract)?.rateRevisions
+            const submittedRates =
+                getLastContractSubmission(contract)?.rateRevisions
             if (submittedRates !== undefined) {
                 const keysFromDocs = submittedRates
                     .flatMap((rateInfo) =>
@@ -353,7 +351,9 @@ export const RateDetailsSummarySectionV2 = ({
                             )}
                             {rateFormData?.supportingDocuments && (
                                 <UploadedDocumentsTable
-                                    documents={rateFormData?.supportingDocuments}
+                                    documents={
+                                        rateFormData?.supportingDocuments
+                                    }
                                     previousSubmissionDate={lastSubmittedDate}
                                     packagesWithSharedRateCerts={
                                         isEditing
