@@ -46,7 +46,7 @@ function draftRateRevToDomainModel(
 
     return {
         id: revision.id,
-        rate: revision.rate,
+        rateID: revision.rateID,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
         formData,

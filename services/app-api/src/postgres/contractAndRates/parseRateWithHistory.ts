@@ -85,7 +85,7 @@ function rateRevisionToDomainModel(
 
     return {
         id: revision.id,
-        rate: revision.rate,
+        rateID: revision.rateID,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
         submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
@@ -221,7 +221,7 @@ function rateWithHistoryToDomainModel(
     }
 
     // Find this rate's parent contract. It'll be the contract it was initially submitted with
-    // or the contract it is associated with as an initial draft. 
+    // or the contract it is associated with as an initial draft.
     const firstRevision = rate.revisions[0]
     const submission = firstRevision.submitInfo
 
@@ -229,7 +229,8 @@ function rateWithHistoryToDomainModel(
     if (!submission) {
         // this is a draft, never submitted, rate
         if (rate.draftContracts.length !== 1) {
-            const msg = 'programming error: its an unsubmitted rate with no draft contracts'
+            const msg =
+                'programming error: its an unsubmitted rate with no draft contracts'
             console.error(msg)
             return new Error(msg)
         }
@@ -238,7 +239,8 @@ function rateWithHistoryToDomainModel(
     } else {
         // check the initial submission
         if (submission.submittedContracts.length !== 1) {
-            const msg = 'programming error: its a submitted rate that was not submitted with a contract initially'
+            const msg =
+                'programming error: its a submitted rate that was not submitted with a contract initially'
             console.error(msg)
             return new Error(msg)
         }

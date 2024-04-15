@@ -13,7 +13,10 @@ import type {
     ContractRevisionTableWithFormData,
     UpdateInfoTableWithUpdater,
 } from './prismaSharedContractRateHelpers'
-import { rateRevisionToDomainModel } from './prismaSharedContractRateHelpers'
+import {
+    rateRevisionToDomainModel,
+    unsortedRatesRevisionsToDomainModel,
+} from './prismaSharedContractRateHelpers'
 import {
     contractFormDataToDomainModel,
     convertUpdateInfoToDomainModel,
@@ -40,7 +43,7 @@ function parseContractWithHistory(
     const parseContract = contractSchema.safeParse(contractWithHistory)
     if (!parseContract.success) {
         const error = `ERROR: attempting to parse prisma contract with history failed: ${parseContract.error}`
-        console.warn(error)
+        console.warn(error, contractWithHistory, parseContract.error)
         return parseContract.error
     }
 
@@ -163,7 +166,7 @@ function contractWithHistoryToDomainModel(
                         updatedAt: r.updatedAt,
                         status: getContractRateStatus(r.revisions),
                         stateCode: r.stateCode,
-                        parentContractID: 'old-style-rate-pull',
+                        parentContractID: contractRev.contractID, // all pre-migrated rates are parented to their only contract.
                         stateNumber: r.stateNumber,
                         revisions: [],
                     }
@@ -326,10 +329,11 @@ function contractWithHistoryToDomainModel(
 
             const relatedRateRevisions = submission.submissionPackages
                 .filter((p) => p.contractRevisionID === revision.id)
+                .sort((a, b) => a.ratePosition - b.ratePosition)
                 .map((p) => p.rateRevision)
 
             const rateRevisions =
-                ratesRevisionsToDomainModel(relatedRateRevisions)
+                unsortedRatesRevisionsToDomainModel(relatedRateRevisions)
 
             if (rateRevisions instanceof Error) {
                 return rateRevisions

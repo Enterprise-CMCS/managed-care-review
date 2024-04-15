@@ -21,7 +21,7 @@ generates:
         CMSUser: ../domain-models#CMSUserType
         HealthPlanPackage: ../domain-models#HealthPlanPackageType
         Rate: ../domain-models#RateType
-        RateRevision: ../domain-models#RateRevisionType
+        RateRevision: ../domain-models#RateRevisionWithContractsType
         Contract: ../domain-models#ContractType as ContractDomainType
         ContractRevision: ../domain-models#ContractRevisionType
         ContractPackageSubmission: ../domain-models#ContractPackageSubmissionWithCauseType

@@ -10,6 +10,7 @@ import { updateDraftRate } from './updateDraftRate'
 import { submitContract } from './submitContract'
 import { findContractWithHistory } from './findContractWithHistory'
 import { must, mockInsertContractArgs } from '../../testHelpers'
+import { updateDraftContractRates } from './updateDraftContractRates'
 
 describe('unlockContract', () => {
     it('Unlocks a rate without breaking connected draft contract', async () => {
@@ -45,51 +46,60 @@ describe('unlockContract', () => {
             await insertDraftContract(client, draftContractData)
         )
         const rate = must(
-            await insertDraftRate(client, {
+            await insertDraftRate(client, contract.id, {
                 stateCode: 'MN',
                 rateCertificationName: 'Rate 1.0',
             })
         )
 
-        // Submit Rate A
-        const submittedRate = must(
-            await submitRate(client, {
-                rateID: rate.id,
+        // Submit Contract With Rate A
+        const submittedContractWithRateA = must(
+            await submitContract(client, {
+                contractID: contract.id,
                 submittedByUserID: stateUser.id,
                 submittedReason: 'Rate A 1.0 submit',
             })
         )
 
+        const submittedRateAID =
+            submittedContractWithRateA.packageSubmissions[0].rateRevisions[0]
+                .rateID
+
+        const contract2 = must(
+            await insertDraftContract(client, draftContractData)
+        )
         // Connect draft contract to submitted rate
         must(
-            await updateDraftContractWithRates(client, {
-                contractID: contract.id,
-                formData: {
-                    submissionType: 'CONTRACT_AND_RATES',
-                    submissionDescription: 'Connecting rate',
-                    contractType: 'BASE',
-                    programIDs: ['PMAP'],
-                    populationCovered: 'MEDICAID',
-                    riskBasedContract: false,
+            await updateDraftContractRates(client, {
+                contractID: contract2.id,
+                rateUpdates: {
+                    create: [],
+                    update: [],
+                    link: [
+                        {
+                            rateID: rate.id,
+                            ratePosition: 1,
+                        },
+                    ],
+                    unlink: [],
+                    delete: [],
                 },
-                rateFormDatas: [submittedRate.revisions[0].formData],
             })
         )
 
         const fullDraftContract = must(
-            await findContractWithHistory(client, contract.id)
+            await findContractWithHistory(client, contract2.id)
         )
 
-        const draftContract = fullDraftContract.draftRevision
+        const draftContractRev = fullDraftContract.draftRevision
+        const draftRates = fullDraftContract.draftRates
 
-        if (draftContract === undefined) {
+        if (draftContractRev === undefined || draftRates === undefined) {
             throw Error('Unexpect error: draft contract missing draft revision')
         }
 
         // Rate revision should be connected to contract
-        expect(draftContract.rateRevisions[0].id).toEqual(
-            submittedRate.revisions[0].id
-        )
+        expect(draftRates[0].id).toEqual(submittedRateAID)
 
         // Unlock the rate
         must(
@@ -116,19 +126,21 @@ describe('unlockContract', () => {
         )
 
         const fullDraftContractTwo = must(
-            await findContractWithHistory(client, contract.id)
+            await findContractWithHistory(client, contract2.id)
         )
 
-        const draftContractTwo = fullDraftContractTwo.draftRevision
+        const draftContractRevTwo = fullDraftContractTwo.draftRevision
+        const draftContractTwoDraftRates = fullDraftContractTwo.draftRates
 
-        if (draftContractTwo === undefined) {
+        if (
+            draftContractRevTwo === undefined ||
+            draftContractTwoDraftRates === undefined
+        ) {
             throw Error('Unexpect error: draft contract missing draft revision')
         }
 
         // Contract should now have the latest rate revision
-        expect(draftContractTwo.rateRevisions[0].id).toEqual(
-            resubmittedRate.revisions[0].id
-        )
+        expect(draftContractTwoDraftRates[0].id).toEqual(resubmittedRate.id)
     })
 
     // This is unlocking a rate without unlocking the contract that this rate belongs to. Then it updates the rate and resubmits.
@@ -136,6 +148,7 @@ describe('unlockContract', () => {
     // This test does not simulate how creating/updating a rate currently works in our app and the contract revision history
     // will not match.
     // Skipping this for now, revisit during rate only feature work.
+    // eslint-disable-next-line jest/no-disabled-tests
     it.skip('Unlocks a rate without breaking connected submitted contract', async () => {
         const client = await sharedTestPrismaClient()
 
@@ -169,7 +182,7 @@ describe('unlockContract', () => {
             await insertDraftContract(client, draftContractData)
         )
         const rate = must(
-            await insertDraftRate(client, {
+            await insertDraftRate(client, contract.id, {
                 stateCode: 'MN',
                 rateCertificationName: 'Rate 1.0',
             })
@@ -285,7 +298,7 @@ describe('unlockContract', () => {
             await insertDraftContract(client, draftContractData)
         )
         const rate = must(
-            await insertDraftRate(client, {
+            await insertDraftRate(client, contract.id, {
                 stateCode: 'MN',
                 rateCertificationName: 'rate 1.0',
             })
@@ -297,31 +310,6 @@ describe('unlockContract', () => {
             )
         }
 
-        // Connect draft contract to draft rate
-        must(
-            await updateDraftContractWithRates(client, {
-                contractID: contract.id,
-                formData: {
-                    submissionType: 'CONTRACT_AND_RATES',
-                    submissionDescription: 'contract 1.0',
-                    contractType: 'BASE',
-                    programIDs: ['PMAP'],
-                    populationCovered: 'MEDICAID',
-                    riskBasedContract: false,
-                },
-                rateFormDatas: [rate.draftRevision?.formData],
-            })
-        )
-
-        // Submit rate
-        const submittedRate = must(
-            await submitRate(client, {
-                rateID: rate.id,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'Submit rate 1.0',
-            })
-        )
-
         // Submit contract
         const submittedContract = must(
             await submitContract(client, {
@@ -330,10 +318,10 @@ describe('unlockContract', () => {
                 submittedReason: 'Submit contract 1.0',
             })
         )
-        const latestContractRev = submittedContract.revisions[0]
+        const lastestSubmission = submittedContract.packageSubmissions[0]
 
-        expect(latestContractRev.rateRevisions[0].id).toEqual(
-            submittedRate.revisions[0].id
+        expect(lastestSubmission.rateRevisions[0].id).toEqual(
+            rate.draftRevision.id
         )
 
         // Unlock and resubmit contract
@@ -344,20 +332,6 @@ describe('unlockContract', () => {
                 unlockReason: 'First unlock',
             })
         )
-        must(
-            await updateDraftContractWithRates(client, {
-                contractID: contract.id,
-                formData: {
-                    submissionType: 'CONTRACT_AND_RATES',
-                    submissionDescription: 'contract 2.0',
-                    contractType: 'BASE',
-                    programIDs: ['PMAP'],
-                    populationCovered: 'MEDICAID',
-                    riskBasedContract: false,
-                },
-                rateFormDatas: [rate.draftRevision?.formData],
-            })
-        )
 
         const resubmittedContract = must(
             await submitContract(client, {
@@ -366,11 +340,11 @@ describe('unlockContract', () => {
                 submittedReason: 'Submit contract 2.0',
             })
         )
-        const latestResubmittedRev = resubmittedContract.revisions[0]
+        const latestResubmission = resubmittedContract.packageSubmissions[0]
 
         // Expect rate revision to still be connected
-        expect(latestResubmittedRev.rateRevisions[0].id).toEqual(
-            submittedRate.revisions[0].id
+        expect(latestResubmission.rateRevisions[0].id).toEqual(
+            rate.draftRevision.id
         )
     })
     it('errors when unlocking a draft contract or rate', async () => {
@@ -395,7 +369,7 @@ describe('unlockContract', () => {
             await insertDraftContract(client, draftContractData)
         )
         const rateA = must(
-            await insertDraftRate(client, {
+            await insertDraftRate(client, contractA.id, {
                 stateCode: 'MN',
                 rateCertificationName: 'rate A 1.1',
             })

@@ -39,6 +39,7 @@ import { contractResolver } from './contract/contractResolver'
 import { contractRevisionResolver } from './contract/contractRevisionResolver'
 import { fetchContractResolver } from './contract/fetchContract'
 import { submitContract } from './contract/submitContract'
+import { rateRevisionResolver } from './rate/rateRevisionResolver'
 
 export function configureResolvers(
     store: Store,
@@ -137,6 +138,7 @@ export function configureResolvers(
         CMSUser: cmsUserResolver,
         HealthPlanPackage: healthPlanPackageResolver(store),
         Rate: rateResolver,
+        RateRevision: rateRevisionResolver,
         Contract: contractResolver(store),
         ContractRevision: contractRevisionResolver(store),
     }
