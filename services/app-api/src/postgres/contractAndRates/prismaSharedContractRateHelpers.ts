@@ -127,7 +127,8 @@ type RateRevisionTableWithFormData = Prisma.RateRevisionTableGetPayload<{
 }>
 
 function rateFormDataToDomainModel(
-    rateRevision: RateRevisionTableWithFormData
+    rateRevision: RateRevisionTableWithFormData,
+    previousRevision?: RateRevisionTableWithFormData
 ): RateFormDataType | Error {
     const packagesWithSharedRateCerts = []
     let statePrograms: ProgramType[] | Error | undefined = undefined
@@ -163,18 +164,35 @@ function rateFormDataToDomainModel(
         rateType: rateRevision.rateType ?? undefined,
         rateCapitationType: rateRevision.rateCapitationType ?? undefined,
         rateDocuments: rateRevision.rateDocuments
-            ? rateRevision.rateDocuments.map((doc) => ({
-                  name: doc.name,
-                  s3URL: doc.s3URL,
-                  sha256: doc.sha256,
-              }))
+            ? rateRevision.rateDocuments.map((doc) => {
+                  const dateAdded =
+                      previousRevision &&
+                      previousRevision.rateDocuments.includes(doc)
+                          ? previousRevision.submitInfo?.updatedAt
+                          : rateRevision.updatedAt
+
+                  return {
+                      name: doc.name,
+                      s3URL: doc.s3URL,
+                      sha256: doc.sha256,
+                      dateAdded: dateAdded ?? rateRevision.updatedAt,
+                  }
+              })
             : [],
         supportingDocuments: rateRevision.supportingDocuments
-            ? rateRevision.supportingDocuments.map((doc) => ({
-                  name: doc.name,
-                  s3URL: doc.s3URL,
-                  sha256: doc.sha256,
-              }))
+            ? rateRevision.supportingDocuments.map((doc) => {
+                  const dateAdded =
+                      previousRevision &&
+                      previousRevision.supportingDocuments.includes(doc)
+                          ? previousRevision.submitInfo?.updatedAt
+                          : rateRevision.updatedAt
+                  return {
+                      name: doc.name,
+                      s3URL: doc.s3URL,
+                      sha256: doc.sha256,
+                      dateAdded: dateAdded ?? rateRevision.updatedAt,
+                  }
+              })
             : [],
         rateDateStart: rateRevision.rateDateStart ?? undefined,
         rateDateEnd: rateRevision.rateDateEnd ?? undefined,
@@ -259,7 +277,8 @@ type ContractRevisionTableWithFormData =
     }>
 
 function contractFormDataToDomainModel(
-    contractRevision: ContractRevisionTableWithFormData
+    contractRevision: ContractRevisionTableWithFormData,
+    previousRevision?: ContractRevisionTableWithFormData
 ): ContractFormDataType {
     return {
         submissionType: contractRevision.submissionType,
@@ -279,20 +298,37 @@ function contractFormDataToDomainModel(
               }))
             : [],
         supportingDocuments: contractRevision.supportingDocuments
-            ? contractRevision.supportingDocuments.map((doc) => ({
-                  name: doc.name,
-                  s3URL: doc.s3URL,
-                  sha256: doc.sha256 ?? undefined,
-              }))
+            ? contractRevision.supportingDocuments.map((doc) => {
+                  const dateAdded =
+                      previousRevision &&
+                      previousRevision.supportingDocuments.includes(doc)
+                          ? previousRevision.submitInfo?.updatedAt
+                          : contractRevision.updatedAt
+
+                  return {
+                      name: doc.name,
+                      s3URL: doc.s3URL,
+                      sha256: doc.sha256 ?? undefined,
+                      dateAdded: dateAdded ?? contractRevision.updatedAt,
+                  }
+              })
             : [],
         contractExecutionStatus:
             contractRevision.contractExecutionStatus ?? undefined,
         contractDocuments: contractRevision.contractDocuments
-            ? contractRevision.contractDocuments.map((doc) => ({
-                  name: doc.name,
-                  s3URL: doc.s3URL,
-                  sha256: doc.sha256 ?? undefined,
-              }))
+            ? contractRevision.contractDocuments.map((doc) => {
+                  const dateAdded =
+                      previousRevision &&
+                      previousRevision.contractDocuments.includes(doc)
+                          ? previousRevision.submitInfo?.updatedAt
+                          : contractRevision.updatedAt
+                  return {
+                      name: doc.name,
+                      s3URL: doc.s3URL,
+                      sha256: doc.sha256 ?? undefined,
+                      dateAdded: dateAdded ?? contractRevision.updatedAt,
+                  }
+              })
             : [],
         contractDateStart: contractRevision.contractDateStart ?? undefined,
         contractDateEnd: contractRevision.contractDateEnd ?? undefined,

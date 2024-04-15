@@ -1,11 +1,13 @@
 import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import type { RateType } from '../../domain-models/contractAndRates'
+import type {
+    RateFormEditableType,
+    RateType,
+} from '../../domain-models/contractAndRates'
 import { parseRateWithHistory } from './parseRateWithHistory'
 import { includeFullRate } from './prismaSubmittedRateHelpers'
 import type { PrismaClient } from '@prisma/client'
-import type { RateFormEditable } from './updateDraftRate'
 
-type InsertRateArgsType = RateFormEditable & {
+type InsertRateArgsType = RateFormEditableType & {
     stateCode: StateCodeType
 }
 

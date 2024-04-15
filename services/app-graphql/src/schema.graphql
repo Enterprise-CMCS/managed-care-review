@@ -865,10 +865,12 @@ type GenericDocument {
     s3URL: String!
     "The sha256 is a unique string representing the file, generated on the FE currently in the FileUpload component"
     sha256: String!
+    "The first date this document was added to submitted package - if still an initial draft, this date is last updated, otherwise it is the submitInfo lastUpdated"
+    dateAdded: Date
 }
 
 """
-GenericDocumentInput
+GenericDocument
 
 This document input should be used (or extended) everywhere we pass documents through GraphQL regardless of domain
 """
@@ -879,6 +881,8 @@ input GenericDocumentInput {
     s3URL: String!
     "The sha256 is a unique string representing the file, generated on the FE currently in the FileUpload component"
     sha256: String!
+     "The first date this document was added to submitted package - this is ignored on input and regenerated on return"
+    dateAdded: Date
 }
 
 "The large overarching population of people that the program covers."

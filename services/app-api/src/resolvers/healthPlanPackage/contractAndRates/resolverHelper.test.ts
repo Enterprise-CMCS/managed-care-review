@@ -5,7 +5,7 @@ import {
 } from './resolverHelpers'
 import type { UnlockedHealthPlanFormDataType } from '../../../../../app-web/src/common-code/healthPlanFormDataType'
 import { must } from '../../../testHelpers'
-import type { RateFormDataType } from '../../../domain-models/contractAndRates'
+import type { RateFormDataType } from '../../../domain-models'
 
 describe('isEqualRateData', () => {
     const rateDataTestCases = [

@@ -1,11 +1,11 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { insertDraftRate } from './insertRate'
-import { must } from '../../testHelpers'
+import { clearDocMetadata, must } from '../../testHelpers'
 import { updateDraftRate } from './updateDraftRate'
 import { PrismaClientValidationError } from '@prisma/client/runtime/library'
 
-import type { RateFormEditable } from './updateDraftRate'
 import type { RateType } from '@prisma/client'
+import type { RateFormEditableType } from '../../domain-models/contractAndRates'
 
 describe('updateDraftRate', () => {
     afterEach(() => {
@@ -42,7 +42,7 @@ describe('updateDraftRate', () => {
     it('updates linked documents as expected in multiple requests', async () => {
         const client = await sharedTestPrismaClient()
 
-        const draftRateForm1: RateFormEditable = {
+        const draftRateForm1: RateFormEditableType = {
             rateCertificationName: 'draftData1',
             rateDocuments: [
                 {
@@ -60,7 +60,7 @@ describe('updateDraftRate', () => {
             ],
         }
         // documents all replaced, additional supporting docs added
-        const draftRateForm2: RateFormEditable = {
+        const draftRateForm2: RateFormEditableType = {
             rateCertificationName: 'draftData2',
             rateDocuments: [
                 {
@@ -84,7 +84,7 @@ describe('updateDraftRate', () => {
         }
 
         // documents unchanged
-        const draftRateForm3: RateFormEditable = {
+        const draftRateForm3: RateFormEditableType = {
             rateCertificationName: 'draftData3',
             rateDocuments: draftRateForm2.rateDocuments,
             supportingDocuments: draftRateForm1.supportingDocuments,
@@ -119,12 +119,12 @@ describe('updateDraftRate', () => {
             'draftData2'
         )
 
-        expect(draft2.draftRevision?.formData.rateDocuments).toEqual(
-            draftRateForm2.rateDocuments
-        )
-        expect(draft2.draftRevision?.formData.supportingDocuments).toEqual(
-            draftRateForm2.supportingDocuments
-        )
+        expect(
+            clearDocMetadata(draft2.draftRevision?.formData.rateDocuments)
+        ).toEqual(draftRateForm2.rateDocuments)
+        expect(
+            clearDocMetadata(draft2.draftRevision?.formData.supportingDocuments)
+        ).toEqual(draftRateForm2.supportingDocuments)
 
         const draft3 = must(
             await updateDraftRate(client, {
@@ -139,17 +139,17 @@ describe('updateDraftRate', () => {
         expect(draft3.draftRevision?.formData.supportingDocuments).toHaveLength(
             1
         )
-        expect(draft3.draftRevision?.formData.rateDocuments).toEqual(
-            draftRateForm3.rateDocuments
-        )
-        expect(draft3.draftRevision?.formData.supportingDocuments).toEqual(
-            draftRateForm3.supportingDocuments
-        )
+        expect(
+            clearDocMetadata(draft3.draftRevision?.formData.rateDocuments)
+        ).toEqual(draftRateForm3.rateDocuments)
+        expect(
+            clearDocMetadata(draft3.draftRevision?.formData.supportingDocuments)
+        ).toEqual(draftRateForm3.supportingDocuments)
     })
 
     it('updates linked contacts as expected in multiple requests', async () => {
         const client = await sharedTestPrismaClient()
-        const draftRateForm1: RateFormEditable = {
+        const draftRateForm1: RateFormEditableType = {
             rateCertificationName: 'draftData1',
             certifyingActuaryContacts: [
                 {
@@ -169,7 +169,7 @@ describe('updateDraftRate', () => {
             ],
         }
         // all contacts replaced
-        const draftRateForm2: RateFormEditable = {
+        const draftRateForm2: RateFormEditableType = {
             rateCertificationName: 'draftData2',
             certifyingActuaryContacts: [
                 {
@@ -190,7 +190,7 @@ describe('updateDraftRate', () => {
         }
 
         // contacts values unchanged
-        const draftRateForm3: RateFormEditable = {
+        const draftRateForm3: RateFormEditableType = {
             rateCertificationName: 'draftData3',
             certifyingActuaryContacts: draftRateForm2.certifyingActuaryContacts,
             addtlActuaryContacts: draftRateForm1.addtlActuaryContacts,

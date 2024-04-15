@@ -1,21 +1,24 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { insertDraftContract } from './insertContract'
-import { mockInsertContractArgs, must } from '../../testHelpers'
-import type { ContractFormEditable } from './updateDraftContractWithRates'
+import {
+    clearDocMetadata,
+    mockInsertContractArgs,
+    must,
+} from '../../testHelpers'
 import { updateDraftContractWithRates } from './updateDraftContractWithRates'
 import { PrismaClientValidationError } from '@prisma/client/runtime/library'
 import type { ContractType } from '@prisma/client'
 import type {
     ContractFormDataType,
-    RateFormDataType,
+    RateFormEditableType,
+    ContractFormEditableType,
 } from '../../domain-models/contractAndRates'
 import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
 import { v4 as uuidv4 } from 'uuid'
-import type { RateFormEditable } from './updateDraftRate'
 import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
 
-describe('updateDraftContract', () => {
+describe('updateDraftContractWithRates postgres', () => {
     afterEach(() => {
         jest.clearAllMocks()
     })
@@ -49,7 +52,7 @@ describe('updateDraftContract', () => {
         )
     })
 
-    function completeTestContract(): ContractFormDataType {
+    function completeTestContract(): ContractFormEditableType {
         return {
             programIDs: ['5904a736-4422-4b78-abef-f3df3d0ae21d'],
             populationCovered: 'MEDICAID' as const,
@@ -120,7 +123,7 @@ describe('updateDraftContract', () => {
         }
     }
 
-    function completeTestRate(): RateFormDataType {
+    function completeTestRate(): RateFormEditableType {
         return {
             rateType: 'AMENDMENT',
             rateCapitationType: 'RATE_CELL',
@@ -218,7 +221,7 @@ describe('updateDraftContract', () => {
     it('updates linked documents as expected in multiple requests', async () => {
         const client = await sharedTestPrismaClient()
 
-        const draftContractForm1: ContractFormEditable = {
+        const draftContractForm1: ContractFormEditableType = {
             submissionDescription: 'draftData1',
             contractDocuments: [
                 {
@@ -236,7 +239,7 @@ describe('updateDraftContract', () => {
             ],
         }
         // documents all replaced, additional supporting docs added
-        const draftContractForm2: ContractFormEditable = {
+        const draftContractForm2: ContractFormEditableType = {
             submissionDescription: 'draftData2',
             contractDocuments: [
                 {
@@ -260,7 +263,7 @@ describe('updateDraftContract', () => {
         }
 
         // documents unchanged
-        const draftContractForm3: ContractFormEditable = {
+        const draftContractForm3: ContractFormEditableType = {
             submissionDescription: 'draftData3',
             contractDocuments: draftContractForm2.contractDocuments,
             supportingDocuments: draftContractForm1.supportingDocuments,
@@ -291,12 +294,12 @@ describe('updateDraftContract', () => {
             'draftData2'
         )
 
-        expect(draft2.draftRevision?.formData.contractDocuments).toEqual(
-            draftContractForm2.contractDocuments
-        )
-        expect(draft2.draftRevision?.formData.supportingDocuments).toEqual(
-            draftContractForm2.supportingDocuments
-        )
+        expect(
+            clearDocMetadata(draft2.draftRevision?.formData.contractDocuments)
+        ).toEqual(draftContractForm2.contractDocuments)
+        expect(
+            clearDocMetadata(draft2.draftRevision?.formData.supportingDocuments)
+        ).toEqual(draftContractForm2.supportingDocuments)
 
         const draft3 = must(
             await updateDraftContractWithRates(client, {
@@ -307,20 +310,20 @@ describe('updateDraftContract', () => {
         expect(draft3.draftRevision?.formData.submissionDescription).toBe(
             'draftData3'
         )
-        expect(draft3.draftRevision?.formData.supportingDocuments).toHaveLength(
-            1
-        )
-        expect(draft3.draftRevision?.formData.contractDocuments).toEqual(
-            draftContractForm3.contractDocuments
-        )
-        expect(draft3.draftRevision?.formData.supportingDocuments).toEqual(
-            draftContractForm3.supportingDocuments
-        )
+        expect(
+            clearDocMetadata(draft3.draftRevision?.formData.supportingDocuments)
+        ).toHaveLength(1)
+        expect(
+            clearDocMetadata(draft3.draftRevision?.formData.contractDocuments)
+        ).toEqual(draftContractForm3.contractDocuments)
+        expect(
+            clearDocMetadata(draft3.draftRevision?.formData.supportingDocuments)
+        ).toEqual(draftContractForm3.supportingDocuments)
     })
 
     it('updates linked contacts as expected in multiple requests', async () => {
         const client = await sharedTestPrismaClient()
-        const draftContractForm1: ContractFormEditable = {
+        const draftContractForm1: ContractFormEditableType = {
             submissionDescription: 'draftData1',
             stateContacts: [
                 {
@@ -331,7 +334,7 @@ describe('updateDraftContract', () => {
             ],
         }
         // all contacts replaced
-        const draftContractForm2: ContractFormEditable = {
+        const draftContractForm2: ContractFormEditableType = {
             submissionDescription: 'draftData2',
             stateContacts: [
                 {
@@ -343,7 +346,7 @@ describe('updateDraftContract', () => {
         }
 
         // contacts values unchanged
-        const draftContractForm3: ContractFormEditable = {
+        const draftContractForm3: ContractFormEditableType = {
             submissionDescription: 'draftData3',
             stateContacts: draftContractForm2.stateContacts,
         }
@@ -436,7 +439,7 @@ describe('updateDraftContract', () => {
         )
 
         // Array of new rates to create
-        const newRates: RateFormDataType[] = [
+        const newRates: RateFormEditableType[] = [
             mockInsertRateArgs({
                 id: uuidv4(),
                 rateType: 'NEW',
@@ -472,7 +475,7 @@ describe('updateDraftContract', () => {
         expect(newlyCreatedRates).toHaveLength(3)
 
         // Array of the current rates, but now with updates
-        const updateRateRevisionData: RateFormEditable[] = [
+        const updateRateRevisionData: RateFormEditableType[] = [
             {
                 ...newlyCreatedRates[0].formData,
                 rateCapitationType: 'RATE_RANGE',
@@ -565,6 +568,12 @@ describe('updateDraftContract', () => {
                     formData: expect.objectContaining({
                         ...updatedRateRevisions[0].formData,
                         ...updateRateRevisionData[0],
+                        rateDocuments: clearDocMetadata(
+                            updatedRateRevisions[0].formData.rateDocuments
+                        ),
+                        supportingDocuments: clearDocMetadata(
+                            updatedRateRevisions[0].formData.supportingDocuments
+                        ),
                     }),
                 }),
                 expect.objectContaining({
@@ -572,6 +581,12 @@ describe('updateDraftContract', () => {
                     formData: expect.objectContaining({
                         ...updatedRateRevisions[1].formData,
                         ...updateRateRevisionData[1],
+                        rateDocuments: clearDocMetadata(
+                            updatedRateRevisions[1].formData.rateDocuments
+                        ),
+                        supportingDocuments: clearDocMetadata(
+                            updatedRateRevisions[1].formData.supportingDocuments
+                        ),
                     }),
                 }),
                 expect.objectContaining({
@@ -579,6 +594,12 @@ describe('updateDraftContract', () => {
                     formData: expect.objectContaining({
                         ...updatedRateRevisions[2].formData,
                         ...updateRateRevisionData[2],
+                        rateDocuments: clearDocMetadata(
+                            updatedRateRevisions[2].formData.rateDocuments
+                        ),
+                        supportingDocuments: clearDocMetadata(
+                            updatedRateRevisions[2].formData.supportingDocuments
+                        ),
                     }),
                 }),
             ])

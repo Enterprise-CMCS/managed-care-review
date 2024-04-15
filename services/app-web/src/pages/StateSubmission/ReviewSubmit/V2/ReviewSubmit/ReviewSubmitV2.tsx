@@ -3,7 +3,7 @@ import {
     ModalRef,
     ModalToggleButton,
 } from '@trussworks/react-uswds'
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { DynamicStepIndicator } from '../../../../../components'
 import { PageActionsContainer } from '../../../PageActions'
@@ -58,6 +58,12 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
 
     const contract = data?.fetchContract.contract
 
+    useEffect(() => {
+        updateHeading({
+            customHeading: contract?.draftRevision?.contractName,
+        })
+    }, [contract, updateHeading])
+
     if (loading) {
         return (
             <GridContainer>
@@ -76,11 +82,6 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
             return <GenericErrorPage />
         }
     }
-    updateHeading({
-        customHeading:
-            data?.fetchContract.contract?.draftRevision?.contractName ??
-            undefined,
-    })
 
     // TODO to be removed once makeDocumentDateTable is updated to not rely on HPP and protos
     const documentDateLookupTable = {

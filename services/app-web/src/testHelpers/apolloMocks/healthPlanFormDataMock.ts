@@ -143,7 +143,7 @@ function mockContractAndRatesDraft(
             {
                 s3URL: 's3://bucketname/key/contract',
                 sha256: 'fakesha',
-                name: 'contract',
+                name: 'contract'
             },
         ],
         contractDateStart: new Date(),

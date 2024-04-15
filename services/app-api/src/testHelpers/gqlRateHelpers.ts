@@ -24,8 +24,8 @@ import type {
 } from '../gen/gqlServer'
 import type { RateType } from '../domain-models'
 import type { InsertRateArgsType } from '../postgres/contractAndRates/insertRate'
-import type { RateFormEditable } from '../postgres/contractAndRates/updateDraftRate'
 import type { ApolloServer } from 'apollo-server-lambda'
+import type { RateFormEditableType } from '../domain-models/contractAndRates'
 
 const fetchTestRateById = async (
     server: ApolloServer,
@@ -263,22 +263,31 @@ function addLinkedRateToRateInput(
     }
 }
 
-function formatGQLRateContractForSending(contact: ActuaryContact): ActuaryContactInput {
+function formatGQLRateContractForSending(
+    contact: ActuaryContact
+): ActuaryContactInput {
     return {
         ...contact,
         id: contact.id || undefined,
-        actuarialFirmOther: contact.actuarialFirmOther || undefined
+        actuarialFirmOther: contact.actuarialFirmOther || undefined,
     }
 }
 
-function formatRateDataForSending(rateFormData: RateFormData): RateFormDataInput {
+function formatRateDataForSending(
+    rateFormData: RateFormData
+): RateFormDataInput {
     return {
         ...rateFormData,
-        certifyingActuaryContacts: rateFormData.certifyingActuaryContacts.map(formatGQLRateContractForSending),
-        addtlActuaryContacts: rateFormData.addtlActuaryContacts ? rateFormData.addtlActuaryContacts.map(formatGQLRateContractForSending) : undefined,
+        certifyingActuaryContacts: rateFormData.certifyingActuaryContacts.map(
+            formatGQLRateContractForSending
+        ),
+        addtlActuaryContacts: rateFormData.addtlActuaryContacts
+            ? rateFormData.addtlActuaryContacts.map(
+                  formatGQLRateContractForSending
+              )
+            : undefined,
     }
 }
-
 
 function updateRatesInputFromDraftContract(
     contract: Contract
@@ -289,7 +298,11 @@ function updateRatesInputFromDraftContract(
     }
 
     const rateInputs = draftRates.map((rate) => {
-        if (rate.status === 'DRAFT' || (rate.status === 'UNLOCKED' && rate.parentContractID === contract.id)) {
+        if (
+            rate.status === 'DRAFT' ||
+            (rate.status === 'UNLOCKED' &&
+                rate.parentContractID === contract.id)
+        ) {
             // this is an editable child rate
             const revision = rate.draftRevision
             if (!revision) {
@@ -305,7 +318,7 @@ function updateRatesInputFromDraftContract(
                 formData: formatRateDataForSending(revision.formData),
             }
         } else {
-            // this is a linked rate. 
+            // this is a linked rate.
             return {
                 type: 'LINK' as const,
                 rateID: rate.id,
@@ -391,7 +404,7 @@ const updateTestDraftRateOnContract = async (
 
 const updateTestRate = async (
     rateID: string,
-    rateData: RateFormEditable
+    rateData: RateFormEditableType
 ): Promise<RateType> => {
     const prismaClient = await sharedTestPrismaClient()
 

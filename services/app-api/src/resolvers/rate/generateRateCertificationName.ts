@@ -1,10 +1,10 @@
 import { formatRateNameDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type { ProgramArgType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import type { RateFormDataType } from '../../domain-models/contractAndRates'
+import type { RateFormEditableType } from '../../domain-models/contractAndRates'
 
 const generateRateCertificationName = (
-    rateFormData: RateFormDataType,
+    rateFormData: RateFormEditableType,
     stateCode: string,
     stateNumber: number,
     statePrograms: ProgramArgType[]

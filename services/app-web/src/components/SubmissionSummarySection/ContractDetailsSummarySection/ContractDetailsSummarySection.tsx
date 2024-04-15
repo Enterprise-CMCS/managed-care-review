@@ -43,6 +43,7 @@ import {
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../constants/statutoryRegulatoryAttestation'
 import { SectionCard } from '../../SectionCard'
+import { convertFromSubmissionDocumentsToGenericDocuments } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -299,15 +300,33 @@ export const ContractDetailsSummarySection = ({
                 )}
             </dl>
             <UploadedDocumentsTable
-                documents={submission.contractDocuments}
-                documentDateLookupTable={documentDateLookupTable}
+                documents={convertFromSubmissionDocumentsToGenericDocuments(
+                    submission.contractDocuments,
+                    documentDateLookupTable
+                )}
+                previousSubmissionDate={
+                    documentDateLookupTable.previousSubmissionDate
+                        ? new Date(
+                              documentDateLookupTable.previousSubmissionDate
+                          )
+                        : undefined
+                }
                 caption="Contract"
                 documentCategory="Contract"
                 isEditing={isEditing}
             />
             <UploadedDocumentsTable
-                documents={contractSupportingDocuments}
-                documentDateLookupTable={documentDateLookupTable}
+                documents={convertFromSubmissionDocumentsToGenericDocuments(
+                    contractSupportingDocuments,
+                    documentDateLookupTable
+                )}
+                previousSubmissionDate={
+                    documentDateLookupTable.previousSubmissionDate
+                        ? new Date(
+                              documentDateLookupTable.previousSubmissionDate
+                          )
+                        : undefined
+                }
                 caption="Contract supporting documents"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments

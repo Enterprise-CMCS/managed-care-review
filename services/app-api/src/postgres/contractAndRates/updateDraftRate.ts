@@ -1,17 +1,15 @@
 import { findRateWithHistory } from './findRateWithHistory'
 import type { NotFoundError } from '../postgresErrors'
 import type {
-    RateFormDataType,
     RateType,
+    RateFormEditableType,
 } from '../../domain-models/contractAndRates'
 import type { PrismaTransactionType } from '../prismaTypes'
-import { emptify, nullify } from '../prismaDomainAdaptors'
-
-type RateFormEditable = Partial<RateFormDataType>
+import { prismaUpdateRateFormDataFromDomain } from './prismaContractRateAdaptors'
 
 type UpdateRateArgsType = {
     rateID: string
-    formData: RateFormEditable
+    formData: RateFormEditableType
     contractIDs: string[]
 }
 
@@ -31,22 +29,6 @@ async function updateDraftRate(
     args: UpdateRateArgsType
 ): Promise<RateType | NotFoundError | Error> {
     const { rateID, formData, contractIDs } = args
-    const {
-        rateType,
-        rateCapitationType,
-        rateDocuments,
-        supportingDocuments,
-        rateDateStart,
-        rateDateEnd,
-        rateDateCertified,
-        amendmentEffectiveDateStart,
-        amendmentEffectiveDateEnd,
-        rateProgramIDs,
-        rateCertificationName,
-        certifyingActuaryContacts,
-        addtlActuaryContacts,
-        actuaryCommunicationPreference,
-    } = formData
 
     try {
         // Given all the Rates associated with this draft, find the most recent submitted to update.
@@ -70,57 +52,7 @@ async function updateDraftRate(
                 id: currentRev.id,
             },
             data: {
-                rateType: nullify(rateType),
-                rateCapitationType: nullify(rateCapitationType),
-
-                rateDocuments: {
-                    deleteMany: {},
-                    create:
-                        rateDocuments &&
-                        rateDocuments.map((d, idx) => ({
-                            position: idx,
-                            ...d,
-                        })),
-                },
-                supportingDocuments: {
-                    deleteMany: {},
-                    create:
-                        supportingDocuments &&
-                        supportingDocuments.map((d, idx) => ({
-                            position: idx,
-                            ...d,
-                        })),
-                },
-                certifyingActuaryContacts: {
-                    deleteMany: {},
-                    create:
-                        certifyingActuaryContacts &&
-                        certifyingActuaryContacts.map((c, idx) => ({
-                            position: idx,
-                            ...c,
-                        })),
-                },
-                addtlActuaryContacts: {
-                    deleteMany: {},
-                    create:
-                        addtlActuaryContacts &&
-                        addtlActuaryContacts.map((c, idx) => ({
-                            position: idx,
-                            ...c,
-                        })),
-                },
-                rateDateStart: nullify(rateDateStart),
-                rateDateEnd: nullify(rateDateEnd),
-                rateDateCertified: nullify(rateDateCertified),
-                amendmentEffectiveDateStart: nullify(
-                    amendmentEffectiveDateStart
-                ),
-                amendmentEffectiveDateEnd: nullify(amendmentEffectiveDateEnd),
-                rateProgramIDs: emptify(rateProgramIDs),
-                rateCertificationName: nullify(rateCertificationName),
-                actuaryCommunicationPreference: nullify(
-                    actuaryCommunicationPreference
-                ),
+                ...prismaUpdateRateFormDataFromDomain(formData),
                 draftContracts: {
                     set: contractIDs.map((rID) => ({
                         id: rID,
@@ -136,4 +68,4 @@ async function updateDraftRate(
 }
 
 export { updateDraftRate }
-export type { RateFormEditable, UpdateRateArgsType }
+export type { UpdateRateArgsType }

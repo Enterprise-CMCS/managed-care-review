@@ -103,7 +103,7 @@ export const RateSummary = (): React.ReactElement => {
                 </div>
                 <SingleRateSummarySection
                     rate={rate}
-                    isSubmitted // can assume isSubmitted because we are building for CMS users
+                    isSubmitted // can assume isSubmitted because we redirect for unlocked
                     statePrograms={rate.state.programs}
                 />
             </GridContainer>

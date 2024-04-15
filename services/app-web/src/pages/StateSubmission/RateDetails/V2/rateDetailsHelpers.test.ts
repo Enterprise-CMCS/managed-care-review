@@ -62,6 +62,7 @@ describe('generateUpdatedRates', () => {
               {
                 rateID: expectedResult.rateID,
                 type: expectedResult.type,
+                // eslint-disable-next-line jest/no-conditional-expect
                 formData: expectedResult.formData? expect.objectContaining({rateDocuments: expectedResult.formData.rateDocuments}): undefined
         })
         }
