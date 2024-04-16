@@ -880,4 +880,80 @@ describe('RateDetailsv2', () => {
             })
         })
     })
+
+    describe('handles multiple actuary contacts', () => {
+        it('should be able to add and remove additional actuary contacts', async () => {
+            const rateID = 'test-abc-123'
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchDraftRateMockSuccess({ id: rateID }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+
+            //Making sure page loads
+            await screen.findByText('Rate Details')
+            expect(
+                screen.getByText(
+                    'Was this rate certification included with another submission?'
+                )
+            ).toBeInTheDocument()
+
+            //Clicking no for the proper form flow
+            const noRadioButton = screen.getByRole('radio', {
+                name: 'No, this rate certification was not included with any other submissions',
+            })
+            expect(noRadioButton).toBeInTheDocument()
+            await user.click(noRadioButton)
+            expect(noRadioButton).toBeChecked()
+
+            //Add actuary contact button should render
+            const addActuaryContact = screen.getByRole('button', {
+                name: 'Add a certifying actuary',
+            })
+            expect(addActuaryContact).toBeInTheDocument()
+
+            await user.click(addActuaryContact)
+
+            //Additional actuary contacts
+            const contacts = screen.getAllByTestId('actuary-contact')
+            expect(contacts).toHaveLength(1)
+
+            //Adding another addtional actuary contact
+            await user.click(addActuaryContact)
+
+            const contactsPostClick = screen.getAllByTestId('actuary-contact')
+            expect(contactsPostClick).toHaveLength(2)
+
+            //Testing removal of actuary contact
+            const removeButtons = screen.getAllByText('Remove')
+            expect(removeButtons).toHaveLength(2)
+            await user.click(removeButtons[0])
+
+            const removeButtonsPostRemoval = screen.getAllByText('Remove')
+            expect(removeButtonsPostRemoval).toHaveLength(1)
+        })
+    })
 })
