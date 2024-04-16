@@ -35,9 +35,9 @@ const includeFullRate = {
                 include: {
                     updatedBy: true,
                     submittedContracts: true,
-                }
+                },
             },
-            
+
             contractRevisions: {
                 include: {
                     contractRevision: {
@@ -48,6 +48,7 @@ const includeFullRate = {
                     validAfter: 'asc',
                 },
             },
+            relatedSubmissions: true,
         },
     },
 } satisfies Prisma.RateTableInclude
