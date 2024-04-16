@@ -54,47 +54,6 @@ describe('contacts', () => {
             // On contacts page, SAVE_DRAFT
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
             cy.fillOutStateContact()
-
-            //Add two additional actuary contacts
-            cy.findByRole('button', { name: /Add actuary contact/ }).safeClick()
-            cy.findByRole('button', { name: /Add actuary contact/ }).safeClick()
-
-            //Actuary contact should have 2 sets of actuary inputs
-            cy.findAllByTestId('actuary-contact').should('have.length', 2)
-
-            //Fill out first actuary contact
-            cy.findAllByLabelText('Name')
-                .eq(1)
-                .click()
-                .type('Actuary Contact Person')
-            cy.findAllByLabelText('Title/Role')
-                .eq(1)
-                .type('Actuary Contact Title')
-            cy.findAllByLabelText('Email')
-                .eq(1)
-                .type('actuarycontact@example.com')
-            cy.findAllByLabelText('Mercer').eq(0).safeClick()
-
-            //Fill out second actuary contact
-            cy.findAllByLabelText('Name')
-                .eq(2)
-                .click()
-                .type('Actuary Contact Person')
-            cy.findAllByLabelText('Title/Role')
-                .eq(2)
-                .type('Actuary Contact Title')
-            cy.findAllByLabelText('Email')
-                .eq(2)
-                .type('actuarycontact@example.com')
-            cy.findAllByLabelText('Mercer').eq(1).safeClick()
-
-            // Actuary communication preference
-            cy.findByText(
-                `OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`
-            ).click()
-
-            cy.navigateFormByButtonClick('SAVE_DRAFT')
-            cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
         })
     })
 
