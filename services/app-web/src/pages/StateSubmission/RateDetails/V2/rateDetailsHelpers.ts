@@ -1,5 +1,6 @@
 import {
     formatActuaryContactsForForm,
+    formatAddtlActuaryContactsForForm,
     formatDocumentsForForm,
     formatDocumentsForGQL,
     formatForForm,
@@ -93,7 +94,7 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate): For
         actuaryContacts: formatActuaryContactsForForm(
             rateForm?.certifyingActuaryContacts
         ),
-        addtlActuaryContacts: formatActuaryContactsForForm(
+        addtlActuaryContacts: formatAddtlActuaryContactsForForm(
             rateForm?.certifyingActuaryContacts
         ),
         actuaryCommunicationPreference:

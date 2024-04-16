@@ -51,6 +51,29 @@ const formatActuaryContactsForForm = (actuaryContacts?: ActuaryContact[] | GQLAc
                     actuarialFirm: actuarialFirm ?? undefined,
                 }
         })
+        : [
+              {
+                  name: '',
+                  titleRole: '',
+                  email: '',
+                  actuarialFirm: undefined,
+                  actuarialFirmOther: '',
+              },
+          ]
+}
+
+const formatAddtlActuaryContactsForForm = (actuaryContacts?: ActuaryContact[] | GQLActuaryContact[]) : ActuaryContact[] => {
+    return actuaryContacts &&  actuaryContacts.length > 0
+        ? actuaryContacts.map( (contact) => {
+            const {name, titleRole,email,actuarialFirm, actuarialFirmOther} = contact
+                    return {
+                    name: name ?? '',
+                    titleRole: titleRole ?? '',
+                    email: email ?? '',
+                    actuarialFirmOther: actuarialFirmOther ?? undefined,
+                    actuarialFirm: actuarialFirm ?? undefined,
+                }
+        })
         : []
 }
 
@@ -199,6 +222,7 @@ export {
     formatDocumentsForDomain,
     formatDocumentsForForm,
     formatActuaryContactsForForm,
+    formatAddtlActuaryContactsForForm,
     formatDocumentsForGQL,
     formatFormDateForGQL
 }

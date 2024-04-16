@@ -497,7 +497,7 @@ export const SingleRateFormFields = ({
             <FormGroup>
                 <ActuaryContactFields
                     shouldValidate={shouldValidate}
-                    fieldNamePrefix={`${fieldNamePrefix}.actuaryContacts.${index}`}
+                    fieldNamePrefix={`${fieldNamePrefix}.actuaryContacts.0`}
                     fieldSetLegend="Certifying Actuary"
                 />
                 <FieldArray name={`${fieldNamePrefix}.addtlActuaryContacts`}>
