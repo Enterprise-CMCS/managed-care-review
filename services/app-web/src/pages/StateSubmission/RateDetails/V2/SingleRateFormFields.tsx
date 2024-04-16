@@ -519,7 +519,6 @@ export const SingleRateFormFields = ({
                                                 shouldValidate={shouldValidate}
                                                 fieldNamePrefix={`${fieldNamePrefix}.addtlActuaryContacts.${index}`}
                                                 fieldSetLegend="Certifying actuary"
-                                                electivity="Optional"
                                                 inputRef={
                                                     newActuaryContactNameRef
                                                 }
