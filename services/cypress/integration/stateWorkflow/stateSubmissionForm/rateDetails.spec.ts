@@ -105,6 +105,7 @@ describe('rate details', () => {
                     //Fill out last rate certification as new rate
                     if (index === arr.length - 1) {
                         cy.fillOutNewRateCertification()
+                        cy.fillOutAdditionalActuaryContact()
                     } else {
                         cy.fillOutAmendmentToPriorRateCertification(index)
                     }
@@ -118,9 +119,6 @@ describe('rate details', () => {
 
         //Fill out one state and one additional actuary contact
         cy.fillOutStateContact()
-        cy.findByRole('button', { name: /Add actuary contact/ }).safeClick()
-        cy.findAllByTestId('actuary-contact').should('have.length', 1)
-        cy.fillOutAdditionalActuaryContact()
 
         // Navigate back to rate details page
         cy.navigateFormByButtonClick('BACK')

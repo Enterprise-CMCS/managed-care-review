@@ -15,6 +15,7 @@ describe('CMS user can view submission', () => {
             name: /Rate details/,
         }).should('exist')
         cy.fillOutNewRateCertification()
+        cy.fillOutAdditionalActuaryContact()
         cy.navigateFormByButtonClick('CONTINUE')
 
         cy.findByRole('heading', {
@@ -22,7 +23,6 @@ describe('CMS user can view submission', () => {
             name: /Contacts/,
         }).should('exist')
         cy.fillOutStateContact()
-        cy.fillOutAdditionalActuaryContact()
         cy.navigateFormByButtonClick('CONTINUE')
 
         cy.findByRole('heading', {

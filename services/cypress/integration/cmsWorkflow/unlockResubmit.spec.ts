@@ -31,7 +31,6 @@ describe('CMS user', () => {
             name: /Contacts/,
         }).should('exist')
         cy.fillOutStateContact()
-        cy.fillOutAdditionalActuaryContact()
         cy.navigateFormByButtonClick('CONTINUE')
 
         cy.findByRole('heading', {

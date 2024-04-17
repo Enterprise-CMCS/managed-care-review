@@ -22,6 +22,7 @@ describe('dashboard', () => {
             name: /Rate details/
         }).should('exist')
         cy.fillOutNewRateCertification()
+        cy.fillOutAdditionalActuaryContact()
         cy.navigateFormByButtonClick('CONTINUE')
 
         cy.findByRole('heading', {
@@ -29,7 +30,6 @@ describe('dashboard', () => {
             name: /Contacts/,
         }).should('exist')
         cy.fillOutStateContact()
-        cy.fillOutAdditionalActuaryContact()
         cy.navigateFormByButtonClick('CONTINUE')
 
         cy.findByRole('heading', { level: 2, name: /Supporting documents/ })

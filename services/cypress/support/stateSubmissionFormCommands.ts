@@ -424,15 +424,15 @@ Cypress.Commands.add('fillOutStateContact', () => {
 })
 
 Cypress.Commands.add('fillOutAdditionalActuaryContact', () => {
-    // Must be on '/submissions/:id/edit/contacts'
+    // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
-    cy.findByRole('button', { name: 'Add actuary contact' })
+    cy.findByRole('button', { name: 'Add a certifying actuary' })
         .should('exist')
         .click()
-    cy.findByText('Additional actuary contact 1').should('exist')
-    cy.findAllByLabelText('Name').eq(1).click().type('Actuary Contact Person')
-    cy.findAllByLabelText('Title/Role').eq(1).type('Actuary Contact Title')
-    cy.findAllByLabelText('Email').eq(1).type('actuarycontact@example.com')
+    cy.findByTestId('actuary-contact').should('exist')
+    cy.get('input["rateForms.0.addtlActuaryContacts.0.name"]').click().type('Actuary Contact Person')
+    cy.get('input["rateForms.0.addtlActuaryContacts.0.titleRole"]').type('Actuary Contact Title')
+    cy.get('input["rateForms.0.addtlActuaryContacts.0.email"]').type('actuarycontact@example.com')
 
     // Actuarial firm
     cy.findAllByLabelText('Mercer').eq(0).safeClick()
