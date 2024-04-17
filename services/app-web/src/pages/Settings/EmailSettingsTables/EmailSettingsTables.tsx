@@ -3,15 +3,15 @@ import React from 'react'
 import { Loading } from '../../../components'
 import {
     EmailConfiguration,
-    StateAnalystsConfiguration,
     useFetchEmailSettingsQuery,
 } from '../../../gen/gqlClient'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import styles from '../Settings.module.scss'
+import { EmailAnalystsTable } from './EmailAnalystsTable'
 
 const formatEmails = (arr?: string[]) => (arr ? arr.join(',') : 'NOT DEFINED')
 
-export const EmailSettingsTable = ({
+const EmailSettingsTable = ({
     type,
 }: {
     type: 'GENERAL' | 'ANALYSTS' | 'SUPPORT'
@@ -26,20 +26,20 @@ export const EmailSettingsTable = ({
             {loading && <Loading />}
 
             {data && config && type === 'GENERAL' && (
-                <EmailsGeneralTable config={config} />
+                <EmailGeneralTable config={config} />
             )}
 
             {data && analysts && type === 'ANALYSTS' && (
-                <EmailsAnalystsTable analysts={analysts} />
+                <EmailAnalystsTable analysts={analysts} />
             )}
             {data && config && type === 'SUPPORT' && (
-                <EmailsSupportTable config={config} />
+                <EmailSupportTable config={config} />
             )}
         </div>
     )
 }
 
-const EmailsGeneralTable = ({ config }: { config: EmailConfiguration }) => {
+const EmailGeneralTable = ({ config }: { config: EmailConfiguration }) => {
     console.info('ALL CONFIG', JSON.stringify(config))
     return (
         <>
@@ -98,45 +98,7 @@ const EmailsGeneralTable = ({ config }: { config: EmailConfiguration }) => {
     )
 }
 
-const EmailsAnalystsTable = ({
-    analysts,
-}: {
-    analysts: StateAnalystsConfiguration[]
-}) => {
-    return (
-        <>
-            <h2>State Analyst emails</h2>
-            <p>
-                State analysts email settings. Currently a standalone
-                configuration based on the state programs spreadsheet.
-            </p>
-            <Table bordered>
-                <caption className="srOnly">Analyst emails</caption>
-                <thead>
-                    <tr>
-                        <th>Inbox</th>
-                        <th>State</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {analysts &&
-                        analysts.map((analyst, index) => {
-                            return (
-                                <tr key={index}>
-                                    <td>
-                                        {formatEmails(analyst.emails || [])}
-                                    </td>
-                                    <td>{analyst.stateCode}</td>
-                                </tr>
-                            )
-                        })}
-                </tbody>
-            </Table>
-        </>
-    )
-}
-
-const EmailsSupportTable = ({ config }: { config: EmailConfiguration }) => {
+const EmailSupportTable = ({ config }: { config: EmailConfiguration }) => {
     return (
         <>
             <h2>Support emails</h2>
@@ -176,3 +138,5 @@ const EmailsSupportTable = ({ config }: { config: EmailConfiguration }) => {
         </>
     )
 }
+
+export {EmailSettingsTable, formatEmails}
