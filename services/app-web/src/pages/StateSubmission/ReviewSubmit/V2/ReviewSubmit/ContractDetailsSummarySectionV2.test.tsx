@@ -36,7 +36,6 @@ describe('ContractDetailsSummarySection', () => {
 
         renderWithProviders(
             <ContractDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={testContract}
                 editNavigateTo="contract-details"
                 submissionName="MN-PMAP-0001"
@@ -70,7 +69,6 @@ describe('ContractDetailsSummarySection', () => {
     it('can render state submission on summary page without errors (submission summary behavior)', async () => {
         renderWithProviders(
             <ContractDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={{
                     ...mockContractPackageSubmitted(),
                     status: 'SUBMITTED',
@@ -108,7 +106,6 @@ describe('ContractDetailsSummarySection', () => {
 
         renderWithProviders(
             <ContractDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={contract}
                 editNavigateTo="contract-details"
                 submissionName="MN-PMAP-0001"
@@ -166,9 +163,6 @@ describe('ContractDetailsSummarySection', () => {
 
             renderWithProviders(
                 <ContractDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
                     contract={contract}
                     editNavigateTo="contract-details"
                     submissionName="MN-PMAP-0001"
@@ -208,9 +202,6 @@ describe('ContractDetailsSummarySection', () => {
 
             renderWithProviders(
                 <ContractDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
                     contract={contract}
                     submissionName="MN-PMAP-0001"
                 />,
@@ -226,7 +217,6 @@ describe('ContractDetailsSummarySection', () => {
     it('displays correct effective dates text for contract amendment', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={mockContractPackageDraft()}
                 submissionName="MN-PMAP-0001"
             />,
@@ -276,9 +266,6 @@ describe('ContractDetailsSummarySection', () => {
 
             renderWithProviders(
                 <ContractDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
                     contract={contract}
                     submissionName="MN-PMAP-0001"
                 />,
@@ -327,7 +314,6 @@ describe('ContractDetailsSummarySection', () => {
     it('does not render supporting contract documents table when no documents exist', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={mockContractPackageDraft()}
                 submissionName="MN-PMAP-0001"
             />,
@@ -346,7 +332,6 @@ describe('ContractDetailsSummarySection', () => {
     it('does not render download all button when on previous submission', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={mockContractPackageDraft()}
                 submissionName="MN-PMAP-0001"
             />,
@@ -378,9 +363,6 @@ describe('ContractDetailsSummarySection', () => {
             }
             renderWithProviders(
                 <ContractDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
                     contract={contract}
                     submissionName="MN-PMAP-0001"
                 />,
@@ -424,9 +406,6 @@ describe('ContractDetailsSummarySection', () => {
             }
             renderWithProviders(
                 <ContractDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
                     contract={contract}
                     submissionName="MN-PMAP-0001"
                 />,
@@ -464,7 +443,6 @@ describe('ContractDetailsSummarySection', () => {
         }
         renderWithProviders(
             <ContractDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={{
                     ...mockContractPackageSubmitted(),
                     status: 'SUBMITTED',
@@ -488,9 +466,6 @@ describe('ContractDetailsSummarySection', () => {
         it('renders provisions and MLR references for a medicaid amendment', () => {
             renderWithProviders(
                 <ContractDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
                     contract={mockContractPackageDraft()}
                     submissionName="MN-PMAP-0001"
                 />,
@@ -593,9 +568,6 @@ describe('ContractDetailsSummarySection', () => {
                 }
                 renderWithProviders(
                     <ContractDetailsSummarySection
-                        documentDateLookupTable={{
-                            previousSubmissionDate: '01/01/01',
-                        }}
                         contract={contract}
                         submissionName="MN-PMAP-0001"
                     />,
@@ -652,9 +624,6 @@ describe('ContractDetailsSummarySection', () => {
                 }
                 renderWithProviders(
                     <ContractDetailsSummarySection
-                        documentDateLookupTable={{
-                            previousSubmissionDate: '01/01/01',
-                        }}
                         contract={contract}
                         submissionName="MN-PMAP-0001"
                     />,
@@ -747,9 +716,6 @@ describe('ContractDetailsSummarySection', () => {
                 }
                 renderWithProviders(
                     <ContractDetailsSummarySection
-                        documentDateLookupTable={{
-                            previousSubmissionDate: '01/01/01',
-                        }}
                         contract={contract}
                         submissionName="MN-PMAP-0001"
                         editNavigateTo="contract-details"
@@ -793,9 +759,6 @@ describe('ContractDetailsSummarySection', () => {
 
                 renderWithProviders(
                     <ContractDetailsSummarySection
-                        documentDateLookupTable={{
-                            previousSubmissionDate: '01/01/01',
-                        }}
                         contract={contract}
                         submissionName="MN-PMAP-0001"
                         editNavigateTo="contract-details"
@@ -839,9 +802,6 @@ describe('ContractDetailsSummarySection', () => {
 
                 renderWithProviders(
                     <ContractDetailsSummarySection
-                        documentDateLookupTable={{
-                            previousSubmissionDate: '01/01/01',
-                        }}
                         contract={contract}
                         submissionName="MN-PMAP-0001"
                     />,
@@ -889,9 +849,6 @@ describe('ContractDetailsSummarySection', () => {
 
                 renderWithProviders(
                     <ContractDetailsSummarySection
-                        documentDateLookupTable={{
-                            previousSubmissionDate: '01/01/01',
-                        }}
                         contract={contract}
                         submissionName="MN-PMAP-0001"
                         editNavigateTo="contract-details"
@@ -947,9 +904,6 @@ describe('ContractDetailsSummarySection', () => {
 
                 renderWithProviders(
                     <ContractDetailsSummarySection
-                        documentDateLookupTable={{
-                            previousSubmissionDate: '01/01/01',
-                        }}
                         contract={contract}
                         submissionName="MN-PMAP-0001"
                     />,

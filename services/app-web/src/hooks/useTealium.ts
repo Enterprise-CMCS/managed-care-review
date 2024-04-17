@@ -145,6 +145,9 @@ const useTealium = (): {
 
     // This effect should only fire each time the url changes
     useEffect(() => {
+        if (process.env.REACT_APP_STAGE_NAME === 'local') {
+            return
+        }
         // Guardrail on initial load - protect against trying to call utag page view before its loaded
       if (!window.utag) {
 

@@ -1,55 +1,81 @@
 import { screen, waitFor } from '@testing-library/react'
 import {
-    fetchCurrentUserMock,
-} from '../../../../../testHelpers/apolloMocks'
-import { renderWithProviders } from '../../../../../testHelpers/jestHelpers'
+    renderWithProviders,
+    userClickByRole,
+} from '../../../../../testHelpers/jestHelpers'
 import { ReviewSubmitV2 } from './ReviewSubmitV2'
-import { fetchContractMockSuccess } from '../../../../../testHelpers/apolloMocks'
+import {
+    fetchCurrentUserMock,
+    fetchContractMockSuccess,
+} from '../../../../../testHelpers/apolloMocks'
 import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '../../../../../constants'
 
-// Wrap test component in some top level routes to allow getParams to be tested
-const wrapInRoutes = (children: React.ReactNode) => {
-    return (
-        <Routes>
-            <Route
-                path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
-                element={
-                    <ReviewSubmitV2/>
-                }
-            />
-        </Routes>
-    )
-}
-
-describe.skip('ReviewSubmit', () => {
-    it.skip('renders without errors', async () => {
-        renderWithProviders(wrapInRoutes(<ReviewSubmitV2 />),
+describe('ReviewSubmit', () => {
+    it('renders without errors', async () => {
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmitV2 />}
+                />
+            </Routes>,
             {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
-                        fetchContractMockSuccess({ contract: { id: 'test-abc-123' } }),
+                        fetchContractMockSuccess({}),
                     ],
                 },
                 routerProvider: {
                     route: '/submissions/test-abc-123/edit/review-and-submit',
-                }
-            })
-            await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', { name: 'Contract details' })
-                ).toBeInTheDocument()  
-            })
-         
+                },
+                featureFlags: {
+                    'link-rates': true,
+                },
+            }
+        )
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('heading', { name: 'Contract details' })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('heading', { name: 'Rate details' })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('heading', { name: 'State contacts' })
+            ).toBeInTheDocument()
+        })
     })
 
-    it.skip('displays edit buttons for every section', async () => {
-        renderWithProviders(<ReviewSubmitV2 />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
+    it('displays edit buttons for every section', async () => {
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmitV2 />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                id: 'test-abc-123',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                },
+                featureFlags: {
+                    'link-rates': true,
+                },
+            }
+        )
 
         await waitFor(() => {
             const sectionHeadings = screen.queryAllByRole('heading', {
@@ -58,18 +84,40 @@ describe.skip('ReviewSubmit', () => {
             const editButtons = screen.queryAllByRole('button', {
                 name: 'Edit',
             })
+            expect(sectionHeadings.length).toBeGreaterThan(1)
             expect(sectionHeadings.length).toBeGreaterThanOrEqual(
                 editButtons.length
             )
         })
     })
 
-    it.skip('does not display zip download buttons', async () => {
-        renderWithProviders(<ReviewSubmitV2 />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
+    it('does not display zip download buttons', async () => {
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmitV2 />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                id: 'test-abc-123',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                },
+                featureFlags: {
+                    'link-rates': true,
+                },
+            }
+        )
 
         await waitFor(() => {
             const bulkDownloadButtons = screen.queryAllByRole('button', {
@@ -79,12 +127,31 @@ describe.skip('ReviewSubmit', () => {
         })
     })
 
-    it.skip('renders info from a DraftSubmission', async () => {
-        renderWithProviders(<ReviewSubmitV2 />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
+    it('renders info from a draft contract', async () => {
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmitV2 />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: { id: 'test-abc-123' },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                },
+                featureFlags: {
+                    'link-rates': true,
+                },
+            }
+        )
 
         await waitFor(() => {
             expect(
@@ -104,45 +171,48 @@ describe.skip('ReviewSubmit', () => {
             expect(sectionHeadings.length).toBeGreaterThanOrEqual(
                 editButtons.length
             )
-
             const submissionDescription =
                 screen.queryByText('A real submission')
             expect(submissionDescription).toBeInTheDocument()
         })
     })
 
-    it.skip('displays back and save as draft buttons', async () => {
-        renderWithProviders(<ReviewSubmitV2 />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
+    it('displays back, save as draft, and submit buttons', async () => {
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmitV2 />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: { id: 'test-abc-123' },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                },
+                featureFlags: {
+                    'link-rates': true,
+                },
+            }
+        )
+
+        await screen.findByRole('button', {
+            name: 'Back',
         })
 
-        await waitFor(() =>
-            expect(
-                screen.getByRole('button', {
-                    name: 'Back',
-                })
-            ).toBeDefined()
-        )
-        await waitFor(() =>
-            expect(
-                screen.getByRole('button', {
-                    name: 'Save as draft',
-                })
-            ).toBeDefined()
-        )
-    })
-
-    it.skip('displays submit button', async () => {
-        renderWithProviders(<ReviewSubmitV2 />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
+        await screen.findByRole('button', {
+            name: 'Save as draft',
         })
 
-        await waitFor(() =>
-            expect(screen.getByTestId('form-submit')).toBeDefined()
-        )
+        expect(screen.getByTestId('form-submit')).toBeDefined()
+        expect(screen.getByText('Submit')).toBeInTheDocument()
+        await userClickByRole(screen, 'button', { name: 'Submit' })
     })
 })

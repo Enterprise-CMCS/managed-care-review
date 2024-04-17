@@ -4,16 +4,17 @@ import {
     ModalToggleButton,
 } from '@trussworks/react-uswds'
 import React, { useRef, useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { DynamicStepIndicator } from '../../../../../components'
 import { PageActionsContainer } from '../../../PageActions'
 import styles from '../../../ReviewSubmit/ReviewSubmit.module.scss'
 import { ActionButton } from '../../../../../components/ActionButton'
-import { useStatePrograms } from '../../../../../hooks/useStatePrograms'
+import { useRouteParams, useStatePrograms } from '../../../../../hooks'
 import {
     RoutesRecord,
     STATE_SUBMISSION_FORM_ROUTES,
 } from '../../../../../constants'
+import { getLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
 import { useAuth } from '../../../../../contexts/AuthContext'
 import { RateDetailsSummarySectionV2 } from './RateDetailsSummarySectionV2'
 import { ContactsSummarySection } from './ContactsSummarySectionV2'
@@ -28,29 +29,19 @@ import { PageBannerAlerts } from '../../../PageBannerAlerts'
 import { packageName } from '../../../../../common-code/healthPlanFormDataType'
 import { usePage } from '../../../../../contexts/PageContext'
 
-type RouteParams = {
-    id: string
-}
 export const ReviewSubmitV2 = (): React.ReactElement => {
     const navigate = useNavigate()
     const modalRef = useRef<ModalRef>(null)
     const [isSubmitting] = useState<boolean>(false)
-    // pull the programs off the user
     const statePrograms = useStatePrograms()
     const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
-
-    const { id } = useParams<keyof RouteParams>()
-    if (!id) {
-        throw new Error(
-            'PROGRAMMING ERROR: id param not set in state submission form.'
-        )
-    }
+    const { id } = useRouteParams()
 
     const { data, loading, error } = useFetchContractQuery({
         variables: {
             input: {
-                contractID: id,
+                contractID: id ?? 'unknown contract',
             },
         },
         fetchPolicy: 'network-only',
@@ -83,28 +74,23 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
         }
     }
 
-    // TODO to be removed once makeDocumentDateTable is updated to not rely on HPP and protos
-    const documentDateLookupTable = {
-        fakesha: 'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-        previousSubmissionDate: '01/01/01',
-    }
+    const contractFormData = getLatestContractFormData(contract)
+    if (!contractFormData) return <GenericErrorPage />
 
     const isContractActionAndRateCertification =
         contract.draftRates && contract.draftRates.length > 0
-    const contractFormData =
-        contract.draftRevision?.formData ||
-        contract.packageSubmissions[0].contractRevision.formData
-    const programIDs = contractFormData.programIDs
+    const programIDs = contractFormData?.programIDs
     const programs = statePrograms.filter((program) =>
-        programIDs.includes(program.id)
+        programIDs?.includes(program.id)
     )
 
-    const submissionName = packageName(
-        contract.stateCode,
-        contract.stateNumber,
-        contractFormData.programIDs,
-        programs
-    )
+    const submissionName =
+        packageName(
+            contract.stateCode,
+            contract.stateNumber,
+            contractFormData.programIDs,
+            programs
+        ) || ''
     return (
         <>
             <div className={styles.stepIndicator}>
@@ -126,12 +112,10 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                     editNavigateTo="../type"
                     statePrograms={statePrograms}
                 />
-
                 <ContractDetailsSummarySectionV2
                     contract={contract}
                     editNavigateTo="../contract-details"
                     submissionName={submissionName}
-                    documentDateLookupTable={documentDateLookupTable}
                 />
 
                 {isContractActionAndRateCertification && (
@@ -139,7 +123,6 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                         contract={contract}
                         editNavigateTo="../rate-details"
                         submissionName={submissionName}
-                        documentDateLookupTable={documentDateLookupTable}
                         statePrograms={statePrograms}
                     />
                 )}
