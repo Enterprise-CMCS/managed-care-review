@@ -165,6 +165,12 @@ export function updateHealthPlanFormDataResolver(
             })
         }
 
+        // if Link Rates, we don't pass any rates into updateDraftContractWithRates, that's
+        // being called separately with the new UI now.
+        const rateUpdatesToPass = featureFlags?.['link-rates']
+            ? undefined
+            : updateRateFormDatas
+
         // Update contract draft revision
         const updateResult = await store.updateDraftContractWithRates({
             contractID: input.pkgID,
@@ -192,7 +198,7 @@ export function updateHealthPlanFormDataResolver(
                     }
                 ),
             },
-            rateFormDatas: updateRateFormDatas,
+            rateFormDatas: rateUpdatesToPass,
         })
 
         if (updateResult instanceof Error) {

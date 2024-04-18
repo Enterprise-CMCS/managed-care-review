@@ -343,8 +343,8 @@ describe('unlockContract', () => {
         const latestResubmission = resubmittedContract.packageSubmissions[0]
 
         // Expect rate revision to still be connected
-        expect(latestResubmission.rateRevisions[0].id).toEqual(
-            rate.draftRevision.id
+        expect(latestResubmission.rateRevisions[0].rateID).toEqual(
+            rate.draftRevision.rateID
         )
     })
     it('errors when unlocking a draft contract or rate', async () => {

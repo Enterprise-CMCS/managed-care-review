@@ -195,12 +195,7 @@ const mockContractRev = (
         rateRevisions: [
             {
                 id: '12345',
-                rate: {
-                    id: 'rate-id',
-                    stateCode: 'MN',
-                    stateNumber: 3,
-                    createdAt: new Date(11 / 27 / 2023),
-                },
+                rateID: '6789',
                 submitInfo: undefined,
                 unlockInfo: undefined,
                 createdAt: new Date(11 / 27 / 2023),

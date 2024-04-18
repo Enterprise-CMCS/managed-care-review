@@ -15,8 +15,7 @@ async function unlockRateInDB(
     rateID: string,
     unlockInfoID: string
 ): Promise<string | Error> {
-    // Given all the Rates associated with this draft, find the most recent submitted
-    // rateRevision to attach to this contract on submit.
+    // find the current rate revision in order to create a new unlocked revision
     const currentRev = await tx.rateRevisionTable.findFirst({
         where: {
             rateID,
@@ -50,6 +49,19 @@ async function unlockRateInDB(
                 },
                 include: {
                     contractRevision: true,
+                },
+            },
+            relatedSubmissions: {
+                orderBy: {
+                    updatedAt: 'desc',
+                },
+                take: 1,
+                include: {
+                    submissionPackages: {
+                        include: {
+                            contractRevision: true,
+                        },
+                    },
                 },
             },
         },
@@ -163,6 +175,25 @@ async function unlockRateInDB(
                 },
             },
         },
+    })
+
+    // add DraftContract connections to the Rate
+    const lastSubmission = currentRev.relatedSubmissions[0]
+    const submissionConnections = lastSubmission.submissionPackages.filter(
+        (p) => p.rateRevisionID === currentRev.id
+    )
+    const newDraftConnections = []
+    for (const submissionConnection of submissionConnections) {
+        newDraftConnections.push({
+            contractID: submissionConnection.contractRevision.contractID,
+            rateID: currentRev.rateID,
+            ratePosition: submissionConnection.ratePosition,
+        })
+    }
+
+    await tx.draftRateJoinTable.createMany({
+        data: newDraftConnections,
+        skipDuplicates: true,
     })
 
     return currentRev.id

@@ -1,12 +1,12 @@
 import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
 import type { Resolvers, SubmissionReason } from '../../gen/gqlServer'
-import { logError } from '../../logger'
-import type { Store } from '../../postgres'
 import { GraphQLError } from 'graphql'
-import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
-import type { ContractPackageSubmissionWithCauseType } from '../../domain-models'
+import type {
+    ContractPackageSubmissionWithCauseType,
+    RateRevisionType,
+} from '../../domain-models'
 
-export function contractResolver(store: Store): Resolvers['Contract'] {
+export function contractResolver(): Resolvers['Contract'] {
     return {
         initiallySubmittedAt(_parent) {
             // we're only working on drafts for now, this will need to change to
@@ -31,43 +31,6 @@ export function contractResolver(store: Store): Resolvers['Contract'] {
             }
             return state
         },
-
-        draftRates: async (parent, _args, context) => {
-            const { span } = context
-            const rateDataArray = parent.draftRevision?.rateRevisions || []
-
-            return rateDataArray.map(async (rateData) => {
-                if (rateData.formData.rateID === undefined) {
-                    const errMessage = `rateID on ${rateData.id} is undefined`
-                    logError('fetchContract', errMessage)
-                    setErrorAttributesOnActiveSpan(errMessage, span)
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'DB_ERROR',
-                        },
-                    })
-                }
-
-                const rateResult = await store.findRateWithHistory(
-                    rateData.formData.rateID
-                )
-
-                if (rateResult instanceof Error) {
-                    const errMessage = `Could not find rate with id: ${rateData.id}. Message: ${rateResult.message}`
-                    logError('fetchContract', errMessage)
-                    setErrorAttributesOnActiveSpan(errMessage, span)
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'DB_ERROR',
-                        },
-                    })
-                }
-                return rateResult
-            })
-        },
-        // not yet implemented, currently only working on drafts:
         packageSubmissions(parent) {
             const gqlSubs: ContractPackageSubmissionWithCauseType[] = []
             for (let i = 0; i < parent.packageSubmissions.length; i++) {
@@ -96,15 +59,19 @@ export function contractResolver(store: Store): Resolvers['Contract'] {
                     if (!submittedRate) {
                         cause = 'RATE_UNLINK'
                     } else {
+                        const thisSubmittedRate =
+                            submittedRate as RateRevisionType
                         if (!prevSub) {
                             throw new Error(
                                 'Programming Error: a non-contract submission must have a previous contract submission'
                             )
                         }
                         const previousRateRevisionIDs =
-                            prevSub.rateRevisions.map((r) => r.id)
+                            prevSub.rateRevisions.map((r) => r.rateID)
                         if (
-                            previousRateRevisionIDs.includes(submittedRate.id)
+                            previousRateRevisionIDs.includes(
+                                thisSubmittedRate.rateID
+                            )
                         ) {
                             cause = 'RATE_SUBMISSION'
                         } else {

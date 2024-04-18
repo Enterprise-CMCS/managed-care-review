@@ -25,6 +25,28 @@ import {
 } from './prismaSharedContractRateHelpers'
 import type { ContractTableFullPayload } from './prismaSubmittedContractHelpers'
 
+// This function might be generally useful later on. It takes an array of objects
+// that can be errors and either returns the first error, or returns the list but with
+// the assertion that none of the elements in the array are errors.
+function arrayOrFirstError<T>(
+    arrayWithPossibleErrors: (T | Error)[]
+): T[] | Error {
+    if (arrayWithPossibleErrors.every((i): i is T => !(i instanceof Error))) {
+        return arrayWithPossibleErrors
+    }
+
+    const firstError = arrayWithPossibleErrors.find(
+        (t): t is Error => t instanceof Error
+    )
+    if (!firstError) {
+        return Error(
+            'Should Not Happen: something in the array was an error but we couldnt find it'
+        )
+    }
+
+    return firstError
+}
+
 // parseContractWithHistory returns a ContractType with a full set of
 // ContractRevisions in reverse chronological order. Each revision is a change to this
 // Contract with submit and unlock info. Changes to the data of this contract, or changes
@@ -139,19 +161,16 @@ function contractWithHistoryToDomainModel(
             }
 
             // if we have a draft revision, we should set draftRates
-            const draftRatesOrError = contract.draftRates.map((dr) =>
+            const draftRatesOrErrors = contract.draftRates.map((dr) =>
                 rateWithHistoryToDomainModel(dr.rate)
             )
-            const firstError: Error | undefined = draftRatesOrError.find(
-                (dr): dr is Error => dr instanceof Error
-            )
-            if (firstError) {
-                return firstError
-            } else {
-                const allDraftRates: RateType[] =
-                    draftRatesOrError as RateType[]
-                draftRates = allDraftRates
+
+            const draftRatesOrError = arrayOrFirstError(draftRatesOrErrors)
+            if (draftRatesOrError instanceof Error) {
+                return draftRatesOrError
             }
+
+            draftRates = draftRatesOrError
 
             if (draftRates.length === 0) {
                 console.info(
@@ -363,7 +382,7 @@ function contractWithHistoryToDomainModel(
         draftRevision,
         draftRates,
         revisions: revisions.reverse(),
-        packageSubmissions: packageSubmissions,
+        packageSubmissions: packageSubmissions.reverse(),
     }
 }
 

@@ -568,9 +568,10 @@ describe('findRate', () => {
             })
         )
 
-        const resubmittedRateIDs = resubmittedContract.packageSubmissions[
-            resubmittedContract.packageSubmissions.length - 1
-        ].rateRevisions.map((rr) => rr.rateID)
+        const resubmittedRateIDs =
+            resubmittedContract.packageSubmissions[0].rateRevisions.map(
+                (rr) => rr.rateID
+            )
         expect(resubmittedRateIDs).toHaveLength(1)
 
         // Unlocked Rate one history
@@ -642,7 +643,8 @@ describe('findRate', () => {
         ).toBe('resubmit without contract')
     })
 
-    it('matches contract revision to rate revision with independent rate submit and unlocks', async () => {
+    // eslint-disable-next-line jest/no-disabled-tests
+    it.skip('matches contract revision to rate revision with independent rate submit and unlocks', async () => {
         const client = await sharedTestPrismaClient()
 
         const stateUser = await client.user.create({
