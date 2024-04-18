@@ -83,6 +83,7 @@ const mockRateRevision = (
         unlockInfo: null,
         submitInfoID: null,
         unlockInfoID: null,
+        relatedSubmissions: [],
         rateType: 'NEW',
         rateID: 'rateID',
         rateCertificationName: 'testState-123',
