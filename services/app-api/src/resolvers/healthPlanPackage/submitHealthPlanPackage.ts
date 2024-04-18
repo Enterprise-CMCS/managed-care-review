@@ -367,51 +367,6 @@ export function submitHealthPlanPackageResolver(
 
         // From this point forward we use updateResult instead of contractWithHistory because it is now old data.
 
-        // If there are rates, submit those first
-        // if (updateResult.draftRevision.rateRevisions.length > 0) {
-        //     const ratePromises: Promise<Error | RateType>[] = []
-        //     updateResult.draftRevision.rateRevisions.forEach((rateRev) => {
-        //         ratePromises.push(
-        //             store.submitRate({
-        //                 rateRevisionID: rateRev.id,
-        //                 submittedByUserID: user.id,
-        //                 submittedReason: updateInfo.updatedReason,
-        //             })
-        //         )
-        //     })
-
-        //     const submitRatesResult = await Promise.all(ratePromises)
-        //     // if any of the promises reject, which shouldn't happen b/c we don't throw...
-        //     if (submitRatesResult instanceof Error) {
-        //         const errMessage = `Failed to submit contract revision's rates with ID: ${contractRevisionID}; ${submitRatesResult.message}`
-        //         logError('submitHealthPlanPackage', errMessage)
-        //         setErrorAttributesOnActiveSpan(errMessage, span)
-        //         throw new GraphQLError(errMessage, {
-        //             extensions: {
-        //                 code: 'INTERNAL_SERVER_ERROR',
-        //                 cause: 'DB_ERROR',
-        //             },
-        //         })
-        //     }
-        //     const submitRateErrors: Error[] = submitRatesResult.filter(
-        //         (res) => res instanceof Error
-        //     ) as Error[]
-        //     if (submitRateErrors.length > 0) {
-        //         console.error('Errors submitting Rates: ', submitRateErrors)
-        //         const errMessage = `Failed to submit contract revision's rates with ID: ${contractRevisionID}; ${submitRateErrors.map(
-        //             (err) => err.message
-        //         )}`
-        //         logError('submitHealthPlanPackage', errMessage)
-        //         setErrorAttributesOnActiveSpan(errMessage, span)
-        //         throw new GraphQLError(errMessage, {
-        //             extensions: {
-        //                 code: 'INTERNAL_SERVER_ERROR',
-        //                 cause: 'DB_ERROR',
-        //             },
-        //         })
-        //     }
-        // }
-
         // then submit the contract!
         const submitContractResult = await store.submitContract({
             contractID: updateResult.id,
