@@ -238,14 +238,19 @@ function rateWithHistoryToDomainModel(
         parentContractID = draftContract.contractID
     } else {
         // check the initial submission
-        if (submission.submittedContracts.length !== 1) {
-            const msg =
-                'programming error: its a submitted rate that was not submitted with a contract initially'
-            console.error(msg)
-            return new Error(msg)
+        if (firstRevision.relatedSubmissions.length == 0) {
+            console.info('No related submission. Unmigrated rate.')
+            parentContractID = '00000000-1111-2222-3333-444444444444'
+        } else {
+            if (submission.submittedContracts.length !== 1) {
+                const msg =
+                    'programming error: its a submitted rate that was not submitted with a contract initially'
+                console.error(msg)
+                return new Error(msg)
+            }
+            const firstContract = submission.submittedContracts[0]
+            parentContractID = firstContract.contractID
         }
-        const firstContract = submission.submittedContracts[0]
-        parentContractID = firstContract.contractID
     }
 
     return {
