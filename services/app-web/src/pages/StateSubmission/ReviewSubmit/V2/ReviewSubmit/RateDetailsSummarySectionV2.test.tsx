@@ -132,7 +132,6 @@ describe('RateDetailsSummarySection', () => {
     it('can render draft contract with rates without errors', () => {
         renderWithProviders(
             <RateDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={draftContract}
                 editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
@@ -157,7 +156,6 @@ describe('RateDetailsSummarySection', () => {
     it('can render submitted contract without errors', async () => {
         renderWithProviders(
             <RateDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={submittedContract}
                 submissionName="MN-MSHO-0003"
                 statePrograms={statePrograms}
@@ -192,7 +190,6 @@ describe('RateDetailsSummarySection', () => {
     it('can render all rate details fields for amendment to prior rate certification submission', () => {
         renderWithProviders(
             <RateDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={draftContract}
                 editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
@@ -236,9 +233,6 @@ describe('RateDetailsSummarySection', () => {
         await waitFor(() => {
             renderWithProviders(
                 <RateDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
                     contract={contract}
                     editNavigateTo="rate-details"
                     submissionName="MN-MSHO-0003"
@@ -274,9 +268,6 @@ describe('RateDetailsSummarySection', () => {
 
                 renderWithProviders(
                     <RateDetailsSummarySection
-                        documentDateLookupTable={{
-                            previousSubmissionDate: '01/01/01',
-                        }}
                         contract={submission}
                         editNavigateTo="rate-details"
                         submissionName="MN-PMAP-0001"
@@ -305,9 +296,6 @@ describe('RateDetailsSummarySection', () => {
         await waitFor(() => {
             renderWithProviders(
                 <RateDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
                     contract={contract}
                     submissionName="MN-MSHO-0003"
                     statePrograms={statePrograms}
@@ -376,9 +364,6 @@ describe('RateDetailsSummarySection', () => {
 
                 renderWithProviders(
                     <RateDetailsSummarySection
-                        documentDateLookupTable={{
-                            previousSubmissionDate: '01/01/01',
-                        }}
                         contract={contractWithRateDocs}
                         editNavigateTo="/rate-details'"
                         submissionName="MN-PMAP-0001"
@@ -456,9 +441,6 @@ describe('RateDetailsSummarySection', () => {
 
                 renderWithProviders(
                     <RateDetailsSummarySection
-                        documentDateLookupTable={{
-                            previousSubmissionDate: '01/01/01',
-                        }}
                         contract={draftContract}
                         submissionName="MN-PMAP-0001"
                         statePrograms={statePrograms}
@@ -480,9 +462,6 @@ describe('RateDetailsSummarySection', () => {
         await waitFor(() =>
             renderWithProviders(
                 <RateDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
                     contract={draftContract}
                     submissionName="MN-PMAP-0001"
                     statePrograms={statePrograms}
@@ -503,7 +482,6 @@ describe('RateDetailsSummarySection', () => {
     it('renders rate cell capitation type', () => {
         renderWithProviders(
             <RateDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={draftContract}
                 editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
@@ -535,9 +513,6 @@ describe('RateDetailsSummarySection', () => {
                 'RATE_RANGE'
             renderWithProviders(
                 <RateDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
                     contract={draftContract}
                     editNavigateTo="rate-details"
                     submissionName="MN-PMAP-0001"
@@ -573,9 +548,6 @@ describe('RateDetailsSummarySection', () => {
                 ]
             renderWithProviders(
                 <RateDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
                     contract={draftContract}
                     editNavigateTo="rate-details"
                     submissionName="MN-PMAP-0001"
@@ -609,9 +581,6 @@ describe('RateDetailsSummarySection', () => {
             ]
             renderWithProviders(
                 <RateDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
                     contract={draftContract}
                     editNavigateTo="rate-details"
                     submissionName="MN-PMAP-0001"
@@ -635,7 +604,6 @@ describe('RateDetailsSummarySection', () => {
         draftContract.draftRates = makeMockRateInfos()
         renderWithProviders(
             <RateDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={draftContract}
                 editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
@@ -659,7 +627,6 @@ describe('RateDetailsSummarySection', () => {
 
         renderWithProviders(
             <RateDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={draftContract}
                 editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
@@ -682,7 +649,6 @@ describe('RateDetailsSummarySection', () => {
         draftSubmission.draftRates = makeMockRateInfos()
         renderWithProviders(
             <RateDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={draftSubmission}
                 editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
@@ -715,7 +681,6 @@ describe('RateDetailsSummarySection', () => {
         draftContract.draftRates = makeMockRateInfos()
         renderWithProviders(
             <RateDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={draftContract}
                 editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
@@ -746,7 +711,6 @@ describe('RateDetailsSummarySection', () => {
     it('renders submitted package without errors', () => {
         renderWithProviders(
             <RateDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={submittedContract}
                 editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
@@ -781,7 +745,6 @@ describe('RateDetailsSummarySection', () => {
 
         renderWithProviders(
             <RateDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={submittedContract}
                 editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
@@ -833,7 +796,6 @@ describe('RateDetailsSummarySection', () => {
     it('does not render shared rate cert info if none are present', async () => {
         renderWithProviders(
             <RateDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={draftContract}
                 editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
@@ -878,7 +840,6 @@ describe('RateDetailsSummarySection', () => {
 
         renderWithProviders(
             <RateDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={draftContract}
                 editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
@@ -913,7 +874,6 @@ describe('RateDetailsSummarySection', () => {
         }
         renderWithProviders(
             <RateDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
                 contract={submittedContract}
                 submissionName="MN-MSHO-0003"
                 statePrograms={statePrograms}

@@ -30,7 +30,6 @@ import {
     federalAuthorityKeysForCHIP,
     CHIPFederalAuthority,
 } from '../../../../../common-code/healthPlanFormDataType'
-import { DocumentDateLookupTableType } from '../../../../../documentHelpers/makeDocumentDateLookupTable'
 import { recordJSException } from '../../../../../otelHelpers'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../../../../components/DocumentWarning'
@@ -49,7 +48,6 @@ import { getLastContractSubmission } from '../../../../../gqlHelpers/contractsAn
 export type ContractDetailsSummarySectionV2Props = {
     contract: Contract
     editNavigateTo?: string
-    documentDateLookupTable: DocumentDateLookupTableType
     isCMSUser?: boolean
     submissionName: string
     onDocumentError?: (error: true) => void
@@ -72,7 +70,6 @@ function renderDownloadButton(zippedFilesURL: string | undefined | Error) {
 export const ContractDetailsSummarySectionV2 = ({
     contract,
     editNavigateTo, // this is the edit link for the section. When this prop exists, summary section is loaded in edit mode
-    documentDateLookupTable,
     submissionName,
     onDocumentError,
 }: ContractDetailsSummarySectionV2Props): React.ReactElement => {
@@ -87,20 +84,20 @@ export const ContractDetailsSummarySectionV2 = ({
 
     const contractFormData =
         contract.draftRevision?.formData ||
-        contract.packageSubmissions[0].contractRevision.formData
+        getLastContractSubmission(contract)?.contractRevision.formData
     const contract438Attestation = ldClient?.variation(
         featureFlags.CONTRACT_438_ATTESTATION.flag,
         featureFlags.CONTRACT_438_ATTESTATION.defaultValue
     )
 
     const attestationYesNo =
-        contractFormData.statutoryRegulatoryAttestation != null &&
+        contractFormData?.statutoryRegulatoryAttestation != null &&
         booleanAsYesNoFormValue(contractFormData.statutoryRegulatoryAttestation)
 
     const contractSupportingDocuments = contractFormData?.supportingDocuments
     const isEditing = !isSubmitted(contract) && editNavigateTo !== undefined
     const applicableFederalAuthorities = isCHIPOnly(contract)
-        ? contractFormData.federalAuthorities.filter((authority) =>
+        ? contractFormData?.federalAuthorities.filter((authority) =>
               federalAuthorityKeysForCHIP.includes(
                   authority as CHIPFederalAuthority
               )
@@ -116,21 +113,25 @@ export const ContractDetailsSummarySectionV2 = ({
 
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
-            const keysFromDocs = contractFormData.contractDocuments
-                .concat(contractSupportingDocuments)
-                .map((doc) => {
-                    const key = getKey(doc.s3URL)
-                    if (!key) return ''
-                    return key
-                })
-                .filter((key) => key !== '')
+            const keysFromDocs =
+                contractSupportingDocuments &&
+                contractFormData?.contractDocuments
+                    .concat(contractSupportingDocuments)
+                    .map((doc) => {
+                        const key = getKey(doc.s3URL)
+                        if (!key) return ''
+                        return key
+                    })
+                    .filter((key) => key !== '')
 
             // call the lambda to zip the files and get the url
-            const zippedURL = await getBulkDlURL(
-                keysFromDocs,
-                submissionName + '-contract-details.zip',
-                'HEALTH_PLAN_DOCS'
-            )
+            const zippedURL =
+                keysFromDocs &&
+                (await getBulkDlURL(
+                    keysFromDocs,
+                    submissionName + '-contract-details.zip',
+                    'HEALTH_PLAN_DOCS'
+                ))
             if (zippedURL instanceof Error) {
                 const msg = `ERROR: getBulkDlURL failed to generate contract document URL. ID: ${contract.id} Message: ${zippedURL}`
                 console.info(msg)
@@ -204,7 +205,7 @@ export const ContractDetailsSummarySectionV2 = ({
                                     label="Non-compliance description"
                                     explainMissingData={!isSubmitted}
                                     children={
-                                        contractFormData.statutoryRegulatoryAttestationDescription
+                                        contractFormData?.statutoryRegulatoryAttestationDescription
                                     }
                                 />
                             </Grid>
@@ -314,7 +315,7 @@ export const ContractDetailsSummarySectionV2 = ({
                     </DoubleColumnGrid>
                 )}
             </dl>
-            {contractFormData.contractDocuments && (
+            {contractFormData?.contractDocuments && (
                 <UploadedDocumentsTable
                     documents={contractFormData.contractDocuments}
                     previousSubmissionDate={lastSubmittedDate}

@@ -1,36 +1,37 @@
 import { Contract, ContractRevision } from '../gen/gqlClient'
+import { getLastContractSubmission } from '../gqlHelpers/contractsAndRates'
 
-const getContractRev = (contract: Contract): ContractRevision => {
+const getContractRev = (contract: Contract): ContractRevision | undefined => {
     if (contract.draftRevision) {
         return contract.draftRevision
     } else {
-        return contract.packageSubmissions[0].contractRevision
+        return getLastContractSubmission(contract)?.contractRevision
     }
 }
 const isContractOnly = (contract: Contract): boolean => {
     const contractRev = getContractRev(contract)
-    return contractRev.formData.submissionType === 'CONTRACT_ONLY' 
+    return contractRev?.formData?.submissionType === 'CONTRACT_ONLY' 
 }
 
 
 const isBaseContract = (contract: Contract): boolean => {
     const contractRev = getContractRev(contract)
-    return contractRev.formData.contractType === 'BASE'
+    return contractRev?.formData?.contractType === 'BASE'
 }
 
 const isContractAmendment = (contract: Contract): boolean => {
     const contractRev = getContractRev(contract)
-    return contractRev.formData.contractType === 'AMENDMENT'
+    return contractRev?.formData?.contractType === 'AMENDMENT'
 }
 
 const isCHIPOnly = (contract: Contract): boolean => {
     const contractRev = getContractRev(contract)
-    return contractRev.formData.populationCovered === 'CHIP'
+    return contractRev?.formData?.populationCovered === 'CHIP'
 }
 
 const isContractAndRates = (contract: Contract): boolean => {
     const contractRev = getContractRev(contract)
-    return contractRev.formData.submissionType === 'CONTRACT_AND_RATES'
+    return contractRev?.formData?.submissionType === 'CONTRACT_AND_RATES'
 }
 
 const isContractWithProvisions = (contract: Contract): boolean =>

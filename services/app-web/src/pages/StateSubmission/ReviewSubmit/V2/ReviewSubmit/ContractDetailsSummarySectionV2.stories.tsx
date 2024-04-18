@@ -24,10 +24,6 @@ WithAction.decorators = [(Story) => ProvidersDecorator(Story, {})]
 
 WithAction.args = {
     contract: mockContractPackageDraft(),
-    documentDateLookupTable: {
-        fakesha: 'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-        previousSubmissionDate: '01/01/01'
-    },
     editNavigateTo: 'contract-details',
 }
 
@@ -36,8 +32,4 @@ WithoutAction.decorators = [(Story) => ProvidersDecorator(Story, {})]
 
 WithoutAction.args = {
     contract: mockContractPackageDraft(),
-    documentDateLookupTable: {
-        fakesha: 'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-        previousSubmissionDate: '01/01/01'
-    },
 }

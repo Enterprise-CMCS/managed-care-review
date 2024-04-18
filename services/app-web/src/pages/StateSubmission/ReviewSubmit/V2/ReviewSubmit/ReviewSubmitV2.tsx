@@ -83,12 +83,6 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
         }
     }
 
-    // TODO to be removed once makeDocumentDateTable is updated to not rely on HPP and protos
-    const documentDateLookupTable = {
-        fakesha: 'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-        previousSubmissionDate: '01/01/01',
-    }
-
     const isContractActionAndRateCertification =
         contract.draftRates && contract.draftRates.length > 0
     const contractFormData =
@@ -131,7 +125,6 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                     contract={contract}
                     editNavigateTo="../contract-details"
                     submissionName={submissionName}
-                    documentDateLookupTable={documentDateLookupTable}
                 />
 
                 {isContractActionAndRateCertification && (
@@ -139,7 +132,6 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                         contract={contract}
                         editNavigateTo="../rate-details"
                         submissionName={submissionName}
-                        documentDateLookupTable={documentDateLookupTable}
                         statePrograms={statePrograms}
                     />
                 )}

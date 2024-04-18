@@ -6,7 +6,8 @@ import {
     ModalToggleButton,
 } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
-import { NavLink, useOutletContext } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
+import { useAuth } from '../../../contexts/AuthContext'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
 import { ContractDetailsSummarySectionV2 } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/ContractDetailsSummarySectionV2'
 import { ContactsSummarySection } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/ContactsSummarySectionV2'
@@ -27,11 +28,10 @@ import {
     UpdateInformation,
 } from '../../../gen/gqlClient'
 import styles from '../SubmissionSummary.module.scss'
-import { ChangeHistory } from '../../../components/ChangeHistory/ChangeHistory'
-import { UnlockSubmitModal } from '../../../components/Modal/UnlockSubmitModal'
+import { ChangeHistoryV2 } from '../../../components/ChangeHistory/ChangeHistoryV2'
+import { UnlockSubmitModalV2 } from '../../../components/Modal/V2/UnlockSubmitModalV2'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
-import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
 import { RoutesRecord } from '../../../constants'
 import { useRouteParams } from '../../../hooks'
 
@@ -62,11 +62,19 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
     const modalRef = useRef<ModalRef>(null)
     const [pkgName, setPkgName] = useState<string | undefined>(undefined)
     const [documentError, setDocumentError] = useState(false)
+    const { loggedInUser } = useAuth()
 
     useEffect(() => {
         updateHeading({ customHeading: pkgName })
     }, [pkgName, updateHeading])
     const { id } = useRouteParams()
+
+    const ldClient = useLDClient()
+    const showQuestionResponse = ldClient?.variation(
+        featureFlags.CMS_QUESTIONS.flag,
+        featureFlags.CMS_QUESTIONS.defaultValue
+    )
+
     // API requests
     const {
         data: fetchContractData,
@@ -79,27 +87,29 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
             },
         },
     })
+    const contract = fetchContractData?.fetchContract.contract
 
-    const ldClient = useLDClient()
-    const showQuestionResponse = ldClient?.variation(
-        featureFlags.CMS_QUESTIONS.flag,
-        featureFlags.CMS_QUESTIONS.defaultValue
+    const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const submissionStatus = contract?.status
+    const statePrograms = contract?.state.programs
+    const contractFormData =
+        contract?.draftRevision?.formData ||
+        contract?.packageSubmissions[0].contractRevision.formData
+    const programIDs = contractFormData?.programIDs
+    const programs = statePrograms?.filter((program) =>
+        programIDs?.includes(program.id)
     )
-
-    const { pkg, currentRevision, packageData, user, documentDates } =
-        useOutletContext<SideNavOutletContextType>()
-
-    const isCMSUser = user?.role === 'CMS_USER'
-    const submissionStatus = pkg.status
-    const statePrograms = pkg.state.programs
-
     // set the page heading
-    const name = packageName(
-        packageData.stateCode,
-        packageData.stateNumber,
-        packageData.programIDs,
-        statePrograms
-    )
+    const name =
+        contract && contractFormData && programs
+            ? packageName(
+                  contract.stateCode,
+                  contract.stateNumber,
+                  contractFormData.programIDs,
+                  programs
+              )
+            : ''
+
     if (pkgName !== name) {
         setPkgName(name)
     }
@@ -122,24 +132,23 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
     if (submissionStatus === 'UNLOCKED' || submissionStatus === 'RESUBMITTED') {
         updateInfo =
             (submissionStatus === 'UNLOCKED'
-                ? pkg.revisions.find((rev) => rev.node.unlockInfo)?.node
-                      .unlockInfo
-                : currentRevision.submitInfo) || undefined
+                ? contract?.packageSubmissions[0].submittedRevisions.find(
+                      (rev) => rev.unlockInfo
+                  )?.unlockInfo
+                : contract?.packageSubmissions[0].contractRevision
+                      .submitInfo) || undefined
     }
 
-    const disableUnlockButton = ['DRAFT', 'UNLOCKED'].includes(pkg.status)
-
     const isContractActionAndRateCertification =
-        packageData.submissionType === 'CONTRACT_AND_RATES'
+        contractFormData?.submissionType === 'CONTRACT_AND_RATES'
 
     const handleDocumentDownloadError = (error: boolean) =>
         setDocumentError(error)
 
-    const editOrAddMCCRSID = pkg.mccrsID
+    const editOrAddMCCRSID = contract?.mccrsID
         ? 'Edit MC-CRS number'
         : 'Add MC-CRS record number'
 
-    const contract = fetchContractData?.fetchContract.contract
     return (
         <div className={styles.background}>
             <div style={{ textAlign: 'center' }}>
@@ -152,7 +161,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                 {submissionStatus === 'UNLOCKED' && updateInfo && (
                     <SubmissionUnlockedBanner
                         userType={
-                            user?.role === 'CMS_USER'
+                            loggedInUser?.role === 'CMS_USER'
                                 ? 'CMS_USER'
                                 : 'STATE_USER'
                         }
@@ -184,7 +193,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                         }}
                     >
                         <Icon.ArrowBack />
-                        {user?.__typename === 'StateUser' ? (
+                        {loggedInUser?.__typename === 'StateUser' ? (
                             <span>&nbsp;Back to state dashboard</span>
                         ) : (
                             <span>&nbsp;Back to dashboard</span>
@@ -192,26 +201,28 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                     </Link>
                 )}
 
-                {contract && (
+                {contract && statePrograms && (
                     <SubmissionTypeSummarySectionV2
                         subHeaderComponent={
                             isCMSUser ? (
                                 <div className={styles.subHeader}>
-                                    {pkg.mccrsID && (
+                                    {contract?.mccrsID && (
                                         <span className={styles.mccrsID}>
                                             MC-CRS record number:
                                             <Link
-                                                href={`https://mccrs.abtsites.com/Home/Index/${pkg.mccrsID}`}
+                                                href={`https://mccrs.abtsites.com/Home/Index/${contract?.mccrsID}`}
                                                 aria-label="MC-CRS system login"
                                             >
-                                                {pkg.mccrsID}
+                                                {contract?.mccrsID}
                                             </Link>
                                         </span>
                                     )}
                                     <Link
-                                        href={`/submissions/${pkg.id}/mccrs-record-number`}
+                                        href={`/submissions/${contract?.id}/mccrs-record-number`}
                                         className={
-                                            pkg.mccrsID ? styles.editLink : ''
+                                            contract?.mccrsID
+                                                ? styles.editLink
+                                                : ''
                                         }
                                         aria-label={editOrAddMCCRSID}
                                     >
@@ -226,18 +237,19 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                             isCMSUser ? (
                                 <UnlockModalButton
                                     modalRef={modalRef}
-                                    disabled={disableUnlockButton}
+                                    disabled={['DRAFT', 'UNLOCKED'].includes(
+                                        contract.status
+                                    )}
                                 />
                             ) : undefined
                         }
                         statePrograms={statePrograms}
-                        initiallySubmittedAt={pkg.initiallySubmittedAt}
+                        initiallySubmittedAt={contract.initiallySubmittedAt}
                     />
                 )}
 
                 {contract && (
                     <ContractDetailsSummarySectionV2
-                        documentDateLookupTable={documentDates}
                         contract={contract}
                         isCMSUser={isCMSUser}
                         submissionName={name}
@@ -245,27 +257,28 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                     />
                 )}
 
-                {contract && isContractActionAndRateCertification && (
-                    <RateDetailsSummarySectionV2
-                        documentDateLookupTable={documentDates}
-                        contract={contract}
-                        submissionName={name}
-                        isCMSUser={isCMSUser}
-                        statePrograms={statePrograms}
-                        onDocumentError={handleDocumentDownloadError}
-                    />
-                )}
+                {contract &&
+                    statePrograms &&
+                    isContractActionAndRateCertification && (
+                        <RateDetailsSummarySectionV2
+                            contract={contract}
+                            submissionName={name}
+                            isCMSUser={isCMSUser}
+                            statePrograms={statePrograms}
+                            onDocumentError={handleDocumentDownloadError}
+                        />
+                    )}
 
                 {contract && <ContactsSummarySection contract={contract} />}
 
-                <ChangeHistory submission={pkg} />
-                {
-                    <UnlockSubmitModal
+                {contract && <ChangeHistoryV2 contract={contract} />}
+                {contract && (
+                    <UnlockSubmitModalV2
                         modalRef={modalRef}
-                        modalType="UNLOCK"
-                        healthPlanPackage={pkg}
+                        modalType="UNLOCK_CONTRACT"
+                        submissionData={contract}
                     />
-                }
+                )}
             </GridContainer>
         </div>
     )
