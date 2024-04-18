@@ -30,12 +30,10 @@ function makeDocumentDateTable(
     Object.keys(revisionsLookup).forEach(
         (revisionId: string, index: number) => {
             const revision = revisionsLookup[revisionId]
-            if (index === 1) {
-                // second most recent revision
+
                 const previousSubmission = getDateAdded(revision) // used in UploadedDocumentsTable to determine if we should show NEW tag
-                if (previousSubmission)
+                if (previousSubmission && !lookupTable['previousSubmissionDate'])
                     lookupTable['previousSubmissionDate'] = previousSubmission
-            }
 
             const allDocuments = getAllDocuments(revision.formData)
             allDocuments.forEach((doc) => {
