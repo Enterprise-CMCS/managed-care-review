@@ -138,7 +138,7 @@ export const UnlockSubmitModalV2 = ({
         useSubmitContractMutation() // TODO this should be unlockContract - linked rates epic
 
     // TODO submitRate and unlockRate should also be set up here - nunlock and edit rate epic
-    // TODO submitContract and unlockContract should also be set up here - nunlock and edit rate epic
+    // TODO unlockContract should also be set up here - nunlock and edit rate epic
     const formik = useFormik({
         initialValues: modalFormInitialValues,
         validationSchema: Yup.object().shape({
@@ -180,7 +180,14 @@ export const UnlockSubmitModalV2 = ({
             case 'SUBMIT_RATE' || 'RESUBMIT_RATE':
                 console.info('submit/resubmit rate not implemented yet')
                 break
-            case 'SUBMIT_CONTRACT' || 'RESUBMIT_CONTRACT':
+            case 'SUBMIT_CONTRACT':
+                result = await submitMutationWrapperV2(
+                    submitContract,
+                    submissionData.id,
+                    unlockSubmitModalInput
+                )
+                break
+            case 'RESUBMIT_CONTRACT':
                 result = await submitMutationWrapperV2(
                     submitContract,
                     submissionData.id,
