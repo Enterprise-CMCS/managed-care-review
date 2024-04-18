@@ -176,7 +176,8 @@ export const RateDetailsSummarySectionV2 = ({
 
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
-            const submittedRates = contract.packageSubmissions[0].rateRevisions
+            const submittedRates =
+                getLastContractSubmission(contract)?.rateRevisions
             if (submittedRates !== undefined) {
                 const keysFromDocs = submittedRates
                     .flatMap((rateInfo) =>

@@ -70,7 +70,7 @@ export const ContactsSummarySection = ({
                     <dl>
                         {contractFormData &&
                         contractFormData.stateContacts.length > 0 ? (
-                            contractFormData.stateContacts.map(
+                            contractFormData?.stateContacts.map(
                                 (stateContact, index) => (
                                     <DataDetail
                                         key={'statecontact_' + index}

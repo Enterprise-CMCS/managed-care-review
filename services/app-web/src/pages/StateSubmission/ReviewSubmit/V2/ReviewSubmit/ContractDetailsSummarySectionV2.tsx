@@ -43,7 +43,10 @@ import {
 } from '../../../../../constants/statutoryRegulatoryAttestation'
 import { SectionCard } from '../../../../../components/SectionCard'
 import { Contract } from '../../../../../gen/gqlClient'
-import { getLastContractSubmission } from '../../../../../gqlHelpers/contractsAndRates'
+import {
+    getLastContractSubmission,
+    getLatestContractFormData,
+} from '../../../../../gqlHelpers/contractsAndRates'
 
 export type ContractDetailsSummarySectionV2Props = {
     contract: Contract
@@ -82,9 +85,7 @@ export const ContractDetailsSummarySectionV2 = ({
     >(undefined)
     const ldClient = useLDClient()
 
-    const contractFormData =
-        contract.draftRevision?.formData ||
-        getLastContractSubmission(contract)?.contractRevision.formData
+    const contractFormData = getLatestContractFormData(contract)
     const contract438Attestation = ldClient?.variation(
         featureFlags.CONTRACT_438_ATTESTATION.flag,
         featureFlags.CONTRACT_438_ATTESTATION.defaultValue
