@@ -62,9 +62,9 @@ export const ChangeHistoryV2 = ({
         (r, index) => {
             const isInitialSubmission = r.updatedReason === 'Initial contract'
             const isSubsequentSubmission = r.kind === 'submit'
-            // We want to know if this package has multiple contracts. To have multiple contracts, there must be minimum
-            // 3 revisions in revisionHistory the initial contract revision, unlock revision and recontract revision.
-            const hasSubsequentSubmissions = revisionHistory.length >= 3
+            // We want to know if this contract has multiple submissions. To have multiple submissions, there must be minimum
+            // more than the initial contract revision.
+            const hasSubsequentSubmissions = revisionHistory.length > 1
             return {
                 title: (
                     <div>
