@@ -8,9 +8,15 @@ import type {
 
 export function contractResolver(): Resolvers['Contract'] {
     return {
-        initiallySubmittedAt(_parent) {
-            // we're only working on drafts for now, this will need to change to
-            // look at the revisions when we expand
+        initiallySubmittedAt(parent) {
+            if (parent.packageSubmissions.length > 0) {
+                const firstSubmission =
+                    parent.packageSubmissions[
+                        parent.packageSubmissions.length - 1
+                    ]
+                return firstSubmission.submitInfo.updatedAt
+            }
+
             return null
         },
         state(parent) {
