@@ -149,7 +149,7 @@ const StateUserRoutes = ({
                                 <SubmissionSummary />
                             )
                         }
-                />
+                    />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
@@ -184,6 +184,11 @@ const CMSUserRoutes = ({
     showQuestionResponse: boolean
     stageName?: string
 }): React.ReactElement => {
+    const ldClient = useLDClient()
+    const useLinkedRates = ldClient?.variation(
+        featureFlags.LINK_RATES.flag,
+        featureFlags.LINK_RATES.defaultValue
+    )
     return (
         <AuthenticatedRouteWrapper authMode={authMode} setAlert={setAlert}>
             <Routes>
@@ -227,7 +232,13 @@ const CMSUserRoutes = ({
                     )}
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<SubmissionSummary />}
+                        element={
+                            useLinkedRates ? (
+                                <SubmissionSummaryV2 />
+                            ) : (
+                                <SubmissionSummary />
+                            )
+                        }
                     />
                 </Route>
 
