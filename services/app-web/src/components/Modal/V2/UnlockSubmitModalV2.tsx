@@ -7,6 +7,7 @@ import {
     useSubmitHealthPlanPackageMutation,
     useUnlockHealthPlanPackageMutation,
     Rate,
+    Contract,
 } from '../../../gen/gqlClient'
 import {
     submitMutationWrapper,
@@ -17,7 +18,7 @@ import { usePrevious } from '../../../hooks/usePrevious'
 import { Modal } from '../Modal'
 import { PoliteErrorMessage } from '../../PoliteErrorMessage'
 import * as Yup from 'yup'
-import styles from './UnlockSubmitModal.module.scss'
+import styles from '../UnlockSubmitModal.module.scss'
 import { GenericApiErrorProps } from '../../Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { ERROR_MESSAGES } from '../../../constants/errors'
 
@@ -31,9 +32,15 @@ const RATE_UNLOCK_SUBMIT_TYPES = [
     'RESUBMIT_RATE',
     'UNLOCK_RATE',
 ] as const
+const CONTRACT_UNLOCK_SUBMIT_TYPES = [
+    'SUBMIT_CONTRACT',
+    'RESUBMIT_CONTRACT',
+    'UNLOCK_CONTRACT',
+] as const
 type PackageModalType = (typeof PACKAGE_UNLOCK_SUBMIT_TYPES)[number]
 type RateModalType = (typeof RATE_UNLOCK_SUBMIT_TYPES)[number]
-type SharedModalType = PackageModalType & RateModalType
+type ContractModalType = (typeof CONTRACT_UNLOCK_SUBMIT_TYPES)[number]
+type SharedModalType = PackageModalType & ContractModalType & RateModalType
 type SharedAdditionalProps = {
     submissionName?: string
     modalRef: React.RefObject<ModalRef>
@@ -45,12 +52,20 @@ type RateModalProps = {
     modalType: RateModalType[number]
 } & SharedAdditionalProps
 
+type ContractModalProps = {
+    submissionData: Contract
+    modalType: ContractModalType[number]
+} & SharedAdditionalProps
+
 type PackageModalProps = {
     submissionData: UnlockedHealthPlanFormDataType | HealthPlanPackage
     modalType: PackageModalType
 } & SharedAdditionalProps
 
-type UnlockSubmitModalProps = PackageModalProps | RateModalProps
+type UnlockSubmitModalProps =
+    | PackageModalProps
+    | RateModalProps
+    | ContractModalProps
 
 type ModalValueType = {
     modalHeading?: string
@@ -108,11 +123,27 @@ const modalValueDictionary: { [Property in SharedModalType]: ModalValueType } =
                 'You must provide a reason for unlocking this rate',
             errorHeading: ERROR_MESSAGES.unlock_error_heading,
         },
+        UNLOCK_CONTRACT: {
+            modalHeading: 'Reason for unlocking rate',
+            onSubmitText: 'Unlock',
+            inputHint: 'Provide reason for unlocking',
+            unlockSubmitModalInputValidation:
+                'You must provide a reason for unlocking this contract',
+            errorHeading: ERROR_MESSAGES.unlock_error_heading,
+        },
         SUBMIT_RATE: {
             modalHeading: 'Ready to submit?',
             onSubmitText: 'Submit',
             modalDescription:
                 'Submitting this rate will send it to CMS to begin their review.',
+            errorHeading: ERROR_MESSAGES.submit_error_heading,
+            errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
+        },
+        SUBMIT_CONTRACT: {
+            modalHeading: 'Ready to submit?',
+            onSubmitText: 'Submit',
+            modalDescription:
+                'Submitting this contract will send it to CMS to begin their review.',
             errorHeading: ERROR_MESSAGES.submit_error_heading,
             errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
         },
@@ -144,6 +175,7 @@ export const UnlockSubmitModalV2 = ({
         useUnlockHealthPlanPackageMutation() // TODO this should be unlockContract - linked rates epic
 
     // TODO submitRate and unlockRate should also be set up here - nunlock and edit rate epic
+    // TODO submitContract and unlockContract should also be set up here - nunlock and edit rate epic
     const formik = useFormik({
         initialValues: modalFormInitialValues,
         validationSchema: Yup.object().shape({
@@ -204,6 +236,9 @@ export const UnlockSubmitModalV2 = ({
 
             case 'SUBMIT_RATE' || 'RESUBMIT_RATE':
                 console.info('submit/resubmit rate not implemented yet')
+                break
+            case 'SUBMIT_CONTRACT' || 'RESUBMIT_CONTRACT':
+                console.info('submit/resubmit contract not implemented yet')
                 break
         }
 
