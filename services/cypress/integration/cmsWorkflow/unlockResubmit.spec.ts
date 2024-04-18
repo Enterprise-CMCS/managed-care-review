@@ -196,6 +196,9 @@ describe('CMS user', () => {
                 cy.navigateFormByDirectLink(submissionURL)
                 cy.findByTestId('updatedSubmissionBanner').should('exist')
 
+                 // No document dates or other fields are undefined
+                 cy.findByText('N/A').should('not.exist')
+
                 // Should have change history records
                 cy.findAllByTestId('change-history-record').should('have.length', 5)
 

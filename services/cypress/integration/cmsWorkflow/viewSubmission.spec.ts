@@ -95,6 +95,10 @@ describe('CMS user can view submission', () => {
             cy.findByText(submissionName).should('exist').click()
             cy.url({ timeout: 10_000 }).should('contain', submissionId)
             cy.findByTestId('submission-summary').should('exist')
+
+
+            // No document dates or other fields are undefined
+            cy.findByText('N/A').should('not.exist')
         })
     })
 })
