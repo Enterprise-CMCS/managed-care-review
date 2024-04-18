@@ -8,6 +8,7 @@ import {
     useUnlockHealthPlanPackageMutation,
     Rate,
     Contract,
+    useSubmitContractMutation,
 } from '../../../gen/gqlClient'
 import {
     submitMutationWrapper,
@@ -21,6 +22,7 @@ import * as Yup from 'yup'
 import styles from '../UnlockSubmitModal.module.scss'
 import { GenericApiErrorProps } from '../../Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { ERROR_MESSAGES } from '../../../constants/errors'
+import { submitMutationWrapperV2 } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 
 const PACKAGE_UNLOCK_SUBMIT_TYPES = [
     'SUBMIT_PACKAGE',
@@ -115,6 +117,16 @@ const modalValueDictionary: { [Property in SharedModalType]: ModalValueType } =
                 'You must provide a summary of changes',
             errorHeading: ERROR_MESSAGES.resubmit_error_heading,
         },
+        RESUBMIT_CONTRACT: {
+            modalHeading: 'Summarize changes',
+            onSubmitText: 'Resubmit',
+            modalDescription:
+                'Once you submit, this contract will be sent to CMS for review and you will no longer be able to make changes.',
+            inputHint: 'Provide summary of all changes made to this contract',
+            unlockSubmitModalInputValidation:
+                'You must provide a summary of changes',
+            errorHeading: ERROR_MESSAGES.resubmit_error_heading,
+        },
         UNLOCK_RATE: {
             modalHeading: 'Reason for unlocking rate',
             onSubmitText: 'Unlock',
@@ -173,6 +185,7 @@ export const UnlockSubmitModalV2 = ({
         useSubmitHealthPlanPackageMutation() // TODO this should be submitContract - linked rates epic
     const [unlockHealthPlanPackage, { loading: unlockMutationLoading }] =
         useUnlockHealthPlanPackageMutation() // TODO this should be unlockContract - linked rates epic
+    const [submitContract] = useSubmitContractMutation() // TODO this should be unlockContract - linked rates epic
 
     // TODO submitRate and unlockRate should also be set up here - nunlock and edit rate epic
     // TODO submitContract and unlockContract should also be set up here - nunlock and edit rate epic
@@ -238,7 +251,11 @@ export const UnlockSubmitModalV2 = ({
                 console.info('submit/resubmit rate not implemented yet')
                 break
             case 'SUBMIT_CONTRACT' || 'RESUBMIT_CONTRACT':
-                console.info('submit/resubmit contract not implemented yet')
+                result = await submitMutationWrapperV2(
+                    submitContract,
+                    submissionData.id,
+                    unlockSubmitModalInput
+                )
                 break
         }
 
@@ -273,7 +290,9 @@ export const UnlockSubmitModalV2 = ({
             modalRef.current?.toggleModal(undefined, false)
             if (
                 (modalType === 'SUBMIT_PACKAGE' ||
-                    modalType === 'RESUBMIT_PACKAGE') &&
+                    modalType === 'RESUBMIT_PACKAGE' ||
+                    modalType === 'RESUBMIT_CONTRACT' ||
+                    modalType === 'SUBMIT_CONTRACT') &&
                 submissionName
             ) {
                 navigate(
