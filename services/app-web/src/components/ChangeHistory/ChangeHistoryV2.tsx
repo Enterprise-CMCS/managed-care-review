@@ -24,7 +24,10 @@ export const ChangeHistoryV2 = ({
                 return submission.cause === 'CONTRACT_SUBMISSION'
             }
         )
-        contractSubmissions.forEach((r, index) => {
+        //Reverse revisions to order from earliest to latest revision. This is to correctly set version for each
+        // contract & recontract.
+        const reversedRevisions = [...contractSubmissions].reverse()
+        reversedRevisions.forEach((r, index) => {
             if (r.contractRevision.unlockInfo) {
                 const newUnlock: flatRevisions = {} as flatRevisions
                 newUnlock.updatedAt = r.contractRevision.unlockInfo.updatedAt
