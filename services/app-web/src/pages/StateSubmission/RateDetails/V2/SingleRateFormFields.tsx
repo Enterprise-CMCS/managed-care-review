@@ -533,6 +533,7 @@ export const SingleRateFormFields = ({
                                                     remove(index)
                                                     setNewActuaryContactButtonFocus()
                                                 }}
+                                                data-testid="removeContactBtn"
                                             >
                                                 Remove
                                             </Button>

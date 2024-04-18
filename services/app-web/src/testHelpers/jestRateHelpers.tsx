@@ -75,11 +75,15 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
         expect(
             withinTargetRateCert.queryByText('Date certified')
         ).toBeInTheDocument()
-        expect(withinTargetRateCert.queryByText('Name')).toBeInTheDocument()
         expect(
-            withinTargetRateCert.queryByText('Title/Role')
+            withinTargetRateCert.queryAllByText('Name')[0]
         ).toBeInTheDocument()
-        expect(withinTargetRateCert.queryByText('Email')).toBeInTheDocument()
+        expect(
+            withinTargetRateCert.queryAllByText('Title/Role')[0]
+        ).toBeInTheDocument()
+        expect(
+            withinTargetRateCert.queryAllByText('Email')[0]
+        ).toBeInTheDocument()
     })
 
     const startDateInputs = withinTargetRateCert.getAllByLabelText('Start date')
@@ -93,16 +97,16 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
     await userEvent.paste('12/01/2021')
 
     // fill out actuary contact
-    withinTargetRateCert.getByLabelText('Name').focus()
+    withinTargetRateCert.getAllByLabelText('Name')[0].focus()
     await userEvent.paste(`Actuary Contact Person ${index}`)
 
-    withinTargetRateCert.getByLabelText('Title/Role').focus()
+    withinTargetRateCert.getAllByLabelText('Title/Role')[0].focus()
     await userEvent.paste(`Actuary Contact Title ${index}`)
 
-    withinTargetRateCert.getByLabelText('Email').focus()
+    withinTargetRateCert.getAllByLabelText('Email')[0].focus()
     await userEvent.paste(`actuarycontact${index}@test.com`)
 
-    await userEvent.click(withinTargetRateCert.getByLabelText('Mercer'))
+    await userEvent.click(withinTargetRateCert.getAllByLabelText('Mercer')[0])
 }
 
 const rateCertifications = (screen: Screen) => {

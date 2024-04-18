@@ -940,21 +940,22 @@ describe('RateDetailsv2', () => {
 
             //Additional actuary contacts
             const contacts = screen.getAllByTestId('actuary-contact')
-            expect(contacts).toHaveLength(1)
+            expect(contacts).toHaveLength(2)
 
             //Adding another addtional actuary contact
             await user.click(addActuaryContact)
 
             const contactsPostClick = screen.getAllByTestId('actuary-contact')
-            expect(contactsPostClick).toHaveLength(2)
+            expect(contactsPostClick).toHaveLength(3)
 
             //Testing removal of actuary contact
-            const removeButtons = screen.getAllByText('Remove')
-            expect(removeButtons).toHaveLength(2)
+            const removeButtons = screen.getAllByTestId('removeContactBtn')
+            expect(removeButtons).toHaveLength(3)
             await user.click(removeButtons[0])
 
-            const removeButtonsPostRemoval = screen.getAllByText('Remove')
-            expect(removeButtonsPostRemoval).toHaveLength(1)
+            const removeButtonsPostRemoval =
+                screen.getAllByTestId('removeContactBtn')
+            expect(removeButtonsPostRemoval).toHaveLength(2)
         })
     })
 })
