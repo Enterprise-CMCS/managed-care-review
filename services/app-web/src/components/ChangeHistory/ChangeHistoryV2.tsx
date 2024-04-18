@@ -19,10 +19,7 @@ export const ChangeHistoryV2 = ({
 }: ChangeHistoryProps): React.ReactElement => {
     const flattenedRevisions = (): flatRevisions[] => {
         const result: flatRevisions[] = []
-        //Reverse revisions to order from earliest to latest revision. This is to correctly set version for each
-        // contract & recontract.
-        const reversedRevisions = [...contract.packageSubmissions].reverse()
-        reversedRevisions.forEach((r, index) => {
+        contract.packageSubmissions.forEach((r, index) => {
             if (r.contractRevision.unlockInfo) {
                 const newUnlock: flatRevisions = {} as flatRevisions
                 newUnlock.updatedAt = r.contractRevision.unlockInfo.updatedAt
@@ -36,10 +33,8 @@ export const ChangeHistoryV2 = ({
             if (r.contractRevision.submitInfo) {
                 const newSubmit: flatRevisions = {} as flatRevisions
 
-                // Only set revisionVersion if not the latest revision and if not unlocked. This is not the same
-                // as the order of change history. The version correlates with each submitted revision.
                 const revisionVersion =
-                    index !== reversedRevisions.length - 1
+                    index !== contract.packageSubmissions.length - 1
                         ? String(index + 1) //Offset version, we want to start at 1
                         : undefined
 

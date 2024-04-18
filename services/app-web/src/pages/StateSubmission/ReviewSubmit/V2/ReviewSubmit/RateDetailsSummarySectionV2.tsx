@@ -77,10 +77,9 @@ export const RateDetailsSummarySectionV2 = ({
     const contractFormData =
         contract.draftRevision?.formData ||
         getLastContractSubmission(contract)?.contractRevision.formData
-    const rates =
-        getLastContractSubmission(contract)?.rateRevisions ||
-        contract.draftRates ||
-        []
+    const rates = isEditing
+        ? contract.draftRates
+        : getLastContractSubmission(contract)?.rateRevisions
     const lastSubmittedDate =
         getLastContractSubmission(contract)?.submitInfo.updatedAt
 
