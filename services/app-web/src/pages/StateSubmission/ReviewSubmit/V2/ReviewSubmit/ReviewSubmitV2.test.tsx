@@ -1,8 +1,5 @@
 import { screen, waitFor, within } from '@testing-library/react'
-import {
-    renderWithProviders,
-    userClickByRole,
-} from '../../../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../../../testHelpers/jestHelpers'
 import { ReviewSubmitV2 } from './ReviewSubmitV2'
 import {
     fetchCurrentUserMock,
@@ -267,7 +264,7 @@ describe('ReviewSubmit', () => {
         })
 
         expect(screen.getByTestId('form-submit')).toBeDefined()
-        expect(screen.getByText('Submit')).toBeInTheDocument()
-        await userClickByRole(screen, 'button', { name: 'Submit' })
+        expect(screen.getAllByText('Submit')).toHaveLength(2)
+        await screen.getAllByText('Submit')[0].click()
     })
 })

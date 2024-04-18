@@ -68,7 +68,8 @@ export const ContactsSummarySection = ({
             <GridContainer className="padding-left-0">
                 <Grid row>
                     <dl>
-                        {contractFormData && contractFormData.stateContacts.length > 0 ? (
+                        {contractFormData &&
+                        contractFormData.stateContacts.length > 0 ? (
                             contractFormData?.stateContacts.map(
                                 (stateContact, index) => (
                                     <DataDetail

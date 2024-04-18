@@ -182,8 +182,10 @@ function mockContractWithLinkedRateDraft(
                 revisions: [],
                 state: mockMNState(),
                 stateNumber: 5,
+                parentContractID: 'foo-baz',
                 draftRevision: {
                     id: '123',
+                    rateID: '456',
                     contractRevisions: [],
                     createdAt: new Date(),
                     updatedAt: new Date(),
@@ -326,8 +328,10 @@ function mockContractPackageUnlocked(
                 revisions: [],
                 state: mockMNState(),
                 stateNumber: 5,
+                parentContractID:'test-abc-123',
                 draftRevision: {
-                    id: '123',
+                    id: '456',
+                    rateID: '123',
                     contractRevisions: [],
                     createdAt: new Date(),
                     updatedAt: new Date(),
@@ -600,6 +604,7 @@ function mockContractPackageSubmitted(
             rateRevisions: [
                 {
                     id: '1234',
+                    rateID: '123',
                     createdAt: new Date('01/01/2023'),
                     updatedAt: new Date('01/01/2023'),
                     contractRevisions: [],
@@ -726,3 +731,4 @@ function mockContractFormData( partial?: Partial<ContractFormData>): ContractFor
 }
 
 export { mockContractPackageDraft, mockContractPackageSubmitted, mockContractWithLinkedRateDraft, mockContractPackageUnlocked, mockContractFormData}
+
