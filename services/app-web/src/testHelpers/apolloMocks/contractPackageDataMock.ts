@@ -36,8 +36,10 @@ function mockContractPackageDraft(
                 revisions: [],
                 state: mockMNState(),
                 stateNumber: 5,
+                parentContractID: 'foo-baz',
                 draftRevision: {
                     id: '123',
+                    rateID: '456',
                     contractRevisions: [],
                     createdAt: new Date(),
                     updatedAt: new Date(),
@@ -455,6 +457,7 @@ function mockContractPackageUnlocked(
             rateRevisions: [
                 {
                     id: '1234',
+                    rateID: '456',
                     createdAt: new Date('01/01/2023'),
                     updatedAt: new Date('01/01/2023'),
                     contractRevisions: [],

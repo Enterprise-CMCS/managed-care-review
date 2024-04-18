@@ -1,10 +1,15 @@
 import { findAllRatesWithHistoryBySubmitInfo } from './findAllRatesWithHistoryBySubmitInfo'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { mockInsertRateArgs, must } from '../../testHelpers'
+import {
+    mockInsertContractArgs,
+    mockInsertRateArgs,
+    must,
+} from '../../testHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import { insertDraftRate } from './insertRate'
-import { submitRate } from './submitRate'
-import { unlockRate } from './unlockRate'
+import { insertDraftContract } from './insertContract'
+import { submitContract } from './submitContract'
+import { unlockContract } from './unlockContract'
 
 describe('findAllRatesWithHistoryBySubmittedInfo', () => {
     it('returns only rates that have been submitted or unlocked', async () => {
@@ -20,57 +25,47 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
             },
         })
 
-        const cmsUser = await client.user.create({
-            data: {
-                id: uuidv4(),
-                givenName: 'Zuko',
-                familyName: 'Hotman',
-                email: 'zuko@example.com',
-                role: 'CMS_USER',
-            },
+        const draftContractData = mockInsertContractArgs({
+            submissionDescription: 'one contract',
         })
+        const contractA = must(
+            await insertDraftContract(client, draftContractData)
+        )
 
         const draftRateData = mockInsertRateArgs({
             rateCertificationName: 'one rate',
         })
 
         // make two submitted rates and submit them
-        const rateOne = must(await insertDraftRate(client, draftRateData))
-        const rateTwo = must(await insertDraftRate(client, draftRateData))
-        const submittedRateOne = must(
-            await submitRate(client, {
-                rateID: rateOne.id,
+        const rateOne = must(
+            await insertDraftRate(client, contractA.id, draftRateData)
+        )
+        const rateTwo = must(
+            await insertDraftRate(client, contractA.id, draftRateData)
+        )
+
+        must(
+            await submitContract(client, {
+                contractID: contractA.id,
                 submittedByUserID: stateUser.id,
-                submittedReason: 'rateOne submit',
+                submittedReason: 'Submitting A.1',
             })
         )
-        const submittedRateTwo = must(
-            await submitRate(client, {
-                rateID: rateTwo.id,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'rateTwo submit',
+
+        must(
+            await unlockContract(client, {
+                contractID: contractA.id,
+                unlockedByUserID: stateUser.id,
+                unlockReason: 'Unlock A.1',
             })
         )
 
         // make two draft rates
-        const draftRateOne = must(await insertDraftRate(client, draftRateData))
-        const draftRateTwo = must(await insertDraftRate(client, draftRateData))
-
-        // make one unlocked rate
-        const rateThree = must(await insertDraftRate(client, draftRateData))
-        must(
-            await submitRate(client, {
-                rateID: rateThree.id,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'unlockRateOne submit',
-            })
+        const draftRateOne = must(
+            await insertDraftRate(client, contractA.id, draftRateData)
         )
-        const unlockedRate = must(
-            await unlockRate(client, {
-                rateID: rateThree.id,
-                unlockedByUserID: cmsUser.id,
-                unlockReason: 'unlock unlockRateOne',
-            })
+        const draftRateTwo = must(
+            await insertDraftRate(client, contractA.id, draftRateData)
         )
 
         // call the find by submit info function
@@ -80,19 +75,10 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
         expect(rates).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({
-                    rateID: submittedRateOne.id,
+                    rateID: rateOne.id,
                 }),
                 expect.objectContaining({
-                    rateID: submittedRateTwo.id,
-                }),
-            ])
-        )
-
-        // expect our one unlocked rate
-        expect(rates).toEqual(
-            expect.arrayContaining([
-                expect.objectContaining({
-                    rateID: unlockedRate.id,
+                    rateID: rateTwo.id,
                 }),
             ])
         )
@@ -123,23 +109,30 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
             },
         })
 
+        const draftContractData = mockInsertContractArgs({
+            submissionDescription: 'one contract',
+        })
+        const contractA = must(
+            await insertDraftContract(client, draftContractData)
+        )
+
         const rateDataForAS = must(
             await insertDraftRate(
                 client,
+                contractA.id,
                 mockInsertRateArgs({
                     stateCode: 'AS',
                     rateCertificationName: 'one rate',
                 })
             )
         )
-        const submittedRateAmericanSamoa = must(
-            await submitRate(client, {
-                rateID: rateDataForAS.id,
+        must(
+            await submitContract(client, {
+                contractID: contractA.id,
                 submittedByUserID: stateUser.id,
-                submittedReason: 'rateOne submit',
+                submittedReason: 'Submitting A.1',
             })
         )
-
         // call the find by submit info function
         const rates = must(await findAllRatesWithHistoryBySubmitInfo(client))
 
@@ -147,7 +140,7 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
         expect(rates).not.toEqual(
             expect.arrayContaining([
                 expect.objectContaining({
-                    rateID: submittedRateAmericanSamoa.id,
+                    rateID: rateDataForAS.id,
                 }),
             ])
         )
@@ -166,20 +159,28 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
             },
         })
 
+        const draftContractData = mockInsertContractArgs({
+            submissionDescription: 'one contract',
+        })
+        const contractA = must(
+            await insertDraftContract(client, draftContractData)
+        )
+
         const rateDataForMN = must(
             await insertDraftRate(
                 client,
+                contractA.id,
                 mockInsertRateArgs({
                     stateCode: 'MN',
                     rateCertificationName: 'one rate',
                 })
             )
         )
-        const submittedRateMinnesota = must(
-            await submitRate(client, {
-                rateID: rateDataForMN.id,
+        must(
+            await submitContract(client, {
+                contractID: contractA.id,
                 submittedByUserID: stateUser.id,
-                submittedReason: 'rateOne submit',
+                submittedReason: 'Submitting A.1',
             })
         )
 
@@ -192,7 +193,7 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
         expect(rates).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({
-                    rateID: submittedRateMinnesota.id,
+                    rateID: rateDataForMN.id,
                 }),
             ])
         )

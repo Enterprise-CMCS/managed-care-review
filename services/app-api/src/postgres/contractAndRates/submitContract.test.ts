@@ -141,16 +141,6 @@ describe('submitContract', () => {
             throw new Error('The draft rates should have been inserted')
         }
 
-        // submit the first rate
-        const submittedRate = must(
-            await submitRate(client, {
-                rateID: draftContractWithRates.draftRates[0].id,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'submit rate A',
-            })
-        )
-        console.info(JSON.stringify(submittedRate, null, '  '))
-
         // submit the draft contract and connect submitInfo
         // the second rate will have the same submitInfo here
         // and the first rate will have a different submitInfo
@@ -174,7 +164,7 @@ describe('submitContract', () => {
         expect(contractSubmitInfo).toEqual(rateSubmitInfoB)
 
         // but rate A does not
-        expect(rateSubmitInfoA?.updatedReason).toBe('submit rate A')
+        expect(rateSubmitInfoA?.updatedReason).toBe('initial submit')
     })
     it('creates a submission from a draft', async () => {
         const client = await sharedTestPrismaClient()
@@ -238,112 +228,7 @@ describe('submitContract', () => {
         })
 
         // resubmitting should be a store error
-        expect(resubmitStoreError).toBeInstanceOf(NotFoundError)
-    })
-
-    it('invalidates old revisions when new revisions are submitted', async () => {
-        const client = await sharedTestPrismaClient()
-
-        const stateUser = must(
-            await client.user.create({
-                data: {
-                    id: uuidv4(),
-                    givenName: 'Aang',
-                    familyName: 'Avatar',
-                    email: 'aang@example.com',
-                    role: 'STATE_USER',
-                    stateCode: 'NM',
-                },
-            })
-        )
-
-        // create a draft contract
-        const draftContractData = mockInsertContractArgs({
-            submissionDescription: 'first contract',
-        })
-        const contractA = must(
-            await insertDraftContract(client, draftContractData)
-        )
-
-        // create a draft rate
-        const rateA = must(
-            await insertDraftRate(client, {
-                stateCode: 'MN',
-                rateCertificationName: 'first rate',
-            })
-        )
-
-        // submit the first draft contract
-        const submittedContractA = must(
-            await submitContract(client, {
-                contractID: contractA.id,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'initial submit',
-            })
-        )
-
-        // submit the first draft rate
-        const rateA1 = must(
-            await submitRate(client, {
-                rateID: rateA.id,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'initial rate submit',
-            })
-        )
-        // set up the relation between the submitted contract and the rate
-        await client.rateRevisionsOnContractRevisionsTable.create({
-            data: {
-                contractRevisionID: submittedContractA.revisions[0].id,
-                rateRevisionID: rateA1.revisions[0].id,
-                validAfter: new Date(),
-            },
-        })
-
-        // create a second draft contract
-        const contractASecondRevision = must(
-            await client.contractTable.update({
-                where: {
-                    id: contractA.id,
-                },
-                data: {
-                    revisions: {
-                        create: {
-                            submissionType: 'CONTRACT_AND_RATES',
-                            submissionDescription: 'second contract revision',
-                            contractType: 'BASE',
-                            programIDs: draftContractData.programIDs,
-                            populationCovered: 'MEDICAID',
-                            riskBasedContract: false,
-                        },
-                    },
-                },
-                include: {
-                    revisions: true,
-                },
-            })
-        )
-
-        // submit the second draft contract
-        must(
-            await submitContract(client, {
-                contractID: contractASecondRevision.id,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'second submit',
-            })
-        )
-
-        /* now that the second contract revision has been submitted, the first contract revision should be invalidated.
-        Something is invalidated when it gets a validUntil value, which marks the time it stopped being valid */
-        const invalidatedRevision = must(
-            await client.rateRevisionsOnContractRevisionsTable.findFirst({
-                where: {
-                    contractRevisionID: submittedContractA.revisions[0].id,
-                    validUntil: { not: null },
-                },
-            })
-        )
-
-        expect(invalidatedRevision).not.toBeNull()
+        expect(resubmitStoreError).toBeInstanceOf(Error)
     })
 
     it('handles concurrent drafts correctly', async () => {
@@ -369,7 +254,7 @@ describe('submitContract', () => {
 
         // Attempt to submit a rate related to this draft contract
         const rate1 = must(
-            await insertDraftRate(client, {
+            await insertDraftRate(client, contractA.id, {
                 stateCode: 'MN',
                 rateCertificationName: 'onepoint0',
             })

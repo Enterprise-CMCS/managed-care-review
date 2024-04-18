@@ -8,12 +8,9 @@ import { testStateUser, testCMSUser } from '../../testHelpers/userHelpers'
 import SUBMIT_RATE from '../../../../app-graphql/src/mutations/submitRate.graphql'
 import FETCH_RATE from '../../../../app-graphql/src/queries/fetchRate.graphql'
 import UNLOCK_RATE from '../../../../app-graphql/src/mutations/unlockRate.graphql'
-import {
-    createTestRate,
-    submitTestRate,
-    updateTestRate,
-} from '../../testHelpers'
+import { submitTestRate, updateTestRate } from '../../testHelpers'
 import SUBMIT_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
+import { createSubmitAndUnlockTestRate } from '../../testHelpers/gqlRateHelpers'
 
 describe('submitRate', () => {
     const ldService = testLDService({
@@ -30,12 +27,19 @@ describe('submitRate', () => {
             ldService,
         })
 
-        // createRate with full data
-        const draftRate = await createTestRate()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+            ldService,
+        })
+
+        const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer)
+
         const fetchDraftRate = await stateServer.executeOperation({
             query: FETCH_RATE,
             variables: {
-                input: { rateID: draftRate.id },
+                input: { rateID: rate.id },
             },
         })
 
@@ -47,7 +51,7 @@ describe('submitRate', () => {
             query: SUBMIT_RATE,
             variables: {
                 input: {
-                    rateID: draftRate.id,
+                    rateID: rate.id,
                 },
             },
         })
@@ -61,7 +65,7 @@ describe('submitRate', () => {
         // expect rate data to be returned
         expect(submittedRate).toBeDefined()
         // expect status to be submitted.
-        expect(submittedRate.status).toBe('SUBMITTED')
+        expect(submittedRate.status).toBe('RESUBMITTED')
         // expect formData to be the same
         expect(submittedRateFormData).toEqual(draftFormData)
     })
@@ -75,29 +79,36 @@ describe('submitRate', () => {
             ldService,
         })
 
-        const draftRate = await createTestRate()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+            ldService,
+        })
+
+        const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer)
 
         const fetchDraftRate = await stateServer.executeOperation({
             query: FETCH_RATE,
             variables: {
-                input: { rateID: draftRate.id },
+                input: { rateID: rate.id },
             },
         })
 
-        const draftFormData = draftRate.draftRevision?.formData
+        const draftFormData = rate.draftRevision?.formData
 
         // expect draft rate created in contract to exist
         expect(fetchDraftRate.errors).toBeUndefined()
         expect(draftFormData).toBeDefined()
 
         // update rate
-        await updateTestRate(draftRate.id, {
+        await updateTestRate(rate.id, {
             rateDateStart: new Date(Date.UTC(2025, 1, 1)),
         })
 
         const submittedRate = await submitTestRate(
             stateServer,
-            draftRate.id,
+            rate.id,
             'Submit with edited rate description'
         )
 
@@ -106,7 +117,7 @@ describe('submitRate', () => {
         // expect rate data to be returned
         expect(submittedRate).toBeDefined()
         // expect status to be submitted.
-        expect(submittedRate.status).toBe('SUBMITTED')
+        expect(submittedRate.status).toBe('RESUBMITTED')
         // expect formData to NOT be the same
         expect(submittedRateFormData.rateDateStart).not.toEqual(
             draftFormData?.rateDateStart
@@ -122,7 +133,17 @@ describe('submitRate', () => {
             ldService,
         })
 
-        const draftRate = await createTestRate()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+            ldService,
+        })
+
+        const draftRate = await createSubmitAndUnlockTestRate(
+            stateServer,
+            cmsServer
+        )
 
         const fetchDraftRate = await stateServer.executeOperation({
             query: FETCH_RATE,
@@ -155,7 +176,7 @@ describe('submitRate', () => {
         // expect rate data to be returned
         expect(submittedRate).toBeDefined()
         // expect status to be submitted.
-        expect(submittedRate.status).toBe('SUBMITTED')
+        expect(submittedRate.status).toBe('RESUBMITTED')
         // expect formData to be the same
         expect(submittedRateFormData).toEqual(draftFormData)
     })
@@ -251,7 +272,17 @@ describe('submitRate', () => {
             }),
         })
 
-        const draftRate = await createTestRate()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+            ldService,
+        })
+
+        const draftRate = await createSubmitAndUnlockTestRate(
+            stateServer,
+            cmsServer
+        )
 
         const fetchDraftRate = await stateServer.executeOperation({
             query: FETCH_RATE,

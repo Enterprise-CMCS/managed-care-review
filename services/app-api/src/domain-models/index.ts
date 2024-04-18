@@ -44,6 +44,8 @@ export type {
     RateRevisionWithContractsType,
     RateFormDataType,
     PackageStatusType,
+    ContractPackageSubmissionType,
+    ContractPackageSubmissionWithCauseType,
 } from './contractAndRates'
 
 export type {

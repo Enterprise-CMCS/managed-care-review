@@ -80,6 +80,7 @@ const contractRevisionOnRateDataMock = (
 const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
     return {
         id: data?.id ?? uuidv4(),
+        rateID: '456',
         createdAt: '2023-10-16T19:01:21.389Z',
         updatedAt: '2023-10-16T19:02:26.767Z',
         unlockInfo: null,
@@ -174,6 +175,7 @@ const draftRateDataMock =  (
         updatedAt: '2023-10-16T19:01:21.389Z',
         stateCode: 'MN',
         stateNumber: 10,
+        parentContractID: 'foo-bar',
         state: mockMNState(),
         status: 'DRAFT',
         initiallySubmittedAt: '2023-10-16',
@@ -202,6 +204,7 @@ const rateDataMock = (
         status: 'RESUBMITTED',
         initiallySubmittedAt: '2023-10-16',
         draftRevision: null,
+        parentContractID: 'foo-bar',
         ...rate,
         id: rateID,
         revisions: [

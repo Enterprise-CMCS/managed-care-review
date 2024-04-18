@@ -85,7 +85,7 @@ function rateRevisionToDomainModel(
 
     return {
         id: revision.id,
-        rate: revision.rate,
+        rateID: revision.rateID,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
         submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
@@ -220,12 +220,46 @@ function rateWithHistoryToDomainModel(
         )
     }
 
+    // Find this rate's parent contract. It'll be the contract it was initially submitted with
+    // or the contract it is associated with as an initial draft.
+    const firstRevision = rate.revisions[0]
+    const submission = firstRevision.submitInfo
+
+    let parentContractID = undefined
+    if (!submission) {
+        // this is a draft, never submitted, rate
+        if (rate.draftContracts.length !== 1) {
+            const msg =
+                'programming error: its an unsubmitted rate with no draft contracts'
+            console.error(msg)
+            return new Error(msg)
+        }
+        const draftContract = rate.draftContracts[0]
+        parentContractID = draftContract.contractID
+    } else {
+        // check the initial submission
+        if (firstRevision.relatedSubmissions.length == 0) {
+            console.info('No related submission. Unmigrated rate.')
+            parentContractID = '00000000-1111-2222-3333-444444444444'
+        } else {
+            if (submission.submittedContracts.length !== 1) {
+                const msg =
+                    'programming error: its a submitted rate that was not submitted with a contract initially'
+                console.error(msg)
+                return new Error(msg)
+            }
+            const firstContract = submission.submittedContracts[0]
+            parentContractID = firstContract.contractID
+        }
+    }
+
     return {
         id: rate.id,
         createdAt: rate.createdAt,
         updatedAt: rate.updatedAt,
         status: getContractRateStatus(rateRevisions),
         stateCode: rate.stateCode,
+        parentContractID: parentContractID,
         stateNumber: rate.stateNumber,
         draftRevision,
         revisions: revisions.reverse(),

@@ -11,6 +11,7 @@ const rateSchema = z.object({
     updatedAt: z.date(),
     status: statusSchema,
     stateCode: z.string(),
+    parentContractID: z.string().uuid(),
     stateNumber: z.number().min(1),
     // If this rate is in a DRAFT or UNLOCKED status, there will be a draftRevision
     draftRevision: rateRevisionWithContractsSchema.optional(),
