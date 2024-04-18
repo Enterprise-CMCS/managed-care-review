@@ -8,7 +8,8 @@ import {
     ContractTypeRecord,
     PopulationCoveredRecord,
 } from '../../../../../constants/healthPlanPackages'
-import { getLastContractSubmission } from '../../../../../gqlHelpers/contractsAndRates'
+import { GenericErrorPage } from '../../../../Errors/GenericErrorPage'
+import { getLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
 import { Program, Contract } from '../../../../../gen/gqlClient'
 import { usePreviousSubmission } from '../../../../../hooks/usePreviousSubmission'
 import { booleanAsYesNoUserValue } from '../../../../../components/Form/FieldYesNo/FieldYesNo'
@@ -35,15 +36,14 @@ export const SubmissionTypeSummarySectionV2 = ({
     submissionName,
 }: SubmissionTypeSummarySectionV2Props): React.ReactElement => {
     const isPreviousSubmission = usePreviousSubmission()
-    const contractFormData =
-        contract.draftRevision?.formData ||
-        getLastContractSubmission(contract)?.contractRevision.formData
+    const contractFormData = getLatestContractFormData(contract)
+    if (!contractFormData) return <GenericErrorPage />
 
     const programNames = statePrograms
-        .filter((p) => contractFormData?.programIDs.includes(p.id))
+        .filter((p) => contractFormData.programIDs.includes(p.id))
         .map((p) => p.name)
     const isSubmitted = contract.status === 'SUBMITTED'
-    // const isRiskBasedContract = contractFormData.riskBasedContract ===
+
     return (
         <SectionCard
             id="submissionTypeSection"
@@ -98,7 +98,7 @@ export const SubmissionTypeSummarySectionV2 = ({
                             label="Contract action type"
                             explainMissingData={!isSubmitted}
                             children={
-                                contractFormData?.contractType
+                                contractFormData.contractType
                                     ? ContractTypeRecord[
                                           contractFormData.contractType
                                       ]
@@ -107,7 +107,7 @@ export const SubmissionTypeSummarySectionV2 = ({
                         />
                     }
                     {contractFormData &&
-                        contractFormData?.riskBasedContract !== null && (
+                        contractFormData.riskBasedContract !== null && (
                             <DataDetail
                                 id="riskBasedContract"
                                 label="Is this a risk based contract"

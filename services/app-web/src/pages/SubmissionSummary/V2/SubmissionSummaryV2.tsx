@@ -18,15 +18,15 @@ import {
     SubmissionUpdatedBanner,
     DocumentWarningBanner,
 } from '../../../components'
-import {
-    ErrorOrLoadingPage,
-    handleAndReturnErrorState,
-} from '../../StateSubmission/ErrorOrLoadingPage'
+import { Loading } from '../../../components'
 import { usePage } from '../../../contexts/PageContext'
 import {
     useFetchContractQuery,
     UpdateInformation,
 } from '../../../gen/gqlClient'
+import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
+import { Error404 } from '../../Errors/Error404Page'
+import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import styles from '../SubmissionSummary.module.scss'
 import { ChangeHistoryV2 } from '../../../components/ChangeHistory/ChangeHistoryV2'
 import { UnlockSubmitModalV2 } from '../../../components/Modal/V2/UnlockSubmitModalV2'
@@ -88,43 +88,51 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
         },
     })
     const contract = fetchContractData?.fetchContract.contract
-
+    if (fetchContractLoading) {
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
+    } else if (fetchContractError || !contract) {
+        //error handling for a state user that tries to access rates for a different state
+        if (
+            fetchContractError?.graphQLErrors[0]?.extensions?.code ===
+            'FORBIDDEN'
+        ) {
+            return (
+                <ErrorForbiddenPage
+                    errorMsg={fetchContractError.graphQLErrors[0].message}
+                />
+            )
+        } else if (
+            fetchContractError?.graphQLErrors[0]?.extensions?.code ===
+            'NOT_FOUND'
+        ) {
+            return <Error404 />
+        } else {
+            return <GenericErrorPage />
+        }
+    }
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
-    const submissionStatus = contract?.status
-    const statePrograms = contract?.state.programs
+    const submissionStatus = contract.status
+    const statePrograms = contract.state.programs
     const contractFormData =
-        contract?.draftRevision?.formData ||
-        contract?.packageSubmissions[0].contractRevision.formData
-    const programIDs = contractFormData?.programIDs
-    const programs = statePrograms?.filter((program) =>
-        programIDs?.includes(program.id)
+        contract.draftRevision?.formData ||
+        contract.packageSubmissions[0].contractRevision.formData
+    const programIDs = contractFormData.programIDs
+    const programs = statePrograms.filter((program) =>
+        programIDs.includes(program.id)
     )
     // set the page heading
-    const name =
-        contract && contractFormData && programs
-            ? packageName(
-                  contract.stateCode,
-                  contract.stateNumber,
-                  contractFormData.programIDs,
-                  programs
-              )
-            : ''
-
+    const name = packageName(
+        contract.stateCode,
+        contract.stateNumber,
+        contractFormData.programIDs,
+        programs
+    )
     if (pkgName !== name) {
         setPkgName(name)
-    }
-
-    // Display any full page interim state resulting from the initial fetch API requests
-    if (fetchContractLoading) {
-        return <ErrorOrLoadingPage state="LOADING" />
-    }
-
-    if (fetchContractError) {
-        return (
-            <ErrorOrLoadingPage
-                state={handleAndReturnErrorState(fetchContractError)}
-            />
-        )
     }
 
     // Get the correct update info depending on the submission status
@@ -132,11 +140,11 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
     if (submissionStatus === 'UNLOCKED' || submissionStatus === 'RESUBMITTED') {
         updateInfo =
             (submissionStatus === 'UNLOCKED'
-                ? contract?.packageSubmissions[0].submittedRevisions.find(
+                ? contract.packageSubmissions[0].submittedRevisions.find(
                       (rev) => rev.unlockInfo
                   )?.unlockInfo
-                : contract?.packageSubmissions[0].contractRevision
-                      .submitInfo) || undefined
+                : contract.packageSubmissions[0].contractRevision.submitInfo) ||
+            undefined
     }
 
     const isContractActionAndRateCertification =
@@ -145,7 +153,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
     const handleDocumentDownloadError = (error: boolean) =>
         setDocumentError(error)
 
-    const editOrAddMCCRSID = contract?.mccrsID
+    const editOrAddMCCRSID = contract.mccrsID
         ? 'Edit MC-CRS number'
         : 'Add MC-CRS record number'
 
@@ -206,21 +214,21 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                         subHeaderComponent={
                             isCMSUser ? (
                                 <div className={styles.subHeader}>
-                                    {contract?.mccrsID && (
+                                    {contract.mccrsID && (
                                         <span className={styles.mccrsID}>
                                             MC-CRS record number:
                                             <Link
-                                                href={`https://mccrs.abtsites.com/Home/Index/${contract?.mccrsID}`}
+                                                href={`https://mccrs.abtsites.com/Home/Index/${contract.mccrsID}`}
                                                 aria-label="MC-CRS system login"
                                             >
-                                                {contract?.mccrsID}
+                                                {contract.mccrsID}
                                             </Link>
                                         </span>
                                     )}
                                     <Link
-                                        href={`/submissions/${contract?.id}/mccrs-record-number`}
+                                        href={`/submissions/${contract.id}/mccrs-record-number`}
                                         className={
-                                            contract?.mccrsID
+                                            contract.mccrsID
                                                 ? styles.editLink
                                                 : ''
                                         }

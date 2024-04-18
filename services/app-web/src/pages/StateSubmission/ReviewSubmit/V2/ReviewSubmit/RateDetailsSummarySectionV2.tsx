@@ -8,6 +8,7 @@ import { DownloadButton } from '../../../../../components/DownloadButton'
 import { UploadedDocumentsTable } from '../../../../../components/SubmissionSummarySection'
 import { usePreviousSubmission } from '../../../../../hooks/usePreviousSubmission'
 import styles from '../../../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
+import { GenericErrorPage } from '../../../../Errors/GenericErrorPage'
 
 import { recordJSException } from '../../../../../otelHelpers'
 import { DataDetailMissingField } from '../../../../../components/DataDetail/DataDetailMissingField'
@@ -96,7 +97,7 @@ export const RateDetailsSummarySectionV2 = ({
     const refreshPackagesWithSharedRateCert = (
         rateFormData: RateFormData
     ): SharedRateCertDisplay[] | undefined => {
-        return rateFormData?.packagesWithSharedRateCerts?.map(
+        return rateFormData.packagesWithSharedRateCerts?.map(
             ({ packageId, packageName }) => {
                 const refreshedName =
                     packageId &&
@@ -115,8 +116,9 @@ export const RateDetailsSummarySectionV2 = ({
 
     const rateCapitationType = (rate: Rate | RateRevision) => {
         const rateFormData = getRateFormData(rate)
-        return rateFormData?.rateCapitationType
-            ? rateFormData?.rateCapitationType === 'RATE_CELL'
+        if (!rateFormData) return <GenericErrorPage />
+        return rateFormData.rateCapitationType
+            ? rateFormData.rateCapitationType === 'RATE_CELL'
                 ? 'Certification of capitation rates specific to each rate cell'
                 : 'Certification of rate ranges of capitation rates per rate cell'
             : ''
@@ -126,12 +128,12 @@ export const RateDetailsSummarySectionV2 = ({
         /* if we have rateProgramIDs, use them, otherwise use programIDs */
         let programIDs = [] as string[]
         const rateFormData = getRateFormData(rate)
-
+        if (!rateFormData) return <GenericErrorPage />
         if (
-            rateFormData?.rateProgramIDs &&
-            rateFormData?.rateProgramIDs.length > 0
+            rateFormData.rateProgramIDs &&
+            rateFormData.rateProgramIDs.length > 0
         ) {
-            programIDs = rateFormData?.rateProgramIDs
+            programIDs = rateFormData.rateProgramIDs
         } else if (
             contractFormData?.programIDs &&
             contractFormData?.programIDs.length > 0
@@ -147,10 +149,11 @@ export const RateDetailsSummarySectionV2 = ({
 
     const rateCertificationType = (rate: Rate | RateRevision) => {
         const rateFormData = getRateFormData(rate)
-        if (rateFormData?.rateType === 'AMENDMENT') {
+        if (!rateFormData) return <GenericErrorPage />
+        if (rateFormData.rateType === 'AMENDMENT') {
             return 'Amendment to prior rate certification'
         }
-        if (rateFormData?.rateType === 'NEW') {
+        if (rateFormData.rateType === 'NEW') {
             return 'New rate certification'
         }
     }
@@ -235,16 +238,19 @@ export const RateDetailsSummarySectionV2 = ({
             {rates && rates.length > 0 ? (
                 rates.map((rate) => {
                     const rateFormData = getRateFormData(rate)
+                    if (!rateFormData) {
+                        return <GenericErrorPage />
+                    }
                     return (
                         <SectionCard
                             id={`rate-details-${rate.id}`}
                             key={rate.id}
                         >
                             <h3
-                                aria-label={`Rate ID: ${rateFormData?.rateCertificationName}`}
+                                aria-label={`Rate ID: ${rateFormData.rateCertificationName}`}
                                 className={styles.rateName}
                             >
-                                {rateFormData?.rateCertificationName}
+                                {rateFormData.rateCertificationName}
                             </h3>
                             <dl>
                                 <DoubleColumnGrid>
@@ -265,19 +271,19 @@ export const RateDetailsSummarySectionV2 = ({
                                     <DataDetail
                                         id="ratingPeriod"
                                         label={
-                                            rateFormData?.rateType ===
+                                            rateFormData.rateType ===
                                             'AMENDMENT'
                                                 ? 'Rating period of original rate certification'
                                                 : 'Rating period'
                                         }
                                         explainMissingData={!isSubmitted}
                                         children={
-                                            rateFormData?.rateDateStart &&
-                                            rateFormData?.rateDateEnd ? (
+                                            rateFormData.rateDateStart &&
+                                            rateFormData.rateDateEnd ? (
                                                 `${formatCalendarDate(
-                                                    rateFormData?.rateDateStart
+                                                    rateFormData.rateDateStart
                                                 )} to ${formatCalendarDate(
-                                                    rateFormData?.rateDateEnd
+                                                    rateFormData.rateDateEnd
                                                 )}`
                                             ) : (
                                                 <DataDetailMissingField />
@@ -287,29 +293,29 @@ export const RateDetailsSummarySectionV2 = ({
                                     <DataDetail
                                         id="dateCertified"
                                         label={
-                                            rateFormData?.amendmentEffectiveDateStart
+                                            rateFormData.amendmentEffectiveDateStart
                                                 ? 'Date certified for rate amendment'
                                                 : 'Date certified'
                                         }
                                         explainMissingData={!isSubmitted}
                                         children={formatCalendarDate(
-                                            rateFormData?.rateDateCertified
+                                            rateFormData.rateDateCertified
                                         )}
                                     />
-                                    {rateFormData?.amendmentEffectiveDateStart ? (
+                                    {rateFormData.amendmentEffectiveDateStart ? (
                                         <DataDetail
                                             id="effectiveRatingPeriod"
                                             label="Rate amendment effective dates"
                                             explainMissingData={!isSubmitted}
                                             children={`${formatCalendarDate(
-                                                rateFormData?.amendmentEffectiveDateStart
+                                                rateFormData.amendmentEffectiveDateStart
                                             )} to ${formatCalendarDate(
-                                                rateFormData?.amendmentEffectiveDateEnd
+                                                rateFormData.amendmentEffectiveDateEnd
                                             )}`}
                                         />
                                     ) : null}
                                     {rateFormData
-                                        ?.certifyingActuaryContacts[0] && (
+                                        .certifyingActuaryContacts[0] && (
                                         <DataDetail
                                             id="certifyingActuary"
                                             label="Certifying actuary"
@@ -332,9 +338,9 @@ export const RateDetailsSummarySectionV2 = ({
                                     />
                                 </DoubleColumnGrid>
                             </dl>
-                            {rateFormData?.rateDocuments && (
+                            {rateFormData.rateDocuments && (
                                 <UploadedDocumentsTable
-                                    documents={rateFormData?.rateDocuments}
+                                    documents={rateFormData.rateDocuments}
                                     packagesWithSharedRateCerts={
                                         isEditing
                                             ? undefined
@@ -349,11 +355,9 @@ export const RateDetailsSummarySectionV2 = ({
                                     isEditing={isEditing}
                                 />
                             )}
-                            {rateFormData?.supportingDocuments && (
+                            {rateFormData.supportingDocuments && (
                                 <UploadedDocumentsTable
-                                    documents={
-                                        rateFormData?.supportingDocuments
-                                    }
+                                    documents={rateFormData.supportingDocuments}
                                     previousSubmissionDate={lastSubmittedDate}
                                     packagesWithSharedRateCerts={
                                         isEditing
