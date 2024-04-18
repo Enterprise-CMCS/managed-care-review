@@ -139,7 +139,7 @@ export function configureResolvers(
         HealthPlanPackage: healthPlanPackageResolver(store),
         Rate: rateResolver,
         RateRevision: rateRevisionResolver,
-        Contract: contractResolver(store),
+        Contract: contractResolver(),
         ContractRevision: contractRevisionResolver(store),
     }
 

@@ -382,7 +382,7 @@ function contractWithHistoryToDomainModel(
         draftRevision,
         draftRates,
         revisions: revisions.reverse(),
-        packageSubmissions: packageSubmissions,
+        packageSubmissions: packageSubmissions.reverse(),
     }
 }
 

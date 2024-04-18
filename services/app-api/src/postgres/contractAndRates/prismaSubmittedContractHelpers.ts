@@ -40,6 +40,9 @@ const includeFullContract = {
             ...includeContractFormData,
 
             relatedSubmisions: {
+                orderBy: {
+                    updatedAt: 'asc',
+                },
                 include: {
                     submittedContracts: {
                         include: includeContractFormData,
@@ -56,7 +59,7 @@ const includeFullContract = {
                         },
                         orderBy: {
                             ratePosition: 'asc',
-                        }
+                        },
                     },
                 },
             },
