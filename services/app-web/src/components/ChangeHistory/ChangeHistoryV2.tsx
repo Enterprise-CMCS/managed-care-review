@@ -19,7 +19,12 @@ export const ChangeHistoryV2 = ({
 }: ChangeHistoryProps): React.ReactElement => {
     const flattenedRevisions = (): flatRevisions[] => {
         const result: flatRevisions[] = []
-        contract.packageSubmissions.forEach((r, index) => {
+        const contractSubmissions = contract.packageSubmissions.filter(
+            (submission) => {
+                return submission.cause === 'CONTRACT_SUBMISSION'
+            }
+        )
+        contractSubmissions.forEach((r, index) => {
             if (r.contractRevision.unlockInfo) {
                 const newUnlock: flatRevisions = {} as flatRevisions
                 newUnlock.updatedAt = r.contractRevision.unlockInfo.updatedAt
@@ -30,7 +35,7 @@ export const ChangeHistoryV2 = ({
                 //Use unshift to push the latest revision unlock info to the beginning of the array
                 result.unshift(newUnlock)
             }
-            if (r.contractRevision.submitInfo) {
+            if (r.submitInfo) {
                 const newSubmit: flatRevisions = {} as flatRevisions
 
                 const revisionVersion =
@@ -38,10 +43,9 @@ export const ChangeHistoryV2 = ({
                         ? String(index + 1) //Offset version, we want to start at 1
                         : undefined
 
-                newSubmit.updatedAt = r.contractRevision.submitInfo.updatedAt
-                newSubmit.updatedBy = r.contractRevision.submitInfo.updatedBy
-                newSubmit.updatedReason =
-                    r.contractRevision.submitInfo.updatedReason
+                newSubmit.updatedAt = r.submitInfo.updatedAt
+                newSubmit.updatedBy = r.submitInfo.updatedBy
+                newSubmit.updatedReason = r.submitInfo.updatedReason
                 newSubmit.kind = 'submit'
                 newSubmit.revisionVersion = revisionVersion
                 //Use unshift to push the latest revision submit info to the beginning of the array
