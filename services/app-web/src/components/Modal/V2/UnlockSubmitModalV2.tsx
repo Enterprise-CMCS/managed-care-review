@@ -1,19 +1,11 @@
-import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import React, { useEffect, useState } from 'react'
 import { FormGroup, ModalRef, Textarea } from '@trussworks/react-uswds'
 import { useNavigate } from 'react-router-dom'
 import {
-    HealthPlanPackage,
-    useSubmitHealthPlanPackageMutation,
-    useUnlockHealthPlanPackageMutation,
     Rate,
     Contract,
     useSubmitContractMutation,
 } from '../../../gen/gqlClient'
-import {
-    submitMutationWrapper,
-    unlockMutationWrapper,
-} from '../../../gqlHelpers'
 import { useFormik } from 'formik'
 import { usePrevious } from '../../../hooks/usePrevious'
 import { Modal } from '../Modal'
@@ -24,11 +16,6 @@ import { GenericApiErrorProps } from '../../Banner/GenericApiErrorBanner/Generic
 import { ERROR_MESSAGES } from '../../../constants/errors'
 import { submitMutationWrapperV2 } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 
-const PACKAGE_UNLOCK_SUBMIT_TYPES = [
-    'SUBMIT_PACKAGE',
-    'RESUBMIT_PACKAGE',
-    'UNLOCK_PACKAGE',
-] as const
 const RATE_UNLOCK_SUBMIT_TYPES = [
     'SUBMIT_RATE',
     'RESUBMIT_RATE',
@@ -39,10 +26,10 @@ const CONTRACT_UNLOCK_SUBMIT_TYPES = [
     'RESUBMIT_CONTRACT',
     'UNLOCK_CONTRACT',
 ] as const
-type PackageModalType = (typeof PACKAGE_UNLOCK_SUBMIT_TYPES)[number]
+
 type RateModalType = (typeof RATE_UNLOCK_SUBMIT_TYPES)[number]
 type ContractModalType = (typeof CONTRACT_UNLOCK_SUBMIT_TYPES)[number]
-type SharedModalType = PackageModalType & ContractModalType & RateModalType
+type SharedModalType = ContractModalType & RateModalType
 type SharedAdditionalProps = {
     submissionName?: string
     modalRef: React.RefObject<ModalRef>
@@ -59,15 +46,7 @@ type ContractModalProps = {
     modalType: ContractModalType[number]
 } & SharedAdditionalProps
 
-type PackageModalProps = {
-    submissionData: UnlockedHealthPlanFormDataType | HealthPlanPackage
-    modalType: PackageModalType
-} & SharedAdditionalProps
-
-type UnlockSubmitModalProps =
-    | PackageModalProps
-    | RateModalProps
-    | ContractModalProps
+type UnlockSubmitModalProps = RateModalProps | ContractModalProps
 
 type ModalValueType = {
     modalHeading?: string
@@ -81,32 +60,6 @@ type ModalValueType = {
 
 const modalValueDictionary: { [Property in SharedModalType]: ModalValueType } =
     {
-        RESUBMIT_PACKAGE: {
-            modalHeading: 'Summarize changes',
-            onSubmitText: 'Resubmit',
-            modalDescription:
-                'Once you submit, this package will be sent to CMS for review and you will no longer be able to make changes.',
-            inputHint: 'Provide summary of all changes made to this submission',
-            unlockSubmitModalInputValidation:
-                'You must provide a summary of changes',
-            errorHeading: ERROR_MESSAGES.resubmit_error_heading,
-        },
-        UNLOCK_PACKAGE: {
-            modalHeading: 'Reason for unlocking submission',
-            onSubmitText: 'Unlock',
-            inputHint: 'Provide reason for unlocking',
-            unlockSubmitModalInputValidation:
-                'You must provide a reason for unlocking this submission',
-            errorHeading: ERROR_MESSAGES.unlock_error_heading,
-        },
-        SUBMIT_PACKAGE: {
-            modalHeading: 'Ready to submit?',
-            onSubmitText: 'Submit',
-            modalDescription:
-                'Submitting this package will send it to CMS to begin their review.',
-            errorHeading: ERROR_MESSAGES.submit_error_heading,
-            errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
-        },
         RESUBMIT_RATE: {
             modalHeading: 'Summarize changes',
             onSubmitText: 'Resubmit',
@@ -181,11 +134,8 @@ export const UnlockSubmitModalV2 = ({
         unlockSubmitModalInput: '',
     }
 
-    const [submitHealthPlanPackage, { loading: submitMutationLoading }] =
-        useSubmitHealthPlanPackageMutation() // TODO this should be submitContract - linked rates epic
-    const [unlockHealthPlanPackage, { loading: unlockMutationLoading }] =
-        useUnlockHealthPlanPackageMutation() // TODO this should be unlockContract - linked rates epic
-    const [submitContract] = useSubmitContractMutation() // TODO this should be unlockContract - linked rates epic
+    const [submitContract, { loading: submitContractLoading }] =
+        useSubmitContractMutation() // TODO this should be unlockContract - linked rates epic
 
     // TODO submitRate and unlockRate should also be set up here - nunlock and edit rate epic
     // TODO submitContract and unlockContract should also be set up here - nunlock and edit rate epic
@@ -200,13 +150,11 @@ export const UnlockSubmitModalV2 = ({
     })
 
     const mutationLoading =
-        modalType === 'UNLOCK_PACKAGE'
-            ? unlockMutationLoading
-            : submitMutationLoading
+        modalType === 'SUBMIT_CONTRACT' && submitContractLoading
     const isSubmitting = mutationLoading || formik.isSubmitting
     const includesFormInput =
-        modalType === 'UNLOCK_PACKAGE' ||
-        modalType === 'RESUBMIT_PACKAGE' ||
+        modalType === 'UNLOCK_CONTRACT' ||
+        modalType === 'RESUBMIT_CONTRACT' ||
         modalType === 'UNLOCK_RATE' ||
         modalType === 'RESUBMIT_RATE'
 
@@ -225,24 +173,6 @@ export const UnlockSubmitModalV2 = ({
         let result
 
         switch (modalType) {
-            case 'UNLOCK_PACKAGE':
-                if (unlockSubmitModalInput) {
-                    await unlockMutationWrapper(
-                        unlockHealthPlanPackage,
-                        submissionData.id,
-                        unlockSubmitModalInput
-                    )
-                }
-                break
-
-            case 'SUBMIT_PACKAGE' || 'RESUBMIT_PACKAGE':
-                result = await submitMutationWrapper(
-                    submitHealthPlanPackage,
-                    submissionData.id,
-                    unlockSubmitModalInput
-                )
-                break
-
             case 'UNLOCK_RATE':
                 console.info('unlock rate not implemented yet')
                 break
@@ -259,23 +189,7 @@ export const UnlockSubmitModalV2 = ({
                 break
         }
 
-        //Allow submitting/unlocking to continue on EMAIL_ERROR.
-        if (result instanceof Error && result.cause === 'EMAIL_ERROR') {
-            modalRef.current?.toggleModal(undefined, false)
-
-            if (
-                (modalType === 'SUBMIT_PACKAGE' ||
-                    modalType === 'RESUBMIT_PACKAGE') &&
-                submissionName
-            ) {
-                // TODO make sure dashboard data is up to date
-                navigate(
-                    `/dashboard/submissions?justSubmitted=${submissionName}`
-                )
-            } else if (modalType === 'UNLOCK_PACKAGE') {
-                // TODO make sure on unlock the submission banners are up to date
-            }
-        } else if (result instanceof Error) {
+        if (result instanceof Error) {
             setModalAlert({
                 heading: modalValues.errorHeading,
                 message: result.message,
@@ -289,9 +203,7 @@ export const UnlockSubmitModalV2 = ({
         } else {
             modalRef.current?.toggleModal(undefined, false)
             if (
-                (modalType === 'SUBMIT_PACKAGE' ||
-                    modalType === 'RESUBMIT_PACKAGE' ||
-                    modalType === 'RESUBMIT_CONTRACT' ||
+                (modalType === 'RESUBMIT_CONTRACT' ||
                     modalType === 'SUBMIT_CONTRACT') &&
                 submissionName
             ) {
