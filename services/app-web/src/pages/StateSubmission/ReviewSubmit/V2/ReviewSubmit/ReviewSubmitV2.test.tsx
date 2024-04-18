@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import {
     renderWithProviders,
     userClickByRole,
@@ -7,6 +7,7 @@ import { ReviewSubmitV2 } from './ReviewSubmitV2'
 import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
+    mockContractPackageUnlocked,
 } from '../../../../../testHelpers/apolloMocks'
 import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '../../../../../constants'
@@ -174,6 +175,60 @@ describe('ReviewSubmit', () => {
             const submissionDescription =
                 screen.queryByText('A real submission')
             expect(submissionDescription).toBeInTheDocument()
+        })
+    })
+
+    it('extracts the correct dates from unlocked submission and displays them in tables', async () => {
+        const contractMock = fetchContractMockSuccess({
+            contract: mockContractPackageUnlocked(),
+        })
+
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmitV2 />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        contractMock,
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                },
+                featureFlags: {
+                    'link-rates': true,
+                },
+            }
+        )
+
+        await waitFor(() => {
+            const contractDocRow = screen.getByRole('row', {
+                name: /contract document/,
+            })
+            expect(
+                within(contractDocRow).getByText('1/1/24')
+            ).toBeInTheDocument()
+            const contractSupporting1Row = screen.getByRole('row', {
+                name: /contractSupporting1/,
+            })
+            expect(
+                within(contractSupporting1Row).getByText('1/15/24')
+            ).toBeInTheDocument()
+            const rateDocRow = screen.getByRole('row', {
+                name: /rate certification/,
+            })
+            expect(within(rateDocRow).getByText('1/13/24')).toBeInTheDocument()
+            const rateSupporting1Row = screen.getByRole('row', {
+                name: /rateSupporting1/,
+            })
+            expect(
+                within(rateSupporting1Row).getByText('1/15/24')
+            ).toBeInTheDocument()
         })
     })
 

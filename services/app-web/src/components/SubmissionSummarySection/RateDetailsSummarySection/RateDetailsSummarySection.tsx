@@ -364,7 +364,7 @@ export const RateDetailsSummarySection = ({
                                             ? new Date(
                                                   documentDateLookupTable.previousSubmissionDate
                                               )
-                                            : undefined
+                                            : null
                                     }
                                     multipleDocumentsAllowed={false}
                                     caption="Rate certification"
@@ -388,7 +388,7 @@ export const RateDetailsSummarySection = ({
                                             ? new Date(
                                                   documentDateLookupTable.previousSubmissionDate
                                               )
-                                            : undefined
+                                            : null
                                     }
                                     caption="Rate supporting documents"
                                     isSupportingDocuments

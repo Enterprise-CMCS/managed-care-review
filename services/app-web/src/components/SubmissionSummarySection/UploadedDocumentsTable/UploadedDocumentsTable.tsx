@@ -32,8 +32,8 @@ export const convertFromSubmissionDocumentsToGenericDocuments = (
 export type UploadedDocumentsTableProps = {
     documents: GenericDocument[]
     caption: string | null
+    previousSubmissionDate: Date | null // used to calculate NEW tag based on doc dateAdded
     packagesWithSharedRateCerts?: SharedRateCertDisplay[] // deprecated - could be deleted after we resolve all historical data linked rates
-    previousSubmissionDate?: Date // used to calculate NEW tag based on doc dateAdded
     isSupportingDocuments?: boolean // used to calculate empty state and styles around the secondary supporting docs tables - would be nice to remove this in favor of more domain agnostic prop such as 'emptyStateText'
     multipleDocumentsAllowed?: boolean // used to determined if we display validations based on doc list length
     documentCategory?: string // used to determine if we display document category column
