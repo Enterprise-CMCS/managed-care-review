@@ -1,5 +1,6 @@
 fragment rateRevisionFragmentForFetchRate on RateRevision {
     id
+    rateID
     createdAt
     updatedAt
     unlockInfo {
@@ -132,6 +133,7 @@ fragment rateFields on Rate {
     updatedAt
     stateCode
     stateNumber
+    parentContractID
     state {
         code
         name
@@ -142,6 +144,7 @@ fragment rateFields on Rate {
         }
     }
     status
+    parentContractID
     initiallySubmittedAt
 }
 

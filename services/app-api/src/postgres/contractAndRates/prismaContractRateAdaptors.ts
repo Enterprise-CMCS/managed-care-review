@@ -64,6 +64,13 @@ function prismaRateCreateFormDataFromDomain(
         },
         actuaryCommunicationPreference:
             rateFormData.actuaryCommunicationPreference,
+        contractsWithSharedRateRevision: {
+            connect: rateFormData.packagesWithSharedRateCerts
+                ? rateFormData.packagesWithSharedRateCerts.map((p) => ({
+                      id: p.packageId,
+                  }))
+                : [],
+        },
     }
 }
 
@@ -112,6 +119,13 @@ function prismaUpdateRateFormDataFromDomain(
         },
         actuaryCommunicationPreference:
             rateFormData.actuaryCommunicationPreference,
+        contractsWithSharedRateRevision: {
+            set: rateFormData.packagesWithSharedRateCerts
+                ? rateFormData.packagesWithSharedRateCerts.map((p) => ({
+                      id: p.packageId,
+                  }))
+                : [],
+        },
     }
 }
 

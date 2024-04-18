@@ -5,11 +5,17 @@ import type {
     RateType,
 } from '../../domain-models/contractAndRates'
 import { contractSchema } from '../../domain-models/contractAndRates'
+import type { ContractPackageSubmissionType } from '../../domain-models/contractAndRates/packageSubmissions'
+import { rateWithHistoryToDomainModel } from './parseRateWithHistory'
 import { draftContractRevToDomainModel } from './prismaDraftContractHelpers'
 import type {
     RateRevisionTableWithFormData,
     ContractRevisionTableWithFormData,
     UpdateInfoTableWithUpdater,
+} from './prismaSharedContractRateHelpers'
+import {
+    rateRevisionToDomainModel,
+    unsortedRatesRevisionsToDomainModel,
 } from './prismaSharedContractRateHelpers'
 import {
     contractFormDataToDomainModel,
@@ -18,6 +24,28 @@ import {
     getContractRateStatus,
 } from './prismaSharedContractRateHelpers'
 import type { ContractTableFullPayload } from './prismaSubmittedContractHelpers'
+
+// This function might be generally useful later on. It takes an array of objects
+// that can be errors and either returns the first error, or returns the list but with
+// the assertion that none of the elements in the array are errors.
+function arrayOrFirstError<T>(
+    arrayWithPossibleErrors: (T | Error)[]
+): T[] | Error {
+    if (arrayWithPossibleErrors.every((i): i is T => !(i instanceof Error))) {
+        return arrayWithPossibleErrors
+    }
+
+    const firstError = arrayWithPossibleErrors.find(
+        (t): t is Error => t instanceof Error
+    )
+    if (!firstError) {
+        return Error(
+            'Should Not Happen: something in the array was an error but we couldnt find it'
+        )
+    }
+
+    return firstError
+}
 
 // parseContractWithHistory returns a ContractType with a full set of
 // ContractRevisions in reverse chronological order. Each revision is a change to this
@@ -37,7 +65,7 @@ function parseContractWithHistory(
     const parseContract = contractSchema.safeParse(contractWithHistory)
     if (!parseContract.success) {
         const error = `ERROR: attempting to parse prisma contract with history failed: ${parseContract.error}`
-        console.warn(error)
+        console.warn(error, contractWithHistory, parseContract.error)
         return parseContract.error
     }
 
@@ -112,7 +140,7 @@ function contractWithHistoryToDomainModel(
     const contractRevisions = contract.revisions
     let draftRevision: ContractRevisionWithRatesType | Error | undefined =
         undefined
-    let draftRates: RateType[] | Error | undefined = undefined
+    let draftRates: RateType[] | undefined = undefined
 
     for (const [contractRevIndex, contractRev] of contractRevisions.entries()) {
         // We set the draft revision aside, all ordered revisions are submitted
@@ -132,19 +160,38 @@ function contractWithHistoryToDomainModel(
                 )
             }
 
-            const draftPrismaRates = contractRev.draftRates
+            // if we have a draft revision, we should set draftRates
+            const draftRatesOrErrors = contract.draftRates.map((dr) =>
+                rateWithHistoryToDomainModel(dr.rate)
+            )
 
-            draftRates = draftPrismaRates.map((r) => {
-                return {
-                    id: r.id,
-                    createdAt: r.createdAt,
-                    updatedAt: r.updatedAt,
-                    status: getContractRateStatus(r.revisions),
-                    stateCode: r.stateCode,
-                    stateNumber: r.stateNumber,
-                    revisions: [],
-                }
-            })
+            const draftRatesOrError = arrayOrFirstError(draftRatesOrErrors)
+            if (draftRatesOrError instanceof Error) {
+                return draftRatesOrError
+            }
+
+            draftRates = draftRatesOrError
+
+            if (draftRates.length === 0) {
+                console.info(
+                    'Checking for old style draft rates, this code should go when migrated to new draft-rates table.'
+                )
+                // This code works for pre-migrated stuff.
+                const draftPrismaRates = contractRev.draftRates
+                draftRates = draftPrismaRates.map((r) => {
+                    return {
+                        id: r.id,
+                        createdAt: r.createdAt,
+                        updatedAt: r.updatedAt,
+                        status: getContractRateStatus(r.revisions),
+                        stateCode: r.stateCode,
+                        parentContractID: contractRev.contractID, // all pre-migrated rates are parented to their only contract.
+                        stateNumber: r.stateNumber,
+                        revisions: [],
+                    }
+                })
+            }
+
             // skip the rest of the processing
             continue
         }
@@ -274,6 +321,56 @@ function contractWithHistoryToDomainModel(
         )
     }
 
+    // New C+R package history code
+    // Every revision has a set of submissions it was part of.
+    const packageSubmissions: ContractPackageSubmissionType[] = []
+    for (const revision of contract.revisions) {
+        for (const submission of revision.relatedSubmisions) {
+            // submittedThings
+            const submittedContract = submission.submittedContracts.map((c) =>
+                contractRevisionToDomainModel(c)
+            )
+            const submittedRates = submission.submittedRates.map((r) =>
+                rateRevisionToDomainModel(r)
+            )
+
+            const submitedRevs: ContractPackageSubmissionType['submittedRevisions'] =
+                []
+            for (const contractRev of submittedContract) {
+                submitedRevs.push(contractRev)
+            }
+            for (const rateRev of submittedRates) {
+                if (rateRev instanceof Error) {
+                    return rateRev
+                }
+                submitedRevs.push(rateRev)
+            }
+
+            const relatedRateRevisions = submission.submissionPackages
+                .filter((p) => p.contractRevisionID === revision.id)
+                .sort((a, b) => a.ratePosition - b.ratePosition)
+                .map((p) => p.rateRevision)
+
+            const rateRevisions =
+                unsortedRatesRevisionsToDomainModel(relatedRateRevisions)
+
+            if (rateRevisions instanceof Error) {
+                return rateRevisions
+            }
+
+            packageSubmissions.push({
+                submitInfo: {
+                    updatedAt: submission.updatedAt,
+                    updatedBy: submission.updatedBy.email,
+                    updatedReason: submission.updatedReason,
+                },
+                submittedRevisions: submitedRevs,
+                contractRevision: contractRevisionToDomainModel(revision),
+                rateRevisions: rateRevisions,
+            })
+        }
+    }
+
     return {
         id: contract.id,
         createdAt: contract.createdAt,
@@ -285,6 +382,7 @@ function contractWithHistoryToDomainModel(
         draftRevision,
         draftRates,
         revisions: revisions.reverse(),
+        packageSubmissions: packageSubmissions.reverse(),
     }
 }
 

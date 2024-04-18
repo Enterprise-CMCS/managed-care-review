@@ -1,11 +1,19 @@
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
+    unlockTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 
 import FETCH_CONTRACT from '../../../../app-graphql/src/queries/fetchContract.graphql'
 import type { RateType } from '../../domain-models'
-import { testStateUser } from '../../testHelpers/userHelpers'
+import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import {
+    createAndUpdateTestContractWithoutRates,
+    fetchTestContract,
+    submitTestContract,
+} from '../../testHelpers/gqlContractHelpers'
+import { addNewRateToTestContract } from '../../testHelpers/gqlRateHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 describe('fetchContract', () => {
     it('fetches the draft contract and a new child rate', async () => {
@@ -32,6 +40,86 @@ describe('fetchContract', () => {
         expect(draftRate).toHaveLength(1)
         expect(draftRate[0].status).toBe('DRAFT')
         expect(draftRate[0].stateCode).toBe('FL')
+    })
+
+    it('gets the right contract name', async () => {
+        const stateServer = await constructTestPostgresServer()
+
+        const stateSubmission =
+            await createAndUpdateTestHealthPlanPackage(stateServer)
+
+        const fetchDraftContractResult = await stateServer.executeOperation({
+            query: FETCH_CONTRACT,
+            variables: {
+                input: {
+                    contractID: stateSubmission.id,
+                },
+            },
+        })
+
+        expect(fetchDraftContractResult.errors).toBeUndefined()
+
+        const draftContract =
+            fetchDraftContractResult.data?.fetchContract.contract.draftRevision
+
+        expect(draftContract.contractName).toMatch(/MCR-FL-\d{4}-MMA/)
+    })
+
+    it('returns a stable initially submitted at', async () => {
+        const ldService = testLDService({
+            'link-rates': true,
+        })
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            ldService,
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const draftA0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const AID = draftA0.id
+        const draftA010 = await addNewRateToTestContract(stateServer, draftA0)
+        await addNewRateToTestContract(stateServer, draftA010)
+
+        const unsubmitted = await fetchTestContract(stateServer, AID)
+        expect(unsubmitted.initiallySubmittedAt).toBeNull()
+
+        const intiallySubmitted = await submitTestContract(stateServer, AID)
+
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.0')
+        await submitTestContract(stateServer, AID, 'Submit A.1')
+
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.1')
+        await submitTestContract(stateServer, AID, 'Submit A.2')
+
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.2')
+        await submitTestContract(stateServer, AID, 'Submit A.3')
+
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.3')
+        await submitTestContract(stateServer, AID, 'Submit A.4')
+
+        const submittedMultiply = await fetchTestContract(stateServer, AID)
+
+        expect(submittedMultiply.packageSubmissions).toHaveLength(5)
+
+        expect(submittedMultiply.initiallySubmittedAt).toBeTruthy()
+        expect(submittedMultiply.initiallySubmittedAt).toEqual(
+            intiallySubmitted.initiallySubmittedAt
+        )
+
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.4')
+
+        const finallyUnlocked = await fetchTestContract(stateServer, AID)
+        expect(finallyUnlocked.packageSubmissions).toHaveLength(5)
+
+        expect(finallyUnlocked.initiallySubmittedAt).toBeTruthy()
+        expect(finallyUnlocked.initiallySubmittedAt).toEqual(
+            intiallySubmitted.initiallySubmittedAt
+        )
     })
 
     it('errors if the wrong state user calls it', async () => {

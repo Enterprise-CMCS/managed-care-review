@@ -19,6 +19,7 @@ const includeLatestSubmittedRateRev = {
 
 // includeFullRate is the prisma includes block for a complete Rate
 const includeFullRate = {
+    draftContracts: true,
     revisions: {
         orderBy: {
             createdAt: 'asc',
@@ -28,6 +29,13 @@ const includeFullRate = {
 
             draftContracts: {
                 include: includeDraftContracts,
+            },
+
+            submitInfo: {
+                include: {
+                    updatedBy: true,
+                    submittedContracts: true,
+                },
             },
 
             contractRevisions: {
@@ -40,6 +48,7 @@ const includeFullRate = {
                     validAfter: 'asc',
                 },
             },
+            relatedSubmissions: true,
         },
     },
 } satisfies Prisma.RateTableInclude

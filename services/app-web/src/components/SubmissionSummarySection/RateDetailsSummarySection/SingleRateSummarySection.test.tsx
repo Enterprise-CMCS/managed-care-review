@@ -448,7 +448,7 @@ describe('SingleRateSummarySection', () => {
 
             // no unlock rate button present
             expect(
-                await screen.queryByRole('button', {
+                screen.queryByRole('button', {
                     name: 'Unlock rate',
                 })
             ).toBeNull()

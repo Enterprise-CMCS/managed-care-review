@@ -80,53 +80,6 @@ export function unlockHealthPlanPackageResolver(
             })
         }
 
-        // unlock all the revisions, then unlock the contract, in a transaction.
-        const currentRateRevIDs = contract.revisions[0].rateRevisions.map(
-            (rr) => rr.id
-        )
-        const unlockRatePromises = []
-        for (const rateRevisionID of currentRateRevIDs) {
-            const resPromise = store.unlockRate({
-                rateRevisionID,
-                unlockReason: unlockedReason,
-                unlockedByUserID: user.id,
-            })
-
-            unlockRatePromises.push(resPromise)
-        }
-
-        const unlockRateResults = await Promise.all(unlockRatePromises)
-        // if any of the promises reject, which shouldn't happen b/c we don't throw...
-        if (unlockRateResults instanceof Error) {
-            const errMessage = `Failed to unlock contract rates with ID: ${contract.id}; ${unlockRateResults.message}`
-            logError('unlockHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
-
-        const unlockRateErrors: Error[] = unlockRateResults.filter(
-            (res) => res instanceof Error
-        ) as Error[]
-        if (unlockRateErrors.length > 0) {
-            console.error('Errors unlocking Rates: ', unlockRateErrors)
-            const errMessage = `Failed to submit contract revision's rates with ID: ${
-                contract.id
-            }; ${unlockRateErrors.map((err) => err.message)}`
-            logError('unlockHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
-
         // Now, unlock the contract!
         const unlockContractResult = await store.unlockContract({
             contractID: contract.id,

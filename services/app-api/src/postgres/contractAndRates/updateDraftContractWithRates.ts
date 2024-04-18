@@ -7,15 +7,11 @@ import type {
     RateFormEditableType,
     ContractFormEditableType,
 } from '../../domain-models/contractAndRates'
-import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { includeDraftRates } from './prismaDraftContractHelpers'
 import { rateRevisionToDomainModel } from './prismaSharedContractRateHelpers'
-import { isEqualData } from '../../resolvers/healthPlanPackage/contractAndRates/resolverHelpers'
-import {
-    prismaUpdateRateFormDataFromDomain,
-    prismaUpdateContractFormDataFromDomain,
-    prismaRateCreateFormDataFromDomain,
-} from './prismaContractRateAdaptors'
+import type { UpdateDraftContractRatesArgsType } from './updateDraftContractRates'
+import { updateDraftContractRatesInTransaction } from './updateDraftContractRates'
+import { prismaUpdateContractFormDataFromDomain } from './prismaContractRateAdaptors'
 
 type UpdateContractArgsType = {
     contractID: string
@@ -23,72 +19,68 @@ type UpdateContractArgsType = {
     rateFormDatas?: RateFormEditableType[]
 }
 
-const sortRatesForUpdate = (
+// going down the old path, from the updateHPFD code, we construct the new
+// call to the new updateContractDraftRates API.
+// no rates will be linked here, only updated/created
+function makeUpdateCommandsFromOldContract(
+    contractID: string,
     ratesFromDB: RateRevisionType[],
     ratesFromClient: RateFormEditableType[]
-): {
-    upsertRates: RateFormEditableType[]
-    disconnectRates: {
-        rateID: string
-        revisionID: string
-    }[]
-} => {
-    const upsertRates = []
-    const disconnectRates = []
+): UpdateDraftContractRatesArgsType {
+    const updateArgs: UpdateDraftContractRatesArgsType = {
+        contractID,
+        rateUpdates: {
+            create: [],
+            update: [],
+            link: [],
+            unlink: [],
+            delete: [],
+        },
+    }
 
-    // Find rates to create or update
+    // all rates are child rates in the old world, only create/update.
+    let thisPosition = 1
     for (const clientRateData of ratesFromClient) {
-        // Find a matching rate revision id in the draftRatesFromDB array.
         const matchingDBRate = ratesFromDB.find(
             (dbRate) => dbRate.formData.rateID === clientRateData.id
         )
 
-        // If there are no matching rates we push into createRates
-        if (!matchingDBRate) {
-            upsertRates.push({
-                id: clientRateData.id,
-                ...clientRateData,
+        if (matchingDBRate) {
+            updateArgs.rateUpdates.update.push({
+                rateID: matchingDBRate.rateID,
+                formData: clientRateData,
+                ratePosition: thisPosition,
             })
-            continue
+        } else {
+            updateArgs.rateUpdates.create.push({
+                formData: clientRateData,
+                ratePosition: thisPosition,
+            })
         }
+        thisPosition++
+    }
 
-        // If a match is found then we deep compare to figure out if we need to update.
-        const isRateDataEqual = isEqualData(
-            matchingDBRate.formData,
-            clientRateData
+    // any rates that have been removed need to be deleted or unlinked.
+    for (const dbRate of ratesFromDB) {
+        const matchingClientRate = ratesFromClient.find(
+            (clientRateData) => dbRate.formData.rateID === clientRateData.id
         )
 
-        // If rates are not equal we then make the update
-        if (!isRateDataEqual) {
-            upsertRates.push({
-                id: clientRateData.id,
-                rateID: matchingDBRate.id,
-                ...clientRateData,
-            })
+        if (!matchingClientRate) {
+            // if it's been submitted before, it's unlink, if not, it's delete
+            if (dbRate.unlockInfo) {
+                updateArgs.rateUpdates.unlink.push({
+                    rateID: dbRate.rateID,
+                })
+            } else {
+                updateArgs.rateUpdates.delete.push({
+                    rateID: dbRate.rateID,
+                })
+            }
         }
     }
 
-    // Find rates to disconnect
-    for (const dbRateRev of ratesFromDB) {
-        //Find a matching rate revision id in the ratesFromClient
-        const matchingHPPRate = ratesFromClient.find(
-            (clientRateData) => clientRateData.id === dbRateRev.formData.rateID
-        )
-
-        // If convertedRateData does not contain the rate revision id from DB, we push these revisions id and  rate id
-        // in disconnectRates
-        if (!matchingHPPRate && dbRateRev.formData.rateID) {
-            disconnectRates.push({
-                rateID: dbRateRev.formData.rateID,
-                revisionID: dbRateRev.id,
-            })
-        }
-    }
-
-    return {
-        upsertRates,
-        disconnectRates,
-    }
+    return updateArgs
 }
 
 // Update the given draft
@@ -123,8 +115,6 @@ async function updateDraftContractWithRates(
                 return new NotFoundError(err)
             }
 
-            const stateCode = currentContractRev.contract
-                .stateCode as StateCodeType
             const ratesFromDB: RateRevisionType[] = []
 
             // Convert all rates from DB to domain model
@@ -142,148 +132,34 @@ async function updateDraftContractWithRates(
                 ratesFromDB.push(domainRateRevision)
             }
 
-            // Parsing rates from request for update or create
-            const updateRates =
-                rateFormDatas && sortRatesForUpdate(ratesFromDB, rateFormDatas)
-
-            if (updateRates) {
-                for (const rateFormData of updateRates.upsertRates) {
-                    // Current rate with the latest revision
-                    let currentRate = undefined
-
-                    // If no rate id is undefined we know this is a new rate that needs to be inserted into the DB.
-                    if (rateFormData.rateID) {
-                        currentRate = await tx.rateTable.findUnique({
-                            where: {
-                                id: rateFormData.id,
-                            },
-                            include: {
-                                // include the single most recent revision that is not submitted
-                                revisions: {
-                                    where: {
-                                        submitInfoID: null,
-                                    },
-                                    take: 1,
-                                    orderBy: {
-                                        createdAt: 'desc',
-                                    },
-                                },
-                            },
-                        })
-                    }
-
-                    const contractsWithSharedRates =
-                        rateFormData.packagesWithSharedRateCerts?.map(
-                            (pkg) => ({
-                                id: pkg.packageId,
-                            })
-                        ) ?? []
-
-                    // If rate does not exist, we need to create a new rate.
-                    if (!currentRate) {
-                        const { latestStateRateCertNumber } =
-                            await tx.state.update({
-                                data: {
-                                    latestStateRateCertNumber: {
-                                        increment: 1,
-                                    },
-                                },
-                                where: {
-                                    stateCode: stateCode,
-                                },
-                            })
-
-                        await tx.rateTable.create({
-                            data: {
-                                id: rateFormData.id,
-                                stateCode: stateCode,
-                                stateNumber: latestStateRateCertNumber,
-                                revisions: {
-                                    create: {
-                                        ...prismaRateCreateFormDataFromDomain(
-                                            rateFormData
-                                        ),
-                                        contractsWithSharedRateRevision: {
-                                            connect: contractsWithSharedRates,
-                                        },
-                                    },
-                                },
-                                draftContractRevisions: {
-                                    connect: {
-                                        id: currentContractRev.id,
-                                    },
-                                },
-                            },
-                        })
-                    } else {
-                        // If the current rate has no draft revisions, based form our find with revision with no submitInfoID
-                        // then this is a submitted rate
-                        const isSubmitted = currentRate.revisions.length === 0
-
-                        await tx.rateTable.update({
-                            where: {
-                                id: currentRate.id,
-                            },
-                            data: {
-                                // if rate is not submitted, we update the revision data, otherwise we only make the
-                                //  connection to the draft contract revision.
-                                revisions: !isSubmitted
-                                    ? {
-                                          update: {
-                                              where: {
-                                                  id: currentRate.revisions[0]
-                                                      .id,
-                                              },
-                                              data: {
-                                                  ...prismaUpdateRateFormDataFromDomain(
-                                                      rateFormData
-                                                  ),
-                                                  contractsWithSharedRateRevision:
-                                                      {
-                                                          set: contractsWithSharedRates,
-                                                      },
-                                              },
-                                          },
-                                      }
-                                    : undefined,
-                                draftContractRevisions: {
-                                    connect: {
-                                        id: currentContractRev.id,
-                                    },
-                                },
-                            },
-                        })
-                    }
+            // call new style rate updates.
+            if (rateFormDatas) {
+                const rateUpdateCommands: UpdateDraftContractRatesArgsType =
+                    makeUpdateCommandsFromOldContract(
+                        contractID,
+                        ratesFromDB,
+                        rateFormDatas
+                    )
+                const rateUpdates = await updateDraftContractRatesInTransaction(
+                    tx,
+                    rateUpdateCommands
+                )
+                if (rateUpdates instanceof Error) {
+                    console.error(
+                        'failed to update new style rates in old style update',
+                        rateUpdates
+                    )
+                    return rateUpdates
                 }
             }
 
-            // Then update resource, adjusting all simple fields and creating new linked resources for fields holding relationships to other day,
+            // Then update the contractRevision, adjusting all simple fields
             await tx.contractRevisionTable.update({
                 where: {
                     id: currentContractRev.id,
                 },
                 data: {
                     ...prismaUpdateContractFormDataFromDomain(formData),
-                    draftRates: {
-                        disconnect: updateRates?.disconnectRates
-                            ? updateRates.disconnectRates.map((rate) => ({
-                                  id: rate.rateID,
-                              }))
-                            : [],
-                    },
-                    contract: {
-                        update: {
-                            draftRateRevisions: {
-                                disconnect: updateRates?.disconnectRates
-                                    ? updateRates.disconnectRates.map(
-                                          (rate) => ({
-                                              id: rate.revisionID,
-                                          })
-                                      )
-                                    : [],
-                            },
-                        },
-                    },
                 },
             })
 

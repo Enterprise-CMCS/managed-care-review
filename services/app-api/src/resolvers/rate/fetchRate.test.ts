@@ -5,13 +5,9 @@ import {
     defaultFloridaRateProgram,
 } from '../../testHelpers/gqlHelpers'
 import { testCMSUser } from '../../testHelpers/userHelpers'
-import {
-    createAndSubmitTestRate,
-    submitTestRate,
-    unlockTestRate,
-    updateTestRate,
-} from '../../testHelpers'
+import { submitTestRate, updateTestRate } from '../../testHelpers'
 import { v4 as uuidv4 } from 'uuid'
+import { createSubmitAndUnlockTestRate } from '../../testHelpers/gqlRateHelpers'
 
 describe('fetchRate', () => {
     const ldService = testLDService({
@@ -30,43 +26,9 @@ describe('fetchRate', () => {
             ldService,
         })
 
-        const initialRate = () => ({
-            id: uuidv4(),
-            rateType: 'NEW' as const,
-            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
-            rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
-            rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
-            rateDocuments: [
-                {
-                    name: 'rateDocument.pdf',
-                    s3URL: 'fakeS3URL',
-                    sha256: 'fakesha',
-                },
-            ],
-            supportingDocuments: [],
-            rateProgramIDs: [defaultFloridaRateProgram().id],
-            actuaryContacts: [
-                {
-                    name: 'test name',
-                    titleRole: 'test title',
-                    email: 'email@example.com',
-                    actuarialFirm: 'MERCER' as const,
-                    actuarialFirmOther: '',
-                },
-            ],
-            actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
-            packagesWithSharedRateCerts: [],
-        })
-
-        // First, submit and unlock a rate
-        const submittedRate = await createAndSubmitTestRate(stateServer, {
-            stateCode: 'FL',
-            ...initialRate(),
-        })
-        await unlockTestRate(
-            cmsServer,
-            submittedRate.id,
-            'Unlock to edit an existing rate'
+        const submittedRate = await createSubmitAndUnlockTestRate(
+            stateServer,
+            cmsServer
         )
 
         // editrate with new data and resubmit
@@ -97,10 +59,10 @@ describe('fetchRate', () => {
         )
         // the initial submit data is correct
         expect(resubmittedRate.revisions[1].formData.rateDateStart).toBe(
-            '2025-06-01'
+            '2024-01-01'
         )
         expect(resubmittedRate.revisions[1].formData.rateDateEnd).toBe(
-            '2026-05-30'
+            '2025-01-01'
         )
         expect(resubmittedRate.revisions[1].submitInfo?.updatedReason).toBe(
             'Initial submission'
@@ -147,21 +109,14 @@ describe('fetchRate', () => {
         })
 
         // First, create new rate and unlock to edit it
-        const submittedInitial = await createAndSubmitTestRate(server, {
-            stateCode: 'MS',
-            rateDateStart: new Date(Date.UTC(2030, 1, 1)),
-            rateDateEnd: new Date(Date.UTC(2031, 1, 1)),
-        })
-
-        const existingRate = await unlockTestRate(
-            cmsServer,
-            submittedInitial.id,
-            'Unlock to edit add a new rate'
+        const submittedInitial = await createSubmitAndUnlockTestRate(
+            server,
+            cmsServer
         )
 
         // add new rate
-        const firstRateID = existingRate.id
-        expect(existingRate.revisions).toHaveLength(1)
+        const firstRateID = submittedInitial.id
+        expect(submittedInitial.revisions).toHaveLength(1)
         const updatedRate = await updateTestRate(submittedInitial.id, {
             ...initialRateInfos(),
             rateDateStart: new Date(Date.UTC(2034, 1, 1)),
@@ -175,7 +130,7 @@ describe('fetchRate', () => {
             'Resubmit with an additional rate'
         )
 
-        // fetch and check rate 1 which was resubmitted with no changese
+        // fetch and check rate 1 which was resubmitted with no changes
         expect(firstRateID).toBe(resubmittedRate.id) // first rate ID should be unchanged
 
         const result1 = await cmsServer.executeOperation({
@@ -200,10 +155,10 @@ describe('fetchRate', () => {
 
         // check that initial rate is correct
         expect(resubmittedRate1.revisions[1].formData.rateDateStart).toBe(
-            '2030-02-01'
+            '2024-01-01'
         )
         expect(resubmittedRate1.revisions[1].formData.rateDateEnd).toBe(
-            '2031-02-01'
+            '2025-01-01'
         )
         expect(resubmittedRate1.revisions[1].submitInfo.updatedReason).toBe(
             'Initial submission'
@@ -221,16 +176,13 @@ describe('fetchRate', () => {
             ldService,
         })
 
-        const submittedRate = await createAndSubmitTestRate(server)
-
-        const unlockRate = await unlockTestRate(
-            cmsServer,
-            submittedRate.id,
-            'Unlock to edit a rate'
+        const submittedRate = await createSubmitAndUnlockTestRate(
+            server,
+            cmsServer
         )
 
         const input = {
-            rateID: unlockRate.id,
+            rateID: submittedRate.id,
         }
 
         // fetch rate

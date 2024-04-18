@@ -2,8 +2,9 @@ import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import UNLOCK_RATE from '../../../../app-graphql/src/mutations/unlockRate.graphql'
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import { expectToBeDefined } from '../../testHelpers/assertionHelpers'
-import { createAndSubmitTestRate } from '../../testHelpers/gqlRateHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import { createSubmitAndUnlockTestRate } from '../../testHelpers/gqlRateHelpers'
+import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContractHelpers'
 
 describe(`unlockRate`, () => {
     const ldService = testLDService({
@@ -21,23 +22,23 @@ describe(`unlockRate`, () => {
         })
 
         // Create and unlock a rate
-        const rate = await createAndSubmitTestRate(stateServer)
-        const rateID = rate.id
-        const unlockedReason = 'Super duper good reason.'
-        const unlockResult = await cmsServer.executeOperation({
-            query: UNLOCK_RATE,
-            variables: {
-                input: {
-                    rateID,
-                    unlockedReason,
-                },
-            },
-        })
+        const updatedRate = await createSubmitAndUnlockTestRate(
+            stateServer,
+            cmsServer
+        )
 
-        const updatedRate = unlockResult.data?.unlockRate.rate
         expect(updatedRate.status).toBe('UNLOCKED')
-        expect(updatedRate.draftRevision.unlockInfo.updatedReason).toEqual(
-            unlockedReason
+
+        if (!updatedRate.draftRevision) {
+            throw new Error('no draftrate')
+        }
+
+        if (!updatedRate.draftRevision.unlockInfo) {
+            throw new Error('no unlockinfo')
+        }
+
+        expect(updatedRate.draftRevision.unlockInfo.updatedReason).toBe(
+            'test unlock'
         )
     })
 
@@ -51,20 +52,7 @@ describe(`unlockRate`, () => {
         })
 
         // Create a rate
-        const rate = await createAndSubmitTestRate(stateServer)
-
-        // Unlock the rate once
-        const unlockResult1 = await cmsServer.executeOperation({
-            query: UNLOCK_RATE,
-            variables: {
-                input: {
-                    rateID: rate.id,
-                    unlockedReason: 'Super duper good reason.',
-                },
-            },
-        })
-
-        expect(unlockResult1.errors).toBeUndefined()
+        const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer)
 
         // Try to unlock the rate again
         const unlockResult2 = await cmsServer.executeOperation({
@@ -85,8 +73,10 @@ describe(`unlockRate`, () => {
 
     it('returns unauthorized error for state user', async () => {
         const stateServer = await constructTestPostgresServer({ ldService })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
         // Create a rate
-        const rate = await createAndSubmitTestRate(stateServer)
+        const rate = contract.packageSubmissions[0].rateRevisions[0]
 
         // Unlock the rate
         const unlockResult = await stateServer.executeOperation({
