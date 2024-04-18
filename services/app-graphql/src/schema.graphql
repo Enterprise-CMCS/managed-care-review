@@ -1415,6 +1415,7 @@ type Contract {
     This value is used to generate the contractName
     """
     stateNumber: Int!
+    mccrsID: String
 
     "draftRevision is the currently modifiable revision if the rate is DRAFT or UNLOCKED"
     draftRevision: ContractRevision

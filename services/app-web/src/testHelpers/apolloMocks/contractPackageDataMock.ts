@@ -216,8 +216,10 @@ function mockContractWithLinkedRateDraft(
                 revisions: [],
                 state: mockMNState(),
                 stateNumber: 5,
+                parentContractID: 'foo-baz',
                 draftRevision: {
                     id: '123',
+                    rateID: '456',
                     contractRevisions: [],
                     createdAt: new Date(),
                     updatedAt: new Date(),
