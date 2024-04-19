@@ -219,6 +219,7 @@ describe('ContractDetailsSummarySection', () => {
             <ContractDetailsSummarySection
                 contract={mockContractPackageDraft()}
                 submissionName="MN-PMAP-0001"
+                editNavigateTo='/contract-details'
             />,
             {
                 apolloProvider: defaultApolloMocks,
@@ -268,6 +269,7 @@ describe('ContractDetailsSummarySection', () => {
                 <ContractDetailsSummarySection
                     contract={contract}
                     submissionName="MN-PMAP-0001"
+                    editNavigateTo='/contract-details'
                 />,
                 {
                     apolloProvider: defaultApolloMocks,
@@ -365,6 +367,7 @@ describe('ContractDetailsSummarySection', () => {
                 <ContractDetailsSummarySection
                     contract={contract}
                     submissionName="MN-PMAP-0001"
+                    editNavigateTo='/contract-details'
                 />,
                 {
                     apolloProvider: defaultApolloMocks,
@@ -408,6 +411,7 @@ describe('ContractDetailsSummarySection', () => {
                 <ContractDetailsSummarySection
                     contract={contract}
                     submissionName="MN-PMAP-0001"
+                    editNavigateTo='/contract-details'
                 />,
                 {
                     apolloProvider: defaultApolloMocks,

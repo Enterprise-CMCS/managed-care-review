@@ -64,8 +64,8 @@ const convertRateFormToGQLRateFormData = (
 // Convert from GQL Rate to FormikRateForm object used in the form
 // if rate is not passed in, return an empty RateForm // we need to pass in the  s3 handler because 3 urls generated client-side
 // useLatestSubmission means to pull the latest submitted info rather than the draft info
-const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate): FormikRateForm => {
-    const handleAsLinkedRate = rate?.status && rate.status !== 'DRAFT' && rate.status !== 'UNLOCKED' // TODO: Make this a more sophisticated check for child-rates
+const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate, parentContractID?: string): FormikRateForm => {
+    const handleAsLinkedRate = rate && rate.parentContractID !== parentContractID // TODO: Make this a more sophisticated check for child-rates
     const rateRev = handleAsLinkedRate ? rate?.revisions[0] : rate?.draftRevision
     const rateForm = rateRev?.formData
     return {

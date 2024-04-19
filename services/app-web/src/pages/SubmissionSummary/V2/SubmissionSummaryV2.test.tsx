@@ -1,4 +1,3 @@
-import fs from 'fs'
 import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router'
 import { domainToBase64 } from '../../../common-code/proto/healthPlanFormDataProto'
@@ -11,7 +10,6 @@ import {
     mockValidUser,
     mockValidStateUser,
     mockUnlockedHealthPlanPackage,
-    mockContractPackageDraft,
     mockContractPackageSubmitted,
 } from '../../../testHelpers/apolloMocks'
 import { basicLockedHealthPlanFormData } from '../../../common-code/healthPlanFormDataMocks'
@@ -19,6 +17,7 @@ import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SubmissionSummaryV2 } from './SubmissionSummaryV2'
 import { SubmissionSideNav } from '../../SubmissionSideNav'
 import { testS3Client } from '../../../testHelpers/s3Helpers'
+import { mockContractPackageUnlocked } from '../../../testHelpers/apolloMocks/contractPackageDataMock'
 
 describe('SubmissionSummary', () => {
     it('renders without errors', async () => {
@@ -163,6 +162,49 @@ describe('SubmissionSummary', () => {
     //     })
     // })
 
+    it('pulls the right version of UNLOCKED data for CMS users', async () => {
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummaryV2 />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                        fetchContractMockSuccess({
+                            contract: mockContractPackageUnlocked(),
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: 'test-abc-123',
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123',
+                },
+                featureFlags: {
+                    'link-rates': true,
+                }, 
+            }
+        )
+
+        expect(await screen.findByText('MCR-MN-0005-SNBC')).toBeInTheDocument()
+
+        const description = await screen.findByLabelText('Submission description')
+        expect(description).toHaveTextContent('An initial submission')
+        const ratingPeriod = await screen.findByLabelText('Rating period of original rate certification')
+        expect(ratingPeriod).toHaveTextContent('01/01/2020 to 01/01/2021')
+
+    })
+
     it('renders add mccrs-id link for CMS user', async () => {
         renderWithProviders(
             <Routes>
@@ -181,9 +223,9 @@ describe('SubmissionSummary', () => {
                             user: mockValidCMSUser(),
                         }),
                         fetchContractMockSuccess({
-                            contract: {
+                            contract: mockContractPackageSubmitted({
                                 id: 'test-abc-123',
-                            },
+                            }),
                         }),
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
                             id: 'test-abc-123',
@@ -223,10 +265,10 @@ describe('SubmissionSummary', () => {
                             statusCode: 200,
                         }),
                         fetchContractMockSuccess({
-                            contract: {
+                            contract: mockContractPackageSubmitted({
                                 id: 'test-abc-123',
                                 mccrsID: '3333',
-                            },
+                            }),
                         }),
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
                             id: 'test-abc-123',
@@ -349,8 +391,8 @@ describe('SubmissionSummary', () => {
         const s3Provider = {
             ...testS3Client(),
             getBulkDlURL: async (
-                keys: string[],
-                fileName: string
+                _keys: string[],
+                _fileName: string
             ): Promise<string | Error> => {
                 return new Error('Error: getBulkDlURL encountered an error')
             },
@@ -466,9 +508,7 @@ describe('SubmissionSummary', () => {
                             id: 'test-abc-123',
                         }),
                         fetchContractMockSuccess({
-                            contract: {
-                                id: 'test-abc-123',
-                            },
+                            contract: mockContractPackageUnlocked(),
                         }),
                     ],
                 },
@@ -654,9 +694,7 @@ describe('SubmissionSummary', () => {
                                 }
                             ),
                             fetchContractMockSuccess({
-                                contract: {
-                                    id: 'test-abc-123',
-                                },
+                                contract: mockContractPackageSubmitted(),
                             }),
                         ],
                     },

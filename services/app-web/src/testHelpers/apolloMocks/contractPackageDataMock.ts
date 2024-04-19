@@ -83,7 +83,7 @@ function mockContractPackageDraft(
                 revisions: [],
                 state: mockMNState(),
                 stateNumber: 5,
-                parentContractID: 'foo-baz',
+                parentContractID: 'test-abc-123',
                 draftRevision: {
                     id: '123',
                     rateID: '456',
@@ -207,22 +207,24 @@ function mockContractWithLinkedRateDraft(
         },
 
         draftRates: [
+            // a linked, unlocked, rate.
             {
-                id: '123',
+                id: 'rate-123',
                 createdAt: new Date(),
                 updatedAt: new Date(),
-                status: 'SUBMITTED',
+                status: 'UNLOCKED',
                 stateCode: 'MN',
-                revisions: [],
                 state: mockMNState(),
                 stateNumber: 5,
-                parentContractID: 'foo-baz',
+                parentContractID: 'some-other-contract-id',
                 draftRevision: {
                     id: '123',
-                    rateID: '456',
+                    rateID: 'rate-123',
                     contractRevisions: [],
                     createdAt: new Date(),
                     updatedAt: new Date(),
+                    submitInfo: undefined,
+                    unlockInfo: undefined,
                     formData: {
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
@@ -235,8 +237,8 @@ function mockContractWithLinkedRateDraft(
                             },
                         ],
                         supportingDocuments: [],
-                        rateDateStart: new Date(),
-                        rateDateEnd: new Date(),
+                        rateDateStart: new Date('2020-02-02'),
+                        rateDateEnd: new Date('2021-02-02'),
                         rateDateCertified: new Date(),
                         amendmentEffectiveDateStart: new Date(),
                         amendmentEffectiveDateEnd: new Date(),
@@ -260,8 +262,53 @@ function mockContractWithLinkedRateDraft(
                         actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
                         packagesWithSharedRateCerts: [],
                     }
-                }
-
+                },
+                revisions: [{
+                    id: '456',
+                    rateID: 'rate-123',
+                    contractRevisions: [],
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    submitInfo: undefined,
+                    unlockInfo: undefined,
+                    formData: {
+                        rateType: 'AMENDMENT',
+                        rateCapitationType: 'RATE_CELL',
+                        rateDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rate',
+                                sha256: 'fakesha',
+                                name: 'rate',
+                                dateAdded: new Date()
+                            },
+                        ],
+                        supportingDocuments: [],
+                        rateDateStart: new Date('2020-01-01'),
+                        rateDateEnd: new Date('2021-01-01'),
+                        rateDateCertified: new Date(),
+                        amendmentEffectiveDateStart: new Date(),
+                        amendmentEffectiveDateEnd: new Date(),
+                        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        certifyingActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        addtlActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'additionalactuarycontact1@test.com',
+                            },
+                        ],
+                        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                        packagesWithSharedRateCerts: [],
+                    }
+                }]
             },
         ],
         packageSubmissions: [],
@@ -291,6 +338,11 @@ function mockContractPackageSubmitted(
                 contractName: 'MCR-MN-0005-SNBC',
                 createdAt: new Date('01/01/2024'),
                 updatedAt: new Date('12/31/2024'),
+                submitInfo: {
+                    updatedAt: new Date(),
+                    updatedBy: 'example@state.com',
+                    updatedReason: 'contract submit'
+                },
                 id: '123',
                 formData: {
                     programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
@@ -341,6 +393,11 @@ function mockContractPackageSubmitted(
                     rateID: '456',
                     createdAt: new Date('01/01/2023'),
                     updatedAt: new Date('01/01/2023'),
+                    submitInfo: {
+                        updatedAt: new Date(),
+                        updatedBy: 'example@state.com',
+                        updatedReason: 'contract submit'
+                    },
                     contractRevisions: [],
                     formData: {
                         rateType: 'AMENDMENT',
@@ -386,4 +443,257 @@ function mockContractPackageSubmitted(
     }
 }
 
-export { mockContractPackageDraft, mockContractPackageSubmitted, mockContractWithLinkedRateDraft }
+function mockContractPackageUnlocked(
+    partial?: Partial<Contract>
+): Contract {
+    return {
+        status: 'UNLOCKED',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        id: 'test-abc-123',
+        stateCode: 'MN',
+        state: mockMNState(),
+        stateNumber: 5,
+        draftRevision: {
+            __typename: 'ContractRevision',
+            submitInfo: undefined,
+            unlockInfo: {
+                updatedAt: new Date(),
+                updatedBy: 'soandso@example.com',
+                updatedReason: 'unlocked for a test',
+            },
+            id: '123',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            contractName: 'MCR-MN-0005-SNBC',
+            formData: {
+                programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                populationCovered: 'MEDICAID',
+                submissionType: 'CONTRACT_AND_RATES',
+                riskBasedContract: true,
+                submissionDescription: 'An updated submission',
+                supportingDocuments: [],
+                stateContacts: [
+                    {
+                        name: 'State Contact 1',
+                        titleRole: 'Test State Contact 1',
+                        email: 'actuarycontact1@test.com',
+                    },
+                ],
+                contractType: 'AMENDMENT',
+                contractExecutionStatus: 'EXECUTED',
+                contractDocuments: [
+                    {
+                        s3URL: 's3://bucketname/one-two/one-two.png',
+                        sha256: 'fakesha',
+                        name: 'one two',
+                        dateAdded: new Date()
+                    },
+                ],
+                contractDateStart: new Date('02/02/2023'),
+                contractDateEnd: new Date('02/02/2024'),
+                managedCareEntities: ['MCO'],
+                federalAuthorities: ['STATE_PLAN'],
+                inLieuServicesAndSettings: true,
+                modifiedBenefitsProvided: true,
+                modifiedGeoAreaServed: false,
+                modifiedMedicaidBeneficiaries: true,
+                modifiedRiskSharingStrategy: true,
+                modifiedIncentiveArrangements: false,
+                modifiedWitholdAgreements: false,
+                modifiedStateDirectedPayments: true,
+                modifiedPassThroughPayments: true,
+                modifiedPaymentsForMentalDiseaseInstitutions: false,
+                modifiedMedicalLossRatioStandards: true,
+                modifiedOtherFinancialPaymentIncentive: false,
+                modifiedEnrollmentProcess: true,
+                modifiedGrevienceAndAppeal: false,
+                modifiedNetworkAdequacyStandards: true,
+                modifiedLengthOfContract: false,
+                modifiedNonRiskPaymentArrangements: true,
+                statutoryRegulatoryAttestation: true,
+                statutoryRegulatoryAttestationDescription: "everything meets regulatory attestation"
+            }
+        },
+
+        draftRates: [
+            {
+                id: '123',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                status: 'SUBMITTED',
+                stateCode: 'MN',
+                revisions: [],
+                state: mockMNState(),
+                stateNumber: 5,
+                parentContractID: 'test-abc-123',
+                draftRevision: {
+                    id: '123',
+                    rateID: '456',
+                    contractRevisions: [],
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    unlockInfo: {
+                        updatedAt: new Date(),
+                        updatedBy: 'soandso@example.com',
+                        updatedReason: 'unlocked for a test',
+                    },
+                    formData: {
+                        rateType: 'AMENDMENT',
+                        rateCapitationType: 'RATE_CELL',
+                        rateDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rate',
+                                sha256: 'fakesha',
+                                name: 'rate',
+                                dateAdded: new Date()
+                            },
+                        ],
+                        supportingDocuments: [],
+                        rateDateStart: new Date('2020-02-02'),
+                        rateDateEnd: new Date('2021-02-02'),
+                        rateDateCertified: new Date(),
+                        amendmentEffectiveDateStart: new Date(),
+                        amendmentEffectiveDateEnd: new Date(),
+                        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        certifyingActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        addtlActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'additionalactuarycontact1@test.com',
+                            },
+                        ],
+                        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                        packagesWithSharedRateCerts: [],
+                    }
+                }
+
+            },
+        ],
+        packageSubmissions: [{
+            cause: 'CONTRACT_SUBMISSION',
+            submitInfo: {
+                updatedAt: new Date('01/01/2024'),
+                updatedBy: 'example@state.com',
+                updatedReason: 'initial submission'
+            },
+            submittedRevisions: [],
+            contractRevision: {
+                contractName: 'MCR-MN-0005-SNBC',
+                createdAt: new Date('01/01/2024'),
+                updatedAt: new Date('12/31/2024'),
+                submitInfo: {
+                    updatedAt: new Date('01/01/2024'),
+                    updatedBy: 'example@state.com',
+                    updatedReason: 'initial submission'
+                },
+                id: '123',
+                formData: {
+                    programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                    populationCovered: 'MEDICAID',
+                    submissionType: 'CONTRACT_AND_RATES',
+                    riskBasedContract: true,
+                    submissionDescription: 'An initial submission',
+                    supportingDocuments: [],
+                    stateContacts: [],
+                    contractType: 'AMENDMENT',
+                    contractExecutionStatus: 'EXECUTED',
+                    contractDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contract',
+                            sha256: 'fakesha',
+                            name: 'contract',
+                            dateAdded: new Date()
+                        },
+                    ],
+                    contractDateStart: new Date('01/01/2023'),
+                    contractDateEnd: new Date('01/01/2024'),
+                    managedCareEntities: ['MCO'],
+                    federalAuthorities: ['STATE_PLAN'],
+                    inLieuServicesAndSettings: true,
+                    modifiedBenefitsProvided: true,
+                    modifiedGeoAreaServed: false,
+                    modifiedMedicaidBeneficiaries: true,
+                    modifiedRiskSharingStrategy: true,
+                    modifiedIncentiveArrangements: false,
+                    modifiedWitholdAgreements: false,
+                    modifiedStateDirectedPayments: true,
+                    modifiedPassThroughPayments: true,
+                    modifiedPaymentsForMentalDiseaseInstitutions: false,
+                    modifiedMedicalLossRatioStandards: true,
+                    modifiedOtherFinancialPaymentIncentive: false,
+                    modifiedEnrollmentProcess: true,
+                    modifiedGrevienceAndAppeal: false,
+                    modifiedNetworkAdequacyStandards: true,
+                    modifiedLengthOfContract: false,
+                    modifiedNonRiskPaymentArrangements: true,
+                    statutoryRegulatoryAttestation: true,
+                    statutoryRegulatoryAttestationDescription: "everything meets regulatory attestation"
+                }
+            },
+            rateRevisions: [
+                {
+                    id: '1234',
+                    rateID: '456',
+                    createdAt: new Date('01/01/2023'),
+                    updatedAt: new Date('01/01/2023'),
+                    submitInfo: {
+                        updatedAt: new Date('01/01/2024'),
+                        updatedBy: 'example@state.com',
+                        updatedReason: 'initial submission'
+                    },
+                    contractRevisions: [],
+                    formData: {
+                        rateType: 'AMENDMENT',
+                        rateCapitationType: 'RATE_CELL',
+                        rateDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rate',
+                                sha256: 'fakesha',
+                                name: 'rate',
+                                dateAdded: new Date()
+                            },
+                        ],
+                        supportingDocuments: [],
+                        rateDateStart: new Date('2020-01-01'),
+                        rateDateEnd: new Date('2021-01-01'),
+                        rateDateCertified: new Date(),
+                        amendmentEffectiveDateStart: new Date(),
+                        amendmentEffectiveDateEnd: new Date(),
+                        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        certifyingActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        addtlActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                        packagesWithSharedRateCerts: []
+                    }
+                },
+            ],
+        }],
+        ...partial,
+    }
+}
+
+export { mockContractPackageDraft, mockContractPackageSubmitted, mockContractWithLinkedRateDraft, mockContractPackageUnlocked }
