@@ -752,11 +752,6 @@
                     "name": "HARP"
                 },
                 {
-                    "id": "f3dc5e6e-e936-453f-b077-b66c99f88f04",
-                    "fullName": "Medicaid Advantage",
-                    "name": "MA"
-                },
-                {
                     "id": "1d9dbd18-9c31-41b8-a287-727e51949908",
                     "fullName": "Medicaid Managed Care",
                     "name": "MMC"
@@ -768,8 +763,8 @@
                 },
                 {
                     "id": "6c94f55a-79a7-4e65-97cf-a3f6fdf40455",
-                    "fullName": "Managed Long Term Care",
-                    "name": "MLTC"
+                    "fullName": "Partial Capitation",
+                    "name": "Partial Capitation"
                 },
                 {
                     "id": "01e1c24b-14aa-40bb-9365-a17271468bd2",
@@ -850,6 +845,11 @@
         {
             "name": "Pennsylvania",
             "programs": [
+                {
+                    "id": "2dcfebda-7910-4c3d-a19f-174ee4c75cc0",
+                    "fullName": "Adult Community Autism Program",
+                    "name": "ACAP"
+                },
                 {
                     "id": "ef45f326-8b3a-44a9-aac6-8fa73400680a",
                     "fullName": "HealthChoices Physical Health",
