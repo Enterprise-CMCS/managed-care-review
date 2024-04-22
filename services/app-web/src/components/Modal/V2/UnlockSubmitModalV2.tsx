@@ -5,6 +5,7 @@ import {
     Rate,
     Contract,
     useSubmitContractMutation,
+    useUnlockHealthPlanPackageMutation,
 } from '../../../gen/gqlClient'
 import { useFormik } from 'formik'
 import { usePrevious } from '../../../hooks/usePrevious'
@@ -14,7 +15,10 @@ import * as Yup from 'yup'
 import styles from '../UnlockSubmitModal.module.scss'
 import { GenericApiErrorProps } from '../../Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { ERROR_MESSAGES } from '../../../constants/errors'
-import { submitMutationWrapperV2 } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
+import {
+    submitMutationWrapperV2,
+    unlockMutationWrapper,
+} from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 
 const RATE_UNLOCK_SUBMIT_TYPES = [
     'SUBMIT_RATE',
@@ -89,11 +93,11 @@ const modalValueDictionary: { [Property in SharedModalType]: ModalValueType } =
             errorHeading: ERROR_MESSAGES.unlock_error_heading,
         },
         UNLOCK_CONTRACT: {
-            modalHeading: 'Reason for unlocking rate',
+            modalHeading: 'Reason for unlocking submission',
             onSubmitText: 'Unlock',
             inputHint: 'Provide reason for unlocking',
             unlockSubmitModalInputValidation:
-                'You must provide a reason for unlocking this contract',
+                'You must provide a reason for unlocking this submission',
             errorHeading: ERROR_MESSAGES.unlock_error_heading,
         },
         SUBMIT_RATE: {
@@ -135,10 +139,12 @@ export const UnlockSubmitModalV2 = ({
     }
 
     const [submitContract, { loading: submitContractLoading }] =
-        useSubmitContractMutation() // TODO this should be unlockContract - linked rates epic
+        useSubmitContractMutation()
 
-    // TODO submitRate and unlockRate should also be set up here - nunlock and edit rate epic
-    // TODO unlockContract should also be set up here - nunlock and edit rate epic
+    const [unlockHealthPlanPackage, { loading: unlockContractLoading }] =
+        useUnlockHealthPlanPackageMutation()
+
+    // TODO submitRate and unlockRate should also be set up here - unlock and edit rate epic
     const formik = useFormik({
         initialValues: modalFormInitialValues,
         validationSchema: Yup.object().shape({
@@ -150,7 +156,10 @@ export const UnlockSubmitModalV2 = ({
     })
 
     const mutationLoading =
-        modalType === 'SUBMIT_CONTRACT' && submitContractLoading
+        modalType === 'UNLOCK_CONTRACT'
+            ? unlockContractLoading
+            : submitContractLoading
+
     const isSubmitting = mutationLoading || formik.isSubmitting
     const includesFormInput =
         modalType === 'UNLOCK_CONTRACT' ||
@@ -180,19 +189,25 @@ export const UnlockSubmitModalV2 = ({
             case 'SUBMIT_RATE' || 'RESUBMIT_RATE':
                 console.info('submit/resubmit rate not implemented yet')
                 break
-            case 'SUBMIT_CONTRACT':
+            case 'SUBMIT_CONTRACT' || 'RESUBMIT_CONTRACT':
                 result = await submitMutationWrapperV2(
                     submitContract,
                     submissionData.id,
                     unlockSubmitModalInput
                 )
                 break
-            case 'RESUBMIT_CONTRACT':
-                result = await submitMutationWrapperV2(
-                    submitContract,
-                    submissionData.id,
-                    unlockSubmitModalInput
-                )
+            case 'UNLOCK_CONTRACT':
+                if (unlockSubmitModalInput) {
+                    // TODO: Remove HPP code fully from here, this is a hack to get through linked rates
+                    result = await unlockMutationWrapper(
+                        unlockHealthPlanPackage,
+                        submissionData.id,
+                        unlockSubmitModalInput
+                    )
+                } else {
+                    console.info('error has occured with unlocking contract')
+                }
+
                 break
         }
 
