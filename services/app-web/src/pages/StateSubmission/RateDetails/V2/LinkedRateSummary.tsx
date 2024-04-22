@@ -64,6 +64,7 @@ export const LinkedRateSummary = ({
                 caption="Rate certification"
                 documentCategory="Rate certification"
                 isEditing={false}
+                previousSubmissionDate={null}
             />
         </SectionCard>
     )

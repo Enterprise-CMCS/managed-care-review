@@ -74,6 +74,9 @@ describe('CMS user can view rate reviews', () => {
                     })
                 cy.findByText('rate1SupportingDocument1.pdf').should('exist')
 
+                // No document dates or other fields are undefined
+                cy.findByText('N/A').should('not.exist')
+
                 // Go back to dashboard and check both rates in the table
                 // check the dashboard has the columns we expect
                 cy.findByText('Back to dashboard').should('exist').click()

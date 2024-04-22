@@ -11,6 +11,7 @@ import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../../../constants/statutoryRegulatoryAttestation'
+import { mockContractFormData } from '../../../../../testHelpers/apolloMocks/contractPackageDataMock'
 
 describe('ContractDetailsSummarySection', () => {
     const defaultApolloMocks = {
@@ -314,7 +315,20 @@ describe('ContractDetailsSummarySection', () => {
     it('does not render supporting contract documents table when no documents exist', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
-                contract={mockContractPackageDraft()}
+                contract={mockContractPackageDraft({
+                    draftRevision: {
+                        __typename: 'ContractRevision',
+                        submitInfo: undefined,
+                        unlockInfo: undefined,
+                        id: '123',
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                        contractName: 'MCR-0005-alvhalfhdsalf',
+                        formData: mockContractFormData({
+                            supportingDocuments: [],
+                        }),
+                    },
+                })}
                 submissionName="MN-PMAP-0001"
             />,
             {

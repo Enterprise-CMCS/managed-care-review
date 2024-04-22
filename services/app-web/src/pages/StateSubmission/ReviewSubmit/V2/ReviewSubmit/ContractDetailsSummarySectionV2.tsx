@@ -157,7 +157,7 @@ export const ContractDetailsSummarySectionV2 = ({
         isPreviousSubmission,
     ])
     const lastSubmittedDate =
-        getLastContractSubmission(contract)?.submitInfo.updatedAt
+        getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
     return (
         <SectionCard
             id="contractDetailsSection"

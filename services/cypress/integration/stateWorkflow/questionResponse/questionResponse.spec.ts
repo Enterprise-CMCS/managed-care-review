@@ -93,6 +93,10 @@ describe('Q&A', () => {
                                 { timeout: 5_000 }
                             ).should('exist')
                         })
+
+
+                    // No document dates or other fields are undefined
+                    cy.findByText('N/A').should('not.exist')
                 }
             )
         })

@@ -81,7 +81,7 @@ export const RateDetailsSummarySectionV2 = ({
         ? contract.draftRates
         : getLastContractSubmission(contract)?.rateRevisions
     const lastSubmittedDate =
-        getLastContractSubmission(contract)?.submitInfo.updatedAt
+        getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
 
     const { getKey, getBulkDlURL } = useS3()
     const [zippedFilesURL, setZippedFilesURL] = useState<

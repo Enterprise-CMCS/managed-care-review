@@ -25,17 +25,17 @@ function makeDocumentDateTable(
     revisionsLookup: RevisionsLookupType
 ): DocumentDateLookupTableType {
     const lookupTable: DocumentDateLookupTableType = {
-        previousSubmissionDate: null,
+        previousSubmissionDate: null, // the last time there was a submission on this package
     }
-    Object.keys(revisionsLookup).forEach(
-        (revisionId: string, index: number) => {
+    const listOfRevisionLookups = Object.keys(revisionsLookup)
+    listOfRevisionLookups.forEach(
+        (revisionId: string, index) => {
             const revision = revisionsLookup[revisionId]
-            if (index === 1) {
-                // second most recent revision
-                const previousSubmission = getDateAdded(revision) // used in UploadedDocumentsTable to determine if we should show NEW tag
-                if (previousSubmission)
-                    lookupTable['previousSubmissionDate'] = previousSubmission
-            }
+
+                const submitDate = revision.submitInfo?.updatedAt
+                if (submitDate && (listOfRevisionLookups.length === 1 || index === 1)) { // if we have a package with only one submitted revision, use that - otherwise use whatever in is the 1 index because thats the last submitted
+                        lookupTable['previousSubmissionDate'] = submitDate
+                }
 
             const allDocuments = getAllDocuments(revision.formData)
             allDocuments.forEach((doc) => {
