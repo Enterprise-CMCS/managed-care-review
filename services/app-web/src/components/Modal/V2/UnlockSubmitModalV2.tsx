@@ -6,6 +6,8 @@ import {
     Contract,
     useSubmitContractMutation,
     useUnlockHealthPlanPackageMutation,
+    FetchHealthPlanPackageWithQuestionsDocument,
+    FetchContractDocument,
 } from '../../../gen/gqlClient'
 import { useFormik } from 'formik'
 import { usePrevious } from '../../../hooks/usePrevious'
@@ -42,12 +44,12 @@ type SharedAdditionalProps = {
 
 type RateModalProps = {
     submissionData: Rate
-    modalType: RateModalType[number]
+    modalType: RateModalType
 } & SharedAdditionalProps
 
 type ContractModalProps = {
     submissionData: Contract
-    modalType: ContractModalType[number]
+    modalType: ContractModalType
 } & SharedAdditionalProps
 
 type UnlockSubmitModalProps = RateModalProps | ContractModalProps
@@ -141,8 +143,10 @@ export const UnlockSubmitModalV2 = ({
     const [submitContract, { loading: submitContractLoading }] =
         useSubmitContractMutation()
 
-    const [unlockHealthPlanPackage, { loading: unlockContractLoading }] =
-        useUnlockHealthPlanPackageMutation()
+    const [
+        unlockHealthPlanPackage,
+        { loading: unlockContractLoading, client },
+    ] = useUnlockHealthPlanPackageMutation()
 
     // TODO submitRate and unlockRate should also be set up here - unlock and edit rate epic
     const formik = useFormik({
@@ -198,7 +202,7 @@ export const UnlockSubmitModalV2 = ({
                 break
             case 'UNLOCK_CONTRACT':
                 if (unlockSubmitModalInput) {
-                    // TODO: Remove HPP code fully from here, this is a hack to get through linked rates
+                    // TODO: Remove HPP code fully from here, this is a hack to get through linked rates since we have no viable unlockContract
                     result = await unlockMutationWrapper(
                         unlockHealthPlanPackage,
                         submissionData.id,
@@ -211,7 +215,26 @@ export const UnlockSubmitModalV2 = ({
                 break
         }
 
-        if (result instanceof Error) {
+        //Allow submitting/unlocking to continue on EMAIL_ERROR.
+        if (result instanceof Error && result.cause === 'EMAIL_ERROR') {
+            modalRef.current?.toggleModal(undefined, false)
+
+            if (modalType !== 'UNLOCK_CONTRACT' && submissionName) {
+                navigate(
+                    `/dashboard/submissions?justSubmitted=${submissionName}`
+                )
+            } else {
+                await client.refetchQueries({
+                    include: [FetchContractDocument],
+                })
+                // TODO: Remove HPP code fully from here, this is a hack to get through linked rates
+                // neded because sidebar UI that also displays questions that assumes latest data fetched on this page
+                // and we haven't had to migrate that yet to contract and ratesyet
+                await client.refetchQueries({
+                    include: [FetchHealthPlanPackageWithQuestionsDocument],
+                })
+            }
+        } else if (result instanceof Error) {
             setModalAlert({
                 heading: modalValues.errorHeading,
                 message: result.message,
