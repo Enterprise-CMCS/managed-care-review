@@ -327,8 +327,11 @@ export const SingleRateSummarySection = ({
                         />
                         <DataDetail
                             id="submittedWithContract"
-                            label="Submission this rate was submitted with"
-                            explainMissingData={explainMissingData}
+                            label={
+                                showLinkedRates
+                                    ? 'Contract actions'
+                                    : 'Submission this rate was submitted with'
+                            }
                             children={relatedSubmissions(
                                 rateRevision?.contractRevisions,
                                 statePrograms
