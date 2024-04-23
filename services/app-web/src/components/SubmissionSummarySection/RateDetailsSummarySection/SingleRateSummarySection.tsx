@@ -99,7 +99,7 @@ export const SingleRateSummarySection = ({
     const navigate = useNavigate()
     const rateRevision = rate.revisions[0]
     const formData: RateFormData = rateRevision?.formData
-    const lastSubmittedDate = rate.revisions[0]?.submitInfo?.updatedAt
+    const lastSubmittedDate = rate.revisions[0]?.submitInfo?.updatedAt ?? null
     const isRateAmendment = formData.rateType === 'AMENDMENT'
     const isUnlocked = rate.status === 'UNLOCKED'
     const explainMissingData =

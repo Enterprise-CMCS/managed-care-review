@@ -24,7 +24,10 @@ import {
     RateFormData,
     HealthPlanPackageStatus,
 } from '../../../../../gen/gqlClient'
-import { getLastContractSubmission, getVisibleLatestRateRevisions } from '../../../../../gqlHelpers/contractsAndRates'
+import {
+    getLastContractSubmission,
+    getVisibleLatestRateRevisions,
+} from '../../../../../gqlHelpers/contractsAndRates'
 
 export type RateDetailsSummarySectionV2Props = {
     contract: Contract
@@ -74,12 +77,12 @@ export const RateDetailsSummarySectionV2 = ({
     const isSubmitted = contract.status === 'SUBMITTED'
     const isEditing = !isSubmitted && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
-    const contractFormData = isEditing ?
-        contract.draftRevision?.formData :
-        getLastContractSubmission(contract)?.contractRevision.formData
+    const contractFormData = isEditing
+        ? contract.draftRevision?.formData
+        : getLastContractSubmission(contract)?.contractRevision.formData
     const rates = getVisibleLatestRateRevisions(contract, isEditing)
     const lastSubmittedDate =
-        getLastContractSubmission(contract)?.submitInfo.updatedAt
+        getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
 
     const { getKey, getBulkDlURL } = useS3()
     const [zippedFilesURL, setZippedFilesURL] = useState<

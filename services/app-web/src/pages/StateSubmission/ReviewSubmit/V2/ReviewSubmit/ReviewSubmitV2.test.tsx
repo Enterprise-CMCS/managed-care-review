@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { renderWithProviders } from '../../../../../testHelpers/jestHelpers'
 import { ReviewSubmitV2 } from './ReviewSubmitV2'
 import {
@@ -176,6 +176,60 @@ describe('ReviewSubmit', () => {
         })
     })
 
+    it('extracts the correct dates from unlocked submission and displays them in tables', async () => {
+        const contractMock = fetchContractMockSuccess({
+            contract: mockContractPackageUnlocked(),
+        })
+
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmitV2 />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        contractMock,
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                },
+                featureFlags: {
+                    'link-rates': true,
+                },
+            }
+        )
+
+        await waitFor(() => {
+            const contractDocRow = screen.getByRole('row', {
+                name: /contract document/,
+            })
+            expect(
+                within(contractDocRow).getByText('1/1/24')
+            ).toBeInTheDocument()
+            const contractSupporting1Row = screen.getByRole('row', {
+                name: /contractSupporting1/,
+            })
+            expect(
+                within(contractSupporting1Row).getByText('1/15/24')
+            ).toBeInTheDocument()
+            const rateDocRow = screen.getByRole('row', {
+                name: /rate certification/,
+            })
+            expect(within(rateDocRow).getByText('1/13/24')).toBeInTheDocument()
+            const rateSupporting1Row = screen.getByRole('row', {
+                name: /rateSupporting1/,
+            })
+            expect(
+                within(rateSupporting1Row).getByText('1/15/24')
+            ).toBeInTheDocument()
+        })
+    })
+
     it('displays back, save as draft, and submit buttons', async () => {
         const { user } = renderWithProviders(
             <Routes>
@@ -240,14 +294,17 @@ describe('ReviewSubmit', () => {
                 },
                 featureFlags: {
                     'link-rates': true,
-                }, 
+                },
             }
         )
 
-        const description = await screen.findByLabelText('Submission description')
+        const description = await screen.findByLabelText(
+            'Submission description'
+        )
         expect(description).toHaveTextContent('An updated submission')
-        const ratingPeriod = await screen.findByLabelText('Rating period of original rate certification')
+        const ratingPeriod = await screen.findByLabelText(
+            'Rating period of original rate certification'
+        )
         expect(ratingPeriod).toHaveTextContent('02/02/2020 to 02/02/2021')
-
     })
 })

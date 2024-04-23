@@ -309,7 +309,7 @@ export const ContractDetailsSummarySection = ({
                         ? new Date(
                               documentDateLookupTable.previousSubmissionDate
                           )
-                        : undefined
+                        : null
                 }
                 caption="Contract"
                 documentCategory="Contract"
@@ -325,7 +325,7 @@ export const ContractDetailsSummarySection = ({
                         ? new Date(
                               documentDateLookupTable.previousSubmissionDate
                           )
-                        : undefined
+                        : null
                 }
                 caption="Contract supporting documents"
                 documentCategory="Contract-supporting"

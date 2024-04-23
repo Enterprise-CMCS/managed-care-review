@@ -86,7 +86,10 @@ export const ContractDetailsSummarySectionV2 = ({
     const ldClient = useLDClient()
     const isEditing = !isSubmitted(contract) && editNavigateTo !== undefined
 
-    const contractFormData = getVisibleLatestContractFormData(contract, isEditing)
+    const contractFormData = getVisibleLatestContractFormData(
+        contract,
+        isEditing
+    )
     const contract438Attestation = ldClient?.variation(
         featureFlags.CONTRACT_438_ATTESTATION.flag,
         featureFlags.CONTRACT_438_ATTESTATION.defaultValue
@@ -157,7 +160,7 @@ export const ContractDetailsSummarySectionV2 = ({
         isPreviousSubmission,
     ])
     const lastSubmittedDate =
-        getLastContractSubmission(contract)?.submitInfo.updatedAt
+        getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
     return (
         <SectionCard
             id="contractDetailsSection"
