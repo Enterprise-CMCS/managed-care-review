@@ -742,16 +742,25 @@ describe('SubmissionSummary', () => {
             )
             await waitFor(() => {
                 const rows = screen.getAllByRole('row')
-                expect(rows).toHaveLength(5)
+                expect(rows).toHaveLength(10)
                 expect(
                     within(rows[0]).getByText('Date added')
                 ).toBeInTheDocument()
-                expect(within(rows[1]).getByText('5/12/22')).toBeInTheDocument()
-                expect(within(rows[2]).getByText('4/12/22')).toBeInTheDocument()
+                expect(within(rows[1]).getByText('1/1/24')).toBeInTheDocument()
                 expect(
-                    within(rows[3]).getByText('Date added')
+                    within(rows[2]).getByText('Date added')
                 ).toBeInTheDocument()
-                expect(within(rows[4]).getByText('3/12/22')).toBeInTheDocument()
+                expect(within(rows[3]).getByText('1/15/24')).toBeInTheDocument()
+                expect(within(rows[4]).getByText('1/13/24')).toBeInTheDocument()
+                expect(
+                    within(rows[5]).getByText('Date added')
+                ).toBeInTheDocument()
+                expect(within(rows[6]).getByText('1/1/23')).toBeInTheDocument()
+                expect(
+                    within(rows[7]).getByText('Date added')
+                ).toBeInTheDocument()
+                expect(within(rows[8]).getByText('1/15/23')).toBeInTheDocument()
+                expect(within(rows[9]).getByText('1/15/23')).toBeInTheDocument()
             })
         })
 
