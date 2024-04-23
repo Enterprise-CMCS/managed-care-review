@@ -15,6 +15,7 @@ function mockContractPackageDraft(
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
+        mccrsID: undefined,
         draftRevision: {
             __typename: 'ContractRevision',
             submitInfo: undefined,
@@ -148,6 +149,7 @@ function mockContractWithLinkedRateDraft(
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
+        mccrsID: undefined,
         draftRevision: {
             __typename: 'ContractRevision',
             submitInfo: undefined,
@@ -322,10 +324,12 @@ function mockContractPackageSubmitted(
         status: 'SUBMITTED',
         createdAt: new Date(),
         updatedAt: new Date(),
+        initiallySubmittedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
+        mccrsID: undefined,
         packageSubmissions: [{
             cause: 'CONTRACT_SUBMISSION',
             submitInfo: {
@@ -343,6 +347,7 @@ function mockContractPackageSubmitted(
                     updatedBy: 'example@state.com',
                     updatedReason: 'contract submit'
                 },
+                unlockInfo: undefined,
                 id: '123',
                 formData: {
                     programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
@@ -359,7 +364,13 @@ function mockContractPackageSubmitted(
                             s3URL: 's3://bucketname/key/contract',
                             sha256: 'fakesha',
                             name: 'contract',
-                            dateAdded: new Date()
+                            dateAdded: new Date('2022-05-12T21:13:20.420Z')
+                        },
+                        {
+                            s3URL: 's3://bucketname/key/contract',
+                            sha256: 'fakesha',
+                            name: 'contract',
+                            dateAdded: new Date('2022-04-12T21:13:20.420Z')
                         },
                     ],
                     contractDateStart: new Date(),
@@ -407,7 +418,7 @@ function mockContractPackageSubmitted(
                                 s3URL: 's3://bucketname/key/rate',
                                 sha256: 'fakesha',
                                 name: 'rate',
-                                dateAdded: new Date()
+                                dateAdded: new Date('2022-03-12T21:13:20.420Z')
                             },
                         ],
                         supportingDocuments: [],
@@ -450,10 +461,12 @@ function mockContractPackageUnlocked(
         status: 'UNLOCKED',
         createdAt: new Date(),
         updatedAt: new Date(),
+        initiallySubmittedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
+        mccrsID: '1234',
         draftRevision: {
             __typename: 'ContractRevision',
             submitInfo: undefined,
@@ -586,7 +599,66 @@ function mockContractPackageUnlocked(
                 updatedBy: 'example@state.com',
                 updatedReason: 'initial submission'
             },
-            submittedRevisions: [],
+            submittedRevisions: [
+                {
+                    contractName: 'MCR-MN-0005-SNBC',
+                    createdAt: new Date('01/01/2024'),
+                    updatedAt: new Date('12/31/2024'),
+                    submitInfo: {
+                        updatedAt: new Date('01/01/2024'),
+                        updatedBy: 'example@state.com',
+                        updatedReason: 'initial submission'
+                    },
+                    unlockInfo: {
+                        updatedAt: new Date('01/01/2024'),
+                        updatedBy: 'example@state.com',
+                        updatedReason: 'unlocked for a test'
+                    },
+                    id: '123',
+                    formData: {
+                        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        populationCovered: 'MEDICAID',
+                        submissionType: 'CONTRACT_AND_RATES',
+                        riskBasedContract: true,
+                        submissionDescription: 'An initial submission',
+                        supportingDocuments: [],
+                        stateContacts: [],
+                        contractType: 'AMENDMENT',
+                        contractExecutionStatus: 'EXECUTED',
+                        contractDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/contract',
+                                sha256: 'fakesha',
+                                name: 'contract',
+                                dateAdded: new Date()
+                            },
+                        ],
+                        contractDateStart: new Date('01/01/2023'),
+                        contractDateEnd: new Date('01/01/2024'),
+                        managedCareEntities: ['MCO'],
+                        federalAuthorities: ['STATE_PLAN'],
+                        inLieuServicesAndSettings: true,
+                        modifiedBenefitsProvided: true,
+                        modifiedGeoAreaServed: false,
+                        modifiedMedicaidBeneficiaries: true,
+                        modifiedRiskSharingStrategy: true,
+                        modifiedIncentiveArrangements: false,
+                        modifiedWitholdAgreements: false,
+                        modifiedStateDirectedPayments: true,
+                        modifiedPassThroughPayments: true,
+                        modifiedPaymentsForMentalDiseaseInstitutions: false,
+                        modifiedMedicalLossRatioStandards: true,
+                        modifiedOtherFinancialPaymentIncentive: false,
+                        modifiedEnrollmentProcess: true,
+                        modifiedGrevienceAndAppeal: false,
+                        modifiedNetworkAdequacyStandards: true,
+                        modifiedLengthOfContract: false,
+                        modifiedNonRiskPaymentArrangements: true,
+                        statutoryRegulatoryAttestation: true,
+                        statutoryRegulatoryAttestationDescription: "everything meets regulatory attestation"
+                    }
+                }
+            ],
             contractRevision: {
                 contractName: 'MCR-MN-0005-SNBC',
                 createdAt: new Date('01/01/2024'),
@@ -595,6 +667,11 @@ function mockContractPackageUnlocked(
                     updatedAt: new Date('01/01/2024'),
                     updatedBy: 'example@state.com',
                     updatedReason: 'initial submission'
+                },
+                unlockInfo: {
+                    updatedAt: new Date('01/01/2024'),
+                    updatedBy: 'example@state.com',
+                    updatedReason: 'unlocked'
                 },
                 id: '123',
                 formData: {
