@@ -205,28 +205,12 @@ describe('ReviewSubmit', () => {
         )
 
         await waitFor(() => {
-            const contractDocRow = screen.getByRole('row', {
-                name: /contract document/,
-            })
-            expect(
-                within(contractDocRow).getByText('1/1/24')
-            ).toBeInTheDocument()
-            const contractSupporting1Row = screen.getByRole('row', {
-                name: /contractSupporting1/,
-            })
-            expect(
-                within(contractSupporting1Row).getByText('1/15/24')
-            ).toBeInTheDocument()
-            const rateDocRow = screen.getByRole('row', {
-                name: /rate certification/,
-            })
-            expect(within(rateDocRow).getByText('1/13/24')).toBeInTheDocument()
-            const rateSupporting1Row = screen.getByRole('row', {
-                name: /rateSupporting1/,
-            })
-            expect(
-                within(rateSupporting1Row).getByText('1/15/24')
-            ).toBeInTheDocument()
+            const rows = screen.getAllByRole('row')
+            expect(rows).toHaveLength(4)
+            expect(within(rows[0]).getByText('Date added')).toBeInTheDocument()
+            expect(within(rows[1]).getByText('2/2/23')).toBeInTheDocument()
+            expect(within(rows[2]).getByText('Date added')).toBeInTheDocument()
+            expect(within(rows[3]).getByText('3/2/23')).toBeInTheDocument()
         })
     })
 

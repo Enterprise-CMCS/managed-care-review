@@ -480,7 +480,7 @@ function mockContractPackageUnlocked(
                         s3URL: 's3://bucketname/one-two/one-two.png',
                         sha256: 'fakesha',
                         name: 'one two',
-                        dateAdded: new Date()
+                        dateAdded: new Date('02/02/2023')
                     },
                 ],
                 contractDateStart: new Date('02/02/2023'),
@@ -539,7 +539,7 @@ function mockContractPackageUnlocked(
                                 s3URL: 's3://bucketname/key/rate',
                                 sha256: 'fakesha',
                                 name: 'rate',
-                                dateAdded: new Date()
+                                dateAdded: new Date('03/02/2023')
                             },
                         ],
                         supportingDocuments: [],
