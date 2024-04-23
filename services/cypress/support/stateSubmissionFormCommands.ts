@@ -184,9 +184,9 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     cy.findByText('No, the contract does not fully comply with all applicable requirements').click()
     cy.findByRole('textbox', {name: 'Provide a brief description of any contractual or operational non-compliance, including regulatory citations and expected timeframe for remediation'})
         .type('Non compliance explanation')
- 
+
     cy.findByText('Unexecuted by some or all parties').click()
- 
+
     cy.findAllByLabelText('Start date', {timeout: 2000})
         .parents()
         .findByTestId('date-picker-external-input')
@@ -323,7 +323,7 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     })
         .should('exist')
         .within(() => {
-            cy.findByText('No').click()
+            cy.findByText(/No/).click()
         })
 
     cy.findByText('New rate certification').click()
@@ -360,6 +360,33 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
 
     cy.verifyDocumentsHaveNoErrors()
     cy.waitForDocumentsToLoad()
+    cy.findAllByTestId('errorMessage').should('have.length', 0)
+})
+
+Cypress.Commands.add('fillOutLinkedRate', () => {
+    // Must be on '/submissions/:id/edit/rate-details'
+    // Must be a contract and rates submission
+    cy.findByRole('radiogroup', {
+        name: /Was this rate certification uploaded to any other submissions?/,
+    })
+        .should('exist')
+        .within(() => {
+            cy.findByText('Yes, this rate certification is part of another submissio').click()
+        })
+        cy.getFeatureFlagStore(['link-rates']).then((store) => {
+            //If this flag value is true, then it will test this code hidden behind the feature flag
+            if (store['link-rates']) {
+               cy.findByRole('combobox', { name: 'Which rate certification was it?' }).click({
+                    force: true,
+                })
+               cy.findAllByRole('option').first().click()
+               cy.findByText(/`Rate ID:/).should('be.visible')
+            }
+
+            cy.verifyDocumentsHaveNoErrors()
+            cy.waitForDocumentsToLoad()
+            cy.findAllByTestId('errorMessage').should('have.length', 0)
+        })
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
