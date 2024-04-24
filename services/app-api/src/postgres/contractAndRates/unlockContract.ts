@@ -16,33 +16,13 @@ type UnlockContractArgsType = {
 // * set relationships based on last submission
 async function unlockContract(
     client: PrismaClient,
-    args: UnlockContractArgsType
+    args: UnlockContractArgsType,
+    linkRatesFF?: boolean
 ): Promise<ContractType | NotFoundError | Error> {
     const { contractID, unlockedByUserID, unlockReason } = args
 
     try {
         return await client.$transaction(async (tx) => {
-            // This finds the child rates for this submission.
-            // A child rate is a rate that shares a submit info with this contract.
-            // technically only a rate that is _initially_ submitted with a contract
-            // is a child rate, but we should never allow re-submission so this simpler
-            // query that doesn't try to filter to initial revisions works.
-            const childRates = await tx.rateTable.findMany({
-                where: {
-                    revisions: {
-                        some: {
-                            submitInfo: {
-                                submittedContracts: {
-                                    some: {
-                                        contractID: contractID,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            })
-
             const currentDateTime = new Date()
             // create the unlock info to be shared across all submissions.
             const unlockInfo = await tx.updateInfoTable.create({
@@ -52,18 +32,6 @@ async function unlockContract(
                     updatedReason: unlockReason,
                 },
             })
-
-            // unlock child rates with that unlock info
-            for (const childRate of childRates) {
-                const unlockRate = await unlockRateInDB(
-                    tx,
-                    childRate.id,
-                    unlockInfo.id
-                )
-                if (unlockRate instanceof Error) {
-                    throw unlockRate
-                }
-            }
 
             // get the last submitted rev in order to unlock it
             const currentRev = await tx.contractRevisionTable.findFirst({
@@ -132,19 +100,70 @@ async function unlockContract(
                 )
             }
 
-            const previouslySubmittedRateIDs = currentRev.rateRevisions.map(
-                (c) => c.rateRevision.rateID
-            )
+            const childRateIDs: string[] = []
+            if (linkRatesFF) {
+                // This finds the child rates for this submission.
+                // A child rate is a rate that shares a submit info with this contract.
+                // technically only a rate that is _initially_ submitted with a contract
+                // is a child rate, but we should never allow re-submission so this simpler
+                // query that doesn't try to filter to initial revisions works.
+                const childRates = await tx.rateTable.findMany({
+                    where: {
+                        revisions: {
+                            some: {
+                                submitInfo: {
+                                    submittedContracts: {
+                                        some: {
+                                            contractID: contractID,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                })
 
-            // find the rates in the last submission package:
-            const lastSubmission = currentRev.relatedSubmisions[0]
-            const thisContractsRatePackages =
-                lastSubmission.submissionPackages.filter(
-                    (p) => p.contractRevisionID === currentRev.id
+                for (const childRate of childRates) {
+                    childRateIDs.push(childRate.id)
+                }
+            } else {
+                // without linked rates, we push all the valid rate revisions attached to the contract revision
+                for (const rrev of currentRev.rateRevisions) {
+                    childRateIDs.push(rrev.rateRevision.rateID)
+                }
+            }
+
+            // unlock child rates with that unlock info
+            for (const childRateID of childRateIDs) {
+                const unlockRate = await unlockRateInDB(
+                    tx,
+                    childRateID,
+                    unlockInfo.id,
+                    linkRatesFF
                 )
-            const relatedRateIDs = thisContractsRatePackages.map(
-                (p) => p.rateRevision.rateID
-            )
+                if (unlockRate instanceof Error) {
+                    throw unlockRate
+                }
+            }
+
+            const relatedRateIDs: string[] = []
+            if (linkRatesFF) {
+                // find the rates in the last submission package:
+                const lastSubmission = currentRev.relatedSubmisions[0]
+                const thisContractsRatePackages =
+                    lastSubmission.submissionPackages.filter(
+                        (p) => p.contractRevisionID === currentRev.id
+                    )
+
+                for (const ratePackage of thisContractsRatePackages) {
+                    relatedRateIDs.push(ratePackage.rateRevision.rateID)
+                }
+            } else {
+                for (const rateRev of currentRev.rateRevisions) {
+                    relatedRateIDs.push(rateRev.rateRevision.rateID)
+                }
+            }
+
             await tx.contractRevisionTable.create({
                 data: {
                     contract: {
@@ -156,7 +175,7 @@ async function unlockContract(
                         connect: { id: unlockInfo.id },
                     },
                     draftRates: {
-                        connect: previouslySubmittedRateIDs.map((cID) => ({
+                        connect: relatedRateIDs.map((cID) => ({
                             id: cID,
                         })),
                     },
