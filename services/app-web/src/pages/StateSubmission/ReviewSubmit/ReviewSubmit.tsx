@@ -75,7 +75,7 @@ export const ReviewSubmit = (): React.ReactElement => {
                 />
             </div>
 
-            <FormContainer id="state-submission-form-page">
+            <FormContainer id="ReviewSubmit">
                 <GridContainer className={styles.reviewSectionWrapper}>
                     <SubmissionTypeSummarySection
                         submission={draftSubmission}

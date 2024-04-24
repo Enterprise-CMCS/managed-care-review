@@ -5,6 +5,9 @@ import {
     Rate,
     Contract,
     useSubmitContractMutation,
+    useUnlockHealthPlanPackageMutation,
+    FetchHealthPlanPackageWithQuestionsDocument,
+    FetchContractDocument,
 } from '../../../gen/gqlClient'
 import { useFormik } from 'formik'
 import { usePrevious } from '../../../hooks/usePrevious'
@@ -14,7 +17,10 @@ import * as Yup from 'yup'
 import styles from '../UnlockSubmitModal.module.scss'
 import { GenericApiErrorProps } from '../../Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { ERROR_MESSAGES } from '../../../constants/errors'
-import { submitMutationWrapperV2 } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
+import {
+    submitMutationWrapperV2,
+    unlockMutationWrapper,
+} from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 
 const RATE_UNLOCK_SUBMIT_TYPES = [
     'SUBMIT_RATE',
@@ -38,12 +44,12 @@ type SharedAdditionalProps = {
 
 type RateModalProps = {
     submissionData: Rate
-    modalType: RateModalType[number]
+    modalType: RateModalType
 } & SharedAdditionalProps
 
 type ContractModalProps = {
     submissionData: Contract
-    modalType: ContractModalType[number]
+    modalType: ContractModalType
 } & SharedAdditionalProps
 
 type UnlockSubmitModalProps = RateModalProps | ContractModalProps
@@ -89,11 +95,11 @@ const modalValueDictionary: { [Property in SharedModalType]: ModalValueType } =
             errorHeading: ERROR_MESSAGES.unlock_error_heading,
         },
         UNLOCK_CONTRACT: {
-            modalHeading: 'Reason for unlocking rate',
+            modalHeading: 'Reason for unlocking submission',
             onSubmitText: 'Unlock',
             inputHint: 'Provide reason for unlocking',
             unlockSubmitModalInputValidation:
-                'You must provide a reason for unlocking this contract',
+                'You must provide a reason for unlocking this submission',
             errorHeading: ERROR_MESSAGES.unlock_error_heading,
         },
         SUBMIT_RATE: {
@@ -135,10 +141,14 @@ export const UnlockSubmitModalV2 = ({
     }
 
     const [submitContract, { loading: submitContractLoading }] =
-        useSubmitContractMutation() // TODO this should be unlockContract - linked rates epic
+        useSubmitContractMutation()
 
-    // TODO submitRate and unlockRate should also be set up here - nunlock and edit rate epic
-    // TODO unlockContract should also be set up here - nunlock and edit rate epic
+    const [
+        unlockHealthPlanPackage,
+        { loading: unlockContractLoading, client },
+    ] = useUnlockHealthPlanPackageMutation()
+
+    // TODO submitRate and unlockRate should also be set up here - unlock and edit rate epic
     const formik = useFormik({
         initialValues: modalFormInitialValues,
         validationSchema: Yup.object().shape({
@@ -150,7 +160,10 @@ export const UnlockSubmitModalV2 = ({
     })
 
     const mutationLoading =
-        modalType === 'SUBMIT_CONTRACT' && submitContractLoading
+        modalType === 'UNLOCK_CONTRACT'
+            ? unlockContractLoading
+            : submitContractLoading
+
     const isSubmitting = mutationLoading || formik.isSubmitting
     const includesFormInput =
         modalType === 'UNLOCK_CONTRACT' ||
@@ -177,16 +190,19 @@ export const UnlockSubmitModalV2 = ({
                 console.info('unlock rate not implemented yet')
                 break
 
-            case 'SUBMIT_RATE' || 'RESUBMIT_RATE':
-                console.info('submit/resubmit rate not implemented yet')
+            case 'SUBMIT_RATE' :
+                console.info('submit rate not implemented yet')
                 break
+            case 'RESUBMIT_RATE' :
+                    console.info('submit rate not implemented yet')
+                    break
             case 'SUBMIT_CONTRACT':
                 result = await submitMutationWrapperV2(
                     submitContract,
                     submissionData.id,
                     unlockSubmitModalInput
                 )
-                break
+                break;
             case 'RESUBMIT_CONTRACT':
                 result = await submitMutationWrapperV2(
                     submitContract,
@@ -194,9 +210,41 @@ export const UnlockSubmitModalV2 = ({
                     unlockSubmitModalInput
                 )
                 break
+            case 'UNLOCK_CONTRACT':
+                if (unlockSubmitModalInput) {
+                    // TODO: Remove HPP code fully from here, this is a hack to get through linked rates since we have no viable unlockContract
+                    result = await unlockMutationWrapper(
+                        unlockHealthPlanPackage,
+                        submissionData.id,
+                        unlockSubmitModalInput
+                    )
+                } else {
+                    console.info('error has occured with unlocking contract')
+                }
+
+                break
         }
 
-        if (result instanceof Error) {
+        //Allow submitting/unlocking to continue on EMAIL_ERROR.
+        if (result instanceof Error && result.cause === 'EMAIL_ERROR') {
+            modalRef.current?.toggleModal(undefined, false)
+
+            if (modalType !== 'UNLOCK_CONTRACT' && submissionName) {
+                navigate(
+                    `/dashboard/submissions?justSubmitted=${submissionName}`
+                )
+            } else {
+                await client.refetchQueries({
+                    include: [FetchContractDocument],
+                })
+                // TODO: Remove HPP code fully from here, this is a hack to get through linked rates
+                // neded because sidebar UI that also displays questions that assumes latest data fetched on this page
+                // and we haven't had to migrate that yet to contract and ratesyet
+                await client.refetchQueries({
+                    include: [FetchHealthPlanPackageWithQuestionsDocument],
+                })
+            }
+        } else if (result instanceof Error) {
             setModalAlert({
                 heading: modalValues.errorHeading,
                 message: result.message,
@@ -217,6 +265,16 @@ export const UnlockSubmitModalV2 = ({
                 navigate(
                     `/dashboard/submissions?justSubmitted=${submissionName}`
                 )
+            } else {
+                await client.refetchQueries({
+                    include: [FetchContractDocument],
+                })
+                // TODO: Remove HPP code fully from here, this is a hack to get through linked rates
+                // neded because sidebar UI that also displays questions that assumes latest data fetched on this page
+                // and we haven't had to migrate that yet to contract and ratesyet
+                await client.refetchQueries({
+                    include: [FetchHealthPlanPackageWithQuestionsDocument],
+                })
             }
         }
     }

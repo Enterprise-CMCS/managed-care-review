@@ -184,9 +184,9 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     cy.findByText('No, the contract does not fully comply with all applicable requirements').click()
     cy.findByRole('textbox', {name: 'Provide a brief description of any contractual or operational non-compliance, including regulatory citations and expected timeframe for remediation'})
         .type('Non compliance explanation')
- 
+
     cy.findByText('Unexecuted by some or all parties').click()
- 
+
     cy.findAllByLabelText('Start date', {timeout: 2000})
         .parents()
         .findByTestId('date-picker-external-input')
@@ -318,13 +318,30 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
 Cypress.Commands.add('fillOutNewRateCertification', () => {
     // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
-    cy.findByRole('radiogroup', {
-        name: /Was this rate certification uploaded to any other submissions?/,
-    })
-        .should('exist')
-        .within(() => {
-            cy.findByText('No').click()
+    cy.getFeatureFlagStore(['link-rates']).then((store) => {
+
+        if (store['link-rates']) {
+            //If this flag value is true, then it will test this code hidden behind the feature flag
+        cy.findByRole('radiogroup', {
+            name: /Was this rate certification included with another submission?/,
         })
+            .should('exist')
+            .within(() => {
+                cy.findByText('No, this rate certification was not included with any other submissions').click()
+            })
+
+        } else {
+            // otherwise use legacy packages with shared rates UI
+            cy.findByRole('radiogroup', {
+                name: /Was this rate certification uploaded to any other submissions?/,
+            })
+                .should('exist')
+                .within(() => {
+                    cy.findByText(/No/).click()
+                })
+
+        }
+
 
     cy.findByText('New rate certification').click()
     cy.findByText(
@@ -361,6 +378,34 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     cy.verifyDocumentsHaveNoErrors()
     cy.waitForDocumentsToLoad()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
+})
+})
+
+Cypress.Commands.add('fillOutLinkedRate', () => {
+    // Must be on '/submissions/:id/edit/rate-details'
+    // Must be a contract and rates submission
+        cy.getFeatureFlagStore(['link-rates']).then((store) => {
+            //If this flag value is true, then it will test this code hidden behind the feature flag
+            cy.findByRole('radiogroup', {
+                name: /Was this rate certification included with another submission?/,
+            })
+                .should('exist')
+                .within(() => {
+                    cy.findByText('Yes, this rate certification is part of another submission').click()
+                })
+
+            if (store['link-rates']) {
+               cy.findByRole('combobox', { name: 'Which rate certification was it?' }).click({
+                    force: true,
+                })
+               cy.findAllByRole('option').first().click()
+               cy.findByText(/`Rate ID:/).should('be.visible')
+            }
+
+            cy.verifyDocumentsHaveNoErrors()
+            cy.waitForDocumentsToLoad()
+            cy.findAllByTestId('errorMessage').should('have.length', 0)
+        })
 })
 
 Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
@@ -484,7 +529,8 @@ Cypress.Commands.add(
             name: 'Submit',
         }).safeClick()
 
-        cy.findAllByTestId('modalWindow')
+        cy.getFeatureFlagStore(['link-rates']).then((store) => {
+            cy.findAllByTestId('modalWindow')
             .eq(1)
             .should('exist')
             .within(() => {
@@ -492,16 +538,35 @@ Cypress.Commands.add(
                     cy.get('#unlockSubmitModalInput').type(
                         summary || 'Resubmission summary'
                     )
-                    cy.findByTestId('resubmit-modal-submit').click()
+                    if (store['link-rates']) {
+                        cy.findByTestId('resubmit_contract-modal-submit').click()
+                    }else {
+                        cy.findByTestId('resubmit-modal-submit').click()
+                    }
                 } else {
-                    cy.findByTestId('submit-modal-submit').click()
+
+                    if (store['link-rates']) {
+                        cy.findByTestId('submit_contract-modal-submit').click()
+                    }else {
+                        cy.findByTestId('submit-modal-submit').click()
+                    }
+
                 }
             })
-        cy.wait('@submitHealthPlanPackageMutation', { timeout: 50_000 })
+
+            if (store['link-rates']) {
+            cy.wait('@submitContractMutation', { timeout: 50_000 })
+            } else {
+                cy.wait('@submitHealthPlanPackageMutation', { timeout: 50_000 })
+            }
+
+
         if (success) {
             cy.findByTestId('state-dashboard-page').should('exist')
             cy.findByRole('heading',{name:'Submissions'}).should('exist')
         }
+        })
+
 
     }
 )

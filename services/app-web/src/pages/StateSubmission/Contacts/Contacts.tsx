@@ -301,7 +301,7 @@ const Contacts = ({
                     showPageErrorMessage={showPageErrorMessage ?? false}
                 />
             </div>
-            <FormContainer id="state-submission-form-page">
+            <FormContainer id="Contacts">
                 <Formik
                     initialValues={contactsInitialValues}
                     onSubmit={handleFormSubmit}
@@ -448,6 +448,7 @@ const Contacts = ({
                                                                             0 && (
                                                                             <Button
                                                                                 type="button"
+
                                                                                 unstyled
                                                                                 className={
                                                                                     styles.removeContactBtn
