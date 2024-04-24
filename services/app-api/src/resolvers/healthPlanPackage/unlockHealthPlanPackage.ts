@@ -19,18 +19,22 @@ import {
 } from '../attributeHelper'
 import type { EmailParameterStore } from '../../parameterStore'
 import { GraphQLError } from 'graphql'
+import type { LDService } from '../../launchDarkly/launchDarkly'
 
 // unlockHealthPlanPackageResolver is a state machine transition for HealthPlanPackage
 export function unlockHealthPlanPackageResolver(
     store: Store,
     emailer: Emailer,
-    emailParameterStore: EmailParameterStore
+    emailParameterStore: EmailParameterStore,
+    launchDarkly: LDService
 ): MutationResolvers['unlockHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
         const { unlockedReason, pkgID } = input
         setResolverDetailsOnActiveSpan('unlockHealthPlanPackage', user, span)
         span?.setAttribute('mcreview.package_id', pkgID)
+        const featureFlags = await launchDarkly.allFlags(context)
+        const linkRatesFF = featureFlags?.['link-rates'] === true
 
         // This resolver is only callable by CMS users
         if (!isCMSUser(user)) {
@@ -81,11 +85,14 @@ export function unlockHealthPlanPackageResolver(
         }
 
         // Now, unlock the contract!
-        const unlockContractResult = await store.unlockContract({
-            contractID: contract.id,
-            unlockReason: unlockedReason,
-            unlockedByUserID: user.id,
-        })
+        const unlockContractResult = await store.unlockContract(
+            {
+                contractID: contract.id,
+                unlockReason: unlockedReason,
+                unlockedByUserID: user.id,
+            },
+            linkRatesFF
+        )
         if (unlockContractResult instanceof Error) {
             const errMessage = `Failed to unlock contract revision with ID: ${contract.id}; ${unlockContractResult.message}`
             logError('unlockHealthPlanPackage', errMessage)

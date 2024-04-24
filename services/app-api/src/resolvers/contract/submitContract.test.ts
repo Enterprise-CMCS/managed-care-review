@@ -646,11 +646,19 @@ describe('submitContract', () => {
     })
 
     it('handles unlock and editing rates', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const ldService = testLDService({
+            'link-rates': true,
+            'rate-edit-unlock': true,
+        })
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+        })
+
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: testCMSUser(),
             },
+            ldService,
         })
 
         console.info('1.')
@@ -724,11 +732,19 @@ describe('submitContract', () => {
     })
 
     it('checks parent rates on update', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const ldService = testLDService({
+            'link-rates': true,
+            'rate-edit-unlock': true,
+        })
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+        })
+
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: testCMSUser(),
             },
+            ldService,
         })
 
         console.info('1.')
@@ -833,11 +849,19 @@ describe('submitContract', () => {
 
     it('can remove a child unlocked rate', async () => {
         //TODO: make a child rate, submit and unlock, then remove it.
-        const stateServer = await constructTestPostgresServer()
+        const ldService = testLDService({
+            'link-rates': true,
+            'rate-edit-unlock': true,
+        })
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+        })
+
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: testCMSUser(),
             },
+            ldService,
         })
 
         console.info('1.')
