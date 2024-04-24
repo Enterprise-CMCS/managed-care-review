@@ -24,7 +24,10 @@ import {
     RateFormData,
     HealthPlanPackageStatus,
 } from '../../../../../gen/gqlClient'
-import { getLastContractSubmission } from '../../../../../gqlHelpers/contractsAndRates'
+import {
+    getLastContractSubmission,
+    getVisibleLatestRateRevisions,
+} from '../../../../../gqlHelpers/contractsAndRates'
 
 export type RateDetailsSummarySectionV2Props = {
     contract: Contract
@@ -74,12 +77,10 @@ export const RateDetailsSummarySectionV2 = ({
     const isSubmitted = contract.status === 'SUBMITTED'
     const isEditing = !isSubmitted && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
-    const contractFormData =
-        contract.draftRevision?.formData ||
-        getLastContractSubmission(contract)?.contractRevision.formData
-    const rates = isEditing
-        ? contract.draftRates
-        : getLastContractSubmission(contract)?.rateRevisions
+    const contractFormData = isEditing
+        ? contract.draftRevision?.formData
+        : getLastContractSubmission(contract)?.contractRevision.formData
+    const rates = getVisibleLatestRateRevisions(contract, isEditing)
     const lastSubmittedDate =
         getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
 
@@ -224,6 +225,7 @@ export const RateDetailsSummarySectionV2 = ({
         isSubmitted,
         isPreviousSubmission,
     ])
+
     return (
         <SectionCard id="rateDetails" className={styles.summarySection}>
             <SectionHeader

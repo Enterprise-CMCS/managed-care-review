@@ -59,6 +59,7 @@ declare global {
             fillOutBaseContractDetails(): void
             fillOutAmendmentToBaseContractDetails(): void
             fillOutNewRateCertification(): void
+            fillOutLinkedRate(): void
             fillOutAmendmentToPriorRateCertification(id?: number): void
             fillOutStateContact(): void
             fillOutAdditionalActuaryContact(): void
@@ -71,6 +72,10 @@ declare global {
 
             // navigate commands
             navigateFormByButtonClick(
+                buttonName: FormButtonKey,
+                waitForLoad?: boolean
+            ): void
+            navigateContractRatesFormByButtonClick(
                 buttonName: FormButtonKey,
                 waitForLoad?: boolean
             ): void

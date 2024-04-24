@@ -520,7 +520,7 @@ export const ContractDetails = ({
                     showPageErrorMessage={showPageErrorMessage ?? false}
                 />
             </div>
-            <FormContainer id="state-submission-form-page">
+            <FormContainer id="ContactDetails">
                 <Formik
                     initialValues={contractDetailsInitialValues}
                     onSubmit={(values, { setSubmitting }) => {

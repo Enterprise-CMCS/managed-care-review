@@ -139,4 +139,4 @@ const EmailSupportTable = ({ config }: { config: EmailConfiguration }) => {
     )
 }
 
-export {EmailSettingsTable, formatEmails}
+export { EmailSettingsTable, formatEmails }

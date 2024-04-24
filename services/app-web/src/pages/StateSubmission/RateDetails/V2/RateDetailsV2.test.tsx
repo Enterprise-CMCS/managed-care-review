@@ -300,7 +300,7 @@ describe('RateDetailsv2', () => {
         })
 
         it('display rest of the form when linked rates question is answered', async () => {
-            renderWithProviders(
+            const { user } = renderWithProviders(
                 <Routes>
                     <Route
                         path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
@@ -315,11 +315,8 @@ describe('RateDetailsv2', () => {
                                 contract: {
                                     ...mockContractWithLinkedRateDraft(),
                                     id: 'test-abc-123',
-                                },
-                            }),
-                            updateDraftContractRatesMockSuccess({
-                                contract: {
-                                    id: 'test-abc-123',
+                                    // clean draft rates for this test.
+                                    draftRates: []
                                 },
                             }),
                         ],
@@ -340,16 +337,17 @@ describe('RateDetailsv2', () => {
                     'No, this rate certification was not included with any other submissions'
                 )
             )
+
             const input = screen.getByLabelText(
                 'Upload one rate certification document'
             )
-            await expect(input).toBeInTheDocument()
+            expect(input).toBeInTheDocument()
             const submitButton = screen.getByRole('button', {
                 name: 'Continue',
             })
 
             // trigger validations
-            await submitButton.click()
+            await user.click(submitButton)
             await waitFor(() => {
                 expect(
                     screen.getByText('Rate certification 1')
@@ -458,7 +456,7 @@ describe('RateDetailsv2', () => {
             })
         })
         it('cannot continue with partially filled out second rate', async () => {
-            renderWithProviders(
+            const { user } = renderWithProviders(
                 <Routes>
                     <Route
                         path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
@@ -495,7 +493,6 @@ describe('RateDetailsv2', () => {
             await screen.findByText('Rate Details')
             const rateCertsOnLoad = rateCertifications(screen)
             expect(rateCertsOnLoad).toHaveLength(1)
-            await fillOutIndexRate(screen, 0)
 
             await clickAddNewRate(screen)
             const submitButton = screen.getByRole('button', {
@@ -503,7 +500,7 @@ describe('RateDetailsv2', () => {
             })
 
             // trigger validations
-            await submitButton.click()
+            await user.click(submitButton)
             await waitFor(() => {
                 expect(
                     screen.getByText('Rate certification 1')

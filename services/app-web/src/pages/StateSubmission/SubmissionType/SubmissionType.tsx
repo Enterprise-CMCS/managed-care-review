@@ -273,7 +273,7 @@ export const SubmissionType = ({
                     showPageErrorMessage={showPageErrorMessage ?? false}
                 />
             </div>
-            <FormContainer id="state-submission-form-page">
+            <FormContainer id="SubmissionType">
                 <Formik
                     initialValues={submissionTypeInitialValues}
                     onSubmit={handleFormSubmit}

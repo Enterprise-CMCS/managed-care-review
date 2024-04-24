@@ -45,7 +45,7 @@ import { SectionCard } from '../../../../../components/SectionCard'
 import { Contract } from '../../../../../gen/gqlClient'
 import {
     getLastContractSubmission,
-    getLatestContractFormData,
+    getVisibleLatestContractFormData,
 } from '../../../../../gqlHelpers/contractsAndRates'
 
 export type ContractDetailsSummarySectionV2Props = {
@@ -84,8 +84,12 @@ export const ContractDetailsSummarySectionV2 = ({
         string | undefined | Error
     >(undefined)
     const ldClient = useLDClient()
+    const isEditing = !isSubmitted(contract) && editNavigateTo !== undefined
 
-    const contractFormData = getLatestContractFormData(contract)
+    const contractFormData = getVisibleLatestContractFormData(
+        contract,
+        isEditing
+    )
     const contract438Attestation = ldClient?.variation(
         featureFlags.CONTRACT_438_ATTESTATION.flag,
         featureFlags.CONTRACT_438_ATTESTATION.defaultValue
@@ -96,7 +100,6 @@ export const ContractDetailsSummarySectionV2 = ({
         booleanAsYesNoFormValue(contractFormData.statutoryRegulatoryAttestation)
 
     const contractSupportingDocuments = contractFormData?.supportingDocuments
-    const isEditing = !isSubmitted(contract) && editNavigateTo !== undefined
     const applicableFederalAuthorities = isCHIPOnly(contract)
         ? contractFormData?.federalAuthorities.filter((authority) =>
               federalAuthorityKeysForCHIP.includes(

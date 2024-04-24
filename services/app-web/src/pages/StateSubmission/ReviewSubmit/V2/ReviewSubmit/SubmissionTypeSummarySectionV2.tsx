@@ -9,7 +9,7 @@ import {
     PopulationCoveredRecord,
 } from '../../../../../constants/healthPlanPackages'
 import { GenericErrorPage } from '../../../../Errors/GenericErrorPage'
-import { getLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
+import { getVisibleLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
 import { Program, Contract } from '../../../../../gen/gqlClient'
 import { usePreviousSubmission } from '../../../../../hooks/usePreviousSubmission'
 import { booleanAsYesNoUserValue } from '../../../../../components/Form/FieldYesNo/FieldYesNo'
@@ -24,6 +24,7 @@ export type SubmissionTypeSummarySectionV2Props = {
     subHeaderComponent?: React.ReactElement
     initiallySubmittedAt?: Date
     submissionName: string
+    isStateUser: boolean
 }
 
 export const SubmissionTypeSummarySectionV2 = ({
@@ -34,9 +35,10 @@ export const SubmissionTypeSummarySectionV2 = ({
     headerChildComponent,
     initiallySubmittedAt,
     submissionName,
+    isStateUser,
 }: SubmissionTypeSummarySectionV2Props): React.ReactElement => {
     const isPreviousSubmission = usePreviousSubmission()
-    const contractFormData = getLatestContractFormData(contract)
+    const contractFormData = getVisibleLatestContractFormData(contract, isStateUser)
     if (!contractFormData) return <GenericErrorPage />
 
     const programNames = statePrograms

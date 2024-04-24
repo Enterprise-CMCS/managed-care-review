@@ -34,6 +34,7 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
 import { RoutesRecord } from '../../../constants'
 import { useRouteParams } from '../../../hooks'
+import { getVisibleLatestContractFormData } from '../../../gqlHelpers/contractsAndRates'
 
 function UnlockModalButton({
     disabled,
@@ -86,6 +87,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                 contractID: id ?? 'unknown-contract',
             },
         },
+        fetchPolicy: 'network-only'
     })
     const contract = fetchContractData?.fetchContract.contract
     if (fetchContractLoading) {
@@ -115,11 +117,16 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
         }
     }
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const isStateUser = loggedInUser?.role === 'STATE_USER'
     const submissionStatus = contract.status
     const statePrograms = contract.state.programs
-    const contractFormData =
-        contract.draftRevision?.formData ||
-        contract.packageSubmissions[0].contractRevision.formData
+
+    const contractFormData = getVisibleLatestContractFormData(contract, isStateUser)
+    if (!contractFormData) {
+        console.error('no form data inside submission summary')
+        return <GenericErrorPage />
+    }
+
     const programIDs = contractFormData.programIDs
     const programs = statePrograms.filter((program) =>
         programIDs.includes(program.id)
@@ -253,6 +260,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                         }
                         statePrograms={statePrograms}
                         initiallySubmittedAt={contract.initiallySubmittedAt}
+                        isStateUser={isStateUser}
                     />
                 )}
 
