@@ -4,10 +4,11 @@ import { ReviewSubmitV2 } from './ReviewSubmitV2'
 import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
-    mockContractPackageUnlocked,
+    mockValidStateUser,
 } from '../../../../../testHelpers/apolloMocks'
 import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '../../../../../constants'
+import { mockContractPackageUnlocked } from '../../../../../testHelpers/apolloMocks/contractPackageDataMock'
 
 describe('ReviewSubmit', () => {
     it('renders without errors', async () => {
@@ -204,33 +205,17 @@ describe('ReviewSubmit', () => {
         )
 
         await waitFor(() => {
-            const contractDocRow = screen.getByRole('row', {
-                name: /contract document/,
-            })
-            expect(
-                within(contractDocRow).getByText('1/1/24')
-            ).toBeInTheDocument()
-            const contractSupporting1Row = screen.getByRole('row', {
-                name: /contractSupporting1/,
-            })
-            expect(
-                within(contractSupporting1Row).getByText('1/15/24')
-            ).toBeInTheDocument()
-            const rateDocRow = screen.getByRole('row', {
-                name: /rate certification/,
-            })
-            expect(within(rateDocRow).getByText('1/13/24')).toBeInTheDocument()
-            const rateSupporting1Row = screen.getByRole('row', {
-                name: /rateSupporting1/,
-            })
-            expect(
-                within(rateSupporting1Row).getByText('1/15/24')
-            ).toBeInTheDocument()
+            const rows = screen.getAllByRole('row')
+            expect(rows).toHaveLength(4)
+            expect(within(rows[0]).getByText('Date added')).toBeInTheDocument()
+            expect(within(rows[1]).getByText('2/2/23')).toBeInTheDocument()
+            expect(within(rows[2]).getByText('Date added')).toBeInTheDocument()
+            expect(within(rows[3]).getByText('3/2/23')).toBeInTheDocument()
         })
     })
 
     it('displays back, save as draft, and submit buttons', async () => {
-        renderWithProviders(
+        const { user } = renderWithProviders(
             <Routes>
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
@@ -265,6 +250,45 @@ describe('ReviewSubmit', () => {
 
         expect(screen.getByTestId('form-submit')).toBeDefined()
         expect(screen.getAllByText('Submit')).toHaveLength(2)
-        await screen.getAllByText('Submit')[0].click()
+        await user.click(screen.getAllByText('Submit')[0])
+    })
+
+    it('pulls the right version of UNLOCKED data for state users', async () => {
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmitV2 />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidStateUser(),
+                        }),
+                        fetchContractMockSuccess({
+                            contract: mockContractPackageUnlocked(),
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                },
+                featureFlags: {
+                    'link-rates': true,
+                },
+            }
+        )
+
+        const description = await screen.findByLabelText(
+            'Submission description'
+        )
+        expect(description).toHaveTextContent('An updated submission')
+        const ratingPeriod = await screen.findByLabelText(
+            'Rating period of original rate certification'
+        )
+        expect(ratingPeriod).toHaveTextContent('02/02/2020 to 02/02/2021')
     })
 })

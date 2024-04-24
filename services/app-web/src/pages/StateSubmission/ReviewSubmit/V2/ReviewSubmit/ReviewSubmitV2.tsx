@@ -15,7 +15,7 @@ import {
     STATE_SUBMISSION_FORM_ROUTES,
 } from '../../../../../constants'
 import { UnlockSubmitModalV2 } from '../../../../../components/Modal/V2/UnlockSubmitModalV2'
-import { getLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
+import { getVisibleLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
 import { useAuth } from '../../../../../contexts/AuthContext'
 import { RateDetailsSummarySectionV2 } from './RateDetailsSummarySectionV2'
 import { ContactsSummarySection } from './ContactsSummarySectionV2'
@@ -75,7 +75,8 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
         }
     }
 
-    const contractFormData = getLatestContractFormData(contract)
+    const isStateUser = loggedInUser?.role === 'STATE_USER'
+    const contractFormData = getVisibleLatestContractFormData(contract, isStateUser)
     if (!contractFormData) return <GenericErrorPage />
 
     const isContractActionAndRateCertification =
@@ -113,6 +114,7 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                     submissionName={submissionName}
                     editNavigateTo="../type"
                     statePrograms={statePrograms}
+                    isStateUser={isStateUser}
                 />
                 <ContractDetailsSummarySectionV2
                     contract={contract}

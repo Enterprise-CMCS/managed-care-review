@@ -25,7 +25,7 @@ describe('RateDetailsSummarySection', () => {
                 state: mockMNState(),
                 stateCode: 'MN',
                 stateNumber: 5,
-                parentContractID: 'fake-id',
+                parentContractID: 'test-abc-123',
                 revisions: [],
                 draftRevision: {
                     id: '1234',
@@ -74,7 +74,7 @@ describe('RateDetailsSummarySection', () => {
                 state: mockMNState(),
                 stateCode: 'MN',
                 stateNumber: 5,
-                parentContractID: 'fake-id',
+                parentContractID: 'test-abc-123',
                 revisions: [],
                 draftRevision: {
                     id: '1234',
