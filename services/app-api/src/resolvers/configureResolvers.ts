@@ -88,7 +88,8 @@ export function configureResolvers(
             unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
                 store,
                 emailer,
-                emailParameterStore
+                emailParameterStore,
+                launchDarkly
             ),
             updateContract: updateContract(store),
             updateDraftContractRates: updateDraftContractRates(store),

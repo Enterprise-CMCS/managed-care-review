@@ -134,7 +134,8 @@ type Store = {
     submitRate: (args: SubmitRateArgsType) => Promise<RateType | Error>
 
     unlockContract: (
-        args: UnlockContractArgsType
+        args: UnlockContractArgsType,
+        linkRatesFF?: boolean
     ) => Promise<ContractType | Error>
 
     unlockRate: (args: UnlockRateArgsType) => Promise<RateType | Error>
@@ -189,7 +190,8 @@ function NewPostgresStore(client: PrismaClient): Store {
             findAllRatesWithHistoryBySubmitInfo(client),
         submitContract: (args) => submitContract(client, args),
         submitRate: (args) => submitRate(client, args),
-        unlockContract: (args) => unlockContract(client, args),
+        unlockContract: (args, linkRatesFF) =>
+            unlockContract(client, args, linkRatesFF),
         unlockRate: (args) => unlockRate(client, args),
     }
 }

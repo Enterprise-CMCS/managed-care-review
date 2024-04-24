@@ -1,15 +1,26 @@
-import { Column, createColumnHelper, getCoreRowModel, getFacetedUniqueValues, getFilteredRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
-import { StateAnalystsConfiguration } from "../../../gen/gqlClient"
-import { useMemo, useRef } from "react"
-import { FilterSelect, FilterSelectedOptionsType } from "../../../components/FilterAccordion"
-import { DoubleColumnGrid } from "../../../components"
-import { formatEmails } from "./EmailSettingsTables"
-import { Table } from "@trussworks/react-uswds"
+import {
+    Column,
+    createColumnHelper,
+    getCoreRowModel,
+    getFacetedUniqueValues,
+    getFilteredRowModel,
+    getSortedRowModel,
+    useReactTable,
+} from '@tanstack/react-table'
+import { StateAnalystsConfiguration } from '../../../gen/gqlClient'
+import { useMemo, useRef } from 'react'
+import {
+    FilterSelect,
+    FilterSelectedOptionsType,
+} from '../../../components/FilterAccordion'
+import { DoubleColumnGrid } from '../../../components'
+import { formatEmails } from './EmailSettingsTables'
+import { Table } from '@trussworks/react-uswds'
 
 import styles from '../Settings.module.scss'
-import { pluralize } from "../../../common-code/formatters"
+import { pluralize } from '../../../common-code/formatters'
 
-const columnHelper = createColumnHelper< StateAnalystsConfiguration>()
+const columnHelper = createColumnHelper<StateAnalystsConfiguration>()
 
 const EmailAnalystsTable = ({
     analysts,
@@ -58,9 +69,9 @@ const EmailAnalystsTable = ({
         'emails'
     ) as Column<StateAnalystsConfiguration>
     const rowCount = `Displaying ${filteredRows.length} of ${analysts.length} ${pluralize(
-          'state',
-          analysts.length
-      )}`
+        'state',
+        filteredRows.length
+    )}`
     const updateFilters = (
         column: Column<StateAnalystsConfiguration>,
         selectedOptions: FilterSelectedOptionsType,
@@ -93,11 +104,7 @@ const EmailAnalystsTable = ({
                             label: state,
                         }))}
                     onChange={(selectedOptions) =>
-                        updateFilters(
-                            stateColumn,
-                            selectedOptions,
-                            'state'
-                        )
+                        updateFilters(stateColumn, selectedOptions, 'state')
                     }
                 />
                 <FilterSelect
@@ -112,17 +119,11 @@ const EmailAnalystsTable = ({
                             label: state,
                         }))}
                     onChange={(selectedOptions) =>
-                        updateFilters(
-                            emailsColumn,
-                            selectedOptions,
-                            'emails'
-                        )
+                        updateFilters(emailsColumn, selectedOptions, 'emails')
                     }
                 />
             </DoubleColumnGrid>
-            <div className={styles.filterCount}>
-                {rowCount}
-            </div>
+            <div className={styles.filterCount}>{rowCount}</div>
             <hr />
 
             <Table bordered>
@@ -135,19 +136,18 @@ const EmailAnalystsTable = ({
                 </thead>
                 <tbody>
                     {filteredRows.map((row) => {
-                            return (
-                                <tr key={row.id}>
-                                    <td>{row.getValue('stateCode')}</td>
-                                    <td>
-                                        {formatEmails(row.getValue('emails') || [])}
-                                    </td>
-
-                                </tr>
-                            )
-                        })}
+                        return (
+                            <tr key={row.id}>
+                                <td>{row.getValue('stateCode')}</td>
+                                <td>
+                                    {formatEmails(row.getValue('emails') || [])}
+                                </td>
+                            </tr>
+                        )
+                    })}
                 </tbody>
             </Table>
         </>
     )
 }
-export {EmailAnalystsTable}
+export { EmailAnalystsTable }

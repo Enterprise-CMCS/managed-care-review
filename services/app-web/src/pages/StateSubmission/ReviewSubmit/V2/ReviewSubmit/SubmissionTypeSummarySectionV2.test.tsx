@@ -22,6 +22,7 @@ describe('SubmissionTypeSummarySection', () => {
                 statePrograms={statePrograms}
                 editNavigateTo="submission-type"
                 submissionName="MN-PMAP-0001"
+                isStateUser={true}
             />
         )
 
@@ -48,6 +49,7 @@ describe('SubmissionTypeSummarySection', () => {
                 contract={stateSubmission}
                 statePrograms={statePrograms}
                 submissionName="MN-MSHO-0003"
+                isStateUser={true}
             />
         )
 
@@ -71,6 +73,7 @@ describe('SubmissionTypeSummarySection', () => {
                 statePrograms={statePrograms}
                 editNavigateTo="submission-type"
                 submissionName="MN-PMAP-0001"
+                isStateUser={true}
             />
         )
 
@@ -109,6 +112,7 @@ describe('SubmissionTypeSummarySection', () => {
                     statePrograms={statePrograms}
                     editNavigateTo="submission-type"
                     submissionName="MN-PMAP-0001"
+                    isStateUser={true}
                 />
             )
         }
@@ -137,6 +141,7 @@ describe('SubmissionTypeSummarySection', () => {
                     statePrograms={statePrograms}
                     editNavigateTo="submission-type"
                     submissionName="MN-PMAP-0001"
+                    isStateUser={true}
                 />
             )
         }
@@ -164,6 +169,7 @@ describe('SubmissionTypeSummarySection', () => {
                 statePrograms={statePrograms}
                 editNavigateTo="submission-type"
                 submissionName="MN-MSHO-0003"
+                isStateUser={true}
             />
         )
         expect(
@@ -187,6 +193,7 @@ describe('SubmissionTypeSummarySection', () => {
                 statePrograms={statePrograms}
                 editNavigateTo="submission-type"
                 submissionName="MN-PMAP-0001"
+                isStateUser={true}
             />
         )
         expect(
@@ -202,6 +209,7 @@ describe('SubmissionTypeSummarySection', () => {
                 editNavigateTo="submission-type"
                 headerChildComponent={<button>Test button</button>}
                 submissionName="MN-PMAP-0001"
+                isStateUser={true}
             />
         )
         expect(

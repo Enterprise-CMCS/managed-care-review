@@ -13,7 +13,8 @@ type UnlockRateArgsType = {
 async function unlockRateInDB(
     tx: PrismaTransactionType,
     rateID: string,
-    unlockInfoID: string
+    unlockInfoID: string,
+    linkRatesFF?: boolean
 ): Promise<string | Error> {
     // find the current rate revision in order to create a new unlocked revision
     const currentRev = await tx.rateRevisionTable.findFirst({
@@ -87,6 +88,8 @@ async function unlockRateInDB(
         )
     }
 
+    // old way to find connected contracts
+    //TODO: with linked rates on, find them via package submission
     const previouslySubmittedContractIDs = currentRev.contractRevisions.map(
         (c) => c.contractRevision.contractID
     )
@@ -177,24 +180,28 @@ async function unlockRateInDB(
         },
     })
 
-    // add DraftContract connections to the Rate
-    const lastSubmission = currentRev.relatedSubmissions[0]
-    const submissionConnections = lastSubmission.submissionPackages.filter(
-        (p) => p.rateRevisionID === currentRev.id
-    )
-    const newDraftConnections = []
-    for (const submissionConnection of submissionConnections) {
-        newDraftConnections.push({
-            contractID: submissionConnection.contractRevision.contractID,
-            rateID: currentRev.rateID,
-            ratePosition: submissionConnection.ratePosition,
+    // Unlock rate will only ever by run after the linked rates FF is enabled
+    // we only need to set draft rates explicitly in that case, when doing a rate
+    // unlock UNDER a contract unlock, the contract will set the draft rates correctly.
+    if (linkRatesFF) {
+        // add DraftContract connections to the Rate
+        const lastSubmission = currentRev.relatedSubmissions[0]
+        const submissionConnections = lastSubmission.submissionPackages.filter(
+            (p) => p.rateRevisionID === currentRev.id
+        )
+        const newDraftConnections = []
+        for (const submissionConnection of submissionConnections) {
+            newDraftConnections.push({
+                contractID: submissionConnection.contractRevision.contractID,
+                rateID: currentRev.rateID,
+                ratePosition: submissionConnection.ratePosition,
+            })
+        }
+        await tx.draftRateJoinTable.createMany({
+            data: newDraftConnections,
+            skipDuplicates: true,
         })
     }
-
-    await tx.draftRateJoinTable.createMany({
-        data: newDraftConnections,
-        skipDuplicates: true,
-    })
 
     return currentRev.id
 }
