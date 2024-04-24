@@ -5,7 +5,7 @@ describe('CMS user', () => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
     })
-    it('can unlock and resubmit', () => {
+    it('can unlock and resubmit child rates', () => {
         cy.logInAsStateUser()
 
         // fill out an entire submission
@@ -158,7 +158,8 @@ describe('CMS user', () => {
                     button.trigger('click')
                     button.siblings().hasClass('usa-accordion__content') /// make sure accordion is expanded
                 })
-                //Check for view previous submission link in the initial accordion item to exist
+
+                // Check for view previous submission link in the initial accordion item to exist
                 cy.findByTestId('revision-link-1').should('be.visible')
                 cy.clickSubmissionLink('revision-link-1')
                 //Making sure we are on SubmissionRevisionSummary page and contains version text
@@ -167,7 +168,8 @@ describe('CMS user', () => {
                     .contains(
                         /(0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET version/i
                     )
-                //Previous submission banner should exist and able to click link to go back to current submission
+
+                // Previous submission banner should exist and able to click link to go back to current submission
                 cy.findByTestId('previous-submission-banner').should('exist')
                 //Navigate back to current submission using link inside banner.
                 cy.clickSubmissionLink('currentSubmissionLink')
@@ -226,7 +228,7 @@ describe('CMS user', () => {
         })
     })
 
-    it.skip('can unlock and resubmit with linked rates', () => {
+    it('can unlock and resubmit child rates with linked rates flag', () => {
         cy.interceptFeatureFlags({"link-rates": true, '438-attestation': true})
         cy.logInAsStateUser()
 
@@ -389,24 +391,26 @@ describe('CMS user', () => {
                     button.trigger('click')
                     button.siblings().hasClass('usa-accordion__content') /// make sure accordion is expanded
                 })
-                //Check for view previous submission link in the initial accordion item to exist
-                cy.findByTestId('revision-link-1').should('be.visible')
-                cy.clickSubmissionLink('revision-link-1')
-                //Making sure we are on SubmissionRevisionSummary page and contains version text
-                cy.findByTestId('revision-version')
-                    .should('exist')
-                    .contains(
-                        /(0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET version/i
-                    )
-                //Previous submission banner should exist and able to click link to go back to current submission
-                cy.findByTestId('previous-submission-banner').should('exist')
-                //Navigate back to current submission using link inside banner.
-                cy.clickSubmissionLink('currentSubmissionLink')
-                //Make sure banner and revision version text are gone.
-                cy.findByTestId('previous-submission-banner').should(
-                    'not.exist'
-                )
-                cy.findByTestId('revision-version').should('not.exist')
+
+                // TURN THIS BACK ON WHEN PREVIOUS SUBMISSION FIXED
+                // //Check for view previous submission link in the initial accordion item to exist
+                // cy.findByTestId('revision-link-1').should('be.visible')
+                // cy.clickSubmissionLink('revision-link-1')
+                // //Making sure we are on SubmissionRevisionSummary page and contains version text
+                // cy.findByTestId('revision-version')
+                //     .should('exist')
+                //     .contains(
+                //         /(0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET version/i
+                //     )
+                // //Previous submission banner should exist and able to click link to go back to current submission
+                // cy.findByTestId('previous-submission-banner').should('exist')
+                // //Navigate back to current submission using link inside banner.
+                // cy.clickSubmissionLink('currentSubmissionLink')
+                // //Make sure banner and revision version text are gone.
+                // cy.findByTestId('previous-submission-banner').should(
+                //     'not.exist'
+                // )
+                // cy.findByTestId('revision-version').should('not.exist')
 
                 // Unlock again and resubmit to test change history
                 cy.unlockSubmission('Second Unlock')
@@ -457,4 +461,8 @@ describe('CMS user', () => {
             })
         })
     })
+
+    // TODO AFTER LINKED RATES AND LINKED RATES CHANGE HISTORY SHIPS
+    // it('can unlock and resubmit a linked rate and change history updates')
+    // it('can unlock and resubmit combination of linked and child rates as expected' )
 })
