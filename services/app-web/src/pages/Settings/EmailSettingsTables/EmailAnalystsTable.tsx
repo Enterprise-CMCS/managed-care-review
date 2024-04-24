@@ -58,7 +58,7 @@ const EmailAnalystsTable = ({
         'emails'
     ) as Column<StateAnalystsConfiguration>
     const rowCount = `Displaying ${filteredRows.length} of ${analysts.length} ${pluralize(
-          'analyst',
+          'state',
           analysts.length
       )}`
     const updateFilters = (
