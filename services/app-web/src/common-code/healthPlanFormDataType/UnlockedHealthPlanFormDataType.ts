@@ -81,6 +81,7 @@ type RateInfoType = {
     rateProgramIDs?: string[]
     rateCertificationName?: string
     actuaryContacts: ActuaryContact[]
+    addtlActuaryContacts?: ActuaryContact[]
     actuaryCommunicationPreference?: ActuaryCommunicationType
     packagesWithSharedRateCerts?: SharedRateCertDisplay[]
 }

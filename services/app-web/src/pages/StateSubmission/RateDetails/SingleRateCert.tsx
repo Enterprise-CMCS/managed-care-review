@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
     Button,
     DatePicker,
@@ -31,13 +31,20 @@ import {
 } from '../../../components/FileUpload'
 import { useS3 } from '../../../contexts/S3Context'
 
-import { FormikErrors, getIn, useFormikContext } from 'formik'
+import {
+    FieldArray,
+    FieldArrayRenderProps,
+    FormikErrors,
+    getIn,
+    useFormikContext,
+} from 'formik'
 import {
     ActuaryCommunicationType,
     SharedRateCertDisplay,
 } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { ActuaryContactFields } from '../Contacts'
 import { PackagesWithSharedRates } from './PackagesWithSharedRates'
+import { useFocus } from '../../../hooks'
 
 const isRateTypeEmpty = (values: RateCertFormType): boolean =>
     values.rateType === undefined
@@ -58,6 +65,7 @@ export type RateCertFormType = {
     rateDocuments: FileItemT[]
     supportingDocuments: FileItemT[]
     actuaryContacts: ActuaryContact[]
+    addtlActuaryContacts: ActuaryContact[]
     actuaryCommunicationPreference?: ActuaryCommunicationType
     packagesWithSharedRateCerts: SharedRateCertDisplay[]
     hasSharedRateCert?: 'YES' | 'NO'
@@ -82,6 +90,14 @@ type SingleRateCertProps = {
     previousDocuments: string[] // this only passed in to ensure S3 deleteFile doesn't remove valid files for previous revisions
     parentSubmissionID: string // this is only passed in for PackagesWithShared rates feature.
     multiRatesConfig?: MultiRatesConfig // this is only passed in to enable displaying this rate within the multi-rates UI
+}
+
+const emptyActuaryContact = {
+    name: '',
+    titleRole: '',
+    email: '',
+    actuarialFirm: undefined,
+    actuarialFirmOther: '',
 }
 
 const RateDatesErrorMessage = ({
@@ -125,6 +141,20 @@ export const SingleRateCert = ({
     const fieldNamePrefix = `rateInfos.${index}`
     const rateCertNumber = index + 1
     const { errors, setFieldValue } = useFormikContext<RateInfoArrayType>()
+    const [focusNewActuaryContact, setFocusNewActuaryContact] = useState(false)
+
+    const newActuaryContactNameRef = useRef<HTMLInputElement | null>(null)
+    const [newActuaryContactButtonRef, setNewActuaryContactButtonFocus] =
+        useFocus()
+
+    useEffect(() => {
+        if (focusNewActuaryContact) {
+            newActuaryContactNameRef.current &&
+                newActuaryContactNameRef.current.focus()
+            setFocusNewActuaryContact(false)
+            newActuaryContactNameRef.current = null
+        }
+    }, [focusNewActuaryContact])
 
     const showFieldErrors = (
         fieldName: keyof RateCertFormType
@@ -550,6 +580,66 @@ export const SingleRateCert = ({
                         fieldNamePrefix={`${fieldNamePrefix}.actuaryContacts.0`}
                         fieldSetLegend="Certifying Actuary"
                     />
+                    <FieldArray
+                        name={`${fieldNamePrefix}.addtlActuaryContacts`}
+                    >
+                        {({ remove, push }: FieldArrayRenderProps) => (
+                            <div
+                                style={{ marginTop: '40px' }}
+                                className={styles.actuaryContacts}
+                                data-testid="actuary-contacts"
+                            >
+                                {rateInfo.addtlActuaryContacts.length > 0 &&
+                                    rateInfo.addtlActuaryContacts.map(
+                                        (_actuaryContact, index) => (
+                                            <div
+                                                className={
+                                                    styles.actuaryContact
+                                                }
+                                                key={index}
+                                                data-testid="actuary-contact"
+                                            >
+                                                <ActuaryContactFields
+                                                    shouldValidate={
+                                                        shouldValidate
+                                                    }
+                                                    fieldNamePrefix={`${fieldNamePrefix}.addtlActuaryContacts.${index}`}
+                                                    fieldSetLegend="Certifying actuary"
+                                                    inputRef={
+                                                        newActuaryContactNameRef
+                                                    }
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    unstyled
+                                                    className={
+                                                        styles.removeContactBtn
+                                                    }
+                                                    onClick={() => {
+                                                        remove(index)
+                                                        setNewActuaryContactButtonFocus()
+                                                    }}
+                                                    data-testid="removeContactBtn"
+                                                >
+                                                    Remove
+                                                </Button>
+                                            </div>
+                                        )
+                                    )}
+                                <Button
+                                    type="button"
+                                    unstyled
+                                    onClick={() => {
+                                        push(emptyActuaryContact)
+                                        setFocusNewActuaryContact(true)
+                                    }}
+                                    ref={newActuaryContactButtonRef}
+                                >
+                                    Add a certifying actuary
+                                </Button>
+                            </div>
+                        )}
+                    </FieldArray>
                 </FormGroup>
                 {index >= 1 && multiRatesConfig && (
                     <Button

@@ -14,7 +14,6 @@ describe('CMS user can view submission', () => {
             level: 2,
             name: /Rate details/,
         }).should('exist')
-        cy.fillOutNewRateCertification()
         cy.fillOutAdditionalActuaryContact()
         cy.navigateFormByButtonClick('CONTINUE')
 

@@ -13,11 +13,7 @@ import { useNavigate } from 'react-router-dom'
 
 import styles from '../StateSubmissionForm.module.scss'
 
-import {
-    ActuaryCommunicationType,
-    ActuaryContact,
-    StateContact,
-} from '../../../common-code/healthPlanFormDataType'
+import { StateContact } from '../../../common-code/healthPlanFormDataType'
 
 import { ErrorSummary, FieldTextInput } from '../../../components/Form'
 
@@ -42,58 +38,6 @@ import { useErrorSummary } from '../../../hooks/useErrorSummary'
 
 export interface ContactsFormValues {
     stateContacts: StateContact[]
-    addtlActuaryContacts: ActuaryContact[]
-    actuaryCommunicationPreference: ActuaryCommunicationType | undefined
-}
-
-const yupValidation = (submissionType: string) => {
-    const contactShape = {
-        stateContacts: Yup.array().of(
-            Yup.object().shape({
-                name: Yup.string().required('You must provide a name'),
-                titleRole: Yup.string().required(
-                    'You must provide a title/role'
-                ),
-                email: Yup.string()
-                    .email('You must enter a valid email address')
-                    .trim()
-                    .required('You must provide an email address'),
-            })
-        ),
-        addtlActuaryContacts: Yup.array(),
-        actuaryCommunicationPreference: Yup.string().nullable(),
-    }
-
-    if (submissionType !== 'CONTRACT_ONLY') {
-        contactShape.addtlActuaryContacts = Yup.array().of(
-            Yup.object().shape({
-                name: Yup.string().required('You must provide a name'),
-                titleRole: Yup.string().required(
-                    'You must provide a title/role'
-                ),
-                email: Yup.string()
-                    .email('You must enter a valid email address')
-                    .trim()
-                    .required('You must provide an email address'),
-                actuarialFirm: Yup.string()
-                    .required('You must select an actuarial firm')
-                    .nullable(),
-                actuarialFirmOther: Yup.string()
-                    .when('actuarialFirm', {
-                        is: 'OTHER',
-                        then: Yup.string()
-                            .required('You must enter a description')
-                            .nullable(),
-                    })
-                    .nullable(),
-            })
-        )
-        contactShape.actuaryCommunicationPreference = Yup.string().required(
-            'You must select a communication preference'
-        )
-    }
-
-    return Yup.object().shape(contactShape)
 }
 
 type FormError =
@@ -114,25 +58,6 @@ const flattenErrors = (
                 flattened[errorKey] = value
             })
         })
-    }
-
-    if (
-        errors.addtlActuaryContacts &&
-        Array.isArray(errors.addtlActuaryContacts)
-    ) {
-        errors.addtlActuaryContacts.forEach((contact, index) => {
-            if (!contact) return
-
-            Object.entries(contact).forEach(([field, value]) => {
-                const errorKey = `addtlActuaryContacts.${index}.${field}`
-                flattened[errorKey] = value
-            })
-        })
-
-        if (errors.actuaryCommunicationPreference) {
-            flattened['actuaryCommunicationPreference'] =
-                errors.actuaryCommunicationPreference
-        }
     }
 
     return flattened
@@ -195,9 +120,6 @@ const Contacts = ({
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
 
     const stateContacts = draftSubmission.stateContacts
-    const addtlActuaryContacts = draftSubmission.addtlActuaryContacts
-    const includeActuaryContacts =
-        draftSubmission.submissionType !== 'CONTRACT_ONLY'
 
     const emptyStateContact = {
         name: '',
@@ -211,9 +133,6 @@ const Contacts = ({
 
     const contactsInitialValues: ContactsFormValues = {
         stateContacts: stateContacts,
-        addtlActuaryContacts: addtlActuaryContacts,
-        actuaryCommunicationPreference:
-            draftSubmission?.addtlActuaryCommunicationPreference ?? undefined,
     }
 
     // Handler for Contacts legends so that contacts show up as
@@ -237,11 +156,6 @@ const Contacts = ({
         formikHelpers: FormikHelpers<ContactsFormValues>
     ) => {
         draftSubmission.stateContacts = values.stateContacts
-        if (includeActuaryContacts) {
-            draftSubmission.addtlActuaryContacts = values.addtlActuaryContacts
-            draftSubmission.addtlActuaryCommunicationPreference =
-                values.actuaryCommunicationPreference
-        }
 
         try {
             const updatedSubmission = await updateDraft(draftSubmission)
@@ -265,7 +179,20 @@ const Contacts = ({
         }
     }
 
-    const contactSchema = yupValidation(draftSubmission.submissionType)
+    const contactSchema = Yup.object().shape({
+        stateContacts: Yup.array().of(
+            Yup.object().shape({
+                name: Yup.string().required('You must provide a name'),
+                titleRole: Yup.string().required(
+                    'You must provide a title/role'
+                ),
+                email: Yup.string()
+                    .email('You must enter a valid email address')
+                    .trim()
+                    .required('You must provide an email address'),
+            })
+        ),
+    })
 
     return (
         <>

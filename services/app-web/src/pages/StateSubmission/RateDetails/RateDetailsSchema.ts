@@ -138,7 +138,6 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
                         .nullable(),
                 })
             ),
-            //The following code explained: https://github.com/jquense/yup/issues/176
             addtlActuaryContacts: Yup.array().of(
                 Yup.object().shape({
                     name: Yup.string().required('You must provide a name'),
@@ -161,10 +160,8 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
                         .nullable(),
                 })
             ),
-            actuaryCommunicationPreference: Yup.string().optional(),
         })
     })
-
 const RateDetailsFormSchema = (activeFeatureFlags?: FeatureFlagSettings) => {
     return activeFeatureFlags?.['rate-edit-unlock'] ||  activeFeatureFlags?.['link-rates'] ?
     Yup.object().shape({
@@ -172,10 +169,13 @@ const RateDetailsFormSchema = (activeFeatureFlags?: FeatureFlagSettings) => {
             SingleRateCertSchema(activeFeatureFlags || {})
         ),
     }):
- Yup.object().shape({
+    Yup.object().shape({
         rateInfos: Yup.array().of(
             SingleRateCertSchema(activeFeatureFlags || {})
         ),
+        actuaryCommunicationPreference: Yup.string().required(
+            'You must select a communication preference'
+        )
     })
 }
 
