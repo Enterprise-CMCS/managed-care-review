@@ -147,9 +147,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
     if (submissionStatus === 'UNLOCKED' || submissionStatus === 'RESUBMITTED') {
         updateInfo =
             (submissionStatus === 'UNLOCKED'
-                ? contract.packageSubmissions[0].submittedRevisions.find(
-                      (rev) => rev.unlockInfo
-                  )?.unlockInfo
+                ? contract.draftRevision?.unlockInfo
                 : contract.packageSubmissions[0].contractRevision.submitInfo) ||
             undefined
     }
