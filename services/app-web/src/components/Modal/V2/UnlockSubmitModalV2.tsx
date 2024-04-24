@@ -190,10 +190,20 @@ export const UnlockSubmitModalV2 = ({
                 console.info('unlock rate not implemented yet')
                 break
 
-            case 'SUBMIT_RATE' || 'RESUBMIT_RATE':
-                console.info('submit/resubmit rate not implemented yet')
+            case 'SUBMIT_RATE' :
+                console.info('submit rate not implemented yet')
                 break
-            case 'SUBMIT_CONTRACT' || 'RESUBMIT_CONTRACT':
+            case 'RESUBMIT_RATE' :
+                    console.info('submit rate not implemented yet')
+                    break
+            case 'SUBMIT_CONTRACT':
+                result = await submitMutationWrapperV2(
+                    submitContract,
+                    submissionData.id,
+                    unlockSubmitModalInput
+                )
+                break;
+            case 'RESUBMIT_CONTRACT':
                 result = await submitMutationWrapperV2(
                     submitContract,
                     submissionData.id,
@@ -255,6 +265,16 @@ export const UnlockSubmitModalV2 = ({
                 navigate(
                     `/dashboard/submissions?justSubmitted=${submissionName}`
                 )
+            } else {
+                await client.refetchQueries({
+                    include: [FetchContractDocument],
+                })
+                // TODO: Remove HPP code fully from here, this is a hack to get through linked rates
+                // neded because sidebar UI that also displays questions that assumes latest data fetched on this page
+                // and we haven't had to migrate that yet to contract and ratesyet
+                await client.refetchQueries({
+                    include: [FetchHealthPlanPackageWithQuestionsDocument],
+                })
             }
         }
     }

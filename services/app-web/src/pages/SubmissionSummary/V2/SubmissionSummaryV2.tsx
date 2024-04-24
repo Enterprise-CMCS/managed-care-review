@@ -86,6 +86,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                 contractID: id ?? 'unknown-contract',
             },
         },
+        fetchPolicy: 'network-only'
     })
     const contract = fetchContractData?.fetchContract.contract
     if (fetchContractLoading) {
