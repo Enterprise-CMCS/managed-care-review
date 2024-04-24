@@ -433,10 +433,7 @@ describe('SingleRateSummarySection', () => {
                 name: 'Unlock rate',
             })
             await waitFor(() => {
-                const parentContractSubmissionID =
-                    rateData.revisions[0].contractRevisions[
-                        rateData.revisions[0].contractRevisions.length - 1
-                    ].contract.id
+                const parentContractSubmissionID = rateData.parentContractID
                 expect(testLocation.pathname).toBe(
                     `/submissions/${parentContractSubmissionID}`
                 )
