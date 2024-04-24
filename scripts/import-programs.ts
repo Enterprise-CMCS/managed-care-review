@@ -127,6 +127,11 @@ fs.createReadStream(file)
                 }
             }
 
+            if (!data.id) {
+                console.error('No ID set for program, make sure to set an ID in the spreadsheet', data)
+                process.exit(1)
+            }
+
             states[code]!.programs.push({
                 id: data.id,
                 fullName: data.Program,
