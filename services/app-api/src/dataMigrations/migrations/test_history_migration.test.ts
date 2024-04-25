@@ -42,63 +42,63 @@ function printThinContract(contract: ContractType) {
 }
 
 /* eslint-disable jest/no-disabled-tests, jest/expect-expect */
-describe('Migrating old submissions to new tables', () => {
-    it.skip('returns expected data', async () => {
+describe.skip('Migrating old submissions to new tables', () => {
+    it('returns expected data', async () => {
         const client = await sharedTestPrismaClient()
 
         await client.$transaction(
             async (tx) => {
-                const whatContractTho = await findContractWithHistory(
-                    client,
-                    '5954f04e-3c3a-4420-b784-ee90dfde7138'
-                )
-                if (whatContractTho instanceof Error) {
-                    throw whatContractTho
-                }
-                const revIDs = whatContractTho.revisions.map((r) => r.id)
-                const rateRevIDs = whatContractTho.revisions.flatMap((r) =>
-                    r.rateRevisions.map((rr) => rr.id)
-                )
+                // const whatContractTho = await findContractWithHistory(
+                //     client,
+                //     '5954f04e-3c3a-4420-b784-ee90dfde7138'
+                // )
+                // if (whatContractTho instanceof Error) {
+                //     throw whatContractTho
+                // }
+                // const revIDs = whatContractTho.revisions.map((r) => r.id)
+                // const rateRevIDs = whatContractTho.revisions.flatMap((r) =>
+                //     r.rateRevisions.map((rr) => rr.id)
+                // )
 
-                printThinContract(whatContractTho)
+                // printThinContract(whatContractTho)
 
-                const rateCreatedAt: { [id: string]: Date } = {}
-                for (const rrid of rateRevIDs) {
-                    const rrev = await tx.rateRevisionTable.findUnique({
-                        where: { id: rrid },
-                        include: {
-                            rate: true,
-                        },
-                    })
-                    if (rrev) {
-                        rateCreatedAt[rrev.rate.id] = rrev.rate.createdAt
-                    }
-                }
+                // const rateCreatedAt: { [id: string]: Date } = {}
+                // for (const rrid of rateRevIDs) {
+                //     const rrev = await tx.rateRevisionTable.findUnique({
+                //         where: { id: rrid },
+                //         include: {
+                //             rate: true,
+                //         },
+                //     })
+                //     if (rrev) {
+                //         rateCreatedAt[rrev.rate.id] = rrev.rate.createdAt
+                //     }
+                // }
 
-                const joinEntries =
-                    await client.rateRevisionsOnContractRevisionsTable.findMany(
-                        {
-                            where: {
-                                OR: [
-                                    {
-                                        contractRevisionID: {
-                                            in: revIDs,
-                                        },
-                                    },
-                                    {
-                                        rateRevisionID: {
-                                            in: rateRevIDs,
-                                        },
-                                    },
-                                ],
-                            },
-                            // include: {
-                            //     rateRevision: true
-                            // }
-                        }
-                    )
+                // const joinEntries =
+                //     await client.rateRevisionsOnContractRevisionsTable.findMany(
+                //         {
+                //             where: {
+                //                 OR: [
+                //                     {
+                //                         contractRevisionID: {
+                //                             in: revIDs,
+                //                         },
+                //                     },
+                //                     {
+                //                         rateRevisionID: {
+                //                             in: rateRevIDs,
+                //                         },
+                //                     },
+                //                 ],
+                //             },
+                //             // include: {
+                //             //     rateRevision: true
+                //             // }
+                //         }
+                //     )
 
-                console.info('PREJOINS', joinEntries)
+                // console.info('PREJOINS', joinEntries)
 
                 // VAL ids
                 // const testContractIDs = [
@@ -121,6 +121,7 @@ describe('Migrating old submissions to new tables', () => {
                 // ]
 
                 const contractsToIgnore = [
+                    // VAL
                     '5954f04e-3c3a-4420-b784-ee90dfde7138',
                     'f8919e8a-0259-48d4-a907-a378d526d401',
                     '4db9fe78-fd9e-40be-b5c2-d6b89c7d22be',
