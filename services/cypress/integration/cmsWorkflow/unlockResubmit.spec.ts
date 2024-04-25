@@ -222,7 +222,7 @@ describe('CMS user', () => {
                     expect(recordText[4]).to.contain('View past submission version')
                     expect(recordText[4]).to.not.contain('Changes made:')
                     expect(recordText[4]).to.not.contain('Reason for unlock:')
-                    console.log(recordText)
+
                 })
             })
         })
@@ -456,7 +456,7 @@ describe('CMS user', () => {
                     expect(recordText[4]).to.contain(/View past submission version/)
                     expect(recordText[4]).to.not.contain(/Changes made:/)
                     expect(recordText[4]).to.not.contain(/Reason for unlock:/)
-                    console.log(recordText)
+
                 })
             })
         })

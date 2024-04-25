@@ -25,7 +25,7 @@ export const ChangeHistoryV2 = ({
                 return submission.cause === 'CONTRACT_SUBMISSION'
             }
         )
-        console.log(contractSubmissions)
+
         //Reverse revisions to order from earliest to latest revision. This is to correctly set version for each
         // contract & recontract.
         const reversedRevisions = [...contractSubmissions].reverse()
