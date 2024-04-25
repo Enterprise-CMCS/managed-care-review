@@ -19,11 +19,13 @@ export const ChangeHistoryV2 = ({
 }: ChangeHistoryProps): React.ReactElement => {
     const flattenedRevisions = (): flatRevisions[] => {
         const result: flatRevisions[] = []
+
         const contractSubmissions = contract.packageSubmissions.filter(
             (submission) => {
                 return submission.cause === 'CONTRACT_SUBMISSION'
             }
         )
+        console.log(contractSubmissions)
         //Reverse revisions to order from earliest to latest revision. This is to correctly set version for each
         // contract & recontract.
         const reversedRevisions = [...contractSubmissions].reverse()
@@ -40,9 +42,8 @@ export const ChangeHistoryV2 = ({
             }
             if (r.submitInfo) {
                 const newSubmit: flatRevisions = {} as flatRevisions
-
                 const revisionVersion =
-                    index !== contract.packageSubmissions.length - 1
+                    index !== contract.packageSubmissions.length - 1 // if we aren't at the last item in list, assign a version
                         ? String(index + 1) //Offset version, we want to start at 1
                         : undefined
 

@@ -122,8 +122,8 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
     const statePrograms = contract.state.programs
 
     const contractFormData = getVisibleLatestContractFormData(contract, isStateUser)
-    if (!contractFormData) {
-        console.error('no form data inside submission summary')
+    if (!contractFormData || !contract || !statePrograms) {
+        console.error('missing fundamental contract data inside submission summary')
         return <GenericErrorPage />
     }
 
@@ -164,7 +164,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
 
     return (
         <div className={styles.background}>
-            <div style={{ textAlign: 'center' }}>
+           <div style={{ textAlign: 'center' }}>
                 This is the V2 page of the SubmissionSummary
             </div>
             <GridContainer
@@ -214,7 +214,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                     </Link>
                 )}
 
-                {contract && statePrograms && (
+                {
                     <SubmissionTypeSummarySectionV2
                         subHeaderComponent={
                             isCMSUser ? (
@@ -260,9 +260,9 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                         initiallySubmittedAt={contract.initiallySubmittedAt}
                         isStateUser={isStateUser}
                     />
-                )}
+                }
 
-                {contract && (
+                {(
                     <ContractDetailsSummarySectionV2
                         contract={contract}
                         isCMSUser={isCMSUser}
@@ -271,9 +271,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                     />
                 )}
 
-                {contract &&
-                    statePrograms &&
-                    isContractActionAndRateCertification && (
+                {isContractActionAndRateCertification && (
                         <RateDetailsSummarySectionV2
                             contract={contract}
                             submissionName={name}
@@ -283,16 +281,16 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                         />
                     )}
 
-                {contract && <ContactsSummarySection contract={contract} />}
+                {<ContactsSummarySection contract={contract} />}
 
-                {contract && <ChangeHistoryV2 contract={contract} />}
-                {contract && (
+                {<ChangeHistoryV2 contract={contract} />}
+                {
                     <UnlockSubmitModalV2
                         modalRef={modalRef}
                         modalType="UNLOCK_CONTRACT"
                         submissionData={contract}
                     />
-                )}
+                }
             </GridContainer>
         </div>
     )
