@@ -12,8 +12,8 @@ async function findAllContractsWithHistoryBySubmitInfo(
             where: {
                 revisions: {
                     some: {
-                        submitInfo: {
-                            isNot: null,
+                        submitInfoID: {
+                            not: null,
                         },
                     },
                 },

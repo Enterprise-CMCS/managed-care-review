@@ -179,8 +179,8 @@ const RateDetailsV2 = ({
     const [submitRate, { error: submitRateError }] = useSubmitRateMutation()
 
     // Set up data for form. Either based on contract API (for multi rate) or rates API (for edit and submit of standalone rate)
-    const ratesFromContract =
-        fetchContractData?.fetchContract.contract.draftRates
+    const contract = fetchContractData?.fetchContract.contract
+    const ratesFromContract = contract?.draftRates
     const initialRequestLoading = fetchContractLoading || fetchRateLoading
     const initialRequestError = fetchContractError || fetchRateError
     const submitRequestError = updateContractError || submitRateError
@@ -202,7 +202,9 @@ const RateDetailsV2 = ({
 
     const initialRateForm: FormikRateForm[] =
         initialRates.length > 0
-            ? initialRates.map((rate) => convertGQLRateToRateForm(getKey, rate))
+            ? initialRates.map((rate) =>
+                  convertGQLRateToRateForm(getKey, rate, contract?.id)
+              )
             : [convertGQLRateToRateForm(getKey)]
 
     const initialValues: RateDetailFormConfig = {

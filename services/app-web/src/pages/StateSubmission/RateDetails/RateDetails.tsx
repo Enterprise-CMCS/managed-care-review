@@ -337,7 +337,7 @@ export const RateDetails = ({
                     showPageErrorMessage={showPageErrorMessage ?? false}
                 />
             </div>
-            <FormContainer id="state-submission-form-page">
+            <FormContainer id="RateDetails">
                 <Formik
                     initialValues={rateInfosInitialValues}
                     onSubmit={(

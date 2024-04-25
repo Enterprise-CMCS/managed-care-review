@@ -19,9 +19,11 @@ query indexRates {
                 }
                 status
                 initiallySubmittedAt
+                parentContractID
 
                 draftRevision {
                     id
+                    rateID
                     createdAt
                     updatedAt
                     unlockInfo {
@@ -151,6 +153,7 @@ query indexRates {
 
                 revisions {
                     id
+                    rateID
                     createdAt
                     updatedAt
                     unlockInfo {

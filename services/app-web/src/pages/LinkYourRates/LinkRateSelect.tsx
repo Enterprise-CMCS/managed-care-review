@@ -113,7 +113,6 @@ export const LinkRateSelect = ({
     ) => {
         if (action === 'select-option') {
             const linkedRateID = newValue.value
-            // const linkedRateName = newValue.label
             const linkedRate = rates.find((rate) => rate.id === linkedRateID)
             const linkedRateForm: FormikRateForm = convertGQLRateToRateForm(
                 getKey,

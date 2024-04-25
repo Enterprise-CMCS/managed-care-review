@@ -49,6 +49,7 @@ const mockContractData = (
         mccrsID: null,
         stateCode: 'MN',
         stateNumber: 111,
+        draftRates: [],
         revisions: [],
         ...contract,
     }
@@ -84,6 +85,7 @@ const mockContractRevision = (
             ...defaultContractData(),
             ...contract,
         },
+        relatedSubmisions: [],
         createdAt: new Date(),
         updatedAt: new Date(),
         submitInfo: {

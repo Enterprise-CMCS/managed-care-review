@@ -33,7 +33,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
         featureFlags.LINK_RATES.defaultValue
     )
     return (
-        <div className={styles.formPage}>
+        <div
+            data-testid="state-submission-form-page"
+            className={styles.formPage}
+        >
             <Routes>
                 <Route
                     path={getRelativePathFromNestedRoute('SUBMISSIONS_TYPE')}

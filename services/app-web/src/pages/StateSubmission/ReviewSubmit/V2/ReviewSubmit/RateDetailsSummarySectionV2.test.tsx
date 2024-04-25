@@ -25,9 +25,11 @@ describe('RateDetailsSummarySection', () => {
                 state: mockMNState(),
                 stateCode: 'MN',
                 stateNumber: 5,
+                parentContractID: 'test-abc-123',
                 revisions: [],
                 draftRevision: {
                     id: '1234',
+                    rateID: '5678',
                     createdAt: new Date('01/01/2021'),
                     updatedAt: new Date('01/01/2021'),
                     contractRevisions: [],
@@ -72,9 +74,11 @@ describe('RateDetailsSummarySection', () => {
                 state: mockMNState(),
                 stateCode: 'MN',
                 stateNumber: 5,
+                parentContractID: 'test-abc-123',
                 revisions: [],
                 draftRevision: {
                     id: '1234',
+                    rateID: '5678',
                     createdAt: new Date('01/01/2021'),
                     updatedAt: new Date('01/01/2021'),
                     contractRevisions: [],

@@ -14,7 +14,8 @@ import {
     RoutesRecord,
     STATE_SUBMISSION_FORM_ROUTES,
 } from '../../../../../constants'
-import { getLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
+import { UnlockSubmitModalV2 } from '../../../../../components/Modal/V2/UnlockSubmitModalV2'
+import { getVisibleLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
 import { useAuth } from '../../../../../contexts/AuthContext'
 import { RateDetailsSummarySectionV2 } from './RateDetailsSummarySectionV2'
 import { ContactsSummarySection } from './ContactsSummarySectionV2'
@@ -32,11 +33,11 @@ import { usePage } from '../../../../../contexts/PageContext'
 export const ReviewSubmitV2 = (): React.ReactElement => {
     const navigate = useNavigate()
     const modalRef = useRef<ModalRef>(null)
-    const [isSubmitting] = useState<boolean>(false)
     const statePrograms = useStatePrograms()
     const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
     const { id } = useRouteParams()
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
     const { data, loading, error } = useFetchContractQuery({
         variables: {
@@ -74,7 +75,11 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
         }
     }
 
-    const contractFormData = getLatestContractFormData(contract)
+    const isStateUser = loggedInUser?.role === 'STATE_USER'
+    const contractFormData = getVisibleLatestContractFormData(
+        contract,
+        isStateUser
+    )
     if (!contractFormData) return <GenericErrorPage />
 
     const isContractActionAndRateCertification =
@@ -91,6 +96,7 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
             contractFormData.programIDs,
             programs
         ) || ''
+
     return (
         <>
             <div className={styles.stepIndicator}>
@@ -111,6 +117,7 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                     submissionName={submissionName}
                     editNavigateTo="../type"
                     statePrograms={statePrograms}
+                    isStateUser={isStateUser}
                 />
                 <ContractDetailsSummarySectionV2
                     contract={contract}
@@ -164,14 +171,18 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                     </ModalToggleButton>
                 </PageActionsContainer>
 
-                {/* // if the session is expiring, close this modal so the countdown modal can appear
-                <UnlockSubmitModal
-                    healthPlanPackage={draftSubmission}
+                {/* if the session is expiring, close this modal so the countdown modal can appear */}
+                <UnlockSubmitModalV2
+                    submissionData={contract}
                     submissionName={submissionName}
-                    modalType={unlocked ? 'RESUBMIT' : 'SUBMIT'}
+                    modalType={
+                        contract.status === 'UNLOCKED'
+                            ? 'RESUBMIT_CONTRACT'
+                            : 'SUBMIT_CONTRACT'
+                    }
                     modalRef={modalRef}
                     setIsSubmitting={setIsSubmitting}
-                /> */}
+                />
             </GridContainer>
         </>
     )

@@ -910,7 +910,7 @@ describe('updateDraftContractRates', () => {
         }
 
         expect(result.errors[0].message).toContain(
-            'Attempted to update a rate that is not a DRAFT'
+            'Attempted to update a rate that is not a child of this contract'
         )
         expect(result.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
         // TODO: This test must be updated to account for CHILDREN

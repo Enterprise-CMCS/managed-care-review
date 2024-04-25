@@ -238,7 +238,7 @@ function rateRevisionToDomainModel(
 
     return {
         id: revision.id,
-        rate: revision.rate,
+        rateID: revision.rateID,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
         unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
@@ -252,6 +252,10 @@ function ratesRevisionsToDomainModel(
 ): RateRevisionType[] | Error {
     const domainRevisions: RateRevisionType[] = []
 
+    rateRevisions.sort(
+        (a, b) => a.rate.createdAt.getTime() - b.rate.createdAt.getTime()
+    )
+
     for (const revision of rateRevisions) {
         const domainRevision = rateRevisionToDomainModel(revision)
 
@@ -262,9 +266,23 @@ function ratesRevisionsToDomainModel(
         domainRevisions.push(domainRevision)
     }
 
-    domainRevisions.sort(
-        (a, b) => a.rate.createdAt.getTime() - b.rate.createdAt.getTime()
-    )
+    return domainRevisions
+}
+
+function unsortedRatesRevisionsToDomainModel(
+    rateRevisions: RateRevisionTableWithFormData[]
+): RateRevisionType[] | Error {
+    const domainRevisions: RateRevisionType[] = []
+
+    for (const revision of rateRevisions) {
+        const domainRevision = rateRevisionToDomainModel(revision)
+
+        if (domainRevision instanceof Error) {
+            return domainRevision
+        }
+
+        domainRevisions.push(domainRevision)
+    }
 
     return domainRevisions
 }
@@ -396,4 +414,5 @@ export {
     rateFormDataToDomainModel,
     rateRevisionToDomainModel,
     ratesRevisionsToDomainModel,
+    unsortedRatesRevisionsToDomainModel,
 }

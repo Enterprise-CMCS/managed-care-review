@@ -36,7 +36,10 @@ import { unlockRate } from './rate/unlockRate'
 import { submitRate } from './rate/submitRate'
 import { updateDraftContractRates } from './contract/updateDraftContractRates'
 import { contractResolver } from './contract/contractResolver'
+import { contractRevisionResolver } from './contract/contractRevisionResolver'
 import { fetchContractResolver } from './contract/fetchContract'
+import { submitContract } from './contract/submitContract'
+import { rateRevisionResolver } from './rate/rateRevisionResolver'
 
 export function configureResolvers(
     store: Store,
@@ -76,10 +79,17 @@ export function configureResolvers(
                 emailParameterStore,
                 launchDarkly
             ),
+            submitContract: submitContract(
+                store,
+                emailer,
+                emailParameterStore,
+                launchDarkly
+            ),
             unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
                 store,
                 emailer,
-                emailParameterStore
+                emailParameterStore,
+                launchDarkly
             ),
             updateContract: updateContract(store),
             updateDraftContractRates: updateDraftContractRates(store),
@@ -116,11 +126,22 @@ export function configureResolvers(
                 }
             },
         },
+        SubmittableRevision: {
+            __resolveType(obj) {
+                if ('contract' in obj) {
+                    return 'ContractRevision'
+                } else {
+                    return 'RateRevision'
+                }
+            },
+        },
         StateUser: stateUserResolver,
         CMSUser: cmsUserResolver,
         HealthPlanPackage: healthPlanPackageResolver(store),
         Rate: rateResolver,
-        Contract: contractResolver(store),
+        RateRevision: rateRevisionResolver,
+        Contract: contractResolver(),
+        ContractRevision: contractRevisionResolver(store),
     }
 
     return resolvers

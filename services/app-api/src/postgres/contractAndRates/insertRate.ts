@@ -14,6 +14,7 @@ type InsertRateArgsType = RateFormEditableType & {
 // creates a new rate, with a new revision
 async function insertDraftRate(
     client: PrismaClient,
+    draftContractID: string,
     args: InsertRateArgsType
 ): Promise<RateType | Error> {
     const {
@@ -47,10 +48,29 @@ async function insertDraftRate(
                 },
             })
 
+            const contract = await tx.contractTable.findUnique({
+                where: { id: draftContractID },
+                include: {
+                    draftRates: true,
+                },
+            })
+
+            if (!contract) {
+                throw new Error('No Contract found for new Rate')
+            }
+
+            const nextRatePosition = contract?.draftRates.length + 1
+
             const rate = await tx.rateTable.create({
                 data: {
                     stateCode: stateCode,
                     stateNumber: latestStateRateCertNumber,
+                    draftContracts: {
+                        create: {
+                            contractID: draftContractID,
+                            ratePosition: nextRatePosition,
+                        },
+                    },
                     revisions: {
                         create: {
                             rateType,

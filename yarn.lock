@@ -8003,27 +8003,27 @@
   resolved "https://registry.yarnpkg.com/@kwsites/promise-deferred/-/promise-deferred-1.1.1.tgz#8ace5259254426ccef57f3175bc64ed7095ed919"
   integrity sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==
 
-"@launchdarkly/js-sdk-common@1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-1.0.2.tgz#8496cb007e88c7402a5d6aacf21dd75ac762de55"
-  integrity sha512-xNZqTHJ9rbmPPSabAwhizRQZU+JSFTAQvGKR0nam6qHeB3CG67n658EomItGycPmqwvv4BYML4wVXhVX3lt4Dg==
+"@launchdarkly/js-sdk-common@2.4.1":
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.4.1.tgz#6fb0fa1f906ffac5fb37b8a1da249b40df8a836d"
+  integrity sha512-bIEiP1+jVlPGwbVn8UYSVBMUDqGEnTevbg+fYD8bApbyFPY0v/vMvUDDhLxZGoj/EI76JfXrgT2/K70Xs1JJkA==
 
-"@launchdarkly/js-server-sdk-common@1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-1.0.7.tgz#404665b92a5208ce8e7d5de8556b0279c8ac6753"
-  integrity sha512-pEFp9ZiX+Bz74AAax+rljSRDFM8LH/f5eX1gWVdjCHEpCzYZKJGI0N/N+CDPKZna7t6jEo3qLQ7FpCaHT58fTA==
+"@launchdarkly/js-server-sdk-common@2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.4.0.tgz#e509fdf8e5c430720810bded6f4435b61f8f5b33"
+  integrity sha512-YNGbPaMdNgR6dcwRmPUzRWoNTCAXeA9/R6y7ZMFtM1GBTUuXiMfU33Q0ITRvHI3LLz9MDlQr15YivkyvoefePA==
   dependencies:
-    "@launchdarkly/js-sdk-common" "1.0.2"
+    "@launchdarkly/js-sdk-common" "2.4.1"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@8.1.1":
-  version "8.1.1"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-8.1.1.tgz#7847f994ffa8198319309713ea4934148e3cb339"
-  integrity sha512-Q7PRH779qa06eIPhtj6GHc4FDLLfxkJL7qQcqeNSIsxKldZJ0ZnrPcKUHTzrK8b1reXxqJYnr/glSe1dU4c5FQ==
+"@launchdarkly/node-server-sdk@9.4.0":
+  version "9.4.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.4.0.tgz#869a3098ceb8253eba87ef6ba0aaf7eba44eade2"
+  integrity sha512-SN3YcGpcEXB3XGi+k7r8X1NPIWnIlG0A/DGvV9zTdENcMAjR1Vq+r+1vLEOaPxVug3fBooAbd4Z3TLXA/N+kuA==
   dependencies:
-    "@launchdarkly/js-server-sdk-common" "1.0.7"
+    "@launchdarkly/js-server-sdk-common" "2.4.0"
     https-proxy-agent "^5.0.1"
-    launchdarkly-eventsource "2.0.0"
+    launchdarkly-eventsource "2.0.1"
 
 "@leichtgewicht/ip-codec@^2.0.1":
   version "2.0.4"
@@ -12316,9 +12316,9 @@
   integrity sha512-Abq9fBviLV93OiXMu+f6r0elxCzRwc0RC5f99cU892uBITL44pTvgvEqlRlPRi8EGcO1z7Cp8A4d0s/p3J/+Nw==
 
 "@types/node@^16.18.39":
-  version "16.18.95"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.95.tgz#f01ea9e77120c76345fe386ab4a234cc0c19e62d"
-  integrity sha512-z9w+CcR7ahc7UhsKe+PGB25nmPmCERQBAdLdFHhoZ6+FfgSr7gUvdQI0eLH2t7ue8u5wKsLdde6cHKPjhC8vGg==
+  version "16.18.96"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.96.tgz#eb0012d23ff53d14d64ec8a352bf89792de6aade"
+  integrity sha512-84iSqGXoO+Ha16j8pRZ/L90vDMKX04QTYMTfYeE1WrjWaZXuchBehGUZEpNgx7JnmlrIHdnABmpjrQjhCnNldQ==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
@@ -14234,11 +14234,11 @@ axios@0.26.0:
     follow-redirects "^1.14.8"
 
 axios@^1.0.0, axios@^1.1.3, axios@^1.6.2, axios@^1.6.7:
-  version "1.6.7"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.6.7.tgz#7b48c2e27c96f9c68a2f8f31e2ab19f59b06b0a7"
-  integrity sha512-/hDJGff6/c7u0hDkvkGxR/oy6CbCs8ziCsC7SqmhjfozqiJGc8Z11wrv9z9lYfY4K8l+H9TpjcMDX0xOZmx+RA==
+  version "1.6.8"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.6.8.tgz#66d294951f5d988a00e87a0ffb955316a619ea66"
+  integrity sha512-v/ZHtJDU39mDpyBoFVkETcd/uNdxrWRrg3bKpOKzXFA6Bvqopts6ALSMU3y6ijYxbw2B+wPrIv46egTzJXCLGQ==
   dependencies:
-    follow-redirects "^1.15.4"
+    follow-redirects "^1.15.6"
     form-data "^4.0.0"
     proxy-from-env "^1.1.0"
 
@@ -19441,7 +19441,7 @@ fn.name@1.x.x:
   resolved "https://registry.yarnpkg.com/fn.name/-/fn.name-1.1.0.tgz#26cad8017967aea8731bc42961d04a3d5988accc"
   integrity sha512-GRnmB5gPyJpAhTQdSZTSp9uaPSvl09KoYcMQtsB9rQoOmzs9dH6ffeccH+Z+cv6P68Hu5bC6JjRh4Ah/mHSNRw==
 
-follow-redirects@^1.0.0, follow-redirects@^1.14.8, follow-redirects@^1.15.4:
+follow-redirects@^1.0.0, follow-redirects@^1.14.8, follow-redirects@^1.15.6:
   version "1.15.6"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.6.tgz#7f815c0cda4249c74ff09e95ef97c23b5fd0399b"
   integrity sha512-wWN62YITEaOpSK584EZXJafH1AGpO8RVgElfkuXbTOrPX4fIfOyEpW/CsiNd8JdYrAoOvafRTOEnvsO++qCqFA==
@@ -20961,15 +20961,7 @@ https-proxy-agent@5, https-proxy-agent@^5.0.0, https-proxy-agent@^5.0.1:
     agent-base "6"
     debug "4"
 
-https-proxy-agent@^7.0.0:
-  version "7.0.2"
-  resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-7.0.2.tgz#e2645b846b90e96c6e6f347fb5b2e41f1590b09b"
-  integrity sha512-NmLNjm6ucYwtcUmL7JQC1ZQ57LmHP4lT15FQ8D61nak1rO6DH+fz5qNK2Ap5UN4ZapYICE3/0KodcLYSPsPbaA==
-  dependencies:
-    agent-base "^7.0.2"
-    debug "4"
-
-https-proxy-agent@^7.0.2, https-proxy-agent@^7.0.3:
+https-proxy-agent@^7.0.0, https-proxy-agent@^7.0.2, https-proxy-agent@^7.0.3:
   version "7.0.4"
   resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-7.0.4.tgz#8e97b841a029ad8ddc8731f26595bad868cb4168"
   integrity sha512-wlwpilI7YdjSkWaQ/7omYBMTliDcmCN8OLihO6I9B86g06lMyAoqgoDpV0XqoaPOKj+0DIdAvnsWfyAAhmimcg==
@@ -23628,10 +23620,10 @@ language-tags@=1.0.5:
   dependencies:
     language-subtag-registry "~0.3.2"
 
-launchdarkly-eventsource@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/launchdarkly-eventsource/-/launchdarkly-eventsource-2.0.0.tgz#2832e73fa8bc0c103a7f8c6dbc3b1b53d22f9acc"
-  integrity sha512-fxZ4IN46juAc3s8/geiutRPbI8cvUBz0Lcsayh3wfd97edYWLIsnaThw2esQ3zc6vgZ1v5IjTbdumNgoT3iRnw==
+launchdarkly-eventsource@2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/launchdarkly-eventsource/-/launchdarkly-eventsource-2.0.1.tgz#fadc950e19fae4114a9b8410c59de87f11a46b99"
+  integrity sha512-zyceGtRni8ct4es5hH8Q+2evvttItb5lOKMm8JtudZbfQFfVdH55NitgJQoGTRYkIvyMGjcaXnyt0FlzCTfspA==
 
 launchdarkly-js-client-sdk@^3.1.4:
   version "3.1.4"

@@ -36,7 +36,7 @@
         "@aws-sdk/client-ses": "^3.529.1",
         "@aws-sdk/client-ssm": "^3.529.1",
         "@aws-sdk/lib-storage": "^3.529.1",
-        "@launchdarkly/node-server-sdk": "8.1.1",
+        "@launchdarkly/node-server-sdk": "9.4.0",
         "@opentelemetry/exporter-trace-otlp-http": "^0.45.1",
         "apollo-server-core": "^3.11.1",
         "apollo-server-lambda": "^3.5.0",

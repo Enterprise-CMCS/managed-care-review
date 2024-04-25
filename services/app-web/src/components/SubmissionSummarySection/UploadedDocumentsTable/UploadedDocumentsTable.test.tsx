@@ -67,6 +67,7 @@ describe('UploadedDocumentsTable', () => {
 
         renderWithProviders(
             <UploadedDocumentsTable
+                previousSubmissionDate={null}
                 documents={testDocuments}
                 caption="Contract supporting"
                 documentCategory="Contract-supporting"
@@ -217,6 +218,7 @@ describe('UploadedDocumentsTable', () => {
         renderWithProviders(
             <UploadedDocumentsTable
                 documents={testDocuments}
+                previousSubmissionDate={null}
                 caption="Contract supporting"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments

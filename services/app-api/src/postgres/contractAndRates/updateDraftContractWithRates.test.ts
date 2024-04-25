@@ -17,6 +17,8 @@ import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
 import { v4 as uuidv4 } from 'uuid'
 import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
+import { submitContract } from './submitContract'
+import { unlockContract } from './unlockContract'
 
 describe('updateDraftContractWithRates postgres', () => {
     afterEach(() => {
@@ -758,6 +760,7 @@ describe('updateDraftContractWithRates postgres', () => {
         const draftRate = must(
             await insertDraftRate(
                 client,
+                draftContract.id,
                 mockInsertRateArgs({
                     rateType: 'NEW',
                     stateCode: 'MN',
@@ -861,19 +864,41 @@ describe('updateDraftContractWithRates postgres', () => {
         // expect 1 rate
         expect(newlyCreatedRates).toHaveLength(1)
 
-        // submit rate
-        const submittedExistingRate = must(
+        // submit contract
+        must(
+            await submitContract(client, {
+                contractID: draftContract.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'Contract submit',
+            })
+        )
+
+        must(
+            await unlockContract(client, {
+                contractID: draftContract.id,
+                unlockedByUserID: stateUser.id,
+                unlockReason: 'Contract unlock',
+            })
+        )
+
+        // resubmit this rate separate from the contract. Technically probably not allowed.
+        must(
             await submitRate(client, {
-                rateID: newlyCreatedRates[0].formData.rateID,
+                rateID: newlyCreatedRates[0].rateID,
                 submittedByUserID: stateUser.id,
                 submittedReason: 'Rate submit',
             })
         )
 
         // Create and submit a new rate that is type 'AMENDMENT'
+        const secondContract = must(
+            await insertDraftContract(client, draftContractFormData)
+        )
+
         const newDraftRate = must(
             await insertDraftRate(
                 client,
+                secondContract.id,
                 mockInsertRateArgs({
                     id: uuidv4(),
                     rateType: 'AMENDMENT',
@@ -881,61 +906,39 @@ describe('updateDraftContractWithRates postgres', () => {
             )
         )
 
-        const newSubmittedRate = must(
-            await submitRate(client, {
-                rateID: newDraftRate.id,
+        if (!newDraftRate.draftRevision) {
+            throw new Error('NO draft')
+        }
+
+        must(
+            await submitContract(client, {
+                contractID: secondContract.id,
                 submittedByUserID: stateUser.id,
-                submittedReason: 'Rate 2 submit',
+                submittedReason: 'Contract submit with amendment rate',
             })
         )
 
-        if (
-            !submittedExistingRate.revisions[0] ||
-            !newSubmittedRate.revisions[0]
-        ) {
-            throw new Error(
-                'Unexpected error. Submitted rates did not contain revisions'
-            )
-        }
-
         // Update contract with submitted rate and try to update the submitted rate revision
-        const attemptToUpdateSubmittedRate = must(
-            await updateDraftContractWithRates(client, {
+        const attemptToUpdateSubmittedRate = await updateDraftContractWithRates(
+            client,
+            {
                 contractID: updatedContractWithNewRates.id,
                 formData: {},
                 rateFormDatas: [
                     // attempt to update the revision data of a submitted rate 1.
                     {
-                        ...submittedExistingRate.revisions[0].formData,
+                        ...newlyCreatedRates[0].formData,
                         rateType: 'AMENDMENT',
                     },
                     // Connect submitted rate 2 and try to update the rate data
                     {
-                        ...newSubmittedRate.revisions[0].formData,
+                        ...newDraftRate.draftRevision.formData,
                         rateType: 'NEW',
                     },
                 ],
-            })
+            }
         )
 
-        if (!attemptToUpdateSubmittedRate.draftRevision) {
-            throw new Error(
-                'Unexpected error: draft rate is missing a draftRevision.'
-            )
-        }
-
-        // Expect 2 connected rates
-        expect(
-            attemptToUpdateSubmittedRate.draftRevision.rateRevisions
-        ).toHaveLength(2)
-
-        // Expect the first rates data not to have changed
-        expect(
-            attemptToUpdateSubmittedRate.draftRevision.rateRevisions[0].formData
-        ).toEqual(submittedExistingRate.revisions[0].formData)
-        // Expect the second rate to be connected and data not to be changed
-        expect(
-            attemptToUpdateSubmittedRate.draftRevision.rateRevisions[1].formData
-        ).toEqual(newSubmittedRate.revisions[0].formData)
+        expect(attemptToUpdateSubmittedRate).toBeInstanceOf(Error)
     })
 })

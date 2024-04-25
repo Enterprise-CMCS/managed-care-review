@@ -260,7 +260,7 @@ export const Documents = (): React.ReactElement => {
                     showPageErrorMessage={showPageErrorMessage ?? false}
                 />
             </div>
-            <FormContainer id="state-submission-form-page">
+            <FormContainer id="Documents">
                 <UswdsForm
                     className={classNames(
                         styles.tableContainer,

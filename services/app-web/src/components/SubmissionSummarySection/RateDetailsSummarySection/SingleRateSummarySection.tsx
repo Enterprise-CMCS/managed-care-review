@@ -99,7 +99,7 @@ export const SingleRateSummarySection = ({
     const navigate = useNavigate()
     const rateRevision = rate.revisions[0]
     const formData: RateFormData = rateRevision?.formData
-    const lastSubmittedDate = rate.revisions[0]?.submitInfo?.updatedAt
+    const lastSubmittedDate = rate.revisions[0]?.submitInfo?.updatedAt ?? null
     const isRateAmendment = formData.rateType === 'AMENDMENT'
     const isUnlocked = rate.status === 'UNLOCKED'
     const explainMissingData =
@@ -197,10 +197,7 @@ export const SingleRateSummarySection = ({
             )
         }
     }
-    const parentContractSubmissionID =
-        rate.revisions[0].contractRevisions[
-            rate.revisions[0].contractRevisions.length - 1
-        ].contract.id
+    const parentContractSubmissionID = rate.parentContractID
     return (
         <React.Fragment key={rate.id}>
             <SectionCard
@@ -327,8 +324,11 @@ export const SingleRateSummarySection = ({
                         />
                         <DataDetail
                             id="submittedWithContract"
-                            label="Submission this rate was submitted with"
-                            explainMissingData={explainMissingData}
+                            label={
+                                showLinkedRates
+                                    ? 'Contract actions'
+                                    : 'Submission this rate was submitted with'
+                            }
                             children={relatedSubmissions(
                                 rateRevision?.contractRevisions,
                                 statePrograms

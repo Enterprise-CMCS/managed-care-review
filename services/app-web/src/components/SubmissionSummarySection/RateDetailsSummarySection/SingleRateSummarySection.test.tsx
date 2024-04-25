@@ -34,7 +34,10 @@ describe('SingleRateSummarySection', () => {
                             }),
                         ],
                     },
-                    featureFlags: { 'rate-edit-unlock': true },
+                    featureFlags: {
+                        'rate-edit-unlock': true,
+                        'link-rates': false,
+                    },
                 }
             )
         })
@@ -96,7 +99,8 @@ describe('SingleRateSummarySection', () => {
             screen.getByRole('heading', { name: 'Rate documents' })
         ).toBeInTheDocument()
     })
-    it('renders documents with linked submissions correctly', async () => {
+    // can delete the next test when linked rates flag is permanently on
+    it('renders documents with linked submissions correctly (legacy feature)', async () => {
         const rateData = rateDataMock()
         const parentContractRev = rateData.revisions[0].contractRevisions[0]
         const rateDoc = rateData.revisions[0].formData.rateDocuments[0]
@@ -209,6 +213,65 @@ describe('SingleRateSummarySection', () => {
                 `${linkedSubmissionTwo.packageName}`
             )
         ).toBeInTheDocument()
+    })
+    it('renders rates linked to other contract actions correctly', async () => {
+        const rateData = rateDataMock()
+        const parentContractRev = rateData.revisions[0].contractRevisions[0]
+
+        const contractPackageName = packageName(
+            parentContractRev.contract.stateCode,
+            parentContractRev.contract.stateNumber,
+            parentContractRev.formData.programIDs,
+            rateData.state.programs
+        )
+
+        await waitFor(() => {
+            renderWithProviders(
+                <SingleRateSummarySection
+                    rate={rateData}
+                    isSubmitted={true}
+                    statePrograms={rateData.state.programs}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidCMSUser(),
+                            }),
+                        ],
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': true,
+                        'link-rates': true,
+                    },
+                }
+            )
+        })
+
+        expect(
+            screen.getByRole('heading', { name: 'Rate documents' })
+        ).toBeInTheDocument()
+
+        const relatedContractActions = screen.getByRole('definition', {
+            name: 'Contract actions',
+        })
+
+        // Expect submissions this rate was submitted with link to exists
+        expect(relatedContractActions).toBeInTheDocument()
+        expect(
+            within(relatedContractActions).getByRole('link', {
+                name: contractPackageName,
+            })
+        ).toBeInTheDocument()
+        expect(
+            within(relatedContractActions).getByRole('link', {
+                name: contractPackageName,
+            })
+        ).toHaveAttribute(
+            'href',
+            `/submissions/${parentContractRev.contract.id}`
+        )
     })
 
     it('should not display missing field text to CMS users', async () => {
@@ -370,10 +433,7 @@ describe('SingleRateSummarySection', () => {
                 name: 'Unlock rate',
             })
             await waitFor(() => {
-                const parentContractSubmissionID =
-                    rateData.revisions[0].contractRevisions[
-                        rateData.revisions[0].contractRevisions.length - 1
-                    ].contract.id
+                const parentContractSubmissionID = rateData.parentContractID
                 expect(testLocation.pathname).toBe(
                     `/submissions/${parentContractSubmissionID}`
                 )
@@ -448,7 +508,7 @@ describe('SingleRateSummarySection', () => {
 
             // no unlock rate button present
             expect(
-                await screen.queryByRole('button', {
+                screen.queryByRole('button', {
                     name: 'Unlock rate',
                 })
             ).toBeNull()

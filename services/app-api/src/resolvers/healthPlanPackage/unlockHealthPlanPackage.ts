@@ -19,18 +19,22 @@ import {
 } from '../attributeHelper'
 import type { EmailParameterStore } from '../../parameterStore'
 import { GraphQLError } from 'graphql'
+import type { LDService } from '../../launchDarkly/launchDarkly'
 
 // unlockHealthPlanPackageResolver is a state machine transition for HealthPlanPackage
 export function unlockHealthPlanPackageResolver(
     store: Store,
     emailer: Emailer,
-    emailParameterStore: EmailParameterStore
+    emailParameterStore: EmailParameterStore,
+    launchDarkly: LDService
 ): MutationResolvers['unlockHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
         const { unlockedReason, pkgID } = input
         setResolverDetailsOnActiveSpan('unlockHealthPlanPackage', user, span)
         span?.setAttribute('mcreview.package_id', pkgID)
+        const featureFlags = await launchDarkly.allFlags(context)
+        const linkRatesFF = featureFlags?.['link-rates'] === true
 
         // This resolver is only callable by CMS users
         if (!isCMSUser(user)) {
@@ -80,59 +84,15 @@ export function unlockHealthPlanPackageResolver(
             })
         }
 
-        // unlock all the revisions, then unlock the contract, in a transaction.
-        const currentRateRevIDs = contract.revisions[0].rateRevisions.map(
-            (rr) => rr.id
-        )
-        const unlockRatePromises = []
-        for (const rateRevisionID of currentRateRevIDs) {
-            const resPromise = store.unlockRate({
-                rateRevisionID,
+        // Now, unlock the contract!
+        const unlockContractResult = await store.unlockContract(
+            {
+                contractID: contract.id,
                 unlockReason: unlockedReason,
                 unlockedByUserID: user.id,
-            })
-
-            unlockRatePromises.push(resPromise)
-        }
-
-        const unlockRateResults = await Promise.all(unlockRatePromises)
-        // if any of the promises reject, which shouldn't happen b/c we don't throw...
-        if (unlockRateResults instanceof Error) {
-            const errMessage = `Failed to unlock contract rates with ID: ${contract.id}; ${unlockRateResults.message}`
-            logError('unlockHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
-
-        const unlockRateErrors: Error[] = unlockRateResults.filter(
-            (res) => res instanceof Error
-        ) as Error[]
-        if (unlockRateErrors.length > 0) {
-            console.error('Errors unlocking Rates: ', unlockRateErrors)
-            const errMessage = `Failed to submit contract revision's rates with ID: ${
-                contract.id
-            }; ${unlockRateErrors.map((err) => err.message)}`
-            logError('unlockHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
-
-        // Now, unlock the contract!
-        const unlockContractResult = await store.unlockContract({
-            contractID: contract.id,
-            unlockReason: unlockedReason,
-            unlockedByUserID: user.id,
-        })
+            },
+            linkRatesFF
+        )
         if (unlockContractResult instanceof Error) {
             const errMessage = `Failed to unlock contract revision with ID: ${contract.id}; ${unlockContractResult.message}`
             logError('unlockHealthPlanPackage', errMessage)

@@ -1,15 +1,14 @@
-import { screen, waitFor } from '@testing-library/react'
-import {
-    renderWithProviders,
-    userClickByRole,
-} from '../../../../../testHelpers/jestHelpers'
+import { screen, waitFor, within } from '@testing-library/react'
+import { renderWithProviders } from '../../../../../testHelpers/jestHelpers'
 import { ReviewSubmitV2 } from './ReviewSubmitV2'
 import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
+    mockValidStateUser,
 } from '../../../../../testHelpers/apolloMocks'
 import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '../../../../../constants'
+import { mockContractPackageUnlocked } from '../../../../../testHelpers/apolloMocks/contractPackageDataMock'
 
 describe('ReviewSubmit', () => {
     it('renders without errors', async () => {
@@ -177,8 +176,46 @@ describe('ReviewSubmit', () => {
         })
     })
 
-    it('displays back, save as draft, and submit buttons', async () => {
+    it('extracts the correct dates from unlocked submission and displays them in tables', async () => {
+        const contractMock = fetchContractMockSuccess({
+            contract: mockContractPackageUnlocked(),
+        })
+
         renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmitV2 />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        contractMock,
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                },
+                featureFlags: {
+                    'link-rates': true,
+                },
+            }
+        )
+
+        await waitFor(() => {
+            const rows = screen.getAllByRole('row')
+            expect(rows).toHaveLength(4)
+            expect(within(rows[0]).getByText('Date added')).toBeInTheDocument()
+            expect(within(rows[1]).getByText('2/2/23')).toBeInTheDocument()
+            expect(within(rows[2]).getByText('Date added')).toBeInTheDocument()
+            expect(within(rows[3]).getByText('3/2/23')).toBeInTheDocument()
+        })
+    })
+
+    it('displays back, save as draft, and submit buttons', async () => {
+        const { user } = renderWithProviders(
             <Routes>
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
@@ -212,7 +249,46 @@ describe('ReviewSubmit', () => {
         })
 
         expect(screen.getByTestId('form-submit')).toBeDefined()
-        expect(screen.getByText('Submit')).toBeInTheDocument()
-        await userClickByRole(screen, 'button', { name: 'Submit' })
+        expect(screen.getAllByText('Submit')).toHaveLength(2)
+        await user.click(screen.getAllByText('Submit')[0])
+    })
+
+    it('pulls the right version of UNLOCKED data for state users', async () => {
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmitV2 />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidStateUser(),
+                        }),
+                        fetchContractMockSuccess({
+                            contract: mockContractPackageUnlocked(),
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                },
+                featureFlags: {
+                    'link-rates': true,
+                },
+            }
+        )
+
+        const description = await screen.findByLabelText(
+            'Submission description'
+        )
+        expect(description).toHaveTextContent('An updated submission')
+        const ratingPeriod = await screen.findByLabelText(
+            'Rating period of original rate certification'
+        )
+        expect(ratingPeriod).toHaveTextContent('02/02/2020 to 02/02/2021')
     })
 })

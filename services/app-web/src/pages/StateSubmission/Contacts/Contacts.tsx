@@ -207,7 +207,7 @@ const Contacts = ({
                     showPageErrorMessage={showPageErrorMessage ?? false}
                 />
             </div>
-            <FormContainer id="state-submission-form-page">
+            <FormContainer id="Contacts">
                 <Formik
                     initialValues={contactsInitialValues}
                     onSubmit={handleFormSubmit}
