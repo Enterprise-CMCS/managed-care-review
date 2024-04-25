@@ -67,7 +67,7 @@ const relatedSubmissions = (
     statePrograms: Program[]
 ): React.ReactElement => {
     return (
-        <ul>
+        <ul className={styles.commaList}>
             {contractRevisions.map((contractRev) => (
                 <li key={contractRev.contract.id}>
                     <Link
