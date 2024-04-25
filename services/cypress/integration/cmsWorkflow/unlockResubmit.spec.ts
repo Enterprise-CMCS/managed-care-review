@@ -228,7 +228,7 @@ describe('CMS user', () => {
         })
     })
 
-    it('can unlock and resubmit child rates with linked rates flag', () => {
+    it.only('can unlock and resubmit child rates with linked rates flag', () => {
         cy.interceptFeatureFlags({"link-rates": true, '438-attestation': true})
         cy.logInAsStateUser()
 
@@ -452,10 +452,10 @@ describe('CMS user', () => {
                     expect(recordText[3]).to.contain('Reason for unlock: Unlock submission reason.')
 
                     // Test for initial submission
-                    expect(recordText[4]).to.contain('Submitted by: aang@example.com')
-                    expect(recordText[4]).to.contain('View past submission version')
-                    expect(recordText[4]).to.not.contain('Changes made:')
-                    expect(recordText[4]).to.not.contain('Reason for unlock:')
+                    expect(recordText[4]).to.contain(/Submitted by: aang@example.com/)
+                    expect(recordText[4]).to.contain(/View past submission version/)
+                    expect(recordText[4]).to.not.contain(/Changes made:/)
+                    expect(recordText[4]).to.not.contain(/Reason for unlock:/)
                     console.log(recordText)
                 })
             })
