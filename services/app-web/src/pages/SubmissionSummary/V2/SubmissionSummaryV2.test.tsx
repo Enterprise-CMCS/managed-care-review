@@ -153,7 +153,7 @@ describe('SubmissionSummary', () => {
                 /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
             )
             expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
-                'by: example@state.com'
+                'by: cms@example.com'
             )
             expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
                 'Reason for unlock: unlocked for a test'
@@ -377,7 +377,7 @@ describe('SubmissionSummary', () => {
                 /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
             )
             expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
-                'by: example@state.com'
+                'by: cms@example.com'
             )
             expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
                 'Reason for unlock: unlocked for a test'
