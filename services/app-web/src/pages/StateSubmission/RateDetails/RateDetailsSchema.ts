@@ -168,6 +168,9 @@ const RateDetailsFormSchema = (activeFeatureFlags?: FeatureFlagSettings) => {
         rateForms: Yup.array().of(
             SingleRateCertSchema(activeFeatureFlags || {})
         ),
+        actuaryCommunicationPreference: Yup.string().required(
+            'You must select a communication preference'
+        )
     }):
     Yup.object().shape({
         rateInfos: Yup.array().of(
