@@ -30,6 +30,7 @@ export async function migrate(
                                         submitInfo: true,
                                         unlockInfo: true,
                                         rateDocuments: true,
+                                        rate: true,
                                     },
                                 },
                             },
@@ -64,21 +65,7 @@ export async function migrate(
 
             if (contractSubmissionTime) {
                 // we're in a submitted contract rev
-
                 console.log('rateLinkTimes', contractRev.rateRevisions.map(rr => rr.validAfter))
-                // console.log('rateLinkids', contractRev.rateRevisions.map(rr => rr.rateRevision))
-                // let firstLinkTime: Date | undefined = undefined
-                // const concurrentlySubmittedRateLinks = contractRev.rateRevisions.filter(rr => {
-                //     if (!firstLinkTime) {
-                //         firstLinkTime = rr.validAfter
-                //         return true
-                //     }
-                //     if (rr.validAfter === firstLinkTime) {
-                //         return true
-                //     } else {
-                //         return false
-                //     }
-                // }).map(rr => rr.rateRevision)
 
                 let firstRateLinkTime: Date | undefined = undefined
                 const concurrentlySubmittedRateLinks = allLinkedRates.filter((linkedRate) => {
@@ -102,6 +89,9 @@ export async function migrate(
                         return false
                     }
                 }).map(rr => rr.rateRevision)
+
+                // we need to sort by rate created at to make this right, something was wrong with the hack, shocker
+                concurrentlySubmittedRateLinks.sort((a, b) => a.rate.createdAt.getTime() - b.rate.createdAt.getTime())
 
                 console.log('filtered out related rates', contractRev.contractID, concurrentlySubmittedRateLinks.length,  allLinkedRates.length - concurrentlySubmittedRateLinks.length)
 
