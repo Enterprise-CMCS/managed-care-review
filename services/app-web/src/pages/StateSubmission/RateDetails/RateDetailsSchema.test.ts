@@ -13,7 +13,8 @@ describe('RateDetailsSchema', () => {
                     supportingDocuments: [],
                     ratePreviouslySubmitted: 'YES',
                 }
-            ]
+            ],
+            actuaryCommunicationPreference: 'OACT_TO_ACTUARY'
         }
 
         const res = await RateDetailsFormSchema({'link-rates': true}).validate(badRateRev, {abortEarly: false})
