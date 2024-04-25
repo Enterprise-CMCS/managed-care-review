@@ -34,9 +34,7 @@ describe('SubmissionSummary', () => {
                             statusCode: 200,
                         }),
                         fetchContractMockSuccess({
-                            contract: {
-                                id: 'test-abc-123',
-                            },
+                            contract: mockContractPackageSubmitted(),
                         }),
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
                             id: 'test-abc-123',
@@ -51,7 +49,6 @@ describe('SubmissionSummary', () => {
                 },
             }
         )
-        screen.debug()
         expect(
             await screen.findByRole('heading', { name: 'Contract details' })
         ).toBeInTheDocument()
@@ -461,9 +458,7 @@ describe('SubmissionSummary', () => {
                             id: 'test-abc-123',
                         }),
                         fetchContractMockSuccess({
-                            contract: {
-                                id: 'test-abc-123',
-                            },
+                            contract: mockContractPackageSubmitted(),
                         }),
                     ],
                 },
@@ -475,6 +470,7 @@ describe('SubmissionSummary', () => {
                 },
             }
         )
+        screen.debug()
         expect(
             await screen.findByRole('heading', {
                 name: 'Contract details',

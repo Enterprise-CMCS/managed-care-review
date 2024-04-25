@@ -8,7 +8,6 @@ import {
 import React, { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
-import { packageName } from '../../../common-code/healthPlanFormDataType'
 import { ContractDetailsSummarySectionV2 } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/ContractDetailsSummarySectionV2'
 import { ContactsSummarySection } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/ContactsSummarySectionV2'
 import { RateDetailsSummarySectionV2 } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/RateDetailsSummarySectionV2'
@@ -61,13 +60,9 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
     // Page level state
     const { updateHeading } = usePage()
     const modalRef = useRef<ModalRef>(null)
-    const [pkgName, setPkgName] = useState<string | undefined>(undefined)
     const [documentError, setDocumentError] = useState(false)
     const { loggedInUser } = useAuth()
 
-    useEffect(() => {
-        updateHeading({ customHeading: pkgName })
-    }, [pkgName, updateHeading])
     const { id } = useRouteParams()
 
     const ldClient = useLDClient()
@@ -87,16 +82,29 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                 contractID: id ?? 'unknown-contract',
             },
         },
-        fetchPolicy: 'network-only'
+        fetchPolicy: 'network-only',
     })
     const contract = fetchContractData?.fetchContract.contract
+    const name =
+        contract && contract?.packageSubmissions.length > 0
+            ? contract.packageSubmissions[0].contractRevision.contractName
+            : ''
+    useEffect(() => {
+        updateHeading({
+            customHeading: name,
+        })
+    }, [name, updateHeading])
     if (fetchContractLoading) {
         return (
             <GridContainer>
                 <Loading />
             </GridContainer>
         )
-    } else if (fetchContractError || !contract) {
+    } else if (
+        fetchContractError ||
+        !contract ||
+        contract.packageSubmissions.length === 0
+    ) {
         //error handling for a state user that tries to access rates for a different state
         if (
             fetchContractError?.graphQLErrors[0]?.extensions?.code ===
@@ -125,21 +133,6 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
     if (!contractFormData || !contract || !statePrograms) {
         console.error('missing fundamental contract data inside submission summary')
         return <GenericErrorPage />
-    }
-
-    const programIDs = contractFormData.programIDs
-    const programs = statePrograms.filter((program) =>
-        programIDs.includes(program.id)
-    )
-    // set the page heading
-    const name = packageName(
-        contract.stateCode,
-        contract.stateNumber,
-        contractFormData.programIDs,
-        programs
-    )
-    if (pkgName !== name) {
-        setPkgName(name)
     }
 
     // Get the correct update info depending on the submission status
