@@ -3,6 +3,7 @@ import type {
     ContractRevisionWithRatesType,
     ContractRevisionType,
     RateType,
+    RateRevisionType,
 } from '../../domain-models/contractAndRates'
 import { contractSchema } from '../../domain-models/contractAndRates'
 import type { ContractPackageSubmissionType } from '../../domain-models/contractAndRates/packageSubmissions'
@@ -12,6 +13,10 @@ import type {
     RateRevisionTableWithFormData,
     ContractRevisionTableWithFormData,
     UpdateInfoTableWithUpdater,
+} from './prismaSharedContractRateHelpers'
+import {
+    setDateAddedForContractRevisions,
+    setDateAddedForRateRevisions,
 } from './prismaSharedContractRateHelpers'
 import {
     rateRevisionToDomainModel,
@@ -369,6 +374,25 @@ function contractWithHistoryToDomainModel(
                 rateRevisions: rateRevisions,
             })
         }
+    }
+
+    // get references to every contract and rate revision in submission order and
+    // set the document dateAdded dates accordingly.
+    const packageContractRevisions: ContractRevisionType[] = []
+    const packageRateRevisions: { [id: string]: RateRevisionType[] } = {}
+    for (const pkg of packageSubmissions) {
+        packageContractRevisions.push(pkg.contractRevision)
+        for (const rrev of pkg.rateRevisions) {
+            if (!(rrev.rateID in packageRateRevisions)) {
+                packageRateRevisions[rrev.rateID] = []
+            }
+            packageRateRevisions[rrev.rateID].push(rrev)
+        }
+    }
+    setDateAddedForContractRevisions(packageContractRevisions)
+
+    for (const rrevs of Object.values(packageRateRevisions)) {
+        setDateAddedForRateRevisions(rrevs)
     }
 
     return {
