@@ -356,7 +356,7 @@ describe('RateDetailsv2', () => {
                 ).toBeInTheDocument()
                 expect(submitButton).toHaveAttribute('aria-disabled', 'true')
                 expect(
-                    screen.getByText('There are 8 errors on this page')
+                    screen.getByText('There are 9 errors on this page')
                 ).toBeInTheDocument()
             })
         })
@@ -510,11 +510,16 @@ describe('RateDetailsv2', () => {
                 ).toBeInTheDocument()
                 expect(submitButton).toHaveAttribute('aria-disabled', 'true')
                 expect(
-                    screen.getByText('There is 1 error on this page')
+                    screen.getByText('There are 2 errors on this page')
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText('You must select yes or no')
                 ).toBeInTheDocument()
+                expect(
+                    screen.getAllByText(
+                        'You must select a communication preference'
+                    )
+                ).toHaveLength(2)
             })
         })
     })
