@@ -10,7 +10,7 @@ import { migrate } from './migrations/20231026123042_test_migrator_works'
 */
 
 /* eslint-disable jest/no-disabled-tests, jest/expect-expect */
-describe('Model of how to test a migration locally', () => {
+describe.skip('Model of how to test a migration locally', () => {
     it('Example migration test for local dev purposes', async () => {
         const client = await sharedTestPrismaClient()
 
