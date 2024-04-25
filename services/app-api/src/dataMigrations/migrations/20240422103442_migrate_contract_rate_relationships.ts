@@ -1,15 +1,13 @@
-import type { PrismaTransactionType } from "../../postgres/prismaTypes"
+import type { PrismaTransactionType } from '../../postgres/prismaTypes'
 
 export async function migrate(
     client: PrismaTransactionType,
     contractIDs?: string[]
 ): Promise<Error | undefined> {
-
     // get all the old contract x rate relationships and splat them into the new tables
     try {
         const contracts = await client.contractTable.findMany({
-            where:
-                contractIDs
+            where: contractIDs
                 ? {
                       id: { in: contractIDs },
                   }
@@ -43,20 +41,15 @@ export async function migrate(
             },
         })
 
-
         const unmigrateRevisions = []
         for (const contract of contracts) {
             for (const contractRev of contract.revisions) {
-
                 if (contractRev.relatedSubmisions.length > 0) {
                     continue
                 }
                 unmigrateRevisions.push(contractRev)
             }
         }
-
-        console.log('found Unmigrated Revs: ', unmigrateRevisions.length)
-
 
         for (const contractRev of unmigrateRevisions) {
             const allLinkedRates = contractRev.rateRevisions
@@ -65,43 +58,52 @@ export async function migrate(
 
             if (contractSubmissionTime) {
                 // we're in a submitted contract rev
-                console.log('rateLinkTimes', contractRev.rateRevisions.map(rr => rr.validAfter))
-
                 let firstRateLinkTime: Date | undefined = undefined
-                const concurrentlySubmittedRateLinks = allLinkedRates.filter((linkedRate) => {
-                    if (linkedRate.isRemoval) {
-                        return false
-                    }
+                const concurrentlySubmittedRateLinks = allLinkedRates
+                    .filter((linkedRate) => {
+                        if (linkedRate.isRemoval) {
+                            return false
+                        }
 
-                    const rateSubmissionTime = linkedRate.validAfter
+                        const rateSubmissionTime = linkedRate.validAfter
 
-                    if (!firstRateLinkTime) {
-                        firstRateLinkTime = rateSubmissionTime
-                        return true
-                    }
+                        if (!firstRateLinkTime) {
+                            firstRateLinkTime = rateSubmissionTime
+                            return true
+                        }
 
-                    console.log('diff', Math.abs(rateSubmissionTime.getTime() - firstRateLinkTime.getTime()))
-
-
-                    if (Math.abs(rateSubmissionTime.getTime() - firstRateLinkTime.getTime()) < 1000) {
-                        return true
-                    } else {
-                        return false
-                    }
-                }).map(rr => rr.rateRevision)
+                        if (
+                            Math.abs(
+                                rateSubmissionTime.getTime() -
+                                    firstRateLinkTime.getTime()
+                            ) < 1000
+                        ) {
+                            return true
+                        } else {
+                            return false
+                        }
+                    })
+                    .map((rr) => rr.rateRevision)
 
                 // we need to sort by rate created at to make this right, something was wrong with the hack, shocker
-                concurrentlySubmittedRateLinks.sort((a, b) => a.rate.createdAt.getTime() - b.rate.createdAt.getTime())
+                concurrentlySubmittedRateLinks.sort(
+                    (a, b) =>
+                        a.rate.createdAt.getTime() - b.rate.createdAt.getTime()
+                )
 
-                console.log('filtered out related rates', contractRev.contractID, concurrentlySubmittedRateLinks.length,  allLinkedRates.length - concurrentlySubmittedRateLinks.length)
-
-                const concurrentRateIDs = concurrentlySubmittedRateLinks.map((r)=> r.rateID)
-                const rateIDSet: {[id: string]: boolean} = {}
+                const concurrentRateIDs = concurrentlySubmittedRateLinks.map(
+                    (r) => r.rateID
+                )
+                const rateIDSet: { [id: string]: boolean } = {}
                 for (const rID of concurrentRateIDs) {
                     rateIDSet[rID] = true
                 }
                 if (concurrentRateIDs.length != Object.keys(rateIDSet).length) {
-                    console.error('found a collision!', contractRev.id, concurrentRateIDs)
+                    console.error(
+                        'found a collision!',
+                        contractRev.id,
+                        concurrentRateIDs
+                    )
                     throw new Error('found a collision')
                 }
 
@@ -111,30 +113,26 @@ export async function migrate(
                 }
 
                 // add contract+submitinfo to related contract submissions
-                const submittedRev = await client.contractRevisionTable.update({
+                await client.contractRevisionTable.update({
                     where: {
-                        id: contractRev.id
-                    }, 
+                        id: contractRev.id,
+                    },
                     data: {
                         relatedSubmisions: {
                             connect: {
-                                id: contractSubmissionID
-                            }
-                        }
+                                id: contractSubmissionID,
+                            },
+                        },
                     },
                     include: {
                         relatedSubmisions: true,
-                    }
+                    },
                 })
-
-                console.log('updateds sumitter ev', submittedRev)
 
                 let ratePosition = 1
                 for (const rateRev of concurrentlySubmittedRateLinks) {
                     const oldSubmitInfoID = rateRev.submitInfo?.id
 
-
-                    console.log('setting rate to contract sub id: ', contractSubmissionID, contractRev.id, ratePosition)
                     // set the submitInfo on each rate to be the same ID as the contract’s
                     // add rates+submitInfo to related rate submissions
                     // add join entries with rate position for contract + update info + rate rev.
@@ -146,24 +144,25 @@ export async function migrate(
                             submitInfoID: contractSubmissionID,
                             relatedSubmissions: {
                                 connect: {
-                                    id: contractSubmissionID
-                                }
+                                    id: contractSubmissionID,
+                                },
                             },
                             submissionPackages: {
                                 create: {
                                     submissionID: contractSubmissionID,
                                     contractRevisionID: contractRev.id,
                                     ratePosition: ratePosition,
-                                }
-                            }
-                        }
+                                },
+                            },
+                        },
                     })
 
                     if (!oldSubmitInfoID) {
-                        throw new Error('Better have an old submit id, we had one above')
+                        throw new Error(
+                            'Better have an old submit id, we had one above'
+                        )
                     }
                     if (oldSubmitInfoID !== contractSubmissionID) {
-                        console.log('deleting', oldSubmitInfoID, rateRev.id, contractRev.id, contractRev.contractID)
                         // ignore updateInfos we've already deleted
                         await client.updateInfoTable.deleteMany({
                             where: {
@@ -172,11 +171,10 @@ export async function migrate(
                         })
                     }
 
-                    ratePosition ++
+                    ratePosition++
                 }
             }
         }
-
     } catch (err) {
         console.error('Prisma Error: ', err)
         return err
