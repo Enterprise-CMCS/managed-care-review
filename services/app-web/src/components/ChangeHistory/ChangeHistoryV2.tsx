@@ -84,15 +84,15 @@ export const ChangeHistoryV2 = ({
                 headingLevel: 'h4',
                 content: isInitialSubmission ? (
                     <div data-testid={`change-history-record`}>
-                        <span className={styles.tag}>Submitted by:</span>
-                        <span> {r.updatedBy}</span>
+                        <span className={styles.tag}>Submitted by:&nbsp;</span>
+                        <span> {r.updatedBy}&nbsp;</span>
                         <br />
                         {r.revisionVersion && hasSubsequentSubmissions && (
                             <Link
-                                href={`/contracts/${contract.id}/revisions/${r.revisionVersion}`}
+                                href={`/submissions/${contract.id}/revisions/${r.revisionVersion}`}
                                 data-testid={`revision-link-${r.revisionVersion}`}
                             >
-                                View past contract version
+                                View past submission version
                             </Link>
                         )}
                     </div>
@@ -102,7 +102,7 @@ export const ChangeHistoryV2 = ({
                             <span className={styles.tag}>
                                 {isSubsequentSubmission
                                     ? 'Submitted by: '
-                                    : 'Unlocked by: '}{' '}
+                                    : 'Unlocked by: '}
                             </span>
                             <span>{r.updatedBy}</span>
                         </div>
@@ -119,7 +119,7 @@ export const ChangeHistoryV2 = ({
                                 href={`/submissions/${contract.id}/revisions/${r.revisionVersion}`}
                                 data-testid={`revision-link-${r.revisionVersion}`}
                             >
-                                View past contract version
+                                View past submission version
                             </Link>
                         )}
                     </div>
