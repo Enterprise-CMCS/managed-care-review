@@ -162,9 +162,6 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
 
     return (
         <div className={styles.background}>
-            <div style={{ textAlign: 'center' }}>
-                This is the V2 page of the SubmissionSummary
-            </div>
             <GridContainer
                 data-testid="submission-summary"
                 className={styles.container}
