@@ -63,7 +63,7 @@ export const ChangeHistoryV2 = ({
 
     const revisedItems: AccordionItemProps[] = revisionHistory.map(
         (r, index) => {
-            const isInitialSubmission = r.updatedReason === 'Initial contract'
+            const isInitialSubmission = r.updatedReason === 'Initial submission'
             const isSubsequentSubmission = r.kind === 'submit'
             // We want to know if this contract has multiple submissions. To have multiple submissions, there must be minimum
             // more than the initial contract revision.
