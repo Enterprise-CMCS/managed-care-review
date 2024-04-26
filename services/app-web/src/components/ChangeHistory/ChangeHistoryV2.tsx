@@ -105,7 +105,7 @@ export const ChangeHistoryV2 = ({
                                     : 'Unlocked by:'}
                                     &nbsp;
                             </span>
-                            <span>{r.updatedBy}</span>
+                            <span>{r.updatedBy}&nbsp;</span>
                         </div>
                         <div>
                             <span className={styles.tag}>
