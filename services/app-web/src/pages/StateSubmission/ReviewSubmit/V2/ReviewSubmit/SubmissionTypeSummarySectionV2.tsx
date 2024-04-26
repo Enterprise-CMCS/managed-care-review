@@ -38,7 +38,10 @@ export const SubmissionTypeSummarySectionV2 = ({
     isStateUser,
 }: SubmissionTypeSummarySectionV2Props): React.ReactElement => {
     const isPreviousSubmission = usePreviousSubmission()
-    const contractFormData = getVisibleLatestContractFormData(contract, isStateUser)
+    const contractFormData = getVisibleLatestContractFormData(
+        contract,
+        isStateUser
+    )
     if (!contractFormData) return <GenericErrorPage />
 
     const programNames = statePrograms
@@ -76,13 +79,15 @@ export const SubmissionTypeSummarySectionV2 = ({
                     </DoubleColumnGrid>
                 )}
                 <DoubleColumnGrid>
-                    <DataDetail
-                        id="program"
-                        label="Program(s)"
-                        explainMissingData={!isSubmitted}
-                        children={programNames}
-                    />
-                    {contractFormData && (
+                    {programNames && (
+                        <DataDetail
+                            id="program"
+                            label="Program(s)"
+                            explainMissingData={!isSubmitted}
+                            children={programNames}
+                        />
+                    )}
+                    {contractFormData && contractFormData.submissionType && (
                         <DataDetail
                             id="submissionType"
                             label="Submission type"
@@ -94,7 +99,7 @@ export const SubmissionTypeSummarySectionV2 = ({
                             }
                         />
                     )}
-                    {
+                    {contractFormData.contractType && (
                         <DataDetail
                             id="contractType"
                             label="Contract action type"
@@ -107,7 +112,7 @@ export const SubmissionTypeSummarySectionV2 = ({
                                     : ''
                             }
                         />
-                    }
+                    )}
                     {contractFormData &&
                         contractFormData.riskBasedContract !== null && (
                             <DataDetail
@@ -119,13 +124,12 @@ export const SubmissionTypeSummarySectionV2 = ({
                                 )}
                             />
                         )}
-                    {contractFormData && (
+                    {contractFormData && contractFormData.populationCovered && (
                         <DataDetail
                             id="populationCoverage"
                             label="Which populations does this contract action cover?"
                             explainMissingData={!isSubmitted}
                             children={
-                                contractFormData.populationCovered &&
                                 PopulationCoveredRecord[
                                     contractFormData.populationCovered
                                 ]
