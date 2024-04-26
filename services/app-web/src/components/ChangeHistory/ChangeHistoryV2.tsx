@@ -84,7 +84,7 @@ export const ChangeHistoryV2 = ({
                 headingLevel: 'h4',
                 content: isInitialSubmission ? (
                     <div data-testid={`change-history-record`}>
-                        <span className={styles.tag}>Submitted by:&nbsp;</span>
+                        <span className={styles.tag}>Submitted by:</span>
                         <span> {r.updatedBy}&nbsp;</span>
                         <br />
                         {r.revisionVersion && hasSubsequentSubmissions && (
@@ -101,16 +101,18 @@ export const ChangeHistoryV2 = ({
                         <div>
                             <span className={styles.tag}>
                                 {isSubsequentSubmission
-                                    ? 'Submitted by: '
-                                    : 'Unlocked by: '}
+                                    ? 'Submitted by:'
+                                    : 'Unlocked by:'}
+                                    &nbsp;
                             </span>
                             <span>{r.updatedBy}</span>
                         </div>
                         <div>
                             <span className={styles.tag}>
                                 {isSubsequentSubmission
-                                    ? 'Changes made: '
-                                    : 'Reason for unlock: '}
+                                    ? 'Changes made:'
+                                    : 'Reason for unlock:'}
+                                     &nbsp;
                             </span>
                             <span>{r.updatedReason}</span>
                         </div>
