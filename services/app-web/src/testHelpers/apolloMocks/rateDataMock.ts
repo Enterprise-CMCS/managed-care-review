@@ -244,4 +244,4 @@ const rateDataMock = (
     }
 }
 
-export { rateDataMock, rateRevisionDataMock,draftRateDataMock,   }
+export { rateDataMock, rateRevisionDataMock, draftRateDataMock }
