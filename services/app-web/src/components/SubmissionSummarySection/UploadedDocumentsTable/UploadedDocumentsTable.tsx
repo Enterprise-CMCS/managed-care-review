@@ -38,6 +38,7 @@ export type UploadedDocumentsTableProps = {
     multipleDocumentsAllowed?: boolean // used to determined if we display validations based on doc list length
     documentCategory?: string // used to determine if we display document category column
     isEditing?: boolean // default false, used to determine if we display validations for state users (or else extra context for CMS reviewers)
+    isSubmitted?: boolean // default false, used to determine if we display validations for CMS users
 }
 
 export const UploadedDocumentsTable = ({
@@ -49,6 +50,7 @@ export const UploadedDocumentsTable = ({
     isSupportingDocuments = false,
     multipleDocumentsAllowed = true,
     isEditing = false,
+    isSubmitted = false,
 }: UploadedDocumentsTableProps): React.ReactElement => {
     const initialDocState = documents.map((doc) => ({
         ...doc,
@@ -94,6 +96,7 @@ export const UploadedDocumentsTable = ({
         ? styles.withMarginTop
         : ''
 
+    const hasMultipleDocs = !multipleDocumentsAllowed && documents.length > 1
     const tableCaptionJSX = (
         <>
             <span>{caption}</span>
@@ -149,16 +152,14 @@ export const UploadedDocumentsTable = ({
                     <div className={styles.captionContainer}>
                         {tableCaptionJSX}
                     </div>
-                    {!multipleDocumentsAllowed &&
-                        documents.length > 1 &&
-                        !isEditing && (
-                            <DataDetailMissingField
-                                classname={styles.missingInfo}
-                                requiredText="Only one document is allowed for a rate
+                    {!!isSubmitted && hasMultipleDocs && !isEditing && (
+                        <DataDetailMissingField
+                            classname={styles.missingInfo}
+                            requiredText="Only one document is allowed for a rate
                         certification. You must remove documents before
                         continuing."
-                            />
-                        )}
+                        />
+                    )}
                 </caption>
                 <thead>
                     <tr>
