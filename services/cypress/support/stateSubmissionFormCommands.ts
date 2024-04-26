@@ -369,6 +369,9 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
     cy.findAllByLabelText('Email').eq(0).type('actuarycontact@example.com')
     cy.findAllByLabelText('Mercer').eq(0).safeClick()
+    cy.findAllByLabelText(
+        "OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions."
+    ).eq(0).safeClick()
 
     // Upload a rate certification and rate supporting document
     cy.findAllByTestId('file-input-input').each(fileInput =>
@@ -446,6 +449,14 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
     cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
     cy.findAllByLabelText('Email').eq(0).type('actuarycontact@example.com')
     cy.findAllByLabelText('Mercer').eq(0).safeClick()
+    cy.findByRole('radiogroup', {
+        name: /Actuaries' communication preference/
+    })
+        .should('exist')
+        .within(() => { 
+            cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
+            .click()
+        })
 
     // Upload a rate certification and rate supporting document
     cy.findAllByTestId('file-input-input').each(fileInput =>
@@ -484,7 +495,7 @@ Cypress.Commands.add('fillOutAdditionalActuaryContact', () => {
 
     // Actuary communication preference
     cy.findByText(
-        `OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`
+        "OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions."
     ).click()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })

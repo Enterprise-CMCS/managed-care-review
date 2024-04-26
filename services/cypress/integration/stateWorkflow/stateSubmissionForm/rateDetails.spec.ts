@@ -31,7 +31,7 @@ describe('rate details', () => {
         })
     })
 
-    it('can add amendment to prior rate certification', () => {
+    it.only('can add amendment to prior rate certification', () => {
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
@@ -112,6 +112,14 @@ describe('rate details', () => {
                 })
             }
         )
+        cy.findByRole('radiogroup', {
+            name: /Actuaries' communication preference/
+        })
+            .should('exist')
+            .within(() => { 
+                cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
+                .click()
+            })
 
         // Navigate to contacts page by clicking continue
         cy.navigateFormByButtonClick('CONTINUE')
