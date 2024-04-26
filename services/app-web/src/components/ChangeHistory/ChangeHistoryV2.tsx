@@ -116,7 +116,7 @@ export const ChangeHistoryV2 = ({
                         </div>
                         {isSubsequentSubmission && r.revisionVersion && (
                             <Link
-                                href={`/contracts/${contract.id}/revisions/${r.revisionVersion}`}
+                                href={`/submissions/${contract.id}/revisions/${r.revisionVersion}`}
                                 data-testid={`revision-link-${r.revisionVersion}`}
                             >
                                 View past contract version
