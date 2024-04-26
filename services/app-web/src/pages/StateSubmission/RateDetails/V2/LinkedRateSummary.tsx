@@ -28,7 +28,7 @@ export const LinkedRateSummary = ({
                         id="submissionDate"
                         label="Submission date"
                         children={formatCalendarDate(
-                            rateForm.rateDateCertified
+                            rateForm.initiallySubmittedAt
                         )}
                     />
 
