@@ -71,6 +71,7 @@ export type FormikRateForm = {
     actuaryCommunicationPreference: RateRevision['formData']['actuaryCommunicationPreference']
     packagesWithSharedRateCerts: RateRevision['formData']['packagesWithSharedRateCerts']
     ratePreviouslySubmitted?: 'YES' | 'NO'
+    initiallySubmittedAt?: Date
 }
 
 // We have a list of rates to enable multi-rate behavior
