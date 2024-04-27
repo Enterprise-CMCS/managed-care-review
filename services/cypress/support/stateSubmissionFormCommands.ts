@@ -342,46 +342,42 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
 
         }
 
+        cy.findByText('New rate certification').click()
+        cy.findByText(
+            'Certification of capitation rates specific to each rate cell'
+        ).click()
 
-    cy.findByText('New rate certification').click()
-    cy.findByText(
-        'Certification of capitation rates specific to each rate cell'
-    ).click()
+        cy.findAllByLabelText('Start date', {timeout: 2000})
+            .parents()
+            .findByTestId('date-picker-external-input')
+            .type('02/29/2024')
+        cy.findAllByLabelText('End date')
+            .parents()
+            .findByTestId('date-picker-external-input')
+            .type('02/28/2025')
+            .blur()
+        cy.findByLabelText('Date certified').type('03/01/2024')
 
-    cy.findAllByLabelText('Start date', {timeout: 2000})
-        .parents()
-        .findByTestId('date-picker-external-input')
-        .type('02/29/2024')
-    cy.findAllByLabelText('End date')
-        .parents()
-        .findByTestId('date-picker-external-input')
-        .type('02/28/2025')
-        .blur()
-    cy.findByLabelText('Date certified').type('03/01/2024')
+        cy.findByRole('combobox', { name: 'programs (required)' }).click({
+            force: true,
+        })
+        cy.findByText('PMAP').click()
 
-    cy.findByRole('combobox', { name: 'programs (required)' }).click({
-        force: true,
+        //Fill out certifying actuary
+        cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
+        cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
+        cy.findAllByLabelText('Email').eq(0).type('actuarycontact@example.com')
+        cy.findAllByLabelText('Mercer').eq(0).safeClick()
+
+        // Upload a rate certification and rate supporting document
+        cy.findAllByTestId('file-input-input').each(fileInput =>
+            cy.wrap(fileInput).attachFile('documents/trussel-guide.pdf')
+        )
+
+        cy.verifyDocumentsHaveNoErrors()
+        cy.waitForDocumentsToLoad()
+        cy.findAllByTestId('errorMessage').should('have.length', 0)
     })
-    cy.findByText('PMAP').click()
-
-    //Fill out certifying actuary
-    cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
-    cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
-    cy.findAllByLabelText('Email').eq(0).type('actuarycontact@example.com')
-    cy.findAllByLabelText('Mercer').eq(0).safeClick()
-    cy.findAllByLabelText(
-        "OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions."
-    ).eq(0).safeClick()
-
-    // Upload a rate certification and rate supporting document
-    cy.findAllByTestId('file-input-input').each(fileInput =>
-        cy.wrap(fileInput).attachFile('documents/trussel-guide.pdf')
-    )
-
-    cy.verifyDocumentsHaveNoErrors()
-    cy.waitForDocumentsToLoad()
-    cy.findAllByTestId('errorMessage').should('have.length', 0)
-})
 })
 
 Cypress.Commands.add('fillOutLinkedRate', () => {
@@ -449,14 +445,6 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
     cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
     cy.findAllByLabelText('Email').eq(0).type('actuarycontact@example.com')
     cy.findAllByLabelText('Mercer').eq(0).safeClick()
-    cy.findByRole('radiogroup', {
-        name: /Actuaries' communication preference/
-    })
-        .should('exist')
-        .within(() => { 
-            cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
-            .click()
-        })
 
     // Upload a rate certification and rate supporting document
     cy.findAllByTestId('file-input-input').each(fileInput =>
@@ -482,21 +470,18 @@ Cypress.Commands.add('fillOutStateContact', () => {
 Cypress.Commands.add('fillOutAdditionalActuaryContact', () => {
     // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
-    cy.findByRole('button', { name: 'Add a certifying actuary' })
+    cy.findAllByRole('button', { name: 'Add a certifying actuary' })
         .should('exist')
+        .eq(0)
         .click()
-    cy.findByTestId('actuary-contact').should('exist')
-    cy.get('input["rateForms.0.addtlActuaryContacts.0.name"]').click().type('Actuary Contact Person')
-    cy.get('input["rateForms.0.addtlActuaryContacts.0.titleRole"]').type('Actuary Contact Title')
-    cy.get('input["rateForms.0.addtlActuaryContacts.0.email"]').type('actuarycontact@example.com')
+    cy.findByTestId('addtnl-actuary-contact').should('exist')
+    cy.findByTestId('addtlActuaryContacts.name').click().type('Actuary Contact Person')
+    cy.findByTestId('addtlActuaryContacts.titleRole').type('Actuary Contact Title')
+    cy.findByTestId('addtlActuaryContacts.email').type('actuarycontact@example.com')
 
     // Actuarial firm
-    cy.findAllByLabelText('Mercer').eq(0).safeClick()
+    cy.findByTestId('addtlActuaryContacts.mercer').safeClick()
 
-    // Actuary communication preference
-    cy.findByText(
-        "OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions."
-    ).click()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 

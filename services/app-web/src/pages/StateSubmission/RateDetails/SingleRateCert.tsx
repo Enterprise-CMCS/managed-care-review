@@ -597,7 +597,7 @@ export const SingleRateCert = ({
                                                     styles.actuaryContact
                                                 }
                                                 key={index}
-                                                data-testid="actuary-contact"
+                                                data-testid="addtnl-actuary-contact"
                                             >
                                                 <ActuaryContactFields
                                                     shouldValidate={

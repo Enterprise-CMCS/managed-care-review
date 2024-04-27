@@ -49,6 +49,14 @@ describe('contacts', () => {
             cy.navigateFormByButtonClick('BACK')
             cy.findByRole('heading', { level: 2, name: /Rate details/ })
             cy.fillOutNewRateCertification()
+            cy.findByRole('radiogroup', {
+                name: /Actuaries' communication preference/
+            })
+                .should('exist')
+                .within(() => { 
+                    cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
+                    .click()
+                })
             cy.navigateFormByButtonClick('CONTINUE')
 
             // On contacts page, SAVE_DRAFT

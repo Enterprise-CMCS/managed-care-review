@@ -513,7 +513,7 @@ export const SingleRateFormFields = ({
                                         <div
                                             className={styles.actuaryContact}
                                             key={index}
-                                            data-testid="actuary-contact"
+                                            data-testid="addtnl-actuary-contact"
                                         >
                                             <ActuaryContactFields
                                                 shouldValidate={shouldValidate}

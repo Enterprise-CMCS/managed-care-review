@@ -53,7 +53,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         'SUBMISSIONS_RATE_DETAILS'
                     )}
                     element={
-                        !useLinkedRates ? (
+                        useLinkedRates ? (
                             <RateDetailsV2 type="MULTI" />
                         ) : (
                             <RateDetails />
@@ -77,7 +77,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         'SUBMISSIONS_REVIEW_SUBMIT'
                     )}
                     element={
-                        !useLinkedRates ? <ReviewSubmitV2 /> : <ReviewSubmit />
+                        useLinkedRates ? <ReviewSubmitV2 /> : <ReviewSubmit />
                     }
                 />
                 <Route path="*" element={<Error404 />} />

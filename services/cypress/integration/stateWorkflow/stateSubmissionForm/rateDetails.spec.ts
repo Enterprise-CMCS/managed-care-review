@@ -31,7 +31,7 @@ describe('rate details', () => {
         })
     })
 
-    it.only('can add amendment to prior rate certification', () => {
+    it('can add amendment to prior rate certification', () => {
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
@@ -43,6 +43,15 @@ describe('rate details', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/rate-details`
             )
+
+            cy.findByRole('radiogroup', {
+                name: /Actuaries' communication preference/
+            })
+                .should('exist')
+                .within(() => { 
+                    cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
+                    .click()
+                })
 
             cy.fillOutAmendmentToPriorRateCertification()
             /* Choose another submission that the rate cert was uploaded to, then check that your selection
@@ -98,6 +107,16 @@ describe('rate details', () => {
         }).click()
 
         cy.findAllByTestId('rate-certification-form').should('have.length', 3)
+
+        cy.findByRole('radiogroup', {
+            name: /Actuaries' communication preference/
+        })
+            .should('exist')
+            .within(() => { 
+                cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
+                .click()
+            })
+
         //Fill out every rate certification form
         cy.findAllByTestId('rate-certification-form').each(
             (form, index, arr) => {
@@ -111,15 +130,8 @@ describe('rate details', () => {
                     }
                 })
             }
-        )
-        cy.findByRole('radiogroup', {
-            name: /Actuaries' communication preference/
-        })
-            .should('exist')
-            .within(() => { 
-                cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
-                .click()
-            })
+            )
+        
 
         // Navigate to contacts page by clicking continue
         cy.navigateFormByButtonClick('CONTINUE')
