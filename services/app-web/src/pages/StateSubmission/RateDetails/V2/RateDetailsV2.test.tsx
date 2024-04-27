@@ -936,13 +936,15 @@ describe('RateDetailsv2', () => {
             await user.click(addActuaryContact)
 
             //Additional actuary contacts
-            const contacts = screen.getAllByTestId('actuary-contact')
+            const contacts = screen.getAllByTestId('addtnl-actuary-contact')
             expect(contacts).toHaveLength(2)
 
             //Adding another addtional actuary contact
             await user.click(addActuaryContact)
 
-            const contactsPostClick = screen.getAllByTestId('actuary-contact')
+            const contactsPostClick = screen.getAllByTestId(
+                'addtnl-actuary-contact'
+            )
             expect(contactsPostClick).toHaveLength(3)
 
             //Testing removal of actuary contact
