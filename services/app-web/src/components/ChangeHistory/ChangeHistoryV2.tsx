@@ -101,18 +101,16 @@ export const ChangeHistoryV2 = ({
                         <div>
                             <span className={styles.tag}>
                                 {isSubsequentSubmission
-                                    ? 'Submitted by:'
-                                    : 'Unlocked by:'}
-                                    &nbsp;
+                                    ? 'Submitted by: '
+                                    : 'Unlocked by: '}
                             </span>
                             <span>{r.updatedBy}&nbsp;</span>
                         </div>
                         <div>
                             <span className={styles.tag}>
                                 {isSubsequentSubmission
-                                    ? 'Changes made:'
-                                    : 'Reason for unlock:'}
-                                     &nbsp;
+                                    ? 'Changes made: '
+                                    : 'Reason for unlock: '}
                             </span>
                             <span>{r.updatedReason}</span>
                         </div>

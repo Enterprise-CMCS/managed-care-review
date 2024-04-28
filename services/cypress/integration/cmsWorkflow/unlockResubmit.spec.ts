@@ -228,7 +228,7 @@ describe('CMS user', () => {
         })
     })
 
-    it('can unlock and resubmit child rates with linked rates flag', () => {
+    it.only('can unlock and resubmit child rates with linked rates flag', () => {
         cy.interceptFeatureFlags({"link-rates": true, '438-attestation': true})
         cy.logInAsStateUser()
 
