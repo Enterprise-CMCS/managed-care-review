@@ -14,7 +14,6 @@ import styles from '../StateSubmissionForm.module.scss'
 
 import {
     ActuaryCommunicationType,
-    ActuaryContact,
     RateInfoType,
 } from '../../../common-code/healthPlanFormDataType'
 
@@ -203,7 +202,7 @@ export const RateDetails = ({
             }
         }
 
-        const cleanedRateInfos = rateInfos.map((rateInfo) => {
+        draftSubmission.rateInfos = rateInfos.map((rateInfo) => {
             return {
                 id: rateInfo.id,
                 rateType: rateInfo.rateType,
@@ -238,16 +237,6 @@ export const RateDetails = ({
                         : [],
             }
         })
-
-        draftSubmission.rateInfos = cleanedRateInfos
-
-        const addtlActuaryContacts: ActuaryContact[] = []
-        rateInfos.forEach((rateInfo) => {
-            rateInfo.addtlActuaryContacts.forEach((contact) => {
-                addtlActuaryContacts.push(contact)
-            })
-        })
-        draftSubmission.addtlActuaryContacts = addtlActuaryContacts
 
         draftSubmission.addtlActuaryCommunicationPreference =
             actuaryCommunicationPreference
