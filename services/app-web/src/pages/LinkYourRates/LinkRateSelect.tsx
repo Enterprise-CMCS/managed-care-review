@@ -41,46 +41,46 @@ export const LinkRateSelect = ({
 
     const rates = data?.indexRates.edges.map((e) => e.node) || []
 
-    const rateNames: LinkRateOptionType[] = rates
-        .map((rate) => {
-            const revision = rate.revisions[0]
-            return {
-                value: rate.id,
-                label: (
-                    <>
-                        <strong>
-                            {revision.formData.rateCertificationName}
-                        </strong>
-                        <div style={{ lineHeight: '50%', fontSize: '14px' }}>
-                            <p>
-                                Programs:&nbsp;
-                                {programNames(
-                                    statePrograms,
-                                    revision.formData.rateProgramIDs
-                                ).join(', ')}
-                            </p>
-                            <p>
-                                Rating period:&nbsp;
-                                {formatCalendarDate(
-                                    revision.formData.rateDateStart
-                                )}
-                                -
-                                {formatCalendarDate(
-                                    revision.formData.rateDateEnd
-                                )}
-                            </p>
-                            <p>
-                                Certification date:&nbsp;
-                                {formatCalendarDate(
-                                    revision.formData.rateDateCertified
-                                )}
-                            </p>
-                        </div>
-                    </>
-                ),
-            }
-        })
-        .reverse()
+    // Sort rates by latest submission in desc order
+    rates.sort(
+        (a, b) =>
+            new Date(b.revisions[0].submitInfo?.updatedAt).getTime() -
+            new Date(a.revisions[0].submitInfo?.updatedAt).getTime()
+    )
+
+    const rateNames: LinkRateOptionType[] = rates.map((rate) => {
+        const revision = rate.revisions[0]
+        return {
+            value: rate.id,
+            label: (
+                <>
+                    <strong>{revision.formData.rateCertificationName}</strong>
+                    <div style={{ lineHeight: '50%', fontSize: '14px' }}>
+                        <p>
+                            Programs:&nbsp;
+                            {programNames(
+                                statePrograms,
+                                revision.formData.rateProgramIDs
+                            ).join(', ')}
+                        </p>
+                        <p>
+                            Rating period:&nbsp;
+                            {formatCalendarDate(
+                                revision.formData.rateDateStart
+                            )}
+                            -{formatCalendarDate(revision.formData.rateDateEnd)}
+                        </p>
+                        <p>
+                            Certification date:&nbsp;
+                            {formatCalendarDate(
+                                revision.formData.rateDateCertified
+                            )}
+                        </p>
+                    </div>
+                </>
+            ),
+        }
+    })
 
     const onFocus: AriaOnFocus<LinkRateOptionType> = ({
         focused,
@@ -143,39 +143,37 @@ export const LinkRateSelect = ({
     const selectedRates = values.rateForms.map((rate) => rate.id && rate.id)
 
     return (
-        <>
-            <Select
-                defaultMenuIsOpen
-                value={defaultValue}
-                className={styles.rateMultiSelect}
-                options={
-                    error || loading
-                        ? undefined
-                        : rateNames.filter(
-                              (rate) => !selectedRates.includes(rate.value)
-                          )
-                }
-                isSearchable
-                maxMenuHeight={400}
-                aria-label="linked rates (required)"
-                ariaLiveMessages={{
-                    onFocus,
-                }}
-                isClearable
-                noOptionsMessage={() => noOptionsMessage()}
-                classNamePrefix="select"
-                id={`${name}-linkRateSelect`}
-                inputId=""
-                placeholder={
-                    loading ? 'Loading rate certifications...' : 'Select...'
-                }
-                loadingMessage={() => 'Loading rate certifications...'}
-                name={name}
-                filterOption={filterOptions}
-                {...selectProps}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                onChange={onInputChange as any} // TODO see why the types definitions are messed up for react-select "single" (not multi) onChange - may need to upgrade dep if this bug was fixed
-            />
-        </>
+        <Select
+            defaultMenuIsOpen
+            value={defaultValue}
+            className={styles.rateMultiSelect}
+            options={
+                error || loading
+                    ? undefined
+                    : rateNames.filter(
+                          (rate) => !selectedRates.includes(rate.value)
+                      )
+            }
+            isSearchable
+            maxMenuHeight={400}
+            aria-label="linked rates (required)"
+            ariaLiveMessages={{
+                onFocus,
+            }}
+            isClearable
+            noOptionsMessage={() => noOptionsMessage()}
+            classNamePrefix="select"
+            id={`${name}-linkRateSelect`}
+            inputId=""
+            placeholder={
+                loading ? 'Loading rate certifications...' : 'Select...'
+            }
+            loadingMessage={() => 'Loading rate certifications...'}
+            name={name}
+            filterOption={filterOptions}
+            {...selectProps}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onChange={onInputChange as any} // TODO see why the types definitions are messed up for react-select "single" (not multi) onChange - may need to upgrade dep if this bug was fixed
+        />
     )
 }

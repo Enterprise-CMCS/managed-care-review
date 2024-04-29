@@ -28,6 +28,7 @@ import {
     getLastContractSubmission,
     getVisibleLatestRateRevisions,
 } from '../../../../../gqlHelpers/contractsAndRates'
+import { useAuth } from '../../../../../contexts/AuthContext'
 
 export type RateDetailsSummarySectionV2Props = {
     contract: Contract
@@ -74,8 +75,9 @@ export const RateDetailsSummarySectionV2 = ({
     onDocumentError,
     isCMSUser,
 }: RateDetailsSummarySectionV2Props): React.ReactElement => {
-    const isSubmitted = contract.status === 'SUBMITTED'
-    const isEditing = !isSubmitted && editNavigateTo !== undefined
+    const { loggedInUser } = useAuth()
+    const isSubmittedOrCMSUser = contract.status === 'SUBMITTED' || loggedInUser?.role === 'CMS_USER'
+    const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
     const contractFormData = isEditing
         ? contract.draftRevision?.formData
@@ -103,12 +105,11 @@ export const RateDetailsSummarySectionV2 = ({
                     packageId &&
                     packageNamesLookup &&
                     packageNamesLookup[packageId]?.packageName
-                const isDraftText =
-                    isCMSUser && !refreshedName ? ' (Draft)' : ''
+
                 return {
                     packageId,
                     packageName:
-                        refreshedName ?? `${packageName}${isDraftText}`,
+                        refreshedName ?? `${packageName}`,
                 }
             }
         )
@@ -175,7 +176,7 @@ export const RateDetailsSummarySectionV2 = ({
 
     useDeepCompareEffect(() => {
         // skip getting urls of this if this is a previous submission or draft
-        if (!isSubmitted || isPreviousSubmission) return
+        if (!isSubmittedOrCMSUser || isPreviousSubmission) return
 
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
@@ -222,7 +223,7 @@ export const RateDetailsSummarySectionV2 = ({
         getBulkDlURL,
         contract,
         submissionName,
-        isSubmitted,
+        isSubmittedOrCMSUser,
         isPreviousSubmission,
     ])
 
@@ -232,7 +233,7 @@ export const RateDetailsSummarySectionV2 = ({
                 header="Rate details"
                 editNavigateTo={editNavigateTo}
             >
-                {isSubmitted &&
+                {isSubmittedOrCMSUser &&
                     !isPreviousSubmission &&
                     renderDownloadButton(zippedFilesURL)}
             </SectionHeader>
@@ -259,14 +260,14 @@ export const RateDetailsSummarySectionV2 = ({
                                         <DataDetail
                                             id="ratePrograms"
                                             label="Programs this rate certification covers"
-                                            explainMissingData={!isSubmitted}
+                                            explainMissingData={!isSubmittedOrCMSUser}
                                             children={ratePrograms(rate)}
                                         />
                                     )}
                                     <DataDetail
                                         id="rateType"
                                         label="Rate certification type"
-                                        explainMissingData={!isSubmitted}
+                                        explainMissingData={!isSubmittedOrCMSUser}
                                         children={rateCertificationType(rate)}
                                     />
                                     <DataDetail
@@ -277,7 +278,7 @@ export const RateDetailsSummarySectionV2 = ({
                                                 ? 'Rating period of original rate certification'
                                                 : 'Rating period'
                                         }
-                                        explainMissingData={!isSubmitted}
+                                        explainMissingData={!isSubmittedOrCMSUser}
                                         children={
                                             rateFormData.rateDateStart &&
                                             rateFormData.rateDateEnd ? (
@@ -298,7 +299,7 @@ export const RateDetailsSummarySectionV2 = ({
                                                 ? 'Date certified for rate amendment'
                                                 : 'Date certified'
                                         }
-                                        explainMissingData={!isSubmitted}
+                                        explainMissingData={!isSubmittedOrCMSUser}
                                         children={formatCalendarDate(
                                             rateFormData.rateDateCertified
                                         )}
@@ -307,7 +308,7 @@ export const RateDetailsSummarySectionV2 = ({
                                         <DataDetail
                                             id="effectiveRatingPeriod"
                                             label="Rate amendment effective dates"
-                                            explainMissingData={!isSubmitted}
+                                            explainMissingData={!isSubmittedOrCMSUser}
                                             children={`${formatCalendarDate(
                                                 rateFormData.amendmentEffectiveDateStart
                                             )} to ${formatCalendarDate(
@@ -320,7 +321,7 @@ export const RateDetailsSummarySectionV2 = ({
                                         <DataDetail
                                             id="certifyingActuary"
                                             label="Certifying actuary"
-                                            explainMissingData={!isSubmitted}
+                                            explainMissingData={!isSubmittedOrCMSUser}
                                             children={
                                                 <DataDetailContactField
                                                     contact={
@@ -334,7 +335,7 @@ export const RateDetailsSummarySectionV2 = ({
                                     <DataDetail
                                         id="rateCapitationType"
                                         label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
-                                        explainMissingData={!isSubmitted}
+                                        explainMissingData={!isSubmittedOrCMSUser}
                                         children={rateCapitationType(rate)}
                                     />
                                 </DoubleColumnGrid>
@@ -370,6 +371,7 @@ export const RateDetailsSummarySectionV2 = ({
                                     caption="Rate supporting documents"
                                     isSupportingDocuments
                                     documentCategory="Rate-supporting"
+                                    isEditing={isEditing}
                                 />
                             )}
                         </SectionCard>
