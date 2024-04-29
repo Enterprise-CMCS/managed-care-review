@@ -73,7 +73,6 @@ export const RateDetailsSummarySectionV2 = ({
     submissionName,
     statePrograms,
     onDocumentError,
-    isCMSUser,
 }: RateDetailsSummarySectionV2Props): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const isSubmittedOrCMSUser =

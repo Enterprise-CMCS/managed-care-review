@@ -13,6 +13,7 @@ import { DoubleColumnGrid } from '../../../../../components/DoubleColumnGrid'
 import { DownloadButton } from '../../../../../components/DownloadButton'
 import { usePreviousSubmission } from '../../../../../hooks/usePreviousSubmission'
 import styles from '../../../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
+import { useAuth } from '../../../../../contexts/AuthContext'
 
 import {
     sortModifiedProvisions,
@@ -84,8 +85,10 @@ export const ContractDetailsSummarySectionV2 = ({
         string | undefined | Error
     >(undefined)
     const ldClient = useLDClient()
-    const isEditing = !isSubmitted(contract) && editNavigateTo !== undefined
-
+    const { loggedInUser } = useAuth()
+    const isSubmittedOrCMSUser =
+    contract.status === 'SUBMITTED' || loggedInUser?.role === 'CMS_USER'
+    const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const contractFormData = getVisibleLatestContractFormData(
         contract,
         isEditing
@@ -113,7 +116,7 @@ export const ContractDetailsSummarySectionV2 = ({
 
     useDeepCompareEffect(() => {
         // skip getting urls of this if this is a previous contract or draft
-        if (!isSubmitted(contract) || isPreviousSubmission) return
+        if (!isSubmittedOrCMSUser || isPreviousSubmission) return
 
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
@@ -170,7 +173,7 @@ export const ContractDetailsSummarySectionV2 = ({
                 header="Contract details"
                 editNavigateTo={editNavigateTo}
             >
-                {isSubmitted(contract) &&
+                {isSubmittedOrCMSUser &&
                     !isPreviousSubmission &&
                     renderDownloadButton(zippedFilesURL)}
             </SectionHeader>
