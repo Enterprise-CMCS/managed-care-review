@@ -382,7 +382,6 @@ export const RateDetailsSummarySectionV2 = ({
                                               )
                                     }
                                     caption="Rate supporting documents"
-                                    isSupportingDocuments
                                     documentCategory="Rate-supporting"
                                     hideDynamicFeedback={isSubmittedOrCMSUser}
                                 />
