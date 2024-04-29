@@ -10,11 +10,7 @@ import {
 } from '../../../../../constants/healthPlanPackages'
 import { GenericErrorPage } from '../../../../Errors/GenericErrorPage'
 import { getVisibleLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
-import {
-    Program,
-    Contract,
-    ContractRevision,
-} from '../../../../../gen/gqlClient'
+import { Program, Contract, ContractRevision } from '../../../../../gen/gqlClient'
 import { usePreviousSubmission } from '../../../../../hooks/usePreviousSubmission'
 import { booleanAsYesNoUserValue } from '../../../../../components/Form/FieldYesNo/FieldYesNo'
 import { SectionCard } from '../../../../../components/SectionCard'
@@ -45,10 +41,7 @@ export const SubmissionTypeSummarySectionV2 = ({
 }: SubmissionTypeSummarySectionV2Props): React.ReactElement => {
     const isPreviousSubmission = usePreviousSubmission()
     const contractOrRev = contractRev ? contractRev : contract
-    const contractFormData = getVisibleLatestContractFormData(
-        contractOrRev,
-        isStateUser
-    )
+    const contractFormData = getVisibleLatestContractFormData(contractOrRev, isStateUser)
     if (!contractFormData) return <GenericErrorPage />
 
     const programNames = statePrograms

@@ -25,7 +25,7 @@ describe('SubmissionRevisionSummary', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
-                            user: mockValidStateUser(),
+                            user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
                         fetchContractMockSuccess({
@@ -46,15 +46,16 @@ describe('SubmissionRevisionSummary', () => {
         expect(
             await screen.findByRole('heading', { name: 'Contract details' })
         ).toBeInTheDocument()
-            screen.debug()
         // const submissionVersion = `${dayjs
         //     .utc('2022-03-24T01:19:46.154Z')
         //     .tz('America/New_York')
         //     .format('MM/DD/YY h:mma')} ET version`
         // expect(await screen.findByText(submissionVersion)).toBeInTheDocument()
         expect(
-            await screen.findByTestId('previous-submission-banner')
+            
+        await screen.findByTestId('previous-submission-banner')
         ).toBeInTheDocument()
+            screen.debug()
     })
     // it('extracts the correct dates from the submission and displays them in tables', async () => {
     //     renderWithProviders(

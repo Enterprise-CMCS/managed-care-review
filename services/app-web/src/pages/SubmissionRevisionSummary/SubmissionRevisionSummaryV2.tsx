@@ -60,7 +60,6 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
         })
     }, [name, updateHeading])
 
-
     if (fetchContractLoading) {
         return (
             <GridContainer>
