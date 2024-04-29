@@ -95,7 +95,7 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate, pare
             rateForm?.certifyingActuaryContacts
         ),
         addtlActuaryContacts: formatAddtlActuaryContactsForForm(
-            rateForm?.certifyingActuaryContacts
+            rateForm?.addtlActuaryContacts
         ),
         actuaryCommunicationPreference:
             rateForm?.actuaryCommunicationPreference?? undefined,
