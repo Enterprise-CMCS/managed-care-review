@@ -313,7 +313,7 @@ export const ContractDetailsSummarySection = ({
                 }
                 caption="Contract"
                 documentCategory="Contract"
-                isEditing={isEditing}
+                hideDynamicFeedback={!isEditing}
             />
             <UploadedDocumentsTable
                 documents={convertFromSubmissionDocumentsToGenericDocuments(
@@ -330,7 +330,7 @@ export const ContractDetailsSummarySection = ({
                 caption="Contract supporting documents"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
-                isEditing={isEditing}
+                hideDynamicFeedback={!isEditing}
             />
         </SectionCard>
     )

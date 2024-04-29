@@ -192,7 +192,7 @@ export const ContractDetailsSummarySectionV2 = ({
                                             StatutoryRegulatoryAttestationQuestion
                                         }
                                         explainMissingData={
-                                            !isSubmitted(contract)
+                                            !isSubmittedOrCMSUser
                                         }
                                         children={
                                             StatutoryRegulatoryAttestation[
@@ -210,7 +210,7 @@ export const ContractDetailsSummarySectionV2 = ({
                                 <DataDetail
                                     id="statutoryRegulatoryAttestationDescription"
                                     label="Non-compliance description"
-                                    explainMissingData={!isSubmitted}
+                                    explainMissingData={!isSubmittedOrCMSUser}
                                     children={
                                         contractFormData?.statutoryRegulatoryAttestationDescription
                                     }
@@ -223,7 +223,7 @@ export const ContractDetailsSummarySectionV2 = ({
                     <DataDetail
                         id="contractExecutionStatus"
                         label="Contract status"
-                        explainMissingData={!isSubmitted(contract)}
+                        explainMissingData={!isSubmittedOrCMSUser}
                         children={
                             contractFormData?.contractExecutionStatus
                                 ? ContractExecutionStatusRecord[
@@ -239,7 +239,7 @@ export const ContractDetailsSummarySectionV2 = ({
                                 ? 'Contract amendment effective dates'
                                 : 'Contract effective dates'
                         }
-                        explainMissingData={!isSubmitted(contract)}
+                        explainMissingData={!isSubmittedOrCMSUser}
                         children={
                             contractFormData?.contractDateStart &&
                             contractFormData?.contractDateEnd
@@ -254,7 +254,7 @@ export const ContractDetailsSummarySectionV2 = ({
                     <DataDetail
                         id="managedCareEntities"
                         label="Managed care entities"
-                        explainMissingData={!isSubmitted(contract)}
+                        explainMissingData={!isSubmittedOrCMSUser}
                         children={
                             contractFormData?.managedCareEntities && (
                                 <DataDetailCheckboxList
@@ -267,7 +267,7 @@ export const ContractDetailsSummarySectionV2 = ({
                     <DataDetail
                         id="federalAuthorities"
                         label="Active federal operating authority"
-                        explainMissingData={!isSubmitted(contract)}
+                        explainMissingData={!isSubmittedOrCMSUser}
                         children={
                             applicableFederalAuthorities && (
                                 <DataDetailCheckboxList
@@ -288,7 +288,7 @@ export const ContractDetailsSummarySectionV2 = ({
                                     : 'This contract action includes new or modified provisions related to the following'
                             }
                             explainMissingData={
-                                provisionsAreInvalid && !isSubmitted(contract)
+                                provisionsAreInvalid && !isSubmittedOrCMSUser
                             }
                         >
                             {provisionsAreInvalid ? null : (
@@ -308,7 +308,7 @@ export const ContractDetailsSummarySectionV2 = ({
                                     : 'This contract action does NOT include new or modified provisions related to the following'
                             }
                             explainMissingData={
-                                provisionsAreInvalid && !isSubmitted(contract)
+                                provisionsAreInvalid && !isSubmittedOrCMSUser
                             }
                         >
                             {provisionsAreInvalid ? null : (
@@ -328,7 +328,7 @@ export const ContractDetailsSummarySectionV2 = ({
                     previousSubmissionDate={lastSubmittedDate}
                     caption="Contract"
                     documentCategory="Contract"
-                    isEditing={isEditing}
+                    hideDynamicFeedback={isSubmittedOrCMSUser}
                 />
             )}
             {contractSupportingDocuments && (
@@ -338,7 +338,7 @@ export const ContractDetailsSummarySectionV2 = ({
                     caption="Contract supporting documents"
                     documentCategory="Contract-supporting"
                     isSupportingDocuments
-                    isEditing={isEditing}
+                    hideDynamicFeedback={isSubmittedOrCMSUser}
                 />
             )}
         </SectionCard>

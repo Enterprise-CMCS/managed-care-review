@@ -13,6 +13,8 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 import { GenericDocument } from '../../../gen/gqlClient'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
+import { featureFlags } from '../../../common-code/featureFlags'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 // V2 API migration note: intentionally trying to avoid making V2 version of this reuseable sub component since it has such a contained focus (on displaying documents only).
 // Use props to pass needed information and seek to make content as domain agnostic as possible.
@@ -33,12 +35,12 @@ export type UploadedDocumentsTableProps = {
     documents: GenericDocument[]
     caption: string | null
     previousSubmissionDate: Date | null // used to calculate NEW tag based on doc dateAdded
+    hideDynamicFeedback: boolean // used to determine if we display static data for submission summary experience or if we display dynamic feedback UI (validations, edit buttons) like on review submit experience
     packagesWithSharedRateCerts?: SharedRateCertDisplay[] // deprecated - could be deleted after we resolve all historical data linked rates
     isSupportingDocuments?: boolean // used to calculate empty state and styles around the secondary supporting docs tables - would be nice to remove this in favor of more domain agnostic prop such as 'emptyStateText'
     multipleDocumentsAllowed?: boolean // used to determined if we display validations based on doc list length
     documentCategory?: string // used to determine if we display document category column
-    isEditing?: boolean // default false, used to determine if we display validations for state users (or else extra context for CMS reviewers)
-    isSubmitted?: boolean // default false, used to determine if we display validations for CMS users
+
 }
 
 export const UploadedDocumentsTable = ({
@@ -49,20 +51,26 @@ export const UploadedDocumentsTable = ({
     previousSubmissionDate,
     isSupportingDocuments = false,
     multipleDocumentsAllowed = true,
-    isEditing = false,
-    isSubmitted = false,
+    hideDynamicFeedback = false,
 }: UploadedDocumentsTableProps): React.ReactElement => {
+    const ldClient = useLDClient()
+
+    const useLinkedRates = ldClient?.variation(
+        featureFlags.LINK_RATES.flag,
+        featureFlags.LINK_RATES.defaultValue
+    ) ?? false
     const initialDocState = documents.map((doc) => ({
         ...doc,
         url: null,
         s3Key: null,
     }))
     const { loggedInUser } = useAuth()
+    const isStateUser = loggedInUser?.__typename === 'StateUser'
     const isCMSUser = loggedInUser?.__typename === 'CMSUser'
     const { getDocumentsWithS3KeyAndUrl } = useDocument()
     const [refreshedDocs, setRefreshedDocs] =
         useState<DocumentWithS3Data[]>(initialDocState)
-    const shouldShowEditButton = isEditing && isSupportingDocuments // at this point only contract supporting documents need the inline EDIT button - this can be deleted when we move supporting docs to ContractDetails page
+    const shouldShowEditButton = !hideDynamicFeedback && isSupportingDocuments // at this point only contract supporting documents need the inline EDIT button - this can be deleted when we move supporting docs to ContractDetails page
 
     // canDisplayDateAddedForDocument -  guards against passing in null or undefined to dayjs
     // don't display on new initial submission
@@ -72,7 +80,7 @@ export const UploadedDocumentsTable = ({
 
     const shouldHaveNewTag = (doc: DocumentWithS3Data) => {
         if (!isCMSUser) {
-            return false // design requirement, don't show new tag to state users  on review submit
+            return false // design requirement, don't show new tag to state users on review submit
         }
 
         if (!doc || !doc.s3Key) {
@@ -85,12 +93,10 @@ export const UploadedDocumentsTable = ({
         return doc.dateAdded > previousSubmissionDate
     }
 
-    const hasSharedRateCert =
-        (packagesWithSharedRateCerts &&
-            packagesWithSharedRateCerts.length > 0) ||
-        false
+    // show legacy shared rates across submissions (this is feature replaced by linked rates)
+    // to cms users always when data available, to state users only when linked rates flag is off
+    const showLegacySharedRatesAcross =  Boolean((useLinkedRates? !isStateUser: true) && (packagesWithSharedRateCerts && packagesWithSharedRateCerts.length > 0))
 
-    const showSharedInfo = hasSharedRateCert && !isEditing
     const borderTopGradientStyles = `borderTopLinearGradient ${styles.uploadedDocumentsTable}`
     const supportingDocsTopMarginStyles = isSupportingDocuments
         ? styles.withMarginTop
@@ -152,7 +158,7 @@ export const UploadedDocumentsTable = ({
                     <div className={styles.captionContainer}>
                         {tableCaptionJSX}
                     </div>
-                    {!isSubmitted && hasMultipleDocs && !isEditing && (
+                    { hasMultipleDocs && !hideDynamicFeedback && (
                         <DataDetailMissingField
                             classname={styles.missingInfo}
                             requiredText="Only one document is allowed for a rate
@@ -168,7 +174,7 @@ export const UploadedDocumentsTable = ({
                         {documentCategory && (
                             <th scope="col">Document category</th>
                         )}
-                        {showSharedInfo && (
+                        {showLegacySharedRatesAcross && (
                             <th scope="col">Linked submissions</th>
                         )}
                     </tr>
@@ -180,7 +186,7 @@ export const UploadedDocumentsTable = ({
                                 <td>
                                     <DocumentTag
                                         isNew={shouldHaveNewTag(doc)}
-                                        isShared={showSharedInfo}
+                                        isShared={showLegacySharedRatesAcross}
                                     />
                                     <Link
                                         className={styles.inlineLink}
@@ -195,6 +201,7 @@ export const UploadedDocumentsTable = ({
                                 <td>
                                     <DocumentTag
                                         isNew={shouldHaveNewTag(doc)}
+                                        isShared={showLegacySharedRatesAcross}
                                     />
                                     {doc.name}
                                 </td>
@@ -207,17 +214,15 @@ export const UploadedDocumentsTable = ({
                                 )}
                             </td>
                             {documentCategory && <td>{documentCategory}</td>}
-                            {showSharedInfo
-                                ? packagesWithSharedRateCerts && (
+                            {showLegacySharedRatesAcross && (
                                       <td>
                                           {linkedPackagesList({
                                               unlinkDrafts: Boolean(isCMSUser),
                                               packages:
-                                                  packagesWithSharedRateCerts,
+                                                  packagesWithSharedRateCerts ?? [],
                                           })}
                                       </td>
-                                  )
-                                : null}
+                                  )}
                         </tr>
                     ))}
                 </tbody>

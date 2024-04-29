@@ -367,7 +367,7 @@ export const RateDetailsSummarySectionV2 = ({
                                     caption="Rate certification"
                                     documentCategory="Rate certification"
                                     previousSubmissionDate={lastSubmittedDate}
-                                    isEditing={isEditing}
+                                    hideDynamicFeedback={isSubmittedOrCMSUser}
                                 />
                             )}
                             {rateFormData.supportingDocuments && (
@@ -384,7 +384,7 @@ export const RateDetailsSummarySectionV2 = ({
                                     caption="Rate supporting documents"
                                     isSupportingDocuments
                                     documentCategory="Rate-supporting"
-                                    isEditing={isEditing}
+                                    hideDynamicFeedback={isSubmittedOrCMSUser}
                                 />
                             )}
                         </SectionCard>

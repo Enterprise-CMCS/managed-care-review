@@ -356,7 +356,7 @@ export const RateDetailsSummarySection = ({
                                         rateInfo.rateDocuments,
                                         documentDateLookupTable
                                     )}
-                                    packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
+                                    packagesWithSharedRateCerts={isPreviousSubmission? []:refreshPackagesWithSharedRateCert(
                                         rateInfo
                                     )}
                                     previousSubmissionDate={
@@ -369,7 +369,7 @@ export const RateDetailsSummarySection = ({
                                     multipleDocumentsAllowed={false}
                                     caption="Rate certification"
                                     documentCategory="Rate certification"
-                                    isEditing={isEditing}
+                                    hideDynamicFeedback={!isEditing}
                                 />
                             ) : (
                                 <span className="srOnly">'LOADING...'</span>
@@ -380,7 +380,7 @@ export const RateDetailsSummarySection = ({
                                         rateInfo.supportingDocuments,
                                         documentDateLookupTable
                                     )}
-                                    packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
+                                    packagesWithSharedRateCerts={isPreviousSubmission? []: refreshPackagesWithSharedRateCert(
                                         rateInfo
                                     )}
                                     previousSubmissionDate={
@@ -393,7 +393,7 @@ export const RateDetailsSummarySection = ({
                                     caption="Rate supporting documents"
                                     isSupportingDocuments
                                     documentCategory="Rate-supporting"
-                                    isEditing={isEditing}
+                                    hideDynamicFeedback={!isEditing}
                                 />
                             ) : (
                                 <span className="srOnly">'LOADING...'</span>

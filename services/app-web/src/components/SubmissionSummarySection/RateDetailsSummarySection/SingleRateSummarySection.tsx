@@ -106,6 +106,8 @@ export const SingleRateSummarySection = ({
     const explainMissingData =
         !isSubmitted && loggedInUser?.role === 'STATE_USER'
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const isSubmittedOrCMSUser =
+    rate.status === 'SUBMITTED' || loggedInUser?.role === 'CMS_USER'
 
     // feature flags
     const ldClient = useLDClient()
@@ -348,12 +350,14 @@ export const SingleRateSummarySection = ({
                     multipleDocumentsAllowed={false}
                     previousSubmissionDate={lastSubmittedDate}
                     caption="Rate certification"
+                    hideDynamicFeedback={!isSubmittedOrCMSUser}
                 />
                 <UploadedDocumentsTable
                     documents={formData.supportingDocuments}
                     packagesWithSharedRateCerts={appendDraftToSharedPackages}
                     previousSubmissionDate={lastSubmittedDate}
                     caption="Rate supporting documents"
+                    hideDynamicFeedback={!isSubmittedOrCMSUser}
                 />
             </SectionCard>
         </React.Fragment>
