@@ -11,7 +11,6 @@ import {
 import { GenericErrorPage } from '../../../../Errors/GenericErrorPage'
 import { getVisibleLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
 import { Program, Contract } from '../../../../../gen/gqlClient'
-import { usePreviousSubmission } from '../../../../../hooks/usePreviousSubmission'
 import { booleanAsYesNoUserValue } from '../../../../../components/Form/FieldYesNo/FieldYesNo'
 import { SectionCard } from '../../../../../components/SectionCard'
 import styles from '../../../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
@@ -37,7 +36,6 @@ export const SubmissionTypeSummarySectionV2 = ({
     submissionName,
     isStateUser,
 }: SubmissionTypeSummarySectionV2Props): React.ReactElement => {
-    const isPreviousSubmission = usePreviousSubmission()
     const contractFormData = getVisibleLatestContractFormData(
         contract,
         isStateUser
@@ -63,7 +61,7 @@ export const SubmissionTypeSummarySectionV2 = ({
                 {headerChildComponent && headerChildComponent}
             </SectionHeader>
             <dl>
-                {isSubmitted && !isPreviousSubmission && (
+                {isSubmitted && (
                     <DoubleColumnGrid>
                         <DataDetail
                             id="submitted"
