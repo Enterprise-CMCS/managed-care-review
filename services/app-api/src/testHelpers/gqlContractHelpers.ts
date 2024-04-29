@@ -17,7 +17,10 @@ import type { ContractType } from '../domain-models'
 import type { ApolloServer } from 'apollo-server-lambda'
 import type { Contract } from '../gen/gqlServer'
 import { latestFormData } from './healthPlanPackageHelpers'
-import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type {
+    StateCodeType,
+    UnlockedHealthPlanFormDataType,
+} from 'app-web/src/common-code/healthPlanFormDataType'
 import { addNewRateToTestContract } from './gqlRateHelpers'
 
 const createAndSubmitTestContract = async (
@@ -144,13 +147,14 @@ async function createAndUpdateTestContractWithRate(
 
 const createAndUpdateTestContractWithoutRates = async (
     server: ApolloServer,
-    stateCode?: StateCodeType
+    stateCode?: StateCodeType,
+    contractFormDataOverrides?: Partial<UnlockedHealthPlanFormDataType>
 ): Promise<Contract> => {
     const pkg = await createTestHealthPlanPackage(server, stateCode)
     const draft = latestFormData(pkg)
 
-    ;(draft.submissionType = 'CONTRACT_AND_RATES' as const),
-        (draft.submissionDescription = 'An updated submission')
+    draft.submissionType = 'CONTRACT_AND_RATES' as const
+    draft.submissionDescription = 'An updated submission'
     draft.stateContacts = [
         {
             name: 'test name',
@@ -187,6 +191,8 @@ const createAndUpdateTestContractWithoutRates = async (
     }
     draft.statutoryRegulatoryAttestation = false
     draft.statutoryRegulatoryAttestationDescription = 'No compliance'
+
+    Object.assign(draft, contractFormDataOverrides)
 
     await updateTestHealthPlanFormData(server, draft)
     const updatedContract = await fetchTestContract(server, draft.id)

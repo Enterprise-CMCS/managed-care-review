@@ -452,7 +452,7 @@ function mockContractPackageUnlocked(
             submitInfo: undefined,
             unlockInfo: {
                 updatedAt: new Date(),
-                updatedBy: 'soandso@example.com',
+                updatedBy: 'cms@example.com',
                 updatedReason: 'unlocked for a test',
             },
             id: '123',
@@ -528,7 +528,7 @@ function mockContractPackageUnlocked(
                     updatedAt: new Date(),
                     unlockInfo: {
                         updatedAt: new Date(),
-                        updatedBy: 'soandso@example.com',
+                        updatedBy: 'cms@example.com',
                         updatedReason: 'unlocked for a test',
                     },
                     formData: {

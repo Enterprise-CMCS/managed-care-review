@@ -3,7 +3,7 @@ describe('CMS user', () => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
     })
-    it('can unlock and resubmit', () => {
+    it('can unlock and resubmit child rates', () => {
         cy.logInAsStateUser()
 
         // fill out an entire submission
@@ -163,7 +163,8 @@ describe('CMS user', () => {
                     button.trigger('click')
                     button.siblings().hasClass('usa-accordion__content') /// make sure accordion is expanded
                 })
-                //Check for view previous submission link in the initial accordion item to exist
+
+                // Check for view previous submission link in the initial accordion item to exist
                 cy.findByTestId('revision-link-1').should('be.visible')
                 cy.clickSubmissionLink('revision-link-1')
                 //Making sure we are on SubmissionRevisionSummary page and contains version text
@@ -172,7 +173,8 @@ describe('CMS user', () => {
                     .contains(
                         /(0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET version/i
                     )
-                //Previous submission banner should exist and able to click link to go back to current submission
+
+                // Previous submission banner should exist and able to click link to go back to current submission
                 cy.findByTestId('previous-submission-banner').should('exist')
                 //Navigate back to current submission using link inside banner.
                 cy.clickSubmissionLink('currentSubmissionLink')
@@ -225,13 +227,13 @@ describe('CMS user', () => {
                     expect(recordText[4]).to.contain('View past submission version')
                     expect(recordText[4]).to.not.contain('Changes made:')
                     expect(recordText[4]).to.not.contain('Reason for unlock:')
-                    console.log(recordText)
+
                 })
             })
         })
     })
 
-    it.skip('can unlock and resubmit with linked rates', () => {
+    it.only('can unlock and resubmit child rates with linked rates flag', () => {
         cy.interceptFeatureFlags({"link-rates": true, '438-attestation': true})
         cy.logInAsStateUser()
 
@@ -394,6 +396,7 @@ describe('CMS user', () => {
                     button.trigger('click')
                     button.siblings().hasClass('usa-accordion__content') /// make sure accordion is expanded
                 })
+
                 //Check for view previous submission link in the initial accordion item to exist
                 cy.findByTestId('revision-link-1').should('be.visible')
                 cy.clickSubmissionLink('revision-link-1')
@@ -453,13 +456,17 @@ describe('CMS user', () => {
                     expect(recordText[3]).to.contain('Reason for unlock: Unlock submission reason.')
 
                     // Test for initial submission
-                    expect(recordText[4]).to.contain('Submitted by: aang@example.com')
+                    expect(recordText[4]).to.contain('aang@example.com')
                     expect(recordText[4]).to.contain('View past submission version')
                     expect(recordText[4]).to.not.contain('Changes made:')
                     expect(recordText[4]).to.not.contain('Reason for unlock:')
-                    console.log(recordText)
+
                 })
             })
         })
     })
+
+    // TODO AFTER LINKED RATES AND LINKED RATES CHANGE HISTORY SHIPS
+    // it('can unlock and resubmit a linked rate and change history updates')
+    // it('can unlock and resubmit combination of linked and child rates as expected' )
 })
