@@ -434,6 +434,504 @@ function mockContractPackageSubmitted(
     }
 }
 
+function mockContractPackageSubmittedWithRevisions(
+    partial?: Partial<Contract>
+): Contract {
+    return {
+        status: 'SUBMITTED',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        id: 'test-abc-123',
+        stateCode: 'MN',
+        state: mockMNState(),
+        stateNumber: 5,
+        packageSubmissions: [
+        {
+            cause: 'CONTRACT_SUBMISSION',
+            submitInfo: {
+                updatedAt: new Date('01/01/2024'),
+                updatedBy: 'example@state.com',
+                updatedReason: 'contract submit'
+            },
+            submittedRevisions: [
+                {
+                    contractName: 'MCR-MN-0005-SNBC',
+                    createdAt: new Date('01/01/2024'),
+                    updatedAt: new Date('12/31/2024'),
+                    id: '123',
+                    submitInfo: {
+                        updatedAt: new Date(),
+                        updatedBy: 'example@state.com',
+                        updatedReason: 'contract submit'
+                    },
+                    unlockInfo: {
+                        updatedAt: new Date(),
+                        updatedBy: 'example@state.com',
+                        updatedReason: 'contract unlock'
+                    },
+                    formData: {
+                        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        populationCovered: 'MEDICAID',
+                        submissionType: 'CONTRACT_AND_RATES',
+                        riskBasedContract: true,
+                        submissionDescription: 'A real submission',
+                        supportingDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/contractsupporting1',
+                                sha256: 'fakesha',
+                                name: 'contractSupporting1',
+                                dateAdded: new Date('01/15/2024')
+                            },
+                            {
+                                s3URL: 's3://bucketname/key/contractSupporting2',
+                                sha256: 'fakesha',
+                                name: 'contractSupporting2',
+                                dateAdded: new Date('01/13/2024')
+                            },
+                        ],
+                        stateContacts: [],
+                        contractType: 'AMENDMENT',
+                        contractExecutionStatus: 'EXECUTED',
+                        contractDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/contract',
+                                sha256: 'fakesha',
+                                name: 'contract',
+                                dateAdded: new Date('01/01/2024')
+                            },
+                        ],
+                        contractDateStart: new Date(),
+                        contractDateEnd: new Date(),
+                        managedCareEntities: ['MCO'],
+                        federalAuthorities: ['STATE_PLAN'],
+                        inLieuServicesAndSettings: true,
+                        modifiedBenefitsProvided: true,
+                        modifiedGeoAreaServed: false,
+                        modifiedMedicaidBeneficiaries: true,
+                        modifiedRiskSharingStrategy: true,
+                        modifiedIncentiveArrangements: false,
+                        modifiedWitholdAgreements: false,
+                        modifiedStateDirectedPayments: true,
+                        modifiedPassThroughPayments: true,
+                        modifiedPaymentsForMentalDiseaseInstitutions: false,
+                        modifiedMedicalLossRatioStandards: true,
+                        modifiedOtherFinancialPaymentIncentive: false,
+                        modifiedEnrollmentProcess: true,
+                        modifiedGrevienceAndAppeal: false,
+                        modifiedNetworkAdequacyStandards: true,
+                        modifiedLengthOfContract: false,
+                        modifiedNonRiskPaymentArrangements: true,
+                        statutoryRegulatoryAttestation: true,
+                        statutoryRegulatoryAttestationDescription: "everything meets regulatory attestation"
+                    }
+                }    
+            ],
+            contractRevision: {
+                contractName: 'MCR-MN-0005-SNBC',
+                createdAt: new Date('01/01/2024'),
+                updatedAt: new Date('12/31/2024'),
+                id: '123',
+                submitInfo: {
+                    updatedAt: new Date(),
+                    updatedBy: 'example@state.com',
+                    updatedReason: 'contract submit'
+                },
+                unlockInfo: undefined,
+                formData: {
+                    programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                    populationCovered: 'MEDICAID',
+                    submissionType: 'CONTRACT_AND_RATES',
+                    riskBasedContract: true,
+                    submissionDescription: 'A initial submission',
+                    supportingDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contractsupporting1',
+                            sha256: 'fakesha',
+                            name: 'contractSupporting1',
+                            dateAdded: new Date('01/15/2024')
+                        },
+                        {
+                            s3URL: 's3://bucketname/key/contractSupporting2',
+                            sha256: 'fakesha',
+                            name: 'contractSupporting2',
+                            dateAdded: new Date('01/13/2024')
+                        },
+                    ],
+                    stateContacts: [],
+                    contractType: 'AMENDMENT',
+                    contractExecutionStatus: 'EXECUTED',
+                    contractDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contract',
+                            sha256: 'fakesha',
+                            name: 'contract',
+                            dateAdded: new Date('01/01/2024')
+                        },
+                    ],
+                    contractDateStart: new Date(),
+                    contractDateEnd: new Date(),
+                    managedCareEntities: ['MCO'],
+                    federalAuthorities: ['STATE_PLAN'],
+                    inLieuServicesAndSettings: true,
+                    modifiedBenefitsProvided: true,
+                    modifiedGeoAreaServed: false,
+                    modifiedMedicaidBeneficiaries: true,
+                    modifiedRiskSharingStrategy: true,
+                    modifiedIncentiveArrangements: false,
+                    modifiedWitholdAgreements: false,
+                    modifiedStateDirectedPayments: true,
+                    modifiedPassThroughPayments: true,
+                    modifiedPaymentsForMentalDiseaseInstitutions: false,
+                    modifiedMedicalLossRatioStandards: true,
+                    modifiedOtherFinancialPaymentIncentive: false,
+                    modifiedEnrollmentProcess: true,
+                    modifiedGrevienceAndAppeal: false,
+                    modifiedNetworkAdequacyStandards: true,
+                    modifiedLengthOfContract: false,
+                    modifiedNonRiskPaymentArrangements: true,
+                    statutoryRegulatoryAttestation: true,
+                    statutoryRegulatoryAttestationDescription: "everything meets regulatory attestation"
+                }
+            },
+            rateRevisions: [
+                {
+                    id: '1234',
+                    rateID: '123',
+                    createdAt: new Date('01/01/2023'),
+                    updatedAt: new Date('01/01/2023'),
+                    contractRevisions: [],
+                    formData: {
+                        rateType: 'AMENDMENT',
+                        rateCapitationType: 'RATE_CELL',
+                        rateDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rate',
+                                sha256: 'fakesha',
+                                name: 'rate',
+                                dateAdded: new Date('01/01/2023')
+                            },
+                        ],
+                        supportingDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rateSupporting1',
+                                sha256: 'fakesha',
+                                name: 'rate supporting 1',
+                                dateAdded: new Date('01/15/2023')
+                            },
+                            {
+                                s3URL: 's3://bucketname/key/rateSupporting1',
+                                sha256: 'fakesha',
+                                name: 'rate supporting 2',
+                                dateAdded: new Date('01/15/2023')
+                            },
+                        ],
+                        rateDateStart: new Date(),
+                        rateDateEnd: new Date(),
+                        rateDateCertified: new Date(),
+                        amendmentEffectiveDateStart: new Date(),
+                        amendmentEffectiveDateEnd: new Date(),
+                        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        certifyingActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        addtlActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                        packagesWithSharedRateCerts: []
+                    }
+                },
+            ],
+        },
+        {
+            cause: 'CONTRACT_SUBMISSION',
+            submitInfo: {
+                updatedAt: new Date(),
+                updatedBy: 'example@state.com',
+                updatedReason: 'contract submit'
+            },
+            submittedRevisions: [],
+            contractRevision: {
+                contractName: 'MCR-MN-0005-SNBC',
+                createdAt: new Date('01/01/2024'),
+                updatedAt: new Date('12/31/2024'),
+                id: '123',
+                submitInfo: {
+                    updatedAt: new Date(),
+                    updatedBy: 'example@state.com',
+                    updatedReason: 'contract submit'
+                },
+                unlockInfo: {
+                    updatedAt: new Date(),
+                    updatedBy: 'example@state.com',
+                    updatedReason: 'contract unlock'
+                },
+                formData: {
+                    programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                    populationCovered: 'MEDICAID',
+                    submissionType: 'CONTRACT_AND_RATES',
+                    riskBasedContract: true,
+                    submissionDescription: 'A real submission',
+                    supportingDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contractsupporting1',
+                            sha256: 'fakesha',
+                            name: 'contractSupporting1',
+                            dateAdded: new Date('01/15/2024')
+                        },
+                        {
+                            s3URL: 's3://bucketname/key/contractSupporting2',
+                            sha256: 'fakesha',
+                            name: 'contractSupporting2',
+                            dateAdded: new Date('01/13/2024')
+                        },
+                    ],
+                    stateContacts: [],
+                    contractType: 'AMENDMENT',
+                    contractExecutionStatus: 'EXECUTED',
+                    contractDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contract',
+                            sha256: 'fakesha',
+                            name: 'contract',
+                            dateAdded: new Date('01/01/2024')
+                        },
+                    ],
+                    contractDateStart: new Date(),
+                    contractDateEnd: new Date(),
+                    managedCareEntities: ['MCO'],
+                    federalAuthorities: ['STATE_PLAN'],
+                    inLieuServicesAndSettings: true,
+                    modifiedBenefitsProvided: true,
+                    modifiedGeoAreaServed: false,
+                    modifiedMedicaidBeneficiaries: true,
+                    modifiedRiskSharingStrategy: true,
+                    modifiedIncentiveArrangements: false,
+                    modifiedWitholdAgreements: false,
+                    modifiedStateDirectedPayments: true,
+                    modifiedPassThroughPayments: true,
+                    modifiedPaymentsForMentalDiseaseInstitutions: false,
+                    modifiedMedicalLossRatioStandards: true,
+                    modifiedOtherFinancialPaymentIncentive: false,
+                    modifiedEnrollmentProcess: true,
+                    modifiedGrevienceAndAppeal: false,
+                    modifiedNetworkAdequacyStandards: true,
+                    modifiedLengthOfContract: false,
+                    modifiedNonRiskPaymentArrangements: true,
+                    statutoryRegulatoryAttestation: true,
+                    statutoryRegulatoryAttestationDescription: "everything meets regulatory attestation"
+                }
+            },
+            rateRevisions: [
+                {
+                    id: '1234',
+                    rateID: '123',
+                    createdAt: new Date('01/01/2023'),
+                    updatedAt: new Date('01/01/2023'),
+                    contractRevisions: [],
+                    formData: {
+                        rateType: 'AMENDMENT',
+                        rateCapitationType: 'RATE_CELL',
+                        rateDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rate',
+                                sha256: 'fakesha',
+                                name: 'rate',
+                                dateAdded: new Date('01/01/2023')
+                            },
+                        ],
+                        supportingDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rateSupporting1',
+                                sha256: 'fakesha',
+                                name: 'rate supporting 1',
+                                dateAdded: new Date('01/15/2023')
+                            },
+                            {
+                                s3URL: 's3://bucketname/key/rateSupporting1',
+                                sha256: 'fakesha',
+                                name: 'rate supporting 2',
+                                dateAdded: new Date('01/15/2023')
+                            },
+                        ],
+                        rateDateStart: new Date(),
+                        rateDateEnd: new Date(),
+                        rateDateCertified: new Date(),
+                        amendmentEffectiveDateStart: new Date(),
+                        amendmentEffectiveDateEnd: new Date(),
+                        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        certifyingActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        addtlActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                        packagesWithSharedRateCerts: []
+                    }
+                },
+            ],
+        },
+        {
+            cause: 'CONTRACT_SUBMISSION',
+            submitInfo: {
+                updatedAt: new Date(),
+                updatedBy: 'example@state.com',
+                updatedReason: 'contract resubmit'
+            },
+            submittedRevisions: [],
+            contractRevision: {
+                contractName: 'MCR-MN-0005-SNBC',
+                createdAt: new Date('01/01/2024'),
+                updatedAt: new Date('12/31/2024'),
+                id: '123',
+                submitInfo: {
+                    updatedAt: new Date(),
+                    updatedBy: 'example@state.com',
+                    updatedReason: 'contract resubmit'
+                },
+                unlockInfo: undefined,
+                formData: {
+                    programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                    populationCovered: 'MEDICAID',
+                    submissionType: 'CONTRACT_AND_RATES',
+                    riskBasedContract: true,
+                    submissionDescription: 'A real submission',
+                    supportingDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contractsupporting1',
+                            sha256: 'fakesha',
+                            name: 'contractSupporting1',
+                            dateAdded: new Date('01/15/2024')
+                        },
+                        {
+                            s3URL: 's3://bucketname/key/contractSupporting2',
+                            sha256: 'fakesha',
+                            name: 'contractSupporting2',
+                            dateAdded: new Date('01/13/2024')
+                        },
+                    ],
+                    stateContacts: [],
+                    contractType: 'AMENDMENT',
+                    contractExecutionStatus: 'EXECUTED',
+                    contractDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contract',
+                            sha256: 'fakesha',
+                            name: 'contract',
+                            dateAdded: new Date('01/01/2024')
+                        },
+                    ],
+                    contractDateStart: new Date(),
+                    contractDateEnd: new Date(),
+                    managedCareEntities: ['MCO'],
+                    federalAuthorities: ['STATE_PLAN'],
+                    inLieuServicesAndSettings: true,
+                    modifiedBenefitsProvided: true,
+                    modifiedGeoAreaServed: false,
+                    modifiedMedicaidBeneficiaries: true,
+                    modifiedRiskSharingStrategy: true,
+                    modifiedIncentiveArrangements: false,
+                    modifiedWitholdAgreements: false,
+                    modifiedStateDirectedPayments: true,
+                    modifiedPassThroughPayments: true,
+                    modifiedPaymentsForMentalDiseaseInstitutions: false,
+                    modifiedMedicalLossRatioStandards: true,
+                    modifiedOtherFinancialPaymentIncentive: false,
+                    modifiedEnrollmentProcess: true,
+                    modifiedGrevienceAndAppeal: false,
+                    modifiedNetworkAdequacyStandards: true,
+                    modifiedLengthOfContract: false,
+                    modifiedNonRiskPaymentArrangements: true,
+                    statutoryRegulatoryAttestation: true,
+                    statutoryRegulatoryAttestationDescription: "everything meets regulatory attestation"
+                }
+            },
+            rateRevisions: [
+                {
+                    id: '1234',
+                    rateID: '123',
+                    createdAt: new Date('01/01/2023'),
+                    updatedAt: new Date('01/01/2023'),
+                    contractRevisions: [],
+                    formData: {
+                        rateType: 'AMENDMENT',
+                        rateCapitationType: 'RATE_CELL',
+                        rateDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rate',
+                                sha256: 'fakesha',
+                                name: 'rate',
+                                dateAdded: new Date('01/01/2023')
+                            },
+                        ],
+                        supportingDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rateSupporting1',
+                                sha256: 'fakesha',
+                                name: 'rate supporting 1',
+                                dateAdded: new Date('01/15/2023')
+                            },
+                            {
+                                s3URL: 's3://bucketname/key/rateSupporting1',
+                                sha256: 'fakesha',
+                                name: 'rate supporting 2',
+                                dateAdded: new Date('01/15/2023')
+                            },
+                        ],
+                        rateDateStart: new Date(),
+                        rateDateEnd: new Date(),
+                        rateDateCertified: new Date(),
+                        amendmentEffectiveDateStart: new Date(),
+                        amendmentEffectiveDateEnd: new Date(),
+                        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        certifyingActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        addtlActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                        packagesWithSharedRateCerts: []
+                    }
+                },
+            ],
+        },
+    ],
+        ...partial,
+    }
+}
+
 function mockContractPackageUnlocked(
     partial?: Partial<Contract>
 ): Contract {
@@ -818,5 +1316,5 @@ function mockContractFormData( partial?: Partial<ContractFormData>): ContractFor
     }
 }
 
-export { mockContractPackageDraft, mockContractPackageSubmitted, mockContractWithLinkedRateDraft, mockContractPackageUnlocked, mockContractFormData}
+export { mockContractPackageDraft, mockContractPackageSubmitted, mockContractWithLinkedRateDraft, mockContractPackageUnlocked, mockContractFormData, mockContractPackageSubmittedWithRevisions}
 

@@ -118,6 +118,7 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                 />
                 <ContractDetailsSummarySectionV2
                     contract={contract}
+                    isStateUser={isStateUser}
                     editNavigateTo="../contract-details"
                     submissionName={submissionName}
                 />
@@ -133,6 +134,7 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
 
                 <ContactsSummarySection
                     contract={contract}
+                    isStateUser={isStateUser}
                     editNavigateTo="../contacts"
                 />
 
