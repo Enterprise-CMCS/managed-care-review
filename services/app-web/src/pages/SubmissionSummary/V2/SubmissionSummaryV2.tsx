@@ -133,8 +133,10 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
         contract,
         isStateUser
     )
-    if (!contractFormData) {
-        console.error('no form data inside submission summary')
+    if (!contractFormData || !contract || !statePrograms) {
+        console.error(
+            'missing fundamental contract data inside submission summary'
+        )
         return <GenericErrorPage />
     }
 
@@ -143,9 +145,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
     if (submissionStatus === 'UNLOCKED' || submissionStatus === 'RESUBMITTED') {
         updateInfo =
             (submissionStatus === 'UNLOCKED'
-                ? contract.packageSubmissions[0].submittedRevisions.find(
-                      (rev) => rev.unlockInfo
-                  )?.unlockInfo
+                ? contract.draftRevision?.unlockInfo
                 : contract.packageSubmissions[0].contractRevision.submitInfo) ||
             undefined
     }
@@ -209,7 +209,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                     </Link>
                 )}
 
-                {contract && statePrograms && (
+                {
                     <SubmissionTypeSummarySectionV2
                         subHeaderComponent={
                             isCMSUser ? (
@@ -255,39 +255,37 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                         initiallySubmittedAt={contract.initiallySubmittedAt}
                         isStateUser={isStateUser}
                     />
-                )}
+                }
 
-                {contract && (
+                {
                     <ContractDetailsSummarySectionV2
                         contract={contract}
                         isCMSUser={isCMSUser}
                         submissionName={name}
                         onDocumentError={handleDocumentDownloadError}
                     />
+                }
+
+                {isContractActionAndRateCertification && (
+                    <RateDetailsSummarySectionV2
+                        contract={contract}
+                        submissionName={name}
+                        isCMSUser={isCMSUser}
+                        statePrograms={statePrograms}
+                        onDocumentError={handleDocumentDownloadError}
+                    />
                 )}
 
-                {contract &&
-                    statePrograms &&
-                    isContractActionAndRateCertification && (
-                        <RateDetailsSummarySectionV2
-                            contract={contract}
-                            submissionName={name}
-                            isCMSUser={isCMSUser}
-                            statePrograms={statePrograms}
-                            onDocumentError={handleDocumentDownloadError}
-                        />
-                    )}
+                {<ContactsSummarySection contract={contract} />}
 
-                {contract && <ContactsSummarySection contract={contract} />}
-
-                {contract && <ChangeHistoryV2 contract={contract} />}
-                {contract && (
+                {<ChangeHistoryV2 contract={contract} />}
+                {
                     <UnlockSubmitModalV2
                         modalRef={modalRef}
                         modalType="UNLOCK_CONTRACT"
                         submissionData={contract}
                     />
-                )}
+                }
             </GridContainer>
         </div>
     )

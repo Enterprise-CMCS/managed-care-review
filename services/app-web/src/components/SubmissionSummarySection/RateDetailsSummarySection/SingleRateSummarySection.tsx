@@ -67,22 +67,23 @@ const relatedSubmissions = (
     statePrograms: Program[]
 ): React.ReactElement => {
     return (
-        <>
+        <ul className={styles.commaList}>
             {contractRevisions.map((contractRev) => (
-                <Link
-                    key={contractRev.contract.id}
-                    asCustom={NavLink}
-                    to={`/submissions/${contractRev.contract.id}`}
-                >
-                    {packageName(
-                        contractRev.contract.stateCode,
-                        contractRev.contract.stateNumber,
-                        contractRev.formData.programIDs,
-                        statePrograms
-                    )}
-                </Link>
+                <li key={contractRev.contract.id}>
+                    <Link
+                        asCustom={NavLink}
+                        to={`/submissions/${contractRev.contract.id}`}
+                    >
+                        {packageName(
+                            contractRev.contract.stateCode,
+                            contractRev.contract.stateNumber,
+                            contractRev.formData.programIDs,
+                            statePrograms
+                        )}
+                    </Link>
+                </li>
             ))}
-        </>
+        </ul>
     )
 }
 

@@ -30,6 +30,17 @@
         li {
             padding: uswds.units(1) 0;
         }
+        &.commaList {
+            li {
+                padding: 0;
+            }
+            li:after {
+                content: ', ';
+            }
+            li:last-of-type::after {
+                display: none;
+            }
+        }
     }
 
     // align state contacts

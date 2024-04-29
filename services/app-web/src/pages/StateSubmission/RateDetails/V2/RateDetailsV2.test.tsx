@@ -33,6 +33,7 @@ import {
 } from '../../../../testHelpers/jestRateHelpers'
 import { Formik } from 'formik'
 import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
+import { Rate } from '../../../../gen/gqlClient'
 
 describe('RateDetailsv2', () => {
     /* eslint-disable jest/no-disabled-tests, jest/expect-expect */
@@ -316,7 +317,7 @@ describe('RateDetailsv2', () => {
                                     ...mockContractWithLinkedRateDraft(),
                                     id: 'test-abc-123',
                                     // clean draft rates for this test.
-                                    draftRates: []
+                                    draftRates: [],
                                 },
                             }),
                         ],
@@ -693,6 +694,134 @@ describe('RateDetailsv2', () => {
             // Assert options are present
             const dropdownOptions = screen.getAllByRole('option')
             expect(dropdownOptions).toHaveLength(3)
+        })
+
+        it('lists dropdown options in desc order by latest submission date', async () => {
+            const rates: Rate[] = [
+                {
+                    ...rateDataMock(),
+                    id: 'test-id-123',
+                    stateNumber: 1,
+                    revisions: [
+                        {
+                            ...rateRevisionDataMock(),
+                            submitInfo: {
+                                __typename: 'UpdateInformation',
+                                updatedAt: new Date('2022-04-10'),
+                                updatedBy: 'aang@example.com',
+                                updatedReason: 'Resubmit',
+                            },
+                            formData: {
+                                ...rateRevisionDataMock().formData,
+                                rateCertificationName: 'Third-Position-Rate',
+                            },
+                        },
+                    ],
+                },
+                {
+                    ...rateDataMock(),
+                    id: 'test-id-124',
+                    stateNumber: 2,
+                    revisions: [
+                        {
+                            ...rateRevisionDataMock(),
+                            submitInfo: {
+                                __typename: 'UpdateInformation',
+                                updatedAt: new Date('2024-04-10'),
+                                updatedBy: 'aang@example.com',
+                                updatedReason: 'Resubmit',
+                            },
+                            formData: {
+                                ...rateRevisionDataMock().formData,
+                                rateCertificationName: 'First-Position-Rate',
+                            },
+                        },
+                    ],
+                },
+                {
+                    ...rateDataMock(),
+                    id: 'test-id-125',
+                    stateNumber: 3,
+                    revisions: [
+                        {
+                            ...rateRevisionDataMock(),
+                            submitInfo: {
+                                __typename: 'UpdateInformation',
+                                updatedAt: new Date('2024-04-08'),
+                                updatedBy: 'aang@example.com',
+                                updatedReason: 'Resubmit',
+                            },
+                            formData: {
+                                ...rateRevisionDataMock().formData,
+                                rateCertificationName: 'Second-Position-Rate',
+                            },
+                        },
+                    ],
+                },
+            ]
+
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            indexRatesMockSuccess(rates),
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: mockContractWithLinkedRateDraft(),
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+
+            //Making sure page loads
+            await screen.findByText('Rate Details')
+            expect(
+                screen.getByText(
+                    'Was this rate certification included with another submission?'
+                )
+            ).toBeInTheDocument()
+
+            //Click the yes button and assert it's clickable and checked
+            const yesRadioButton = screen.getByRole('radio', {
+                name: 'Yes, this rate certification is part of another submission',
+            })
+            expect(yesRadioButton).toBeInTheDocument()
+            await user.click(yesRadioButton)
+            expect(yesRadioButton).toBeChecked()
+
+            // Assert the dropdown has rendered
+            await waitFor(() => {
+                expect(
+                    screen.getByText('Which rate certification was it?')
+                ).toBeInTheDocument()
+                expect(screen.getByRole('combobox')).toBeInTheDocument()
+            })
+
+            // Assert the options menu is open
+            const dropdownMenu = screen.getByRole('listbox')
+            expect(dropdownMenu).toBeInTheDocument()
+
+            // Assert options are present
+            const dropdownOptions = screen.getAllByRole('option')
+            expect(dropdownOptions).toHaveLength(3)
+
+            expect(dropdownOptions[0]).toHaveTextContent('First-Position-Rate')
+            expect(dropdownOptions[1]).toHaveTextContent('Second-Position-Rate')
+            expect(dropdownOptions[2]).toHaveTextContent('Third-Position-Rate')
         })
 
         it('removes the selected option from the dropdown list', async () => {

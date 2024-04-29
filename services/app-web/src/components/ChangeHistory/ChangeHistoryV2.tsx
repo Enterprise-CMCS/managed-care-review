@@ -19,11 +19,13 @@ export const ChangeHistoryV2 = ({
 }: ChangeHistoryProps): React.ReactElement => {
     const flattenedRevisions = (): flatRevisions[] => {
         const result: flatRevisions[] = []
+
         const contractSubmissions = contract.packageSubmissions.filter(
             (submission) => {
                 return submission.cause === 'CONTRACT_SUBMISSION'
             }
         )
+
         //Reverse revisions to order from earliest to latest revision. This is to correctly set version for each
         // contract & recontract.
         const reversedRevisions = [...contractSubmissions].reverse()
@@ -40,9 +42,8 @@ export const ChangeHistoryV2 = ({
             }
             if (r.submitInfo) {
                 const newSubmit: flatRevisions = {} as flatRevisions
-
                 const revisionVersion =
-                    index !== contract.packageSubmissions.length - 1
+                    index !== contract.packageSubmissions.length - 1 // if we aren't at the last item in list, assign a version
                         ? String(index + 1) //Offset version, we want to start at 1
                         : undefined
 
@@ -62,7 +63,7 @@ export const ChangeHistoryV2 = ({
 
     const revisedItems: AccordionItemProps[] = revisionHistory.map(
         (r, index) => {
-            const isInitialSubmission = r.updatedReason === 'Initial contract'
+            const isInitialSubmission = r.updatedReason === 'Initial submission'
             const isSubsequentSubmission = r.kind === 'submit'
             // We want to know if this contract has multiple submissions. To have multiple submissions, there must be minimum
             // more than the initial contract revision.
@@ -84,14 +85,14 @@ export const ChangeHistoryV2 = ({
                 content: isInitialSubmission ? (
                     <div data-testid={`change-history-record`}>
                         <span className={styles.tag}>Submitted by:</span>
-                        <span> {r.updatedBy}</span>
+                        <span> {r.updatedBy}&nbsp;</span>
                         <br />
                         {r.revisionVersion && hasSubsequentSubmissions && (
                             <Link
-                                href={`/contracts/${contract.id}/revisions/${r.revisionVersion}`}
+                                href={`/submissions/${contract.id}/revisions/${r.revisionVersion}`}
                                 data-testid={`revision-link-${r.revisionVersion}`}
                             >
-                                View past contract version
+                                View past submission version
                             </Link>
                         )}
                     </div>
@@ -101,9 +102,9 @@ export const ChangeHistoryV2 = ({
                             <span className={styles.tag}>
                                 {isSubsequentSubmission
                                     ? 'Submitted by: '
-                                    : 'Unlocked by: '}{' '}
+                                    : 'Unlocked by: '}
                             </span>
-                            <span>{r.updatedBy}</span>
+                            <span>{r.updatedBy}&nbsp;</span>
                         </div>
                         <div>
                             <span className={styles.tag}>
@@ -118,7 +119,7 @@ export const ChangeHistoryV2 = ({
                                 href={`/submissions/${contract.id}/revisions/${r.revisionVersion}`}
                                 data-testid={`revision-link-${r.revisionVersion}`}
                             >
-                                View past contract version
+                                View past submission version
                             </Link>
                         )}
                     </div>
