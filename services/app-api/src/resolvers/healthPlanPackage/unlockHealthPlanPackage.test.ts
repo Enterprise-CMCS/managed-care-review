@@ -259,6 +259,8 @@ describe(`Tests unlockHealthPlanPackage`, () => {
                         email: 'en@example.com',
                         actuarialFirm: 'MERCER',
                     },
+                ],
+                addtlActuaryContacts: [
                     {
                         name: 'Enrico Soletzo 2',
                         titleRole: 'person',
@@ -383,8 +385,14 @@ describe(`Tests unlockHealthPlanPackage`, () => {
             finallySubmittedFormData.rateInfos[0].actuaryContacts.map(
                 (c) => c.name
             )
-        expect(actuariesInOrder).toEqual([
-            'Enrico Soletzo 1',
+        expect(actuariesInOrder).toEqual(['Enrico Soletzo 1'])
+
+        // checks additional actuaries in order
+        const addtlActuariesInOrder =
+            finallySubmittedFormData.rateInfos[0].addtlActuaryContacts?.map(
+                (c) => c.name
+            )
+        expect(addtlActuariesInOrder).toEqual([
             'Enrico Soletzo 2',
             'Enrico Soletzo 3',
         ])

@@ -212,6 +212,15 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
                         actuarialFirm: 'OTHER' as const,
                         actuarialFirmOther: 'ACME',
                     },
+                ],
+                addtlActuaryContacts: [
+                    {
+                        name: 'foo bar',
+                        titleRole: 'manager',
+                        email: 'soandso@example.com',
+                        actuarialFirm: 'OTHER' as const,
+                        actuarialFirmOther: 'ACME',
+                    },
                     {
                         name: 'Fine Bab',
                         titleRole: 'supervisor',
@@ -237,21 +246,7 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
                 email: 'lodar@example.com',
             },
         ],
-        addtlActuaryContacts: [
-            {
-                name: 'foo bar',
-                titleRole: 'manager',
-                email: 'soandso@example.com',
-                actuarialFirm: 'OTHER' as const,
-                actuarialFirmOther: 'ACME',
-            },
-            {
-                name: 'Fine Bab',
-                titleRole: 'supervisor',
-                email: 'lodar@example.com',
-                actuarialFirm: 'MERCER' as const,
-            },
-        ],
+        addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         statutoryRegulatoryAttestation: false,
         statutoryRegulatoryAttestationDescription: 'No compliance',
@@ -324,6 +319,15 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
                         email: 'soandso@example.com',
                         actuarialFirm: 'OTHER' as const,
                         actuarialFirmOther: 'ACME',
+                    }
+                ],
+                addtlActuaryContacts: [
+                    {
+                        name: 'foo bar',
+                        titleRole: 'manager',
+                        email: 'soandso@example.com',
+                        actuarialFirm: 'OTHER' as const,
+                        actuarialFirmOther: 'ACME',
                     },
                     {
                         name: 'Fine Bab',
@@ -350,21 +354,7 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
                 email: 'lodar@example.com',
             },
         ],
-        addtlActuaryContacts: [
-            {
-                name: 'foo bar',
-                titleRole: 'manager',
-                email: 'soandso@example.com',
-                actuarialFirm: 'OTHER' as const,
-                actuarialFirmOther: 'ACME',
-            },
-            {
-                name: 'Fine Bab',
-                titleRole: 'supervisor',
-                email: 'lodar@example.com',
-                actuarialFirm: 'MERCER' as const,
-            },
-        ],
+        addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         statutoryRegulatoryAttestation: false,
         statutoryRegulatoryAttestationDescription: 'No compliance',
@@ -434,6 +424,15 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
                         actuarialFirm: 'OTHER' as const,
                         actuarialFirmOther: 'ACME',
                     },
+                ],
+                addtlActuaryContacts: [
+                    {
+                        name: 'foo bar',
+                        titleRole: 'manager',
+                        email: 'soandso@example.com',
+                        actuarialFirm: 'OTHER' as const,
+                        actuarialFirmOther: 'ACME',
+                    },
                     {
                         name: 'Fine Bab',
                         titleRole: 'supervisor',
@@ -457,21 +456,7 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
                 email: 'lodar@example.com',
             },
         ],
-        addtlActuaryContacts: [
-            {
-                name: 'foo bar',
-                titleRole: 'manager',
-                email: 'soandso@example.com',
-                actuarialFirm: 'OTHER' as const,
-                actuarialFirmOther: 'ACME',
-            },
-            {
-                name: 'Fine Bab',
-                titleRole: 'supervisor',
-                email: 'lodar@example.com',
-                actuarialFirm: 'MERCER' as const,
-            },
-        ],
+        addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         statutoryRegulatoryAttestation: false,
         statutoryRegulatoryAttestationDescription: 'No compliance',
@@ -568,6 +553,15 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
                         actuarialFirm: 'OTHER' as const,
                         actuarialFirmOther: 'ACME',
                     },
+                ],
+                addtlActuaryContacts: [
+                    {
+                        name: 'foo bar',
+                        titleRole: 'manager',
+                        email: 'soandso@example.com',
+                        actuarialFirm: 'OTHER' as const,
+                        actuarialFirmOther: 'ACME',
+                    },
                     {
                         name: 'Fine Bab',
                         titleRole: 'supervisor',
@@ -591,21 +585,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
                 email: 'lodar@example.com',
             },
         ],
-        addtlActuaryContacts: [
-            {
-                name: 'foo bar',
-                titleRole: 'manager',
-                email: 'soandso@example.com',
-                actuarialFirm: 'OTHER' as const,
-                actuarialFirmOther: 'ACME',
-            },
-            {
-                name: 'Fine Bab',
-                titleRole: 'supervisor',
-                email: 'lodar@example.com',
-                actuarialFirm: 'MERCER' as const,
-            },
-        ],
+        addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         statutoryRegulatoryAttestation: false,
         statutoryRegulatoryAttestationDescription: 'No compliance',
@@ -706,6 +686,15 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
                         actuarialFirm: 'OTHER' as const,
                         actuarialFirmOther: 'ACME',
                     },
+                ],
+                addtlActuaryContacts: [
+                    {
+                        name: 'foo bar',
+                        titleRole: 'manager',
+                        email: 'soandso@example.com',
+                        actuarialFirm: 'OTHER' as const,
+                        actuarialFirmOther: 'ACME',
+                    },
                     {
                         name: 'Fine Bab',
                         titleRole: 'supervisor',
@@ -729,21 +718,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
                 email: 'lodar@example.com',
             },
         ],
-        addtlActuaryContacts: [
-            {
-                name: 'foo bar',
-                titleRole: 'manager',
-                email: 'soandso@example.com',
-                actuarialFirm: 'OTHER' as const,
-                actuarialFirmOther: 'ACME',
-            },
-            {
-                name: 'Fine Bab',
-                titleRole: 'supervisor',
-                email: 'lodar@example.com',
-                actuarialFirm: 'MERCER' as const,
-            },
-        ],
+        addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         statutoryRegulatoryAttestation: false,
         statutoryRegulatoryAttestationDescription: 'No compliance',

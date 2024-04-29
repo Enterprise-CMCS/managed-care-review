@@ -1,6 +1,5 @@
 import type {
     ActuaryCommunicationType,
-    ActuaryContact,
     HealthPlanFormDataType,
     RateInfoType,
     SubmissionDocument,
@@ -17,7 +16,6 @@ import {
 import type { ContractRevisionWithRatesType } from './revisionTypes'
 import { parsePartialHPFD } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/toDomain'
 import type { PartialHealthPlanFormData } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/toDomain'
-import { isEqualData } from '../../resolvers/healthPlanPackage/contractAndRates/resolverHelpers'
 
 function convertContractWithRatesToUnlockedHPP(
     contract: ContractType
@@ -91,7 +89,6 @@ function convertContractWithRatesToFormData(
     stateNumber: number
 ): HealthPlanFormDataType | Error {
     // additional certifying actuaries are on every rate post refactor but on the package pre-refactor
-    const pkgAdditionalCertifyingActuaries: ActuaryContact[] = []
     let pkgActuaryCommsPref: ActuaryCommunicationType | undefined = undefined
 
     const rateInfos: RateInfoType[] = contractRev.rateRevisions.map(
@@ -113,16 +110,6 @@ function convertContractWithRatesToFormData(
                 amendmentEffectiveDateStart,
                 actuaryCommunicationPreference,
             } = rateRev.formData
-
-            for (const additionalActuary of addtlActuaryContacts) {
-                if (
-                    !pkgAdditionalCertifyingActuaries.find((actuary) =>
-                        isEqualData(actuary, additionalActuary)
-                    )
-                ) {
-                    pkgAdditionalCertifyingActuaries.push(additionalActuary)
-                }
-            }
 
             // The first time we find a rate that has an actuary comms pref, we use that to set the package's prefs
             if (actuaryCommunicationPreference && !pkgActuaryCommsPref) {
@@ -151,6 +138,7 @@ function convertContractWithRatesToFormData(
                 rateProgramIDs,
                 rateCertificationName,
                 actuaryContacts: certifyingActuaryContacts ?? [],
+                addtlActuaryContacts: addtlActuaryContacts ?? [],
                 actuaryCommunicationPreference,
                 packagesWithSharedRateCerts,
             }
@@ -171,7 +159,6 @@ function convertContractWithRatesToFormData(
         submissionDescription: contractRev.formData.submissionDescription,
         stateContacts: contractRev.formData.stateContacts,
         addtlActuaryCommunicationPreference: pkgActuaryCommsPref,
-        addtlActuaryContacts: [...pkgAdditionalCertifyingActuaries],
         documents: contractRev.formData.supportingDocuments.map((doc) => ({
             ...doc,
         })) as SubmissionDocument[],
@@ -225,6 +212,7 @@ function convertContractWithRatesToFormData(
                     contractRev.formData.modifiedNonRiskPaymentArrangements,
             },
         },
+        addtlActuaryContacts: [],
         statutoryRegulatoryAttestation:
             contractRev.formData.statutoryRegulatoryAttestation,
         statutoryRegulatoryAttestationDescription:
