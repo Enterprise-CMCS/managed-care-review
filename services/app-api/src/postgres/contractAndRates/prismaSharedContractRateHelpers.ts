@@ -6,6 +6,7 @@ import type {
     RateRevisionType,
     PackageStatusType,
     UpdateInfoType,
+    ContractRevisionType,
 } from '../../domain-models/contractAndRates'
 import { findStatePrograms } from '../state'
 import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
@@ -247,6 +248,59 @@ function rateRevisionToDomainModel(
     }
 }
 
+// setDateAddedForContractRevisions takes a list of contractRevs and sets dateAdded
+// for all documents based on when the doc first appears in the list. The contractRevs
+// should be in createdAt order.
+function setDateAddedForContractRevisions(
+    contractRevs: ContractRevisionType[]
+) {
+    const firstSeenDate: { [sha: string]: Date } = {}
+
+    for (const contractRev of contractRevs) {
+        const sinceDate =
+            contractRev.submitInfo?.updatedAt || contractRev.updatedAt
+        for (const doc of contractRev.formData.contractDocuments) {
+            if (!firstSeenDate[doc.sha256]) {
+                firstSeenDate[doc.sha256] = sinceDate
+            }
+            doc.dateAdded = firstSeenDate[doc.sha256]
+        }
+        for (const doc of contractRev.formData.supportingDocuments) {
+            if (!firstSeenDate[doc.sha256]) {
+                firstSeenDate[doc.sha256] = sinceDate
+            }
+            doc.dateAdded = firstSeenDate[doc.sha256]
+        }
+    }
+}
+
+// setDateAddedForContractRevisions takes a list of contractRevs and sets dateAdded
+// for all documents based on when the doc first appears in the list. The contractRevs
+// should be in createdAt order.
+function setDateAddedForRateRevisions(rateRevs: RateRevisionType[]) {
+    const firstSeenDate: { [sha: string]: Date } = {}
+
+    for (const rateRev of rateRevs) {
+        const sinceDate = rateRev.submitInfo?.updatedAt || rateRev.updatedAt
+        if (rateRev.formData.rateDocuments) {
+            for (const doc of rateRev.formData.rateDocuments) {
+                if (!firstSeenDate[doc.sha256]) {
+                    firstSeenDate[doc.sha256] = sinceDate
+                }
+                doc.dateAdded = firstSeenDate[doc.sha256]
+            }
+        }
+        if (rateRev.formData.supportingDocuments) {
+            for (const doc of rateRev.formData.supportingDocuments) {
+                if (!firstSeenDate[doc.sha256]) {
+                    firstSeenDate[doc.sha256] = sinceDate
+                }
+                doc.dateAdded = firstSeenDate[doc.sha256]
+            }
+        }
+    }
+}
+
 function ratesRevisionsToDomainModel(
     rateRevisions: RateRevisionTableWithFormData[]
 ): RateRevisionType[] | Error {
@@ -415,4 +469,6 @@ export {
     rateRevisionToDomainModel,
     ratesRevisionsToDomainModel,
     unsortedRatesRevisionsToDomainModel,
+    setDateAddedForContractRevisions,
+    setDateAddedForRateRevisions,
 }
