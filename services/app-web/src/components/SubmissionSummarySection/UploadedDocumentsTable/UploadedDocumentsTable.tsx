@@ -210,7 +210,6 @@ export const UploadedDocumentsTable = ({
                                 ? packagesWithSharedRateCerts && (
                                       <td>
                                           {linkedPackagesList({
-                                              unlinkDrafts: Boolean(isCMSUser),
                                               packages:
                                                   packagesWithSharedRateCerts,
                                           })}
@@ -232,27 +231,15 @@ type DocumentWithS3Data = {
 } & GenericDocument
 
 type LinkedPackagesListProps = {
-    unlinkDrafts: boolean
     packages: SharedRateCertDisplay[]
 }
 
 const linkedPackagesList = ({
-    unlinkDrafts,
     packages,
 }: LinkedPackagesListProps): React.ReactElement[] => {
     return packages.map((item, index) => {
         const maybeComma = index > 0 ? ', ' : ''
-        const linkedPackageIsDraft =
-            item.packageName && item.packageName.includes('(Draft)')
 
-        if (linkedPackageIsDraft && unlinkDrafts) {
-            return (
-                <span key={item.packageId}>
-                    {maybeComma}
-                    <span>{item.packageName}</span>
-                </span>
-            )
-        } else {
             return (
                 <span key={item.packageId}>
                     {maybeComma}
@@ -264,6 +251,5 @@ const linkedPackagesList = ({
                     </Link>
                 </span>
             )
-        }
-    })
+        })
 }
