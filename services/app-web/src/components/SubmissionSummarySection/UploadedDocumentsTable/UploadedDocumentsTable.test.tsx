@@ -329,6 +329,7 @@ describe('UploadedDocumentsTable', () => {
                 caption="Contract"
                 documentCategory="Contract"
                 multipleDocumentsAllowed={false}
+                hideDynamicFeedback={false}
             />,
             {
                 apolloProvider: {
