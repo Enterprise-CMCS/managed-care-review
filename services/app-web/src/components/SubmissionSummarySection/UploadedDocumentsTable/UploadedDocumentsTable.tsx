@@ -152,7 +152,7 @@ export const UploadedDocumentsTable = ({
                     <div className={styles.captionContainer}>
                         {tableCaptionJSX}
                     </div>
-                    {!!isSubmitted && hasMultipleDocs && !isEditing && (
+                    {!isSubmitted && hasMultipleDocs && !isEditing && (
                         <DataDetailMissingField
                             classname={styles.missingInfo}
                             requiredText="Only one document is allowed for a rate
