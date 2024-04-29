@@ -457,7 +457,6 @@ const RateDetailsV2 = ({
                                                                         }}
                                                                     />
                                                                 )}
-
                                                                 {rateForm.ratePreviouslySubmitted ===
                                                                     'YES' &&
                                                                     rateForm.id && (
