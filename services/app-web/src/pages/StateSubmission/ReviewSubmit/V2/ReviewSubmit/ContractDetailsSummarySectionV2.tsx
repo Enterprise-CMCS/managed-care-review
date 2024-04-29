@@ -25,7 +25,6 @@ import {
     isBaseContract,
     isCHIPOnly,
     isContractWithProvisions,
-    isSubmitted,
 } from '../../../../../common-code/ContractType'
 import {
     federalAuthorityKeysForCHIP,
