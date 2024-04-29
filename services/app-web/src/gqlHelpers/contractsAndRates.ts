@@ -32,7 +32,7 @@ function getVisibleLatestRateRevisions(contract: Contract, isEditing: boolean): 
                 }
                 rateRevs.push(lastRateSubmission)
             }
-        } 
+        }
         return rateRevs
     } else {
         const lastContractSubmission = getLastContractSubmission(contract)
@@ -57,9 +57,13 @@ const getVisibleLatestContractFormData = (contract: Contract, isStateUser: boole
 const getLastContractSubmission = (contract: Contract): ContractPackageSubmission | undefined => {
     return (contract.packageSubmissions && contract.packageSubmissions[0]) ?? undefined
 }
+// used for previous revisions
+const getContractFormDataByIndex =  (contract: Contract, index: number): ContractFormData | undefined =>{
+    return (contract.packageSubmissions && contract.packageSubmissions[index]).contractRevision.formData ?? undefined
+}
 
 const getDraftRates = (contract: Contract): Rate[] | undefined => {
     return (contract.draftRates && contract.draftRates[0]) ? contract.draftRates : undefined
 }
 
-export {getDraftRates, getLastContractSubmission, getVisibleLatestContractFormData, getVisibleLatestRateRevisions}
+export {getDraftRates, getLastContractSubmission, getVisibleLatestContractFormData, getVisibleLatestRateRevisions, getContractFormDataByIndex }

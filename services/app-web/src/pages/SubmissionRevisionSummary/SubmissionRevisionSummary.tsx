@@ -24,7 +24,7 @@ type RouteParams = {
     id: string
     revisionVersion: string
 }
-
+// THIS FILE HAS NO V2 EQUIVALENT ITS WRAPPED INTO SUBMISSION SUMMARY
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
     const { id, revisionVersion } = useParams<keyof RouteParams>()

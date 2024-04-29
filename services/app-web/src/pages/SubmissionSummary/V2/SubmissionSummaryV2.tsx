@@ -6,22 +6,19 @@ import {
     ModalToggleButton,
 } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
 import { ContractDetailsSummarySectionV2 } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/ContractDetailsSummarySectionV2'
 import { ContactsSummarySection } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/ContactsSummarySectionV2'
 import { RateDetailsSummarySectionV2 } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/RateDetailsSummarySectionV2'
 import { SubmissionTypeSummarySectionV2 } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/SubmissionTypeSummarySectionV2'
 import {
-    SubmissionUnlockedBanner,
-    SubmissionUpdatedBanner,
     DocumentWarningBanner,
 } from '../../../components'
 import { Loading } from '../../../components'
 import { usePage } from '../../../contexts/PageContext'
 import {
     useFetchContractQuery,
-    UpdateInformation,
 } from '../../../gen/gqlClient'
 import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../Errors/Error404Page'
@@ -34,6 +31,8 @@ import { featureFlags } from '../../../common-code/featureFlags'
 import { RoutesRecord } from '../../../constants'
 import { useRouteParams } from '../../../hooks'
 import { getVisibleLatestContractFormData } from '../../../gqlHelpers/contractsAndRates'
+import { getRouteName } from '../../../routeHelpers'
+import { CurrentSubmissionBanner } from '../CurrentSubmissionBanner'
 
 function UnlockModalButton({
     disabled,
@@ -59,10 +58,16 @@ function UnlockModalButton({
 export const SubmissionSummaryV2 = (): React.ReactElement => {
     // Page level state
     const { updateHeading } = usePage()
+    const {pathname} = useLocation();
     const modalRef = useRef<ModalRef>(null)
     const [documentError, setDocumentError] = useState(false)
+    const [pkgName, setPkgName] = useState<string|undefined>(undefined)
     const { loggedInUser } = useAuth()
 
+    const isCurrentSubmission = getRouteName(pathname) !== 'SUBMISSIONS_REVISION'
+    useEffect(() => {
+        updateHeading({ customHeading: pkgName })
+    }, [pkgName, updateHeading])
     const { id } = useRouteParams()
 
     const ldClient = useLDClient()
@@ -126,7 +131,6 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
     }
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
     const isStateUser = loggedInUser?.role === 'STATE_USER'
-    const submissionStatus = contract.status
     const statePrograms = contract.state.programs
 
     const contractFormData = getVisibleLatestContractFormData(contract, isStateUser)
@@ -135,14 +139,8 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
         return <GenericErrorPage />
     }
 
-    // Get the correct update info depending on the submission status
-    let updateInfo: UpdateInformation | undefined = undefined
-    if (submissionStatus === 'UNLOCKED' || submissionStatus === 'RESUBMITTED') {
-        updateInfo =
-            (submissionStatus === 'UNLOCKED'
-                ? contract.draftRevision?.unlockInfo
-                : contract.packageSubmissions[0].contractRevision.submitInfo) ||
-            undefined
+    if (pkgName !== name) {
+        setPkgName(name)
     }
 
     const isContractActionAndRateCertification =
@@ -164,29 +162,8 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                 data-testid="submission-summary"
                 className={styles.container}
             >
-                {submissionStatus === 'UNLOCKED' && updateInfo && (
-                    <SubmissionUnlockedBanner
-                        userType={
-                            loggedInUser?.role === 'CMS_USER'
-                                ? 'CMS_USER'
-                                : 'STATE_USER'
-                        }
-                        unlockedBy={updateInfo.updatedBy}
-                        unlockedOn={updateInfo.updatedAt}
-                        reason={updateInfo.updatedReason}
-                        className={styles.banner}
-                    />
-                )}
 
-                {submissionStatus === 'RESUBMITTED' && updateInfo && (
-                    <SubmissionUpdatedBanner
-                        submittedBy={updateInfo.updatedBy}
-                        updatedOn={updateInfo.updatedAt}
-                        changesMade={updateInfo.updatedReason}
-                        className={styles.banner}
-                    />
-                )}
-
+            {isCurrentSubmission  && <CurrentSubmissionBanner contract={contract} isStateUser={isStateUser}/>}
                 {documentError && (
                     <DocumentWarningBanner className={styles.banner} />
                 )}
