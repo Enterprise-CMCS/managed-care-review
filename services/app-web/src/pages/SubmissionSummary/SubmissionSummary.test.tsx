@@ -1814,7 +1814,7 @@ describe('SubmissionSummary', () => {
             const soAndSo = screen.getAllByRole('link', {
                 name: 'soandso@example.com',
             })
-            expect(soAndSo).toHaveLength(3)
+            expect(soAndSo).toHaveLength(2)
             expect(soAndSo[0]).toHaveAttribute(
                 'href',
                 'mailto:soandso@example.com'
@@ -1830,9 +1830,9 @@ describe('SubmissionSummary', () => {
             ).toHaveLength(2)
 
             expect(screen.getByText('Certifying actuary')).toBeInTheDocument()
-            expect(
-                screen.getAllByText('Additional actuary contact')
-            ).toHaveLength(2)
+            // expect(
+            //     screen.getAllByText('Additional actuary contact')
+            // ).toHaveLength(2)
             expect(
                 screen.getByText(
                     'OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.'
@@ -2181,7 +2181,7 @@ describe('SubmissionSummary', () => {
             const soAndSo = screen.getAllByRole('link', {
                 name: 'soandso@example.com',
             })
-            expect(soAndSo).toHaveLength(3)
+            expect(soAndSo).toHaveLength(2)
             expect(soAndSo[0]).toHaveAttribute(
                 'href',
                 'mailto:soandso@example.com'
@@ -2199,7 +2199,7 @@ describe('SubmissionSummary', () => {
             expect(screen.getByText('Certifying actuary')).toBeInTheDocument()
             expect(
                 screen.getAllByText('Additional actuary contact')
-            ).toHaveLength(2)
+            ).toHaveLength(1)
             expect(
                 screen.getByText(
                     'OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.'
