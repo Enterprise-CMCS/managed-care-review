@@ -12,15 +12,22 @@ import {
     DataDetailContactField,
 } from '../../../../../components/DataDetail'
 import { SectionCard } from '../../../../../components/SectionCard'
-import { Contract, RateRevision } from '../../../../../gen/gqlClient'
+import {
+    Contract,
+    RateRevision,
+    ContractRevision,
+} from '../../../../../gen/gqlClient'
 import {
     getDraftRates,
     getLastContractSubmission,
+    getVisibleLatestContractFormData,
 } from '../../../../../gqlHelpers/contractsAndRates'
 
 export type ContactsSummarySectionProps = {
     contract: Contract
+    contractRev?: ContractRevision
     editNavigateTo?: string
+    isStateUser: boolean
 }
 
 export const getActuaryFirm = (actuaryContact: ActuaryContact): string => {
@@ -41,13 +48,17 @@ export const getActuaryFirm = (actuaryContact: ActuaryContact): string => {
 
 export const ContactsSummarySection = ({
     contract,
+    contractRev,
     editNavigateTo,
+    isStateUser,
 }: ContactsSummarySectionProps): React.ReactElement => {
     const isSubmitted = contract.status === 'SUBMITTED'
-    const contractFormData =
-        contract.draftRevision?.formData ||
-        getLastContractSubmission(contract)?.contractRevision.formData
+    const contractOrRev = contractRev ? contractRev : contract
 
+    const contractFormData = getVisibleLatestContractFormData(
+        contractOrRev,
+        isStateUser
+    )
     let rateRev: RateRevision | undefined = undefined
 
     if (contractFormData?.submissionType === 'CONTRACT_AND_RATES') {

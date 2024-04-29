@@ -129,9 +129,14 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
     const submissionStatus = contract.status
     const statePrograms = contract.state.programs
 
-    const contractFormData = getVisibleLatestContractFormData(contract, isStateUser)
+    const contractFormData = getVisibleLatestContractFormData(
+        contract,
+        isStateUser
+    )
     if (!contractFormData || !contract || !statePrograms) {
-        console.error('missing fundamental contract data inside submission summary')
+        console.error(
+            'missing fundamental contract data inside submission summary'
+        )
         return <GenericErrorPage />
     }
 
@@ -157,7 +162,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
 
     return (
         <div className={styles.background}>
-           <div style={{ textAlign: 'center' }}>
+            <div style={{ textAlign: 'center' }}>
                 This is the V2 page of the SubmissionSummary
             </div>
             <GridContainer
@@ -255,26 +260,32 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                     />
                 }
 
-                {(
+                {
                     <ContractDetailsSummarySectionV2
                         contract={contract}
                         isCMSUser={isCMSUser}
+                        isStateUser={isStateUser}
                         submissionName={name}
+                        onDocumentError={handleDocumentDownloadError}
+                    />
+                }
+
+                {isContractActionAndRateCertification && (
+                    <RateDetailsSummarySectionV2
+                        contract={contract}
+                        submissionName={name}
+                        isCMSUser={isCMSUser}
+                        statePrograms={statePrograms}
                         onDocumentError={handleDocumentDownloadError}
                     />
                 )}
 
-                {isContractActionAndRateCertification && (
-                        <RateDetailsSummarySectionV2
-                            contract={contract}
-                            submissionName={name}
-                            isCMSUser={isCMSUser}
-                            statePrograms={statePrograms}
-                            onDocumentError={handleDocumentDownloadError}
-                        />
-                    )}
-
-                {<ContactsSummarySection contract={contract} />}
+                {
+                    <ContactsSummarySection
+                        contract={contract}
+                        isStateUser={isStateUser}
+                    />
+                }
 
                 {<ChangeHistoryV2 contract={contract} />}
                 {
