@@ -338,6 +338,14 @@ function parseRateInfos(
 
     if (rateInfos.length > 0) {
         rateInfos.forEach((rateInfo) => {
+
+            /**
+             * Not adding more to the proto schema, instead additional actuaries are added to the actuaryContacts array
+             * from index 1.
+             */
+            const certifyingActuary = rateInfo?.actuaryContacts?.slice(0,1)
+            const additionalActuaries = rateInfo.actuaryContacts?.slice(1)
+
             const rate: RecursivePartial<RateInfoType> = {
                 id: rateInfo.id ?? undefined,
                 rateAmendmentInfo: parseProtoRateAmendment(
@@ -365,7 +373,10 @@ function parseRateInfos(
                     rateInfo?.rateCertificationName
                 ),
                 actuaryContacts: parseActuaryContacts(
-                    rateInfo?.actuaryContacts
+                    certifyingActuary
+                ),
+                addtlActuaryContacts: parseActuaryContacts(
+                    additionalActuaries
                 ),
                 actuaryCommunicationPreference: enumToDomain(
                     mcreviewproto.ActuaryCommunicationType,

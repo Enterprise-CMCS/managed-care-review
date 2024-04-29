@@ -200,6 +200,15 @@ const toProtoBuffer = (
         rateInfos:
             domainData.rateInfos && domainData.rateInfos.length
                 ? domainData.rateInfos.map((rateInfo) => {
+
+                    /**
+                     * Not adding more to the proto schema, we will combine certifying actuaries with additional actuaries
+                     * in the same array, where certifying actuary is at index 0 and additional actuaries are from index
+                     * 1 and beyond.
+                     */
+                    const combinedActuaries =
+                        rateInfo?.actuaryContacts.concat(rateInfo?.addtlActuaryContacts ?? []) ?? []
+
                       return {
                           id: rateInfo.id,
                           rateType: domainEnumToProto(
@@ -239,7 +248,11 @@ const toProtoBuffer = (
                                   rateInfo.rateAmendmentInfo.effectiveDateEnd
                               ),
                           },
-                          actuaryContacts: rateInfo.actuaryContacts.map(
+                          /**
+                           * Not making more changes to the proto schema, instead additional actuaries are added to the
+                           * actuaryContacts array from index 1.
+                           */
+                          actuaryContacts: combinedActuaries.map(
                               (actuaryContact) => {
                                   const firmType = domainEnumToProto(
                                       actuaryContact.actuarialFirm,
@@ -267,24 +280,7 @@ const toProtoBuffer = (
                       }
                   })
                 : undefined,
-        addtlActuaryContacts: domainData.addtlActuaryContacts.map(
-            (actuaryContact) => {
-                const firmType = domainEnumToProto(
-                    actuaryContact.actuarialFirm,
-                    mcreviewproto.ActuarialFirmType
-                )
-
-                return {
-                    contact: {
-                        name: actuaryContact.name,
-                        titleRole: actuaryContact.titleRole,
-                        email: actuaryContact.email,
-                    },
-                    actuarialFirmType: firmType,
-                    actuarialFirmOther: actuaryContact.actuarialFirmOther,
-                }
-            }
-        ),
+        addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: domainEnumToProto(
             domainData.addtlActuaryCommunicationPreference,
             mcreviewproto.ActuaryCommunicationType
