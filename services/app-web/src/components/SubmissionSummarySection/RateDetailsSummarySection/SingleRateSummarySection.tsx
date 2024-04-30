@@ -107,7 +107,7 @@ export const SingleRateSummarySection = ({
         !isSubmitted && loggedInUser?.role === 'STATE_USER'
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
     const isSubmittedOrCMSUser =
-    rate.status === 'SUBMITTED' || loggedInUser?.role === 'CMS_USER'
+        rate.status === 'SUBMITTED' || loggedInUser?.role === 'CMS_USER'
 
     // feature flags
     const ldClient = useLDClient()

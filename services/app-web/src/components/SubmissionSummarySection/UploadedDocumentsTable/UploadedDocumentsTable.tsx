@@ -40,7 +40,6 @@ export type UploadedDocumentsTableProps = {
     isSupportingDocuments?: boolean // used to calculate empty state and styles around the secondary supporting docs tables - would be nice to remove this in favor of more domain agnostic prop such as 'emptyStateText'
     multipleDocumentsAllowed?: boolean // used to determined if we display validations based on doc list length
     documentCategory?: string // used to determine if we display document category column
-
 }
 
 export const UploadedDocumentsTable = ({
@@ -159,7 +158,7 @@ export const UploadedDocumentsTable = ({
                     <div className={styles.captionContainer}>
                         {tableCaptionJSX}
                     </div>
-                    { hasMultipleDocs && !hideDynamicFeedback && (
+                    {hasMultipleDocs && !hideDynamicFeedback && (
                         <DataDetailMissingField
                             classname={styles.missingInfo}
                             requiredText="Only one document is allowed for a rate
@@ -216,13 +215,13 @@ export const UploadedDocumentsTable = ({
                             </td>
                             {documentCategory && <td>{documentCategory}</td>}
                             {showLegacySharedRatesAcross && (
-                                      <td>
-                                          {linkedPackagesList({
-                                              packages:
-                                                  packagesWithSharedRateCerts ?? [],
-                                          })}
-                                      </td>
-                                  )}
+                                <td>
+                                    {linkedPackagesList({
+                                        packages:
+                                            packagesWithSharedRateCerts ?? [],
+                                    })}
+                                </td>
+                            )}
                         </tr>
                     ))}
                 </tbody>
@@ -247,16 +246,13 @@ const linkedPackagesList = ({
     return packages.map((item, index) => {
         const maybeComma = index > 0 ? ', ' : ''
 
-            return (
-                <span key={item.packageId}>
-                    {maybeComma}
-                    <Link
-                        asCustom={NavLink}
-                        to={`/submissions/${item.packageId}`}
-                    >
-                        {item.packageName}
-                    </Link>
-                </span>
-            )
-        })
+        return (
+            <span key={item.packageId}>
+                {maybeComma}
+                <Link asCustom={NavLink} to={`/submissions/${item.packageId}`}>
+                    {item.packageName}
+                </Link>
+            </span>
+        )
+    })
 }

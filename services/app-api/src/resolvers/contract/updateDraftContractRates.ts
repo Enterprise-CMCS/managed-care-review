@@ -162,13 +162,12 @@ function updateDraftContractRates(
         let thisPosition = 1
         for (const rateUpdate of parsedUpdates) {
             if (rateUpdate.type === 'CREATE') {
-
                 // set rateName for now https://jiraent.cms.gov/browse/MCR-4012
                 const rateName = generateRateCertificationName(
                     rateUpdate.formData,
                     contract.stateCode,
                     contract.stateNumber,
-                    statePrograms,
+                    statePrograms
                 )
 
                 rateUpdates.create.push({
@@ -206,7 +205,12 @@ function updateDraftContractRates(
                     throw new Error(errmsg)
                 }
 
-                if (!(rateToUpdate.status === 'DRAFT' || rateToUpdate.status === 'UNLOCKED')) {
+                if (
+                    !(
+                        rateToUpdate.status === 'DRAFT' ||
+                        rateToUpdate.status === 'UNLOCKED'
+                    )
+                ) {
                     // eventually, this will be enough to cancel this. But until we have unlock-rate, you can edit UNLOCKED children of this contract.
                     const errmsg =
                         'Attempted to update a rate that is not editable: ' +
@@ -230,7 +234,7 @@ function updateDraftContractRates(
                     rateUpdate.formData,
                     contract.stateCode,
                     contract.stateNumber,
-                    statePrograms,
+                    statePrograms
                 )
 
                 rateUpdates.update.push({
@@ -253,7 +257,6 @@ function updateDraftContractRates(
                         ratePosition: thisPosition,
                     })
                 } else {
-
                     // linked rates must exist and not be DRAFT
                     const rateToLink = await store.findRateWithHistory(
                         rateUpdate.rateID

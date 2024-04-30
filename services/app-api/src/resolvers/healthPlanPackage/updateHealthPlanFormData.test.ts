@@ -224,23 +224,28 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
 
         // update that draft form data.
         const formData = Object.assign(latestFormData(createdDraft), {
-            addtlActuaryContacts: [
+            rateInfos: [
                 {
-                    name: 'additional actuary 1',
-                    titleRole: 'additional actuary title 1',
-                    email: 'additionalactuary1@example.com',
-                    actuarialFirm: 'MERCER' as const,
-                    actuarialFirmOther: '',
+                    ...rate1,
+                    addtlActuaryContacts: [
+                        {
+                            name: 'additional actuary 1',
+                            titleRole: 'additional actuary title 1',
+                            email: 'additionalactuary1@example.com',
+                            actuarialFirm: 'MERCER' as const,
+                            actuarialFirmOther: '',
+                        },
+                        {
+                            name: 'additional actuary 2',
+                            titleRole: 'additional actuary title 2',
+                            email: 'additionalactuary1@example.com',
+                            actuarialFirm: 'MERCER' as const,
+                            actuarialFirmOther: '',
+                        },
+                    ],
                 },
-                {
-                    name: 'additional actuary 2',
-                    titleRole: 'additional actuary title 2',
-                    email: 'additionalactuary1@example.com',
-                    actuarialFirm: 'MERCER' as const,
-                    actuarialFirmOther: '',
-                },
+                rate2,
             ],
-            rateInfos: [rate1, rate2],
         })
 
         // convert to base64 proto
@@ -282,6 +287,18 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
                             expect.objectContaining({
                                 packageId: packageWithSharedRate2.packageId,
                                 packageName: packageWithSharedRate2.packageName,
+                            }),
+                        ]),
+                        addtlActuaryContacts: expect.arrayContaining([
+                            expect.objectContaining({
+                                name: 'additional actuary 1',
+                                titleRole: 'additional actuary title 1',
+                                email: 'additionalactuary1@example.com',
+                            }),
+                            expect.objectContaining({
+                                name: 'additional actuary 2',
+                                titleRole: 'additional actuary title 2',
+                                email: 'additionalactuary1@example.com',
                             }),
                         ]),
                     }),

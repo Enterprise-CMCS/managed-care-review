@@ -31,7 +31,9 @@ export const ActuaryContactFields = ({
     const { values, errors } = useFormikContext()
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
-
+    const testIdPrefix = fieldNamePrefix.includes('actuaryContacts')
+        ? 'actuaryContacts'
+        : 'addtlActuaryContacts'
     return (
         <Fieldset legend={fieldSetLegend}>
             <span className={styles.requiredOptionalText}>Required</span>
@@ -46,6 +48,7 @@ export const ActuaryContactFields = ({
                 inputRef={inputRef}
                 variant="SUBHEAD"
                 aria-required
+                data-testid={`${testIdPrefix}.name`}
             />
 
             <FieldTextInput
@@ -60,6 +63,7 @@ export const ActuaryContactFields = ({
                 )}
                 type="text"
                 variant="SUBHEAD"
+                data-testid={`${testIdPrefix}.titleRole`}
             />
 
             <FieldTextInput
@@ -72,6 +76,7 @@ export const ActuaryContactFields = ({
                 )}
                 type="email"
                 variant="SUBHEAD"
+                data-testid={`${testIdPrefix}.email`}
             />
 
             <FormGroup
@@ -96,6 +101,7 @@ export const ActuaryContactFields = ({
                     label="Mercer"
                     value={'MERCER'}
                     aria-required
+                    data-testid={`${testIdPrefix}.mercer`}
                 />
                 <FieldRadio
                     id={`${fieldNamePrefix}-milliman`}
@@ -103,6 +109,7 @@ export const ActuaryContactFields = ({
                     label="Milliman"
                     value={'MILLIMAN'}
                     aria-required
+                    data-testid={`${testIdPrefix}.milliman`}
                 />
                 <FieldRadio
                     id={`${fieldNamePrefix}-optumas`}
@@ -110,6 +117,7 @@ export const ActuaryContactFields = ({
                     label="Optumas"
                     value={'OPTUMAS'}
                     aria-required
+                    data-testid={`${testIdPrefix}.optumas`}
                 />
                 <FieldRadio
                     id={`${fieldNamePrefix}-guidehouse`}
@@ -117,6 +125,7 @@ export const ActuaryContactFields = ({
                     label="Guidehouse"
                     value={'GUIDEHOUSE'}
                     aria-required
+                    data-testid={`${testIdPrefix}.guidehouse`}
                 />
                 <FieldRadio
                     id={`${fieldNamePrefix}-deloitte`}
@@ -124,6 +133,7 @@ export const ActuaryContactFields = ({
                     label="Deloitte"
                     value={'DELOITTE'}
                     aria-required
+                    data-testid={`${testIdPrefix}.deloitte`}
                 />
                 <FieldRadio
                     id={`${fieldNamePrefix}-stateInHouse`}
@@ -131,6 +141,7 @@ export const ActuaryContactFields = ({
                     label="State in-house"
                     value={'STATE_IN_HOUSE'}
                     aria-required
+                    data-testid={`${testIdPrefix}.stateInHouse`}
                 />
                 <FieldRadio
                     id={`${fieldNamePrefix}-other`}
@@ -138,6 +149,7 @@ export const ActuaryContactFields = ({
                     label="Other"
                     value={'OTHER'}
                     aria-required
+                    data-testid={`${testIdPrefix}.other`}
                 />
 
                 {getIn(values, `${fieldNamePrefix}.actuarialFirm`) ===

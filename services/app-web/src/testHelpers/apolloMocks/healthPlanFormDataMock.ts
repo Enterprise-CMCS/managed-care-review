@@ -193,6 +193,14 @@ function mockContractAndRatesDraft(
                         email: 'actuarycontact1@test.com',
                     },
                 ],
+                addtlActuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Additional Actuary Contact',
+                        titleRole: 'Test Actuary Contact',
+                        email: 'additionalactuarycontact1@test.com',
+                    },
+                ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
                 packagesWithSharedRateCerts: [],
             },
@@ -209,14 +217,7 @@ function mockContractAndRatesDraft(
                 email: 'statecontact2@test.com',
             },
         ],
-        addtlActuaryContacts: [
-            {
-                actuarialFirm: 'DELOITTE',
-                name: 'Additional Actuary Contact',
-                titleRole: 'Test Actuary Contact',
-                email: 'additionalactuarycontact1@test.com',
-            },
-        ],
+        addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         statutoryRegulatoryAttestation: false,
         statutoryRegulatoryAttestationDescription: 'No compliance',

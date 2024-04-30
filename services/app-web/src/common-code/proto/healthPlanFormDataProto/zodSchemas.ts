@@ -132,6 +132,7 @@ const rateInfosTypeSchema = z.object({
     rateProgramIDs: z.array(z.string()),
     rateCertificationName: z.string().optional(),
     actuaryContacts: z.array(actuaryContactSchema),
+    addtlActuaryContacts: z.array(actuaryContactSchema).optional(),
     actuaryCommunicationPreference: actuaryCommunicationTypeSchema.optional(),
     packagesWithSharedRateCerts: z.array(sharedRateCertDisplay),
 })

@@ -138,21 +138,47 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
                         .nullable(),
                 })
             ),
-            actuaryCommunicationPreference: Yup.string().optional(),
+            addtlActuaryContacts: Yup.array().of(
+                Yup.object().shape({
+                    name: Yup.string().required('You must provide a name'),
+                    titleRole: Yup.string().required(
+                        'You must provide a title/role'
+                    ),
+                    email: Yup.string()
+                        .email('You must enter a valid email address')
+                        .required('You must provide an email address'),
+                    actuarialFirm: Yup.string()
+                        .required('You must select an actuarial firm')
+                        .nullable(),
+                    actuarialFirmOther: Yup.string()
+                        .when('actuarialFirm', {
+                            is: 'OTHER',
+                            then: Yup.string()
+                                .required('You must enter a description')
+                                .nullable(),
+                        })
+                        .nullable(),
+                })
+            ),
         })
     })
-
 const RateDetailsFormSchema = (activeFeatureFlags?: FeatureFlagSettings) => {
     return activeFeatureFlags?.['rate-edit-unlock'] ||  activeFeatureFlags?.['link-rates'] ?
     Yup.object().shape({
         rateForms: Yup.array().of(
             SingleRateCertSchema(activeFeatureFlags || {})
         ),
+        actuaryCommunicationPreference: Yup.string().required(
+            'You must select a communication preference'
+        )
     }):
- Yup.object().shape({
+    Yup.object().shape({
         rateInfos: Yup.array().of(
             SingleRateCertSchema(activeFeatureFlags || {})
         ),
+        actuaryCommunicationPreference: Yup.string().required(
+            'You must select a communication preference'
+        )
     })
 }
 

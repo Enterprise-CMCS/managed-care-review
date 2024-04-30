@@ -1,17 +1,11 @@
 import React, { useEffect } from 'react'
 import * as Yup from 'yup'
-import {
-    Form as UswdsForm,
-    FormGroup,
-    Fieldset,
-    Button,
-} from '@trussworks/react-uswds'
+import { Form as UswdsForm, Fieldset, Button } from '@trussworks/react-uswds'
 import {
     Formik,
     FormikErrors,
     FormikHelpers,
     FieldArray,
-    ErrorMessage,
     getIn,
     FieldArrayRenderProps,
 } from 'formik'
@@ -19,17 +13,9 @@ import { useNavigate } from 'react-router-dom'
 
 import styles from '../StateSubmissionForm.module.scss'
 
-import {
-    ActuaryCommunicationType,
-    ActuaryContact,
-    StateContact,
-} from '../../../common-code/healthPlanFormDataType'
+import { StateContact } from '../../../common-code/healthPlanFormDataType'
 
-import {
-    ErrorSummary,
-    FieldRadio,
-    FieldTextInput,
-} from '../../../components/Form'
+import { ErrorSummary, FieldTextInput } from '../../../components/Form'
 
 import { useFocus } from '../../../hooks/useFocus'
 import { PageActions } from '../PageActions'
@@ -37,7 +23,6 @@ import {
     activeFormPages,
     type HealthPlanFormPageProps,
 } from '../StateSubmissionForm'
-import { ActuaryContactFields } from './ActuaryContactFields'
 import { RoutesRecord } from '../../../constants'
 import { DynamicStepIndicator, SectionCard } from '../../../components'
 import { FormContainer } from '../FormContainer'
@@ -53,58 +38,6 @@ import { useErrorSummary } from '../../../hooks/useErrorSummary'
 
 export interface ContactsFormValues {
     stateContacts: StateContact[]
-    addtlActuaryContacts: ActuaryContact[]
-    actuaryCommunicationPreference: ActuaryCommunicationType | undefined
-}
-
-const yupValidation = (submissionType: string) => {
-    const contactShape = {
-        stateContacts: Yup.array().of(
-            Yup.object().shape({
-                name: Yup.string().required('You must provide a name'),
-                titleRole: Yup.string().required(
-                    'You must provide a title/role'
-                ),
-                email: Yup.string()
-                    .email('You must enter a valid email address')
-                    .trim()
-                    .required('You must provide an email address'),
-            })
-        ),
-        addtlActuaryContacts: Yup.array(),
-        actuaryCommunicationPreference: Yup.string().nullable(),
-    }
-
-    if (submissionType !== 'CONTRACT_ONLY') {
-        contactShape.addtlActuaryContacts = Yup.array().of(
-            Yup.object().shape({
-                name: Yup.string().required('You must provide a name'),
-                titleRole: Yup.string().required(
-                    'You must provide a title/role'
-                ),
-                email: Yup.string()
-                    .email('You must enter a valid email address')
-                    .trim()
-                    .required('You must provide an email address'),
-                actuarialFirm: Yup.string()
-                    .required('You must select an actuarial firm')
-                    .nullable(),
-                actuarialFirmOther: Yup.string()
-                    .when('actuarialFirm', {
-                        is: 'OTHER',
-                        then: Yup.string()
-                            .required('You must enter a description')
-                            .nullable(),
-                    })
-                    .nullable(),
-            })
-        )
-        contactShape.actuaryCommunicationPreference = Yup.string().required(
-            'You must select a communication preference'
-        )
-    }
-
-    return Yup.object().shape(contactShape)
 }
 
 type FormError =
@@ -125,25 +58,6 @@ const flattenErrors = (
                 flattened[errorKey] = value
             })
         })
-    }
-
-    if (
-        errors.addtlActuaryContacts &&
-        Array.isArray(errors.addtlActuaryContacts)
-    ) {
-        errors.addtlActuaryContacts.forEach((contact, index) => {
-            if (!contact) return
-
-            Object.entries(contact).forEach(([field, value]) => {
-                const errorKey = `addtlActuaryContacts.${index}.${field}`
-                flattened[errorKey] = value
-            })
-        })
-
-        if (errors.actuaryCommunicationPreference) {
-            flattened['actuaryCommunicationPreference'] =
-                errors.actuaryCommunicationPreference
-        }
     }
 
     return flattened
@@ -176,8 +90,6 @@ const Contacts = ({
     const [newStateContactButtonRef, setNewStateContactButtonFocus] = useFocus() // This ref.current is always the same element
 
     const newActuaryContactNameRef = React.useRef<HTMLInputElement | null>(null)
-    const [newActuaryContactButtonRef, setNewActuaryContactButtonFocus] =
-        useFocus()
 
     const navigate = useNavigate()
 
@@ -208,22 +120,11 @@ const Contacts = ({
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
 
     const stateContacts = draftSubmission.stateContacts
-    const addtlActuaryContacts = draftSubmission.addtlActuaryContacts
-    const includeActuaryContacts =
-        draftSubmission.submissionType !== 'CONTRACT_ONLY'
 
     const emptyStateContact = {
         name: '',
         titleRole: '',
         email: '',
-    }
-
-    const emptyActuaryContact = {
-        name: '',
-        titleRole: '',
-        email: '',
-        actuarialFirm: undefined,
-        actuarialFirmOther: '',
     }
 
     if (stateContacts.length === 0) {
@@ -232,9 +133,6 @@ const Contacts = ({
 
     const contactsInitialValues: ContactsFormValues = {
         stateContacts: stateContacts,
-        addtlActuaryContacts: addtlActuaryContacts,
-        actuaryCommunicationPreference:
-            draftSubmission?.addtlActuaryCommunicationPreference ?? undefined,
     }
 
     // Handler for Contacts legends so that contacts show up as
@@ -258,11 +156,6 @@ const Contacts = ({
         formikHelpers: FormikHelpers<ContactsFormValues>
     ) => {
         draftSubmission.stateContacts = values.stateContacts
-        if (includeActuaryContacts) {
-            draftSubmission.addtlActuaryContacts = values.addtlActuaryContacts
-            draftSubmission.addtlActuaryCommunicationPreference =
-                values.actuaryCommunicationPreference
-        }
 
         try {
             const updatedSubmission = await updateDraft(draftSubmission)
@@ -286,7 +179,20 @@ const Contacts = ({
         }
     }
 
-    const contactSchema = yupValidation(draftSubmission.submissionType)
+    const contactSchema = Yup.object().shape({
+        stateContacts: Yup.array().of(
+            Yup.object().shape({
+                name: Yup.string().required('You must provide a name'),
+                titleRole: Yup.string().required(
+                    'You must provide a title/role'
+                ),
+                email: Yup.string()
+                    .email('You must enter a valid email address')
+                    .trim()
+                    .required('You must provide an email address'),
+            })
+        ),
+    })
 
     return (
         <>
@@ -448,7 +354,6 @@ const Contacts = ({
                                                                             0 && (
                                                                             <Button
                                                                                 type="button"
-
                                                                                 unstyled
                                                                                 className={
                                                                                     styles.removeContactBtn
@@ -492,173 +397,6 @@ const Contacts = ({
                                         </FieldArray>
                                     </fieldset>
                                 </SectionCard>
-
-                                {includeActuaryContacts && (
-                                    <>
-                                        <SectionCard>
-                                            <fieldset className="usa-fieldset with-sections">
-                                                <h3>
-                                                    Additional Actuary Contacts
-                                                </h3>
-
-                                                <p>
-                                                    Provide contact information
-                                                    for any additional actuaries
-                                                    who worked directly on this
-                                                    submission.
-                                                </p>
-                                                <legend className="srOnly">
-                                                    Actuary contacts
-                                                </legend>
-
-                                                <FieldArray name="addtlActuaryContacts">
-                                                    {({
-                                                        remove,
-                                                        push,
-                                                    }: FieldArrayRenderProps) => (
-                                                        <div
-                                                            className={
-                                                                styles.actuaryContacts
-                                                            }
-                                                            data-testid="state-contacts"
-                                                        >
-                                                            {values
-                                                                .addtlActuaryContacts
-                                                                .length > 0 &&
-                                                                values.addtlActuaryContacts.map(
-                                                                    (
-                                                                        _actuaryContact,
-                                                                        index
-                                                                    ) => (
-                                                                        <div
-                                                                            className={
-                                                                                styles.actuaryContact
-                                                                            }
-                                                                            key={
-                                                                                index
-                                                                            }
-                                                                            data-testid="actuary-contact"
-                                                                        >
-                                                                            <ActuaryContactFields
-                                                                                shouldValidate={
-                                                                                    shouldValidate
-                                                                                }
-                                                                                fieldNamePrefix={`addtlActuaryContacts.${index}`}
-                                                                                fieldSetLegend={handleContactLegend(
-                                                                                    index,
-                                                                                    'Actuary'
-                                                                                )}
-                                                                                inputRef={
-                                                                                    newActuaryContactNameRef
-                                                                                }
-                                                                            />
-                                                                            <Button
-                                                                                type="button"
-                                                                                unstyled
-                                                                                className={
-                                                                                    styles.removeContactBtn
-                                                                                }
-                                                                                onClick={() => {
-                                                                                    remove(
-                                                                                        index
-                                                                                    )
-                                                                                    setNewActuaryContactButtonFocus()
-                                                                                }}
-                                                                            >
-                                                                                Remove
-                                                                                contact
-                                                                            </Button>
-                                                                        </div>
-                                                                    )
-                                                                )}
-
-                                                            <button
-                                                                type="button"
-                                                                className={`usa-button usa-button--outline ${styles.addContactBtn}`}
-                                                                onClick={() => {
-                                                                    push(
-                                                                        emptyActuaryContact
-                                                                    )
-                                                                    setFocusNewActuaryContact(
-                                                                        true
-                                                                    )
-                                                                }}
-                                                                ref={
-                                                                    newActuaryContactButtonRef
-                                                                }
-                                                            >
-                                                                Add actuary
-                                                                contact
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </FieldArray>
-                                            </fieldset>
-                                        </SectionCard>
-
-                                        <SectionCard>
-                                            <fieldset className="usa-fieldset with-sections">
-                                                <h3>
-                                                    Actuaries' communication
-                                                    preference
-                                                </h3>
-
-                                                <legend className="srOnly">
-                                                    Actuarial communication
-                                                    preference
-                                                </legend>
-                                                <FormGroup
-                                                    error={showFieldErrors(
-                                                        errors.actuaryCommunicationPreference
-                                                    )}
-                                                >
-                                                    <Fieldset
-                                                        className={
-                                                            styles.radioGroup
-                                                        }
-                                                        legend="Communication preference between CMS Office of the Actuary (OACT) and all state’s actuaries (i.e. certifying actuaries and additional actuary contacts)"
-                                                    >
-                                                        <span
-                                                            className={
-                                                                styles.requiredOptionalText
-                                                            }
-                                                        >
-                                                            Required
-                                                        </span>
-                                                        {showFieldErrors(
-                                                            `True`
-                                                        ) && (
-                                                            <ErrorMessage
-                                                                name={`actuaryCommunicationPreference`}
-                                                                component="div"
-                                                                className="usa-error-message"
-                                                            />
-                                                        )}
-                                                        <FieldRadio
-                                                            id="OACTtoActuary"
-                                                            name="actuaryCommunicationPreference"
-                                                            label={`OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`}
-                                                            value={
-                                                                'OACT_TO_ACTUARY'
-                                                            }
-                                                            aria-required
-                                                        />
-                                                        <FieldRadio
-                                                            id="OACTtoState"
-                                                            name="actuaryCommunicationPreference"
-                                                            label={`OACT can communicate directly with the state, and the state will relay all written communication to their actuaries and set up time for any potential verbal discussions.`}
-                                                            value={
-                                                                'OACT_TO_STATE'
-                                                            }
-                                                            aria-required
-                                                        />
-                                                    </Fieldset>
-                                                </FormGroup>
-                                            </fieldset>
-                                        </SectionCard>
-                                    </>
-                                )}
-
                                 <PageActions
                                     saveAsDraftOnClick={() => {
                                         if (!dirty) {
