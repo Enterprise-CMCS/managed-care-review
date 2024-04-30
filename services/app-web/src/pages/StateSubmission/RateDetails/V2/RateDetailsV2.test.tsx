@@ -604,7 +604,7 @@ describe('RateDetailsv2', () => {
             })
         })
 
-        it('displays dropdown menu if yes is selected', async () => {
+        it('displays dropdown menu if yes is selected and dropdown is clicked', async () => {
             const { user } = renderWithProviders(
                 <Routes>
                     <Route
@@ -687,7 +687,10 @@ describe('RateDetailsv2', () => {
                 expect(screen.getByRole('combobox')).toBeInTheDocument()
             })
 
-            // Assert the options menu is open
+            // Assert the options menu is open when clicked
+            const dropdown = screen.getByRole('combobox')
+            expect(dropdown).toBeInTheDocument()
+            await user.click(dropdown)
             const dropdownMenu = screen.getByRole('listbox')
             expect(dropdownMenu).toBeInTheDocument()
 
@@ -811,7 +814,10 @@ describe('RateDetailsv2', () => {
                 expect(screen.getByRole('combobox')).toBeInTheDocument()
             })
 
-            // Assert the options menu is open
+            // Assert the options menu is open when clicked
+            const dropdown = screen.getByRole('combobox')
+            expect(dropdown).toBeInTheDocument()
+            await user.click(dropdown)
             const dropdownMenu = screen.getByRole('listbox')
             expect(dropdownMenu).toBeInTheDocument()
 
@@ -897,6 +903,9 @@ describe('RateDetailsv2', () => {
             await user.click(yesRadioButton)
 
             // Assert that the selected value is removed from the list of options
+            const dropdown = screen.getByRole('combobox')
+            expect(dropdown).toBeInTheDocument()
+            await user.click(dropdown)
             const option = screen
                 .getByRole('listbox')
                 .querySelector('#react-select-2-option-0')
@@ -982,6 +991,9 @@ describe('RateDetailsv2', () => {
             await user.click(yesRadioButton)
 
             // Checking that the selected value is removed from the list of options
+            const dropdown = screen.getByRole('combobox')
+            expect(dropdown).toBeInTheDocument()
+            await user.click(dropdown)
             const option = screen
                 .getByRole('listbox')
                 .querySelector('#react-select-2-option-0')
