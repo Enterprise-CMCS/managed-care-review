@@ -15,7 +15,6 @@ import {
     Contract,
     ContractRevision,
 } from '../../../../../gen/gqlClient'
-import { usePreviousSubmission } from '../../../../../hooks/usePreviousSubmission'
 import { booleanAsYesNoUserValue } from '../../../../../components/Form/FieldYesNo/FieldYesNo'
 import { SectionCard } from '../../../../../components/SectionCard'
 import styles from '../../../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
