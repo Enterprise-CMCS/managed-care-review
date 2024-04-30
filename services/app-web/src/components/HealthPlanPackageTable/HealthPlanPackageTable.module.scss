@@ -30,6 +30,8 @@
     background: custom.$mcr-primary-lighter;
     color: custom.$mcr-foundation-ink;
     display: inline-block;
+    text-align: center;
+    overflow: auto;
 }
 
 .submittedTag {
