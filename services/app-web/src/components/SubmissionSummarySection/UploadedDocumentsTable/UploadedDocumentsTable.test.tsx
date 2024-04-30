@@ -9,6 +9,10 @@ import {
 import type { GenericDocument } from '../../../gen/gqlClient'
 
 describe('UploadedDocumentsTable', () => {
+
+    afterEach ( () => {
+        jest.clearAllMocks()
+    })
     it('renders documents without errors', async () => {
         const testDocuments = [
             {
@@ -24,6 +28,7 @@ describe('UploadedDocumentsTable', () => {
                 caption="Contract"
                 documentCategory="Contract"
                 previousSubmissionDate={new Date('01/01/01')}
+                hideDynamicFeedback={true}
             />,
             {
                 apolloProvider: {
@@ -72,6 +77,7 @@ describe('UploadedDocumentsTable', () => {
                 caption="Contract supporting"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
+                hideDynamicFeedback={true}
             />,
             {
                 apolloProvider: {
@@ -121,6 +127,7 @@ describe('UploadedDocumentsTable', () => {
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
                 previousSubmissionDate={new Date('03/26/2022')}
+                hideDynamicFeedback={true}
             />,
             {
                 apolloProvider: {
@@ -171,6 +178,7 @@ describe('UploadedDocumentsTable', () => {
                 caption="Contract supporting"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
+                hideDynamicFeedback={true}
             />,
             {
                 apolloProvider: {
@@ -222,6 +230,7 @@ describe('UploadedDocumentsTable', () => {
                 caption="Contract supporting"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
+                hideDynamicFeedback={true}
             />,
             {
                 apolloProvider: {
@@ -251,7 +260,7 @@ describe('UploadedDocumentsTable', () => {
             })
         })
     })
-    it('shows the NEW tag when a document is submitted after the last submission', async () => {
+    it('renders the NEW tag when a document is submitted after the last submission', async () => {
         const testDocuments: GenericDocument[] = [
             {
                 s3URL: 's3://foo/bar/test-1',
@@ -279,6 +288,7 @@ describe('UploadedDocumentsTable', () => {
                 caption="Contract supporting"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
+                hideDynamicFeedback={true}
             />,
             {
                 apolloProvider: {
@@ -319,6 +329,7 @@ describe('UploadedDocumentsTable', () => {
                 caption="Contract"
                 documentCategory="Contract"
                 multipleDocumentsAllowed={false}
+                hideDynamicFeedback={false}
             />,
             {
                 apolloProvider: {
@@ -338,7 +349,7 @@ describe('UploadedDocumentsTable', () => {
         })
     })
 
-    it('does not show the NEW tag if the user is not a CMS user', async () => {
+    it('does not show the NEW tag to state user', async () => {
         const testDocuments = [
             {
                 s3URL: 's3://foo/bar/test-1',
@@ -366,6 +377,7 @@ describe('UploadedDocumentsTable', () => {
                 caption="Contract supporting"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
+                hideDynamicFeedback={true}
             />,
             {
                 apolloProvider: {
@@ -377,6 +389,251 @@ describe('UploadedDocumentsTable', () => {
             const rows = screen.getAllByRole('row')
             expect(rows).toHaveLength(4)
             expect(screen.queryByTestId('tag')).not.toBeInTheDocument()
+        })
+    })
+
+    it('renders SHARED tag to CMS users when packages across submissions present', async () => {
+        const packagesWithSharedRateCerts = [
+            {
+                packageId: '333b4225-5b49-4e82-aa71-be0d33d7418d',
+                packageName: 'MCR-MN-0001-SNBC',
+            },
+            {
+                packageId: '21467dba-6ae8-11ed-a1eb-0242ac120002',
+                packageName: 'MCR-MN-0002-PMAP',
+            },
+        ]
+        const testDocuments = [
+            {
+                s3URL: 's3://foo/bar/test-1',
+                name: 'supporting docs test 1',
+                sha256: 'fakesha',
+                dateAdded: new Date('01/01/00'),
+            },
+        ]
+        renderWithProviders(
+            <UploadedDocumentsTable
+                documents={testDocuments}
+                caption="Rate"
+                documentCategory="Rate certification"
+                packagesWithSharedRateCerts={packagesWithSharedRateCerts}
+                previousSubmissionDate={new Date('01/01/01')}
+                hideDynamicFeedback={true}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ user: mockValidCMSUser(), statusCode: 200 })],
+                },
+                featureFlags: {
+                    'link-rates': false,
+                },
+            }
+        )
+
+        expect(await screen.findByTestId('tag')).toHaveTextContent('SHARED')
+    })
+
+    it('renders SHARED tag to state users when packages across submissions present', async () => {
+        const packagesWithSharedRateCerts = [
+            {
+                packageId: '333b4225-5b49-4e82-aa71-be0d33d7418d',
+                packageName: 'MCR-MN-0001-SNBC',
+            },
+            {
+                packageId: '21467dba-6ae8-11ed-a1eb-0242ac120002',
+                packageName: 'MCR-MN-0002-PMAP',
+            },
+        ]
+        const testDocuments = [
+            {
+                s3URL: 's3://foo/bar/test-1',
+                name: 'supporting docs test 1',
+                sha256: 'fakesha',
+                dateAdded: new Date('01/01/00'),
+            },
+        ]
+        renderWithProviders(
+            <UploadedDocumentsTable
+                documents={testDocuments}
+                caption="Rate"
+                documentCategory="Rate certification"
+                packagesWithSharedRateCerts={packagesWithSharedRateCerts}
+                previousSubmissionDate={new Date('01/01/01')}
+                hideDynamicFeedback={true}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+                featureFlags: {
+                    'link-rates': false,
+                },
+            }
+        )
+
+        expect(await screen.findByTestId('tag')).toHaveTextContent('SHARED')
+    })
+
+    it('still renders SHARED tag to CMS user if linked rates flag on', async () => {
+        const packagesWithSharedRateCerts = [
+            {
+                packageId: '333b4225-5b49-4e82-aa71-be0d33d7418d',
+                packageName: 'MCR-MN-0001-SNBC',
+            },
+            {
+                packageId: '21467dba-6ae8-11ed-a1eb-0242ac120002',
+                packageName: 'MCR-MN-0002-PMAP',
+            },
+        ]
+        const testDocuments = [
+            {
+                s3URL: 's3://foo/bar/test-1',
+                name: 'supporting docs test 1',
+                sha256: 'fakesha',
+                dateAdded: new Date('01/01/00'),
+            },
+        ]
+        renderWithProviders(
+            <UploadedDocumentsTable
+                documents={testDocuments}
+                caption="Rate"
+                documentCategory="Rate certification"
+                packagesWithSharedRateCerts={packagesWithSharedRateCerts}
+                previousSubmissionDate={new Date('01/01/01')}
+                hideDynamicFeedback={true}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ user: mockValidCMSUser(), statusCode: 200 })],
+                },
+                featureFlags: {
+                    'link-rates': true,
+                },
+            }
+        )
+
+        expect(await screen.findByTestId('tag')).toHaveTextContent('SHARED')
+    })
+
+    it('still renders SHARED tag to state user when linked rates flag on', async () => {
+        const packagesWithSharedRateCerts = [
+            {
+                packageId: '333b4225-5b49-4e82-aa71-be0d33d7418d',
+                packageName: 'MCR-MN-0001-SNBC',
+            },
+            {
+                packageId: '21467dba-6ae8-11ed-a1eb-0242ac120002',
+                packageName: 'MCR-MN-0002-PMAP',
+            },
+        ]
+        const testDocuments = [
+            {
+                s3URL: 's3://foo/bar/test-1',
+                name: 'supporting docs test 1',
+                sha256: 'fakesha',
+                dateAdded: new Date('01/01/00'),
+            },
+        ]
+        renderWithProviders(
+            <UploadedDocumentsTable
+                documents={testDocuments}
+                caption="Rate"
+                documentCategory="Rate certification"
+                packagesWithSharedRateCerts={packagesWithSharedRateCerts}
+                previousSubmissionDate={new Date('01/01/01')}
+                hideDynamicFeedback={true}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ user: mockValidStateUser(), statusCode: 200 })],
+                },
+                featureFlags: {
+                    'link-rates': true,
+                },
+            }
+        )
+
+        expect(await screen.findByTestId('tag')).toBeInTheDocument()
+    })
+
+    it('does not validations when hideDynamicFeedback is set to true',async() =>{
+        const testDocuments = [
+            {
+                s3URL: 's3://foo/bar/test-1',
+                name: 'supporting docs test 1',
+                sha256: 'fakesha',
+                dateAdded: new Date('03/25/2022'),
+            },
+            {
+                s3URL: 's3://foo/bar/test-2',
+                name: 'supporting docs test 2',
+                sha256: 'fakesha1',
+                dateAdded: new Date('03/25/2022'),
+            },
+            {
+                s3URL: 's3://foo/bar/test-3',
+                name: 'supporting docs test 3',
+                sha256: 'fakesha2',
+                dateAdded: new Date('03/27/2022'),
+            },
+        ]
+        renderWithProviders(
+            <UploadedDocumentsTable
+                documents={testDocuments}
+                previousSubmissionDate={new Date('03/27/2022')}
+                caption="Contract"
+                documentCategory="Contract-supporting"
+                multipleDocumentsAllowed={false}
+                hideDynamicFeedback={true}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        await waitFor(() => {
+            expect(screen.queryByText(/Only one document is allowed/)).not.toBeInTheDocument()
+        })
+    })
+    it('renders document validations if hideDynamicFeedback is false and too many documents uploaded',async() =>{
+        const testDocuments = [
+            {
+                s3URL: 's3://foo/bar/test-1',
+                name: 'supporting docs test 1',
+                sha256: 'fakesha',
+                dateAdded: new Date('03/25/2022'),
+            },
+            {
+                s3URL: 's3://foo/bar/test-2',
+                name: 'supporting docs test 2',
+                sha256: 'fakesha1',
+                dateAdded: new Date('03/25/2022'),
+            },
+            {
+                s3URL: 's3://foo/bar/test-3',
+                name: 'supporting docs test 3',
+                sha256: 'fakesha2',
+                dateAdded: new Date('03/27/2022'),
+            },
+        ]
+        renderWithProviders(
+            <UploadedDocumentsTable
+                documents={testDocuments}
+                previousSubmissionDate={new Date('03/27/2022')}
+                caption="Contract"
+                documentCategory="Contract-supporting"
+                multipleDocumentsAllowed={false}
+                hideDynamicFeedback={false}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        await waitFor(() => {
+            expect(screen.queryByText(/Only one document is allowed/)).toBeInTheDocument()
         })
     })
 })

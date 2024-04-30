@@ -100,7 +100,7 @@ describe('SingleRateSummarySection', () => {
         ).toBeInTheDocument()
     })
     // can delete the next test when linked rates flag is permanently on
-    it('renders documents with linked submissions correctly (legacy feature)', async () => {
+    it('renders documents with linked submissions correctly for CMS users (legacy feature)', async () => {
         const rateData = rateDataMock()
         const parentContractRev = rateData.revisions[0].contractRevisions[0]
         const rateDoc = rateData.revisions[0].formData.rateDocuments[0]

@@ -73,10 +73,10 @@ export const RateDetailsSummarySectionV2 = ({
     submissionName,
     statePrograms,
     onDocumentError,
-    isCMSUser,
 }: RateDetailsSummarySectionV2Props): React.ReactElement => {
     const { loggedInUser } = useAuth()
-    const isSubmittedOrCMSUser = contract.status === 'SUBMITTED' || loggedInUser?.role === 'CMS_USER'
+    const isSubmittedOrCMSUser =
+        contract.status === 'SUBMITTED' || loggedInUser?.role === 'CMS_USER'
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
     const contractFormData = isEditing
@@ -108,8 +108,7 @@ export const RateDetailsSummarySectionV2 = ({
 
                 return {
                     packageId,
-                    packageName:
-                        refreshedName ?? `${packageName}`,
+                    packageName: refreshedName ?? `${packageName}`,
                 }
             }
         )
@@ -260,14 +259,18 @@ export const RateDetailsSummarySectionV2 = ({
                                         <DataDetail
                                             id="ratePrograms"
                                             label="Programs this rate certification covers"
-                                            explainMissingData={!isSubmittedOrCMSUser}
+                                            explainMissingData={
+                                                !isSubmittedOrCMSUser
+                                            }
                                             children={ratePrograms(rate)}
                                         />
                                     )}
                                     <DataDetail
                                         id="rateType"
                                         label="Rate certification type"
-                                        explainMissingData={!isSubmittedOrCMSUser}
+                                        explainMissingData={
+                                            !isSubmittedOrCMSUser
+                                        }
                                         children={rateCertificationType(rate)}
                                     />
                                     <DataDetail
@@ -278,7 +281,9 @@ export const RateDetailsSummarySectionV2 = ({
                                                 ? 'Rating period of original rate certification'
                                                 : 'Rating period'
                                         }
-                                        explainMissingData={!isSubmittedOrCMSUser}
+                                        explainMissingData={
+                                            !isSubmittedOrCMSUser
+                                        }
                                         children={
                                             rateFormData.rateDateStart &&
                                             rateFormData.rateDateEnd ? (
@@ -299,7 +304,9 @@ export const RateDetailsSummarySectionV2 = ({
                                                 ? 'Date certified for rate amendment'
                                                 : 'Date certified'
                                         }
-                                        explainMissingData={!isSubmittedOrCMSUser}
+                                        explainMissingData={
+                                            !isSubmittedOrCMSUser
+                                        }
                                         children={formatCalendarDate(
                                             rateFormData.rateDateCertified
                                         )}
@@ -308,7 +315,9 @@ export const RateDetailsSummarySectionV2 = ({
                                         <DataDetail
                                             id="effectiveRatingPeriod"
                                             label="Rate amendment effective dates"
-                                            explainMissingData={!isSubmittedOrCMSUser}
+                                            explainMissingData={
+                                                !isSubmittedOrCMSUser
+                                            }
                                             children={`${formatCalendarDate(
                                                 rateFormData.amendmentEffectiveDateStart
                                             )} to ${formatCalendarDate(
@@ -321,7 +330,9 @@ export const RateDetailsSummarySectionV2 = ({
                                         <DataDetail
                                             id="certifyingActuary"
                                             label="Certifying actuary"
-                                            explainMissingData={!isSubmittedOrCMSUser}
+                                            explainMissingData={
+                                                !isSubmittedOrCMSUser
+                                            }
                                             children={
                                                 <DataDetailContactField
                                                     contact={
@@ -335,7 +346,9 @@ export const RateDetailsSummarySectionV2 = ({
                                     <DataDetail
                                         id="rateCapitationType"
                                         label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
-                                        explainMissingData={!isSubmittedOrCMSUser}
+                                        explainMissingData={
+                                            !isSubmittedOrCMSUser
+                                        }
                                         children={rateCapitationType(rate)}
                                     />
                                 </DoubleColumnGrid>
@@ -354,7 +367,7 @@ export const RateDetailsSummarySectionV2 = ({
                                     caption="Rate certification"
                                     documentCategory="Rate certification"
                                     previousSubmissionDate={lastSubmittedDate}
-                                    isEditing={isEditing}
+                                    hideDynamicFeedback={isSubmittedOrCMSUser}
                                 />
                             )}
                             {rateFormData.supportingDocuments && (
@@ -369,9 +382,8 @@ export const RateDetailsSummarySectionV2 = ({
                                               )
                                     }
                                     caption="Rate supporting documents"
-                                    isSupportingDocuments
                                     documentCategory="Rate-supporting"
-                                    isEditing={isEditing}
+                                    hideDynamicFeedback={isSubmittedOrCMSUser}
                                 />
                             )}
                         </SectionCard>

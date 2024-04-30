@@ -63,7 +63,7 @@ export const LinkedRateSummary = ({
                 multipleDocumentsAllowed={false}
                 caption="Rate certification"
                 documentCategory="Rate certification"
-                isEditing={false}
+                hideDynamicFeedback={true} // linked rates always displayed without validations
                 previousSubmissionDate={null}
             />
         </SectionCard>

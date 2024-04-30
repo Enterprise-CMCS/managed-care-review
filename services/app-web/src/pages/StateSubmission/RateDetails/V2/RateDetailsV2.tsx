@@ -363,9 +363,7 @@ const RateDetailsV2 = ({
                     />
                 )}
             </div>
-            <div style={{ textAlign: 'center' }}>
-                This is the V2 version of the Rate Details Page
-            </div>
+
             <Formik
                 initialValues={initialValues}
                 onSubmit={(rateFormValues, { setSubmitting }) => {
