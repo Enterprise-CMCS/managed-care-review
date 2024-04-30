@@ -147,15 +147,6 @@ function rateWithHistoryToDomainModel(
             continue
         }
 
-        const initialEntry: RateRevisionSet = {
-            rateRev,
-            submitInfo: rateRev.submitInfo,
-            unlockInfo: rateRev.unlockInfo || undefined,
-            contractRevs: [],
-        }
-
-        allEntries.push(initialEntry)
-
         /**
          * Below a temporary approach to finding the matching rate revision to the contract revision. The correct way
          * for this is to build the actual contract and rate history. This will be done in the Rate Change History epic
@@ -171,43 +162,84 @@ function rateWithHistoryToDomainModel(
          * should not be reflected on it, including contract changes.
          **/
 
-        // Next rate revision in the array.
-        const nextRateRev: RateRevisionTableWithFormData | undefined =
-            rateRevisions[currentRevIndex + 1]
+        // New Way: post-migration
+        if (rateRev.relatedSubmissions.length > 0) {
+            // we aren't returning individual submission packages, so we just want to make sure that
+            // each rate revision we return has the most up to date set of related contract submissions associated with it
 
-        // Reverse contractRevisions so it is in DESC order.
-        const contractRevisions = rateRev.contractRevisions.reverse()
-
-        for (const contractRev of contractRevisions) {
-            if (!contractRev.contractRevision.submitInfo) {
-                return new Error(
-                    'Programming Error: a rate is associated with an unsubmitted contract'
+            const mostRecentSubmission =
+                rateRev.relatedSubmissions[
+                    rateRev.relatedSubmissions.length - 1
+                ]
+            const mostRecentPackageContracts =
+                mostRecentSubmission.submissionPackages.filter(
+                    (p) => p.rateRevisionID === rateRev.id
                 )
-            }
-
-            // Check if contract revision submitted date is earlier then the proceeding rate revision unlock date.
-            // If nextRateRev does not exist, then there is no date constraint.
-            const isContractSubmittedDateValid = nextRateRev?.unlockInfo
-                ? contractRev.contractRevision.submitInfo.updatedAt.getTime() <
-                  nextRateRev.unlockInfo.updatedAt.getTime()
-                : true
-
-            // Does initialEntry.contractRevs already include a revision for this contract
-            const isContractIncluded = !!initialEntry.contractRevs.find(
-                (cc) =>
-                    cc.contractID === contractRev.contractRevision.contractID
+            const mostRecentContractRevs = mostRecentPackageContracts.map(
+                (p) => p.contractRevision
             )
 
-            // Contract revision that belong to this rate revision has to be:
-            // - Submitted before the next contract rev unlock date
-            // - Not already in the initial entry. We are looping through this in desc order, so the first contract rev is the latest.
-            // - Not removed from contract
-            if (
-                isContractSubmittedDateValid &&
-                !isContractIncluded &&
-                !contractRev.isRemoval
-            ) {
-                initialEntry.contractRevs.unshift(contractRev.contractRevision)
+            allEntries.push({
+                rateRev,
+                submitInfo: rateRev.submitInfo,
+                unlockInfo: rateRev.unlockInfo || undefined,
+                contractRevs: mostRecentContractRevs,
+            })
+        } else {
+            // The OLD way.
+            const initialEntry: RateRevisionSet = {
+                rateRev,
+                submitInfo: rateRev.submitInfo,
+                unlockInfo: rateRev.unlockInfo || undefined,
+                contractRevs: [],
+            }
+
+            allEntries.push(initialEntry)
+
+            console.info(
+                'Old way of determining rate revision comp, should go away post refactor'
+            )
+            // Next rate revision in the array.
+            const nextRateRev: RateRevisionTableWithFormData | undefined =
+                rateRevisions[currentRevIndex + 1]
+
+            // Reverse contractRevisions so it is in DESC order.
+            const contractRevisions = rateRev.contractRevisions.reverse()
+
+            for (const contractRev of contractRevisions) {
+                if (!contractRev.contractRevision.submitInfo) {
+                    return new Error(
+                        'Programming Error: a rate is associated with an unsubmitted contract'
+                    )
+                }
+
+                // Check if contract revision submitted date is earlier then the proceeding rate revision unlock date.
+                // If nextRateRev does not exist, then there is no date constraint.
+                const isContractSubmittedDateValid = nextRateRev?.unlockInfo
+                    ? contractRev.contractRevision.submitInfo.updatedAt.getTime() <
+                      nextRateRev.unlockInfo.updatedAt.getTime()
+                    : true
+
+                // Does initialEntry.contractRevs already include a revision for this contract
+                const isContractIncluded = !!initialEntry.contractRevs.find(
+                    (cc) =>
+                        cc.contractID ===
+                        contractRev.contractRevision.contractID
+                )
+
+                // Contract revision that belong to this rate revision has to be:
+                // - Submitted before the next contract rev unlock date
+                // - Not already in the initial entry. We are looping through this in desc order, so the first contract rev is the latest.
+                // - Not removed from contract
+                if (
+                    isContractSubmittedDateValid &&
+                    !isContractIncluded &&
+                    !contractRev.isRemoval
+                ) {
+                    initialEntry.contractRevs.unshift(
+                        contractRev.contractRevision
+                    )
+                }
             }
         }
     }
@@ -276,7 +308,6 @@ function rateWithHistoryToDomainModel(
             }
         }
     }
-
 
     return {
         id: rate.id,
