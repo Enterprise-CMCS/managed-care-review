@@ -43,7 +43,6 @@ export const SubmissionTypeSummarySectionV2 = ({
     submissionName,
     isStateUser,
 }: SubmissionTypeSummarySectionV2Props): React.ReactElement => {
-    const isPreviousSubmission = usePreviousSubmission()
     const contractOrRev = contractRev ? contractRev : contract
     const contractFormData = getVisibleLatestContractFormData(
         contractOrRev,
@@ -70,7 +69,7 @@ export const SubmissionTypeSummarySectionV2 = ({
                 {headerChildComponent && headerChildComponent}
             </SectionHeader>
             <dl>
-                {isSubmitted && !isPreviousSubmission && (
+                {isSubmitted && (
                     <DoubleColumnGrid>
                         <DataDetail
                             id="submitted"
@@ -86,13 +85,15 @@ export const SubmissionTypeSummarySectionV2 = ({
                     </DoubleColumnGrid>
                 )}
                 <DoubleColumnGrid>
-                    <DataDetail
-                        id="program"
-                        label="Program(s)"
-                        explainMissingData={!isSubmitted}
-                        children={programNames}
-                    />
-                    {contractFormData && (
+                    {(programNames?.length > 0 || !isSubmitted) && (
+                        <DataDetail
+                            id="program"
+                            label="Program(s)"
+                            explainMissingData={!isSubmitted}
+                            children={programNames}
+                        />
+                    )}
+                    {(contractFormData.submissionType || !isSubmitted) && (
                         <DataDetail
                             id="submissionType"
                             label="Submission type"
@@ -104,7 +105,7 @@ export const SubmissionTypeSummarySectionV2 = ({
                             }
                         />
                     )}
-                    {contractFormData && (
+                    {(contractFormData.contractType || !isSubmitted) && (
                         <DataDetail
                             id="contractType"
                             label="Contract action type"
@@ -118,18 +119,19 @@ export const SubmissionTypeSummarySectionV2 = ({
                             }
                         />
                     )}
-                    {contractFormData &&
-                        contractFormData.riskBasedContract !== null && (
-                            <DataDetail
-                                id="riskBasedContract"
-                                label="Is this a risk based contract"
-                                explainMissingData={!isSubmitted}
-                                children={booleanAsYesNoUserValue(
-                                    contractFormData.riskBasedContract
-                                )}
-                            />
-                        )}
-                    {contractFormData && (
+                    {(contractFormData.riskBasedContract !== null ||
+                        (!isSubmitted &&
+                            contractFormData.riskBasedContract !== null)) && (
+                        <DataDetail
+                            id="riskBasedContract"
+                            label="Is this a risk based contract"
+                            explainMissingData={!isSubmitted}
+                            children={booleanAsYesNoUserValue(
+                                contractFormData.riskBasedContract
+                            )}
+                        />
+                    )}
+                    {(contractFormData.populationCovered || !isSubmitted) && (
                         <DataDetail
                             id="populationCoverage"
                             label="Which populations does this contract action cover?"
@@ -146,7 +148,8 @@ export const SubmissionTypeSummarySectionV2 = ({
 
                 <Grid row gap className={styles.reviewDataRow}>
                     <Grid col={12}>
-                        {contractFormData && (
+                        {(contractFormData.submissionDescription ||
+                            !isSubmitted) && (
                             <DataDetail
                                 id="submissionDescription"
                                 label="Submission description"

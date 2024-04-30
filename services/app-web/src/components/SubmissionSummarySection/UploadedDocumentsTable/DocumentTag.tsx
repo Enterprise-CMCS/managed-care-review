@@ -3,7 +3,7 @@ import { InfoTag } from '../../InfoTag/InfoTag'
 import styles from './UploadedDocumentsTable.module.scss'
 
 type DocumentTagProps = {
-    isShared?: boolean // can be delted after LINK_RATES
+    isShared?: boolean // can be deleted after legacy submissions addressed and LINK_RATES permanently on
     isNew?: boolean
 }
 export const DocumentTag = ({

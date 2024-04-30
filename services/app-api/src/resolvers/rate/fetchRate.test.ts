@@ -3,17 +3,22 @@ import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import {
     constructTestPostgresServer,
     defaultFloridaRateProgram,
+    unlockTestHealthPlanPackage,
+    updateTestHealthPlanFormData,
 } from '../../testHelpers/gqlHelpers'
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import { submitTestRate, updateTestRate } from '../../testHelpers'
 import { v4 as uuidv4 } from 'uuid'
-import { createSubmitAndUnlockTestRate } from '../../testHelpers/gqlRateHelpers'
+import { addNewRateToTestContract, createSubmitAndUnlockTestRate, fetchTestRateById, updateRatesInputFromDraftContract, updateTestDraftRatesOnContract } from '../../testHelpers/gqlRateHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { createAndUpdateTestContractWithoutRates, fetchTestContract, submitTestContract } from '../../testHelpers/gqlContractHelpers'
+import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 
 describe('fetchRate', () => {
     const ldService = testLDService({
         'rate-edit-unlock': true,
     })
-    it('returns correct rate revisions on resubmit when existing rate is edited', async () => {
+    it('returns correct revisions on resubmit when existing rate is edited', async () => {
         const cmsUser = testCMSUser()
         const stateServer = await constructTestPostgresServer({
             ldService,
@@ -69,7 +74,7 @@ describe('fetchRate', () => {
         )
     })
 
-    it('returns correct rate revisions on resubmit when new rate added', async () => {
+    it('returns correct revisions on resubmit when new rate added', async () => {
         const cmsUser = testCMSUser()
         const server = await constructTestPostgresServer({ ldService })
 
@@ -204,5 +209,147 @@ describe('fetchRate', () => {
         expect(unlockedRate.revisions).toHaveLength(1)
         expect(unlockedRate.revisions[0].submitInfo).toBeTruthy()
         expect(unlockedRate.revisions[0].unlockInfo).toBeNull()
+    })
+
+    it('returns the correct dateAdded for documents', async () => {
+        const ldService = testLDService({
+            'link-rates': true,
+        })
+        const prismaClient = await sharedTestPrismaClient()
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            ldService,
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const dummyDoc = (postfix: string) => {
+            return {
+                name: `doc${postfix}.pdf`,
+                s3URL: `fakeS3URL${postfix}`,
+                sha256: `fakesha${postfix}`,
+            }
+        }
+
+        // 1. Submit A0 with Rate1 and Rate2
+        const draftA0 = await createAndUpdateTestContractWithoutRates(
+            stateServer,
+            'FL',
+            {
+                contractDocuments: [dummyDoc('c1')],
+                documents: [dummyDoc('s1')],
+            }
+        )
+        const AID = draftA0.id
+        await addNewRateToTestContract(stateServer, draftA0, {
+            rateDateStart: '2001-01-01',
+            rateDocuments: [dummyDoc('r1')],
+            supportingDocuments: [dummyDoc('x1')],
+        })
+
+        const contractA0 = await submitTestContract(stateServer, AID)
+        const subA0 = contractA0.packageSubmissions[0]
+        const rate10 = subA0.rateRevisions[0]
+        const OneID = rate10.rateID
+
+        // CHANGE SUBMISSION DATE
+        await prismaClient.contractRevisionTable.update({
+            where: {
+                id: subA0.contractRevision.id,
+            },
+            data: {
+                submitInfo: {
+                    update: {
+                        updatedAt: new Date('2024-01-01'),
+                    },
+                },
+            },
+        })
+
+        const fixSubmitA0 = await fetchTestRateById(stateServer, OneID)
+        const rateRev = fixSubmitA0.revisions[0]
+        if (!rateRev.formData.rateDocuments || !rateRev.formData.rateDocuments[0]) throw new Error( 'something')
+            if (!rateRev.formData.supportingDocuments || !rateRev.formData.supportingDocuments[0]) throw new Error( 'something')
+        expect(rateRev.formData.rateDocuments).toHaveLength(1)
+        expect(rateRev.formData.rateDocuments[0].name).toBe('docr1.pdf')
+        expect(rateRev.formData.rateDocuments[0].dateAdded).toBe('2024-01-01')
+
+        expect(rateRev.formData.supportingDocuments).toHaveLength(1)
+        expect(rateRev.formData.supportingDocuments[0].name).toBe('docx1.pdf')
+        expect(rateRev.formData.supportingDocuments[0].dateAdded).toBe(
+            '2024-01-01'
+        )
+
+        // 2. Unlock and add more documents
+        const unlockedA0Pkg = await unlockTestHealthPlanPackage(
+            cmsServer,
+            AID,
+            'Unlock A.0'
+        )
+        const a0FormData = latestFormData(unlockedA0Pkg)
+        const unlockedA0Contract = await fetchTestContract(stateServer, AID)
+        a0FormData.submissionDescription = 'DESC A1'
+        a0FormData.contractDocuments.push(dummyDoc('c2'))
+        a0FormData.documents.push(dummyDoc('s2'))
+
+        await updateTestHealthPlanFormData(stateServer, a0FormData)
+        const a0RatesUpdates =
+            updateRatesInputFromDraftContract(unlockedA0Contract)
+        expect(a0RatesUpdates.updatedRates[0].rateID).toBe(OneID)
+        a0RatesUpdates.updatedRates[0].formData?.rateDocuments.push(
+            dummyDoc('r2')
+        )
+        a0RatesUpdates.updatedRates[0].formData?.supportingDocuments.push(
+            dummyDoc('x2')
+        )
+
+        await updateTestDraftRatesOnContract(stateServer, a0RatesUpdates)
+
+        const submittedA1 = await submitTestContract(
+            stateServer,
+            AID,
+            'Submit A.1'
+        )
+        const a1sub = submittedA1.packageSubmissions[0]
+
+        // CHANGE SUBMISSION DATE
+        await prismaClient.contractRevisionTable.update({
+            where: {
+                id: a1sub.contractRevision.id,
+            },
+            data: {
+                submitInfo: {
+                    update: {
+                        updatedAt: new Date('2024-02-02'),
+                    },
+                },
+            },
+        })
+
+        const rateA1 = await fetchTestRateById(stateServer, OneID)
+
+        const rateRevA1 = rateA1.revisions[0]
+        if (!rateRevA1.formData.rateDocuments || !rateRev.formData.rateDocuments[0]) throw new Error( 'something')
+        if (!rateRevA1.formData.supportingDocuments || !rateRev.formData.supportingDocuments[0]) throw new Error( 'something')
+        expect(rateRevA1.formData.rateDocuments).toHaveLength(2)
+        expect(rateRevA1.formData.rateDocuments[0].name).toBe('docr1.pdf')
+        expect(rateRevA1.formData.rateDocuments[0].dateAdded).toBe('2024-01-01')
+
+        expect(rateRevA1.formData.rateDocuments[1].name).toBe('docr2.pdf')
+        expect(rateRevA1.formData.rateDocuments[1].dateAdded).toBe('2024-02-02')
+
+        expect(rateRevA1.formData.supportingDocuments).toHaveLength(2)
+        expect(rateRevA1.formData.supportingDocuments[0].name).toBe('docx1.pdf')
+        expect(rateRevA1.formData.supportingDocuments[0].dateAdded).toBe(
+            '2024-01-01'
+        )
+
+        expect(rateRevA1.formData.supportingDocuments[1].name).toBe('docx2.pdf')
+        expect(rateRevA1.formData.supportingDocuments[1].dateAdded).toBe(
+            '2024-02-02'
+        )
     })
 })

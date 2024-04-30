@@ -37,12 +37,11 @@
             li:after {
                 content: ', ';
             }
-            li:last-of-type::after{
+            li:last-of-type::after {
                 display: none;
             }
         }
     }
-
 
     // align state contacts
     dl div[class^='grid-container'] {
@@ -127,4 +126,3 @@
         padding: 0;
     }
 }
-

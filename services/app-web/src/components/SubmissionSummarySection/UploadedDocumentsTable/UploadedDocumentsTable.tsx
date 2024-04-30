@@ -33,11 +33,12 @@ export type UploadedDocumentsTableProps = {
     documents: GenericDocument[]
     caption: string | null
     previousSubmissionDate: Date | null // used to calculate NEW tag based on doc dateAdded
+    hideDynamicFeedback: boolean // used to determine if we display static data for submission summary experience or if we display dynamic feedback UI (validations, edit buttons) like on review submit experience
     packagesWithSharedRateCerts?: SharedRateCertDisplay[] // deprecated - could be deleted after we resolve all historical data linked rates
     isSupportingDocuments?: boolean // used to calculate empty state and styles around the secondary supporting docs tables - would be nice to remove this in favor of more domain agnostic prop such as 'emptyStateText'
     multipleDocumentsAllowed?: boolean // used to determined if we display validations based on doc list length
     documentCategory?: string // used to determine if we display document category column
-    isEditing?: boolean // default false, used to determine if we display validations for state users (or else extra context for CMS reviewers)
+
 }
 
 export const UploadedDocumentsTable = ({
@@ -48,7 +49,7 @@ export const UploadedDocumentsTable = ({
     previousSubmissionDate,
     isSupportingDocuments = false,
     multipleDocumentsAllowed = true,
-    isEditing = false,
+    hideDynamicFeedback = false,
 }: UploadedDocumentsTableProps): React.ReactElement => {
     const initialDocState = documents.map((doc) => ({
         ...doc,
@@ -60,7 +61,7 @@ export const UploadedDocumentsTable = ({
     const { getDocumentsWithS3KeyAndUrl } = useDocument()
     const [refreshedDocs, setRefreshedDocs] =
         useState<DocumentWithS3Data[]>(initialDocState)
-    const shouldShowEditButton = isEditing && isSupportingDocuments // at this point only contract supporting documents need the inline EDIT button - this can be deleted when we move supporting docs to ContractDetails page
+    const shouldShowEditButton = !hideDynamicFeedback && isSupportingDocuments // at this point only contract supporting documents need the inline EDIT button - this can be deleted when we move supporting docs to ContractDetails page
 
     // canDisplayDateAddedForDocument -  guards against passing in null or undefined to dayjs
     // don't display on new initial submission
@@ -70,7 +71,7 @@ export const UploadedDocumentsTable = ({
 
     const shouldHaveNewTag = (doc: DocumentWithS3Data) => {
         if (!isCMSUser) {
-            return false // design requirement, don't show new tag to state users  on review submit
+            return false // design requirement, don't show new tag to state users on review submit
         }
 
         if (!doc || !doc.s3Key) {
@@ -83,17 +84,16 @@ export const UploadedDocumentsTable = ({
         return doc.dateAdded > previousSubmissionDate
     }
 
-    const hasSharedRateCert =
-        (packagesWithSharedRateCerts &&
-            packagesWithSharedRateCerts.length > 0) ||
-        false
+    // show legacy shared rates across submissions (this is feature replaced by linked rates)
+    // to cms users always when data available, to state users only when linked rates flag is off
+    const showLegacySharedRatesAcross =  Boolean(packagesWithSharedRateCerts && packagesWithSharedRateCerts.length > 0)
 
-    const showSharedInfo = hasSharedRateCert && !isEditing
     const borderTopGradientStyles = `borderTopLinearGradient ${styles.uploadedDocumentsTable}`
     const supportingDocsTopMarginStyles = isSupportingDocuments
         ? styles.withMarginTop
         : ''
 
+    const hasMultipleDocs = !multipleDocumentsAllowed && documents.length > 1
     const tableCaptionJSX = (
         <>
             <span>{caption}</span>
@@ -149,16 +149,14 @@ export const UploadedDocumentsTable = ({
                     <div className={styles.captionContainer}>
                         {tableCaptionJSX}
                     </div>
-                    {!multipleDocumentsAllowed &&
-                        documents.length > 1 &&
-                        !isEditing && (
-                            <DataDetailMissingField
-                                classname={styles.missingInfo}
-                                requiredText="Only one document is allowed for a rate
+                    { hasMultipleDocs && !hideDynamicFeedback && (
+                        <DataDetailMissingField
+                            classname={styles.missingInfo}
+                            requiredText="Only one document is allowed for a rate
                         certification. You must remove documents before
                         continuing."
-                            />
-                        )}
+                        />
+                    )}
                 </caption>
                 <thead>
                     <tr>
@@ -167,7 +165,7 @@ export const UploadedDocumentsTable = ({
                         {documentCategory && (
                             <th scope="col">Document category</th>
                         )}
-                        {showSharedInfo && (
+                        {showLegacySharedRatesAcross && (
                             <th scope="col">Linked submissions</th>
                         )}
                     </tr>
@@ -179,7 +177,7 @@ export const UploadedDocumentsTable = ({
                                 <td>
                                     <DocumentTag
                                         isNew={shouldHaveNewTag(doc)}
-                                        isShared={showSharedInfo}
+                                        isShared={showLegacySharedRatesAcross}
                                     />
                                     <Link
                                         className={styles.inlineLink}
@@ -194,6 +192,7 @@ export const UploadedDocumentsTable = ({
                                 <td>
                                     <DocumentTag
                                         isNew={shouldHaveNewTag(doc)}
+                                        isShared={showLegacySharedRatesAcross}
                                     />
                                     {doc.name}
                                 </td>
@@ -206,17 +205,14 @@ export const UploadedDocumentsTable = ({
                                 )}
                             </td>
                             {documentCategory && <td>{documentCategory}</td>}
-                            {showSharedInfo
-                                ? packagesWithSharedRateCerts && (
+                            {showLegacySharedRatesAcross && (
                                       <td>
                                           {linkedPackagesList({
-                                              unlinkDrafts: Boolean(isCMSUser),
                                               packages:
-                                                  packagesWithSharedRateCerts,
+                                                  packagesWithSharedRateCerts ?? [],
                                           })}
                                       </td>
-                                  )
-                                : null}
+                                  )}
                         </tr>
                     ))}
                 </tbody>
@@ -232,27 +228,15 @@ type DocumentWithS3Data = {
 } & GenericDocument
 
 type LinkedPackagesListProps = {
-    unlinkDrafts: boolean
     packages: SharedRateCertDisplay[]
 }
 
 const linkedPackagesList = ({
-    unlinkDrafts,
     packages,
 }: LinkedPackagesListProps): React.ReactElement[] => {
     return packages.map((item, index) => {
         const maybeComma = index > 0 ? ', ' : ''
-        const linkedPackageIsDraft =
-            item.packageName && item.packageName.includes('(Draft)')
 
-        if (linkedPackageIsDraft && unlinkDrafts) {
-            return (
-                <span key={item.packageId}>
-                    {maybeComma}
-                    <span>{item.packageName}</span>
-                </span>
-            )
-        } else {
             return (
                 <span key={item.packageId}>
                     {maybeComma}
@@ -264,6 +248,5 @@ const linkedPackagesList = ({
                     </Link>
                 </span>
             )
-        }
-    })
+        })
 }

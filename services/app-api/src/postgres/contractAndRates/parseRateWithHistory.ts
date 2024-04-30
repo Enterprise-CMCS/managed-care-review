@@ -253,6 +253,31 @@ function rateWithHistoryToDomainModel(
         }
     }
 
+    // handle legacy revisions dateAdded  on documents
+    // get references to rate revision in submission order and
+    // reset the document dateAdded dates accordingly.
+    const firstSeenDate: { [sha: string]: Date } = {}
+    for (const rateRev of revisions) {
+        const sinceDate = rateRev.submitInfo?.updatedAt || rateRev.updatedAt
+        if (rateRev.formData.rateDocuments) {
+            for (const doc of rateRev.formData.rateDocuments) {
+                if (!firstSeenDate[doc.sha256]) {
+                    firstSeenDate[doc.sha256] = sinceDate
+                }
+                doc.dateAdded = firstSeenDate[doc.sha256]
+            }
+        }
+        if (rateRev.formData.supportingDocuments) {
+            for (const doc of rateRev.formData.supportingDocuments) {
+                if (!firstSeenDate[doc.sha256]) {
+                    firstSeenDate[doc.sha256] = sinceDate
+                }
+                doc.dateAdded = firstSeenDate[doc.sha256]
+            }
+        }
+    }
+
+
     return {
         id: rate.id,
         createdAt: rate.createdAt,

@@ -236,4 +236,31 @@ describe('SubmissionTypeSummarySection', () => {
             screen.queryByRole('button', { name: 'Test button' })
         ).toBeInTheDocument()
     })
+
+    it('does not render fields with missing fields for submitted package on submission summary', () => {
+        const stateSubmission = mockContractPackageSubmitted()
+        const submittedPackage = stateSubmission.packageSubmissions[0]
+        submittedPackage.contractRevision.formData = {
+            ...submittedPackage.contractRevision.formData,
+            submissionDescription: '',
+            programIDs: [],
+        }
+        stateSubmission.packageSubmissions[0] = submittedPackage
+
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                contract={{ ...stateSubmission, status: 'SUBMITTED' }}
+                statePrograms={statePrograms}
+                editNavigateTo="submission-type"
+                submissionName="MN-MSHO-0003"
+                isStateUser={true}
+            />
+        )
+        expect(
+            screen.queryByRole('definition', { name: 'Program(s)' })
+        ).not.toBeInTheDocument()
+        expect(
+            screen.queryByRole('definition', { name: 'Submission description' })
+        ).not.toBeInTheDocument()
+    })
 })
