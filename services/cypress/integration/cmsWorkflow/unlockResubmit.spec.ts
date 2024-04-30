@@ -256,6 +256,14 @@ describe('CMS user', () => {
                 cy.fillOutNewRateCertification();
         })
         )
+        cy.findByRole('radiogroup', {
+            name: /Actuaries' communication preference/
+        })
+            .should('exist')
+            .within(() => { 
+                cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
+                .click()
+            })
         cy.navigateContractRatesFormByButtonClick('CONTINUE')
 
         // fill out the rest of the form
@@ -264,11 +272,6 @@ describe('CMS user', () => {
             name: /Contacts/,
         }).should('exist')
         cy.fillOutStateContact()
-        // There is a currently bug with actuary contacts with linked rates that makes us delete actuary contacts that aren't even filled out on this page
-        cy.findAllByRole('button', { name: 'Remove contact' }).last()
-        .should('exist')
-        .click()
-        cy.fillOutAdditionalActuaryContact();
         cy.navigateFormByButtonClick('CONTINUE')
         cy.findByRole('heading', {
             level: 2,
