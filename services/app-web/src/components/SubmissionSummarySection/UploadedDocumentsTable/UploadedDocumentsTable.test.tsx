@@ -9,8 +9,7 @@ import {
 import type { GenericDocument } from '../../../gen/gqlClient'
 
 describe('UploadedDocumentsTable', () => {
-
-    afterEach ( () => {
+    afterEach(() => {
         jest.clearAllMocks()
     })
     it('renders documents without errors', async () => {
@@ -422,7 +421,12 @@ describe('UploadedDocumentsTable', () => {
             />,
             {
                 apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ user: mockValidCMSUser(), statusCode: 200 })],
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                    ],
                 },
                 featureFlags: {
                     'link-rates': false,
@@ -504,7 +508,12 @@ describe('UploadedDocumentsTable', () => {
             />,
             {
                 apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ user: mockValidCMSUser(), statusCode: 200 })],
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                    ],
                 },
                 featureFlags: {
                     'link-rates': true,
@@ -545,7 +554,12 @@ describe('UploadedDocumentsTable', () => {
             />,
             {
                 apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ user: mockValidStateUser(), statusCode: 200 })],
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidStateUser(),
+                            statusCode: 200,
+                        }),
+                    ],
                 },
                 featureFlags: {
                     'link-rates': true,
@@ -556,7 +570,7 @@ describe('UploadedDocumentsTable', () => {
         expect(await screen.findByTestId('tag')).toBeInTheDocument()
     })
 
-    it('does not validations when hideDynamicFeedback is set to true',async() =>{
+    it('does not validations when hideDynamicFeedback is set to true', async () => {
         const testDocuments = [
             {
                 s3URL: 's3://foo/bar/test-1',
@@ -593,10 +607,12 @@ describe('UploadedDocumentsTable', () => {
             }
         )
         await waitFor(() => {
-            expect(screen.queryByText(/Only one document is allowed/)).not.toBeInTheDocument()
+            expect(
+                screen.queryByText(/Only one document is allowed/)
+            ).not.toBeInTheDocument()
         })
     })
-    it('renders document validations if hideDynamicFeedback is false and too many documents uploaded',async() =>{
+    it('renders document validations if hideDynamicFeedback is false and too many documents uploaded', async () => {
         const testDocuments = [
             {
                 s3URL: 's3://foo/bar/test-1',
@@ -633,7 +649,9 @@ describe('UploadedDocumentsTable', () => {
             }
         )
         await waitFor(() => {
-            expect(screen.queryByText(/Only one document is allowed/)).toBeInTheDocument()
+            expect(
+                screen.queryByText(/Only one document is allowed/)
+            ).toBeInTheDocument()
         })
     })
 })

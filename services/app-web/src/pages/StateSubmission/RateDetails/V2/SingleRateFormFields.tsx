@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import {
+    Button,
     DatePicker,
     DateRangePicker,
     Fieldset,
@@ -23,9 +24,16 @@ import {
 } from '../../../../components/FileUpload'
 import { useS3 } from '../../../../contexts/S3Context'
 
-import { FormikErrors, getIn, useFormikContext } from 'formik'
+import {
+    FieldArray,
+    FieldArrayRenderProps,
+    FormikErrors,
+    getIn,
+    useFormikContext,
+} from 'formik'
 import { ActuaryContactFields } from '../../Contacts'
 import { FormikRateForm, RateDetailFormConfig } from './RateDetailsV2'
+import { useFocus } from '../../../../hooks/useFocus'
 const isRateTypeEmpty = (rateForm: FormikRateForm): boolean =>
     rateForm.rateType === undefined
 const isRateTypeAmendment = (rateForm: FormikRateForm): boolean =>
@@ -75,6 +83,14 @@ const RateDatesErrorMessage = ({
     return <PoliteErrorMessage>{validationErrorMessage}</PoliteErrorMessage>
 }
 
+const emptyActuaryContact = {
+    name: '',
+    titleRole: '',
+    email: '',
+    actuarialFirm: undefined,
+    actuarialFirmOther: '',
+}
+
 export const SingleRateFormFields = ({
     rateForm,
     shouldValidate,
@@ -85,6 +101,20 @@ export const SingleRateFormFields = ({
     // page level setup
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
     const { errors, setFieldValue } = useFormikContext<RateDetailFormConfig>()
+    const [focusNewActuaryContact, setFocusNewActuaryContact] = useState(false)
+
+    const newActuaryContactNameRef = useRef<HTMLInputElement | null>(null)
+    const [newActuaryContactButtonRef, setNewActuaryContactButtonFocus] =
+        useFocus()
+
+    useEffect(() => {
+        if (focusNewActuaryContact) {
+            newActuaryContactNameRef.current &&
+                newActuaryContactNameRef.current.focus()
+            setFocusNewActuaryContact(false)
+            newActuaryContactNameRef.current = null
+        }
+    }, [focusNewActuaryContact])
 
     const showFieldErrors = (
         fieldName: keyof FormikRateForm
@@ -470,6 +500,60 @@ export const SingleRateFormFields = ({
                     fieldNamePrefix={`${fieldNamePrefix}.actuaryContacts.0`}
                     fieldSetLegend="Certifying Actuary"
                 />
+                <FieldArray name={`${fieldNamePrefix}.addtlActuaryContacts`}>
+                    {({ remove, push }: FieldArrayRenderProps) => (
+                        <div
+                            style={{ marginTop: '40px' }}
+                            className={styles.actuaryContacts}
+                            data-testid="actuary-contacts"
+                        >
+                            {rateForm.addtlActuaryContacts.length > 0 &&
+                                rateForm.addtlActuaryContacts.map(
+                                    (_actuaryContact, index) => (
+                                        <div
+                                            className={styles.actuaryContact}
+                                            key={index}
+                                            data-testid="addtnl-actuary-contact"
+                                        >
+                                            <ActuaryContactFields
+                                                shouldValidate={shouldValidate}
+                                                fieldNamePrefix={`${fieldNamePrefix}.addtlActuaryContacts.${index}`}
+                                                fieldSetLegend="Certifying actuary"
+                                                inputRef={
+                                                    newActuaryContactNameRef
+                                                }
+                                            />
+                                            <Button
+                                                type="button"
+                                                unstyled
+                                                className={
+                                                    styles.removeContactBtn
+                                                }
+                                                onClick={() => {
+                                                    remove(index)
+                                                    setNewActuaryContactButtonFocus()
+                                                }}
+                                                data-testid="removeContactBtn"
+                                            >
+                                                Remove
+                                            </Button>
+                                        </div>
+                                    )
+                                )}
+                            <Button
+                                type="button"
+                                unstyled
+                                onClick={() => {
+                                    push(emptyActuaryContact)
+                                    setFocusNewActuaryContact(true)
+                                }}
+                                ref={newActuaryContactButtonRef}
+                            >
+                                Add a certifying actuary
+                            </Button>
+                        </div>
+                    )}
+                </FieldArray>
             </FormGroup>
         </>
     )

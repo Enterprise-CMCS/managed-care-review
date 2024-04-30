@@ -15,6 +15,15 @@ describe('CMS user can view submission', () => {
             name: /Rate details/,
         }).should('exist')
         cy.fillOutNewRateCertification()
+        cy.fillOutAdditionalActuaryContact()
+        cy.findByRole('radiogroup', {
+            name: /Actuaries' communication preference/
+        })
+            .should('exist')
+            .within(() => { 
+                cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
+                .click()
+            })
         cy.navigateFormByButtonClick('CONTINUE')
 
         cy.findByRole('heading', {
@@ -22,7 +31,6 @@ describe('CMS user can view submission', () => {
             name: /Contacts/,
         }).should('exist')
         cy.fillOutStateContact()
-        cy.fillOutAdditionalActuaryContact()
         cy.navigateFormByButtonClick('CONTINUE')
 
         cy.findByRole('heading', {

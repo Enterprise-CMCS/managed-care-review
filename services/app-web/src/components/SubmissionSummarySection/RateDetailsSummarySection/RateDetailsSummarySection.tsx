@@ -356,9 +356,13 @@ export const RateDetailsSummarySection = ({
                                         rateInfo.rateDocuments,
                                         documentDateLookupTable
                                     )}
-                                    packagesWithSharedRateCerts={isPreviousSubmission? []:refreshPackagesWithSharedRateCert(
-                                        rateInfo
-                                    )}
+                                    packagesWithSharedRateCerts={
+                                        isPreviousSubmission
+                                            ? []
+                                            : refreshPackagesWithSharedRateCert(
+                                                  rateInfo
+                                              )
+                                    }
                                     previousSubmissionDate={
                                         documentDateLookupTable.previousSubmissionDate
                                             ? new Date(
@@ -380,9 +384,13 @@ export const RateDetailsSummarySection = ({
                                         rateInfo.supportingDocuments,
                                         documentDateLookupTable
                                     )}
-                                    packagesWithSharedRateCerts={isPreviousSubmission? []: refreshPackagesWithSharedRateCert(
-                                        rateInfo
-                                    )}
+                                    packagesWithSharedRateCerts={
+                                        isPreviousSubmission
+                                            ? []
+                                            : refreshPackagesWithSharedRateCert(
+                                                  rateInfo
+                                              )
+                                    }
                                     previousSubmissionDate={
                                         documentDateLookupTable.previousSubmissionDate
                                             ? new Date(

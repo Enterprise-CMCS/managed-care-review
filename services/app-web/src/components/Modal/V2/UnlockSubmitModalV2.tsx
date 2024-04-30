@@ -190,19 +190,19 @@ export const UnlockSubmitModalV2 = ({
                 console.info('unlock rate not implemented yet')
                 break
 
-            case 'SUBMIT_RATE' :
+            case 'SUBMIT_RATE':
                 console.info('submit rate not implemented yet')
                 break
-            case 'RESUBMIT_RATE' :
-                    console.info('submit rate not implemented yet')
-                    break
+            case 'RESUBMIT_RATE':
+                console.info('submit rate not implemented yet')
+                break
             case 'SUBMIT_CONTRACT':
                 result = await submitMutationWrapperV2(
                     submitContract,
                     submissionData.id,
                     unlockSubmitModalInput
                 )
-                break;
+                break
             case 'RESUBMIT_CONTRACT':
                 result = await submitMutationWrapperV2(
                     submitContract,

@@ -123,7 +123,35 @@ describe('ContactsSummarySection', () => {
     })
 
     it('does not include additional actuary contacts heading when this optional field is not provided', () => {
-        const mockSubmission = { ...draftSubmission, addtlActuaryContacts: [] }
+        const mockSubmission = mockContractAndRatesDraft({
+            rateInfos: [
+                {
+                    rateType: 'AMENDMENT',
+                    rateCapitationType: 'RATE_CELL',
+                    rateDocuments: [],
+                    supportingDocuments: [],
+                    rateDateStart: new Date(),
+                    rateDateEnd: new Date(),
+                    rateDateCertified: new Date(),
+                    rateAmendmentInfo: {
+                        effectiveDateStart: new Date(),
+                        effectiveDateEnd: new Date(),
+                    },
+                    rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                    actuaryContacts: [
+                        {
+                            actuarialFirm: 'DELOITTE',
+                            name: 'Actuary Contact 1',
+                            titleRole: 'Test Actuary Contact 1',
+                            email: 'actuarycontact1@test.com',
+                        },
+                    ],
+                    addtlActuaryContacts: [],
+                    actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                    packagesWithSharedRateCerts: [],
+                },
+            ],
+        })
         renderWithProviders(
             <ContactsSummarySection submission={mockSubmission} />
         )

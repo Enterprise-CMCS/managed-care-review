@@ -76,7 +76,10 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
     }
 
     const isStateUser = loggedInUser?.role === 'STATE_USER'
-    const contractFormData = getVisibleLatestContractFormData(contract, isStateUser)
+    const contractFormData = getVisibleLatestContractFormData(
+        contract,
+        isStateUser
+    )
     if (!contractFormData) return <GenericErrorPage />
 
     const isContractActionAndRateCertification =

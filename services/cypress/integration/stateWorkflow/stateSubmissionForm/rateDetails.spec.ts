@@ -44,6 +44,15 @@ describe('rate details', () => {
                 `/submissions/${draftSubmissionId}/edit/rate-details`
             )
 
+            cy.findByRole('radiogroup', {
+                name: /Actuaries' communication preference/
+            })
+                .should('exist')
+                .within(() => { 
+                    cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
+                    .click()
+                })
+
             cy.fillOutAmendmentToPriorRateCertification()
             /* Choose another submission that the rate cert was uploaded to, then check that your selection
             is still there when you come back */
@@ -98,6 +107,16 @@ describe('rate details', () => {
         }).click()
 
         cy.findAllByTestId('rate-certification-form').should('have.length', 3)
+
+        cy.findByRole('radiogroup', {
+            name: /Actuaries' communication preference/
+        })
+            .should('exist')
+            .within(() => { 
+                cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
+                .click()
+            })
+
         //Fill out every rate certification form
         cy.findAllByTestId('rate-certification-form').each(
             (form, index, arr) => {
@@ -105,12 +124,14 @@ describe('rate details', () => {
                     //Fill out last rate certification as new rate
                     if (index === arr.length - 1) {
                         cy.fillOutNewRateCertification()
+                        cy.fillOutAdditionalActuaryContact()
                     } else {
                         cy.fillOutAmendmentToPriorRateCertification(index)
                     }
                 })
             }
-        )
+            )
+        
 
         // Navigate to contacts page by clicking continue
         cy.navigateFormByButtonClick('CONTINUE')
@@ -118,9 +139,6 @@ describe('rate details', () => {
 
         //Fill out one state and one additional actuary contact
         cy.fillOutStateContact()
-        cy.findByRole('button', { name: /Add actuary contact/ }).safeClick()
-        cy.findAllByTestId('actuary-contact').should('have.length', 1)
-        cy.fillOutAdditionalActuaryContact()
 
         // Navigate back to rate details page
         cy.navigateFormByButtonClick('BACK')

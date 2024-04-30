@@ -169,6 +169,14 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                             email: 'actuarycontact1@test.com',
                         },
                     ],
+                    addtlActuaryContacts: [
+                        {
+                            actuarialFirm: 'DELOITTE',
+                            name: 'Additional Actuary Contact',
+                            titleRole: 'Test Additional Actuary Contact',
+                            email: 'additionalactuarycontact1@test.com',
+                        },
+                    ],
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
                     packagesWithSharedRateCerts: [],
                 },
@@ -199,6 +207,14 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                             email: 'actuarycontact1@test.com',
                         },
                     ],
+                    addtlActuaryContacts: [
+                        {
+                            actuarialFirm: 'DELOITTE',
+                            name: 'Additional Actuary Contact',
+                            titleRole: 'Test Additional Actuary Contact',
+                            email: 'additionalactuarycontact1@test.com',
+                        },
+                    ],
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
                     packagesWithSharedRateCerts: [
                         {
@@ -217,15 +233,8 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                 },
             ],
             stateContacts: [],
+            addtlActuaryContacts: [],
             addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-            addtlActuaryContacts: [
-                {
-                    actuarialFirm: 'DELOITTE',
-                    name: 'Additional Actuary Contact',
-                    titleRole: 'Test Actuary Contact',
-                    email: 'additionalactuarycontact1@test.com',
-                },
-            ],
             statutoryRegulatoryAttestation: false,
             statutoryRegulatoryAttestationDescription: 'No compliance',
         }
@@ -258,12 +267,11 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
                 packagesWithSharedRateCerts: [],
-                // Additional actuaries from package should be in each rate now.
                 addtlActuaryContacts: [
                     {
                         actuarialFirm: 'DELOITTE',
                         name: 'Additional Actuary Contact',
-                        titleRole: 'Test Actuary Contact',
+                        titleRole: 'Test Additional Actuary Contact',
                         email: 'additionalactuarycontact1@test.com',
                     },
                 ],
@@ -308,7 +316,7 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                     {
                         actuarialFirm: 'DELOITTE',
                         name: 'Additional Actuary Contact',
-                        titleRole: 'Test Actuary Contact',
+                        titleRole: 'Test Additional Actuary Contact',
                         email: 'additionalactuarycontact1@test.com',
                     },
                 ],

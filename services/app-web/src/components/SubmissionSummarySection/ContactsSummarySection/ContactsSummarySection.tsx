@@ -37,6 +37,16 @@ export const ContactsSummarySection = ({
 }: ContactsSummarySectionProps): React.ReactElement => {
     const isSubmitted = submission.status === 'SUBMITTED'
 
+    // Combine additional actuaries from all rates.
+    const additionalActuaries: ActuaryContact[] = submission.rateInfos.flatMap(
+        (rate) => {
+            if (rate.addtlActuaryContacts?.length) {
+                return rate.addtlActuaryContacts
+            }
+            return []
+        }
+    )
+
     return (
         <SectionCard id="stateContacts" className={styles.summarySection}>
             <SectionHeader
@@ -76,12 +86,12 @@ export const ContactsSummarySection = ({
 
             {submission.submissionType === 'CONTRACT_AND_RATES' && (
                 <>
-                    {submission.addtlActuaryContacts.length > 0 && (
+                    {additionalActuaries.length > 0 && (
                         <dl>
                             <SectionHeader header="Additional actuary contacts" />
                             <GridContainer>
                                 <Grid row>
-                                    {submission.addtlActuaryContacts.map(
+                                    {additionalActuaries.map(
                                         (actuaryContact, index) => (
                                             <Grid
                                                 col={6}
