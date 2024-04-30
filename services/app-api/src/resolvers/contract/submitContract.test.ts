@@ -171,6 +171,89 @@ describe('submitContract', () => {
         console.info(ThreeID, FourID, contractD0)
     })
 
+    it('unlocks a submission with a removed child rate', async () => {
+        const ldService = testLDService({
+            'link-rates': true,
+        })
+
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            ldService,
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        // 1. Submit A0 with Rate1 and Rate2
+        const draftA0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const AID = draftA0.id
+        await addNewRateToTestContract(stateServer, draftA0)
+
+        const contractA0 = await submitTestContract(stateServer, AID)
+        const subA0 = contractA0.packageSubmissions[0]
+        const rate10 = subA0.rateRevisions[0]
+        const OneID = rate10.rateID
+
+        // 2. Submit B0 with Rate1 and Rate3
+        const draftB0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const draftB010 = await addLinkedRateToTestContract(
+            stateServer,
+            draftB0,
+            OneID
+        )
+        await addNewRateToTestContract(stateServer, draftB010)
+
+        const contractB0 = await submitTestContract(stateServer, draftB0.id)
+        const subB0 = contractB0.packageSubmissions[0]
+
+        expect(subB0.rateRevisions[0].rateID).toBe(OneID)
+
+        // 3. unlock and resubmit B, removing Three
+        await unlockTestHealthPlanPackage(
+            cmsServer,
+            contractB0.id,
+            'remove that child rate'
+        )
+
+        const unlockedB0 = await fetchTestContract(stateServer, contractB0.id)
+
+        const unlockedBUpdateInput =
+            updateRatesInputFromDraftContract(unlockedB0)
+        unlockedBUpdateInput.updatedRates = [
+            unlockedBUpdateInput.updatedRates[0],
+        ]
+
+        const updatedUnlockedB0 = await updateTestDraftRatesOnContract(
+            stateServer,
+            unlockedBUpdateInput
+        )
+
+        expect(updatedUnlockedB0.draftRates).toHaveLength(1)
+
+        await submitTestContract(
+            stateServer,
+            updatedUnlockedB0.id,
+            'resubmit without child'
+        )
+
+        // 4. Unlock again, should not error
+        await unlockTestHealthPlanPackage(
+            cmsServer,
+            updatedUnlockedB0.id,
+            'dont try and reunlock'
+        )
+        const unlockedB1 = await fetchTestContract(
+            stateServer,
+            updatedUnlockedB0.id
+        )
+
+        expect(unlockedB1.draftRates).toHaveLength(1)
+    })
+
     it('handles complex submission etc', async () => {
         const ldService = testLDService({
             'link-rates': true,
