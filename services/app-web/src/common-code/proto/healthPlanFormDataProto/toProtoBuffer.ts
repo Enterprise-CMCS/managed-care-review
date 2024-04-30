@@ -280,6 +280,11 @@ const toProtoBuffer = (
                       }
                   })
                 : undefined,
+        /**
+         * This field is unused and will need cleaned up, additional actuaries have been moved to the rate level.
+         * Leaving this as am empty array to get linked rates feature work in without having to fix all the broken tests
+         * by removing this field.
+         */
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: domainEnumToProto(
             domainData.addtlActuaryCommunicationPreference,
