@@ -144,7 +144,6 @@ export const LinkRateSelect = ({
 
     return (
         <Select
-            defaultMenuIsOpen
             value={defaultValue}
             className={styles.rateMultiSelect}
             options={
