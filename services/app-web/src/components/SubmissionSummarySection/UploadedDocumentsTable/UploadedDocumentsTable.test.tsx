@@ -524,7 +524,49 @@ describe('UploadedDocumentsTable', () => {
         expect(await screen.findByTestId('tag')).toHaveTextContent('SHARED')
     })
 
-    it('still renders SHARED tag to state user when linked rates flag on', async () => {
+    it('still renders SHARED tag to state user on submission summary when linked rates flag on', async () => {
+        const packagesWithSharedRateCerts = [
+            {
+                packageId: '333b4225-5b49-4e82-aa71-be0d33d7418d',
+                packageName: 'MCR-MN-0001-SNBC',
+            },
+            {
+                packageId: '21467dba-6ae8-11ed-a1eb-0242ac120002',
+                packageName: 'MCR-MN-0002-PMAP',
+            },
+        ]
+        const testDocuments = [
+            {
+                s3URL: 's3://foo/bar/test-1',
+                name: 'supporting docs test 1',
+                sha256: 'fakesha',
+                dateAdded: new Date('01/01/00'),
+            },
+        ]
+        renderWithProviders(
+            <UploadedDocumentsTable
+                documents={testDocuments}
+                caption="Rate"
+                documentCategory="Rate certification"
+                packagesWithSharedRateCerts={packagesWithSharedRateCerts}
+                previousSubmissionDate={new Date('01/01/01')}
+                hideDynamicFeedback={false}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ user: mockValidStateUser(), statusCode: 200 })],
+                },
+                featureFlags: {
+                    'link-rates': true,
+                },
+            }
+        )
+
+        expect(await screen.findByTestId('tag')).toHaveTextContent('SHARED')
+        expect(await screen.findByText('Linked submissions')).toBeInTheDocument()
+    })
+
+    it('does not render SHARED tag to state user on review submit when linked rates flag on', async () => {
         const packagesWithSharedRateCerts = [
             {
                 packageId: '333b4225-5b49-4e82-aa71-be0d33d7418d',
@@ -567,7 +609,8 @@ describe('UploadedDocumentsTable', () => {
             }
         )
 
-        expect(await screen.findByTestId('tag')).toBeInTheDocument()
+        expect(await screen.findByTestId('tag')).not.toBeInTheDocument()
+        expect(await screen.queryByText('Linked submissions')).not.toBeInTheDocument()
     })
 
     it('does not validations when hideDynamicFeedback is set to true', async () => {

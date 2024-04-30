@@ -1242,7 +1242,10 @@ function mockContractPackageUnlocked(
                             },
                         ],
                         actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                        packagesWithSharedRateCerts: []
+                        packagesWithSharedRateCerts: [ {
+                            packageName: 'testABC1',
+                            packageId: 'test-abc-1',
+                        },]
                     }
                 },
             ],
