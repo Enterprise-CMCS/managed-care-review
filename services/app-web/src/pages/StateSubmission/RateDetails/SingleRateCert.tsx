@@ -584,11 +584,7 @@ export const SingleRateCert = ({
                         name={`${fieldNamePrefix}.addtlActuaryContacts`}
                     >
                         {({ remove, push }: FieldArrayRenderProps) => (
-                            <div
-                                style={{ marginTop: '40px' }}
-                                className={styles.actuaryContacts}
-                                data-testid="actuary-contacts"
-                            >
+                            <FormGroup data-testid="actuary-contacts">
                                 {rateInfo.addtlActuaryContacts.length > 0 &&
                                     rateInfo.addtlActuaryContacts.map(
                                         (_actuaryContact, index) => (
@@ -621,7 +617,7 @@ export const SingleRateCert = ({
                                                     }}
                                                     data-testid="removeContactBtn"
                                                 >
-                                                    Remove
+                                                    Remove certifying actuary
                                                 </Button>
                                             </div>
                                         )
@@ -637,7 +633,7 @@ export const SingleRateCert = ({
                                 >
                                     Add a certifying actuary
                                 </Button>
-                            </div>
+                            </FormGroup>
                         )}
                     </FieldArray>
                 </FormGroup>

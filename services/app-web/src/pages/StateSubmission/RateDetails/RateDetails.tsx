@@ -299,6 +299,27 @@ export const RateDetails = ({
                             }
                         )
                     }
+
+                    // If the field is addtlActuaryContacts, then it should be an array.
+                    if (
+                        field === 'addtlActuaryContacts' &&
+                        Array.isArray(value)
+                    ) {
+                        // Loops through every additional certifying actuary and adds each actuary field with an error to
+                        // the errorObject.
+                        value.forEach((contact, contactIndex) => {
+                            if (!contact) return
+
+                            Object.entries(contact).forEach(
+                                ([field, value]) => {
+                                    const errorKey = `rateInfos.${index}.addtlActuaryContacts.${contactIndex}.${field}`
+                                    if (typeof value === 'string') {
+                                        errorObject[errorKey] = value
+                                    }
+                                }
+                            )
+                        })
+                    }
                 })
             })
         }
