@@ -535,7 +535,7 @@ export const SingleRateFormFields = ({
                                                 }}
                                                 data-testid="removeContactBtn"
                                             >
-                                                Remove
+                                                Remove certifying actuary
                                             </Button>
                                         </div>
                                     )
