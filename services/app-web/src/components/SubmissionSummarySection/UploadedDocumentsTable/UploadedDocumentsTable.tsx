@@ -95,7 +95,7 @@ export const UploadedDocumentsTable = ({
 
     // show legacy shared rates across submissions (this is feature replaced by linked rates)
     // to cms users always when data available, to state users only when linked rates flag is off
-    const showLegacySharedRatesAcross =  Boolean((useLinkedRates? !isStateUser: true) && (packagesWithSharedRateCerts && packagesWithSharedRateCerts.length > 0))
+    const showLegacySharedRatesAcross =  Boolean(packagesWithSharedRateCerts && packagesWithSharedRateCerts.length > 0)
 
     const borderTopGradientStyles = `borderTopLinearGradient ${styles.uploadedDocumentsTable}`
     const supportingDocsTopMarginStyles = isSupportingDocuments

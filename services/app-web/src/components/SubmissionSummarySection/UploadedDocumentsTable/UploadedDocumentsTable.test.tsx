@@ -515,7 +515,7 @@ describe('UploadedDocumentsTable', () => {
         expect(await screen.findByTestId('tag')).toHaveTextContent('SHARED')
     })
 
-    it('no longer renders SHARED tag to state user when linked rates flag on', async () => {
+    it('still renders SHARED tag to state user when linked rates flag on', async () => {
         const packagesWithSharedRateCerts = [
             {
                 packageId: '333b4225-5b49-4e82-aa71-be0d33d7418d',
@@ -553,7 +553,7 @@ describe('UploadedDocumentsTable', () => {
             }
         )
 
-        expect(await screen.findByTestId('tag')).not.toBeInTheDocument()
+        expect(await screen.findByTestId('tag')).toBeInTheDocument()
     })
 
     it('does not validations when hideDynamicFeedback is set to true',async() =>{
