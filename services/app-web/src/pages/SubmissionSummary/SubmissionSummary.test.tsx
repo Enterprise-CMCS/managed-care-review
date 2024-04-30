@@ -1830,9 +1830,9 @@ describe('SubmissionSummary', () => {
             ).toHaveLength(2)
 
             expect(screen.getByText('Certifying actuary')).toBeInTheDocument()
-            // expect(
-            //     screen.getAllByText('Additional actuary contact')
-            // ).toHaveLength(2)
+            expect(
+                screen.getAllByText('Additional actuary contact')
+            ).toHaveLength(1)
             expect(
                 screen.getByText(
                     'OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.'
