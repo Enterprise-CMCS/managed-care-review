@@ -289,6 +289,7 @@ function mockContractPackageSubmitted(
 ): Contract {
     return {
         status: 'SUBMITTED',
+        __typename: 'Contract',
         createdAt: new Date(),
         updatedAt: new Date(),
         id: 'test-abc-123',
@@ -937,6 +938,7 @@ function mockContractPackageUnlocked(
 ): Contract {
     return {
         status: 'UNLOCKED',
+        __typename: 'Contract',
         createdAt: new Date(),
         updatedAt: new Date(),
         initiallySubmittedAt: new Date(),
