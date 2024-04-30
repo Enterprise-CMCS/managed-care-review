@@ -13,6 +13,8 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 import { GenericDocument } from '../../../gen/gqlClient'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
+import { featureFlags } from '../../../common-code/featureFlags'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 // V2 API migration note: intentionally trying to avoid making V2 version of this reuseable sub component since it has such a contained focus (on displaying documents only).
 // Use props to pass needed information and seek to make content as domain agnostic as possible.
@@ -33,7 +35,7 @@ export type UploadedDocumentsTableProps = {
     documents: GenericDocument[]
     caption: string | null
     previousSubmissionDate: Date | null // used to calculate NEW tag based on doc dateAdded
-    hideDynamicFeedback: boolean // used to determine if we display static data for submission summary experience or if we display dynamic feedback UI (validations, edit buttons) like on review submit experience
+    hideDynamicFeedback: boolean // used to determine if we display static data the dynamic feedback UI (validations, edit buttons). If true, assume submission summary experience, if false, assume review submit experience
     packagesWithSharedRateCerts?: SharedRateCertDisplay[] // deprecated - could be deleted after we resolve all historical data linked rates
     isSupportingDocuments?: boolean // used to calculate empty state and styles around the secondary supporting docs tables - would be nice to remove this in favor of more domain agnostic prop such as 'emptyStateText'
     multipleDocumentsAllowed?: boolean // used to determined if we display validations based on doc list length
@@ -51,19 +53,27 @@ export const UploadedDocumentsTable = ({
     multipleDocumentsAllowed = true,
     hideDynamicFeedback = false,
 }: UploadedDocumentsTableProps): React.ReactElement => {
+    const ldClient = useLDClient()
     const initialDocState = documents.map((doc) => ({
         ...doc,
         url: null,
         s3Key: null,
     }))
     const { loggedInUser } = useAuth()
+    const isStateUser = loggedInUser?.__typename === 'StateUser'
     const isCMSUser = loggedInUser?.__typename === 'CMSUser'
     const { getDocumentsWithS3KeyAndUrl } = useDocument()
     const [refreshedDocs, setRefreshedDocs] =
         useState<DocumentWithS3Data[]>(initialDocState)
     const shouldShowEditButton = !hideDynamicFeedback && isSupportingDocuments // at this point only contract supporting documents need the inline EDIT button - this can be deleted when we move supporting docs to ContractDetails page
 
-    // canDisplayDateAddedForDocument -  guards against passing in null or undefined to dayjs
+
+    const useLinkedRates = ldClient?.variation(
+        featureFlags.LINK_RATES.flag,
+        featureFlags.LINK_RATES.defaultValue
+    ) ?? false
+
+    // canDisplayDateForDocument -  guards against passing in null or undefined to dayjs
     // don't display on new initial submission
     const canDisplayDateAddedForDocument = (doc: DocumentWithS3Data) => {
         return doc.dateAdded && previousSubmissionDate
@@ -86,7 +96,7 @@ export const UploadedDocumentsTable = ({
 
     // show legacy shared rates across submissions (this is feature replaced by linked rates)
     // to cms users always when data available, to state users only when linked rates flag is off
-    const showLegacySharedRatesAcross =  Boolean(packagesWithSharedRateCerts && packagesWithSharedRateCerts.length > 0)
+    const showLegacySharedRatesAcross = Boolean((useLinkedRates && hideDynamicFeedback? !isStateUser: true) && (packagesWithSharedRateCerts && packagesWithSharedRateCerts.length > 0))
 
     const borderTopGradientStyles = `borderTopLinearGradient ${styles.uploadedDocumentsTable}`
     const supportingDocsTopMarginStyles = isSupportingDocuments

@@ -204,6 +204,45 @@ describe('SubmissionSummary', () => {
         expect(ratingPeriod).toHaveTextContent('01/01/2020 to 01/01/2021')
     })
 
+    it('displays the legacy shared rates across submissions UI for CMS users when unlocked', async () => {
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummaryV2 />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                     mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                        fetchContractMockSuccess({
+                            contract: mockContractPackageUnlocked(),
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: 'test-abc-123',
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123',
+                },
+                featureFlags: {
+                    'link-rates': true,
+                },
+            }
+        )
+
+        expect(await screen.findByText('SHARED')).toBeInTheDocument()
+        expect(await screen.findByText('Linked submissions')).toBeInTheDocument()
+    })
+
+
     it('renders add mccrs-id link for CMS user', async () => {
         renderWithProviders(
             <Routes>

@@ -291,4 +291,37 @@ describe('ReviewSubmit', () => {
         )
         expect(ratingPeriod).toHaveTextContent('02/02/2020 to 02/02/2021')
     })
+
+    it('hides the legacy shared rates across submissions UI for state users when unlocked', async () => {
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmitV2 />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidStateUser(),
+                        }),
+                        fetchContractMockSuccess({
+                            contract: mockContractPackageUnlocked(),
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                },
+                featureFlags: {
+                    'link-rates': true,
+                },
+            }
+        )
+
+        expect(await screen.queryByText('Linked submissions')).not.toBeInTheDocument()
+        expect(await screen.queryByText('SHARED')).not.toBeInTheDocument()
+    })
 })
