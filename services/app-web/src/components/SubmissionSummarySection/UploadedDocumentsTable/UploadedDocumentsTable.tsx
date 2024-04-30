@@ -13,8 +13,6 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 import { GenericDocument } from '../../../gen/gqlClient'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
-import { featureFlags } from '../../../common-code/featureFlags'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 // V2 API migration note: intentionally trying to avoid making V2 version of this reuseable sub component since it has such a contained focus (on displaying documents only).
 // Use props to pass needed information and seek to make content as domain agnostic as possible.
@@ -53,19 +51,12 @@ export const UploadedDocumentsTable = ({
     multipleDocumentsAllowed = true,
     hideDynamicFeedback = false,
 }: UploadedDocumentsTableProps): React.ReactElement => {
-    const ldClient = useLDClient()
-
-    const useLinkedRates = ldClient?.variation(
-        featureFlags.LINK_RATES.flag,
-        featureFlags.LINK_RATES.defaultValue
-    ) ?? false
     const initialDocState = documents.map((doc) => ({
         ...doc,
         url: null,
         s3Key: null,
     }))
     const { loggedInUser } = useAuth()
-    const isStateUser = loggedInUser?.__typename === 'StateUser'
     const isCMSUser = loggedInUser?.__typename === 'CMSUser'
     const { getDocumentsWithS3KeyAndUrl } = useDocument()
     const [refreshedDocs, setRefreshedDocs] =
