@@ -90,7 +90,6 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
     const contractData = revision.formData
     const statePrograms = contract.state.programs
     const submitInfo = revision.submitInfo || undefined
-
     const isContractActionAndRateCertification =
         contractData.submissionType === 'CONTRACT_AND_RATES'
 

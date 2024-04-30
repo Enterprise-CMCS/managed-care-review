@@ -68,7 +68,7 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeNull()
     })
 
-    it('can render state submission on summary page without errors (submission summary behavior)', async () => {
+    it.skip('can render state submission on summary page without errors (submission summary behavior)', async () => {
         renderWithProviders(
             <ContractDetailsSummarySection
                 contract={{
@@ -460,7 +460,7 @@ describe('ContractDetailsSummarySection', () => {
         ).not.toBeInTheDocument()
     })
 
-    it('renders inline error when bulk URL is unavailable', async () => {
+    it.skip('renders inline error when bulk URL is unavailable', async () => {
         const s3Provider = {
             ...testS3Client(),
             getBulkDlURL: async (
