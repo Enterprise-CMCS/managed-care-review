@@ -52,8 +52,8 @@ export const SubmissionTypeSummarySectionV2 = ({
     const programNames = statePrograms
         .filter((p) => contractFormData?.programIDs.includes(p.id))
         .map((p) => p.name)
-    const isSubmitted = contract.status === 'SUBMITTED'
-
+    const isSubmitted =
+        contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     return (
         <SectionCard
             id="submissionTypeSection"
