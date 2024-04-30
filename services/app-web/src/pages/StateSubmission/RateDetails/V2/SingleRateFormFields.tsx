@@ -502,11 +502,7 @@ export const SingleRateFormFields = ({
                 />
                 <FieldArray name={`${fieldNamePrefix}.addtlActuaryContacts`}>
                     {({ remove, push }: FieldArrayRenderProps) => (
-                        <div
-                            style={{ marginTop: '40px' }}
-                            className={styles.actuaryContacts}
-                            data-testid="actuary-contacts"
-                        >
+                        <FormGroup data-testid="actuary-contacts">
                             {rateForm.addtlActuaryContacts.length > 0 &&
                                 rateForm.addtlActuaryContacts.map(
                                     (_actuaryContact, index) => (
@@ -551,7 +547,7 @@ export const SingleRateFormFields = ({
                             >
                                 Add a certifying actuary
                             </Button>
-                        </div>
+                        </FormGroup>
                     )}
                 </FieldArray>
             </FormGroup>
