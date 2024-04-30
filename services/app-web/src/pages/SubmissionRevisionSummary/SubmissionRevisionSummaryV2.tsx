@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
 import { useParams } from 'react-router-dom'
-import { Loading } from '../../components/Loading'
 import { useAuth } from '../../contexts/AuthContext'
 import { ContractDetailsSummarySectionV2 } from '../StateSubmission/ReviewSubmit/V2/ReviewSubmit/ContractDetailsSummarySectionV2'
 import { ContactsSummarySection } from '../StateSubmission/ReviewSubmit/V2/ReviewSubmit/ContactsSummarySectionV2'
@@ -9,14 +8,14 @@ import { RateDetailsSummarySectionV2 } from '../StateSubmission/ReviewSubmit/V2/
 import { SubmissionTypeSummarySectionV2 } from '../StateSubmission/ReviewSubmit/V2/ReviewSubmit/SubmissionTypeSummarySectionV2'
 import { usePage } from '../../contexts/PageContext'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
-import { Error404 } from '../Errors/Error404Page'
 import { dayjs } from '../../common-code/dateHelpers'
 import styles from './SubmissionRevisionSummary.module.scss'
 import { PreviousSubmissionBanner } from '../../components'
+import { useFetchContractQuery } from '../../gen/gqlClient'
 import {
-    useFetchContractQuery,
-} from '../../gen/gqlClient'
-import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
+    ErrorOrLoadingPage,
+    handleAndReturnErrorState,
+} from '../StateSubmission/ErrorOrLoadingPage'
 
 type RouteParams = {
     id: string
@@ -25,7 +24,7 @@ type RouteParams = {
 
 export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
     // Page level state
-    const { id } = useParams<keyof RouteParams>()
+    const { id, revisionVersion } = useParams<keyof RouteParams>()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'
@@ -50,9 +49,14 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
         fetchPolicy: 'network-only',
     })
     const contract = fetchContractData?.fetchContract.contract
+    //We offset version by +1 of index, remove offset to find revision in revisions
+    const revisionIndex = Number(revisionVersion)
+
     const name =
-        contract && contract?.packageSubmissions.length > 0
-            ? contract.packageSubmissions[0].contractRevision.contractName
+        contract &&
+        contract?.packageSubmissions.length === Number(revisionVersion)
+            ? contract.packageSubmissions.reverse()[revisionIndex]
+                  .contractRevision.contractName
             : ''
     useEffect(() => {
         updateHeading({
@@ -60,39 +64,29 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
         })
     }, [name, updateHeading])
 
+    // Display any full page interim state resulting from the initial fetch API requests
     if (fetchContractLoading) {
+        return <ErrorOrLoadingPage state="LOADING" />
+    }
+
+    if (fetchContractError) {
         return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
+            <ErrorOrLoadingPage
+                state={handleAndReturnErrorState(fetchContractError)}
+            />
         )
-    } else if (
-        fetchContractError ||
+    }
+
+    if (
         !contract ||
-        contract.packageSubmissions.length === 0
+        contract.packageSubmissions.length === Number(revisionVersion)
     ) {
-        //error handling for a state user that tries to access rates for a different state
-        if (
-            fetchContractError?.graphQLErrors[0]?.extensions?.code ===
-            'FORBIDDEN'
-        ) {
-            return (
-                <ErrorForbiddenPage
-                    errorMsg={fetchContractError.graphQLErrors[0].message}
-                />
-            )
-        } else if (
-            fetchContractError?.graphQLErrors[0]?.extensions?.code ===
-            'NOT_FOUND'
-        ) {
-            return <Error404 />
-        } else {
-            return <GenericErrorPage />
-        }
+        return <GenericErrorPage />
     }
 
     //Reversing revisions to get correct submission order
-    const revision = contract.packageSubmissions[0].contractRevision
+    const revision = [...contract.packageSubmissions].reverse()[revisionIndex]
+        .contractRevision
     const contractData = revision.formData
     const statePrograms = contract.state.programs
     const submitInfo = revision.submitInfo || undefined
@@ -145,7 +139,11 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
                         statePrograms={statePrograms}
                     />
                 )}
-                <ContactsSummarySection contract={contract} contractRev={revision} isStateUser={isStateUser} />
+                <ContactsSummarySection
+                    contract={contract}
+                    contractRev={revision}
+                    isStateUser={isStateUser}
+                />
             </GridContainer>
         </div>
     )
