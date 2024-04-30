@@ -42,7 +42,7 @@ import {
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../../../constants/statutoryRegulatoryAttestation'
 import { SectionCard } from '../../../../../components/SectionCard'
-import { Contract } from '../../../../../gen/gqlClient'
+import { Contract, ContractRevision } from '../../../../../gen/gqlClient'
 import {
     getLastContractSubmission,
     getVisibleLatestContractFormData,
@@ -50,8 +50,10 @@ import {
 
 export type ContractDetailsSummarySectionV2Props = {
     contract: Contract
+    contractRev?: ContractRevision
     editNavigateTo?: string
     isCMSUser?: boolean
+    isStateUser: boolean
     submissionName: string
     onDocumentError?: (error: true) => void
 }
@@ -72,6 +74,8 @@ function renderDownloadButton(zippedFilesURL: string | undefined | Error) {
 
 export const ContractDetailsSummarySectionV2 = ({
     contract,
+    contractRev,
+    isStateUser,
     editNavigateTo, // this is the edit link for the section. When this prop exists, summary section is loaded in edit mode
     submissionName,
     onDocumentError,
@@ -88,8 +92,10 @@ export const ContractDetailsSummarySectionV2 = ({
     const isSubmittedOrCMSUser =
         contract.status === 'SUBMITTED' || loggedInUser?.role === 'CMS_USER'
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
+    const contractOrRev = contractRev ? contractRev : contract
+
     const contractFormData = getVisibleLatestContractFormData(
-        contract,
+        contractOrRev,
         isEditing
     )
     const contract438Attestation = ldClient?.variation(

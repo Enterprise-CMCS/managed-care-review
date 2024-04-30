@@ -15,7 +15,6 @@ import {
     convertUpdateInfoToDomainModel,
     getContractRateStatus,
     rateFormDataToDomainModel,
-    setDateAddedForRateRevisions,
 } from './prismaSharedContractRateHelpers'
 import type { RateTableFullPayload } from './prismaSubmittedRateHelpers'
 

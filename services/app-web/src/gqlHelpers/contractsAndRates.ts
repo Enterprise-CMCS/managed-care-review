@@ -3,7 +3,7 @@ These helpers help you access nested data from the Contract and Rate Apollo Clie
 If the data doesn't exist, returns undefined reliably
 */
 
-import { Contract, ContractFormData, ContractPackageSubmission, Rate, RateRevision } from "../gen/gqlClient"
+import { Contract, ContractFormData, ContractPackageSubmission, ContractRevision, Rate, RateRevision } from "../gen/gqlClient"
 
 
 function getVisibleLatestRateRevisions(contract: Contract, isEditing: boolean): RateRevision[] | undefined {
@@ -46,12 +46,16 @@ function getVisibleLatestRateRevisions(contract: Contract, isEditing: boolean): 
 
 // returns draft form data for unlocked and draft, and last package submission data for submitted or resubmitted
 // only state users get to see draft data.
-const getVisibleLatestContractFormData = (contract: Contract, isStateUser: boolean): ContractFormData | undefined =>{
-   if (isStateUser) {
-      return contract.draftRevision?.formData ||
-            getLastContractSubmission(contract)?.contractRevision.formData
+const getVisibleLatestContractFormData = (contract: Contract | ContractRevision, isStateUser: boolean): ContractFormData | undefined =>{
+   if (contract.__typename === 'Contract') {
+        if (isStateUser) {
+            return contract.draftRevision?.formData ||
+                getLastContractSubmission(contract)?.contractRevision.formData
+        }
+        return getLastContractSubmission(contract)?.contractRevision.formData
+   } else if (contract.__typename === 'ContractRevision') {
+    return contract.formData
    }
-   return getLastContractSubmission(contract)?.contractRevision.formData
 }
 
 const getLastContractSubmission = (contract: Contract): ContractPackageSubmission | undefined => {

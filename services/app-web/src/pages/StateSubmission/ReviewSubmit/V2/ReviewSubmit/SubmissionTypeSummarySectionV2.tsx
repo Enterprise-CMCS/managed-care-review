@@ -10,7 +10,11 @@ import {
 } from '../../../../../constants/healthPlanPackages'
 import { GenericErrorPage } from '../../../../Errors/GenericErrorPage'
 import { getVisibleLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
-import { Program, Contract } from '../../../../../gen/gqlClient'
+import {
+    Program,
+    Contract,
+    ContractRevision,
+} from '../../../../../gen/gqlClient'
 import { booleanAsYesNoUserValue } from '../../../../../components/Form/FieldYesNo/FieldYesNo'
 import { SectionCard } from '../../../../../components/SectionCard'
 import styles from '../../../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
@@ -18,6 +22,7 @@ import styles from '../../../../../components/SubmissionSummarySection/Submissio
 export type SubmissionTypeSummarySectionV2Props = {
     contract: Contract
     statePrograms: Program[]
+    contractRev?: ContractRevision
     editNavigateTo?: string
     headerChildComponent?: React.ReactElement
     subHeaderComponent?: React.ReactElement
@@ -28,6 +33,7 @@ export type SubmissionTypeSummarySectionV2Props = {
 
 export const SubmissionTypeSummarySectionV2 = ({
     contract,
+    contractRev,
     statePrograms,
     editNavigateTo,
     subHeaderComponent,
@@ -36,14 +42,15 @@ export const SubmissionTypeSummarySectionV2 = ({
     submissionName,
     isStateUser,
 }: SubmissionTypeSummarySectionV2Props): React.ReactElement => {
+    const contractOrRev = contractRev ? contractRev : contract
     const contractFormData = getVisibleLatestContractFormData(
-        contract,
+        contractOrRev,
         isStateUser
     )
     if (!contractFormData) return <GenericErrorPage />
 
     const programNames = statePrograms
-        .filter((p) => contractFormData.programIDs.includes(p.id))
+        .filter((p) => contractFormData?.programIDs.includes(p.id))
         .map((p) => p.name)
     const isSubmitted = contract.status === 'SUBMITTED'
 

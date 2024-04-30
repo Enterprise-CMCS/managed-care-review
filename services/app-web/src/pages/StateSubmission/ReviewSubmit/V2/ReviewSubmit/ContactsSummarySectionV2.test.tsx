@@ -16,6 +16,7 @@ describe('ContactsSummarySection', () => {
             <ContactsSummarySection
                 contract={draftSubmission}
                 editNavigateTo="contacts"
+                isStateUser
             />
         )
 
@@ -38,7 +39,7 @@ describe('ContactsSummarySection', () => {
 
     it('can render state submission without errors', () => {
         renderWithProviders(
-            <ContactsSummarySection contract={stateSubmission} />
+            <ContactsSummarySection contract={stateSubmission} isStateUser />
         )
 
         expect(
@@ -55,6 +56,7 @@ describe('ContactsSummarySection', () => {
             <ContactsSummarySection
                 contract={draftSubmission}
                 editNavigateTo="contacts"
+                isStateUser
             />
         )
 
@@ -98,7 +100,7 @@ describe('ContactsSummarySection', () => {
             submissionType: 'CONTRACT_ONLY',
         }
         renderWithProviders(
-            <ContactsSummarySection contract={stateSubmission} />
+            <ContactsSummarySection isStateUser contract={stateSubmission} />
         )
 
         expect(
@@ -113,7 +115,7 @@ describe('ContactsSummarySection', () => {
 
     it('renders submitted package without errors', () => {
         renderWithProviders(
-            <ContactsSummarySection contract={draftSubmission} />
+            <ContactsSummarySection isStateUser contract={draftSubmission} />
         )
 
         // We should never display missing field text on submission summary for submitted packages
@@ -133,7 +135,7 @@ describe('ContactsSummarySection', () => {
                 addtlActuaryContacts: [],
             }
             renderWithProviders(
-                <ContactsSummarySection contract={draftSubmission} />
+                <ContactsSummarySection isStateUser contract={draftSubmission} />
             )
         }
         expect(screen.queryByText(/Additional actuary contacts/)).toBeNull()

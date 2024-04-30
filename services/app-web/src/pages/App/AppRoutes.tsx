@@ -27,6 +27,7 @@ import { NewStateSubmissionForm, StateSubmissionForm } from '../StateSubmission'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { SubmissionSummaryV2 } from '../SubmissionSummary/V2/SubmissionSummaryV2'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
+import { SubmissionRevisionSummaryV2 } from '../SubmissionRevisionSummary'
 import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
 import { featureFlags } from '../../common-code/featureFlags'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
@@ -157,7 +158,13 @@ const StateUserRoutes = ({
                 </Route>
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
-                    element={<SubmissionRevisionSummary />}
+                    element={
+                        useLinkedRates ? (
+                            <SubmissionRevisionSummaryV2 />
+                        ) : (
+                            <SubmissionRevisionSummary />
+                        )
+                    }
                 />
                 {UniversalRoutes}
                 {stageName !== 'prod' && (
@@ -254,7 +261,13 @@ const CMSUserRoutes = ({
 
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
-                    element={<SubmissionRevisionSummary />}
+                    element={
+                        useLinkedRates ? (
+                            <SubmissionRevisionSummaryV2 />
+                        ) : (
+                            <SubmissionRevisionSummary />
+                        )
+                    }
                 />
                 {stageName !== 'prod' && (
                     <Route

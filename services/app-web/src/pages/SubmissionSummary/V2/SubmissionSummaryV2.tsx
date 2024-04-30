@@ -261,6 +261,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                     <ContractDetailsSummarySectionV2
                         contract={contract}
                         isCMSUser={isCMSUser}
+                        isStateUser={isStateUser}
                         submissionName={name}
                         onDocumentError={handleDocumentDownloadError}
                     />
@@ -276,7 +277,12 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                     />
                 )}
 
-                {<ContactsSummarySection contract={contract} />}
+                {
+                    <ContactsSummarySection
+                        contract={contract}
+                        isStateUser={isStateUser}
+                    />
+                }
 
                 {<ChangeHistoryV2 contract={contract} />}
                 {

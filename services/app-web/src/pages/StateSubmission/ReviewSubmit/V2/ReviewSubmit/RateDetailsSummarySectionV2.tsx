@@ -19,6 +19,7 @@ import { SectionCard } from '../../../../../components/SectionCard'
 import {
     Rate,
     Contract,
+    ContractRevision,
     Program,
     RateRevision,
     RateFormData,
@@ -27,11 +28,14 @@ import {
 import {
     getLastContractSubmission,
     getVisibleLatestRateRevisions,
+    getVisibleLatestContractFormData,
 } from '../../../../../gqlHelpers/contractsAndRates'
 import { useAuth } from '../../../../../contexts/AuthContext'
 
 export type RateDetailsSummarySectionV2Props = {
     contract: Contract
+    contractRev?: ContractRevision
+    rateRevs?: RateRevision[]
     editNavigateTo?: string
     isCMSUser?: boolean
     submissionName: string
@@ -69,6 +73,8 @@ export function renderDownloadButton(
 
 export const RateDetailsSummarySectionV2 = ({
     contract,
+    contractRev,
+    rateRevs,
     editNavigateTo,
     submissionName,
     statePrograms,
@@ -79,10 +85,15 @@ export const RateDetailsSummarySectionV2 = ({
         contract.status === 'SUBMITTED' || loggedInUser?.role === 'CMS_USER'
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
-    const contractFormData = isEditing
-        ? contract.draftRevision?.formData
-        : getLastContractSubmission(contract)?.contractRevision.formData
-    const rates = getVisibleLatestRateRevisions(contract, isEditing)
+    const contractOrRev = contractRev ? contractRev : contract
+
+    const contractFormData = getVisibleLatestContractFormData(
+        contractOrRev,
+        isEditing
+    )
+    const rates = rateRevs
+        ? rateRevs
+        : getVisibleLatestRateRevisions(contract, isEditing)
     const lastSubmittedDate =
         getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
 
