@@ -87,6 +87,9 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
     //Reversing revisions to get correct submission order
     const revision = [...contract.packageSubmissions].reverse()[revisionIndex]
         .contractRevision
+    const rateRevisions = [...contract.packageSubmissions].reverse()[
+        revisionIndex
+    ].rateRevisions
     const contractData = revision.formData
     const statePrograms = contract.state.programs
     const submitInfo = revision.submitInfo || undefined
@@ -136,6 +139,7 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
                         contractRev={revision}
                         submissionName={name}
                         statePrograms={statePrograms}
+                        rateRevs={rateRevisions}
                     />
                 )}
                 <ContactsSummarySection

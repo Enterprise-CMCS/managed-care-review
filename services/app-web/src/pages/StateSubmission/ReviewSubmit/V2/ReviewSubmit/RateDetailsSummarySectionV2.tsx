@@ -35,6 +35,7 @@ import { useAuth } from '../../../../../contexts/AuthContext'
 export type RateDetailsSummarySectionV2Props = {
     contract: Contract
     contractRev?: ContractRevision
+    rateRevs?: RateRevision[]
     editNavigateTo?: string
     isCMSUser?: boolean
     submissionName: string
@@ -73,6 +74,7 @@ export function renderDownloadButton(
 export const RateDetailsSummarySectionV2 = ({
     contract,
     contractRev,
+    rateRevs,
     editNavigateTo,
     submissionName,
     statePrograms,
@@ -89,7 +91,9 @@ export const RateDetailsSummarySectionV2 = ({
         contractOrRev,
         isEditing
     )
-    const rates = getVisibleLatestRateRevisions(contract, isEditing)
+    const rates = rateRevs
+        ? rateRevs
+        : getVisibleLatestRateRevisions(contract, isEditing)
     const lastSubmittedDate =
         getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
 
