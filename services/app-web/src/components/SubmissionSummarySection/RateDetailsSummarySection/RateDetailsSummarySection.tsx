@@ -356,9 +356,13 @@ export const RateDetailsSummarySection = ({
                                         rateInfo.rateDocuments,
                                         documentDateLookupTable
                                     )}
-                                    packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
-                                        rateInfo
-                                    )}
+                                    packagesWithSharedRateCerts={
+                                        isPreviousSubmission
+                                            ? []
+                                            : refreshPackagesWithSharedRateCert(
+                                                  rateInfo
+                                              )
+                                    }
                                     previousSubmissionDate={
                                         documentDateLookupTable.previousSubmissionDate
                                             ? new Date(
@@ -369,7 +373,7 @@ export const RateDetailsSummarySection = ({
                                     multipleDocumentsAllowed={false}
                                     caption="Rate certification"
                                     documentCategory="Rate certification"
-                                    isEditing={isEditing}
+                                    hideDynamicFeedback={!isEditing}
                                 />
                             ) : (
                                 <span className="srOnly">'LOADING...'</span>
@@ -380,9 +384,13 @@ export const RateDetailsSummarySection = ({
                                         rateInfo.supportingDocuments,
                                         documentDateLookupTable
                                     )}
-                                    packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
-                                        rateInfo
-                                    )}
+                                    packagesWithSharedRateCerts={
+                                        isPreviousSubmission
+                                            ? []
+                                            : refreshPackagesWithSharedRateCert(
+                                                  rateInfo
+                                              )
+                                    }
                                     previousSubmissionDate={
                                         documentDateLookupTable.previousSubmissionDate
                                             ? new Date(
@@ -391,9 +399,8 @@ export const RateDetailsSummarySection = ({
                                             : null
                                     }
                                     caption="Rate supporting documents"
-                                    isSupportingDocuments
                                     documentCategory="Rate-supporting"
-                                    isEditing={isEditing}
+                                    hideDynamicFeedback={!isEditing}
                                 />
                             ) : (
                                 <span className="srOnly">'LOADING...'</span>

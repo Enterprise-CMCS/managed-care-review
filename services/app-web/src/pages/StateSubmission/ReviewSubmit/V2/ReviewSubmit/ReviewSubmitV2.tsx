@@ -111,7 +111,6 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                 />
             </div>
             <GridContainer className={styles.reviewSectionWrapper}>
-                <div>This is the V2 version of the Review Submit Page</div>
                 <SubmissionTypeSummarySectionV2
                     contract={contract}
                     submissionName={submissionName}
