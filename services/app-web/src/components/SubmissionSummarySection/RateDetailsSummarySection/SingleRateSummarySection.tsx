@@ -21,14 +21,14 @@ import { DocumentWarningBanner } from '../../Banner'
 import { useS3 } from '../../../contexts/S3Context'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { recordJSException } from '../../../otelHelpers'
-import { Link } from '@trussworks/react-uswds'
+import { Grid, Link } from '@trussworks/react-uswds'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
 import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 import { useAuth } from '../../../contexts/AuthContext'
 import { SectionCard } from '../../SectionCard'
 import { UnlockRateButton } from './UnlockRateButton'
-import { ERROR_MESSAGES } from '../../../constants'
+import { ActuaryCommunicationRecord, ERROR_MESSAGES } from '../../../constants'
 import { handleApolloErrorsAndAddUserFacingMessages } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
@@ -302,18 +302,6 @@ export const SingleRateSummarySection = ({
                             />
                         ) : null}
                         <DataDetail
-                            id="certifyingActuary"
-                            label="Certifying actuary"
-                            explainMissingData={explainMissingData}
-                            children={
-                                <DataDetailContactField
-                                    contact={
-                                        formData.certifyingActuaryContacts[0]
-                                    }
-                                />
-                            }
-                        />
-                        <DataDetail
                             id="rateSubmissionDate"
                             label="Rate submission date"
                             explainMissingData={!isSubmitted}
@@ -328,6 +316,50 @@ export const SingleRateSummarySection = ({
                             children={rateCapitationType(formData)}
                         />
                         <DataDetail
+                            id="certifyingActuary"
+                            label="Certifying actuary"
+                            explainMissingData={explainMissingData}
+                            children={
+                                <DataDetailContactField
+                                    contact={
+                                        formData.certifyingActuaryContacts[0]
+                                    }
+                                />
+                            }
+                        />
+                        {formData.addtlActuaryContacts?.length
+                            ? formData.addtlActuaryContacts.map(
+                                  (contact, addtlContactIndex) => (
+                                      <DataDetail
+                                          key={`addtlCertifyingActuary-${addtlContactIndex}`}
+                                          id={`addtlCertifyingActuary-${addtlContactIndex}`}
+                                          label="Certifying actuary"
+                                          explainMissingData={
+                                              explainMissingData
+                                          }
+                                          children={
+                                              <DataDetailContactField
+                                                  contact={contact}
+                                              />
+                                          }
+                                      />
+                                  )
+                              )
+                            : null}
+                    </DoubleColumnGrid>
+                    <Grid row gap className={styles.singleColumnGrid}>
+                        <DataDetail
+                            id="communicationPreference"
+                            label="Actuaries’ communication preference"
+                            children={
+                                formData.actuaryCommunicationPreference &&
+                                ActuaryCommunicationRecord[
+                                    formData.actuaryCommunicationPreference
+                                ]
+                            }
+                            explainMissingData={explainMissingData}
+                        />
+                        <DataDetail
                             id="submittedWithContract"
                             label={
                                 showLinkedRates
@@ -339,7 +371,7 @@ export const SingleRateSummarySection = ({
                                 statePrograms
                             )}
                         />
-                    </DoubleColumnGrid>
+                    </Grid>
                 </dl>
             </SectionCard>
             <SectionCard className={styles.summarySection}>

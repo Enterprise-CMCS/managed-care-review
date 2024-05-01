@@ -10,6 +10,7 @@ import { renderWithProviders } from '../../../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySectionV2 as RateDetailsSummarySection } from './RateDetailsSummarySectionV2'
 import { Rate } from '../../../../../gen/gqlClient'
 import { testS3Client } from '../../../../../testHelpers/s3Helpers'
+import { ActuaryCommunicationRecord } from '../../../../../constants'
 
 describe('RateDetailsSummarySection', () => {
     const draftContract = mockContractPackageDraft()
@@ -61,7 +62,15 @@ describe('RateDetailsSummarySection', () => {
                                 email: 'jj.actuary@test.com',
                             },
                         ],
-                        addtlActuaryContacts: [],
+                        addtlActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Additional actuary',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'additionalactuarycontact1@test.com',
+                            },
+                        ],
+                        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
                         packagesWithSharedRateCerts: [],
                     },
                 },
@@ -111,6 +120,7 @@ describe('RateDetailsSummarySection', () => {
                             },
                         ],
                         addtlActuaryContacts: [],
+                        actuaryCommunicationPreference: 'OACT_TO_STATE',
                         packagesWithSharedRateCerts: [],
                     },
                 },
@@ -676,7 +686,7 @@ describe('RateDetailsSummarySection', () => {
         })
     })
 
-    it('renders multiple rate certifications with certifying actuary', async () => {
+    it('renders multiple rate certifications with certifying actuaries and actuary communication preference', async () => {
         const draftContract = mockContractPackageDraft()
         draftContract.draftRates = makeMockRateInfos()
         renderWithProviders(
@@ -694,7 +704,7 @@ describe('RateDetailsSummarySection', () => {
             const certifyingActuary = screen.getAllByRole('definition', {
                 name: 'Certifying actuary',
             })
-            expect(certifyingActuary).toHaveLength(2)
+            expect(certifyingActuary).toHaveLength(3)
             expect(
                 within(certifyingActuary[0]).queryByRole('link', {
                     name: 'jj.actuary@test.com',
@@ -702,9 +712,24 @@ describe('RateDetailsSummarySection', () => {
             ).toBeInTheDocument()
             expect(
                 within(certifyingActuary[1]).queryByRole('link', {
+                    name: 'additionalactuarycontact1@test.com',
+                })
+            ).toBeInTheDocument()
+            expect(
+                within(certifyingActuary[2]).queryByRole('link', {
                     name: 'tt.actuary@test.com',
                 })
             ).toBeInTheDocument()
+            const actuaryCommPreference = screen.getAllByRole('definition', {
+                name: 'Actuaries’ communication preference',
+            })
+            expect(actuaryCommPreference).toHaveLength(2)
+            expect(actuaryCommPreference[0]).toHaveTextContent(
+                ActuaryCommunicationRecord['OACT_TO_ACTUARY']
+            )
+            expect(actuaryCommPreference[1]).toHaveTextContent(
+                ActuaryCommunicationRecord['OACT_TO_STATE']
+            )
         })
     })
 

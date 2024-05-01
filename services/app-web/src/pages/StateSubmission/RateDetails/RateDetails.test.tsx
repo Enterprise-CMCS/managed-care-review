@@ -280,7 +280,7 @@ describe('RateDetails', () => {
 
             // check for expected errors
             await waitFor(() => {
-                expect(screen.queryAllByTestId('errorMessage')).toHaveLength(8)
+                expect(screen.queryAllByTestId('errorMessage')).toHaveLength(7)
                 expect(
                     screen.queryAllByText('You must select a program')
                 ).toHaveLength(2)
@@ -1750,7 +1750,7 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
     await userEvent.click(withinTargetRateCert.getByLabelText('Mercer'))
 
     await userEvent.click(
-        screen.getByText(
+        withinTargetRateCert.getByText(
             "OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions."
         )
     )
