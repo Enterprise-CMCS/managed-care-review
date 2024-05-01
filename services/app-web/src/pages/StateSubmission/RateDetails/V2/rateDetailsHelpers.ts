@@ -98,7 +98,7 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate, pare
             rateForm?.addtlActuaryContacts
         ),
         actuaryCommunicationPreference:
-            rateForm?.actuaryCommunicationPreference?? undefined,
+            rateForm?.actuaryCommunicationPreference ?? undefined,
         packagesWithSharedRateCerts:
             rateForm?.packagesWithSharedRateCerts ?? [],
         ratePreviouslySubmitted: handleAsLinkedRate? 'YES' : rateForm ? 'NO' : undefined,
