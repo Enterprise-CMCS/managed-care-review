@@ -608,8 +608,10 @@ const RateDetailsV2 = ({
                                               }
                                     }
                                     disableContinue={
-                                        shouldValidate &&
-                                        !!Object.keys(errors).length
+                                        (shouldValidate &&
+                                            !!Object.keys(errors).length) ||
+                                        rateForms.filter((rate) => rate.id)
+                                            .length === 0
                                     }
                                     actionInProgress={isSubmitting}
                                 />
