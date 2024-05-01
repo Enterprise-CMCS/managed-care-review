@@ -311,7 +311,7 @@ describe('RateDetailsv2', () => {
             })
         })
 
-        it('display rest of the form when linked rates question is answered', async () => {
+        it('display rest of the form when linked rates question is answered as NO', async () => {
             const { user } = renderWithProviders(
                 <Routes>
                     <Route
@@ -367,6 +367,65 @@ describe('RateDetailsv2', () => {
                 expect(submitButton).toHaveAttribute('aria-disabled', 'true')
                 expect(
                     screen.getByText('There are 9 errors on this page')
+                ).toBeInTheDocument()
+            })
+        })
+
+        it('validate form when the linked rate question is answered as YES', async () => {
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractWithLinkedRateDraft(),
+                                    id: 'test-abc-123',
+                                    // clean draft rates for this test.
+                                    draftRates: [],
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+            await screen.findByText('Rate Details')
+
+            await userEvent.click(
+                screen.getByLabelText(
+                    'Yes, this rate certification is part of another submission'
+                )
+            )
+
+            const submitButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+
+            // trigger validations
+            await user.click(submitButton)
+            await waitFor(() => {
+                expect(
+                    screen.getByText('Rate certification 1')
+                ).toBeInTheDocument()
+                expect(submitButton).toHaveAttribute('aria-disabled', 'true')
+                expect(
+                    screen.getByText('There is 1 error on this page')
+                ).toBeInTheDocument()
+                expect(
+                    screen.getByText('You must select a rate certification')
                 ).toBeInTheDocument()
             })
         })
