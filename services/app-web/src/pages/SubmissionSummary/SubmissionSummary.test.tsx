@@ -1068,12 +1068,6 @@ describe('SubmissionSummary', () => {
             expect(
                 screen.getByRole('heading', { name: 'State contacts' })
             ).toBeInTheDocument()
-            expect(screen.getByText('Contact 1')).toBeInTheDocument()
-            expect(
-                screen.getByRole('heading', {
-                    name: 'Additional actuary contacts',
-                })
-            ).toBeInTheDocument()
             expect(screen.getByText('Contact 2')).toBeInTheDocument()
             const soAndSo = screen.getAllByRole('link', {
                 name: 'soandso@example.com',
@@ -1093,10 +1087,7 @@ describe('SubmissionSummary', () => {
                 screen.getAllByRole('link', { name: 'lodar@example.com' })
             ).toHaveLength(2)
 
-            expect(screen.getByText('Certifying actuary')).toBeInTheDocument()
-            expect(
-                screen.getByText('Additional actuary contact')
-            ).toBeInTheDocument()
+            expect(screen.getAllByText('Certifying actuary')).toHaveLength(2)
             expect(
                 screen.getByText(
                     'OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.'
@@ -1436,12 +1427,6 @@ describe('SubmissionSummary', () => {
             expect(
                 screen.getByRole('heading', { name: 'State contacts' })
             ).toBeInTheDocument()
-            expect(screen.getByText('Contact 1')).toBeInTheDocument()
-            expect(
-                screen.getByRole('heading', {
-                    name: 'Additional actuary contacts',
-                })
-            ).toBeInTheDocument()
             expect(screen.getByText('Contact 2')).toBeInTheDocument()
             const soAndSo = screen.getAllByRole('link', {
                 name: 'soandso@example.com',
@@ -1461,10 +1446,7 @@ describe('SubmissionSummary', () => {
                 screen.getAllByRole('link', { name: 'lodar@example.com' })
             ).toHaveLength(2)
 
-            expect(screen.getByText('Certifying actuary')).toBeInTheDocument()
-            expect(
-                screen.getByText('Additional actuary contact')
-            ).toBeInTheDocument()
+            expect(screen.getAllByText('Certifying actuary')).toHaveLength(2)
             expect(
                 screen.getByText(
                     'OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.'
@@ -1804,12 +1786,6 @@ describe('SubmissionSummary', () => {
             expect(
                 screen.getByRole('heading', { name: 'State contacts' })
             ).toBeInTheDocument()
-            expect(screen.getByText('Contact 1')).toBeInTheDocument()
-            expect(
-                screen.getByRole('heading', {
-                    name: 'Additional actuary contacts',
-                })
-            ).toBeInTheDocument()
             expect(screen.getByText('Contact 2')).toBeInTheDocument()
             const soAndSo = screen.getAllByRole('link', {
                 name: 'soandso@example.com',
@@ -1829,10 +1805,7 @@ describe('SubmissionSummary', () => {
                 screen.getAllByRole('link', { name: 'lodar@example.com' })
             ).toHaveLength(2)
 
-            expect(screen.getByText('Certifying actuary')).toBeInTheDocument()
-            expect(
-                screen.getAllByText('Additional actuary contact')
-            ).toHaveLength(1)
+            expect(screen.getAllByText('Certifying actuary')).toHaveLength(2)
             expect(
                 screen.getByText(
                     'OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.'
@@ -2171,12 +2144,6 @@ describe('SubmissionSummary', () => {
             expect(
                 screen.getByRole('heading', { name: 'State contacts' })
             ).toBeInTheDocument()
-            expect(screen.getByText('Contact 1')).toBeInTheDocument()
-            expect(
-                screen.getByRole('heading', {
-                    name: 'Additional actuary contacts',
-                })
-            ).toBeInTheDocument()
             expect(screen.getByText('Contact 2')).toBeInTheDocument()
             const soAndSo = screen.getAllByRole('link', {
                 name: 'soandso@example.com',
@@ -2196,10 +2163,7 @@ describe('SubmissionSummary', () => {
                 screen.getAllByRole('link', { name: 'lodar@example.com' })
             ).toHaveLength(2)
 
-            expect(screen.getByText('Certifying actuary')).toBeInTheDocument()
-            expect(
-                screen.getAllByText('Additional actuary contact')
-            ).toHaveLength(1)
+            expect(screen.getAllByText('Certifying actuary')).toHaveLength(2)
             expect(
                 screen.getByText(
                     'OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.'
