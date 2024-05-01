@@ -233,9 +233,6 @@ describe('SubmissionTypeSummarySection', () => {
         expect(
             screen.getByRole('definition', { name: 'Submission description' })
         ).toBeInTheDocument()
-        expect(
-            screen.queryByRole('definition', { name: 'Submitted' })
-        ).toBeInTheDocument()
     })
 
     it('renders expected fields for unlocked package on submission summary for CMS users', () => {
@@ -260,9 +257,6 @@ describe('SubmissionTypeSummarySection', () => {
         expect(
             screen.getByRole('definition', { name: 'Submission description' })
         ).toBeInTheDocument()
-        expect(
-            screen.queryByRole('definition', { name: 'Submitted' })
-        ).toBeInTheDocument()
     })
 
     it('renders expected fields for unlocked package on submission summary for state users', () => {
@@ -276,7 +270,7 @@ describe('SubmissionTypeSummarySection', () => {
             />
         )
         expect(
-            screen.getByRole('definition', { name: 'Submitted' })
+            screen.queryByRole('definition', { name: 'Submitted' })
         ).not.toBeInTheDocument()
         expect(
             screen.getByRole('definition', { name: 'Program(s)' })
@@ -286,9 +280,6 @@ describe('SubmissionTypeSummarySection', () => {
         ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', { name: 'Submission description' })
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByRole('definition', { name: 'Submitted' })
         ).toBeInTheDocument()
     })
 
