@@ -12,6 +12,7 @@ import {
     updateDraftContractRatesMockSuccess,
     mockValidStateUser,
     mockContractWithLinkedRateDraft,
+    mockContractPackageDraft,
 } from '../../../../testHelpers/apolloMocks'
 import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '../../../../constants'
@@ -212,6 +213,16 @@ describe('RateDetailsv2', () => {
     })
 
     describe('handles editing multiple rates', () => {
+        // beforeEach(() => {
+        //     jest.spyOn(
+        //         useUpdateDraftContractRatesMutation,
+        //         mockUpdateDraftFn
+        //     ).mockReturnValue({
+        //         updateDraft: mockUpdateDraftFn,
+        //         createDraft: jest.fn(),
+        //         showPageErrorMessage: false,
+        //     })
+        // })
         it('renders linked rates without errors', async () => {
             renderWithProviders(
                 <Routes>
@@ -514,6 +525,71 @@ describe('RateDetailsv2', () => {
                     screen.getByText('You must select yes or no')
                 ).toBeInTheDocument()
             })
+        })
+
+        it('save as draft with partial data without error', async () => {
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    // clean draft rates for this test.
+                                    draftRates: [
+                                        rateDataMock(
+                                            {
+                                                formData: {
+                                                    ...rateRevisionDataMock()
+                                                        .formData,
+                                                    rateCapitationType:
+                                                        undefined,
+                                                    rateType: undefined,
+                                                },
+                                            },
+                                            { id: 'test-abc-123' }
+                                        ),
+                                    ],
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+            await screen.findByText('Rate Details')
+
+            await userEvent.click(
+                screen.getByLabelText(
+                    'No, this rate certification was not included with any other submissions'
+                )
+            )
+
+            const saveButton = screen.getByRole('button', {
+                name: 'Save as draft',
+            })
+
+            await user.click(saveButton)
+
+            // await waitFor(() => {
+            //     expect(
+            //         screen.getByText('Start new submission')
+            //     ).toBeInTheDocument()
+            // })
         })
     })
 
