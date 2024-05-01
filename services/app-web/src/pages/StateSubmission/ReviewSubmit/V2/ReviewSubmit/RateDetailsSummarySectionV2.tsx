@@ -82,7 +82,9 @@ export const RateDetailsSummarySectionV2 = ({
 }: RateDetailsSummarySectionV2Props): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const isSubmittedOrCMSUser =
-        contract.status === 'SUBMITTED' || loggedInUser?.role === 'CMS_USER'
+        contract.status === 'SUBMITTED' ||
+        contract.status === 'RESUBMITTED' ||
+        loggedInUser?.role === 'CMS_USER'
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
     const contractOrRev = contractRev ? contractRev : contract

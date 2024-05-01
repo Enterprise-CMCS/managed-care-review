@@ -945,6 +945,7 @@ function mockContractPackageUnlocked(
 ): Contract {
     return {
         status: 'UNLOCKED',
+        __typename: 'Contract',
         createdAt: new Date(),
         updatedAt: new Date(),
         initiallySubmittedAt: new Date(),
