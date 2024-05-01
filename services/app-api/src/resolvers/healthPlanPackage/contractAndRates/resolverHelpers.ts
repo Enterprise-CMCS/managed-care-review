@@ -133,7 +133,6 @@ const convertHealthPlanPackageRatesToDomain = async (
             rateCertificationName: hppRateFormData.rateCertificationName,
             certifyingActuaryContacts: hppRateFormData.actuaryContacts,
             addtlActuaryContacts: hppRateFormData.addtlActuaryContacts,
-            //  toProtobuffer already does this, so we can directly set the value from the rate data.
             actuaryCommunicationPreference:
                 hppRateFormData.actuaryCommunicationPreference,
             packagesWithSharedRateCerts,
