@@ -293,7 +293,6 @@ const RateDetailsV2 = ({
                     }
                 })
                 const updatedRates = generateUpdatedRates(formattedRateForms)
-
                 await updateDraftContractRates({
                     variables: {
                         input: {

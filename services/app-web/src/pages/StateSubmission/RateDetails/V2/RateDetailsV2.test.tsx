@@ -1,5 +1,6 @@
 import { screen, waitFor } from '@testing-library/react'
 import { RateDetailsV2 } from './RateDetailsV2'
+
 import {
     TEST_DOC_FILE,
     TEST_PNG_FILE,
@@ -12,9 +13,8 @@ import {
     updateDraftContractRatesMockSuccess,
     mockValidStateUser,
     mockContractWithLinkedRateDraft,
-    mockContractPackageDraft,
 } from '../../../../testHelpers/apolloMocks'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, Location } from 'react-router-dom'
 import { RoutesRecord } from '../../../../constants'
 import userEvent from '@testing-library/user-event'
 import {
@@ -119,7 +119,7 @@ describe('RateDetailsv2', () => {
                 })
             })
             // eslint-disable-next-line
-            it.skip('disabled with alert if previously submitted with more than one rate cert file', async () => {
+            it('disabled with alert if previously submitted with more than one rate cert file', async () => {
                 const rateID = 'abc-123'
                 renderWithProviders(
                     <Routes>
@@ -528,11 +528,16 @@ describe('RateDetailsv2', () => {
         })
 
         it('save as draft with partial data without error', async () => {
+            let testLocation: Location // set up location to track URL changes
             const { user } = renderWithProviders(
                 <Routes>
                     <Route
                         path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
                         element={<RateDetailsV2 type="MULTI" />}
+                    />
+                    <Route
+                        path={RoutesRecord.DASHBOARD_SUBMISSIONS}
+                        element={<div>Dashboard page placeholder</div>}
                     />
                 </Routes>,
                 {
@@ -541,23 +546,42 @@ describe('RateDetailsv2', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: {
-                                    ...mockContractPackageDraft(),
-                                    id: 'test-abc-123',
-                                    // clean draft rates for this test.
-                                    draftRates: [
-                                        rateDataMock(
-                                            {
-                                                formData: {
-                                                    ...rateRevisionDataMock()
-                                                        .formData,
-                                                    rateCapitationType:
-                                                        undefined,
-                                                    rateType: undefined,
+                                    ...mockContractWithLinkedRateDraft({
+                                        draftRates: [
+                                            rateDataMock(
+                                                {
+                                                    formData: {
+                                                        ...rateRevisionDataMock()
+                                                            .formData,
+                                                        rateCapitationType:
+                                                            undefined,
+                                                        rateType: undefined,
+                                                    },
                                                 },
-                                            },
-                                            { id: 'test-abc-123' }
-                                        ),
-                                    ],
+                                                { id: 'test-abc-123' }
+                                            ),
+                                        ],
+                                    }),
+                                },
+                            }),
+                            updateDraftContractRatesMockSuccess({
+                                contract: {
+                                    ...mockContractWithLinkedRateDraft({
+                                        draftRates: [
+                                            rateDataMock(
+                                                {
+                                                    formData: {
+                                                        ...rateRevisionDataMock()
+                                                            .formData,
+                                                        rateCapitationType:
+                                                            undefined,
+                                                        rateType: undefined,
+                                                    },
+                                                },
+                                                { id: 'test-abc-123' }
+                                            ),
+                                        ],
+                                    }),
                                 },
                             }),
                         ],
@@ -569,6 +593,7 @@ describe('RateDetailsv2', () => {
                         'link-rates': true,
                         'rate-edit-unlock': false,
                     },
+                    location: (location) => (testLocation = location),
                 }
             )
             await screen.findByText('Rate Details')
@@ -584,12 +609,12 @@ describe('RateDetailsv2', () => {
             })
 
             await user.click(saveButton)
-
-            // await waitFor(() => {
-            //     expect(
-            //         screen.getByText('Start new submission')
-            //     ).toBeInTheDocument()
-            // })
+            await waitFor(() => {
+                expect(testLocation.pathname).toBe(`/dashboard/submissions`)
+                expect(
+                    screen.getByText('Dashboard page placeholder')
+                ).toBeInTheDocument()
+            })
         })
     })
 
