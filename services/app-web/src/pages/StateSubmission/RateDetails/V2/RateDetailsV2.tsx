@@ -676,12 +676,16 @@ const RateDetailsV2 = ({
                                                 {
                                                     type: 'CANCEL',
                                                     redirectPath:
-                                                        'DASHBOARD_SUBMISSIONS',
+                                                        displayAsStandaloneRate
+                                                            ? 'DASHBOARD_SUBMISSIONS'
+                                                            : 'SUBMISSIONS_CONTRACT_DETAILS',
                                                 }
                                             )
                                         } else {
                                             navigate(
-                                                RoutesRecord.DASHBOARD_SUBMISSIONS
+                                                displayAsStandaloneRate
+                                                    ? RoutesRecord.DASHBOARD_SUBMISSIONS
+                                                    : '../contract-details'
                                             )
                                         }
                                     }}
