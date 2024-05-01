@@ -7,7 +7,6 @@ import { ContactsSummarySection } from '../StateSubmission/ReviewSubmit/V2/Revie
 import { RateDetailsSummarySectionV2 } from '../StateSubmission/ReviewSubmit/V2/ReviewSubmit/RateDetailsSummarySectionV2'
 import { SubmissionTypeSummarySectionV2 } from '../StateSubmission/ReviewSubmit/V2/ReviewSubmit/SubmissionTypeSummarySectionV2'
 import { usePage } from '../../contexts/PageContext'
-import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { dayjs } from '../../common-code/dateHelpers'
 import styles from './SubmissionRevisionSummary.module.scss'
 import { PreviousSubmissionBanner } from '../../components'
@@ -16,6 +15,7 @@ import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
 } from '../StateSubmission/ErrorOrLoadingPage'
+import { Error404 } from '../Errors/Error404Page'
 
 type RouteParams = {
     id: string
@@ -50,11 +50,11 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
     })
     const contract = fetchContractData?.fetchContract.contract
     //We offset version by +1 of index, remove offset to find revision in revisions
-    const revisionIndex = Number(revisionVersion)
+    const revisionIndex = Number(revisionVersion) - 1
 
     const name =
         contract &&
-        contract?.packageSubmissions.length === Number(revisionVersion)
+        contract?.packageSubmissions.length < Number(revisionVersion)
             ? contract.packageSubmissions.reverse()[revisionIndex]
                   .contractRevision.contractName
             : ''
@@ -79,17 +79,16 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
 
     if (
         !contract ||
-        contract.packageSubmissions.length === Number(revisionVersion)
+        contract.packageSubmissions.length <= Number(revisionVersion)
     ) {
-        return <GenericErrorPage />
+        return <Error404 />
     }
 
-    //Reversing revisions to get correct submission order
-    const revision = [...contract.packageSubmissions].reverse()[revisionIndex]
-        .contractRevision
-    const rateRevisions = [...contract.packageSubmissions].reverse()[
-        revisionIndex
-    ].rateRevisions
+    // Reversing revisions to get correct submission order
+    // we offset the index by one so that our indices start at 1
+    const packageSubmission = [...contract.packageSubmissions].reverse()[revisionIndex]
+    const revision = packageSubmission.contractRevision
+    const rateRevisions = packageSubmission.rateRevisions
     const contractData = revision.formData
     const statePrograms = contract.state.programs
     const submitInfo = revision.submitInfo || undefined
