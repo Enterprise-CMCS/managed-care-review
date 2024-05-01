@@ -333,7 +333,7 @@ describe('ContractDetailsSummarySection', () => {
                         id: '123',
                         createdAt: new Date(),
                         updatedAt: new Date(),
-                        contractName: 'MCR-0005-alvhalfhdsalf',
+                        contractName: 'MCR-0005-alvhalfhdsalfdd',
                         formData: mockContractFormData({
                             supportingDocuments: [],
                         }),
