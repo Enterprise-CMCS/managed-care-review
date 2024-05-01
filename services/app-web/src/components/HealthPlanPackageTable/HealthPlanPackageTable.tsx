@@ -240,6 +240,7 @@ export const HealthPlanPackageTable = ({
                             info.getValue().status,
                             isCMSOrAdminUser
                         )}
+                        className={`${styles.ID}`}
                     >
                         {info.getValue().name}
                     </Link>

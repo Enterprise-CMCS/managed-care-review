@@ -26,10 +26,16 @@
     }
 }
 
+.ID {
+    word-break: break-all;
+}
+
 .programTag {
     background: custom.$mcr-primary-lighter;
     color: custom.$mcr-foundation-ink;
-    display: inline-block;
+    display: inline-flex;
+    text-align: center;
+    overflow-wrap: break-word;
 }
 
 .submittedTag {
