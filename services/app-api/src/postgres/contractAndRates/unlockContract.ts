@@ -123,8 +123,18 @@ async function unlockContract(
                     },
                 })
 
+                // only unlock children that were submitted in the latest submission
+                const submissionPackageEntries =
+                    currentRev.relatedSubmisions[0].submissionPackages
+
                 for (const childRate of childRates) {
-                    childRateIDs.push(childRate.id)
+                    if (
+                        submissionPackageEntries.some(
+                            (p) => p.rateRevision.rateID === childRate.id
+                        )
+                    ) {
+                        childRateIDs.push(childRate.id)
+                    }
                 }
             } else {
                 // without linked rates, we push all the valid rate revisions attached to the contract revision
