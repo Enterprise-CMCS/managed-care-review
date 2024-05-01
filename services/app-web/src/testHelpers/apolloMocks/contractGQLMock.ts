@@ -63,7 +63,7 @@ const updateDraftContractRatesMockSuccess = ({
                     }
                 ],
                 addtlActuaryContacts: [],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                actuaryCommunicationPreference: undefined,
                 packagesWithSharedRateCerts: [],
             },
             rateID: undefined,

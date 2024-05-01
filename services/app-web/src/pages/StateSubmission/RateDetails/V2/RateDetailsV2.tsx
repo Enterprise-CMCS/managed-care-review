@@ -72,6 +72,7 @@ export type FormikRateForm = {
     packagesWithSharedRateCerts: RateRevision['formData']['packagesWithSharedRateCerts']
     ratePreviouslySubmitted?: 'YES' | 'NO'
     initiallySubmittedAt?: Date
+    linkRateSelect?: string
 }
 
 // We have a list of rates to enable multi-rate behavior
@@ -608,10 +609,8 @@ const RateDetailsV2 = ({
                                               }
                                     }
                                     disableContinue={
-                                        (shouldValidate &&
-                                            !!Object.keys(errors).length) ||
-                                        rateForms.filter((rate) => rate.id)
-                                            .length === 0
+                                        shouldValidate &&
+                                        !!Object.keys(errors).length
                                     }
                                     actionInProgress={isSubmitting}
                                 />
