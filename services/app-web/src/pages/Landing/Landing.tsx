@@ -34,7 +34,8 @@ export const Landing = (): React.ReactElement => {
     const redirectFromSessionTimeout = new URLSearchParams(location.search).get(
         'session-timeout'
     )
-
+    throw new Error('this is a crasher - should catch in error boudnary')
+    // eslint-disable-next-line no-unreachable
     return (
         <>
             <section className={styles.detailsSection}>
