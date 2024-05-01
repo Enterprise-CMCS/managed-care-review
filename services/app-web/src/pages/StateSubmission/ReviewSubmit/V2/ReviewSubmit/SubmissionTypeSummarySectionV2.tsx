@@ -55,6 +55,7 @@ export const SubmissionTypeSummarySectionV2 = ({
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isUnlocked = contract.status === 'UNLOCKED'
+
     return (
         <SectionCard
             id="submissionTypeSection"
@@ -69,7 +70,7 @@ export const SubmissionTypeSummarySectionV2 = ({
                 {headerChildComponent && headerChildComponent}
             </SectionHeader>
             <dl>
-                {(isSubmitted || isUnlocked) && (
+                {(isSubmitted || (!isStateUser && isUnlocked)) && (
                     <DoubleColumnGrid>
                         <DataDetail
                             id="submitted"

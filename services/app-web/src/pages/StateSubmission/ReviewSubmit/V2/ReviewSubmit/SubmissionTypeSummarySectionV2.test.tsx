@@ -237,7 +237,34 @@ describe('SubmissionTypeSummarySection', () => {
         ).toBeInTheDocument()
     })
 
-    it('renders expected fields for unlocked package on submission summary', () => {
+    it('renders expected fields for unlocked package on submission summary for CMS users', () => {
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                contract={mockContractPackageUnlocked()}
+                statePrograms={statePrograms}
+                editNavigateTo="submission-type"
+                submissionName="MN-MSHO-0003"
+                isStateUser={false}
+            />
+        )
+        expect(
+            screen.getByRole('definition', { name: 'Submitted' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Program(s)' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Submission type' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Submission description' })
+        ).toBeInTheDocument()
+        expect(
+            screen.queryByRole('definition', { name: 'Submitted' })
+        ).toBeInTheDocument()
+    })
+
+    it('renders expected fields for unlocked package on submission summary for state users', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
                 contract={mockContractPackageUnlocked()}
@@ -249,7 +276,7 @@ describe('SubmissionTypeSummarySection', () => {
         )
         expect(
             screen.getByRole('definition', { name: 'Submitted' })
-        ).toBeInTheDocument()
+        ).not.toBeInTheDocument()
         expect(
             screen.getByRole('definition', { name: 'Program(s)' })
         ).toBeInTheDocument()
