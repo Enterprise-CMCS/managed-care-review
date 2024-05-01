@@ -479,8 +479,6 @@ const toDomain = (
         stateContacts,
         contractInfo,
         rateInfos,
-        addtlActuaryContacts,
-        addtlActuaryCommunicationPreference,
     } = formDataMessage
 
     const cleanedStateContacts = replaceNullsWithUndefineds(stateContacts)
@@ -544,12 +542,13 @@ const toDomain = (
             contractInfo?.contractAmendmentInfo
         ),
         rateInfos: parseRateInfos(rateInfos),
-        addtlActuaryCommunicationPreference: enumToDomain(
-            mcreviewproto.ActuaryCommunicationType,
-            addtlActuaryCommunicationPreference
-        ),
         stateContacts: cleanedStateContacts,
-        addtlActuaryContacts: parseActuaryContacts(addtlActuaryContacts),
+        /**
+         * addtlActuaryCommunicationPreference and addtlActuaryContacts are unused. Leaving cleanup for a standalone PR
+         * as there will be many broken tests
+         */
+        addtlActuaryCommunicationPreference: undefined,
+        addtlActuaryContacts: [],
         documents: parseProtoDocuments(formDataMessage.documents),
         statutoryRegulatoryAttestation:
             contractInfo?.statutoryRegulatoryAttestation ?? undefined,
