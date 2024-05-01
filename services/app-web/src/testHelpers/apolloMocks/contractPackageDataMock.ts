@@ -444,6 +444,7 @@ function mockContractPackageSubmittedWithRevisions(
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
+        __typename: 'Contract',
         state: mockMNState(),
         stateNumber: 5,
         packageSubmissions: [
@@ -531,9 +532,10 @@ function mockContractPackageSubmittedWithRevisions(
                 contractName: 'MCR-MN-0005-SNBC',
                 createdAt: new Date('01/01/2024'),
                 updatedAt: new Date('12/31/2024'),
+                __typename: 'ContractRevision',
                 id: '123',
                 submitInfo: {
-                    updatedAt: new Date(),
+                    updatedAt: new Date('01/01/2024'),
                     updatedBy: 'example@state.com',
                     updatedReason: 'contract submit'
                 },
@@ -598,6 +600,7 @@ function mockContractPackageSubmittedWithRevisions(
                 {
                     id: '1234',
                     rateID: '123',
+                    __typename: 'RateRevision',
                     createdAt: new Date('01/01/2023'),
                     updatedAt: new Date('01/01/2023'),
                     contractRevisions: [],
@@ -663,6 +666,7 @@ function mockContractPackageSubmittedWithRevisions(
             },
             submittedRevisions: [],
             contractRevision: {
+                __typename: 'ContractRevision',
                 contractName: 'MCR-MN-0005-SNBC',
                 createdAt: new Date('01/01/2024'),
                 updatedAt: new Date('12/31/2024'),
@@ -740,6 +744,7 @@ function mockContractPackageSubmittedWithRevisions(
                     createdAt: new Date('01/01/2023'),
                     updatedAt: new Date('01/01/2023'),
                     contractRevisions: [],
+                    __typename: 'RateRevision',
                     formData: {
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
@@ -805,6 +810,7 @@ function mockContractPackageSubmittedWithRevisions(
                 contractName: 'MCR-MN-0005-SNBC',
                 createdAt: new Date('01/01/2024'),
                 updatedAt: new Date('12/31/2024'),
+                __typename: 'ContractRevision',
                 id: '123',
                 submitInfo: {
                     updatedAt: new Date(),
@@ -871,6 +877,7 @@ function mockContractPackageSubmittedWithRevisions(
             rateRevisions: [
                 {
                     id: '1234',
+                    __typename: 'RateRevision',
                     rateID: '123',
                     createdAt: new Date('01/01/2023'),
                     updatedAt: new Date('01/01/2023'),

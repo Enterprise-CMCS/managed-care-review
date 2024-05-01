@@ -7,7 +7,7 @@ import {
     mockContractPackageSubmitted,
     fetchCurrentUserMock,
     mockValidStateUser,
-    mockContractPackageUnlocked
+    mockContractPackageUnlocked,
 } from '../../../../../testHelpers/apolloMocks'
 
 describe('SubmissionTypeSummarySection', () => {
@@ -26,17 +26,18 @@ describe('SubmissionTypeSummarySection', () => {
                 editNavigateTo="submission-type"
                 submissionName="MN-PMAP-0001"
                 isStateUser={true}
-            />
-        ,{
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({
-                        user: mockValidStateUser(),
-                        statusCode: 200,
-                    }),
-                ],
-            },
-        })
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidStateUser(),
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            }
+        )
 
         expect(
             screen.getByRole('heading', {
@@ -55,15 +56,15 @@ describe('SubmissionTypeSummarySection', () => {
         ).toBeNull()
     })
 
-    it.skip('can render submitted package without errors', () => {
+    it('can render submitted package without errors', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
                 contract={stateSubmission}
                 statePrograms={statePrograms}
                 submissionName="MN-MSHO-0003"
                 isStateUser={true}
-            />
-            ,{
+            />,
+            {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
