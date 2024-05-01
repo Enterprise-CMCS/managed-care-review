@@ -10,10 +10,7 @@ import { PageActionsContainer } from '../../../PageActions'
 import styles from '../../../ReviewSubmit/ReviewSubmit.module.scss'
 import { ActionButton } from '../../../../../components/ActionButton'
 import { useRouteParams, useStatePrograms } from '../../../../../hooks'
-import {
-    RoutesRecord,
-    STATE_SUBMISSION_FORM_ROUTES,
-} from '../../../../../constants'
+import { RoutesRecord } from '../../../../../constants'
 import { UnlockSubmitModalV2 } from '../../../../../components/Modal/V2/UnlockSubmitModalV2'
 import { getVisibleLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
 import { useAuth } from '../../../../../contexts/AuthContext'
@@ -29,6 +26,7 @@ import { Loading } from '../../../../../components'
 import { PageBannerAlerts } from '../../../PageBannerAlerts'
 import { packageName } from '../../../../../common-code/healthPlanFormDataType'
 import { usePage } from '../../../../../contexts/PageContext'
+import { activeFormPages } from '../../../StateSubmissionForm'
 
 export const ReviewSubmitV2 = (): React.ReactElement => {
     const navigate = useNavigate()
@@ -101,7 +99,7 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
         <>
             <div className={styles.stepIndicator}>
                 <DynamicStepIndicator
-                    formPages={STATE_SUBMISSION_FORM_ROUTES}
+                    formPages={activeFormPages(contractFormData)}
                     currentFormPage="SUBMISSIONS_REVIEW_SUBMIT"
                 />
                 <PageBannerAlerts
