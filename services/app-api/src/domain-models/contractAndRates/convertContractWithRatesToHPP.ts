@@ -1,5 +1,4 @@
 import type {
-    ActuaryCommunicationType,
     HealthPlanFormDataType,
     RateInfoType,
     SubmissionDocument,
@@ -88,9 +87,6 @@ function convertContractWithRatesToFormData(
     stateCode: string,
     stateNumber: number
 ): HealthPlanFormDataType | Error {
-    // additional certifying actuaries are on every rate post refactor but on the package pre-refactor
-    let pkgActuaryCommsPref: ActuaryCommunicationType | undefined = undefined
-
     const rateInfos: RateInfoType[] = contractRev.rateRevisions.map(
         (rateRev) => {
             const {
@@ -110,11 +106,6 @@ function convertContractWithRatesToFormData(
                 amendmentEffectiveDateStart,
                 actuaryCommunicationPreference,
             } = rateRev.formData
-
-            // The first time we find a rate that has an actuary comms pref, we use that to set the package's prefs
-            if (actuaryCommunicationPreference && !pkgActuaryCommsPref) {
-                pkgActuaryCommsPref = actuaryCommunicationPreference
-            }
 
             const rateAmendmentInfo = (amendmentEffectiveDateStart ||
                 amendmentEffectiveDateEnd) && {
@@ -158,7 +149,6 @@ function convertContractWithRatesToFormData(
         riskBasedContract: contractRev.formData.riskBasedContract,
         submissionDescription: contractRev.formData.submissionDescription,
         stateContacts: contractRev.formData.stateContacts,
-        addtlActuaryCommunicationPreference: pkgActuaryCommsPref,
         documents: contractRev.formData.supportingDocuments.map((doc) => ({
             ...doc,
         })) as SubmissionDocument[],
@@ -213,10 +203,10 @@ function convertContractWithRatesToFormData(
             },
         },
         /**
-         * This field is unused and will need cleaned up, additional actuaries have been moved to the rate level.
-         * Leaving this as am empty array to get linked rates feature work in without having to fix all the broken tests
-         * by removing this field.
+         * addtlActuaryCommunicationPreference and addtlActuaryContacts are unused. Leaving cleanup for a standalone PR
+         * as there will be many broken tests.
          */
+        addtlActuaryCommunicationPreference: undefined,
         addtlActuaryContacts: [],
         statutoryRegulatoryAttestation:
             contractRev.formData.statutoryRegulatoryAttestation,

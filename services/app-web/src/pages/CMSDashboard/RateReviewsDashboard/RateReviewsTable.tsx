@@ -247,6 +247,7 @@ export const RateReviewsTable = ({
                         }`}
                         asCustom={NavLink}
                         to={rateURL(info.getValue())}
+                        className={`${styles.ID}`}
                     >
                         {info.getValue().name}
                     </Link>

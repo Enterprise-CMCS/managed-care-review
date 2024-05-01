@@ -25,6 +25,7 @@ import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../DocumentWarning'
 import { SectionCard } from '../../SectionCard'
 import { convertFromSubmissionDocumentsToGenericDocuments } from '../UploadedDocumentsTable/UploadedDocumentsTable'
+import { ActuaryCommunicationRecord } from '../../../constants'
 // Used for refreshed packages names keyed by their package id
 // package name includes (Draft) for draft packages.
 type PackageNameType = string
@@ -327,6 +328,12 @@ export const RateDetailsSummarySection = ({
                                             )}`}
                                         />
                                     ) : null}
+                                    <DataDetail
+                                        id="rateCapitationType"
+                                        label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
+                                        explainMissingData={!isSubmitted}
+                                        children={rateCapitationType(rateInfo)}
+                                    />
                                     {rateInfo.actuaryContacts[0] && (
                                         <DataDetail
                                             id="certifyingActuary"
@@ -342,11 +349,36 @@ export const RateDetailsSummarySection = ({
                                             }
                                         />
                                     )}
+                                    {rateInfo.addtlActuaryContacts?.length
+                                        ? rateInfo.addtlActuaryContacts.map(
+                                              (contact, addtlContactIndex) => (
+                                                  <DataDetail
+                                                      key={`addtlCertifyingActuary-${addtlContactIndex}`}
+                                                      id={`addtlCertifyingActuary-${addtlContactIndex}`}
+                                                      label="Certifying actuary"
+                                                      explainMissingData={
+                                                          !isSubmitted
+                                                      }
+                                                      children={
+                                                          <DataDetailContactField
+                                                              contact={contact}
+                                                          />
+                                                      }
+                                                  />
+                                              )
+                                          )
+                                        : null}
                                     <DataDetail
-                                        id="rateCapitationType"
-                                        label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
+                                        id="communicationPreference"
+                                        label="Actuaries’ communication preference"
+                                        children={
+                                            rateInfo.actuaryCommunicationPreference &&
+                                            ActuaryCommunicationRecord[
+                                                rateInfo
+                                                    .actuaryCommunicationPreference
+                                            ]
+                                        }
                                         explainMissingData={!isSubmitted}
-                                        children={rateCapitationType(rateInfo)}
                                     />
                                 </DoubleColumnGrid>
                             </dl>

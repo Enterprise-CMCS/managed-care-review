@@ -247,7 +247,6 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
             },
         ],
         addtlActuaryContacts: [],
-        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         statutoryRegulatoryAttestation: false,
         statutoryRegulatoryAttestationDescription: 'No compliance',
     }
@@ -355,7 +354,6 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
             },
         ],
         addtlActuaryContacts: [],
-        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         statutoryRegulatoryAttestation: false,
         statutoryRegulatoryAttestationDescription: 'No compliance',
     }
@@ -457,7 +455,6 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
             },
         ],
         addtlActuaryContacts: [],
-        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         statutoryRegulatoryAttestation: false,
         statutoryRegulatoryAttestationDescription: 'No compliance',
     }
@@ -586,7 +583,6 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
             },
         ],
         addtlActuaryContacts: [],
-        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         statutoryRegulatoryAttestation: false,
         statutoryRegulatoryAttestationDescription: 'No compliance',
     }
@@ -719,7 +715,6 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
             },
         ],
         addtlActuaryContacts: [],
-        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         statutoryRegulatoryAttestation: false,
         statutoryRegulatoryAttestationDescription: 'No compliance',
     }

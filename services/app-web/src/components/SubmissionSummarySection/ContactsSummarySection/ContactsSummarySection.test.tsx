@@ -26,12 +26,6 @@ describe('ContactsSummarySection', () => {
             })
         ).toBeInTheDocument()
         expect(
-            screen.getByRole('heading', {
-                level: 2,
-                name: 'Additional actuary contacts',
-            })
-        ).toBeInTheDocument()
-        expect(
             screen.getByRole('link', { name: 'Edit State contacts' })
         ).toHaveAttribute('href', '/contacts')
     })
@@ -50,7 +44,7 @@ describe('ContactsSummarySection', () => {
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
     })
 
-    it('can render all state and actuary contact fields', () => {
+    it('can render all state contact fields', () => {
         renderWithProviders(
             <ContactsSummarySection
                 submission={draftSubmission}
@@ -64,31 +58,10 @@ describe('ContactsSummarySection', () => {
                 name: 'State contacts',
             })
         ).toBeInTheDocument()
-        expect(screen.queryByText('Contact 1')).toBeInTheDocument()
-        // expect(screen.queryByText('State Contact 1')).toBeInTheDocument()
-        // expect(screen.queryByText('Test State Contact 1')).toBeInTheDocument()
-        expect(
-            screen.getByRole('heading', {
-                level: 2,
-                name: 'Additional actuary contacts',
-            })
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByText('Additional actuary contact')
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('link', {
-                name: 'additionalactuarycontact1@test.com',
-            })
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByText('Actuaries’ communication preference')
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByText(
-                'OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.'
-            )
-        ).toBeInTheDocument()
+        expect(screen.getByText(/State Contact 1/)).toBeInTheDocument()
+        expect(screen.getByText(/Test State Contact 1/)).toBeInTheDocument()
+        expect(screen.getByText(/State Contact 2/)).toBeInTheDocument()
+        expect(screen.getByText(/Test State Contact 2/)).toBeInTheDocument()
     })
 
     it('can render only state contacts for contract only submission', () => {

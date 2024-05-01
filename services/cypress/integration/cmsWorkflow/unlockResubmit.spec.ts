@@ -22,14 +22,6 @@ describe('CMS user', () => {
         cy.findAllByTestId('rate-certification-form').each((form) =>
             cy.wrap(form).within(() => cy.fillOutNewRateCertification())
         )
-        cy.findByRole('radiogroup', {
-            name: /Actuaries' communication preference/
-        })
-            .should('exist')
-            .within(() => { 
-                cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
-                .click()
-            })
         cy.navigateFormByButtonClick('CONTINUE')
 
         cy.findByRole('heading', {
@@ -256,14 +248,6 @@ describe('CMS user', () => {
                 cy.fillOutNewRateCertification();
         })
         )
-        cy.findByRole('radiogroup', {
-            name: /Actuaries' communication preference/
-        })
-            .should('exist')
-            .within(() => { 
-                cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
-                .click()
-            })
         cy.navigateContractRatesFormByButtonClick('CONTINUE')
 
         // fill out the rest of the form

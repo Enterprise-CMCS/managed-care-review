@@ -82,8 +82,8 @@ describe('SingleRateSummarySection', () => {
             })
         ).toHaveTextContent('10/16/2023')
         expect(
-            screen.getByRole('definition', { name: 'Certifying actuary' })
-        ).toBeInTheDocument()
+            screen.getAllByRole('definition', { name: 'Certifying actuary' })
+        ).toHaveLength(2)
         expect(
             screen.getByRole('definition', {
                 name: 'Does the actuary certify capitation rates specific to each rate cell or a rate range?',

@@ -582,6 +582,17 @@ export async function submitContract(
                     .concat(submissionRelatedRateRevs.map((r) => r.id))
             // Links
 
+            // filter out any duplicate links, we may have double counted since we went through
+            // related contracts and rates
+            const seenLinks: { [compoundKey: string]: boolean } = {}
+            const uniqueLinks = linksToCreate.filter((link) => {
+                const compoundKey = `${link.contractRevID}:${link.rateRevID}`
+                if (seenLinks[compoundKey]) {
+                    return false
+                }
+                seenLinks[compoundKey] = true
+                return true
+            })
             // all in one!
             await tx.updateInfoTable.update({
                 where: { id: submitInfo.id },
@@ -602,7 +613,7 @@ export async function submitContract(
                         ),
                     },
                     submissionPackages: {
-                        create: linksToCreate.map((l) => ({
+                        create: uniqueLinks.map((l) => ({
                             contractRevisionID: l.contractRevID,
                             rateRevisionID: l.rateRevID,
                             ratePosition: l.ratePosition,

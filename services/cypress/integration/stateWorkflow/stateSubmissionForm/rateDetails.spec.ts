@@ -44,15 +44,6 @@ describe('rate details', () => {
                 `/submissions/${draftSubmissionId}/edit/rate-details`
             )
 
-            cy.findByRole('radiogroup', {
-                name: /Actuaries' communication preference/
-            })
-                .should('exist')
-                .within(() => { 
-                    cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
-                    .click()
-                })
-
             cy.fillOutAmendmentToPriorRateCertification()
             /* Choose another submission that the rate cert was uploaded to, then check that your selection
             is still there when you come back */
@@ -107,15 +98,6 @@ describe('rate details', () => {
         }).click()
 
         cy.findAllByTestId('rate-certification-form').should('have.length', 3)
-
-        cy.findByRole('radiogroup', {
-            name: /Actuaries' communication preference/
-        })
-            .should('exist')
-            .within(() => { 
-                cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
-                .click()
-            })
 
         //Fill out every rate certification form
         cy.findAllByTestId('rate-certification-form').each(

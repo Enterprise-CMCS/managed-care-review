@@ -254,6 +254,126 @@ describe('submitContract', () => {
         expect(unlockedB1.draftRates).toHaveLength(1)
     })
 
+    it('handles cross related rates and contracts', async () => {
+        const ldService = testLDService({
+            'link-rates': true,
+        })
+        const prismaClient = await sharedTestPrismaClient()
+
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            ldService,
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        // 1. Submit A0 with Rate1 and Rate2
+        const draftA0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const AID = draftA0.id
+        const draftA010 = await addNewRateToTestContract(stateServer, draftA0, {
+            rateDateStart: '2001-01-01',
+        })
+
+        await addNewRateToTestContract(stateServer, draftA010, {
+            rateDateStart: '2002-01-01',
+        })
+
+        const contractA0 = await submitTestContract(stateServer, AID)
+        const subA0 = contractA0.packageSubmissions[0]
+        const rate10 = subA0.rateRevisions[0]
+        const OneID = rate10.rateID
+        const rate20 = subA0.rateRevisions[1]
+        const TwoID = rate20.rateID
+
+        console.info('ONEID', OneID)
+        console.info('TWOID', TwoID)
+
+        // 2. Submit B0 with Rate1 and Rate3
+        const draftB0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const BID = draftB0.id
+        const draftB010 = await addNewRateToTestContract(stateServer, draftB0, {
+            rateDateStart: '2003-01-01',
+        })
+        await addLinkedRateToTestContract(stateServer, draftB010, OneID)
+
+        const contractB0 = await submitTestContract(stateServer, BID)
+        const subB0 = contractB0.packageSubmissions[0]
+        const rate30 = subB0.rateRevisions[0]
+        const ThreeID = rate30.rateID
+        console.info('THREEID', ThreeID)
+
+        expect(subB0.rateRevisions[0].rateID).toBe(ThreeID)
+        expect(subB0.rateRevisions[1].rateID).toBe(OneID)
+
+        // 3. Submit C0 with Rate20 and Rate30 and Rate40
+        const draftC0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const CID = draftC0.id
+        const draftC020 = await addLinkedRateToTestContract(
+            stateServer,
+            draftC0,
+            TwoID
+        )
+        const draftC020two = await addNewRateToTestContract(
+            stateServer,
+            draftC020,
+            {
+                rateDateStart: '2004-01-01',
+            }
+        )
+
+        await addLinkedRateToTestContract(stateServer, draftC020two, ThreeID)
+
+        const contractC0 = await submitTestContract(stateServer, CID)
+        const subC0 = contractC0.packageSubmissions[0]
+        const rate40 = subC0.rateRevisions[1]
+        const FourID = rate40.rateID
+        console.info('FOURID', FourID)
+        expect(subC0.rateRevisions[0].rateID).toBe(TwoID)
+        expect(subC0.rateRevisions[2].rateID).toBe(ThreeID)
+
+        // resubmit A, connecting it to B and C's
+        await unlockTestHealthPlanPackage(
+            cmsServer,
+            AID,
+            'unlock to weave the web'
+        )
+        const unlockedA0 = await fetchTestContract(stateServer, AID)
+        const unlockedA0Three = await addLinkedRateToTestContract(
+            stateServer,
+            unlockedA0,
+            ThreeID
+        )
+        await addLinkedRateToTestContract(stateServer, unlockedA0Three, FourID)
+
+        await submitTestContract(stateServer, AID, 'a tied up')
+        const revisionA1 = await prismaClient.contractRevisionTable.findFirst({
+            where: {
+                contractID: AID,
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+        })
+        if (!revisionA1 || !revisionA1.submitInfoID) {
+            throw new Error('No A1')
+        }
+
+        const connections =
+            await prismaClient.submissionPackageJoinTable.findMany({
+                where: {
+                    submissionID: revisionA1.submitInfoID,
+                },
+            })
+
+        expect(connections).toHaveLength(9)
+    })
+
     it('handles complex submission etc', async () => {
         const ldService = testLDService({
             'link-rates': true,

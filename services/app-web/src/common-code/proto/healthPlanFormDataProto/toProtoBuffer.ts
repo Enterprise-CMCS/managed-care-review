@@ -272,7 +272,7 @@ const toProtoBuffer = (
                               }
                           ),
                           actuaryCommunicationPreference: domainEnumToProto(
-                              domainData.addtlActuaryCommunicationPreference,
+                              rateInfo.actuaryCommunicationPreference,
                               mcreviewproto.ActuaryCommunicationType
                           ),
                           packagesWithSharedRateCerts:
@@ -281,15 +281,11 @@ const toProtoBuffer = (
                   })
                 : undefined,
         /**
-         * This field is unused and will need cleaned up, additional actuaries have been moved to the rate level.
-         * Leaving this as am empty array to get linked rates feature work in without having to fix all the broken tests
-         * by removing this field.
+         * addtlActuaryCommunicationPreference and addtlActuaryContacts are unused. Leaving cleanup for a standalone PR
+         * as there will be many broken tests
          */
         addtlActuaryContacts: [],
-        addtlActuaryCommunicationPreference: domainEnumToProto(
-            domainData.addtlActuaryCommunicationPreference,
-            mcreviewproto.ActuaryCommunicationType
-        ),
+        addtlActuaryCommunicationPreference: undefined,
         documents: domainData.documents.map((doc) => ({
             s3Url: doc.s3URL,
             name: doc.name,
