@@ -90,7 +90,9 @@ export const ContractDetailsSummarySectionV2 = ({
     const ldClient = useLDClient()
     const { loggedInUser } = useAuth()
     const isSubmittedOrCMSUser =
-        contract.status === 'SUBMITTED' || loggedInUser?.role === 'CMS_USER'
+        contract.status === 'SUBMITTED' ||
+        contract.status === 'RESUBMITTED' ||
+        loggedInUser?.role === 'CMS_USER'
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const contractOrRev = contractRev ? contractRev : contract
 

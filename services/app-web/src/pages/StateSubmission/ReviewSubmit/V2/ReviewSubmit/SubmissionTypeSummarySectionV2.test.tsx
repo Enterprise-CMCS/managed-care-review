@@ -6,7 +6,8 @@ import {
     mockMNState,
     mockContractPackageSubmitted,
     fetchCurrentUserMock,
-    mockValidStateUser
+    mockValidStateUser,
+    mockContractPackageUnlocked,
 } from '../../../../../testHelpers/apolloMocks'
 
 describe('SubmissionTypeSummarySection', () => {
@@ -25,17 +26,18 @@ describe('SubmissionTypeSummarySection', () => {
                 editNavigateTo="submission-type"
                 submissionName="MN-PMAP-0001"
                 isStateUser={true}
-            />
-        ,{
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({
-                        user: mockValidStateUser(),
-                        statusCode: 200,
-                    }),
-                ],
-            },
-        })
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidStateUser(),
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            }
+        )
 
         expect(
             screen.getByRole('heading', {
@@ -54,15 +56,15 @@ describe('SubmissionTypeSummarySection', () => {
         ).toBeNull()
     })
 
-    it.skip('can render submitted package without errors', () => {
+    it('can render submitted package without errors', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
                 contract={stateSubmission}
                 statePrograms={statePrograms}
                 submissionName="MN-MSHO-0003"
                 isStateUser={true}
-            />
-            ,{
+            />,
+            {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
@@ -182,7 +184,7 @@ describe('SubmissionTypeSummarySection', () => {
         )
     })
 
-    it.skip('renders expected fields for submitted package on submission summary', () => {
+    it('renders expected fields for submitted package on submission summary', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
                 contract={{ ...stateSubmission, status: 'SUBMITTED' }}
@@ -192,6 +194,9 @@ describe('SubmissionTypeSummarySection', () => {
                 isStateUser={true}
             />
         )
+        expect(
+            screen.getByRole('definition', { name: 'Submitted' })
+        ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', { name: 'Program(s)' })
         ).toBeInTheDocument()
@@ -203,6 +208,78 @@ describe('SubmissionTypeSummarySection', () => {
         ).toBeInTheDocument()
         expect(
             screen.queryByRole('definition', { name: 'Submitted' })
+        ).toBeInTheDocument()
+    })
+
+    it('renders expected fields for resubmitted package on submission summary', () => {
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                contract={{ ...stateSubmission, status: 'RESUBMITTED' }}
+                statePrograms={statePrograms}
+                editNavigateTo="submission-type"
+                submissionName="MN-MSHO-0003"
+                isStateUser={true}
+            />
+        )
+        expect(
+            screen.getByRole('definition', { name: 'Submitted' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Program(s)' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Submission type' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Submission description' })
+        ).toBeInTheDocument()
+    })
+
+    it('renders expected fields for unlocked package on submission summary for CMS users', () => {
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                contract={mockContractPackageUnlocked()}
+                statePrograms={statePrograms}
+                editNavigateTo="submission-type"
+                submissionName="MN-MSHO-0003"
+                isStateUser={false}
+            />
+        )
+        expect(
+            screen.getByRole('definition', { name: 'Submitted' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Program(s)' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Submission type' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Submission description' })
+        ).toBeInTheDocument()
+    })
+
+    it('renders expected fields for unlocked package on submission summary for state users', () => {
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                contract={mockContractPackageUnlocked()}
+                statePrograms={statePrograms}
+                editNavigateTo="submission-type"
+                submissionName="MN-MSHO-0003"
+                isStateUser={true}
+            />
+        )
+        expect(
+            screen.queryByRole('definition', { name: 'Submitted' })
+        ).not.toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Program(s)' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Submission type' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Submission description' })
         ).toBeInTheDocument()
     })
 
