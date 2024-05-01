@@ -2,6 +2,8 @@ import { screen, render } from '@testing-library/react'
 import { DynamicStepIndicator } from './DynamicStepIndicator'
 
 import { STATE_SUBMISSION_FORM_ROUTES } from '../../constants/routes'
+import { activeFormPages } from '../../pages/StateSubmission/StateSubmissionForm'
+import { mockContractFormData } from '../../testHelpers/apolloMocks/contractPackageDataMock'
 
 describe('DynamicStepIndicator', () => {
     it('renders without errors', () => {
@@ -34,5 +36,31 @@ describe('DynamicStepIndicator', () => {
         )
 
         expect(screen.getByTestId('container')).toBeEmptyDOMElement()
+    })
+
+    it('renders the rate details step for contract and rates submissions', () => {
+        const contract = mockContractFormData()
+        render(
+            <DynamicStepIndicator
+                formPages={activeFormPages(contract)}
+                currentFormPage={STATE_SUBMISSION_FORM_ROUTES[5]}
+            />
+        )
+
+        expect(screen.getByText('Rate details')).toBeInTheDocument()
+    })
+
+    it('does not render the rate details step for contract only submissions', () => {
+        const contract = mockContractFormData({
+            submissionType: 'CONTRACT_ONLY',
+        })
+        render(
+            <DynamicStepIndicator
+                formPages={activeFormPages(contract)}
+                currentFormPage={STATE_SUBMISSION_FORM_ROUTES[5]}
+            />
+        )
+
+        expect(screen.queryByText('Rate details')).not.toBeInTheDocument()
     })
 })
