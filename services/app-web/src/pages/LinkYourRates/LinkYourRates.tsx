@@ -64,7 +64,7 @@ export const LinkYourRates = ({
             {getIn(values, `${fieldNamePrefix}.ratePreviouslySubmitted`) ===
                 'YES' && (
                 <>
-                    <Label htmlFor={`${fieldNamePrefix}.linkedRates`}>
+                    <Label htmlFor={`${fieldNamePrefix}.linkedRatesYesNo`}>
                         Which rate certification was it?
                     </Label>
                     <span className={styles.requiredOptionalText}>
@@ -72,8 +72,8 @@ export const LinkYourRates = ({
                     </span>
                     <LinkRateSelect
                         key={`rateOptions-${index}`}
-                        inputId={`${fieldNamePrefix}.linkedRates`}
-                        name={`${fieldNamePrefix}.linkRatesSelect`}
+                        inputId={`${fieldNamePrefix}.linkedRatesYesNo`}
+                        name={`${fieldNamePrefix}.linkedRatesYesNo`}
                         initialValue={getIn(values, `${fieldNamePrefix}.id`)}
                         autofill={autofill}
                     />
