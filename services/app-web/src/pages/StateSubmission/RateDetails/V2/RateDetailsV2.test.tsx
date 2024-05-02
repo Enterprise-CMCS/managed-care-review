@@ -209,7 +209,7 @@ describe('RateDetailsV2', () => {
         })
     })
 
-    describe.skip('handles editing multiple rates', () => {
+    describe('handles editing multiple rates', () => {
         it('renders linked rates without errors', async () => {
             renderWithProviders(
                 <Routes>
@@ -412,8 +412,8 @@ describe('RateDetailsV2', () => {
                     screen.getByText('There is 1 error on this page')
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText('You must select a rate certification')
-                ).toBeInTheDocument()
+                    screen.getAllByText('You must select a rate certification')
+                ).toHaveLength(2)
             })
 
         })
@@ -566,11 +566,11 @@ describe('RateDetailsV2', () => {
                 ).toBeInTheDocument()
                 expect(submitButton).toHaveAttribute('aria-disabled', 'true')
                 expect(
-                    screen.getByText('There is 1 error on this page')
-                ).toBeInTheDocument()
+                    screen.getByText('There are 2 errors on this page')
+                ).toBeInTheDocument() // two errors because we have both inline and error summary
                 expect(
-                    screen.getByText('You must select yes or no')
-                ).toBeInTheDocument()
+                    screen.getAllByText('You must select yes or no')
+                ).toHaveLength(2)
             })
         })
 
@@ -665,7 +665,7 @@ describe('RateDetailsV2', () => {
         })
     })
 
-    describe.skip('can link existing rate', () => {
+    describe('can link existing rate', () => {
         it('does not display dropdown menu if no is selected', async () => {
             const { user } = renderWithProviders(
                 <Routes>
