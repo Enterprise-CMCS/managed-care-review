@@ -180,12 +180,6 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
             })
     })
 const RateDetailsFormSchema = (activeFeatureFlags?: FeatureFlagSettings) => {
-    return activeFeatureFlags?.['link-rates'] ?
-    Yup.object().shape({
-        rateForms: Yup.array().of(
-            SingleRateCertSchema(activeFeatureFlags || {})
-        ),
-    }):
     Yup.object().shape({
         rateInfos: Yup.array().of(
             SingleRateCertSchema(activeFeatureFlags || {})
