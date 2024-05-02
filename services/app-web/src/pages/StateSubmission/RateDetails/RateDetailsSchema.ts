@@ -10,9 +10,6 @@ import {
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
-    // Yup.object().shape({
-    //     linkRateSelect: Yup.string().defined('wowow'),
-    // })
     Yup.object().when('.ratePreviouslySubmitted', {
         // this first when is skipping all validations for a previously submitted rate.
         is: 'YES',
