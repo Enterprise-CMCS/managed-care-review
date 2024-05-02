@@ -20,11 +20,13 @@ export const ChangeHistoryV2 = ({
     const flattenedRevisions = (): flatRevisions[] => {
         const result: flatRevisions[] = []
 
-        const contractSubmissions = contract.packageSubmissions.filter(
-            (submission) => {
-                return submission.cause === 'CONTRACT_SUBMISSION'
-            }
-        )
+        const contractSubmissions = contract.packageSubmissions
+        // console.log(contract, 'submissions')
+        // const contractSubmissions = contract.packageSubmissions.filter(
+        //     (submission) => {
+        //         return submission.cause === 'CONTRACT_SUBMISSION'
+        //     }
+        // )
 
         //Reverse revisions to order from earliest to latest revision. This is to correctly set version for each
         // contract & recontract.
@@ -36,6 +38,18 @@ export const ChangeHistoryV2 = ({
                 newUnlock.updatedBy = r.contractRevision.unlockInfo.updatedBy
                 newUnlock.updatedReason =
                     r.contractRevision.unlockInfo.updatedReason
+                newUnlock.kind = 'unlock'
+                //Use unshift to push the latest revision unlock info to the beginning of the array
+                result.unshift(newUnlock)
+            }
+            if (contract.draftRevision?.unlockInfo) {
+                const newUnlock: flatRevisions = {} as flatRevisions
+                newUnlock.updatedAt =
+                    contract.draftRevision?.unlockInfo.updatedAt
+                newUnlock.updatedBy =
+                    contract.draftRevision?.unlockInfo.updatedBy
+                newUnlock.updatedReason =
+                    contract.draftRevision?.unlockInfo.updatedReason
                 newUnlock.kind = 'unlock'
                 //Use unshift to push the latest revision unlock info to the beginning of the array
                 result.unshift(newUnlock)
