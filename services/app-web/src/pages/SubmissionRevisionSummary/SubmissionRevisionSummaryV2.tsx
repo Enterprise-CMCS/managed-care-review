@@ -54,7 +54,7 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
 
     const name =
         contract &&
-        contract?.packageSubmissions.length < Number(revisionVersion)
+        contract?.packageSubmissions.length > Number(revisionVersion)
             ? contract.packageSubmissions.reverse()[revisionIndex]
                   .contractRevision.contractName
             : ''
@@ -86,7 +86,9 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
 
     // Reversing revisions to get correct submission order
     // we offset the index by one so that our indices start at 1
-    const packageSubmission = [...contract.packageSubmissions].reverse()[revisionIndex]
+    const packageSubmission = [...contract.packageSubmissions].reverse()[
+        revisionIndex
+    ]
     const revision = packageSubmission.contractRevision
     const rateRevisions = packageSubmission.rateRevisions
     const contractData = revision.formData
@@ -109,6 +111,7 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
                     statePrograms={statePrograms}
                     isStateUser={isStateUser}
                     submissionName={name}
+                    initiallySubmittedAt={contract.initiallySubmittedAt}
                     headerChildComponent={
                         submitInfo && (
                             <p

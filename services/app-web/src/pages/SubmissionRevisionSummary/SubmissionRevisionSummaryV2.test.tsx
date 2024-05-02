@@ -139,6 +139,8 @@ describe('SubmissionRevisionSummary', () => {
         
         expect(await screen.findByLabelText('Submission description')).toHaveTextContent('Submission 2')
         expect(await screen.findByText('rate2 doc')).toBeInTheDocument()
+        expect(await screen.findByRole('heading', { name: 'MCR-MN-0005-SNBC'})).toBeInTheDocument()
+        expect(await screen.findByLabelText('Submitted')).toHaveTextContent('01/01/24')
 
     })
 
