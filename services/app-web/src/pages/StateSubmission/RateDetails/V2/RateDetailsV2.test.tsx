@@ -213,16 +213,6 @@ describe('RateDetailsv2', () => {
     })
 
     describe('handles editing multiple rates', () => {
-        // beforeEach(() => {
-        //     jest.spyOn(
-        //         useUpdateDraftContractRatesMutation,
-        //         mockUpdateDraftFn
-        //     ).mockReturnValue({
-        //         updateDraft: mockUpdateDraftFn,
-        //         createDraft: jest.fn(),
-        //         showPageErrorMessage: false,
-        //     })
-        // })
         it('renders linked rates without errors', async () => {
             renderWithProviders(
                 <Routes>
