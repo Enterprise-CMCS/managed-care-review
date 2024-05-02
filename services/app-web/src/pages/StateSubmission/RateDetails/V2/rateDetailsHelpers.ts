@@ -73,8 +73,8 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate, pare
         id: rate?.id,
         status: rate?.status,
         rateCertificationName: rateForm?.rateCertificationName ?? undefined,
-        rateType: rateForm?.rateType,
-        rateCapitationType: rateForm?.rateCapitationType,
+        rateType: rateForm?.rateType ?? undefined,
+        rateCapitationType: rateForm?.rateCapitationType ?? undefined,
         rateDateStart: formatForForm(rateForm?.rateDateStart),
         rateDateEnd: formatForForm(rateForm?.rateDateEnd),
         rateDateCertified: formatForForm(rateForm?.rateDateCertified),
@@ -102,7 +102,8 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate, pare
         packagesWithSharedRateCerts:
             rateForm?.packagesWithSharedRateCerts ?? [],
         ratePreviouslySubmitted: handleAsLinkedRate? 'YES' : rateForm ? 'NO' : undefined,
-        initiallySubmittedAt: rate?.initiallySubmittedAt
+        initiallySubmittedAt: rate?.initiallySubmittedAt,
+        linkRateSelect: handleAsLinkedRate && rate?.id ? 'true' : undefined
     }
 }
 
