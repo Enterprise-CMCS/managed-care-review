@@ -155,7 +155,7 @@ export const LinkRateSelect = ({
             }
             isSearchable
             maxMenuHeight={400}
-            aria-label="linked rates (required)"
+            aria-label="linked rate (required)"
             ariaLiveMessages={{
                 onFocus,
             }}

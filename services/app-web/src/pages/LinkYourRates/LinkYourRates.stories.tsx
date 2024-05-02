@@ -16,6 +16,7 @@ export const LinkRates = (): React.ReactElement => {
                 <LinkYourRates
                     fieldNamePrefix="rateForms.1"
                     index={1}
+                    shouldValidate={false}
                     autofill={() => {
                         console.info('autofill rate')
                     }}

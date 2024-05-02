@@ -14,7 +14,7 @@ const ErrorSummaryMessage = ({
     let fieldSelector: string
     let href: string
 
-    // Treat keys that begin with # as ids
+    // Treat keys that begin with # as ids - this is used with react-select Select-  a combobox component
     if (errorKey.startsWith('#')) {
         fieldSelector = `[id="${errorKey}"]`
         href = errorKey
