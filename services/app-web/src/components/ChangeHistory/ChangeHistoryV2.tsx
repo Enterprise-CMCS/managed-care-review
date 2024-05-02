@@ -20,57 +20,62 @@ export const ChangeHistoryV2 = ({
     const flattenedRevisions = (): flatRevisions[] => {
         const result: flatRevisions[] = []
 
-        const contractSubmissions = contract.packageSubmissions
-        // console.log(contract, 'submissions')
-        // const contractSubmissions = contract.packageSubmissions.filter(
-        //     (submission) => {
-        //         return submission.cause === 'CONTRACT_SUBMISSION'
-        //     }
-        // )
+        const contractSubmissions = contract.packageSubmissions.filter(
+            (submission) => {
+                return submission.cause === 'CONTRACT_SUBMISSION'
+            }
+        )
 
         //Reverse revisions to order from earliest to latest revision. This is to correctly set version for each
         // contract & recontract.
-        const reversedRevisions = [...contractSubmissions].reverse()
+        const reversedRevisions = [
+            ...contractSubmissions,
+            contract.draftRevision,
+        ].reverse()
         reversedRevisions.forEach((r, index) => {
-            if (r.contractRevision.unlockInfo) {
-                const newUnlock: flatRevisions = {} as flatRevisions
-                newUnlock.updatedAt = r.contractRevision.unlockInfo.updatedAt
-                newUnlock.updatedBy = r.contractRevision.unlockInfo.updatedBy
-                newUnlock.updatedReason =
-                    r.contractRevision.unlockInfo.updatedReason
-                newUnlock.kind = 'unlock'
-                //Use unshift to push the latest revision unlock info to the beginning of the array
-                result.unshift(newUnlock)
-            }
-            if (contract.draftRevision?.unlockInfo) {
-                const newUnlock: flatRevisions = {} as flatRevisions
-                newUnlock.updatedAt =
-                    contract.draftRevision?.unlockInfo.updatedAt
-                newUnlock.updatedBy =
-                    contract.draftRevision?.unlockInfo.updatedBy
-                newUnlock.updatedReason =
-                    contract.draftRevision?.unlockInfo.updatedReason
-                newUnlock.kind = 'unlock'
-                //Use unshift to push the latest revision unlock info to the beginning of the array
-                result.unshift(newUnlock)
-            }
-            if (r.submitInfo) {
-                const newSubmit: flatRevisions = {} as flatRevisions
-                const revisionVersion =
-                    index !== contract.packageSubmissions.length - 1 // if we aren't at the last item in list, assign a version
-                        ? String(index + 1) //Offset version, we want to start at 1
-                        : undefined
+            if (r?.__typename === 'ContractPackageSubmission') {
+                if (r.contractRevision.unlockInfo) {
+                    const newUnlock: flatRevisions = {} as flatRevisions
+                    newUnlock.updatedAt =
+                        r.contractRevision.unlockInfo.updatedAt
+                    newUnlock.updatedBy =
+                        r.contractRevision.unlockInfo.updatedBy
+                    newUnlock.updatedReason =
+                        r.contractRevision.unlockInfo.updatedReason
+                    newUnlock.kind = 'unlock'
+                    result.push(newUnlock)
+                }
+                if (r.submitInfo) {
+                    const newSubmit: flatRevisions = {} as flatRevisions
+                    const revisionVersion =
+                        index !== contract.packageSubmissions.length - 1 // if we aren't at the last item in list, assign a version
+                            ? String(index + 1) //Offset version, we want to start at 1
+                            : undefined
 
-                newSubmit.updatedAt = r.submitInfo.updatedAt
-                newSubmit.updatedBy = r.submitInfo.updatedBy
-                newSubmit.updatedReason = r.submitInfo.updatedReason
-                newSubmit.kind = 'submit'
-                newSubmit.revisionVersion = revisionVersion
-                //Use unshift to push the latest revision submit info to the beginning of the array
-                result.unshift(newSubmit)
+                    newSubmit.updatedAt = r.submitInfo.updatedAt
+                    newSubmit.updatedBy = r.submitInfo.updatedBy
+                    newSubmit.updatedReason = r.submitInfo.updatedReason
+                    newSubmit.kind = 'submit'
+                    newSubmit.revisionVersion = revisionVersion
+                    result.push(newSubmit)
+                }
+            }
+            if (r?.__typename === 'ContractRevision') {
+                if (r.unlockInfo) {
+                    const newUnlock: flatRevisions = {} as flatRevisions
+                    newUnlock.updatedAt = r.unlockInfo.updatedAt
+                    newUnlock.updatedBy = r.unlockInfo.updatedBy
+                    newUnlock.updatedReason = r.unlockInfo.updatedReason
+                    newUnlock.kind = 'unlock'
+                    result.push(newUnlock)
+                }
             }
         })
-        return result
+        return result.sort(
+            (a, b) =>
+                new Date(b.updatedAt).getTime() -
+                new Date(a.updatedAt).getTime()
+        )
     }
 
     const revisionHistory = flattenedRevisions()
