@@ -13,9 +13,9 @@ describe('SubmissionTypeSummarySection', () => {
     afterEach(() => {
         jest.clearAllMocks()
     })
-    const submittedContract = mockContractPackageSubmitted()
 
     it('can render history for initial submission', () => {
+        const submittedContract = mockContractPackageSubmitted()
         renderWithProviders(<ChangeHistory contract={submittedContract} />, {
             apolloProvider: {
                 mocks: [
