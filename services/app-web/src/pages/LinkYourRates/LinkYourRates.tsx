@@ -73,7 +73,7 @@ export const LinkYourRates = ({
                     <LinkRateSelect
                         key={`rateOptions-${index}`}
                         inputId={`${fieldNamePrefix}.linkedRates`}
-                        name={`${fieldNamePrefix}.linkedRates`}
+                        name={`${fieldNamePrefix}.linkRatesSelect`}
                         initialValue={getIn(values, `${fieldNamePrefix}.id`)}
                         autofill={autofill}
                     />
