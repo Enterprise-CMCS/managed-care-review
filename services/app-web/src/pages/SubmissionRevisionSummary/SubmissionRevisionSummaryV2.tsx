@@ -51,7 +51,6 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
     const contract = fetchContractData?.fetchContract.contract
     //We offset version by +1 of index, remove offset to find revision in revisions
     const revisionIndex = Number(revisionVersion) - 1
-
     const name =
         contract &&
         contract?.packageSubmissions.length > Number(revisionVersion)
@@ -86,9 +85,11 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
 
     // Reversing revisions to get correct submission order
     // we offset the index by one so that our indices start at 1
-    const packageSubmission = [...contract.packageSubmissions].reverse()[
-        revisionIndex
-    ]
+    const packageSubmission = [...contract.packageSubmissions]
+        .filter((submission) => {
+            return submission.cause === 'CONTRACT_SUBMISSION'
+        })
+        .reverse()[revisionIndex]
     const revision = packageSubmission.contractRevision
     const rateRevisions = packageSubmission.rateRevisions
     const contractData = revision.formData

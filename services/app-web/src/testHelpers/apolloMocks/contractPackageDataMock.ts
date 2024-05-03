@@ -460,8 +460,9 @@ function mockContractPackageSubmitted(
         stateNumber: 5,
         packageSubmissions: [{
             cause: 'CONTRACT_SUBMISSION',
+            __typename: 'ContractPackageSubmission',
             submitInfo: {
-                updatedAt: new Date(),
+                updatedAt: new Date('12/18/2023'),
                 updatedBy: 'example@state.com',
                 updatedReason: 'contract submit'
             },
