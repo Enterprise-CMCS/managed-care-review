@@ -9,7 +9,7 @@ import {
     ErrorSummary,
     SectionCard,
 } from '../../../../components'
-import { AlwaysBrandNewRateFormSchema, RateDetailsFormSchema } from '../RateDetailsSchema'
+import { RateDetailsFormSchema } from '../RateDetailsSchema'
 import { PageActions } from '../../PageActions'
 
 import { useS3 } from '../../../../contexts/S3Context'
@@ -109,17 +109,14 @@ const RateDetailsV2 = ({
 
     // Form validation
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const rateDetailsFormSchema = displayAsStandaloneRate? AlwaysBrandNewRateFormSchema({
+    const rateDetailsFormSchema = RateDetailsFormSchema({
         'rate-edit-unlock': useEditUnlockRate,
         'link-rates': useLinkedRates,
-    }):  RateDetailsFormSchema({
-        'rate-edit-unlock': useEditUnlockRate,
-        'link-rates': useLinkedRates,
-    })
+    }, !displayAsStandaloneRate)
 
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
-
+    console.log('HERE')
     // Multi-rates state management
     const [focusNewRate, setFocusNewRate] = React.useState(false)
     const newRateNameRef = React.useRef<HTMLElement | null>(null)
@@ -152,7 +149,7 @@ const RateDetailsV2 = ({
         },
         skip: !displayAsStandaloneRate,
     })
-    console.log(fetchRateError)
+
     useEffect(() => {
         if (focusNewRate) {
             newRateNameRef?.current?.focus()
@@ -372,6 +369,7 @@ const RateDetailsV2 = ({
     }
 
     const fieldNamePrefix = (idx: number) => `rateForms.${idx}`
+    console.log('HERE')
     return (
         <>
             <div className={styles.stepIndicator}>
@@ -483,7 +481,7 @@ const RateDetailsV2 = ({
                                                                         shouldValidate={shouldValidate}
                                                                     />
                                                                 )}
-                                                                {rateForm.ratePreviouslySubmitted ===
+                                                                {!displayAsStandaloneRate && rateForm.ratePreviouslySubmitted  ===
                                                                     'YES' &&
                                                                     rateForm.id && (
                                                                         <LinkedRateSummary
@@ -493,8 +491,8 @@ const RateDetailsV2 = ({
                                                                         />
                                                                     )}
 
-                                                                {rateForm.ratePreviouslySubmitted ===
-                                                                    'NO' && (
+                                                                {(displayAsStandaloneRate || rateForm.ratePreviouslySubmitted ===
+                                                                    'NO') &&  (
                                                                     <SingleRateFormFields
                                                                         rateForm={
                                                                             rateForm
@@ -537,7 +535,7 @@ const RateDetailsV2 = ({
                                                         </SectionCard>
                                                     )
                                                 )}
-                                                <SectionCard>
+                                                {!displayAsStandaloneRate && <SectionCard>
                                                     <h3>
                                                         Additional rate
                                                         certification
@@ -561,7 +559,7 @@ const RateDetailsV2 = ({
                                                         Add another rate
                                                         certification
                                                     </button>
-                                                </SectionCard>
+                                                </SectionCard>}
                                             </>
                                         )}
                                     </FieldArray>

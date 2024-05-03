@@ -159,42 +159,53 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
         )
 })
 
-const AlwaysBrandNewRateFormSchema = (activeFeatureFlags?: FeatureFlagSettings) => {
-   return  Yup.object().shape({
-    rateInfos: Yup.array().of(
-        SingleRateCertSchema(activeFeatureFlags || {})
-    )
-})
+
+const RateDetailsFormSchema = (activeFeatureFlags?: FeatureFlagSettings, isMultiRate?: boolean) => {
+    // LEGACY V1
+    if(!activeFeatureFlags?.['link-rates']) {
+        return  Yup.object().shape({
+            rateInfos: Yup.array().of(
+                SingleRateCertSchema(activeFeatureFlags || {})
+            )
+            })
+    } else {
+
+    // V2 SCHEMAS
+    return isMultiRate ?
+        Yup.object().shape({
+            rateForms: Yup.array().of(
+            Yup.object()
+                .when('.ratePreviouslySubmitted', {
+                    // make the user select something for rate preivously submitted yes no question
+                    is: undefined,
+                    then: Yup.object().shape({
+                        ratePreviouslySubmitted: activeFeatureFlags['link-rates']? Yup.string().defined(
+                            "You must select yes or no "
+                        ) : Yup.string(),
+                    }),
+                        })
+                .when('.ratePreviouslySubmitted', {
+                    // make the user select a linked rate, skip all other validations for a previously submitted rate
+                    is: 'YES',
+                    then: Yup.object().shape({
+                        linkedRateDropdown: Yup.string().defined('You must select a rate certification'),
+                    }),
+                })
+                .when('.ratePreviouslySubmitted', {
+                    // continue with normal rate form validations when its a new rate
+                    is: 'NO',
+                    then: SingleRateCertSchema(activeFeatureFlags || {})
+                })
+        )})
+        // This the standlaone rate unlock page schema
+        // it does not use linked rate form fields at all - user must always fill rate data from scratch
+        // eventually this could be just a single rate cert schema, but for now since the UI is shared, it still uses an array like RateDetailsV2
+        : Yup.object().shape({
+            rateForms: Yup.array().of(
+                SingleRateCertSchema(activeFeatureFlags || {})
+            )
+        })
+    }
 }
 
-const RateDetailsFormSchema = (activeFeatureFlags?: FeatureFlagSettings) => {
-    return activeFeatureFlags?.['link-rates'] ?
-    Yup.object().shape({
-        rateForms: Yup.array().of(
-        Yup.object()
-            .when('.ratePreviouslySubmitted', {
-                // make the user select something for rate preivously submitted yes no question
-                is: undefined,
-                then: Yup.object().shape({
-                    ratePreviouslySubmitted: activeFeatureFlags['link-rates']? Yup.string().defined(
-                        "You must select yes or no "
-                    ) : Yup.string(),
-                }),
-                    })
-            .when('.ratePreviouslySubmitted', {
-                // make the user select a linked rate, skip all other validations for a previously submitted rate
-                is: 'YES',
-                then: Yup.object().shape({
-                    linkedRateDropdown: Yup.string().defined('You must select a rate certification'),
-                }),
-            })
-            .when('.ratePreviouslySubmitted', {
-                // continue with normal rate form validations when its a new rate
-                is: 'NO',
-                then: SingleRateCertSchema(activeFeatureFlags || {})
-            })
-    )})
-    : AlwaysBrandNewRateFormSchema
-}
-
-export { RateDetailsFormSchema, AlwaysBrandNewRateFormSchema }
+export { RateDetailsFormSchema }
