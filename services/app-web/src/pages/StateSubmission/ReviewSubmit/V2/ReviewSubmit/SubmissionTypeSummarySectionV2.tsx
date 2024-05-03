@@ -70,21 +70,22 @@ export const SubmissionTypeSummarySectionV2 = ({
                 {headerChildComponent && headerChildComponent}
             </SectionHeader>
             <dl>
-                {(isSubmitted || (!isStateUser && isUnlocked)) && (
-                    <DoubleColumnGrid>
-                        <DataDetail
-                            id="submitted"
-                            label="Submitted"
-                            children={
-                                <span>
-                                    {dayjs(initiallySubmittedAt).format(
-                                        'MM/DD/YY'
-                                    )}
-                                </span>
-                            }
-                        />
-                    </DoubleColumnGrid>
-                )}
+                {initiallySubmittedAt &&
+                    (isSubmitted || (!isStateUser && isUnlocked)) && (
+                        <DoubleColumnGrid>
+                            <DataDetail
+                                id="submitted"
+                                label="Submitted"
+                                children={
+                                    <span>
+                                        {dayjs(initiallySubmittedAt).format(
+                                            'MM/DD/YY'
+                                        )}
+                                    </span>
+                                }
+                            />
+                        </DoubleColumnGrid>
+                    )}
                 <DoubleColumnGrid>
                     {(programNames?.length > 0 || !isSubmitted) && (
                         <DataDetail

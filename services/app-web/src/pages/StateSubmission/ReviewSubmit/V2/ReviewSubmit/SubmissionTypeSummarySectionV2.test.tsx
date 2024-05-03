@@ -191,6 +191,7 @@ describe('SubmissionTypeSummarySection', () => {
                 statePrograms={statePrograms}
                 editNavigateTo="submission-type"
                 submissionName="MN-MSHO-0003"
+                initiallySubmittedAt={new Date('2023-01-02')}
                 isStateUser={true}
             />
         )
@@ -218,6 +219,7 @@ describe('SubmissionTypeSummarySection', () => {
                 statePrograms={statePrograms}
                 editNavigateTo="submission-type"
                 submissionName="MN-MSHO-0003"
+                initiallySubmittedAt={new Date('2023-01-02')}
                 isStateUser={true}
             />
         )
@@ -242,6 +244,7 @@ describe('SubmissionTypeSummarySection', () => {
                 statePrograms={statePrograms}
                 editNavigateTo="submission-type"
                 submissionName="MN-MSHO-0003"
+                initiallySubmittedAt={new Date('2023-01-02')}
                 isStateUser={false}
             />
         )
