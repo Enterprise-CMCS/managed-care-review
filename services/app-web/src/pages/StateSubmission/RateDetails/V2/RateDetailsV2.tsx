@@ -9,7 +9,7 @@ import {
     ErrorSummary,
     SectionCard,
 } from '../../../../components'
-import { RateDetailsFormSchema } from '../RateDetailsSchema'
+import { AlwaysBrandNewRateFormSchema, RateDetailsFormSchema } from '../RateDetailsSchema'
 import { PageActions } from '../../PageActions'
 
 import { useS3 } from '../../../../contexts/S3Context'
@@ -109,10 +109,14 @@ const RateDetailsV2 = ({
 
     // Form validation
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const rateDetailsFormSchema = RateDetailsFormSchema({
+    const rateDetailsFormSchema = displayAsStandaloneRate? AlwaysBrandNewRateFormSchema({
+        'rate-edit-unlock': useEditUnlockRate,
+        'link-rates': useLinkedRates,
+    }):  RateDetailsFormSchema({
         'rate-edit-unlock': useEditUnlockRate,
         'link-rates': useLinkedRates,
     })
+
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
 
@@ -148,6 +152,7 @@ const RateDetailsV2 = ({
         },
         skip: !displayAsStandaloneRate,
     })
+    console.log(fetchRateError)
     useEffect(() => {
         if (focusNewRate) {
             newRateNameRef?.current?.focus()
