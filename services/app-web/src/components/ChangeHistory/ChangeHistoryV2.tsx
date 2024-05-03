@@ -31,7 +31,7 @@ export const ChangeHistoryV2 = ({
         const reversedRevisions = [
             ...contractSubmissions,
             contract.draftRevision,
-        ].reverse()
+        ]
         reversedRevisions.forEach((r, index) => {
             if (r?.__typename === 'ContractPackageSubmission') {
                 if (r.contractRevision.unlockInfo) {
@@ -48,7 +48,7 @@ export const ChangeHistoryV2 = ({
                 if (r.submitInfo) {
                     const newSubmit: flatRevisions = {} as flatRevisions
                     const revisionVersion =
-                        index !== contract.packageSubmissions.length - 1 // if we aren't at the last item in list, assign a version
+                        index !== contractSubmissions.length - 1 // if we aren't at the last item in list, assign a version
                             ? String(index + 1) //Offset version, we want to start at 1
                             : undefined
 

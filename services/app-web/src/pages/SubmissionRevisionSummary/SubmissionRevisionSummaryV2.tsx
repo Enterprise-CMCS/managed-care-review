@@ -50,10 +50,16 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
     })
     const contract = fetchContractData?.fetchContract.contract
     //We offset version by +1 of index, remove offset to find revision in revisions
-    const revisionIndex = Number(revisionVersion) - 1
+    const revisionIndex =
+        (contract &&
+            [...contract.packageSubmissions].filter((submission) => {
+                return submission.cause === 'CONTRACT_SUBMISSION'
+            }).length - 1) ||
+        0
 
     const name =
         contract &&
+        revisionIndex &&
         contract?.packageSubmissions.length < Number(revisionVersion)
             ? contract.packageSubmissions.reverse()[revisionIndex]
                   .contractRevision.contractName
