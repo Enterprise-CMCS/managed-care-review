@@ -18,6 +18,7 @@ import { Documents } from './Documents'
 import { ReviewSubmit } from './ReviewSubmit'
 import { SubmissionType } from './SubmissionType'
 import { UnlockedHealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
+import { ContractFormData } from '../../gen/gqlClient'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
 import { RateDetailsV2 } from './RateDetails/V2/RateDetailsV2'
@@ -89,7 +90,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
 // Utilities
 
 export const activeFormPages = (
-    draft: UnlockedHealthPlanFormDataType
+    draft: UnlockedHealthPlanFormDataType | ContractFormData
 ): RouteTWithUnknown[] => {
     // If submission type is contract only, rate details is left out of the step indicator
     return STATE_SUBMISSION_FORM_ROUTES.filter(

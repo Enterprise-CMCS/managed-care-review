@@ -3,7 +3,7 @@ import {
     Contract,
     FetchContractDocument,
     UpdateDraftContractRatesDocument,
-    UpdateDraftContractRatesMutation
+    UpdateDraftContractRatesMutation,
 } from '../../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
 import { mockContractPackageDraft } from './contractPackageDataMock'
@@ -62,15 +62,7 @@ const updateDraftContractRatesMockSuccess = ({
                         actuarialFirmOther: ""
                     }
                 ],
-                addtlActuaryContacts: [
-                    {
-                        name: "",
-                        titleRole: "",
-                        email: "",
-                        actuarialFirm: undefined,
-                        actuarialFirmOther: ""
-                    }
-                ],
+                addtlActuaryContacts: [],
                 actuaryCommunicationPreference: undefined,
                 packagesWithSharedRateCerts: [],
             },

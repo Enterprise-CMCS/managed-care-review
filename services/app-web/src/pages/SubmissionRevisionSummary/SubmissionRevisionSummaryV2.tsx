@@ -59,8 +59,7 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
 
     const name =
         contract &&
-        revisionIndex &&
-        contract?.packageSubmissions.length < Number(revisionVersion)
+        contract?.packageSubmissions.length > Number(revisionVersion)
             ? contract.packageSubmissions.reverse()[revisionIndex]
                   .contractRevision.contractName
             : ''
@@ -119,6 +118,7 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
                     statePrograms={statePrograms}
                     isStateUser={isStateUser}
                     submissionName={name}
+                    initiallySubmittedAt={contract.initiallySubmittedAt}
                     headerChildComponent={
                         submitInfo && (
                             <p

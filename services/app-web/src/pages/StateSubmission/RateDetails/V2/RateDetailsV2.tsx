@@ -72,6 +72,7 @@ export type FormikRateForm = {
     packagesWithSharedRateCerts: RateRevision['formData']['packagesWithSharedRateCerts']
     ratePreviouslySubmitted?: 'YES' | 'NO'
     initiallySubmittedAt?: Date
+    linkRateSelect?: string
 }
 
 // We have a list of rates to enable multi-rate behavior
@@ -266,8 +267,14 @@ const RateDetailsV2 = ({
             (options.type === 'CONTINUE' || options.type === 'SAVE_AS_DRAFT')
         ) {
             try {
-                const updatedRates = generateUpdatedRates(rateForms)
-
+                const formattedRateForms = rateForms.filter((rate) => {
+                    if (rate.ratePreviouslySubmitted === 'YES') {
+                        return rate.id
+                    } else {
+                        return rate
+                    }
+                })
+                const updatedRates = generateUpdatedRates(formattedRateForms)
                 await updateDraftContractRates({
                     variables: {
                         input: {

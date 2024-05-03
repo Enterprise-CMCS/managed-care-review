@@ -162,13 +162,13 @@ export const LinkRateSelect = ({
             isClearable
             noOptionsMessage={() => noOptionsMessage()}
             classNamePrefix="select"
-            id={`${name}-linkRateSelect`}
+            id={`${name}.linkRateSelect`}
             inputId=""
             placeholder={
                 loading ? 'Loading rate certifications...' : 'Select...'
             }
             loadingMessage={() => 'Loading rate certifications...'}
-            name={name}
+            name={`${name}.linkRateSelect`}
             filterOption={filterOptions}
             {...selectProps}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

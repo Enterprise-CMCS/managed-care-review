@@ -13,6 +13,9 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
     Yup.object().when('.ratePreviouslySubmitted', {
         // this first when is skipping all validations for a previously submitted rate.
         is: 'YES',
+        then: Yup.object().shape({
+            linkRateSelect: Yup.string().defined('You must select a rate certification'),
+        }),
         otherwise: Yup.object().shape({
             ratePreviouslySubmitted: _activeFeatureFlags['rate-edit-unlock'] || _activeFeatureFlags['link-rates']? Yup.string().defined(
                 "You must select yes or no "
