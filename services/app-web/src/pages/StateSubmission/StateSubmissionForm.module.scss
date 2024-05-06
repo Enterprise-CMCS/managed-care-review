@@ -106,11 +106,6 @@
 .stateContact,
 .actuaryContact {
     margin-bottom: uswds.units(2);
-
-    .removeContactBtn {
-        margin-top: uswds.units(3);
-        @include uswds.u-text('secondary');
-    }
 }
 
 .addRateBtn {
@@ -126,10 +121,11 @@
     .addContactBtn {
         margin-top: 0.5rem;
     }
+}
 
-    .removeContactBtn {
-        margin-top: uswds.units(3);
-    }
+.removeContactBtn {
+    margin-top: uswds.units(3);
+    @include uswds.u-text('secondary');
 }
 
 .capitationLegend {
