@@ -188,7 +188,7 @@ const RateDetailsFormSchema = (activeFeatureFlags?: FeatureFlagSettings, isMulti
                     // make the user select a linked rate, skip all other validations for a previously submitted rate
                     is: 'YES',
                     then: Yup.object().shape({
-                        linkedRateDropdown: Yup.string().defined('You must select a rate certification'),
+                        linkRateSelect: Yup.string().defined('You must select a rate certification'),
                     }),
                 })
                 .when('.ratePreviouslySubmitted', {

@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { logRoles, screen, waitFor } from '@testing-library/react'
 import { RateDetailsV2 } from './RateDetailsV2'
 
 import {
@@ -566,8 +566,8 @@ describe('RateDetailsV2', () => {
                 ).toBeInTheDocument()
                 expect(submitButton).toHaveAttribute('aria-disabled', 'true')
                 expect(
-                    screen.getByText('There are 2 errors on this page')
-                ).toBeInTheDocument() // two errors because we have both inline and error summary
+                    screen.getByText('There is 1 error on this page')
+                ).toBeInTheDocument()
                 expect(
                     screen.getAllByText('You must select yes or no')
                 ).toHaveLength(2)
@@ -1191,6 +1191,7 @@ describe('RateDetailsV2', () => {
       })
 
       it('when rate previously submitted question is answered with YES', async () => {
+
         const contractID = 'test-abc-123'
         const {user} = renderWithProviders(
             <Routes>
@@ -1217,7 +1218,7 @@ describe('RateDetailsV2', () => {
                 featureFlags: {
                     'link-rates': true,
                     'rate-edit-unlock': false,
-                },
+                }
             }
         )
 
@@ -1240,11 +1241,14 @@ describe('RateDetailsV2', () => {
        expect(screen.getByRole('link', {
             name: 'You must select a rate certification',
         })).toBeInTheDocument()
+
         await user.click(screen.getByRole('link', {
             name: 'You must select a rate certification',
         }))
-        // this isnt working but in the app it works
-        // expect(screen.getByRole('combobox', {name: /linked rate/})).toHaveFocus()
+
+        expect(screen.getByRole('combobox', {name: /linked rate/})).toBeInTheDocument()
+        expect(screen.getByRole('combobox', {name: /linked rate/})).toHaveFocus()
+
       })
 
       it('when rate previously submitted question is answered with NO', async () => {

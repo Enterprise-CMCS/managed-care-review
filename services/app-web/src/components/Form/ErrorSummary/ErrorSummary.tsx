@@ -16,7 +16,8 @@ const ErrorSummaryMessage = ({
 
     // Treat keys that begin with # as ids - this is used with react-select Select-  a combobox component
     if (errorKey.startsWith('#')) {
-        fieldSelector = `[id="${errorKey}"]`
+        const id = errorKey.substring(1)
+        fieldSelector = `[id="${id}"]`
         href = errorKey
 
         // Otherwise, assume that keys correspond to name attributes and ids
@@ -33,7 +34,7 @@ const ErrorSummaryMessage = ({
             onClick={(event) => {
                 const fieldElement: HTMLElement | null =
                     document.querySelector(fieldSelector)
-
+                console.log('fieldElement',fieldElement, fieldSelector)
                 if (fieldElement) {
                     event.preventDefault()
                     fieldElement.focus()

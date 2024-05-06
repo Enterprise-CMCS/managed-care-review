@@ -27,14 +27,14 @@ export const LinkYourRates = ({
     const { getKey } = useS3()
 
     const showFieldErrors = (
-        fieldName: 'ratePreviouslySubmitted' | 'linkedRateDropdown' | 'rateCertificationName'
+        fieldName: 'ratePreviouslySubmitted' | 'linkRateSelect' | 'rateCertificationName'
     ): string | undefined => {
         if (!shouldValidate) return undefined
         return getIn(errors, `${fieldNamePrefix}.${fieldName}`)
     }
 
     return (
-        <FormGroup data-testid="link-your-rates" error={Boolean(showFieldErrors('ratePreviouslySubmitted') || Boolean(showFieldErrors('linkedRateDropdown')))}>
+        <FormGroup data-testid="link-your-rates" error={Boolean(showFieldErrors('ratePreviouslySubmitted') || Boolean(showFieldErrors('linkRateSelect')))}>
             <Fieldset
                 role="radiogroup"
                 className={styles.radioGroup}
@@ -77,19 +77,19 @@ export const LinkYourRates = ({
             {getIn(values, `${fieldNamePrefix}.ratePreviouslySubmitted`) ===
                 'YES' && (
                 <>
-                    <Label htmlFor={`${fieldNamePrefix}.linkedRateDropdown`}>
+                    <Label htmlFor={`${fieldNamePrefix}.linkRateSelect`}>
                         Which rate certification was it?
                     </Label>
                     <span className={styles.requiredOptionalText}>
                         Required
                     </span>
                     <PoliteErrorMessage>
-                    {showFieldErrors('linkedRateDropdown')}
+                    {showFieldErrors('linkRateSelect')}
                  </PoliteErrorMessage>
                     <LinkRateSelect
                         key={`rateOptions-${index}`}
-                        inputId={`${fieldNamePrefix}.linkedRateDropdown`}
-                        name={`${fieldNamePrefix}.linkedRateDropdown`}
+                        inputId={`${fieldNamePrefix}.linkRateSelect`}
+                        name={`${fieldNamePrefix}.linkRateSelect`}
                         initialValue={getIn(values, `${fieldNamePrefix}.id`)}
                         autofill={autofill}
                     />

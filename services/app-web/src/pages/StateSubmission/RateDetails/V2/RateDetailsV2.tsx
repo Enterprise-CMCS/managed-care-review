@@ -116,7 +116,7 @@ const RateDetailsV2 = ({
 
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
-    console.log('HERE')
+
     // Multi-rates state management
     const [focusNewRate, setFocusNewRate] = React.useState(false)
     const newRateNameRef = React.useRef<HTMLElement | null>(null)
@@ -318,7 +318,7 @@ const RateDetailsV2 = ({
                     if (typeof value === 'string') {
                         // select dropdown component error messages needs a # proceeding the key name because this is the only way to be able to link to react-select based components. See comments in ErrorSummaryMessage component.
                         const errorKey =
-                            field === 'rateProgramIDs' || field === 'linkedRateDropdown'
+                            field === 'rateProgramIDs' || field === 'linkRateSelect'
                                 ? `#rateForms.${index}.${field}`
                                 : `rateForms.${index}.${field}`
                         errorObject[errorKey] = value
@@ -369,7 +369,7 @@ const RateDetailsV2 = ({
     }
 
     const fieldNamePrefix = (idx: number) => `rateForms.${idx}`
-    console.log('HERE')
+
     return (
         <>
             <div className={styles.stepIndicator}>
