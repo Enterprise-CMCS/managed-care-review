@@ -125,7 +125,7 @@
 
 .removeContactBtn {
     margin-top: uswds.units(3);
-    @include uswds.u-text('secondary');
+    color: custom.$mcr-error-base;
 }
 
 .capitationLegend {
