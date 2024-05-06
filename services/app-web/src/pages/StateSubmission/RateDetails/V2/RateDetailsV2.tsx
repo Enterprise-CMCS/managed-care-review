@@ -388,7 +388,7 @@ const RateDetailsV2 = ({
                             fetchRateData?.fetchRate.rate.draftRevision
                                 ?.unlockInfo
                         }
-                        showPageErrorMessage={showAPIErrorBanner} // TODO WHEN WE IMPLEMENT UDPATE API -  FIGURE OUT ERROR BANNER FOR BOTH MULTI AND STANDALONE USE CASE
+                        showPageErrorMessage={showAPIErrorBanner}
                     />
                 )}
             </div>

@@ -1,6 +1,6 @@
 import { screen, waitFor } from '@testing-library/react'
 
-import { renderWithProviders } from '../../testHelpers'
+import { renderWithProviders, updateDateRange } from '../../testHelpers'
 import { RateEdit } from './RateEdit'
 import {
     fetchCurrentUserMock,
@@ -71,6 +71,7 @@ describe('RateEdit', () => {
                 },
                 featureFlags: {
                     'rate-edit-unlock': true,
+                    'link-rates': true
                 },
             })
 
@@ -82,18 +83,22 @@ describe('RateEdit', () => {
                 )
             ).not.toBeInTheDocument()
 
-            // do nothing and try to continue to trigger validations
+            // delete some fields so we trigger validations
+            const startDateInput = screen.getAllByLabelText('Start date')
+            const endDateInput = screen.getAllByLabelText('End date')
+            await updateDateRange({
+                start: { elements: startDateInput, date: 'abc' },
+                end: { elements: endDateInput, date: 'abc' },
+            })
+        await user.click(screen.getByRole('button', { name: 'Remove rate-document.pdf document' }))
+        screen.debug()
          await user.click(screen.getByRole('button', {
             name: 'Submit',
         }))
 
-        // check that general form errors appear both in summary and inline
         await screen.findByTestId('error-summary')
-        expect(screen.getAllByText('You must upload a rate certification')).toHaveLength(2)
-        expect(screen.getAllByText('You must select a program')).toHaveLength(2)
-        expect(screen.getAllByText('You must choose a rate certification type')).toHaveLength(2)
-        expect(screen.getAllByText("You must select whether you're certifying rates or rate ranges")).toHaveLength(2)
-        expect(screen.getAllByText('You must select an actuarial firm')).toHaveLength(2)
+        expect(screen.getAllByText('The end date must be in MM/DD/YYYY format')).toHaveLength(1) // we show only start date error messages inline if both fields have errors, see RateDatesErrorMessage
+        expect(screen.getAllByText('The start date must be in MM/DD/YYYY format')).toHaveLength(2)
         // check that linked rates errors do not appear
         expect(screen.queryAllByText('You must select a rate certification')).toHaveLength(0)
         })

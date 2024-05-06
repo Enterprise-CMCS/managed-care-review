@@ -34,8 +34,8 @@ const ErrorSummaryMessage = ({
             onClick={(event) => {
                 const fieldElement: HTMLElement | null =
                     document.querySelector(fieldSelector)
-                console.log('fieldElement',fieldElement, fieldSelector)
-                if (fieldElement) {
+
+                    if (fieldElement) {
                     event.preventDefault()
                     fieldElement.focus()
                 }

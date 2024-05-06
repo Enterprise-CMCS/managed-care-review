@@ -5,7 +5,6 @@ import {
     IndexRatesQuery,
     Rate,
     RateRevision,
-    SubmitRateMutation,
 } from '../../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
 import { draftRateDataMock, rateDataMock } from './rateDataMock'
