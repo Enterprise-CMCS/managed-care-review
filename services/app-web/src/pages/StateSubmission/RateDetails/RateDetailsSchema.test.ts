@@ -1,9 +1,9 @@
 import { RateDetailsFormSchema } from "./RateDetailsSchema"
 
 describe('RateDetailsSchema', () => {
-    
+
     it('checks child rates', async () => {
-        
+
         const badRateRev = {
             rateForms: [
                 {
@@ -26,7 +26,7 @@ describe('RateDetailsSchema', () => {
     })
 
     it('checks unspecified rates', async () => {
-        
+
         const badRateRev = {
             rateForms: [
                 {
@@ -48,7 +48,7 @@ describe('RateDetailsSchema', () => {
     })
 
     it('checks empty linked rates', async () => {
-        
+
         const badRateRev = {
             rateForms: [
                 {

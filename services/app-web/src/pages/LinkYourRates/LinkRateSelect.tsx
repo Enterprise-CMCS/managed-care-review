@@ -155,22 +155,22 @@ export const LinkRateSelect = ({
             }
             isSearchable
             maxMenuHeight={400}
-            aria-label="linked rates (required)"
+            aria-label="linked rate (required)"
             ariaLiveMessages={{
                 onFocus,
             }}
             isClearable
             noOptionsMessage={() => noOptionsMessage()}
             classNamePrefix="select"
-            id={`${name}.linkRateSelect`}
-            inputId=""
+            id={`${name}-parentDiv`}
             placeholder={
                 loading ? 'Loading rate certifications...' : 'Select...'
             }
             loadingMessage={() => 'Loading rate certifications...'}
-            name={`${name}.linkRateSelect`}
+            name={name}
             filterOption={filterOptions}
             {...selectProps}
+            inputId={name}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onChange={onInputChange as any} // TODO see why the types definitions are messed up for react-select "single" (not multi) onChange - may need to upgrade dep if this bug was fixed
         />
