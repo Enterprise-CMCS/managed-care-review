@@ -79,7 +79,10 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate, pare
         'rateProgramIDs', 'certifyingActuaryContacts', 'addtlActuaryContacts',
         'actuaryCommunicationPreference']
     rateForm && Object.entries(rateForm).forEach(([field, value]) => {
-        if (fillableFields.includes(field) && Array.isArray(value) && value.length > 0 || fillableFields.includes(field) && value && !Array.isArray(value)) {
+        if (
+            (fillableFields.includes(field) && Array.isArray(value) && value.length > 0) ||
+            (fillableFields.includes(field) && value && !Array.isArray(value))
+        ) {
             isFilledIn = true
         }
     })
