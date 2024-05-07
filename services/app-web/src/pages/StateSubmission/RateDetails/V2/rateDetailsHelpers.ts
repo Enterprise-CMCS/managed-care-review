@@ -69,6 +69,23 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate, pare
     const handleAsLinkedRate = rate && rate.parentContractID !== parentContractID // TODO: Make this a more sophisticated check for child-rates
     const rateRev = handleAsLinkedRate ? rate?.revisions[0] : rate?.draftRevision
     const rateForm = rateRev?.formData
+
+    // isFilledIn and fillableFields are used for determining if the rateForm 
+    // should be saved in the case of the yes/no question for was this rate included in another submission
+    // fillableFields includes only fields that aren't auto populated on initial yes/no selection, like id and rateName
+    let isFilledIn = false
+    const fillableFields = ['rateCapitationType', 'rateDocuments', 'supportingDocuments', 'rateDateStart',
+        'rateDateEnd', 'rateDateCertified', 'amendmentEffectiveDateStart', 'amendmentEffectiveDateEnd',
+        'rateProgramIDs', 'certifyingActuaryContacts', 'addtlActuaryContacts',
+        'actuaryCommunicationPreference']
+    rateForm && Object.entries(rateForm).forEach(([field, value]) => {
+        if (
+            (fillableFields.includes(field) && Array.isArray(value) && value.length > 0) ||
+            (fillableFields.includes(field) && value && !Array.isArray(value))
+        ) {
+            isFilledIn = true
+        }
+    })
     return {
         id: rate?.id,
         status: rate?.status,
@@ -101,7 +118,7 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate, pare
             rateForm?.actuaryCommunicationPreference ?? undefined,
         packagesWithSharedRateCerts:
             rateForm?.packagesWithSharedRateCerts ?? [],
-        ratePreviouslySubmitted: handleAsLinkedRate? 'YES' : rateForm ? 'NO' : undefined,
+        ratePreviouslySubmitted: handleAsLinkedRate? 'YES' : isFilledIn ? 'NO' : undefined,
         initiallySubmittedAt: rate?.initiallySubmittedAt,
         linkRateSelect: handleAsLinkedRate && rate?.id ? 'true' : undefined
     }
