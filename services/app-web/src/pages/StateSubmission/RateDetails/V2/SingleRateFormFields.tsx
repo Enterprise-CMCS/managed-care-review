@@ -536,9 +536,10 @@ export const SingleRateFormFields = ({
                                         </div>
                                     )
                                 )}
-                            <button
+                            <Button
                                 type="button"
-                                className={`usa-button usa-button--outline ${styles.addRateBtn}`}
+                                outline
+                                className={styles.addRateBtn}
                                 onClick={() => {
                                     push(emptyActuaryContact)
                                     setFocusNewActuaryContact(true)
@@ -546,7 +547,7 @@ export const SingleRateFormFields = ({
                                 ref={newActuaryContactButtonRef}
                             >
                                 Add a certifying actuary
-                            </button>
+                            </Button>
                         </FormGroup>
                     )}
                 </FieldArray>
