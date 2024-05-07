@@ -109,10 +109,13 @@ const RateDetailsV2 = ({
 
     // Form validation
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const rateDetailsFormSchema = RateDetailsFormSchema({
-        'rate-edit-unlock': useEditUnlockRate,
-        'link-rates': useLinkedRates,
-    }, !displayAsStandaloneRate)
+    const rateDetailsFormSchema = RateDetailsFormSchema(
+        {
+            'rate-edit-unlock': useEditUnlockRate,
+            'link-rates': useLinkedRates,
+        },
+        !displayAsStandaloneRate
+    )
 
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
@@ -318,7 +321,8 @@ const RateDetailsV2 = ({
                     if (typeof value === 'string') {
                         // select dropdown component error messages needs a # proceeding the key name because this is the only way to be able to link to react-select based components. See comments in ErrorSummaryMessage component.
                         const errorKey =
-                            field === 'rateProgramIDs' || field === 'linkRateSelect'
+                            field === 'rateProgramIDs' ||
+                            field === 'linkRateSelect'
                                 ? `#rateForms.${index}.${field}`
                                 : `rateForms.${index}.${field}`
                         errorObject[errorKey] = value
@@ -478,11 +482,14 @@ const RateDetailsV2 = ({
                                                                                 rateForm
                                                                             )
                                                                         }}
-                                                                        shouldValidate={shouldValidate}
+                                                                        shouldValidate={
+                                                                            shouldValidate
+                                                                        }
                                                                     />
                                                                 )}
-                                                                {!displayAsStandaloneRate && rateForm.ratePreviouslySubmitted  ===
-                                                                    'YES' &&
+                                                                {!displayAsStandaloneRate &&
+                                                                    rateForm.ratePreviouslySubmitted ===
+                                                                        'YES' &&
                                                                     rateForm.id && (
                                                                         <LinkedRateSummary
                                                                             rateForm={
@@ -491,8 +498,9 @@ const RateDetailsV2 = ({
                                                                         />
                                                                     )}
 
-                                                                {(displayAsStandaloneRate || rateForm.ratePreviouslySubmitted ===
-                                                                    'NO') &&  (
+                                                                {(displayAsStandaloneRate ||
+                                                                    rateForm.ratePreviouslySubmitted ===
+                                                                        'NO') && (
                                                                     <SingleRateFormFields
                                                                         rateForm={
                                                                             rateForm
@@ -535,31 +543,38 @@ const RateDetailsV2 = ({
                                                         </SectionCard>
                                                     )
                                                 )}
-                                                {!displayAsStandaloneRate && <SectionCard>
-                                                    <h3>
-                                                        Additional rate
-                                                        certification
-                                                    </h3>
-                                                    <button
-                                                        type="button"
-                                                        className={`usa-button usa-button--outline ${styles.addRateBtn}`}
-                                                        onClick={() => {
-                                                            const newRate =
-                                                                convertGQLRateToRateForm(
-                                                                    getKey
-                                                                ) // empty rate
+                                                {!displayAsStandaloneRate && (
+                                                    <SectionCard>
+                                                        <h3>
+                                                            Additional rate
+                                                            certification
+                                                        </h3>
+                                                        <Button
+                                                            type="button"
+                                                            outline
+                                                            className={
+                                                                styles.addRateBtn
+                                                            }
+                                                            onClick={() => {
+                                                                const newRate =
+                                                                    convertGQLRateToRateForm(
+                                                                        getKey
+                                                                    ) // empty rate
 
-                                                            push(newRate)
-                                                            setFocusNewRate(
-                                                                true
-                                                            )
-                                                        }}
-                                                        ref={newRateButtonRef}
-                                                    >
-                                                        Add another rate
-                                                        certification
-                                                    </button>
-                                                </SectionCard>}
+                                                                push(newRate)
+                                                                setFocusNewRate(
+                                                                    true
+                                                                )
+                                                            }}
+                                                            ref={
+                                                                newRateButtonRef
+                                                            }
+                                                        >
+                                                            Add another rate
+                                                            certification
+                                                        </Button>
+                                                    </SectionCard>
+                                                )}
                                             </>
                                         )}
                                     </FieldArray>

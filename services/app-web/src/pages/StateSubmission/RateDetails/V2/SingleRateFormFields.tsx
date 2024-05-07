@@ -538,7 +538,8 @@ export const SingleRateFormFields = ({
                                 )}
                             <Button
                                 type="button"
-                                unstyled
+                                outline
+                                className={styles.addRateBtn}
                                 onClick={() => {
                                     push(emptyActuaryContact)
                                     setFocusNewActuaryContact(true)
