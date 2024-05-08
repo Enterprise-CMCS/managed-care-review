@@ -1,5 +1,10 @@
 import React from 'react'
-import Select, { ActionMeta, AriaOnFocus, Props } from 'react-select'
+import Select, {
+    ActionMeta,
+    AriaOnFocus,
+    Props,
+    FormatOptionLabelMeta,
+} from 'react-select'
 import styles from '../../components/Select/RateSelect/RateSelect.module.scss'
 import { StateUser, useIndexRatesQuery } from '../../gen/gqlClient'
 import { useAuth } from '../../contexts/AuthContext'
@@ -15,9 +20,14 @@ import { useFormikContext } from 'formik'
 
 export interface LinkRateOptionType {
     readonly value: string
-    readonly label: React.ReactElement
+    readonly label: string
     readonly isFixed?: boolean
     readonly isDisabled?: boolean
+    readonly rateCertificationName: string
+    readonly rateProgramIDs: string
+    readonly rateDateStart: string
+    readonly rateDateEnd: string
+    readonly rateDateCertified: string
 }
 
 export type LinkRateSelectPropType = {
@@ -52,32 +62,20 @@ export const LinkRateSelect = ({
         const revision = rate.revisions[0]
         return {
             value: rate.id,
-            label: (
-                <>
-                    <strong>{revision.formData.rateCertificationName}</strong>
-                    <div style={{ lineHeight: '50%', fontSize: '14px' }}>
-                        <p>
-                            Programs:&nbsp;
-                            {programNames(
-                                statePrograms,
-                                revision.formData.rateProgramIDs
-                            ).join(', ')}
-                        </p>
-                        <p>
-                            Rating period:&nbsp;
-                            {formatCalendarDate(
-                                revision.formData.rateDateStart
-                            )}
-                            -{formatCalendarDate(revision.formData.rateDateEnd)}
-                        </p>
-                        <p>
-                            Certification date:&nbsp;
-                            {formatCalendarDate(
-                                revision.formData.rateDateCertified
-                            )}
-                        </p>
-                    </div>
-                </>
+            label:
+                revision.formData.rateCertificationName ??
+                'Unknown rate certification',
+            rateCertificationName:
+                revision.formData.rateCertificationName ??
+                'Unknown rate certification',
+            rateProgramIDs: programNames(
+                statePrograms,
+                revision.formData.rateProgramIDs
+            ).join(', '),
+            rateDateStart: formatCalendarDate(revision.formData.rateDateStart),
+            rateDateEnd: formatCalendarDate(revision.formData.rateDateEnd),
+            rateDateCertified: formatCalendarDate(
+                revision.formData.rateDateCertified
             ),
         }
     })
@@ -134,10 +132,32 @@ export const LinkRateSelect = ({
 
     //Need this to make the label searchable since the rate name is buried in a react element
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const filterOptions = ({ label }: any, input: string) =>
-        label.props.children[0].props.children
+    const filterOptions = (value: any, input: string) =>
+        value.data.rateCertificationName
             ?.toLowerCase()
             .includes(input.toLowerCase())
+
+    const formatOptionLabel = (
+        data: LinkRateOptionType,
+        optionMeta: FormatOptionLabelMeta<LinkRateOptionType>
+    ) => {
+        if (optionMeta.context === 'menu') {
+            return (
+                <>
+                    <strong>{data.rateCertificationName}</strong>
+                    <div style={{ lineHeight: '50%' }}>
+                        <p>Programs: {data.rateProgramIDs}</p>
+                        <p>
+                            Rating period: {data.rateDateStart}-
+                            {data.rateDateEnd}
+                        </p>
+                        <p>Certification date: {data.rateDateCertified}</p>
+                    </div>
+                </>
+            )
+        }
+        return <div>{data.rateCertificationName}</div>
+    }
 
     //We track rates that have already been selected to remove them from the dropdown
     const selectedRates = values.rateForms.map((rate) => rate.id && rate.id)
@@ -153,6 +173,7 @@ export const LinkRateSelect = ({
                           (rate) => !selectedRates.includes(rate.value)
                       )
             }
+            formatOptionLabel={formatOptionLabel}
             isSearchable
             maxMenuHeight={400}
             aria-label="linked rate (required)"
