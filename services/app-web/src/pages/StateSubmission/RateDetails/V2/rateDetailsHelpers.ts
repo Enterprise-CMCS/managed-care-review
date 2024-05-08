@@ -133,5 +133,6 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate, pare
 export {
     convertGQLRateToRateForm,
     convertRateFormToGQLRateFormData,
-    generateUpdatedRates
+    generateUpdatedRates,
+    isRatePartiallyFilled
 }
