@@ -7,6 +7,7 @@ import {
     formatFormDateForGQL,
 } from '../../../../formHelpers/formatters'
 import {
+    ActuaryContact,
     Rate,
     RateFormData,
     UpdateContractRateInput,
@@ -62,6 +63,22 @@ const convertRateFormToGQLRateFormData = (
         packagesWithSharedRateCerts: rateForm.packagesWithSharedRateCerts,
     }
 }
+
+const isRatePartiallyFilled = (rate: RateFormData): boolean => {
+    const hasActuaryContacts = (actuaries: ActuaryContact[]): boolean => actuaries.some(actuary => (
+            actuary.id || actuary.name || actuary.titleRole || actuary.actuarialFirm || actuary.email
+        ))
+
+    return Boolean(rate.rateDocuments.length ||
+        rate.supportingDocuments.length ||
+        rate.rateProgramIDs.length ||
+        rate.rateType ||
+        rate.rateCapitationType ||
+        hasActuaryContacts(rate.certifyingActuaryContacts) ||
+        hasActuaryContacts(rate.addtlActuaryContacts) ||
+        rate.actuaryCommunicationPreference)
+}
+
 // Convert from GQL Rate to FormikRateForm object used in the form
 // if rate is not passed in, return an empty RateForm // we need to pass in the  s3 handler because 3 urls generated client-side
 // useLatestSubmission means to pull the latest submitted info rather than the draft info
@@ -70,22 +87,11 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate, pare
     const rateRev = handleAsLinkedRate ? rate?.revisions[0] : rate?.draftRevision
     const rateForm = rateRev?.formData
 
-    // isFilledIn and fillableFields are used for determining if the rateForm 
+    // isFilledIn and fillableFields are used for determining if the rateForm
     // should be saved in the case of the yes/no question for was this rate included in another submission
     // fillableFields includes only fields that aren't auto populated on initial yes/no selection, like id and rateName
-    let isFilledIn = false
-    const fillableFields = ['rateCapitationType', 'rateDocuments', 'supportingDocuments', 'rateDateStart',
-        'rateDateEnd', 'rateDateCertified', 'amendmentEffectiveDateStart', 'amendmentEffectiveDateEnd',
-        'rateProgramIDs', 'certifyingActuaryContacts', 'addtlActuaryContacts',
-        'actuaryCommunicationPreference']
-    rateForm && Object.entries(rateForm).forEach(([field, value]) => {
-        if (
-            (fillableFields.includes(field) && Array.isArray(value) && value.length > 0) ||
-            (fillableFields.includes(field) && value && !Array.isArray(value))
-        ) {
-            isFilledIn = true
-        }
-    })
+    const isFilledIn = rateForm && isRatePartiallyFilled(rateForm)
+
     return {
         id: rate?.id,
         status: rate?.status,
