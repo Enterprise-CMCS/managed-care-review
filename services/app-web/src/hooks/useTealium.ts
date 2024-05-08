@@ -111,11 +111,13 @@ const useTealium = (): {
             src: `https://tags.tiqcdn.com/utag/cmsgov/${tealiumProfile}/${tealiumEnv}/utag.sync.js`,
             id: 'tealium-load-tags-sync',
         })
-        document.head.appendChild(initializeTagManagerSnippet)
+        if(document.getElementById(initializeTagManagerSnippet.id) === null){
+            document.head.appendChild(initializeTagManagerSnippet)
+        }
 
         // Load utag.js - Add to body element- ASYNC load inline script
         const inlineScript =
-            document.createTextNode(`(function (t, e, a, l, i, u, m) {
+            `(function (t, e, a, l, i, u, m) {
             t = 'cmsgov/${tealiumProfile}'
             e = '${tealiumEnv}'
             a = '/' + t + '/' + e + '/utag.js'
@@ -128,16 +130,17 @@ const useTealium = (): {
             m.async = true
             l = i.getElementsByTagName(u)[0]
             l.parentNode.insertBefore(m, l)
-        })()`)
+        })()`
 
         const loadTagsSnippet = createScript({
             src: '',
-            useInlineScriptNotSrc: true,
+            inlineScriptAsString: inlineScript,
             id: 'tealium-load-tags-async',
         })
-        loadTagsSnippet.appendChild(inlineScript)
 
-        document.body.appendChild(loadTagsSnippet)
+        if(document.getElementById(loadTagsSnippet.id) === null) {
+            document.body.appendChild(loadTagsSnippet)
+        }
         return () => {
             document.head.removeChild(initializeTagManagerSnippet)
         }
