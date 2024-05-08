@@ -87,9 +87,9 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate, pare
     const rateRev = handleAsLinkedRate ? rate?.revisions[0] : rate?.draftRevision
     const rateForm = rateRev?.formData
 
-    // isFilledIn and fillableFields are used for determining if the rateForm
-    // should be saved in the case of the yes/no question for was this rate included in another submission
-    // fillableFields includes only fields that aren't auto populated on initial yes/no selection, like id and rateName
+    // isFilledIn is used for determining if the rateForm should be saved in the case of the yes/no question for was
+    // this rate included in another submission fillable Fields includes only fields that aren't auto populated on
+    // initial yes/no selection, like id and rateName
     const isFilledIn = rateForm && isRatePartiallyFilled(rateForm)
 
     return {
