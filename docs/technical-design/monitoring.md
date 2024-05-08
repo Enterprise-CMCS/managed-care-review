@@ -27,6 +27,3 @@ We export all monitoring and peformance data to New Relic. In order to access ou
 ### Technical details
 - New Relic browser monitoring is currently set up in `App.tsx` via inline script. More about this approach in the [instrumentation for browser monitoring](https://docs.newrelic.com/docs/browser/new-relic-browser/page-load-timing-resources/instrumentation-browser-monitoring/).
 
-## Related Documentation
-- Often we have how tos that relate to other how tos or other documentation.
-- They can be listed here.
