@@ -4,6 +4,8 @@ import Select, {
     AriaOnFocus,
     Props,
     FormatOptionLabelMeta,
+    SingleValue,
+    createFilter,
 } from 'react-select'
 import styles from '../../components/Select/RateSelect/RateSelect.module.scss'
 import { StateUser, useIndexRatesQuery } from '../../gen/gqlClient'
@@ -41,7 +43,7 @@ export const LinkRateSelect = ({
     initialValue,
     autofill,
     ...selectProps
-}: LinkRateSelectPropType & Props<LinkRateOptionType, true>) => {
+}: LinkRateSelectPropType & Props<LinkRateOptionType, false>) => {
     const { values }: { values: RateDetailFormConfig } = useFormikContext()
     const { data, loading, error } = useIndexRatesQuery()
     const { getKey } = useS3()
@@ -106,10 +108,10 @@ export const LinkRateSelect = ({
     }
 
     const onInputChange = (
-        newValue: LinkRateOptionType,
+        newValue: SingleValue<LinkRateOptionType>,
         { action }: ActionMeta<LinkRateOptionType>
     ) => {
-        if (action === 'select-option') {
+        if (action === 'select-option' && newValue) {
             const linkedRateID = newValue.value
             const linkedRate = rates.find((rate) => rate.id === linkedRateID)
             const linkedRateForm: FormikRateForm = convertGQLRateToRateForm(
@@ -129,13 +131,6 @@ export const LinkRateSelect = ({
             autofill(emptyRateForm)
         }
     }
-
-    //Need this to make the label searchable since the rate name is buried in a react element
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const filterOptions = (value: any, input: string) =>
-        value.data.rateCertificationName
-            ?.toLowerCase()
-            .includes(input.toLowerCase())
 
     const formatOptionLabel = (
         data: LinkRateOptionType,
@@ -189,11 +184,14 @@ export const LinkRateSelect = ({
             }
             loadingMessage={() => 'Loading rate certifications...'}
             name={name}
-            filterOption={filterOptions}
+            filterOption={createFilter({
+                ignoreCase: true,
+                trim: true,
+                matchFrom: 'any' as const,
+            })}
             {...selectProps}
             inputId={name}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onChange={onInputChange as any} // TODO see why the types definitions are messed up for react-select "single" (not multi) onChange - may need to upgrade dep if this bug was fixed
+            onChange={onInputChange}
         />
     )
 }
