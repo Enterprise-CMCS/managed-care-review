@@ -1,5 +1,6 @@
 import { FormikRateForm } from "./RateDetailsV2"
-import { convertGQLRateToRateForm, generateUpdatedRates } from "./rateDetailsHelpers"
+import { convertGQLRateToRateForm, generateUpdatedRates, isRatePartiallyFilled, convertRateFormToGQLRateFormData } from "./rateDetailsHelpers"
+import {RateFormData} from '../../../../gen/gqlClient';
 
 describe('generateUpdatedRates', () => {
     const emptyRateForm = () => convertGQLRateToRateForm(jest.fn())
@@ -67,5 +68,99 @@ describe('generateUpdatedRates', () => {
         })
         }
     )
+})
 
+describe('isRatePartiallyFilled', () => {
+    const testCases = [
+        {
+            testValue: {
+                rateDocuments: [],
+                supportingDocuments: [],
+                rateProgramIDs: [],
+                certifyingActuaryContacts: [],
+                addtlActuaryContacts: []
+            },
+            testName: 'empty rate',
+            expectedResult: false,
+        },
+        {
+            testValue: {
+                rateDocuments: [],
+                supportingDocuments: [],
+                rateProgramIDs: [],
+                certifyingActuaryContacts: [
+                    {
+                        name: '',
+                        titleRole: '',
+                        email: '',
+                        actuarialFirm: undefined,
+                        actuarialFirmOther: '',
+                    }
+                ],
+                addtlActuaryContacts: []
+            } ,
+            testName: 'there is a certifying actuary with empty values',
+            expectedResult: false,
+        },
+        {
+            testValue: {
+                rateDocuments: [],
+                supportingDocuments: [],
+                rateProgramIDs: [],
+                certifyingActuaryContacts: [
+                    {
+                        name: 'Bob'
+                    }
+                ],
+                addtlActuaryContacts: []
+            },
+            testName: 'there is a certifying actuary',
+            expectedResult: true,
+        },
+        {
+            testValue: {
+                rateDocuments: [],
+                supportingDocuments: [],
+                rateProgramIDs: [],
+                certifyingActuaryContacts: [],
+                addtlActuaryContacts: [
+                    {
+                        actuarialFirm: 'OTHER'
+                    }
+                ]
+            },
+            testName: 'there is an additional actuary',
+            expectedResult: true,
+        },
+        {
+            testValue: {
+                rateDocuments: [],
+                supportingDocuments: [],
+                rateProgramIDs: [],
+                certifyingActuaryContacts: [],
+                addtlActuaryContacts: [],
+                rateType: 'NEW'
+            },
+            testName: 'rate type is filled in',
+            expectedResult: true,
+        },
+        {
+            testValue: {
+                rateDocuments: [],
+                supportingDocuments: [],
+                rateProgramIDs: ['test-program'],
+                certifyingActuaryContacts: [],
+                addtlActuaryContacts: [],
+            },
+            testName: 'rate programs is filled in',
+            expectedResult: true,
+        },
+    ]
+
+    test.each(testCases)(
+        'Returns correct boolean: $testName',
+        ({ testValue, expectedResult }) => {
+            expect(isRatePartiallyFilled(testValue as unknown as RateFormData)).toEqual(expectedResult)
+        }
+    )
 })
