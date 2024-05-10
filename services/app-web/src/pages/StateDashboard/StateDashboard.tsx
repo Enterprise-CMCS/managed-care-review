@@ -81,9 +81,12 @@ export const StateDashboard = (): React.ReactElement => {
                     currentSubmissionData.programIDs,
                     programs
                 ),
-                programs: programs.filter((program) =>
-                    currentSubmissionData.programIDs.includes(program.id)
-                ),
+                programs: programs.filter((program) => {
+                    return (
+                        currentSubmissionData.programIDs.includes(program.id) &&
+                        !program.isRateProgram
+                    )
+                }),
                 submittedAt: sub.initiallySubmittedAt,
                 status: sub.status,
                 updatedAt: currentSubmissionData.updatedAt,
