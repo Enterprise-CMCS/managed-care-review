@@ -13,6 +13,7 @@ query indexHealthPlanPackages {
                         id
                         name
                         fullName
+                        isRateProgram
                     }
                 }
                 status
