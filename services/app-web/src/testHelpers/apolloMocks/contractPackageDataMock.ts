@@ -1,6 +1,12 @@
 import { mockMNState } from '../../common-code/healthPlanFormDataMocks/healthPlanFormData'
-import { Contract, ContractFormData, ContractRevision, RateRevision } from '../../gen/gqlClient'
-
+import {
+    Contract,
+    ContractFormData,
+    ContractRevision,
+    RateFormData,
+    RateRevision,
+    RelatedContractRevisions
+} from '../../gen/gqlClient'
 
 function mockContractRevision(name?: string, partial?: Partial<ContractRevision>): ContractRevision {
     name = name || '1'
@@ -76,6 +82,32 @@ function mockContractRevision(name?: string, partial?: Partial<ContractRevision>
             statutoryRegulatoryAttestation: true,
             statutoryRegulatoryAttestationDescription: "everything meets regulatory attestation"
         },
+        ...partial
+    }
+}
+
+function mockRelatedContractRevision(partial?: Partial<RelatedContractRevisions>): RelatedContractRevisions {
+    return {
+        __typename: 'RelatedContractRevisions',
+        contract: {
+            id: 'test-123',
+            stateCode: 'MN',
+            stateNumber: 2
+        },
+        createdAt: new Date(),
+        formData: mockContractFormData(),
+        id: '123',
+        submitInfo: {
+            updatedAt: new Date(),
+            updatedBy: 'example@state.com',
+            updatedReason: 'contract submit'
+        },
+        unlockInfo: {
+            updatedAt: new Date(),
+            updatedBy: 'example@state.com',
+            updatedReason: 'contract unlock'
+        },
+        updatedAt: new Date(),
         ...partial
     }
 }
@@ -1059,12 +1091,60 @@ function mockContractFormData( partial?: Partial<ContractFormData>): ContractFor
     }
 }
 
+function mockRateFormData(partial?: Partial<RateFormData>): RateFormData {
+    return {
+        rateType: 'AMENDMENT',
+        rateCapitationType: 'RATE_CELL',
+        rateDocuments: [
+            {
+                s3URL: 's3://bucketname/key/rate',
+                sha256: 'fakesha',
+                name: 'rate',
+                dateAdded: new Date()
+            },
+        ],
+        supportingDocuments: [],
+        rateDateStart: new Date('2020-01-01'),
+        rateDateEnd: new Date('2021-01-01'),
+        rateDateCertified: new Date(),
+        amendmentEffectiveDateStart: new Date(),
+        amendmentEffectiveDateEnd: new Date(),
+        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+        certifyingActuaryContacts: [
+            {
+                actuarialFirm: 'DELOITTE',
+                name: 'Actuary Contact 1',
+                titleRole: 'Test Actuary Contact 1',
+                email: 'actuarycontact1@test.com',
+            },
+        ],
+        addtlActuaryContacts: [
+            {
+                actuarialFirm: 'DELOITTE',
+                name: 'Actuary Contact 1',
+                titleRole: 'Test Actuary Contact 1',
+                email: 'actuarycontact1@test.com',
+            },
+        ],
+        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        packagesWithSharedRateCerts: [
+            {
+                packageName: 'testABC1',
+                packageId: 'test-abc-1',
+            },
+        ],
+        ...partial
+    }
+}
+
 export { 
     mockContractPackageDraft, 
     mockContractPackageSubmitted, 
-    mockContractWithLinkedRateDraft, 
-    mockContractPackageUnlocked, 
-    mockContractFormData, 
+    mockContractWithLinkedRateDraft,
+    mockContractPackageUnlocked,
+    mockContractFormData,
+    mockRateFormData,
     mockContractPackageSubmittedWithRevisions,
+    mockRelatedContractRevision
 }
 
