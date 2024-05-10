@@ -192,6 +192,21 @@ const RateDetailsV2 = ({
         [ratesFromContract, fetchRateData]
     )
 
+    // Checks if the rate has been linked to another submission by looking at the number of contractRevisions.
+    const isChildRateLinked = (rateFormData: FormikRateForm): boolean => {
+        const fullRate = initialRates.find(
+            (rate) => rate.id === rateFormData.id
+        )
+        if (!fullRate || rateFormData.linkRateSelect) {
+            return false
+        } else {
+            const contractRevisions =
+                fullRate.revisions[0]?.contractRevisions ?? []
+            // If more than 1 contractRevision, then it has been linked to another submission
+            return contractRevisions.length > 1
+        }
+    }
+
     const initialRateForm: FormikRateForm[] =
         initialRates.length > 0
             ? initialRates.map((rate) =>
@@ -453,6 +468,7 @@ const RateDetailsV2 = ({
                                                     (rateForm, index = 0) => (
                                                         <SectionCard
                                                             key={index}
+                                                            data-testid={`rate-certification-${index}`}
                                                         >
                                                             <h3
                                                                 className={
@@ -463,6 +479,18 @@ const RateDetailsV2 = ({
                                                                     ? `Rate certification`
                                                                     : `Rate certification ${index + 1}`}
                                                             </h3>
+                                                            {isChildRateLinked(
+                                                                rateForm
+                                                            ) && (
+                                                                <p>
+                                                                    Changes made
+                                                                    to this rate
+                                                                    will apply
+                                                                    to all
+                                                                    associated
+                                                                    submissions.
+                                                                </p>
+                                                            )}
                                                             <Fieldset
                                                                 data-testid={`rate-certification-form`}
                                                             >
