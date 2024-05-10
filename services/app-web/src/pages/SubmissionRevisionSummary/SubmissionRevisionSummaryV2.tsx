@@ -82,8 +82,7 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
             />
         )
     }
-    console.log(contract)
-    console.log(targetPreviousSubmission)
+
     if (
         !contract || !targetPreviousSubmission || !name
     ) {
