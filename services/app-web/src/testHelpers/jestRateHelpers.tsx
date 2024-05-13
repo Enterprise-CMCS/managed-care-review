@@ -51,7 +51,7 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
     selectEvent.openMenu(combobox)
     await selectEvent.select(combobox, 'PMAP')
     expect(
-        withinTargetRateCert.getByLabelText('Remove SNBC')
+        withinTargetRateCert.getAllByLabelText('Remove SNBC')[0]
     ).toBeInTheDocument()
     expect(
         withinTargetRateCert.getByLabelText('Remove PMAP')

@@ -50,7 +50,7 @@ describe('ProgramSelect', () => {
         jest.spyOn(useStatePrograms, 'useStatePrograms').mockRestore()
     })
 
-    it('displays program options', async () => {
+    it('displays program with all options', async () => {
         renderWithProviders(
             <ProgramSelect
                 name="programSelect"
@@ -72,12 +72,43 @@ describe('ProgramSelect', () => {
         await selectEvent.openMenu(combobox)
 
         await waitFor(() => {
-            expect(screen.getByText('MSHO')).toBeInTheDocument()
-            expect(screen.getByText('SNBC')).toBeInTheDocument()
-            expect(screen.getByText('PMAP')).toBeInTheDocument()
-            expect(screen.getByText('MSC+')).toBeInTheDocument()
+            expect(screen.getAllByText('MSHO')).toHaveLength(1)
+            expect(screen.getAllByText('SNBC')).toHaveLength(2)
+            expect(screen.getAllByText('PMAP')).toHaveLength(2)
+            expect(screen.getAllByText('MSC+')).toHaveLength(1)
         })
     })
+
+    it('displays program with only contract program options', async () => {
+        renderWithProviders(
+            <ProgramSelect
+                name="programSelect"
+                programIDs={[]}
+                onChange={mockOnChange}
+                contractProgramsOnly
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            }
+        )
+        const combobox = await screen.findByRole('combobox')
+
+        await selectEvent.openMenu(combobox)
+
+        await waitFor(() => {
+            expect(screen.getAllByText('MSHO')).toHaveLength(1)
+            expect(screen.getAllByText('SNBC')).toHaveLength(1)
+            expect(screen.getAllByText('PMAP')).toHaveLength(1)
+            expect(screen.getAllByText('MSC+')).toHaveLength(1)
+        })
+    })
+
     it('can select and return programs in an array', async () => {
         renderWithProviders(
             <ProgramSelect
@@ -100,24 +131,24 @@ describe('ProgramSelect', () => {
         await selectEvent.openMenu(combobox)
 
         await waitFor(() => {
-            expect(screen.getByText('MSHO')).toBeInTheDocument()
-            expect(screen.getByText('SNBC')).toBeInTheDocument()
-            expect(screen.getByText('PMAP')).toBeInTheDocument()
-            expect(screen.getByText('MSC+')).toBeInTheDocument()
+            expect(screen.getAllByText('MSHO')).toHaveLength(1)
+            expect(screen.getAllByText('SNBC')).toHaveLength(2)
+            expect(screen.getAllByText('PMAP')).toHaveLength(2)
+            expect(screen.getAllByText('MSC+')).toHaveLength(1)
         })
 
         await selectEvent.select(combobox, 'MSHO')
         await selectEvent.openMenu(combobox)
-        await selectEvent.select(combobox, 'SNBC')
+        await selectEvent.select(combobox, 'MSC+')
 
         expect(mockOnChange.mock.calls).toHaveLength(2)
         expect(mockOnChange.mock.results[1].value).toStrictEqual([
             '3fd36500-bf2c-47bc-80e8-e7aa417184c5',
-            'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+            'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
         ])
         // in react-select, only items that are selected have a "remove item" label
-        expect(screen.getByLabelText('Remove SNBC')).toBeInTheDocument()
         expect(screen.getByLabelText('Remove MSHO')).toBeInTheDocument()
+        expect(screen.getByLabelText('Remove MSC+')).toBeInTheDocument()
     })
 
     it('can remove all selected programs', async () => {
@@ -145,10 +176,10 @@ describe('ProgramSelect', () => {
         await selectEvent.openMenu(combobox)
 
         await waitFor(() => {
-            expect(screen.getByText('MSHO')).toBeInTheDocument()
-            expect(screen.getByText('SNBC')).toBeInTheDocument()
-            expect(screen.getByText('PMAP')).toBeInTheDocument()
-            expect(screen.getByText('MSC+')).toBeInTheDocument()
+            expect(screen.getAllByText('MSHO')).toHaveLength(1)
+            expect(screen.getAllByText('SNBC')).toHaveLength(2)
+            expect(screen.getAllByText('PMAP')).toHaveLength(2)
+            expect(screen.getAllByText('MSC+')).toHaveLength(1)
         })
 
         const removeMSHO = screen.getByLabelText('Remove MSHO')
