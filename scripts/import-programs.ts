@@ -20,7 +20,6 @@ https://github.com/Enterprise-CMCS/managed-care-review/blob/main/docs/technical-
 
 import csv from 'csv-parser'
 import fs from 'fs'
-import { v4 as uuidv4 } from 'uuid'
 
 const stateNames = {
     AL: 'Alabama',
@@ -122,6 +121,11 @@ fs.createReadStream(file)
                 process.exit(1)
             }
 
+            if (!data.id) {
+                console.error('No ID set for program, make sure to set an ID in the spreadsheet', data)
+                process.exit(1)
+            }
+
             if (!states[code]) {
                 states[code] = {
                     name: stateNames[code],
@@ -131,7 +135,7 @@ fs.createReadStream(file)
             }
 
             states[code]!.programs.push({
-                id: !data.id ? uuidv4() : data.id,
+                id: data.id,
                 fullName: data.Program,
                 name: data.Nickname,
                 isRateProgram: data.IsRateProgram === 'TRUE'
