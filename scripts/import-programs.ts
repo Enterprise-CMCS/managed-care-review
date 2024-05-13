@@ -122,6 +122,11 @@ fs.createReadStream(file)
                 process.exit(1)
             }
 
+            if (!data.id) {
+                console.error('No ID set for program, make sure to set an ID in the spreadsheet', data)
+                process.exit(1)
+            }
+
             if (!states[code]) {
                 states[code] = {
                     name: stateNames[code],
