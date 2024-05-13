@@ -109,10 +109,14 @@ const RateDetailsV2 = ({
 
     // Form validation
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const rateDetailsFormSchema = RateDetailsFormSchema({
-        'rate-edit-unlock': useEditUnlockRate,
-        'link-rates': useLinkedRates,
-    })
+    const rateDetailsFormSchema = RateDetailsFormSchema(
+        {
+            'rate-edit-unlock': useEditUnlockRate,
+            'link-rates': useLinkedRates,
+        },
+        !displayAsStandaloneRate
+    )
+
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
 
@@ -148,6 +152,7 @@ const RateDetailsV2 = ({
         },
         skip: !displayAsStandaloneRate,
     })
+
     useEffect(() => {
         if (focusNewRate) {
             newRateNameRef?.current?.focus()
@@ -312,17 +317,12 @@ const RateDetailsV2 = ({
         if (rateErrors && Array.isArray(rateErrors)) {
             rateErrors.forEach((rateError, index) => {
                 if (!rateError) return
-                if (
-                    Object.keys(rateError).includes('ratePreviouslySubmitted')
-                ) {
-                    return (errorObject['ratePreviouslySubmitted'] =
-                        'You must select yes or no')
-                }
                 Object.entries(rateError).forEach(([field, value]) => {
                     if (typeof value === 'string') {
-                        //rateProgramIDs error message needs a # proceeding the key name because this is the only way to be able to link to the Select component element see comments in ErrorSummaryMessage component.
+                        // select dropdown component error messages needs a # proceeding the key name because this is the only way to be able to link to react-select based components. See comments in ErrorSummaryMessage component.
                         const errorKey =
-                            field === 'rateProgramIDs'
+                            field === 'rateProgramIDs' ||
+                            field === 'linkRateSelect'
                                 ? `#rateForms.${index}.${field}`
                                 : `rateForms.${index}.${field}`
                         errorObject[errorKey] = value
@@ -373,6 +373,7 @@ const RateDetailsV2 = ({
     }
 
     const fieldNamePrefix = (idx: number) => `rateForms.${idx}`
+
     return (
         <>
             <div className={styles.stepIndicator}>
@@ -391,7 +392,7 @@ const RateDetailsV2 = ({
                             fetchRateData?.fetchRate.rate.draftRevision
                                 ?.unlockInfo
                         }
-                        showPageErrorMessage={showAPIErrorBanner} // TODO WHEN WE IMPLEMENT UDPATE API -  FIGURE OUT ERROR BANNER FOR BOTH MULTI AND STANDALONE USE CASE
+                        showPageErrorMessage={showAPIErrorBanner}
                     />
                 )}
             </div>
@@ -481,10 +482,14 @@ const RateDetailsV2 = ({
                                                                                 rateForm
                                                                             )
                                                                         }}
+                                                                        shouldValidate={
+                                                                            shouldValidate
+                                                                        }
                                                                     />
                                                                 )}
-                                                                {rateForm.ratePreviouslySubmitted ===
-                                                                    'YES' &&
+                                                                {!displayAsStandaloneRate &&
+                                                                    rateForm.ratePreviouslySubmitted ===
+                                                                        'YES' &&
                                                                     rateForm.id && (
                                                                         <LinkedRateSummary
                                                                             rateForm={
@@ -493,8 +498,9 @@ const RateDetailsV2 = ({
                                                                         />
                                                                     )}
 
-                                                                {rateForm.ratePreviouslySubmitted ===
-                                                                    'NO' && (
+                                                                {(displayAsStandaloneRate ||
+                                                                    rateForm.ratePreviouslySubmitted ===
+                                                                        'NO') && (
                                                                     <SingleRateFormFields
                                                                         rateForm={
                                                                             rateForm
@@ -537,31 +543,35 @@ const RateDetailsV2 = ({
                                                         </SectionCard>
                                                     )
                                                 )}
-                                                <SectionCard>
-                                                    <h3>
-                                                        Additional rate
-                                                        certification
-                                                    </h3>
-                                                    <button
-                                                        type="button"
-                                                        className={`usa-button usa-button--outline ${styles.addRateBtn}`}
-                                                        onClick={() => {
-                                                            const newRate =
-                                                                convertGQLRateToRateForm(
-                                                                    getKey
-                                                                ) // empty rate
+                                                {!displayAsStandaloneRate && (
+                                                    <SectionCard>
+                                                        <h3>
+                                                            Additional rate
+                                                            certification
+                                                        </h3>
+                                                        <button
+                                                            type="button"
+                                                            className={`usa-button usa-button--outline ${styles.addRateBtn}`}
+                                                            onClick={() => {
+                                                                const newRate =
+                                                                    convertGQLRateToRateForm(
+                                                                        getKey
+                                                                    ) // empty rate
 
-                                                            push(newRate)
-                                                            setFocusNewRate(
-                                                                true
-                                                            )
-                                                        }}
-                                                        ref={newRateButtonRef}
-                                                    >
-                                                        Add another rate
-                                                        certification
-                                                    </button>
-                                                </SectionCard>
+                                                                push(newRate)
+                                                                setFocusNewRate(
+                                                                    true
+                                                                )
+                                                            }}
+                                                            ref={
+                                                                newRateButtonRef
+                                                            }
+                                                        >
+                                                            Add another rate
+                                                            certification
+                                                        </button>
+                                                    </SectionCard>
+                                                )}
                                             </>
                                         )}
                                     </FieldArray>
