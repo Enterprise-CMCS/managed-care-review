@@ -31,13 +31,13 @@ function mockMNState(): State {
             {
                 id: 'bab766a5-650e-4851-8fdf-6a420ffc41c1',
                 fullName: 'Minnesota Special Needs Basic Care',
-                name: 'SNBC',
+                name: 'SNBC Rate Program',
                 isRateProgram: true
             },
             {
                 id: '31ddd823-7c6e-46d9-bc31-e0b7d6389a43',
                 fullName: 'Prepaid Medical Assistance Program for Seniors',
-                name: 'PMAP',
+                name: 'PMAP Rate Program',
                 isRateProgram: true
             },
         ],

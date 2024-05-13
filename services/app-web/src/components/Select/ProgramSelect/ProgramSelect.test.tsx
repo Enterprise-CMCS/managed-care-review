@@ -72,10 +72,12 @@ describe('ProgramSelect', () => {
         await selectEvent.openMenu(combobox)
 
         await waitFor(() => {
-            expect(screen.getAllByText('MSHO')).toHaveLength(1)
-            expect(screen.getAllByText('SNBC')).toHaveLength(2)
-            expect(screen.getAllByText('PMAP')).toHaveLength(2)
-            expect(screen.getAllByText('MSC+')).toHaveLength(1)
+            expect(screen.getByText('MSHO')).toBeInTheDocument()
+            expect(screen.getByText('SNBC')).toBeInTheDocument()
+            expect(screen.getByText('SNBC Rate Program')).toBeInTheDocument()
+            expect(screen.getByText('PMAP')).toBeInTheDocument()
+            expect(screen.getByText('PMAP Rate Program')).toBeInTheDocument()
+            expect(screen.getByText('MSC+')).toBeInTheDocument()
         })
     })
 
@@ -102,10 +104,16 @@ describe('ProgramSelect', () => {
         await selectEvent.openMenu(combobox)
 
         await waitFor(() => {
-            expect(screen.getAllByText('MSHO')).toHaveLength(1)
-            expect(screen.getAllByText('SNBC')).toHaveLength(1)
-            expect(screen.getAllByText('PMAP')).toHaveLength(1)
-            expect(screen.getAllByText('MSC+')).toHaveLength(1)
+            expect(screen.getByText('MSHO')).toBeInTheDocument()
+            expect(screen.getByText('SNBC')).toBeInTheDocument()
+            expect(
+                screen.queryByText('SNBC Rate Program')
+            ).not.toBeInTheDocument()
+            expect(screen.getByText('PMAP')).toBeInTheDocument()
+            expect(
+                screen.queryByText('PMAP Rate Program')
+            ).not.toBeInTheDocument()
+            expect(screen.getByText('MSC+')).toBeInTheDocument()
         })
     })
 
@@ -131,10 +139,12 @@ describe('ProgramSelect', () => {
         await selectEvent.openMenu(combobox)
 
         await waitFor(() => {
-            expect(screen.getAllByText('MSHO')).toHaveLength(1)
-            expect(screen.getAllByText('SNBC')).toHaveLength(2)
-            expect(screen.getAllByText('PMAP')).toHaveLength(2)
-            expect(screen.getAllByText('MSC+')).toHaveLength(1)
+            expect(screen.getByText('MSHO')).toBeInTheDocument()
+            expect(screen.getByText('SNBC')).toBeInTheDocument()
+            expect(screen.getByText('SNBC Rate Program')).toBeInTheDocument()
+            expect(screen.getByText('PMAP')).toBeInTheDocument()
+            expect(screen.getByText('PMAP Rate Program')).toBeInTheDocument()
+            expect(screen.getByText('MSC+')).toBeInTheDocument()
         })
 
         await selectEvent.select(combobox, 'MSHO')
@@ -176,10 +186,12 @@ describe('ProgramSelect', () => {
         await selectEvent.openMenu(combobox)
 
         await waitFor(() => {
-            expect(screen.getAllByText('MSHO')).toHaveLength(1)
-            expect(screen.getAllByText('SNBC')).toHaveLength(2)
-            expect(screen.getAllByText('PMAP')).toHaveLength(2)
-            expect(screen.getAllByText('MSC+')).toHaveLength(1)
+            expect(screen.getByText('MSHO')).toBeInTheDocument()
+            expect(screen.getByText('SNBC')).toBeInTheDocument()
+            expect(screen.getByText('SNBC Rate Program')).toBeInTheDocument()
+            expect(screen.getByText('PMAP')).toBeInTheDocument()
+            expect(screen.getByText('PMAP Rate Program')).toBeInTheDocument()
+            expect(screen.getByText('MSC+')).toBeInTheDocument()
         })
 
         const removeMSHO = screen.getByLabelText('Remove MSHO')
