@@ -49,18 +49,25 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
         fetchPolicy: 'network-only',
     })
     const contract = fetchContractData?.fetchContract.contract
-    //We offset version by +1 of index, remove offset to find revision in revisions
+
+    // Offset version by +1 of index, remove offset to find target previous submission in the history list
     const revisionIndex = Number(revisionVersion) - 1
-    const name =
-        contract &&
-        contract?.packageSubmissions.length > Number(revisionVersion)
-            ? contract.packageSubmissions.reverse()[revisionIndex]
-                  .contractRevision.contractName
-            : ''
-    useEffect(() => {
-        updateHeading({
-            customHeading: name,
+
+    // Reverse revisions to get correct submission order
+    const packageSubmissions = contract? [...contract.packageSubmissions]
+        .filter((submission) => {
+            return submission.cause === 'CONTRACT_SUBMISSION'
         })
+        .reverse() : []
+    const targetPreviousSubmission = packageSubmissions[revisionIndex] && packageSubmissions[revisionIndex].__typename ? packageSubmissions[revisionIndex] : undefined
+    const name = targetPreviousSubmission?.contractRevision.contractName
+
+    useEffect(() => {
+        // make sure you do not update the page heading until we are sure the name for that previous submission exists
+        if (name) {
+            updateHeading({
+            customHeading: name,
+        })}
     }, [name, updateHeading])
 
     // Display any full page interim state resulting from the initial fetch API requests
@@ -77,26 +84,20 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
     }
 
     if (
-        !contract ||
-        contract.packageSubmissions.length <= Number(revisionVersion)
+        !contract || !targetPreviousSubmission || !name
     ) {
         return <Error404 />
     }
 
-    // Reversing revisions to get correct submission order
-    // we offset the index by one so that our indices start at 1
-    const packageSubmission = [...contract.packageSubmissions]
-        .filter((submission) => {
-            return submission.cause === 'CONTRACT_SUBMISSION'
-        })
-        .reverse()[revisionIndex]
-    const revision = packageSubmission.contractRevision
-    const rateRevisions = packageSubmission.rateRevisions
+
+    const revision = targetPreviousSubmission.contractRevision
+    const rateRevisions = targetPreviousSubmission.rateRevisions
     const contractData = revision.formData
     const statePrograms = contract.state.programs
     const submitInfo = revision.submitInfo || undefined
     const isContractActionAndRateCertification =
         contractData.submissionType === 'CONTRACT_AND_RATES'
+
 
     return (
         <div className={styles.background}>
@@ -105,7 +106,6 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
                 className={styles.container}
             >
                 <PreviousSubmissionBanner link={`/submissions/${id}`} />
-
                 <SubmissionTypeSummarySectionV2
                     contract={contract}
                     contractRev={revision}
