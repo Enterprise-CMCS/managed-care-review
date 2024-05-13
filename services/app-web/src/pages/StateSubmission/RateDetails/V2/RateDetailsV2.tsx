@@ -577,12 +577,9 @@ const RateDetailsV2 = ({
                                                             Additional rate
                                                             certification
                                                         </h3>
-                                                        <Button
+                                                        <button
                                                             type="button"
-                                                            outline
-                                                            className={
-                                                                styles.addRateBtn
-                                                            }
+                                                            className={`usa-button usa-button--outline ${styles.addRateBtn}`}
                                                             onClick={() => {
                                                                 const newRate =
                                                                     convertGQLRateToRateForm(
@@ -600,7 +597,7 @@ const RateDetailsV2 = ({
                                                         >
                                                             Add another rate
                                                             certification
-                                                        </Button>
+                                                        </button>
                                                     </SectionCard>
                                                 )}
                                             </>
