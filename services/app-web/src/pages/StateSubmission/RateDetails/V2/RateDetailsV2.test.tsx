@@ -1,4 +1,4 @@
-import { logRoles, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import { RateDetailsV2 } from './RateDetailsV2'
 
 import {
@@ -415,7 +415,6 @@ describe('RateDetailsV2', () => {
                     screen.getAllByText('You must select a rate certification')
                 ).toHaveLength(2)
             })
-
         })
 
         it('renders remove rate certification button, which removes set of rate certification fields from the form', async () => {
@@ -1133,174 +1132,215 @@ describe('RateDetailsV2', () => {
     })
 
     describe('error summary displays as expected', () => {
-      it('when rate previously submitted question is not answered', async () => {
-        const contractID = 'test-abc-123'
-        const {user} = renderWithProviders(
-            <Routes>
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
-                    element={<RateDetailsV2 type="MULTI" />}
-                />
-            </Routes>,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        fetchContractMockSuccess({
-                            contract: {
-                                id: contractID,
-                                draftRates: [] //clear out rates
-                            },
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: `/submissions/${contractID}/edit/rate-details`,
-                },
-                featureFlags: {
-                    'link-rates': true,
-                    'rate-edit-unlock': false,
-                },
-            }
-        )
-
-        await screen.findByText('Rate Details')
-        expect(
-            screen.getByText(
-                'Was this rate certification included with another submission?'
-            )
-        ).toBeInTheDocument()
-
-        // do nothing and try to continue to trigger validations
-        await user.click(screen.getByRole('button', {
-            name: 'Continue',
-        }))
-        await screen.findByTestId('error-summary')
-
-    // check that both inline and error summary validations appear for radio buttons being empty
-        expect(screen.getAllByText('You must select yes or no')).toHaveLength(2)
-
-        // check that focus travels to radio buttons when clicking error in summary
-        await user.click(screen.getByRole('link', {
-            name: 'You must select yes or no',
-        }))
-
-        expect(screen.getByLabelText(
-            'No, this rate certification was not included with any other submissions'
-        )).toHaveFocus()
-      })
-
-      it('when rate previously submitted question is answered with YES', async () => {
-
-        const contractID = 'test-abc-123'
-        const {user} = renderWithProviders(
-            <Routes>
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
-                    element={<RateDetailsV2 type="MULTI" />}
-                />
-            </Routes>,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        fetchContractMockSuccess({
-                            contract: {
-                                id: contractID,
-                                draftRates: [] //clear out rates
-                            },
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: `/submissions/${contractID}/edit/rate-details`,
-                },
-                featureFlags: {
-                    'link-rates': true,
-                    'rate-edit-unlock': false,
+        it('when rate previously submitted question is not answered', async () => {
+            const contractID = 'test-abc-123'
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    id: contractID,
+                                    draftRates: [], //clear out rates
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/${contractID}/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
                 }
-            }
-        )
+            )
 
-        await screen.findByText('Rate Details')
+            await screen.findByText('Rate Details')
+            expect(
+                screen.getByText(
+                    'Was this rate certification included with another submission?'
+                )
+            ).toBeInTheDocument()
 
-        // select yes and trigger validations
-        await user.click(screen.getByRole('radio', {
-            name: 'Yes, this rate certification is part of another submission',
-        }))
-        await screen.findByText('Which rate certification was it?')
-        await user.click(screen.getByRole('button', {
-            name: 'Continue',
-        }))
+            // do nothing and try to continue to trigger validations
+            await user.click(
+                screen.getByRole('button', {
+                    name: 'Continue',
+                })
+            )
+            await screen.findByTestId('error-summary')
 
-        // check that both inline and error summary validations appear for dropdown being empty
-        await screen.findByTestId('error-summary')
-        expect(screen.getAllByText('You must select a rate certification')).toHaveLength(2)
+            // check that both inline and error summary validations appear for radio buttons being empty
+            expect(
+                screen.getAllByText('You must select yes or no')
+            ).toHaveLength(2)
 
-        // check that focus travels to dropdown when clicking link from summary
-       expect(screen.getByRole('link', {
-            name: 'You must select a rate certification',
-        })).toBeInTheDocument()
+            // check that focus travels to radio buttons when clicking error in summary
+            await user.click(
+                screen.getByRole('link', {
+                    name: 'You must select yes or no',
+                })
+            )
 
-        await user.click(screen.getByRole('link', {
-            name: 'You must select a rate certification',
-        }))
+            expect(
+                screen.getByLabelText(
+                    'No, this rate certification was not included with any other submissions'
+                )
+            ).toHaveFocus()
+        })
 
-        expect(screen.getByRole('combobox', {name: /linked rate/})).toBeInTheDocument()
-        expect(screen.getByRole('combobox', {name: /linked rate/})).toHaveFocus()
+        it('when rate previously submitted question is answered with YES', async () => {
+            const contractID = 'test-abc-123'
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    id: contractID,
+                                    draftRates: [], //clear out rates
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/${contractID}/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
 
-      })
+            await screen.findByText('Rate Details')
 
-      it('when rate previously submitted question is answered with NO', async () => {
-        const contractID = 'test-abc-123'
-        const {user} =renderWithProviders(
-            <Routes>
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
-                    element={<RateDetailsV2 type="MULTI" />}
-                />
-            </Routes>,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        fetchContractMockSuccess({
-                            contract: {
-                                id: contractID,
-                                draftRates: [] //clear out rates
-                            },
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: `/submissions/${contractID}/edit/rate-details`,
-                },
-                featureFlags: {
-                    'link-rates': true,
-                    'rate-edit-unlock': false,
-                },
-            }
-        )
+            // select yes and trigger validations
+            await user.click(
+                screen.getByRole('radio', {
+                    name: 'Yes, this rate certification is part of another submission',
+                })
+            )
+            await screen.findByText('Which rate certification was it?')
+            await user.click(
+                screen.getByRole('button', {
+                    name: 'Continue',
+                })
+            )
 
-        await screen.findByText('Rate Details')
+            // check that both inline and error summary validations appear for dropdown being empty
+            await screen.findByTestId('error-summary')
+            expect(
+                screen.getAllByText('You must select a rate certification')
+            ).toHaveLength(2)
 
-        // select no and trigger validations
-        await user.click(screen.getByRole('radio', {
-            name: 'No, this rate certification was not included with any other submissions',
-        }))
-        await user.click(screen.getByRole('button', {
-            name: 'Continue'}))
+            // check that focus travels to dropdown when clicking link from summary
+            expect(
+                screen.getByRole('link', {
+                    name: 'You must select a rate certification',
+                })
+            ).toBeInTheDocument()
 
-        // check that general form errors appear both in summary and inline
-        await screen.findByTestId('error-summary')
-        expect(screen.getAllByText('You must upload a rate certification')).toHaveLength(2)
-        expect(screen.getAllByText('You must select a program')).toHaveLength(2)
-        expect(screen.getAllByText('You must choose a rate certification type')).toHaveLength(2)
-        expect(screen.getAllByText("You must select whether you're certifying rates or rate ranges")).toHaveLength(2)
-        expect(screen.getAllByText('You must select an actuarial firm')).toHaveLength(2)
-        // check that linked rates errors do not appear
-        expect(screen.queryAllByText('You must select a rate certification')).toHaveLength(0)
-      })
+            await user.click(
+                screen.getByRole('link', {
+                    name: 'You must select a rate certification',
+                })
+            )
+
+            expect(
+                screen.getByRole('combobox', { name: /linked rate/ })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('combobox', { name: /linked rate/ })
+            ).toHaveFocus()
+        })
+
+        it('when rate previously submitted question is answered with NO', async () => {
+            const contractID = 'test-abc-123'
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetailsV2 type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    id: contractID,
+                                    draftRates: [], //clear out rates
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/${contractID}/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+
+            await screen.findByText('Rate Details')
+
+            // select no and trigger validations
+            await user.click(
+                screen.getByRole('radio', {
+                    name: 'No, this rate certification was not included with any other submissions',
+                })
+            )
+            await user.click(
+                screen.getByRole('button', {
+                    name: 'Continue',
+                })
+            )
+
+            // check that general form errors appear both in summary and inline
+            await screen.findByTestId('error-summary')
+            expect(
+                screen.getAllByText('You must upload a rate certification')
+            ).toHaveLength(2)
+            expect(
+                screen.getAllByText(
+                    'You must indicate which rate are included in this certification'
+                )
+            ).toHaveLength(2)
+            expect(
+                screen.getAllByText('You must choose a rate certification type')
+            ).toHaveLength(2)
+            expect(
+                screen.getAllByText(
+                    "You must select whether you're certifying rates or rate ranges"
+                )
+            ).toHaveLength(2)
+            expect(
+                screen.getAllByText('You must select an actuarial firm')
+            ).toHaveLength(2)
+            // check that linked rates errors do not appear
+            expect(
+                screen.queryAllByText('You must select a rate certification')
+            ).toHaveLength(0)
+        })
     })
 
     describe('handles multiple actuary contacts', () => {
