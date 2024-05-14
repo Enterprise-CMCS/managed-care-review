@@ -1,56 +1,13 @@
 import { formatRateNameDate } from '../../../../app-web/src/common-code/dateHelpers'
-import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import type { ProgramArgType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type { RateFormEditableType } from '../../domain-models/contractAndRates'
 
 const generateRateCertificationName = (
     rateFormData: RateFormEditableType,
-    stateCode: string,
-    stateNumber: number,
-    statePrograms: ProgramArgType[]
+    stateCode: string
 ): string => {
-    const {
-        rateType,
-        rateProgramIDs,
-        amendmentEffectiveDateEnd,
-        amendmentEffectiveDateStart,
-        rateDateCertified,
-        rateDateEnd,
-        rateDateStart,
-    } = rateFormData
+    const { rateType, rateDateCertified, rateDateStart } = rateFormData
 
-    let rateName = `${packageName(
-        stateCode,
-        stateNumber,
-        rateProgramIDs ?? [],
-        statePrograms
-    )}-RATE`
-    if (rateType === 'NEW' && rateDateStart) {
-        rateName = rateName.concat(
-            '-',
-            formatRateNameDate(rateDateStart),
-            '-',
-            formatRateNameDate(rateDateEnd),
-            '-',
-            'CERTIFICATION'
-        )
-    }
-
-    if (rateType === 'AMENDMENT') {
-        rateName = rateName.concat(
-            '-',
-            formatRateNameDate(amendmentEffectiveDateStart),
-            '-',
-            formatRateNameDate(amendmentEffectiveDateEnd),
-            '-',
-            'AMENDMENT'
-        )
-    }
-
-    if (rateDateCertified) {
-        rateName = rateName.concat('-', formatRateNameDate(rateDateCertified))
-    }
-    return rateName
+    return `MCR-${stateCode.toUpperCase()}-${formatRateNameDate(rateDateStart)}-${rateType}-${formatRateNameDate(rateDateCertified)}`
 }
 
 export { generateRateCertificationName }

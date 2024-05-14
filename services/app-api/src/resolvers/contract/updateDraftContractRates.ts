@@ -165,9 +165,7 @@ function updateDraftContractRates(
                 // set rateName for now https://jiraent.cms.gov/browse/MCR-4012
                 const rateName = generateRateCertificationName(
                     rateUpdate.formData,
-                    contract.stateCode,
-                    contract.stateNumber,
-                    statePrograms
+                    contract.stateCode
                 )
 
                 rateUpdates.create.push({
@@ -232,9 +230,7 @@ function updateDraftContractRates(
                 // set rateName for now https://jiraent.cms.gov/browse/MCR-4012
                 const rateName = generateRateCertificationName(
                     rateUpdate.formData,
-                    contract.stateCode,
-                    contract.stateNumber,
-                    statePrograms
+                    contract.stateCode
                 )
 
                 rateUpdates.update.push({
