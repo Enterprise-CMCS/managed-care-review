@@ -9,14 +9,14 @@ import {
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import { submitTestRate, updateTestRate } from '../../testHelpers'
 import { v4 as uuidv4 } from 'uuid'
-import { addNewRateToTestContract, createSubmitAndUnlockTestRate, fetchTestRateById, updateRatesInputFromDraftContract, updateTestDraftRatesOnContract } from '../../testHelpers/gqlRateHelpers'
+import { addNewRateToTestContract, createSubmitAndUnlockTestRate, fetchTestRateById,  updateRatesInputFromDraftContract, updateTestDraftRatesOnContract } from '../../testHelpers/gqlRateHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { createAndUpdateTestContractWithoutRates, fetchTestContract, submitTestContract } from '../../testHelpers/gqlContractHelpers'
+import { createAndUpdateTestContractWithoutRates, fetchTestContract, linkRateToDraftContract, submitTestContract, updateRateOnDraftContract } from '../../testHelpers/gqlContractHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 
 describe('fetchRate', () => {
     const ldService = testLDService({
-        'rate-edit-unlock': true,
+        'rate-edit-unlock':  true,
     })
     it('returns correct revisions on resubmit when existing rate is edited', async () => {
         const cmsUser = testCMSUser()
@@ -213,7 +213,7 @@ describe('fetchRate', () => {
 
     it('returns the correct dateAdded for documents', async () => {
         const ldService = testLDService({
-            'link-rates': true,
+            'link-rates':  true,
         })
         const prismaClient = await sharedTestPrismaClient()
         const stateServer = await constructTestPostgresServer({
@@ -351,5 +351,75 @@ describe('fetchRate', () => {
         expect(rateRevA1.formData.supportingDocuments[1].dateAdded).toBe(
             '2024-02-02'
         )
+    })
+
+    it('returns correct linked contractRevisions, even when rate has changed', async()=>{
+    const ldService = testLDService({
+        'link-rates':  true,
+    })
+    const stateServer = await constructTestPostgresServer({
+        ldService,
+    })
+    const cmsServer = await constructTestPostgresServer({
+        ldService,
+        context: {
+            user: testCMSUser(),
+        },
+    })
+
+    // Add a target rate
+    const draftA0 = await createAndUpdateTestContractWithoutRates(
+        stateServer,
+        'FL',
+        {submissionDescription: 'contract A'}
+    )
+    await addNewRateToTestContract(stateServer, draftA0)
+
+    // submit Contract A
+    const contractA0 = await submitTestContract(stateServer, draftA0.id)
+    const targetRate = contractA0.packageSubmissions[0].rateRevisions[0]
+    const targetRateID = targetRate.rateID
+
+    // Create contract B, link to target rate, and submit
+    const draftB0 = await createAndUpdateTestContractWithoutRates(
+        stateServer,
+        'FL',
+        {submissionDescription: 'contract B'}
+    )
+    await linkRateToDraftContract(stateServer, draftB0.id, targetRateID)
+    await submitTestContract(stateServer, draftB0.id)
+
+    // Unlock, edit and resubmit target rate
+    await unlockTestHealthPlanPackage(cmsServer, contractA0.id, 'unlock to update the target rate')
+    await updateRateOnDraftContract(stateServer, contractA0.id, targetRateID, {  ...targetRate.formData, addtlActuaryContacts: [] ,  certifyingActuaryContacts: [
+        {
+            name: 'Actuary Contact 1',
+            titleRole: 'Title',
+            email: 'statecontact1@example.com',
+            actuarialFirm: 'MERCER',
+        },
+    ],
+    actuaryCommunicationPreference: 'OACT_TO_ACTUARY', rateCapitationType: 'RATE_RANGE'})
+    await submitTestContract(stateServer, contractA0.id, 'resumbitted contract with updated rate')
+
+    // Create contract C, link to target rate, submit
+    const draftC0 = await createAndUpdateTestContractWithoutRates(
+        stateServer,
+        'FL',
+        {submissionDescription: 'contract C'}
+    )
+    await linkRateToDraftContract(stateServer, draftC0.id, targetRateID)
+    await submitTestContract(stateServer, draftC0.id)
+
+    // contract A, B, C should all be in  the related contract revisions list
+    // for the current revision of our target rate
+    const targetRateData = await fetchTestRateById(cmsServer, targetRateID)
+    const contractRevisions  = targetRateData.revisions[0].contractRevisions
+    expect(contractRevisions).toHaveLength(3)
+    const contractRevIds = contractRevisions.map( (related) => related.contract.id)
+    expect(contractRevIds.includes(draftA0.id)).toBeTruthy()
+    expect(contractRevIds.includes(draftB0.id)).toBeTruthy()
+    expect(contractRevIds.includes(draftC0.id)).toBeTruthy()
+
     })
 })

@@ -1,5 +1,6 @@
 import FETCH_CONTRACT from '../../../app-graphql/src/queries/fetchContract.graphql'
 import SUBMIT_CONTRACT from '../../../app-graphql/src/mutations/submitContract.graphql'
+import UPDATE_DRAFT_CONTRACT_RATES from '../../../app-graphql/src/mutations/updateDraftContractRates.graphql'
 import { findStatePrograms } from '../postgres'
 import type { InsertContractArgsType } from '../postgres/contractAndRates/insertContract'
 
@@ -15,7 +16,7 @@ import { insertDraftContract } from '../postgres/contractAndRates/insertContract
 
 import type { ContractType } from '../domain-models'
 import type { ApolloServer } from 'apollo-server-lambda'
-import type { Contract } from '../gen/gqlServer'
+import type { Contract, RateFormData } from '../gen/gqlServer'
 import { latestFormData } from './healthPlanPackageHelpers'
 import type {
     StateCodeType,
@@ -199,6 +200,56 @@ const createAndUpdateTestContractWithoutRates = async (
     return updatedContract
 }
 
+const linkRateToDraftContract = async (  server: ApolloServer,
+    contractID: string,
+    linkedRateID: string) => {
+
+    const updatedContract =    await server.executeOperation({
+        query: UPDATE_DRAFT_CONTRACT_RATES,
+        variables: {
+            input: {
+                contractID: contractID,
+                updatedRates: [
+                    {
+                        type: 'LINK',
+                        rateID: linkedRateID,
+                    },
+                ],
+            },
+        },
+    })
+    return updatedContract
+}
+
+const updateRateOnDraftContract = async (
+    server: ApolloServer,
+    contractID: string,
+    rateID: string,
+    rateData: Partial<RateFormData>,
+) : Promise<ContractType> => {
+
+    const updatedContract =   await server.executeOperation({
+        query: UPDATE_DRAFT_CONTRACT_RATES,
+        variables: {
+            input: {
+                contractID: contractID,
+                updatedRates: [
+                    {
+                        type: 'UPDATE',
+                        formData: rateData,
+                        rateID: rateID
+                    },
+                ],
+            },
+        },
+    })
+    must(updatedContract)
+    const contractData = updatedContract.data?.updateDraftContractRates.contract
+    if (!contractData)throw Error (`malformatted response: ${updatedContract.data}` )
+    return updatedContract.data?.contract
+}
+
+
 export {
     createTestContract,
     submitTestContract,
@@ -207,4 +258,6 @@ export {
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
     createAndSubmitTestContractWithRate,
+    linkRateToDraftContract,
+    updateRateOnDraftContract
 }
