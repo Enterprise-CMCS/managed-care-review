@@ -689,30 +689,35 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
                    "id": "712277fb-f43f-4eb5-98c5-6c6a97509201",
                    "name": "NEMT",
                    "fullName": "Non-Emergency Medical Transportation",
+                   "isRateProgram": false,
                    "__typename": "Program"
                },
                {
                    "id": "037af66b-81eb-4472-8b80-01edf17d12d9",
                    "name": "PCCMe",
                    "fullName": "Healthy Start MomCare Network, Inc.",
+                   "isRateProgram": false,
                    "__typename": "Program"
                },
                {
                    "id": "5c10fe9f-bec9-416f-a20c-718b152ad633",
                    "name": "MMA",
                    "fullName": "Managed Medical Assistance Program",
+                   "isRateProgram": false,
                    "__typename": "Program"
                },
                {
                    "id": "3b8d8fa1-1fa6-4504-9c5b-ef522877fe1e",
                    "name": "LTC",
                    "fullName": "Long-term Care Program",
+                   "isRateProgram": false,
                    "__typename": "Program"
                },
                {
                    "id": "08d114c2-0c01-4a1a-b8ff-e2b79336672d",
                    "name": "Dental",
                    "fullName": "Prepaid Dental Health Program",
+                   "isRateProgram": false,
                    "__typename": "Program"
                }
            ],
