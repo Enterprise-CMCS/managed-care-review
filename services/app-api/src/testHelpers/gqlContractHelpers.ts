@@ -221,6 +221,24 @@ const linkRateToDraftContract = async (  server: ApolloServer,
     return updatedContract
 }
 
+const clearRatesOnDraftContract = async (  server: ApolloServer,
+    contractID: string,
+    ) => {
+
+    const updatedContract =    await server.executeOperation({
+        query: UPDATE_DRAFT_CONTRACT_RATES,
+        variables: {
+            input: {
+                contractID: contractID,
+                updatedRates: [
+
+                ],
+            },
+        },
+    })
+    return updatedContract
+}
+
 const updateRateOnDraftContract = async (
     server: ApolloServer,
     contractID: string,
@@ -259,5 +277,6 @@ export {
     createAndUpdateTestContractWithRate,
     createAndSubmitTestContractWithRate,
     linkRateToDraftContract,
-    updateRateOnDraftContract
+    updateRateOnDraftContract,
+    clearRatesOnDraftContract
 }

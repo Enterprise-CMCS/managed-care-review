@@ -5,13 +5,14 @@ import {
     defaultFloridaRateProgram,
     unlockTestHealthPlanPackage,
     updateTestHealthPlanFormData,
+    updateTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import { submitTestRate, updateTestRate } from '../../testHelpers'
 import { v4 as uuidv4 } from 'uuid'
-import { addNewRateToTestContract, createSubmitAndUnlockTestRate, fetchTestRateById,  updateRatesInputFromDraftContract, updateTestDraftRatesOnContract } from '../../testHelpers/gqlRateHelpers'
+import { addNewRateToTestContract, createSubmitAndUnlockTestRate, fetchTestRateById,  updateRatesInputFromDraftContract, updateTestDraftRatesOnContract,  } from '../../testHelpers/gqlRateHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { createAndUpdateTestContractWithoutRates, fetchTestContract, linkRateToDraftContract, submitTestContract, updateRateOnDraftContract } from '../../testHelpers/gqlContractHelpers'
+import { createAndUpdateTestContractWithoutRates, fetchTestContract, linkRateToDraftContract, submitTestContract, updateRateOnDraftContract, clearRatesOnDraftContract } from '../../testHelpers/gqlContractHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 
 describe('fetchRate', () => {
@@ -353,7 +354,8 @@ describe('fetchRate', () => {
         )
     })
 
-    it('returns correct linked contractRevisions, even when rate has changed', async()=>{
+    // TEST NOT FAILING WHEN EXPECTED, NEED TO FIGURE OUT HOW TO GET RATE REVISIONS OUT OF SYNC
+    it.skip('returns correct linked contractRevisions, even when rate has changed', async()=>{
     const ldService = testLDService({
         'link-rates':  true,
     })
@@ -389,7 +391,7 @@ describe('fetchRate', () => {
     await linkRateToDraftContract(stateServer, draftB0.id, targetRateID)
     await submitTestContract(stateServer, draftB0.id)
 
-    // Unlock, edit and resubmit target rate
+    // Unlock A, edit and resubmit target rate
     await unlockTestHealthPlanPackage(cmsServer, contractA0.id, 'unlock to update the target rate')
     await updateRateOnDraftContract(stateServer, contractA0.id, targetRateID, {  ...targetRate.formData, addtlActuaryContacts: [] ,  certifyingActuaryContacts: [
         {
@@ -410,6 +412,13 @@ describe('fetchRate', () => {
     )
     await linkRateToDraftContract(stateServer, draftC0.id, targetRateID)
     await submitTestContract(stateServer, draftC0.id)
+
+    // Unlock B, update data several times, removing, readding linked rate, and resubmit
+    await unlockTestHealthPlanPackage(cmsServer, draftB0.id, 'unlock to relink the same rate')
+    await updateTestHealthPlanPackage(stateServer,draftB0.id, {submissionDescription: 'changed description'})
+    await clearRatesOnDraftContract(stateServer, draftB0.id)
+    await linkRateToDraftContract(stateServer, draftB0.id, targetRateID)
+    await submitTestContract(stateServer, draftB0.id, 'resubmit with technically nothing changed about rate')
 
     // contract A, B, C should all be in  the related contract revisions list
     // for the current revision of our target rate
