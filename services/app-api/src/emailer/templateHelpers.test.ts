@@ -228,6 +228,7 @@ describe('findContractPrograms', () => {
                 id: 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                 name: 'CHIP',
                 fullName: 'MN CHIP',
+                isRateProgram: false,
             },
         ]
 
@@ -243,6 +244,7 @@ describe('findContractPrograms', () => {
                 id: 'unmatched-id',
                 name: 'CHIP',
                 fullName: 'MN CHIP',
+                isRateProgram: false,
             },
         ]
 

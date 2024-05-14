@@ -10,6 +10,7 @@ query fetchHealthPlanPackage($input: FetchHealthPlanPackageInput!) {
                     id
                     name
                     fullName
+                    isRateProgram
                 }
             }
             status
