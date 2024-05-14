@@ -141,6 +141,7 @@ mutation unlockRate($input: UnlockRateInput!) {
                     id
                     name
                     fullName
+                    isRateProgram
                 }
             }
             status

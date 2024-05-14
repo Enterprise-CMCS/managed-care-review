@@ -20,6 +20,7 @@ https://github.com/Enterprise-CMCS/managed-care-review/blob/main/docs/technical-
 
 import csv from 'csv-parser'
 import fs from 'fs'
+import { v4 as uuidv4 } from 'uuid'
 
 const stateNames = {
     AL: 'Alabama',
@@ -135,7 +136,7 @@ fs.createReadStream(file)
             }
 
             states[code]!.programs.push({
-                id: data.id,
+                id: !data.id ? uuidv4() : data.id,
                 fullName: data.Program,
                 name: data.Nickname,
                 isRateProgram: data.IsRateProgram === 'TRUE'

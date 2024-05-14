@@ -15,6 +15,7 @@ mutation updateCMSUser($input: UpdateCMSUserInput!) {
                         id
                         name
                         fullName
+                        isRateProgram
                     }
                 }
                 divisionAssignment
