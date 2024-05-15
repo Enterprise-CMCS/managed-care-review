@@ -13,7 +13,8 @@ import { ForbiddenError } from 'apollo-server-core'
 
 export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
     return async (_parent, { input }, context) => {
-        const { user, span } = context
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('fetchRate', {}, ctx)
         setResolverDetailsOnActiveSpan('fetchRate', user, span)
 
         const rateWithHistory = await store.findRateWithHistory(input.rateID)

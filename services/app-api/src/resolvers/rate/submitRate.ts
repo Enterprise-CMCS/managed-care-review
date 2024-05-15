@@ -23,11 +23,13 @@ export function submitRate(
     launchDarkly: LDService
 ): MutationResolvers['submitRate'] {
     return async (_parent, { input }, context) => {
-        const { user, span } = context
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('submitRate', {}, ctx)
+        setResolverDetailsOnActiveSpan('submitRate', user, span)
+
         const { rateID, submittedReason, formData } = input
         const featureFlags = await launchDarkly.allFlags(context)
 
-        setResolverDetailsOnActiveSpan('submitRate', user, span)
         span?.setAttribute('mcreview.rate_id', rateID)
 
         // throw error if the feature flag is off

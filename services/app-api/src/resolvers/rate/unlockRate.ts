@@ -14,9 +14,11 @@ import { GraphQLError } from 'graphql'
 
 export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
     return async (_parent, { input }, context) => {
-        const { user, span } = context
-        const { unlockedReason, rateID } = input
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('unlockRate', {}, ctx)
         setResolverDetailsOnActiveSpan('unlockRate', user, span)
+
+        const { unlockedReason, rateID } = input
         span?.setAttribute('mcreview.rate_id', rateID)
 
         // This resolver is only callable by CMS users
