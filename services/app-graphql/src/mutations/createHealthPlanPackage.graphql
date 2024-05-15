@@ -11,6 +11,7 @@ mutation createHealthPlanPackage($input: CreateHealthPlanPackageInput!) {
                     id
                     name
                     fullName
+                    isRateProgram
                 }
             }
             status

@@ -41,6 +41,7 @@ fragment contractFields on Contract {
             id
             name
             fullName
+            isRateProgram
         }
     }
 
@@ -61,6 +62,7 @@ fragment rateFields on Rate {
             id
             name
             fullName
+            isRateProgram
         }
     }
     status

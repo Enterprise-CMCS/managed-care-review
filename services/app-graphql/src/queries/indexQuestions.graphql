@@ -17,6 +17,7 @@ fragment questionEdgeFragment on QuestionEdge {
                     id
                     name
                     fullName
+                    isRateProgram
                 }
             }
         }
@@ -42,6 +43,7 @@ fragment questionEdgeFragment on QuestionEdge {
                         id
                         name
                         fullName
+                        isRateProgram
                     }
                 }
             }

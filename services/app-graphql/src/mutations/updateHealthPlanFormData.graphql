@@ -10,6 +10,7 @@ mutation updateHealthPlanFormData($input: UpdateHealthPlanFormDataInput!) {
                     id
                     name
                     fullName
+                    isRateProgram
                 }
             }
             status

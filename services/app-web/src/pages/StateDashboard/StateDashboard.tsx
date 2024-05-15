@@ -59,7 +59,9 @@ export const StateDashboard = (): React.ReactElement => {
         )
     }
 
-    const programs = loggedInUser.state.programs
+    const programs = loggedInUser.state.programs.filter(
+        (program) => !program.isRateProgram
+    )
     const submissionRows: PackageInDashboardType[] = []
 
     data?.indexHealthPlanPackages.edges
@@ -81,9 +83,9 @@ export const StateDashboard = (): React.ReactElement => {
                     currentSubmissionData.programIDs,
                     programs
                 ),
-                programs: programs.filter((program) =>
-                    currentSubmissionData.programIDs.includes(program.id)
-                ),
+                programs: programs.filter((program) => {
+                    return currentSubmissionData.programIDs.includes(program.id)
+                }),
                 submittedAt: sub.initiallySubmittedAt,
                 status: sub.status,
                 updatedAt: currentSubmissionData.updatedAt,

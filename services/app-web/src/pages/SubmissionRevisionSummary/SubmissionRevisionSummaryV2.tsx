@@ -54,20 +54,27 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
     const revisionIndex = Number(revisionVersion) - 1
 
     // Reverse revisions to get correct submission order
-    const packageSubmissions = contract? [...contract.packageSubmissions]
-        .filter((submission) => {
-            return submission.cause === 'CONTRACT_SUBMISSION'
-        })
-        .reverse() : []
-    const targetPreviousSubmission = packageSubmissions[revisionIndex] && packageSubmissions[revisionIndex].__typename ? packageSubmissions[revisionIndex] : undefined
+    const packageSubmissions = contract
+        ? [...contract.packageSubmissions]
+              .filter((submission) => {
+                  return submission.cause === 'CONTRACT_SUBMISSION'
+              })
+              .reverse()
+        : []
+    const targetPreviousSubmission =
+        packageSubmissions[revisionIndex] &&
+        packageSubmissions[revisionIndex].__typename
+            ? packageSubmissions[revisionIndex]
+            : undefined
     const name = targetPreviousSubmission?.contractRevision.contractName
 
     useEffect(() => {
         // make sure you do not update the page heading until we are sure the name for that previous submission exists
         if (name) {
             updateHeading({
-            customHeading: name,
-        })}
+                customHeading: name,
+            })
+        }
     }, [name, updateHeading])
 
     // Display any full page interim state resulting from the initial fetch API requests
@@ -83,12 +90,9 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
         )
     }
 
-    if (
-        !contract || !targetPreviousSubmission || !name
-    ) {
+    if (!contract || !targetPreviousSubmission || !name) {
         return <Error404 />
     }
-
 
     const revision = targetPreviousSubmission.contractRevision
     const rateRevisions = targetPreviousSubmission.rateRevisions
@@ -97,7 +101,6 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
     const submitInfo = revision.submitInfo || undefined
     const isContractActionAndRateCertification =
         contractData.submissionType === 'CONTRACT_AND_RATES'
-
 
     return (
         <div className={styles.background}>

@@ -13,6 +13,7 @@ mutation submitRate($input: SubmitRateInput!) {
                     id
                     name
                     fullName
+                    isRateProgram
                 }
             }
             status
