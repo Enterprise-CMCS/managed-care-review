@@ -186,9 +186,11 @@ export function submitHealthPlanPackageResolver(
     return async (_parent, { input }, context) => {
         const featureFlags = await launchDarkly.allFlags(context)
 
-        const { user, span } = context
-        const { submittedReason, pkgID } = input
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('submitHealthPlanPackage', {}, ctx)
         setResolverDetailsOnActiveSpan('submitHealthPlanPackage', user, span)
+
+        const { submittedReason, pkgID } = input
         span?.setAttribute('mcreview.package_id', pkgID)
 
         //Set updateInfo default to initial submission

@@ -59,7 +59,13 @@ export function healthPlanPackageResolver(
             return state
         },
         questions: async (parent, _args, context) => {
-            const { span } = context
+            const { ctx, tracer } = context
+            const span = tracer?.startSpan(
+                'healthPlanPackageResolver.questions',
+                {},
+                ctx
+            )
+
             const pkgID = parent.id
             const result = await store.findAllQuestionsByContract(pkgID)
 

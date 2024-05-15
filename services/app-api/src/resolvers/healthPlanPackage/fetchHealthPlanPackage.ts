@@ -23,7 +23,8 @@ export function fetchHealthPlanPackageResolver(
     store: Store
 ): QueryResolvers['fetchHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
-        const { user, span } = context
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('fetchHealthPlanPackage', {}, ctx)
         setResolverDetailsOnActiveSpan('fetchHealthPlanPackage', user, span)
 
         // Fetch the full contract
