@@ -17,7 +17,8 @@ export function updateContract(
     store: Store
 ): MutationResolvers['updateContract'] {
     return async (_parent, { input }, context) => {
-        const { user, span } = context
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('updateContract', {}, ctx)
         setResolverDetailsOnActiveSpan('updateContract', user, span)
 
         // This resolver is only callable by CMS users

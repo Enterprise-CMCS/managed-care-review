@@ -12,7 +12,9 @@ export function fetchContractResolver(
     store: Store
 ): QueryResolvers['fetchContract'] {
     return async (_parent, { input }, context) => {
-        const { user, span } = context
+        const { user, ctx, tracer } = context
+        // add a span to OTEL
+        const span = tracer?.startSpan('fetchContractResolver', {}, ctx)
         setResolverDetailsOnActiveSpan('fetchContract', user, span)
 
         const contractWithHistory = await store.findContractWithHistory(
