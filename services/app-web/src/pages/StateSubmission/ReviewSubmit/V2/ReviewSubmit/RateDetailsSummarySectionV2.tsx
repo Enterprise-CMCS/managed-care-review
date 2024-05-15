@@ -82,10 +82,11 @@ export const RateDetailsSummarySectionV2 = ({
     onDocumentError,
 }: RateDetailsSummarySectionV2Props): React.ReactElement => {
     const { loggedInUser } = useAuth()
-    const isSubmittedOrCMSUser =
-        contract.status === 'SUBMITTED' ||
-        contract.status === 'RESUBMITTED' ||
-        loggedInUser?.role === 'CMS_USER'
+    const isSubmitted =
+        contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
+    const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const isSubmittedOrCMSUser = isSubmitted || isCMSUser
+
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
     const contractOrRev = contractRev ? contractRev : contract
@@ -138,12 +139,17 @@ export const RateDetailsSummarySectionV2 = ({
             : ''
     }
 
-    const ratePrograms = (rate: Rate | RateRevision) => {
+    const ratePrograms = (
+        rate: Rate | RateRevision,
+        useHistoricPrograms: boolean
+    ) => {
         /* if we have rateProgramIDs, use them, otherwise use programIDs */
         let programIDs = [] as string[]
         const rateFormData = getRateFormData(rate)
         if (!rateFormData) return <GenericErrorPage />
-        if (
+        if (useHistoricPrograms) {
+            programIDs = rateFormData.deprecatedRateProgramIDs
+        } else if (
             rateFormData.rateProgramIDs &&
             rateFormData.rateProgramIDs.length > 0
         ) {
@@ -269,16 +275,21 @@ export const RateDetailsSummarySectionV2 = ({
                             </h3>
                             <dl>
                                 <DoubleColumnGrid>
-                                    {/* {ratePrograms && (
-                                        <DataDetail
-                                            id="historicRatePrograms"
-                                            label="Programs this rate certification covers"
-                                            explainMissingData={
-                                                !isSubmittedOrCMSUser
-                                            }
-                                            children={ratePrograms(rate)}
-                                        />
-                                    )} */}
+                                    {rate.formData.deprecatedRateProgramIDs
+                                        .length > 0 &&
+                                        isSubmitted && (
+                                            <DataDetail
+                                                id="historicRatePrograms"
+                                                label="Programs this rate certification covers"
+                                                explainMissingData={
+                                                    !isSubmittedOrCMSUser
+                                                }
+                                                children={ratePrograms(
+                                                    rate,
+                                                    true
+                                                )}
+                                            />
+                                        )}
                                     {ratePrograms && (
                                         <DataDetail
                                             id="ratePrograms"
@@ -286,7 +297,7 @@ export const RateDetailsSummarySectionV2 = ({
                                             explainMissingData={
                                                 !isSubmittedOrCMSUser
                                             }
-                                            children={ratePrograms(rate)}
+                                            children={ratePrograms(rate, false)}
                                         />
                                     )}
                                     <DataDetail
