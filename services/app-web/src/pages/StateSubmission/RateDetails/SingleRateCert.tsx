@@ -293,7 +293,7 @@ export const SingleRateCert = ({
 
                 <FormGroup error={Boolean(showFieldErrors('rateProgramIDs'))}>
                     <Label htmlFor={`${fieldNamePrefix}.rateProgramIDs`}>
-                        Programs this rate certification covers
+                        Rates this rate certification covers
                     </Label>
                     <span className={styles.requiredOptionalText}>
                         Required

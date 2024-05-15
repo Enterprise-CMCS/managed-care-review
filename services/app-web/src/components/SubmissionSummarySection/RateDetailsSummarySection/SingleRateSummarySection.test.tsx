@@ -55,7 +55,7 @@ describe('SingleRateSummarySection', () => {
         expect(screen.getByText(rateName)).toBeInTheDocument()
         expect(
             screen.getByRole('definition', {
-                name: 'Programs this rate certification covers',
+                name: 'Rates this rate certification covers',
             })
         ).toBeInTheDocument()
         expect(

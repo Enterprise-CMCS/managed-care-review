@@ -233,7 +233,7 @@ describe('RateDetails', () => {
             })
 
             expect(
-                screen.getByText('Programs this rate certification covers')
+                screen.getByText('Rates this rate certification covers')
             ).toBeInTheDocument()
             expect(
                 screen.getByText('Rate certification type')
@@ -282,7 +282,9 @@ describe('RateDetails', () => {
             await waitFor(() => {
                 expect(screen.queryAllByTestId('errorMessage')).toHaveLength(7)
                 expect(
-                    screen.queryAllByText('You must select a program')
+                    screen.queryAllByText(
+                        'You must indicate which rate are included in this certification'
+                    )
                 ).toHaveLength(2)
                 expect(
                     screen.queryByText(
@@ -1660,9 +1662,7 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
         withinTargetRateCert.getByText('Upload one rate certification document')
     ).toBeInTheDocument()
     expect(
-        withinTargetRateCert.getByText(
-            'Programs this rate certification covers'
-        )
+        withinTargetRateCert.getByText('Rates this rate certification covers')
     ).toBeInTheDocument()
     expect(
         withinTargetRateCert.getByText('Rate certification type')

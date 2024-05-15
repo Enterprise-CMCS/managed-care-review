@@ -569,7 +569,7 @@ describe('RateDetailsSummarySection', () => {
             )
         }
         const programElement = screen.getByRole('definition', {
-            name: 'Programs this rate certification covers',
+            name: 'Rates this rate certification covers',
         })
         expect(programElement).toBeInTheDocument()
         const programList = within(programElement).getByText('SNBC, PMAP')
@@ -602,7 +602,7 @@ describe('RateDetailsSummarySection', () => {
             )
         }
         const programElement = screen.getByRole('definition', {
-            name: 'Programs this rate certification covers',
+            name: 'Rates this rate certification covers',
         })
         expect(programElement).toBeInTheDocument()
         const programList = within(programElement).getByText('SNBC, PMAP')
@@ -624,7 +624,7 @@ describe('RateDetailsSummarySection', () => {
             }
         )
         const programList = screen.getAllByRole('definition', {
-            name: 'Programs this rate certification covers',
+            name: 'Rates this rate certification covers',
         })
         expect(programList).toHaveLength(2)
         expect(programList[0]).toHaveTextContent('SNBC')

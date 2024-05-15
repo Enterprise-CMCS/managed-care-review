@@ -1021,7 +1021,7 @@ describe('SubmissionSummary', () => {
             ).toBeInTheDocument()
             expect(
                 screen.getByRole('definition', {
-                    name: 'Programs this rate certification covers',
+                    name: 'Rates this rate certification covers',
                 })
             ).toBeInTheDocument()
             expect(screen.getByText('SNBC')).toBeInTheDocument()
@@ -1380,7 +1380,7 @@ describe('SubmissionSummary', () => {
             ).toBeInTheDocument()
             expect(
                 screen.getByRole('definition', {
-                    name: 'Programs this rate certification covers',
+                    name: 'Rates this rate certification covers',
                 })
             ).toBeInTheDocument()
             expect(screen.getByText('SNBC')).toBeInTheDocument()
@@ -1739,7 +1739,7 @@ describe('SubmissionSummary', () => {
             ).toBeInTheDocument()
             expect(
                 screen.getByRole('definition', {
-                    name: 'Programs this rate certification covers',
+                    name: 'Rates this rate certification covers',
                 })
             ).toBeInTheDocument()
             expect(screen.getByText('SNBC')).toBeInTheDocument()
@@ -2097,7 +2097,7 @@ describe('SubmissionSummary', () => {
             ).toBeInTheDocument()
             expect(
                 screen.getByRole('definition', {
-                    name: 'Programs this rate certification covers',
+                    name: 'Rates this rate certification covers',
                 })
             ).toBeInTheDocument()
             expect(screen.getByText('SNBC')).toBeInTheDocument()
