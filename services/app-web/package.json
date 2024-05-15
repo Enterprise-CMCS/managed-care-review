@@ -85,6 +85,8 @@
         "@cypress/instrument-cra": "^1.4.0",
         "@opentelemetry/api": "^1.6.0",
         "@opentelemetry/auto-instrumentations-web": "^0.34.0",
+        "@opentelemetry/context-zone": "^1.24.1",
+        "@opentelemetry/exporter-collector": "^0.25.0",
         "@opentelemetry/exporter-trace-otlp-http": "^0.45.1",
         "@opentelemetry/id-generator-aws-xray": "^1.2.1",
         "@opentelemetry/instrumentation": "^0.45.1",

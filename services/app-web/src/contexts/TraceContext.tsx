@@ -56,7 +56,10 @@ registerInstrumentations({
                     /(.*)\.adoberesources\.net/g,
                     /(.*)\.google-analytics\.com/g,
                 ],
-                propagateTraceHeaderCorsUrls: [/.+/g],
+                //propagateTraceHeaderCorsUrls: [/.+/g],
+                propagateTraceHeaderCorsUrls: [
+                    new RegExp('http://localhost:3000'),
+                ],
             },
         }),
     ],
