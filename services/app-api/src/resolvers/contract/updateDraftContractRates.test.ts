@@ -258,7 +258,6 @@ describe('updateDraftContractRates', () => {
                                 amendmentEffectiveDateStart: '2024-02-01',
                                 amendmentEffectiveDateEnd: '2025-02-01',
                                 rateProgramIDs: ['foo'],
-
                                 rateDocuments: [
                                     {
                                         s3URL: 'foo://bar',
@@ -569,6 +568,7 @@ describe('updateDraftContractRates', () => {
                 rateDocuments: [],
                 supportingDocuments: [],
                 rateProgramIDs: [],
+                deprecatedRateProgramIDs: [],
                 certifyingActuaryContacts: [],
                 addtlActuaryContacts: [],
                 packagesWithSharedRateCerts: [],
@@ -597,6 +597,7 @@ describe('updateDraftContractRates', () => {
                 rateDocuments: [],
                 supportingDocuments: [],
                 rateProgramIDs: [],
+                deprecatedRateProgramIDs: [],
                 certifyingActuaryContacts: [],
                 addtlActuaryContacts: [],
                 packagesWithSharedRateCerts: [],

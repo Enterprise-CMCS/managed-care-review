@@ -54,6 +54,7 @@ describe('RateDetailsSummarySection', () => {
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
+                        deprecatedRateProgramIDs: [],
                         certifyingActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
@@ -111,6 +112,7 @@ describe('RateDetailsSummarySection', () => {
                         rateProgramIDs: [
                             'd95394e5-44d1-45df-8151-1cc1ee66f100',
                         ],
+                        deprecatedRateProgramIDs: [],
                         certifyingActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',

@@ -2,5 +2,5 @@ BEGIN;
 ALTER TABLE "RateRevisionTable"
 RENAME COLUMN "rateProgramIDs" to "deprecatedRateProgramIDs";
 ALTER TABLE "RateRevisionTable"
-ADD COLUMN "rateProgramIDS" TEXT[];
+ADD COLUMN "rateProgramIDs" TEXT[];
 COMMIT;
