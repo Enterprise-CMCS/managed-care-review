@@ -269,6 +269,16 @@ export const RateDetailsSummarySectionV2 = ({
                             </h3>
                             <dl>
                                 <DoubleColumnGrid>
+                                    {/* {ratePrograms && (
+                                        <DataDetail
+                                            id="historicRatePrograms"
+                                            label="Programs this rate certification covers"
+                                            explainMissingData={
+                                                !isSubmittedOrCMSUser
+                                            }
+                                            children={ratePrograms(rate)}
+                                        />
+                                    )} */}
                                     {ratePrograms && (
                                         <DataDetail
                                             id="ratePrograms"

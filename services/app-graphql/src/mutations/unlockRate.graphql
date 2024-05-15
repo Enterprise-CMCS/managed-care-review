@@ -33,6 +33,7 @@ fragment rateRevisionFragmentForUnlock on RateRevision {
         amendmentEffectiveDateStart,
         amendmentEffectiveDateEnd,
         rateProgramIDs,
+        deprecatedRateProgramIDs,
         rateCertificationName,
         certifyingActuaryContacts {
             id

@@ -52,6 +52,7 @@ mutation submitRate($input: SubmitRateInput!) {
                     amendmentEffectiveDateStart,
                     amendmentEffectiveDateEnd,
                     rateProgramIDs,
+                    deprecatedRateProgramIDs,
                     rateCertificationName,
                     certifyingActuaryContacts {
                         id

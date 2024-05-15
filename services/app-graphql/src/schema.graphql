@@ -1175,7 +1175,11 @@ type RateFormData {
     """
     amendmentEffectiveDateEnd: Date
     """
-    An array of IDs representing state programs that the rate covers
+    Deprecated an array of IDs representing historic state programs that the rate covers
+    """
+    deprecatedRateProgramIDs: [String!]!
+    """
+    An array of IDs representing historic state programs that the rate covers
     """
     rateProgramIDs: [String!]!
     """
@@ -1535,7 +1539,11 @@ input RateFormDataInput {
     """
     amendmentEffectiveDateEnd: Date
     """
-    An array of IDs representing state programs that the rate covers
+    Deprecated an array of IDs representing historic state programs that the rate covers
+    """
+    deprecatedRateProgramIDs: [String!]!
+    """
+    An array of IDs representing historic state programs that the rate covers
     """
     rateProgramIDs: [String!]!
     """
@@ -1561,7 +1569,7 @@ input RateFormDataInput {
     """
     actuaryCommunicationPreference: ActuaryCommunication
     """
-    An array of PackageWithSameRate elements
+    Deprecated - an array of PackageWithSameRate elements
     which contain the packageName, packageId, and packageStatus
     These elements represent other packages in the system
     that are using this rate

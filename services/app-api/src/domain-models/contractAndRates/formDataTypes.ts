@@ -81,6 +81,7 @@ const rateFormDataSchema = z.object({
     rateDateCertified: z.date().optional(),
     amendmentEffectiveDateStart: z.date().optional(),
     amendmentEffectiveDateEnd: z.date().optional(),
+    deprecatedRateProgramIDs: z.array(z.string()).optional(),
     rateProgramIDs: z.array(z.string()).optional(),
     rateCertificationName: z.string().optional(),
     certifyingActuaryContacts: z.array(actuaryContactSchema).optional(),

@@ -165,6 +165,7 @@ function addNewRateToRateInput(
         amendmentEffectiveDateStart: '2024-02-01',
         amendmentEffectiveDateEnd: '2025-02-01',
         rateProgramIDs: [defaultFloridaRateProgram().id],
+        deprecatedRateProgramIDs: [],
 
         rateDocuments: [
             {
