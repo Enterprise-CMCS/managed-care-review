@@ -11,7 +11,8 @@ import {
 
 export function indexUsersResolver(store: Store): QueryResolvers['indexUsers'] {
     return async (_parent, _args, context) => {
-        const { user: currentUser, span } = context
+        const { user: currentUser, ctx, tracer } = context
+        const span = tracer?.startSpan('indexUser', {}, ctx)
         setResolverDetailsOnActiveSpan('indexUsers', currentUser, span)
 
         if (!hasAdminPermissions(currentUser)) {

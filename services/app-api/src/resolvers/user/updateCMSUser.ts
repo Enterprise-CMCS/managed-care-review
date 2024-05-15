@@ -16,7 +16,8 @@ export function updateCMSUserResolver(
     store: Store
 ): MutationResolvers['updateCMSUser'] {
     return async (_parent, { input }, context) => {
-        const { user: currentUser, span } = context
+        const { user: currentUser, ctx, tracer } = context
+        const span = tracer?.startSpan('updateCMSUser', {}, ctx)
         setResolverDetailsOnActiveSpan('updateCmsUser', currentUser, span)
 
         // This resolver is only callable by admin users
