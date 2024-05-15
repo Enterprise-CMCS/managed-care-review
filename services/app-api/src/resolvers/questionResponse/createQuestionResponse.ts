@@ -18,7 +18,8 @@ export function createQuestionResponseResolver(
     emailParameterStore: EmailParameterStore
 ): MutationResolvers['createQuestionResponse'] {
     return async (_parent, { input }, context) => {
-        const { user, span } = context
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('createQuestionResponse', {}, ctx)
 
         if (!isStateUser(user)) {
             const msg = 'user not authorized to create a question response'

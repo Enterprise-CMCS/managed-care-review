@@ -19,7 +19,8 @@ export function createQuestionResolver(
     emailer: Emailer
 ): MutationResolvers['createQuestion'] {
     return async (_parent, { input }, context) => {
-        const { user, span } = context
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('createQuestion', {}, ctx)
 
         if (!isCMSUser(user)) {
             const msg = 'user not authorized to create a question'

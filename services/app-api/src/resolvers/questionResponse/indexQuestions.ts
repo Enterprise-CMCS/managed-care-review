@@ -12,7 +12,8 @@ export function indexQuestionsResolver(
     store: Store
 ): QueryResolvers['indexQuestions'] {
     return async (_parent, { input }, context) => {
-        const { user, span } = context
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('indexQuestions', {}, ctx)
 
         const contractResult = await store.findContractWithHistory(
             input.contractID
