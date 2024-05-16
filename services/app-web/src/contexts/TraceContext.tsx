@@ -57,9 +57,7 @@ registerInstrumentations({
                     /(.*)\.google-analytics\.com/g,
                 ],
                 //propagateTraceHeaderCorsUrls: [/.+/g],
-                propagateTraceHeaderCorsUrls: [
-                    new RegExp('http://localhost:3000'),
-                ],
+                propagateTraceHeaderCorsUrls: [/.+/g],
             },
         }),
     ],
