@@ -1,25 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import {
-    Button,
-    Fieldset,
-    FormGroup,
-    Form as UswdsForm,
-} from '@trussworks/react-uswds'
-import {
-    FieldArray,
-    FieldArrayRenderProps,
-    Formik,
-    FormikErrors,
-    getIn,
-} from 'formik'
+import { Button, Fieldset, Form as UswdsForm } from '@trussworks/react-uswds'
+import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
 import { generatePath, useNavigate } from 'react-router-dom'
 
 import styles from '../../StateSubmissionForm.module.scss'
 import {
     DynamicStepIndicator,
     ErrorSummary,
-    FieldRadio,
-    PoliteErrorMessage,
     SectionCard,
 } from '../../../../components'
 import { RateDetailsFormSchema } from '../RateDetailsSchema'
@@ -64,7 +51,6 @@ import {
 import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
 import { LinkedRateSummary } from './LinkedRateSummary'
 import { usePage } from '../../../../contexts/PageContext'
-import { ActuaryCommunicationType } from '../../../../common-code/healthPlanFormDataType'
 
 export type FormikRateForm = {
     id?: string // no id if its a new rate
@@ -86,12 +72,12 @@ export type FormikRateForm = {
     packagesWithSharedRateCerts: RateRevision['formData']['packagesWithSharedRateCerts']
     ratePreviouslySubmitted?: 'YES' | 'NO'
     initiallySubmittedAt?: Date
+    linkRateSelect?: string
 }
 
 // We have a list of rates to enable multi-rate behavior
 export type RateDetailFormConfig = {
     rateForms: FormikRateForm[]
-    actuaryCommunicationPreference: ActuaryCommunicationType | undefined
 }
 
 type RateDetailsV2Props = {
@@ -123,10 +109,14 @@ const RateDetailsV2 = ({
 
     // Form validation
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const rateDetailsFormSchema = RateDetailsFormSchema({
-        'rate-edit-unlock': useEditUnlockRate,
-        'link-rates': useLinkedRates,
-    })
+    const rateDetailsFormSchema = RateDetailsFormSchema(
+        {
+            'rate-edit-unlock': useEditUnlockRate,
+            'link-rates': useLinkedRates,
+        },
+        !displayAsStandaloneRate
+    )
+
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
 
@@ -162,6 +152,7 @@ const RateDetailsV2 = ({
         },
         skip: !displayAsStandaloneRate,
     })
+
     useEffect(() => {
         if (focusNewRate) {
             newRateNameRef?.current?.focus()
@@ -210,10 +201,6 @@ const RateDetailsV2 = ({
 
     const initialValues: RateDetailFormConfig = {
         rateForms: initialRateForm,
-        actuaryCommunicationPreference: initialRateForm[0]
-            .actuaryCommunicationPreference
-            ? initialRateForm[0].actuaryCommunicationPreference
-            : undefined,
     }
 
     // Display any full page interim state resulting from the initial fetch API requests
@@ -285,8 +272,14 @@ const RateDetailsV2 = ({
             (options.type === 'CONTINUE' || options.type === 'SAVE_AS_DRAFT')
         ) {
             try {
-                const updatedRates = generateUpdatedRates(rateForms)
-
+                const formattedRateForms = rateForms.filter((rate) => {
+                    if (rate.ratePreviouslySubmitted === 'YES') {
+                        return rate.id
+                    } else {
+                        return rate
+                    }
+                })
+                const updatedRates = generateUpdatedRates(formattedRateForms)
                 await updateDraftContractRates({
                     variables: {
                         input: {
@@ -320,23 +313,16 @@ const RateDetailsV2 = ({
         errors: FormikErrors<RateDetailFormConfig>
     ) => {
         const rateErrors = errors.rateForms
-        const actuaryCommunicationPreference =
-            errors.actuaryCommunicationPreference
         const errorObject: { [field: string]: string } = {}
         if (rateErrors && Array.isArray(rateErrors)) {
             rateErrors.forEach((rateError, index) => {
                 if (!rateError) return
-                if (
-                    Object.keys(rateError).includes('ratePreviouslySubmitted')
-                ) {
-                    return (errorObject['ratePreviouslySubmitted'] =
-                        'You must select yes or no')
-                }
                 Object.entries(rateError).forEach(([field, value]) => {
                     if (typeof value === 'string') {
-                        //rateProgramIDs error message needs a # proceeding the key name because this is the only way to be able to link to the Select component element see comments in ErrorSummaryMessage component.
+                        // select dropdown component error messages needs a # proceeding the key name because this is the only way to be able to link to react-select based components. See comments in ErrorSummaryMessage component.
                         const errorKey =
-                            field === 'rateProgramIDs'
+                            field === 'rateProgramIDs' ||
+                            field === 'linkRateSelect'
                                 ? `#rateForms.${index}.${field}`
                                 : `rateForms.${index}.${field}`
                         errorObject[errorKey] = value
@@ -383,17 +369,11 @@ const RateDetailsV2 = ({
             })
         }
 
-        if (actuaryCommunicationPreference) {
-            errorObject['actuaryCommunicationPreference'] =
-                actuaryCommunicationPreference
-        }
-
         return errorObject
     }
-    const showFieldErrors = (error?: string | undefined) =>
-        shouldValidate && Boolean(error)
 
     const fieldNamePrefix = (idx: number) => `rateForms.${idx}`
+
     return (
         <>
             <div className={styles.stepIndicator}>
@@ -412,36 +392,25 @@ const RateDetailsV2 = ({
                             fetchRateData?.fetchRate.rate.draftRevision
                                 ?.unlockInfo
                         }
-                        showPageErrorMessage={showAPIErrorBanner} // TODO WHEN WE IMPLEMENT UDPATE API -  FIGURE OUT ERROR BANNER FOR BOTH MULTI AND STANDALONE USE CASE
+                        showPageErrorMessage={showAPIErrorBanner}
                     />
                 )}
             </div>
 
             <Formik
                 initialValues={initialValues}
-                onSubmit={(rateFormValues, { setSubmitting }) => {
-                    const actuaryCommunicationPreference =
-                        rateFormValues.actuaryCommunicationPreference
-                    rateFormValues.rateForms.forEach((rateForm) => {
-                        rateForm.actuaryCommunicationPreference =
-                            actuaryCommunicationPreference
+                onSubmit={(rateFormValues, { setSubmitting }) =>
+                    handlePageAction(rateFormValues.rateForms, setSubmitting, {
+                        type: 'CONTINUE',
+                        redirectPath: displayAsStandaloneRate
+                            ? 'DASHBOARD_SUBMISSIONS'
+                            : 'SUBMISSIONS_CONTACTS',
                     })
-
-                    return handlePageAction(
-                        rateFormValues.rateForms,
-                        setSubmitting,
-                        {
-                            type: 'CONTINUE',
-                            redirectPath: displayAsStandaloneRate
-                                ? 'DASHBOARD_SUBMISSIONS'
-                                : 'SUBMISSIONS_CONTACTS',
-                        }
-                    )
-                }}
+                }
                 validationSchema={rateDetailsFormSchema}
             >
                 {({
-                    values: { rateForms, actuaryCommunicationPreference },
+                    values: { rateForms },
                     errors,
                     dirty,
                     handleSubmit,
@@ -513,10 +482,14 @@ const RateDetailsV2 = ({
                                                                                 rateForm
                                                                             )
                                                                         }}
+                                                                        shouldValidate={
+                                                                            shouldValidate
+                                                                        }
                                                                     />
                                                                 )}
-                                                                {rateForm.ratePreviouslySubmitted ===
-                                                                    'YES' &&
+                                                                {!displayAsStandaloneRate &&
+                                                                    rateForm.ratePreviouslySubmitted ===
+                                                                        'YES' &&
                                                                     rateForm.id && (
                                                                         <LinkedRateSummary
                                                                             rateForm={
@@ -525,8 +498,9 @@ const RateDetailsV2 = ({
                                                                         />
                                                                     )}
 
-                                                                {rateForm.ratePreviouslySubmitted ===
-                                                                    'NO' && (
+                                                                {(displayAsStandaloneRate ||
+                                                                    rateForm.ratePreviouslySubmitted ===
+                                                                        'NO') && (
                                                                     <SingleRateFormFields
                                                                         rateForm={
                                                                             rateForm
@@ -569,94 +543,38 @@ const RateDetailsV2 = ({
                                                         </SectionCard>
                                                     )
                                                 )}
-                                                <SectionCard>
-                                                    <h3>
-                                                        Additional rate
-                                                        certification
-                                                    </h3>
-                                                    <button
-                                                        type="button"
-                                                        className={`usa-button usa-button--outline ${styles.addRateBtn}`}
-                                                        onClick={() => {
-                                                            const newRate =
-                                                                convertGQLRateToRateForm(
-                                                                    getKey
-                                                                ) // empty rate
+                                                {!displayAsStandaloneRate && (
+                                                    <SectionCard>
+                                                        <h3>
+                                                            Additional rate
+                                                            certification
+                                                        </h3>
+                                                        <button
+                                                            type="button"
+                                                            className={`usa-button usa-button--outline ${styles.addRateBtn}`}
+                                                            onClick={() => {
+                                                                const newRate =
+                                                                    convertGQLRateToRateForm(
+                                                                        getKey
+                                                                    ) // empty rate
 
-                                                            push(newRate)
-                                                            setFocusNewRate(
-                                                                true
-                                                            )
-                                                        }}
-                                                        ref={newRateButtonRef}
-                                                    >
-                                                        Add another rate
-                                                        certification
-                                                    </button>
-                                                </SectionCard>
+                                                                push(newRate)
+                                                                setFocusNewRate(
+                                                                    true
+                                                                )
+                                                            }}
+                                                            ref={
+                                                                newRateButtonRef
+                                                            }
+                                                        >
+                                                            Add another rate
+                                                            certification
+                                                        </button>
+                                                    </SectionCard>
+                                                )}
                                             </>
                                         )}
                                     </FieldArray>
-                                    <SectionCard>
-                                        <FormGroup
-                                            error={showFieldErrors(
-                                                errors.actuaryCommunicationPreference
-                                            )}
-                                        >
-                                            <Fieldset
-                                                className={styles.radioGroup}
-                                                legend="Actuaries' communication preference"
-                                                role="radiogroup"
-                                                aria-required
-                                            >
-                                                <span
-                                                    className={
-                                                        styles.requiredOptionalText
-                                                    }
-                                                    style={{
-                                                        marginBottom: '10px',
-                                                    }}
-                                                >
-                                                    Required
-                                                </span>
-                                                <span
-                                                    className={
-                                                        styles.requiredOptionalText
-                                                    }
-                                                >
-                                                    Communication preference
-                                                    between CMS Office of the
-                                                    Actuary (OACT) and all
-                                                    state’s actuaries (i.e.
-                                                    certifying actuaries and
-                                                    additional actuary contacts)
-                                                </span>
-                                                <PoliteErrorMessage>
-                                                    {showFieldErrors(
-                                                        errors.actuaryCommunicationPreference
-                                                    ) &&
-                                                        getIn(
-                                                            errors,
-                                                            'actuaryCommunicationPreference'
-                                                        )}
-                                                </PoliteErrorMessage>
-                                                <FieldRadio
-                                                    id={`OACTtoActuary`}
-                                                    name={`actuaryCommunicationPreference`}
-                                                    label={`OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.`}
-                                                    value={'OACT_TO_ACTUARY'}
-                                                    aria-required
-                                                />
-                                                <FieldRadio
-                                                    id={`OACTtoState`}
-                                                    name={`actuaryCommunicationPreference`}
-                                                    label={`OACT can communicate directly with the state, and the state will relay all written communication to their actuaries and set up time for any potential verbal discussions.`}
-                                                    value={'OACT_TO_STATE'}
-                                                    aria-required
-                                                />
-                                            </Fieldset>
-                                        </FormGroup>
-                                    </SectionCard>
                                 </fieldset>
                                 <PageActions
                                     pageVariant={
@@ -666,22 +584,22 @@ const RateDetailsV2 = ({
                                     }
                                     backOnClick={async () => {
                                         if (dirty) {
-                                            rateForms.forEach((rateForm) => {
-                                                rateForm.actuaryCommunicationPreference =
-                                                    actuaryCommunicationPreference
-                                            })
                                             await handlePageAction(
                                                 rateForms,
                                                 setSubmitting,
                                                 {
                                                     type: 'CANCEL',
                                                     redirectPath:
-                                                        'DASHBOARD_SUBMISSIONS',
+                                                        displayAsStandaloneRate
+                                                            ? 'DASHBOARD_SUBMISSIONS'
+                                                            : 'SUBMISSIONS_CONTRACT_DETAILS',
                                                 }
                                             )
                                         } else {
                                             navigate(
-                                                RoutesRecord.DASHBOARD_SUBMISSIONS
+                                                displayAsStandaloneRate
+                                                    ? RoutesRecord.DASHBOARD_SUBMISSIONS
+                                                    : '../contract-details'
                                             )
                                         }
                                     }}
@@ -689,12 +607,6 @@ const RateDetailsV2 = ({
                                         displayAsStandaloneRate
                                             ? () => undefined
                                             : async () => {
-                                                  rateForms.forEach(
-                                                      (rateForm) => {
-                                                          rateForm.actuaryCommunicationPreference =
-                                                              actuaryCommunicationPreference
-                                                      }
-                                                  )
                                                   await handlePageAction(
                                                       rateForms,
                                                       setSubmitting,

@@ -48,7 +48,30 @@ const includeFullRate = {
                     validAfter: 'asc',
                 },
             },
-            relatedSubmissions: true,
+            relatedSubmissions: {
+                orderBy: {
+                    updatedAt: 'asc',
+                },
+                include: {
+                    submittedContracts: {
+                        include: includeContractFormData,
+                    },
+                    submittedRates: {
+                        include: includeRateFormData,
+                    },
+                    updatedBy: true,
+                    submissionPackages: {
+                        include: {
+                            contractRevision: {
+                                include: includeContractFormData,
+                            },
+                        },
+                        orderBy: {
+                            ratePosition: 'asc',
+                        },
+                    },
+                },
+            },
         },
     },
 } satisfies Prisma.RateTableInclude

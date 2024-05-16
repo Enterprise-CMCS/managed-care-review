@@ -4,6 +4,8 @@ If the data doesn't exist, returns undefined reliably
 */
 
 import { Contract, ContractFormData, ContractPackageSubmission, ContractRevision, Rate, RateRevision } from "../gen/gqlClient"
+import {ActuaryContact} from '../common-code/healthPlanFormDataType';
+import {ActuaryFirmsRecord} from '../constants';
 
 
 function getVisibleLatestRateRevisions(contract: Contract, isEditing: boolean): RateRevision[] | undefined {
@@ -66,4 +68,20 @@ const getDraftRates = (contract: Contract): Rate[] | undefined => {
     return (contract.draftRates && contract.draftRates[0]) ? contract.draftRates : undefined
 }
 
-export {getDraftRates, getLastContractSubmission, getVisibleLatestContractFormData, getVisibleLatestRateRevisions}
+const getActuaryFirm = (actuaryContact: ActuaryContact): string => {
+    if (
+        actuaryContact.actuarialFirmOther &&
+        actuaryContact.actuarialFirm === 'OTHER'
+    ) {
+        return actuaryContact.actuarialFirmOther
+    } else if (
+        actuaryContact.actuarialFirm &&
+        ActuaryFirmsRecord[actuaryContact.actuarialFirm]
+    ) {
+        return ActuaryFirmsRecord[actuaryContact.actuarialFirm]
+    } else {
+        return ''
+    }
+}
+
+export {getDraftRates, getLastContractSubmission, getVisibleLatestContractFormData, getVisibleLatestRateRevisions, getActuaryFirm}

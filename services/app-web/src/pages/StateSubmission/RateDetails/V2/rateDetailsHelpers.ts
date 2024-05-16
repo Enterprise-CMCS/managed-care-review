@@ -7,6 +7,7 @@ import {
     formatFormDateForGQL,
 } from '../../../../formHelpers/formatters'
 import {
+    ActuaryContact,
     Rate,
     RateFormData,
     UpdateContractRateInput,
@@ -62,6 +63,22 @@ const convertRateFormToGQLRateFormData = (
         packagesWithSharedRateCerts: rateForm.packagesWithSharedRateCerts,
     }
 }
+
+const isRatePartiallyFilled = (rate: RateFormData): boolean => {
+    const hasActuaryContacts = (actuaries: ActuaryContact[]): boolean => actuaries.some(actuary => (
+            actuary.id || actuary.name || actuary.titleRole || actuary.actuarialFirm || actuary.email
+        ))
+
+    return Boolean(rate.rateDocuments.length ||
+        rate.supportingDocuments.length ||
+        rate.rateProgramIDs.length ||
+        rate.rateType ||
+        rate.rateCapitationType ||
+        hasActuaryContacts(rate.certifyingActuaryContacts) ||
+        hasActuaryContacts(rate.addtlActuaryContacts) ||
+        rate.actuaryCommunicationPreference)
+}
+
 // Convert from GQL Rate to FormikRateForm object used in the form
 // if rate is not passed in, return an empty RateForm // we need to pass in the  s3 handler because 3 urls generated client-side
 // useLatestSubmission means to pull the latest submitted info rather than the draft info
@@ -69,12 +86,18 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate, pare
     const handleAsLinkedRate = rate && rate.parentContractID !== parentContractID // TODO: Make this a more sophisticated check for child-rates
     const rateRev = handleAsLinkedRate ? rate?.revisions[0] : rate?.draftRevision
     const rateForm = rateRev?.formData
+
+    // isFilledIn is used for determining if the rateForm should be saved in the case of the yes/no question for was
+    // this rate included in another submission fillable Fields includes only fields that aren't auto populated on
+    // initial yes/no selection, like id and rateName
+    const isFilledIn = rateForm && isRatePartiallyFilled(rateForm)
+
     return {
         id: rate?.id,
         status: rate?.status,
         rateCertificationName: rateForm?.rateCertificationName ?? undefined,
-        rateType: rateForm?.rateType,
-        rateCapitationType: rateForm?.rateCapitationType,
+        rateType: rateForm?.rateType ?? undefined,
+        rateCapitationType: rateForm?.rateCapitationType ?? undefined,
         rateDateStart: formatForForm(rateForm?.rateDateStart),
         rateDateEnd: formatForForm(rateForm?.rateDateEnd),
         rateDateCertified: formatForForm(rateForm?.rateDateCertified),
@@ -98,16 +121,18 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate, pare
             rateForm?.addtlActuaryContacts
         ),
         actuaryCommunicationPreference:
-            rateForm?.actuaryCommunicationPreference?? undefined,
+            rateForm?.actuaryCommunicationPreference ?? undefined,
         packagesWithSharedRateCerts:
             rateForm?.packagesWithSharedRateCerts ?? [],
-        ratePreviouslySubmitted: handleAsLinkedRate? 'YES' : rateForm ? 'NO' : undefined,
-        initiallySubmittedAt: rate?.initiallySubmittedAt
+        ratePreviouslySubmitted: handleAsLinkedRate? 'YES' : isFilledIn ? 'NO' : undefined,
+        initiallySubmittedAt: rate?.initiallySubmittedAt,
+        linkRateSelect: handleAsLinkedRate && rate?.id ? 'true' : undefined
     }
 }
 
 export {
     convertGQLRateToRateForm,
     convertRateFormToGQLRateFormData,
-    generateUpdatedRates
+    generateUpdatedRates,
+    isRatePartiallyFilled
 }

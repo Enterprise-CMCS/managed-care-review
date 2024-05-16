@@ -380,13 +380,24 @@ describe('SubmissionType', () => {
                 name: 'Minnesota',
                 code: 'MN',
                 programs: [
-                    { id: 'first', name: 'Program 1', fullName: 'Program 1' },
+                    {
+                        id: 'first',
+                        name: 'Program 1',
+                        fullName: 'Program 1',
+                        isRateProgram: false,
+                    },
                     {
                         id: 'second',
                         name: 'Program Test',
                         fullName: 'Program Test',
+                        isRateProgram: false,
                     },
-                    { id: 'third', name: 'Program 3', fullName: 'Program 3' },
+                    {
+                        id: 'third',
+                        name: 'Program 3',
+                        fullName: 'Program 3',
+                        isRateProgram: false,
+                    },
                 ],
             },
         }

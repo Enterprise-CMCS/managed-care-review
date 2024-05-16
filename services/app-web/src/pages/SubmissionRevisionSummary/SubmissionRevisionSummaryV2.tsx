@@ -7,7 +7,6 @@ import { ContactsSummarySection } from '../StateSubmission/ReviewSubmit/V2/Revie
 import { RateDetailsSummarySectionV2 } from '../StateSubmission/ReviewSubmit/V2/ReviewSubmit/RateDetailsSummarySectionV2'
 import { SubmissionTypeSummarySectionV2 } from '../StateSubmission/ReviewSubmit/V2/ReviewSubmit/SubmissionTypeSummarySectionV2'
 import { usePage } from '../../contexts/PageContext'
-import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { dayjs } from '../../common-code/dateHelpers'
 import styles from './SubmissionRevisionSummary.module.scss'
 import { PreviousSubmissionBanner } from '../../components'
@@ -16,6 +15,7 @@ import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
 } from '../StateSubmission/ErrorOrLoadingPage'
+import { Error404 } from '../Errors/Error404Page'
 
 type RouteParams = {
     id: string
@@ -49,19 +49,32 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
         fetchPolicy: 'network-only',
     })
     const contract = fetchContractData?.fetchContract.contract
-    //We offset version by +1 of index, remove offset to find revision in revisions
-    const revisionIndex = Number(revisionVersion)
 
-    const name =
-        contract &&
-        contract?.packageSubmissions.length === Number(revisionVersion)
-            ? contract.packageSubmissions.reverse()[revisionIndex]
-                  .contractRevision.contractName
-            : ''
+    // Offset version by +1 of index, remove offset to find target previous submission in the history list
+    const revisionIndex = Number(revisionVersion) - 1
+
+    // Reverse revisions to get correct submission order
+    const packageSubmissions = contract
+        ? [...contract.packageSubmissions]
+              .filter((submission) => {
+                  return submission.cause === 'CONTRACT_SUBMISSION'
+              })
+              .reverse()
+        : []
+    const targetPreviousSubmission =
+        packageSubmissions[revisionIndex] &&
+        packageSubmissions[revisionIndex].__typename
+            ? packageSubmissions[revisionIndex]
+            : undefined
+    const name = targetPreviousSubmission?.contractRevision.contractName
+
     useEffect(() => {
-        updateHeading({
-            customHeading: name,
-        })
+        // make sure you do not update the page heading until we are sure the name for that previous submission exists
+        if (name) {
+            updateHeading({
+                customHeading: name,
+            })
+        }
     }, [name, updateHeading])
 
     // Display any full page interim state resulting from the initial fetch API requests
@@ -77,19 +90,12 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
         )
     }
 
-    if (
-        !contract ||
-        contract.packageSubmissions.length === Number(revisionVersion)
-    ) {
-        return <GenericErrorPage />
+    if (!contract || !targetPreviousSubmission || !name) {
+        return <Error404 />
     }
 
-    //Reversing revisions to get correct submission order
-    const revision = [...contract.packageSubmissions].reverse()[revisionIndex]
-        .contractRevision
-    const rateRevisions = [...contract.packageSubmissions].reverse()[
-        revisionIndex
-    ].rateRevisions
+    const revision = targetPreviousSubmission.contractRevision
+    const rateRevisions = targetPreviousSubmission.rateRevisions
     const contractData = revision.formData
     const statePrograms = contract.state.programs
     const submitInfo = revision.submitInfo || undefined
@@ -103,13 +109,13 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
                 className={styles.container}
             >
                 <PreviousSubmissionBanner link={`/submissions/${id}`} />
-
                 <SubmissionTypeSummarySectionV2
                     contract={contract}
                     contractRev={revision}
                     statePrograms={statePrograms}
                     isStateUser={isStateUser}
                     submissionName={name}
+                    initiallySubmittedAt={contract.initiallySubmittedAt}
                     headerChildComponent={
                         submitInfo && (
                             <p

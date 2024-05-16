@@ -68,7 +68,7 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeNull()
     })
 
-    it.skip('can render state submission on summary page without errors (submission summary behavior)', async () => {
+    it('can render state submission on summary page without errors (submission summary behavior)', async () => {
         renderWithProviders(
             <ContractDetailsSummarySection
                 contract={{
@@ -333,7 +333,7 @@ describe('ContractDetailsSummarySection', () => {
                         id: '123',
                         createdAt: new Date(),
                         updatedAt: new Date(),
-                        contractName: 'MCR-0005-alvhalfhdsalf',
+                        contractName: 'MCR-0005-alvhalfhdsalfdd',
                         formData: mockContractFormData({
                             supportingDocuments: [],
                         }),
@@ -460,7 +460,7 @@ describe('ContractDetailsSummarySection', () => {
         ).not.toBeInTheDocument()
     })
 
-    it.skip('renders inline error when bulk URL is unavailable', async () => {
+    it('renders inline error when bulk URL is unavailable', async () => {
         const s3Provider = {
             ...testS3Client(),
             getBulkDlURL: async (

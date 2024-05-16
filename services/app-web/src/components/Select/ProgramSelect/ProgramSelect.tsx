@@ -7,6 +7,7 @@ import { useStatePrograms } from '../../../hooks'
 export type ProgramSelectPropType = {
     name: string
     programIDs: string[]
+    contractProgramsOnly?: boolean
 }
 
 export interface ProgramOptionType {
@@ -26,10 +27,14 @@ export interface ProgramOptionType {
 export const ProgramSelect = ({
     name,
     programIDs,
+    contractProgramsOnly,
     ...selectProps
 }: ProgramSelectPropType & Props<ProgramOptionType, true>) => {
     const [_field, _meta, helpers] = useField({ name })
-    const statePrograms = useStatePrograms()
+    const allPrograms = useStatePrograms()
+    const statePrograms = contractProgramsOnly
+        ? allPrograms.filter((program) => !program.isRateProgram)
+        : allPrograms
 
     const programOptions: ProgramOptionType[] = statePrograms.map((program) => {
         return { value: program.id, label: program.name }

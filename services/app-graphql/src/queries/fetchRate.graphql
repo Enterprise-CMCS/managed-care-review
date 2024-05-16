@@ -141,6 +141,7 @@ fragment rateFields on Rate {
             id
             name
             fullName
+            isRateProgram
         }
     }
     status

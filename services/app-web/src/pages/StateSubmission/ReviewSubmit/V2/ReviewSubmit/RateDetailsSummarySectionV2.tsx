@@ -31,6 +31,7 @@ import {
     getVisibleLatestContractFormData,
 } from '../../../../../gqlHelpers/contractsAndRates'
 import { useAuth } from '../../../../../contexts/AuthContext'
+import { ActuaryCommunicationRecord } from '../../../../../constants'
 
 export type RateDetailsSummarySectionV2Props = {
     contract: Contract
@@ -82,7 +83,9 @@ export const RateDetailsSummarySectionV2 = ({
 }: RateDetailsSummarySectionV2Props): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const isSubmittedOrCMSUser =
-        contract.status === 'SUBMITTED' || loggedInUser?.role === 'CMS_USER'
+        contract.status === 'SUBMITTED' ||
+        contract.status === 'RESUBMITTED' ||
+        loggedInUser?.role === 'CMS_USER'
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
     const contractOrRev = contractRev ? contractRev : contract
@@ -248,7 +251,7 @@ export const RateDetailsSummarySectionV2 = ({
                     renderDownloadButton(zippedFilesURL)}
             </SectionHeader>
             {rates && rates.length > 0 ? (
-                rates.map((rate) => {
+                rates.map((rate, rateIndex) => {
                     const rateFormData = getRateFormData(rate)
                     if (!rateFormData) {
                         return <GenericErrorPage />
@@ -336,6 +339,14 @@ export const RateDetailsSummarySectionV2 = ({
                                             )}`}
                                         />
                                     ) : null}
+                                    <DataDetail
+                                        id="rateCapitationType"
+                                        label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
+                                        explainMissingData={
+                                            !isSubmittedOrCMSUser
+                                        }
+                                        children={rateCapitationType(rate)}
+                                    />
                                     {rateFormData
                                         .certifyingActuaryContacts[0] && (
                                         <DataDetail
@@ -354,13 +365,36 @@ export const RateDetailsSummarySectionV2 = ({
                                             }
                                         />
                                     )}
+                                    {rateFormData.addtlActuaryContacts.map(
+                                        (contact, addtlContactIndex) => (
+                                            <DataDetail
+                                                key={`addtlCertifyingActuary-${addtlContactIndex}`}
+                                                id={`addtlCertifyingActuary-${addtlContactIndex}`}
+                                                label="Certifying actuary"
+                                                explainMissingData={
+                                                    !isSubmittedOrCMSUser
+                                                }
+                                                children={
+                                                    <DataDetailContactField
+                                                        contact={contact}
+                                                    />
+                                                }
+                                            />
+                                        )
+                                    )}
                                     <DataDetail
-                                        id="rateCapitationType"
-                                        label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
+                                        id="communicationPreference"
+                                        label="Actuaries’ communication preference"
+                                        children={
+                                            rateFormData.actuaryCommunicationPreference &&
+                                            ActuaryCommunicationRecord[
+                                                rateFormData
+                                                    .actuaryCommunicationPreference
+                                            ]
+                                        }
                                         explainMissingData={
                                             !isSubmittedOrCMSUser
                                         }
-                                        children={rateCapitationType(rate)}
                                     />
                                 </DoubleColumnGrid>
                             </dl>

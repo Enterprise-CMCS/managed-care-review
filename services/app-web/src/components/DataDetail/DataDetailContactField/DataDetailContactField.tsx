@@ -3,11 +3,18 @@ import {
     ActuaryContact,
     StateContact,
 } from '../../../common-code/healthPlanFormDataType'
-import { getActuaryFirm } from '../../SubmissionSummarySection'
+import { getActuaryFirm } from '../../../gqlHelpers/contractsAndRates'
 import { DataDetailMissingField } from '../DataDetailMissingField'
-import { ActuaryContact as GQLActuaryContact, StateContact as GQLStateContact } from '../../../gen/gqlClient'
+import {
+    ActuaryContact as GQLActuaryContact,
+    StateContact as GQLStateContact,
+} from '../../../gen/gqlClient'
 
-type Contact = ActuaryContact | GQLActuaryContact | StateContact | GQLStateContact
+type Contact =
+    | ActuaryContact
+    | GQLActuaryContact
+    | StateContact
+    | GQLStateContact
 function isCertainActuaryContact(contact: Contact): contact is ActuaryContact {
     return (contact as ActuaryContact).actuarialFirm !== undefined
 }

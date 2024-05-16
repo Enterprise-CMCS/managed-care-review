@@ -1,28 +1,14 @@
 import React from 'react'
-import { Fieldset, FormGroup, Form as UswdsForm } from '@trussworks/react-uswds'
-import {
-    FieldArray,
-    FieldArrayRenderProps,
-    Formik,
-    FormikErrors,
-    getIn,
-} from 'formik'
+import { Form as UswdsForm } from '@trussworks/react-uswds'
+import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
 import { useNavigate } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
 
-import {
-    ActuaryCommunicationType,
-    RateInfoType,
-} from '../../../common-code/healthPlanFormDataType'
+import { RateInfoType } from '../../../common-code/healthPlanFormDataType'
 
-import {
-    DynamicStepIndicator,
-    ErrorSummary,
-    FieldRadio,
-    PoliteErrorMessage,
-} from '../../../components'
+import { DynamicStepIndicator, ErrorSummary } from '../../../components'
 import { formatFormDateForDomain } from '../../../formHelpers'
 import { RateDetailsFormSchema } from './RateDetailsSchema'
 import { PageActions } from '../PageActions'
@@ -113,7 +99,6 @@ const generateRateCertFormValues = (params?: {
 
 interface RateInfoArrayType {
     rateInfos: RateCertFormType[]
-    actuaryCommunicationPreference: ActuaryCommunicationType | undefined
 }
 
 export const rateErrorHandling = (
@@ -171,10 +156,6 @@ export const RateDetails = ({
                       generateRateCertFormValues({ rateInfo, getKey })
                   )
                 : [generateRateCertFormValues()],
-        actuaryCommunicationPreference:
-            draftSubmission.addtlActuaryCommunicationPreference
-                ? draftSubmission.addtlActuaryCommunicationPreference
-                : undefined,
     }
 
     const handleFormSubmit = async (
@@ -185,7 +166,7 @@ export const RateDetails = ({
             redirectPath: string
         }
     ) => {
-        const { rateInfos, actuaryCommunicationPreference } = form
+        const { rateInfos } = form
 
         if (options.shouldValidateDocuments) {
             const fileErrorsNeedAttention = rateInfos.some((rateInfo) =>
@@ -230,16 +211,14 @@ export const RateDetails = ({
                 rateProgramIDs: rateInfo.rateProgramIDs,
                 actuaryContacts: rateInfo.actuaryContacts,
                 addtlActuaryContacts: rateInfo.addtlActuaryContacts,
-                actuaryCommunicationPreference: actuaryCommunicationPreference,
+                actuaryCommunicationPreference:
+                    rateInfo.actuaryCommunicationPreference,
                 packagesWithSharedRateCerts:
                     rateInfo.hasSharedRateCert === 'YES'
                         ? rateInfo.packagesWithSharedRateCerts
                         : [],
             }
         })
-
-        draftSubmission.addtlActuaryCommunicationPreference =
-            actuaryCommunicationPreference
 
         try {
             const updatedSubmission = await updateDraft(draftSubmission)
@@ -264,8 +243,6 @@ export const RateDetails = ({
         errors: FormikErrors<RateInfoArrayType>
     ) => {
         const rateErrors = errors.rateInfos
-        const actuaryCommunicationPreference =
-            errors.actuaryCommunicationPreference
         const errorObject: { [field: string]: string } = {}
 
         if (rateErrors && Array.isArray(rateErrors)) {
@@ -324,15 +301,8 @@ export const RateDetails = ({
             })
         }
 
-        if (actuaryCommunicationPreference) {
-            errorObject['actuaryCommunicationPreference'] =
-                actuaryCommunicationPreference
-        }
-
         return errorObject
     }
-    const showFieldErrors = (error?: string | undefined) =>
-        shouldValidate && Boolean(error)
 
     return (
         <>
@@ -350,23 +320,16 @@ export const RateDetails = ({
             <FormContainer id="RateDetails">
                 <Formik
                     initialValues={rateInfosInitialValues}
-                    onSubmit={(
-                        { rateInfos, actuaryCommunicationPreference },
-                        { setSubmitting }
-                    ) => {
-                        return handleFormSubmit(
-                            { rateInfos, actuaryCommunicationPreference },
-                            setSubmitting,
-                            {
-                                shouldValidateDocuments: true,
-                                redirectPath: `../contacts`,
-                            }
-                        )
+                    onSubmit={({ rateInfos }, { setSubmitting }) => {
+                        return handleFormSubmit({ rateInfos }, setSubmitting, {
+                            shouldValidateDocuments: true,
+                            redirectPath: `../contacts`,
+                        })
                     }}
                     validationSchema={rateDetailsFormSchema}
                 >
                     {({
-                        values: { rateInfos, actuaryCommunicationPreference },
+                        values: { rateInfos },
                         errors,
                         dirty,
                         handleSubmit,
@@ -469,72 +432,6 @@ export const RateDetails = ({
                                                 </>
                                             )}
                                         </FieldArray>
-                                        <SectionCard>
-                                            <FormGroup
-                                                error={showFieldErrors(
-                                                    errors.actuaryCommunicationPreference
-                                                )}
-                                            >
-                                                <Fieldset
-                                                    className={
-                                                        styles.radioGroup
-                                                    }
-                                                    legend="Actuaries' communication preference"
-                                                    role="radiogroup"
-                                                    aria-required
-                                                >
-                                                    <span
-                                                        className={
-                                                            styles.requiredOptionalText
-                                                        }
-                                                        style={{
-                                                            marginBottom:
-                                                                '10px',
-                                                        }}
-                                                    >
-                                                        Required
-                                                    </span>
-                                                    <span
-                                                        className={
-                                                            styles.requiredOptionalText
-                                                        }
-                                                    >
-                                                        Communication preference
-                                                        between CMS Office of
-                                                        the Actuary (OACT) and
-                                                        all state’s actuaries
-                                                        (i.e. certifying
-                                                        actuaries and additional
-                                                        actuary contacts)
-                                                    </span>
-                                                    <PoliteErrorMessage>
-                                                        {showFieldErrors(
-                                                            errors.actuaryCommunicationPreference
-                                                        ) &&
-                                                            getIn(
-                                                                errors,
-                                                                'actuaryCommunicationPreference'
-                                                            )}
-                                                    </PoliteErrorMessage>
-                                                    <FieldRadio
-                                                        id={`OACTtoActuary`}
-                                                        name={`actuaryCommunicationPreference`}
-                                                        label={`OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.`}
-                                                        value={
-                                                            'OACT_TO_ACTUARY'
-                                                        }
-                                                        aria-required
-                                                    />
-                                                    <FieldRadio
-                                                        id={`OACTtoState`}
-                                                        name={`actuaryCommunicationPreference`}
-                                                        label={`OACT can communicate directly with the state, and the state will relay all written communication to their actuaries and set up time for any potential verbal discussions.`}
-                                                        value={'OACT_TO_STATE'}
-                                                        aria-required
-                                                    />
-                                                </Fieldset>
-                                            </FormGroup>
-                                        </SectionCard>
                                     </fieldset>
                                     <PageActions
                                         backOnClick={async () => {
@@ -543,7 +440,6 @@ export const RateDetails = ({
                                                 await handleFormSubmit(
                                                     {
                                                         rateInfos,
-                                                        actuaryCommunicationPreference,
                                                     },
                                                     setSubmitting,
                                                     {
@@ -560,7 +456,6 @@ export const RateDetails = ({
                                             await handleFormSubmit(
                                                 {
                                                     rateInfos,
-                                                    actuaryCommunicationPreference,
                                                 },
                                                 setSubmitting,
                                                 {
