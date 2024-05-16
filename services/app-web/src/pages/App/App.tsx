@@ -29,8 +29,8 @@ function App({
     s3Client,
 }: AppProps): React.ReactElement {
     return (
-        <ErrorBoundary FallbackComponent={ErrorBoundaryRoot}>
-            <TraceProvider>
+        <TraceProvider>
+            <ErrorBoundary FallbackComponent={ErrorBoundaryRoot}>
                 <BrowserRouter>
                     <ApolloProvider client={apolloClient}>
                         <S3Provider client={s3Client}>
@@ -42,8 +42,8 @@ function App({
                         </S3Provider>
                     </ApolloProvider>
                 </BrowserRouter>
-            </TraceProvider>
-        </ErrorBoundary>
+            </ErrorBoundary>
+        </TraceProvider>
     )
 }
 

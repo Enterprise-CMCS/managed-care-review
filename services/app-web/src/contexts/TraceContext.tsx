@@ -1,7 +1,7 @@
 import React from 'react'
 import {
     WebTracerProvider,
-    SimpleSpanProcessor,
+    BatchSpanProcessor,
 } from '@opentelemetry/sdk-trace-web'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http/build/esnext'
 import { Resource } from '@opentelemetry/resources'
@@ -27,7 +27,7 @@ const collectorOptions = {
 }
 const exporter = new OTLPTraceExporter(collectorOptions)
 
-provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
+provider.addSpanProcessor(new BatchSpanProcessor(exporter))
 
 const contextManager = new ZoneContextManager()
 provider.register({
