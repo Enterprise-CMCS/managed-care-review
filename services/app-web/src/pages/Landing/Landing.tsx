@@ -35,9 +35,6 @@ export const Landing = (): React.ReactElement => {
         'session-timeout'
     )
 
-    if (location.pathname === '/crash') {
-        throw new Error('this is a crasher - should catch in error boundary and log to otel')
-    }
     return (
         <>
             <section className={styles.detailsSection}>

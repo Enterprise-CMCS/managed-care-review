@@ -294,7 +294,6 @@ const UnauthenticatedRoutes = ({
     return (
         <Routes>
             <Route path={RoutesRecord.ROOT} element={<Landing />} />
-            <Route path='/crash' element={<Landing />} />
             {UniversalRoutes}
             {/* no /auth page for IDM auth, we just have the login redirect link */}
             {authComponent && (
