@@ -20,7 +20,7 @@ export function createTracer(serviceName: string): Tracer {
 
     // log to console and send to New Relic
     const exporter = new OTLPTraceExporter({
-        url: 'http://localhost:4318/v1/traces', //process.env.REACT_APP_OTEL_COLLECTOR_URL,
+        url: process.env.REACT_APP_OTEL_COLLECTOR_URL,
         headers: {},
     })
 
@@ -35,5 +35,5 @@ export function createTracer(serviceName: string): Tracer {
         instrumentations: [new HttpInstrumentation()],
     })
 
-    return trace.getTracer('app-api')
+    return trace.getTracer(serviceName)
 }
