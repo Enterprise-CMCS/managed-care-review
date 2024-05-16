@@ -11,6 +11,7 @@ import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import { generateRateCertificationName } from './generateRateCertificationName'
+import { findStatePrograms } from '../../../../app-web/src/common-code/healthPlanFormDataType/findStatePrograms'
 import { nullsToUndefined } from '../../domain-models/nullstoUndefined'
 
 /*
@@ -93,14 +94,17 @@ export function submitRate(
 
         // prepare to generate rate cert name - either use new form data coming down on submit or unsubmitted submission data already in database
         const stateCode = unsubmittedRate.stateCode
+        const statePrograms = findStatePrograms(stateCode)
         const generatedRateCertName = formData
             ? generateRateCertificationName(
                   nullsToUndefined(formData),
-                  stateCode
+                  stateCode,
+                  statePrograms
               )
             : generateRateCertificationName(
                   draftRateRevision.formData,
-                  stateCode
+                  stateCode,
+                  statePrograms
               )
 
         // combine existing db draft data with any form data added on submit
