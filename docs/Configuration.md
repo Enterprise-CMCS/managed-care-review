@@ -193,7 +193,7 @@ Read by `app-web`
 
 There are vars per environment for dev/val/prod.
 - REACT_APP_NR_ACCOUNT_ID
-- REACT_APP_NR_APPLICATION_ID
+- REACT_APP_NR_AGENT_ID
 
 These are the same in all environments.
 - REACT_APP_NR_LICENSE_KEY
