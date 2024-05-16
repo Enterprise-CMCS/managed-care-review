@@ -194,7 +194,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     const stageName = process.env.stage
     const applicationEndpoint = process.env.APPLICATION_ENDPOINT
     const emailerMode = process.env.EMAILER_MODE
-    const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
+    const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
     const parameterStoreMode = process.env.PARAMETER_STORE_MODE
     const ldSDKKey = process.env.LD_SDK_KEY
     const allowedIpAddresses = process.env.ALLOWED_IP_ADDRESSES
@@ -222,7 +222,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (otelCollectorUrl === undefined || otelCollectorUrl === '') {
         throw new Error(
-            'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL is required to run app-api'
+            'Configuration Error: API_APP_OTEL_COLLECTOR_URL is required to run app-api'
         )
     }
 

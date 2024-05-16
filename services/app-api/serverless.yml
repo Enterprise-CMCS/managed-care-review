@@ -31,7 +31,7 @@ custom:
   qa_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.QAUploadsBucketArn}
   secretsManagerSecret: aurora_postgres_${sls:stage} #pragma: allowlist secret
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
-  reactAppOtelCollectorUrl: ${env:REACT_APP_OTEL_COLLECTOR_URL, ssm:/configuration/react_app_otel_collector_url}
+  apiAppOtelCollectorUrl: ${env:API_APP_OTEL_COLLECTOR_URL, ssm:/configuration/api_app_otel_collector_url}
   dbURL: ${env:DATABASE_URL}
   ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key_feds}
   allowedIpAddresses: ${env:ALLOWED_IP_ADDRESSES, ssm:/configuration/allowed_ip_addresses}
@@ -150,7 +150,7 @@ provider:
     stage: ${sls:stage}
     DATABASE_URL: ${self:custom.dbURL}
     REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
-    REACT_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
+    API_APP_OTEL_COLLECTOR_URL: ${self:custom.apiAppOtelCollectorUrl}
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
     EMAILER_MODE: ${self:custom.emailerMode}
     PARAMETER_STORE_MODE: ${self:custom.parameterStoreMode}
@@ -189,7 +189,7 @@ functions:
           path: otel
           method: post
           cors: true
- 
+
   graphql:
     handler: src/handlers/apollo_gql.graphqlHandler
     events:
@@ -208,15 +208,15 @@ functions:
           method: post
           cors: true
           authorizer:
-              name: third_party_api_authorizer
-              identitySource: method.request.header.Authorization
+            name: third_party_api_authorizer
+            identitySource: method.request.header.Authorization
       - http:
           path: v1/graphql/external
           method: get
           cors: true
           authorizer:
-              name: third_party_api_authorizer
-              identitySource: method.request.header.Authorization
+            name: third_party_api_authorizer
+            identitySource: method.request.header.Authorization
     timeout: 60 # aurora cold start can be long
     vpc:
       securityGroupIds:
