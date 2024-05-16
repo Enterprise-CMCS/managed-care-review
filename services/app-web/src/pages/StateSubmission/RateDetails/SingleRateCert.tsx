@@ -305,7 +305,7 @@ export const SingleRateCert = ({
                         name={`${fieldNamePrefix}.rateProgramIDs`}
                         inputId={`${fieldNamePrefix}.rateProgramIDs`}
                         programIDs={rateInfo.rateProgramIDs}
-                        aria-label="programs (required)"
+                        aria-label="What rates this rate certification covers (required)"
                     />
                 </FormGroup>
 

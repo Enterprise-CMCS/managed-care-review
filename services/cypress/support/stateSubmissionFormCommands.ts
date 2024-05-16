@@ -358,7 +358,7 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
             .blur()
         cy.findByLabelText('Date certified').type('03/01/2024')
 
-        cy.findByRole('combobox', { name: 'programs (required)' }).click({
+        cy.findByRole('combobox', { name: 'What rates are included in this certification? (required)' }).click({
             force: true,
         })
         cy.findByText('PMAP').click()
@@ -444,7 +444,7 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
     cy.get(`[id="rateInfos.${id}.effectiveDateStart"]`).type('03/01/2024')
     cy.get(`[id="rateInfos.${id}.effectiveDateEnd"]`).type('03/01/2025')
 
-    cy.findByRole('combobox', { name: 'programs (required)' }).click({
+    cy.findByRole('combobox', { name: 'What rates are included in this certification? (required)' }).click({
         force: true,
     })
     cy.findByText('PMAP').click()
