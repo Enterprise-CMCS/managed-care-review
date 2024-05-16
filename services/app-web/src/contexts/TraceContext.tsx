@@ -10,6 +10,7 @@ import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web'
 import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
 import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
+import { ZoneContextManager } from '@opentelemetry/context-zone'
 
 const serviceName = 'app-web-' + process.env.REACT_APP_STAGE_NAME
 
@@ -28,12 +29,15 @@ const exporter = new OTLPTraceExporter(collectorOptions)
 
 provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
 
+const contextManager = new ZoneContextManager()
 provider.register({
+    contextManager,
     propagator: new AWSXRayPropagator(),
 })
 
 // Registering instrumentations
 registerInstrumentations({
+    tracerProvider: provider,
     instrumentations: [
         getWebAutoInstrumentations({
             // load custom configuration for xml-http-request instrumentation
