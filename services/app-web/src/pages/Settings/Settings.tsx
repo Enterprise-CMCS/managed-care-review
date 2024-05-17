@@ -7,11 +7,19 @@ import { EmailSettingsTable } from './EmailSettingsTables/EmailSettingsTables'
 import { CMSUsersTable } from './CMSUsersTable/CMSUsersTable'
 import { SettingsErrorAlert } from './SettingsErrorAlert'
 import { useLocation } from 'react-router-dom'
+import { recordJSException } from '../../otelHelpers'
 
 export const TestMonitoring = (): null => {
     const location = useLocation()
-    if (location.pathname === 'settings/test-monitoring') {
-        throw new Error('This is a force JS error - should catch in error boundary and log to monitoring')
+    const monitoringTest = new URLSearchParams(
+        location.search
+    ).get('test')
+    if (monitoringTest) {
+        if (monitoringTest === 'crash') {
+            throw new Error('This is a force JS error - should catch in error boundary and log to monitoring')
+        } else if (monitoringTest === 'error') {
+            recordJSException(new Error('Test error logging'))
+        }
     }
     return null
 }
