@@ -293,7 +293,7 @@ export const SingleRateCert = ({
 
                 <FormGroup error={Boolean(showFieldErrors('rateProgramIDs'))}>
                     <Label htmlFor={`${fieldNamePrefix}.rateProgramIDs`}>
-                        Rates this rate certification covers
+                        Programs this rate certification covers
                     </Label>
                     <span className={styles.requiredOptionalText}>
                         Required
@@ -305,7 +305,7 @@ export const SingleRateCert = ({
                         name={`${fieldNamePrefix}.rateProgramIDs`}
                         inputId={`${fieldNamePrefix}.rateProgramIDs`}
                         programIDs={rateInfo.rateProgramIDs}
-                        aria-label="What rates this rate certification covers (required)"
+                        aria-label="programs (required)"
                     />
                 </FormGroup>
 

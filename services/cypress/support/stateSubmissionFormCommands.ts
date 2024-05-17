@@ -358,7 +358,7 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
             .blur()
         cy.findByLabelText('Date certified').type('03/01/2024')
 
-        cy.findByRole('combobox', { name: 'What rates are included in this certification? (required)' }).click({
+        cy.findByRole('combobox', { name: 'programs (required)' }).click({
             force: true,
         })
         cy.findByText('PMAP').click()

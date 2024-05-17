@@ -233,7 +233,7 @@ describe('RateDetails', () => {
             })
 
             expect(
-                screen.getByText('Rates this rate certification covers')
+                screen.getByText('Programs this rate certification covers')
             ).toBeInTheDocument()
             expect(
                 screen.getByText('Rate certification type')
@@ -1665,7 +1665,9 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
         withinTargetRateCert.getByText('Upload one rate certification document')
     ).toBeInTheDocument()
     expect(
-        withinTargetRateCert.getByText('Rates this rate certification covers')
+        withinTargetRateCert.getByText(
+            'Programs this rate certification covers'
+        )
     ).toBeInTheDocument()
     expect(
         withinTargetRateCert.getByText('Rate certification type')
