@@ -33,7 +33,7 @@ custom:
   storybook_cloudfront_distribution_id: ${cf:storybook-${sls:stage}.CloudFrontDistributionId}
   react_app_auth_mode: ${env:REACT_APP_AUTH_MODE}
   nr_license_key: ${env:NR_LICENSE_KEY, ssm:/configuration/nr_license_key}
-  react_app_ld_client_id: ${env:REACT_APP_LD_CLIENT_ID, ssm:/configuration/react_app_ld_client_id}
+  react_app_ld_client_id: ${env:REACT_APP_LD_CLIENT_ID, ssm:/configuration/react_app_ld_client_id_feds}
   react_app_nr_account_id: ${env:REACT_APP_NR_ACCOUNT_ID, ssm:/configuration/react_app_nr_account_id}
   react_app_nr_trust_key: ${env:REACT_APP_NR_TRUST_KEY, ssm:/configuration/react_app_nr_trust_key}
   react_app_nr_license_key: ${env:REACT_APP_NR_TRUST_KEY, ssm:/configuration/react_app_nr_license_key}
