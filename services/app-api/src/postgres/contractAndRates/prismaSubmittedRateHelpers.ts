@@ -65,6 +65,9 @@ const includeFullRate = {
                             contractRevision: {
                                 include: includeContractFormData,
                             },
+                            rateRevision: {
+                                include: includeRateFormData
+                            }
                         },
                         orderBy: {
                             ratePosition: 'asc',
