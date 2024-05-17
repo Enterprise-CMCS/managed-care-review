@@ -60,7 +60,6 @@ registerInstrumentations({
                     /(.*)\.adoberesources\.net/g,
                     /(.*)\.google-analytics\.com/g,
                 ],
-                //propagateTraceHeaderCorsUrls: [/.+/g],
                 propagateTraceHeaderCorsUrls: [/.+/g],
             },
         }),
