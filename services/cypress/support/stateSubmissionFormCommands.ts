@@ -333,7 +333,7 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
         } else {
             // otherwise use legacy packages with shared rates UI
             cy.findByRole('radiogroup', {
-                name: /Was this rate certification uploaded to any other submissions?/,
+                name: /Was this rate certification included with another submission?/,
             })
                 .should('exist')
                 .within(() => {
@@ -421,7 +421,7 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
     // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
     cy.findByRole('radiogroup', {
-        name: /Was this rate certification uploaded to any other submissions?/,
+        name: /Was this rate certification included with another submission?/,
     })
         .should('exist')
         .within(() => {
@@ -444,7 +444,7 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
     cy.get(`[id="rateInfos.${id}.effectiveDateStart"]`).type('03/01/2024')
     cy.get(`[id="rateInfos.${id}.effectiveDateEnd"]`).type('03/01/2025')
 
-    cy.findByRole('combobox', { name: 'What rates are included in this certification? (required)' }).click({
+    cy.findByRole('combobox', { name: 'programs (required)' }).click({
         force: true,
     })
     cy.findByText('PMAP').click()
