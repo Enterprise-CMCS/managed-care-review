@@ -34,7 +34,7 @@ function App({
     s3Client,
 }: AppProps): React.ReactElement {
     const environmentName = process.env.REACT_APP_STAGE_NAME || ''
-    const isHigherEnv = ['prod', 'val', 'dev'].includes(environmentName )
+    const isHigherEnv = ['prod', 'val', 'main'].includes(environmentName )
     const nrSnippet = generateNRScriptContent({accountID: getEnv('REACT_APP_NR_ACCOUNT_ID'), trustKey: getEnv('REACT_APP_NR_TRUST_KEY'), applicationID: getEnv('REACT_APP_NR_AGENT_ID'), licenseKey: getEnv('REACT_APP_NR_LICENSE_KEY')})
     useScript({inlineScriptAsString: nrSnippet, src:'', id: 'newrelic', showScript: isHigherEnv})
 
