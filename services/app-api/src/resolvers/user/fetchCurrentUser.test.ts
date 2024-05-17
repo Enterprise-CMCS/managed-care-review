@@ -16,7 +16,7 @@ describe('currentUser', () => {
 
         expect(res.data?.fetchCurrentUser.email).toBe('james@example.com')
         expect(res.data?.fetchCurrentUser.state.code).toBe('FL')
-        expect(res.data?.fetchCurrentUser.state.programs).toHaveLength(5)
+        expect(res.data?.fetchCurrentUser.state.programs).toHaveLength(7)
     })
 
     it('returns programs for MI', async () => {
