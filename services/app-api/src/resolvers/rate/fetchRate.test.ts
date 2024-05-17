@@ -5,14 +5,13 @@ import {
     defaultFloridaRateProgram,
     unlockTestHealthPlanPackage,
     updateTestHealthPlanFormData,
-    updateTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import { submitTestRate, updateTestRate } from '../../testHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import { addNewRateToTestContract, createSubmitAndUnlockTestRate, fetchTestRateById,  updateRatesInputFromDraftContract, updateTestDraftRatesOnContract,  } from '../../testHelpers/gqlRateHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { createAndUpdateTestContractWithoutRates, fetchTestContract, linkRateToDraftContract, submitTestContract, updateRateOnDraftContract, clearRatesOnDraftContract } from '../../testHelpers/gqlContractHelpers'
+import { createAndUpdateTestContractWithoutRates, fetchTestContract, submitTestContract} from '../../testHelpers/gqlContractHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 
 describe('fetchRate', () => {
