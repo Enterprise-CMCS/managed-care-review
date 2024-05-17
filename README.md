@@ -306,16 +306,7 @@ You'll need to add this service to our deployment GitHub Actions workflows:
 
 ## Monitoring
 
-We currently are using Open Telemetry for distributed tracing, with our OTEL exporters pointed to New Relic. In order to access our New Relic dashboard, you'll first need to request access from someone on the team. Once access has been granted, the following should be used to sign in to your account:
-
-1. Open https://one.newrelic.com and log in to your account using your `@teamtrussworks.com` email address.
-2. You will be redirected to the CMS SSO for Active Directory in Azure.
-3. Log in with an email address consisting of your EUA ID + `@cloud.cms.gov`.
-4. Enter your EUA password at the next screen.
-5. You should be prompted to choose your MFA type, either by SMS or by phone.
-6. Enter your MFA token.
-
-You should now be at our New Relic dashboard where all our OTEL metrics are being displayed.
+Read more in [monitoring documentation](./docs/technical-design/monitoring.md).
 
 ## Launch Darkly
 

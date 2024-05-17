@@ -187,6 +187,21 @@ Read by `app-web`
 
 This is the client ID for Launch Darkly in our frontend. This key is designed to have limited access since it's exposed in our client side code. There is one per environment of local/dev/val/prod.
 
+### `REACT_APP_NR_*`
+
+Read by `app-web`
+
+There are vars per environment for dev/val/prod.
+- REACT_APP_NR_ACCOUNT_ID
+- REACT_APP_NR_AGENT_ID
+
+These are the same in all environments.
+- REACT_APP_NR_LICENSE_KEY
+- REACT_APP_NR_TRUST_KEY
+
+
+These env vars configure new relic for browser monitoring. They are interpolated into browser monitoring inline script. If we move towards integration via New Relic APM instead, these variables can be deleted.
+
 ## Email configuration
 
 Important email configuration is stored in AWS Parameter Store. Reference for the expected values can be found in [Confluence](https://qmacbis.atlassian.net/wiki/spaces/OY2/pages/3164864517/Emails)
@@ -211,7 +226,7 @@ We plan to move this to the DB down the road. Until then, know that if these val
 
 #### `/configuration/email/rateHelpAddress`
 
-*[same in prod/val* This the help address displayed in state emails for contacting the rate policy team.
+*[same in prod/val]* This the help address displayed in state emails for contacting the rate policy team.
 
 #### `/configuration/email/reviewHelpAddress`
 
@@ -223,7 +238,7 @@ We plan to move this to the DB down the road. Until then, know that if these val
 
 #### `/configuration/email/dmcpReview`
 
-*[environment specific]* This contains the DMCP inbox for external communication and Q&A notifications. 
+*[environment specific]* This contains the DMCP inbox for external communication and Q&A notifications.
 
 
 #### `/configuration/email/oact`

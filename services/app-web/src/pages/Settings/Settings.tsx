@@ -6,24 +6,41 @@ import { Tabs, TabPanel, Loading } from '../../components'
 import { EmailSettingsTable } from './EmailSettingsTables/EmailSettingsTables'
 import { CMSUsersTable } from './CMSUsersTable/CMSUsersTable'
 import { SettingsErrorAlert } from './SettingsErrorAlert'
+import { useLocation } from 'react-router-dom'
+import { recordJSException } from '../../otelHelpers'
 
+export const TestMonitoring = (): null => {
+    const location = useLocation()
+    const monitoringTest = new URLSearchParams(
+        location.search
+    ).get('test')
+    if (monitoringTest) {
+        if (monitoringTest === 'crash') {
+            throw new Error('This is a force JS error - should catch in error boundary and log to monitoring')
+        } else if (monitoringTest === 'error') {
+            recordJSException(new Error('Test error logging'))
+        }
+    }
+    return null
+}
 export const Settings = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
     const isAuthenticated = loginStatus === 'LOGGED_IN'
     const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const isHelpdeskUser = loggedInUser?.role === 'HELPDESK_USER'
     const isBusinessOwnerUser = loggedInUser?.role === 'BUSINESSOWNER_USER'
-
+    const isAllowedToSeeSettings = isAdminUser || isHelpdeskUser || isBusinessOwnerUser
     const loading = loginStatus === 'LOADING' || !loggedInUser
+
     return (
         <GridContainer className={styles.pageContainer}>
             {loading ? (
                 <Loading />
             ) : !isAuthenticated ||
-              !(isAdminUser || isHelpdeskUser || isBusinessOwnerUser) ? (
+              !(isAllowedToSeeSettings) ? (
                 <SettingsErrorAlert
                     isAuthenticated={isAuthenticated}
-                    isAdmin={isAdminUser || isHelpdeskUser}
+                    isAdmin={isAllowedToSeeSettings}
                 />
             ) : (
                 <Grid>
@@ -46,6 +63,7 @@ export const Settings = (): React.ReactElement => {
                             <EmailSettingsTable type="SUPPORT" />
                         </TabPanel>
                     </Tabs>
+                    <TestMonitoring />
                 </Grid>
             )}
         </GridContainer>
