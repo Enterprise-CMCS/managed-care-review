@@ -306,6 +306,16 @@ model State {
   rates                       RateTable[]
 }
 
+model StateProgram {
+  id                 String                @id @default(uuid())
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @default(now()) @updatedAt
+  fullName           String
+  name               String
+  stateCode          String
+  isRateProgram      Boolean
+}
+
 model User {
   id                    String             @id @default(uuid())
   createdAt             DateTime           @default(now())
