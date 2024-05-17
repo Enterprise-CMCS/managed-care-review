@@ -148,12 +148,6 @@
                     "isRateProgram": false
                 },
                 {
-                    "id": "14a5d2f4-d4ff-49cf-93b6-7d2f7c2b89e5",
-                    "fullName": "Coordinated Care Initiative Duals",
-                    "name": "CCI Duals",
-                    "isRateProgram": false
-                },
-                {
                     "id": "46680d23-ce69-49ec-a5f8-e2b3f0173578",
                     "fullName": "AIDS Healthcare Foundation ",
                     "name": "AHF",
@@ -262,6 +256,18 @@
             "name": "Florida",
             "programs": [
                 {
+                    "id": "83d0e9d9-6592-439a-b46c-3235e8192fa0",
+                    "fullName": "Non-Emergency Medical Transportation - Medical Transportation Management (NEMT MTM)",
+                    "name": "NEMT MTM",
+                    "isRateProgram": true
+                },
+                {
+                    "id": "83b12618-4e53-40fa-9db8-c714fba64e49",
+                    "fullName": "Non-Emergency Medical Transportation - LogistiCare (NEMT LC)",
+                    "name": "NEMT LC",
+                    "isRateProgram": true
+                },
+                {
                     "id": "712277fb-f43f-4eb5-98c5-6c6a97509201",
                     "fullName": "Non-Emergency Medical Transportation",
                     "name": "NEMT",
@@ -336,7 +342,7 @@
                 {
                     "id": "47995323-dd69-4ea5-afeb-eef15d6da27f",
                     "fullName": "Hawaii QUEST Integration",
-                    "name": "QI",
+                    "name": "Quest",
                     "isRateProgram": false
                 },
                 {
@@ -656,6 +662,18 @@
                     "fullName": "MO HealthNet Managed Care – General Plan",
                     "name": "HealthNet General",
                     "isRateProgram": false
+                },
+                {
+                    "id": "820be0ba-6c98-4aea-8880-8a617f2d2ab5",
+                    "fullName": "HealthNet",
+                    "name": "HealthNet",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "79244a27-b8b2-4d3f-811c-ca74a51310a6",
+                    "fullName": "HealthNet Expansion",
+                    "name": "HN Expansion",
+                    "isRateProgram": false
                 }
             ],
             "code": "MO"
@@ -796,6 +814,18 @@
             "name": "New Jersey",
             "programs": [
                 {
+                    "id": "09dae8a2-df85-40e7-815e-0262fc49528c",
+                    "fullName": "NJ FamilyCare MLTSS",
+                    "name": "FamilyCare MLTSS",
+                    "isRateProgram": true
+                },
+                {
+                    "id": "060cff75-f126-4248-95d1-846b3305a886",
+                    "fullName": "NJ FamilyCare Acute",
+                    "name": "FamilyCare Acute",
+                    "isRateProgram": true
+                },
+                {
                     "id": "da99a50b-accc-4849-b4a6-ce1436391dc2",
                     "fullName": "NJFamilyCare",
                     "name": "NJ FamilyCare",
@@ -816,8 +846,32 @@
                 {
                     "id": "601937ba-a590-41a3-a006-57bec219e75f",
                     "fullName": "Centennial Care 2.0",
-                    "name": "Centennial Care",
+                    "name": "CC",
                     "isRateProgram": false
+                },
+                {
+                    "id": "2f12c537-716a-419d-9822-bc8163b91c13",
+                    "fullName": "Centennial Care BH",
+                    "name": "BH",
+                    "isRateProgram": true
+                },
+                {
+                    "id": "66efa54a-9a2b-4c0d-8097-f368da41e44c",
+                    "fullName": "Centennial Care PH",
+                    "name": "PH",
+                    "isRateProgram": true
+                },
+                {
+                    "id": "00b57070-60d6-4deb-8b79-72b960e5e512",
+                    "fullName": "Centennial Care LTSS",
+                    "name": "LTSS",
+                    "isRateProgram": true
+                },
+                {
+                    "id": "bb078c3f-9259-4a29-a370-04368154f0ef",
+                    "fullName": "Centennial Care OAG",
+                    "name": "OAG",
+                    "isRateProgram": true
                 }
             ],
             "code": "NM"
@@ -894,7 +948,7 @@
                 {
                     "id": "889f525e-08c7-4e62-9df9-b67186a87975",
                     "fullName": "Ohio Resilience through Integrated Systems and Excellence",
-                    "name": "OhioRISE",
+                    "name": "RISE",
                     "isRateProgram": false
                 },
                 {
@@ -961,6 +1015,12 @@
                     "id": "46246196-3b63-40be-8db1-c09cec281dae",
                     "fullName": "Coordinated Care Organizations",
                     "name": "CCO",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "fd2589c9-c008-494d-bd56-16f3098f94b6",
+                    "fullName": "Dental Care Organizations",
+                    "name": "DCO",
                     "isRateProgram": false
                 }
             ],
@@ -1051,12 +1111,6 @@
                     "id": "75034655-ebc5-4fc3-8415-578379eb3d74",
                     "fullName": "South Carolina Medical Homes Network ",
                     "name": "Medical Home Network",
-                    "isRateProgram": false
-                },
-                {
-                    "id": "134551a3-9af1-4ccc-8c3c-33f99e196fd1",
-                    "fullName": "South Carolina Non-Emergency Medical Transportation",
-                    "name": "NEMT",
                     "isRateProgram": false
                 }
             ],
@@ -1196,6 +1250,12 @@
                     "fullName": "Global Commitment to Health",
                     "name": "GCTH",
                     "isRateProgram": false
+                },
+                {
+                    "id": "395aeb44-c728-4cbf-bc26-64318da4814e",
+                    "fullName": "Vermont Medicaid Next Generation Accountable Care Organization",
+                    "name": "VMNG",
+                    "isRateProgram": false
                 }
             ],
             "code": "VT"
@@ -1206,7 +1266,7 @@
                 {
                     "id": "7877a1e5-bdda-4668-b379-e35bde146536",
                     "fullName": "Apple Health Integrated Managed Care (FIMC)",
-                    "name": "Apple Health",
+                    "name": "AHIMC",
                     "isRateProgram": false
                 },
                 {
@@ -1289,18 +1349,6 @@
                 }
             ],
             "code": "WV"
-        },
-        {
-            "name": "Wyoming",
-            "programs": [
-                {
-                    "id": "0ed2a36a-397c-4309-a2ff-cbb452f5e490",
-                    "fullName": "Care Management Entity for Emotionally Disturbed Children",
-                    "name": "CME",
-                    "isRateProgram": false
-                }
-            ],
-            "code": "WY"
         }
     ]
 }
