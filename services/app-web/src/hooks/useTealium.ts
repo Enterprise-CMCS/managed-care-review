@@ -141,9 +141,7 @@ const useTealium = (): {
         if(document.getElementById(loadTagsSnippet.id) === null) {
             document.body.appendChild(loadTagsSnippet)
         }
-        return () => {
-            document.head.removeChild(initializeTagManagerSnippet)
-        }
+
     }, [])
 
     // This effect should only fire each time the url changes
