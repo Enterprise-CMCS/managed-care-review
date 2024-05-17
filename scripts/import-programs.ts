@@ -20,6 +20,7 @@ https://github.com/Enterprise-CMCS/managed-care-review/blob/main/docs/technical-
 
 import csv from 'csv-parser'
 import fs from 'fs'
+import { v4 as uuidv4 } from 'uuid'
 
 const stateNames = {
     AL: 'Alabama',
@@ -92,6 +93,7 @@ type ProgramDefinition = {
     id: string
     fullName: string
     name: string
+    isRateProgram: boolean
 }
 
 type StateDefinition = {
@@ -111,11 +113,17 @@ fs.createReadStream(file)
             State: string
             Program: string
             Nickname: string
+            IsRateProgram: string
         }) => {
             const code = data.State.trim() as keyof typeof stateNames
 
             if (!stateNames[code]) {
                 console.error(`No state name defined for state code '${code}'`)
+                process.exit(1)
+            }
+
+            if (!data.id) {
+                console.error('No ID set for program, make sure to set an ID in the spreadsheet', data)
                 process.exit(1)
             }
 
@@ -127,15 +135,11 @@ fs.createReadStream(file)
                 }
             }
 
-            if (!data.id) {
-                console.error('No ID set for program, make sure to set an ID in the spreadsheet', data)
-                process.exit(1)
-            }
-
             states[code]!.programs.push({
-                id: data.id,
+                id: !data.id ? uuidv4() : data.id,
                 fullName: data.Program,
                 name: data.Nickname,
+                isRateProgram: data.IsRateProgram === 'TRUE'
             })
         }
     )

@@ -53,6 +53,7 @@ function defaultFloridaProgram(): ProgramType {
         id: '5c10fe9f-bec9-416f-a20c-718b152ad633',
         name: 'MMA',
         fullName: 'Managed Medical Assistance Program ',
+        isRateProgram: false,
     }
 }
 
@@ -61,6 +62,7 @@ function defaultFloridaRateProgram(): ProgramType {
         id: '3b8d8fa1-1fa6-4504-9c5b-ef522877fe1e',
         fullName: 'Long-term Care Program',
         name: 'LTC',
+        isRateProgram: false,
     }
 }
 

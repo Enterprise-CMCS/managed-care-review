@@ -16,6 +16,7 @@ query indexUsers {
                             id
                             name
                             fullName
+                            isRateProgram
                         }
                     }
                     divisionAssignment
@@ -33,6 +34,7 @@ query indexUsers {
                             id
                             name
                             fullName
+                            isRateProgram
                         }
                     }
                 }

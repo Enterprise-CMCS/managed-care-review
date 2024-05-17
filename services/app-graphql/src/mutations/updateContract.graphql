@@ -11,6 +11,7 @@ mutation updateContract($input: UpdateContractInput!) {
                     id
                     name
                     fullName
+                    isRateProgram
                 }
             }
             status

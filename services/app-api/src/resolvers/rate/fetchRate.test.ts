@@ -9,14 +9,14 @@ import {
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import { submitTestRate, updateTestRate } from '../../testHelpers'
 import { v4 as uuidv4 } from 'uuid'
-import { addNewRateToTestContract, createSubmitAndUnlockTestRate, fetchTestRateById, updateRatesInputFromDraftContract, updateTestDraftRatesOnContract } from '../../testHelpers/gqlRateHelpers'
+import { addNewRateToTestContract, createSubmitAndUnlockTestRate, fetchTestRateById,  updateRatesInputFromDraftContract, updateTestDraftRatesOnContract,  } from '../../testHelpers/gqlRateHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { createAndUpdateTestContractWithoutRates, fetchTestContract, submitTestContract } from '../../testHelpers/gqlContractHelpers'
+import { createAndUpdateTestContractWithoutRates, fetchTestContract, submitTestContract} from '../../testHelpers/gqlContractHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 
 describe('fetchRate', () => {
     const ldService = testLDService({
-        'rate-edit-unlock': true,
+        'rate-edit-unlock':  true,
     })
     it('returns correct revisions on resubmit when existing rate is edited', async () => {
         const cmsUser = testCMSUser()
@@ -213,7 +213,7 @@ describe('fetchRate', () => {
 
     it('returns the correct dateAdded for documents', async () => {
         const ldService = testLDService({
-            'link-rates': true,
+            'link-rates':  true,
         })
         const prismaClient = await sharedTestPrismaClient()
         const stateServer = await constructTestPostgresServer({
@@ -352,4 +352,5 @@ describe('fetchRate', () => {
             '2024-02-02'
         )
     })
+
 })

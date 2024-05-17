@@ -150,8 +150,7 @@ function rateWithHistoryToDomainModel(
         /**
          * Below a temporary approach to finding the matching rate revision to the contract revision. The correct way
          * for this is to build the actual contract and rate history. This will be done in the Rate Change History epic
-         * https://qmacbis.atlassian.net/browse/MCR-3607
-         *
+
          * The approach to finding the **single** rate revision for the submitted contract revision is to find
          * the latest contract revision submitted before the next rate revision unlock date. The latest contract revision
          * and not the one submitted with the rate, because contracts can be unlocked and resubmitted independently of
@@ -171,10 +170,12 @@ function rateWithHistoryToDomainModel(
                 rateRev.relatedSubmissions[
                     rateRev.relatedSubmissions.length - 1
                 ]
+
             const mostRecentPackageContracts =
                 mostRecentSubmission.submissionPackages.filter(
-                    (p) => p.rateRevisionID === rateRev.id
+                    (p) => p.rateRevision.rateID === rateRev.rateID
                 )
+
             const mostRecentContractRevs = mostRecentPackageContracts.map(
                 (p) => p.contractRevision
             )
@@ -205,7 +206,6 @@ function rateWithHistoryToDomainModel(
 
             // Reverse contractRevisions so it is in DESC order.
             const contractRevisions = rateRev.contractRevisions.reverse()
-
             for (const contractRev of contractRevisions) {
                 if (!contractRev.contractRevision.submitInfo) {
                     return new Error(

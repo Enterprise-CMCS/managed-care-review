@@ -666,6 +666,8 @@ type Program {
     name: String!
     "The full name for the program"
     fullName: String!
+    "Specifies if a program relates to a rate rather than a contract"
+    isRateProgram: Boolean!
 }
 
 """

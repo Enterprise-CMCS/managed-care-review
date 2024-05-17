@@ -1,7 +1,7 @@
 import React from 'react'
 import styles from './Errors.module.scss'
 import { GridContainer } from '@trussworks/react-uswds'
-import { usePage } from '../../contexts/PageContext'
+import { PageHeading } from '../../components'
 
 interface ForbiddenErrorPageProps {
     errorMsg?: string
@@ -10,12 +10,10 @@ interface ForbiddenErrorPageProps {
 export const ErrorForbiddenPage = ({
     errorMsg,
 }: ForbiddenErrorPageProps): React.ReactElement => {
-    const { updateHeading } = usePage()
-    updateHeading({ customHeading: 'Not allowed' })
     return (
         <section className={styles.errorsContainer}>
             <GridContainer>
-                <h1>Forbidden </h1>
+                <PageHeading>Forbidden</PageHeading>
                 {errorMsg ? (
                     <p>{errorMsg}</p>
                 ) : (
