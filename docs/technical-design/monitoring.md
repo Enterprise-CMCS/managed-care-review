@@ -16,6 +16,10 @@ See [Jaeger docs](https://www.jaegertracing.io/docs/1.35/getting-started/) or vi
 ## New Relic
 We export all monitoring and peformance data to New Relic. In order to access our New Relic dashboard, you'll first need to request access from someone on the team. Once access has been granted, the following should be used to sign in to your account:
 
+### Setup
+- New Relic browser monitoring is currently set up in `App.tsx` via inline script established in `newRelic.ts`. More about this approach in the [instrumentation for browser monitoring](https://docs.newrelic.com/docs/browser/new-relic-browser/page-load-timing-resources/instrumentation-browser-monitoring/).
+- New Relic is hooked in OTEL data exports via `collector.yml`
+
 ### Steps to check new relic dashboard
 1. Open https://one.newrelic.com and log in to your account using your `@teamtrussworks.com` email address.
 2. You will be redirected to the CMS SSO for Active Directory in Azure.
@@ -24,6 +28,8 @@ We export all monitoring and peformance data to New Relic. In order to access ou
 5. You should be prompted to choose your MFA type, either by SMS or by phone.
 6. Enter your MFA token. You should now be at our New Relic dashboard where all our OTEL metrics are being displayed.
 
-### Technical details
-- New Relic browser monitoring is currently set up in `App.tsx` via inline script. More about this approach in the [instrumentation for browser monitoring](https://docs.newrelic.com/docs/browser/new-relic-browser/page-load-timing-resources/instrumentation-browser-monitoring/).
-
+### How to test monitoring
+- Login as admin user
+- Navigate to `/settings?test=crash` to test a full frontend crash
+- Navigate to `/settings?test=error` to test logging an error
+- To test backend crash - instructions forthcoming.
