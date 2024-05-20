@@ -21,6 +21,20 @@ const generateRateCertificationName = (
         amendmentEffectiveDateStart,
         amendmentEffectiveDateEnd,
     } = rateFormData
+
+    const dateStart = rateDateStart
+        ? `-${formatRateNameDate(rateDateStart)}`
+        : ''
+    const dateEnd = rateDateEnd ? `-${formatRateNameDate(rateDateEnd)}` : ''
+    const effectiveStart = amendmentEffectiveDateStart
+        ? `-${formatRateNameDate(amendmentEffectiveDateStart)}`
+        : ''
+    const effectiveEnd = amendmentEffectiveDateEnd
+        ? `-${formatRateNameDate(amendmentEffectiveDateEnd)}`
+        : ''
+    const certifiedDate = rateDateCertified
+        ? `-${formatRateNameDate(rateDateCertified)}`
+        : ''
     const pNames = programNames(statePrograms, rateProgramIDs)
         .sort(naturalSort)
         .map((n) =>
@@ -31,32 +45,27 @@ const generateRateCertificationName = (
         )
         .join('-')
 
-    let rateName = `MCR-${stateCode.toUpperCase()}-${pNames}`
+    let rateName = `MCR-${stateCode.toUpperCase()}`
 
-    if (rateType === 'NEW' && rateDateStart) {
-        rateName = rateName.concat(
-            '-',
-            formatRateNameDate(rateDateStart),
-            '-',
-            formatRateNameDate(rateDateEnd),
-            '-',
-            'CERTIFICATION'
-        )
+    if (pNames) {
+        rateName = rateName.concat('-', pNames)
+    }
+
+    if (rateType === 'NEW') {
+        rateName = rateName.concat(dateStart, dateEnd, '-', 'CERTIFICATION')
     }
 
     if (rateType === 'AMENDMENT') {
         rateName = rateName.concat(
-            '-',
-            formatRateNameDate(amendmentEffectiveDateStart),
-            '-',
-            formatRateNameDate(amendmentEffectiveDateEnd),
+            effectiveStart,
+            effectiveEnd,
             '-',
             'AMENDMENT'
         )
     }
 
     if (rateDateCertified) {
-        rateName = rateName.concat('-', formatRateNameDate(rateDateCertified))
+        rateName = rateName.concat(certifiedDate)
     }
 
     return rateName
