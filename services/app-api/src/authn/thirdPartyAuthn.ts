@@ -8,10 +8,10 @@ export async function userFromThirdPartyAuthorizer(
     userId: string
 ) {
     // setup otel tracing
-    const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
+    const otelCollectorURL = process.env.API_APP_OTEL_COLLECTOR_URL
     if (!otelCollectorURL || otelCollectorURL === '') {
         const errMsg =
-            'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
+            'Configuration Error: API_APP_OTEL_COLLECTOR_URL must be set'
         throw errMsg
     }
 
