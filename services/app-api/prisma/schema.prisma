@@ -304,6 +304,7 @@ model State {
   users                       User[]
   contracts                   ContractTable[]
   rates                       RateTable[]
+  statePrograms               StateProgram[]
 }
 
 model StateProgram {
@@ -313,6 +314,7 @@ model StateProgram {
   fullName           String
   name               String
   stateCode          String
+  state              State                @relation(fields: [stateCode], references: [stateCode])
   isRateProgram      Boolean
 }
 
