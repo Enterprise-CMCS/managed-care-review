@@ -1,8 +1,9 @@
-import { renderWithProviders } from '../../../testHelpers'
+import {renderWithProviders } from '../../../testHelpers'
 import { RateInDashboardType } from './RateReviewsTable'
 import {
     fetchCurrentUserMock,
     mockMNState,
+    mockValidAdminUser,
     mockValidCMSUser,
 } from '../../../testHelpers/apolloMocks'
 import { RateReviewsTable } from './RateReviewsTable'
@@ -20,6 +21,7 @@ describe('RateReviewsTable', () => {
         {
             id: 'rate-1-id',
             name: 'rate-1-certification-name',
+            rateNumber: 1,
             programs: [statePrograms[0]],
             submittedAt: '2023-10-16',
             rateDateStart: new Date('2023-10-16'),
@@ -33,6 +35,7 @@ describe('RateReviewsTable', () => {
         {
             id: 'rate-2-id',
             name: 'rate-2-certification-name',
+            rateNumber: 1,
             programs: [statePrograms[0]],
             submittedAt: '2023-11-18',
             rateDateStart: new Date('2023-11-18'),
@@ -47,6 +50,7 @@ describe('RateReviewsTable', () => {
             id: 'rate-3-id',
             name: 'rate-3-certification-name',
             programs: [statePrograms[0]],
+            rateNumber: 2,
             submittedAt: '2023-12-01',
             rateDateStart: new Date('2023-12-01'),
             rateDateEnd: new Date('2024-12-01'),
@@ -293,5 +297,48 @@ describe('RateReviewsTable', () => {
         expect(
             screen.getByText('Displaying 3 of 3 rate reviews')
         ).toBeInTheDocument()
+    })
+    it('renders rate number for Admin users', async () => {
+        renderWithProviders(
+            <RateReviewsTable
+                tableData={tableData()}
+                caption={'Test table caption'}
+                isAdminUser={true}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidAdminUser(),
+                        }),
+                    ],
+                },
+            }
+        )
+
+        await screen.findByText('Rate period start date')
+        await screen.findByText('Rate #')
+    })
+    it('does not render rate number by default', async () => {
+        renderWithProviders(
+            <RateReviewsTable
+                tableData={tableData()}
+                caption={'Test table caption'}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                    ],
+                },
+            }
+        )
+
+    await screen.findByText('Rate period start date')
+       expect(screen.queryByText('Rate #')).toBeNull()
     })
 })

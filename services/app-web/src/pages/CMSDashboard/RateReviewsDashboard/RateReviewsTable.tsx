@@ -54,6 +54,7 @@ declare module '@tanstack/table-core' {
 export type RateInDashboardType = {
     id: string
     name: string
+    rateNumber: number,
     submittedAt: string
     updatedAt: Date
     status: HealthPlanPackageStatus
@@ -68,6 +69,7 @@ export type RateInDashboardType = {
 export type RateTableProps = {
     tableData: RateInDashboardType[]
     caption?: string
+    isAdminUser?: boolean
 }
 
 function rateURL(rate: RateInDashboardType): string {
@@ -190,6 +192,7 @@ type TableVariantConfig = {
 export const RateReviewsTable = ({
     caption,
     tableData,
+    isAdminUser = false,
 }: RateTableProps): React.ReactElement => {
     const lastClickedElement = useRef<string | null>(null)
     const filterDateRangeRef = useRef<FilterDateRangeRef>(null)
@@ -265,6 +268,11 @@ export const RateReviewsTable = ({
                 },
                 filterFn: `arrIncludesSome`,
             }),
+            columnHelper.accessor('rateNumber', {
+                id: 'rateNumber',
+                header: 'Rate #',
+                cell: (info) => <span>{info.getValue()}</span>,
+            }),
             columnHelper.accessor('programs', {
                 header: 'Programs',
                 cell: (info) =>
@@ -333,6 +341,11 @@ export const RateReviewsTable = ({
         data: tableData.sort((a, b) =>
             a['updatedAt'] > b['updatedAt'] ? -1 : 1
         ),
+        initialState: {
+            columnVisibility: {
+              rateNumber: isAdminUser,
+            },
+        },
         columns: tableColumns,
         filterFns: {
             dateRangeFilter: dateRangeFilter,
@@ -346,6 +359,7 @@ export const RateReviewsTable = ({
         getFilteredRowModel: getFilteredRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFacetedMinMaxValues: getFacetedMinMaxValues(),
+
     })
 
     const filteredRows = reactTable.getRowModel().rows

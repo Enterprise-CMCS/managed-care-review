@@ -12,7 +12,7 @@ import { RateTypeRecord } from '../../../constants/healthPlanPackages'
 
 const RateReviewsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
-
+const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const { data, loading, error } = useIndexRatesQuery({
         fetchPolicy: 'network-only',
     })
@@ -75,6 +75,7 @@ const RateReviewsDashboard = (): React.ReactElement => {
             reviewRows.push({
                 id: rate.id,
                 name: displayRateFormData.rateCertificationName || missingField,
+                rateNumber: rate.stateNumber,
                 programs: programs.filter(
                     (program) =>
                         displayRateFormData?.rateProgramIDs &&
@@ -105,7 +106,7 @@ const RateReviewsDashboard = (): React.ReactElement => {
     } else {
         return (
             <section className={styles.panel}>
-                <RateReviewsTable tableData={reviewRows} />
+                <RateReviewsTable tableData={reviewRows} isAdminUser={isAdminUser} />
             </section>
         )
     }
