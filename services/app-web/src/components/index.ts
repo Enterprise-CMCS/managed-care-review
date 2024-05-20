@@ -32,7 +32,7 @@ export { Logo } from './Logo'
 export { PoliteErrorMessage } from './PoliteErrorMessage'
 export { Spinner } from './Spinner'
 export { SectionHeader } from './SectionHeader'
-
+export {PageHeading} from './PageHeading'
 export {
     SubmissionTypeSummarySection,
     ContractDetailsSummarySection,

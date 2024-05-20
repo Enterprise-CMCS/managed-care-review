@@ -3,6 +3,7 @@ import { GridContainer, Grid } from '@trussworks/react-uswds'
 
 import styles from '../Header.module.scss'
 
+import { PageHeading } from '../../../components/PageHeading'
 import { StateIcon, StateIconProps } from '../StateIcon/StateIcon'
 import {
     User,
@@ -23,7 +24,7 @@ const CMSUserRow = ({
         <div className={styles.dashboardHeading}>
             <GridContainer>
                 <Grid row className="flex-align-center">
-                    <h1>
+                    <PageHeading>
                         <span>CMS</span>
                         {heading && (
                             <span
@@ -33,7 +34,7 @@ const CMSUserRow = ({
                                 {heading}
                             </span>
                         )}
-                    </h1>
+                    </PageHeading>
                 </Grid>
             </GridContainer>
         </div>
@@ -57,7 +58,7 @@ const StateUserRow = ({
                         />
                         <span>{user.state.name}&nbsp;</span>
                     </div>
-                    <h1>
+                    <PageHeading>
                         {/* Have to have state name here but screen reader only to make page heading announce as expected */}
                         <span className="srOnly">{user.state.name}&nbsp;</span>
                         {heading && (
@@ -68,7 +69,7 @@ const StateUserRow = ({
                                 {heading}
                             </span>
                         )}
-                    </h1>
+                    </PageHeading>
                 </Grid>
             </GridContainer>
         </div>

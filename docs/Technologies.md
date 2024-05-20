@@ -40,7 +40,7 @@ Protobuf is a tool for serializing key-value data. Designed for API requests, th
 
 ### New Relic
 
-New Relic is used for endpoint monitoring and to observe Open Telemetry data in deployed environments. Read more in [Monitoring](../README.md#monitoring).
+New Relic is used for endpoint monitoring and to observe Open Telemetry data in deployed environments. Read more in [Monitoring](./technical-design/monitoring.md).
 
 ### Open Telemetry
 
@@ -48,7 +48,7 @@ Open Telemetry (OTEL) is an ecosystem of tools for collecting data about an appl
 
 ### Jaeger
 
-[Jaeger](https://www.jaegertracing.io/) is used to observe Open Telemetry data in local dev. Read more in the [Jaeger docs](https://www.jaegertracing.io/docs/1.35/getting-started/) or visit port [16686](http://localhost:16686)) on local dev.
+[Jaeger](https://www.jaegertracing.io/) is used to observe Open Telemetry data in local dev. Read more in [Monitoring](./technical-design/monitoring.md)
 
 ## React Web Application
 
