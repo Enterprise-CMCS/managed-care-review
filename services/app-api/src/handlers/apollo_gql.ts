@@ -1,5 +1,5 @@
-import type { Span, Tracer } from '@opentelemetry/api'
-import { propagation, ROOT_CONTEXT, SpanKind } from '@opentelemetry/api'
+import type { Context as OTELContext, Span, Tracer } from '@opentelemetry/api'
+import { propagation, ROOT_CONTEXT } from '@opentelemetry/api'
 import { ApolloServer } from 'apollo-server-lambda'
 import type {
     APIGatewayProxyEvent,
@@ -20,7 +20,6 @@ import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
 import { createTracer } from '../otel/otel_handler'
-import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import {
     newAWSEmailParameterStore,
     newLocalEmailParameterStore,
@@ -29,14 +28,11 @@ import type { LDService } from '../launchDarkly/launchDarkly'
 import { ldService, offlineLDService } from '../launchDarkly/launchDarkly'
 import type { LDClient } from '@launchdarkly/node-server-sdk'
 import * as ld from '@launchdarkly/node-server-sdk'
-import {
-    ApolloServerPluginLandingPageLocalDefault,
-    ApolloServerPluginLandingPageDisabled,
-} from 'apollo-server-core'
 import { newJWTLib } from '../jwt'
-
-const requestSpanKey = 'REQUEST_SPAN'
-let tracer: Tracer
+import {
+    ApolloServerPluginLandingPageDisabled,
+    ApolloServerPluginLandingPageLocalDefault,
+} from 'apollo-server-core'
 
 let ldClient: LDClient
 
@@ -44,6 +40,8 @@ let ldClient: LDClient
 export interface Context {
     user: UserType
     span?: Span
+    tracer?: Tracer
+    ctx?: OTELContext
 }
 
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
@@ -57,9 +55,10 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
 }) => Promise<Context> {
     return async ({ event, context }) => {
         // pull the current span out of the LAMBDA context, to place it in the APOLLO context
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const anyContext = context as any
-        const requestSpan = anyContext[requestSpanKey]
+        const stageName = process.env.stage
+        const tracer = createTracer('app-api-' + stageName)
+        const ctx = propagation.extract(ROOT_CONTEXT, event.headers)
+
         const authProvider =
             event.requestContext.identity.cognitoAuthenticationProvider
         // This handler is shared with the third_party_API_authorizer
@@ -104,7 +103,8 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                 if (!userResult.isErr()) {
                     return {
                         user: userResult.value,
-                        span: requestSpan,
+                        tracer: tracer,
+                        ctx: ctx,
                     }
                 } else {
                     throw new Error(
@@ -179,37 +179,6 @@ function ipRestrictionMiddleware(
     }
 }
 
-// Tracing Middleware
-function tracingMiddleware(wrapped: Handler): Handler {
-    return async function (event, context, completion) {
-        // get the parent context from headers
-        const ctx = propagation.extract(ROOT_CONTEXT, event.headers)
-        const span = tracer.startSpan(
-            'handleRequest',
-            {
-                kind: SpanKind.SERVER,
-                attributes: {
-                    [SemanticAttributes.AWS_LAMBDA_INVOKED_ARN]:
-                        context.invokedFunctionArn,
-                },
-            },
-            ctx
-        )
-
-        // Put the span into the LAMBDA context, in order to pass it into the APOLLO context in contextForRequestForFetcher
-        // We have to use any here because this context's type is not under our control.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const anyContext = context as any
-        anyContext[requestSpanKey] = span
-
-        const result = await wrapped(event, context, completion)
-
-        span.end()
-
-        return result
-    }
-}
-
 // This asynchronous function is started on the cold-load of this script
 // and is awaited by our handler function
 // Pattern is explained here https://serverlessfirst.com/function-initialisation/
@@ -225,7 +194,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     const stageName = process.env.stage
     const applicationEndpoint = process.env.APPLICATION_ENDPOINT
     const emailerMode = process.env.EMAILER_MODE
-    const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
+    const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
     const parameterStoreMode = process.env.PARAMETER_STORE_MODE
     const ldSDKKey = process.env.LD_SDK_KEY
     const allowedIpAddresses = process.env.ALLOWED_IP_ADDRESSES
@@ -253,7 +222,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (otelCollectorUrl === undefined || otelCollectorUrl === '') {
         throw new Error(
-            'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL is required to run app-api'
+            'Configuration Error: API_APP_OTEL_COLLECTOR_URL is required to run app-api'
         )
     }
 
@@ -452,11 +421,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         },
     })
 
-    // init tracer and set the middleware. tracer needs to be global.
-    tracer = createTracer('app-api-' + stageName)
-    const combinedHandler = ipRestrictionMiddleware(allowedIpAddresses)(
-        tracingMiddleware(handler)
-    )
+    const combinedHandler = ipRestrictionMiddleware(allowedIpAddresses)(handler)
 
     // Locally, we wrap our handler in a middleware that returns 403 for unauthenticated requests
     const isLocal = authMode === 'LOCAL'

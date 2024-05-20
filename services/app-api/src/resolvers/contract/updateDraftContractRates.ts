@@ -49,7 +49,8 @@ function updateDraftContractRates(
     store: Store
 ): MutationResolvers['updateDraftContractRates'] {
     return async (_parent, { input }, context) => {
-        const { user, span } = context
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('updateDraftContractRates', {}, ctx)
         setResolverDetailsOnActiveSpan('updateDraftContractRates', user, span)
 
         const { contractID, updatedRates } = input

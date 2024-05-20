@@ -23,7 +23,9 @@ export function fetchEmailSettingsResolver(
     emailParameterStore: EmailParameterStore
 ): QueryResolvers['fetchEmailSettings'] {
     return async (_parent, __, context) => {
-        const { user, span } = context
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('fetchEmailSettings', {}, ctx)
+        setResolverDetailsOnActiveSpan('fetchEmailSettings', user, span)
         if (
             !(
                 isAdminUser(user) ||

@@ -7,10 +7,10 @@ import { migrate, newDBMigrator } from '../dataMigrations/dataMigrator'
 
 export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // setup otel tracing
-    const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
+    const otelCollectorURL = process.env.API_APP_OTEL_COLLECTOR_URL
     if (!otelCollectorURL || otelCollectorURL === '') {
         const errMsg =
-            'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
+            'Configuration Error: API_APP_OTEL_COLLECTOR_URL must be set'
         return fmtMigrateError(errMsg)
     }
     const serviceName = 'postgres-migrate'

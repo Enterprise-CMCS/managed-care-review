@@ -29,10 +29,13 @@ export function unlockHealthPlanPackageResolver(
     launchDarkly: LDService
 ): MutationResolvers['unlockHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
-        const { user, span } = context
-        const { unlockedReason, pkgID } = input
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('unlockHealthPlanPackage', {}, ctx)
         setResolverDetailsOnActiveSpan('unlockHealthPlanPackage', user, span)
+
+        const { unlockedReason, pkgID } = input
         span?.setAttribute('mcreview.package_id', pkgID)
+
         const featureFlags = await launchDarkly.allFlags(context)
         const linkRatesFF = featureFlags?.['link-rates'] === true
 

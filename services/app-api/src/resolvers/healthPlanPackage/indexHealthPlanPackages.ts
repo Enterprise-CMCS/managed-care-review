@@ -43,8 +43,8 @@ export function indexHealthPlanPackagesResolver(
     store: Store
 ): QueryResolvers['indexHealthPlanPackages'] {
     return async (_parent, _args, context) => {
-        const { user, span } = context
-
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('indexHealthPlanPackages', {}, ctx)
         setResolverDetailsOnActiveSpan('indexHealthPlanPackages', user, span)
 
         if (isStateUser(user)) {

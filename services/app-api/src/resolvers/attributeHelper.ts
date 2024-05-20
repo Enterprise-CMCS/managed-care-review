@@ -29,6 +29,7 @@ export function setErrorAttributesOnActiveSpan(
         message: message,
         code: SpanStatusCode.ERROR,
     })
+    span.end()
 }
 
 export function setSuccessAttributesOnActiveSpan(span: Context['span']): void {
@@ -36,4 +37,5 @@ export function setSuccessAttributesOnActiveSpan(span: Context['span']): void {
     span.setAttributes({
         'graphql.operation.success': true,
     })
+    span.end()
 }

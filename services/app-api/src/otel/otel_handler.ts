@@ -6,9 +6,9 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
-import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
 import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
 import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
+import { AwsLambdaInstrumentation } from '@opentelemetry/instrumentation-aws-lambda'
 
 export function createTracer(serviceName: string): Tracer {
     const provider = new NodeTracerProvider({
@@ -20,7 +20,7 @@ export function createTracer(serviceName: string): Tracer {
 
     // log to console and send to New Relic
     const exporter = new OTLPTraceExporter({
-        url: process.env.REACT_APP_OTEL_COLLECTOR_URL,
+        url: process.env.API_APP_OTEL_COLLECTOR_URL,
         headers: {},
     })
 
@@ -32,8 +32,8 @@ export function createTracer(serviceName: string): Tracer {
     })
 
     registerInstrumentations({
-        instrumentations: [new HttpInstrumentation()],
+        instrumentations: [new AwsLambdaInstrumentation()],
     })
 
-    return trace.getTracer('app-api')
+    return trace.getTracer(serviceName)
 }

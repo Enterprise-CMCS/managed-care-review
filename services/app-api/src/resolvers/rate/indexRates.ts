@@ -46,7 +46,8 @@ const validateAndReturnRates = (
 
 export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
     return async (_parent, _args, context) => {
-        const { user, span } = context
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('indexRates', {}, ctx)
         setResolverDetailsOnActiveSpan('indexRates', user, span)
 
         const adminPermissions = hasAdminPermissions(user)

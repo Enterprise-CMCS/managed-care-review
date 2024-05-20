@@ -16,7 +16,8 @@ export function createHealthPlanPackageResolver(
     store: Store
 ): MutationResolvers['createHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
-        const { user, span } = context
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('createHealthPlanPackage', {}, ctx)
         setResolverDetailsOnActiveSpan('createHealthPlanPackage', user, span)
 
         // This resolver is only callable by state users

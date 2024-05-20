@@ -23,7 +23,8 @@ export function updateHealthPlanFormDataResolver(
     launchDarkly: LDService
 ): MutationResolvers['updateHealthPlanFormData'] {
     return async (_parent, { input }, context) => {
-        const { user, span } = context
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('updateHealthPlanFormData', {}, ctx)
         setResolverDetailsOnActiveSpan('updateHealthPlanFormData', user, span)
 
         const featureFlags = await launchDarkly.allFlags(context)
