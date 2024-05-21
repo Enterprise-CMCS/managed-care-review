@@ -1,55 +1,73 @@
 import { formatRateNameDate } from '../../../../app-web/src/common-code/dateHelpers'
-import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { programNames } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type { ProgramArgType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import type { RateFormEditableType } from '../../domain-models/contractAndRates'
+
+const naturalSort = (a: string, b: string): number => {
+    return a.localeCompare(b, 'en', { numeric: true })
+}
 
 const generateRateCertificationName = (
     rateFormData: RateFormEditableType,
     stateCode: string,
-    stateNumber: number,
     statePrograms: ProgramArgType[]
 ): string => {
     const {
         rateType,
-        rateProgramIDs,
-        amendmentEffectiveDateEnd,
-        amendmentEffectiveDateStart,
         rateDateCertified,
-        rateDateEnd,
         rateDateStart,
+        rateDateEnd,
+        rateProgramIDs = [],
+        amendmentEffectiveDateStart,
+        amendmentEffectiveDateEnd,
     } = rateFormData
 
-    let rateName = `${packageName(
-        stateCode,
-        stateNumber,
-        rateProgramIDs ?? [],
-        statePrograms
-    )}-RATE`
-    if (rateType === 'NEW' && rateDateStart) {
-        rateName = rateName.concat(
-            '-',
-            formatRateNameDate(rateDateStart),
-            '-',
-            formatRateNameDate(rateDateEnd),
-            '-',
-            'CERTIFICATION'
+    const dateStart = rateDateStart
+        ? `-${formatRateNameDate(rateDateStart)}`
+        : ''
+    const dateEnd = rateDateEnd ? `-${formatRateNameDate(rateDateEnd)}` : ''
+    const effectiveStart = amendmentEffectiveDateStart
+        ? `-${formatRateNameDate(amendmentEffectiveDateStart)}`
+        : ''
+    const effectiveEnd = amendmentEffectiveDateEnd
+        ? `-${formatRateNameDate(amendmentEffectiveDateEnd)}`
+        : ''
+    const certifiedDate = rateDateCertified
+        ? `-${formatRateNameDate(rateDateCertified)}`
+        : ''
+    const pNames = programNames(statePrograms, rateProgramIDs)
+        .sort(naturalSort)
+        .map((n) =>
+            n
+                .replace(/\s/g, '-')
+                .replace(/[^a-zA-Z0-9+]/g, '')
+                .toUpperCase()
         )
+        .join('-')
+
+    let rateName = `MCR-${stateCode.toUpperCase()}`
+
+    if (pNames) {
+        rateName = rateName.concat('-', pNames)
+    }
+
+    if (rateType === 'NEW') {
+        rateName = rateName.concat(dateStart, dateEnd, '-', 'CERTIFICATION')
     }
 
     if (rateType === 'AMENDMENT') {
         rateName = rateName.concat(
-            '-',
-            formatRateNameDate(amendmentEffectiveDateStart),
-            '-',
-            formatRateNameDate(amendmentEffectiveDateEnd),
+            effectiveStart,
+            effectiveEnd,
             '-',
             'AMENDMENT'
         )
     }
 
     if (rateDateCertified) {
-        rateName = rateName.concat('-', formatRateNameDate(rateDateCertified))
+        rateName = rateName.concat(certifiedDate)
     }
+
     return rateName
 }
 

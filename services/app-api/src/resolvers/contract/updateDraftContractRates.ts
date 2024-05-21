@@ -167,7 +167,6 @@ function updateDraftContractRates(
                 const rateName = generateRateCertificationName(
                     rateUpdate.formData,
                     contract.stateCode,
-                    contract.stateNumber,
                     statePrograms
                 )
 
@@ -234,7 +233,6 @@ function updateDraftContractRates(
                 const rateName = generateRateCertificationName(
                     rateUpdate.formData,
                     contract.stateCode,
-                    contract.stateNumber,
                     statePrograms
                 )
 

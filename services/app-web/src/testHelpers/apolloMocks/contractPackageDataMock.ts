@@ -673,10 +673,391 @@ function mockContractPackageSubmittedWithRevisions(
 
 // this package has val-like data - different versions have different descriptions and programs and package names
 function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
-   return{ "id": "e670adsfdfadsfc", "status": "RESUBMITTED", "createdAt": "2024-05-07T19:44:53.732Z", "updatedAt": "2024-05-07T19:44:53.732Z", "initiallySubmittedAt": "2024-05-07", "stateCode": "FL", "mccrsID": null, "state": { "code": "FL", "name": "Florida", "programs": [{ "id": "712277fb-f43f-4eb5-98c5-6c6a97509201", "name": "NEMT", "fullName": "Non-Emergency Medical Transportation", "isRateProgram": false, "__typename": "Program" }, { "id": "037af66b-81eb-4472-8b80-01edf17d12d9", "name": "PCCMe", "fullName": "Healthy Start MomCare Network, Inc.", "isRateProgram": false, "__typename": "Program" }, { "id": "5c10fe9f-bec9-416f-a20c-718b152ad633", "name": "MMA", "fullName": "Managed Medical Assistance Program", "isRateProgram": false, "__typename": "Program" }, { "id": "3b8d8fa1-1fa6-4504-9c5b-ef522877fe1e", "name": "LTC", "fullName": "Long-term Care Program", "isRateProgram": false, "__typename": "Program" }, { "id": "08d114c2-0c01-4a1a-b8ff-e2b79336672d", "name": "Dental", "fullName": "Prepaid Dental Health Program", "isRateProgram": false, "__typename": "Program" }], "__typename": "State" }, "stateNumber": 221, "__typename": "Contract", "draftRevision": null, "draftRates": null,
-   // pragma: allowlist nextline secret 
-   "packageSubmissions": [{ "cause": "CONTRACT_SUBMISSION", "submitInfo": { "updatedAt": "2024-05-08T17:42:52.696Z", "updatedBy": "mc-review-team@truss.works", "updatedReason": "testing 4100", "__typename": "UpdateInformation" }, "submittedRevisions": [{ "id": "a334b516-f219-47ac-aedf-97c93b18d7d6", "createdAt": "2024-05-07T19:49:36.173Z", "updatedAt": "2024-05-08T17:42:52.696Z", "contractName": "MCR-FL-0221-DENTAL", "submitInfo": { "updatedAt": "2024-05-08T17:42:52.696Z", "updatedBy": "team@example.com", "updatedReason": "testing 4100", "__typename": "UpdateInformation" }, "unlockInfo": { "updatedAt": "2024-05-07T19:49:36.175Z", "updatedBy": "team@example.com", "updatedReason": "test", "__typename": "UpdateInformation" }, "formData": { "programIDs": ["08d114c2-0c01-4a1a-b8ff-e2b79336672d"], "populationCovered": "CHIP", "submissionType": "CONTRACT_ONLY", "riskBasedContract": true, "submissionDescription": "This amendment revises calendar year (CY) 2019 capitation rates, adds new language concerning capitation payments related to a program no longer authorized by law, and changes the requirement that the MCO pay or deny clean paper claims within thirty (30), rather than twenty-one (21) calendar days of receipt.", "stateContacts": [{ "name": "Raymond Holt", "titleRole": "test", "email": "kaleigh@example.com", "__typename": "StateContact" }], "supportingDocuments": [{ "name": "State User Manual - MC-Review - January 2024.pdf", "s3URL": "s3://uploads-val-uploads-798659716464/b88e8dd1-f4f1-4d39-8591-645b64a15e27.pdf/State User Manual - MC-Review - January 2024.pdf", "sha256": "74f6efc997e4524aa7eb52f75b7f595c91cf7f4420dc9c8a995d98b470494540", "dateAdded": "2024-05-08", "__typename": "GenericDocument" }], "contractType": "BASE", "contractExecutionStatus": "EXECUTED", "contractDocuments": [{ "name": "Test document.pdf", "s3URL": "s3://uploads-val-uploads-798659716464/63f44255-e82a-4156-996c-876a1ca86768.pdf/Test document.pdf", "sha256": "66b53218e2e32b046a354cf78a604fcd24825b3958044c6de53ea1b2b3ed6cf9", "dateAdded": "2024-05-08", "__typename": "GenericDocument" }], "contractDateStart": "2024-07-01", "contractDateEnd": "2025-06-30", "managedCareEntities": ["MCO"], "federalAuthorities": ["WAIVER_1115"], "inLieuServicesAndSettings": null, "modifiedBenefitsProvided": null, "modifiedGeoAreaServed": null, "modifiedMedicaidBeneficiaries": null, "modifiedRiskSharingStrategy": null, "modifiedIncentiveArrangements": null, "modifiedWitholdAgreements": null, "modifiedStateDirectedPayments": null, "modifiedPassThroughPayments": null, "modifiedPaymentsForMentalDiseaseInstitutions": null, "modifiedMedicalLossRatioStandards": null, "modifiedOtherFinancialPaymentIncentive": null, "modifiedEnrollmentProcess": null, "modifiedGrevienceAndAppeal": null, "modifiedNetworkAdequacyStandards": null, "modifiedLengthOfContract": null, "modifiedNonRiskPaymentArrangements": null, "__typename": "ContractFormData" }, "__typename": "ContractRevision" }], "contractRevision": { "id": "a334b516-f219-47ac-aedf-97c93b18d7d6", "createdAt": "2024-05-07T19:49:36.173Z", "updatedAt": "2024-05-08T17:42:52.696Z", "contractName": "MCR-FL-0221-DENTAL", "submitInfo": { "updatedAt": "2024-05-08T17:42:52.696Z", "updatedBy": "team@example.com", "updatedReason": "testing 4100", "__typename": "UpdateInformation" }, "unlockInfo": { "updatedAt": "2024-05-07T19:49:36.175Z", "updatedBy": "team@example.com", "updatedReason": "test", "__typename": "UpdateInformation" }, "formData": { "programIDs": ["08d114c2-0c01-4a1a-b8ff-e2b79336672d"], "populationCovered": "CHIP", "submissionType": "CONTRACT_ONLY", "riskBasedContract": true, "submissionDescription": "This amendment revises calendar year (CY) 2019 capitation rates, adds new language concerning capitation payments related to a program no longer authorized by law, and changes the requirement that the MCO pay or deny clean paper claims within thirty (30), rather than twenty-one (21) calendar days of receipt.", "stateContacts": [{ "name": "Raymond Holt", "titleRole": "test", "email": "kaleigh@example.com", "__typename": "StateContact" }], "supportingDocuments": [{ "name": "State User Manual - MC-Review - January 2024.pdf", "s3URL": "s3://uploads-val-uploads-798659716464/b88e8dd1-f4f1-4d39-8591-645b64a15e27.pdf/State User Manual - MC-Review - January 2024.pdf", "sha256": "74f6efc997e4524aa7eb52f75b7f595c91cf7f4420dc9c8a995d98b470494540", "dateAdded": "2024-05-08", "__typename": "GenericDocument" }], "contractType": "BASE", "contractExecutionStatus": "EXECUTED", "contractDocuments": [{ "name": "Test document.pdf", "s3URL": "s3://uploads-val-uploads-798659716464/63f44255-e82a-4156-996c-876a1ca86768.pdf/Test document.pdf", "sha256": "66b53218e2e32b046a354cf78a604fcd24825b3958044c6de53ea1b2b3ed6cf9", "dateAdded": "2024-05-07", "__typename": "GenericDocument" }], "contractDateStart": "2024-07-01", "contractDateEnd": "2025-06-30", "managedCareEntities": ["MCO"], "federalAuthorities": ["WAIVER_1115"], "inLieuServicesAndSettings": null, "modifiedBenefitsProvided": null, "modifiedGeoAreaServed": null, "modifiedMedicaidBeneficiaries": null, "modifiedRiskSharingStrategy": null, "modifiedIncentiveArrangements": null, "modifiedWitholdAgreements": null, "modifiedStateDirectedPayments": null, "modifiedPassThroughPayments": null, "modifiedPaymentsForMentalDiseaseInstitutions": null, "modifiedMedicalLossRatioStandards": null, "modifiedOtherFinancialPaymentIncentive": null, "modifiedEnrollmentProcess": null, "modifiedGrevienceAndAppeal": null, "modifiedNetworkAdequacyStandards": null, "modifiedLengthOfContract": null, "modifiedNonRiskPaymentArrangements": null, "__typename": "ContractFormData" }, "__typename": "ContractRevision" }, "rateRevisions": [], "__typename": "ContractPackageSubmission" }, { "cause": "CONTRACT_SUBMISSION", "submitInfo": { "updatedAt": "2024-05-07T19:46:19.376Z", "updatedBy": "team@example.com", "updatedReason": "Initial submission", "__typename": "UpdateInformation" }, "submittedRevisions": [{ "id": "5e124160-8ac5-4d6f-9733-c5e8723c5af6", "createdAt": "2024-05-07T19:44:53.732Z", "updatedAt": "2024-05-07T19:46:19.377Z", "contractName": "MCR-FL-0221-PCCME", "submitInfo": { "updatedAt": "2024-05-07T19:46:19.376Z", "updatedBy": "team@example.com", "updatedReason": "Initial submission", "__typename": "UpdateInformation" }, "unlockInfo": null, "formData": { "programIDs": ["037af66b-81eb-4472-8b80-01edf17d12d9"], "populationCovered": "CHIP", "submissionType": "CONTRACT_ONLY", "riskBasedContract": true, "submissionDescription": "test", "stateContacts": [{ "name": "Raymond Holt", "titleRole": "test", "email": "kaleigh@example.com", "__typename": "StateContact" }], "supportingDocuments": [], "contractType": "BASE", "contractExecutionStatus": "EXECUTED", "contractDocuments": [{ "name": "Test document.pdf", "s3URL": "s3://uploads-val-uploads-798659716464/63f44255-e82a-4156-996c-876a1ca86768.pdf/Test document.pdf", "sha256": "66b53218e2e32b046a354cf78a604fcd24825b3958044c6de53ea1b2b3ed6cf9", "dateAdded": "2024-05-07", "__typename": "GenericDocument" }], "contractDateStart": "2024-07-01", "contractDateEnd": "2025-06-30", "managedCareEntities": ["MCO"], "federalAuthorities": ["WAIVER_1115"], "inLieuServicesAndSettings": null, "modifiedBenefitsProvided": null, "modifiedGeoAreaServed": null, "modifiedMedicaidBeneficiaries": null, "modifiedRiskSharingStrategy": null, "modifiedIncentiveArrangements": null, "modifiedWitholdAgreements": null, "modifiedStateDirectedPayments": null, "modifiedPassThroughPayments": null, "modifiedPaymentsForMentalDiseaseInstitutions": null, "modifiedMedicalLossRatioStandards": null, "modifiedOtherFinancialPaymentIncentive": null, "modifiedEnrollmentProcess": null, "modifiedGrevienceAndAppeal": null, "modifiedNetworkAdequacyStandards": null, "modifiedLengthOfContract": null, "modifiedNonRiskPaymentArrangements": null, "__typename": "ContractFormData" }, "__typename": "ContractRevision" }], "contractRevision": { "id": "5e124160-8ac5-4d6f-9733-c5e8723c5af6", "createdAt": "2024-05-07T19:44:53.732Z", "updatedAt": "2024-05-07T19:46:19.377Z", "contractName": "MCR-FL-0221-PCCME", "submitInfo": { "updatedAt": "2024-05-07T19:46:19.376Z", "updatedBy": "team@example.com", "updatedReason": "Initial submission", "__typename": "UpdateInformation" }, "unlockInfo": null, "formData": { "programIDs": ["037af66b-81eb-4472-8b80-01edf17d12d9"], "populationCovered": "CHIP", "submissionType": "CONTRACT_ONLY", "riskBasedContract": true, "submissionDescription": "test", "stateContacts": [{ "name": "Raymond Holt", "titleRole": "test", "email": "kaleigh@example.com", "__typename": "StateContact" }], "supportingDocuments": [], "contractType": "BASE", "contractExecutionStatus": "EXECUTED", "contractDocuments": [{ "name": "Test document.pdf", "s3URL": "s3://uploads-val-uploads-798659716464/63f44255-e82a-4156-996c-876a1ca86768.pdf/Test document.pdf", "sha256": "66b53218e2e32b046a354cf78a604fcd24825b3958044c6de53ea1b2b3ed6cf9", "dateAdded": "2024-05-07", "__typename": "GenericDocument" }], "contractDateStart": "2024-07-01", "contractDateEnd": "2025-06-30", "managedCareEntities": ["MCO"], "federalAuthorities": ["WAIVER_1115"], "inLieuServicesAndSettings": null, "modifiedBenefitsProvided": null, "modifiedGeoAreaServed": null, "modifiedMedicaidBeneficiaries": null, "modifiedRiskSharingStrategy": null, "modifiedIncentiveArrangements": null, "modifiedWitholdAgreements": null, "modifiedStateDirectedPayments": null, "modifiedPassThroughPayments": null, "modifiedPaymentsForMentalDiseaseInstitutions": null, "modifiedMedicalLossRatioStandards": null, "modifiedOtherFinancialPaymentIncentive": null, "modifiedEnrollmentProcess": null, "modifiedGrevienceAndAppeal": null, "modifiedNetworkAdequacyStandards": null, "modifiedLengthOfContract": null, "modifiedNonRiskPaymentArrangements": null, "__typename": "ContractFormData" }, "__typename": "ContractRevision" }, "rateRevisions": [], "__typename": "ContractPackageSubmission" }] }
-
+   return {
+       "id": "e670adsfdfadsfc",
+       "status": "RESUBMITTED",
+       "createdAt": "2024-05-07T19:44:53.732Z",
+       "updatedAt": "2024-05-07T19:44:53.732Z",
+       "initiallySubmittedAt": "2024-05-07",
+       "stateCode": "FL",
+       "mccrsID": null,
+       "state": {
+           "code": "FL",
+           "name": "Florida",
+           "programs": [
+               {
+                   "id": "712277fb-f43f-4eb5-98c5-6c6a97509201",
+                   "name": "NEMT",
+                   "fullName": "Non-Emergency Medical Transportation",
+                   "isRateProgram": false,
+                   "__typename": "Program"
+               },
+               {
+                   "id": "037af66b-81eb-4472-8b80-01edf17d12d9",
+                   "name": "PCCMe",
+                   "fullName": "Healthy Start MomCare Network, Inc.",
+                   "isRateProgram": false,
+                   "__typename": "Program"
+               },
+               {
+                   "id": "5c10fe9f-bec9-416f-a20c-718b152ad633",
+                   "name": "MMA",
+                   "fullName": "Managed Medical Assistance Program",
+                   "isRateProgram": false,
+                   "__typename": "Program"
+               },
+               {
+                   "id": "3b8d8fa1-1fa6-4504-9c5b-ef522877fe1e",
+                   "name": "LTC",
+                   "fullName": "Long-term Care Program",
+                   "isRateProgram": false,
+                   "__typename": "Program"
+               },
+               {
+                   "id": "08d114c2-0c01-4a1a-b8ff-e2b79336672d",
+                   "name": "Dental",
+                   "fullName": "Prepaid Dental Health Program",
+                   "isRateProgram": false,
+                   "__typename": "Program"
+               }
+           ],
+           "__typename": "State"
+       },
+       "stateNumber": 221,
+       "__typename": "Contract",
+       "draftRevision": null,
+       "draftRates": null,
+       "packageSubmissions": [
+           {
+               "cause": "CONTRACT_SUBMISSION",
+               "submitInfo": {
+                   "updatedAt": "2024-05-08T17:42:52.696Z",
+                   "updatedBy": "mc-review-team@truss.works",
+                   "updatedReason": "testing 4100",
+                   "__typename": "UpdateInformation"
+               },
+               "submittedRevisions": [
+                   {
+                       "id": "a334b516-f219-47ac-aedf-97c93b18d7d6",
+                       "createdAt": "2024-05-07T19:49:36.173Z",
+                       "updatedAt": "2024-05-08T17:42:52.696Z",
+                       "contractName": "MCR-FL-0221-DENTAL",
+                       "submitInfo": {
+                           "updatedAt": "2024-05-08T17:42:52.696Z",
+                           "updatedBy": "team@example.com",
+                           "updatedReason": "testing 4100",
+                           "__typename": "UpdateInformation"
+                       },
+                       "unlockInfo": {
+                           "updatedAt": "2024-05-07T19:49:36.175Z",
+                           "updatedBy": "team@example.com",
+                           "updatedReason": "test",
+                           "__typename": "UpdateInformation"
+                       },
+                       "formData": {
+                           "programIDs": [
+                               "08d114c2-0c01-4a1a-b8ff-e2b79336672d"
+                           ],
+                           "populationCovered": "CHIP",
+                           "submissionType": "CONTRACT_ONLY",
+                           "riskBasedContract": true,
+                           "submissionDescription": "This amendment revises calendar year (CY) 2019 capitation rates, adds new language concerning capitation payments related to a program no longer authorized by law, and changes the requirement that the MCO pay or deny clean paper claims within thirty (30), rather than twenty-one (21) calendar days of receipt.",
+                           "stateContacts": [
+                               {
+                                   "name": "Raymond Holt",
+                                   "titleRole": "test",
+                                   "email": "kaleigh@example.com",
+                                   "__typename": "StateContact"
+                               }
+                           ],
+                           "supportingDocuments": [
+                               {
+                                   "name": "State User Manual - MC-Review - January 2024.pdf",
+                                   "s3URL": "s3://uploads-val-uploads-798659716464/b88e8dd1-f4f1-4d39-8591-645b64a15e27.pdf/State User Manual - MC-Review - January 2024.pdf",
+                                   "sha256": "fakeSha",
+                                   "dateAdded": "2024-05-08",
+                                   "__typename": "GenericDocument"
+                               }
+                           ],
+                           "contractType": "BASE",
+                           "contractExecutionStatus": "EXECUTED",
+                           "contractDocuments": [
+                               {
+                                   "name": "Test document.pdf",
+                                   "s3URL": "s3://uploads-val-uploads-798659716464/63f44255-e82a-4156-996c-876a1ca86768.pdf/Test document.pdf",
+                                   "sha256": "fakeSha",
+                                   "dateAdded": "2024-05-08",
+                                   "__typename": "GenericDocument"
+                               }
+                           ],
+                           "contractDateStart": "2024-07-01",
+                           "contractDateEnd": "2025-06-30",
+                           "managedCareEntities": [
+                               "MCO"
+                           ],
+                           "federalAuthorities": [
+                               "WAIVER_1115"
+                           ],
+                           "inLieuServicesAndSettings": null,
+                           "modifiedBenefitsProvided": null,
+                           "modifiedGeoAreaServed": null,
+                           "modifiedMedicaidBeneficiaries": null,
+                           "modifiedRiskSharingStrategy": null,
+                           "modifiedIncentiveArrangements": null,
+                           "modifiedWitholdAgreements": null,
+                           "modifiedStateDirectedPayments": null,
+                           "modifiedPassThroughPayments": null,
+                           "modifiedPaymentsForMentalDiseaseInstitutions": null,
+                           "modifiedMedicalLossRatioStandards": null,
+                           "modifiedOtherFinancialPaymentIncentive": null,
+                           "modifiedEnrollmentProcess": null,
+                           "modifiedGrevienceAndAppeal": null,
+                           "modifiedNetworkAdequacyStandards": null,
+                           "modifiedLengthOfContract": null,
+                           "modifiedNonRiskPaymentArrangements": null,
+                           "__typename": "ContractFormData"
+                       },
+                       "__typename": "ContractRevision"
+                   }
+               ],
+               "contractRevision": {
+                   "id": "a334b516-f219-47ac-aedf-97c93b18d7d6",
+                   "createdAt": "2024-05-07T19:49:36.173Z",
+                   "updatedAt": "2024-05-08T17:42:52.696Z",
+                   "contractName": "MCR-FL-0221-DENTAL",
+                   "submitInfo": {
+                       "updatedAt": "2024-05-08T17:42:52.696Z",
+                       "updatedBy": "team@example.com",
+                       "updatedReason": "testing 4100",
+                       "__typename": "UpdateInformation"
+                   },
+                   "unlockInfo": {
+                       "updatedAt": "2024-05-07T19:49:36.175Z",
+                       "updatedBy": "team@example.com",
+                       "updatedReason": "test",
+                       "__typename": "UpdateInformation"
+                   },
+                   "formData": {
+                       "programIDs": [
+                           "08d114c2-0c01-4a1a-b8ff-e2b79336672d"
+                       ],
+                       "populationCovered": "CHIP",
+                       "submissionType": "CONTRACT_ONLY",
+                       "riskBasedContract": true,
+                       "submissionDescription": "This amendment revises calendar year (CY) 2019 capitation rates, adds new language concerning capitation payments related to a program no longer authorized by law, and changes the requirement that the MCO pay or deny clean paper claims within thirty (30), rather than twenty-one (21) calendar days of receipt.",
+                       "stateContacts": [
+                           {
+                               "name": "Raymond Holt",
+                               "titleRole": "test",
+                               "email": "kaleigh@example.com",
+                               "__typename": "StateContact"
+                           }
+                       ],
+                       "supportingDocuments": [
+                           {
+                               "name": "State User Manual - MC-Review - January 2024.pdf",
+                               "s3URL": "s3://uploads-val-uploads-798659716464/b88e8dd1-f4f1-4d39-8591-645b64a15e27.pdf/State User Manual - MC-Review - January 2024.pdf",
+                               "sha256": "fakeSha",
+                               "dateAdded": "2024-05-08",
+                               "__typename": "GenericDocument"
+                           }
+                       ],
+                       "contractType": "BASE",
+                       "contractExecutionStatus": "EXECUTED",
+                       "contractDocuments": [
+                           {
+                               "name": "Test document.pdf",
+                               "s3URL": "s3://uploads-val-uploads-798659716464/63f44255-e82a-4156-996c-876a1ca86768.pdf/Test document.pdf",
+                               "sha256": "fakeSha",
+                               "dateAdded": "2024-05-07",
+                               "__typename": "GenericDocument"
+                           }
+                       ],
+                       "contractDateStart": "2024-07-01",
+                       "contractDateEnd": "2025-06-30",
+                       "managedCareEntities": [
+                           "MCO"
+                       ],
+                       "federalAuthorities": [
+                           "WAIVER_1115"
+                       ],
+                       "inLieuServicesAndSettings": null,
+                       "modifiedBenefitsProvided": null,
+                       "modifiedGeoAreaServed": null,
+                       "modifiedMedicaidBeneficiaries": null,
+                       "modifiedRiskSharingStrategy": null,
+                       "modifiedIncentiveArrangements": null,
+                       "modifiedWitholdAgreements": null,
+                       "modifiedStateDirectedPayments": null,
+                       "modifiedPassThroughPayments": null,
+                       "modifiedPaymentsForMentalDiseaseInstitutions": null,
+                       "modifiedMedicalLossRatioStandards": null,
+                       "modifiedOtherFinancialPaymentIncentive": null,
+                       "modifiedEnrollmentProcess": null,
+                       "modifiedGrevienceAndAppeal": null,
+                       "modifiedNetworkAdequacyStandards": null,
+                       "modifiedLengthOfContract": null,
+                       "modifiedNonRiskPaymentArrangements": null,
+                       "__typename": "ContractFormData"
+                   },
+                   "__typename": "ContractRevision"
+               },
+               "rateRevisions": [],
+               "__typename": "ContractPackageSubmission"
+           },
+           {
+               "cause": "CONTRACT_SUBMISSION",
+               "submitInfo": {
+                   "updatedAt": "2024-05-07T19:46:19.376Z",
+                   "updatedBy": "team@example.com",
+                   "updatedReason": "Initial submission",
+                   "__typename": "UpdateInformation"
+               },
+               "submittedRevisions": [
+                   {
+                       "id": "5e124160-8ac5-4d6f-9733-c5e8723c5af6",
+                       "createdAt": "2024-05-07T19:44:53.732Z",
+                       "updatedAt": "2024-05-07T19:46:19.377Z",
+                       "contractName": "MCR-FL-0221-PCCME",
+                       "submitInfo": {
+                           "updatedAt": "2024-05-07T19:46:19.376Z",
+                           "updatedBy": "team@example.com",
+                           "updatedReason": "Initial submission",
+                           "__typename": "UpdateInformation"
+                       },
+                       "unlockInfo": null,
+                       "formData": {
+                           "programIDs": [
+                               "037af66b-81eb-4472-8b80-01edf17d12d9"
+                           ],
+                           "populationCovered": "CHIP",
+                           "submissionType": "CONTRACT_ONLY",
+                           "riskBasedContract": true,
+                           "submissionDescription": "test",
+                           "stateContacts": [
+                               {
+                                   "name": "Raymond Holt",
+                                   "titleRole": "test",
+                                   "email": "kaleigh@example.com",
+                                   "__typename": "StateContact"
+                               }
+                           ],
+                           "supportingDocuments": [],
+                           "contractType": "BASE",
+                           "contractExecutionStatus": "EXECUTED",
+                           "contractDocuments": [
+                               {
+                                   "name": "Test document.pdf",
+                                   "s3URL": "s3://uploads-val-uploads-798659716464/63f44255-e82a-4156-996c-876a1ca86768.pdf/Test document.pdf",
+                                   "sha256": "fakeSha",
+                                   "dateAdded": "2024-05-07",
+                                   "__typename": "GenericDocument"
+                               }
+                           ],
+                           "contractDateStart": "2024-07-01",
+                           "contractDateEnd": "2025-06-30",
+                           "managedCareEntities": [
+                               "MCO"
+                           ],
+                           "federalAuthorities": [
+                               "WAIVER_1115"
+                           ],
+                           "inLieuServicesAndSettings": null,
+                           "modifiedBenefitsProvided": null,
+                           "modifiedGeoAreaServed": null,
+                           "modifiedMedicaidBeneficiaries": null,
+                           "modifiedRiskSharingStrategy": null,
+                           "modifiedIncentiveArrangements": null,
+                           "modifiedWitholdAgreements": null,
+                           "modifiedStateDirectedPayments": null,
+                           "modifiedPassThroughPayments": null,
+                           "modifiedPaymentsForMentalDiseaseInstitutions": null,
+                           "modifiedMedicalLossRatioStandards": null,
+                           "modifiedOtherFinancialPaymentIncentive": null,
+                           "modifiedEnrollmentProcess": null,
+                           "modifiedGrevienceAndAppeal": null,
+                           "modifiedNetworkAdequacyStandards": null,
+                           "modifiedLengthOfContract": null,
+                           "modifiedNonRiskPaymentArrangements": null,
+                           "__typename": "ContractFormData"
+                       },
+                       "__typename": "ContractRevision"
+                   }
+               ],
+               "contractRevision": {
+                   "id": "5e124160-8ac5-4d6f-9733-c5e8723c5af6",
+                   "createdAt": "2024-05-07T19:44:53.732Z",
+                   "updatedAt": "2024-05-07T19:46:19.377Z",
+                   "contractName": "MCR-FL-0221-PCCME",
+                   "submitInfo": {
+                       "updatedAt": "2024-05-07T19:46:19.376Z",
+                       "updatedBy": "team@example.com",
+                       "updatedReason": "Initial submission",
+                       "__typename": "UpdateInformation"
+                   },
+                   "unlockInfo": null,
+                   "formData": {
+                       "programIDs": [
+                           "037af66b-81eb-4472-8b80-01edf17d12d9"
+                       ],
+                       "populationCovered": "CHIP",
+                       "submissionType": "CONTRACT_ONLY",
+                       "riskBasedContract": true,
+                       "submissionDescription": "test",
+                       "stateContacts": [
+                           {
+                               "name": "Raymond Holt",
+                               "titleRole": "test",
+                               "email": "kaleigh@example.com",
+                               "__typename": "StateContact"
+                           }
+                       ],
+                       "supportingDocuments": [],
+                       "contractType": "BASE",
+                       "contractExecutionStatus": "EXECUTED",
+                       "contractDocuments": [
+                           {
+                               "name": "Test document.pdf",
+                               "s3URL": "s3://uploads-val-uploads-798659716464/63f44255-e82a-4156-996c-876a1ca86768.pdf/Test document.pdf",
+                               "sha256": "fakeSha",
+                               "dateAdded": "2024-05-07",
+                               "__typename": "GenericDocument"
+                           }
+                       ],
+                       "contractDateStart": "2024-07-01",
+                       "contractDateEnd": "2025-06-30",
+                       "managedCareEntities": [
+                           "MCO"
+                       ],
+                       "federalAuthorities": [
+                           "WAIVER_1115"
+                       ],
+                       "inLieuServicesAndSettings": null,
+                       "modifiedBenefitsProvided": null,
+                       "modifiedGeoAreaServed": null,
+                       "modifiedMedicaidBeneficiaries": null,
+                       "modifiedRiskSharingStrategy": null,
+                       "modifiedIncentiveArrangements": null,
+                       "modifiedWitholdAgreements": null,
+                       "modifiedStateDirectedPayments": null,
+                       "modifiedPassThroughPayments": null,
+                       "modifiedPaymentsForMentalDiseaseInstitutions": null,
+                       "modifiedMedicalLossRatioStandards": null,
+                       "modifiedOtherFinancialPaymentIncentive": null,
+                       "modifiedEnrollmentProcess": null,
+                       "modifiedGrevienceAndAppeal": null,
+                       "modifiedNetworkAdequacyStandards": null,
+                       "modifiedLengthOfContract": null,
+                       "modifiedNonRiskPaymentArrangements": null,
+                       "__typename": "ContractFormData"
+                   },
+                   "__typename": "ContractRevision"
+               },
+               "rateRevisions": [],
+               "__typename": "ContractPackageSubmission"
+           }
+       ]
+   }
 }
 
 function mockContractPackageUnlocked(
@@ -1076,4 +1457,3 @@ export {
     mockContractPackageSubmittedWithRevisions,
     mockContractPackageWithDifferentProgramsInRevisions
 }
-

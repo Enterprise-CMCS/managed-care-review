@@ -96,19 +96,16 @@ export function submitRate(
 
         // prepare to generate rate cert name - either use new form data coming down on submit or unsubmitted submission data already in database
         const stateCode = unsubmittedRate.stateCode
-        const stateNumber = unsubmittedRate.stateNumber
         const statePrograms = findStatePrograms(stateCode)
         const generatedRateCertName = formData
             ? generateRateCertificationName(
                   nullsToUndefined(formData),
                   stateCode,
-                  stateNumber,
                   statePrograms
               )
             : generateRateCertificationName(
                   draftRateRevision.formData,
                   stateCode,
-                  stateNumber,
                   statePrograms
               )
 
