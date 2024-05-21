@@ -338,11 +338,14 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
     })
 
-    it('can render the deprecated rate programs when present on a rate certification submission', async () => {
+    it('Displays any historic rate programs when present on a rate certification submission', async () => {
         const statePrograms = mockMNState().programs
         const contract = mockContractPackageSubmitted()
         contract.packageSubmissions[0].rateRevisions[0].formData.deprecatedRateProgramIDs =
-            ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce']
+            [statePrograms[0].id]
+
+        contract.packageSubmissions[0].rateRevisions[0].formData.rateProgramIDs =
+            [statePrograms[1].id]
         await waitFor(() => {
             renderWithProviders(
                 <RateDetailsSummarySection
@@ -355,37 +358,7 @@ describe('RateDetailsSummarySection', () => {
                 }
             )
         })
-
-        expect(
-            screen.getByRole('definition', {
-                name: 'Programs this rate certification covers',
-            })
-        ).toBeInTheDocument()
-    })
-
-    it('does not render the deprecated rate programs when present on a rate certification submission', async () => {
-        const statePrograms = mockMNState().programs
-        const contract = mockContractPackageSubmitted()
-        contract.packageSubmissions[0].rateRevisions[0].formData.deprecatedRateProgramIDs =
-            []
-        await waitFor(() => {
-            renderWithProviders(
-                <RateDetailsSummarySection
-                    contract={contract}
-                    submissionName="MN-MSHO-0003"
-                    statePrograms={statePrograms}
-                />,
-                {
-                    apolloProvider,
-                }
-            )
-        })
-
-        expect(
-            screen.queryByRole('definition', {
-                name: 'Programs this rate certification covers',
-            })
-        ).not.toBeInTheDocument()
+        expect(screen.getByText('SNBC, PMAP')).toBeInTheDocument()
     })
 
     it('renders supporting rates docs when they exist', async () => {

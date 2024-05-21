@@ -8,6 +8,7 @@ import {
     mockValidCMSUser,
     mockValidStateUser,
     rateDataMock,
+    mockMNState,
 } from '../../../testHelpers/apolloMocks'
 import { screen, waitFor, within } from '@testing-library/react'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
@@ -272,6 +273,40 @@ describe('SingleRateSummarySection', () => {
             'href',
             `/submissions/${parentContractRev.contract.id}`
         )
+    })
+
+    it('Displays any historic rate programs when present on a rate certification submission', async () => {
+        const statePrograms = mockMNState().programs
+        const rateData = rateDataMock()
+        rateData.revisions[0].formData.deprecatedRateProgramIDs = [
+            statePrograms[0].id,
+        ]
+
+        rateData.revisions[0].formData.rateProgramIDs = [statePrograms[1].id]
+        await waitFor(() => {
+            renderWithProviders(
+                <SingleRateSummarySection
+                    rate={rateData}
+                    isSubmitted={true}
+                    statePrograms={rateData.state.programs}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidCMSUser(),
+                            }),
+                        ],
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': true,
+                        'link-rates': true,
+                    },
+                }
+            )
+        })
+        expect(screen.getByText('SNBC, PMAP')).toBeInTheDocument()
     })
 
     it('should not display missing field text to CMS users', async () => {
