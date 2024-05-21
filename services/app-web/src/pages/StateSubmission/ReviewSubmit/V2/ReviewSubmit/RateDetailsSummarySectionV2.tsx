@@ -28,7 +28,6 @@ import {
 import {
     getLastContractSubmission,
     getVisibleLatestRateRevisions,
-    getVisibleLatestContractFormData,
 } from '../../../../../gqlHelpers/contractsAndRates'
 import { useAuth } from '../../../../../contexts/AuthContext'
 import { ActuaryCommunicationRecord } from '../../../../../constants'
@@ -74,7 +73,6 @@ export function renderDownloadButton(
 
 export const RateDetailsSummarySectionV2 = ({
     contract,
-    contractRev,
     rateRevs,
     editNavigateTo,
     submissionName,
@@ -89,12 +87,7 @@ export const RateDetailsSummarySectionV2 = ({
 
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
-    const contractOrRev = contractRev ? contractRev : contract
 
-    const contractFormData = getVisibleLatestContractFormData(
-        contractOrRev,
-        isEditing
-    )
     const rates = rateRevs
         ? rateRevs
         : getVisibleLatestRateRevisions(contract, isEditing)
@@ -154,11 +147,6 @@ export const RateDetailsSummarySectionV2 = ({
             rateFormData.rateProgramIDs.length > 0
         ) {
             programIDs = rateFormData.rateProgramIDs
-        } else if (
-            contractFormData?.programIDs &&
-            contractFormData?.programIDs.length > 0
-        ) {
-            programIDs = contractFormData.programIDs
         }
         return programIDs
             ? statePrograms
