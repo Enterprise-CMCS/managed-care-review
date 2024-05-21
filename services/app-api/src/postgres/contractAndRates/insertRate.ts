@@ -29,7 +29,6 @@ async function insertDraftRate(
         amendmentEffectiveDateStart,
         amendmentEffectiveDateEnd,
         rateProgramIDs,
-        deprecatedRateProgramIDs,
         rateCertificationName,
         certifyingActuaryContacts,
         addtlActuaryContacts,
@@ -98,7 +97,6 @@ async function insertDraftRate(
                             amendmentEffectiveDateStart,
                             amendmentEffectiveDateEnd,
                             rateProgramIDs,
-                            deprecatedRateProgramIDs,
                             rateCertificationName,
                             certifyingActuaryContacts: {
                                 create:

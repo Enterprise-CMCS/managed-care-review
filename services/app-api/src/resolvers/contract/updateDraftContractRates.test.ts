@@ -139,7 +139,6 @@ describe('updateDraftContractRates', () => {
             rateDateStart: '2024-01-01',
             rateDateEnd: '2025-01-01',
             rateProgramIDs: ['foo'],
-            deprecatedRateProgramIDs: [],
 
             rateDocuments: [
                 {
@@ -259,7 +258,6 @@ describe('updateDraftContractRates', () => {
                                 amendmentEffectiveDateStart: '2024-02-01',
                                 amendmentEffectiveDateEnd: '2025-02-01',
                                 rateProgramIDs: ['foo'],
-                                deprecatedRateProgramIDs: [],
                                 rateDocuments: [
                                     {
                                         s3URL: 'foo://bar',
@@ -341,7 +339,6 @@ describe('updateDraftContractRates', () => {
                                 amendmentEffectiveDateStart: '2024-02-01',
                                 amendmentEffectiveDateEnd: '2025-02-01',
                                 rateProgramIDs: ['foo'],
-                                deprecatedRateProgramIDs: [],
                                 rateDocuments: [
                                     {
                                         s3URL: 'foo://bar',
@@ -425,7 +422,6 @@ describe('updateDraftContractRates', () => {
                                 amendmentEffectiveDateStart: '2024-02-01',
                                 amendmentEffectiveDateEnd: '2025-02-01',
                                 rateProgramIDs: ['foo'],
-                                deprecatedRateProgramIDs: [],
                                 rateDocuments: [
                                     {
                                         s3URL: 'foo://bar',
@@ -503,7 +499,6 @@ describe('updateDraftContractRates', () => {
                                 amendmentEffectiveDateStart: '2024-02-01',
                                 amendmentEffectiveDateEnd: '2025-02-01',
                                 rateProgramIDs: ['foo'],
-                                deprecatedRateProgramIDs: [],
                                 rateDocuments: [
                                     {
                                         s3URL: 'foo://bar',
@@ -570,7 +565,6 @@ describe('updateDraftContractRates', () => {
                 rateDocuments: [],
                 supportingDocuments: [],
                 rateProgramIDs: [],
-                deprecatedRateProgramIDs: [],
                 certifyingActuaryContacts: [],
                 addtlActuaryContacts: [],
                 packagesWithSharedRateCerts: [],
@@ -599,7 +593,6 @@ describe('updateDraftContractRates', () => {
                 rateDocuments: [],
                 supportingDocuments: [],
                 rateProgramIDs: [],
-                deprecatedRateProgramIDs: [],
                 certifyingActuaryContacts: [],
                 addtlActuaryContacts: [],
                 packagesWithSharedRateCerts: [],
@@ -713,7 +706,6 @@ describe('updateDraftContractRates', () => {
                                 amendmentEffectiveDateStart: '2024-02-01',
                                 amendmentEffectiveDateEnd: '2025-02-01',
                                 rateProgramIDs: ['foo'],
-                                deprecatedRateProgramIDs: [],
                                 rateDocuments: [
                                     {
                                         s3URL: 'foo://bar',
@@ -860,7 +852,6 @@ describe('updateDraftContractRates', () => {
                                 amendmentEffectiveDateStart: '2024-02-01',
                                 amendmentEffectiveDateEnd: '2025-02-01',
                                 rateProgramIDs: ['foo'],
-                                deprecatedRateProgramIDs: [],
                                 rateDocuments: [
                                     {
                                         s3URL: 'foo://bar',

@@ -1177,10 +1177,6 @@ type RateFormData {
     """
     amendmentEffectiveDateEnd: Date
     """
-    Deprecated an array of IDs representing historic state programs that the rate covers
-    """
-    deprecatedRateProgramIDs: [String!]!
-    """
     An array of IDs representing historic state programs that the rate covers
     """
     rateProgramIDs: [String!]!
@@ -1540,10 +1536,6 @@ input RateFormDataInput {
     Only relevant if rate type is AMENDMENT
     """
     amendmentEffectiveDateEnd: Date
-    """
-    Deprecated an array of IDs representing historic state programs that the rate covers
-    """
-    deprecatedRateProgramIDs: [String!]!
     """
     An array of IDs representing historic state programs that the rate covers
     """

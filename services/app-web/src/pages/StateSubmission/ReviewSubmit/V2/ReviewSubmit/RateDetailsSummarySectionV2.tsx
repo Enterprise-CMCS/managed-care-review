@@ -143,14 +143,6 @@ export const RateDetailsSummarySectionV2 = ({
         ) {
             programIDs = rateFormData.rateProgramIDs
         }
-        if (
-            rateFormData.deprecatedRateProgramIDs &&
-            rateFormData.deprecatedRateProgramIDs.length > 0
-        ) {
-            programIDs = programIDs.concat(
-                rateFormData.deprecatedRateProgramIDs
-            )
-        }
 
         return programIDs
             ? statePrograms

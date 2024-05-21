@@ -34,7 +34,6 @@ fragment rateRevisionFragmentForFetchRate on RateRevision {
         amendmentEffectiveDateStart
         amendmentEffectiveDateEnd
         rateProgramIDs
-        deprecatedRateProgramIDs
         rateCertificationName
         certifyingActuaryContacts {
             id

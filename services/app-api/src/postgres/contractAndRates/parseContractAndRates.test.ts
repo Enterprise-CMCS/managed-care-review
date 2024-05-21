@@ -185,7 +185,6 @@ describe('parseDomainData', () => {
                                         amendmentEffectiveDateStart: null,
                                         amendmentEffectiveDateEnd: null,
                                         rateProgramIDs: [],
-                                        deprecatedRateProgramIDs: [],
                                         rateCertificationName: null,
                                         actuaryCommunicationPreference: null,
                                         contractsWithSharedRateRevision: [],

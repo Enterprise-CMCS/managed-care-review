@@ -86,7 +86,6 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                         amendmentEffectiveDateStart
                         amendmentEffectiveDateEnd
                         rateProgramIDs
-                        deprecatedRateProgramIDs
                         rateCertificationName
                         actuaryCommunicationPreference
                         certifyingActuaryContacts {
@@ -142,7 +141,6 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                         amendmentEffectiveDateStart
                         amendmentEffectiveDateEnd
                         rateProgramIDs
-                        deprecatedRateProgramIDs
                         rateCertificationName
                         actuaryCommunicationPreference
                         certifyingActuaryContacts {

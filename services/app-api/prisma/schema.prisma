@@ -162,8 +162,7 @@ model RateRevisionTable {
   rateDateEnd                     DateTime?                @db.Date
   rateDateCertified               DateTime?                @db.Date
   amendmentEffectiveDateStart     DateTime?                @db.Date
-  amendmentEffectiveDateEnd       DateTime?                @db.Date
-  deprecatedRateProgramIDs        String[]
+  amendmentEffectiveDateEnd       DateTime?
   rateProgramIDs                  String[]
   rateCertificationName           String?
   certifyingActuaryContacts       ActuaryContact[]         @relation(name: "CertifyingActuaryOnRateRevision")

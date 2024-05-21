@@ -123,7 +123,6 @@ async function unlockRateInDB(
             amendmentEffectiveDateEnd: currentRev.amendmentEffectiveDateEnd,
             amendmentEffectiveDateStart: currentRev.amendmentEffectiveDateStart,
             rateProgramIDs: currentRev.rateProgramIDs,
-            deprecatedRateProgramIDs: currentRev.deprecatedRateProgramIDs,
             rateCertificationName: currentRev.rateCertificationName,
             actuaryCommunicationPreference:
                 currentRev.actuaryCommunicationPreference,

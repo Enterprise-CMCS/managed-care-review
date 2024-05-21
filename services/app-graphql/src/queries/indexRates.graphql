@@ -59,7 +59,6 @@ query indexRates {
                         amendmentEffectiveDateStart,
                         amendmentEffectiveDateEnd,
                         rateProgramIDs,
-                        deprecatedRateProgramIDs,
                         rateCertificationName,
                         certifyingActuaryContacts {
                             name
@@ -189,7 +188,6 @@ query indexRates {
                         amendmentEffectiveDateStart,
                         amendmentEffectiveDateEnd,
                         rateProgramIDs,
-                        deprecatedRateProgramIDs,
                         rateCertificationName,
                         certifyingActuaryContacts {
                             name
