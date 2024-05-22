@@ -304,6 +304,18 @@ model State {
   users                       User[]
   contracts                   ContractTable[]
   rates                       RateTable[]
+  statePrograms               StateProgram[]
+}
+
+model StateProgram {
+  id                 String                @id @default(uuid())
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @default(now()) @updatedAt
+  fullName           String
+  name               String
+  stateCode          String
+  state              State                @relation(fields: [stateCode], references: [stateCode])
+  isRateProgram      Boolean
 }
 
 model User {
