@@ -132,26 +132,22 @@ export const RateDetailsSummarySectionV2 = ({
             : ''
     }
 
-    const ratePrograms = (rate: Rate | RateRevision) => {
+    const ratePrograms = (
+        rate: Rate | RateRevision,
+        useHistoricPrograms: boolean
+    ) => {
         /* if we have rateProgramIDs, use them, otherwise use programIDs */
         let programIDs = [] as string[]
         const rateFormData = getRateFormData(rate)
         if (!rateFormData) return <GenericErrorPage />
-        if (
+        if (useHistoricPrograms) {
+            programIDs = rateFormData.deprecatedRateProgramIDs
+        } else if (
             rateFormData.rateProgramIDs &&
             rateFormData.rateProgramIDs.length > 0
         ) {
             programIDs = rateFormData.rateProgramIDs
         }
-        if (
-            rateFormData.deprecatedRateProgramIDs &&
-            rateFormData.deprecatedRateProgramIDs.length > 0
-        ) {
-            programIDs = programIDs.concat(
-                rateFormData.deprecatedRateProgramIDs
-            )
-        }
-
         return programIDs
             ? statePrograms
                   .filter((p) => programIDs.includes(p.id))
@@ -267,6 +263,21 @@ export const RateDetailsSummarySectionV2 = ({
                             </h3>
                             <dl>
                                 <DoubleColumnGrid>
+                                    {rate.formData.deprecatedRateProgramIDs
+                                        .length > 0 &&
+                                        isSubmitted && (
+                                            <DataDetail
+                                                id="historicRatePrograms"
+                                                label="Programs this rate certification covers"
+                                                explainMissingData={
+                                                    !isSubmittedOrCMSUser
+                                                }
+                                                children={ratePrograms(
+                                                    rate,
+                                                    true
+                                                )}
+                                            />
+                                        )}
                                     {ratePrograms && (
                                         <DataDetail
                                             id="ratePrograms"
@@ -274,7 +285,7 @@ export const RateDetailsSummarySectionV2 = ({
                                             explainMissingData={
                                                 !isSubmittedOrCMSUser
                                             }
-                                            children={ratePrograms(rate)}
+                                            children={ratePrograms(rate, false)}
                                         />
                                     )}
                                     <DataDetail

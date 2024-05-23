@@ -46,14 +46,6 @@ const ratePrograms = (formData: RateFormData, statePrograms: Program[]) => {
     if (formData.rateProgramIDs && formData.rateProgramIDs.length > 0) {
         programIDs = formData.rateProgramIDs
     }
-
-    if (
-        formData.deprecatedRateProgramIDs &&
-        formData.deprecatedRateProgramIDs.length > 0
-    ) {
-        programIDs = programIDs.concat(formData.deprecatedRateProgramIDs)
-    }
-
     return programIDs
         ? statePrograms
               .filter((p) => programIDs.includes(p.id))
