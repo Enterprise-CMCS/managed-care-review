@@ -54,6 +54,7 @@ describe('RateDetailsSummarySection', () => {
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
+                        deprecatedRateProgramIDs: [],
                         certifyingActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
@@ -111,6 +112,7 @@ describe('RateDetailsSummarySection', () => {
                         rateProgramIDs: [
                             'd95394e5-44d1-45df-8151-1cc1ee66f100',
                         ],
+                        deprecatedRateProgramIDs: [],
                         certifyingActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
@@ -334,6 +336,29 @@ describe('RateDetailsSummarySection', () => {
         expect(
             screen.getByRole('definition', { name: 'Date certified' })
         ).toBeInTheDocument()
+    })
+
+    it('Displays any historic rate programs when present on a rate certification submission', async () => {
+        const statePrograms = mockMNState().programs
+        const contract = mockContractPackageSubmitted()
+        contract.packageSubmissions[0].rateRevisions[0].formData.deprecatedRateProgramIDs =
+            [statePrograms[0].id]
+
+        contract.packageSubmissions[0].rateRevisions[0].formData.rateProgramIDs =
+            [statePrograms[1].id]
+        await waitFor(() => {
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    contract={contract}
+                    submissionName="MN-MSHO-0003"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider,
+                }
+            )
+        })
+        expect(screen.getByText('SNBC, PMAP')).toBeInTheDocument()
     })
 
     it('renders supporting rates docs when they exist', async () => {
