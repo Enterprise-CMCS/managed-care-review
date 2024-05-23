@@ -50,8 +50,8 @@ const ratePrograms = (
 
     if (
         useHistoricPrograms &&
-        formData.rateProgramIDs &&
-        formData.rateProgramIDs.length > 0
+        formData.deprecatedRateProgramIDs &&
+        formData.deprecatedRateProgramIDs.length > 0
     ) {
         programIDs = formData.deprecatedRateProgramIDs
     }
