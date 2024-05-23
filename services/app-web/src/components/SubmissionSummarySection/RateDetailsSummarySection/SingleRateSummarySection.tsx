@@ -40,9 +40,21 @@ const rateCapitationType = (formData: RateFormData) =>
             : 'Certification of rate ranges of capitation rates per rate cell'
         : ''
 
-const ratePrograms = (formData: RateFormData, statePrograms: Program[]) => {
+const ratePrograms = (
+    formData: RateFormData,
+    statePrograms: Program[],
+    useHistoricPrograms: boolean
+) => {
     /* if we have rateProgramIDs, use them, otherwise use programIDs */
     let programIDs = [] as string[]
+
+    if (
+        useHistoricPrograms &&
+        formData.rateProgramIDs &&
+        formData.rateProgramIDs.length > 0
+    ) {
+        programIDs = formData.deprecatedRateProgramIDs
+    }
     if (formData.rateProgramIDs && formData.rateProgramIDs.length > 0) {
         programIDs = formData.rateProgramIDs
     }
@@ -251,7 +263,8 @@ export const SingleRateSummarySection = ({
                                     explainMissingData={!isSubmittedOrCMSUser}
                                     children={ratePrograms(
                                         formData,
-                                        statePrograms
+                                        statePrograms,
+                                        true
                                     )}
                                 />
                             )}
@@ -260,7 +273,11 @@ export const SingleRateSummarySection = ({
                                 id="ratePrograms"
                                 label="Rates this rate certification covers"
                                 explainMissingData={explainMissingData}
-                                children={ratePrograms(formData, statePrograms)}
+                                children={ratePrograms(
+                                    formData,
+                                    statePrograms,
+                                    false
+                                )}
                             />
                         )}
                         <DataDetail
