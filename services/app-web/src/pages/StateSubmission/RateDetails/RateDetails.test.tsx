@@ -283,7 +283,7 @@ describe('RateDetails', () => {
                 expect(screen.queryAllByTestId('errorMessage')).toHaveLength(7)
                 expect(
                     screen.queryAllByText(
-                        'You must indicate which rate are included in this certification'
+                        'You must select which rate(s) are included in this certification'
                     )
                 ).toHaveLength(2)
                 expect(

@@ -1322,7 +1322,7 @@ describe('RateDetailsV2', () => {
             ).toHaveLength(2)
             expect(
                 screen.getAllByText(
-                    'You must indicate which rate are included in this certification'
+                    'You must select which rate(s) are included in this certification'
                 )
             ).toHaveLength(2)
             expect(
