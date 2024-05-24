@@ -18,6 +18,7 @@ import { RoutesRecord } from '../../../constants'
 describe('SingleRateSummarySection', () => {
     it('can render rate details without errors', async () => {
         const rateData = rateDataMock()
+        rateData.revisions[0].formData.deprecatedRateProgramIDs = ['123']
         await waitFor(() => {
             renderWithProviders(
                 <SingleRateSummarySection
@@ -53,6 +54,11 @@ describe('SingleRateSummarySection', () => {
             .rateCertificationName as string
 
         expect(screen.getByText(rateName)).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: 'Rates this rate certification covers',
+            })
+        ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', {
                 name: 'Programs this rate certification covers',

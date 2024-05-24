@@ -255,7 +255,7 @@ describe('RateDetails', () => {
             await userEvent.upload(input, [TEST_DOC_FILE])
             const hasSharedRateFieldset = screen
                 .getByText(
-                    /Was this rate certification uploaded to any other submissions/
+                    /Was this rate certification included with another submission/
                 )
                 .closest('fieldset')
             await userEvent.click(
@@ -282,7 +282,9 @@ describe('RateDetails', () => {
             await waitFor(() => {
                 expect(screen.queryAllByTestId('errorMessage')).toHaveLength(7)
                 expect(
-                    screen.queryAllByText('You must select a program')
+                    screen.queryAllByText(
+                        'You must select which rate(s) are included in this certification'
+                    )
                 ).toHaveLength(2)
                 expect(
                     screen.queryByText(
@@ -698,7 +700,7 @@ describe('RateDetails', () => {
             const firstRateCert = within(rateCertsOnLoad[0]!)
             const firstRateHasSharedRateFieldset = firstRateCert
                 .getByText(
-                    /Was this rate certification uploaded to any other submissions/
+                    /Was this rate certification included with another submission/
                 )
                 .closest('fieldset')
             const firstRateYesSharedRate = within(
@@ -781,7 +783,7 @@ describe('RateDetails', () => {
             const secondRateCert = within(rateCertifications(screen)[1]!)
             const secondRateHasSharedRateFieldset = secondRateCert
                 .getByText(
-                    /Was this rate certification uploaded to any other submissions/
+                    /Was this rate certification included with another submission/
                 )
                 .closest('fieldset')
             const secondRateYesSharedRate = within(
@@ -945,7 +947,7 @@ describe('RateDetails', () => {
             const firstRateCert = within(rateCertsOnLoad[0]!)
             const firstRateHasSharedRateFieldset = screen
                 .getByText(
-                    /Was this rate certification uploaded to any other submissions/,
+                    /Was this rate certification included with another submission/,
                     {
                         selector: 'legend',
                     }
@@ -1064,7 +1066,7 @@ describe('RateDetails', () => {
             const firstRateCert = within(rateCertsOnLoad[0]!)
             const firstRateHasSharedRateFieldset = screen
                 .getByText(
-                    /Was this rate certification uploaded to any other submissions/,
+                    /Was this rate certification included with another submission/,
                     {
                         selector: 'legend',
                     }
@@ -1678,7 +1680,7 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
 
     //Rates across submission
     const sharedRates = withinTargetRateCert.queryByText(
-        /Was this rate certification uploaded to any other submissions/
+        /Was this rate certification included with another submission/
     )
     //if rates across submission UI exists then fill out section
     if (sharedRates) {

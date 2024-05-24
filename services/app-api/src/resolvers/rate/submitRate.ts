@@ -131,6 +131,8 @@ export function submitRate(
                       amendmentEffectiveDateEnd:
                           formData.amendmentEffectiveDateEnd ?? undefined,
                       rateProgramIDs: formData.rateProgramIDs ?? [],
+                      deprecatedRateProgramIDs:
+                          formData.deprecatedRateProgramIDs ?? [],
                       certifyingActuaryContacts:
                           formData.certifyingActuaryContacts
                               ? formData.certifyingActuaryContacts.map(

@@ -42,7 +42,7 @@ const localUsers: LocalUserType[] = [
         givenName: 'Toph',
         familyName: 'Beifong',
         role: 'STATE_USER',
-        stateCode: 'VA',
+        stateCode: 'FL',
     },
     {
         id: 'user3',
@@ -135,12 +135,12 @@ export function LocalLogin(): React.ReactElement {
                         user.role === 'ADMIN_USER'
                             ? 'CMS (Admin)'
                             : user.role === 'BUSINESSOWNER_USER'
-                            ? 'CMS (Business Owner)'
-                            : user.role === 'HELPDESK_USER'
-                            ? 'CMS (Helpdesk)'
-                            : user.role === 'CMS_USER'
-                            ? 'CMS'
-                            : user.stateCode
+                              ? 'CMS (Business Owner)'
+                              : user.role === 'HELPDESK_USER'
+                                ? 'CMS (Helpdesk)'
+                                : user.role === 'CMS_USER'
+                                  ? 'CMS'
+                                  : user.stateCode
 
                     return (
                         <Card key={user.email} className={styles.userCard}>
