@@ -233,7 +233,6 @@ export const RateDetailsSummarySectionV2 = ({
         isSubmittedOrCMSUser,
         isPreviousSubmission,
     ])
-
     return (
         <SectionCard id="rateDetails" className={styles.summarySection}>
             <SectionHeader
@@ -285,7 +284,13 @@ export const RateDetailsSummarySectionV2 = ({
                                             explainMissingData={
                                                 !isSubmittedOrCMSUser
                                             }
-                                            children={ratePrograms(rate, false)}
+                                            children={
+                                                rate.formData
+                                                    .deprecatedRateProgramIDs
+                                                    .length > 0
+                                                    ? null
+                                                    : ratePrograms(rate, false)
+                                            }
                                         />
                                     )}
                                     <DataDetail

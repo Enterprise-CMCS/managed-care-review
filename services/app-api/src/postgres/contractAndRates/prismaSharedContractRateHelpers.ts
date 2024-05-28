@@ -203,7 +203,7 @@ function rateFormDataToDomainModel(
         amendmentEffectiveDateEnd:
             rateRevision.amendmentEffectiveDateEnd ?? undefined,
         rateProgramIDs: rateRevision.rateProgramIDs,
-        deprecatedRateProgramIDs: rateRevision.deprecatedRateProgramIDs,
+        deprecatedRateProgramIDs: [],
         rateCertificationName: rateRevision.rateCertificationName ?? undefined,
         certifyingActuaryContacts: rateRevision.certifyingActuaryContacts
             ? rateRevision.certifyingActuaryContacts.map((actuary) => ({
