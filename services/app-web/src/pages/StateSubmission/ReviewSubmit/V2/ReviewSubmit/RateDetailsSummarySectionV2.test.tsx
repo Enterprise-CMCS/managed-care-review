@@ -911,6 +911,40 @@ describe('RateDetailsSummarySection', () => {
         })
     })
 
+    it('displays missing info text for unlocked submissions with only historic rate program ids', async () => {
+        const draftContract = mockContractPackageDraft()
+        if (
+            draftContract.draftRevision &&
+            draftContract.draftRates &&
+            draftContract.draftRates[0].draftRevision
+        ) {
+            draftContract.draftRates[0].draftRevision.formData.deprecatedRateProgramIDs =
+                [statePrograms[0].id]
+            draftContract.draftRates[0].draftRevision.formData.rateProgramIDs =
+                []
+        }
+
+        renderWithProviders(
+            <RateDetailsSummarySection
+                contract={draftContract}
+                editNavigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+            />,
+            {
+                apolloProvider,
+            }
+        )
+        await waitFor(() => {
+            expect(
+                screen.getByText(/You must provide this information/)
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(/Programs this rate certification covers/)
+            ).not.toBeInTheDocument()
+        })
+    })
+
     it('renders inline error when bulk URL is unavailable', async () => {
         const s3Provider = {
             ...testS3Client(),
