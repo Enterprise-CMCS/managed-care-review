@@ -287,7 +287,9 @@ export const RateDetailsSummarySectionV2 = ({
                                             children={
                                                 rate.formData
                                                     .deprecatedRateProgramIDs
-                                                    .length > 0
+                                                    .length > 0 &&
+                                                rate.formData.rateProgramIDs
+                                                    .length === 0
                                                     ? null
                                                     : ratePrograms(rate, false)
                                             }
