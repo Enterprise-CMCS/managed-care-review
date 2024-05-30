@@ -262,7 +262,7 @@ export const RateDetailsSummarySectionV2 = ({
                             </h3>
                             <dl>
                                 <DoubleColumnGrid>
-                                    {rate.formData.deprecatedRateProgramIDs
+                                    {rateFormData.deprecatedRateProgramIDs
                                         .length > 0 &&
                                         isSubmitted && (
                                             <DataDetail
@@ -285,10 +285,12 @@ export const RateDetailsSummarySectionV2 = ({
                                                 !isSubmittedOrCMSUser
                                             }
                                             children={
-                                                rate.formData
+                                                // explictly set children to null when rate
+                                                // only has deprecatedRateProgramIDs
+                                                rateFormData
                                                     .deprecatedRateProgramIDs
                                                     .length > 0 &&
-                                                rate.formData.rateProgramIDs
+                                                rateFormData.rateProgramIDs
                                                     .length === 0
                                                     ? null
                                                     : ratePrograms(rate, false)
