@@ -27,17 +27,17 @@ Tealium is the data layer for Google Analytics and other data tracking at CMS
 */
 
 const useTealium = (): {
-    logUserEvent: (linkData: TealiumLinkDataObject) => void,
+    logUserEvent: (linkData: TealiumLinkDataObject) => void
     logPageView: () => void
 } => {
     const { pathname } = useLocation()
     const { heading } = usePage()
     const { loggedInUser } = useAuth()
     const lastLoggedRoute = useRef<RouteT | 'UNKNOWN_ROUTE' | undefined>(
-       undefined
+        undefined
     )
     const logPageView = useCallback(() => {
-        if (process.env.REACT_APP_STAGE_NAME === 'local') {
+        if (import.meta.env.VITE_APP_STAGE_NAME === 'local') {
             return
         }
         const currentRoute = getRouteName(pathname)
@@ -46,7 +46,7 @@ const useTealium = (): {
             route: currentRoute,
             user: loggedInUser,
         })
-         // eslint-disable-next-line @typescript-eslint/no-empty-function
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         const utag = window.utag || { link: () => {}, view: () => {} }
         const tagData: TealiumViewDataObject = {
             content_language: 'en',
@@ -54,47 +54,46 @@ const useTealium = (): {
             page_name: tealiumPageName,
             page_path: pathname,
             site_domain: 'cms.gov',
-            site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+            site_environment: `${import.meta.env.VITE_APP_STAGE_NAME}`,
             site_section: `${currentRoute}`,
             logged_in: `${Boolean(loggedInUser) ?? false}`,
         }
         utag.view(tagData)
 
         lastLoggedRoute.current = currentRoute
-     },[heading, pathname, loggedInUser])
+    }, [heading, pathname, loggedInUser])
 
-    const logUserEvent = useCallback((linkData: {
-        tealium_event: TealiumEvent
-        content_type?: string
-    }) => {
-        if (process.env.REACT_APP_STAGE_NAME === 'local') {
-            return
-        }
-        const currentRoute = getRouteName(pathname)
+    const logUserEvent = useCallback(
+        (linkData: { tealium_event: TealiumEvent; content_type?: string }) => {
+            if (import.meta.env.VITE_APP_STAGE_NAME === 'local') {
+                return
+            }
+            const currentRoute = getRouteName(pathname)
 
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const utag = window.utag || { link: () => {}, view: () => {} }
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            const utag = window.utag || { link: () => {}, view: () => {} }
 
-        const tagData: TealiumLinkDataObject = {
-            content_language: 'en',
-            page_name: `${heading}: ${PageTitlesRecord[currentRoute]}`,
-            page_path: pathname,
-            site_domain: 'cms.gov',
-            site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
-            site_section: `${currentRoute}`,
-            logged_in: `${Boolean(loggedInUser) ?? false}`,
-            userId: loggedInUser?.email,
-            ...linkData,
-        }
-        utag.link(tagData)
-
-    },[heading, pathname, loggedInUser])
+            const tagData: TealiumLinkDataObject = {
+                content_language: 'en',
+                page_name: `${heading}: ${PageTitlesRecord[currentRoute]}`,
+                page_path: pathname,
+                site_domain: 'cms.gov',
+                site_environment: `${import.meta.env.VITE_APP_STAGE_NAME}`,
+                site_section: `${currentRoute}`,
+                logged_in: `${Boolean(loggedInUser) ?? false}`,
+                userId: loggedInUser?.email,
+                ...linkData,
+            }
+            utag.link(tagData)
+        },
+        [heading, pathname, loggedInUser]
+    )
 
     // Add Tealium setup
     // This effect should only fire on initial app load
     useEffect(() => {
         const tealiumEnv = getTealiumEnv(
-            process.env.REACT_APP_STAGE_NAME || 'main'
+            import.meta.env.VITE_APP_STAGE_NAME || 'main'
         )
         const tealiumProfile = 'cms-mcreview'
         if (!tealiumEnv || !tealiumProfile) {
@@ -111,13 +110,12 @@ const useTealium = (): {
             src: `https://tags.tiqcdn.com/utag/cmsgov/${tealiumProfile}/${tealiumEnv}/utag.sync.js`,
             id: 'tealium-load-tags-sync',
         })
-        if(document.getElementById(initializeTagManagerSnippet.id) === null){
+        if (document.getElementById(initializeTagManagerSnippet.id) === null) {
             document.head.appendChild(initializeTagManagerSnippet)
         }
 
         // Load utag.js - Add to body element- ASYNC load inline script
-        const inlineScript =
-            `(function (t, e, a, l, i, u, m) {
+        const inlineScript = `(function (t, e, a, l, i, u, m) {
             t = 'cmsgov/${tealiumProfile}'
             e = '${tealiumEnv}'
             a = '/' + t + '/' + e + '/utag.js'
@@ -138,33 +136,34 @@ const useTealium = (): {
             id: 'tealium-load-tags-async',
         })
 
-        if(document.getElementById(loadTagsSnippet.id) === null) {
+        if (document.getElementById(loadTagsSnippet.id) === null) {
             document.body.appendChild(loadTagsSnippet)
         }
-
     }, [])
 
     // This effect should only fire each time the url changes
     useEffect(() => {
-        if (process.env.REACT_APP_STAGE_NAME === 'local') {
+        if (import.meta.env.VITE_APP_STAGE_NAME === 'local') {
             return
         }
         // Guardrail on initial load - protect against trying to call utag page view before its loaded
-      if (!window.utag) {
-
-            new Promise(resolve => setTimeout(resolve, 1000)).finally( () =>{
-            if (!window.utag) {
-                recordJSException('Analytics did not load in time')
-                return
-            } else {
-                logPageView()
-             }
+        if (!window.utag) {
+            new Promise((resolve) => setTimeout(resolve, 1000)).finally(() => {
+                if (!window.utag) {
+                    recordJSException('Analytics did not load in time')
+                    return
+                } else {
+                    logPageView()
+                }
             })
-        // Guardrail on subsequent page view  - protect against multiple calls when route seems similar
-        } else if (window.utag && lastLoggedRoute.current &&  lastLoggedRoute.current !== getRouteName(pathname)) {
+            // Guardrail on subsequent page view  - protect against multiple calls when route seems similar
+        } else if (
+            window.utag &&
+            lastLoggedRoute.current &&
+            lastLoggedRoute.current !== getRouteName(pathname)
+        ) {
             logPageView()
         }
-
     }, [pathname, logPageView])
 
     return { logUserEvent, logPageView }

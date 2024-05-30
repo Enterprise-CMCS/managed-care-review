@@ -31,7 +31,7 @@ jobs:
       - name: Check for secrets
         uses: ./.github/actions/check_secrets
         with:
-          expected-secret: ${{ secrets.REACT_APP_AUTH_MODE }}
+          expected-secret: ${{ secrets.VITE_APP_AUTH_MODE }}
 
       - name: set app version
         id: app-version
@@ -103,7 +103,7 @@ jobs:
 
       - name: Web Unit Tests
         env:
-          REACT_APP_AUTH_MODE: AWS_COGNITO
+          VITE_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-web
         run: yarn test:once --coverage
@@ -143,7 +143,7 @@ jobs:
       postgres:
         image: postgres:13.3
         env:
-          REACT_APP_AUTH_MODE: AWS_COGNITO
+          VITE_APP_AUTH_MODE: AWS_COGNITO
           POSTGRES_PASSWORD: shhhsecret #pragma: allowlist secret
         # Set health checks to wait until postgres has started
         options: >-
@@ -170,7 +170,7 @@ jobs:
       - name: Generate Prisma
         env:
           NODE_OPTIONS: --max_old_space_size=6000
-          REACT_APP_AUTH_MODE: AWS_COGNITO
+          VITE_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-api
         run: |
@@ -181,8 +181,8 @@ jobs:
         env:
           stage: ${steps.stage-name.outputs.stage-name-for-branch}
           NODE_OPTIONS: --max_old_space_size=6000
-          REACT_APP_OTEL_COLLECTOR_URL: ${{vars.REACT_APP_OTEL_COLLECTOR_URL}}
-          REACT_APP_AUTH_MODE: AWS_COGNITO
+          VITE_APP_OTEL_COLLECTOR_URL: ${{vars.VITE_APP_OTEL_COLLECTOR_URL}}
+          VITE_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-api
         run: |
@@ -512,11 +512,11 @@ jobs:
           # Point to the cypress config file from root
           config-file: services/cypress/cypress.config.ts
         env:
-          REACT_APP_AUTH_MODE: AWS_COGNITO
+          VITE_APP_AUTH_MODE: AWS_COGNITO
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
-          REACT_APP_API_URL: ${{ needs.finishing-prep.outputs.api-endpoint }}
+          VITE_APP_API_URL: ${{ needs.finishing-prep.outputs.api-endpoint }}
           COGNITO_USER_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-id }}
           COGNITO_REGION: ${{ needs.finishing-prep.outputs.cognito-region }}
           COGNITO_IDENTITY_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-identity-pool-id }}

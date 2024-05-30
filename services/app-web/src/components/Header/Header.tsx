@@ -1,7 +1,7 @@
 import { Grid, GridContainer } from '@trussworks/react-uswds'
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import onemacLogo from '../../assets/images/onemac-logo.svg'
+import onemacLogo from '../../assets/images/onemac-logo.svg?react'
 import { AuthModeType } from '../../common-code/config'
 import { useCurrentRoute } from '../../hooks/useCurrentRoute'
 import { useAuth } from '../../contexts/AuthContext'

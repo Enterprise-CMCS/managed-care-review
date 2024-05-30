@@ -13,7 +13,7 @@ import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './APIAccess.module.scss'
 
 function APIAccess(): React.ReactElement {
-    const apiURL = process.env.REACT_APP_API_URL
+    const apiURL = import.meta.env.VITE_APP_API_URL
 
     const thirdPartyAPIURL = !apiURL
         ? undefined

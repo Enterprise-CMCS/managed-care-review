@@ -2,9 +2,9 @@
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "project": ["./tsconfig.json"],
-        "sourceType": "module"
+        "sourceType": "module",
     },
-    "plugins": ["@typescript-eslint", "jsx-a11y", "testing-library", "jest"],
+    "plugins": ["@typescript-eslint", "jsx-a11y", "jest"],
     "extends": [
         "eslint:recommended",
         "plugin:jest/recommended",
@@ -12,10 +12,9 @@
         "plugin:jsx-a11y/recommended",
         "plugin:@typescript-eslint/recommended",
         "prettier",
-        "react-app"
     ],
     "env": {
-        "jest/globals": true
+        "jest/globals": true,
     },
     "ignorePatterns": ["src/gen/*", "*.config.ts"],
     "rules": {
@@ -30,8 +29,8 @@
             "warn",
             {
                 "argsIgnorePattern": "^_*",
-                "destructuredArrayIgnorePattern": "^_"
-            }
+                "destructuredArrayIgnorePattern": "^_",
+            },
         ],
         "no-console": [
             "warn",
@@ -57,17 +56,17 @@
                     "timeLog",
                     "timeStamp",
                     "trace",
-                    "warn"
-                ]
-            }
-        ]
+                    "warn",
+                ],
+            },
+        ],
     },
     "overrides": [
         {
             "files": ["src/**/*.stories.tsx"],
             "rules": {
-                "import/no-anonymous-default-export": "off"
-            }
-        }
-    ]
+                "import/no-anonymous-default-export": "off",
+            },
+        },
+    ],
 }

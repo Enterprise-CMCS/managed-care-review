@@ -1,6 +1,6 @@
 import opentelemetry, { Span } from '@opentelemetry/api'
 
-const serviceNameOTEL = 'app-web-' + process.env.REACT_APP_STAGE_NAME
+const serviceNameOTEL = 'app-web-' + import.meta.env.VITE_APP_STAGE_NAME
 
 function getTracer() {
     return opentelemetry.trace.getTracer(serviceNameOTEL)

@@ -186,7 +186,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     // Initializing our handler should be the only place we read environment variables. Everything
     // should be configured by parameters, per /docs/designPatterns.md#Dependency_Injection
 
-    const authMode = process.env.REACT_APP_AUTH_MODE
+    const authMode = process.env.VITE_APP_AUTH_MODE
     assertIsAuthMode(authMode)
 
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET

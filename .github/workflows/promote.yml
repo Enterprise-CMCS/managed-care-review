@@ -28,7 +28,7 @@ jobs:
       postgres:
         image: postgres:13.3
         env:
-          REACT_APP_AUTH_MODE: IDM
+          VITE_APP_AUTH_MODE: IDM
           POSTGRES_PASSWORD: shhhsecret #pragma: allowlist secret
         # Set health checks to wait until postgres has started
         options: >-
@@ -53,7 +53,7 @@ jobs:
 
       - name: Unit Tests
         env:
-          REACT_APP_AUTH_MODE: IDM
+          VITE_APP_AUTH_MODE: IDM
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
           NODE_OPTIONS: --max_old_space_size=6000
         run: ./dev test --unit
@@ -274,7 +274,7 @@ jobs:
           # Point to the cypress config file from root
           config-file: services/cypress/cypress.config.ts
         env:
-          REACT_APP_AUTH_MODE: IDM
+          VITE_APP_AUTH_MODE: IDM
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Overwrites folder directories in cypress config because in CI we run from root

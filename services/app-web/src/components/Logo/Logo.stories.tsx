@@ -1,5 +1,5 @@
 import React from 'react'
-import onemacLogo from '../../assets/images/onemac-logo.svg'
+import onemacLogo from '../../assets/images/onemac-logo.svg?react'
 import { Logo } from './Logo'
 
 export default {

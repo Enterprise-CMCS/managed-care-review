@@ -78,19 +78,19 @@ describe('AppBody', () => {
     })
 
     describe('Environment specific banner', () => {
-        const OLD_ENV = process.env
+        const OLD_ENV = import.meta.env
 
         beforeEach(() => {
             jest.resetModules() // Most important - clears the cache
-            process.env = { ...OLD_ENV } // Make a copy
+            import.meta.env = { ...OLD_ENV } // Make a copy
         })
 
         afterAll(() => {
-            process.env = OLD_ENV // Restore old environment
+            import.meta.env = OLD_ENV // Restore old environment
         })
 
         it('shows test environment banner in val', () => {
-            process.env.REACT_APP_STAGE_NAME = 'val'
+            import.meta.env.VITE_APP_STAGE_NAME = 'val'
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
                     mocks: [
@@ -107,7 +107,7 @@ describe('AppBody', () => {
         })
 
         it('does not show test environment banner in prod', () => {
-            process.env.REACT_APP_STAGE_NAME = 'prod'
+            import.meta.env.VITE_APP_STAGE_NAME = 'prod'
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
                     mocks: [

@@ -30,7 +30,7 @@ custom:
   document_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.DocumentUploadsBucketArn}
   qa_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.QAUploadsBucketArn}
   secretsManagerSecret: aurora_postgres_${sls:stage} #pragma: allowlist secret
-  reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
+  reactAppAuthMode: ${env:VITE_APP_AUTH_MODE}
   apiAppOtelCollectorUrl: ${env:API_APP_OTEL_COLLECTOR_URL, ssm:/configuration/api_app_otel_collector_url}
   dbURL: ${env:DATABASE_URL}
   ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key_feds}
@@ -149,7 +149,7 @@ provider:
   environment:
     stage: ${sls:stage}
     DATABASE_URL: ${self:custom.dbURL}
-    REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
+    VITE_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
     API_APP_OTEL_COLLECTOR_URL: ${self:custom.apiAppOtelCollectorUrl}
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
     EMAILER_MODE: ${self:custom.emailerMode}

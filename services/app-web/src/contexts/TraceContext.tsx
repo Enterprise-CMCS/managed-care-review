@@ -12,7 +12,7 @@ import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
 import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
 import { ZoneContextManager } from '@opentelemetry/context-zone'
 
-const serviceName = 'app-web-' + process.env.REACT_APP_STAGE_NAME
+const serviceName = 'app-web-' + import.meta.env.VITE_APP_STAGE_NAME
 
 const provider = new WebTracerProvider({
     idGenerator: new AWSXRayIdGenerator(),
@@ -22,7 +22,7 @@ const provider = new WebTracerProvider({
 })
 
 const collectorOptions = {
-    url: process.env.REACT_APP_OTEL_COLLECTOR_URL,
+    url: import.meta.env.VITE_APP_OTEL_COLLECTOR_URL,
     headers: {},
 }
 const exporter = new OTLPTraceExporter(collectorOptions)

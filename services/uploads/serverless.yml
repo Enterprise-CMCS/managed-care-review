@@ -51,7 +51,7 @@ provider:
 
 custom:
   region: ${aws:region}
-  reactAppOtelCollectorUrl: ${env:REACT_APP_OTEL_COLLECTOR_URL, ssm:/configuration/react_app_otel_collector_url}
+  reactAppOtelCollectorUrl: ${env:VITE_APP_OTEL_COLLECTOR_URL, ssm:/configuration/react_app_otel_collector_url}
   authorizedKeys: ${file(../postgres/scripts/authorized_keys)}
   webpack:
     webpackConfig: webpack.config.js
@@ -116,7 +116,7 @@ functions:
       PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
       AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
-      REACT_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
+      VITE_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
 
   avDownloadDefinitions:
     handler: src/lambdas/index.avDownloadDefinitions
@@ -133,7 +133,7 @@ functions:
       PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
       AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
-      REACT_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
+      VITE_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
 
   avAuditUploads:
     handler: src/lambdas/index.avAuditUploads
@@ -150,7 +150,7 @@ functions:
       LIST_INFECTED_FILES_LAMBDA_NAME: ${self:functions.avAuditFiles.name}
       AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
-      REACT_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
+      VITE_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
 
   avAuditFiles:
     handler: src/lambdas/index.avAuditFiles
@@ -169,7 +169,7 @@ functions:
       PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
       AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
-      REACT_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
+      VITE_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
 
 resources:
   Conditions:
