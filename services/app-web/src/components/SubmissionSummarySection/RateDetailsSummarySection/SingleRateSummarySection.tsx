@@ -254,8 +254,7 @@ export const SingleRateSummarySection = ({
                 )}
                 <dl>
                     <DoubleColumnGrid>
-                        {rate.revisions[0].formData.deprecatedRateProgramIDs
-                            .length > 0 &&
+                        {formData.deprecatedRateProgramIDs.length > 0 &&
                             isSubmitted && (
                                 <DataDetail
                                     id="historicRatePrograms"
@@ -273,11 +272,18 @@ export const SingleRateSummarySection = ({
                                 id="ratePrograms"
                                 label="Rates this rate certification covers"
                                 explainMissingData={explainMissingData}
-                                children={ratePrograms(
-                                    formData,
-                                    statePrograms,
-                                    false
-                                )}
+                                children={
+                                    rate.revisions[0].formData
+                                        .deprecatedRateProgramIDs.length > 0 &&
+                                    rate.revisions[0].formData.rateProgramIDs
+                                        .length === 0
+                                        ? null
+                                        : ratePrograms(
+                                              formData,
+                                              statePrograms,
+                                              false
+                                          )
+                                }
                             />
                         )}
                         <DataDetail
