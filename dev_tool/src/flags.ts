@@ -57,7 +57,7 @@ export function parseRunFlags<T extends runFlags>(
         Object.entries(inputFlags).map(
             ([key, value]: [string, boolean | undefined]): [
                 string,
-                boolean
+                boolean,
             ] => {
                 if (value === undefined) {
                     return [key, !anyTrue]
