@@ -254,8 +254,7 @@ export const SingleRateSummarySection = ({
                 )}
                 <dl>
                     <DoubleColumnGrid>
-                        {rate.revisions[0].formData.deprecatedRateProgramIDs
-                            .length > 0 &&
+                        {formData.deprecatedRateProgramIDs.length > 0 &&
                             isSubmitted && (
                                 <DataDetail
                                     id="historicRatePrograms"

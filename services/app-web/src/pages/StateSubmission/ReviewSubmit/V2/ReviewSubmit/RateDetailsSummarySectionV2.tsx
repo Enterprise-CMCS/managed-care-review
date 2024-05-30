@@ -233,7 +233,6 @@ export const RateDetailsSummarySectionV2 = ({
         isSubmittedOrCMSUser,
         isPreviousSubmission,
     ])
-
     return (
         <SectionCard id="rateDetails" className={styles.summarySection}>
             <SectionHeader
@@ -263,7 +262,7 @@ export const RateDetailsSummarySectionV2 = ({
                             </h3>
                             <dl>
                                 <DoubleColumnGrid>
-                                    {rate.formData.deprecatedRateProgramIDs
+                                    {rateFormData.deprecatedRateProgramIDs
                                         .length > 0 &&
                                         isSubmitted && (
                                             <DataDetail

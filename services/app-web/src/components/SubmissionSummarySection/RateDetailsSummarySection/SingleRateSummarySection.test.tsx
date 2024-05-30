@@ -322,9 +322,14 @@ describe('SingleRateSummarySection', () => {
             {
                 rateType: undefined,
                 rateDateCertified: undefined,
+                rateProgramIDs: [],
             } as unknown as Partial<RateRevision>,
             { status: 'UNLOCKED' }
         )
+        rateData.revisions[0].formData.deprecatedRateProgramIDs = [
+            rateData.state.programs[0].id,
+        ]
+        rateData.revisions[0].formData.rateProgramIDs = []
         renderWithProviders(
             <SingleRateSummarySection
                 rate={rateData}
@@ -354,7 +359,7 @@ describe('SingleRateSummarySection', () => {
 
         expect(
             await screen.findAllByText(/You must provide this information/)
-        ).toHaveLength(2)
+        ).toHaveLength(3)
     })
 
     describe('Unlock rate', () => {
