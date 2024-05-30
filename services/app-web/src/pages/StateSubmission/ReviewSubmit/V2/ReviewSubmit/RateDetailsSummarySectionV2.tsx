@@ -284,17 +284,7 @@ export const RateDetailsSummarySectionV2 = ({
                                             explainMissingData={
                                                 !isSubmittedOrCMSUser
                                             }
-                                            children={
-                                                // explictly set children to null when rate
-                                                // only has deprecatedRateProgramIDs
-                                                rateFormData
-                                                    .deprecatedRateProgramIDs
-                                                    .length > 0 &&
-                                                rateFormData.rateProgramIDs
-                                                    .length === 0
-                                                    ? null
-                                                    : ratePrograms(rate, false)
-                                            }
+                                            children={ratePrograms(rate, false)}
                                         />
                                     )}
                                     <DataDetail

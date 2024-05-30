@@ -39,7 +39,7 @@ export const DataDetail = ({
         <div className={styles.dataDetail}>
             <dt id={id}>{label}</dt>
             <dd role="definition" aria-labelledby={id}>
-                {handleArray ? (
+                {handleArray && !noData ? (
                     children.join(', ').toUpperCase()
                 ) : explainMissingData && noData ? (
                     <DataDetailMissingField />

@@ -272,19 +272,11 @@ export const SingleRateSummarySection = ({
                                 id="ratePrograms"
                                 label="Rates this rate certification covers"
                                 explainMissingData={explainMissingData}
-                                children={
-                                    // explictly set children to null when rate
-                                    // only has deprecatedRateProgramIDs
-                                    formData.deprecatedRateProgramIDs.length >
-                                        0 &&
-                                    formData.rateProgramIDs.length === 0
-                                        ? null
-                                        : ratePrograms(
-                                              formData,
-                                              statePrograms,
-                                              false
-                                          )
-                                }
+                                children={ratePrograms(
+                                    formData,
+                                    statePrograms,
+                                    false
+                                )}
                             />
                         )}
                         <DataDetail
