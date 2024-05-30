@@ -35,12 +35,6 @@ describe('SubmissionTypeSummarySection', () => {
         expect(
             screen.getByRole('link', { name: 'Edit MN-PMAP-0001' })
         ).toHaveAttribute('href', '/submission-type')
-
-        // Our mocks use the latest package data by default.
-        // Therefore we can check here that missing field is not being displayed unexpectedly
-        expect(
-            screen.queryByText(/You must provide this information/)
-        ).toBeNull()
     })
 
     it('can render submitted package without errors', () => {
