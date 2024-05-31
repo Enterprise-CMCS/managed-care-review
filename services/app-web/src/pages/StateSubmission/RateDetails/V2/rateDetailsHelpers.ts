@@ -61,7 +61,6 @@ const convertRateFormToGQLRateFormData = (
         certifyingActuaryContacts: rateForm.actuaryContacts,
         addtlActuaryContacts: rateForm.addtlActuaryContacts,
         actuaryCommunicationPreference: rateForm.actuaryCommunicationPreference ?? undefined,
-        packagesWithSharedRateCerts: [],
     }
 }
 
