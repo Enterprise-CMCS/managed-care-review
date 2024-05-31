@@ -4,18 +4,18 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import {
-    mockBaseContract,
-    mockSubmittedHealthPlanPackage,
-    mockSubmittedHealthPlanPackageWithRevisions,
-    submitHealthPlanPackageMockError,
-    submitHealthPlanPackageMockSuccess,
+    mockContractPackageDraft,
+    mockContractPackageSubmitted,
     unlockHealthPlanPackageMockError,
     unlockHealthPlanPackageMockSuccess,
-    mockUnlockedHealthPlanPackage,
 } from '../../testHelpers/apolloMocks'
-import { UnlockSubmitModal } from './UnlockSubmitModal'
+import { UnlockSubmitModal } from './V2/UnlockSubmitModalV2'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { Location } from 'react-router-dom'
+import {
+    submitContractMockError,
+    submitContractMockSuccess,
+} from '../../testHelpers/apolloMocks/contractGQLMock'
 
 describe('UnlockSubmitModal', () => {
     const mockSetIsSubmitting = jest.fn()
@@ -27,9 +27,9 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockBaseContract()}
+                    submissionData={mockContractPackageDraft()}
                     submissionName="Test-Submission"
-                    modalType="SUBMIT"
+                    modalType="SUBMIT_CONTRACT"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
                 />
@@ -38,15 +38,18 @@ describe('UnlockSubmitModal', () => {
             const dialog = screen.getByRole('dialog')
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
-            const confirmSubmit = screen.getByTestId('submit-modal-submit')
+            const confirmSubmit = screen.getByTestId(
+                'submit_contract-modal-submit'
+            )
             expect(confirmSubmit).toBeInTheDocument()
             expect(screen.getByText('Ready to submit?')).toBeInTheDocument()
             expect(
                 screen.getByText(
-                    'Submitting this package will send it to CMS to begin their review.'
+                    'Submitting this contract will send it to CMS to begin their review.'
                 )
             ).toBeInTheDocument()
         })
+
         it('redirects if submission succeeds', async () => {
             let testLocation: Location
             const modalRef = createRef<ModalRef>()
@@ -54,23 +57,23 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockBaseContract()}
+                    submissionData={mockContractPackageDraft()}
                     submissionName="Test-Submission"
-                    modalType="SUBMIT"
+                    modalType="SUBMIT_CONTRACT"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
                 />,
                 {
                     apolloProvider: {
                         mocks: [
-                            submitHealthPlanPackageMockSuccess({
-                                id: mockBaseContract().id,
+                            submitContractMockSuccess({
+                                id: mockContractPackageDraft().id,
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `draftSubmission/${
-                            mockBaseContract().id
+                        route: `/submissions/${
+                            mockContractPackageDraft().id
                         }/review-and-submit`,
                     },
                     location: (location) => (testLocation = location),
@@ -81,7 +84,9 @@ describe('UnlockSubmitModal', () => {
             const dialog = screen.getByRole('dialog')
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
-            await userEvent.click(screen.getByTestId('submit-modal-submit'))
+            await userEvent.click(
+                screen.getByTestId('submit_contract-modal-submit')
+            )
 
             await waitFor(() =>
                 expect(testLocation.pathname).toBe(`/dashboard/submissions`)
@@ -99,17 +104,17 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockBaseContract()}
+                    submissionData={mockContractPackageDraft()}
                     submissionName="Test-Submission"
-                    modalType="SUBMIT"
+                    modalType="SUBMIT_CONTRACT"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
                 />,
                 {
                     apolloProvider: {
                         mocks: [
-                            submitHealthPlanPackageMockError({
-                                id: mockBaseContract().id,
+                            submitContractMockError({
+                                id: mockContractPackageDraft().id,
                                 error: {
                                     code: 'INTERNAL_SERVER_ERROR',
                                     cause: 'EMAIL_ERROR',
@@ -118,8 +123,8 @@ describe('UnlockSubmitModal', () => {
                         ],
                     },
                     routerProvider: {
-                        route: `draftSubmission/${
-                            mockBaseContract().id
+                        route: `submissions/${
+                            mockContractPackageDraft().id
                         }/review-and-submit`,
                     },
                     location: (location) => (testLocation = location),
@@ -130,7 +135,9 @@ describe('UnlockSubmitModal', () => {
             const dialog = screen.getByRole('dialog')
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
-            await userEvent.click(screen.getByTestId('submit-modal-submit'))
+            await userEvent.click(
+                screen.getByTestId('submit_contract-modal-submit')
+            )
 
             await waitFor(() =>
                 expect(testLocation.pathname).toBe(`/dashboard/submissions`)
@@ -147,17 +154,17 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockBaseContract()}
+                    submissionData={mockContractPackageDraft()}
                     submissionName="Test-Submission"
-                    modalType="SUBMIT"
+                    modalType="SUBMIT_CONTRACT"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
                 />,
                 {
                     apolloProvider: {
                         mocks: [
-                            submitHealthPlanPackageMockError({
-                                id: mockBaseContract().id,
+                            submitContractMockError({
+                                id: mockContractPackageDraft().id,
                             }),
                         ],
                     },
@@ -167,7 +174,9 @@ describe('UnlockSubmitModal', () => {
             const dialog = screen.getByRole('dialog')
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
-            await userEvent.click(screen.getByTestId('submit-modal-submit'))
+            await userEvent.click(
+                screen.getByTestId('submit_contract-modal-submit')
+            )
 
             expect(
                 await screen.findByText('Error attempting to submit.')
@@ -190,8 +199,8 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     modalRef={modalRef}
-                    modalType="UNLOCK"
-                    healthPlanPackage={mockSubmittedHealthPlanPackageWithRevisions()}
+                    modalType="UNLOCK_CONTRACT"
+                    submissionData={mockContractPackageSubmitted()}
                 />
             )
             await waitFor(() => handleOpen())
@@ -207,9 +216,9 @@ describe('UnlockSubmitModal', () => {
             expect(
                 screen.getByTestId('unlockSubmitModalInput')
             ).toBeInTheDocument()
-            expect(screen.getByTestId('unlock-modal-submit')).toHaveTextContent(
-                'Unlock'
-            )
+            expect(
+                screen.getByTestId('unlock_contract-modal-submit')
+            ).toHaveTextContent('Unlock')
         })
 
         it('displays form validation error when submitting without a unlock reason', async () => {
@@ -219,14 +228,16 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     modalRef={modalRef}
-                    modalType="UNLOCK"
-                    healthPlanPackage={mockSubmittedHealthPlanPackageWithRevisions()}
+                    modalType="UNLOCK_CONTRACT"
+                    submissionData={mockContractPackageSubmitted()}
                 />
             )
             await waitFor(() => handleOpen())
             await screen.findByTestId('unlockSubmitModalInput')
 
-            const modalSubmit = screen.getByTestId('unlock-modal-submit')
+            const modalSubmit = screen.getByTestId(
+                'unlock_contract-modal-submit'
+            )
             expect(modalSubmit).toHaveTextContent('Unlock')
             await userEvent.click(modalSubmit)
             const dialog = await screen.getByRole('dialog')
@@ -247,8 +258,8 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     modalRef={modalRef}
-                    modalType="UNLOCK"
-                    healthPlanPackage={mockSubmittedHealthPlanPackageWithRevisions()}
+                    modalType="UNLOCK_CONTRACT"
+                    submissionData={mockContractPackageSubmitted()}
                 />
             )
 
@@ -258,7 +269,9 @@ describe('UnlockSubmitModal', () => {
             const textbox = await screen.findByTestId('unlockSubmitModalInput')
 
             // submit without entering anything
-            await userEvent.click(screen.getByTestId('unlock-modal-submit'))
+            await userEvent.click(
+                screen.getByTestId('unlock_contract-modal-submit')
+            )
 
             expect(
                 await screen.findByText(
@@ -279,14 +292,14 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     modalRef={modalRef}
-                    modalType="UNLOCK"
-                    healthPlanPackage={mockSubmittedHealthPlanPackage()}
+                    modalType="UNLOCK_CONTRACT"
+                    submissionData={mockContractPackageSubmitted()}
                 />,
                 {
                     apolloProvider: {
                         mocks: [
                             unlockHealthPlanPackageMockSuccess({
-                                id: mockUnlockedHealthPlanPackage().id,
+                                id: mockContractPackageSubmitted().id,
                                 reason: 'Test unlock summary',
                             }),
                         ],
@@ -304,7 +317,9 @@ describe('UnlockSubmitModal', () => {
                 'Test unlock summary'
             )
 
-            await userEvent.click(screen.getByTestId('unlock-modal-submit'))
+            await userEvent.click(
+                screen.getByTestId('unlock_contract-modal-submit')
+            )
 
             // the popup dialog should be hidden again
             await waitFor(() => {
@@ -326,14 +341,14 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     modalRef={modalRef}
-                    modalType="UNLOCK"
-                    healthPlanPackage={mockSubmittedHealthPlanPackage()}
+                    modalType="UNLOCK_CONTRACT"
+                    submissionData={mockContractPackageSubmitted()}
                 />,
                 {
                     apolloProvider: {
                         mocks: [
                             unlockHealthPlanPackageMockError({
-                                id: mockUnlockedHealthPlanPackage().id,
+                                id: mockContractPackageSubmitted().id,
                                 reason: 'Test unlock summary',
                             }),
                         ],
@@ -349,7 +364,9 @@ describe('UnlockSubmitModal', () => {
                 'Test unlock summary'
             )
 
-            await userEvent.click(screen.getByTestId('unlock-modal-submit'))
+            await userEvent.click(
+                screen.getByTestId('unlock_contract-modal-submit')
+            )
 
             await waitFor(() => {
                 const errorHeading = screen.queryByRole('heading', {
@@ -369,14 +386,14 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     modalRef={modalRef}
-                    modalType="UNLOCK"
-                    healthPlanPackage={mockSubmittedHealthPlanPackage()}
+                    modalType="UNLOCK_CONTRACT"
+                    submissionData={mockContractPackageSubmitted()}
                 />,
                 {
                     apolloProvider: {
                         mocks: [
                             unlockHealthPlanPackageMockError({
-                                id: mockUnlockedHealthPlanPackage().id,
+                                id: mockContractPackageSubmitted().id,
                                 reason: 'Test unlock summary',
                                 error: {
                                     code: 'INTERNAL_SERVER_ERROR',
@@ -396,7 +413,9 @@ describe('UnlockSubmitModal', () => {
                 'Test unlock summary'
             )
 
-            await userEvent.click(screen.getByTestId('unlock-modal-submit'))
+            await userEvent.click(
+                screen.getByTestId('unlock_contract-modal-submit')
+            )
 
             await waitFor(() => {
                 const errorHeading = screen.queryByRole('heading', {
@@ -420,9 +439,9 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockBaseContract()}
+                    submissionData={mockContractPackageDraft()}
                     submissionName="Test-Submission"
-                    modalType="RESUBMIT"
+                    modalType="RESUBMIT_CONTRACT"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
                 />
@@ -434,19 +453,19 @@ describe('UnlockSubmitModal', () => {
             expect(screen.getByText('Summarize changes')).toBeInTheDocument()
             expect(
                 screen.getByText(
-                    'Once you submit, this package will be sent to CMS for review and you will no longer be able to make changes.'
+                    'Once you submit, this contract will be sent to CMS for review and you will no longer be able to make changes.'
                 )
             ).toBeInTheDocument()
             expect(
                 screen.getByText(
-                    'Provide summary of all changes made to this submission'
+                    'Provide summary of all changes made to this contract'
                 )
             ).toBeInTheDocument()
             expect(
                 screen.getByTestId('unlockSubmitModalInput')
             ).toBeInTheDocument()
             expect(
-                screen.getByTestId('resubmit-modal-submit')
+                screen.getByTestId('resubmit_contract-modal-submit')
             ).toHaveTextContent('Resubmit')
         })
         it('displays form validation error when submitting without an submission summary', async () => {
@@ -455,9 +474,9 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockBaseContract()}
+                    submissionData={mockContractPackageDraft()}
                     submissionName="Test-Submission"
-                    modalType="RESUBMIT"
+                    modalType="RESUBMIT_CONTRACT"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
                 />
@@ -469,7 +488,9 @@ describe('UnlockSubmitModal', () => {
             expect(screen.getByRole('dialog')).toHaveClass('is-visible')
             expect(screen.getByText('Summarize changes')).toBeInTheDocument()
 
-            await userEvent.click(screen.getByTestId('resubmit-modal-submit'))
+            await userEvent.click(
+                screen.getByTestId('resubmit_contract-modal-submit')
+            )
 
             expect(
                 await screen.findByText('You must provide a summary of changes')
@@ -481,9 +502,9 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockBaseContract()}
+                    submissionData={mockContractPackageDraft()}
                     submissionName="Test-Submission"
-                    modalType="RESUBMIT"
+                    modalType="RESUBMIT_CONTRACT"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
                 />
@@ -496,7 +517,9 @@ describe('UnlockSubmitModal', () => {
             const textbox = await screen.getByTestId('unlockSubmitModalInput')
 
             // submit without entering anything
-            await userEvent.click(screen.getByTestId('resubmit-modal-submit'))
+            await userEvent.click(
+                screen.getByTestId('resubmit_contract-modal-submit')
+            )
 
             expect(
                 await screen.findByText('You must provide a summary of changes')
@@ -515,14 +538,14 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     modalRef={modalRef}
-                    modalType="RESUBMIT"
-                    healthPlanPackage={mockBaseContract()}
+                    modalType="RESUBMIT_CONTRACT"
+                    submissionData={mockContractPackageDraft()}
                 />,
                 {
                     apolloProvider: {
                         mocks: [
-                            submitHealthPlanPackageMockError({
-                                id: mockBaseContract().id,
+                            submitContractMockError({
+                                id: mockContractPackageDraft().id,
                             }),
                         ],
                     },
@@ -537,7 +560,9 @@ describe('UnlockSubmitModal', () => {
                 'Test unlock resubmit'
             )
 
-            await userEvent.click(screen.getByTestId('resubmit-modal-submit'))
+            await userEvent.click(
+                screen.getByTestId('resubmit_contract-modal-submit')
+            )
 
             await waitFor(() => {
                 const errorHeading = screen.queryByRole('heading', {
@@ -548,7 +573,7 @@ describe('UnlockSubmitModal', () => {
             })
         })
 
-        it('redirects if submission succeeds on unlocked plan package', async () => {
+        it('redirects if submission succeeds on unlocked contract', async () => {
             let testLocation: Location
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
@@ -556,24 +581,24 @@ describe('UnlockSubmitModal', () => {
 
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockBaseContract()}
+                    submissionData={mockContractPackageDraft()}
                     submissionName="Test-Submission"
-                    modalType="RESUBMIT"
+                    modalType="RESUBMIT_CONTRACT"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
                 />,
                 {
                     apolloProvider: {
                         mocks: [
-                            submitHealthPlanPackageMockSuccess({
-                                id: mockBaseContract().id,
+                            submitContractMockSuccess({
+                                id: mockContractPackageDraft().id,
                                 submittedReason: 'Test submission summary',
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `draftSubmission/${
-                            mockBaseContract().id
+                        route: `submissions/${
+                            mockContractPackageDraft().id
                         }/review-and-submit`,
                     },
                     location: (location) => (testLocation = location),
@@ -588,7 +613,9 @@ describe('UnlockSubmitModal', () => {
                 'Test submission summary'
             )
 
-            await userEvent.click(screen.getByTestId('resubmit-modal-submit'))
+            await userEvent.click(
+                screen.getByTestId('resubmit_contract-modal-submit')
+            )
 
             await waitFor(() =>
                 expect(screen.getByRole('dialog')).toHaveClass('is-hidden')

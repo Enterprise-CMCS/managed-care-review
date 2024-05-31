@@ -318,11 +318,7 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
 Cypress.Commands.add('fillOutNewRateCertification', () => {
     // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
-    cy.getFeatureFlagStore(['link-rates']).then((store) => {
-
-        if (store['link-rates']) {
-            //If this flag value is true, then it will test this code hidden behind the feature flag
-        cy.findByRole('radiogroup', {
+    cy.findByRole('radiogroup', {
             name: /Was this rate certification included with another submission?/,
         })
             .should('exist')
@@ -330,71 +326,12 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
                 cy.findByText('No, this rate certification was not included with any other submissions').click()
             })
 
-        } else {
-            // otherwise use legacy packages with shared rates UI
-            cy.findByRole('radiogroup', {
-                name: /Was this rate certification uploaded to any other submissions?/,
-            })
-                .should('exist')
-                .within(() => {
-                    cy.findByText(/No/).click()
-                })
-
         }
-
-        cy.findByText('New rate certification').click()
-        cy.findByText(
-            'Certification of capitation rates specific to each rate cell'
-        ).click()
-
-        cy.findAllByLabelText('Start date', {timeout: 2000})
-            .parents()
-            .findByTestId('date-picker-external-input')
-            .type('02/29/2024')
-        cy.findAllByLabelText('End date')
-            .parents()
-            .findByTestId('date-picker-external-input')
-            .type('02/28/2025')
-            .blur()
-        cy.findByLabelText('Date certified').type('03/01/2024')
-
-        cy.findByRole('combobox', { name: 'programs (required)' }).click({
-            force: true,
-        })
-        cy.findByText('PMAP').click()
-
-        //Fill out certifying actuary
-        cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
-        cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
-        cy.findAllByLabelText('Email').eq(0).type('actuarycontact@example.com')
-        cy.findAllByLabelText('Mercer').eq(0).safeClick()
-
-        //Actuary communication preference
-        cy.findByRole('radiogroup', {
-            name: /Actuaries' communication preference/
-        })
-            .should('exist')
-            .within(() => {
-                cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
-                    .click()
-            })
-
-        // Upload a rate certification and rate supporting document
-        cy.findAllByTestId('file-input-input').each(fileInput =>
-            cy.wrap(fileInput).attachFile('documents/trussel-guide.pdf')
-        )
-
-        cy.verifyDocumentsHaveNoErrors()
-        cy.waitForDocumentsToLoad()
-        cy.findAllByTestId('errorMessage').should('have.length', 0)
-    })
-})
+)
 
 Cypress.Commands.add('fillOutLinkedRate', () => {
     // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
-        cy.getFeatureFlagStore(['link-rates']).then((store) => {
-            //If this flag value is true, then it will test this code hidden behind the feature flag
             cy.findByRole('radiogroup', {
                 name: /Was this rate certification included with another submission?/,
             })
@@ -403,19 +340,18 @@ Cypress.Commands.add('fillOutLinkedRate', () => {
                     cy.findByText('Yes, this rate certification is part of another submission').click()
                 })
 
-            if (store['link-rates']) {
+
                cy.findByRole('combobox', { name: 'Which rate certification was it?' }).click({
                     force: true,
                 })
                cy.findAllByRole('option').first().click()
                cy.findByText(/`Rate ID:/).should('be.visible')
-            }
+
 
             cy.verifyDocumentsHaveNoErrors()
             cy.waitForDocumentsToLoad()
             cy.findAllByTestId('errorMessage').should('have.length', 0)
         })
-})
 
 Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
     // Must be on '/submissions/:id/edit/rate-details'
@@ -545,7 +481,6 @@ Cypress.Commands.add(
             name: 'Submit',
         }).safeClick()
 
-        cy.getFeatureFlagStore(['link-rates']).then((store) => {
             cy.findAllByTestId('modalWindow')
             .eq(1)
             .should('exist')
@@ -554,27 +489,18 @@ Cypress.Commands.add(
                     cy.get('#unlockSubmitModalInput').type(
                         summary || 'Resubmission summary'
                     )
-                    if (store['link-rates']) {
-                        cy.findByTestId('resubmit_contract-modal-submit').click()
-                    }else {
-                        cy.findByTestId('resubmit-modal-submit').click()
-                    }
+
+                    cy.findByTestId('resubmit_contract-modal-submit').click()
+
                 } else {
 
-                    if (store['link-rates']) {
                         cy.findByTestId('submit_contract-modal-submit').click()
-                    }else {
-                        cy.findByTestId('submit-modal-submit').click()
-                    }
+
 
                 }
             })
 
-            if (store['link-rates']) {
             cy.wait('@submitContractMutation', { timeout: 50_000 })
-            } else {
-                cy.wait('@submitHealthPlanPackageMutation', { timeout: 50_000 })
-            }
 
 
         if (success) {
@@ -582,7 +508,3 @@ Cypress.Commands.add(
             cy.findByRole('heading',{name:'Submissions'}).should('exist')
         }
         })
-
-
-    }
-)

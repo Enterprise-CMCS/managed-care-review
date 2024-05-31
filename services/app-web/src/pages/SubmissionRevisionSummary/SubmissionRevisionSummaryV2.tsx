@@ -2,10 +2,10 @@ import React, { useEffect } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
 import { useParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { ContractDetailsSummarySectionV2 } from '../StateSubmission/ReviewSubmit/V2/ReviewSubmit/ContractDetailsSummarySectionV2'
-import { ContactsSummarySection } from '../StateSubmission/ReviewSubmit/V2/ReviewSubmit/ContactsSummarySectionV2'
-import { RateDetailsSummarySectionV2 } from '../StateSubmission/ReviewSubmit/V2/ReviewSubmit/RateDetailsSummarySectionV2'
-import { SubmissionTypeSummarySectionV2 } from '../StateSubmission/ReviewSubmit/V2/ReviewSubmit/SubmissionTypeSummarySectionV2'
+import { ContractDetailsSummarySection } from '../StateSubmission/ReviewSubmit/ContractDetailsSummarySection'
+import { ContactsSummarySection } from '../StateSubmission/ReviewSubmit/ContactsSummarySection'
+import { RateDetailsSummarySection } from '../StateSubmission/ReviewSubmit/RateDetailsSummarySection'
+import { SubmissionTypeSummarySection } from '../StateSubmission/ReviewSubmit/SubmissionTypeSummarySection'
 import { usePage } from '../../contexts/PageContext'
 import { dayjs } from '../../common-code/dateHelpers'
 import styles from './SubmissionRevisionSummary.module.scss'
@@ -22,7 +22,7 @@ type RouteParams = {
     revisionVersion: string
 }
 
-export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
+export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
     const { id, revisionVersion } = useParams<keyof RouteParams>()
     if (!id) {
@@ -109,7 +109,7 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
                 className={styles.container}
             >
                 <PreviousSubmissionBanner link={`/submissions/${id}`} />
-                <SubmissionTypeSummarySectionV2
+                <SubmissionTypeSummarySection
                     contract={contract}
                     contractRev={revision}
                     statePrograms={statePrograms}
@@ -131,7 +131,7 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
                     }
                 />
 
-                <ContractDetailsSummarySectionV2
+                <ContractDetailsSummarySection
                     contract={contract}
                     submissionName={name}
                     isCMSUser={isCMSUser}
@@ -140,7 +140,7 @@ export const SubmissionRevisionSummaryV2 = (): React.ReactElement => {
                 />
 
                 {isContractActionAndRateCertification && (
-                    <RateDetailsSummarySectionV2
+                    <RateDetailsSummarySection
                         contract={contract}
                         contractRev={revision}
                         submissionName={name}

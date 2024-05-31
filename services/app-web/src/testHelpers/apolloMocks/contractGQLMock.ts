@@ -4,9 +4,14 @@ import {
     FetchContractDocument,
     UpdateDraftContractRatesDocument,
     UpdateDraftContractRatesMutation,
+    SubmitContractMutation,
+    SubmitContractDocument,
 } from '../../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
-import { mockContractPackageDraft } from './contractPackageDataMock'
+import { mockContractPackageDraft, mockContractPackageSubmittedWithRevisions } from './contractPackageDataMock'
+import { GRAPHQL_ERROR_CAUSE_MESSAGES, GraphQLErrorCauseTypes, GraphQLErrorCodeTypes } from './apolloErrorCodeMocks'
+import { GraphQLError } from 'graphql'
+import { ApolloError } from '@apollo/client'
 
 const fetchContractMockSuccess = ({
     contract,
@@ -86,4 +91,58 @@ const updateDraftContractRatesMockSuccess = ({
         },
     }
 }
-export { fetchContractMockSuccess, updateDraftContractRatesMockSuccess }
+
+const submitContractMockSuccess = ({
+    id,
+    submittedReason,
+}: {
+    submittedReason?: string
+    id: string,
+}): MockedResponse<SubmitContractMutation> => {
+    const contractData = mockContractPackageSubmittedWithRevisions({id})
+    return {
+        request: {
+            query: SubmitContractDocument,
+            variables: { input: { contractID: id, submittedReason } },
+        },
+        result: { data: { submitContract: { contract: {...contractData} } } },
+    }
+}
+
+const submitContractMockError = ({
+    id,
+    error,
+}: {
+    id: string
+    error?: {
+        code: GraphQLErrorCodeTypes
+        cause: GraphQLErrorCauseTypes
+    }
+}): MockedResponse<SubmitContractMutation | ApolloError> => {
+    const graphQLError = new GraphQLError(
+        error
+            ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
+            : 'Error attempting to submit.',
+        {
+            extensions: {
+                code: error?.code,
+                cause: error?.cause,
+            },
+        }
+    )
+
+    return {
+        request: {
+            query: SubmitContractDocument,
+            variables: { input: { contractID: id } },
+        },
+        error: new ApolloError({
+            graphQLErrors: [graphQLError],
+        }),
+        result: {
+            data: null,
+            errors: [graphQLError],
+        },
+    }
+}
+export { fetchContractMockSuccess, updateDraftContractRatesMockSuccess, submitContractMockSuccess, submitContractMockError }

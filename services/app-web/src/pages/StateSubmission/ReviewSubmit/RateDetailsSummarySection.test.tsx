@@ -5,12 +5,12 @@ import {
     mockMNState,
     fetchCurrentUserMock,
     mockValidCMSUser,
-} from '../../../../../testHelpers/apolloMocks'
-import { renderWithProviders } from '../../../../../testHelpers/jestHelpers'
-import { RateDetailsSummarySectionV2 as RateDetailsSummarySection } from './RateDetailsSummarySectionV2'
-import { Rate } from '../../../../../gen/gqlClient'
-import { testS3Client } from '../../../../../testHelpers/s3Helpers'
-import { ActuaryCommunicationRecord } from '../../../../../constants'
+} from '../../../testHelpers/apolloMocks'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import { RateDetailsSummarySection } from './RateDetailsSummarySection'
+import { Rate } from '../../../gen/gqlClient'
+import { testS3Client } from '../../../testHelpers/s3Helpers'
+import { ActuaryCommunicationRecord } from '../../../constants'
 
 describe('RateDetailsSummarySection', () => {
     const draftContract = mockContractPackageDraft()

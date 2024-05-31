@@ -13,11 +13,6 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 import { GenericDocument } from '../../../gen/gqlClient'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
-import { featureFlags } from '../../../common-code/featureFlags'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-
-// V2 API migration note: intentionally trying to avoid making V2 version of this reuseable sub component since it has such a contained focus (on displaying documents only).
-// Use props to pass needed information and seek to make content as domain agnostic as possible.
 
 // This is used to convert from deprecated FE domain types from protos to GQL GenericDocuments by added in a dateAdded
 export const convertFromSubmissionDocumentsToGenericDocuments = (
@@ -52,7 +47,6 @@ export const UploadedDocumentsTable = ({
     multipleDocumentsAllowed = true,
     hideDynamicFeedback = false,
 }: UploadedDocumentsTableProps): React.ReactElement => {
-    const ldClient = useLDClient()
     const initialDocState = documents.map((doc) => ({
         ...doc,
         url: null,
@@ -65,13 +59,6 @@ export const UploadedDocumentsTable = ({
     const [refreshedDocs, setRefreshedDocs] =
         useState<DocumentWithS3Data[]>(initialDocState)
     const shouldShowEditButton = !hideDynamicFeedback && isSupportingDocuments // at this point only contract supporting documents need the inline EDIT button - this can be deleted when we move supporting docs to ContractDetails page
-
-
-    const useLinkedRates = ldClient?.variation(
-        featureFlags.LINK_RATES.flag,
-        featureFlags.LINK_RATES.defaultValue
-    ) ?? false
-
     // canDisplayDateForDocument -  guards against passing in null or undefined to dayjs
     // don't display on new initial submission
     const canDisplayDateAddedForDocument = (doc: DocumentWithS3Data) => {
@@ -95,7 +82,11 @@ export const UploadedDocumentsTable = ({
 
     // show legacy shared rates across submissions (this is feature replaced by linked rates)
     // to cms users always when data available, to state users only when linked rates flag is off
-    const showLegacySharedRatesAcross = Boolean((useLinkedRates && hideDynamicFeedback? !isStateUser: true) && (packagesWithSharedRateCerts && packagesWithSharedRateCerts.length > 0))
+    const showLegacySharedRatesAcross = Boolean(
+        (hideDynamicFeedback ? !isStateUser : true) &&
+            packagesWithSharedRateCerts &&
+            packagesWithSharedRateCerts.length > 0
+    )
 
     const borderTopGradientStyles = `borderTopLinearGradient ${styles.uploadedDocumentsTable}`
     const supportingDocsTopMarginStyles = isSupportingDocuments

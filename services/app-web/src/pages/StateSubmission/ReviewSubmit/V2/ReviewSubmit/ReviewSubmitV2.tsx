@@ -7,17 +7,17 @@ import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DynamicStepIndicator } from '../../../../../components'
 import { PageActionsContainer } from '../../../PageActions'
-import styles from '../../../ReviewSubmit/ReviewSubmit.module.scss'
+import styles from '../../../../../ReviewSubmit/ReviewSubmit.module.scss'
 import { ActionButton } from '../../../../../components/ActionButton'
 import { useRouteParams, useStatePrograms } from '../../../../../hooks'
 import { RoutesRecord } from '../../../../../constants'
-import { UnlockSubmitModalV2 } from '../../../../../components/Modal/V2/UnlockSubmitModalV2'
+import { UnlockSubmitModal } from '../../../../../components/Modal/V2/UnlockSubmitModalV2'
 import { getVisibleLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
 import { useAuth } from '../../../../../contexts/AuthContext'
-import { RateDetailsSummarySectionV2 } from './RateDetailsSummarySectionV2'
-import { ContactsSummarySection } from './ContactsSummarySectionV2'
-import { ContractDetailsSummarySectionV2 } from './ContractDetailsSummarySectionV2'
-import { SubmissionTypeSummarySectionV2 } from './SubmissionTypeSummarySectionV2'
+import { RateDetailsSummarySection } from '../../RateDetailsSummarySection'
+import { ContactsSummarySection } from '../../ContactsSummarySection'
+import { ContractDetailsSummarySection } from '../../ContractDetailsSummarySection'
+import { SubmissionTypeSummarySection } from '../../SubmissionTypeSummarySection'
 import { useFetchContractQuery } from '../../../../../gen/gqlClient'
 import { ErrorForbiddenPage } from '../../../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../../../Errors/Error404Page'
@@ -28,7 +28,7 @@ import { packageName } from '../../../../../common-code/healthPlanFormDataType'
 import { usePage } from '../../../../../contexts/PageContext'
 import { activeFormPages } from '../../../StateSubmissionForm'
 
-export const ReviewSubmitV2 = (): React.ReactElement => {
+export const ReviewSubmit = (): React.ReactElement => {
     const navigate = useNavigate()
     const modalRef = useRef<ModalRef>(null)
     const statePrograms = useStatePrograms()
@@ -109,14 +109,14 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                 />
             </div>
             <GridContainer className={styles.reviewSectionWrapper}>
-                <SubmissionTypeSummarySectionV2
+                <SubmissionTypeSummarySection
                     contract={contract}
                     submissionName={submissionName}
                     editNavigateTo="../type"
                     statePrograms={statePrograms}
                     isStateUser={isStateUser}
                 />
-                <ContractDetailsSummarySectionV2
+                <ContractDetailsSummarySection
                     contract={contract}
                     isStateUser={isStateUser}
                     editNavigateTo="../contract-details"
@@ -124,7 +124,7 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                 />
 
                 {isContractActionAndRateCertification && (
-                    <RateDetailsSummarySectionV2
+                    <RateDetailsSummarySection
                         contract={contract}
                         editNavigateTo="../rate-details"
                         submissionName={submissionName}
@@ -171,7 +171,7 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                 </PageActionsContainer>
 
                 {/* if the session is expiring, close this modal so the countdown modal can appear */}
-                <UnlockSubmitModalV2
+                <UnlockSubmitModal
                     submissionData={contract}
                     submissionName={submissionName}
                     modalType={

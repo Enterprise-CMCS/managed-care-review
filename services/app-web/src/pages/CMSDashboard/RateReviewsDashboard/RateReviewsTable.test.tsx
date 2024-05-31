@@ -1,4 +1,4 @@
-import {renderWithProviders } from '../../../testHelpers'
+import { renderWithProviders } from '../../../testHelpers'
 import { RateInDashboardType } from './RateReviewsTable'
 import {
     fetchCurrentUserMock,
@@ -318,7 +318,7 @@ describe('RateReviewsTable', () => {
         )
 
         await screen.findByText('Rate period start date')
-        await screen.findByText('Rate #')
+        expect(await screen.findByText('Rate #')).toBeInTheDocument()
     })
     it('does not render rate number by default', async () => {
         renderWithProviders(
@@ -338,7 +338,7 @@ describe('RateReviewsTable', () => {
             }
         )
 
-    await screen.findByText('Rate period start date')
-       expect(screen.queryByText('Rate #')).toBeNull()
+        await screen.findByText('Rate period start date')
+        expect(screen.queryByText('Rate #')).toBeNull()
     })
 })

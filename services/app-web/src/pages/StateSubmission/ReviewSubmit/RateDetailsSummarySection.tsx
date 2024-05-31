@@ -1,21 +1,21 @@
 import React, { useState } from 'react'
-import { DataDetail } from '../../../../../components/DataDetail'
-import { SectionHeader } from '../../../../../components/SectionHeader'
-import { useS3 } from '../../../../../contexts/S3Context'
-import { formatCalendarDate } from '../../../../../common-code/dateHelpers'
-import { DoubleColumnGrid } from '../../../../../components/DoubleColumnGrid'
-import { DownloadButton } from '../../../../../components/DownloadButton'
-import { UploadedDocumentsTable } from '../../../../../components/SubmissionSummarySection'
-import { usePreviousSubmission } from '../../../../../hooks/usePreviousSubmission'
+import { DataDetail } from '../../../components/DataDetail'
+import { SectionHeader } from '../../../components/SectionHeader'
+import { useS3 } from '../../../contexts/S3Context'
+import { formatCalendarDate } from '../../../common-code/dateHelpers'
+import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
+import { DownloadButton } from '../../../components/DownloadButton'
+import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
+import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../../../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
-import { GenericErrorPage } from '../../../../Errors/GenericErrorPage'
+import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
-import { recordJSException } from '../../../../../otelHelpers'
-import { DataDetailMissingField } from '../../../../../components/DataDetail/DataDetailMissingField'
-import { DataDetailContactField } from '../../../../../components/DataDetail/DataDetailContactField/DataDetailContactField'
+import { recordJSException } from '../../../otelHelpers'
+import { DataDetailMissingField } from '../../../components/DataDetail/DataDetailMissingField'
+import { DataDetailContactField } from '../../../components/DataDetail/DataDetailContactField/DataDetailContactField'
 import useDeepCompareEffect from 'use-deep-compare-effect'
-import { InlineDocumentWarning } from '../../../../../components/DocumentWarning'
-import { SectionCard } from '../../../../../components/SectionCard'
+import { InlineDocumentWarning } from '../../../components/DocumentWarning'
+import { SectionCard } from '../../../components/SectionCard'
 import {
     Rate,
     Contract,
@@ -24,16 +24,16 @@ import {
     RateRevision,
     RateFormData,
     HealthPlanPackageStatus,
-} from '../../../../../gen/gqlClient'
+} from '../../../gen/gqlClient'
 import {
     getLastContractSubmission,
     getVisibleLatestRateRevisions,
     getVisibleLatestContractFormData,
-} from '../../../../../gqlHelpers/contractsAndRates'
-import { useAuth } from '../../../../../contexts/AuthContext'
-import { ActuaryCommunicationRecord } from '../../../../../constants'
+} from '../../../gqlHelpers/contractsAndRates'
+import { useAuth } from '../../../contexts/AuthContext'
+import { ActuaryCommunicationRecord } from '../../../constants'
 
-export type RateDetailsSummarySectionV2Props = {
+export type RateDetailsSummarySectionProps = {
     contract: Contract
     contractRev?: ContractRevision
     rateRevs?: RateRevision[]
@@ -72,7 +72,7 @@ export function renderDownloadButton(
     )
 }
 
-export const RateDetailsSummarySectionV2 = ({
+export const RateDetailsSummarySection = ({
     contract,
     contractRev,
     rateRevs,
@@ -80,7 +80,7 @@ export const RateDetailsSummarySectionV2 = ({
     submissionName,
     statePrograms,
     onDocumentError,
-}: RateDetailsSummarySectionV2Props): React.ReactElement => {
+}: RateDetailsSummarySectionProps): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const isSubmittedOrCMSUser =
         contract.status === 'SUBMITTED' ||
@@ -108,7 +108,7 @@ export const RateDetailsSummarySectionV2 = ({
         null
     )
 
-    // For V2 we only call this function and show deprecated shared rates across packages when the submission for historical data
+    // For show deprecated shared rates across packages when the submission for historical data
     // if submission is being edited, don't show this UI
     const refreshPackagesWithSharedRateCert = (
         rateFormData: RateFormData

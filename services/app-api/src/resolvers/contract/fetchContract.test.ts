@@ -13,7 +13,6 @@ import {
     submitTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { addNewRateToTestContract } from '../../testHelpers/gqlRateHelpers'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 describe('fetchContract', () => {
     it('fetches the draft contract and a new child rate', async () => {
@@ -66,14 +65,8 @@ describe('fetchContract', () => {
     })
 
     it('returns a stable initially submitted at', async () => {
-        const ldService = testLDService({
-            'link-rates': true,
-        })
-        const stateServer = await constructTestPostgresServer({
-            ldService,
-        })
+        const stateServer = await constructTestPostgresServer({})
         const cmsServer = await constructTestPostgresServer({
-            ldService,
             context: {
                 user: testCMSUser(),
             },

@@ -1,14 +1,14 @@
 import { Grid, GridContainer } from '@trussworks/react-uswds'
 import styles from '../../../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
 
-import { SectionHeader } from '../../../../../components/SectionHeader'
+import { SectionHeader } from '../../../components/SectionHeader'
 import {
     DataDetail,
     DataDetailContactField,
-} from '../../../../../components/DataDetail'
-import { SectionCard } from '../../../../../components/SectionCard'
-import { Contract, ContractRevision } from '../../../../../gen/gqlClient'
-import { getVisibleLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
+} from '../../../components/DataDetail'
+import { SectionCard } from '../../../components/SectionCard'
+import { Contract, ContractRevision } from '../../../gen/gqlClient'
+import { getVisibleLatestContractFormData } from '../../../gqlHelpers/contractsAndRates'
 
 export type ContactsSummarySectionProps = {
     contract: Contract

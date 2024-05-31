@@ -36,7 +36,6 @@ describe('SingleRateSummarySection', () => {
                     },
                     featureFlags: {
                         'rate-edit-unlock': true,
-                        'link-rates': false,
                     },
                 }
             )
@@ -243,7 +242,6 @@ describe('SingleRateSummarySection', () => {
                     },
                     featureFlags: {
                         'rate-edit-unlock': true,
-                        'link-rates': true,
                     },
                 }
             )
@@ -420,7 +418,6 @@ describe('SingleRateSummarySection', () => {
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
-                        'link-rates': true,
                     },
                     location: (location) => (testLocation = location),
                 }

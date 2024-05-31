@@ -117,10 +117,8 @@ export const SingleRateSummarySection = ({
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
-    const showLinkedRates: boolean = ldClient?.variation(
-        featureFlags.LINK_RATES.flag,
-        featureFlags.LINK_RATES.defaultValue
-    )
+
+    const linkedContracts = rateRevision?.contractRevisions
 
     // TODO BULK DOWNLOAD
     // needs to be wrap in a standalone hook
@@ -224,7 +222,7 @@ export const SingleRateSummarySection = ({
                         </UnlockRateButton>
                     )}
                     {/* This second option is an interim state for unlock rate button (when linked rates is turned on but unlock and edit rate is not available yet). Remove when rate unlock is permanently on. */}
-                    {isCMSUser && showLinkedRates && !showRateUnlock && (
+                    {isCMSUser && !showRateUnlock && (
                         <UnlockRateButton
                             disabled={isUnlocked || unlockLoading}
                             onClick={() => {
@@ -361,13 +359,9 @@ export const SingleRateSummarySection = ({
                         />
                         <DataDetail
                             id="submittedWithContract"
-                            label={
-                                showLinkedRates
-                                    ? 'Contract actions'
-                                    : 'Submission this rate was submitted with'
-                            }
+                            label="Contract actions"
                             children={relatedSubmissions(
-                                rateRevision?.contractRevisions,
+                                linkedContracts,
                                 statePrograms
                             )}
                         />

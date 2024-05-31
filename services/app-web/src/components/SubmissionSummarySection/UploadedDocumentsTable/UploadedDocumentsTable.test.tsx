@@ -428,9 +428,7 @@ describe('UploadedDocumentsTable', () => {
                         }),
                     ],
                 },
-                featureFlags: {
-                    'link-rates': false,
-                },
+                featureFlags: {},
             }
         )
 
@@ -469,9 +467,7 @@ describe('UploadedDocumentsTable', () => {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
-                featureFlags: {
-                    'link-rates': false,
-                },
+                featureFlags: {},
             }
         )
 
@@ -515,9 +511,7 @@ describe('UploadedDocumentsTable', () => {
                         }),
                     ],
                 },
-                featureFlags: {
-                    'link-rates': true,
-                },
+                featureFlags: {},
             }
         )
 
@@ -554,16 +548,21 @@ describe('UploadedDocumentsTable', () => {
             />,
             {
                 apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ user: mockValidStateUser(), statusCode: 200 })],
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidStateUser(),
+                            statusCode: 200,
+                        }),
+                    ],
                 },
-                featureFlags: {
-                    'link-rates': true,
-                },
+                featureFlags: {},
             }
         )
 
         expect(await screen.findByTestId('tag')).toHaveTextContent('SHARED')
-        expect(await screen.findByText('Linked submissions')).toBeInTheDocument()
+        expect(
+            await screen.findByText('Linked submissions')
+        ).toBeInTheDocument()
     })
 
     it('does not render SHARED tag to state user on review submit when linked rates flag on', async () => {
@@ -603,14 +602,14 @@ describe('UploadedDocumentsTable', () => {
                         }),
                     ],
                 },
-                featureFlags: {
-                    'link-rates': true,
-                },
+                featureFlags: {},
             }
         )
 
         expect(await screen.findByTestId('tag')).not.toBeInTheDocument()
-        expect(await screen.queryByText('Linked submissions')).not.toBeInTheDocument()
+        expect(
+            await screen.queryByText('Linked submissions')
+        ).not.toBeInTheDocument()
     })
 
     it('does not validations when hideDynamicFeedback is set to true', async () => {
