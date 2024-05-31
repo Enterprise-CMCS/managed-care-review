@@ -16,7 +16,7 @@ import {
     ProgramSelect,
 } from '../../../components'
 
-import styles from '../../StateSubmissionForm.module.scss'
+import styles from '../StateSubmissionForm.module.scss'
 import { formatUserInputDate, isDateRangeEmpty } from '../../../formHelpers'
 import {
     ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES,

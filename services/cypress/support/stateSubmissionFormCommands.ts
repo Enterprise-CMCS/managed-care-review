@@ -6,7 +6,7 @@ Cypress.Commands.add('startNewContractOnlySubmissionWithBaseContract', () => {
 
     cy.fillOutContractActionOnlyWithBaseContract()
 
-    cy.navigateFormByButtonClick('CONTINUE_FROM_START_NEW')
+    cy.deprecatedNavigateV1Form('CONTINUE_FROM_START_NEW')
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
@@ -18,7 +18,7 @@ Cypress.Commands.add('startNewContractOnlySubmissionWithAmendment', () => {
 
     cy.fillOutContractActionOnlyWithAmendment()
 
-    cy.navigateFormByButtonClick('CONTINUE_FROM_START_NEW')
+    cy.deprecatedNavigateV1Form('CONTINUE_FROM_START_NEW')
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
@@ -30,7 +30,7 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
 
     cy.fillOutContractActionAndRateCertification()
 
-    cy.navigateFormByButtonClick('CONTINUE_FROM_START_NEW')
+    cy.deprecatedNavigateV1Form('CONTINUE_FROM_START_NEW')
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 

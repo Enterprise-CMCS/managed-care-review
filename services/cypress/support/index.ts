@@ -71,11 +71,11 @@ declare global {
             unlockSubmission(unlockReason?: string): void
 
             // navigate commands
-            navigateFormByButtonClick(
+            deprecatedNavigateV1Form(
                 buttonName: FormButtonKey,
                 waitForLoad?: boolean
             ): void
-            navigateContractRatesFormByButtonClick(
+            navigateContractRatesForm(
                 buttonName: FormButtonKey,
                 waitForLoad?: boolean
             ): void

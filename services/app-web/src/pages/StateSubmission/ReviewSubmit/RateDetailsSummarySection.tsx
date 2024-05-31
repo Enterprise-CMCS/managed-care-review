@@ -7,7 +7,7 @@ import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
 import { DownloadButton } from '../../../components/DownloadButton'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
-import styles from '../../../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
+import styles from '../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
 import { recordJSException } from '../../../otelHelpers'

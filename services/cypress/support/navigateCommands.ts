@@ -11,8 +11,9 @@ const buttonsWithLabels: FormButtons = {
     BACK: 'Back',
 }
 
+// can be deleted when Contract API is complete
 Cypress.Commands.add(
-    'navigateFormByButtonClick',
+    'deprecatedNavigateV1Form',
     (buttonKey: FormButtonKey, waitForLoad = true) => {
         cy.findByRole('button', {
             name: buttonsWithLabels[buttonKey],
@@ -46,7 +47,7 @@ Cypress.Commands.add(
 )
 // navigate helper for v2 forms
 Cypress.Commands.add(
-    'navigateContractRatesFormByButtonClick',
+    'navigateContractRatesForm',
     (buttonKey: FormButtonKey, waitForLoad = true) => {
         cy.findByRole('button', {
             name: buttonsWithLabels[buttonKey],

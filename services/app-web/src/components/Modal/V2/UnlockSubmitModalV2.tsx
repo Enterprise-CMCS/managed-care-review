@@ -14,7 +14,7 @@ import { usePrevious } from '../../../hooks/usePrevious'
 import { Modal } from '../Modal'
 import { PoliteErrorMessage } from '../../PoliteErrorMessage'
 import * as Yup from 'yup'
-import styles from '../../UnlockSubmitModal.module.scss'
+import styles from '../UnlockSubmitModal.module.scss'
 import { GenericApiErrorProps } from '../../Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { ERROR_MESSAGES } from '../../../constants/errors'
 import {

@@ -1,5 +1,5 @@
 import { Grid, GridContainer } from '@trussworks/react-uswds'
-import styles from '../../../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
+import styles from '../StateSubmissionForm.module.scss'
 
 import { SectionHeader } from '../../../components/SectionHeader'
 import {
