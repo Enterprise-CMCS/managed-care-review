@@ -26,9 +26,10 @@ import {
     FeatureFlagSettings,
 } from '../../app-web/src/common-code/featureFlags'
 import './apiCommands'
-import { HealthPlanPackage } from '../gen/gqlClient';
+import { Contract, HealthPlanPackage } from '../gen/gqlClient';
 import { CMSUserType, DivisionType } from '../utils/apollo-test-utils';
 import { StateUserType } from 'app-api/src/domain-models';
+import { UnlockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 
 type FormButtonKey =
     | 'CONTINUE_FROM_START_NEW'
@@ -104,8 +105,8 @@ declare global {
                 division: DivisionType
             }): void
 
-            apiCreateAndSubmitContractOnlySubmission(stateUser: StateUserType): Cypress.Chainable<HealthPlanPackage>
-            apiCreateAndSubmitContractWithRates(stateUser: StateUserType): Cypress.Chainable<HealthPlanPackage>
+            apiDeprecatedCreateSubmitHPP(stateUser: StateUserType, formData?: Partial<UnlockedHealthPlanFormDataType>): Cypress.Chainable<HealthPlanPackage>
+            apiCreateAndSubmitBaseContract(stateUser: StateUserType): Cypress.Chainable<Contract>
             apiAssignDivisionToCMSUser(cmsUser: CMSUserType, division: DivisionType): Cypress.Chainable<void>
 
             interceptGraphQL(): void

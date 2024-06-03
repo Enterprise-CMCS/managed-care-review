@@ -46,29 +46,29 @@ const minnesotaStatePrograms =[
         "id": "abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce",
         "fullName": "Special Needs Basic Care",
         "name": "SNBC",
-        "isRateProgram": "false"
+        "isRateProgram": false
     },
     {
         "id": "d95394e5-44d1-45df-8151-1cc1ee66f100",
         "fullName": "Prepaid Medical Assistance Program",
         "name": "PMAP",
-        "isRateProgram": "false"
+        "isRateProgram": false
     },
     {
         "id": "ea16a6c0-5fc6-4df8-adac-c627e76660ab",
         "fullName": "Minnesota Senior Care Plus ",
         "name": "MSC+",
-        "isRateProgram": "false"
+        "isRateProgram": false
     },
     {
         "id": "3fd36500-bf2c-47bc-80e8-e7aa417184c5",
         "fullName": "Minnesota Senior Health Options",
         "name": "MSHO",
-        "isRateProgram": "false"
+        "isRateProgram": false
     }
 ]
 
-const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
+const deprecatedContractOnlyData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
     stateContacts: [
         {
             name: 'Name',
@@ -106,7 +106,7 @@ const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
     statutoryRegulatoryAttestation: true
 })
 
-const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
+const deprecatedContractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
     stateCode: 'MN',
     stateContacts: [
         {
@@ -430,7 +430,8 @@ const apolloClientWrapper = async <T>(
 
 export {
     apolloClientWrapper,
-    contractOnlyData,
+    deprecatedContractOnlyData,
+    deprecatedContractAndRatesData,
     contractAndRatesData,
     newSubmissionInput,
     cmsUser,

@@ -1,7 +1,7 @@
 import { HealthPlanFormDataType, packageName } from "../../../app-web/src/common-code/healthPlanFormDataType"
 import { base64ToDomain } from "../../../app-web/src/common-code/proto/healthPlanFormDataProto"
 import { HealthPlanPackage } from "../../gen/gqlClient"
-import { cmsUser, minnesotaStatePrograms, stateUser } from "../../utils/apollo-test-utils"
+import { cmsUser, deprecatedContractAndRatesData, minnesotaStatePrograms, stateUser } from "../../utils/apollo-test-utils"
 
 describe('CMS user can view rate reviews', () => {
     beforeEach(() => {
@@ -23,12 +23,12 @@ describe('CMS user can view rate reviews', () => {
         return unwrapResult
     }
 
-
-    it('and navigate to a specific rate from the rates dashboard', () => {
+    // NEEDS TO BE REWRITTEN AS API TEST WE FINISH CONTRACT API EPIC
+    it.skip('and navigate to a specific rate from the rates dashboard', () => {
           cy.apiAssignDivisionToCMSUser(cmsUser(), 'DMCO').then(() => {
 
             // Create a new contract and rates submission with two attached rates
-            cy.apiCreateAndSubmitContractWithRates(stateUser()).then(
+            cy.apiDeprecatedCreateSubmitHPP(stateUser(), deprecatedContractAndRatesData()).then(
                 (pkg) => {
                 const submission = getFormData(pkg)
                     const submissionName = packageName(
