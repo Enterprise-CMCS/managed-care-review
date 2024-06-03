@@ -43,7 +43,7 @@ describe('FileUpload component', () => {
             return
         },
     }
-    beforeEach(() => jest.clearAllMocks())
+    beforeEach(() => vi.clearAllMocks())
 
     it('renders without errors', async () => {
         render(<FileUpload {...testProps} />)
@@ -195,12 +195,12 @@ describe('FileUpload component', () => {
             id: 'Default',
             name: 'Default Input',
             label: 'File input label',
-            uploadFile: jest
+            uploadFile: vi
                 .fn()
                 .mockResolvedValue({ key: '12313', s3Url: 's3:/12313' }),
-            deleteFile: jest.fn().mockResolvedValue(undefined),
-            scanFile: jest.fn().mockResolvedValue(undefined),
-            onFileItemsUpdate: jest.fn().mockResolvedValue(undefined),
+            deleteFile: vi.fn().mockResolvedValue(undefined),
+            scanFile: vi.fn().mockResolvedValue(undefined),
+            onFileItemsUpdate: vi.fn().mockResolvedValue(undefined),
             accept: '.pdf,.txt',
         }
 
@@ -221,12 +221,12 @@ describe('FileUpload component', () => {
             id: 'Default',
             name: 'Default Input',
             label: 'File input label',
-            uploadFile: jest
+            uploadFile: vi
                 .fn()
                 .mockResolvedValue({ key: '12313', s3Url: 's3:/12313' }),
-            deleteFile: jest.fn().mockResolvedValue(undefined),
-            scanFile: jest.fn().mockRejectedValue(new Error('failed')),
-            onFileItemsUpdate: jest.fn().mockResolvedValue(undefined),
+            deleteFile: vi.fn().mockResolvedValue(undefined),
+            scanFile: vi.fn().mockRejectedValue(new Error('failed')),
+            onFileItemsUpdate: vi.fn().mockResolvedValue(undefined),
             accept: '.pdf,.txt',
         }
 
@@ -247,12 +247,12 @@ describe('FileUpload component', () => {
             id: 'Default',
             name: 'Default Input',
             label: 'File input label',
-            uploadFile: jest
+            uploadFile: vi
                 .fn()
                 .mockResolvedValue({ key: '12313', s3Url: 's3:/12313' }),
-            deleteFile: jest.fn().mockResolvedValue(undefined),
-            scanFile: jest.fn().mockRejectedValue(new Error('failed')),
-            onFileItemsUpdate: jest.fn().mockResolvedValue(undefined),
+            deleteFile: vi.fn().mockResolvedValue(undefined),
+            scanFile: vi.fn().mockRejectedValue(new Error('failed')),
+            onFileItemsUpdate: vi.fn().mockResolvedValue(undefined),
             accept: '.pdf,.txt',
         }
 
@@ -285,7 +285,7 @@ describe('FileUpload component', () => {
             render(
                 <FileUpload
                     {...testProps}
-                    scanFile={jest.fn().mockRejectedValue(new Error('failed'))}
+                    scanFile={vi.fn().mockRejectedValue(new Error('failed'))}
                     accept=".pdf,.txt,.doc"
                 />
             )

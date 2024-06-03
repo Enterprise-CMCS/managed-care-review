@@ -18,7 +18,7 @@ import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { Location } from 'react-router-dom'
 
 describe('UnlockSubmitModal', () => {
-    const mockSetIsSubmitting = jest.fn()
+    const mockSetIsSubmitting = vi.fn()
 
     describe('initial submission modal', () => {
         it('displays correct modal when submitting initial submission', async () => {

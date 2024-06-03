@@ -54,7 +54,7 @@ describe('FilterAccordion', () => {
             <FilterAccordion
                 filterTitle={'Testing filter accordion'}
                 children={filters}
-                onClearFilters={jest.fn()}
+                onClearFilters={vi.fn()}
             />,
             {
                 apolloProvider: {

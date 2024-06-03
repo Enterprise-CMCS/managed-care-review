@@ -14,7 +14,7 @@ describe('ActionButton', () => {
     describe('default state', () => {
         it('renders button with own text', () => {
             render(
-                <ActionButton type="button" onClick={jest.fn()}>
+                <ActionButton type="button" onClick={vi.fn()}>
                     Test Button Default
                 </ActionButton>
             )
@@ -28,7 +28,7 @@ describe('ActionButton', () => {
 
         it('renders button without disabled styles and aria-disabled', () => {
             render(
-                <ActionButton type="button" onClick={jest.fn()}>
+                <ActionButton type="button" onClick={vi.fn()}>
                     Test Button Default
                 </ActionButton>
             )
@@ -43,7 +43,7 @@ describe('ActionButton', () => {
 
         it('renders button without loading styles and spinner', async () => {
             render(
-                <ActionButton type="button" onClick={jest.fn()}>
+                <ActionButton type="button" onClick={vi.fn()}>
                     Test Button Default
                 </ActionButton>
             )
@@ -62,7 +62,7 @@ describe('ActionButton', () => {
             render(
                 <ActionButton
                     type="button"
-                    onClick={jest.fn()}
+                    onClick={vi.fn()}
                     loading
                     animationTimeout={0}
                 >
@@ -81,7 +81,7 @@ describe('ActionButton', () => {
             render(
                 <ActionButton
                     type="button"
-                    onClick={jest.fn()}
+                    onClick={vi.fn()}
                     loading
                     animationTimeout={0}
                 >
@@ -102,33 +102,33 @@ describe('ActionButton', () => {
             })
         })
 
-        jest.useFakeTimers()
+        vi.useFakeTimers()
         it('by default, wait 750 ms before displaying loading spinner', async () => {
             render(
-                <ActionButton type="button" onClick={jest.fn()} loading>
+                <ActionButton type="button" onClick={vi.fn()} loading>
                     Test Button Loading
                 </ActionButton>
             )
 
             expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
-            jest.advanceTimersByTime(749)
+            vi.advanceTimersByTime(749)
             expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
 
-            jest.advanceTimersByTime(1)
+            vi.advanceTimersByTime(1)
             await waitFor(() => {
                 expect(
                     screen.getByRole('button', { name: 'Loading' })
                 ).toBeInTheDocument()
                 expect(screen.getByRole('progressbar')).toBeInTheDocument()
             })
-            jest.useRealTimers()
+            vi.useRealTimers()
         })
     })
 
     describe('disabled state', () => {
         it('renders button with own text', () => {
             render(
-                <ActionButton type="button" onClick={jest.fn()} disabled>
+                <ActionButton type="button" onClick={vi.fn()} disabled>
                     Test Button Disabled
                 </ActionButton>
             )
@@ -142,7 +142,7 @@ describe('ActionButton', () => {
 
         it('renders button with aria-disabled attribute', () => {
             render(
-                <ActionButton type="button" onClick={jest.fn()} disabled>
+                <ActionButton type="button" onClick={vi.fn()} disabled>
                     Test Button Disabled
                 </ActionButton>
             )
@@ -156,7 +156,7 @@ describe('ActionButton', () => {
 
         it('renders button with disabled styles and cursor', () => {
             render(
-                <ActionButton type="button" onClick={jest.fn()} disabled>
+                <ActionButton type="button" onClick={vi.fn()} disabled>
                     Test Button Disabled
                 </ActionButton>
             )
@@ -176,17 +176,10 @@ describe('ActionButton', () => {
 
     describe('incompatible props warning', () => {
         it('Console error when incompatible props are being used', () => {
-            const consoleErrorMock = jest
-                .spyOn(console, 'error')
-                .mockImplementation()
+            const consoleErrorMock = vi.spyOn(console, 'error')
 
             render(
-                <ActionButton
-                    type="button"
-                    onClick={jest.fn()}
-                    disabled
-                    loading
-                >
+                <ActionButton type="button" onClick={vi.fn()} disabled loading>
                     Test Button
                 </ActionButton>
             )

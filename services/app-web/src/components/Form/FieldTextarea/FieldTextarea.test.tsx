@@ -2,16 +2,16 @@ import { screen, render } from '@testing-library/react'
 import { FieldTextarea } from './FieldTextarea'
 import { Link } from '@trussworks/react-uswds'
 
-const mockOnChange = jest.fn()
-const mockSetValue = jest.fn()
+const mockOnChange = vi.fn()
+const mockSetValue = vi.fn()
 
 // mock out formik hook as we are not testing formik
 // needs to be before first describe
-jest.mock('formik', () => {
+vi.mock('formik', () => {
     return {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore-next-line
-        ...jest.requireActual('formik'),
+        ...vi.requireActual('formik'),
         useField: () => [
             {
                 onChange: mockOnChange,

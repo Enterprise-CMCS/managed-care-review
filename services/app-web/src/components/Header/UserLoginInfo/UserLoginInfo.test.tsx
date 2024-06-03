@@ -4,7 +4,7 @@ import { UserLoginInfo } from './UserLoginInfo'
 import { useStringConstants } from '../../../hooks/useStringConstants'
 
 describe('UserLoginInfo', () => {
-    afterEach(() => jest.clearAllMocks())
+    afterEach(() => vi.clearAllMocks())
     const loggedInUser = {
         state: {
             name: 'Minnesota',
@@ -22,7 +22,7 @@ describe('UserLoginInfo', () => {
         email: 'bob@dmas.mn.gov',
     }
     it('renders without errors', () => {
-        const jestFn = jest.fn()
+        const jestFn = vi.fn()
 
         renderWithProviders(
             <UserLoginInfo
@@ -37,7 +37,7 @@ describe('UserLoginInfo', () => {
     })
 
     it('renders a username', () => {
-        const jestFn = jest.fn()
+        const jestFn = vi.fn()
 
         renderWithProviders(
             <UserLoginInfo
@@ -55,7 +55,7 @@ describe('UserLoginInfo', () => {
     it('renders link to support email', () => {
         const stringConstants = useStringConstants()
         const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
-        const jestFn = jest.fn()
+        const jestFn = vi.fn()
 
         renderWithProviders(
             <UserLoginInfo
@@ -76,7 +76,7 @@ describe('UserLoginInfo', () => {
     })
 
     it('displays nothing while loading', () => {
-        const jestFn = jest.fn()
+        const jestFn = vi.fn()
 
         renderWithProviders(
             <UserLoginInfo
@@ -92,7 +92,7 @@ describe('UserLoginInfo', () => {
     })
 
     it('displays nothing when disabled', () => {
-        const jestFn = jest.fn()
+        const jestFn = vi.fn()
 
         renderWithProviders(
             <UserLoginInfo

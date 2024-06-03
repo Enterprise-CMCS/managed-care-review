@@ -78,7 +78,7 @@ describe('Modal', () => {
     it('Calls onSubmit prop when Submit button is clicked', async () => {
         const modalRef = createRef<ModalRef>()
         const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
-        const onSubmit = jest.fn()
+        const onSubmit = vi.fn()
         render(
             <div>
                 <Modal
@@ -99,7 +99,7 @@ describe('Modal', () => {
     it('Calls onCancel prop when Cancel button is clicked', async () => {
         const modalRef = createRef<ModalRef>()
         const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
-        const onCancel = jest.fn()
+        const onCancel = vi.fn()
         render(
             <div>
                 <Modal
@@ -120,7 +120,7 @@ describe('Modal', () => {
     it('renders onSubmitText prop string on Submit button when one is passed', async () => {
         const modalRef = createRef<ModalRef>()
         const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
-        const onSubmit = jest.fn()
+        const onSubmit = vi.fn()
         render(
             <div>
                 <Modal
@@ -142,7 +142,7 @@ describe('Modal', () => {
     it('renders default submit button text when onSubmitText is undefined', async () => {
         const modalRef = createRef<ModalRef>()
         const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
-        const onSubmit = jest.fn()
+        const onSubmit = vi.fn()
         render(
             <div>
                 <Modal
@@ -316,7 +316,7 @@ describe('Modal', () => {
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
-            const onSubmit = jest.fn()
+            const onSubmit = vi.fn()
             render(
                 <div>
                     <Modal

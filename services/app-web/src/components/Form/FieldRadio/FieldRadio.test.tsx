@@ -1,12 +1,12 @@
 import { screen, render } from '@testing-library/react'
 import { FieldRadio } from './FieldRadio'
 
-const mockOnChange = jest.fn()
-const mockSetValue = jest.fn()
+const mockOnChange = vi.fn()
+const mockSetValue = vi.fn()
 
-jest.mock('formik', () => {
+vi.mock('formik', () => {
     return {
-        ...jest.requireActual('formik'),
+        ...vi.requireActual('formik'),
         useField: () => [
             {
                 onChange: mockOnChange,
@@ -19,7 +19,7 @@ jest.mock('formik', () => {
 
 describe('FieldRadio component', () => {
     afterAll(() => {
-        jest.clearAllMocks()
+        vi.clearAllMocks()
     })
 
     it('renders without errors', () => {

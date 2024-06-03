@@ -118,7 +118,7 @@ describe('Header', () => {
         })
 
         it('calls logout api when Sign Out button is clicked', async () => {
-            const spy = jest
+            const spy = vi
                 .spyOn(CognitoAuthApi, 'signOut')
                 .mockResolvedValue(null)
 
@@ -143,10 +143,10 @@ describe('Header', () => {
         })
 
         it('calls setAlert when logout is unsuccessful', async () => {
-            const spy = jest
+            const spy = vi
                 .spyOn(CognitoAuthApi, 'signOut')
                 .mockRejectedValue('This logout failed!')
-            const mockAlert = jest.fn()
+            const mockAlert = vi.fn()
 
             renderWithProviders(
                 <Header authMode={'AWS_COGNITO'} setAlert={mockAlert} />,

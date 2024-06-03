@@ -8,16 +8,16 @@ import { screen, waitFor } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import userEvent from '@testing-library/user-event'
 
-const mockOnChange = jest.fn()
-const mockSetValue = jest.fn()
+const mockOnChange = vi.fn()
+const mockSetValue = vi.fn()
 
 // mock out formik hook as we are not testing formik
 // needs to be before first describe
-jest.mock('formik', () => {
+vi.mock('formik', () => {
     return {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore-next-line
-        ...jest.requireActual('formik'),
+        ...vi.requireActual('formik'),
         useField: () => [
             {
                 onChange: mockOnChange,
@@ -39,14 +39,14 @@ describe('ProgramSelect', () => {
         { value: 'test-id-127', label: 'MCR-MN-0008-MSC+' },
     ]
     const statePrograms = mockMNState().programs
-    let mockOnChange = jest.fn()
+    let mockOnChange = vi.fn()
     beforeEach(
         () =>
-            (mockOnChange = jest.fn((programs) => {
+            (mockOnChange = vi.fn((programs) => {
                 return programs.map((item: { value: string }) => item.value)
             }))
     )
-    afterEach(() => jest.resetAllMocks())
+    afterEach(() => vi.resetAllMocks())
 
     it('displays program options', async () => {
         renderWithProviders(

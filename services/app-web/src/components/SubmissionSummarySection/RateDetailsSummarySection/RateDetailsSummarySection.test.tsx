@@ -88,7 +88,7 @@ describe('RateDetailsSummarySection', () => {
         ],
     }
 
-    afterEach(() => jest.clearAllMocks())
+    afterEach(() => vi.clearAllMocks())
 
     it('can render draft submission without errors', () => {
         renderWithProviders(
@@ -725,7 +725,7 @@ describe('RateDetailsSummarySection', () => {
         })
     })
     it('does not render shared rate cert info for previous submissons', async () => {
-        jest.spyOn(
+        vi.spyOn(
             usePreviousSubmission,
             'usePreviousSubmission'
         ).mockReturnValue(true)

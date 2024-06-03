@@ -22,7 +22,7 @@ describe('ExpandableText', () => {
             // eslint-disable-next-line @typescript-eslint/no-empty-function
             set current(_value) {},
         }
-        jest.spyOn(React, 'useRef').mockReturnValue(mockRef)
+        vi.spyOn(React, 'useRef').mockReturnValue(mockRef)
     }
 
     const longText =

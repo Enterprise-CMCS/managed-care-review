@@ -7,8 +7,8 @@ import userEvent from '@testing-library/user-event'
 
 describe('FilterDateRange', () => {
     it('returns inputted start and end date', async () => {
-        const onStartChange = jest.fn((date?: string) => date)
-        const onEndChange = jest.fn((date?: string) => date)
+        const onStartChange = vi.fn((date?: string) => date)
+        const onEndChange = vi.fn((date?: string) => date)
         renderWithProviders(
             <FilterDateRange
                 startDatePickerProps={{
@@ -56,8 +56,8 @@ describe('FilterDateRange', () => {
 
     it('can clear inputs with forward refs', async () => {
         const ref = React.createRef<FilterDateRangeRef>()
-        const onStartChange = jest.fn((date?: string) => date)
-        const onEndChange = jest.fn((date?: string) => date)
+        const onStartChange = vi.fn((date?: string) => date)
+        const onEndChange = vi.fn((date?: string) => date)
         renderWithProviders(
             <FilterDateRange
                 startDatePickerProps={{
@@ -124,8 +124,8 @@ describe('FilterDateRange', () => {
 
     it('shows error on invalid date input', async () => {
         const ref = React.createRef<FilterDateRangeRef>()
-        const onStartChange = jest.fn((date?: string) => date)
-        const onEndChange = jest.fn((date?: string) => date)
+        const onStartChange = vi.fn((date?: string) => date)
+        const onEndChange = vi.fn((date?: string) => date)
         renderWithProviders(
             <FilterDateRange
                 startDatePickerProps={{
