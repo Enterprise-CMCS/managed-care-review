@@ -57,6 +57,7 @@ const convertRateFormToGQLRateFormData = (
             rateForm.effectiveDateEnd
         ),
         rateProgramIDs: rateForm.rateProgramIDs,
+        deprecatedRateProgramIDs: [],
         certifyingActuaryContacts: rateForm.actuaryContacts,
         addtlActuaryContacts: rateForm.addtlActuaryContacts,
         actuaryCommunicationPreference: rateForm.actuaryCommunicationPreference ?? undefined,

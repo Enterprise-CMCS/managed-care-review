@@ -24,7 +24,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
         })
         .required(),
         rateProgramIDs: Yup.array(
-        ).min(1, 'You must select a program'),
+        ).min(1, 'You must select which rate(s) are included in this certification'),
         rateType: Yup.string().defined(
             'You must choose a rate certification type'
         ),

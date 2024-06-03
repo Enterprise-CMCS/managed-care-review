@@ -10,9 +10,9 @@ provider:
 plugins:
   - serverless-plugin-scripts
   - serverless-s3-sync
-  - serverless-cloudfront-invalidate
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
+  - serverless-cf-invalidate-proxy
 
 custom:
   stage: ${opt:stage, self:provider.stage}

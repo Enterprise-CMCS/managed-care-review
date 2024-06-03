@@ -54,6 +54,7 @@ describe('RateDetailsSummarySection', () => {
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
+                        deprecatedRateProgramIDs: [],
                         certifyingActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
@@ -111,6 +112,7 @@ describe('RateDetailsSummarySection', () => {
                         rateProgramIDs: [
                             'd95394e5-44d1-45df-8151-1cc1ee66f100',
                         ],
+                        deprecatedRateProgramIDs: [],
                         certifyingActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
@@ -324,11 +326,66 @@ describe('RateDetailsSummarySection', () => {
             screen.getByRole('definition', { name: 'Rate certification type' })
         ).toBeInTheDocument()
         expect(
+            screen.getByRole('definition', {
+                name: 'Rates this rate certification covers',
+            })
+        ).toBeInTheDocument()
+        expect(
             screen.getByRole('definition', { name: 'Rating period' })
         ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', { name: 'Date certified' })
         ).toBeInTheDocument()
+    })
+
+    it('can render the deprecated rate programs when present on a rate certification submission', async () => {
+        const statePrograms = mockMNState().programs
+        const contract = mockContractPackageSubmitted()
+        contract.packageSubmissions[0].rateRevisions[0].formData.deprecatedRateProgramIDs =
+            ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce']
+        await waitFor(() => {
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    contract={contract}
+                    submissionName="MN-MSHO-0003"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider,
+                }
+            )
+        })
+
+        expect(
+            screen.getByRole('definition', {
+                name: 'Programs this rate certification covers',
+            })
+        ).toBeInTheDocument()
+    })
+
+    it('does not render the deprecated rate programs when present on a rate certification submission', async () => {
+        const statePrograms = mockMNState().programs
+        const contract = mockContractPackageSubmitted()
+        contract.packageSubmissions[0].rateRevisions[0].formData.deprecatedRateProgramIDs =
+            []
+        await waitFor(() => {
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    contract={contract}
+                    submissionName="MN-MSHO-0003"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider,
+                }
+            )
+        })
+
+        expect(
+            screen.queryByRole('definition', {
+                name: 'Programs this rate certification covers',
+            })
+        ).not.toBeInTheDocument()
     })
 
     it('renders supporting rates docs when they exist', async () => {
@@ -569,40 +626,7 @@ describe('RateDetailsSummarySection', () => {
             )
         }
         const programElement = screen.getByRole('definition', {
-            name: 'Programs this rate certification covers',
-        })
-        expect(programElement).toBeInTheDocument()
-        const programList = within(programElement).getByText('SNBC, PMAP')
-        expect(programList).toBeInTheDocument()
-    })
-
-    it('renders rate program names even when rate program ids are missing', async () => {
-        const draftContract = mockContractPackageDraft()
-        if (
-            draftContract.draftRevision &&
-            draftContract.draftRates &&
-            draftContract.draftRates[0].draftRevision
-        ) {
-            draftContract.draftRates[0].draftRevision.formData.rateProgramIDs =
-                []
-            draftContract.draftRevision.formData.programIDs = [
-                'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
-                'd95394e5-44d1-45df-8151-1cc1ee66f100',
-            ]
-            renderWithProviders(
-                <RateDetailsSummarySection
-                    contract={draftContract}
-                    editNavigateTo="rate-details"
-                    submissionName="MN-PMAP-0001"
-                    statePrograms={statePrograms}
-                />,
-                {
-                    apolloProvider,
-                }
-            )
-        }
-        const programElement = screen.getByRole('definition', {
-            name: 'Programs this rate certification covers',
+            name: 'Rates this rate certification covers',
         })
         expect(programElement).toBeInTheDocument()
         const programList = within(programElement).getByText('SNBC, PMAP')
@@ -624,7 +648,7 @@ describe('RateDetailsSummarySection', () => {
             }
         )
         const programList = screen.getAllByRole('definition', {
-            name: 'Programs this rate certification covers',
+            name: 'Rates this rate certification covers',
         })
         expect(programList).toHaveLength(2)
         expect(programList[0]).toHaveTextContent('SNBC')
@@ -883,6 +907,40 @@ describe('RateDetailsSummarySection', () => {
             ).not.toBeInTheDocument()
             expect(
                 within(rateDocsTable).queryByText('Linked submissions')
+            ).not.toBeInTheDocument()
+        })
+    })
+
+    it('displays missing info text for unlocked submissions with only historic rate program ids', async () => {
+        const draftContract = mockContractPackageDraft()
+        if (
+            draftContract.draftRevision &&
+            draftContract.draftRates &&
+            draftContract.draftRates[0].draftRevision
+        ) {
+            draftContract.draftRates[0].draftRevision.formData.deprecatedRateProgramIDs =
+                [statePrograms[0].id]
+            draftContract.draftRates[0].draftRevision.formData.rateProgramIDs =
+                []
+        }
+
+        renderWithProviders(
+            <RateDetailsSummarySection
+                contract={draftContract}
+                editNavigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+            />,
+            {
+                apolloProvider,
+            }
+        )
+        await waitFor(() => {
+            expect(
+                screen.getByText(/You must provide this information/)
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(/Programs this rate certification covers/)
             ).not.toBeInTheDocument()
         })
     })

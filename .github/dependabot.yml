@@ -10,6 +10,32 @@ updates:
     schedule:
       interval: 'daily'
     open-pull-requests-limit: 4
+    groups:
+      aws-sdk:
+        applies-to: version-updates
+        patterns:
+          - '@aws-sdk/*'
+      prisma:
+        applies-to: version-updates
+        patterns:
+          - '@prisma/client'
+          - 'prisma'
+      otel:
+        applies-to: version-updates
+        patterns:
+          - '@opentelemetry/exporter-trace-otlp-http'
+          - '@opentelemetry/instrumentation'
+          - '@opentelemetry/exporter-metrics-otlp-http'
+          - '@opentelemetry/sdk-node'
+      opentelemetry-js:
+        applies-to: version-updates
+        patterns:
+          - '@opentelemetry/core'
+          - '@opentelemetry/resources'
+          - '@opentelemetry/sdk-trace-base'
+          - '@opentelemetry/sdk-trace-node'
+          - '@opentelemetry/semantic-conventions'
+          - '@opentelemetry/sdk-metrics'
     ignore:
       - dependency-name: '@types/node'
         versions: ['>14.999'] # I think this is how we don't ever go above 14?

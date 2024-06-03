@@ -39,6 +39,7 @@ function prismaRateCreateFormDataFromDomain(
         amendmentEffectiveDateStart: rateFormData.amendmentEffectiveDateStart,
         amendmentEffectiveDateEnd: rateFormData.amendmentEffectiveDateEnd,
         rateProgramIDs: rateFormData.rateProgramIDs,
+        deprecatedRateProgramIDs: [],
         rateCertificationName: rateFormData.rateCertificationName,
         rateDocuments: {
             create:
@@ -90,6 +91,7 @@ function prismaUpdateRateFormDataFromDomain(
             rateFormData.amendmentEffectiveDateEnd
         ),
         rateProgramIDs: emptify(rateFormData.rateProgramIDs),
+        deprecatedRateProgramIDs: [],
         rateCertificationName: nullify(rateFormData.rateCertificationName),
         rateDocuments: {
             deleteMany: {},

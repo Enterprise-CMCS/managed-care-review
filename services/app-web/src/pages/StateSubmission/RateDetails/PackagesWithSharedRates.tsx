@@ -118,7 +118,7 @@ export const PackagesWithSharedRates = ({
                 className={styles.radioGroup}
                 id={`hasSharedRateCert.${index}.hasSharedRateCert`}
                 name={`${fieldNamePrefix}.hasSharedRateCert`}
-                label="Was this rate certification uploaded to any other submissions?"
+                label="Was this rate certification included with another submission?"
                 showError={Boolean(showFieldErrors('hasSharedRateCert'))}
                 aria-required
             />

@@ -28,7 +28,6 @@ import {
 import {
     getLastContractSubmission,
     getVisibleLatestRateRevisions,
-    getVisibleLatestContractFormData,
 } from '../../../../../gqlHelpers/contractsAndRates'
 import { useAuth } from '../../../../../contexts/AuthContext'
 import { ActuaryCommunicationRecord } from '../../../../../constants'
@@ -74,7 +73,6 @@ export function renderDownloadButton(
 
 export const RateDetailsSummarySectionV2 = ({
     contract,
-    contractRev,
     rateRevs,
     editNavigateTo,
     submissionName,
@@ -82,18 +80,14 @@ export const RateDetailsSummarySectionV2 = ({
     onDocumentError,
 }: RateDetailsSummarySectionV2Props): React.ReactElement => {
     const { loggedInUser } = useAuth()
-    const isSubmittedOrCMSUser =
-        contract.status === 'SUBMITTED' ||
-        contract.status === 'RESUBMITTED' ||
-        loggedInUser?.role === 'CMS_USER'
+    const isSubmitted =
+        contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
+    const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const isSubmittedOrCMSUser = isSubmitted || isCMSUser
+
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
-    const contractOrRev = contractRev ? contractRev : contract
 
-    const contractFormData = getVisibleLatestContractFormData(
-        contractOrRev,
-        isEditing
-    )
     const rates = rateRevs
         ? rateRevs
         : getVisibleLatestRateRevisions(contract, isEditing)
@@ -138,21 +132,21 @@ export const RateDetailsSummarySectionV2 = ({
             : ''
     }
 
-    const ratePrograms = (rate: Rate | RateRevision) => {
+    const ratePrograms = (
+        rate: Rate | RateRevision,
+        useHistoricPrograms: boolean
+    ) => {
         /* if we have rateProgramIDs, use them, otherwise use programIDs */
         let programIDs = [] as string[]
         const rateFormData = getRateFormData(rate)
         if (!rateFormData) return <GenericErrorPage />
-        if (
+        if (useHistoricPrograms) {
+            programIDs = rateFormData.deprecatedRateProgramIDs
+        } else if (
             rateFormData.rateProgramIDs &&
             rateFormData.rateProgramIDs.length > 0
         ) {
             programIDs = rateFormData.rateProgramIDs
-        } else if (
-            contractFormData?.programIDs &&
-            contractFormData?.programIDs.length > 0
-        ) {
-            programIDs = contractFormData.programIDs
         }
         return programIDs
             ? statePrograms
@@ -239,7 +233,6 @@ export const RateDetailsSummarySectionV2 = ({
         isSubmittedOrCMSUser,
         isPreviousSubmission,
     ])
-
     return (
         <SectionCard id="rateDetails" className={styles.summarySection}>
             <SectionHeader
@@ -269,14 +262,29 @@ export const RateDetailsSummarySectionV2 = ({
                             </h3>
                             <dl>
                                 <DoubleColumnGrid>
+                                    {rateFormData.deprecatedRateProgramIDs
+                                        .length > 0 &&
+                                        isSubmitted && (
+                                            <DataDetail
+                                                id="historicRatePrograms"
+                                                label="Programs this rate certification covers"
+                                                explainMissingData={
+                                                    !isSubmittedOrCMSUser
+                                                }
+                                                children={ratePrograms(
+                                                    rate,
+                                                    true
+                                                )}
+                                            />
+                                        )}
                                     {ratePrograms && (
                                         <DataDetail
                                             id="ratePrograms"
-                                            label="Programs this rate certification covers"
+                                            label="Rates this rate certification covers"
                                             explainMissingData={
                                                 !isSubmittedOrCMSUser
                                             }
-                                            children={ratePrograms(rate)}
+                                            children={ratePrograms(rate, false)}
                                         />
                                     )}
                                     <DataDetail

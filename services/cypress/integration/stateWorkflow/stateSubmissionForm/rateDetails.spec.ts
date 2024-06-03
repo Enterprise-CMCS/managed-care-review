@@ -48,7 +48,7 @@ describe('rate details', () => {
             /* Choose another submission that the rate cert was uploaded to, then check that your selection
             is still there when you come back */
             cy.findByRole('radiogroup', {
-                name: /Was this rate certification uploaded to any other submissions?/,
+                name: /Was this rate certification included with another submission?/,
             })
                 .should('exist')
                 .within(() => {

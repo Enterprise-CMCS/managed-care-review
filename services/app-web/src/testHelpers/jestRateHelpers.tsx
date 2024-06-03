@@ -26,7 +26,7 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
     ).toBeInTheDocument()
     expect(
         withinTargetRateCert.getByText(
-            'Programs this rate certification covers'
+            'What rates are included in this certification?'
         )
     ).toBeInTheDocument()
     expect(

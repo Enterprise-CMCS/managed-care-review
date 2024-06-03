@@ -53,6 +53,7 @@ const updateDraftContractRatesMockSuccess = ({
                 amendmentEffectiveDateStart: undefined,
                 amendmentEffectiveDateEnd: undefined,
                 rateProgramIDs: [],
+                deprecatedRateProgramIDs: [],
                 certifyingActuaryContacts: [
                     {
                         name: "",
