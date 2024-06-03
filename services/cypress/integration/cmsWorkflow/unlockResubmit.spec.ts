@@ -4,16 +4,16 @@ describe('CMS user', () => {
         cy.interceptGraphQL()
     })
 
-    it('can unlock and resubmit child rates', () => {
+    it('can unlock and see state resubmit with child rates', () => {
         cy.interceptFeatureFlags({'438-attestation': true})
         cy.logInAsStateUser()
 
         // fill out contract details
         cy.startNewContractAndRatesSubmission()
         cy.fillOutBaseContractDetails()
-        cy.navigateFormByButtonClick('CONTINUE')
+        cy.deprecatedNavigateV1Form('CONTINUE')
 
-        // fill out three rate details - two with child rates AND one with a linked rate
+        // fill out two child rates
         cy.findByRole('heading', {
             level: 2,
             name: /Rate details/,
@@ -22,12 +22,14 @@ describe('CMS user', () => {
         cy.findByRole('button', {
             name: 'Add another rate certification',
         }).click()
+        cy.findAllByTestId('rate-certification-form').should('have.length', 2)
         cy.findAllByTestId('rate-certification-form').each((form) =>
             cy.wrap(form).within(() => {
                 cy.fillOutNewRateCertification();
         })
         )
-        cy.navigateContractRatesFormByButtonClick('CONTINUE')
+
+        cy.navigateContractRatesForm('CONTINUE')
 
         // fill out the rest of the form
         cy.findByRole('heading', {
@@ -35,12 +37,12 @@ describe('CMS user', () => {
             name: /Contacts/,
         }).should('exist')
         cy.fillOutStateContact()
-        cy.navigateFormByButtonClick('CONTINUE')
+        cy.deprecatedNavigateV1Form('CONTINUE')
         cy.findByRole('heading', {
             level: 2,
             name: /Supporting documents/,
         }).should('exist')
-        cy.navigateFormByButtonClick('CONTINUE')
+        cy.deprecatedNavigateV1Form('CONTINUE')
 
         cy.findByRole('heading', {
             level: 2,

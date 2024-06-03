@@ -51,7 +51,7 @@ Cypress.Commands.add('fillOutContractActionOnlyWithBaseContract', () => {
         //rate-cert-assurance
         cy.get('label[for="riskBasedContractNo"]').click()
 
-        cy.findByRole('textbox', { name: 'Submission description' }).type(
+        cy.findByRole('textbox', { name: 'Submission description' }).clear().type(
             'description of contract only submission'
         )
 })
@@ -73,8 +73,8 @@ Cypress.Commands.add('fillOutContractActionOnlyWithAmendment', () => {
         cy.get('label[for="riskBasedContractNo"]').click()
 
         cy.findByText('Amendment to base contract').click()
-        cy.findByRole('textbox', { name: 'Submission description' }).type(
-            'description of contract only submission'
+        cy.findByRole('textbox', { name: 'Submission description' }).clear().type(
+            'description of contract only submission with amendment'
         )
     })
 
@@ -93,7 +93,7 @@ Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
         cy.get('label[for="riskBasedContractNo"]').click()
 
         cy.findByText('Base contract').click()
-        cy.findByRole('textbox', { name: 'Submission description' }).type(
+        cy.findByRole('textbox', { name: 'Submission description' }).clear().type(
             'description of contract and rates submission'
         )
     })
@@ -325,8 +325,55 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
             .within(() => {
                 cy.findByText('No, this rate certification was not included with any other submissions').click()
             })
+            cy.findByText('New rate certification').should('exist')
+            cy.findByText('New rate certification').click()
+            cy.findByText(
+                'Certification of capitation rates specific to each rate cell'
+            ).click()
 
-        }
+            cy.findAllByLabelText('Start date', {timeout: 2000})
+                .parents()
+                .findByTestId('date-picker-external-input')
+                .type('02/29/2024')
+            cy.findAllByLabelText('End date')
+                .parents()
+                .findByTestId('date-picker-external-input')
+                .type('02/28/2025')
+                .blur()
+            cy.findByLabelText('Date certified').type('03/01/2024')
+
+            cy.findByRole('combobox', { name: 'programs (required)' }).click({
+                force: true,
+            })
+            cy.findByText('PMAP').click()
+
+            //Fill out certifying actuary
+            cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
+            cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
+            cy.findAllByLabelText('Email').eq(0).type('actuarycontact@example.com')
+            cy.findAllByLabelText('Mercer').eq(0).safeClick()
+
+            //Actuary communication preference
+            cy.findByRole('radiogroup', {
+                name: /Actuaries' communication preference/
+            })
+                .should('exist')
+                .within(() => {
+                    cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
+                        .click()
+                })
+
+            // Upload a rate certification and rate supporting document
+            cy.findAllByTestId('file-input-input').each(fileInput =>
+                cy.wrap(fileInput).attachFile('documents/trussel-guide.pdf')
+            )
+
+            cy.verifyDocumentsHaveNoErrors()
+            cy.waitForDocumentsToLoad()
+            cy.findAllByTestId('errorMessage').should('have.length', 0)
+
+    }
+
 )
 
 Cypress.Commands.add('fillOutLinkedRate', () => {
@@ -357,11 +404,11 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
     // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
     cy.findByRole('radiogroup', {
-        name: /Was this rate certification uploaded to any other submissions?/,
+        name: /Was this rate certification included with another submission?/,
     })
         .should('exist')
         .within(() => {
-            cy.findByText('No').click()
+            cy.findByText('No, this rate certification was not included with any other submissions').click()
         })
 
     cy.findByText('Amendment to prior rate certification').click()
@@ -375,21 +422,21 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
     However, surfacing custom attributes on the nested inputs in third party component DateRangePicker not possible in current react-uswds version
     For now using targeting by html id (anti-pattern)
 */
-    cy.get(`[id="rateInfos.${id}.rateDateStart"]`, {timeout: 2000}).type('02/01/2023')
-    cy.get(`[id="rateInfos.${id}.rateDateEnd"]`).type('03/01/2025')
-    cy.get(`[id="rateInfos.${id}.effectiveDateStart"]`).type('03/01/2024')
-    cy.get(`[id="rateInfos.${id}.effectiveDateEnd"]`).type('03/01/2025')
+    cy.get(`[id="rateForms.${id}.rateDateStart"]`, {timeout: 2000}).clear().type('02/01/2023')
+    cy.get(`[id="rateForms.${id}.rateDateEnd"]`).clear().type('03/01/2025')
+    cy.get(`[id="rateForms.${id}.effectiveDateStart"]`).clear().type('03/01/2024')
+    cy.get(`[id="rateForms.${id}.effectiveDateEnd"]`).clear().type('03/01/2025')
 
     cy.findByRole('combobox', { name: 'programs (required)' }).click({
         force: true,
     })
     cy.findByText('PMAP').click()
-    cy.findByLabelText('Date certified for rate amendment').type('03/01/2024')
+    cy.findByLabelText('Date certified for rate amendment').clear().type('03/01/2024')
 
     //Fill out certifying actuary
-    cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
-    cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
-    cy.findAllByLabelText('Email').eq(0).type('actuarycontact@example.com')
+    cy.findAllByLabelText('Name').eq(0).click().clear().type('Actuary Contact Person')
+    cy.findAllByLabelText('Title/Role').eq(0).clear().type('Actuary Contact Title')
+    cy.findAllByLabelText('Email').eq(0).clear().type('actuarycontact@example.com')
     cy.findAllByLabelText('Mercer').eq(0).safeClick()
 
     //Actuary communication preference
@@ -404,7 +451,7 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
 
     // Upload a rate certification and rate supporting document
     cy.findAllByTestId('file-input-input').each(fileInput =>
-        cy.wrap(fileInput).attachFile('documents/trussel-guide.pdf')
+        cy.wrap(fileInput).attachFile('documents/how-to-open-source.pdf')
     )
 
     cy.verifyDocumentsHaveNoErrors()
@@ -414,12 +461,12 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
 
 Cypress.Commands.add('fillOutStateContact', () => {
     // Must be on '/submissions/:id/contacts'
-    cy.findAllByLabelText('Name').eq(0).click().type('State Contact Person')
+    cy.findAllByLabelText('Name').eq(0).click().clear().type('State Contact Person')
     cy.findAllByLabelText('Name')
         .eq(0)
         .should('have.value', 'State Contact Person') // this assertion is here to catch flakes early due to state contact person value not persisting
-    cy.findAllByLabelText('Title/Role').eq(0).type('State Contact Title')
-    cy.findAllByLabelText('Email').eq(0).type('mc-review-qa@truss.works')
+    cy.findAllByLabelText('Title/Role').eq(0).clear().type('State Contact Title')
+    cy.findAllByLabelText('Email').eq(0).clear().type('mc-review-qa@truss.works')
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
@@ -431,9 +478,9 @@ Cypress.Commands.add('fillOutAdditionalActuaryContact', () => {
         .eq(0)
         .click()
     cy.findByTestId('addtnl-actuary-contact').should('exist')
-    cy.findByTestId('addtlActuaryContacts.name').click().type('Actuary Contact Person')
-    cy.findByTestId('addtlActuaryContacts.titleRole').type('Actuary Contact Title')
-    cy.findByTestId('addtlActuaryContacts.email').type('actuarycontact@example.com')
+    cy.findByTestId('addtlActuaryContacts.name').click().clear().type('Actuary Contact Person')
+    cy.findByTestId('addtlActuaryContacts.titleRole').clear().type('Actuary Contact Title')
+    cy.findByTestId('addtlActuaryContacts.email').clear().type('actuarycontact@example.com')
 
     // Actuarial firm
     cy.findByTestId('addtlActuaryContacts.mercer').safeClick()

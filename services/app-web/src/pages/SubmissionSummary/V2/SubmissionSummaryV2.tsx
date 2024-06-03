@@ -26,7 +26,7 @@ import {
 import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../Errors/Error404Page'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
-import styles from '../../SubmissionSummary.module.scss'
+import styles from '../SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../../components/ChangeHistory'
 import { UnlockSubmitModal } from '../../../components/Modal'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
