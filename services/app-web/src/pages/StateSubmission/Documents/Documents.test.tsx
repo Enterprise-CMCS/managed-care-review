@@ -20,30 +20,30 @@ import * as useRouteParams from '../../../hooks/useRouteParams'
 import * as useHealthPlanPackageForm from '../../../hooks/useHealthPlanPackageForm'
 
 describe('Documents', () => {
-    const mockUpdateDraftFn = jest.fn()
+    const mockUpdateDraftFn = vi.fn()
 
     beforeEach(() => {
-        jest.spyOn(
+        vi.spyOn(
             useHealthPlanPackageForm,
             'useHealthPlanPackageForm'
         ).mockReturnValue({
             updateDraft: mockUpdateDraftFn,
-            createDraft: jest.fn(),
+            createDraft: vi.fn(),
             showPageErrorMessage: false,
             draftSubmission: mockDraft(),
         })
-        jest.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
+        vi.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
             id: '123-abc',
         })
     })
 
     afterEach(() => {
-        jest.clearAllMocks()
-        jest.spyOn(
+        vi.clearAllMocks()
+        vi.spyOn(
             useHealthPlanPackageForm,
             'useHealthPlanPackageForm'
         ).mockRestore()
-        jest.spyOn(useRouteParams, 'useRouteParams').mockRestore()
+        vi.spyOn(useRouteParams, 'useRouteParams').mockRestore()
     })
 
     it('renders without errors', async () => {

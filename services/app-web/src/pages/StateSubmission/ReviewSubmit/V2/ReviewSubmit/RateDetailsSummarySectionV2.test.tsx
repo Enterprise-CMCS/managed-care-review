@@ -139,7 +139,7 @@ describe('RateDetailsSummarySection', () => {
         ],
     }
 
-    afterEach(() => jest.clearAllMocks())
+    afterEach(() => vi.clearAllMocks())
 
     it('can render draft contract with rates without errors', () => {
         renderWithProviders(
