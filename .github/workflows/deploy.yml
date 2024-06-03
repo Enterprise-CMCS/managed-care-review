@@ -106,7 +106,7 @@ jobs:
           VITE_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-web
-        run: yarn test:once --coverage
+        run: yarn test:coverage
 
       - name: upload app web gen directory
         uses: actions/upload-artifact@v4
@@ -186,7 +186,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-api
         run: |
-          yarn test:once --coverage
+          yarn test:coverage
 
       - name: upload api test coverage
         uses: actions/upload-artifact@v4

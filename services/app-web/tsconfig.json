@@ -2,7 +2,7 @@
     "extends": "../../tsconfig.json",
     "compilerOptions": {
         "target": "ESNext",
-        "types": ["cypress", "vite/client", "node"],
+        "types": ["cypress", "node", "vite/client", "vitest/globals"],
         "lib": ["es6", "dom", "dom.iterable", "esnext"],
         "allowJs": true,
         "skipLibCheck": true,

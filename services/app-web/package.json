@@ -11,11 +11,8 @@
         "format": "prettier --write src/**/*.ts{,x}",
         "lint": "tsc --noEmit && eslint src/ --max-warnings=0 && yarn lint:style",
         "lint:style": "npx stylelint '**/*.scss'",
-        "test": "TZ=UTC vite test",
-        "test:once": "TZ=UTC vite test --watchAll=false --runInBand --ci",
-        "test:update": "vite test -u",
-        "test:coverage": "yarn test --coverage --watchAll=false",
-        "test:clear": "vite test --clearCache",
+        "test": "TZ=UTC vitest",
+        "test:coverage": "vitest --coverage",
         "storybook": "start-storybook -p 6006 -s public --quiet",
         "build-storybook": "build-storybook -s public --quiet",
         "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""
@@ -106,6 +103,7 @@
         "graphql": "^16.8.1",
         "jotai": "^2.2.1",
         "jotai-location": "^0.5.1",
+        "jsdom": "^24.1.0",
         "launchdarkly-react-client-sdk": "^3.0.10",
         "path-browserify": "^1.0.1",
         "qs": "^6.11.0",
@@ -175,6 +173,7 @@
         "vite-plugin-graphql-loader": "^3.0.1",
         "vite-plugin-node-polyfills": "^0.22.0",
         "vite-plugin-svgr": "^4.2.0",
+        "vitest": "^1.6.0",
         "webpack": "^5.72.0",
         "yarn": "^1.22.19"
     }
