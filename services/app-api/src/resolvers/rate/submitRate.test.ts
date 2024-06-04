@@ -194,8 +194,6 @@ describe('submitRate', () => {
     })
 
     it('returns the latest linked contracts', async () => {
-        l
-
         const stateServer = await constructTestPostgresServer({
             ldService,
         })

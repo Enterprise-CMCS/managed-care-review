@@ -824,6 +824,11 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
+                            fetchContractMockSuccess({
+                                contract: mockContractPackageUnlocked({
+                                    id: '15',
+                                }),
+                            }),
                         ],
                     },
                     routerProvider: {
@@ -845,10 +850,10 @@ describe('SubmissionSummary', () => {
             )
             expect(
                 await screen.findByTestId('unlockedBanner')
-            ).toHaveTextContent('Unlocked by: bob@dmas.mn.govUnlocked')
+            ).toHaveTextContent('Unlocked by: cms@example.com')
             expect(
                 await screen.findByTestId('unlockedBanner')
-            ).toHaveTextContent('Reason for unlock: Test unlock reason')
+            ).toHaveTextContent('Reason for unlock: unlocked for a test')
         })
     })
 })
