@@ -5,13 +5,15 @@ import {
 import { SingleRateSummarySection } from './SingleRateSummarySection'
 import {
     fetchCurrentUserMock,
+    mockEmptyDraftContractAndRate,
     mockValidCMSUser,
+    mockValidHelpDeskUser,
     mockValidStateUser,
     rateDataMock,
 } from '../../../testHelpers/apolloMocks'
 import { screen, waitFor, within } from '@testing-library/react'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
-import { RateRevision } from '../../../gen/gqlClient'
+import { RateFormData, RateRevision } from '../../../gen/gqlClient'
 import { type Location, Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '../../../constants'
 
@@ -318,13 +320,21 @@ describe('SingleRateSummarySection', () => {
     })
 
     it('should display missing field text to state users', async () => {
-        const rateData = rateDataMock({}, { status: 'UNLOCKED' })
-        rateData.revisions[0].formData.deprecatedRateProgramIDs = [
-            rateData.state.programs[0].id,
-        ]
-        rateData.revisions[0].formData.rateProgramIDs = []
-        rateData.revisions[0].formData.rateType = undefined
-        rateData.revisions[0].formData.rateDateCertified = undefined
+        const draftRates = mockEmptyDraftContractAndRate().draftRates
+        if (!draftRates) {
+            throw new Error('Unexpected error: draft rates is undefined')
+        }
+        const emptyRateFormData = draftRates[0].draftRevision
+            ?.formData as RateFormData
+        const rateData = rateDataMock(
+            {
+                formData: {
+                    ...emptyRateFormData,
+                    rateType: 'AMENDMENT',
+                },
+            },
+            { status: 'UNLOCKED' }
+        )
         renderWithProviders(
             <SingleRateSummarySection
                 rate={rateData}
@@ -352,9 +362,146 @@ describe('SingleRateSummarySection', () => {
             name: 'Download all rate documents',
         })
 
+        const text = /You must provide this information/
+
+        expect(await screen.findAllByText(text)).toHaveLength(8)
+
+        // expect Amendment rate
+        expect(
+            within(await screen.findByTestId('rateType')).getByText(
+                /Amendment to prior rate certification/
+            )
+        ).toBeInTheDocument()
+
+        // expected errors
+        expect(
+            within(
+                await screen.findByTestId('effectiveRatingPeriod')
+            ).getByText(text)
+        ).toBeInTheDocument()
+        expect(
+            within(await screen.findByTestId('ratePrograms')).getByText(text)
+        ).toBeInTheDocument()
+        expect(
+            within(await screen.findByTestId('ratingPeriod')).getByText(text)
+        ).toBeInTheDocument()
+        expect(
+            within(await screen.findByTestId('dateCertified')).getByText(text)
+        ).toBeInTheDocument()
+        expect(
+            within(await screen.findByTestId('rateCapitationType')).getByText(
+                text
+            )
+        ).toBeInTheDocument()
+        expect(
+            within(await screen.findByTestId('certifyingActuary')).getByText(
+                text
+            )
+        ).toBeInTheDocument()
+        expect(
+            within(
+                await screen.findByTestId('addtlCertifyingActuary-0')
+            ).getByText(text)
+        ).toBeInTheDocument()
+        expect(
+            within(
+                await screen.findByTestId('communicationPreference')
+            ).getByText(text)
+        ).toBeInTheDocument()
+    })
+
+    it('should display missing field text to helpdesk users', async () => {
+        const draftRates = mockEmptyDraftContractAndRate().draftRates
+        if (!draftRates) {
+            throw new Error('Unexpected error: draft rates is undefined')
+        }
+        const emptyRateFormData = draftRates[0].draftRevision
+            ?.formData as RateFormData
+        const rateData = rateDataMock(
+            {
+                formData: {
+                    ...emptyRateFormData,
+                },
+            },
+            { status: 'UNLOCKED' }
+        )
+        renderWithProviders(
+            <SingleRateSummarySection
+                rate={rateData}
+                isSubmitted={false}
+                statePrograms={rateData.state.programs}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidHelpDeskUser(),
+                        }),
+                    ],
+                },
+                featureFlags: { 'rate-edit-unlock': true },
+            }
+        )
+
+        // Wait for all the documents to be in the table
+        await screen.findByText(
+            rateData.revisions[0].formData.rateDocuments[0].name
+        )
+        await screen.findByRole('link', {
+            name: 'Download all rate documents',
+        })
+
         expect(
             await screen.findAllByText(/You must provide this information/)
-        ).toHaveLength(3)
+        ).toHaveLength(8)
+    })
+
+    it('should not display missing field text on submitted rates', async () => {
+        const draftRates = mockEmptyDraftContractAndRate().draftRates
+        if (!draftRates) {
+            throw new Error('Unexpected error: draft rates is undefined')
+        }
+        const emptyRateFormData = draftRates[0].draftRevision
+            ?.formData as RateFormData
+        const rateData = rateDataMock(
+            {
+                formData: {
+                    ...emptyRateFormData,
+                },
+            },
+            { status: 'SUBMITTED' }
+        )
+        renderWithProviders(
+            <SingleRateSummarySection
+                rate={rateData}
+                isSubmitted={true}
+                statePrograms={rateData.state.programs}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidHelpDeskUser(),
+                        }),
+                    ],
+                },
+                featureFlags: { 'rate-edit-unlock': true },
+            }
+        )
+
+        // Wait for all the documents to be in the table
+        await screen.findByText(
+            rateData.revisions[0].formData.rateDocuments[0].name
+        )
+        await screen.findByRole('link', {
+            name: 'Download all rate documents',
+        })
+
+        expect(
+            screen.queryAllByText(/You must provide this information/)
+        ).toHaveLength(0)
     })
 
     describe('Unlock rate', () => {
