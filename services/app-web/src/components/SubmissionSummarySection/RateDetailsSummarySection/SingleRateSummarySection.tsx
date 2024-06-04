@@ -116,7 +116,9 @@ export const SingleRateSummarySection = ({
     const isRateAmendment = formData.rateType === 'AMENDMENT'
     const isUnlocked = rate.status === 'UNLOCKED'
     const explainMissingData =
-        !isSubmitted && loggedInUser?.role === 'STATE_USER'
+        !isSubmitted &&
+        (loggedInUser?.role === 'STATE_USER' ||
+            loggedInUser?.role === 'HELPDESK_USER')
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
     const isSubmittedOrCMSUser =
         rate.status === 'SUBMITTED' ||
@@ -267,18 +269,16 @@ export const SingleRateSummarySection = ({
                                     )}
                                 />
                             )}
-                        {ratePrograms && (
-                            <DataDetail
-                                id="ratePrograms"
-                                label="Rates this rate certification covers"
-                                explainMissingData={explainMissingData}
-                                children={ratePrograms(
-                                    formData,
-                                    statePrograms,
-                                    false
-                                )}
-                            />
-                        )}
+                        <DataDetail
+                            id="ratePrograms"
+                            label="Rates this rate certification covers"
+                            explainMissingData={explainMissingData}
+                            children={ratePrograms(
+                                formData,
+                                statePrograms,
+                                false
+                            )}
+                        />
                         <DataDetail
                             id="rateType"
                             label="Rate certification type"

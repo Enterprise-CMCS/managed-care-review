@@ -318,18 +318,13 @@ describe('SingleRateSummarySection', () => {
     })
 
     it('should display missing field text to state users', async () => {
-        const rateData = rateDataMock(
-            {
-                rateType: undefined,
-                rateDateCertified: undefined,
-                rateProgramIDs: [],
-            } as unknown as Partial<RateRevision>,
-            { status: 'UNLOCKED' }
-        )
+        const rateData = rateDataMock({}, { status: 'UNLOCKED' })
         rateData.revisions[0].formData.deprecatedRateProgramIDs = [
             rateData.state.programs[0].id,
         ]
         rateData.revisions[0].formData.rateProgramIDs = []
+        rateData.revisions[0].formData.rateType = undefined
+        rateData.revisions[0].formData.rateDateCertified = undefined
         renderWithProviders(
             <SingleRateSummarySection
                 rate={rateData}
