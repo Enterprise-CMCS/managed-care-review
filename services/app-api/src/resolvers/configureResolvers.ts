@@ -29,6 +29,7 @@ import type { JWTLib } from '../jwt'
 import { fetchEmailSettingsResolver } from './email/fetchEmailSettings'
 import { indexRatesResolver } from './rate/indexRates'
 import { rateResolver } from './rate/rateResolver'
+import { genericDocumentResolver } from './shared/genericDocumentResolver'
 import { fetchRateResolver } from './rate/fetchRate'
 import { updateContract } from './contract/updateContract'
 import { createAPIKeyResolver } from './APIKey'
@@ -142,6 +143,7 @@ export function configureResolvers(
         RateRevision: rateRevisionResolver,
         Contract: contractResolver(),
         ContractRevision: contractRevisionResolver(store),
+        GenericDocument: genericDocumentResolver(),
     }
 
     return resolvers

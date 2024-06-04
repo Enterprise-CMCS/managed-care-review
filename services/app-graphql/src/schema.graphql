@@ -867,6 +867,8 @@ type GenericDocument {
     sha256: String!
     "The first date this document was added to submitted package - if still an initial draft, this date is last updated, otherwise it is the submitInfo lastUpdated"
     dateAdded: Date
+    "URL received from S3 for downloading the document"
+    downloadURL: String
 }
 
 """
