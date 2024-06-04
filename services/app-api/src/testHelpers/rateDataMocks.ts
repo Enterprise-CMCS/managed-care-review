@@ -187,7 +187,6 @@ function mockRateFormDataInput(): RateFormDataInput {
             },
         ],
         actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-        packagesWithSharedRateCerts: [],
     }
 }
 

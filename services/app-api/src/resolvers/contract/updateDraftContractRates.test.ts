@@ -159,7 +159,6 @@ describe('updateDraftContractRates', () => {
             ],
             addtlActuaryContacts: [],
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-            packagesWithSharedRateCerts: [],
         }
 
         const stateServer = await constructTestPostgresServer()
@@ -298,7 +297,6 @@ describe('updateDraftContractRates', () => {
                                 ],
                                 actuaryCommunicationPreference:
                                     'OACT_TO_ACTUARY',
-                                packagesWithSharedRateCerts: [],
                             },
                         },
                     ],
@@ -380,7 +378,6 @@ describe('updateDraftContractRates', () => {
                                 ],
                                 actuaryCommunicationPreference:
                                     'OACT_TO_ACTUARY',
-                                packagesWithSharedRateCerts: [],
                             },
                         },
                     ],
@@ -464,7 +461,6 @@ describe('updateDraftContractRates', () => {
                                 ],
                                 actuaryCommunicationPreference:
                                     'OACT_TO_ACTUARY',
-                                packagesWithSharedRateCerts: [],
                             },
                         },
                     ],
@@ -542,7 +538,6 @@ describe('updateDraftContractRates', () => {
                                 ],
                                 actuaryCommunicationPreference:
                                     'OACT_TO_ACTUARY',
-                                packagesWithSharedRateCerts: [],
                             },
                         },
                     ],
@@ -573,7 +568,6 @@ describe('updateDraftContractRates', () => {
                 deprecatedRateProgramIDs: [],
                 certifyingActuaryContacts: [],
                 addtlActuaryContacts: [],
-                packagesWithSharedRateCerts: [],
             }
         )
 
@@ -602,7 +596,6 @@ describe('updateDraftContractRates', () => {
                 deprecatedRateProgramIDs: [],
                 certifyingActuaryContacts: [],
                 addtlActuaryContacts: [],
-                packagesWithSharedRateCerts: [],
             }
         )
 
@@ -752,7 +745,6 @@ describe('updateDraftContractRates', () => {
                                 ],
                                 actuaryCommunicationPreference:
                                     'OACT_TO_ACTUARY',
-                                packagesWithSharedRateCerts: [],
                             },
                         },
                     ],
@@ -899,7 +891,6 @@ describe('updateDraftContractRates', () => {
                                 ],
                                 actuaryCommunicationPreference:
                                     'OACT_TO_ACTUARY',
-                                packagesWithSharedRateCerts: [],
                             },
                         },
                     ],
