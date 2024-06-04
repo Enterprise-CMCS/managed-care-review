@@ -748,9 +748,9 @@
     tslib "^1.8.0"
 
 "@aws-sdk/client-amplify@^3.529.1":
-  version "3.588.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-amplify/-/client-amplify-3.588.0.tgz#78aa33f241c424be0f9f742c93a6bde2fc924aab"
-  integrity sha512-W/FMTeb71Hvw5gWCGIaQlcbxUX/sjU4Xa26rtNe8Bmu2lOkGGrGh5859OETGJoIAhbX7WR4YtNnrDqNQ7Zi4zw==
+  version "3.589.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-amplify/-/client-amplify-3.589.0.tgz#c60ea96b5053e698070190f362cad45011bf7369"
+  integrity sha512-tOWDMnL1YUnljbKKKRbvtHt6api4qC34neEFvh7E7iNtglNAY7SlQ/UCPbTBFo6pIm7NPLN1v+AiKZQvWWkONA==
   dependencies:
     "@aws-crypto/sha256-browser" "3.0.0"
     "@aws-crypto/sha256-js" "3.0.0"
@@ -11402,9 +11402,9 @@
   integrity sha512-Abq9fBviLV93OiXMu+f6r0elxCzRwc0RC5f99cU892uBITL44pTvgvEqlRlPRi8EGcO1z7Cp8A4d0s/p3J/+Nw==
 
 "@types/node@^16.18.39":
-  version "16.18.97"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.97.tgz#d7926a8030f0d714d555b4550c0cc7731495cfe5"
-  integrity sha512-4muilE1Lbfn57unR+/nT9AFjWk0MtWi5muwCEJqnOvfRQDbSfLCUdN7vCIg8TYuaANfhLOV85ve+FNpiUsbSRg==
+  version "16.18.98"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.98.tgz#3554bb7911ea2bbc3a528be0776d6ab16b7674d2"
+  integrity sha512-fpiC20NvLpTLAzo3oVBKIqBGR6Fx/8oAK/SSf7G+fydnXMY1x4x9RZ6sBXhqKlCU21g2QapUsbLlhv3+a7wS+Q==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
