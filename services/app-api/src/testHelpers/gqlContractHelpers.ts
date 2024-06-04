@@ -14,14 +14,11 @@ import { mockInsertContractArgs, mockContractData } from './contractDataMocks'
 import { sharedTestPrismaClient } from './storeHelpers'
 import { insertDraftContract } from '../postgres/contractAndRates/insertContract'
 
-import type { ContractType } from '../domain-models'
+import { type ContractType } from '../domain-models'
 import type { ApolloServer } from 'apollo-server-lambda'
-import type { Contract, RateFormData } from '../gen/gqlServer'
+import type { Contract, ContractFormData, RateFormData } from '../gen/gqlServer'
 import { latestFormData } from './healthPlanPackageHelpers'
-import type {
-    StateCodeType,
-    UnlockedHealthPlanFormDataType,
-} from 'app-web/src/common-code/healthPlanFormDataType'
+import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 import { addNewRateToTestContract } from './gqlRateHelpers'
 
 const createAndSubmitTestContract = async (
@@ -149,7 +146,7 @@ async function createAndUpdateTestContractWithRate(
 const createAndUpdateTestContractWithoutRates = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
-    contractFormDataOverrides?: Partial<UnlockedHealthPlanFormDataType>
+    contractFormDataOverrides?: Partial<ContractFormData>
 ): Promise<Contract> => {
     const pkg = await createTestHealthPlanPackage(server, stateCode)
     const draft = latestFormData(pkg)
@@ -200,11 +197,12 @@ const createAndUpdateTestContractWithoutRates = async (
     return updatedContract
 }
 
-const linkRateToDraftContract = async (  server: ApolloServer,
+const linkRateToDraftContract = async (
+    server: ApolloServer,
     contractID: string,
-    linkedRateID: string) => {
-
-    const updatedContract =    await server.executeOperation({
+    linkedRateID: string
+) => {
+    const updatedContract = await server.executeOperation({
         query: UPDATE_DRAFT_CONTRACT_RATES,
         variables: {
             input: {
@@ -221,18 +219,16 @@ const linkRateToDraftContract = async (  server: ApolloServer,
     return updatedContract
 }
 
-const clearRatesOnDraftContract = async (  server: ApolloServer,
-    contractID: string,
-    ) => {
-
-    const updatedContract =    await server.executeOperation({
+const clearRatesOnDraftContract = async (
+    server: ApolloServer,
+    contractID: string
+) => {
+    const updatedContract = await server.executeOperation({
         query: UPDATE_DRAFT_CONTRACT_RATES,
         variables: {
             input: {
                 contractID: contractID,
-                updatedRates: [
-
-                ],
+                updatedRates: [],
             },
         },
     })
@@ -243,10 +239,9 @@ const updateRateOnDraftContract = async (
     server: ApolloServer,
     contractID: string,
     rateID: string,
-    rateData: Partial<RateFormData>,
-) : Promise<ContractType> => {
-
-    const updatedContract =   await server.executeOperation({
+    rateData: Partial<RateFormData>
+): Promise<ContractType> => {
+    const updatedContract = await server.executeOperation({
         query: UPDATE_DRAFT_CONTRACT_RATES,
         variables: {
             input: {
@@ -255,7 +250,7 @@ const updateRateOnDraftContract = async (
                     {
                         type: 'UPDATE',
                         formData: rateData,
-                        rateID: rateID
+                        rateID: rateID,
                     },
                 ],
             },
@@ -263,10 +258,10 @@ const updateRateOnDraftContract = async (
     })
     must(updatedContract)
     const contractData = updatedContract.data?.updateDraftContractRates.contract
-    if (!contractData)throw Error (`malformatted response: ${updatedContract.data}` )
+    if (!contractData)
+        throw Error(`malformatted response: ${updatedContract.data}`)
     return updatedContract.data?.contract
 }
-
 
 export {
     createTestContract,
@@ -278,5 +273,5 @@ export {
     createAndSubmitTestContractWithRate,
     linkRateToDraftContract,
     updateRateOnDraftContract,
-    clearRatesOnDraftContract
+    clearRatesOnDraftContract,
 }

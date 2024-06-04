@@ -45,6 +45,9 @@ import { findStatePrograms } from '../postgres'
 import { must } from './assertionHelpers'
 import { newJWTLib } from '../jwt'
 import type { JWTLib } from '../jwt'
+import { convertUnlockedHPPToContractAndRates } from '../domain-models/contractAndRates/convertHPPtoContractWithRates'
+import { createAndUpdateTestContractWithoutRates } from './gqlContractHelpers'
+import { addNewRateToTestContract } from './gqlRateHelpers'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -229,97 +232,111 @@ const createAndUpdateTestHealthPlanPackage = async (
     partialUpdates?: Partial<UnlockedHealthPlanFormDataType>,
     stateCode?: StateCodeType
 ): Promise<HealthPlanPackage> => {
-    const pkg = await createTestHealthPlanPackage(server, stateCode)
-    const draft = latestFormData(pkg)
-
     const ratePrograms = stateCode
         ? [must(findStatePrograms(stateCode))[0]]
         : [defaultFloridaRateProgram()]
 
-    ;(draft.submissionType = 'CONTRACT_AND_RATES' as const),
-        (draft.submissionDescription = 'An updated submission')
-    draft.stateContacts = [
-        {
-            name: 'test name',
-            titleRole: 'test title',
-            email: 'email@example.com',
+    const draft: Partial<UnlockedHealthPlanFormDataType> = {
+        submissionType: 'CONTRACT_AND_RATES' as const,
+        submissionDescription: 'An updated submission',
+        stateContacts: [
+            {
+                name: 'test name',
+                titleRole: 'test title',
+                email: 'email@example.com',
+            },
+        ],
+        rateInfos: [
+            {
+                id: uuidv4(),
+                rateType: 'NEW' as const,
+                rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+                rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+                rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+                rateDocuments: [
+                    {
+                        name: 'rateDocument.pdf',
+                        s3URL: 'fakeS3URL',
+                        sha256: 'fakesha',
+                    },
+                ],
+                supportingDocuments: [],
+                //We only want one rate ID and use last program in list to differentiate from programID if possible.
+                rateProgramIDs: [ratePrograms.reverse()[0].id],
+                actuaryContacts: [
+                    {
+                        id: '123-abc',
+                        name: 'test name',
+                        titleRole: 'test title',
+                        email: 'email@example.com',
+                        actuarialFirm: 'MERCER' as const,
+                        actuarialFirmOther: '',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
+                packagesWithSharedRateCerts: [],
+            },
+        ],
+        addtlActuaryContacts: [
+            {
+                id: '123-addtl-abv',
+                name: 'test name',
+                titleRole: 'test title',
+                email: 'email@example.com',
+                actuarialFirm: 'MERCER' as const,
+                actuarialFirmOther: '',
+            },
+        ],
+        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
+        contractType: 'BASE' as const,
+        contractExecutionStatus: 'EXECUTED' as const,
+        contractDateStart: new Date(Date.UTC(2025, 5, 1)),
+        contractDateEnd: new Date(Date.UTC(2026, 4, 30)),
+        contractDocuments: [
+            {
+                name: 'contractDocument.pdf',
+                s3URL: 'fakeS3URL',
+                sha256: 'fakesha',
+            },
+        ],
+        managedCareEntities: ['MCO'],
+        federalAuthorities: ['STATE_PLAN' as const],
+        populationCovered: 'MEDICAID' as const,
+        contractAmendmentInfo: {
+            modifiedProvisions: {
+                inLieuServicesAndSettings: true,
+                modifiedRiskSharingStrategy: false,
+                modifiedIncentiveArrangements: false,
+                modifiedWitholdAgreements: false,
+                modifiedStateDirectedPayments: true,
+                modifiedPassThroughPayments: true,
+                modifiedPaymentsForMentalDiseaseInstitutions: true,
+                modifiedNonRiskPaymentArrangements: true,
+            },
         },
-    ]
-    draft.rateInfos = [
-        {
-            id: uuidv4(),
-            rateType: 'NEW' as const,
-            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
-            rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
-            rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
-            rateDocuments: [
-                {
-                    name: 'rateDocument.pdf',
-                    s3URL: 'fakeS3URL',
-                    sha256: 'fakesha',
-                },
-            ],
-            supportingDocuments: [],
-            //We only want one rate ID and use last program in list to differentiate from programID if possible.
-            rateProgramIDs: [ratePrograms.reverse()[0].id],
-            actuaryContacts: [
-                {
-                    id: '123-abc',
-                    name: 'test name',
-                    titleRole: 'test title',
-                    email: 'email@example.com',
-                    actuarialFirm: 'MERCER' as const,
-                    actuarialFirmOther: '',
-                },
-            ],
-            actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
-            packagesWithSharedRateCerts: [],
-        },
-    ]
-    draft.addtlActuaryContacts = [
-        {
-            id: '123-addtl-abv',
-            name: 'test name',
-            titleRole: 'test title',
-            email: 'email@example.com',
-            actuarialFirm: 'MERCER' as const,
-            actuarialFirmOther: '',
-        },
-    ]
-    ;(draft.addtlActuaryCommunicationPreference = 'OACT_TO_ACTUARY' as const),
-        (draft.contractType = 'BASE' as const)
-    draft.contractExecutionStatus = 'EXECUTED' as const
-    draft.contractDateStart = new Date(Date.UTC(2025, 5, 1))
-    draft.contractDateEnd = new Date(Date.UTC(2026, 4, 30))
-    draft.contractDocuments = [
-        {
-            name: 'contractDocument.pdf',
-            s3URL: 'fakeS3URL',
-            sha256: 'fakesha',
-        },
-    ]
-    draft.managedCareEntities = ['MCO']
-    draft.federalAuthorities = ['STATE_PLAN' as const]
-    draft.populationCovered = 'MEDICAID' as const
-    draft.contractAmendmentInfo = {
-        modifiedProvisions: {
-            inLieuServicesAndSettings: true,
-            modifiedRiskSharingStrategy: false,
-            modifiedIncentiveArrangements: false,
-            modifiedWitholdAgreements: false,
-            modifiedStateDirectedPayments: true,
-            modifiedPassThroughPayments: true,
-            modifiedPaymentsForMentalDiseaseInstitutions: true,
-            modifiedNonRiskPaymentArrangements: true,
-        },
+        statutoryRegulatoryAttestation: false,
+        statutoryRegulatoryAttestationDescription: 'No compliance',
     }
-    draft.statutoryRegulatoryAttestation = false
-    draft.statutoryRegulatoryAttestationDescription = 'No compliance'
 
     Object.assign(draft, partialUpdates)
-
-    const updatedDraft = await updateTestHealthPlanFormData(server, draft)
-
+    const [contractFormData, rateFormDatas] =
+        convertUnlockedHPPToContractAndRates(
+            draft as UnlockedHealthPlanFormDataType
+        )
+    const contract = await createAndUpdateTestContractWithoutRates(
+        server,
+        stateCode,
+        contractFormData
+    )
+    if (rateFormDatas.length > 0) {
+        rateFormDatas.forEach(async (rateData) => {
+            await addNewRateToTestContract(server, contract, rateData)
+        })
+    }
+    const updatedDraft = await fetchTestHealthPlanPackageById(
+        server,
+        contract.id
+    )
     return updatedDraft
 }
 
@@ -331,6 +348,7 @@ const createAndSubmitTestHealthPlanPackage = async (
         server,
         partialUpdates
     )
+
     return await submitTestHealthPlanPackage(server, pkg.id)
 }
 
