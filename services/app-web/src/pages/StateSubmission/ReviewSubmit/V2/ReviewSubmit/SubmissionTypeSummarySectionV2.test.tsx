@@ -135,6 +135,7 @@ describe('SubmissionTypeSummarySection', () => {
                     editNavigateTo="submission-type"
                     submissionName="MN-PMAP-0001"
                     isStateUser={true}
+                    explainMissingData
                 />
             )
         }
@@ -164,6 +165,7 @@ describe('SubmissionTypeSummarySection', () => {
                     editNavigateTo="submission-type"
                     submissionName="MN-PMAP-0001"
                     isStateUser={true}
+                    explainMissingData
                 />
             )
         }
