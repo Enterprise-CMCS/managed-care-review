@@ -456,8 +456,8 @@ describe('SingleRateSummarySection', () => {
         const emptyRateFormData = draftRates[0].draftRevision
             ?.formData as RateFormData
 
-        it('should not display missing field text to CMS users', async () => {
-            const rateData = rateDataMock(
+        const mockEmptyRateData = () =>
+            rateDataMock(
                 {
                     formData: {
                         ...emptyRateFormData,
@@ -466,6 +466,9 @@ describe('SingleRateSummarySection', () => {
                 },
                 { status: 'UNLOCKED' }
             )
+
+        it('should not display missing field text to CMS users', async () => {
+            const rateData = mockEmptyRateData()
             renderWithProviders(
                 <SingleRateSummarySection
                     rate={rateData}
@@ -499,15 +502,7 @@ describe('SingleRateSummarySection', () => {
         })
 
         it('should display missing field text to state users', async () => {
-            const rateData = rateDataMock(
-                {
-                    formData: {
-                        ...emptyRateFormData,
-                        rateType: 'AMENDMENT',
-                    },
-                },
-                { status: 'UNLOCKED' }
-            )
+            const rateData = mockEmptyRateData()
             renderWithProviders(
                 <SingleRateSummarySection
                     rate={rateData}
@@ -590,16 +585,7 @@ describe('SingleRateSummarySection', () => {
         })
 
         it('should display missing field text to helpdesk users', async () => {
-            const emptyRateFormData = draftRates[0].draftRevision
-                ?.formData as RateFormData
-            const rateData = rateDataMock(
-                {
-                    formData: {
-                        ...emptyRateFormData,
-                    },
-                },
-                { status: 'UNLOCKED' }
-            )
+            const rateData = mockEmptyRateData()
             renderWithProviders(
                 <SingleRateSummarySection
                     rate={rateData}
@@ -633,14 +619,8 @@ describe('SingleRateSummarySection', () => {
         })
 
         it('should not display missing field text on submitted rates', async () => {
-            const rateData = rateDataMock(
-                {
-                    formData: {
-                        ...emptyRateFormData,
-                    },
-                },
-                { status: 'SUBMITTED' }
-            )
+            const rateData = mockEmptyRateData()
+            rateData.status = 'SUBMITTED'
             renderWithProviders(
                 <SingleRateSummarySection
                     rate={rateData}
