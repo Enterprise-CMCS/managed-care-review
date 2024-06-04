@@ -39,6 +39,7 @@ function prismaRateCreateFormDataFromDomain(
         amendmentEffectiveDateStart: rateFormData.amendmentEffectiveDateStart,
         amendmentEffectiveDateEnd: rateFormData.amendmentEffectiveDateEnd,
         rateProgramIDs: rateFormData.rateProgramIDs,
+        deprecatedRateProgramIDs: [],
         rateCertificationName: rateFormData.rateCertificationName,
         rateDocuments: {
             create:
@@ -64,6 +65,7 @@ function prismaRateCreateFormDataFromDomain(
         },
         actuaryCommunicationPreference:
             rateFormData.actuaryCommunicationPreference,
+        //TODO: Remove this once HPP resolvers are not used anymore
         contractsWithSharedRateRevision: {
             connect: rateFormData.packagesWithSharedRateCerts
                 ? rateFormData.packagesWithSharedRateCerts.map((p) => ({
@@ -90,6 +92,7 @@ function prismaUpdateRateFormDataFromDomain(
             rateFormData.amendmentEffectiveDateEnd
         ),
         rateProgramIDs: emptify(rateFormData.rateProgramIDs),
+        deprecatedRateProgramIDs: [],
         rateCertificationName: nullify(rateFormData.rateCertificationName),
         rateDocuments: {
             deleteMany: {},
@@ -119,6 +122,7 @@ function prismaUpdateRateFormDataFromDomain(
         },
         actuaryCommunicationPreference:
             rateFormData.actuaryCommunicationPreference,
+        //TODO: Remove this once HPP resolvers are not used anymore
         contractsWithSharedRateRevision: {
             set: rateFormData.packagesWithSharedRateCerts
                 ? rateFormData.packagesWithSharedRateCerts.map((p) => ({

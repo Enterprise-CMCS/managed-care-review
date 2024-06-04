@@ -39,9 +39,7 @@ describe('RateSummary', () => {
             })
 
             expect(
-                await screen.findByText(
-                    'Programs this rate certification covers'
-                )
+                await screen.findByText('Rates this rate certification covers')
             ).toBeInTheDocument()
         })
 
@@ -137,9 +135,7 @@ describe('RateSummary', () => {
             })
 
             expect(
-                await screen.findByText(
-                    'Programs this rate certification covers'
-                )
+                await screen.findByText('Rates this rate certification covers')
             ).toBeInTheDocument()
         })
 

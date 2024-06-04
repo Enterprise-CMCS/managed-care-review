@@ -94,7 +94,6 @@ export const ReviewSubmit = (): React.ReactElement => {
             contractFormData.programIDs,
             programs
         ) || ''
-
     return (
         <>
             <div className={styles.stepIndicator}>

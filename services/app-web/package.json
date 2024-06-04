@@ -165,7 +165,7 @@
         "react-select-event": "^5.5.0",
         "react-test-renderer": "^18.2.0",
         "serverless": "^3.26.0",
-        "serverless-cloudfront-invalidate": "^1.11.0",
+        "serverless-cf-invalidate-proxy": "^1.0.1",
         "serverless-s3-sync": "^3.0.0",
         "serverless-stack-termination-protection": "^2.0.2",
         "stylelint": "^16.1.0",

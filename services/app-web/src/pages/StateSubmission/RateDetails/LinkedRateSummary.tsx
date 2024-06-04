@@ -34,7 +34,7 @@ export const LinkedRateSummary = ({
 
                     <DataDetail
                         id="ratePrograms"
-                        label="Programs this rate certification covers"
+                        label="Rates this rate certification covers"
                         children={statePrograms
                             .filter((p) =>
                                 rateForm.rateProgramIDs.includes(p.id)

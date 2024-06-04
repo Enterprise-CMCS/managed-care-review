@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { RateDetails } from './V2/RateDetailsV2'
 
 import {
@@ -32,6 +32,7 @@ import {
     fillOutIndexRate,
 } from '../../../testHelpers/jestRateHelpers'
 import { Rate } from '../../../gen/gqlClient'
+import selectEvent from 'react-select-event'
 
 describe('RateDetails', () => {
     /* eslint-disable jest/no-disabled-tests, jest/expect-expect */
@@ -245,6 +246,136 @@ describe('RateDetails', () => {
                     'Was this rate certification included with another submission?'
                 )
             ).toBeInTheDocument()
+            screen
+                .getByLabelText(
+                    'Certification of capitation rates specific to each rate cell'
+                )
+                .click()
+            const input = screen.getByLabelText(
+                'Upload one rate certification document'
+            )
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            const hasSharedRateFieldset = screen
+                .getByText(
+                    /Was this rate certification included with another submission/
+                )
+                .closest('fieldset')
+            await userEvent.click(
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                within(hasSharedRateFieldset!).getByLabelText(/No/i)
+            )
+
+            // check that now we can see hidden things
+            await waitFor(() => {
+                expect(screen.queryByText('Rating period')).toBeInTheDocument()
+                expect(screen.queryByText('Rating period')).toBeInTheDocument()
+                expect(screen.queryByText('Start date')).toBeInTheDocument()
+                expect(screen.queryByText('End date')).toBeInTheDocument()
+                expect(screen.queryByText('Date certified')).toBeInTheDocument()
+                expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
+            })
+            // click "continue"
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+
+            fireEvent.click(continueButton)
+
+            // check for expected errors
+            await waitFor(() => {
+                expect(screen.queryAllByTestId('errorMessage')).toHaveLength(7)
+                expect(
+                    screen.queryAllByText(
+                        'You must select which rate(s) are included in this certification'
+                    )
+                ).toHaveLength(2)
+                expect(
+                    screen.queryByText(
+                        'You must provide a start and an end date'
+                    )
+                ).toBeInTheDocument()
+                expect(
+                    screen.queryAllByText(
+                        'You must enter the date the document was certified'
+                    )
+                ).toHaveLength(2)
+                expect(
+                    screen.queryAllByText('You must provide a name')
+                ).toHaveLength(2)
+                expect(
+                    screen.queryAllByText('You must provide a title/role')
+                ).toHaveLength(2)
+                expect(
+                    screen.queryAllByText('You must provide an email address')
+                ).toHaveLength(2)
+                expect(
+                    screen.queryAllByText('You must select an actuarial firm')
+                ).toHaveLength(2)
+            })
+
+            await fillOutFirstRate(screen)
+
+            //wait for all errors to clear
+            await waitFor(() =>
+                expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
+            )
+        })
+
+        it('displays program options based on current user state', async () => {
+            const mockUser = {
+                __typename: 'StateUser' as const,
+                role: 'STATE_USER',
+                name: 'Sheena in Minnesota',
+                email: 'Sheena@dmas.mn.gov',
+                state: {
+                    name: 'Minnesota',
+                    code: 'MN',
+                    programs: [
+                        {
+                            id: 'first',
+                            name: 'Program 1',
+                            fullName: 'Program 1',
+                            isRateProgram: false,
+                        },
+                        {
+                            id: 'second',
+                            name: 'Program Test',
+                            fullName: 'Program Test',
+                            isRateProgram: false,
+                        },
+                        {
+                            id: 'third',
+                            name: 'Program 3',
+                            fullName: 'Program 3',
+                            isRateProgram: false,
+                        },
+                    ],
+                },
+            }
+
+            renderWithProviders(<RateDetails type="MULTI" />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockUser,
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            })
+            const combobox = await screen.findByRole('combobox')
+
+            selectEvent.openMenu(combobox)
+
+            await waitFor(() => {
+                expect(screen.getByText('Program 3')).toBeInTheDocument()
+            })
+
+            await selectEvent.select(combobox, 'Program 1')
+            selectEvent.openMenu(combobox)
+            await selectEvent.select(combobox, 'Program 3')
+
+            // in react-select, only items that are selected have a "remove item" label
             expect(
                 screen.queryByText('Upload one rate certification document')
             ).not.toBeInTheDocument()

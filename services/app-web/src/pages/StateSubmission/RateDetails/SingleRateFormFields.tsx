@@ -226,9 +226,12 @@ export const SingleRateFormFields = ({
             </FormGroup>
             <FormGroup error={Boolean(showFieldErrors('rateProgramIDs'))}>
                 <Label htmlFor={`${fieldNamePrefix}.rateProgramIDs`}>
-                    Programs this rate certification covers
+                    What rates are included in this certification?
                 </Label>
                 <span className={styles.requiredOptionalText}>Required</span>
+                <span className={styles.requiredOptionalText}>
+                    This information will be used to generate the rate name
+                </span>
                 <PoliteErrorMessage>
                     {showFieldErrors('rateProgramIDs')}
                 </PoliteErrorMessage>
@@ -236,7 +239,7 @@ export const SingleRateFormFields = ({
                     name={`${fieldNamePrefix}.rateProgramIDs`}
                     inputId={`${fieldNamePrefix}.rateProgramIDs`}
                     programIDs={rateForm.rateProgramIDs}
-                    aria-label="programs (required)"
+                    aria-label={'programs (required)'}
                 />
             </FormGroup>
 

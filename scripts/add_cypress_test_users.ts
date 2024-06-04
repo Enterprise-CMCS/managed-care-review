@@ -186,6 +186,12 @@ async function main() {
             state: 'VA',
         },
         {
+            name: 'Toph',
+            email: 'toph2@example.com',
+            role: 'STATE_USER' as const,
+            state: 'FL',
+        },
+        {
             name: 'Zuko',
             email: 'zuko@example.com',
             role: 'CMS_USER' as const,

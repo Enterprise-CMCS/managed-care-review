@@ -117,6 +117,7 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
             amendmentEffectiveDateStart: '2024-03-01',
             amendmentEffectiveDateEnd: '2025-03-01',
             rateProgramIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
+            deprecatedRateProgramIDs: [],
             rateCertificationName:
                 'MCR-MN-0003-PMAP-RATE-20240301-20250301-AMENDMENT-20240301',
             certifyingActuaryContacts: [

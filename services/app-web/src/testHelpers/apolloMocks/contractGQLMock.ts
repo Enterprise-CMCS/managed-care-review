@@ -58,6 +58,7 @@ const updateDraftContractRatesMockSuccess = ({
                 amendmentEffectiveDateStart: undefined,
                 amendmentEffectiveDateEnd: undefined,
                 rateProgramIDs: [],
+                deprecatedRateProgramIDs: [],
                 certifyingActuaryContacts: [
                     {
                         name: "",
@@ -69,7 +70,6 @@ const updateDraftContractRatesMockSuccess = ({
                 ],
                 addtlActuaryContacts: [],
                 actuaryCommunicationPreference: undefined,
-                packagesWithSharedRateCerts: [],
             },
             rateID: undefined,
             type: "CREATE"

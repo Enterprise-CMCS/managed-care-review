@@ -12,7 +12,7 @@ import { RateTypeRecord } from '../../../constants/healthPlanPackages'
 
 const RateReviewsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
-const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
+    const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const { data, loading, error } = useIndexRatesQuery({
         fetchPolicy: 'network-only',
     })
@@ -78,8 +78,14 @@ const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
                 rateNumber: rate.stateNumber,
                 programs: programs.filter(
                     (program) =>
-                        displayRateFormData?.rateProgramIDs &&
-                        displayRateFormData.rateProgramIDs.includes(program.id) // only show programs that are still assigned to that state
+                        (displayRateFormData?.rateProgramIDs &&
+                            displayRateFormData.rateProgramIDs.includes(
+                                program.id
+                            )) || // only show programs that are still assigned to that state
+                        (displayRateFormData?.deprecatedRateProgramIDs &&
+                            displayRateFormData.deprecatedRateProgramIDs.includes(
+                                program.id
+                            ))
                 ),
                 submittedAt: rate.initiallySubmittedAt,
                 rateDateStart: displayRateFormData.rateDateStart,
@@ -106,7 +112,10 @@ const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     } else {
         return (
             <section className={styles.panel}>
-                <RateReviewsTable tableData={reviewRows} isAdminUser={isAdminUser} />
+                <RateReviewsTable
+                    tableData={reviewRows}
+                    isAdminUser={isAdminUser}
+                />
             </section>
         )
     }

@@ -265,7 +265,7 @@ export const RateDetailsSummarySection = ({
                                     {ratePrograms && (
                                         <DataDetail
                                             id="ratePrograms"
-                                            label="Programs this rate certification covers"
+                                            label="Rates this rate certification covers"
                                             explainMissingData={!isSubmitted}
                                             children={ratePrograms(
                                                 submission,

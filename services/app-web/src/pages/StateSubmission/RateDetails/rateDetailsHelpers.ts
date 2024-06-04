@@ -9,7 +9,7 @@ import {
 import {
     ActuaryContact,
     Rate,
-    RateFormData,
+    RateFormData, RateFormDataInput,
     UpdateContractRateInput,
 } from '../../../gen/gqlClient'
 import { S3ClientT } from '../../../s3'
@@ -38,7 +38,7 @@ const generateUpdatedRates = (
 // convert from FormikRateForm to GQL RateFormData used in API
 const convertRateFormToGQLRateFormData = (
     rateForm: FormikRateForm
-): RateFormData => {
+): RateFormDataInput => {
     return {
         // intentionally do not map backend calculated fields on submit such status and rateCertificationName
         rateType: rateForm.rateType,
@@ -57,10 +57,10 @@ const convertRateFormToGQLRateFormData = (
             rateForm.effectiveDateEnd
         ),
         rateProgramIDs: rateForm.rateProgramIDs,
+        deprecatedRateProgramIDs: [],
         certifyingActuaryContacts: rateForm.actuaryContacts,
         addtlActuaryContacts: rateForm.addtlActuaryContacts,
         actuaryCommunicationPreference: rateForm.actuaryCommunicationPreference ?? undefined,
-        packagesWithSharedRateCerts: rateForm.packagesWithSharedRateCerts,
     }
 }
 

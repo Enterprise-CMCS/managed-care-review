@@ -143,7 +143,6 @@ async function addNewRateToTestContract(
     rateFormDataOverrides?: Partial<RateFormDataInput>
 ): Promise<Contract> {
     const rateUpdateInput = updateRatesInputFromDraftContract(contract)
-
     const addedInput = addNewRateToRateInput(
         rateUpdateInput,
         rateFormDataOverrides
@@ -165,6 +164,7 @@ function addNewRateToRateInput(
         amendmentEffectiveDateStart: '2024-02-01',
         amendmentEffectiveDateEnd: '2025-02-01',
         rateProgramIDs: [defaultFloridaRateProgram().id],
+        deprecatedRateProgramIDs: [],
 
         rateDocuments: [
             {
@@ -203,7 +203,6 @@ function addNewRateToRateInput(
             },
         ],
         actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-        packagesWithSharedRateCerts: [],
 
         ...rateFormDataOverrides,
     }
@@ -262,7 +261,20 @@ function formatRateDataForSending(
     rateFormData: RateFormData
 ): RateFormDataInput {
     return {
-        ...rateFormData,
+        rateType: rateFormData.rateType,
+        rateCapitationType: rateFormData.rateCapitationType,
+        rateDocuments: rateFormData.rateDocuments,
+        supportingDocuments: rateFormData.supportingDocuments,
+        rateDateStart: rateFormData.rateDateStart,
+        rateDateEnd: rateFormData.rateDateEnd,
+        rateDateCertified: rateFormData.rateDateCertified,
+        amendmentEffectiveDateStart: rateFormData.amendmentEffectiveDateStart,
+        amendmentEffectiveDateEnd: rateFormData.amendmentEffectiveDateEnd,
+        deprecatedRateProgramIDs: rateFormData.deprecatedRateProgramIDs,
+        rateProgramIDs: rateFormData.rateProgramIDs,
+        rateCertificationName: rateFormData.rateCertificationName,
+        actuaryCommunicationPreference:
+            rateFormData.actuaryCommunicationPreference,
         certifyingActuaryContacts: rateFormData.certifyingActuaryContacts.map(
             formatGQLRateContractForSending
         ),
@@ -290,6 +302,7 @@ function updateRatesInputFromDraftContract(
         ) {
             // this is an editable child rate
             const revision = rate.draftRevision
+
             if (!revision) {
                 console.error(
                     'programming error no draft revision found for rate',
@@ -415,4 +428,5 @@ export {
     submitTestRate,
     unlockTestRate,
     updateTestRate,
+    formatRateDataForSending,
 }

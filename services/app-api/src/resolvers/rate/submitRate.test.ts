@@ -16,6 +16,7 @@ import {
     addNewRateToTestContract,
     createSubmitAndUnlockTestRate,
     fetchTestRateById,
+    formatRateDataForSending,
 } from '../../testHelpers/gqlRateHelpers'
 import {
     createAndUpdateTestContractWithoutRates,
@@ -365,7 +366,9 @@ describe('submitRate', () => {
                 input: {
                     rateID: rateID,
                     submittedReason: 'submit rate',
-                    formData: unlockedRate.draftRevision.formData,
+                    formData: formatRateDataForSending(
+                        unlockedRate.draftRevision.formData
+                    ),
                 },
             },
         })

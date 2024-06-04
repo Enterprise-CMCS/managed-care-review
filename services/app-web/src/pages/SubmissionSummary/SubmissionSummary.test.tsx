@@ -808,5 +808,47 @@ describe('SubmissionSummary', () => {
                 ).toBeDisabled()
             })
         })
+
+        it('displays unlock banner with correct data for an unlocked submission', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15',
+                    },
+                }
+            )
+
+            expect(
+                await screen.findByTestId('unlockedBanner')
+            ).toBeInTheDocument()
+            expect(await screen.findByTestId('unlockedBanner')).toHaveClass(
+                'usa-alert--warning'
+            )
+            expect(
+                await screen.findByTestId('unlockedBanner')
+            ).toHaveTextContent(
+                /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+            )
+            expect(
+                await screen.findByTestId('unlockedBanner')
+            ).toHaveTextContent('Unlocked by: bob@dmas.mn.govUnlocked')
+            expect(
+                await screen.findByTestId('unlockedBanner')
+            ).toHaveTextContent('Reason for unlock: Test unlock reason')
+        })
     })
 })

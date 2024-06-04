@@ -88,6 +88,7 @@ const mockRateRevision = (
         rateID: 'rateID',
         rateCertificationName: 'testState-123',
         rateProgramIDs: [statePrograms[0].id],
+        deprecatedRateProgramIDs: [statePrograms[0].id],
         rateCapitationType: 'RATE_CELL',
         rateDateStart: new Date(),
         rateDateEnd: new Date(),
@@ -147,6 +148,7 @@ function mockRateFormDataInput(): RateFormDataInput {
         amendmentEffectiveDateStart: '2024-02-01',
         amendmentEffectiveDateEnd: '2025-02-01',
         rateProgramIDs: ['foo'],
+        deprecatedRateProgramIDs: ['foo'],
 
         rateDocuments: [
             {
@@ -185,7 +187,6 @@ function mockRateFormDataInput(): RateFormDataInput {
             },
         ],
         actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-        packagesWithSharedRateCerts: [],
     }
 }
 
