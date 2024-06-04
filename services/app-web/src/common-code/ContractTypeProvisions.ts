@@ -129,7 +129,7 @@ const sortModifiedProvisions = (
 }
 
 /*
-    Returns boolean for weher a submission variant is missing required provisions 
+    Returns boolean for whether a submission variant is missing required provisions
     This is used to determine if we display the missing data warning on review and submit  
 */
 const isMissingProvisions = (contract: Contract): boolean => {
