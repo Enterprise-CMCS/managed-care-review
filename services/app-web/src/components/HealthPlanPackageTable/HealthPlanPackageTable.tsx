@@ -223,8 +223,7 @@ export const HealthPlanPackageTable = ({
 
     const [tableCaption, setTableCaption] = useState<React.ReactNode | null>()
 
-    const isCMSOrAdminUser =
-        user.__typename === 'CMSUser' || user.__typename === 'AdminUser'
+    const isCMSOrAdminUser = user.__typename !== 'StateUser'
     const tableColumns = React.useMemo(
         () => [
             columnHelper.accessor((row) => row, {
