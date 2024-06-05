@@ -45,7 +45,7 @@ export const Header = ({
         })
     }
 
-    return (
+    return route !== 'GRAPHQL_EXPLORER' ? (
         <header>
             <div className={styles.banner}>
                 <GridContainer>
@@ -75,5 +75,7 @@ export const Header = ({
                 loggedInUser={loggedInUser}
             />
         </header>
+    ) : (
+        <></>
     )
 }
