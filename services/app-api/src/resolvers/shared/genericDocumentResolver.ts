@@ -25,10 +25,17 @@ const parseKey = (maybeS3URL: string): string | Error => {
     if (!isValidS3URLFormat(url)) return new Error('Not valid S3URL')
     return url.pathname.split('/')[1]
 }
+const streamToString = (stream: any): Promise<String> =>
+new Promise((resolve, reject) => {
+  const chunks: any[] = [];
+  stream.on("data", (chunk: any) => chunks.push(chunk));
+  stream.on("error", reject);
+  stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+});
 export function genericDocumentResolver(s3: any): Resolvers['GenericDocument'] {
     return {
         downloadURL: async (parent) => {
-            try {
+            // try {
                 const s3URL = parent.s3URL ?? ''
                 const key = parseKey(s3URL)
                 const bucket = parseBucketName(s3URL)
@@ -43,9 +50,7 @@ export function genericDocumentResolver(s3: any): Resolvers['GenericDocument'] {
                     })
                 )
                 return url
-        } catch(e) {
-            // throw error
-        }
+        // } 
     }
     }  
 }
