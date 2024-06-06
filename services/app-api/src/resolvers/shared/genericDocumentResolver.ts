@@ -35,12 +35,12 @@ new Promise((resolve, reject) => {
 export function genericDocumentResolver(s3: any): Resolvers['GenericDocument'] {
     return {
         downloadURL: async (parent) => {
-            // try {
+            try {
                 const s3URL = parent.s3URL ?? ''
                 const key = parseKey(s3URL)
                 const bucket = parseBucketName(s3URL)
                 if (key instanceof Error || bucket instanceof Error) {
-                    // to throw error
+                    // todo throw error
                     return 'err'
                 }
                 const url = await s3.send(
@@ -49,8 +49,14 @@ export function genericDocumentResolver(s3: any): Resolvers['GenericDocument'] {
                         Key: key,
                     })
                 )
+                .then((data:any) => console.log(data))
+                .catch((err: any) => console.log(err));
+                // const content = await streamToString(stream);
                 return url
-        // } 
+        } catch(e) {
+            return 'test'
+            // throw error
+        }
     }
     }  
 }
