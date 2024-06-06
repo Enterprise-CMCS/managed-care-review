@@ -38,7 +38,7 @@ export function genericDocumentResolver(s3: any): Resolvers['GenericDocument'] {
                 }
                 const url = await s3.send(
                     new GetObjectCommand({
-                        Bucket: 'local-bucket',
+                        Bucket: bucket,
                         Key: key,
                     })
                 )
