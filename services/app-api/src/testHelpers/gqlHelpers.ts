@@ -45,6 +45,7 @@ import { findStatePrograms } from '../postgres'
 import { must } from './assertionHelpers'
 import { newJWTLib } from '../jwt'
 import type { JWTLib } from '../jwt'
+import { S3Client } from '@aws-sdk/client-s3'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -98,13 +99,21 @@ const constructTestPostgresServer = async (opts?: {
         })
 
     await insertUserToLocalAurora(postgresStore, context.user)
-
+    const s3 = new S3Client({
+        forcePathStyle: true,
+        credentials: {
+          accessKeyId: "S3RVER", // This specific key is required when working offline
+          secretAccessKey: "S3RVER", // pragma: allowlist secret
+        },
+        endpoint: "http://localhost:4569",
+    })
     const postgresResolvers = configureResolvers(
         postgresStore,
         emailer,
         parameterStore,
         ldService,
-        jwt
+        jwt,
+        s3
     )
 
     return new ApolloServer({

@@ -1,5 +1,5 @@
-import type { Resolvers } from '../../gen/gqlServer'
-import { Storage } from 'aws-amplify'
+import type { Resolvers } from '../../gen/gqlServer'	
+import { GetObjectCommand } from '@aws-sdk/client-s3'
 import Url from 'url-parse'
 
 // tslint:disable-next-line
@@ -25,29 +25,27 @@ const parseKey = (maybeS3URL: string): string | Error => {
     if (!isValidS3URLFormat(url)) return new Error('Not valid S3URL')
     return url.pathname.split('/')[1]
 }
-
-export function genericDocumentResolver(): Resolvers['GenericDocument'] {
+export function genericDocumentResolver(s3: any): Resolvers['GenericDocument'] {
     return {
         downloadURL: async (parent) => {
-            const s3URL = parent.s3URL ?? ''
-            const key = parseKey(s3URL)
-            const bucket = parseBucketName(s3URL)
-            if (key instanceof Error || bucket instanceof Error) {
-                return null
-            }
-
-            const result = await Storage.get(key, {
-                bucket,
-                expires: 3600,
-                download: true,
-            })
-
-            if (typeof result === 'string') {
-                return result
-            } else {
-                const error = new Error(`Didn't get a string back from s3`)
-                throw error
-            }
-        },
+            try {
+                const s3URL = parent.s3URL ?? ''
+                const key = parseKey(s3URL)
+                const bucket = parseBucketName(s3URL)
+                if (key instanceof Error || bucket instanceof Error) {
+                    // to throw error
+                    return 'err'
+                }
+                const url = await s3.send(
+                    new GetObjectCommand({
+                        Bucket: 'local-bucket',
+                        Key: key,
+                    })
+                )
+                return url
+        } catch(e) {
+            // throw error
+        }
     }
+    }  
 }

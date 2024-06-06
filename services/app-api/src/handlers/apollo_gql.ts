@@ -33,6 +33,7 @@ import {
     ApolloServerPluginLandingPageDisabled,
     ApolloServerPluginLandingPageLocalDefault,
 } from 'apollo-server-core'
+import { S3Client } from "@aws-sdk/client-s3"
 
 let ldClient: LDClient
 
@@ -387,6 +388,14 @@ async function initializeGQLHandler(): Promise<Handler> {
                   dmcoEmails,
                   helpDeskEmail,
               })
+        const s3 = authMode == 'LOCAL' ? new S3Client({
+            forcePathStyle: true,
+            credentials: {
+              accessKeyId: "S3RVER", // This specific key is required when working offline
+              secretAccessKey: "S3RVER", // pragma: allowlist secret
+            },
+            endpoint: "http://localhost:4569",
+        }) : new S3Client({})
 
     // Resolvers are defined and tested in the resolvers package
     const resolvers = configureResolvers(
@@ -394,7 +403,8 @@ async function initializeGQLHandler(): Promise<Handler> {
         emailer,
         emailParameterStore,
         launchDarkly,
-        jwtLib
+        jwtLib,
+        s3
     )
 
     const userFetcher =
