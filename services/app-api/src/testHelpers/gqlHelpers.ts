@@ -236,7 +236,15 @@ const createAndUpdateTestHealthPlanPackage = async (
         ? [must(findStatePrograms(stateCode))[0]]
         : [defaultFloridaRateProgram()]
 
-    const draft: Partial<UnlockedHealthPlanFormDataType> = {
+    const draft: UnlockedHealthPlanFormDataType = {
+        id: uuidv4(),
+        createdAt: new Date(Date.now()),
+        updatedAt: new Date(Date.now()),
+        status: 'DRAFT',
+        stateCode: stateCode || 'FL',
+        stateNumber: 1,
+        programIDs: [],
+        documents: [],
         submissionType: 'CONTRACT_AND_RATES' as const,
         submissionDescription: 'An updated submission',
         stateContacts: [
@@ -319,10 +327,10 @@ const createAndUpdateTestHealthPlanPackage = async (
     }
 
     Object.assign(draft, partialUpdates)
+
     const [contractFormData, rateFormDatas] =
-        convertUnlockedHPPToContractAndRates(
-            draft as UnlockedHealthPlanFormDataType
-        )
+        convertUnlockedHPPToContractAndRates(draft)
+
     const contract = await createAndUpdateTestContractWithoutRates(
         server,
         stateCode,

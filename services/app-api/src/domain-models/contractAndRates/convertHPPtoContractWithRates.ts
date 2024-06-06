@@ -1,5 +1,6 @@
 import type { UnlockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 import type { ContractFormData, RateFormData } from '../../gen/gqlServer'
+import dayjs from 'dayjs'
 
 // interim solution -this file was made to deal with test helpers that may expect contract rates when we only have HPP coming from another test helper
 
@@ -32,8 +33,8 @@ const convertUnlockedHPPToContractAndRates = (
         stateContacts,
         contractType,
         contractExecutionStatus,
-        contractDateStart,
-        contractDateEnd,
+        contractDateStart: dayjs(contractDateStart).format('YYYY-MM-DD'),
+        contractDateEnd: dayjs(contractDateEnd).format('YYYY-MM-DD'),
         programIDs,
         contractDocuments,
         supportingDocuments: documents,
@@ -87,9 +88,10 @@ const convertUnlockedHPPToContractAndRates = (
                 rateType,
                 rateCapitationType,
                 rateCertificationName,
-                rateDateCertified,
-                rateDateEnd,
-                rateDateStart,
+                rateDateCertified:
+                    dayjs(rateDateCertified).format('YYYY-MM-DD'),
+                rateDateEnd: dayjs(rateDateEnd).format('YYYY-MM-DD'),
+                rateDateStart: dayjs(rateDateStart).format('YYYY-MM-DD'),
                 rateDocuments,
                 supportingDocuments,
                 rateProgramIDs,
