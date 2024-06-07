@@ -399,16 +399,15 @@ async function initializeGQLHandler(): Promise<Handler> {
                       secretAccessKey: 'S3RVER', // pragma: allowlist secret
                   },
                   endpoint: s3LocalURL,
-                //   region: s3Region,
+                  region: s3Region,
               })
             : new S3Client({
-                region: s3Region,
-                // credentials: {
-                //     accessKeyId: AWS_ACCESS_KEY_ID,
-                //     secretAccessKey: AWS_SECRET_ACCESS_KEY
-                // }
-                
-            })
+                  region: s3Region,
+                  // credentials: {
+                  //     accessKeyId: AWS_ACCESS_KEY_ID,
+                  //     secretAccessKey: AWS_SECRET_ACCESS_KEY
+                  // }
+              })
 
     if (s3 instanceof Error) {
         console.error('S3 not initiated')
