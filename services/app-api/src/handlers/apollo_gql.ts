@@ -388,7 +388,7 @@ async function initializeGQLHandler(): Promise<Handler> {
                   dmcoEmails,
                   helpDeskEmail,
               })
-    const s3Region = 'us-east-2'
+    const s3Region = 'us-east-1'
     const s3LocalURL = process.env.REACT_APP_S3_LOCAL_URL
     
     const s3 =

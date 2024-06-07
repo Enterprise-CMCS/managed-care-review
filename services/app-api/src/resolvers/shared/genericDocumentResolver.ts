@@ -49,11 +49,15 @@ export function genericDocumentResolver(s3: any): Resolvers['GenericDocument'] {
                         Key: key,
                     })
                 )
-                .then((data:any) => console.log(data))
+                .then((data:any) => {
+                    console.log(data)
+                    return data
+                })
                 .catch((err: any) => console.log(err));
                 // const content = await streamToString(stream);
                 return url
         } catch(e) {
+            console.error(e)
             return 'test'
             // throw error
         }
