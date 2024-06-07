@@ -1,6 +1,7 @@
 import type { Resolvers } from '../../gen/gqlServer'	
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import Url from 'url-parse'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 // tslint:disable-next-line
 const isValidS3URLFormat = (url: {
@@ -25,13 +26,7 @@ const parseKey = (maybeS3URL: string): string | Error => {
     if (!isValidS3URLFormat(url)) return new Error('Not valid S3URL')
     return url.pathname.split('/')[1]
 }
-const streamToString = (stream: any): Promise<String> =>
-new Promise((resolve, reject) => {
-  const chunks: any[] = [];
-  stream.on("data", (chunk: any) => chunks.push(chunk));
-  stream.on("error", reject);
-  stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
-});
+
 export function genericDocumentResolver(s3: any): Resolvers['GenericDocument'] {
     return {
         downloadURL: async (parent) => {
@@ -43,23 +38,22 @@ export function genericDocumentResolver(s3: any): Resolvers['GenericDocument'] {
                     // todo throw error
                     return 'err'
                 }
-                const url = await s3.send(
+                console.info(`${bucket} ====================== BUCKET =============`)
+                console.info(`${s3URL} ====================== S3URL =============`)
+                const command = await s3.send(
                     new GetObjectCommand({
                         Bucket: bucket,
                         Key: key,
                     })
                 )
-                .then((data:any) => {
-                    console.log(data)
-                    return data
+                const url =  await getSignedUrl(s3, command, {
+                    expiresIn: 3600,
                 })
-                .catch((err: any) => console.log(err));
-                // const content = await streamToString(stream);
+                console.info(`${getSignedUrl} ====================== getSignedURLOutput =============`)
                 return url
         } catch(e) {
             console.error(e)
             return 'test'
-            // throw error
         }
     }
     }  

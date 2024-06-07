@@ -390,7 +390,6 @@ async function initializeGQLHandler(): Promise<Handler> {
               })
     const s3Region = 'us-east-1'
     const s3LocalURL = process.env.REACT_APP_S3_LOCAL_URL
-    
     const s3 =
         authMode == 'LOCAL'
             ? new S3Client({
@@ -400,7 +399,7 @@ async function initializeGQLHandler(): Promise<Handler> {
                       secretAccessKey: 'S3RVER', // pragma: allowlist secret
                   },
                   endpoint: s3LocalURL,
-                  region: s3Region,
+                //   region: s3Region,
               })
             : new S3Client({
                 region: s3Region,
