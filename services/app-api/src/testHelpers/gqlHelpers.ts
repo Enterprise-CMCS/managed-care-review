@@ -102,10 +102,11 @@ const constructTestPostgresServer = async (opts?: {
     const s3 = new S3Client({
         forcePathStyle: true,
         credentials: {
-          accessKeyId: "S3RVER", // This specific key is required when working offline
-          secretAccessKey: "S3RVER", // pragma: allowlist secret
+            accessKeyId: 'S3RVER', // This specific key is required when working offline
+            secretAccessKey: 'S3RVER', // pragma: allowlist secret
         },
-        endpoint: "http://localhost:4569",
+        endpoint: 'http://localhost:4569',
+        region: 'us-east-1',
     })
     const postgresResolvers = configureResolvers(
         postgresStore,
