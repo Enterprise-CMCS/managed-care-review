@@ -33,6 +33,8 @@ custom:
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   apiAppOtelCollectorUrl: ${env:API_APP_OTEL_COLLECTOR_URL, ssm:/configuration/api_app_otel_collector_url}
   dbURL: ${env:DATABASE_URL}
+  s3_documents_bucket_region: ${cf:uploads-${sls:stage}.Region}
+  s3_documents_bucket_name: ${cf:uploads-${sls:stage}.DocumentUploadsBucketName}
   ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key_feds}
   allowedIpAddresses: ${env:ALLOWED_IP_ADDRESSES, ssm:/configuration/allowed_ip_addresses}
   # because the secret is in JSON in secret manager, we have to pass it into jwtSecret when not running locally

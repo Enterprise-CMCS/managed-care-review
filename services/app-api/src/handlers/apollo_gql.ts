@@ -388,7 +388,9 @@ async function initializeGQLHandler(): Promise<Handler> {
                   dmcoEmails,
                   helpDeskEmail,
               })
-
+    const s3Region = 'us-east-2'
+    const s3LocalURL = process.env.REACT_APP_S3_LOCAL_URL
+    
     const s3 =
         authMode == 'LOCAL'
             ? new S3Client({
@@ -397,14 +399,21 @@ async function initializeGQLHandler(): Promise<Handler> {
                       accessKeyId: 'S3RVER', // This specific key is required when working offline
                       secretAccessKey: 'S3RVER', // pragma: allowlist secret
                   },
-                  endpoint: 'http://localhost:4569',
-                  region: 'us-east-1',
+                  endpoint: s3LocalURL,
+                  region: s3Region,
               })
             : new S3Client({
-                  region: 'us-east-1',
-              })
+                region: s3Region,
+                // credentials: {
+                //     accessKeyId: AWS_ACCESS_KEY_ID,
+                //     secretAccessKey: AWS_SECRET_ACCESS_KEY
+                // }
+                
+            })
+
     if (s3 instanceof Error) {
-        console.error('s3 not initiated ')
+        console.error('S3 not initiated')
+        throw new Error('Initialization error for S3 client')
     }
 
     // Resolvers are defined and tested in the resolvers package
