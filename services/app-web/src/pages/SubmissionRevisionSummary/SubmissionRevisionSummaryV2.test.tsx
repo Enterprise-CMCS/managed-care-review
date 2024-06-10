@@ -6,11 +6,15 @@ import {
     mockValidCMSUser,
     fetchContractMockSuccess,
     mockContractPackageSubmittedWithRevisions,
+    mockEmptyDraftContractAndRate,
+    mockValidHelpDeskUser,
+    mockValidStateUser,
 } from '../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionRevisionSummaryV2 } from './SubmissionRevisionSummaryV2'
 import { dayjs } from '../../common-code/dateHelpers'
 import { mockContractPackageWithDifferentProgramsInRevisions } from '../../testHelpers/apolloMocks/contractPackageDataMock'
+import { ContractFormData, RateFormData } from '../../gen/gqlClient'
 
 describe('SubmissionRevisionSummary', () => {
     it('renders correctly without errors', async () => {
@@ -321,5 +325,186 @@ describe('SubmissionRevisionSummary', () => {
                     .submissionDescription
             )
         ).toBeInTheDocument()
+    })
+
+    describe('Missing data error notifications', () => {
+        const draftRates = mockEmptyDraftContractAndRate().draftRates
+        if (!draftRates) {
+            throw new Error('Unexpected error: draft rates is undefined')
+        }
+        const emptyContractFormData = mockEmptyDraftContractAndRate()
+            .draftRevision?.formData as ContractFormData
+        const emptyRateFormData = draftRates[0].draftRevision
+            ?.formData as RateFormData
+        const emptyContract = mockContractPackageSubmittedWithRevisions({
+            id: '15',
+            packageSubmissions: [
+                {
+                    __typename: 'ContractPackageSubmission',
+                    cause: 'CONTRACT_SUBMISSION',
+                    submitInfo: {
+                        __typename: 'UpdateInformation',
+                        updatedAt: '2024-03-03',
+                        updatedBy: 'example@state.com',
+                        updatedReason: 'submit 3',
+                    },
+                    submittedRevisions: [],
+                    contractRevision: {
+                        __typename: 'ContractRevision',
+                        contractName: 'Test123',
+                        createdAt: new Date('01/01/2024'),
+                        updatedAt: new Date('12/31/2024'),
+                        submitInfo: {
+                            updatedAt: new Date('01/01/2024'),
+                            updatedBy: 'example@state.com',
+                            updatedReason: 'initial submission',
+                        },
+                        unlockInfo: {
+                            updatedAt: new Date('01/01/2024'),
+                            updatedBy: 'example@state.com',
+                            updatedReason: 'unlocked for a test',
+                        },
+                        id: '223',
+                        formData: {
+                            ...emptyContractFormData,
+                            submissionType: 'CONTRACT_AND_RATES',
+                        },
+                    },
+                    rateRevisions: [
+                        {
+                            __typename: 'RateRevision',
+                            id: '1234',
+                            rateID: '456',
+                            createdAt: new Date('01/01/2023'),
+                            updatedAt: new Date('01/01/2023'),
+                            submitInfo: {
+                                updatedAt: new Date('01/01/2024'),
+                                updatedBy: 'example@state.com',
+                                updatedReason: 'initial submission',
+                            },
+                            contractRevisions: [],
+                            formData: emptyRateFormData,
+                        },
+                    ],
+                },
+            ],
+        })
+
+        it('does not render missing data notification for CMS users', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVISION}
+                        element={<SubmissionRevisionSummaryV2 />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractMockSuccess({
+                                contract: emptyContract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/revisions/1',
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        '438-attestation': true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(screen.getByTestId('submissionType')).toBeInTheDocument()
+            })
+
+            expect(
+                screen.queryAllByText(/You must provide this information/)
+            ).toHaveLength(0)
+        })
+
+        it('does not render missing data notification for Helpdesk users', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVISION}
+                        element={<SubmissionRevisionSummaryV2 />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidHelpDeskUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractMockSuccess({
+                                contract: emptyContract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/revisions/1',
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        '438-attestation': true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(screen.getByTestId('submissionType')).toBeInTheDocument()
+            })
+
+            expect(
+                screen.queryAllByText(/You must provide this information/)
+            ).toHaveLength(0)
+        })
+
+        it('does not render missing data notification for State users', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVISION}
+                        element={<SubmissionRevisionSummaryV2 />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidStateUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractMockSuccess({
+                                contract: emptyContract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/revisions/1',
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        '438-attestation': true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(screen.getByTestId('submissionType')).toBeInTheDocument()
+            })
+
+            expect(
+                screen.queryAllByText(/You must provide this information/)
+            ).toHaveLength(0)
+        })
     })
 })

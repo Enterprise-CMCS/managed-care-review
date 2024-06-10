@@ -77,9 +77,9 @@ const isSubmitted = (status: HealthPlanPackageStatus) =>
 function submissionURL(
     id: PackageInDashboardType['id'],
     status: PackageInDashboardType['status'],
-    isCMSOrAdminUser: boolean
+    isNotStateUser: boolean
 ): string {
-    if (isCMSOrAdminUser) {
+    if (isNotStateUser) {
         return `/submissions/${id}`
     } else if (status === 'DRAFT') {
         return `/submissions/${id}/edit/type`
@@ -223,8 +223,7 @@ export const HealthPlanPackageTable = ({
 
     const [tableCaption, setTableCaption] = useState<React.ReactNode | null>()
 
-    const isCMSOrAdminUser =
-        user.__typename === 'CMSUser' || user.__typename === 'AdminUser'
+    const isNotStateUser = user.__typename !== 'StateUser'
     const tableColumns = React.useMemo(
         () => [
             columnHelper.accessor((row) => row, {
@@ -238,7 +237,7 @@ export const HealthPlanPackageTable = ({
                         to={submissionURL(
                             info.getValue().id,
                             info.getValue().status,
-                            isCMSOrAdminUser
+                            isNotStateUser
                         )}
                         className={`${styles.ID}`}
                     >
@@ -313,7 +312,7 @@ export const HealthPlanPackageTable = ({
                 },
             }),
         ],
-        [isCMSOrAdminUser, tableConfig.rowIDName]
+        [isNotStateUser, tableConfig.rowIDName]
     )
 
     const reactTable = useReactTable({
@@ -328,8 +327,8 @@ export const HealthPlanPackageTable = ({
         state: {
             columnFilters,
             columnVisibility: {
-                stateName: isCMSOrAdminUser,
-                submissionType: isCMSOrAdminUser,
+                stateName: isNotStateUser,
+                submissionType: isNotStateUser,
             },
         },
         onColumnFiltersChange: setColumnFilters,

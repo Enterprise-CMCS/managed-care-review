@@ -930,6 +930,7 @@ describe('RateDetailsSummarySection', () => {
                 editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
+                explainMissingData
             />,
             {
                 apolloProvider,
