@@ -47,8 +47,7 @@ export function configureResolvers(
     emailer: Emailer,
     emailParameterStore: EmailParameterStore,
     launchDarkly: LDService,
-    jwt: JWTLib,
-    s3: any,
+    jwt: JWTLib
 ): Resolvers {
     const resolvers: Resolvers = {
         Date: GraphQLDate,
@@ -144,7 +143,7 @@ export function configureResolvers(
         RateRevision: rateRevisionResolver,
         Contract: contractResolver(),
         ContractRevision: contractRevisionResolver(store),
-        GenericDocument: genericDocumentResolver(s3),
+        GenericDocument: genericDocumentResolver(),
     }
 
     return resolvers
