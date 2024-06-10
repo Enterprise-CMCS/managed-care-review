@@ -71,6 +71,11 @@ custom:
       - offline
     ssm:
       '/configuration/iam/full_permissions_boundary_policy': 'arn:aws:iam::local:policy/local/developer-boundary-policy'
+      '/configuration/default/vpc/id': 'offline'
+      '/configuration/default/vpc/sg/id': 'offline'
+      '/configuration/default/vpc/subnets/private/a/id': 'offline'
+      '/configuration/default/vpc/subnets/private/b/id': 'offline'
+      '/configuration/default/vpc/subnets/private/c/id': 'offline'
   s3:
     # address: 127.0.0.1 # this started defaulting to ipv6 which prevented tests from connecting
     # when vhostBuckets are enabled all non-localhost hostnames are re-written as buckets
