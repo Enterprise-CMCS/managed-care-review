@@ -9,19 +9,28 @@ import {
     fetchCurrentUserMock,
     indexHealthPlanPackagesMockSuccess,
 } from '../../testHelpers/apolloMocks'
+import { beforeEach } from 'vitest'
 
-window.scrollTo = jest.fn()
-jest.mock('../../hooks/useTealium', () => ({
-    useTealium: jest.fn().mockReturnValue([]),
+vi.mock('../../hooks/useTealium', () => ({
+    useTealium: vi.fn().mockReturnValue([]),
 }))
 
 // Looking for routing tests? Check AppRoutes.test.tsx
 describe('AppBody', () => {
+    Object.defineProperty(window, 'scrollTo', {
+        writable: true,
+        value: vi.fn(),
+    })
+    beforeEach(() => {
+        vi.mock('../../hooks/useTealium', () => ({
+            useTealium: vi.fn().mockReturnValue([]),
+        }))
+    })
     afterEach(() => {
-        jest.resetAllMocks()
+        vi.resetAllMocks()
     })
     afterAll(() => {
-        jest.clearAllMocks()
+        vi.clearAllMocks()
     })
 
     it('App renders without errors', () => {
@@ -81,12 +90,19 @@ describe('AppBody', () => {
         const OLD_ENV = import.meta.env
 
         beforeEach(() => {
-            jest.resetModules() // Most important - clears the cache
-            import.meta.env = { ...OLD_ENV } // Make a copy
+            vi.resetModules() // Most important - clears the cache
+            Object.defineProperty(import.meta, 'env', {
+                value: OLD_ENV,
+                writable: true,
+            })
         })
 
         afterAll(() => {
-            import.meta.env = OLD_ENV // Restore old environment
+            Object.defineProperty(import.meta, 'env', {
+                value: {
+                    ...OLD_ENV,
+                },
+            })
         })
 
         it('shows test environment banner in val', () => {

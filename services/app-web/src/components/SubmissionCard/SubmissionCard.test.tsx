@@ -1,5 +1,5 @@
 import React from 'react'
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import dayjs from 'dayjs'
 import {
     SubmissionCard,
@@ -23,13 +23,14 @@ describe('SubmissionCard', () => {
         expect(screen.getByRole('listitem')).toBeInTheDocument()
     })
 
-    it('displays draft tag styling when submission type is draft', () => {
+    it('displays draft tag styling when submission type is draft', async () => {
         renderWithProviders(<SubmissionCard {...contractOnlyDraftSubmission} />)
-        expect(screen.getByTestId('tag')).toBeInTheDocument()
 
-        expect(screen.getByTestId('tag')).toHaveStyle(`
-            background-color: '#e4a61b',
-        `)
+        await waitFor(() => {
+            expect(screen.getByTestId('tag')).toBeInTheDocument()
+            expect(screen.getByTestId('tag')).toHaveTextContent('Draft')
+            expect(screen.getByTestId('tag')).toHaveClass(/tagWarning/)
+        })
     })
 
     it('displays submitted tag styling when submission type is submitted', () => {
