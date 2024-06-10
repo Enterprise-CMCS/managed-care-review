@@ -9,12 +9,19 @@ import {
     mockValidUser,
     mockValidStateUser,
     mockContractPackageSubmitted,
+    mockEmptyDraftContractAndRate,
+    mockValidHelpDeskUser,
 } from '../../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SubmissionSummaryV2 } from './SubmissionSummaryV2'
 import { SubmissionSideNav } from '../../SubmissionSideNav'
 import { testS3Client } from '../../../testHelpers/s3Helpers'
 import { mockContractPackageUnlocked } from '../../../testHelpers/apolloMocks/contractPackageDataMock'
+import {
+    ContractFormData,
+    ContractPackageSubmission,
+    RateFormData,
+} from '../../../gen/gqlClient'
 
 describe('SubmissionSummary', () => {
     it('renders without errors', async () => {
@@ -216,7 +223,7 @@ describe('SubmissionSummary', () => {
             </Routes>,
             {
                 apolloProvider: {
-                     mocks: [
+                    mocks: [
                         fetchCurrentUserMock({
                             statusCode: 200,
                             user: mockValidCMSUser(),
@@ -239,9 +246,10 @@ describe('SubmissionSummary', () => {
         )
 
         expect(await screen.findByText('SHARED')).toBeInTheDocument()
-        expect(await screen.findByText('Linked submissions')).toBeInTheDocument()
+        expect(
+            await screen.findByText('Linked submissions')
+        ).toBeInTheDocument()
     })
-
 
     it('renders add mccrs-id link for CMS user', async () => {
         renderWithProviders(
@@ -802,12 +810,10 @@ describe('SubmissionSummary', () => {
         it('disables the unlock button for an unlocked submission', async () => {
             renderWithProviders(
                 <Routes>
-                    <Route element={<SubmissionSideNav />}>
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                            element={<SubmissionSummaryV2 />}
-                        />
-                    </Route>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummaryV2 />}
+                    />
                 </Routes>,
                 {
                     apolloProvider: {
@@ -816,11 +822,6 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
-                                    id: 'test-abc-123',
-                                }
-                            ),
                             fetchContractMockSuccess({
                                 contract: mockContractPackageUnlocked(),
                             }),
@@ -842,6 +843,350 @@ describe('SubmissionSummary', () => {
                     })
                 ).toBeDisabled()
             })
+        })
+    })
+
+    describe('Missing data error notifications', () => {
+        const draftRates = mockEmptyDraftContractAndRate().draftRates
+        if (!draftRates) {
+            throw new Error('Unexpected error: draft rates is undefined')
+        }
+        const emptyContractFormData = mockEmptyDraftContractAndRate()
+            .draftRevision?.formData as ContractFormData
+        const emptyRateFormData = draftRates[0].draftRevision
+            ?.formData as RateFormData
+        const packageSubmissions: ContractPackageSubmission[] = [
+            {
+                cause: 'CONTRACT_SUBMISSION',
+                submitInfo: {
+                    updatedAt: new Date('01/01/2024'),
+                    updatedBy: 'example@state.com',
+                    updatedReason: 'initial submission',
+                },
+                submittedRevisions:
+                    mockContractPackageUnlocked().packageSubmissions[0]
+                        .submittedRevisions,
+                contractRevision: {
+                    contractName: 'MCR-MN-0005-SNBC',
+                    createdAt: new Date('01/01/2024'),
+                    updatedAt: new Date('12/31/2024'),
+                    submitInfo: {
+                        updatedAt: new Date('01/01/2024'),
+                        updatedBy: 'example@state.com',
+                        updatedReason: 'initial submission',
+                    },
+                    unlockInfo: {
+                        updatedAt: new Date('01/01/2024'),
+                        updatedBy: 'example@state.com',
+                        updatedReason: 'unlocked',
+                    },
+                    id: '123',
+                    formData: {
+                        ...emptyContractFormData,
+                        submissionType: 'CONTRACT_AND_RATES',
+                    },
+                },
+                rateRevisions: [
+                    {
+                        id: '1234',
+                        rateID: '456',
+                        createdAt: new Date('01/01/2023'),
+                        updatedAt: new Date('01/01/2023'),
+                        submitInfo: {
+                            updatedAt: new Date('01/01/2024'),
+                            updatedBy: 'example@state.com',
+                            updatedReason: 'initial submission',
+                        },
+                        contractRevisions: [],
+                        formData: emptyRateFormData,
+                    },
+                ],
+            },
+        ]
+
+        it('renders missing data error notifications for helpdesk user', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummaryV2 />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidHelpDeskUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractMockSuccess({
+                                contract: mockContractPackageUnlocked({
+                                    packageSubmissions,
+                                }),
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/test-abc-123',
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        '438-attestation': true,
+                    },
+                }
+            )
+
+            // Expect 19 notifications, if this fails change length to what is found in test to isolate which field failed.
+            await waitFor(() => {
+                expect(
+                    screen.getAllByText(/You must provide this information/)
+                ).toHaveLength(19)
+            })
+            const text = /You must provide this information/
+
+            //Submission type summary section
+            // Submission type must be 'CONTRACT_AND_RATES' for rate details section to appear.
+            expect(
+                within(await screen.findByTestId('program')).getByText(text)
+            ).toBeInTheDocument()
+            expect(
+                within(await screen.findByTestId('contractType')).getByText(
+                    text
+                )
+            ).toBeInTheDocument()
+            expect(
+                within(
+                    await screen.findByTestId('riskBasedContract')
+                ).getByText(text)
+            ).toBeInTheDocument()
+            expect(
+                within(
+                    await screen.findByTestId('populationCoverage')
+                ).getByText(text)
+            ).toBeInTheDocument()
+            expect(
+                within(
+                    await screen.findByTestId('submissionDescription')
+                ).getByText(text)
+            ).toBeInTheDocument()
+
+            //Contract details summary section
+            expect(
+                within(
+                    await screen.findByTestId(
+                        'statutoryRegulatoryAttestationDescription'
+                    )
+                ).getByText(text)
+            ).toBeInTheDocument()
+            expect(
+                within(
+                    await screen.findByTestId('contractExecutionStatus')
+                ).getByText(text)
+            ).toBeInTheDocument()
+            expect(
+                within(
+                    await screen.findByTestId('contractEffectiveDates')
+                ).getByText(text)
+            ).toBeInTheDocument()
+            expect(
+                within(
+                    await screen.findByTestId('managedCareEntities')
+                ).getByText(text)
+            ).toBeInTheDocument()
+            expect(
+                within(
+                    await screen.findByTestId('federalAuthorities')
+                ).getByText(text)
+            ).toBeInTheDocument()
+
+            //Rate detail summary section
+            expect(
+                within(await screen.findByTestId('ratePrograms')).getByText(
+                    text
+                )
+            ).toBeInTheDocument()
+            expect(
+                within(await screen.findByTestId('rateType')).getByText(text)
+            ).toBeInTheDocument()
+            expect(
+                within(await screen.findByTestId('ratingPeriod')).getByText(
+                    text
+                )
+            ).toBeInTheDocument()
+            expect(
+                within(await screen.findByTestId('dateCertified')).getByText(
+                    text
+                )
+            ).toBeInTheDocument()
+            expect(
+                within(
+                    await screen.findByTestId('rateCapitationType')
+                ).getByText(text)
+            ).toBeInTheDocument()
+            expect(
+                within(
+                    await screen.findByTestId('certifyingActuary')
+                ).getByText(text)
+            ).toBeInTheDocument()
+            expect(
+                within(
+                    await screen.findByTestId('addtlCertifyingActuary-0')
+                ).getByText(text)
+            ).toBeInTheDocument()
+            expect(
+                within(
+                    await screen.findByTestId('communicationPreference')
+                ).getByText(text)
+            ).toBeInTheDocument()
+
+            // Contact details summary section
+            expect(
+                within(await screen.findByTestId('statecontact')).getByText(
+                    text
+                )
+            ).toBeInTheDocument()
+        })
+
+        it('renders missing data error notifications for State user', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummaryV2 />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidStateUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractMockSuccess({
+                                contract: mockContractPackageUnlocked({
+                                    draftRevision: {
+                                        __typename: 'ContractRevision',
+                                        submitInfo: undefined,
+                                        unlockInfo: {
+                                            updatedAt: new Date(),
+                                            updatedBy: 'cms@example.com',
+                                            updatedReason:
+                                                'unlocked for a test',
+                                        },
+                                        id: '123',
+                                        createdAt: new Date(),
+                                        updatedAt: new Date(),
+                                        contractName: 'MCR-MN-0005-SNBC',
+                                        formData: {
+                                            ...emptyContractFormData,
+                                            submissionType:
+                                                'CONTRACT_AND_RATES',
+                                        },
+                                    },
+                                    packageSubmissions,
+                                }),
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/test-abc-123',
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        '438-attestation': true,
+                    },
+                }
+            )
+
+            // Expect 19 notifications
+            await waitFor(() => {
+                expect(
+                    screen.getAllByText(/You must provide this information/)
+                ).toHaveLength(19)
+            })
+        })
+
+        it('does not render missing data error notifications for CMS user', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummaryV2 />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractMockSuccess({
+                                contract: mockContractPackageUnlocked({
+                                    packageSubmissions,
+                                }),
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/test-abc-123',
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        '438-attestation': true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(screen.getByTestId('submissionType')).toBeInTheDocument()
+            })
+
+            expect(
+                screen.queryAllByText(/You must provide this information/)
+            ).toHaveLength(0)
+        })
+
+        it('does not render missing data error notifications on submitted submissions', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummaryV2 />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidStateUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractMockSuccess({
+                                contract: mockContractPackageUnlocked({
+                                    status: 'SUBMITTED',
+                                    packageSubmissions,
+                                }),
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/test-abc-123',
+                    },
+                    featureFlags: {
+                        'link-rates': true,
+                        '438-attestation': true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(screen.getByTestId('submissionType')).toBeInTheDocument()
+            })
+
+            expect(
+                screen.queryAllByText(/You must provide this information/)
+            ).toHaveLength(0)
         })
     })
 })

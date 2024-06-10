@@ -8,6 +8,7 @@ import {
     IndexUsersDocument,
     IndexUsersQuery,
     StateUser,
+    HelpdeskUser
 } from '../../gen/gqlClient'
 
 import { mockMNState } from './stateMock'
@@ -47,6 +48,18 @@ function mockValidAdminUser(userData?: Partial<AdminUser>): AdminUser {
         __typename: 'AdminUser' as const,
         id: 'bar-id',
         role: 'ADMIN_USER',
+        givenName: 'bob',
+        familyName: 'ddmas',
+        email: 'bob@dmas.mn.gov',
+        ...userData,
+    }
+}
+
+function mockValidHelpDeskUser(userData?: Partial<HelpdeskUser>): HelpdeskUser {
+    return {
+        __typename: 'HelpdeskUser' as const,
+        id: 'bar-id',
+        role: 'HELPDESK_USER',
         givenName: 'bob',
         familyName: 'ddmas',
         email: 'bob@dmas.mn.gov',
@@ -128,4 +141,5 @@ export {
     mockValidUser,
     mockValidAdminUser,
     indexUsersQueryMock,
+    mockValidHelpDeskUser
 }

@@ -39,6 +39,7 @@ export {
     mockValidUser,
     mockValidAdminUser,
     indexUsersQueryMock,
+    mockValidHelpDeskUser
 } from './userGQLMock'
 
 export {
@@ -67,7 +68,8 @@ export {
     mockContractPackageSubmitted,
     mockContractWithLinkedRateDraft,
     mockContractPackageUnlocked,
-    mockContractPackageSubmittedWithRevisions
+    mockContractPackageSubmittedWithRevisions,
+    mockEmptyDraftContractAndRate
 } from './contractPackageDataMock'
 export { rateDataMock } from './rateDataMock'
 export { fetchContractMockSuccess, updateDraftContractRatesMockSuccess } from './contractGQLMock'

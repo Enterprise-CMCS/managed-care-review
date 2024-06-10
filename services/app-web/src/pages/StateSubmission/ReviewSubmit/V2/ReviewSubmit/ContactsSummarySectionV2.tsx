@@ -15,6 +15,7 @@ export type ContactsSummarySectionProps = {
     contractRev?: ContractRevision
     editNavigateTo?: string
     isStateUser: boolean
+    explainMissingData?: boolean
 }
 
 export const ContactsSummarySection = ({
@@ -22,8 +23,8 @@ export const ContactsSummarySection = ({
     contractRev,
     editNavigateTo,
     isStateUser,
+    explainMissingData,
 }: ContactsSummarySectionProps): React.ReactElement => {
-    const isSubmitted = contract.status === 'SUBMITTED'
     const contractOrRev = contractRev ? contractRev : contract
 
     const contractFormData = getVisibleLatestContractFormData(
@@ -60,7 +61,7 @@ export const ContactsSummarySection = ({
                             <DataDetail
                                 id="statecontact"
                                 label="Contact"
-                                explainMissingData={!isSubmitted}
+                                explainMissingData={explainMissingData}
                                 children={undefined}
                             />
                         )}
