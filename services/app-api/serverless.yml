@@ -94,7 +94,7 @@ provider:
     restApiId: ${self:custom.appApiGatewayId}
     restApiRootResourceId: ${self:custom.appApiGatewayRootResourceId}
   layers:
-    - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
+    - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:3
   iam:
     role:
       path: ${ssm:/configuration/iam/path, "/"}
@@ -224,7 +224,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientEngineLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:3
 
   migrate:
     handler: src/handlers/postgres_migrate.main
@@ -235,7 +235,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientMigrationLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:3
 
   zip_keys:
     handler: src/handlers/bulk_download.main
@@ -252,7 +252,7 @@ functions:
     events:
       - schedule: cron(0 14 ? * MON-FRI *)
     layers:
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:3
 
 resources:
   Resources:
