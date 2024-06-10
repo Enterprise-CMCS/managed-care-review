@@ -202,6 +202,11 @@ async function initializeGQLHandler(): Promise<Handler> {
     const ldSDKKey = process.env.LD_SDK_KEY
     const allowedIpAddresses = process.env.ALLOWED_IP_ADDRESSES
     const jwtSecret = process.env.JWT_SECRET
+    const s3LocalURL =
+        process.env.REACT_APP_S3_LOCAL_URL || 'http://localhost:4569'
+    const s3DocumentsBucket =
+        process.env.REACT_APP_S3_DOCUMENTS_BUCKET || 'local-uploads'
+    const s3QABucket = process.env.REACT_APP_S3_QA_BUCKET || 'qa-uploads'
 
     // START Assert configuration is valid
     if (emailerMode !== 'LOCAL' && emailerMode !== 'SES')
@@ -244,6 +249,12 @@ async function initializeGQLHandler(): Promise<Handler> {
     if (jwtSecret === undefined || jwtSecret === '') {
         throw new Error(
             'Configuration Error: JWT_SECRET is required to run app-api.'
+        )
+    }
+
+    if (s3DocumentsBucket === undefined || s3QABucket === undefined) {
+        throw new Error(
+            'To configure s3, you  must set REACT_APP_S3_DOCUMENTS_BUCKET and REACT_APP_S3_QA_BUCKET'
         )
     }
 
@@ -390,33 +401,21 @@ async function initializeGQLHandler(): Promise<Handler> {
                   dmcoEmails,
                   helpDeskEmail,
               })
-    // S3 Region and LocalUrl are mutually exclusive.
-    // One is used in AWS and one is used locally.
-    const s3Region = process.env.REACT_APP_S3_REGION
-    const s3LocalURL = process.env.REACT_APP_S3_LOCAL_URL
-    const s3DocumentsBucket = process.env.REACT_APP_S3_DOCUMENTS_BUCKET
-    const s3QABucket = process.env.REACT_APP_S3_QA_BUCKET
 
-    if (s3DocumentsBucket === undefined || s3QABucket === undefined) {
-        throw new Error(
-            'To configure s3, you  must set REACT_APP_S3_DOCUMENTS_BUCKET and REACT_APP_S3_QA_BUCKET'
-        )
-    }
-
-    if (s3Region !== undefined && s3LocalURL !== undefined) {
-        throw new Error(
-            'You cant set both REACT_APP_S3_REGION and REACT_APP_S3_LOCAL_URL. Pick one depending on what environment you are in'
-        )
-    }
+    // if (s3Region !== undefined && s3LocalURL !== undefined) {
+    //     throw new Error(
+    //         'You cant set both REACT_APP_S3_REGION and REACT_APP_S3_LOCAL_URL. Pick one depending on what environment you are in'
+    //     )
+    // }
     let s3Client: S3ClientT
     const S3_BUCKETS_CONFIG: S3BucketConfigType = {
         HEALTH_PLAN_DOCS: s3DocumentsBucket,
         QUESTION_ANSWER_DOCS: s3QABucket,
     }
     console.info('================= S3URL ===============' + s3LocalURL)
-    console.info('================= S3Region ===============' + s3Region)
+    // console.info('================= S3Region ===============' + s3Region)
 
-    if (authMode != 'LOCAL') {
+    if (authMode !== 'LOCAL') {
         s3Client = newAmplifyS3Client(S3_BUCKETS_CONFIG)
     } else if (s3LocalURL) {
         s3Client = newLocalS3Client(s3LocalURL, S3_BUCKETS_CONFIG)
