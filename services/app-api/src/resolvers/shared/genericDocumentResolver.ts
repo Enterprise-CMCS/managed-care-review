@@ -1,7 +1,5 @@
 import type { Resolvers } from '../../gen/gqlServer'	
-import { GetObjectCommand } from '@aws-sdk/client-s3'
 import Url from 'url-parse'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 // tslint:disable-next-line
 const isValidS3URLFormat = (url: {
@@ -41,7 +39,7 @@ export function genericDocumentResolver(s3: any): Resolvers['GenericDocument'] {
                 console.info(`${bucket} ====================== BUCKET =============`)
                 console.info(`${s3URL} ====================== S3URL =============`)
                 
-                const url =  s3.getURL(key, bucket)
+                const url =  await s3.getURL(key, bucket)
                 console.info(`${url} ====================== RETRIEVED URL =============`)
 
                 return url
