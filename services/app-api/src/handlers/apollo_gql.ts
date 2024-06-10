@@ -34,6 +34,8 @@ import {
     ApolloServerPluginLandingPageLocalDefault,
 } from 'apollo-server-core'
 import { S3Client } from '@aws-sdk/client-s3'
+import { S3ClientT, newAmplifyS3Client, newLocalS3Client } from '../../../app-web/src/s3'
+import type { S3BucketConfigType } from '../../../app-web/src/s3/s3Amplify'
 
 let ldClient: LDClient
 
@@ -388,31 +390,64 @@ async function initializeGQLHandler(): Promise<Handler> {
                   dmcoEmails,
                   helpDeskEmail,
               })
-    const s3Region = 'us-east-1'
-    const s3LocalURL = process.env.REACT_APP_S3_LOCAL_URL
-    const s3 =
-        authMode == 'LOCAL'
-            ? new S3Client({
-                  forcePathStyle: true,
-                  credentials: {
-                      accessKeyId: 'S3RVER', // This specific key is required when working offline
-                      secretAccessKey: 'S3RVER', // pragma: allowlist secret
-                  },
-                  endpoint: s3LocalURL,
-                  region: s3Region,
-              })
-            : new S3Client({
-                  region: s3Region,
-                  // credentials: {
-                  //     accessKeyId: AWS_ACCESS_KEY_ID,
-                  //     secretAccessKey: AWS_SECRET_ACCESS_KEY
-                  // }
-              })
-
-    if (s3 instanceof Error) {
-        console.error('S3 not initiated')
-        throw new Error('Initialization error for S3 client')
+    // S3 Region and LocalUrl are mutually exclusive.
+    // One is used in AWS and one is used locally.
+    const s3Region = undefined
+    const s3LocalURL = 'http://localhost:4569'
+    const s3DocumentsBucket = 'local-uploads'
+    const s3QABucket = 'local-qa'
+    if (s3DocumentsBucket === undefined || s3QABucket === undefined) {
+        throw new Error(
+            'To configure s3, you  must set REACT_APP_S3_DOCUMENTS_BUCKET and REACT_APP_S3_QA_BUCKET'
+        )
     }
+    
+    if (s3Region !== undefined && s3LocalURL !== undefined) {
+        throw new Error(
+            'You cant set both REACT_APP_S3_REGION and REACT_APP_S3_LOCAL_URL. Pick one depending on what environment you are in'
+        )
+    }
+    let s3Client: S3ClientT
+    const S3_BUCKETS_CONFIG: S3BucketConfigType = {
+        HEALTH_PLAN_DOCS: s3DocumentsBucket,
+        QUESTION_ANSWER_DOCS: s3QABucket,
+    }
+    console.info("================= S3URL ==============="+ s3LocalURL)
+    console.info("================= S3Region ==============="+ s3Region)
+    s3Client = newLocalS3Client(s3LocalURL, S3_BUCKETS_CONFIG)
+
+    // if (s3Region) {
+    //     s3Client = newAmplifyS3Client(S3_BUCKETS_CONFIG)
+    // } else if (s3LocalURL) {
+    //     s3Client = newLocalS3Client(s3LocalURL, S3_BUCKETS_CONFIG)
+    // } else {
+    //     throw new Error(
+    //         'You must set either REACT_APP_S3_REGION or REACT_APP_S3_LOCAL_URL depending on what environment you are in'
+    //     )
+    // }
+    // const s3 =
+    //     authMode == 'LOCAL'
+    //         ? new S3Client({
+    //               forcePathStyle: true,
+    //               credentials: {
+    //                   accessKeyId: 'S3RVER', // This specific key is required when working offline
+    //                   secretAccessKey: 'S3RVER', // pragma: allowlist secret
+    //               },
+    //               endpoint: s3LocalURL,
+    //               region: s3Region,
+    //           })
+    //         : new S3Client({
+    //               region: s3Region,
+    //               // credentials: {
+    //               //     accessKeyId: AWS_ACCESS_KEY_ID,
+    //               //     secretAccessKey: AWS_SECRET_ACCESS_KEY
+    //               // }
+    //           })
+
+    // if (s3 instanceof Error) {
+    //     console.error('S3 not initiated')
+    //     throw new Error('Initialization error for S3 client')
+    // }
 
     // Resolvers are defined and tested in the resolvers package
     const resolvers = configureResolvers(
@@ -421,7 +456,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         emailParameterStore,
         launchDarkly,
         jwtLib,
-        s3
+        s3Client
     )
 
     const userFetcher =

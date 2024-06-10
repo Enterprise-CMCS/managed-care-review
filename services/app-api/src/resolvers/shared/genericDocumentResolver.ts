@@ -40,16 +40,10 @@ export function genericDocumentResolver(s3: any): Resolvers['GenericDocument'] {
                 }
                 console.info(`${bucket} ====================== BUCKET =============`)
                 console.info(`${s3URL} ====================== S3URL =============`)
-                const command = await s3.send(
-                    new GetObjectCommand({
-                        Bucket: bucket,
-                        Key: key,
-                    })
-                )
-                const url =  await getSignedUrl(s3, command, {
-                    expiresIn: 3600,
-                })
-                console.info(`${getSignedUrl} ====================== getSignedURLOutput =============`)
+                
+                const url =  s3.getURL(key, bucket)
+                console.info(`${url} ====================== RETRIEVED URL =============`)
+
                 return url
         } catch(e) {
             console.error(e)
