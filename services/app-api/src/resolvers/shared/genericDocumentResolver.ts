@@ -5,7 +5,7 @@ import {
     parseBucketName,
     parseKey,
 } from '../../s3'
-import type { S3BucketConfigType } from '../../s3/s3Amplify'
+// import type { S3BucketConfigType } from '../../s3/s3Amplify'
 import type { S3ClientT } from '../../s3'
 
 export function genericDocumentResolver(): Resolvers['GenericDocument'] {
@@ -24,23 +24,23 @@ export function genericDocumentResolver(): Resolvers['GenericDocument'] {
                 const s3LocalURL = 'http://localhost:4569'
                 const s3DocumentsBucket = 'local-uploads'
                 const s3QABucket = 'local-qa'
-                const S3_BUCKETS_CONFIG: S3BucketConfigType = {
-                    HEALTH_PLAN_DOCS: s3DocumentsBucket,
-                    QUESTION_ANSWER_DOCS: s3QABucket,
-                }
+                // const S3_BUCKETS_CONFIG: S3BucketConfigType = {
+                //     HEALTH_PLAN_DOCS: s3DocumentsBucket,
+                //     QUESTION_ANSWER_DOCS: s3QABucket,
+                // }
 
                 // s3Client = newAmplifyS3Client(S3_BUCKETS_CONFIG)
                 // if (process.env.REACT_APP_AUTH_MODE !== 'LOCAL') {
                 // } else if (s3LocalURL) {
-                    const s3Client = newLocalS3Client(s3LocalURL, S3_BUCKETS_CONFIG)
+                    // const s3Client = newLocalS3Client(s3LocalURL, S3_BUCKETS_CONFIG)
                 // } else {
                 //     throw new Error(
                 //         'You must set either REACT_APP_S3_REGION or REACT_APP_S3_LOCAL_URL depending on what environment you are in'
                 //     )
                 // }
-                const url = await s3Client.getURL(key, 'HEALTH_PLAN_DOCS')
+                // const url = await s3Client.getURL(key, 'HEALTH_PLAN_DOCS')
                 
-                return url
+                return ''
             } catch (e) {
                 console.error(e)
                 throw e
