@@ -33,9 +33,18 @@ import {
     ApolloServerPluginLandingPageDisabled,
     ApolloServerPluginLandingPageLocalDefault,
 } from 'apollo-server-core'
+import {
+    newLocalS3Client,
+} from '../s3'
+import type { S3ClientT } from '../s3'
 
 let ldClient: LDClient
+let s3Client: S3ClientT
 
+type BucketShortName = 'HEALTH_PLAN_DOCS' | 'QUESTION_ANSWER_DOCS'
+type S3BucketConfigType = {
+    [K in BucketShortName]: string
+}
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
     user: UserType
@@ -199,6 +208,10 @@ async function initializeGQLHandler(): Promise<Handler> {
     const ldSDKKey = process.env.LD_SDK_KEY
     const allowedIpAddresses = process.env.ALLOWED_IP_ADDRESSES
     const jwtSecret = process.env.JWT_SECRET
+    const s3LocalURL = process.env.REACT_APP_S3_LOCAL_URL
+    const s3DocumentsBucket =
+        process.env.REACT_APP_S3_DOCUMENTS_BUCKET
+    const s3QABucket = process.env.REACT_APP_S3_QA_BUCKET
 
     // START Assert configuration is valid
     if (emailerMode !== 'LOCAL' && emailerMode !== 'SES')
@@ -241,6 +254,15 @@ async function initializeGQLHandler(): Promise<Handler> {
     if (jwtSecret === undefined || jwtSecret === '') {
         throw new Error(
             'Configuration Error: JWT_SECRET is required to run app-api.'
+        )
+    }
+
+    if (
+        s3DocumentsBucket === undefined ||
+        s3QABucket === undefined
+    ) {
+        throw new Error(
+            'To configure s3, you  must set REACT_APP_S3_DOCUMENTS_BUCKET and REACT_APP_S3_QA_BUCKET'
         )
     }
 
@@ -387,6 +409,17 @@ async function initializeGQLHandler(): Promise<Handler> {
                   dmcoEmails,
                   helpDeskEmail,
               })
+    const S3_BUCKETS_CONFIG: S3BucketConfigType = {
+        HEALTH_PLAN_DOCS: s3DocumentsBucket,
+        QUESTION_ANSWER_DOCS: s3QABucket,
+    }
+    // if (process.env.REACT_APP_AUTH_MODE !== 'LOCAL') {
+    //     s3Client = newLocalS3Client(s3LocalURL, S3_BUCKETS_CONFIG)
+    // } else if (s3LocalURL) {
+    //     s3Client = newLocalS3Client(s3LocalURL, S3_BUCKETS_CONFIG)
+    // }
+    const url = s3LocalURL ? s3LocalURL : ''
+    s3Client = newLocalS3Client(url, S3_BUCKETS_CONFIG)
 
     // Resolvers are defined and tested in the resolvers package
     const resolvers = configureResolvers(
@@ -394,7 +427,8 @@ async function initializeGQLHandler(): Promise<Handler> {
         emailer,
         emailParameterStore,
         launchDarkly,
-        jwtLib
+        jwtLib,
+        s3Client
     )
 
     const userFetcher =
