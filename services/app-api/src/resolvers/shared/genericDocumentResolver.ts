@@ -29,10 +29,10 @@ export function genericDocumentResolver(): Resolvers['GenericDocument'] {
                     QUESTION_ANSWER_DOCS: s3QABucket,
                 }
 
-                s3Client = newAmplifyS3Client(S3_BUCKETS_CONFIG)
+                // s3Client = newAmplifyS3Client(S3_BUCKETS_CONFIG)
                 // if (process.env.REACT_APP_AUTH_MODE !== 'LOCAL') {
                 // } else if (s3LocalURL) {
-                //     s3Client = newLocalS3Client(s3LocalURL, S3_BUCKETS_CONFIG)
+                    s3Client = newLocalS3Client(s3LocalURL, S3_BUCKETS_CONFIG)
                 // } else {
                 //     throw new Error(
                 //         'You must set either REACT_APP_S3_REGION or REACT_APP_S3_LOCAL_URL depending on what environment you are in'
