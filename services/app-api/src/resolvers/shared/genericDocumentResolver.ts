@@ -1,35 +1,12 @@
 import type { Resolvers } from '../../gen/gqlServer'
-import Url from 'url-parse'
 import {
     newAmplifyS3Client,
     newLocalS3Client,
-} from '../../../../app-web/src/s3'
-import type { S3BucketConfigType } from '../../../../app-web/src/s3/s3Amplify'
-import type { S3ClientT } from '../../../../app-web/src/s3'
-
-// tslint:disable-next-line
-const isValidS3URLFormat = (url: {
-    protocol: string
-    slashes: boolean
-    pathname: string
-}): boolean => {
-    return (
-        url.protocol === 's3:' &&
-        url.slashes === true &&
-        url.pathname.split('/').length === 3
-    )
-}
-const parseBucketName = (maybeS3URL: string): string | Error => {
-    const url = new Url(maybeS3URL)
-    if (!isValidS3URLFormat(url)) throw new Error('Not valid S3URL')
-    return url.hostname
-}
-
-const parseKey = (maybeS3URL: string): string | Error => {
-    const url = new Url(maybeS3URL)
-    if (!isValidS3URLFormat(url)) return new Error('Not valid S3URL')
-    return url.pathname.split('/')[1]
-}
+    parseBucketName,
+    parseKey,
+} from '../../s3'
+import type { S3BucketConfigType } from '../../s3/s3Amplify'
+import type { S3ClientT } from '../../s3'
 
 export function genericDocumentResolver(): Resolvers['GenericDocument'] {
     return {
