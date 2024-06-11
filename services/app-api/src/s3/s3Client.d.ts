@@ -1,5 +1,4 @@
-import type { BucketShortName } from './s3Amplify'
-import type { S3Error } from './s3Error'
+type BucketShortName = 'HEALTH_PLAN_DOCS' | 'QUESTION_ANSWER_DOCS'
 
 export type S3ClientT = {
     uploadFile: (
