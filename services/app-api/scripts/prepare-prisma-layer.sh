@@ -20,7 +20,7 @@ function preparePrismaLayer() {
     mkdir -p lambda-layers-prisma-client-engine/nodejs/prisma
 
     echo "Generate RHEL client..."
-    PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn prisma generate
+    PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x yarn prisma generate
 
     echo "Prepare Prisma Client Migration lambda layer"
     rsync -av ../../node_modules/@prisma/client/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/client
