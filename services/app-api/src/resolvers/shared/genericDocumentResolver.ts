@@ -21,26 +21,24 @@ export function genericDocumentResolver(): Resolvers['GenericDocument'] {
                     )
                     throw err
                 }
-                // S3 Region and LocalUrl are mutually exclusive.
-                // One is used in AWS and one is used locally.
-                const s3Region = process.env.REACT_APP_S3_REGION
                 const s3LocalURL = process.env.REACT_APP_S3_LOCAL_URL
                 const s3DocumentsBucket =
                     process.env.REACT_APP_S3_DOCUMENTS_BUCKET
                 const s3QABucket = process.env.REACT_APP_S3_QA_BUCKET
-
+                console.info(
+                    '============ s3DocumentsBucket ==============',
+                    s3DocumentsBucket
+                )
+                console.info(
+                    '============ s3QABucket ==============',
+                    s3QABucket
+                )
                 if (
                     s3DocumentsBucket === undefined ||
                     s3QABucket === undefined
                 ) {
                     throw new Error(
                         'To configure s3, you  must set REACT_APP_S3_DOCUMENTS_BUCKET and REACT_APP_S3_QA_BUCKET'
-                    )
-                }
-
-                if (s3Region !== undefined && s3LocalURL !== undefined) {
-                    throw new Error(
-                        'You cant set both REACT_APP_S3_REGION and REACT_APP_S3_LOCAL_URL. Pick one depending on what environment you are in'
                     )
                 }
 
