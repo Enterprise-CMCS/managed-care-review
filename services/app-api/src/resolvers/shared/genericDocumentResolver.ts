@@ -1,11 +1,8 @@
 import type { Resolvers } from '../../gen/gqlServer'
 import {
-    newAmplifyS3Client,
-    newLocalS3Client,
     parseBucketName,
     parseKey,
 } from '../../s3'
-import type { S3BucketConfigType } from '../../s3/s3Amplify'
 import type { S3ClientT } from '../../s3'
 
 export function genericDocumentResolver(s3Client: S3ClientT): Resolvers['GenericDocument'] {
