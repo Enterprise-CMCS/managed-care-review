@@ -7822,18 +7822,18 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/context-async-hooks/-/context-async-hooks-1.25.0.tgz#bc3dcb1302b34b0f56047dd0d0f56b33013f657f"
   integrity sha512-sBW313mnMyFg0cp/40BRzrZBWG+581s2j5gIsa5fgGadswyILk4mNFATsqrCOpAx945RDuZ2B7ThQLgor9OpfA==
 
-"@opentelemetry/context-zone-peer-dep@1.24.1":
-  version "1.24.1"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/context-zone-peer-dep/-/context-zone-peer-dep-1.24.1.tgz#400badb0390dc5f1344d489627690cc4855144ec"
-  integrity sha512-s67becvBZFFjSLKSiy8ia2m7htsC4gsk8J/X0368FzBYseb/26daYr4ewx6tKcAsmZqJA7402cTQirv175x5BA==
+"@opentelemetry/context-zone-peer-dep@1.25.0":
+  version "1.25.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/context-zone-peer-dep/-/context-zone-peer-dep-1.25.0.tgz#89f0ea243a26c9255e2214db69f8653eeaa365f4"
+  integrity sha512-wh03u4ECYonjaxB+hzriWzHcr4GRlYSQoirDn0ldBDebz3WDZgjHCD/NPBoZaulGGwU6lvmQZXuyfz5hRrJhOw==
 
 "@opentelemetry/context-zone@^1.24.1":
-  version "1.24.1"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/context-zone/-/context-zone-1.24.1.tgz#c0bc4c02a016e5e936c35b7e4766e648c087b462"
-  integrity sha512-pt5KLJws1m+rHTeEA6uootoyiuZlCt7j90dmdjXnqx4JZH6sFWqWB5IW1gOukDY7Ym3cNKjtoh3/uK0KuSRBfg==
+  version "1.25.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/context-zone/-/context-zone-1.25.0.tgz#549f4fb858022a3381269de68598bf53fc04ab34"
+  integrity sha512-LmO64smA9SZrl8f1HRRSNA4oudwpjCMVxZz08EhkRCcTRvFB8p+6Lnu6mtT54wD/raeXoEbLGtVqMYHsZ6bpmA==
   dependencies:
-    "@opentelemetry/context-zone-peer-dep" "1.24.1"
-    zone.js "^0.11.0 || ^0.13.0 || ^0.14.0"
+    "@opentelemetry/context-zone-peer-dep" "1.25.0"
+    zone.js "^0.11.0 || ^0.12.0 || ^0.13.0 || ^0.14.0"
 
 "@opentelemetry/core@0.25.0":
   version "0.25.0"
@@ -32513,12 +32513,10 @@ zod@^3.10.1, zod@^3.11.6:
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.23.8.tgz#e37b957b5d52079769fb8097099b592f0ef4067d"
   integrity sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==
 
-"zone.js@^0.11.0 || ^0.13.0 || ^0.14.0":
-  version "0.14.5"
-  resolved "https://registry.yarnpkg.com/zone.js/-/zone.js-0.14.5.tgz#7f3591dc4cad1a030cda86b03d10450b719dd460"
-  integrity sha512-9XYWZzY6PhHOSdkYryNcMm7L8EK7a4q+GbTvxbIA2a9lMdRUpGuyaYvLDcg8D6bdn+JomSsbPcilVKg6SmUx6w==
-  dependencies:
-    tslib "^2.3.0"
+"zone.js@^0.11.0 || ^0.12.0 || ^0.13.0 || ^0.14.0":
+  version "0.14.7"
+  resolved "https://registry.yarnpkg.com/zone.js/-/zone.js-0.14.7.tgz#4a9a70599109663b1921165663bbac521995eef3"
+  integrity sha512-0w6DGkX2BPuiK/NLf+4A8FLE43QwBfuqz2dVgi/40Rj1WmqUskCqj329O/pwrqFJLG5X8wkeG2RhIAro441xtg==
 
 zwitch@^1.0.0:
   version "1.0.5"
