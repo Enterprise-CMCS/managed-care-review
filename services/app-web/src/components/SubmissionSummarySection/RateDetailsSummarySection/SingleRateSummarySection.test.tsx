@@ -61,6 +61,7 @@ describe('SingleRateSummarySection', () => {
                 name: 'Rates this rate certification covers',
             })
         ).toBeInTheDocument()
+        // this is a deprecated field but should still show if present on summary page
         expect(
             screen.getByRole('definition', {
                 name: 'Programs this rate certification covers',

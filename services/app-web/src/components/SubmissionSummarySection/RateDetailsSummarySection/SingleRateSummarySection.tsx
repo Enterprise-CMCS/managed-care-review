@@ -271,11 +271,11 @@ export const SingleRateSummarySection = ({
                 <dl>
                     <DoubleColumnGrid>
                         {formData.deprecatedRateProgramIDs.length > 0 &&
-                            isSubmitted && (
+                            isSubmittedOrCMSUser && (
                                 <DataDetail
                                     id="historicRatePrograms"
                                     label="Programs this rate certification covers"
-                                    explainMissingData={explainMissingData}
+                                    explainMissingData={false} // this is a deprecated field, we never need to explain if its missing
                                     children={ratePrograms(
                                         formData,
                                         statePrograms,
