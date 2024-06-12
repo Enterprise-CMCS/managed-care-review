@@ -5,12 +5,16 @@ import {
     mockMNState,
     fetchCurrentUserMock,
     mockValidCMSUser,
+    mockContractPackageSubmittedWithRevisions,
+    mockValidStateUser,
+    mockContractPackageUnlocked,
 } from '../../../../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySectionV2 as RateDetailsSummarySection } from './RateDetailsSummarySectionV2'
 import { Rate } from '../../../../../gen/gqlClient'
 import { testS3Client } from '../../../../../testHelpers/s3Helpers'
 import { ActuaryCommunicationRecord } from '../../../../../constants'
+import * as usePreviousSubmission from '../../../../../hooks/usePreviousSubmission'
 
 describe('RateDetailsSummarySection', () => {
     const draftContract = mockContractPackageDraft()
@@ -130,11 +134,19 @@ describe('RateDetailsSummarySection', () => {
         ]
     }
 
-    const apolloProvider = {
+    const apolloProviderCMSUser = {
         mocks: [
             fetchCurrentUserMock({
                 statusCode: 200,
                 user: mockValidCMSUser(),
+            }),
+        ],
+    }
+    const apolloProviderStateUser = {
+        mocks: [
+            fetchCurrentUserMock({
+                statusCode: 200,
+                user: mockValidStateUser(),
             }),
         ],
     }
@@ -150,7 +162,7 @@ describe('RateDetailsSummarySection', () => {
                 statePrograms={statePrograms}
             />,
             {
-                apolloProvider,
+                apolloProvider: apolloProviderCMSUser,
             }
         )
 
@@ -173,7 +185,7 @@ describe('RateDetailsSummarySection', () => {
                 statePrograms={statePrograms}
             />,
             {
-                apolloProvider,
+                apolloProvider: apolloProviderCMSUser,
             }
         )
 
@@ -208,7 +220,7 @@ describe('RateDetailsSummarySection', () => {
                 statePrograms={statePrograms}
             />,
             {
-                apolloProvider,
+                apolloProvider: apolloProviderCMSUser,
             }
         )
         expect(
@@ -251,7 +263,7 @@ describe('RateDetailsSummarySection', () => {
                     statePrograms={statePrograms}
                 />,
                 {
-                    apolloProvider,
+                    apolloProvider: apolloProviderCMSUser,
                 }
             )
         })
@@ -286,7 +298,7 @@ describe('RateDetailsSummarySection', () => {
                         statePrograms={statePrograms}
                     />,
                     {
-                        apolloProvider,
+                        apolloProvider: apolloProviderCMSUser,
                     }
                 )
             }
@@ -313,7 +325,7 @@ describe('RateDetailsSummarySection', () => {
                     statePrograms={statePrograms}
                 />,
                 {
-                    apolloProvider,
+                    apolloProvider: apolloProviderCMSUser,
                 }
             )
         })
@@ -351,7 +363,7 @@ describe('RateDetailsSummarySection', () => {
                     statePrograms={statePrograms}
                 />,
                 {
-                    apolloProvider,
+                    apolloProvider: apolloProviderCMSUser,
                 }
             )
         })
@@ -376,7 +388,7 @@ describe('RateDetailsSummarySection', () => {
                     statePrograms={statePrograms}
                 />,
                 {
-                    apolloProvider,
+                    apolloProvider: apolloProviderCMSUser,
                 }
             )
         })
@@ -437,7 +449,7 @@ describe('RateDetailsSummarySection', () => {
                         statePrograms={statePrograms}
                     />,
                     {
-                        apolloProvider,
+                        apolloProvider: apolloProviderCMSUser,
                     }
                 )
             }
@@ -513,7 +525,7 @@ describe('RateDetailsSummarySection', () => {
                         statePrograms={statePrograms}
                     />,
                     {
-                        apolloProvider,
+                        apolloProvider: apolloProviderCMSUser,
                     }
                 )
             }
@@ -526,6 +538,10 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('does not render download all button when on previous submission', async () => {
+        jest.spyOn(
+            usePreviousSubmission,
+            'usePreviousSubmission'
+        ).mockReturnValue(true)
         await waitFor(() =>
             renderWithProviders(
                 <RateDetailsSummarySection
@@ -534,7 +550,7 @@ describe('RateDetailsSummarySection', () => {
                     statePrograms={statePrograms}
                 />,
                 {
-                    apolloProvider,
+                    apolloProvider: apolloProviderCMSUser,
                 }
             )
         )
@@ -555,7 +571,7 @@ describe('RateDetailsSummarySection', () => {
                 statePrograms={statePrograms}
             />,
             {
-                apolloProvider,
+                apolloProvider: apolloProviderCMSUser,
             }
         )
         expect(
@@ -586,7 +602,7 @@ describe('RateDetailsSummarySection', () => {
                     statePrograms={statePrograms}
                 />,
                 {
-                    apolloProvider,
+                    apolloProvider: apolloProviderCMSUser,
                 }
             )
         }
@@ -621,7 +637,7 @@ describe('RateDetailsSummarySection', () => {
                     statePrograms={statePrograms}
                 />,
                 {
-                    apolloProvider,
+                    apolloProvider: apolloProviderCMSUser,
                 }
             )
         }
@@ -644,7 +660,7 @@ describe('RateDetailsSummarySection', () => {
                 statePrograms={statePrograms}
             />,
             {
-                apolloProvider,
+                apolloProvider: apolloProviderCMSUser,
             }
         )
         const programList = screen.getAllByRole('definition', {
@@ -667,7 +683,7 @@ describe('RateDetailsSummarySection', () => {
                 statePrograms={statePrograms}
             />,
             {
-                apolloProvider,
+                apolloProvider: apolloProviderCMSUser,
             }
         )
         const certType = screen.getAllByRole('definition', {
@@ -689,7 +705,7 @@ describe('RateDetailsSummarySection', () => {
                 statePrograms={statePrograms}
             />,
             {
-                apolloProvider,
+                apolloProvider: apolloProviderCMSUser,
             }
         )
         await waitFor(() => {
@@ -721,7 +737,7 @@ describe('RateDetailsSummarySection', () => {
                 statePrograms={statePrograms}
             />,
             {
-                apolloProvider,
+                apolloProvider: apolloProviderCMSUser,
             }
         )
         await waitFor(() => {
@@ -766,7 +782,7 @@ describe('RateDetailsSummarySection', () => {
                 statePrograms={statePrograms}
             />,
             {
-                apolloProvider,
+                apolloProvider: apolloProviderCMSUser,
             }
         )
 
@@ -800,7 +816,7 @@ describe('RateDetailsSummarySection', () => {
                 statePrograms={statePrograms}
             />,
             {
-                apolloProvider,
+                apolloProvider: apolloProviderCMSUser,
             }
         )
         await waitFor(() => {
@@ -851,7 +867,7 @@ describe('RateDetailsSummarySection', () => {
                 statePrograms={statePrograms}
             />,
             {
-                apolloProvider,
+                apolloProvider: apolloProviderCMSUser,
             }
         )
         await waitFor(() => {
@@ -895,7 +911,7 @@ describe('RateDetailsSummarySection', () => {
                 statePrograms={statePrograms}
             />,
             {
-                apolloProvider,
+                apolloProvider: apolloProviderCMSUser,
             }
         )
         await waitFor(() => {
@@ -911,7 +927,7 @@ describe('RateDetailsSummarySection', () => {
         })
     })
 
-    it('displays missing info text for unlocked submissions with only historic rate program ids', async () => {
+    it('displays missing info text for state users on unlocked submissions with only historic rate program ids', async () => {
         const draftContract = mockContractPackageDraft()
         if (
             draftContract.draftRevision &&
@@ -930,9 +946,10 @@ describe('RateDetailsSummarySection', () => {
                 editNavigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
                 statePrograms={statePrograms}
+                explainMissingData
             />,
             {
-                apolloProvider,
+                apolloProvider: apolloProviderStateUser,
             }
         )
         await waitFor(() => {
@@ -963,7 +980,7 @@ describe('RateDetailsSummarySection', () => {
             />,
             {
                 s3Provider,
-                apolloProvider,
+                apolloProvider: apolloProviderCMSUser,
             }
         )
 
@@ -972,5 +989,85 @@ describe('RateDetailsSummarySection', () => {
                 screen.getByText('Rate document download is unavailable')
             ).toBeInTheDocument()
         })
+    })
+    it('displays deprecated fields on previous submissions viewed by state users', async () => {
+        jest.spyOn(
+            usePreviousSubmission,
+            'usePreviousSubmission'
+        ).mockReturnValue(true)
+        const draftContract = mockContractPackageSubmittedWithRevisions()
+        draftContract.packageSubmissions[0].rateRevisions[0].formData.deprecatedRateProgramIDs =
+            [statePrograms[1].id]
+        draftContract.packageSubmissions[0].rateRevisions[0].formData.rateProgramIDs =
+            []
+
+        renderWithProviders(
+            <RateDetailsSummarySection
+                contract={draftContract}
+                editNavigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+                explainMissingData
+            />,
+            {
+                apolloProvider: apolloProviderStateUser,
+            }
+        )
+
+        expect(
+            screen.findByText('Programs this rate certification covers')
+        ).toBeTruthy()
+    })
+
+    it('displays deprecated fields on unlocked submissions for CMS users', async () => {
+        const contract = mockContractPackageUnlocked()
+
+        renderWithProviders(
+            <RateDetailsSummarySection
+                contract={contract}
+                editNavigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+            />,
+            {
+                apolloProvider: apolloProviderCMSUser,
+            }
+        )
+
+        expect(
+            screen.findByText('Programs this rate certification covers')
+        ).toBeTruthy()
+    })
+    it('does not display deprecated fields on unlocked submissions for state users', async () => {
+        const draftContract = mockContractPackageDraft()
+        if (
+            draftContract.draftRevision &&
+            draftContract.draftRates &&
+            draftContract.draftRates[0].draftRevision
+        ) {
+            draftContract.draftRates[0].draftRevision.formData.deprecatedRateProgramIDs =
+                [statePrograms[0].id]
+            draftContract.draftRates[0].draftRevision.formData.rateProgramIDs =
+                []
+            draftContract.status = 'UNLOCKED'
+            draftContract.draftRates[0].status = 'UNLOCKED'
+        }
+
+        renderWithProviders(
+            <RateDetailsSummarySection
+                contract={draftContract}
+                editNavigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+                explainMissingData
+            />,
+            {
+                apolloProvider: apolloProviderStateUser,
+            }
+        )
+
+        expect(
+            screen.queryByText('Programs this rate certification covers')
+        ).toBeNull()
     })
 })

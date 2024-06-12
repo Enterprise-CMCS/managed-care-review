@@ -1115,12 +1115,6 @@ type PackageWithSameRate {
     packageStatus: HealthPlanPackageStatus
 }
 
-input PackageWithSameRateInput {
-    packageName: String!
-    packageId: String!
-    packageStatus: HealthPlanPackageStatus
-}
-
 """
 RateFormData represents the form data that was inputted by the state
 This type is used for the form data field found on a rate revision
@@ -1570,13 +1564,6 @@ input RateFormDataInput {
     directly or go through them
     """
     actuaryCommunicationPreference: ActuaryCommunication
-    """
-    Deprecated - an array of PackageWithSameRate elements
-    which contain the packageName, packageId, and packageStatus
-    These elements represent other packages in the system
-    that are using this rate
-    """
-    packagesWithSharedRateCerts: [PackageWithSameRateInput!]!
 }
 
 input SubmitRateInput {

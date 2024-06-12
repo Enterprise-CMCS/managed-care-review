@@ -223,7 +223,7 @@ jobs:
 
       - name: Install packages
         working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
 
       - name: Generate protos
         run: npx lerna run generate && npx lerna run build --scope=app-proto
@@ -232,7 +232,7 @@ jobs:
       - name: Prepare prisma client
         working-directory: services/app-api
         env:
-          PRISMA_CLI_BINARY_TARGETS: rhel-openssl-1.0.x
+          PRISMA_CLI_BINARY_TARGETS: rhel-openssl-3.0.x
         run: yarn prisma generate
 
       - name: Prepare "@prisma/client" lambda layer

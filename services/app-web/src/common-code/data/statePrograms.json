@@ -713,19 +713,19 @@
             "programs": [
                 {
                     "id": "75358ece-92f0-4c89-a45b-817f80d8be37",
-                    "fullName": "Behavioral Health Medicaid Managed Care Program",
-                    "name": "LME/MCO",
+                    "fullName": "Medicaid Direct Behavioral Health PIHP",
+                    "name": "BH PIHP",
                     "isRateProgram": false
                 },
                 {
                     "id": "b4e8d1e4-0520-4fa6-b472-d3b655d3efdc",
-                    "fullName": "Managed Care PrePaid Health Plan",
-                    "name": "MC PHP",
+                    "fullName": "Standard Plan MCO",
+                    "name": "Standard Plans",
                     "isRateProgram": false
                 },
                 {
                     "id": "fae74329-159c-42c1-9f7a-eb1e82afd2c5",
-                    "fullName": "Tailored Plans",
+                    "fullName": "BH I/DD Tailored Plan MCO",
                     "name": "Tailored Plans",
                     "isRateProgram": false
                 },
@@ -1228,15 +1228,9 @@
             "name": "Virginia",
             "programs": [
                 {
-                    "id": "055f12ba-ca0d-4436-8581-f3e0b201d2c1",
-                    "fullName": "Medallion 4.0",
-                    "name": "Medallion 4.0",
-                    "isRateProgram": false
-                },
-                {
-                    "id": "ba8e4fd4-7888-4e1a-a720-5dfcc045e034",
-                    "fullName": "Commonwealth Coordinated Care Plus",
-                    "name": "CCC Plus",
+                    "id": "05e5316f-b9ba-4f2a-9a24-9449b63ef8a1",
+                    "fullName": "Cardinal Care Managed Care",
+                    "name": "CCMC",
                     "isRateProgram": false
                 }
             ],

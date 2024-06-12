@@ -1,13 +1,10 @@
 import React, { useState } from 'react'
 import styles from '../SubmissionSummarySection.module.scss'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
-import {
-    DataDetail,
-    DataDetailContactField,
-    DataDetailMissingField,
-} from '../../DataDetail'
+import { DataDetail, DataDetailContactField } from '../../DataDetail'
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import {
+    ActuaryContact,
     Program,
     Rate,
     RateFormData,
@@ -116,7 +113,9 @@ export const SingleRateSummarySection = ({
     const isRateAmendment = formData.rateType === 'AMENDMENT'
     const isUnlocked = rate.status === 'UNLOCKED'
     const explainMissingData =
-        !isSubmitted && loggedInUser?.role === 'STATE_USER'
+        !isSubmitted &&
+        (loggedInUser?.role === 'STATE_USER' ||
+            loggedInUser?.role === 'HELPDESK_USER')
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
     const isSubmittedOrCMSUser =
         rate.status === 'SUBMITTED' ||
@@ -150,6 +149,23 @@ export const SingleRateSummarySection = ({
                     ? pkg.packageName.concat(' (Draft)')
                     : pkg.packageName,
         }))
+
+    const formatDatePeriod = (
+        startDate: Date | undefined,
+        endDate: Date | undefined
+    ): string | undefined => {
+        if (!startDate || !endDate) {
+            return undefined
+        }
+        return `${formatCalendarDate(startDate)} to ${formatCalendarDate(endDate)}`
+    }
+
+    const validateActuary = (actuary: ActuaryContact): boolean => {
+        if (!actuary?.name || !actuary?.email) {
+            return false
+        }
+        return true
+    }
 
     useDeepCompareEffect(() => {
         // get all the keys for the documents we want to zip
@@ -255,11 +271,11 @@ export const SingleRateSummarySection = ({
                 <dl>
                     <DoubleColumnGrid>
                         {formData.deprecatedRateProgramIDs.length > 0 &&
-                            isSubmitted && (
+                            isSubmittedOrCMSUser && (
                                 <DataDetail
                                     id="historicRatePrograms"
                                     label="Programs this rate certification covers"
-                                    explainMissingData={!isSubmittedOrCMSUser}
+                                    explainMissingData={false} // this is a deprecated field, we never need to explain if its missing
                                     children={ratePrograms(
                                         formData,
                                         statePrograms,
@@ -267,18 +283,16 @@ export const SingleRateSummarySection = ({
                                     )}
                                 />
                             )}
-                        {ratePrograms && (
-                            <DataDetail
-                                id="ratePrograms"
-                                label="Rates this rate certification covers"
-                                explainMissingData={explainMissingData}
-                                children={ratePrograms(
-                                    formData,
-                                    statePrograms,
-                                    false
-                                )}
-                            />
-                        )}
+                        <DataDetail
+                            id="ratePrograms"
+                            label="Rates this rate certification covers"
+                            explainMissingData={explainMissingData}
+                            children={ratePrograms(
+                                formData,
+                                statePrograms,
+                                false
+                            )}
+                        />
                         <DataDetail
                             id="rateType"
                             label="Rate certification type"
@@ -293,18 +307,10 @@ export const SingleRateSummarySection = ({
                                     : 'Rating period'
                             }
                             explainMissingData={explainMissingData}
-                            children={
-                                formData.rateDateStart &&
-                                formData.rateDateEnd ? (
-                                    `${formatCalendarDate(
-                                        formData.rateDateStart
-                                    )} to ${formatCalendarDate(
-                                        formData.rateDateEnd
-                                    )}`
-                                ) : (
-                                    <DataDetailMissingField />
-                                )
-                            }
+                            children={formatDatePeriod(
+                                formData.rateDateStart,
+                                formData.rateDateEnd
+                            )}
                         />
                         <DataDetail
                             id="dateCertified"
@@ -323,17 +329,16 @@ export const SingleRateSummarySection = ({
                                 id="effectiveRatingPeriod"
                                 label="Rate amendment effective dates"
                                 explainMissingData={explainMissingData}
-                                children={`${formatCalendarDate(
-                                    formData.amendmentEffectiveDateStart
-                                )} to ${formatCalendarDate(
+                                children={formatDatePeriod(
+                                    formData.amendmentEffectiveDateStart,
                                     formData.amendmentEffectiveDateEnd
-                                )}`}
+                                )}
                             />
                         ) : null}
                         <DataDetail
                             id="rateSubmissionDate"
                             label="Rate submission date"
-                            explainMissingData={!isSubmitted}
+                            explainMissingData={explainMissingData}
                             children={formatCalendarDate(
                                 rate.initiallySubmittedAt
                             )}
@@ -349,11 +354,16 @@ export const SingleRateSummarySection = ({
                             label="Certifying actuary"
                             explainMissingData={explainMissingData}
                             children={
-                                <DataDetailContactField
-                                    contact={
-                                        formData.certifyingActuaryContacts[0]
-                                    }
-                                />
+                                validateActuary(
+                                    formData.certifyingActuaryContacts[0]
+                                ) && (
+                                    <DataDetailContactField
+                                        contact={
+                                            formData
+                                                .certifyingActuaryContacts[0]
+                                        }
+                                    />
+                                )
                             }
                         />
                         {formData.addtlActuaryContacts?.length
@@ -367,9 +377,11 @@ export const SingleRateSummarySection = ({
                                               explainMissingData
                                           }
                                           children={
-                                              <DataDetailContactField
-                                                  contact={contact}
-                                              />
+                                              validateActuary(contact) && (
+                                                  <DataDetailContactField
+                                                      contact={contact}
+                                                  />
+                                              )
                                           }
                                       />
                                   )

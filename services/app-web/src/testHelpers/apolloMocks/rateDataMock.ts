@@ -157,11 +157,11 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
                     packageStatus: 'SUBMITTED',
                 },
             ],
-            ...data,
             __typename: 'RateFormData',
         },
         contractRevisions: [contractRevisionOnRateDataMock()],
         __typename: 'RateRevision',
+        ...data,
     }
 }
 

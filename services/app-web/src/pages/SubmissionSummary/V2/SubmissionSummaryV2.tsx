@@ -126,6 +126,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
     }
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
     const isStateUser = loggedInUser?.role === 'STATE_USER'
+    const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
     const submissionStatus = contract.status
     const statePrograms = contract.state.programs
 
@@ -159,6 +160,9 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
     const editOrAddMCCRSID = contract.mccrsID
         ? 'Edit MC-CRS number'
         : 'Add MC-CRS record number'
+    const isSubmitted =
+        contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
+    const explainMissingData = (isHelpDeskUser || isStateUser) && !isSubmitted
 
     return (
         <div className={styles.background}>
@@ -218,7 +222,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                                         <span className={styles.mccrsID}>
                                             MC-CRS record number:
                                             <Link
-                                                href={`https://mccrs.abtsites.com/Home/Index/${contract.mccrsID}`}
+                                                href={`https://mccrs.internal.cms.gov/Home/Index/${contract.mccrsID}`}
                                                 aria-label="MC-CRS system login"
                                             >
                                                 {contract.mccrsID}
@@ -254,6 +258,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                         statePrograms={statePrograms}
                         initiallySubmittedAt={contract.initiallySubmittedAt}
                         isStateUser={isStateUser}
+                        explainMissingData={explainMissingData}
                     />
                 }
 
@@ -264,6 +269,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                         isStateUser={isStateUser}
                         submissionName={name}
                         onDocumentError={handleDocumentDownloadError}
+                        explainMissingData={explainMissingData}
                     />
                 }
 
@@ -274,6 +280,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                         isCMSUser={isCMSUser}
                         statePrograms={statePrograms}
                         onDocumentError={handleDocumentDownloadError}
+                        explainMissingData={explainMissingData}
                     />
                 )}
 
@@ -281,6 +288,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                     <ContactsSummarySection
                         contract={contract}
                         isStateUser={isStateUser}
+                        explainMissingData={explainMissingData}
                     />
                 }
 

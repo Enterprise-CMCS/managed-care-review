@@ -44,7 +44,9 @@ describe('localLogin', () => {
         store.setItem('localUser', 'weofnef{{{|')
 
         await expect(getLoggedInUser()).rejects.toEqual(
-            new SyntaxError('Unexpected token w in JSON at position 0')
+            new SyntaxError(
+                `Unexpected token 'w', "weofnef{{{|" is not valid JSON`
+            )
         )
     })
 

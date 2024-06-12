@@ -1181,7 +1181,7 @@ function mockContractPackageUnlocked(
                         amendmentEffectiveDateStart: new Date(),
                         amendmentEffectiveDateEnd: new Date(),
                         rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                        deprecatedRateProgramIDs: [],
+                        deprecatedRateProgramIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f10'],
                         certifyingActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
@@ -1360,7 +1360,7 @@ function mockContractPackageUnlocked(
                         amendmentEffectiveDateStart: new Date(),
                         amendmentEffectiveDateEnd: new Date(),
                         rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                        deprecatedRateProgramIDs: [],
+                        deprecatedRateProgramIDs: ['ea16a6c0-5fc6-4df8-adac-c627e76660ab'],
                         certifyingActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
@@ -1455,6 +1455,154 @@ function mockContractFormData( partial?: Partial<ContractFormData>): ContractFor
     }
 }
 
+const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
+    {
+        draftRevision: {
+            __typename: 'ContractRevision',
+            submitInfo: undefined,
+            unlockInfo: undefined,
+            id: '123',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            contractName: 'MCR-0005-alvhalfhdsalfee',
+            formData: {
+                programIDs: [],
+                populationCovered: undefined,
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                submissionType: undefined,
+                riskBasedContract: undefined,
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                submissionDescription: undefined,
+                supportingDocuments: [
+                    {
+                        s3URL: 's3://bucketname/key/contractsupporting1',
+                        sha256: 'fakesha',
+                        name: 'contractSupporting1',
+                        dateAdded: new Date('01/15/2024')
+                    },
+                    {
+                        s3URL: 's3://bucketname/key/contractSupporting2',
+                        sha256: 'fakesha',
+                        name: 'contractSupporting2',
+                        dateAdded: new Date('01/13/2024')
+                    },
+                ],
+                stateContacts: [],
+                contractType: undefined,
+                contractExecutionStatus: undefined,
+                contractDocuments: [
+                    {
+                        s3URL: 's3://bucketname/one-two/one-two.png',
+                        sha256: 'fakesha',
+                        name: 'contract document',
+                        dateAdded: new Date('01/01/2024')
+                    },
+                ],
+                contractDateStart:undefined,
+                contractDateEnd: undefined,
+                managedCareEntities: [],
+                federalAuthorities: [],
+                inLieuServicesAndSettings: undefined,
+                modifiedBenefitsProvided: undefined,
+                modifiedGeoAreaServed: undefined,
+                modifiedMedicaidBeneficiaries: undefined,
+                modifiedRiskSharingStrategy: undefined,
+                modifiedIncentiveArrangements: undefined,
+                modifiedWitholdAgreements: undefined,
+                modifiedStateDirectedPayments: undefined,
+                modifiedPassThroughPayments: undefined,
+                modifiedPaymentsForMentalDiseaseInstitutions: undefined,
+                modifiedMedicalLossRatioStandards: undefined,
+                modifiedOtherFinancialPaymentIncentive: undefined,
+                modifiedEnrollmentProcess: undefined,
+                modifiedGrevienceAndAppeal: undefined,
+                modifiedNetworkAdequacyStandards: undefined,
+                modifiedLengthOfContract: undefined,
+                modifiedNonRiskPaymentArrangements: undefined,
+                statutoryRegulatoryAttestation: false,
+                statutoryRegulatoryAttestationDescription: undefined
+            }
+        },
+        draftRates: [
+            {
+                id: '123',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                status: 'DRAFT',
+                stateCode: 'MN',
+                revisions: [],
+                state: mockMNState(),
+                stateNumber: 5,
+                parentContractID: 'test-abc-123',
+                draftRevision: {
+                    id: '123',
+                    rateID: '456',
+                    contractRevisions: [],
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    formData: {
+                        rateType: undefined,
+                        rateCapitationType: undefined,
+                        rateDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rate',
+                                sha256: 'fakesha',
+                                name: 'rate certification',
+                                dateAdded: new Date('01/13/2024')
+                            },
+                        ],
+                        supportingDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/ratesupporting1',
+                                sha256: 'fakesha',
+                                name: 'rateSupporting1',
+                                dateAdded: new Date('01/15/2024')
+                            },
+                            {
+                                s3URL: 's3://bucketname/key/rateSupporting2',
+                                sha256: 'fakesha',
+                                name: 'rateSupporting2',
+                                dateAdded: new Date('01/13/2024')
+                            },
+                        ],
+                        rateDateStart: undefined,
+                        rateDateEnd: undefined,
+                        rateDateCertified: undefined,
+                        amendmentEffectiveDateStart: undefined,
+                        amendmentEffectiveDateEnd: undefined,
+                        deprecatedRateProgramIDs: [],
+                        rateProgramIDs: [],
+                        certifyingActuaryContacts: [
+                            {
+                                id: null,
+                                actuarialFirmOther: null,
+                                actuarialFirm: undefined,
+                                name: '',
+                                titleRole: '',
+                                email: '',
+                            },
+                        ],
+                        addtlActuaryContacts: [
+                            {
+                                id: null,
+                                actuarialFirmOther: null,
+                                actuarialFirm: undefined,
+                                name: '',
+                                titleRole: '',
+                                email: '',
+                            },
+                        ],
+                        actuaryCommunicationPreference: undefined,
+                        packagesWithSharedRateCerts: [],
+                    }
+                }
+            },
+        ],
+    }
+)
+
 export {
     mockContractPackageDraft,
     mockContractPackageSubmitted,
@@ -1462,5 +1610,6 @@ export {
     mockContractPackageUnlocked,
     mockContractFormData,
     mockContractPackageSubmittedWithRevisions,
-    mockContractPackageWithDifferentProgramsInRevisions
+    mockContractPackageWithDifferentProgramsInRevisions,
+    mockEmptyDraftContractAndRate
 }

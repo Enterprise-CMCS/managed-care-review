@@ -65,6 +65,7 @@ function prismaRateCreateFormDataFromDomain(
         },
         actuaryCommunicationPreference:
             rateFormData.actuaryCommunicationPreference,
+        //TODO: Remove this once HPP resolvers are not used anymore
         contractsWithSharedRateRevision: {
             connect: rateFormData.packagesWithSharedRateCerts
                 ? rateFormData.packagesWithSharedRateCerts.map((p) => ({
@@ -121,6 +122,7 @@ function prismaUpdateRateFormDataFromDomain(
         },
         actuaryCommunicationPreference:
             rateFormData.actuaryCommunicationPreference,
+        //TODO: Remove this once HPP resolvers are not used anymore
         contractsWithSharedRateRevision: {
             set: rateFormData.packagesWithSharedRateCerts
                 ? rateFormData.packagesWithSharedRateCerts.map((p) => ({

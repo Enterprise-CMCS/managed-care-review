@@ -56,6 +56,7 @@ export type ContractDetailsSummarySectionV2Props = {
     isStateUser: boolean
     submissionName: string
     onDocumentError?: (error: true) => void
+    explainMissingData?: boolean
 }
 
 function renderDownloadButton(zippedFilesURL: string | undefined | Error) {
@@ -75,10 +76,10 @@ function renderDownloadButton(zippedFilesURL: string | undefined | Error) {
 export const ContractDetailsSummarySectionV2 = ({
     contract,
     contractRev,
-    isStateUser,
     editNavigateTo, // this is the edit link for the section. When this prop exists, summary section is loaded in edit mode
     submissionName,
     onDocumentError,
+    explainMissingData,
 }: ContractDetailsSummarySectionV2Props): React.ReactElement => {
     // Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
@@ -198,9 +199,7 @@ export const ContractDetailsSummarySectionV2 = ({
                                         label={
                                             StatutoryRegulatoryAttestationQuestion
                                         }
-                                        explainMissingData={
-                                            !isSubmittedOrCMSUser
-                                        }
+                                        explainMissingData={explainMissingData}
                                         children={
                                             StatutoryRegulatoryAttestation[
                                                 attestationYesNo
@@ -217,7 +216,7 @@ export const ContractDetailsSummarySectionV2 = ({
                                 <DataDetail
                                     id="statutoryRegulatoryAttestationDescription"
                                     label="Non-compliance description"
-                                    explainMissingData={!isSubmittedOrCMSUser}
+                                    explainMissingData={explainMissingData}
                                     children={
                                         contractFormData?.statutoryRegulatoryAttestationDescription
                                     }
@@ -230,7 +229,7 @@ export const ContractDetailsSummarySectionV2 = ({
                     <DataDetail
                         id="contractExecutionStatus"
                         label="Contract status"
-                        explainMissingData={!isSubmittedOrCMSUser}
+                        explainMissingData={explainMissingData}
                         children={
                             contractFormData?.contractExecutionStatus
                                 ? ContractExecutionStatusRecord[
@@ -246,7 +245,7 @@ export const ContractDetailsSummarySectionV2 = ({
                                 ? 'Contract amendment effective dates'
                                 : 'Contract effective dates'
                         }
-                        explainMissingData={!isSubmittedOrCMSUser}
+                        explainMissingData={explainMissingData}
                         children={
                             contractFormData?.contractDateStart &&
                             contractFormData?.contractDateEnd
@@ -261,12 +260,13 @@ export const ContractDetailsSummarySectionV2 = ({
                     <DataDetail
                         id="managedCareEntities"
                         label="Managed care entities"
-                        explainMissingData={!isSubmittedOrCMSUser}
                         children={
                             contractFormData?.managedCareEntities && (
                                 <DataDetailCheckboxList
                                     list={contractFormData?.managedCareEntities}
                                     dict={ManagedCareEntityRecord}
+                                    // if showing error for missing data, then we do NOT display empty list
+                                    displayEmptyList={!explainMissingData}
                                 />
                             )
                         }
@@ -274,12 +274,13 @@ export const ContractDetailsSummarySectionV2 = ({
                     <DataDetail
                         id="federalAuthorities"
                         label="Active federal operating authority"
-                        explainMissingData={!isSubmittedOrCMSUser}
                         children={
                             applicableFederalAuthorities && (
                                 <DataDetailCheckboxList
                                     list={applicableFederalAuthorities}
                                     dict={FederalAuthorityRecord}
+                                    // if error for missing data, then we do NOT display empty list
+                                    displayEmptyList={!explainMissingData}
                                 />
                             )
                         }
@@ -295,7 +296,7 @@ export const ContractDetailsSummarySectionV2 = ({
                                     : 'This contract action includes new or modified provisions related to the following'
                             }
                             explainMissingData={
-                                provisionsAreInvalid && !isSubmittedOrCMSUser
+                                provisionsAreInvalid && explainMissingData
                             }
                         >
                             {provisionsAreInvalid ? null : (
@@ -315,7 +316,7 @@ export const ContractDetailsSummarySectionV2 = ({
                                     : 'This contract action does NOT include new or modified provisions related to the following'
                             }
                             explainMissingData={
-                                provisionsAreInvalid && !isSubmittedOrCMSUser
+                                provisionsAreInvalid && explainMissingData
                             }
                         >
                             {provisionsAreInvalid ? null : (
