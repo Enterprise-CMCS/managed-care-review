@@ -7,10 +7,14 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 import { parseKey } from './helpers'
-import type { BucketShortName, S3BucketConfigType } from './s3Amplify'
+
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
 
+type BucketShortName = 'HEALTH_PLAN_DOCS' | 'QUESTION_ANSWER_DOCS'
+type S3BucketConfigType = {
+    [K in BucketShortName]: string
+}
 export function newLocalS3Client(
     endpoint: string,
     bucketConfig: S3BucketConfigType
