@@ -1,7 +1,10 @@
 import React from 'react'
-import onemacLogo from '../../assets/images/onemac-logo.svg?react'
 import { Logo } from './Logo'
 
+const onemacLogo = new URL(
+    '../../assets/images/onemac-logo.svg',
+    import.meta.url
+).href
 export default {
     title: 'Components/Logo',
     component: Logo,

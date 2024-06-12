@@ -1,7 +1,6 @@
 import { Grid, GridContainer } from '@trussworks/react-uswds'
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import onemacLogo from '../../assets/images/onemac-logo.svg?react'
 import { AuthModeType } from '../../common-code/config'
 import { useCurrentRoute } from '../../hooks/useCurrentRoute'
 import { useAuth } from '../../contexts/AuthContext'
@@ -27,6 +26,10 @@ export const Header = ({
     setAlert,
     disableLogin = false,
 }: HeaderProps): React.ReactElement => {
+    const onemacLogo = new URL(
+        '../../assets/images/onemac-logo.svg',
+        import.meta.url
+    ).href
     const { logout, loggedInUser, loginStatus } = useAuth()
     const { heading } = usePage()
     const { currentRoute: route } = useCurrentRoute()
