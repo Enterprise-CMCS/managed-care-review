@@ -151,7 +151,10 @@ describe('RateDetailsSummarySection', () => {
         ],
     }
 
-    afterEach(() => vi.clearAllMocks())
+    afterEach(() => {
+        vi.clearAllMocks()
+        vi.resetAllMocks()
+    })
 
     it('can render draft contract with rates without errors', () => {
         renderWithProviders(

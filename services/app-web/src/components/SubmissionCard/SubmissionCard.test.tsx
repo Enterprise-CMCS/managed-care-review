@@ -40,14 +40,12 @@ describe('SubmissionCard', () => {
                 description="Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly."
                 submissionType={SubmissionType.ContractOnly}
                 status={SubmissionStatus.submitted}
+                date={dayjs()}
                 href="/foo"
             />
         )
         expect(screen.getByTestId('tag')).toBeInTheDocument()
-
-        expect(screen.getByTestId('tag')).toHaveStyle(`
-            background-color: '#2e8540',
-        `)
+        expect(screen.getByTestId('tag')).toHaveClass(/tagSuccess/)
     })
 
     it('displays draft tag text when submission type is draft', () => {

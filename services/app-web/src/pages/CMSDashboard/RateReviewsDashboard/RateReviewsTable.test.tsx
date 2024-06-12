@@ -1,4 +1,4 @@
-import {renderWithProviders } from '../../../testHelpers'
+import { renderWithProviders } from '../../../testHelpers'
 import { RateInDashboardType } from './RateReviewsTable'
 import {
     fetchCurrentUserMock,
@@ -13,7 +13,9 @@ import userEvent from '@testing-library/user-event'
 
 describe('RateReviewsTable', () => {
     afterEach(() => {
+        // Reset url and hash to prevent jotai from saving filters between tests.
         window.history.pushState({}, '', '')
+        window.location.hash = ''
     })
 
     const statePrograms = mockMNState().programs
@@ -81,7 +83,7 @@ describe('RateReviewsTable', () => {
 
         await waitFor(() => {
             expect(
-                screen.queryByText('Displaying 3 of 3 rate reviews')
+                screen.getByText('Displaying 3 of 3 rate reviews')
             ).toBeInTheDocument()
         })
         // expect filter accordion to be present
@@ -132,22 +134,16 @@ describe('RateReviewsTable', () => {
         ).toBeInTheDocument()
     })
     it('can filter table by submission state', async () => {
-        renderWithProviders(
-            <RateReviewsTable
-                tableData={tableData()}
-                caption={'Test table caption'}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            statusCode: 200,
-                            user: mockValidCMSUser(),
-                        }),
-                    ],
-                },
-            }
-        )
+        renderWithProviders(<RateReviewsTable tableData={tableData()} />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        statusCode: 200,
+                        user: mockValidCMSUser(),
+                    }),
+                ],
+            },
+        })
 
         const stateFilter = screen.getByTestId('state-filter')
         const accordionButton = screen.getByTestId(
@@ -194,26 +190,21 @@ describe('RateReviewsTable', () => {
         ).toBeInTheDocument()
     })
     it('can filter on date ranges', async () => {
-        renderWithProviders(
-            <RateReviewsTable
-                tableData={tableData()}
-                caption={'Test table caption'}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            statusCode: 200,
-                            user: mockValidCMSUser(),
-                        }),
-                    ],
-                },
-            }
-        )
+        const data = tableData()
+        renderWithProviders(<RateReviewsTable tableData={data} />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        statusCode: 200,
+                        user: mockValidCMSUser(),
+                    }),
+                ],
+            },
+        })
 
         await waitFor(() => {
             expect(
-                screen.queryByText('Displaying 3 of 3 rate reviews')
+                screen.getByText('Displaying 3 of 3 rate reviews')
             ).toBeInTheDocument()
         })
 
@@ -317,8 +308,12 @@ describe('RateReviewsTable', () => {
             }
         )
 
-        await screen.findByText('Rate period start date')
-        await screen.findByText('Rate #')
+        await waitFor(() => {
+            expect(
+                screen.getByText('Rate period start date')
+            ).toBeInTheDocument()
+            expect(screen.getByText('Rate #')).toBeInTheDocument()
+        })
     })
     it('does not render rate number by default', async () => {
         renderWithProviders(
@@ -338,7 +333,7 @@ describe('RateReviewsTable', () => {
             }
         )
 
-    await screen.findByText('Rate period start date')
-       expect(screen.queryByText('Rate #')).toBeNull()
+        await screen.findByText('Rate period start date')
+        expect(screen.queryByText('Rate #')).toBeNull()
     })
 })

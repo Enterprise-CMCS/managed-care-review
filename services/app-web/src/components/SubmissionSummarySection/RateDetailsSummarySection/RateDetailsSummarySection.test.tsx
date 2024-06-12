@@ -88,7 +88,10 @@ describe('RateDetailsSummarySection', () => {
         ],
     }
 
-    afterEach(() => vi.clearAllMocks())
+    afterEach(() => {
+        vi.clearAllMocks()
+        vi.resetAllMocks()
+    })
 
     it('can render draft submission without errors', () => {
         renderWithProviders(
