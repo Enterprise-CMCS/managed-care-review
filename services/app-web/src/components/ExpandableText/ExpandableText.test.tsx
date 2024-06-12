@@ -52,7 +52,9 @@ describe('ExpandableText', () => {
             </ExpandableText>
         )
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
-        expect(screen.getByTestId('clampElement')).toHaveClass('textContracted')
+        expect(screen.getByTestId('clampElement')).toHaveClass(
+            '_textContracted_a80648'
+        )
         expect(screen.getByText('Show More')).toBeInTheDocument()
     })
 
@@ -65,10 +67,14 @@ describe('ExpandableText', () => {
         )
         expect(screen.getByText('Show More')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
-        expect(screen.getByTestId('clampElement')).toHaveClass('textContracted')
+        expect(screen.getByTestId('clampElement')).toHaveClass(
+            '_textContracted_a80648'
+        )
         await userEvent.click(screen.getByText('Show More'))
         expect(screen.getByText('Show Less')).toBeInTheDocument()
-        expect(screen.getByTestId('clampElement')).toHaveClass('textExpanded')
+        expect(screen.getByTestId('clampElement')).toHaveClass(
+            '_textExpanded_a80648'
+        )
     })
 
     it('renders short text without errors and not clamped', () => {
@@ -80,7 +86,9 @@ describe('ExpandableText', () => {
         )
         expect(screen.queryByText('Show More')).toBeNull()
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
-        expect(screen.getByTestId('clampElement')).toHaveClass('textContracted')
+        expect(screen.getByTestId('clampElement')).toHaveClass(
+            '_textContracted_a80648'
+        )
     })
 
     it('can render react elements and clamp long text correctly', () => {
@@ -94,7 +102,9 @@ describe('ExpandableText', () => {
             </ExpandableText>
         )
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
-        expect(screen.getByTestId('clampElement')).toHaveClass('textContracted')
+        expect(screen.getByTestId('clampElement')).toHaveClass(
+            '_textContracted_a80648'
+        )
         expect(screen.getByText('Show More')).toBeInTheDocument()
     })
 
@@ -110,9 +120,13 @@ describe('ExpandableText', () => {
         )
         expect(screen.getByText('Show More')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
-        expect(screen.getByTestId('clampElement')).toHaveClass('textContracted')
+        expect(screen.getByTestId('clampElement')).toHaveClass(
+            '_textContracted_a80648'
+        )
         await userEvent.click(screen.getByText('Show More'))
         expect(screen.getByText('Show Less')).toBeInTheDocument()
-        expect(screen.getByTestId('clampElement')).toHaveClass('textExpanded')
+        expect(screen.getByTestId('clampElement')).toHaveClass(
+            '_textExpanded_a80648'
+        )
     })
 })

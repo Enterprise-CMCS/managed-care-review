@@ -538,7 +538,7 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('does not render download all button when on previous submission', async () => {
-        jest.spyOn(
+        vi.spyOn(
             usePreviousSubmission,
             'usePreviousSubmission'
         ).mockReturnValue(true)
@@ -991,7 +991,7 @@ describe('RateDetailsSummarySection', () => {
         })
     })
     it('displays deprecated fields on previous submissions viewed by state users', async () => {
-        jest.spyOn(
+        vi.spyOn(
             usePreviousSubmission,
             'usePreviousSubmission'
         ).mockReturnValue(true)

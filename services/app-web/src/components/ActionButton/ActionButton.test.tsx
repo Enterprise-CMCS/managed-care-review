@@ -38,7 +38,7 @@ describe('ActionButton', () => {
 
             expect(defaultButton).not.toHaveAttribute('aria-disabled')
             expect(defaultButton).not.toHaveClass('usa-button--disabled')
-            expect(defaultButton).not.toHaveClass('disabledCursor')
+            expect(defaultButton).not.toHaveClass('_disabledCursor_b7011e')
         })
 
         it('renders button without loading styles and spinner', async () => {
@@ -52,7 +52,7 @@ describe('ActionButton', () => {
             })
 
             expect(defaultButton).not.toHaveClass('usa-button--active')
-            expect(defaultButton).not.toHaveClass('disabledCursor')
+            expect(defaultButton).not.toHaveClass('_disabledCursor_b7011e')
             expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
         })
     })
@@ -93,11 +93,11 @@ describe('ActionButton', () => {
             })
             expect(loadingButton).toHaveClass('usa-button--active')
 
-            expect(loadingButton).toHaveClass('disabledCursor')
+            expect(loadingButton).toHaveClass('_disabledCursor_b7011e')
             await waitFor(() => {
                 expect(screen.getByRole('progressbar')).toBeInTheDocument()
                 expect(screen.getByRole('progressbar')).toHaveClass(
-                    'ds-c-spinner'
+                    ' _ds-c-spinner_d122df'
                 )
             })
         })
@@ -170,7 +170,7 @@ describe('ActionButton', () => {
                 screen.getByRole('button', {
                     name: /Test Button/,
                 })
-            ).toHaveClass('disabledCursor')
+            ).toHaveClass('_disabledCursor_b7011e')
         })
     })
 
