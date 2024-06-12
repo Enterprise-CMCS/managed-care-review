@@ -186,7 +186,6 @@ export function updateHealthPlanFormDataResolver(
                         s3URL: doc.s3URL,
                         sha256: doc.sha256,
                         id: doc.id,
-                        downloadURL: '',
                     }
                 }),
                 contractDocuments: unlockedFormData.contractDocuments.map(
@@ -196,7 +195,6 @@ export function updateHealthPlanFormDataResolver(
                             s3URL: doc.s3URL,
                             sha256: doc.sha256,
                             id: doc.id,
-                            downloadURL: '',
                         }
                     }
                 ),

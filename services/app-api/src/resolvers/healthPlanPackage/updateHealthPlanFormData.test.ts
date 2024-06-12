@@ -577,7 +577,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             documents: [
                 {
                     name: 'supportingDocument11.pdf',
-                    s3URL: 's3://bucketname/key/test1',
+                    s3URL: 'fakeS3URL',
                     sha256: 'needs-to-be-there',
                 },
             ],

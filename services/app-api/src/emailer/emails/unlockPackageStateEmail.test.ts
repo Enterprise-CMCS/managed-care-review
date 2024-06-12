@@ -24,7 +24,7 @@ const sub: UnlockedHealthPlanFormDataType = {
             rateType: 'NEW',
             rateDocuments: [
                 {
-                    s3URL: 's3://bucketname/key/test1',
+                    s3URL: 'bar',
                     name: 'foo',
                     sha256: 'fakesha',
                 },
@@ -144,7 +144,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                 rateType: 'NEW',
                 rateDocuments: [
                     {
-                        s3URL: 's3://bucketname/key/test1',
+                        s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
                     },
@@ -172,7 +172,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                 rateType: 'NEW',
                 rateDocuments: [
                     {
-                        s3URL: 's3://bucketname/key/test1',
+                        s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
                     },
@@ -200,7 +200,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                 rateType: 'AMENDMENT',
                 rateDocuments: [
                     {
-                        s3URL: 's3://bucketname/key/test1',
+                        s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
                     },
@@ -333,7 +333,7 @@ test('renders overall email as expected', async () => {
                 rateType: 'NEW',
                 rateDocuments: [
                     {
-                        s3URL: 's3://bucketname/key/test1',
+                        s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
                     },
@@ -361,7 +361,7 @@ test('renders overall email as expected', async () => {
                 rateType: 'NEW',
                 rateDocuments: [
                     {
-                        s3URL: 's3://bucketname/key/test1',
+                        s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
                     },

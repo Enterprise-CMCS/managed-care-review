@@ -867,9 +867,8 @@ describe('submitContract', () => {
         const dummyDoc = (postfix: string) => {
             return {
                 name: `doc${postfix}.pdf`,
-                s3URL: `s3://local-uploads/1718132158843-testDocument.pdf/testDocument.pdf${postfix}`,
+                s3URL: `fakeS3URL${postfix}`,
                 sha256: `fakesha${postfix}`,
-                downloadURL: `downloadURL${postfix}`,
             }
         }
 

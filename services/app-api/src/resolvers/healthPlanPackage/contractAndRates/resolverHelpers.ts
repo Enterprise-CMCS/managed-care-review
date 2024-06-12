@@ -75,7 +75,6 @@ const convertHPPDocsToDomain = async (docs: SubmissionDocument[]) =>
                 name,
                 s3URL,
                 sha256,
-                downloadURL: '',
             }
         })
     )

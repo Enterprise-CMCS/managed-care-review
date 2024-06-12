@@ -61,7 +61,6 @@ describe('updateDraftRate', () => {
                     s3URL: 's3://bucketname/key/rate1',
                     name: 'Rate cert 1',
                     sha256: 'shaS56',
-                    downloadURL: 'downloadURL',
                 },
             ],
             supportingDocuments: [
@@ -69,7 +68,6 @@ describe('updateDraftRate', () => {
                     s3URL: 's3://bucketname/key/ratesupporting1-1',
                     name: 'supporting documents 1-1',
                     sha256: 'shaS56',
-                    downloadURL: 'downloadURL',
                 },
             ],
         }
@@ -81,7 +79,6 @@ describe('updateDraftRate', () => {
                     s3URL: 's3://bucketname/key/rate2',
                     name: 'Rate cert 2',
                     sha256: 'shaS56',
-                    downloadURL: 'downloadURL',
                 },
             ],
             supportingDocuments: [
@@ -89,13 +86,11 @@ describe('updateDraftRate', () => {
                     s3URL: 's3://bucketname/key/ratesupporting2-1',
                     name: 'supporting documents 2-1',
                     sha256: 'shaS56',
-                    downloadURL: 'downloadURL',
                 },
                 {
                     s3URL: 's3://bucketname/key/ratesupporting2-2',
                     name: 'supporting documents2-2',
                     sha256: 'shaS56',
-                    downloadURL: 'downloadURL',
                 },
             ],
         }

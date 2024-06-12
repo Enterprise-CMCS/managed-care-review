@@ -23,19 +23,19 @@ describe('FileUpload component', () => {
         uploadFile: (_file: File) =>
             fakeRequest<S3FileData>(true, {
                 key: 'testtest',
-                s3URL: 's3://bucketname/key/test1',
+                s3URL: 'fakeS3url',
             }),
         deleteFile: async (_key: string) => {
             await fakeRequest<S3FileData>(true, {
                 key: 'testtest',
-                s3URL: 's3://bucketname/key/test1',
+                s3URL: 'fakeS3url',
             })
             return
         },
         scanFile: async (_key: string) => {
             await fakeRequest<S3FileData>(true, {
                 key: 'testtest',
-                s3URL: 's3://bucketname/key/test1',
+                s3URL: 'fakeS3url',
             })
             return
         },

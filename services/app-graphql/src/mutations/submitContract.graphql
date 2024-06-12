@@ -93,14 +93,12 @@ fragment rateRevisionFragmentForFetchContract on RateRevision {
             s3URL
             sha256
             dateAdded
-            downloadURL
         }
         supportingDocuments {
             name
             s3URL
             sha256
             dateAdded
-            downloadURL
         }
         rateDateStart
         rateDateEnd
@@ -168,7 +166,6 @@ fragment rateRevisionFragmentForFetchContract on RateRevision {
                 s3URL
                 sha256
                 dateAdded
-                downloadURL
             }
             contractType
             contractExecutionStatus
@@ -177,7 +174,6 @@ fragment rateRevisionFragmentForFetchContract on RateRevision {
                 s3URL
                 sha256
                 dateAdded
-                downloadURL
             }
             contractDateStart
             contractDateEnd
@@ -224,7 +220,6 @@ fragment contractFormDataFragment on ContractFormData {
         s3URL
         sha256
         dateAdded
-        downloadURL
     }
 
     contractType
@@ -234,7 +229,6 @@ fragment contractFormDataFragment on ContractFormData {
         s3URL
         sha256
         dateAdded
-        downloadURL
     }
 
     contractDateStart

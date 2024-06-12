@@ -15,9 +15,8 @@ describe('isEqualRateData', () => {
                 rateDocuments: [
                     {
                         name: 'Rate 1 Doc',
-                        s3URL: 's3://bucketname/key/test1',
+                        s3URL: 'fakeS3URL1',
                         sha256: 'someShaForRateDoc1',
-                        downloadURL: 'downloadURL',
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 5, 1)),
@@ -36,9 +35,8 @@ describe('isEqualRateData', () => {
                 rateDocuments: [
                     {
                         name: 'Rate 1 Doc',
-                        s3URL: 's3://bucketname/key/test1',
+                        s3URL: 'fakeS3URL1',
                         sha256: 'someShaForRateDoc1',
-                        downloadURL: 'downloadURL',
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 5, 1)),
@@ -60,9 +58,8 @@ describe('isEqualRateData', () => {
                 rateDocuments: [
                     {
                         name: 'Rate 1 Doc',
-                        s3URL: 's3://bucketname/key/test1',
+                        s3URL: 'fakeS3URL1',
                         sha256: 'someShaForRateDoc1',
-                        downloadURL: 'downloadURL',
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 5, 1)),
@@ -74,9 +71,8 @@ describe('isEqualRateData', () => {
                 rateDocuments: [
                     {
                         name: 'Rate 1 Doc',
-                        s3URL: 's3://bucketname/key/test1----2',
+                        s3URL: 'fakeS3URL1----2',
                         sha256: 'someShaForRateDoc1',
-                        downloadURL: 'downloadURL',
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 5, 1)),
@@ -98,9 +94,8 @@ describe('isEqualRateData', () => {
                 rateDocuments: [
                     {
                         name: 'Rate 1 Doc',
-                        s3URL: 's3://bucketname/key/test1',
+                        s3URL: 'fakeS3URL1',
                         sha256: 'someShaForRateDoc1',
-                        downloadURL: 'downloadURL',
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 5, 1)),
@@ -253,7 +248,6 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                         s3URL: 's3://bucketname/key/rate',
                         name: 'rate',
                         sha256: 'fakesha',
-                        downloadURL: 'downloadURL',
                     },
                 ],
                 supportingDocuments: [],
@@ -291,7 +285,6 @@ describe('convertHealthPlanPackageRatesToDomain', () => {
                         s3URL: 's3://bucketname/key/supporting-documents',
                         name: 'supporting documents',
                         sha256: 'supportingDocsSha',
-                        downloadURL: 'downloadURL',
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 5, 1)),

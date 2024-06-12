@@ -249,7 +249,7 @@ test('includes expected data summary for a contract and rates submission State e
                 rateType: 'NEW',
                 rateDocuments: [
                     {
-                        s3URL: 's3://bucketname/key/test1',
+                        s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
                     },
@@ -335,7 +335,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                 rateType: 'NEW',
                 rateDocuments: [
                     {
-                        s3URL: 's3://bucketname/key/test1',
+                        s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
                     },
@@ -363,7 +363,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                 rateType: 'NEW',
                 rateDocuments: [
                     {
-                        s3URL: 's3://bucketname/key/test1',
+                        s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
                     },
@@ -391,7 +391,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                 rateType: 'AMENDMENT',
                 rateDocuments: [
                     {
-                        s3URL: 's3://bucketname/key/test1',
+                        s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
                     },
@@ -501,7 +501,7 @@ test('includes expected data summary for a rate amendment submission State email
 
                 rateDocuments: [
                     {
-                        s3URL: 's3://bucketname/key/test1',
+                        s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
                     },
@@ -582,7 +582,7 @@ test('renders overall email for a new package with a rate amendment as expected'
                 rateType: 'AMENDMENT',
                 rateDocuments: [
                     {
-                        s3URL: 's3://bucketname/key/test1',
+                        s3URL: 'bar',
                         name: 'foo',
                         sha256: 'fakesha',
                     },

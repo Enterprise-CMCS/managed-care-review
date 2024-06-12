@@ -55,7 +55,7 @@ describe('createQuestionResponse', () => {
                         documents: [
                             {
                                 name: 'Test Question Response',
-                                s3URL: 's3://bucketname/key/test1',
+                                s3URL: 'testS3Url',
                             },
                         ],
                         addedBy: expect.objectContaining({
@@ -79,7 +79,7 @@ describe('createQuestionResponse', () => {
                     documents: [
                         {
                             name: 'Test Question',
-                            s3URL: 's3://bucketname/key/test1',
+                            s3URL: 'testS3Url',
                         },
                     ],
                 },
@@ -115,7 +115,7 @@ describe('createQuestionResponse', () => {
                     documents: [
                         {
                             name: 'Test Question',
-                            s3URL: 's3://bucketname/key/test1',
+                            s3URL: 'testS3Url',
                         },
                     ],
                 },

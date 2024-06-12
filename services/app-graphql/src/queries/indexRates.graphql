@@ -45,7 +45,6 @@ query indexRates {
                             s3URL
                             sha256
                             dateAdded
-                            downloadURL
 
                         },
                         supportingDocuments {
@@ -53,7 +52,6 @@ query indexRates {
                             s3URL
                             sha256
                             dateAdded
-                            downloadURL
                         },
                         rateDateStart,
                         rateDateEnd,
@@ -119,7 +117,6 @@ query indexRates {
                                 s3URL
                                 sha256
                                 dateAdded
-                                downloadURL
                             }
                             contractType
                             contractExecutionStatus
@@ -128,7 +125,6 @@ query indexRates {
                                 s3URL
                                 sha256
                                 dateAdded
-                                downloadURL
                             }
                             contractDateStart
                             contractDateEnd
@@ -180,14 +176,12 @@ query indexRates {
                             s3URL
                             sha256
                             dateAdded
-                            downloadURL
                         },
                         supportingDocuments {
                             name
                             s3URL
                             sha256
                             dateAdded
-                            downloadURL
                         },
                         rateDateStart,
                         rateDateEnd,
@@ -253,7 +247,6 @@ query indexRates {
                                 s3URL
                                 sha256
                                 dateAdded
-                                downloadURL
                             }
                             contractType
                             contractExecutionStatus
@@ -262,7 +255,6 @@ query indexRates {
                                 s3URL
                                 sha256
                                 dateAdded
-                                downloadURL
                             }
                             contractDateStart
                             contractDateEnd

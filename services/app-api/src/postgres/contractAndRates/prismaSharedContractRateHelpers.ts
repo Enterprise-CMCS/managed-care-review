@@ -176,7 +176,6 @@ function rateFormDataToDomainModel(
                       name: doc.name,
                       s3URL: doc.s3URL,
                       sha256: doc.sha256,
-                      downloadURL: doc.downloadURL,
                       dateAdded: dateAdded ?? rateRevision.updatedAt,
                   }
               })
@@ -192,7 +191,6 @@ function rateFormDataToDomainModel(
                       name: doc.name,
                       s3URL: doc.s3URL,
                       sha256: doc.sha256,
-                      downloadURL: doc.downloadURL,
                       dateAdded: dateAdded ?? rateRevision.updatedAt,
                   }
               })
@@ -385,7 +383,6 @@ function contractFormDataToDomainModel(
                       s3URL: doc.s3URL,
                       sha256: doc.sha256 ?? undefined,
                       dateAdded: dateAdded ?? contractRevision.updatedAt,
-                      downloadURL: doc.downloadURL,
                   }
               })
             : [],
@@ -401,7 +398,6 @@ function contractFormDataToDomainModel(
                   return {
                       name: doc.name,
                       s3URL: doc.s3URL,
-                      downloadURL: doc.downloadURL,
                       sha256: doc.sha256 ?? undefined,
                       dateAdded: dateAdded ?? contractRevision.updatedAt,
                   }

@@ -71,15 +71,13 @@ describe('updateDraftContractWithRates postgres', () => {
             supportingDocuments: [
                 {
                     name: 'contract supporting doc',
-                    s3URL: 's3://bucketname/key/test1',
+                    s3URL: 'fakeS3URL',
                     sha256: '2342fwlkdmwvw',
-                    downloadURL: 'downloadurl',
                 },
                 {
                     name: 'contract supporting doc 2',
-                    s3URL: 's3://bucketname/key/test1',
+                    s3URL: 'fakeS3URL',
                     sha256: '45662342fwlkdmwvw',
-                    downloadURL: 'downloadurl',
                 },
             ],
             contractType: 'BASE',
@@ -87,9 +85,8 @@ describe('updateDraftContractWithRates postgres', () => {
             contractDocuments: [
                 {
                     name: 'contract doc',
-                    s3URL: 's3://bucketname/key/test1',
+                    s3URL: 'fakeS3URL',
                     sha256: '8984234fwlkdmwvw',
-                    downloadURL: 'downloadurl',
                 },
             ],
             contractDateStart: new Date(Date.UTC(2025, 5, 1)),
@@ -135,17 +132,15 @@ describe('updateDraftContractWithRates postgres', () => {
             rateDocuments: [
                 {
                     name: 'rate doc',
-                    s3URL: 's3://bucketname/key/test1',
+                    s3URL: 'fakeS3URL',
                     sha256: '8984234fwlkdmwvw',
-                    downloadURL: 'downloadurl',
                 },
             ],
             supportingDocuments: [
                 {
                     name: 'rate sup doc',
-                    s3URL: 's3://bucketname/key/test1',
+                    s3URL: 'fakeS3URL',
                     sha256: '8984234fwlkdmwvw',
-                    downloadURL: 'downloadurl',
                 },
             ],
             rateDateStart: new Date(Date.UTC(2025, 5, 1)),
@@ -235,7 +230,6 @@ describe('updateDraftContractWithRates postgres', () => {
                     s3URL: 's3://bucketname/key/contract1',
                     name: 'Rate cert 1',
                     sha256: 'shaS56',
-                    downloadURL: 'downloadurl',
                 },
             ],
             supportingDocuments: [
@@ -243,7 +237,6 @@ describe('updateDraftContractWithRates postgres', () => {
                     s3URL: 's3://bucketname/key/contractsupporting1-1',
                     name: 'supporting documents 1-1',
                     sha256: 'shaS56',
-                    downloadURL: 'downloadurl',
                 },
             ],
         }
@@ -255,7 +248,6 @@ describe('updateDraftContractWithRates postgres', () => {
                     s3URL: 's3://bucketname/key/contract2',
                     name: 'Rate cert 2',
                     sha256: 'shaS56',
-                    downloadURL: 'downloadurl',
                 },
             ],
             supportingDocuments: [
@@ -263,13 +255,11 @@ describe('updateDraftContractWithRates postgres', () => {
                     s3URL: 's3://bucketname/key/contractsupporting2-1',
                     name: 'supporting documents 2-1',
                     sha256: 'shaS56',
-                    downloadURL: 'downloadurl',
                 },
                 {
                     s3URL: 's3://bucketname/key/contractsupporting2-2',
                     name: 'supporting documents2-2',
                     sha256: 'shaS56',
-                    downloadURL: 'downloadurl',
                 },
             ],
         }
@@ -494,9 +484,8 @@ describe('updateDraftContractWithRates postgres', () => {
                 rateDocuments: [
                     {
                         name: 'Rate 1 Doc',
-                        s3URL: 's3://bucketname/key/test1',
+                        s3URL: 'fakeS3URL1',
                         sha256: 'someShaForRateDoc1',
-                        downloadURL: 'downloadurl',
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 5, 1)),
@@ -516,9 +505,8 @@ describe('updateDraftContractWithRates postgres', () => {
                 rateDocuments: [
                     {
                         name: 'Rate 2 Doc',
-                        s3URL: 's3://bucketname/key/test1',
+                        s3URL: 'fakeS3URL2',
                         sha256: 'someShaForRateDoc2',
-                        downloadURL: 'downloadurl',
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 8, 1)),
@@ -537,9 +525,8 @@ describe('updateDraftContractWithRates postgres', () => {
                 rateDocuments: [
                     {
                         name: 'Rate 3 Doc',
-                        s3URL: 's3://bucketname/key/test1',
+                        s3URL: 'fakeS3URL3',
                         sha256: 'someShaForRateDoc3',
-                        downloadURL: 'downloadurl',
                     },
                 ],
                 rateDateStart: new Date(Date.UTC(2024, 3, 1)),

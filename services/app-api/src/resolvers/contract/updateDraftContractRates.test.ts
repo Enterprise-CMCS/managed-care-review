@@ -143,10 +143,9 @@ describe('updateDraftContractRates', () => {
 
             rateDocuments: [
                 {
-                    s3URL: 's3://bucketname/key/test1',
+                    s3URL: 'foo://bar',
                     name: 'ratedoc1.doc',
                     sha256: 'foobar',
-                    downloadURL: 'downloadURL',
                 },
             ],
             supportingDocuments: [],
@@ -262,24 +261,21 @@ describe('updateDraftContractRates', () => {
                                 deprecatedRateProgramIDs: [],
                                 rateDocuments: [
                                     {
-                                        s3URL: 's3://bucketname/key/test1',
+                                        s3URL: 'foo://bar',
                                         name: 'ratedoc1.doc',
                                         sha256: 'foobar',
-                                        downloadURL: 'downloadURL',
                                     },
                                 ],
                                 supportingDocuments: [
                                     {
-                                        s3URL: 's3://bucketname/key/test1',
+                                        s3URL: 'foo://bar1',
                                         name: 'ratesupdoc1.doc',
                                         sha256: 'foobar1',
-                                        downloadURL: 'downloadURL',
                                     },
                                     {
-                                        s3URL: 's3://bucketname/key/test1',
+                                        s3URL: 'foo://bar2',
                                         name: 'ratesupdoc2.doc',
                                         sha256: 'foobar2',
-                                        downloadURL: 'downloadURL',
                                     },
                                 ],
                                 certifyingActuaryContacts: [
@@ -346,24 +342,21 @@ describe('updateDraftContractRates', () => {
                                 deprecatedRateProgramIDs: [],
                                 rateDocuments: [
                                     {
-                                        s3URL: 's3://bucketname/key/test1',
+                                        s3URL: 'foo://bar',
                                         name: 'updatedratedoc1.doc',
                                         sha256: 'foobar',
-                                        downloadURL: 'downloadURL',
                                     },
                                 ],
                                 supportingDocuments: [
                                     {
-                                        s3URL: 's3://bucketname/key/test1',
+                                        s3URL: 'foo://bar1',
                                         name: 'ratesupdoc1.doc',
                                         sha256: 'foobar1',
-                                        downloadURL: 'downloadURL',
                                     },
                                     {
-                                        s3URL: 's3://bucketname/key/test1',
+                                        s3URL: 'foo://bar2',
                                         name: 'ratesupdoc2.doc',
                                         sha256: 'foobar2',
-                                        downloadURL: 'downloadURL',
                                     },
                                 ],
                                 certifyingActuaryContacts: [
@@ -432,24 +425,21 @@ describe('updateDraftContractRates', () => {
                                 deprecatedRateProgramIDs: [],
                                 rateDocuments: [
                                     {
-                                        s3URL: 's3://bucketname/key/test1',
+                                        s3URL: 'foo://bar',
                                         name: 'updatedratedoc1.doc',
                                         sha256: 'foobar',
-                                        downloadURL: 'downloadURL',
                                     },
                                 ],
                                 supportingDocuments: [
                                     {
-                                        s3URL: 's3://bucketname/key/test1',
+                                        s3URL: 'foo://bar1',
                                         name: 'ratesupdoc1.doc',
                                         sha256: 'foobar1',
-                                        downloadURL: 'downloadURL',
                                     },
                                     {
-                                        s3URL: 's3://bucketname/key/test1',
+                                        s3URL: 'foo://bar2',
                                         name: 'ratesupdoc2.doc',
                                         sha256: 'foobar2',
-                                        downloadURL: 'downloadURL',
                                     },
                                 ],
                                 certifyingActuaryContacts: [
@@ -512,24 +502,21 @@ describe('updateDraftContractRates', () => {
                                 deprecatedRateProgramIDs: [],
                                 rateDocuments: [
                                     {
-                                        s3URL: 's3://bucketname/key/test1',
+                                        s3URL: 'foo://bar',
                                         name: 'updatedratedoc1.doc',
                                         sha256: 'foobar',
-                                        downloadURL: 'downloadURL',
                                     },
                                 ],
                                 supportingDocuments: [
                                     {
-                                        s3URL: 's3://bucketname/key/test1',
+                                        s3URL: 'foo://bar1',
                                         name: 'ratesupdoc1.doc',
                                         sha256: 'foobar1',
-                                        downloadURL: 'downloadURL',
                                     },
                                     {
-                                        s3URL: 's3://bucketname/key/test1',
+                                        s3URL: 'foo://bar2',
                                         name: 'ratesupdoc2.doc',
                                         sha256: 'foobar2',
-                                        downloadURL: 'downloadURL',
                                     },
                                 ],
                                 certifyingActuaryContacts: [
@@ -722,24 +709,21 @@ describe('updateDraftContractRates', () => {
                                 deprecatedRateProgramIDs: [],
                                 rateDocuments: [
                                     {
-                                        s3URL: 's3://bucketname/key/test1',
+                                        s3URL: 'foo://bar',
                                         name: 'updatedratedoc1.doc',
                                         sha256: 'foobar',
-                                        downloadURL: 'downloadURL',
                                     },
                                 ],
                                 supportingDocuments: [
                                     {
-                                        s3URL: 's3://bucketname/key/test1',
+                                        s3URL: 'foo://bar1',
                                         name: 'ratesupdoc1.doc',
                                         sha256: 'foobar1',
-                                        downloadURL: 'downloadURL',
                                     },
                                     {
-                                        s3URL: 's3://bucketname/key/test1',
+                                        s3URL: 'foo://bar2',
                                         name: 'ratesupdoc2.doc',
                                         sha256: 'foobar2',
-                                        downloadURL: 'downloadURL',
                                     },
                                 ],
                                 certifyingActuaryContacts: [
@@ -871,24 +855,21 @@ describe('updateDraftContractRates', () => {
                                 deprecatedRateProgramIDs: [],
                                 rateDocuments: [
                                     {
-                                        s3URL: 's3://bucketname/key/test1',
+                                        s3URL: 'foo://bar',
                                         name: 'updatedratedoc1.doc',
                                         sha256: 'foobar',
-                                        downloadURL: 'downloadURL',
                                     },
                                 ],
                                 supportingDocuments: [
                                     {
-                                        s3URL: 's3://bucketname/key/test1',
+                                        s3URL: 'foo://bar1',
                                         name: 'ratesupdoc1.doc',
                                         sha256: 'foobar1',
-                                        downloadURL: 'downloadURL',
                                     },
                                     {
-                                        s3URL: 's3://bucketname/key/test1',
+                                        s3URL: 'foo://bar2',
                                         name: 'ratesupdoc2.doc',
                                         sha256: 'foobar2',
-                                        downloadURL: 'downloadURL',
                                     },
                                 ],
                                 certifyingActuaryContacts: [

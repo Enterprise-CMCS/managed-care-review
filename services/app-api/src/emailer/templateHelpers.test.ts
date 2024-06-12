@@ -72,7 +72,7 @@ describe('generateCMSReviewerEmails', () => {
                         rateType: 'NEW',
                         rateDocuments: [
                             {
-                                s3URL: 's3://bucketname/key/test1',
+                                s3URL: 'bar',
                                 name: 'foo',
                                 sha256: 'fakesha',
                             },

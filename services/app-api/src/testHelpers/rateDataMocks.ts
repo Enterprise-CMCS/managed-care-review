@@ -106,9 +106,8 @@ const mockRateRevision = (
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 name: 'rate supporting doc',
-                s3URL: 's3://bucketname/key/test1',
+                s3URL: 'fakeS3URL',
                 sha256: '2342fwlkdmwvw',
-                downloadURL: 'downloadURL',
             },
             {
                 id: uuidv4(),
@@ -117,9 +116,8 @@ const mockRateRevision = (
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 name: 'rate supporting doc 2',
-                s3URL: 's3://bucketname/key/test1',
+                s3URL: 'fakeS3URL',
                 sha256: '45662342fwlkdmwvw',
-                downloadURL: 'downloadURL',
             },
         ],
         rateDocuments: [
@@ -130,9 +128,8 @@ const mockRateRevision = (
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 name: 'contract doc',
-                s3URL: 's3://bucketname/key/test1',
+                s3URL: 'fakeS3URL',
                 sha256: '8984234fwlkdmwvw',
-                downloadURL: 'downloadURL',
             },
         ],
         contractRevisions: [],
@@ -155,24 +152,21 @@ function mockRateFormDataInput(): RateFormDataInput {
 
         rateDocuments: [
             {
-                s3URL: 's3://bucketname/key/test1',
+                s3URL: 'foo://bar',
                 name: 'updatedratedoc1.doc',
                 sha256: 'foobar',
-                downloadURL: 'downloadURL',
             },
         ],
         supportingDocuments: [
             {
-                s3URL: 's3://bucketname/key/test1',
+                s3URL: 'foo://bar1',
                 name: 'ratesupdoc1.doc',
                 sha256: 'foobar1',
-                downloadURL: 'downloadURL',
             },
             {
-                s3URL: 's3://bucketname/key/test1',
+                s3URL: 'foo://bar2',
                 name: 'ratesupdoc2.doc',
                 sha256: 'foobar2',
-                downloadURL: 'downloadURL',
             },
         ],
         certifyingActuaryContacts: [
