@@ -49,7 +49,7 @@ export function configureResolvers(
     emailParameterStore: EmailParameterStore,
     launchDarkly: LDService,
     jwt: JWTLib,
-    s3Client: any
+    s3Client: S3ClientT
 ): Resolvers {
     const resolvers: Resolvers = {
         Date: GraphQLDate,

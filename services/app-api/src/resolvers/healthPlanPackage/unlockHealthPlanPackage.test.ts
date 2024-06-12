@@ -232,22 +232,22 @@ describe(`Tests unlockHealthPlanPackage`, () => {
                 rateDocuments: [
                     {
                         name: 'fake doc',
-                        s3URL: 'foo://bar',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'fakesha',
                     },
                     {
                         name: 'fake doc 2',
-                        s3URL: 'foo://bar',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'fakesha',
                     },
                     {
                         name: 'fake doc 3',
-                        s3URL: 'foo://bar',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'fakesha',
                     },
                     {
                         name: 'fake doc 4',
-                        s3URL: 'foo://bar',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'fakesha',
                     },
                 ],
@@ -285,7 +285,7 @@ describe(`Tests unlockHealthPlanPackage`, () => {
                 rateDocuments: [
                     {
                         name: 'fake doc number two',
-                        s3URL: 'foo://bar',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'fakesha',
                     },
                 ],

@@ -244,6 +244,7 @@ model ContractDocument {
   name               String
   s3URL              String
   sha256             String
+  downloadURL        String
   contractRevisionID String
   contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
 }
@@ -256,6 +257,7 @@ model ContractSupportingDocument {
   name               String
   s3URL              String
   sha256             String
+  downloadURL        String
   contractRevisionID String
   contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
 }
@@ -268,6 +270,7 @@ model RateDocument {
   name           String
   s3URL          String
   sha256         String
+  downloadURL    String
   rateRevisionID String
   rateRevision   RateRevisionTable @relation(fields: [rateRevisionID], references: [id], onDelete: Cascade)
 }
@@ -280,6 +283,7 @@ model RateSupportingDocument {
   name           String
   s3URL          String
   sha256         String
+  downloadURL    String
   rateRevisionID String
   rateRevision   RateRevisionTable @relation(fields: [rateRevisionID], references: [id], onDelete: Cascade)
 }

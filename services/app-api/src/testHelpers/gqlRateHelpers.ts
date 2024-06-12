@@ -168,21 +168,24 @@ function addNewRateToRateInput(
 
         rateDocuments: [
             {
-                s3URL: 'foo://bar',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'ratedoc1.doc',
                 sha256: 'foobar',
+                downloadURL: 'downloadURL',
             },
         ],
         supportingDocuments: [
             {
-                s3URL: 'foo://bar1',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'ratesupdoc1.doc',
                 sha256: 'foobar1',
+                downloadURL: 'downloadURL',
             },
             {
-                s3URL: 'foo://bar2',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'ratesupdoc2.doc',
                 sha256: 'foobar2',
+                downloadURL: 'downloadURL',
             },
         ],
         certifyingActuaryContacts: [

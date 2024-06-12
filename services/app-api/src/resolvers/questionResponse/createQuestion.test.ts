@@ -50,7 +50,7 @@ describe('createQuestion', () => {
                 documents: [
                     {
                         name: 'Test Question',
-                        s3URL: 'testS3Url',
+                        s3URL: 's3://bucketname/key/test1',
                     },
                 ],
                 addedBy: cmsUser,
@@ -87,7 +87,7 @@ describe('createQuestion', () => {
             documents: [
                 {
                     name: 'Test Question 2',
-                    s3URL: 'testS3Url2',
+                    s3URL: 's3://bucketname/key/test1',
                 },
             ],
         })
@@ -112,7 +112,7 @@ describe('createQuestion', () => {
                                 documents: [
                                     {
                                         name: 'Test Question',
-                                        s3URL: 'testS3Url',
+                                        s3URL: 's3://bucketname/key/test1',
                                     },
                                 ],
                                 addedBy: cmsUser,
@@ -127,7 +127,7 @@ describe('createQuestion', () => {
                                 documents: [
                                     {
                                         name: 'Test Question 2',
-                                        s3URL: 'testS3Url2',
+                                        s3URL: 's3://bucketname/key/test1',
                                     },
                                 ],
                                 addedBy: cmsUser,
@@ -164,7 +164,7 @@ describe('createQuestion', () => {
                     documents: [
                         {
                             name: 'Test Question',
-                            s3URL: 'testS3Url',
+                            s3URL: 's3://bucketname/key/test1',
                         },
                     ],
                 },
@@ -190,7 +190,7 @@ describe('createQuestion', () => {
                     documents: [
                         {
                             name: 'Test Question',
-                            s3URL: 'testS3Url',
+                            s3URL: 's3://bucketname/key/test1',
                         },
                     ],
                 },
@@ -221,7 +221,7 @@ describe('createQuestion', () => {
                     documents: [
                         {
                             name: 'Test Question',
-                            s3URL: 'testS3Url',
+                            s3URL: 's3://bucketname/key/test1',
                         },
                     ],
                 },
@@ -256,7 +256,7 @@ describe('createQuestion', () => {
                     documents: [
                         {
                             name: 'Test Question',
-                            s3URL: 'testS3Url',
+                            s3URL: 's3://bucketname/key/test1',
                         },
                     ],
                 },
@@ -470,7 +470,7 @@ describe('createQuestion', () => {
                     documents: [
                         {
                             name: 'Test Question',
-                            s3URL: 'testS3Url',
+                            s3URL: 's3://bucketname/key/test1',
                         },
                     ],
                 },

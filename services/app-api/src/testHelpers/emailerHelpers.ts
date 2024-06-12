@@ -158,20 +158,22 @@ const mockContractRev = (
             ],
             supportingDocuments: [
                 {
-                    s3URL: 'bar',
+                    s3URL: 's3://bucketname/key/test1',
                     name: 'foo',
                     sha256: 'fakesha',
                     dateAdded: new Date('02/01/2021'),
+                    downloadURL: 'downloadURL',
                 },
             ],
             contractType: 'BASE',
             contractExecutionStatus: undefined,
             contractDocuments: [
                 {
-                    s3URL: 'bar',
+                    s3URL: 's3://bucketname/key/test1',
                     name: 'foo',
                     sha256: 'fakesha',
                     dateAdded: new Date('02/01/2021'),
+                    downloadURL: 'downloadURL',
                 },
             ],
             contractDateStart: new Date('01/01/2024'),
@@ -213,10 +215,11 @@ const mockContractRev = (
                     rateCapitationType: 'RATE_CELL',
                     rateDocuments: [
                         {
-                            s3URL: 'bar',
+                            s3URL: 's3://bucketname/key/test1',
                             name: 'foo',
                             sha256: 'fakesha',
                             dateAdded: new Date(11 / 27 / 2023),
+                            downloadURL: 'downloadURL',
                         },
                     ],
                     supportingDocuments: [],
@@ -268,7 +271,7 @@ const mockContractAndRatesFormData = (
         submittedAt: new Date('02/01/2021'),
         documents: [
             {
-                s3URL: 'bar',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'foo',
                 sha256: 'fakesha',
             },
@@ -277,7 +280,7 @@ const mockContractAndRatesFormData = (
         contractExecutionStatus: 'EXECUTED',
         contractDocuments: [
             {
-                s3URL: 'bar',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'foo',
                 sha256: 'fakesha',
             },
@@ -291,7 +294,7 @@ const mockContractAndRatesFormData = (
                 rateType: 'NEW',
                 rateDocuments: [
                     {
-                        s3URL: 'bar',
+                        s3URL: 's3://bucketname/key/test1',
                         name: 'foo',
                         sha256: 'fakesha',
                     },
@@ -352,7 +355,7 @@ const mockUnlockedContractAndRatesFormData = (
         submissionDescription: 'A submitted submission',
         documents: [
             {
-                s3URL: 'bar',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'foo',
                 sha256: 'fakesha',
             },
@@ -361,7 +364,7 @@ const mockUnlockedContractAndRatesFormData = (
         contractExecutionStatus: 'EXECUTED',
         contractDocuments: [
             {
-                s3URL: 'bar',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'foo',
                 sha256: 'fakesha',
             },
@@ -375,7 +378,7 @@ const mockUnlockedContractAndRatesFormData = (
                 rateType: 'NEW',
                 rateDocuments: [
                     {
-                        s3URL: 'bar',
+                        s3URL: 's3://bucketname/key/test1',
                         name: 'foo',
                         sha256: 'fakesha',
                     },
@@ -436,7 +439,7 @@ const mockUnlockedContractOnlyFormData = (
         submissionDescription: 'A submitted submission',
         documents: [
             {
-                s3URL: 'bar',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'foo',
                 sha256: 'fakesha',
             },
@@ -445,7 +448,7 @@ const mockUnlockedContractOnlyFormData = (
         contractExecutionStatus: 'EXECUTED',
         contractDocuments: [
             {
-                s3URL: 'bar',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'foo',
                 sha256: 'fakesha',
             },
@@ -486,7 +489,7 @@ const mockContractOnlyFormData = (
         submittedAt: new Date('02/01/2021'),
         documents: [
             {
-                s3URL: 'bar',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'foo',
                 sha256: 'fakesha',
             },
@@ -495,7 +498,7 @@ const mockContractOnlyFormData = (
         contractExecutionStatus: 'EXECUTED',
         contractDocuments: [
             {
-                s3URL: 'bar',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'foo',
                 sha256: 'fakesha',
             },
@@ -536,7 +539,7 @@ const mockContractAmendmentFormData = (
         submittedAt: new Date('02/01/2021'),
         documents: [
             {
-                s3URL: 'bar',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'foo',
                 sha256: 'fakesha',
             },
@@ -545,7 +548,7 @@ const mockContractAmendmentFormData = (
         contractExecutionStatus: 'UNEXECUTED',
         contractDocuments: [
             {
-                s3URL: 'bar',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'foo',
                 sha256: 'fakesha',
             },
@@ -559,7 +562,7 @@ const mockContractAmendmentFormData = (
                 rateType: 'NEW',
                 rateDocuments: [
                     {
-                        s3URL: 'bar',
+                        s3URL: 's3://bucketname/key/test1',
                         name: 'foo',
                         sha256: 'fakesha',
                     },
@@ -615,7 +618,7 @@ const mockQuestionAndResponses = (
         documents: [
             {
                 name: 'Test Question',
-                s3URL: 'testS3Url',
+                s3URL: 's3://bucketname/key/test1',
             },
         ],
         division: 'DMCO',
@@ -638,7 +641,7 @@ const mockQuestionAndResponses = (
             documents: [
                 {
                     name: 'Test Question Response',
-                    s3URL: 'testS3Url',
+                    s3URL: 's3://bucketname/key/test1',
                 },
             ],
         },

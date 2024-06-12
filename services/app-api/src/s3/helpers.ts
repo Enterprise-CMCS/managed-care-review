@@ -14,7 +14,8 @@ import Url from 'url-parse'
 
 const parseBucketName = (maybeS3URL: string): string | Error => {
     const url = new Url(maybeS3URL)
-    if (!isValidS3URLFormat(url)) throw new Error('Not valid S3URL')
+    if (!isValidS3URLFormat(url))
+        throw new Error(`Not valid S3URL: ${maybeS3URL}`)
     return url.hostname
 }
 

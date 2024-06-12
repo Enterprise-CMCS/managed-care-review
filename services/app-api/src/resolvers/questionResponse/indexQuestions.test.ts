@@ -55,7 +55,7 @@ describe('indexQuestions', () => {
                 documents: [
                     {
                         name: 'Test Question 1',
-                        s3URL: 'testS3Url1',
+                        s3URL: 's3://bucketname/key/test1',
                     },
                 ],
             }
@@ -73,7 +73,7 @@ describe('indexQuestions', () => {
                 documents: [
                     {
                         name: 'Test Question 2',
-                        s3URL: 'testS3Url2',
+                        s3URL: 's3://bucketname/key/test1',
                     },
                 ],
             }
@@ -91,7 +91,7 @@ describe('indexQuestions', () => {
                 documents: [
                     {
                         name: 'Test Question 3',
-                        s3URL: 'testS3Url3',
+                        s3URL: 's3://bucketname/key/test1',
                     },
                 ],
             }

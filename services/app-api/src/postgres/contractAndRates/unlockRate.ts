@@ -134,6 +134,7 @@ async function unlockRateInDB(
                     name: d.name,
                     s3URL: d.s3URL,
                     sha256: d.sha256,
+                    downloadURL: d.downloadURL,
                 })),
             },
             supportingDocuments: {
@@ -142,6 +143,7 @@ async function unlockRateInDB(
                     name: d.name,
                     s3URL: d.s3URL,
                     sha256: d.sha256,
+                    downloadURL: d.downloadURL,
                 })),
             },
             certifyingActuaryContacts: {

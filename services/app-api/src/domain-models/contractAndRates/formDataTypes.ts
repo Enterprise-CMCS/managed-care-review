@@ -17,7 +17,7 @@ const documentSchema = z.object({
     name: z.string(),
     s3URL: z.string(),
     sha256: z.string(),
-    downloadURL: z.string().optional(),
+    downloadURL: z.string(),
     dateAdded: z.date().optional(), //  date added to the first submission to CMS
 })
 

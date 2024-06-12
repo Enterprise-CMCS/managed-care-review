@@ -47,19 +47,21 @@ const formData: ContractFormDataType = {
     submissionDescription: 'A submitted submission',
     supportingDocuments: [
         {
-            s3URL: 'bar',
+            s3URL: 's3://bucketname/key/test1',
             name: 'foo',
             sha256: 'fakesha',
             dateAdded: new Date(),
+            downloadURL: 'downloadURL',
         },
     ],
     contractType: 'BASE',
     contractExecutionStatus: undefined,
     contractDocuments: [
         {
-            s3URL: 'bar',
+            s3URL: 's3://bucketname/key/test1',
             name: 'foo',
             sha256: 'fakesha',
+            downloadURL: 'downloadURL',
         },
     ],
     contractDateStart: new Date('01/01/2024'),

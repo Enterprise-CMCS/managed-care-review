@@ -45,7 +45,8 @@ import { findStatePrograms } from '../postgres'
 import { must } from './assertionHelpers'
 import { newJWTLib } from '../jwt'
 import type { JWTLib } from '../jwt'
-import { S3Client } from '@aws-sdk/client-s3'
+import { newLocalS3Client } from '../s3'
+import type { S3ClientT } from '../s3'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -73,6 +74,16 @@ const defaultContext = (): Context => {
     }
 }
 
+type BucketShortName = 'HEALTH_PLAN_DOCS' | 'QUESTION_ANSWER_DOCS'
+type S3BucketConfigType = {
+    [K in BucketShortName]: string
+}
+
+const S3_BUCKETS_CONFIG: S3BucketConfigType = {
+    HEALTH_PLAN_DOCS: 'local-uploads',
+    QUESTION_ANSWER_DOCS: 'local-qa',
+}
+
 const constructTestPostgresServer = async (opts?: {
     context?: Context
     emailer?: Emailer
@@ -80,7 +91,7 @@ const constructTestPostgresServer = async (opts?: {
     emailParameterStore?: EmailParameterStore
     ldService?: LDService
     jwt?: JWTLib
-    s3Client?: any
+    s3Client?: S3ClientT
 }): Promise<ApolloServer> => {
     // set defaults
     const context = opts?.context || defaultContext()
@@ -100,16 +111,7 @@ const constructTestPostgresServer = async (opts?: {
         })
 
     await insertUserToLocalAurora(postgresStore, context.user)
-    const s3 = new S3Client({
-        forcePathStyle: true,
-        apiVersion: '2006-03-01',
-        credentials: {
-            accessKeyId: 'S3RVER', // This specific key is required when working offline
-            secretAccessKey: 'S3RVER', // pragma: allowlist secret; pre-set by serverless-s3-offline
-        },
-        endpoint: 'http://localhost:4569',
-        region: 'us-east', // This region cannot be undefined and any string here will work.
-    })
+    const s3 = newLocalS3Client('http://localhost:4569', S3_BUCKETS_CONFIG)
 
     const postgresResolvers = configureResolvers(
         postgresStore,
@@ -117,7 +119,7 @@ const constructTestPostgresServer = async (opts?: {
         parameterStore,
         ldService,
         jwt,
-        s3,
+        s3
     )
 
     return new ApolloServer({
@@ -268,7 +270,7 @@ const createAndUpdateTestHealthPlanPackage = async (
             rateDocuments: [
                 {
                     name: 'rateDocument.pdf',
-                    s3URL: 'fakeS3URL',
+                    s3URL: 's3://bucketname/key/test1',
                     sha256: 'fakesha',
                 },
             ],
@@ -307,7 +309,7 @@ const createAndUpdateTestHealthPlanPackage = async (
     draft.contractDocuments = [
         {
             name: 'contractDocument.pdf',
-            s3URL: 'fakeS3URL',
+            s3URL: 's3://bucketname/key/test1',
             sha256: 'fakesha',
         },
     ]
@@ -463,7 +465,7 @@ const createTestQuestion = async (
         documents: [
             {
                 name: 'Test Question',
-                s3URL: 'testS3Url',
+                s3URL: 's3://bucketname/key/test1',
             },
         ],
     }
@@ -523,7 +525,7 @@ const createTestQuestionResponse = async (
         documents: [
             {
                 name: 'Test Question Response',
-                s3URL: 'testS3Url',
+                s3URL: 's3://bucketname/key/test1',
             },
         ],
     }
