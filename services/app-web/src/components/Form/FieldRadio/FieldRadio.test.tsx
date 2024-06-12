@@ -6,7 +6,7 @@ const mockSetValue = vi.fn()
 
 vi.mock('formik', () => {
     return {
-        ...vi.requireActual('formik'),
+        ...vi.importActual('formik'),
         useField: () => [
             {
                 onChange: mockOnChange,

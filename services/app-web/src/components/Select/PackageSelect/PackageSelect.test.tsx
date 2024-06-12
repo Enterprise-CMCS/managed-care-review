@@ -17,7 +17,7 @@ vi.mock('formik', () => {
     return {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore-next-line
-        ...vi.requireActual('formik'),
+        ...vi.importActual('formik'),
         useField: () => [
             {
                 onChange: mockOnChange,
