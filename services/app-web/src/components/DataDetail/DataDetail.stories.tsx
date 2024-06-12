@@ -1,4 +1,4 @@
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import React from 'react'
 import { DataDetail } from './DataDetail'
 import type { DataDetailProps } from './DataDetail'
@@ -12,7 +12,7 @@ export default {
     },
 }
 
-const Template: Story<DataDetailProps> = (args) => (
+const Template: StoryFn<DataDetailProps> = (args) => (
     <dl>
         <DataDetail {...args} />
     </dl>

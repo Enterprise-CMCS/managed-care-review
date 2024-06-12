@@ -16,7 +16,7 @@
     "env": {
         "jest/globals": true,
     },
-    "ignorePatterns": ["src/gen/*", "*.config.ts"],
+    "ignorePatterns": ["src/gen/gqlClient.tsx", "*.config.ts"],
     "rules": {
         "array-callback-return": "error",
         "prefer-promise-reject-errors": "error",

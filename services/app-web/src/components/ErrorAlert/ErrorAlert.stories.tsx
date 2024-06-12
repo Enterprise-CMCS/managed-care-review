@@ -1,4 +1,4 @@
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import { ErrorAlertProps, ErrorAlert } from './ErrorAlert'
 import { ErrorAlertFailedRequest } from './ErrorAlertFailedRequest'
 import { ErrorAlertSessionExpired } from './ErrorAlertSessionExpired'
@@ -10,7 +10,7 @@ export default {
     component: ErrorAlert,
 }
 
-const Template: Story<ErrorAlertProps> = (args) => <ErrorAlert {...args} />
+const Template: StoryFn<ErrorAlertProps> = (args) => <ErrorAlert {...args} />
 
 export const Default = Template.bind({})
 
