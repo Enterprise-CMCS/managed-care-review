@@ -9,14 +9,24 @@ import {
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import { submitTestRate, updateTestRate } from '../../testHelpers'
 import { v4 as uuidv4 } from 'uuid'
-import { addNewRateToTestContract, createSubmitAndUnlockTestRate, fetchTestRateById,  updateRatesInputFromDraftContract, updateTestDraftRatesOnContract,  } from '../../testHelpers/gqlRateHelpers'
+import {
+    addNewRateToTestContract,
+    createSubmitAndUnlockTestRate,
+    fetchTestRateById,
+    updateRatesInputFromDraftContract,
+    updateTestDraftRatesOnContract,
+} from '../../testHelpers/gqlRateHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { createAndUpdateTestContractWithoutRates, fetchTestContract, submitTestContract} from '../../testHelpers/gqlContractHelpers'
+import {
+    createAndUpdateTestContractWithoutRates,
+    fetchTestContract,
+    submitTestContract,
+} from '../../testHelpers/gqlContractHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 
 describe('fetchRate', () => {
     const ldService = testLDService({
-        'rate-edit-unlock':  true,
+        'rate-edit-unlock': true,
     })
     it('returns correct revisions on resubmit when existing rate is edited', async () => {
         const cmsUser = testCMSUser()
@@ -94,7 +104,7 @@ describe('fetchRate', () => {
             rateDocuments: [
                 {
                     name: 'rateDocument.pdf',
-                    s3URL: 'fakeS3URL',
+                    s3URL: 's3://bucketname/key/test1',
                     sha256: 'fakesha',
                 },
             ],
@@ -213,7 +223,7 @@ describe('fetchRate', () => {
 
     it('returns the correct dateAdded for documents', async () => {
         const ldService = testLDService({
-            'link-rates':  true,
+            'link-rates': true,
         })
         const prismaClient = await sharedTestPrismaClient()
         const stateServer = await constructTestPostgresServer({
@@ -229,7 +239,7 @@ describe('fetchRate', () => {
         const dummyDoc = (postfix: string) => {
             return {
                 name: `doc${postfix}.pdf`,
-                s3URL: `fakeS3URL${postfix}`,
+                s3URL: `s3://bucketname/key/test1${postfix}`,
                 sha256: `fakesha${postfix}`,
             }
         }
@@ -271,8 +281,16 @@ describe('fetchRate', () => {
 
         const fixSubmitA0 = await fetchTestRateById(stateServer, OneID)
         const rateRev = fixSubmitA0.revisions[0]
-        if (!rateRev.formData.rateDocuments || !rateRev.formData.rateDocuments[0]) throw new Error( 'something')
-            if (!rateRev.formData.supportingDocuments || !rateRev.formData.supportingDocuments[0]) throw new Error( 'something')
+        if (
+            !rateRev.formData.rateDocuments ||
+            !rateRev.formData.rateDocuments[0]
+        )
+            throw new Error('something')
+        if (
+            !rateRev.formData.supportingDocuments ||
+            !rateRev.formData.supportingDocuments[0]
+        )
+            throw new Error('something')
         expect(rateRev.formData.rateDocuments).toHaveLength(1)
         expect(rateRev.formData.rateDocuments[0].name).toBe('docr1.pdf')
         expect(rateRev.formData.rateDocuments[0].dateAdded).toBe('2024-01-01')
@@ -332,8 +350,16 @@ describe('fetchRate', () => {
         const rateA1 = await fetchTestRateById(stateServer, OneID)
 
         const rateRevA1 = rateA1.revisions[0]
-        if (!rateRevA1.formData.rateDocuments || !rateRev.formData.rateDocuments[0]) throw new Error( 'something')
-        if (!rateRevA1.formData.supportingDocuments || !rateRev.formData.supportingDocuments[0]) throw new Error( 'something')
+        if (
+            !rateRevA1.formData.rateDocuments ||
+            !rateRev.formData.rateDocuments[0]
+        )
+            throw new Error('something')
+        if (
+            !rateRevA1.formData.supportingDocuments ||
+            !rateRev.formData.supportingDocuments[0]
+        )
+            throw new Error('something')
         expect(rateRevA1.formData.rateDocuments).toHaveLength(2)
         expect(rateRevA1.formData.rateDocuments[0].name).toBe('docr1.pdf')
         expect(rateRevA1.formData.rateDocuments[0].dateAdded).toBe('2024-01-01')
@@ -352,5 +378,4 @@ describe('fetchRate', () => {
             '2024-02-02'
         )
     })
-
 })

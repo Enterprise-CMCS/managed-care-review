@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
-import { mockContractRevision} from '../../testHelpers'
+import { mockContractRevision } from '../../testHelpers'
 import {
     getContractRateStatus,
     contractFormDataToDomainModel,
@@ -19,19 +19,19 @@ describe('prismaToDomainModel', () => {
                     supportingDocuments: expect.arrayContaining([
                         expect.objectContaining({
                             name: 'contract supporting doc',
-                            s3URL: 'fakeS3URL',
+                            s3URL: 's3://bucketname/key/test1',
                             sha256: '2342fwlkdmwvw',
                         }),
                         expect.objectContaining({
                             name: 'contract supporting doc 2',
-                            s3URL: 'fakeS3URL',
+                            s3URL: 's3://bucketname/key/test1',
                             sha256: '45662342fwlkdmwvw',
                         }),
                     ]),
                     contractDocuments: expect.arrayContaining([
                         expect.objectContaining({
                             name: 'contract doc',
-                            s3URL: 'fakeS3URL',
+                            s3URL: 's3://bucketname/key/test1',
                             sha256: '8984234fwlkdmwvw',
                         }),
                     ]),
