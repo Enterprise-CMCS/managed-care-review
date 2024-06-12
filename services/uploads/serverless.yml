@@ -15,7 +15,7 @@ plugins:
 # The `provider` block defines where your service will be deployed
 provider:
   name: aws
-  runtime: nodejs18.x
+  runtime: nodejs20.x
   region: us-east-1
   iam:
     role:

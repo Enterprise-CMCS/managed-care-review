@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import { Crypto } from '@peculiar/webcrypto'
 import { TextEncoder, TextDecoder } from 'util'
 
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
@@ -11,7 +11,8 @@ import '@testing-library/jest-dom'
 Element.prototype.scrollIntoView = () => {}
 
 // to make calculating the sha work in jest
-Object.assign(window, {
-    crypto: crypto,
+Object.defineProperty(globalThis, 'crypto', {
+    value: new Crypto(),
 })
+
 Object.assign(global, { TextDecoder, TextEncoder })
