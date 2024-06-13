@@ -12,6 +12,7 @@ import { emptify, nullify } from '../prismaDomainAdaptors'
 const formatDocsForPrisma = (docs: GenericDocument[]) => {
     return docs.map((d, idx) => {
         delete d['dateAdded']
+        delete d['downloadURL']
         return {
             position: idx,
             ...d,
