@@ -39,7 +39,7 @@ custom:
   jwtSecretJSON: ${env:CF_CONFIG_IGNORED_LOCALLY, ssm:/aws/reference/secretsmanager/api_jwt_secret_${sls:stage}}
   jwtSecret: ${env:JWT_SECRET, self:custom.jwtSecretJSON.jwtsigningkey}
   reactAppS3QABucket: ${env:REACT_APP_S3_QA_BUCKET, cf:uploads-${sls:stage}.QAUploadsBucketName}
-  reactAppS3DocumentsBucket: ${env:REACT_APP_S3_DOCUMENTS_BUCKET, cf:uploads-${sls:stage}.DocumentUploadsBucketName}
+  reactAppS3DocumentsBucket: ${env:REACT_APP_S3_DOCUMENTS_BUCKET, cf:uploads-${sls:stage}.QAUploadsBucketName}
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
@@ -163,7 +163,6 @@ provider:
     ALLOWED_IP_ADDRESSES: ${self:custom.allowedIpAddresses}
     JWT_SECRET: ${self:custom.jwtSecret}
     REACT_APP_S3_QA_BUCKET: ${self:custom.reactAppS3QABucket}
-    REACT_APP_S3_REGION: ${self:custom.region}
     REACT_APP_S3_DOCUMENTS_BUCKET: {$self:custom.reactAppS3DocumentsBucket}
 layers:
   prismaClientMigration:
@@ -172,8 +171,8 @@ layers:
     path: lambda-layers-prisma-client-engine
 
 functions:
-  # email_submit:
-  #   handler: src/handlers/email_submit.main
+  email_submit:
+    handler: src/handlers/email_submit.main
 
   health:
     handler: src/handlers/health_check.main
