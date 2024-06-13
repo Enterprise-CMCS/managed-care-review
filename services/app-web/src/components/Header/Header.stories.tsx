@@ -1,4 +1,4 @@
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 
 import ProvidersDecorator from '../../../.storybook/providersDecorator'
 import { Header, HeaderProps } from './Header'
@@ -13,16 +13,16 @@ export default {
     },
 }
 
-const Template: Story<HeaderProps> = (args) => <Header {...args} />
+const Template: StoryFn<HeaderProps> = (args) => <Header {...args} />
 
 export const CMSHeaderLoggedOut = Template.bind({})
-CMSHeaderLoggedOut.decorators = [(Story) => ProvidersDecorator(Story, {})]
+CMSHeaderLoggedOut.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 
 export const CMSHeaderLoggedIn = Template.bind({})
 
 CMSHeaderLoggedIn.decorators = [
-    (Story) =>
-        ProvidersDecorator(Story, {
+    (StoryFn) =>
+        ProvidersDecorator(StoryFn, {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },

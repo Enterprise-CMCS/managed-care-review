@@ -1,5 +1,5 @@
 import React from 'react'
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import { Modal, ModalProps } from './Modal';
 
 export default {
@@ -7,7 +7,7 @@ export default {
     component: Modal,
 }
 
-const Template: Story<ModalProps> = (args) => <Modal {...args} />
+const Template: StoryFn<ModalProps> = (args) => <Modal {...args} />
 
 export const ModalShow = Template.bind({})
 ModalShow.args = {

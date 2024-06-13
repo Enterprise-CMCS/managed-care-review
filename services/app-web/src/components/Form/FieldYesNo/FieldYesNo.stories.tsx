@@ -1,4 +1,4 @@
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import { Formik } from 'formik'
 import * as Yup from 'yup'
 import { FieldYesNo, FieldYesNoProps } from './FieldYesNo'
@@ -13,7 +13,7 @@ interface YesNoStoryParams {
     initialValues: { [key: string]: string }
 }
 
-const Template: Story<YesNoStoryParams> = (args) => {
+const Template: StoryFn<YesNoStoryParams> = (args) => {
     const innerSchema: { [key: string]: Yup.AnySchema } = {}
 
     for (const fieldArg of args.fieldProps) {

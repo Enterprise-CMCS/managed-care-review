@@ -1,4 +1,4 @@
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import { PackageSelect, PackageSelectPropType } from '../index'
 import { mockDraft, mockMNState } from '../../../testHelpers/apolloMocks'
 import React from 'react'
@@ -22,13 +22,13 @@ export default {
     component: PackageSelect,
 }
 
-const Template: Story<PackageSelectPropType> = (args) => (
+const Template: StoryFn<PackageSelectPropType> = (args) => (
     <PackageSelect {...args} />
 )
 
 export const Default = Template.bind({})
 
-Default.decorators = [(Story) => ProvidersDecorator(Story, {})]
+Default.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 Default.args = {
     name: 'packageSelect',
     statePrograms: statePrograms,

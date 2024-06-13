@@ -1,5 +1,5 @@
 import React from 'react'
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import { DoubleColumnGrid, DoubleColumnGridProps } from './DoubleColumnGrid'
 
 export default {
@@ -7,7 +7,7 @@ export default {
     component: DoubleColumnGrid
 }
 
-const Template: Story<DoubleColumnGridProps> = (args) => <DoubleColumnGrid {...args}/>
+const Template: StoryFn<DoubleColumnGridProps> = (args) => <DoubleColumnGrid {...args}/>
 
 export const DoubleColumnGridEvenChildren = Template.bind({})
 DoubleColumnGridEvenChildren.args = {
