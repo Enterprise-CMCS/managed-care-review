@@ -14,7 +14,7 @@
     "test": "TZ=UTC vitest",
     "test:coverage": "vitest --coverage",
     "storybook": "npx storybook dev -p 6006 --quiet",
-    "build-storybook": "npx storybook build -s public --quiet",
+    "build-storybook": "npx storybook build --quiet",
     "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""
   },
   "lint-staged": {
