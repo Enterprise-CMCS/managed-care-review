@@ -132,7 +132,7 @@ describe('Auth', () => {
                     location: (location) => (testLocation = location),
                 }
             )
-            await waitFor(() => userLogin(screen))
+            await userLogin(screen)
 
             await waitFor(() => {
                 expect(loginSpy).toHaveBeenCalledTimes(1)

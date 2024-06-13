@@ -18,7 +18,11 @@ import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { Location } from 'react-router-dom'
 
 describe('UnlockSubmitModal', () => {
-    const mockSetIsSubmitting = vi.fn()
+    // mock implementation so we can clear it between tests, otherwise the last tests will count function calls from previous tests.
+    const mockSetIsSubmitting = vi.fn().mockImplementation(vi.fn())
+    afterEach(() => {
+        vi.clearAllMocks()
+    })
 
     describe('initial submission modal', () => {
         it('displays correct modal when submitting initial submission', async () => {

@@ -18,6 +18,11 @@ import { type Location, Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '../../../constants'
 
 describe('SingleRateSummarySection', () => {
+    // Using real times for these tests. Without it, LD variables are not getting updated between tests.
+    vi.useRealTimers()
+    afterAll(() => {
+        vi.useFakeTimers()
+    })
     it('can render rate details without errors', async () => {
         const rateData = rateDataMock()
         rateData.revisions[0].formData.deprecatedRateProgramIDs = ['123']
