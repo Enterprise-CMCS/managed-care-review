@@ -20,6 +20,9 @@ import { RoutesRecord } from '../../../constants'
 describe('SingleRateSummarySection', () => {
     // Using real times for these tests. Without it, LD variables are not getting updated between tests.
     vi.useRealTimers()
+    beforeEach(() => {
+        vi.clearAllMocks()
+    })
     afterAll(() => {
         vi.useFakeTimers()
     })
