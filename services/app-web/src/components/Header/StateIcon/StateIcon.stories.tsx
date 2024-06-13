@@ -1,4 +1,4 @@
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import { StateIcon, StateIconProps } from './StateIcon'
 
 export default {
@@ -13,7 +13,7 @@ export default {
     },
 }
 
-const Template: Story<StateIconProps> = (args) => (
+const Template: StoryFn<StateIconProps> = (args) => (
     <div style={{ width: 400, height: 400 }}>
         <StateIcon {...args} />
     </div>

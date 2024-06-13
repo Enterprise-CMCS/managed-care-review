@@ -1,5 +1,5 @@
 import React from 'react'
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 
 import ProvidersDecorator from '../../../.storybook/providersDecorator'
 import dayjs from 'dayjs'
@@ -28,14 +28,14 @@ export default {
     },
 }
 
-const Template: Story<SubmissionCardProps> = (args) => (
+const Template: StoryFn<SubmissionCardProps> = (args) => (
     <ul className={styles.submissionList}>
         <SubmissionCard {...args} />
     </ul>
 )
 
 export const Default = Template.bind({})
-Default.decorators = [(Story) => ProvidersDecorator(Story, {})]
+Default.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 
 Default.args = {
     name: 'VA-CCCPlus-0001',

@@ -1,4 +1,4 @@
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import {
     HealthPlanPackageTable,
     PackageTableProps,
@@ -97,20 +97,20 @@ export default {
     component: HealthPlanPackageTable,
 }
 
-const Template: Story<PackageTableProps> = (args) => (
+const Template: StoryFn<PackageTableProps> = (args) => (
     <HealthPlanPackageTable {...args} />
 )
 
 export const Default = Template.bind({})
 
-Default.decorators = [(Story) => ProvidersDecorator(Story, {})]
+Default.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 Default.args = {
     tableData,
     user: mockCMSUser,
 }
 
 export const WithCaption = Template.bind({})
-WithCaption.decorators = [(Story) => ProvidersDecorator(Story, {})]
+WithCaption.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 WithCaption.args = {
     tableData,
     user: mockCMSUser,
@@ -119,7 +119,7 @@ WithCaption.args = {
 
 // CMS User experience
 export const WithFilters = Template.bind({})
-WithFilters.decorators = [(Story) => ProvidersDecorator(Story, {})]
+WithFilters.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 WithFilters.args = {
     tableData,
     user: mockCMSUser,

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import {
     SubmissionUpdatedBanner,
     UpdatedProps,
@@ -10,7 +10,7 @@ export default {
     component: SubmissionUpdatedBanner,
 }
 
-const Template: Story<UpdatedProps> = (args) => (
+const Template: StoryFn<UpdatedProps> = (args) => (
     <SubmissionUpdatedBanner {...args} />
 )
 

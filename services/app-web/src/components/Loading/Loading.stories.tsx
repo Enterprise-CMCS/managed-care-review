@@ -1,4 +1,4 @@
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 
 import ProvidersDecorator from '../../../.storybook/providersDecorator'
 import { Loading } from './Loading'
@@ -8,7 +8,7 @@ export default {
     component: Loading,
 }
 
-const Template: Story = (args) => <Loading {...args} />
+const Template: StoryFn = (args) => <Loading {...args} />
 
 export const LoadingDefault = Template.bind({})
-LoadingDefault.decorators = [(Story) => ProvidersDecorator(Story, {})]
+LoadingDefault.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
