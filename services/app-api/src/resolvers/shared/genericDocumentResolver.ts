@@ -1,11 +1,10 @@
 import type { Resolvers } from '../../gen/gqlServer'
-import {
-    parseBucketName,
-    parseKey,
-} from '../../s3'
+import { parseBucketName, parseKey } from '../../s3'
 import type { S3ClientT } from '../../s3'
 
-export function genericDocumentResolver(s3Client: S3ClientT): Resolvers['GenericDocument'] {
+export function genericDocumentResolver(
+    s3Client: S3ClientT
+): Resolvers['GenericDocument'] {
     return {
         downloadURL: async (parent) => {
             try {
@@ -20,7 +19,10 @@ export function genericDocumentResolver(s3Client: S3ClientT): Resolvers['Generic
                 }
 
                 const url = await s3Client.getURL(key, 'HEALTH_PLAN_DOCS')
-
+                if (!url) {
+                    const msg = new Error('error')
+                    throw msg
+                }
                 return url
             } catch (err) {
                 console.error(err)

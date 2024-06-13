@@ -8,6 +8,7 @@ import {
     updateTestHealthPlanFormData,
 } from '../../testHelpers/gqlHelpers'
 import SUBMIT_CONTRACT from '../../../../app-graphql/src/mutations/submitContract.graphql'
+import { testS3Client } from '../../testHelpers/s3Helpers'
 
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import type {
@@ -259,7 +260,7 @@ describe('submitContract', () => {
             'link-rates': true,
         })
         const prismaClient = await sharedTestPrismaClient()
-
+        const mockS3 = testS3Client()
         const stateServer = await constructTestPostgresServer({
             ldService,
         })
@@ -268,6 +269,7 @@ describe('submitContract', () => {
             context: {
                 user: testCMSUser(),
             },
+            s3Client: mockS3,
         })
 
         // 1. Submit A0 with Rate1 and Rate2
@@ -382,11 +384,13 @@ describe('submitContract', () => {
         const stateServer = await constructTestPostgresServer({
             ldService,
         })
+        const mockS3 = testS3Client()
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
                 user: testCMSUser(),
             },
+            s3Client: mockS3,
         })
 
         // 1. Submit A0 with Rate1 and Rate2
