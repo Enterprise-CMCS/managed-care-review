@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
-import dayjs from 'dayjs'
+import { dayjs } from '../../../common-code/dateHelpers/dayjs'
 import styles from './UploadedDocumentsTable.module.scss'
 import {
     SharedRateCertDisplay,
@@ -66,11 +66,11 @@ export const UploadedDocumentsTable = ({
         useState<DocumentWithS3Data[]>(initialDocState)
     const shouldShowEditButton = !hideDynamicFeedback && isSupportingDocuments // at this point only contract supporting documents need the inline EDIT button - this can be deleted when we move supporting docs to ContractDetails page
 
-
-    const useLinkedRates = ldClient?.variation(
-        featureFlags.LINK_RATES.flag,
-        featureFlags.LINK_RATES.defaultValue
-    ) ?? false
+    const useLinkedRates =
+        ldClient?.variation(
+            featureFlags.LINK_RATES.flag,
+            featureFlags.LINK_RATES.defaultValue
+        ) ?? false
 
     // canDisplayDateForDocument -  guards against passing in null or undefined to dayjs
     // don't display on new initial submission
@@ -88,14 +88,19 @@ export const UploadedDocumentsTable = ({
         }
 
         if (!previousSubmissionDate) {
-            return false // this document is on an initial submission or not submitted yet
+            return false // design require, don't show new tags on initial submission
         }
-        return doc.dateAdded > previousSubmissionDate
+        // compare the last submission with this documents first seen on package date (date added)
+        return dayjs(doc.dateAdded).isSameOrAfter(previousSubmissionDate)
     }
 
     // show legacy shared rates across submissions (this is feature replaced by linked rates)
     // to cms users always when data available, to state users only when linked rates flag is off
-    const showLegacySharedRatesAcross = Boolean((useLinkedRates && hideDynamicFeedback? !isStateUser: true) && (packagesWithSharedRateCerts && packagesWithSharedRateCerts.length > 0))
+    const showLegacySharedRatesAcross = Boolean(
+        (useLinkedRates && hideDynamicFeedback ? !isStateUser : true) &&
+            packagesWithSharedRateCerts &&
+            packagesWithSharedRateCerts.length > 0
+    )
 
     const borderTopGradientStyles = `borderTopLinearGradient ${styles.uploadedDocumentsTable}`
     const supportingDocsTopMarginStyles = isSupportingDocuments
