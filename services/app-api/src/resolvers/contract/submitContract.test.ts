@@ -32,6 +32,7 @@ import {
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import dayjs from 'dayjs'
 
 describe('submitContract', () => {
     it('submits a contract', async () => {
@@ -913,9 +914,11 @@ describe('submitContract', () => {
 
         expect(contractRev.formData.contractDocuments).toHaveLength(1)
         expect(contractRev.formData.contractDocuments[0].name).toBe('docc1.pdf')
-        expect(contractRev.formData.contractDocuments[0].dateAdded).toBe(
-            '2024-01-01'
-        )
+        expect(
+            dayjs(contractRev.formData.contractDocuments[0].dateAdded).format(
+                'YYYY-DD-DD'
+            )
+        ).toBe('2024-01-01')
 
         expect(contractRev.formData.supportingDocuments).toHaveLength(1)
         expect(contractRev.formData.supportingDocuments[0].name).toBe(
