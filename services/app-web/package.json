@@ -13,8 +13,8 @@
     "lint:style": "npx stylelint '**/*.scss'",
     "test": "TZ=UTC vitest",
     "test:coverage": "vitest --coverage",
-    "storybook": "storybook dev -p 6006 -s public --quiet",
-    "build-storybook": "storybook build -s public --quiet",
+    "storybook": "npx storybook dev -p 6006 --quiet",
+    "build-storybook": "npx storybook build -s public --quiet",
     "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""
   },
   "lint-staged": {
