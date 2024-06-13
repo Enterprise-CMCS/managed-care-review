@@ -38,9 +38,8 @@ custom:
   # because the secret is in JSON in secret manager, we have to pass it into jwtSecret when not running locally
   jwtSecretJSON: ${env:CF_CONFIG_IGNORED_LOCALLY, ssm:/aws/reference/secretsmanager/api_jwt_secret_${sls:stage}}
   jwtSecret: ${env:JWT_SECRET, self:custom.jwtSecretJSON.jwtsigningkey}
-  reactAppS3QABucket: ${env:REACT_APP_S3_QA_BUCKET}
-  reactAppS3DocumentsBucket: ${env:REACT_APP_S3_DOCUMENTS_BUCKET}
-  s3LocalURL: ${env:REACT_APP_S3_LOCAL_URL}
+  reactAppS3QABucket: ${env:REACT_APP_S3_QA_BUCKET, cf:uploads-${sls:stage}.QAUploadsBucketArn}
+  reactAppS3DocumentsBucket: ${env:REACT_APP_S3_DOCUMENTS_BUCKET, cf:uploads-${sls:stage}.DocumentUploadsBucketArn}
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
@@ -165,7 +164,6 @@ provider:
     JWT_SECRET: ${self:custom.jwtSecret}
     REACT_APP_S3_QA_BUCKET: ${self:custom.reactAppS3QABucket}
     REACT_APP_S3_REGION: ${self:custom.region}
-    REACT_APP_S3_LOCAL_URL: ${self:custom.s3LocalURL}
     REACT_APP_S3_DOCUMENTS_BUCKET: {$self:custom.reactAppS3DocumentsBucket}
 layers:
   prismaClientMigration:
