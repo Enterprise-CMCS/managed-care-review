@@ -38,8 +38,8 @@ custom:
   # because the secret is in JSON in secret manager, we have to pass it into jwtSecret when not running locally
   jwtSecretJSON: ${env:CF_CONFIG_IGNORED_LOCALLY, ssm:/aws/reference/secretsmanager/api_jwt_secret_${sls:stage}}
   jwtSecret: ${env:JWT_SECRET, self:custom.jwtSecretJSON.jwtsigningkey}
+  reactAppS3DocumentUploadsBucket: ${env:REACT_APP_S3_DOCUMENTS_BUCKET, cf:uploads-${sls:stage}.DocumentUploadsBucketName}
   reactAppS3QABucket: ${env:REACT_APP_S3_QA_BUCKET, cf:uploads-${sls:stage}.QAUploadsBucketName}
-  reactAppS3DocumentsBucket: ${env:REACT_APP_S3_DOCUMENTS_BUCKET, cf:uploads-${sls:stage}.QAUploadsBucketName}
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
@@ -163,7 +163,7 @@ provider:
     ALLOWED_IP_ADDRESSES: ${self:custom.allowedIpAddresses}
     JWT_SECRET: ${self:custom.jwtSecret}
     REACT_APP_S3_QA_BUCKET: ${self:custom.reactAppS3QABucket}
-    REACT_APP_S3_DOCUMENTS_BUCKET: {$self:custom.reactAppS3DocumentsBucket}
+    REACT_APP_S3_DOCUMENTS_BUCKET: {$self:custom.reactAppS3DocumentUploadsBucket}
 layers:
   prismaClientMigration:
     path: lambda-layers-prisma-client-migration
