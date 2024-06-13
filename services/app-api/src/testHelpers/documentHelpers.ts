@@ -1,4 +1,8 @@
-import type { GenericDocument } from '../gen/gqlServer'
+import type {
+    ContractFormData,
+    GenericDocument,
+    RateFormData,
+} from '../gen/gqlServer'
 
 // Clear document metadata that is added by API
 // enables direct compare between document lists (created by FE and submitted by users)
@@ -12,4 +16,28 @@ const clearDocMetadata = (documents?: GenericDocument[]): GenericDocument[] => {
     })
 }
 
-export { clearDocMetadata }
+const clearDocMetadataFromContractFormData = (
+    contractForm: ContractFormData
+): ContractFormData => {
+    return {
+        ...contractForm,
+        contractDocuments: clearDocMetadata(contractForm.contractDocuments),
+        supportingDocuments: clearDocMetadata(contractForm.supportingDocuments),
+    }
+}
+
+const clearDocMetadataFromRateFormData = (
+    rateForm: RateFormData
+): RateFormData => {
+    return {
+        ...rateForm,
+        rateDocuments: clearDocMetadata(rateForm.rateDocuments),
+        supportingDocuments: clearDocMetadata(rateForm.supportingDocuments),
+    }
+}
+
+export {
+    clearDocMetadata,
+    clearDocMetadataFromRateFormData,
+    clearDocMetadataFromContractFormData,
+}
