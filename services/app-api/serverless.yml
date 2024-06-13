@@ -39,7 +39,7 @@ custom:
   jwtSecretJSON: ${env:CF_CONFIG_IGNORED_LOCALLY, ssm:/aws/reference/secretsmanager/api_jwt_secret_${sls:stage}}
   jwtSecret: ${env:JWT_SECRET, self:custom.jwtSecretJSON.jwtsigningkey}
   reactAppS3QABucket: ${env:REACT_APP_S3_QA_BUCKET, cf:uploads-${sls:stage}.QAUploadsBucketArn}
-  reactAppS3DocumentsBucket: ${env:REACT_APP_S3_DOCUMENTS_BUCKET, cf:uploads-${sls:stage}.DocumentUploadsBucketArn}
+  reactAppS3DocumentsBucket: ${env:REACT_APP_S3_DOCUMENTS_BUCKET, cf:uploads-${sls:stage}.DocumentUploadsBucket.Arn}
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'

@@ -418,7 +418,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     // } else if (s3LocalURL) {
     //     s3Client = newLocalS3Client(s3LocalURL, S3_BUCKETS_CONFIG)
     // }
-    const url = s3LocalURL ? s3LocalURL : ''
+    const url = 'http://localhost:4569'
     s3Client = newLocalS3Client(url, S3_BUCKETS_CONFIG)
 
     // Resolvers are defined and tested in the resolvers package
