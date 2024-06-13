@@ -172,8 +172,8 @@ layers:
     path: lambda-layers-prisma-client-engine
 
 functions:
-  email_submit:
-    handler: src/handlers/email_submit.main
+  # email_submit:
+  #   handler: src/handlers/email_submit.main
 
   health:
     handler: src/handlers/health_check.main
