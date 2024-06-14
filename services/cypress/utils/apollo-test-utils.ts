@@ -9,6 +9,7 @@ import {
 } from '@apollo/client'
 import { Amplify, Auth as AmplifyAuth, API } from 'aws-amplify'
 import { UnlockedHealthPlanFormDataType } from '../../app-web/src/common-code/healthPlanFormDataType'
+import { RateFormDataInput } from '../gen/gqlClient';
 
 type StateUserType = {
     id: string
@@ -203,6 +204,35 @@ const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
     ],
     statutoryRegulatoryAttestation: false,
     statutoryRegulatoryAttestationDescription: 'No compliance'
+})
+
+const rateFormData = (): RateFormDataInput => ({
+    rateType: 'NEW',
+    rateCapitationType: 'RATE_CELL',
+    rateDocuments: [
+        {
+            name: 'rate1Document1.pdf',
+            s3URL: 's3://local-uploads/1684382956834-rate1Document1.pdf/rate1Document1.pdf',
+            sha256: 'fakesha',
+        },
+    ],
+    supportingDocuments: [],
+    rateDateStart: '2025-05-01',
+    rateDateEnd: '2026-04-30',
+    rateDateCertified: '2025-03-15',
+    rateProgramIDs: [minnesotaStatePrograms[0].id],
+    certifyingActuaryContacts: [
+        {
+            name: 'actuary1',
+            titleRole: 'test title',
+            email: 'email@example.com',
+            actuarialFirm: 'MERCER' as const,
+            actuarialFirmOther: '',
+        },
+    ],
+    deprecatedRateProgramIDs: [],
+    addtlActuaryContacts: [],
+    actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
 })
 
 const newSubmissionInput = (overrides?: Partial<UnlockedHealthPlanFormDataType> ): Partial<UnlockedHealthPlanFormDataType> => {
@@ -436,6 +466,7 @@ export {
     cmsUser,
     adminUser,
     stateUser,
+    rateFormData,
     minnesotaStatePrograms
 }
 export type {

@@ -7,7 +7,7 @@ import {
     UserEdge,
     User,
     UpdateCmsUserDocument,
-    FetchCurrentUserDocument,
+    FetchCurrentUserDocument, UpdateContractRateInput, UpdateDraftContractRatesDocument, UpdateDraftContractRatesInput,
 } from '../gen/gqlClient'
 import {
     domainToBase64,
@@ -20,6 +20,7 @@ import {
     contractOnlyData,
     contractAndRatesData,
     newSubmissionInput,
+    rateFormData,
     CMSUserType,
 } from '../utils/apollo-test-utils'
 import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
@@ -90,9 +91,11 @@ const createAndSubmitContractWithRates = async (
         throw new Error(formData1.message)
     }
 
-    const fullFormData1 = {
+    const fullFormData1: UnlockedHealthPlanFormDataType = {
         ...formData1,
         ...contractAndRatesData(),
+        status: 'DRAFT',
+        rateInfos: []
     }
 
     const formDataProto = domainToBase64(fullFormData1 as UnlockedHealthPlanFormDataType)
@@ -105,6 +108,25 @@ const createAndSubmitContractWithRates = async (
                 pkgID: pkg1.id,
             },
         },
+    })
+
+    // Using new API to create child rates
+    const updateDraftContractRatesInput: UpdateDraftContractRatesInput = {
+        contractID: pkg1.id,
+        updatedRates: [
+            {
+                formData: rateFormData(),
+                rateID: undefined,
+                type: 'CREATE'
+            }
+        ]
+    }
+
+    await apolloClient.mutate({
+        mutation: UpdateDraftContractRatesDocument,
+        variables: {
+            input: updateDraftContractRatesInput
+        }
     })
 
     const submission1 = await apolloClient.mutate({
