@@ -206,7 +206,7 @@ const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
     statutoryRegulatoryAttestationDescription: 'No compliance'
 })
 
-const rateFormData = (): RateFormDataInput => ({
+const rateFormData = (data?: Partial<RateFormDataInput>): RateFormDataInput => ({
     rateType: 'NEW',
     rateCapitationType: 'RATE_CELL',
     rateDocuments: [
@@ -233,6 +233,7 @@ const rateFormData = (): RateFormDataInput => ({
     deprecatedRateProgramIDs: [],
     addtlActuaryContacts: [],
     actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
+    ...data
 })
 
 const newSubmissionInput = (overrides?: Partial<UnlockedHealthPlanFormDataType> ): Partial<UnlockedHealthPlanFormDataType> => {

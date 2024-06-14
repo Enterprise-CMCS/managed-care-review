@@ -21,7 +21,7 @@ import {
     contractAndRatesData,
     newSubmissionInput,
     rateFormData,
-    CMSUserType,
+    CMSUserType, minnesotaStatePrograms,
 } from '../utils/apollo-test-utils'
 import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
 import {UnlockedHealthPlanFormDataType} from 'app-web/src/common-code/healthPlanFormDataType';
@@ -115,7 +115,22 @@ const createAndSubmitContractWithRates = async (
         contractID: pkg1.id,
         updatedRates: [
             {
-                formData: rateFormData(),
+                formData: rateFormData({
+                    rateDateStart: '2025-05-01',
+                    rateDateEnd: '2026-04-30',
+                    rateDateCertified: '2025-03-15',
+                    rateProgramIDs: [minnesotaStatePrograms[0].id]
+                }),
+                rateID: undefined,
+                type: 'CREATE'
+            },
+            {
+                formData: rateFormData({
+                    rateDateStart: '2024-03-01',
+                    rateDateEnd: '2025-04-30',
+                    rateDateCertified: '2025-03-15',
+                    rateProgramIDs: [minnesotaStatePrograms[1].id]
+                }),
                 rateID: undefined,
                 type: 'CREATE'
             }
