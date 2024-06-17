@@ -69,7 +69,8 @@ const minnesotaStatePrograms = [
     }
 ]
 
-const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
+const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType> => ({
+    stateCode: 'MN',
     stateContacts: [
         {
             name: 'Name',
@@ -104,7 +105,8 @@ const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
     managedCareEntities: ['MCO'],
     federalAuthorities: ['STATE_PLAN'],
     rateInfos: [],
-    statutoryRegulatoryAttestation: true
+    statutoryRegulatoryAttestation: true,
+    programIDs: [minnesotaStatePrograms[0].id]
 })
 
 const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
@@ -203,7 +205,8 @@ const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
             },
     ],
     statutoryRegulatoryAttestation: false,
-    statutoryRegulatoryAttestationDescription: 'No compliance'
+    statutoryRegulatoryAttestationDescription: 'No compliance',
+    programIDs: [minnesotaStatePrograms[0].id]
 })
 
 const rateFormData = (data?: Partial<RateFormDataInput>): RateFormDataInput => ({
