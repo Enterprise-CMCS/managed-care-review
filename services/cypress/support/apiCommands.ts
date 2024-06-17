@@ -10,7 +10,7 @@ import {
     FetchCurrentUserDocument,
     UpdateDraftContractRatesDocument,
     UpdateDraftContractRatesInput,
-    FetchContractDocument, FetchContractPayload, Contract,
+    Contract, SubmitContractDocument,
 } from '../gen/gqlClient'
 import {
     domainToBase64,
@@ -147,31 +147,16 @@ const createAndSubmitContractWithRates = async (
         }
     })
 
-    // We will want to replace submit with the contract API when it's made for now we will
-    // make an additional call for the contract using fetchContract.
-    await apolloClient.mutate({
-        mutation: SubmitHealthPlanPackageDocument,
+    const submission = await apolloClient.mutate({
+        mutation: SubmitContractDocument,
         variables: {
             input: {
-                pkgID: pkg1.id,
-                submittedReason: 'Submit package for Rates Dashboard tests',
+                contractID: pkg1.id,
             },
         },
     })
 
-    // We are returning Contract instead of HPP because rate names are different between the two.
-    // Instead of fixing HPP rate names, lets just use Contract since HPP will go away.
-    const submission1 = await apolloClient.query({
-        query: FetchContractDocument,
-        variables: {
-            input: {
-                contractID: pkg1.id
-            }
-        }
-    })
-
-    // Return with contract api FetchContract
-    return submission1.data.fetchContract.contract
+    return submission.data.submitContract.contract
 }
 
 
