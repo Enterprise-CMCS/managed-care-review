@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
 
 import { defineConfig } from 'vite'
-import "vitest/config"
+import 'vitest/config'
 import react from '@vitejs/plugin-react'
 import svgr from 'vite-plugin-svgr'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
@@ -22,7 +22,6 @@ export default defineConfig(() => ({
         }),
         nodePolyfills(),
         graphqlLoader(),
-
     ],
     server: {
         open: true,
@@ -44,5 +43,8 @@ export default defineConfig(() => ({
         environment: 'jsdom',
         setupFiles: 'src/setupTests.ts',
         globals: true,
-    }
+        coverage: {
+            reporter: ['text', 'json', 'html'],
+        },
+    },
 }))

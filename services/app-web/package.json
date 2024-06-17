@@ -12,7 +12,8 @@
         "lint": "tsc --noEmit && eslint src/ --max-warnings=0 && yarn lint:style",
         "lint:style": "npx stylelint '**/*.scss'",
         "test": "TZ=UTC vitest",
-        "test:coverage": "vitest --coverage",
+        "test:coverage": "TZ=UTC vitest --coverage",
+        "test:ui": "TZ=UTC vitest --ui --coverage.enabled=true",
         "storybook": "npx storybook dev -p 6006 --quiet",
         "build-storybook": "npx storybook build --quiet",
         "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""
@@ -150,6 +151,7 @@
         "@typescript-eslint/eslint-plugin": "^5.6.0",
         "@typescript-eslint/parser": "^6.5.0",
         "@vitest/coverage-v8": "^1.6.0",
+        "@vitest/ui": "^1.6.0",
         "add": "^2.0.6",
         "classnames": "^2.2.6",
         "eslint-config-prettier": "^9.1.0",
