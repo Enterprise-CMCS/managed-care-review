@@ -461,7 +461,7 @@ describe('CMS user', () => {
         cy.interceptFeatureFlags({'link-rates': true, '438-attestation': true})
 
         // Set up a submission with linked rates
-        cy.apiCreateAndSubmitContractWithRates(stateUser()).then((pkg) => {
+        cy.apiCreateAndSubmitContractWithRates(stateUser()).then((contract) => {
             cy.logInAsStateUser()
 
             cy.startNewContractAndRatesSubmission()
@@ -473,6 +473,8 @@ describe('CMS user', () => {
             cy.fillOutLinkedRate()
             cy.navigateContractRatesFormByButtonClick('CONTINUE')
 
+            // Set link-rates to true again.
+            cy.interceptFeatureFlags({'link-rates': true, '438-attestation': true})
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
             cy.fillOutStateContact()
             cy.navigateFormByButtonClick('CONTINUE')
