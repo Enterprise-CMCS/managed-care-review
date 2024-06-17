@@ -35,30 +35,20 @@ describe('CMS user can view rate reviews', () => {
 
                     const rate1 = latestSubmission.rateRevisions[0]
                     const rate2 = latestSubmission.rateRevisions[1]
-                    let rate1Name = rate1.formData.rateCertificationName
-                    let rate2Name = rate2.formData.rateCertificationName
-
-                    if (!rate1Name || !rate2Name) {
-                        throw new Error(`Unexpected error: Rate name(s) did not exist. Rate1Name: ${rate1Name}, Rate2Name: ${rate2Name}`)
-                    }
 
                     // Then check both rates in rate reviews table
                     cy.logInAsCMSUser({
                         initialURL: `/dashboard/rate-reviews`,
                     })
 
-                    // Rate names can be the same, rare in prod, but common in automated tests and manual tests.
-                    // Here were just checking to make sure the first exists in findAll.
                     cy.get('table')
-                    .findAllByRole('link', { name: rate1Name }).first()
-                    .should('exist')
+                        .findByTestId(`rate-link-${rate1.rateID}`).should('exist')
                     cy.get('table')
-                    .findAllByRole('link', { name: rate2Name }).first()
-                    .should('exist')
+                        .findByTestId(`rate-link-${rate2.rateID}`).should('exist')
 
                     // click the first rate to navigate to rate summary page
                     cy.get('table')
-                    .findAllByRole('link', { name: rate1Name }).first().click()
+                        .findByTestId(`rate-link-${rate1.rateID}`).click()
                     cy.url({ timeout: 10_000 }).should('contain',rate1.rateID)
                     cy.findByRole('heading', {
                         name: `${rate1.formData.rateCertificationName}`,
