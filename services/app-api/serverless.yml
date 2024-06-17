@@ -132,8 +132,9 @@ provider:
             # this is the "public" folder for all regular uploads from Amplify
             - ${self:custom.document_uploads_bucket_arn}/allusers/*
             - ${self:custom.qa_uploads_bucket_arn}/allusers/*
-            - arn:aws:s3:::${cf:uploads-${sls:stage}.DocumentUploadsBucketName}/allusers/*
-            - arn:aws:s3:::${cf:uploads-${sls:stage}.QAUploadsBucketName}/allusers/*
+            - ${self:custom.qa_uploads_bucket_arn}/*
+            - ${self:custom.document_uploads_bucket_arn}/*
+
         - Effect: 'Allow' 
           Action:
             - ssm:GetParameter
