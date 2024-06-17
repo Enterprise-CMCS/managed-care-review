@@ -112,8 +112,8 @@ const constructTestPostgresServer = async (opts?: {
 
     await insertUserToLocalAurora(postgresStore, context.user)
     const s3LocalClient = await newLocalS3Client(
-        'http://localhost:4569',
-        S3_BUCKETS_CONFIG
+        S3_BUCKETS_CONFIG,
+        'http://localhost:4569'
     )
     const s3 = opts?.s3Client || s3LocalClient
 
