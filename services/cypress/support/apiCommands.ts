@@ -7,7 +7,10 @@ import {
     UserEdge,
     User,
     UpdateCmsUserDocument,
-    FetchCurrentUserDocument, UpdateContractRateInput, UpdateDraftContractRatesDocument, UpdateDraftContractRatesInput,
+    FetchCurrentUserDocument,
+    UpdateDraftContractRatesDocument,
+    UpdateDraftContractRatesInput,
+    FetchContractDocument, FetchContractPayload, Contract,
 } from '../gen/gqlClient'
 import {
     domainToBase64,
@@ -76,7 +79,7 @@ const createAndSubmitContractOnlyPackage = async (
 
 const createAndSubmitContractWithRates = async (
     apolloClient: ApolloClient<NormalizedCacheObject>
-): Promise<HealthPlanPackage> => {
+): Promise<Contract> => {
     const newSubmission1 = await apolloClient.mutate({
         mutation: CreateHealthPlanPackageDocument,
         variables: {
@@ -116,9 +119,9 @@ const createAndSubmitContractWithRates = async (
         updatedRates: [
             {
                 formData: rateFormData({
-                    rateDateStart: '2025-05-01',
-                    rateDateEnd: '2026-04-30',
-                    rateDateCertified: '2025-03-15',
+                    rateDateStart: '2025-06-01',
+                    rateDateEnd: '2026-05-30',
+                    rateDateCertified: '2025-04-15',
                     rateProgramIDs: [minnesotaStatePrograms[0].id]
                 }),
                 rateID: undefined,
@@ -144,7 +147,9 @@ const createAndSubmitContractWithRates = async (
         }
     })
 
-    const submission1 = await apolloClient.mutate({
+    // We will want to replace submit with the contract API when it's made for now we will
+    // make an additional call for the contract using fetchContract.
+    await apolloClient.mutate({
         mutation: SubmitHealthPlanPackageDocument,
         variables: {
             input: {
@@ -153,7 +158,20 @@ const createAndSubmitContractWithRates = async (
             },
         },
     })
-    return submission1.data.submitHealthPlanPackage.pkg
+
+    // We are returning Contract instead of HPP because rate names are different between the two.
+    // Instead of fixing HPP rate names, lets just use Contract since HPP will go away.
+    const submission1 = await apolloClient.query({
+        query: FetchContractDocument,
+        variables: {
+            input: {
+                contractID: pkg1.id
+            }
+        }
+    })
+
+    // Return with contract api FetchContract
+    return submission1.data.fetchContract.contract
 }
 
 
@@ -216,7 +234,7 @@ Cypress.Commands.add(
 
 Cypress.Commands.add(
     'apiCreateAndSubmitContractWithRates',
-    (stateUser): Cypress.Chainable<HealthPlanPackage> =>
+    (stateUser): Cypress.Chainable<Contract> =>
         cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
             apolloClientWrapper(
                 schema,
