@@ -134,7 +134,7 @@ provider:
             - ${self:custom.qa_uploads_bucket_arn}/allusers/*
             - arn:aws:s3:::${cf:uploads-${sls:stage}.DocumentUploadsBucketName}/allusers/*
             - arn:aws:s3:::${cf:uploads-${sls:stage}.QAUploadsBucketName}/allusers/*
-        - Effect: 'Allow'
+        - Effect: 'Allow' 
           Action:
             - ssm:GetParameter
             - ssm:GetParameters
