@@ -40,6 +40,7 @@ import { contractRevisionResolver } from './contract/contractRevisionResolver'
 import { fetchContractResolver } from './contract/fetchContract'
 import { submitContract } from './contract/submitContract'
 import { rateRevisionResolver } from './rate/rateRevisionResolver'
+import { createContract } from './contract/createContract'
 
 export function configureResolvers(
     store: Store,
@@ -91,6 +92,7 @@ export function configureResolvers(
                 emailParameterStore,
                 launchDarkly
             ),
+            createContract: createContract(store),
             updateContract: updateContract(store),
             updateDraftContractRates: updateDraftContractRates(store),
             updateCMSUser: updateCMSUserResolver(store),

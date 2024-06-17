@@ -115,6 +115,24 @@ type Mutation {
     ): CreateHealthPlanPackagePayload!
 
     """
+    createContract creates a new Contract.
+
+    The new Contract is created with a single contractRevision with
+    the information specified in the input parameters. The created contract will have
+    the DRAFT status. The stateCode of the contract will be set to the state the
+    user that calls this mutation is from.
+
+    This can only be called by StateUsers
+
+    Errors:
+    - ForbiddenError: A CMSUser calls this mutation
+    - UserInputError: ProgramID not found in this state's programs
+    """
+    createContract(
+        input: CreateContractInput!
+    ): CreateContractPayload!
+
+    """
     updateHealthPlanFormData updates a single package with the current
     state of the form encoded as a protobuf.
 
@@ -408,6 +426,34 @@ input CreateHealthPlanPackageInput {
 type CreateHealthPlanPackagePayload {
     "The newly created HealthPlanPackage"
     pkg: HealthPlanPackage!
+}
+
+input CreateContractInput {
+    """
+    The large overarching population of people that the program covers.
+    Options are MEDICAID, CHIP, MEDICAID_AND_CHIP
+    """
+    populationCovered: PopulationCovered!
+    "An array of managed care program IDs this package covers"
+    programIDs: [String!]!
+    "Whether or not this contract is risk based"
+    riskBasedContract: Boolean
+    """
+    The submission type of this package
+    Options are CONTRACT_ONLY and CONTRACT_AND_RATES
+    """
+    submissionType: SubmissionType!
+    "User description of the reason for the submission"
+    submissionDescription: String!
+    """
+    Type of contract the state is submitting
+    Options are: BASE, AMENDMENT
+    """
+    contractType: ContractType!
+}
+
+type CreateContractPayload {
+    contract: Contract!
 }
 
 input FetchHealthPlanPackageInput {
