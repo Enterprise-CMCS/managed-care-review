@@ -17,6 +17,7 @@ type SubmitRateArgsType = {
     submittedReason: UpdateInfoType['updatedReason']
 }
 
+// TODO Re-write submit rate to rely on packageSubmissions - lots of errors in the files and reliance on old patterns
 // Update the given revision
 // * invalidate relationships of previous revision
 // * set the UpdateInfo

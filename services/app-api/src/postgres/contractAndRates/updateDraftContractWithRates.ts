@@ -7,11 +7,11 @@ import type {
     RateFormEditableType,
     ContractFormEditableType,
 } from '../../domain-models/contractAndRates'
-import { includeDraftRates } from './prismaDraftContractHelpers'
 import { rateRevisionToDomainModel } from './prismaSharedContractRateHelpers'
 import type { UpdateDraftContractRatesArgsType } from './updateDraftContractRates'
 import { updateDraftContractRatesInTransaction } from './updateDraftContractRates'
 import { prismaUpdateContractFormDataFromDomain } from './prismaContractRateAdaptors'
+import { includeFullRate } from './prismaSubmittedRateHelpers'
 
 type UpdateContractArgsType = {
     contractID: string
@@ -102,9 +102,19 @@ async function updateDraftContractWithRates(
                         submitInfoID: null,
                     },
                     include: {
-                        contract: true,
-                        draftRates: {
-                            include: includeDraftRates,
+                        contract: {
+                            include: {
+                                draftRates: {
+                                    orderBy: {
+                                        ratePosition: 'asc',
+                                    },
+                                    include: {
+                                        rate: {
+                                            include: includeFullRate,
+                                        },
+                                    },
+                                },
+                            },
                         },
                     },
                 }
@@ -118,9 +128,9 @@ async function updateDraftContractWithRates(
             const ratesFromDB: RateRevisionType[] = []
 
             // Convert all rates from DB to domain model
-            for (const rate of currentContractRev.draftRates) {
+            for (const rate of currentContractRev.contract.draftRates) {
                 const domainRateRevision = rateRevisionToDomainModel(
-                    rate.revisions[0]
+                    rate.rate.revisions[0]
                 )
 
                 if (domainRateRevision instanceof Error) {

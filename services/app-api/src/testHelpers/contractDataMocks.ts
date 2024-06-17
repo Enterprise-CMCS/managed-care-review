@@ -56,16 +56,10 @@ const mockContractData = (
 
     Object.assign(contractData, {
         revisions: contract?.revisions ?? [
-            mockContractRevision(
-                {
-                    ...contractData,
-                    ...contract,
-                },
-                {
-                    draftRates: [],
-                },
-                contract?.stateCode as StateCodeType
-            ) as ContractRevisionTableWithRates,
+            mockContractRevision({
+                ...contractData,
+                ...contract,
+            }) as ContractRevisionTableWithRates,
         ],
     })
 
@@ -172,8 +166,6 @@ const mockContractRevision = (
         modifiedLengthOfContract: true,
         modifiedNonRiskPaymentArrangements: null,
         inLieuServicesAndSettings: null,
-        rateRevisions: [],
-        draftRates: [],
         statutoryRegulatoryAttestation: null,
         statutoryRegulatoryAttestationDescription: null,
         ...revision,

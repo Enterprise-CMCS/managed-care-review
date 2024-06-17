@@ -43,15 +43,6 @@ async function unlockRateInDB(
                 },
             },
             contractsWithSharedRateRevision: true,
-
-            contractRevisions: {
-                where: {
-                    validUntil: null,
-                },
-                include: {
-                    contractRevision: true,
-                },
-            },
             relatedSubmissions: {
                 orderBy: {
                     updatedAt: 'desc',
@@ -87,13 +78,6 @@ async function unlockRateInDB(
             'Programming Error: cannot unlock a already unlocked rate'
         )
     }
-
-    // old way to find connected contracts
-    //TODO: with linked rates on, find them via package submission
-    const previouslySubmittedContractIDs = currentRev.contractRevisions.map(
-        (c) => c.contractRevision.contractID
-    )
-
     const prevContractsWithSharedRateRevisionIDs =
         currentRev.contractsWithSharedRateRevision.map(
             (contract) => contract.id
@@ -109,12 +93,6 @@ async function unlockRateInDB(
             unlockInfo: {
                 connect: { id: unlockInfoID },
             },
-            draftContracts: {
-                connect: previouslySubmittedContractIDs.map((cID) => ({
-                    id: cID,
-                })),
-            },
-
             rateType: currentRev.rateType,
             rateCapitationType: currentRev.rateCapitationType,
             rateDateStart: currentRev.rateDateStart,
@@ -172,13 +150,6 @@ async function unlockRateInDB(
                 ),
             },
         },
-        include: {
-            contractRevisions: {
-                include: {
-                    contractRevision: true,
-                },
-            },
-        },
     })
 
     // Unlock rate will only ever by run after the linked rates FF is enabled
@@ -186,6 +157,7 @@ async function unlockRateInDB(
     // unlock UNDER a contract unlock, the contract will set the draft rates correctly.
     if (linkRatesFF) {
         // add DraftContract connections to the Rate
+        // TODO how are relatedSubmissions ordered - is it the first item or last item we should be using here
         const lastSubmission = currentRev.relatedSubmissions[0]
         const submissionConnections = lastSubmission.submissionPackages.filter(
             (p) => p.rateRevisionID === currentRev.id

@@ -7,7 +7,6 @@ import type { ContractType } from '../../domain-models/contractAndRates'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
 import type { UpdateInfoType } from '../../domain-models'
-import { includeDraftRates } from './prismaDraftContractHelpers'
 
 export type SubmitContractArgsType = {
     contractID: string // revision ID
@@ -47,11 +46,6 @@ export async function submitContract(
                     contractID: contractID,
                     submitInfoID: null,
                 },
-                include: {
-                    draftRates: {
-                        include: includeDraftRates,
-                    },
-                },
             })
 
             if (!currentRev) {
@@ -88,9 +82,6 @@ export async function submitContract(
                 }
             }
 
-            // this is all the revs that the newly submitted contract will be connected to. Those to be submitted and those already submitted.
-            const draftRateRevs = unsubmittedChildRevs.concat(linkedRateRevs)
-
             // Create the submitInfo record in the updateInfoTable
             const submitInfo = await tx.updateInfoTable.create({
                 data: {
@@ -99,117 +90,6 @@ export async function submitContract(
                     updatedReason: submittedReason,
                 },
             })
-
-            // OLD SUBMIT STYLE
-            // Update the contract to include the submitInfo ID
-            const updated = await tx.contractRevisionTable.update({
-                where: {
-                    id: currentRev.id,
-                },
-                data: {
-                    submitInfo: {
-                        connect: {
-                            id: submitInfo.id,
-                        },
-                    },
-                    rateRevisions: {
-                        createMany: {
-                            data: draftRateRevs.map((rev, idx) => ({
-                                rateRevisionID: rev.id,
-                                // Since rates come out the other side ordered by validAfter, we need to order things on the way in that way.
-                                validAfter: new Date(
-                                    currentDateTime.getTime() -
-                                        draftRateRevs.length +
-                                        idx +
-                                        1
-                                ),
-                            })),
-                        },
-                    },
-                    draftRates: {
-                        set: [],
-                    },
-                },
-                include: {
-                    rateRevisions: {
-                        include: {
-                            rateRevision: true,
-                        },
-                    },
-                },
-            })
-
-            // we only want to update the rateRevision's submit info if it has not already been submitted
-            await tx.rateRevisionTable.updateMany({
-                where: {
-                    id: {
-                        in: unsubmittedChildRevs.map((rev) => rev.id),
-                    },
-                },
-                data: {
-                    submitInfoID: submitInfo.id,
-                },
-            })
-
-            // oldRev is the previously submitted revision of this contract (the one just superseded by the update)
-            // on an initial submission, there won't be an oldRev
-            const oldRev = await tx.contractRevisionTable.findFirst({
-                where: {
-                    contractID: updated.contractID,
-                    NOT: {
-                        id: updated.id,
-                    },
-                },
-                include: {
-                    rateRevisions: {
-                        include: {
-                            rateRevision: true,
-                        },
-                    },
-                },
-                orderBy: {
-                    createdAt: 'desc',
-                },
-            })
-
-            // Take oldRev, invalidate all relationships and add any removed entries to the join table.
-            if (oldRev) {
-                // If any of the old rev's Rates aren't in the new Rates, add an entry in revisions join table
-                // isRemoval field shows that this is a previous rate related with this contract that is now removed
-                const oldRateRevs = oldRev.rateRevisions
-                    .filter((rrevjoin) => !rrevjoin.validUntil)
-                    .map((rrevjoin) => rrevjoin.rateRevision)
-                const removedRateRevs = oldRateRevs.filter(
-                    (rrev) =>
-                        !currentRev.draftRates
-                            .map((r) => r.id)
-                            .includes(rrev.rateID)
-                )
-
-                if (removedRateRevs.length > 0) {
-                    await tx.rateRevisionsOnContractRevisionsTable.createMany({
-                        data: removedRateRevs.map((rrev) => ({
-                            contractRevisionID: updated.id,
-                            rateRevisionID: rrev.id,
-                            validAfter: currentDateTime,
-                            validUntil: currentDateTime,
-                            isRemoval: true,
-                        })),
-                    })
-                }
-
-                // Invalidate old revision join table links by updating validUntil
-                // these links are considered outdated going forward
-                await tx.rateRevisionsOnContractRevisionsTable.updateMany({
-                    where: {
-                        contractRevisionID: oldRev.id,
-                        validUntil: null,
-                    },
-                    data: {
-                        validUntil: currentDateTime,
-                    },
-                })
-            }
 
             // NEW C+R HISTORY CODE post-submit (updateInfo placed in submitted revs.)
 

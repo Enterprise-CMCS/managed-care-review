@@ -133,7 +133,7 @@ async function updateDraftContractRatesInTransaction(
     ]
 
     // create new rates and link and unlink others
-    await tx.contractRevisionTable.update({
+    await tx.contractTable.update({
         where: { id: draftRevision.id },
         data: {
             draftRates: {
@@ -235,8 +235,8 @@ async function updateDraftContractRatesInTransaction(
             )
         }
 
-        await tx.rateRevisionTable.update({
-            where: { id: draftRev.id },
+        await tx.rateTable.update({
+            where: { id: draftRev.rateID },
             data: {
                 draftContracts: {
                     disconnect: {
