@@ -19,16 +19,18 @@ export function newLocalS3Client(
     bucketConfig: S3BucketConfigType,
     endpoint?: string
 ): S3ClientT {
-    const s3Client = endpoint ? new S3Client({
-        forcePathStyle: true,
-        apiVersion: '2006-03-01',
-        credentials: {
-            accessKeyId: 'S3RVER', // This specific key is required when working offline
-            secretAccessKey: 'S3RVER', // pragma: allowlist secret; pre-set by serverless-s3-offline
-        },
-        endpoint: endpoint,
-        region: 'us-east', // This region cannot be undefined and any string here will work.
-    }) : new S3Client({region: 'us-east'})
+    const s3Client = endpoint
+        ? new S3Client({
+              forcePathStyle: true,
+              apiVersion: '2006-03-01',
+              credentials: {
+                  accessKeyId: 'S3RVER', // This specific key is required when working offline
+                  secretAccessKey: 'S3RVER', // pragma: allowlist secret; pre-set by serverless-s3-offline
+              },
+              endpoint: endpoint,
+              region: 'us-east', // This region cannot be undefined and any string here will work.
+          })
+        : new S3Client({ region: 'us-east-1' })
 
     return {
         uploadFile: async (
