@@ -127,7 +127,17 @@ provider:
           Resource: '*'
         - Effect: 'Allow'
           Action:
-            - 's3:*'
+            - 's3:AbortMultipartUpload'
+            - 's3:GetBucketLocation'
+            - 's3:GetObject'
+            - 's3:ListBucket'
+            - 's3:ListBucketMultipartUploads'
+            - 's3:PutObject'
+            - s3:GetObjectTagging
+            - s3:PutObjectAcl
+            - s3:PutObjectTagging
+            - s3:PutObjectVersionTagging
+            - s3:DeleteObject
           Resource:
             # this is the "public" folder for all regular uploads from Amplify
             - ${self:custom.document_uploads_bucket_arn}/allusers/*
