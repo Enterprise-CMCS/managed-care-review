@@ -120,7 +120,7 @@ export function newLocalS3Client(
         ): Promise<string> => {
             const command = new GetObjectCommand({
                 Bucket: bucketConfig[bucket],
-                Key: s3key + '/allusers/',
+                Key: `'/allusers/'${s3key}`,
             })
             // Create the presigned URL.
             const signedUrl = await getSignedUrl(s3Client, command)
