@@ -122,6 +122,7 @@ export function newLocalS3Client(
                 Bucket: bucketConfig[bucket],
                 Key: `'/allusers/'${s3key}`,
             })
+            console.info(`S3 KEY: ${s3key}`)
             // Create the presigned URL.
             const signedUrl = await getSignedUrl(s3Client, command)
             return signedUrl
