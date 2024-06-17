@@ -51,7 +51,10 @@ function draftRateRevToDomainModel(
         updatedAt: revision.updatedAt,
         formData,
         unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
-        contractRevisions: draftContractsToDomainModel(revision.draftContracts),
+        // TODO - figure out how to calculate contractRevisions from relatedSubmissions.packageSubmissions going forward
+        contractRevisions: draftContractsToDomainModel(
+            revision.relatedSubmissions
+        ),
     }
 }
 

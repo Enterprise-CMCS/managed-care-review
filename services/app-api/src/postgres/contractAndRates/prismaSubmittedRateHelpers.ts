@@ -1,5 +1,4 @@
 import type { Prisma } from '@prisma/client'
-import { includeDraftContracts } from './prismaDraftRatesHelpers'
 import {
     includeContractFormData,
     includeRateFormData,
@@ -27,10 +26,6 @@ const includeFullRate = {
         include: {
             ...includeRateFormData,
 
-            draftContracts: {
-                include: includeDraftContracts,
-            },
-
             submitInfo: {
                 include: {
                     updatedBy: true,
@@ -38,16 +33,6 @@ const includeFullRate = {
                 },
             },
 
-            contractRevisions: {
-                include: {
-                    contractRevision: {
-                        include: includeContractFormData,
-                    },
-                },
-                orderBy: {
-                    validAfter: 'asc',
-                },
-            },
             relatedSubmissions: {
                 orderBy: {
                     updatedAt: 'asc',
@@ -66,8 +51,8 @@ const includeFullRate = {
                                 include: includeContractFormData,
                             },
                             rateRevision: {
-                                include: includeRateFormData
-                            }
+                                include: includeRateFormData,
+                            },
                         },
                         orderBy: {
                             ratePosition: 'asc',

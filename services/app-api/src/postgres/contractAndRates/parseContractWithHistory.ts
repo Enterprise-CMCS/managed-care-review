@@ -177,26 +177,6 @@ function contractWithHistoryToDomainModel(
 
             draftRates = draftRatesOrError
 
-            if (draftRates.length === 0) {
-                console.info(
-                    'Checking for old style draft rates, this code should go when migrated to new draft-rates table.'
-                )
-                // This code works for pre-migrated stuff.
-                const draftPrismaRates = contractRev.draftRates
-                draftRates = draftPrismaRates.map((r) => {
-                    return {
-                        id: r.id,
-                        createdAt: r.createdAt,
-                        updatedAt: r.updatedAt,
-                        status: getContractRateStatus(r.revisions),
-                        stateCode: r.stateCode,
-                        parentContractID: contractRev.contractID, // all pre-migrated rates are parented to their only contract.
-                        stateNumber: r.stateNumber,
-                        revisions: [],
-                    }
-                })
-            }
-
             // skip the rest of the processing
             continue
         }
@@ -280,7 +260,7 @@ function contractWithHistoryToDomainModel(
             contractRevisions[contractRevIndex + 1]
 
         // Reverse rateRevisions so it is in DESC order.
-        const rateRevisions = contractRev.rateRevisions.reverse()
+        const rateRevisions = contractRev.submissionPackages
 
         for (const rateRev of rateRevisions) {
             if (!rateRev.rateRevision.submitInfo) {

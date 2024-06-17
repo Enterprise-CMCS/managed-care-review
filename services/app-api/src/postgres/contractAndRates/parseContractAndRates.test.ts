@@ -145,58 +145,6 @@ describe('parseDomainData', () => {
                 }),
                 testDescription: 'undefined stateCode',
             },
-            {
-                contract: mockContractData({
-                    revisions: [
-                        mockContractRevision(contract, {
-                            rateRevisions: [
-                                {
-                                    rateRevisionID: uuidv4(),
-                                    contractRevisionID: uuidv4(),
-                                    validAfter: new Date(),
-                                    validUntil: null,
-                                    updatedAt: new Date(),
-                                    isRemoval: false,
-                                    rateRevision: {
-                                        id: uuidv4(),
-                                        rate: {
-                                            id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
-                                            createdAt: new Date(),
-                                            updatedAt: new Date(),
-                                            stateCode: 'MN',
-                                            stateNumber: 111,
-                                        },
-                                        rateID: 'Rate ID',
-                                        createdAt: new Date(),
-                                        updatedAt: new Date(),
-                                        submitInfoID: null,
-                                        submitInfo: null,
-                                        unlockInfo: null,
-                                        unlockInfoID: null,
-                                        rateType: null,
-                                        rateCapitationType: null,
-                                        rateDateStart: null,
-                                        rateDateEnd: null,
-                                        rateDateCertified: null,
-                                        rateDocuments: [],
-                                        certifyingActuaryContacts: [],
-                                        addtlActuaryContacts: [],
-                                        supportingDocuments: [],
-                                        amendmentEffectiveDateStart: null,
-                                        amendmentEffectiveDateEnd: null,
-                                        rateProgramIDs: [],
-                                        deprecatedRateProgramIDs: [],
-                                        rateCertificationName: null,
-                                        actuaryCommunicationPreference: null,
-                                        contractsWithSharedRateRevision: [],
-                                    },
-                                },
-                            ],
-                        }) as ContractTableFullPayload['revisions'][0],
-                    ],
-                }),
-                testDescription: 'unsubmitted rate',
-            },
         ]
         test.each(contractRevisionsWithInvalidData)(
             'parseContractWithHistory returns an error when contract data is invalid: $testDescription',
