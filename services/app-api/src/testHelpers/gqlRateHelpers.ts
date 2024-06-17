@@ -21,6 +21,7 @@ import type { RateType } from '../domain-models'
 import type { ApolloServer } from 'apollo-server-lambda'
 import type { RateFormEditableType } from '../domain-models/contractAndRates'
 import { createAndSubmitTestContractWithRate } from './gqlContractHelpers'
+import { clearDocMetadata } from './documentHelpers'
 
 const fetchTestRateById = async (
     server: ApolloServer,
@@ -263,8 +264,8 @@ function formatRateDataForSending(
     return {
         rateType: rateFormData.rateType,
         rateCapitationType: rateFormData.rateCapitationType,
-        rateDocuments: rateFormData.rateDocuments,
-        supportingDocuments: rateFormData.supportingDocuments,
+        rateDocuments: clearDocMetadata(rateFormData.rateDocuments),
+        supportingDocuments: clearDocMetadata(rateFormData.supportingDocuments),
         rateDateStart: rateFormData.rateDateStart,
         rateDateEnd: rateFormData.rateDateEnd,
         rateDateCertified: rateFormData.rateDateCertified,

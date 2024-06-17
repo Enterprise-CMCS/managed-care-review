@@ -40,6 +40,6 @@ export {
 
 export {
     clearDocMetadata,
-    clearDocMetadataFromContractFormData,
-    clearDocMetadataFromRateFormData,
+    clearMetadataFromContractFormData,
+    clearMetadataFromRateFormData,
 } from './documentHelpers'

@@ -10,7 +10,7 @@ import SUBMIT_RATE from '../../../../app-graphql/src/mutations/submitRate.graphq
 import FETCH_RATE from '../../../../app-graphql/src/queries/fetchRate.graphql'
 import UNLOCK_RATE from '../../../../app-graphql/src/mutations/unlockRate.graphql'
 import {
-    clearDocMetadataFromRateFormData,
+    clearMetadataFromRateFormData,
     submitTestRate,
     updateTestRate,
 } from '../../testHelpers'
@@ -83,8 +83,8 @@ describe('submitRate', () => {
         // expect status to be submitted.
         expect(submittedRate.status).toBe('RESUBMITTED')
         // expect formData to be the same
-        expect(clearDocMetadataFromRateFormData(submittedRateFormData)).toEqual(
-            clearDocMetadataFromRateFormData(draftFormData)
+        expect(clearMetadataFromRateFormData(submittedRateFormData)).toEqual(
+            clearMetadataFromRateFormData(draftFormData)
         )
     })
     it('can submit rate with formData updates', async () => {
@@ -198,8 +198,8 @@ describe('submitRate', () => {
 
         // expect formData to be the same
 
-        expect(clearDocMetadataFromRateFormData(submittedRateFormData)).toEqual(
-            clearDocMetadataFromRateFormData(draftFormData)
+        expect(clearMetadataFromRateFormData(submittedRateFormData)).toEqual(
+            clearMetadataFromRateFormData(draftFormData)
         )
     })
 

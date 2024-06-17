@@ -295,17 +295,17 @@ describe('fetchRate', () => {
         expect(rateRev.formData.rateDocuments).toHaveLength(1)
         expect(rateRev.formData.rateDocuments[0].name).toBe('docr1.pdf')
         expect(
-            dayjs(rateRev.formData.rateDocuments[0].dateAdded).format(
-                'YYYY-DD-DD'
-            )
+            dayjs
+                .tz(rateRev.formData.rateDocuments[0].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
         ).toBe('2024-01-01')
 
         expect(rateRev.formData.supportingDocuments).toHaveLength(1)
         expect(rateRev.formData.supportingDocuments[0].name).toBe('docx1.pdf')
         expect(
-            dayjs(rateRev.formData.supportingDocuments[0].dateAdded).format(
-                'YYYY-DD-DD'
-            )
+            dayjs
+                .tz(rateRev.formData.supportingDocuments[0].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
         ).toBe('2024-01-01')
 
         // 2. Unlock and add more documents
@@ -369,20 +369,32 @@ describe('fetchRate', () => {
             throw new Error('something')
         expect(rateRevA1.formData.rateDocuments).toHaveLength(2)
         expect(rateRevA1.formData.rateDocuments[0].name).toBe('docr1.pdf')
-        expect(rateRevA1.formData.rateDocuments[0].dateAdded).toBe('2024-01-01')
+        expect(
+            dayjs
+                .tz(rateRevA1.formData.rateDocuments[0].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
+        ).toBe('2024-01-01')
 
         expect(rateRevA1.formData.rateDocuments[1].name).toBe('docr2.pdf')
-        expect(rateRevA1.formData.rateDocuments[1].dateAdded).toBe('2024-02-02')
+        expect(
+            dayjs
+                .tz(rateRevA1.formData.rateDocuments[1].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
+        ).toBe('2024-02-02')
 
         expect(rateRevA1.formData.supportingDocuments).toHaveLength(2)
         expect(rateRevA1.formData.supportingDocuments[0].name).toBe('docx1.pdf')
-        expect(rateRevA1.formData.supportingDocuments[0].dateAdded).toBe(
-            '2024-01-01'
-        )
+        expect(
+            dayjs
+                .tz(rateRevA1.formData.supportingDocuments[0].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
+        ).toBe('2024-01-01')
 
         expect(rateRevA1.formData.supportingDocuments[1].name).toBe('docx2.pdf')
-        expect(rateRevA1.formData.supportingDocuments[1].dateAdded).toBe(
-            '2024-02-02'
-        )
+        expect(
+            dayjs
+                .tz(rateRevA1.formData.supportingDocuments[1].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
+        ).toBe('2024-02-02')
     })
 })

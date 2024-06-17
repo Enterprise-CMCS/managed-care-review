@@ -16,7 +16,7 @@ const clearDocMetadata = (documents?: GenericDocument[]): GenericDocument[] => {
     })
 }
 
-const clearDocMetadataFromContractFormData = (
+const clearMetadataFromContractFormData = (
     contractForm: ContractFormData
 ): ContractFormData => {
     return {
@@ -26,7 +26,7 @@ const clearDocMetadataFromContractFormData = (
     }
 }
 
-const clearDocMetadataFromRateFormData = (
+const clearMetadataFromRateFormData = (
     rateForm: RateFormData
 ): RateFormData => {
     return {
@@ -38,6 +38,6 @@ const clearDocMetadataFromRateFormData = (
 
 export {
     clearDocMetadata,
-    clearDocMetadataFromRateFormData,
-    clearDocMetadataFromContractFormData,
+    clearMetadataFromRateFormData,
+    clearMetadataFromContractFormData,
 }
