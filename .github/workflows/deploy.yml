@@ -306,9 +306,9 @@ jobs:
       app_version: ${{ needs.begin-deployment.outputs.app-version }}
       changed_services: ${{ needs.begin-deployment.outputs.changed-services }}
       aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
+      vite_app_auth_mode: AWS_COGNITO
     secrets:
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
-      react_app_auth_mode: AWS_COGNITO
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   finishing-prep:
