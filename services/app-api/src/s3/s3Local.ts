@@ -16,10 +16,10 @@ type S3BucketConfigType = {
     [K in BucketShortName]: string
 }
 export function newLocalS3Client(
-    endpoint: string,
-    bucketConfig: S3BucketConfigType
+    bucketConfig: S3BucketConfigType,
+    endpoint?: string
 ): S3ClientT {
-    const s3Client = new S3Client({
+    const s3Client = endpoint ? new S3Client({
         forcePathStyle: true,
         apiVersion: '2006-03-01',
         credentials: {
@@ -28,7 +28,7 @@ export function newLocalS3Client(
         },
         endpoint: endpoint,
         region: 'us-east', // This region cannot be undefined and any string here will work.
-    })
+    }) : new S3Client({region: 'us-east'})
 
     return {
         uploadFile: async (

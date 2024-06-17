@@ -413,13 +413,12 @@ async function initializeGQLHandler(): Promise<Handler> {
         HEALTH_PLAN_DOCS: s3DocumentsBucket,
         QUESTION_ANSWER_DOCS: s3QABucket,
     }
-    // if (process.env.REACT_APP_AUTH_MODE !== 'LOCAL') {
-    //     s3Client = newLocalS3Client(s3LocalURL, S3_BUCKETS_CONFIG)
-    // } else if (s3LocalURL) {
-    //     s3Client = newLocalS3Client(s3LocalURL, S3_BUCKETS_CONFIG)
-    // }
     const url = 'http://localhost:4569'
-    s3Client = newLocalS3Client(url, S3_BUCKETS_CONFIG)
+    if (process.env.REACT_APP_AUTH_MODE === 'LOCAL') {
+        s3Client = newLocalS3Client(S3_BUCKETS_CONFIG, url)
+    } else {
+        s3Client = newLocalS3Client(S3_BUCKETS_CONFIG)
+    }
 
     // Resolvers are defined and tested in the resolvers package
     const resolvers = configureResolvers(

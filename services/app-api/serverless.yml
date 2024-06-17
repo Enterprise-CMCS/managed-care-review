@@ -163,7 +163,7 @@ provider:
     ALLOWED_IP_ADDRESSES: ${self:custom.allowedIpAddresses}
     JWT_SECRET: ${self:custom.jwtSecret}
     REACT_APP_S3_QA_BUCKET: ${self:custom.reactAppS3QABucket}
-    REACT_APP_S3_DOCUMENTS_BUCKET: {$self:custom.reactAppS3DocumentUploadsBucket}
+    REACT_APP_S3_DOCUMENTS_BUCKET: ${self:custom.reactAppS3DocumentUploadsBucket}
 layers:
   prismaClientMigration:
     path: lambda-layers-prisma-client-migration
