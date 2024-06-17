@@ -227,7 +227,7 @@ describe('CMS user', () => {
         })
     })
 
-    it.only('can unlock and resubmit child rates with linked rates flag', () => {
+    it('can unlock and resubmit child rates with linked rates flag', () => {
         cy.interceptFeatureFlags({"link-rates": true, '438-attestation': true})
         cy.logInAsStateUser()
 
@@ -464,31 +464,44 @@ describe('CMS user', () => {
         cy.apiCreateAndSubmitContractWithRates(stateUser()).then(() => {
             cy.logInAsStateUser()
 
+            // This section still uses old API, so we want to do that first before using the new link-rates UI
             cy.startNewContractAndRatesSubmission()
             cy.fillOutBaseContractDetails()
 
             cy.navigateFormByButtonClick('CONTINUE')
-
             cy.findByRole('heading', { level: 2, name: /Rate details/ })
-            cy.fillOutLinkedRate()
-            cy.navigateContractRatesFormByButtonClick('CONTINUE')
-
-            cy.findByRole('heading', { level: 2, name: /Contacts/ })
-            cy.fillOutStateContact()
-            cy.navigateFormByButtonClick('CONTINUE')
-
-            cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
-            cy.navigateFormByButtonClick('CONTINUE')
-
-            cy.findByRole('heading', { level: 2, name: /Review and submit/ })
 
             // Test unlock and resubmit with a linked rate submission
             cy.location().then((fullUrl) => {
-                const reviewURL = fullUrl.toString()
-                const submissionURL = reviewURL.replace(
-                    'edit/review-and-submit',
+                const submissionURL = fullUrl.toString().replace(
+                    'edit/rate-details',
                     ''
                 )
+                const reviewURL = `${submissionURL}edit/review-and-submit`
+
+                /**
+                 * The updateHealthPlanFormData endpoint fails to update rates when the flag is on, causing an error after
+                 * the rate details page due to Cypress's inability to toggle backend flags. This is due to the API's
+                 * attempt to update the new rate format with HPP. The solution is to apply old API updates before new
+                 * rate API updates in a non-sequential order.
+                 */
+                cy.navigateFormByDirectLink(`${submissionURL}edit/contacts`)
+                cy.findByRole('heading', { level: 2, name: /Contacts/ })
+                cy.fillOutStateContact()
+
+                cy.navigateFormByButtonClick('CONTINUE')
+                cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
+
+                // New API
+                cy.navigateFormByDirectLink(`${submissionURL}edit/rate-details`)
+                cy.findByRole('heading', { level: 2, name: /Rate details/ })
+                cy.fillOutLinkedRate()
+
+                cy.navigateContractRatesFormByButtonClick('CONTINUE')
+                cy.findByRole('heading', { level: 2, name: /Contacts/ })
+
+                cy.navigateFormByDirectLink(`${submissionURL}edit/review-and-submit`)
+                cy.findByRole('heading', { level: 2, name: /Review and submit/ })
 
                 // Submit, sent to dashboard
                 cy.submitStateSubmissionForm()
