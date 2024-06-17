@@ -91,7 +91,9 @@ export const UploadedDocumentsTable = ({
             return false // design require, don't show new tags on initial submission
         }
         // compare the last submission with this documents first seen on package date (date added)
-        return dayjs(doc.dateAdded).isSameOrAfter(previousSubmissionDate)
+        return dayjs(doc.dateAdded)
+            .utc()
+            .isSameOrAfter(dayjs(previousSubmissionDate).utc())
     }
 
     // show legacy shared rates across submissions (this is feature replaced by linked rates)
