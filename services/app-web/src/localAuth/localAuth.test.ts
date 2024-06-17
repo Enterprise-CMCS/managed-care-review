@@ -45,7 +45,7 @@ describe('localLogin', () => {
 
         await expect(getLoggedInUser()).rejects.toEqual(
             new SyntaxError(
-                `Unexpected token w in JSON at position 0`
+                `Unexpected token 'w', "weofnef{{{|" is not valid JSON`
             )
         )
     })
