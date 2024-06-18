@@ -33,9 +33,7 @@ import {
     ApolloServerPluginLandingPageDisabled,
     ApolloServerPluginLandingPageLocalDefault,
 } from 'apollo-server-core'
-import {
-    newLocalS3Client,
-} from '../s3'
+import { newLocalS3Client } from '../s3'
 import type { S3ClientT } from '../s3'
 
 let ldClient: LDClient
@@ -209,8 +207,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     const allowedIpAddresses = process.env.ALLOWED_IP_ADDRESSES
     const jwtSecret = process.env.JWT_SECRET
     const s3LocalURL = process.env.REACT_APP_S3_LOCAL_URL
-    const s3DocumentsBucket =
-        process.env.REACT_APP_S3_DOCUMENTS_BUCKET
+    const s3DocumentsBucket = process.env.REACT_APP_S3_DOCUMENTS_BUCKET
     const s3QABucket = process.env.REACT_APP_S3_QA_BUCKET
 
     // START Assert configuration is valid
@@ -257,10 +254,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         )
     }
 
-    if (
-        s3DocumentsBucket === undefined ||
-        s3QABucket === undefined
-    ) {
+    if (s3DocumentsBucket === undefined || s3QABucket === undefined) {
         throw new Error(
             'To configure s3, you  must set REACT_APP_S3_DOCUMENTS_BUCKET and REACT_APP_S3_QA_BUCKET'
         )
@@ -413,9 +407,9 @@ async function initializeGQLHandler(): Promise<Handler> {
         HEALTH_PLAN_DOCS: s3DocumentsBucket,
         QUESTION_ANSWER_DOCS: s3QABucket,
     }
-    const url = 'http://localhost:4569'
+
     if (process.env.REACT_APP_AUTH_MODE === 'LOCAL') {
-        s3Client = newLocalS3Client(S3_BUCKETS_CONFIG, url)
+        s3Client = newLocalS3Client(S3_BUCKETS_CONFIG, s3LocalURL)
     } else {
         s3Client = newLocalS3Client(S3_BUCKETS_CONFIG)
     }
