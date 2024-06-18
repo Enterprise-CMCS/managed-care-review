@@ -3,8 +3,8 @@ import type { Resolvers } from '../../gen/gqlServer'
 import {
     parseBucketName,
     parseKey,
-} from 'app-web/src/common-code/s3URLEncoding'
-import type { S3ClientT } from 'app-web/src/s3'
+} from '../../../../app-web/src/common-code/s3URLEncoding'
+import type { S3ClientT } from '../../../../app-web/src/s3'
 import type { QuestionResponseDocument } from '../../domain-models'
 
 export function questionResponseDocumentResolver(

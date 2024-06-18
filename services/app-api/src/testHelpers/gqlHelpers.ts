@@ -45,8 +45,8 @@ import { findStatePrograms } from '../postgres'
 import { must } from './assertionHelpers'
 import { newJWTLib } from '../jwt'
 import type { JWTLib } from '../jwt'
-import { newLocalS3Client } from '../../../app-web/src/s3/'
-import type { S3ClientT } from '../../../app-web/src/s3/'
+import { newLocalS3Client } from '../../../app-web/src/s3'
+import type { S3ClientT } from '../../../app-web/src/s3'
 import type { S3BucketConfigType } from '../../../app-web/src/s3/s3Amplify'
 
 // Since our programs are checked into source code, we have a program we
