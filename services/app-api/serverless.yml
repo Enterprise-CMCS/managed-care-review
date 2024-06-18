@@ -5,8 +5,9 @@ frameworkVersion: '^3.19.0'
 package:
   individually: true
   patterns:
-    - src/**               # include only files from ./src/**/*
-    - '!node_modules/**'   # exclude files from ./node_modules/**/*
+    - '!node_modules/prisma'
+    - '!node_modules/.prisma'
+    - '!node_modules/@prisma'
 
 plugins:
   - serverless-offline-ssm
@@ -61,6 +62,8 @@ custom:
       nodeModulesRelativeDir: '../../'
     packagerOptions:
       lockFile: '../../yarn.lock'
+      scripts:
+        - rm -rf node_modules/@aws-sdk
     excludeRegex: 'darwin|debian'
   serverlessTerminationProtection:
     stages:
@@ -167,7 +170,7 @@ layers:
   prismaClientMigration:
     path: lambda-layers-prisma-client-migration
   prismaClientEngine:
-    path: lambda-layers-prisma-client-engine 
+    path: lambda-layers-prisma-client-engine
 
 functions:
   email_submit:
