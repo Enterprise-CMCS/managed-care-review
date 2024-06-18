@@ -35,14 +35,11 @@ import {
 } from 'apollo-server-core'
 import { newDeployedS3Client, newLocalS3Client } from '../../../app-web/src/s3'
 import type { S3ClientT } from '../../../app-web/src/s3'
+import type { S3BucketConfigType } from '../../../app-web/src/s3/s3Amplify'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
 
-type BucketShortName = 'HEALTH_PLAN_DOCS' | 'QUESTION_ANSWER_DOCS'
-type S3BucketConfigType = {
-    [K in BucketShortName]: string
-}
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
     user: UserType
@@ -206,7 +203,6 @@ async function initializeGQLHandler(): Promise<Handler> {
     const ldSDKKey = process.env.LD_SDK_KEY
     const allowedIpAddresses = process.env.ALLOWED_IP_ADDRESSES
     const jwtSecret = process.env.JWT_SECRET
-    const s3LocalURL = process.env.REACT_APP_S3_LOCAL_URL
     const s3DocumentsBucket = process.env.REACT_APP_S3_DOCUMENTS_BUCKET
     const s3QABucket = process.env.REACT_APP_S3_QA_BUCKET
 
@@ -408,8 +404,9 @@ async function initializeGQLHandler(): Promise<Handler> {
         QUESTION_ANSWER_DOCS: s3QABucket,
     }
 
-    if (authMode === 'LOCAL' && s3LocalURL) {
-        s3Client = newLocalS3Client(s3LocalURL, S3_BUCKETS_CONFIG)
+    const s3Local = 'http://localhost:4569'
+    if (authMode === 'LOCAL') {
+        s3Client = newLocalS3Client(s3Local, S3_BUCKETS_CONFIG)
     } else {
         s3Client = newDeployedS3Client(S3_BUCKETS_CONFIG)
     }

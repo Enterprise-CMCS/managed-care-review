@@ -8,7 +8,7 @@ import {
     updateTestHealthPlanFormData,
 } from '../../testHelpers/gqlHelpers'
 import SUBMIT_CONTRACT from '../../../../app-graphql/src/mutations/submitContract.graphql'
-import { testS3Client } from '../../testHelpers/s3Helpers'
+import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
 
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import type {

@@ -19,7 +19,7 @@ import {
     submitTestContract,
     createAndUpdateTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
-import { testS3Client } from '../../testHelpers/s3Helpers'
+import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
 
 describe('indexRates', () => {
     const ldService = testLDService({
