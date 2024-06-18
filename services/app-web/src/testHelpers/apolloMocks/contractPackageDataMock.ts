@@ -1181,7 +1181,7 @@ function mockContractPackageUnlocked(
                         amendmentEffectiveDateStart: new Date(),
                         amendmentEffectiveDateEnd: new Date(),
                         rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                        deprecatedRateProgramIDs: [],
+                        deprecatedRateProgramIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f10'],
                         certifyingActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
@@ -1360,7 +1360,7 @@ function mockContractPackageUnlocked(
                         amendmentEffectiveDateStart: new Date(),
                         amendmentEffectiveDateEnd: new Date(),
                         rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                        deprecatedRateProgramIDs: [],
+                        deprecatedRateProgramIDs: ['ea16a6c0-5fc6-4df8-adac-c627e76660ab'],
                         certifyingActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',

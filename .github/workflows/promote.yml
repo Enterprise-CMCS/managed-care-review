@@ -59,7 +59,7 @@ jobs:
         run: ./dev test --unit
 
       - name: publish code coverage
-        uses: paambaati/codeclimate-action@v6.0.0
+        uses: paambaati/codeclimate-action@v8.0.0
         continue-on-error: true
         env:
           CC_TEST_REPORTER_ID: f7474ffe9522492f5380eb86189480f352c841718c1fe6a63f169353c7cee243
@@ -93,7 +93,7 @@ jobs:
 
       - name: Install packages
         working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
 
       - name: Generate protos
         run: npx lerna run generate --scope=app-proto
@@ -101,7 +101,7 @@ jobs:
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client
         working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn prisma generate
+        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x yarn prisma generate
 
       - name: Prepare "@prisma/client" lambda layer
         working-directory: services/app-api

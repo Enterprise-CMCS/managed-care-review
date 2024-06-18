@@ -1,4 +1,9 @@
-module.exports = {
+import type { Config } from '@jest/types'
+
+const config: Config.InitialOptions = {
     setupFiles: ['jest-launchdarkly-mock'],
-    clearMocks: true
+
+    clearMocks: true,
 }
+
+export default config

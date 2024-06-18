@@ -222,7 +222,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                                         <span className={styles.mccrsID}>
                                             MC-CRS record number:
                                             <Link
-                                                href={`https://mccrs.abtsites.com/Home/Index/${contract.mccrsID}`}
+                                                href={`https://mccrs.internal.cms.gov/Home/Index/${contract.mccrsID}`}
                                                 aria-label="MC-CRS system login"
                                             >
                                                 {contract.mccrsID}

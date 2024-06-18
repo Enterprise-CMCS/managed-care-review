@@ -94,6 +94,7 @@ export const RateDetailsSummarySectionV2 = ({
     const rates = rateRevs
         ? rateRevs
         : getVisibleLatestRateRevisions(contract, isEditing)
+
     const lastSubmittedDate =
         getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
 
@@ -284,12 +285,12 @@ export const RateDetailsSummarySectionV2 = ({
                                   <DoubleColumnGrid>
                                       {rateFormData.deprecatedRateProgramIDs
                                           .length > 0 &&
-                                          isSubmitted && (
+                                          isSubmittedOrCMSUser && (
                                               <DataDetail
                                                   id="historicRatePrograms"
                                                   label="Programs this rate certification covers"
                                                   explainMissingData={
-                                                      explainMissingData
+                                                      false // this is a deprecated field, we never need to explain if its missing
                                                   }
                                                   children={ratePrograms(
                                                       rate,
