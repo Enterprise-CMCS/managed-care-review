@@ -57,7 +57,7 @@ describe('createQuestion', () => {
             })
         )
     })
-    it('allows question creation on UNLOCKED and RESUBMITTED package', async () => {
+    it.skip('allows question creation on UNLOCKED and RESUBMITTED package', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {

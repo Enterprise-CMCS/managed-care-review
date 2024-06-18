@@ -15,6 +15,7 @@ import {
     indexQuestionsResolver,
     createQuestionResolver,
     createQuestionResponseResolver,
+    questionResponseDocumentResolver,
 } from './questionResponse'
 import {
     fetchCurrentUserResolver,
@@ -146,6 +147,7 @@ export function configureResolvers(
         Contract: contractResolver(),
         ContractRevision: contractRevisionResolver(store),
         GenericDocument: genericDocumentResolver(s3Client),
+        Document: questionResponseDocumentResolver(s3Client),
     }
 
     return resolvers
