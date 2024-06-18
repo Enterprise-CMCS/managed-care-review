@@ -1,5 +1,4 @@
 import { ApolloServer } from 'apollo-server-lambda'
-import { v4 as uuidv4 } from 'uuid'
 import CREATE_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/createHealthPlanPackage.graphql'
 import SUBMIT_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/submitHealthPlanPackage.graphql'
 import UNLOCK_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
@@ -45,7 +44,7 @@ import { findStatePrograms } from '../postgres'
 import { must } from './assertionHelpers'
 import { newJWTLib } from '../jwt'
 import type { JWTLib } from '../jwt'
-import { convertUnlockedHPPToContractAndRates } from '../domain-models/contractAndRates/convertHPPtoContractWithRates'
+import { convertRateInfoToRateFormData } from '../domain-models/contractAndRates/convertHPPtoContractWithRates'
 import { createAndUpdateTestContractWithoutRates } from './gqlContractHelpers'
 import { addNewRateToTestContract } from './gqlRateHelpers'
 
@@ -232,35 +231,23 @@ const createAndUpdateTestHealthPlanPackage = async (
     partialUpdates?: Partial<UnlockedHealthPlanFormDataType>,
     stateCode?: StateCodeType
 ): Promise<HealthPlanPackage> => {
-    const ratePrograms = stateCode
-        ? [must(findStatePrograms(stateCode))[0]]
-        : [defaultFloridaRateProgram()]
-
-    const draft: UnlockedHealthPlanFormDataType = {
-        id: uuidv4(),
-        createdAt: new Date(Date.now()),
-        updatedAt: new Date(Date.now()),
-        status: 'DRAFT',
-        stateCode: stateCode || 'FL',
-        stateNumber: 1,
-        programIDs: [],
-        documents: [],
-        submissionType: 'CONTRACT_AND_RATES' as const,
-        submissionDescription: 'An updated submission',
-        stateContacts: [
+    // the rates have to be added separately now
+    let rateFormDatas = []
+    if (partialUpdates?.rateInfos) {
+        rateFormDatas = convertRateInfoToRateFormData(
+            partialUpdates?.rateInfos || []
+        )
+    } else {
+        const ratePrograms = stateCode
+            ? [must(findStatePrograms(stateCode))[0]]
+            : [defaultFloridaRateProgram()]
+        // let's have some default test data:
+        rateFormDatas = [
             {
-                name: 'test name',
-                titleRole: 'test title',
-                email: 'email@example.com',
-            },
-        ],
-        rateInfos: [
-            {
-                id: uuidv4(),
                 rateType: 'NEW' as const,
-                rateDateStart: new Date(Date.UTC(2025, 5, 1)),
-                rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
-                rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+                rateDateStart: '2025-05-01',
+                rateDateEnd: '2026-04-30',
+                rateDateCertified: '2025-03-15',
                 rateDocuments: [
                     {
                         name: 'rateDocument.pdf',
@@ -271,9 +258,8 @@ const createAndUpdateTestHealthPlanPackage = async (
                 supportingDocuments: [],
                 //We only want one rate ID and use last program in list to differentiate from programID if possible.
                 rateProgramIDs: [ratePrograms.reverse()[0].id],
-                actuaryContacts: [
+                certifyingActuaryContacts: [
                     {
-                        id: '123-abc',
                         name: 'test name',
                         titleRole: 'test title',
                         email: 'email@example.com',
@@ -282,64 +268,17 @@ const createAndUpdateTestHealthPlanPackage = async (
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
-                packagesWithSharedRateCerts: [],
             },
-        ],
-        addtlActuaryContacts: [
-            {
-                id: '123-addtl-abv',
-                name: 'test name',
-                titleRole: 'test title',
-                email: 'email@example.com',
-                actuarialFirm: 'MERCER' as const,
-                actuarialFirmOther: '',
-            },
-        ],
-        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
-        contractType: 'BASE' as const,
-        contractExecutionStatus: 'EXECUTED' as const,
-        contractDateStart: new Date(Date.UTC(2025, 5, 1)),
-        contractDateEnd: new Date(Date.UTC(2026, 4, 30)),
-        contractDocuments: [
-            {
-                name: 'contractDocument.pdf',
-                s3URL: 'fakeS3URL',
-                sha256: 'fakesha',
-            },
-        ],
-        managedCareEntities: ['MCO'],
-        federalAuthorities: ['STATE_PLAN' as const],
-        populationCovered: 'MEDICAID' as const,
-        contractAmendmentInfo: {
-            modifiedProvisions: {
-                inLieuServicesAndSettings: true,
-                modifiedRiskSharingStrategy: false,
-                modifiedIncentiveArrangements: false,
-                modifiedWitholdAgreements: false,
-                modifiedStateDirectedPayments: true,
-                modifiedPassThroughPayments: true,
-                modifiedPaymentsForMentalDiseaseInstitutions: true,
-                modifiedNonRiskPaymentArrangements: true,
-            },
-        },
-        statutoryRegulatoryAttestation: false,
-        statutoryRegulatoryAttestationDescription: 'No compliance',
+        ]
     }
 
-    Object.assign(draft, partialUpdates)
-
-    const [contractFormData, rateFormDatas] =
-        convertUnlockedHPPToContractAndRates(draft)
-
-    const contract = await createAndUpdateTestContractWithoutRates(
+    let contract = await createAndUpdateTestContractWithoutRates(
         server,
         stateCode,
-        contractFormData
+        partialUpdates
     )
-    if (rateFormDatas.length > 0) {
-        rateFormDatas.forEach(async (rateData) => {
-            await addNewRateToTestContract(server, contract, rateData)
-        })
+    for (const rateData of rateFormDatas) {
+        contract = await addNewRateToTestContract(server, contract, rateData)
     }
     const updatedDraft = await fetchTestHealthPlanPackageById(
         server,

@@ -16,9 +16,12 @@ import { insertDraftContract } from '../postgres/contractAndRates/insertContract
 
 import { type ContractType } from '../domain-models'
 import type { ApolloServer } from 'apollo-server-lambda'
-import type { Contract, ContractFormData, RateFormData } from '../gen/gqlServer'
+import type { Contract, RateFormData } from '../gen/gqlServer'
 import { latestFormData } from './healthPlanPackageHelpers'
-import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import type {
+    HealthPlanFormDataType,
+    StateCodeType,
+} from 'app-web/src/common-code/healthPlanFormDataType'
 import { addNewRateToTestContract } from './gqlRateHelpers'
 
 const createAndSubmitTestContract = async (
@@ -146,7 +149,7 @@ async function createAndUpdateTestContractWithRate(
 const createAndUpdateTestContractWithoutRates = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
-    contractFormDataOverrides?: Partial<ContractFormData>
+    contractFormDataOverrides?: Partial<HealthPlanFormDataType>
 ): Promise<Contract> => {
     const pkg = await createTestHealthPlanPackage(server, stateCode)
     const draft = latestFormData(pkg)

@@ -371,13 +371,8 @@ describe('submitContract', () => {
     })
 
     it('handles complex submission etc', async () => {
-        const ldService = testLDService({})
-
-        const stateServer = await constructTestPostgresServer({
-            ldService,
-        })
+        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
-            ldService,
             context: {
                 user: testCMSUser(),
             },
