@@ -11,27 +11,21 @@ export function genericDocumentResolver(
 ): Resolvers['GenericDocument'] {
     return {
         downloadURL: async (parent) => {
-            try {
-                const s3URL = parent.s3URL ?? ''
-                const key = parseKey(s3URL)
-                const bucket = parseBucketName(s3URL)
-                if (key instanceof Error || bucket instanceof Error) {
-                    const err = new Error(
-                        'S3 needs to be provided a valid key and bucket'
-                    )
-                    throw err
-                }
-
-                const url = await s3Client.getURL(key, 'HEALTH_PLAN_DOCS')
-                if (!url) {
-                    const msg = new Error('error')
-                    throw msg
-                }
-                return url
-            } catch (err) {
-                console.error(err)
+            const s3URL = parent.s3URL ?? ''
+            const key = parseKey(s3URL)
+            const bucket = parseBucketName(s3URL)
+            if (key instanceof Error || bucket instanceof Error) {
+                const err = new Error(
+                    'S3 needs to be provided a valid key and bucket'
+                )
                 throw err
             }
+
+            const url = await s3Client.getURL(key, 'HEALTH_PLAN_DOCS')
+            if (!url) {
+                throw new Error('error getting download url from S3')
+            }
+            return url
         },
     }
 }

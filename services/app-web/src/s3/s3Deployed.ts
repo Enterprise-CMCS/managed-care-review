@@ -12,7 +12,8 @@ import { BucketShortName, S3BucketConfigType } from './s3Amplify'
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
 
-
+// newDeployedS3Client is used for calling S3 from app-api
+// app-api does not use amplify for interfacing with S3
 export function newDeployedS3Client(
     bucketConfig: S3BucketConfigType,
 ): S3ClientT {
@@ -104,6 +105,8 @@ export function newDeployedS3Client(
             s3key: string,
             bucket: BucketShortName
         ): Promise<string> => {
+            // uploads from app-web are prepended with '/allusers'
+            // hardcode the 'allusers' into the key so that the path matches
             const command = new GetObjectCommand({
                 Bucket: bucketConfig[bucket],
                 Key: `allusers/${s3key}`,

@@ -23,11 +23,13 @@ import {
     fetchTestContract,
     submitTestContract,
 } from '../../testHelpers/gqlContractHelpers'
+import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
 
 describe('submitRate', () => {
     const ldService = testLDService({
         'rate-edit-unlock': true,
     })
+    const mockS3 = testS3Client()
 
     it('can submit rate without updates', async () => {
         const stateUser = testStateUser()
@@ -37,6 +39,7 @@ describe('submitRate', () => {
                 user: stateUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -44,6 +47,7 @@ describe('submitRate', () => {
                 user: testCMSUser(),
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer)
@@ -95,6 +99,7 @@ describe('submitRate', () => {
                 user: stateUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -102,6 +107,7 @@ describe('submitRate', () => {
                 user: testCMSUser(),
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer)
@@ -149,6 +155,7 @@ describe('submitRate', () => {
                 user: stateUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -156,6 +163,7 @@ describe('submitRate', () => {
                 user: testCMSUser(),
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const draftRate = await createSubmitAndUnlockTestRate(
@@ -206,12 +214,14 @@ describe('submitRate', () => {
 
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
                 user: testCMSUser(),
             },
+            s3Client: mockS3,
         })
 
         // 1. Submit A0 with Rate1 and Rate2
@@ -315,6 +325,7 @@ describe('submitRate', () => {
                 user: stateUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -322,6 +333,7 @@ describe('submitRate', () => {
                 user: cmsUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const draftContractWithRate =
@@ -397,6 +409,7 @@ describe('submitRate', () => {
             ldService: testLDService({
                 'rate-edit-unlock': false,
             }),
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -404,6 +417,7 @@ describe('submitRate', () => {
                 user: testCMSUser(),
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const draftRate = await createSubmitAndUnlockTestRate(
