@@ -1537,9 +1537,9 @@
     tslib "^2.6.2"
 
 "@aws-sdk/client-secrets-manager@^3.529.1":
-  version "3.598.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-secrets-manager/-/client-secrets-manager-3.598.0.tgz#3ecef58b94f9fcce857dfffd263aabea13154748"
-  integrity sha512-TGTCazj5yL6j5+uPHSNlCAe5ptVnh3nV96ihd7ACEFJJg513dR4s+Q4GIR6h3UuMtqHCJ5Zuk98P9SX32V2YhQ==
+  version "3.599.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-secrets-manager/-/client-secrets-manager-3.599.0.tgz#b52c7d38fd0644d1b86b4f4beee752ddaa8178a3"
+  integrity sha512-TxwNu1BZ6nWlkohCFnzhrPwBwA8UUnGQ1R1v7IqxsYqTY0gKrZVCm/9H7ys39ylLWGqnoRAmSVRac4maj+vXaQ==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"
@@ -11459,9 +11459,9 @@
   integrity sha512-Abq9fBviLV93OiXMu+f6r0elxCzRwc0RC5f99cU892uBITL44pTvgvEqlRlPRi8EGcO1z7Cp8A4d0s/p3J/+Nw==
 
 "@types/node@^16.18.39":
-  version "16.18.98"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.98.tgz#3554bb7911ea2bbc3a528be0776d6ab16b7674d2"
-  integrity sha512-fpiC20NvLpTLAzo3oVBKIqBGR6Fx/8oAK/SSf7G+fydnXMY1x4x9RZ6sBXhqKlCU21g2QapUsbLlhv3+a7wS+Q==
+  version "16.18.99"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.99.tgz#6600ee92acb332e5409b22166041c27afce8bb6e"
+  integrity sha512-X2Yc+NQaPXDuaR32UmFrTr3OXWaht756A6sJw56o4dehkySBZ0NWH30CCRviuC0KFwTDW/NTjrtbFHhYcHkd6g==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
