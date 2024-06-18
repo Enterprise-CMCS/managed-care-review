@@ -133,7 +133,7 @@ provider:
             - ${self:custom.document_uploads_bucket_arn}/allusers/*
             - ${self:custom.qa_uploads_bucket_arn}/allusers/*
 
-        - Effect: 'Allow' 
+        - Effect: 'Allow'
           Action:
             - ssm:GetParameter
             - ssm:GetParameters
