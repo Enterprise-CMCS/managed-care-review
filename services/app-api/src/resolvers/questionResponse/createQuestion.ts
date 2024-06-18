@@ -104,8 +104,18 @@ export function createQuestionResolver(
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
-
-        const questionResult = await store.insertQuestion(input, user)
+        const docs = input.documents.map((doc) => {
+            return {
+                name: doc.name,
+                s3URL: doc.s3URL,
+                downloadURL: doc.downloadURL ?? undefined,
+            }
+        })
+        const inputFormatted = {
+            ...input,
+            documents: docs
+        }
+        const questionResult = await store.insertQuestion(inputFormatted, user)
 
         if (questionResult instanceof Error) {
             const errMessage = `Issue creating question for package. Message: ${questionResult.message}`

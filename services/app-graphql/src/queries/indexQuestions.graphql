@@ -1,4 +1,4 @@
-fragment questionEdgeFragment on QuestionEdge {
+fragment questionEdgeFragmentIndexQuestions on QuestionEdge {
     node {
         id
         contractID
@@ -60,19 +60,19 @@ query indexQuestions($input: IndexQuestionsInput!) {
     indexQuestions(input: $input) {
         DMCOQuestions {
             edges {
-                ...questionEdgeFragment
+                ...questionEdgeFragmentIndexQuestions
             }
             totalCount
         }
         DMCPQuestions {
             edges {
-                ...questionEdgeFragment
+                ...questionEdgeFragmentIndexQuestions
             }
             totalCount
         }
         OACTQuestions {
             edges {
-                ...questionEdgeFragment
+                ...questionEdgeFragmentIndexQuestions
             }
             totalCount
         }

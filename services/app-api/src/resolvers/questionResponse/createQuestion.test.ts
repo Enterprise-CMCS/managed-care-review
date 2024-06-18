@@ -113,6 +113,7 @@ describe('createQuestion', () => {
                                     {
                                         name: 'Test Question',
                                         s3URL: 's3://bucketname/key/test1',
+                                        downloadURL: ''
                                     },
                                 ],
                                 addedBy: cmsUser,
@@ -128,6 +129,7 @@ describe('createQuestion', () => {
                                     {
                                         name: 'Test Question 2',
                                         s3URL: 's3://bucketname/key/test12',
+                                        downloadURL: ''
                                     },
                                 ],
                                 addedBy: cmsUser,
