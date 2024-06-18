@@ -6,31 +6,17 @@ import {
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
-import { parseKey } from './helpers'
+import { parseKey } from '../common-code/s3URLEncoding'
+import { BucketShortName, S3BucketConfigType } from './s3Amplify'
 
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
 
-type BucketShortName = 'HEALTH_PLAN_DOCS' | 'QUESTION_ANSWER_DOCS'
-type S3BucketConfigType = {
-    [K in BucketShortName]: string
-}
-export function newLocalS3Client(
+
+export function newDeployedS3Client(
     bucketConfig: S3BucketConfigType,
-    endpoint?: string
 ): S3ClientT {
-    const s3Client = endpoint
-        ? new S3Client({
-              forcePathStyle: true,
-              apiVersion: '2006-03-01',
-              credentials: {
-                  accessKeyId: 'S3RVER', // This specific key is required when working offline
-                  secretAccessKey: 'S3RVER', // pragma: allowlist secret; pre-set by serverless-s3-offline
-              },
-              endpoint: endpoint,
-              region: 'us-east', // This region cannot be undefined and any string here will work.
-          })
-        : new S3Client({ region: 'us-east-1' })
+    const s3Client = new S3Client({ region: 'us-east-1' })
 
     return {
         uploadFile: async (

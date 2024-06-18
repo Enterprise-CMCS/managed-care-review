@@ -33,8 +33,8 @@ import {
     ApolloServerPluginLandingPageDisabled,
     ApolloServerPluginLandingPageLocalDefault,
 } from 'apollo-server-core'
-import { newLocalS3Client } from '../s3'
-import type { S3ClientT } from '../s3'
+import { newDeployedS3Client, newLocalS3Client } from '../../../app-web/src/s3'
+import type { S3ClientT } from '../../../app-web/src/s3'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
@@ -408,10 +408,10 @@ async function initializeGQLHandler(): Promise<Handler> {
         QUESTION_ANSWER_DOCS: s3QABucket,
     }
 
-    if (process.env.REACT_APP_AUTH_MODE === 'LOCAL') {
-        s3Client = newLocalS3Client(S3_BUCKETS_CONFIG, s3LocalURL)
+    if (authMode === 'LOCAL' && s3LocalURL) {
+        s3Client = newLocalS3Client(s3LocalURL, S3_BUCKETS_CONFIG)
     } else {
-        s3Client = newLocalS3Client(S3_BUCKETS_CONFIG)
+        s3Client = newDeployedS3Client(S3_BUCKETS_CONFIG)
     }
 
     // Resolvers are defined and tested in the resolvers package
