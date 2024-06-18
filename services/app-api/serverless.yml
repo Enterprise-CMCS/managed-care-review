@@ -170,6 +170,11 @@ layers:
   prismaClientEngine:
     path: lambda-layers-prisma-client-engine
 
+package:
+  patterns:
+    - src/**               # include only files from ./src/**/*
+    - '!node_modules/**'   # exclude files from ./node_modules/**/*
+
 functions:
   email_submit:
     handler: src/handlers/email_submit.main
