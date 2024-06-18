@@ -52,15 +52,15 @@ describe('submitRate', () => {
 
         const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer)
 
-        // const fetchDraftRate = await stateServer.executeOperation({
-        //     query: FETCH_RATE,
-        //     variables: {
-        //         input: { rateID: rate.id },
-        //     },
-        // })
+        const fetchDraftRate = await stateServer.executeOperation({
+            query: FETCH_RATE,
+            variables: {
+                input: { rateID: rate.id },
+            },
+        })
 
-        // const draftFormData =
-        // fetchDraftRate.data?.fetchRate.rate.draftRevision.formData
+        const draftFormData =
+            fetchDraftRate.data?.fetchRate.rate.draftRevision.formData
 
         // submitRate with no form data updates
         const result = await stateServer.executeOperation({
@@ -74,7 +74,7 @@ describe('submitRate', () => {
 
         expect(result.errors).toBeUndefined()
         const submittedRate = result.data?.submitRate.rate
-        // const submittedRateFormData = submittedRate.revisions[0].formData
+        const submittedRateFormData = submittedRate.revisions[0].formData
 
         // expect no errors from submit rate
         expect(result.errors).toBeUndefined()
@@ -82,14 +82,51 @@ describe('submitRate', () => {
         expect(submittedRate).toBeDefined()
         // expect status to be submitted.
         expect(submittedRate.status).toBe('RESUBMITTED')
-        // expect formData to be the same
         // const formDataKeys = Object.keys(submittedRateFormData)
         // formDataKeys.forEach((key) => {
-        //     // tslint:disable-next-line
         //     if (key !== 'rateDocuments' && key !== 'supportingDocuments') {
         //         expect(submittedRateFormData[key]).toEqual(draftFormData[key])
         //     }
         // })
+        expect(submittedRateFormData.rateCapitationType).toEqual(
+            draftFormData.rateCapitationType
+        )
+        expect(submittedRateFormData.rateDateStart).toEqual(
+            draftFormData.rateDateStart
+        )
+        expect(submittedRateFormData.rateDateEnd).toEqual(
+            draftFormData.rateDateEnd
+        )
+        expect(submittedRateFormData.rateDateCertified).toEqual(
+            draftFormData.rateDateCertified
+        )
+        expect(submittedRateFormData.amendmentEffectiveDateStart).toEqual(
+            draftFormData.amendmentEffectiveDateStart
+        )
+        expect(submittedRateFormData.amendmentEffectiveDateEnd).toEqual(
+            draftFormData.amendmentEffectiveDateEnd
+        )
+        expect(submittedRateFormData.deprecatedRateProgramIDs).toEqual(
+            draftFormData.deprecatedRateProgramIDs
+        )
+        expect(submittedRateFormData.rateProgramIDs).toEqual(
+            draftFormData.rateProgramIDs
+        )
+        expect(submittedRateFormData.rateCertificationName).toEqual(
+            draftFormData.rateCertificationName
+        )
+        expect(submittedRateFormData.certifyingActuaryContacts).toEqual(
+            draftFormData.certifyingActuaryContacts
+        )
+        expect(submittedRateFormData.addtlActuaryContacts).toEqual(
+            draftFormData.addtlActuaryContacts
+        )
+        expect(submittedRateFormData.actuaryCommunicationPreference).toEqual(
+            draftFormData.actuaryCommunicationPreference
+        )
+        expect(submittedRateFormData.packagesWithSharedRateCerts).toEqual(
+            draftFormData.packagesWithSharedRateCerts
+        )
     })
     it('can submit rate with formData updates', async () => {
         const stateUser = testStateUser()

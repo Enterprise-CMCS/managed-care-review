@@ -234,6 +234,52 @@ describe('fetchRate', () => {
         expect(unlockedRate.revisions[0].unlockInfo).toBeNull()
     })
 
+    it('returns the downloadURL on a fetchedRate', async () => {
+        const cmsUser = testCMSUser()
+        const server = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            ldService,
+            s3Client: mockS3,
+        })
+
+        const submittedRate = await createSubmitAndUnlockTestRate(
+            server,
+            cmsServer
+        )
+        expect(submittedRate).toBeDefined()
+
+        const input = {
+            rateID: submittedRate.id,
+        }
+
+        // fetch rate
+        const result = await cmsServer.executeOperation({
+            query: FETCH_RATE,
+            variables: {
+                input,
+            },
+        })
+
+        const unlockedRate = result.data?.fetchRate.rate
+        expect(result.errors).toBeUndefined()
+        expect(unlockedRate).toBeDefined()
+
+        expect(
+            unlockedRate.draftRevision.formData.rateDocuments[0].downloadURL
+        ).toBeDefined()
+        expect(
+            unlockedRate.draftRevision.formData.supportingDocuments[0]
+                .downloadURL
+        ).toBeDefined()
+    })
+
     it('returns the correct dateAdded for documents', async () => {
         const ldService = testLDService({
             'link-rates': true,

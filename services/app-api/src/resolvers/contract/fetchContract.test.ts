@@ -45,6 +45,10 @@ describe('fetchContract', () => {
         expect(draftRate).toHaveLength(1)
         expect(draftRate[0].status).toBe('DRAFT')
         expect(draftRate[0].stateCode).toBe('FL')
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        expect(
+            draftRate[0].draftRevision?.formData.rateDocuments![0].downloadURL
+        ).toBeDefined()
     })
 
     it('gets the right contract name', async () => {
