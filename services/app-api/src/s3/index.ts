@@ -1,0 +1,7 @@
+export type { S3ClientT } from './s3Client'
+export type { S3Error } from './s3Error'
+export { isS3Error } from './s3Error'
+export type { BucketShortName, S3BucketConfigType } from './helpers'
+export { parseBucketName, parseKey } from './helpers'
+export { newLocalS3Client } from './s3Local'
+export { newDeployedS3Client } from './s3Deployed'

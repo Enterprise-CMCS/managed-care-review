@@ -42,7 +42,7 @@ import { contractRevisionResolver } from './contract/contractRevisionResolver'
 import { fetchContractResolver } from './contract/fetchContract'
 import { submitContract } from './contract/submitContract'
 import { rateRevisionResolver } from './rate/rateRevisionResolver'
-import type { S3ClientT } from '../../../app-web/src/s3'
+import type { S3ClientT } from '../s3'
 
 export function configureResolvers(
     store: Store,

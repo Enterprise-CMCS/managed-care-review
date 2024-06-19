@@ -1,10 +1,7 @@
 import type { Resolvers } from '../../gen/gqlServer'
 
-import {
-    parseBucketName,
-    parseKey,
-} from '../../../../app-web/src/common-code/s3URLEncoding'
-import type { S3ClientT } from '../../../../app-web/src/s3'
+import { parseBucketName, parseKey } from '../../s3'
+import type { S3ClientT } from '../../s3'
 
 export function genericDocumentResolver(
     s3Client: S3ClientT

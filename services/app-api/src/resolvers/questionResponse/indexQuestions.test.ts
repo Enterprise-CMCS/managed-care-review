@@ -27,7 +27,7 @@ describe('indexQuestions', () => {
         await createDBUsersWithFullData([dmcoCMSUser, dmcpCMSUser, oactCMSUser])
     })
 
-    it.skip('returns package with questions and responses for each division', async () => {
+    it('returns package with questions and responses for each division', async () => {
         const stateServer = await constructTestPostgresServer()
         const dmcoCMSServer = await constructTestPostgresServer({
             context: {

@@ -57,7 +57,7 @@ describe('createQuestion', () => {
             })
         )
     })
-    it.skip('allows question creation on UNLOCKED and RESUBMITTED package', async () => {
+    it('allows question creation on UNLOCKED and RESUBMITTED package', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
@@ -113,7 +113,10 @@ describe('createQuestion', () => {
                                     {
                                         name: 'Test Question',
                                         s3URL: 's3://bucketname/key/test1',
-                                        downloadURL: ''
+                                        downloadURL:
+                                            indexQuestionsPayload.DMCOQuestions
+                                                .edges[0].node.documents[0]
+                                                .downloadURL,
                                     },
                                 ],
                                 addedBy: cmsUser,
@@ -129,7 +132,10 @@ describe('createQuestion', () => {
                                     {
                                         name: 'Test Question 2',
                                         s3URL: 's3://bucketname/key/test12',
-                                        downloadURL: ''
+                                        downloadURL:
+                                            indexQuestionsPayload.DMCOQuestions
+                                                .edges[1].node.documents[0]
+                                                .downloadURL,
                                     },
                                 ],
                                 addedBy: cmsUser,

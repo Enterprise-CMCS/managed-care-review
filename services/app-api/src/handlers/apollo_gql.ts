@@ -33,8 +33,8 @@ import {
     ApolloServerPluginLandingPageDisabled,
     ApolloServerPluginLandingPageLocalDefault,
 } from 'apollo-server-core'
-import { newDeployedS3Client, newLocalS3Client } from '../../../app-web/src/s3'
-import type { S3ClientT, S3BucketConfigType } from '../../../app-web/src/s3'
+import { newDeployedS3Client, newLocalS3Client } from '../s3'
+import type { S3ClientT, S3BucketConfigType } from '../s3'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
