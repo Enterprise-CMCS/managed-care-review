@@ -15,13 +15,15 @@ const isValidS3URLFormat = (url: {
 
 const parseBucketName = (maybeS3URL: string): string | Error => {
     const url = new Url(maybeS3URL)
-    // if (!isValidS3URLFormat(url)) throw new Error('Not valid S3URL')
+    if (!isValidS3URLFormat(url))
+        throw new Error(`Not valid S3URL for parsebucket: ${maybeS3URL}`)
     return url.hostname
 }
 
 const parseKey = (maybeS3URL: string): string | Error => {
     const url = new Url(maybeS3URL)
-    // if (!isValidS3URLFormat(url)) return new Error('Not valid S3URL')
+    if (!isValidS3URLFormat(url))
+        return new Error(`Not valid S3URL for parsekey: ${maybeS3URL}`)
     return url.pathname.split('/')[1]
 }
 type BucketShortName = 'HEALTH_PLAN_DOCS' | 'QUESTION_ANSWER_DOCS'
