@@ -204,7 +204,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     const jwtSecret = process.env.JWT_SECRET
     const s3DocumentsBucket = process.env.REACT_APP_S3_DOCUMENTS_BUCKET
     const s3QABucket = process.env.REACT_APP_S3_QA_BUCKET
-
+    const region = process.env.REGION
     // START Assert configuration is valid
     if (emailerMode !== 'LOCAL' && emailerMode !== 'SES')
         throw new Error(
@@ -253,6 +253,10 @@ async function initializeGQLHandler(): Promise<Handler> {
         throw new Error(
             'To configure s3, you  must set REACT_APP_S3_DOCUMENTS_BUCKET and REACT_APP_S3_QA_BUCKET'
         )
+    }
+
+    if (region === undefined) {
+        throw new Error('Configuration error: region is required')
     }
 
     // END
@@ -407,7 +411,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     if (authMode === 'LOCAL') {
         s3Client = newLocalS3Client(s3Local, S3_BUCKETS_CONFIG)
     } else {
-        s3Client = newDeployedS3Client(S3_BUCKETS_CONFIG)
+        s3Client = newDeployedS3Client(S3_BUCKETS_CONFIG, region)
     }
 
     // Resolvers are defined and tested in the resolvers package

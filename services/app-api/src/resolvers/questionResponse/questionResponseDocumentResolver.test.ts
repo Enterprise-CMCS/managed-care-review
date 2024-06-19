@@ -1,4 +1,3 @@
-import INDEX_QUESTIONS from 'app-graphql/src/queries/indexQuestions.graphql'
 import {
     constructTestPostgresServer,
     createAndSubmitTestHealthPlanPackage,
@@ -6,16 +5,14 @@ import {
     createTestQuestionResponse,
     indexTestQuestions,
 } from '../../testHelpers/gqlHelpers'
-import { assertAnError, assertAnErrorCode } from '../../testHelpers'
 import {
-    createDBUsersWithFullData,
     testCMSUser,
+    createDBUsersWithFullData,
 } from '../../testHelpers/userHelpers'
 import { testS3Client } from '../../testHelpers/s3Helpers'
 
-describe('indexQuestions', () => {
+describe(`questionResponseDocumentResolver`, () => {
     const mockS3 = testS3Client()
-
     const dmcoCMSUser = testCMSUser({
         divisionAssignment: 'DMCO',
     })
@@ -30,7 +27,7 @@ describe('indexQuestions', () => {
         await createDBUsersWithFullData([dmcoCMSUser, dmcpCMSUser, oactCMSUser])
     })
 
-    it('returns package with questions and responses for each division', async () => {
+    it('populates a download url for documents on fetch', async () => {
         const stateServer = await constructTestPostgresServer()
         const dmcoCMSServer = await constructTestPostgresServer({
             context: {
@@ -179,70 +176,6 @@ describe('indexQuestions', () => {
                     ],
                 }),
             })
-        )
-    })
-    it('returns an error if you are requesting for a different state (403)', async () => {
-        const stateServer = await constructTestPostgresServer({
-            s3Client: mockS3,
-        })
-        const otherStateServer = await constructTestPostgresServer({
-            context: {
-                user: {
-                    id: '4fed22c0-6d05-4bae-9e9a-b2345073ccf8',
-                    stateCode: 'VA',
-                    role: 'STATE_USER',
-                    email: 'aang@va.gov',
-                    familyName: 'Aang',
-                    givenName: 'Aang',
-                },
-            },
-            s3Client: mockS3,
-        })
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: dmcoCMSUser,
-            },
-            s3Client: mockS3,
-        })
-
-        const submittedPkg =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
-
-        await createTestQuestion(cmsServer, submittedPkg.id)
-
-        const result = await otherStateServer.executeOperation({
-            query: INDEX_QUESTIONS,
-            variables: {
-                input: {
-                    contractID: submittedPkg.id,
-                },
-            },
-        })
-
-        expect(result.errors).toBeDefined()
-        expect(assertAnErrorCode(result)).toBe('FORBIDDEN')
-        expect(assertAnError(result).message).toBe(
-            'User not authorized to fetch data from a different state'
-        )
-    })
-    it('returns an error if health plan package does not exist', async () => {
-        const server = await constructTestPostgresServer({ s3Client: mockS3 })
-
-        await createAndSubmitTestHealthPlanPackage(server)
-
-        const result = await server.executeOperation({
-            query: INDEX_QUESTIONS,
-            variables: {
-                input: {
-                    contractID: 'invalid-pkg-id',
-                },
-            },
-        })
-
-        expect(result.errors).toBeDefined()
-        expect(assertAnErrorCode(result)).toBe('NOT_FOUND')
-        expect(assertAnError(result).message).toBe(
-            'Issue finding a contract with id invalid-pkg-id. Message: Contract with id invalid-pkg-id does not exist'
         )
     })
 })

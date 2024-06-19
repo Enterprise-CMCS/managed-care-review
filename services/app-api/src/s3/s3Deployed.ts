@@ -15,9 +15,10 @@ import type { S3Error } from './s3Error'
 // newDeployedS3Client is used for calling S3 from app-api
 // app-api does not use amplify for interfacing with S3
 export function newDeployedS3Client(
-    bucketConfig: S3BucketConfigType
+    bucketConfig: S3BucketConfigType,
+    region: string
 ): S3ClientT {
-    const s3Client = new S3Client({ region: 'us-east-1' })
+    const s3Client = new S3Client({ region })
 
     return {
         uploadFile: async (

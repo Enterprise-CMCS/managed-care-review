@@ -152,6 +152,7 @@ provider:
 
   environment:
     stage: ${sls:stage}
+    REGION: ${self:custom.region}
     DATABASE_URL: ${self:custom.dbURL}
     REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
     API_APP_OTEL_COLLECTOR_URL: ${self:custom.apiAppOtelCollectorUrl}

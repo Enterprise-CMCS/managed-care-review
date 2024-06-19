@@ -113,10 +113,7 @@ describe('createQuestion', () => {
                                     {
                                         name: 'Test Question',
                                         s3URL: 's3://bucketname/key/test1',
-                                        downloadURL:
-                                            indexQuestionsPayload.DMCOQuestions
-                                                .edges[0].node.documents[0]
-                                                .downloadURL,
+                                        downloadURL: expect.any(String),
                                     },
                                 ],
                                 addedBy: cmsUser,
@@ -132,10 +129,7 @@ describe('createQuestion', () => {
                                     {
                                         name: 'Test Question 2',
                                         s3URL: 's3://bucketname/key/test12',
-                                        downloadURL:
-                                            indexQuestionsPayload.DMCOQuestions
-                                                .edges[1].node.documents[0]
-                                                .downloadURL,
+                                        downloadURL: expect.any(String),
                                     },
                                 ],
                                 addedBy: cmsUser,

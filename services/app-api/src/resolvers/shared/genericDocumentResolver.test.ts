@@ -3,7 +3,7 @@ import FETCH_RATE from '../../../../app-graphql/src/queries/fetchRate.graphql'
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { createSubmitAndUnlockTestRate } from '../../testHelpers/gqlRateHelpers'
-import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
+import { testS3Client } from '../../testHelpers/s3Helpers'
 
 describe(`genericDocumentResolver`, () => {
     const ldService = testLDService({
@@ -12,7 +12,7 @@ describe(`genericDocumentResolver`, () => {
     const cmsUser = testCMSUser()
     const mockS3 = testS3Client()
 
-    it('returns status error if rate is actively being edited in draft', async () => {
+    it('populates a download url for documents on fetch', async () => {
         const server = await constructTestPostgresServer({
             ldService,
             s3Client: mockS3,
