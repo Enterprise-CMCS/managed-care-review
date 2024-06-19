@@ -22,7 +22,7 @@ export function questionResponseDocumentResolver(
                 throw err
             }
 
-            const url = await s3Client.getURL(key, 'HEALTH_PLAN_DOCS')
+            const url = await s3Client.getURL(key, 'QUESTION_ANSWER_DOCS')
             if (!url) {
                 throw new Error('error getting download url from S3')
             }
