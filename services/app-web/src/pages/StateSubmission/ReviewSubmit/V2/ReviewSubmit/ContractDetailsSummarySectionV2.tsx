@@ -44,9 +44,12 @@ import {
 import { SectionCard } from '../../../../../components/SectionCard'
 import { Contract, ContractRevision } from '../../../../../gen/gqlClient'
 import {
+    getIndexFromRevisionVersion,
     getLastContractSubmission,
+    getPackageSubmissionAtIndex,
     getVisibleLatestContractFormData,
 } from '../../../../../gqlHelpers/contractsAndRates'
+import { useParams } from 'react-router-dom'
 
 export type ContractDetailsSummarySectionV2Props = {
     contract: Contract
@@ -90,6 +93,7 @@ export const ContractDetailsSummarySectionV2 = ({
     >(undefined)
     const ldClient = useLDClient()
     const { loggedInUser } = useAuth()
+    const { revisionVersion } = useParams()
     const isSubmittedOrCMSUser =
         contract.status === 'SUBMITTED' ||
         contract.status === 'RESUBMITTED' ||
@@ -170,8 +174,16 @@ export const ContractDetailsSummarySectionV2 = ({
         submissionName,
         isPreviousSubmission,
     ])
-    const lastSubmittedDate =
-        getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
+    // Calculate last submitted data for document upload tables
+    const lastSubmittedIndex = getIndexFromRevisionVersion(
+        contract,
+        Number(revisionVersion)
+    )
+    const lastSubmittedDate = isPreviousSubmission
+        ? getPackageSubmissionAtIndex(contract, lastSubmittedIndex)?.submitInfo
+              .updatedAt
+        : getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
+
     return (
         <SectionCard
             id="contractDetailsSection"

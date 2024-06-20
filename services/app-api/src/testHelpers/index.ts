@@ -38,4 +38,8 @@ export {
     // updateTestContract,
 } from './gqlContractHelpers'
 
-export { clearDocMetadata } from './documentHelpers'
+export {
+    clearDocMetadata,
+    clearMetadataFromContractFormData,
+    clearMetadataFromRateFormData,
+} from './documentHelpers'

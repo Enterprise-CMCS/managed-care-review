@@ -27,11 +27,14 @@ import {
     ActuaryContact,
 } from '../../../../../gen/gqlClient'
 import {
+    getIndexFromRevisionVersion,
     getLastContractSubmission,
+    getPackageSubmissionAtIndex,
     getVisibleLatestRateRevisions,
 } from '../../../../../gqlHelpers/contractsAndRates'
 import { useAuth } from '../../../../../contexts/AuthContext'
 import { ActuaryCommunicationRecord } from '../../../../../constants'
+import { useParams } from 'react-router-dom'
 
 export type RateDetailsSummarySectionV2Props = {
     contract: Contract
@@ -83,6 +86,7 @@ export const RateDetailsSummarySectionV2 = ({
     explainMissingData,
 }: RateDetailsSummarySectionV2Props): React.ReactElement => {
     const { loggedInUser } = useAuth()
+    const { revisionVersion } = useParams()
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
@@ -95,8 +99,15 @@ export const RateDetailsSummarySectionV2 = ({
         ? rateRevs
         : getVisibleLatestRateRevisions(contract, isEditing)
 
-    const lastSubmittedDate =
-        getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
+    // Calculate last submitted data for document upload tables
+    const lastSubmittedIndex = getIndexFromRevisionVersion(
+        contract,
+        Number(revisionVersion)
+    )
+    const lastSubmittedDate = isPreviousSubmission
+        ? getPackageSubmissionAtIndex(contract, lastSubmittedIndex)?.submitInfo
+              .updatedAt
+        : getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
 
     const { getKey, getBulkDlURL } = useS3()
     const [zippedFilesURL, setZippedFilesURL] = useState<
