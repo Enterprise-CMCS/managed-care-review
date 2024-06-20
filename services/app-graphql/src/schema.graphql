@@ -886,15 +886,10 @@ input GenericDocumentInput {
     s3URL: String!
     "The sha256 is a unique string representing the file, generated on the FE currently in the FileUpload component"
     sha256: String!
-<<<<<<< HEAD
-    "The first date this document was added to submitted package - this is ignored on input and regenerated on return"
-    dateAdded: Date
     "The url used for downloading a file from S3"
     downloadURL: String
-=======
      "The first date this document was added to submitted package - this is ignored on input and regenerated on return"
     dateAdded: DateTime
->>>>>>> 321b51a30ae321128ed1a510fab9a2ef2b977672
 }
 
 "The large overarching population of people that the program covers."
