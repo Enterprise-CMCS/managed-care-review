@@ -82,12 +82,7 @@ describe('submitRate', () => {
         expect(submittedRate).toBeDefined()
         // expect status to be submitted.
         expect(submittedRate.status).toBe('RESUBMITTED')
-        // const formDataKeys = Object.keys(submittedRateFormData)
-        // formDataKeys.forEach((key) => {
-        //     if (key !== 'rateDocuments' && key !== 'supportingDocuments') {
-        //         expect(submittedRateFormData[key]).toEqual(draftFormData[key])
-        //     }
-        // })
+
         expect(submittedRateFormData.rateCapitationType).toEqual(
             draftFormData.rateCapitationType
         )
