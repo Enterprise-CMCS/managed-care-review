@@ -62,8 +62,6 @@ custom:
       nodeModulesRelativeDir: '../../'
     packagerOptions:
       lockFile: '../../yarn.lock'
-      scripts:
-        - rm -rf node_modules/@aws-sdk
     excludeRegex: 'darwin|debian'
   serverlessTerminationProtection:
     stages:
