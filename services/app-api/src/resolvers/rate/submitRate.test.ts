@@ -9,7 +9,11 @@ import { testStateUser, testCMSUser } from '../../testHelpers/userHelpers'
 import SUBMIT_RATE from '../../../../app-graphql/src/mutations/submitRate.graphql'
 import FETCH_RATE from '../../../../app-graphql/src/queries/fetchRate.graphql'
 import UNLOCK_RATE from '../../../../app-graphql/src/mutations/unlockRate.graphql'
-import { submitTestRate, updateTestRate } from '../../testHelpers'
+import {
+    clearMetadataFromRateFormData,
+    submitTestRate,
+    updateTestRate,
+} from '../../testHelpers'
 import SUBMIT_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
 import {
     addLinkedRateToTestContract,
@@ -121,6 +125,9 @@ describe('submitRate', () => {
         )
         expect(submittedRateFormData.packagesWithSharedRateCerts).toEqual(
             draftFormData.packagesWithSharedRateCerts
+        )
+        expect(clearMetadataFromRateFormData(submittedRateFormData)).toEqual(
+            clearMetadataFromRateFormData(draftFormData)
         )
     })
     it('can submit rate with formData updates', async () => {
@@ -235,8 +242,12 @@ describe('submitRate', () => {
         expect(submittedRate).toBeDefined()
         // expect status to be submitted.
         expect(submittedRate.status).toBe('RESUBMITTED')
+
         // expect formData to be the same
-        expect(submittedRateFormData).toEqual(draftFormData)
+
+        expect(clearMetadataFromRateFormData(submittedRateFormData)).toEqual(
+            clearMetadataFromRateFormData(draftFormData)
+        )
     })
 
     it('returns the latest linked contracts', async () => {

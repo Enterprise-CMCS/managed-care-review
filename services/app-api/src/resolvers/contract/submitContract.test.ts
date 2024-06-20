@@ -33,6 +33,7 @@ import {
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import dayjs from 'dayjs'
 
 describe('submitContract', () => {
     const mockS3 = testS3Client()
@@ -928,29 +929,42 @@ describe('submitContract', () => {
 
         expect(contractRev.formData.contractDocuments).toHaveLength(1)
         expect(contractRev.formData.contractDocuments[0].name).toBe('docc1.pdf')
-        expect(contractRev.formData.contractDocuments[0].dateAdded).toBe(
-            '2024-01-01'
-        )
+        expect(
+            dayjs
+                .tz(contractRev.formData.contractDocuments[0].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
+        ).toBe('2024-01-01')
 
         expect(contractRev.formData.supportingDocuments).toHaveLength(1)
         expect(contractRev.formData.supportingDocuments[0].name).toBe(
             'docs1.pdf'
         )
-        expect(contractRev.formData.supportingDocuments[0].dateAdded).toBe(
-            '2024-01-01'
-        )
+        expect(
+            dayjs
+                .tz(
+                    contractRev.formData.supportingDocuments[0].dateAdded,
+                    'UTC'
+                )
+                .format('YYYY-MM-DD')
+        ).toBe('2024-01-01')
 
         const rateRev = fixSubmitA0.packageSubmissions[0].rateRevisions[0]
 
         expect(rateRev.formData.rateDocuments).toHaveLength(1)
         expect(rateRev.formData.rateDocuments[0].name).toBe('docr1.pdf')
-        expect(rateRev.formData.rateDocuments[0].dateAdded).toBe('2024-01-01')
+        expect(
+            dayjs
+                .tz(rateRev.formData.rateDocuments[0].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
+        ).toBe('2024-01-01')
 
         expect(rateRev.formData.supportingDocuments).toHaveLength(1)
         expect(rateRev.formData.supportingDocuments[0].name).toBe('docx1.pdf')
-        expect(rateRev.formData.supportingDocuments[0].dateAdded).toBe(
-            '2024-01-01'
-        )
+        expect(
+            dayjs
+                .tz(rateRev.formData.supportingDocuments[0].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
+        ).toBe('2024-01-01')
 
         // 2. Unlock and add more documents
         const unlockedA0Pkg = await unlockTestHealthPlanPackage(
@@ -1007,51 +1021,83 @@ describe('submitContract', () => {
         expect(contractRevA1.formData.contractDocuments[0].name).toBe(
             'docc1.pdf'
         )
-        expect(contractRevA1.formData.contractDocuments[0].dateAdded).toBe(
-            '2024-01-01'
-        )
+        expect(
+            dayjs
+                .tz(
+                    contractRevA1.formData.contractDocuments[0].dateAdded,
+                    'UTC'
+                )
+                .format('YYYY-MM-DD')
+        ).toBe('2024-01-01')
 
         expect(contractRevA1.formData.contractDocuments[1].name).toBe(
             'docc2.pdf'
         )
-        expect(contractRevA1.formData.contractDocuments[1].dateAdded).toBe(
-            '2024-02-02'
-        )
+        expect(
+            dayjs
+                .tz(
+                    contractRevA1.formData.contractDocuments[1].dateAdded,
+                    'UTC'
+                )
+                .format('YYYY-MM-DD')
+        ).toBe('2024-02-02')
 
         expect(contractRevA1.formData.supportingDocuments).toHaveLength(2)
         expect(contractRevA1.formData.supportingDocuments[0].name).toBe(
             'docs1.pdf'
         )
-        expect(contractRevA1.formData.supportingDocuments[0].dateAdded).toBe(
-            '2024-01-01'
-        )
+        expect(
+            dayjs
+                .tz(
+                    contractRevA1.formData.supportingDocuments[0].dateAdded,
+                    'UTC'
+                )
+                .format('YYYY-MM-DD')
+        ).toBe('2024-01-01')
 
         expect(contractRevA1.formData.supportingDocuments[1].name).toBe(
             'docs2.pdf'
         )
-        expect(contractRevA1.formData.supportingDocuments[1].dateAdded).toBe(
-            '2024-02-02'
-        )
+        expect(
+            dayjs
+                .tz(
+                    contractRevA1.formData.supportingDocuments[1].dateAdded,
+                    'UTC'
+                )
+                .format('YYYY-MM-DD')
+        ).toBe('2024-02-02')
 
         const rateRevA1 = fixedContractA1.packageSubmissions[0].rateRevisions[0]
 
         expect(rateRevA1.formData.rateDocuments).toHaveLength(2)
         expect(rateRevA1.formData.rateDocuments[0].name).toBe('docr1.pdf')
-        expect(rateRevA1.formData.rateDocuments[0].dateAdded).toBe('2024-01-01')
+        expect(
+            dayjs
+                .tz(rateRevA1.formData.rateDocuments[0].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
+        ).toBe('2024-01-01')
 
         expect(rateRevA1.formData.rateDocuments[1].name).toBe('docr2.pdf')
-        expect(rateRevA1.formData.rateDocuments[1].dateAdded).toBe('2024-02-02')
+        expect(
+            dayjs
+                .tz(rateRevA1.formData.rateDocuments[1].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
+        ).toBe('2024-02-02')
 
         expect(rateRevA1.formData.supportingDocuments).toHaveLength(2)
         expect(rateRevA1.formData.supportingDocuments[0].name).toBe('docx1.pdf')
-        expect(rateRevA1.formData.supportingDocuments[0].dateAdded).toBe(
-            '2024-01-01'
-        )
+        expect(
+            dayjs
+                .tz(rateRevA1.formData.supportingDocuments[0].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
+        ).toBe('2024-01-01')
 
         expect(rateRevA1.formData.supportingDocuments[1].name).toBe('docx2.pdf')
-        expect(rateRevA1.formData.supportingDocuments[1].dateAdded).toBe(
-            '2024-02-02'
-        )
+        expect(
+            dayjs
+                .tz(rateRevA1.formData.supportingDocuments[1].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
+        ).toBe('2024-02-02')
     })
 
     it('handles unlock and editing rates', async () => {
@@ -1404,7 +1450,8 @@ describe('submitContract', () => {
         )
     })
 
-    it('tests actions from the diagram that Jason made', async () => {
+    // Find the change history diagram in contract-rate-change-history.md
+    it('tests actions from the MC-Review change diagram', async () => {
         const ldService = testLDService({
             'link-rates': true,
             'rate-edit-unlock': true,
@@ -1445,7 +1492,6 @@ describe('submitContract', () => {
             stateServer,
             S2draft
         )
-
         const S2 = await submitTestContract(
             stateServer,
             S2draftWithRateB.id,

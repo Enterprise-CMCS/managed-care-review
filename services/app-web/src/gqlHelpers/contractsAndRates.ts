@@ -34,7 +34,7 @@ function getVisibleLatestRateRevisions(contract: Contract, isEditing: boolean): 
                 }
                 rateRevs.push(lastRateSubmission)
             }
-        } 
+        }
         return rateRevs
     } else {
         const lastContractSubmission = getLastContractSubmission(contract)
@@ -64,6 +64,11 @@ const getLastContractSubmission = (contract: Contract): ContractPackageSubmissio
     return (contract.packageSubmissions && contract.packageSubmissions[0]) ?? undefined
 }
 
+const getPackageSubmissionAtIndex = (contract: Contract, indx: number): ContractPackageSubmission | undefined => {
+    return (contract.packageSubmissions[indx]) ?? undefined
+}
+// revisionVersion is a integer used in the URLs for previous submission - numbering the submission in order from first submitted
+const getIndexFromRevisionVersion = (contract: Contract, revisionVersion: number) => contract.packageSubmissions.length - (Number(revisionVersion) - 1)
 const getDraftRates = (contract: Contract): Rate[] | undefined => {
     return (contract.draftRates && contract.draftRates[0]) ? contract.draftRates : undefined
 }
@@ -84,4 +89,4 @@ const getActuaryFirm = (actuaryContact: ActuaryContact): string => {
     }
 }
 
-export {getDraftRates, getLastContractSubmission, getVisibleLatestContractFormData, getVisibleLatestRateRevisions, getActuaryFirm}
+export {getDraftRates, getLastContractSubmission, getVisibleLatestContractFormData, getVisibleLatestRateRevisions, getActuaryFirm, getPackageSubmissionAtIndex, getIndexFromRevisionVersion}
