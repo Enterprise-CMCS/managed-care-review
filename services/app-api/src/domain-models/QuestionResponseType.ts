@@ -3,6 +3,7 @@ import type { StateUserType } from './UserType'
 type QuestionResponseDocument = {
     name: string
     s3URL: string
+    downloadURL?: string
 }
 
 type QuestionResponseType = {

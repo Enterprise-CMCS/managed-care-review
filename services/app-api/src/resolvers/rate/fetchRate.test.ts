@@ -23,16 +23,20 @@ import {
     submitTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
+import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
 import dayjs from 'dayjs'
 
 describe('fetchRate', () => {
     const ldService = testLDService({
         'rate-edit-unlock': true,
     })
+    const mockS3 = testS3Client()
+
     it('returns correct revisions on resubmit when existing rate is edited', async () => {
         const cmsUser = testCMSUser()
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -40,6 +44,7 @@ describe('fetchRate', () => {
                 user: cmsUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const submittedRate = await createSubmitAndUnlockTestRate(
@@ -87,13 +92,17 @@ describe('fetchRate', () => {
 
     it('returns correct revisions on resubmit when new rate added', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer({ ldService })
+        const server = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const initialRateInfos = () => ({
@@ -105,7 +114,7 @@ describe('fetchRate', () => {
             rateDocuments: [
                 {
                     name: 'rateDocument.pdf',
-                    s3URL: 'fakeS3URL',
+                    s3URL: 's3://bucketname/key/test1',
                     sha256: 'fakesha',
                 },
             ],
@@ -183,13 +192,17 @@ describe('fetchRate', () => {
 
     it('returns the right revisions as a rate is unlocked', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer({ ldService })
+        const server = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const submittedRate = await createSubmitAndUnlockTestRate(
@@ -222,6 +235,52 @@ describe('fetchRate', () => {
         expect(unlockedRate.revisions[0].unlockInfo).toBeNull()
     })
 
+    it('returns the downloadURL on a fetchedRate', async () => {
+        const cmsUser = testCMSUser()
+        const server = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            ldService,
+            s3Client: mockS3,
+        })
+
+        const submittedRate = await createSubmitAndUnlockTestRate(
+            server,
+            cmsServer
+        )
+        expect(submittedRate).toBeDefined()
+
+        const input = {
+            rateID: submittedRate.id,
+        }
+
+        // fetch rate
+        const result = await cmsServer.executeOperation({
+            query: FETCH_RATE,
+            variables: {
+                input,
+            },
+        })
+
+        const unlockedRate = result.data?.fetchRate.rate
+        expect(result.errors).toBeUndefined()
+        expect(unlockedRate).toBeDefined()
+
+        expect(
+            unlockedRate.draftRevision.formData.rateDocuments[0].downloadURL
+        ).toBeDefined()
+        expect(
+            unlockedRate.draftRevision.formData.supportingDocuments[0]
+                .downloadURL
+        ).toBeDefined()
+    })
+
     it('returns the correct dateAdded for documents', async () => {
         const ldService = testLDService({
             'link-rates': true,
@@ -229,18 +288,20 @@ describe('fetchRate', () => {
         const prismaClient = await sharedTestPrismaClient()
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
                 user: testCMSUser(),
             },
+            s3Client: mockS3,
         })
 
         const dummyDoc = (postfix: string) => {
             return {
                 name: `doc${postfix}.pdf`,
-                s3URL: `fakeS3URL${postfix}`,
+                s3URL: `s3://bucketname/key/test1${postfix}`,
                 sha256: `fakesha${postfix}`,
             }
         }

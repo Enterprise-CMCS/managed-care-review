@@ -8,6 +8,7 @@ import {
     updateTestHealthPlanFormData,
 } from '../../testHelpers/gqlHelpers'
 import SUBMIT_CONTRACT from '../../../../app-graphql/src/mutations/submitContract.graphql'
+import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
 
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import type {
@@ -35,8 +36,12 @@ import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import dayjs from 'dayjs'
 
 describe('submitContract', () => {
+    const mockS3 = testS3Client()
+
     it('submits a contract', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         const draft = await createAndUpdateTestContractWithoutRates(stateServer)
         const draftWithRates = await addNewRateToTestContract(
@@ -107,7 +112,9 @@ describe('submitContract', () => {
     })
 
     it('handles the first miro scenario', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         // 1. Submit A0 with Rate1 and Rate2
         const draftA0 =
@@ -179,12 +186,14 @@ describe('submitContract', () => {
 
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
                 user: testCMSUser(),
             },
+            s3Client: mockS3,
         })
 
         // 1. Submit A0 with Rate1 and Rate2
@@ -260,15 +269,16 @@ describe('submitContract', () => {
             'link-rates': true,
         })
         const prismaClient = await sharedTestPrismaClient()
-
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
                 user: testCMSUser(),
             },
+            s3Client: mockS3,
         })
 
         // 1. Submit A0 with Rate1 and Rate2
@@ -382,12 +392,15 @@ describe('submitContract', () => {
 
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
+
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
                 user: testCMSUser(),
             },
+            s3Client: mockS3,
         })
 
         // 1. Submit A0 with Rate1 and Rate2
@@ -857,18 +870,20 @@ describe('submitContract', () => {
         const prismaClient = await sharedTestPrismaClient()
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
                 user: testCMSUser(),
             },
+            s3Client: mockS3,
         })
 
         const dummyDoc = (postfix: string) => {
             return {
                 name: `doc${postfix}.pdf`,
-                s3URL: `fakeS3URL${postfix}`,
+                s3URL: `s3://bucketname/key/test1${postfix}`,
                 sha256: `fakesha${postfix}`,
             }
         }
@@ -1092,6 +1107,7 @@ describe('submitContract', () => {
         })
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -1099,6 +1115,7 @@ describe('submitContract', () => {
                 user: testCMSUser(),
             },
             ldService,
+            s3Client: mockS3,
         })
 
         console.info('1.')
@@ -1178,6 +1195,7 @@ describe('submitContract', () => {
         })
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -1185,6 +1203,7 @@ describe('submitContract', () => {
                 user: testCMSUser(),
             },
             ldService,
+            s3Client: mockS3,
         })
 
         console.info('1.')
@@ -1295,6 +1314,7 @@ describe('submitContract', () => {
         })
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -1302,6 +1322,7 @@ describe('submitContract', () => {
                 user: testCMSUser(),
             },
             ldService,
+            s3Client: mockS3,
         })
 
         console.info('1.')
@@ -1410,6 +1431,7 @@ describe('submitContract', () => {
             context: {
                 user: testCMSUser(),
             },
+            s3Client: mockS3,
         })
 
         const input: SubmitContractInput = {
@@ -1436,6 +1458,7 @@ describe('submitContract', () => {
         })
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -1443,6 +1466,7 @@ describe('submitContract', () => {
                 user: testCMSUser(),
             },
             ldService,
+            s3Client: mockS3,
         })
 
         // make draft contract 1.1 with rate A.1 and submit

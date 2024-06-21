@@ -25,6 +25,7 @@ fragment questionEdgeFragment on QuestionEdge {
         documents {
             s3URL
             name
+            downloadURL
         }
         responses {
             id
@@ -50,6 +51,7 @@ fragment questionEdgeFragment on QuestionEdge {
             documents {
                 name
                 s3URL
+                downloadURL
             }
         }
     }

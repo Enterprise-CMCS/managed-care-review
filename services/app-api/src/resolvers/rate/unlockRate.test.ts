@@ -5,20 +5,26 @@ import { expectToBeDefined } from '../../testHelpers/assertionHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { createSubmitAndUnlockTestRate } from '../../testHelpers/gqlRateHelpers'
 import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContractHelpers'
+import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
 
 describe(`unlockRate`, () => {
     const ldService = testLDService({
         'rate-edit-unlock': true,
     })
     const cmsUser = testCMSUser()
+    const mockS3 = testS3Client()
 
     it('changes rate status to UNLOCKED and creates a new draft revision with unlock info', async () => {
-        const stateServer = await constructTestPostgresServer({ ldService })
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         // Create and unlock a rate
@@ -43,12 +49,16 @@ describe(`unlockRate`, () => {
     })
 
     it('returns status error if rate is actively being edited in draft', async () => {
-        const stateServer = await constructTestPostgresServer({ ldService })
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         // Create a rate
@@ -72,7 +82,10 @@ describe(`unlockRate`, () => {
     })
 
     it('returns unauthorized error for state user', async () => {
-        const stateServer = await constructTestPostgresServer({ ldService })
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
         // Create a rate
