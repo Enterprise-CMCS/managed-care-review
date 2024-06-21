@@ -1,5 +1,5 @@
-query fetchContract($input: FetchContractInput!) {
-    fetchContract(input: $input) {
+mutation updateContractDraftRevision($input: UpdateContractDraftRevisionInput!) {
+    updateContractDraftRevision(input: $input) {
         contract {
             ...contractFieldsFetchContract
 

@@ -253,6 +253,8 @@ fragment contractFormDataFragment on ContractFormData {
     modifiedNetworkAdequacyStandards
     modifiedLengthOfContract
     modifiedNonRiskPaymentArrangements
+    statutoryRegulatoryAttestation
+    statutoryRegulatoryAttestationDescription
 }
 
 fragment contractRevisionFragment on ContractRevision {
