@@ -19,6 +19,7 @@ export {
 } from './rateDataMocks'
 
 export { getStateRecord } from './stateHelpers'
+export type { StateCodeType } from './stateHelpers'
 
 export { consoleLogFullData } from './debugHelpers'
 
@@ -30,12 +31,12 @@ export {
 } from './gqlRateHelpers'
 
 export {
-    createTestContract,
+    createTestContractWithDB,
     createAndSubmitTestContract,
-    // fetchTestContractById,
-    // submitTestContract,
-    // unlockTestContract,
-    // updateTestContract,
+    fetchTestContract,
+    updateTestContractDraftRevision,
+    createTestContract,
+    mockGqlContractDraftRevisionFormDataInput,
 } from './gqlContractHelpers'
 
 export { clearDocMetadata } from './documentHelpers'
