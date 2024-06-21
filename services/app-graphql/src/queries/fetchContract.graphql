@@ -89,18 +89,10 @@ fragment rateRevisionFragmentForFetchContract on RateRevision {
         rateType
         rateCapitationType
         rateDocuments {
-            name
-            s3URL
-            sha256
-            dateAdded
-            downloadURL
+            ...genericDocumentFields
         }
         supportingDocuments {
-            name
-            s3URL
-            sha256
-            dateAdded
-            downloadURL
+            ...genericDocumentFields
         }
         rateDateStart
         rateDateEnd
@@ -153,53 +145,7 @@ fragment rateRevisionFragmentForFetchContract on RateRevision {
             updatedReason
         }
         formData {
-            programIDs
-            populationCovered
-            submissionType
-            riskBasedContract
-            submissionDescription
-            stateContacts {
-                name
-                titleRole
-                email
-            }
-            supportingDocuments {
-                name
-                s3URL
-                sha256
-                dateAdded
-                downloadURL
-            }
-            contractType
-            contractExecutionStatus
-            contractDocuments {
-                name
-                s3URL
-                sha256
-                dateAdded
-                downloadURL
-            }
-            contractDateStart
-            contractDateEnd
-            managedCareEntities
-            federalAuthorities
-            inLieuServicesAndSettings
-            modifiedBenefitsProvided
-            modifiedGeoAreaServed
-            modifiedMedicaidBeneficiaries
-            modifiedRiskSharingStrategy
-            modifiedIncentiveArrangements
-            modifiedWitholdAgreements
-            modifiedStateDirectedPayments
-            modifiedPassThroughPayments
-            modifiedPaymentsForMentalDiseaseInstitutions
-            modifiedMedicalLossRatioStandards
-            modifiedOtherFinancialPaymentIncentive
-            modifiedEnrollmentProcess
-            modifiedGrevienceAndAppeal
-            modifiedNetworkAdequacyStandards
-            modifiedLengthOfContract
-            modifiedNonRiskPaymentArrangements
+            ...contractFormDataFragment
         }
     }
 }
@@ -220,21 +166,13 @@ fragment contractFormDataFragment on ContractFormData {
     }
 
     supportingDocuments {
-        name
-        s3URL
-        sha256
-        dateAdded
-        downloadURL
+        ...genericDocumentFields
     }
 
     contractType
     contractExecutionStatus
     contractDocuments {
-        name
-        s3URL
-        sha256
-        dateAdded
-        downloadURL
+        ...genericDocumentFields
     }
 
     contractDateStart
@@ -317,4 +255,12 @@ fragment updateInformationFields on UpdateInformation {
     updatedAt
     updatedBy
     updatedReason
+}
+
+fragment genericDocumentFields on GenericDocument {
+    name
+    s3URL
+    sha256
+    dateAdded
+    downloadURL
 }
