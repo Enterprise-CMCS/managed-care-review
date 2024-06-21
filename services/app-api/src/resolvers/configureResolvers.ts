@@ -15,6 +15,7 @@ import {
     indexQuestionsResolver,
     createQuestionResolver,
     createQuestionResponseResolver,
+    questionResponseDocumentResolver,
 } from './questionResponse'
 import {
     fetchCurrentUserResolver,
@@ -29,6 +30,7 @@ import type { JWTLib } from '../jwt'
 import { fetchEmailSettingsResolver } from './email/fetchEmailSettings'
 import { indexRatesResolver } from './rate/indexRates'
 import { rateResolver } from './rate/rateResolver'
+import { genericDocumentResolver } from './shared/genericDocumentResolver'
 import { fetchRateResolver } from './rate/fetchRate'
 import { updateContract } from './contract/updateContract'
 import { createAPIKeyResolver } from './APIKey'
@@ -40,6 +42,7 @@ import { contractRevisionResolver } from './contract/contractRevisionResolver'
 import { fetchContractResolver } from './contract/fetchContract'
 import { submitContract } from './contract/submitContract'
 import { rateRevisionResolver } from './rate/rateRevisionResolver'
+import type { S3ClientT } from '../s3'
 import { createContract } from './contract/createContract'
 import { updateContractDraftRevision } from './contract/updateContractDraftRevision'
 
@@ -48,7 +51,8 @@ export function configureResolvers(
     emailer: Emailer,
     emailParameterStore: EmailParameterStore,
     launchDarkly: LDService,
-    jwt: JWTLib
+    jwt: JWTLib,
+    s3Client: S3ClientT
 ): Resolvers {
     const resolvers: Resolvers = {
         Date: GraphQLDate,
@@ -149,6 +153,8 @@ export function configureResolvers(
         RateRevision: rateRevisionResolver,
         Contract: contractResolver(),
         ContractRevision: contractRevisionResolver(store),
+        GenericDocument: genericDocumentResolver(s3Client),
+        Document: questionResponseDocumentResolver(s3Client),
     }
 
     return resolvers

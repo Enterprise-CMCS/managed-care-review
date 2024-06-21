@@ -54,7 +54,7 @@ declare module '@tanstack/table-core' {
 export type RateInDashboardType = {
     id: string
     name: string
-    rateNumber: number,
+    rateNumber: number
     submittedAt: string
     updatedAt: Date
     status: HealthPlanPackageStatus
@@ -251,6 +251,7 @@ export const RateReviewsTable = ({
                         asCustom={NavLink}
                         to={rateURL(info.getValue())}
                         className={`${styles.ID}`}
+                        data-testid={`rate-link-${info.getValue().id}`}
                     >
                         {info.getValue().name}
                     </Link>
@@ -343,7 +344,7 @@ export const RateReviewsTable = ({
         ),
         initialState: {
             columnVisibility: {
-              rateNumber: isAdminUser,
+                rateNumber: isAdminUser,
             },
         },
         columns: tableColumns,
@@ -359,7 +360,6 @@ export const RateReviewsTable = ({
         getFilteredRowModel: getFilteredRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFacetedMinMaxValues: getFacetedMinMaxValues(),
-
     })
 
     const filteredRows = reactTable.getRowModel().rows

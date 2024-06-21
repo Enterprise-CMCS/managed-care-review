@@ -5,6 +5,7 @@ import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import duration from 'dayjs/plugin/duration'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 
 dayjs.extend(utc)
 dayjs.extend(advancedFormat)
@@ -12,5 +13,6 @@ dayjs.extend(timezone)
 dayjs.extend(isLeapYear)
 dayjs.extend(duration)
 dayjs.extend(customParseFormat)
+dayjs.extend(isSameOrAfter)
 
 export { dayjs }

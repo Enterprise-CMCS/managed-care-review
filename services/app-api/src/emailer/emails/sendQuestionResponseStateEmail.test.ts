@@ -51,7 +51,7 @@ const formData: ContractFormDataType = {
     submissionDescription: 'A submitted submission',
     supportingDocuments: [
         {
-            s3URL: 'bar',
+            s3URL: 's3://bucketname/key/test1',
             name: 'foo',
             sha256: 'fakesha',
         },
@@ -60,7 +60,7 @@ const formData: ContractFormDataType = {
     contractExecutionStatus: undefined,
     contractDocuments: [
         {
-            s3URL: 'bar',
+            s3URL: 's3://bucketname/key/test1',
             name: 'foo',
             sha256: 'fakesha',
         },

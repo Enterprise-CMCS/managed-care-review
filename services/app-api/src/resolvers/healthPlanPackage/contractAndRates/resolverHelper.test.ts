@@ -15,7 +15,7 @@ describe('isEqualRateData', () => {
                 rateDocuments: [
                     {
                         name: 'Rate 1 Doc',
-                        s3URL: 'fakeS3URL1',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'someShaForRateDoc1',
                     },
                 ],
@@ -35,7 +35,7 @@ describe('isEqualRateData', () => {
                 rateDocuments: [
                     {
                         name: 'Rate 1 Doc',
-                        s3URL: 'fakeS3URL1',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'someShaForRateDoc1',
                     },
                 ],
@@ -58,7 +58,7 @@ describe('isEqualRateData', () => {
                 rateDocuments: [
                     {
                         name: 'Rate 1 Doc',
-                        s3URL: 'fakeS3URL1',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'someShaForRateDoc1',
                     },
                 ],
@@ -71,7 +71,7 @@ describe('isEqualRateData', () => {
                 rateDocuments: [
                     {
                         name: 'Rate 1 Doc',
-                        s3URL: 'fakeS3URL1----2',
+                        s3URL: 's3://bucketname/key/test1----2',
                         sha256: 'someShaForRateDoc1',
                     },
                 ],
@@ -94,7 +94,7 @@ describe('isEqualRateData', () => {
                 rateDocuments: [
                     {
                         name: 'Rate 1 Doc',
-                        s3URL: 'fakeS3URL1',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'someShaForRateDoc1',
                     },
                 ],
