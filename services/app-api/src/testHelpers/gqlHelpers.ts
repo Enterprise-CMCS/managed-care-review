@@ -45,8 +45,8 @@ import { findStatePrograms } from '../postgres'
 import { must } from './assertionHelpers'
 import { newJWTLib } from '../jwt'
 import type { JWTLib } from '../jwt'
-import { newLocalS3Client } from '../s3'
-import type { S3ClientT, S3BucketConfigType } from '../s3'
+import { testS3Client } from './s3Helpers'
+import type { S3ClientT } from '../s3'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -72,11 +72,6 @@ const defaultContext = (): Context => {
     return {
         user: testStateUser(),
     }
-}
-
-const S3_BUCKETS_CONFIG: S3BucketConfigType = {
-    HEALTH_PLAN_DOCS: 'local-uploads',
-    QUESTION_ANSWER_DOCS: 'local-qa',
 }
 
 const constructTestPostgresServer = async (opts?: {
@@ -106,11 +101,8 @@ const constructTestPostgresServer = async (opts?: {
         })
 
     await insertUserToLocalAurora(postgresStore, context.user)
-    const s3LocalClient = await newLocalS3Client(
-        'http://localhost:4569',
-        S3_BUCKETS_CONFIG
-    )
-    const s3 = opts?.s3Client || s3LocalClient
+    const s3TestClient = await testS3Client()
+    const s3 = opts?.s3Client || s3TestClient
 
     const postgresResolvers = configureResolvers(
         postgresStore,

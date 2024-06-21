@@ -108,12 +108,11 @@ export function createQuestionResolver(
             return {
                 name: doc.name,
                 s3URL: doc.s3URL,
-                downloadURL: doc.downloadURL ?? undefined,
             }
         })
         const inputFormatted = {
             ...input,
-            documents: docs
+            documents: docs,
         }
         const questionResult = await store.insertQuestion(inputFormatted, user)
 
