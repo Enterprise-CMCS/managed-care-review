@@ -89,10 +89,18 @@ fragment rateRevisionFragmentForFetchContract on RateRevision {
         rateType
         rateCapitationType
         rateDocuments {
-            ...genericDocumentFields
+            name
+            s3URL
+            sha256
+            dateAdded
+            downloadURL
         }
         supportingDocuments {
-            ...genericDocumentFields
+            name
+            s3URL
+            sha256
+            dateAdded
+            downloadURL
         }
         rateDateStart
         rateDateEnd
@@ -166,13 +174,21 @@ fragment contractFormDataFragment on ContractFormData {
     }
 
     supportingDocuments {
-        ...genericDocumentFields
+        name
+        s3URL
+        sha256
+        dateAdded
+        downloadURL
     }
 
     contractType
     contractExecutionStatus
     contractDocuments {
-        ...genericDocumentFields
+        name
+        s3URL
+        sha256
+        dateAdded
+        downloadURL
     }
 
     contractDateStart
@@ -255,12 +271,4 @@ fragment updateInformationFields on UpdateInformation {
     updatedAt
     updatedBy
     updatedReason
-}
-
-fragment genericDocumentFields on GenericDocument {
-    name
-    s3URL
-    sha256
-    dateAdded
-    downloadURL
 }
