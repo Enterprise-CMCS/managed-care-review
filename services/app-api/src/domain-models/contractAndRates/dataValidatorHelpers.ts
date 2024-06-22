@@ -4,7 +4,7 @@ import { contractFormDataSchema } from './formDataTypes'
 import {
     contractTypeSchema,
     submissionTypeSchema,
-} from 'app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
+} from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
 import { z } from 'zod'
 import type { SafeParseReturnType } from 'zod'
 
@@ -18,6 +18,7 @@ const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
 type UpdateDraftContractFormDataType = z.infer<
     typeof updateDraftContractFormDataSchema
 >
+
 const validateContractDraftRevisionFormDataInput = (
     formData: ContractDraftRevisionFormDataInput,
     featureFlags?: FeatureFlagSettings
