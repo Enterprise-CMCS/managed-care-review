@@ -338,14 +338,14 @@ const mockGqlContractDraftRevisionFormDataInput = (
         contractDocuments: [
             {
                 name: 'contractDocument1.pdf',
-                s3URL: 'fakeS3URL',
+                s3URL: 's3://bucketname/key/contractDocument1.pdf',
                 sha256: 'needs-to-be-there',
             },
         ],
         supportingDocuments: [
             {
                 name: 'supportingDocument11.pdf',
-                s3URL: 'fakeS3URL',
+                s3URL: 's3://bucketname/key/supportingDocument11.pdf',
                 sha256: 'needs-to-be-there',
             },
         ],
