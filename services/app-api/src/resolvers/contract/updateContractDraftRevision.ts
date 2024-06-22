@@ -116,7 +116,7 @@ export function updateContractDraftRevision(
         const editableFormData = parsedFormData.data
 
         // Update contract draft revision
-        const updateResult = await store.updateDraftContractWithRates({
+        const updateResult = await store.updateDraftContract({
             contractID,
             formData: editableFormData,
         })

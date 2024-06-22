@@ -443,8 +443,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         const failStore = mockStoreThatErrors()
 
         // set store error for flag on.
-        postgresStore.updateDraftContractWithRates =
-            failStore.updateDraftContractWithRates
+        postgresStore.updateDraftContract = failStore.updateDraftContract
 
         const server = await constructTestPostgresServer({
             store: postgresStore,
