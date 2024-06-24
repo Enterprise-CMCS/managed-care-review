@@ -8,7 +8,6 @@ import type {
 import { contractSchema } from '../../domain-models/contractAndRates'
 import type { ContractPackageSubmissionType } from '../../domain-models/contractAndRates/packageSubmissions'
 import { rateWithHistoryToDomainModel } from './parseRateWithHistory'
-import { draftContractRevToDomainModel } from './prismaDraftContractHelpers'
 import type {
     RateRevisionTableWithFormData,
     ContractRevisionTableWithFormData,
@@ -148,7 +147,8 @@ function contractWithHistoryToDomainModel(
     let draftRates: RateType[] | undefined = undefined
 
     for (const [contractRevIndex, contractRev] of contractRevisions.entries()) {
-        // We set the draft revision aside, all ordered revisions are submitted
+        // If we have a draft revision
+        // We set the draft revision aside, format it properly
         if (!contractRev.submitInfo) {
             if (draftRevision) {
                 return new Error(
@@ -157,15 +157,33 @@ function contractWithHistoryToDomainModel(
                 )
             }
 
-            draftRevision = draftContractRevToDomainModel(contractRev)
+            const domainRateRevisions: RateRevisionType[] = []
+            for (const submission of contractRev.relatedSubmisions) {
+                const relatedRateRevisions = submission.submissionPackages
+                    .filter((p) => p.contractRevisionID === contractRev.id)
+                    .sort((a, b) => a.ratePosition - b.ratePosition)
+                    .map((p) => p.rateRevision)
 
-            if (draftRevision instanceof Error) {
-                return new Error(
-                    `error converting draft contract revision with id ${contractRev.id} to domain model: ${draftRevision}`
-                )
+                for (const rateRev of relatedRateRevisions) {
+                    const domainRate = rateRevisionToDomainModel(rateRev)
+
+                    domainRateRevisions.push(domainRate)
+                }
             }
 
-            // if we have a draft revision, we should set draftRates
+            draftRevision = {
+                id: contractRev.id,
+                contract: contractRev.contract,
+                createdAt: contractRev.createdAt,
+                updatedAt: contractRev.updatedAt,
+                unlockInfo: convertUpdateInfoToDomainModel(
+                    contractRev.unlockInfo
+                ),
+                formData: contractFormDataToDomainModel(contractRev),
+                rateRevisions: domainRateRevisions,
+            }
+
+            // since we have a draft revision, we should also hold onto any set draftRates for later
             const draftRatesOrErrors = contract.draftRates.map((dr) =>
                 rateWithHistoryToDomainModel(dr.rate)
             )
@@ -335,10 +353,6 @@ function contractWithHistoryToDomainModel(
 
             const rateRevisions =
                 unsortedRatesRevisionsToDomainModel(relatedRateRevisions)
-
-            if (rateRevisions instanceof Error) {
-                return rateRevisions
-            }
 
             packageSubmissions.push({
                 submitInfo: {

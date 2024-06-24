@@ -325,15 +325,11 @@ function ratesRevisionsToDomainModel(
 
 function unsortedRatesRevisionsToDomainModel(
     rateRevisions: RateRevisionTableWithFormData[]
-): RateRevisionType[] | Error {
+): RateRevisionType[] {
     const domainRevisions: RateRevisionType[] = []
 
     for (const revision of rateRevisions) {
         const domainRevision = rateRevisionToDomainModel(revision)
-
-        if (domainRevision instanceof Error) {
-            return domainRevision
-        }
 
         domainRevisions.push(domainRevision)
     }

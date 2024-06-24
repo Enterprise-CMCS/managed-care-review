@@ -2,10 +2,13 @@ import type {
     RateRevisionWithContractsType,
     RateType,
     RateRevisionType,
+    ContractRevisionType,
 } from '../../domain-models/contractAndRates'
 import { rateSchema } from '../../domain-models/contractAndRates'
-import { contractRevisionsToDomainModels } from './parseContractWithHistory'
-import { draftRateRevToDomainModel } from './prismaDraftRatesHelpers'
+import {
+    contractRevisionToDomainModel,
+    contractRevisionsToDomainModels,
+} from './parseContractWithHistory'
 import type {
     ContractRevisionTableWithFormData,
     RateRevisionTableWithFormData,
@@ -126,7 +129,8 @@ function rateWithHistoryToDomainModel(
     let draftRevision: RateRevisionWithContractsType | Error | undefined =
         undefined
     for (const [, rateRev] of rateRevisions.entries()) {
-        // We have already set the draft revision aside, all ordered revisions here should be submitted
+        // If we have a draft revision
+        // We set the draft revision aside, format it properly
         if (!rateRev.submitInfo) {
             if (draftRevision) {
                 return new Error(
@@ -135,12 +139,29 @@ function rateWithHistoryToDomainModel(
                 )
             }
 
-            draftRevision = draftRateRevToDomainModel(rateRev)
+            const domainContractRevisions: ContractRevisionType[] = []
+            for (const submission of rateRev.relatedSubmissions) {
+                const relatedContractRevisions = submission.submissionPackages
+                    .filter((p) => p.rateRevisionID === rateRev.id)
+                    .map((p) => p.contractRevision)
 
-            if (draftRevision instanceof Error) {
-                return new Error(
-                    `error converting draft rate revision with id ${rateRev.id} to domain model: ${draftRevision}`
-                )
+                for (const contractRev of relatedContractRevisions) {
+                    const domainContract =
+                        contractRevisionToDomainModel(contractRev)
+
+                    domainContractRevisions.push(domainContract)
+                }
+            }
+
+            draftRevision = {
+                id: rateRev.id,
+                rateID: rateRev.rateID,
+                // rate: rateRev.rate, // not symmetric - this exists on contract draft revision but not on rate
+                createdAt: rateRev.createdAt,
+                updatedAt: rateRev.updatedAt,
+                unlockInfo: convertUpdateInfoToDomainModel(rateRev.unlockInfo),
+                formData: rateFormDataToDomainModel(rateRev),
+                contractRevisions: domainContractRevisions,
             }
 
             // skip the rest of the processing
