@@ -18,7 +18,6 @@ import type { ContractType } from '../domain-models'
 import type { ApolloServer } from 'apollo-server-lambda'
 import type {
     Contract,
-    ContractDraftRevisionFormDataInput,
     ContractDraftRevisionInput,
     RateFormData,
 } from '../gen/gqlServer'
@@ -32,6 +31,7 @@ import UPDATE_CONTRACT_DRAFT_REVISION from 'app-graphql/src/mutations/updateCont
 import type { ContractFormDataType } from '../domain-models'
 import type { CreateHealthPlanPackageInput } from '../gen/gqlServer'
 import CREATE_CONTRACT from 'app-graphql/src/mutations/createContract.graphql'
+import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
 
 const createAndSubmitTestContract = async (
     contractData?: InsertContractArgsType
@@ -312,73 +312,6 @@ const updateRateOnDraftContract = async (
     return updatedContract.data?.contract
 }
 
-// This mock is used strictly for Graphql Input types
-const mockGqlContractDraftRevisionFormDataInput = (
-    stateCode?: StateCodeType,
-    formDataInput?: Partial<ContractDraftRevisionFormDataInput>
-): ContractDraftRevisionFormDataInput => {
-    const programs = stateCode
-        ? [must(findStatePrograms(stateCode))[0]]
-        : [defaultFloridaProgram()]
-    const programIDs = programs.map((program) => program.id)
-
-    return {
-        programIDs: [programIDs[0]],
-        populationCovered: 'MEDICAID',
-        submissionType: 'CONTRACT_ONLY',
-        riskBasedContract: true,
-        submissionDescription: 'Updated submission',
-        stateContacts: [
-            {
-                name: 'statecontact',
-                titleRole: 'thestatestofcontacts',
-                email: 'statemcstate@examepl.com',
-            },
-        ],
-        contractDocuments: [
-            {
-                name: 'contractDocument1.pdf',
-                s3URL: 's3://bucketname/key/contractDocument1.pdf',
-                sha256: 'needs-to-be-there',
-            },
-        ],
-        supportingDocuments: [
-            {
-                name: 'supportingDocument11.pdf',
-                s3URL: 's3://bucketname/key/supportingDocument11.pdf',
-                sha256: 'needs-to-be-there',
-            },
-        ],
-        contractType: 'BASE',
-        contractExecutionStatus: 'EXECUTED',
-        contractDateStart: '2025-06-01',
-        contractDateEnd: '2026-06-01',
-        managedCareEntities: ['MCO'],
-        federalAuthorities: ['BENCHMARK'],
-        inLieuServicesAndSettings: true,
-        modifiedBenefitsProvided: true,
-        modifiedGeoAreaServed: true,
-        modifiedMedicaidBeneficiaries: true,
-        modifiedRiskSharingStrategy: true,
-        modifiedIncentiveArrangements: true,
-        modifiedWitholdAgreements: true,
-        modifiedStateDirectedPayments: true,
-        modifiedPassThroughPayments: false,
-        modifiedPaymentsForMentalDiseaseInstitutions: false,
-        modifiedMedicalLossRatioStandards: false,
-        modifiedOtherFinancialPaymentIncentive: false,
-        modifiedEnrollmentProcess: false,
-        modifiedGrevienceAndAppeal: false,
-        modifiedNetworkAdequacyStandards: true,
-        modifiedLengthOfContract: true,
-        modifiedNonRiskPaymentArrangements: true,
-        statutoryRegulatoryAttestation: true,
-        statutoryRegulatoryAttestationDescription:
-            'Hi, I should be gone after update.',
-        ...formDataInput,
-    }
-}
-
 const updateTestContractDraftRevision = async (
     server: ApolloServer,
     contractID: string,
@@ -440,5 +373,4 @@ export {
     clearRatesOnDraftContract,
     updateTestContractDraftRevision,
     createTestContract,
-    mockGqlContractDraftRevisionFormDataInput,
 }

@@ -11,7 +11,7 @@ import {
 } from '../attributeHelper'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql/index'
-import { validateContractDraftRevisionFormDataInput } from '../../domain-models/contractAndRates/dataValidatorHelpers'
+import { validateContractDraftRevisionInput } from '../../domain-models/contractAndRates'
 
 export function updateContractDraftRevision(
     store: Store,
@@ -98,11 +98,10 @@ export function updateContractDraftRevision(
             throw new UserInputError(errMessage)
         }
 
-        const inputFormData = draftRevision.formData
-
         // Using zod to transform graphQL types into domain types.
-        const parsedFormData = validateContractDraftRevisionFormDataInput(
-            inputFormData,
+        const parsedFormData = validateContractDraftRevisionInput(
+            draftRevision,
+            contractWithHistory.stateCode,
             featureFlags
         )
 
