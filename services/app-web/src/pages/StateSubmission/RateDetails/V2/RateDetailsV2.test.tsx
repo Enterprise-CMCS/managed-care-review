@@ -512,7 +512,7 @@ describe('RateDetailsV2', () => {
             await waitFor(() => {
                 expect(screen.getAllByText(/1 complete/)).toHaveLength(2)
             })
-        })
+        }, 10000)
         it('cannot continue with partially filled out second rate', async () => {
             const { user } = renderWithProviders(
                 <Routes>

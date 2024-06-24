@@ -179,8 +179,10 @@ describe('QuestionResponse', () => {
             }
         )
 
+        const sidenav = screen.queryByTestId('sidenav')
+
         await waitFor(() => {
-            expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
+            expect(sidenav).toBeInTheDocument()
             expect(
                 screen.queryByRole('link', { name: /Add questions/ })
             ).toBeInTheDocument()
@@ -236,8 +238,9 @@ describe('QuestionResponse', () => {
             }
         )
 
+        const sidenav = screen.queryByTestId('sidenav')
         await waitFor(() => {
-            expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
+            expect(sidenav).toBeInTheDocument()
             expect(
                 screen.queryByRole('link', { name: /Add questions/ })
             ).toBeInTheDocument()
