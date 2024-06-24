@@ -103,6 +103,7 @@ jobs:
 
       - name: Web Unit Tests
         env:
+          NODE_OPTIONS: --max_old_space_size=6000
           VITE_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-web
