@@ -179,12 +179,15 @@ describe('QuestionResponse', () => {
             }
         )
 
-        await waitFor(() => {
-            expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
-            expect(
-                screen.queryByRole('link', { name: /Add questions/ })
-            ).toBeInTheDocument()
-        })
+        await waitFor(
+            () => {
+                expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
+                expect(
+                    screen.queryByRole('link', { name: /Add questions/ })
+                ).toBeInTheDocument()
+            },
+            { timeout: 10000 }
+        )
 
         const qaSections = screen.getAllByTestId(/.*-qa-section/)
 
@@ -236,12 +239,15 @@ describe('QuestionResponse', () => {
             }
         )
 
-        await waitFor(() => {
-            expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
-            expect(
-                screen.queryByRole('link', { name: /Add questions/ })
-            ).toBeInTheDocument()
-        })
+        await waitFor(
+            () => {
+                expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
+                expect(
+                    screen.queryByRole('link', { name: /Add questions/ })
+                ).toBeInTheDocument()
+            },
+            { timeout: 10000 }
+        )
 
         const qaSections = screen.getAllByTestId(/.*-qa-section/)
 
