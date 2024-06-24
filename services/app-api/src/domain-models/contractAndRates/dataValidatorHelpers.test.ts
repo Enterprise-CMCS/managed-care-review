@@ -15,6 +15,13 @@ describe('validateContractDraftRevisionInput', () => {
             statutoryRegulatoryAttestation: true,
             statutoryRegulatoryAttestationDescription:
                 'Hi, I should be gone after validation.',
+            stateContacts: [
+                {
+                    name: 'Bill',
+                    titleRole: 'A Title',
+                    email: '', // Accepts empty string because users can save as draft with incomplete data.
+                },
+            ],
         }
 
         const expectedResult = {
