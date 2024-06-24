@@ -127,29 +127,6 @@ async function updateDraftContractRatesInTransaction(
         },
     })
 
-    const oldLinksToCreate = [
-        ...createdRateJoins.map((lr) => lr.rateID),
-        ...args.rateUpdates.link.map((ru) => ru.rateID),
-    ]
-
-    // create new rates and link and unlink others
-    await tx.contractTable.update({
-        where: { id: draftRevision.id },
-        data: {
-            draftRates: {
-                connect: oldLinksToCreate.map((rID) => ({
-                    id: rID,
-                })),
-                disconnect: args.rateUpdates.unlink.map((ru) => ({
-                    id: ru.rateID,
-                })),
-            },
-        },
-        include: {
-            draftRates: true,
-        },
-    })
-
     // new rate + contract Linking tables
 
     // for each of the links, we have to get the order right
@@ -234,17 +211,6 @@ async function updateDraftContractRatesInTransaction(
                 'attempting to unlink a rate with no revision: ' + ru.rateID
             )
         }
-
-        await tx.rateTable.update({
-            where: { id: draftRev.rateID },
-            data: {
-                draftContracts: {
-                    disconnect: {
-                        id: args.contractID,
-                    },
-                },
-            },
-        })
     }
 
     return findContractWithHistory(tx, args.contractID)
