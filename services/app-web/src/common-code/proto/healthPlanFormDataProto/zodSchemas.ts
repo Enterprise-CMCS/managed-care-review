@@ -92,14 +92,14 @@ const federalAuthoritySchema = z.union([
 const stateContactSchema = z.object({
     name: z.string().optional(),
     titleRole: z.string().optional(),
-    email: z.string().email().optional(),
+    email: z.string().email().optional().or(z.literal('')),
 })
 
 const actuaryContactSchema = z.object({
     id: z.string().optional(),
     name: z.string().optional(),
     titleRole: z.string().optional(),
-    email: z.string().email().optional(),
+    email: z.string().email().optional().or(z.literal('')),
     actuarialFirm: actuarialFirmTypeSchema.optional(),
     actuarialFirmOther: z.string().optional(),
 })
