@@ -260,7 +260,8 @@ function contractWithHistoryToDomainModel(
             contractRevisions[contractRevIndex + 1]
 
         // Reverse rateRevisions so it is in DESC order.
-        const rateRevisions = contractRev.submissionPackages
+        const rateRevisions =
+            contractRev.relatedSubmisions[0].submissionPackages
 
         for (const rateRev of rateRevisions) {
             if (!rateRev.rateRevision.submitInfo) {
@@ -285,11 +286,7 @@ function contractWithHistoryToDomainModel(
             // - Submitted before the next contract rev unlock date
             // - Not already in the initial entry. We are looping through this in desc order, so the first rate rev is the latest.
             // - Not removed from the contract
-            if (
-                isRateSubmittedDateValid &&
-                !isRateIncluded &&
-                !rateRev.isRemoval
-            ) {
+            if (isRateSubmittedDateValid && !isRateIncluded) {
                 // unshift rate revision into entries to asc order
                 initialEntry.rateRevisions.unshift(rateRev.rateRevision)
             }

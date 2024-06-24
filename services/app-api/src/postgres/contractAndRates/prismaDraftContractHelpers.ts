@@ -1,40 +1,22 @@
-import type { Prisma } from '@prisma/client'
 import type {
     ContractRevisionWithRatesType,
     RateRevisionType,
 } from '../../domain-models/contractAndRates'
 import {
+    type RateRevisionTableWithFormData,
     contractFormDataToDomainModel,
     convertUpdateInfoToDomainModel,
-    includeRateFormData,
     rateRevisionToDomainModel,
 } from './prismaSharedContractRateHelpers'
 import type { ContractRevisionTableWithRates } from './prismaSubmittedContractHelpers'
 
-const includeDraftRates = {
-    revisions: {
-        include: includeRateFormData,
-        orderBy: {
-            createdAt: 'desc',
-        },
-    },
-} satisfies Prisma.RateTableInclude
-
-type DraftRatesTable = Prisma.RateTableGetPayload<{
-    include: typeof includeDraftRates
-}>
-
 function draftRatesToDomainModel(
-    draftRates: DraftRatesTable[]
-): RateRevisionType[] | Error {
+    relatedRateRevisions: RateRevisionTableWithFormData[]
+): RateRevisionType[] {
     const domainRates: RateRevisionType[] = []
 
-    for (const rate of draftRates) {
-        const domainRate = rateRevisionToDomainModel(rate.revisions[0])
-
-        if (domainRate instanceof Error) {
-            return domainRate
-        }
+    for (const rateRev of relatedRateRevisions) {
+        const domainRate = rateRevisionToDomainModel(rateRev)
 
         domainRates.push(domainRate)
     }
@@ -46,13 +28,7 @@ function draftRatesToDomainModel(
 
 function draftContractRevToDomainModel(
     revision: ContractRevisionTableWithRates
-): ContractRevisionWithRatesType | Error {
-    const rateRevisions = draftRatesToDomainModel(revision.draftRates)
-
-    if (rateRevisions instanceof Error) {
-        return rateRevisions
-    }
-
+): ContractRevisionWithRatesType {
     return {
         id: revision.id,
         contract: revision.contract,
@@ -60,8 +36,10 @@ function draftContractRevToDomainModel(
         updatedAt: revision.updatedAt,
         unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
         formData: contractFormDataToDomainModel(revision),
-        rateRevisions,
+        rateRevisions: draftRatesToDomainModel(
+            revision.relatedSubmisions[0].submittedRates
+        ),
     }
 }
 
-export { includeDraftRates, draftContractRevToDomainModel }
+export { draftContractRevToDomainModel }

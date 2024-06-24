@@ -1,4 +1,3 @@
-import type { Prisma } from '@prisma/client'
 import type {
     ContractRevisionType,
     RateRevisionWithContractsType,
@@ -6,56 +5,33 @@ import type {
 import type { RateRevisionTableWithContracts } from './prismaSubmittedRateHelpers'
 import { contractRevisionToDomainModel } from './parseContractWithHistory'
 import {
+    type ContractRevisionTableWithFormData,
     convertUpdateInfoToDomainModel,
-    includeContractFormData,
     rateFormDataToDomainModel,
 } from './prismaSharedContractRateHelpers'
 
-const includeDraftContracts = {
-    revisions: {
-        include: includeContractFormData,
-        take: 1,
-        orderBy: {
-            createdAt: 'desc',
-        },
-    },
-} satisfies Prisma.ContractTableInclude
-
-type DraftContractsTable = Prisma.ContractTableGetPayload<{
-    include: typeof includeDraftContracts
-}>
-
 function draftContractsToDomainModel(
-    draftContracts: DraftContractsTable[]
+    relatedContractRevisions: ContractRevisionTableWithFormData[]
 ): ContractRevisionType[] {
-    return draftContracts.map((dc) =>
-        contractRevisionToDomainModel(dc.revisions[0])
-    )
+    return relatedContractRevisions.map((c) => contractRevisionToDomainModel(c))
 }
 
 // -----------
 
 function draftRateRevToDomainModel(
     revision: RateRevisionTableWithContracts
-): RateRevisionWithContractsType | Error {
-    const formData = rateFormDataToDomainModel(revision)
-
-    if (formData instanceof Error) {
-        return formData
-    }
-
+): RateRevisionWithContractsType {
     return {
         id: revision.id,
         rateID: revision.rateID,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
-        formData,
         unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
-        // TODO - figure out how to calculate contractRevisions from relatedSubmissions.packageSubmissions going forward
+        formData: rateFormDataToDomainModel(revision),
         contractRevisions: draftContractsToDomainModel(
-            revision.relatedSubmissions
+            revision.relatedSubmissions[0].submittedContracts
         ),
     }
 }
 
-export { includeDraftContracts, draftRateRevToDomainModel }
+export { draftRateRevToDomainModel }
