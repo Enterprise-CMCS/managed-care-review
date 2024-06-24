@@ -33,8 +33,11 @@ import {
     ApolloServerPluginLandingPageDisabled,
     ApolloServerPluginLandingPageLocalDefault,
 } from 'apollo-server-core'
+import { newDeployedS3Client, newLocalS3Client } from '../s3'
+import type { S3ClientT, S3BucketConfigType } from '../s3'
 
 let ldClient: LDClient
+let s3Client: S3ClientT
 
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
@@ -199,7 +202,9 @@ async function initializeGQLHandler(): Promise<Handler> {
     const ldSDKKey = process.env.LD_SDK_KEY
     const allowedIpAddresses = process.env.ALLOWED_IP_ADDRESSES
     const jwtSecret = process.env.JWT_SECRET
-
+    const s3DocumentsBucket = process.env.REACT_APP_S3_DOCUMENTS_BUCKET
+    const s3QABucket = process.env.REACT_APP_S3_QA_BUCKET
+    const region = process.env.REGION
     // START Assert configuration is valid
     if (emailerMode !== 'LOCAL' && emailerMode !== 'SES')
         throw new Error(
@@ -242,6 +247,16 @@ async function initializeGQLHandler(): Promise<Handler> {
         throw new Error(
             'Configuration Error: JWT_SECRET is required to run app-api.'
         )
+    }
+
+    if (s3DocumentsBucket === undefined || s3QABucket === undefined) {
+        throw new Error(
+            'To configure s3, you  must set REACT_APP_S3_DOCUMENTS_BUCKET and REACT_APP_S3_QA_BUCKET'
+        )
+    }
+
+    if (region === undefined) {
+        throw new Error('Configuration error: region is required')
     }
 
     // END
@@ -387,6 +402,17 @@ async function initializeGQLHandler(): Promise<Handler> {
                   dmcoEmails,
                   helpDeskEmail,
               })
+    const S3_BUCKETS_CONFIG: S3BucketConfigType = {
+        HEALTH_PLAN_DOCS: s3DocumentsBucket,
+        QUESTION_ANSWER_DOCS: s3QABucket,
+    }
+
+    const s3Local = 'http://localhost:4569'
+    if (authMode === 'LOCAL') {
+        s3Client = newLocalS3Client(s3Local, S3_BUCKETS_CONFIG)
+    } else {
+        s3Client = newDeployedS3Client(S3_BUCKETS_CONFIG, region)
+    }
 
     // Resolvers are defined and tested in the resolvers package
     const resolvers = configureResolvers(
@@ -394,7 +420,8 @@ async function initializeGQLHandler(): Promise<Handler> {
         emailer,
         emailParameterStore,
         launchDarkly,
-        jwtLib
+        jwtLib,
+        s3Client
     )
 
     const userFetcher =

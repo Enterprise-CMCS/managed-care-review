@@ -19,20 +19,27 @@ import {
     submitTestContract,
     createAndUpdateTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
+import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
 
 describe('indexRates', () => {
     const ldService = testLDService({
         'rate-edit-unlock': true,
     })
+    const mockS3 = testS3Client()
 
     it('returns rate reviews list for cms user with no errors', async () => {
         const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer({ ldService })
+
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const contract1 = await createAndSubmitTestContractWithRate(stateServer)
@@ -64,11 +71,15 @@ describe('indexRates', () => {
 
     it('does not return rates still in initial draft', async () => {
         const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer({ ldService })
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
+            s3Client: mockS3,
         })
 
         const contract1 = await createAndUpdateTestContractWithRate(stateServer)
@@ -108,6 +119,7 @@ describe('indexRates', () => {
                 user: cmsUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         // create and submit new contracts
@@ -142,13 +154,17 @@ describe('indexRates', () => {
 
     it('returns a rate with history with correct data in each revision', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer({ ldService })
+        const server = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const contract1 = await createAndSubmitTestContractWithRate(server)
@@ -279,13 +295,17 @@ describe('indexRates', () => {
 
     it('synthesizes the right statuses as a rate is submitted/unlocked/etc', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer({ ldService })
+        const server = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         // First, create new submissions
@@ -337,13 +357,17 @@ describe('indexRates', () => {
 
     it('returns the right revisions as a rate is submitted/unlocked/etc', async () => {
         const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer({ ldService })
+        const server = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
 
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         // First, create new rates
@@ -424,12 +448,16 @@ describe('indexRates', () => {
 
     it('return a list of submitted rates from multiple states', async () => {
         const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer({ ldService })
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
             ldService,
+            s3Client: mockS3,
         })
         const otherStateServer = await constructTestPostgresServer({
             context: {

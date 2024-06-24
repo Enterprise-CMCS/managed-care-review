@@ -11,8 +11,11 @@ import {
     createDBUsersWithFullData,
     testCMSUser,
 } from '../../testHelpers/userHelpers'
+import { testS3Client } from '../../testHelpers/s3Helpers'
 
 describe('indexQuestions', () => {
+    const mockS3 = testS3Client()
+
     const dmcoCMSUser = testCMSUser({
         divisionAssignment: 'DMCO',
     })
@@ -33,16 +36,19 @@ describe('indexQuestions', () => {
             context: {
                 user: dmcoCMSUser,
             },
+            s3Client: mockS3,
         })
         const dmcpCMSServer = await constructTestPostgresServer({
             context: {
                 user: dmcpCMSUser,
             },
+            s3Client: mockS3,
         })
         const oactCMServer = await constructTestPostgresServer({
             context: {
                 user: oactCMSUser,
             },
+            s3Client: mockS3,
         })
 
         const submittedPkg =
@@ -55,7 +61,7 @@ describe('indexQuestions', () => {
                 documents: [
                     {
                         name: 'Test Question 1',
-                        s3URL: 'testS3Url1',
+                        s3URL: 's3://bucketname/key/test11',
                     },
                 ],
             }
@@ -73,7 +79,7 @@ describe('indexQuestions', () => {
                 documents: [
                     {
                         name: 'Test Question 2',
-                        s3URL: 'testS3Url2',
+                        s3URL: 's3://bucketname/key/test12',
                     },
                 ],
             }
@@ -91,7 +97,7 @@ describe('indexQuestions', () => {
                 documents: [
                     {
                         name: 'Test Question 3',
-                        s3URL: 'testS3Url3',
+                        s3URL: 's3://bucketname/key/test13',
                     },
                 ],
             }
@@ -113,9 +119,20 @@ describe('indexQuestions', () => {
                     totalCount: 1,
                     edges: expect.arrayContaining([
                         {
-                            node: expect.objectContaining(
-                                responseToDMCO.question
-                            ),
+                            node: expect.objectContaining({
+                                id: expect.any(String),
+                                createdAt: expect.any(Date),
+                                contractID: submittedPkg.id,
+                                division: 'DMCO',
+                                documents: [
+                                    {
+                                        name: 'Test Question 1',
+                                        s3URL: 's3://bucketname/key/test11',
+                                        downloadURL: expect.any(String),
+                                    },
+                                ],
+                                addedBy: responseToDMCO.question.addedBy,
+                            }),
                         },
                     ]),
                 }),
@@ -123,9 +140,20 @@ describe('indexQuestions', () => {
                     totalCount: 1,
                     edges: [
                         {
-                            node: expect.objectContaining(
-                                responseToDMCP.question
-                            ),
+                            node: expect.objectContaining({
+                                id: expect.any(String),
+                                createdAt: expect.any(Date),
+                                contractID: submittedPkg.id,
+                                division: 'DMCP',
+                                documents: [
+                                    {
+                                        name: 'Test Question 2',
+                                        s3URL: 's3://bucketname/key/test12',
+                                        downloadURL: expect.any(String),
+                                    },
+                                ],
+                                addedBy: responseToDMCP.question.addedBy,
+                            }),
                         },
                     ],
                 }),
@@ -133,9 +161,20 @@ describe('indexQuestions', () => {
                     totalCount: 1,
                     edges: [
                         {
-                            node: expect.objectContaining(
-                                responseToOACT.question
-                            ),
+                            node: expect.objectContaining({
+                                id: expect.any(String),
+                                createdAt: expect.any(Date),
+                                contractID: submittedPkg.id,
+                                division: 'OACT',
+                                documents: [
+                                    {
+                                        name: 'Test Question 3',
+                                        s3URL: 's3://bucketname/key/test13',
+                                        downloadURL: expect.any(String),
+                                    },
+                                ],
+                                addedBy: responseToOACT.question.addedBy,
+                            }),
                         },
                     ],
                 }),
@@ -143,7 +182,9 @@ describe('indexQuestions', () => {
         )
     })
     it('returns an error if you are requesting for a different state (403)', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
         const otherStateServer = await constructTestPostgresServer({
             context: {
                 user: {
@@ -155,11 +196,13 @@ describe('indexQuestions', () => {
                     givenName: 'Aang',
                 },
             },
+            s3Client: mockS3,
         })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: dmcoCMSUser,
             },
+            s3Client: mockS3,
         })
 
         const submittedPkg =
@@ -183,7 +226,7 @@ describe('indexQuestions', () => {
         )
     })
     it('returns an error if health plan package does not exist', async () => {
-        const server = await constructTestPostgresServer()
+        const server = await constructTestPostgresServer({ s3Client: mockS3 })
 
         await createAndSubmitTestHealthPlanPackage(server)
 

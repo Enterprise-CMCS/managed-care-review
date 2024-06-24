@@ -393,28 +393,31 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
 Cypress.Commands.add('fillOutLinkedRate', () => {
     // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
-        cy.getFeatureFlagStore(['link-rates']).then((store) => {
-            //If this flag value is true, then it will test this code hidden behind the feature flag
-            cy.findByRole('radiogroup', {
-                name: /Was this rate certification included with another submission?/,
-            })
-                .should('exist')
-                .within(() => {
-                    cy.findByText('Yes, this rate certification is part of another submission').click()
-                })
-
-            if (store['link-rates']) {
-               cy.findByRole('combobox', { name: 'Which rate certification was it?' }).click({
-                    force: true,
-                })
-               cy.findAllByRole('option').first().click()
-               cy.findByText(/`Rate ID:/).should('be.visible')
-            }
-
-            cy.verifyDocumentsHaveNoErrors()
-            cy.waitForDocumentsToLoad()
-            cy.findAllByTestId('errorMessage').should('have.length', 0)
+    // Must have existing rates to work. Otherwise, there will be no options
+    cy.getFeatureFlagStore(['link-rates']).then((store) => {
+        //If this flag value is true, then it will test this code hidden behind the feature flag
+        cy.findByRole('radiogroup', {
+            name: /Was this rate certification included with another submission?/,
         })
+            .should('exist')
+            .within(() => {
+                cy.findByText('Yes, this rate certification is part of another submission').click()
+            })
+
+        if (store['link-rates']) {
+            cy.findByLabelText('Which rate certification was it?').should('be.visible').click({
+                force: true
+            })
+            let rateName = ''
+            cy.findAllByRole('option').first().within(current => {
+                cy.get('strong').should($div => {
+                    rateName = $div.text()
+                }).click()
+            }).then(() => {
+                cy.root().findByRole('heading', { level: 3, name: `Rate ID: ${rateName}`}).should('exist')
+            })
+        }
+    })
 })
 
 Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {

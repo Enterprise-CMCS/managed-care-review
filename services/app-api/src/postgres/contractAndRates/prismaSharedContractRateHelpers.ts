@@ -164,37 +164,8 @@ function rateFormDataToDomainModel(
         rateID: rateRevision.rateID,
         rateType: rateRevision.rateType ?? undefined,
         rateCapitationType: rateRevision.rateCapitationType ?? undefined,
-        rateDocuments: rateRevision.rateDocuments
-            ? rateRevision.rateDocuments.map((doc) => {
-                  const dateAdded =
-                      previousRevision &&
-                      previousRevision.rateDocuments.includes(doc)
-                          ? previousRevision.submitInfo?.updatedAt
-                          : rateRevision.updatedAt
-
-                  return {
-                      name: doc.name,
-                      s3URL: doc.s3URL,
-                      sha256: doc.sha256,
-                      dateAdded: dateAdded ?? rateRevision.updatedAt,
-                  }
-              })
-            : [],
-        supportingDocuments: rateRevision.supportingDocuments
-            ? rateRevision.supportingDocuments.map((doc) => {
-                  const dateAdded =
-                      previousRevision &&
-                      previousRevision.supportingDocuments.includes(doc)
-                          ? previousRevision.submitInfo?.updatedAt
-                          : rateRevision.updatedAt
-                  return {
-                      name: doc.name,
-                      s3URL: doc.s3URL,
-                      sha256: doc.sha256,
-                      dateAdded: dateAdded ?? rateRevision.updatedAt,
-                  }
-              })
-            : [],
+        rateDocuments: rateRevision.rateDocuments ?? [],
+        supportingDocuments: rateRevision.supportingDocuments ?? [],
         rateDateStart: rateRevision.rateDateStart ?? undefined,
         rateDateEnd: rateRevision.rateDateEnd ?? undefined,
         rateDateCertified: rateRevision.rateDateCertified ?? undefined,
@@ -256,10 +227,9 @@ function setDateAddedForContractRevisions(
     contractRevs: ContractRevisionType[]
 ) {
     const firstSeenDate: { [sha: string]: Date } = {}
-
     for (const contractRev of contractRevs) {
-        const sinceDate =
-            contractRev.submitInfo?.updatedAt || contractRev.updatedAt
+        const sinceDate = contractRev.submitInfo?.updatedAt
+        if (!sinceDate) break
         for (const doc of contractRev.formData.contractDocuments) {
             if (!firstSeenDate[doc.sha256]) {
                 firstSeenDate[doc.sha256] = sinceDate
@@ -270,19 +240,21 @@ function setDateAddedForContractRevisions(
             if (!firstSeenDate[doc.sha256]) {
                 firstSeenDate[doc.sha256] = sinceDate
             }
+
             doc.dateAdded = firstSeenDate[doc.sha256]
         }
     }
 }
 
-// setDateAddedForContractRevisions takes a list of contractRevs and sets dateAdded
+// setDateAddedForRateRevisions takes a list of rateRevs and sets dateAdded
 // for all documents based on when the doc first appears in the list. The contractRevs
 // should be in createdAt order.
 function setDateAddedForRateRevisions(rateRevs: RateRevisionType[]) {
     const firstSeenDate: { [sha: string]: Date } = {}
 
     for (const rateRev of rateRevs) {
-        const sinceDate = rateRev.submitInfo?.updatedAt || rateRev.updatedAt
+        const sinceDate = rateRev.submitInfo?.updatedAt
+        if (!sinceDate) break
         if (rateRev.formData.rateDocuments) {
             for (const doc of rateRev.formData.rateDocuments) {
                 if (!firstSeenDate[doc.sha256]) {
@@ -370,39 +342,10 @@ function contractFormDataToDomainModel(
                   email: contact.email ?? undefined,
               }))
             : [],
-        supportingDocuments: contractRevision.supportingDocuments
-            ? contractRevision.supportingDocuments.map((doc) => {
-                  const dateAdded =
-                      previousRevision &&
-                      previousRevision.supportingDocuments.includes(doc)
-                          ? previousRevision.submitInfo?.updatedAt
-                          : contractRevision.updatedAt
-
-                  return {
-                      name: doc.name,
-                      s3URL: doc.s3URL,
-                      sha256: doc.sha256 ?? undefined,
-                      dateAdded: dateAdded ?? contractRevision.updatedAt,
-                  }
-              })
-            : [],
+        supportingDocuments: contractRevision.supportingDocuments ?? [],
         contractExecutionStatus:
             contractRevision.contractExecutionStatus ?? undefined,
-        contractDocuments: contractRevision.contractDocuments
-            ? contractRevision.contractDocuments.map((doc) => {
-                  const dateAdded =
-                      previousRevision &&
-                      previousRevision.contractDocuments.includes(doc)
-                          ? previousRevision.submitInfo?.updatedAt
-                          : contractRevision.updatedAt
-                  return {
-                      name: doc.name,
-                      s3URL: doc.s3URL,
-                      sha256: doc.sha256 ?? undefined,
-                      dateAdded: dateAdded ?? contractRevision.updatedAt,
-                  }
-              })
-            : [],
+        contractDocuments: contractRevision.contractDocuments ?? [],
         contractDateStart: contractRevision.contractDateStart ?? undefined,
         contractDateEnd: contractRevision.contractDateEnd ?? undefined,
         managedCareEntities: contractRevision.managedCareEntities ?? undefined,

@@ -20,14 +20,9 @@ import { useFetchHealthPlanPackageWrapper } from '../../gqlHelpers'
 import { ApolloError } from '@apollo/client'
 import { handleApolloError } from '../../gqlHelpers/apolloErrors'
 
-type RouteParams = {
-    id: string
-    revisionVersion: string
-}
-
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
-    const { id, revisionVersion } = useParams<keyof RouteParams>()
+    const { id, revisionVersion } = useParams()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'

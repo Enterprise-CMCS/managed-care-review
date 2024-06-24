@@ -9,6 +9,7 @@ import {
 } from '@apollo/client'
 import { Amplify, Auth as AmplifyAuth, API } from 'aws-amplify'
 import { UnlockedHealthPlanFormDataType } from '../../app-web/src/common-code/healthPlanFormDataType'
+import { RateFormDataInput } from '../gen/gqlClient';
 
 type StateUserType = {
     id: string
@@ -41,34 +42,35 @@ type DivisionType = 'DMCO' | 'DMCP' | 'OACT'
 type UserType = StateUserType | AdminUserType | CMSUserType
 
 // programs for state used in tests
-const minnesotaStatePrograms =[
+const minnesotaStatePrograms = [
     {
         "id": "abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce",
         "fullName": "Special Needs Basic Care",
         "name": "SNBC",
-        "isRateProgram": "false"
+        "isRateProgram": false
     },
     {
         "id": "d95394e5-44d1-45df-8151-1cc1ee66f100",
         "fullName": "Prepaid Medical Assistance Program",
         "name": "PMAP",
-        "isRateProgram": "false"
+        "isRateProgram": false
     },
     {
         "id": "ea16a6c0-5fc6-4df8-adac-c627e76660ab",
         "fullName": "Minnesota Senior Care Plus ",
         "name": "MSC+",
-        "isRateProgram": "false"
+        "isRateProgram": false
     },
     {
         "id": "3fd36500-bf2c-47bc-80e8-e7aa417184c5",
         "fullName": "Minnesota Senior Health Options",
         "name": "MSHO",
-        "isRateProgram": "false"
+        "isRateProgram": false
     }
 ]
 
-const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
+const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType> => ({
+    stateCode: 'MN',
     stateContacts: [
         {
             name: 'Name',
@@ -103,7 +105,8 @@ const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
     managedCareEntities: ['MCO'],
     federalAuthorities: ['STATE_PLAN'],
     rateInfos: [],
-    statutoryRegulatoryAttestation: true
+    statutoryRegulatoryAttestation: true,
+    programIDs: [minnesotaStatePrograms[0].id]
 })
 
 const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
@@ -202,7 +205,42 @@ const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
             },
     ],
     statutoryRegulatoryAttestation: false,
-    statutoryRegulatoryAttestationDescription: 'No compliance'
+    statutoryRegulatoryAttestationDescription: 'No compliance',
+    programIDs: [minnesotaStatePrograms[0].id]
+})
+
+const rateFormData = (data?: Partial<RateFormDataInput>): RateFormDataInput => ({
+    rateType: 'NEW',
+    rateCapitationType: 'RATE_CELL',
+    rateDocuments: [
+        {
+            name: 'rate1Document1.pdf',
+            s3URL: 's3://local-uploads/1684382956834-rate1Document1.pdf/rate1Document1.pdf',
+            sha256: 'fakesha',
+        },
+    ],
+    supportingDocuments: [   {
+        name: 'rate1SupportingDocument1.pdf',
+        s3URL: 's3://local-uploads/1684382956834-rate1SupportingDocument1.pdf/rate1SupportingDocument1.pdf',
+        sha256: 'fakesha2',
+    }],
+    rateDateStart: '2025-05-01',
+    rateDateEnd: '2026-04-30',
+    rateDateCertified: '2025-03-15',
+    rateProgramIDs: [minnesotaStatePrograms[0].id],
+    certifyingActuaryContacts: [
+        {
+            name: 'actuary1',
+            titleRole: 'test title',
+            email: 'email@example.com',
+            actuarialFirm: 'MERCER' as const,
+            actuarialFirmOther: '',
+        },
+    ],
+    deprecatedRateProgramIDs: [],
+    addtlActuaryContacts: [],
+    actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
+    ...data
 })
 
 const newSubmissionInput = (overrides?: Partial<UnlockedHealthPlanFormDataType> ): Partial<UnlockedHealthPlanFormDataType> => {
@@ -436,6 +474,7 @@ export {
     cmsUser,
     adminUser,
     stateUser,
+    rateFormData,
     minnesotaStatePrograms
 }
 export type {

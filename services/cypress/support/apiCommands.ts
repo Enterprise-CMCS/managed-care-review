@@ -8,6 +8,9 @@ import {
     User,
     UpdateCmsUserDocument,
     FetchCurrentUserDocument,
+    UpdateDraftContractRatesDocument,
+    UpdateDraftContractRatesInput,
+    Contract, SubmitContractDocument,
 } from '../gen/gqlClient'
 import {
     domainToBase64,
@@ -20,7 +23,8 @@ import {
     contractOnlyData,
     contractAndRatesData,
     newSubmissionInput,
-    CMSUserType,
+    rateFormData,
+    CMSUserType, minnesotaStatePrograms,
 } from '../utils/apollo-test-utils'
 import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
 import {UnlockedHealthPlanFormDataType} from 'app-web/src/common-code/healthPlanFormDataType';
@@ -75,7 +79,7 @@ const createAndSubmitContractOnlyPackage = async (
 
 const createAndSubmitContractWithRates = async (
     apolloClient: ApolloClient<NormalizedCacheObject>
-): Promise<HealthPlanPackage> => {
+): Promise<Contract> => {
     const newSubmission1 = await apolloClient.mutate({
         mutation: CreateHealthPlanPackageDocument,
         variables: {
@@ -90,9 +94,11 @@ const createAndSubmitContractWithRates = async (
         throw new Error(formData1.message)
     }
 
-    const fullFormData1 = {
+    const fullFormData1: UnlockedHealthPlanFormDataType = {
         ...formData1,
         ...contractAndRatesData(),
+        status: 'DRAFT',
+        rateInfos: []
     }
 
     const formDataProto = domainToBase64(fullFormData1 as UnlockedHealthPlanFormDataType)
@@ -107,16 +113,50 @@ const createAndSubmitContractWithRates = async (
         },
     })
 
-    const submission1 = await apolloClient.mutate({
-        mutation: SubmitHealthPlanPackageDocument,
+    // Using new API to create child rates
+    const updateDraftContractRatesInput: UpdateDraftContractRatesInput = {
+        contractID: pkg1.id,
+        updatedRates: [
+            {
+                formData: rateFormData({
+                    rateDateStart: '2025-06-01',
+                    rateDateEnd: '2026-05-30',
+                    rateDateCertified: '2025-04-15',
+                    rateProgramIDs: [minnesotaStatePrograms[0].id]
+                }),
+                rateID: undefined,
+                type: 'CREATE'
+            },
+            {
+                formData: rateFormData({
+                    rateDateStart: '2024-03-01',
+                    rateDateEnd: '2025-04-30',
+                    rateDateCertified: '2025-03-15',
+                    rateProgramIDs: [minnesotaStatePrograms[1].id]
+                }),
+                rateID: undefined,
+                type: 'CREATE'
+            }
+        ]
+    }
+
+    await apolloClient.mutate({
+        mutation: UpdateDraftContractRatesDocument,
+        variables: {
+            input: updateDraftContractRatesInput
+        }
+    })
+
+    const submission = await apolloClient.mutate({
+        mutation: SubmitContractDocument,
         variables: {
             input: {
-                pkgID: pkg1.id,
-                submittedReason: 'Submit package for Rates Dashboard tests',
+                contractID: pkg1.id,
             },
         },
     })
-    return submission1.data.submitHealthPlanPackage.pkg
+
+    return submission.data.submitContract.contract
 }
 
 
@@ -179,7 +219,7 @@ Cypress.Commands.add(
 
 Cypress.Commands.add(
     'apiCreateAndSubmitContractWithRates',
-    (stateUser): Cypress.Chainable<HealthPlanPackage> =>
+    (stateUser): Cypress.Chainable<Contract> =>
         cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
             apolloClientWrapper(
                 schema,

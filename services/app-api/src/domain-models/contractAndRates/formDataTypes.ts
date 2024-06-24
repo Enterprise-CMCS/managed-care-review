@@ -18,6 +18,7 @@ const documentSchema = z.object({
     s3URL: z.string(),
     sha256: z.string(),
     dateAdded: z.date().optional(), //  date added to the first submission to CMS
+    downloadURL: z.string().optional(),
 })
 
 const managedCareEntitiesSchema = z.union([

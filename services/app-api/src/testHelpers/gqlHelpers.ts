@@ -45,6 +45,8 @@ import { findStatePrograms } from '../postgres'
 import { must } from './assertionHelpers'
 import { newJWTLib } from '../jwt'
 import type { JWTLib } from '../jwt'
+import { testS3Client } from './s3Helpers'
+import type { S3ClientT } from '../s3'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -79,6 +81,7 @@ const constructTestPostgresServer = async (opts?: {
     emailParameterStore?: EmailParameterStore
     ldService?: LDService
     jwt?: JWTLib
+    s3Client?: S3ClientT
 }): Promise<ApolloServer> => {
     // set defaults
     const context = opts?.context || defaultContext()
@@ -98,13 +101,16 @@ const constructTestPostgresServer = async (opts?: {
         })
 
     await insertUserToLocalAurora(postgresStore, context.user)
+    const s3TestClient = await testS3Client()
+    const s3 = opts?.s3Client || s3TestClient
 
     const postgresResolvers = configureResolvers(
         postgresStore,
         emailer,
         parameterStore,
         ldService,
-        jwt
+        jwt,
+        s3
     )
 
     return new ApolloServer({
@@ -255,7 +261,7 @@ const createAndUpdateTestHealthPlanPackage = async (
             rateDocuments: [
                 {
                     name: 'rateDocument.pdf',
-                    s3URL: 'fakeS3URL',
+                    s3URL: 's3://bucketname/key/test1',
                     sha256: 'fakesha',
                 },
             ],
@@ -294,7 +300,7 @@ const createAndUpdateTestHealthPlanPackage = async (
     draft.contractDocuments = [
         {
             name: 'contractDocument.pdf',
-            s3URL: 'fakeS3URL',
+            s3URL: 's3://bucketname/key/test1',
             sha256: 'fakesha',
         },
     ]
@@ -450,7 +456,7 @@ const createTestQuestion = async (
         documents: [
             {
                 name: 'Test Question',
-                s3URL: 'testS3Url',
+                s3URL: 's3://bucketname/key/test1',
             },
         ],
     }
@@ -510,7 +516,7 @@ const createTestQuestionResponse = async (
         documents: [
             {
                 name: 'Test Question Response',
-                s3URL: 'testS3Url',
+                s3URL: 's3://bucketname/key/test1',
             },
         ],
     }

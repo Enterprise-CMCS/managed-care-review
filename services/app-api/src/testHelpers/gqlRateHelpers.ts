@@ -21,6 +21,7 @@ import type { RateType } from '../domain-models'
 import type { ApolloServer } from 'apollo-server-lambda'
 import type { RateFormEditableType } from '../domain-models/contractAndRates'
 import { createAndSubmitTestContractWithRate } from './gqlContractHelpers'
+import { clearDocMetadata } from './documentHelpers'
 
 const fetchTestRateById = async (
     server: ApolloServer,
@@ -168,19 +169,19 @@ function addNewRateToRateInput(
 
         rateDocuments: [
             {
-                s3URL: 'foo://bar',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'ratedoc1.doc',
                 sha256: 'foobar',
             },
         ],
         supportingDocuments: [
             {
-                s3URL: 'foo://bar1',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'ratesupdoc1.doc',
                 sha256: 'foobar1',
             },
             {
-                s3URL: 'foo://bar2',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'ratesupdoc2.doc',
                 sha256: 'foobar2',
             },
@@ -263,8 +264,8 @@ function formatRateDataForSending(
     return {
         rateType: rateFormData.rateType,
         rateCapitationType: rateFormData.rateCapitationType,
-        rateDocuments: rateFormData.rateDocuments,
-        supportingDocuments: rateFormData.supportingDocuments,
+        rateDocuments: clearDocMetadata(rateFormData.rateDocuments),
+        supportingDocuments: clearDocMetadata(rateFormData.supportingDocuments),
         rateDateStart: rateFormData.rateDateStart,
         rateDateEnd: rateFormData.rateDateEnd,
         rateDateCertified: rateFormData.rateDateCertified,

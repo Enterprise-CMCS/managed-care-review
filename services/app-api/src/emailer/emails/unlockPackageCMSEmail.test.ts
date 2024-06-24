@@ -27,7 +27,7 @@ const sub: UnlockedHealthPlanFormDataType = {
             rateType: 'NEW',
             rateDocuments: [
                 {
-                    s3URL: 'bar',
+                    s3URL: 's3://bucketname/key/test1',
                     name: 'foo',
                     sha256: 'fakesha',
                 },
@@ -142,7 +142,7 @@ describe('unlockPackageCMSEmail', () => {
                     rateType: 'NEW',
                     rateDocuments: [
                         {
-                            s3URL: 'bar',
+                            s3URL: 's3://bucketname/key/test1',
                             name: 'foo',
                             sha256: 'fakesha',
                         },
@@ -170,7 +170,7 @@ describe('unlockPackageCMSEmail', () => {
                     rateType: 'NEW',
                     rateDocuments: [
                         {
-                            s3URL: 'bar',
+                            s3URL: 's3://bucketname/key/test1',
                             name: 'foo',
                             sha256: 'fakesha',
                         },
@@ -198,7 +198,7 @@ describe('unlockPackageCMSEmail', () => {
                     rateType: 'AMENDMENT',
                     rateDocuments: [
                         {
-                            s3URL: 'bar',
+                            s3URL: 's3://bucketname/key/test1',
                             name: 'foo',
                             sha256: 'fakesha',
                         },
@@ -571,7 +571,7 @@ describe('unlockPackageCMSEmail', () => {
                     rateType: 'NEW',
                     rateDocuments: [
                         {
-                            s3URL: 'bar',
+                            s3URL: 's3://bucketname/key/test1',
                             name: 'foo',
                             sha256: 'fakesha',
                         },
@@ -625,7 +625,7 @@ describe('unlockPackageCMSEmail', () => {
                     rateType: 'NEW',
                     rateDocuments: [
                         {
-                            s3URL: 'bar',
+                            s3URL: 's3://bucketname/key/test1',
                             name: 'foo',
                             sha256: 'fakesha',
                         },

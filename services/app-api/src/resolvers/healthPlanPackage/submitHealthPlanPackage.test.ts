@@ -126,7 +126,7 @@ describe(`Tests $testName`, () => {
             rateDocuments: [
                 {
                     name: 'rateDocument.pdf',
-                    s3URL: 'fakeS3URL',
+                    s3URL: 's3://bucketname/key/test1',
                     sha256: 'fakesha',
                 },
             ],
@@ -375,7 +375,7 @@ describe(`Tests $testName`, () => {
                     rateDocuments: [
                         {
                             name: 'rateDocument.pdf',
-                            s3URL: 'fakeS3URL',
+                            s3URL: 's3://bucketname/key/test1',
                             sha256: 'fakesha',
                         },
                     ],
@@ -415,12 +415,12 @@ describe(`Tests $testName`, () => {
             documents: [
                 {
                     name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
-                    s3URL: 'fakeS3URL',
+                    s3URL: 's3://bucketname/key/test1',
                     sha256: 'fakesha',
                 },
                 {
                     name: 'rate_only_supporting_doc.pdf',
-                    s3URL: 'fakeS3URL',
+                    s3URL: 's3://bucketname/key/test1',
                     sha256: 'fakesha',
                 },
             ],
@@ -449,12 +449,12 @@ describe(`Tests $testName`, () => {
                 documents: [
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
-                        s3URL: 'fakeS3URL',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'fakesha',
                     },
                     {
                         name: 'rate_only_supporting_doc.pdf',
-                        s3URL: 'fakeS3URL',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'fakesha',
                     },
                 ],
@@ -471,12 +471,12 @@ describe(`Tests $testName`, () => {
             documents: [
                 {
                     name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
-                    s3URL: 'fakeS3URL',
+                    s3URL: 's3://bucketname/key/test1',
                     sha256: 'fakesha',
                 },
                 {
                     name: 'rate_only_supporting_doc.pdf',
-                    s3URL: 'fakeS3URL',
+                    s3URL: 's3://bucketname/key/test1',
                     sha256: 'fakesha',
                 },
             ],
@@ -498,12 +498,12 @@ describe(`Tests $testName`, () => {
                 documents: [
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
-                        s3URL: 'fakeS3URL',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'fakesha',
                     },
                     {
                         name: 'rate_only_supporting_doc.pdf',
-                        s3URL: 'fakeS3URL',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'fakesha',
                     },
                 ],

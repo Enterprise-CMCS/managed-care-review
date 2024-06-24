@@ -5,6 +5,7 @@ import type { DivisionType } from './DivisionType'
 type Document = {
     name: string
     s3URL: string
+    downloadURL?: string
 }
 
 type Question = {

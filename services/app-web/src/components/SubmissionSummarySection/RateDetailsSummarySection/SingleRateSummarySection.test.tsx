@@ -197,9 +197,8 @@ describe('SingleRateSummarySection', () => {
         expect(
             within(rateDocsTable).getByText(rateDoc.name)
         ).toBeInTheDocument()
-        expect(
-            within(within(rateDocsTable).getByTestId('tag')).getByText('SHARED')
-        ).toBeInTheDocument()
+        expect(within(rateDocsTable).getByText('SHARED')).toBeInTheDocument()
+        expect(within(rateDocsTable).getByText('NEW')).toBeInTheDocument()
         expect(
             within(rateDocsTable).getByText(
                 `${linkedSubmissionOne.packageName} (Draft)`

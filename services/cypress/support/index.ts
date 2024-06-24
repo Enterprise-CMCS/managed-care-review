@@ -26,7 +26,7 @@ import {
     FeatureFlagSettings,
 } from '../../app-web/src/common-code/featureFlags'
 import './apiCommands'
-import { HealthPlanPackage } from '../gen/gqlClient';
+import { HealthPlanPackage, Contract } from '../gen/gqlClient';
 import { CMSUserType, DivisionType } from '../utils/apollo-test-utils';
 import { StateUserType } from 'app-api/src/domain-models';
 
@@ -105,7 +105,7 @@ declare global {
             }): void
 
             apiCreateAndSubmitContractOnlySubmission(stateUser: StateUserType): Cypress.Chainable<HealthPlanPackage>
-            apiCreateAndSubmitContractWithRates(stateUser: StateUserType): Cypress.Chainable<HealthPlanPackage>
+            apiCreateAndSubmitContractWithRates(stateUser: StateUserType): Cypress.Chainable<Contract>
             apiAssignDivisionToCMSUser(cmsUser: CMSUserType, division: DivisionType): Cypress.Chainable<void>
 
             interceptGraphQL(): void

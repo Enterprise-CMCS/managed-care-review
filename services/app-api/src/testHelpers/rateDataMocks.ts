@@ -106,7 +106,7 @@ const mockRateRevision = (
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 name: 'rate supporting doc',
-                s3URL: 'fakeS3URL',
+                s3URL: 's3://bucketname/key/test1',
                 sha256: '2342fwlkdmwvw',
             },
             {
@@ -116,7 +116,7 @@ const mockRateRevision = (
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 name: 'rate supporting doc 2',
-                s3URL: 'fakeS3URL',
+                s3URL: 's3://bucketname/key/test1',
                 sha256: '45662342fwlkdmwvw',
             },
         ],
@@ -128,7 +128,7 @@ const mockRateRevision = (
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 name: 'contract doc',
-                s3URL: 'fakeS3URL',
+                s3URL: 's3://bucketname/key/test1',
                 sha256: '8984234fwlkdmwvw',
             },
         ],
@@ -152,19 +152,19 @@ function mockRateFormDataInput(): RateFormDataInput {
 
         rateDocuments: [
             {
-                s3URL: 'foo://bar',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'updatedratedoc1.doc',
                 sha256: 'foobar',
             },
         ],
         supportingDocuments: [
             {
-                s3URL: 'foo://bar1',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'ratesupdoc1.doc',
                 sha256: 'foobar1',
             },
             {
-                s3URL: 'foo://bar2',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'ratesupdoc2.doc',
                 sha256: 'foobar2',
             },

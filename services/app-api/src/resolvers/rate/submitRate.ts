@@ -120,8 +120,28 @@ export function submitRate(
                       rateType: formData.rateType ?? undefined,
                       rateCapitationType:
                           formData.rateCapitationType ?? undefined,
-                      rateDocuments: formData.rateDocuments ?? [],
-                      supportingDocuments: formData.supportingDocuments ?? [],
+                      rateDocuments: formData.rateDocuments
+                          ? formData.rateDocuments.map((doc) => {
+                                return {
+                                    name: doc.name,
+                                    sha256: doc.sha256,
+                                    s3URL: doc.s3URL,
+                                    downloadURL: doc.downloadURL ?? undefined,
+                                    dateAdded: doc.dateAdded ?? undefined,
+                                }
+                            })
+                          : [],
+                      supportingDocuments: formData.supportingDocuments
+                          ? formData.rateDocuments.map((doc) => {
+                                return {
+                                    name: doc.name,
+                                    sha256: doc.sha256,
+                                    s3URL: doc.s3URL,
+                                    downloadURL: doc.downloadURL ?? undefined,
+                                    dateAdded: doc.dateAdded ?? undefined,
+                                }
+                            })
+                          : [],
                       rateDateStart: formData.rateDateStart ?? undefined,
                       rateDateEnd: formData.rateDateEnd ?? undefined,
                       rateDateCertified:
