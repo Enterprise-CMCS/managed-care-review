@@ -3,10 +3,7 @@ import type {
     ContractDraftRevisionFormDataInput,
     ContractDraftRevisionInput,
 } from '../../gen/gqlServer'
-import {
-    contractFormDataSchema,
-    nullishTransformWrapper,
-} from './formDataTypes'
+import { contractFormDataSchema, preprocessNulls } from './formDataTypes'
 import {
     contractTypeSchema,
     populationCoveredSchema,
@@ -16,8 +13,8 @@ import type { SafeParseReturnType } from 'zod'
 import { findStatePrograms } from '../../postgres'
 
 const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
-    contractType: nullishTransformWrapper(contractTypeSchema),
-    submissionDescription: nullishTransformWrapper(z.string()),
+    contractType: preprocessNulls(contractTypeSchema.optional()),
+    submissionDescription: preprocessNulls(z.string().optional()),
 })
 
 type UpdateDraftContractFormDataType = z.infer<
@@ -28,28 +25,21 @@ const validateStatutoryRegulatoryAttestation = (
     formData: ContractDraftRevisionFormDataInput,
     featureFlags?: FeatureFlagSettings
 ) =>
-    z
-        .string()
-        .optional()
-        .nullish()
-        .transform((val, ctx) => {
-            if (featureFlags?.['438-attestation']) {
-                if (formData.statutoryRegulatoryAttestation === false && !val) {
-                    ctx.addIssue({
-                        code: z.ZodIssueCode.custom,
-                        message:
-                            'statutoryRegulatoryAttestationDescription must be defined when statutoryRegulatoryAttestation is false',
-                    })
+    preprocessNulls(
+        z
+            .string()
+            .optional()
+            .transform((val, ctx) => {
+                if (featureFlags?.['438-attestation']) {
+                    // Clear out existing statutoryRegulatoryAttestationDescription if statutoryRegulatoryAttestation is true
+                    if (formData.statutoryRegulatoryAttestation && val) {
+                        return undefined
+                    }
                 }
 
-                // Clear out existing statutoryRegulatoryAttestationDescription if statutoryRegulatoryAttestation is true
-                if (formData.statutoryRegulatoryAttestation && val) {
-                    return undefined
-                }
-            }
-
-            return val ?? undefined // return undefined if null.
-        })
+                return val ?? undefined
+            })
+    )
 
 const validateProgramIDs = (stateCode: string) => {
     const allPrograms = findStatePrograms(stateCode)
