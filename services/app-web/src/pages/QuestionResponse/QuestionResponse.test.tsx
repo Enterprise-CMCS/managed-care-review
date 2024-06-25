@@ -179,13 +179,8 @@ describe('QuestionResponse', () => {
             }
         )
 
-        const sidenav = await screen.findByTestId(
-            'sidenav',
-            {},
-            { timeout: 5000 }
-        )
-        expect(sidenav).toBeInTheDocument()
         await waitFor(() => {
+            expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
             expect(
                 screen.queryByRole('link', { name: /Add questions/ })
             ).toBeInTheDocument()
@@ -241,13 +236,8 @@ describe('QuestionResponse', () => {
             }
         )
 
-        const sidenav = await screen.findByTestId(
-            'sidenav',
-            {},
-            { timeout: 5000 }
-        )
-        expect(sidenav).toBeInTheDocument()
         await waitFor(() => {
+            expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
             expect(
                 screen.queryByRole('link', { name: /Add questions/ })
             ).toBeInTheDocument()
