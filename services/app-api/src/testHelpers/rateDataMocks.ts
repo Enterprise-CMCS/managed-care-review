@@ -39,7 +39,6 @@ const mockDraftRate = (
         mockRateRevision(
             rate,
             {
-                contractRevisions: [],
                 submitInfo: null,
             },
             rate?.stateCode as StateCodeType
@@ -132,8 +131,6 @@ const mockRateRevision = (
                 sha256: '8984234fwlkdmwvw',
             },
         ],
-        contractRevisions: [],
-        draftContracts: [],
         contractsWithSharedRateRevision: [],
         ...revision,
     }

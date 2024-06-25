@@ -74,15 +74,6 @@ async function unlockContract(
                             },
                         },
                     },
-
-                    rateRevisions: {
-                        where: {
-                            validUntil: null,
-                        },
-                        include: {
-                            rateRevision: true,
-                        },
-                    },
                 },
             })
             if (!currentRev) {
@@ -138,8 +129,9 @@ async function unlockContract(
                 }
             } else {
                 // without linked rates, we push all the valid rate revisions attached to the contract revision
-                for (const rrev of currentRev.rateRevisions) {
-                    childRateIDs.push(rrev.rateRevision.rateID)
+                for (const sub of currentRev.relatedSubmisions[0]
+                    .submissionPackages) {
+                    childRateIDs.push(sub.rateRevision.rateID)
                 }
             }
 
@@ -169,7 +161,8 @@ async function unlockContract(
                     relatedRateIDs.push(ratePackage.rateRevision.rateID)
                 }
             } else {
-                for (const rateRev of currentRev.rateRevisions) {
+                for (const rateRev of currentRev.relatedSubmisions[0]
+                    .submissionPackages) {
                     relatedRateIDs.push(rateRev.rateRevision.rateID)
                 }
             }
@@ -184,12 +177,6 @@ async function unlockContract(
                     unlockInfo: {
                         connect: { id: unlockInfo.id },
                     },
-                    draftRates: {
-                        connect: relatedRateIDs.map((cID) => ({
-                            id: cID,
-                        })),
-                    },
-
                     populationCovered: currentRev.populationCovered,
                     programIDs: currentRev.programIDs,
                     riskBasedContract: currentRev.riskBasedContract,
@@ -262,13 +249,6 @@ async function unlockContract(
                             email: c.email,
                             titleRole: c.titleRole,
                         })),
-                    },
-                },
-                include: {
-                    rateRevisions: {
-                        include: {
-                            rateRevision: true,
-                        },
                     },
                 },
             })

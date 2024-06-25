@@ -2,10 +2,13 @@ import type {
     RateRevisionWithContractsType,
     RateType,
     RateRevisionType,
+    ContractRevisionType,
 } from '../../domain-models/contractAndRates'
 import { rateSchema } from '../../domain-models/contractAndRates'
-import { contractRevisionsToDomainModels } from './parseContractWithHistory'
-import { draftRateRevToDomainModel } from './prismaDraftRatesHelpers'
+import {
+    contractRevisionToDomainModel,
+    contractRevisionsToDomainModels,
+} from './parseContractWithHistory'
 import type {
     ContractRevisionTableWithFormData,
     RateRevisionTableWithFormData,
@@ -125,8 +128,9 @@ function rateWithHistoryToDomainModel(
     const rateRevisions = rate.revisions
     let draftRevision: RateRevisionWithContractsType | Error | undefined =
         undefined
-    for (const [currentRevIndex, rateRev] of rateRevisions.entries()) {
-        // We have already set the draft revision aside, all ordered revisions here should be submitted
+    for (const [, rateRev] of rateRevisions.entries()) {
+        // If we have a draft revision
+        // We set the draft revision aside, format it properly
         if (!rateRev.submitInfo) {
             if (draftRevision) {
                 return new Error(
@@ -135,12 +139,29 @@ function rateWithHistoryToDomainModel(
                 )
             }
 
-            draftRevision = draftRateRevToDomainModel(rateRev)
+            const domainContractRevisions: ContractRevisionType[] = []
+            for (const submission of rateRev.relatedSubmissions) {
+                const relatedContractRevisions = submission.submissionPackages
+                    .filter((p) => p.rateRevisionID === rateRev.id)
+                    .map((p) => p.contractRevision)
 
-            if (draftRevision instanceof Error) {
-                return new Error(
-                    `error converting draft rate revision with id ${rateRev.id} to domain model: ${draftRevision}`
-                )
+                for (const contractRev of relatedContractRevisions) {
+                    const domainContract =
+                        contractRevisionToDomainModel(contractRev)
+
+                    domainContractRevisions.push(domainContract)
+                }
+            }
+
+            draftRevision = {
+                id: rateRev.id,
+                rateID: rateRev.rateID,
+                // rate: rateRev.rate, // not symmetric - this exists on contract draft revision but not on rate
+                createdAt: rateRev.createdAt,
+                updatedAt: rateRev.updatedAt,
+                unlockInfo: convertUpdateInfoToDomainModel(rateRev.unlockInfo),
+                formData: rateFormDataToDomainModel(rateRev),
+                contractRevisions: domainContractRevisions,
             }
 
             // skip the rest of the processing
@@ -186,61 +207,6 @@ function rateWithHistoryToDomainModel(
                 unlockInfo: rateRev.unlockInfo || undefined,
                 contractRevs: mostRecentContractRevs,
             })
-        } else {
-            // The OLD way.
-            const initialEntry: RateRevisionSet = {
-                rateRev,
-                submitInfo: rateRev.submitInfo,
-                unlockInfo: rateRev.unlockInfo || undefined,
-                contractRevs: [],
-            }
-
-            allEntries.push(initialEntry)
-
-            console.info(
-                'Old way of determining rate revision comp, should go away post refactor'
-            )
-            // Next rate revision in the array.
-            const nextRateRev: RateRevisionTableWithFormData | undefined =
-                rateRevisions[currentRevIndex + 1]
-
-            // Reverse contractRevisions so it is in DESC order.
-            const contractRevisions = rateRev.contractRevisions.reverse()
-            for (const contractRev of contractRevisions) {
-                if (!contractRev.contractRevision.submitInfo) {
-                    return new Error(
-                        'Programming Error: a rate is associated with an unsubmitted contract'
-                    )
-                }
-
-                // Check if contract revision submitted date is earlier then the proceeding rate revision unlock date.
-                // If nextRateRev does not exist, then there is no date constraint.
-                const isContractSubmittedDateValid = nextRateRev?.unlockInfo
-                    ? contractRev.contractRevision.submitInfo.updatedAt.getTime() <
-                      nextRateRev.unlockInfo.updatedAt.getTime()
-                    : true
-
-                // Does initialEntry.contractRevs already include a revision for this contract
-                const isContractIncluded = !!initialEntry.contractRevs.find(
-                    (cc) =>
-                        cc.contractID ===
-                        contractRev.contractRevision.contractID
-                )
-
-                // Contract revision that belong to this rate revision has to be:
-                // - Submitted before the next contract rev unlock date
-                // - Not already in the initial entry. We are looping through this in desc order, so the first contract rev is the latest.
-                // - Not removed from contract
-                if (
-                    isContractSubmittedDateValid &&
-                    !isContractIncluded &&
-                    !contractRev.isRemoval
-                ) {
-                    initialEntry.contractRevs.unshift(
-                        contractRev.contractRevision
-                    )
-                }
-            }
         }
     }
 

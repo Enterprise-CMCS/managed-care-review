@@ -12,6 +12,7 @@ import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
 import { must, mockInsertContractArgs } from '../../testHelpers'
 import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
+import { convertContractToDraftRateRevisions } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
 
 // TODO: Enable these tests again after reimplementing rate change history that was in contractWithHistoryToDomainModel
 // eslint-disable-next-line jest/no-disabled-tests
@@ -237,7 +238,9 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateFormDatas: unlockedContractA.draftRevision?.rateRevisions
+                rateFormDatas: convertContractToDraftRateRevisions(
+                    unlockedContractA
+                )
                     .filter(
                         (rateRevision) =>
                             rateRevision.formData.rateID !== rate1.id &&
@@ -546,7 +549,9 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateFormDatas: unlockedContractA.draftRevision?.rateRevisions
+                rateFormDatas: convertContractToDraftRateRevisions(
+                    unlockedContractA
+                )
                     .filter(
                         (rateRevision) =>
                             rateRevision.formData.rateID !== rate1.id &&
@@ -687,15 +692,19 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
                 'Unexpected error: draftRevision does not exist in contract'
             )
         }
+        if (!updatedDraftContractWithRates.draftRates) {
+            throw new Error('Unexpected error: revisions missing draftRates')
+        }
 
         const draftRateRevisionData1 =
-            updatedDraftContractWithRates.draftRevision.rateRevisions[0]
-                .formData
+            updatedDraftContractWithRates.draftRates[0].draftRevision?.formData
         const draftRateRevisionData2 =
-            updatedDraftContractWithRates.draftRevision.rateRevisions[1]
-                .formData
+            updatedDraftContractWithRates.draftRates[1].draftRevision?.formData
 
-        if (!draftRateRevisionData1.rateID || !draftRateRevisionData2.rateID) {
+        if (
+            !draftRateRevisionData1?.rateID ||
+            !draftRateRevisionData2?.rateID
+        ) {
             throw new Error('Unexpected error: rate revision is missing rateID')
         }
 
@@ -740,9 +749,10 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         )
         expect(draftPreRateUnlock.draftRevision).toBeDefined()
         expect(
-            draftPreRateUnlock.draftRevision?.rateRevisions.map(
-                (rr) => rr.formData.rateCertificationName
-            )
+            draftPreRateUnlock.draftRates &&
+                draftPreRateUnlock.draftRates.map(
+                    (rr) => rr?.draftRevision?.formData.rateCertificationName
+                )
         ).toEqual(['onepoint0', 'twopoint0'])
 
         // unlock and submit second rate rev
@@ -767,7 +777,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         )
         expect(draftPreRateSubmit.draftRevision).toBeDefined()
         expect(
-            draftPreRateSubmit.draftRevision?.rateRevisions.map(
+            convertContractToDraftRateRevisions(draftPreRateSubmit).map(
                 (rr) => rr.formData.rateCertificationName
             )
         ).toEqual(['onepoint0', 'twopointone'])
@@ -787,7 +797,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         )
         expect(draftPostRateSubmit.draftRevision).toBeDefined()
         expect(
-            draftPostRateSubmit.draftRevision?.rateRevisions.map(
+            convertContractToDraftRateRevisions(draftPostRateSubmit).map(
                 (rr) => rr.formData.rateCertificationName
             )
         ).toEqual(['onepoint0', 'twopointone'])
@@ -896,7 +906,8 @@ describe('findContractWithHistory with only contract history', () => {
         }
 
         const contractID = updatedContract.id
-        const rateID = updatedContract.draftRevision.rateRevisions[0].rateID
+        const rateID =
+            convertContractToDraftRateRevisions(updatedContract)[0].rateID
 
         // Submit contract
         must(
@@ -1047,7 +1058,8 @@ describe('findContractWithHistory with only contract history', () => {
                 formData: {},
                 rateFormDatas: [
                     // Make sure existing rate is still included. If not it will be removed from the contract
-                    unlockedContract.draftRevision.rateRevisions[0].formData,
+                    convertContractToDraftRateRevisions(unlockedContract)[0]
+                        .formData,
                     mockInsertRateArgs({
                         id: uuidv4(),
                         rateType: 'NEW',
@@ -1057,10 +1069,9 @@ describe('findContractWithHistory with only contract history', () => {
             })
         )
 
-        const secondRate =
-            updatedContractWithRates.draftRevision?.rateRevisions.find(
-                (rr) => rr.formData.rateCertificationName === 'Second rate'
-            )
+        const secondRate = convertContractToDraftRateRevisions(
+            updatedContractWithRates
+        ).find((rr) => rr.formData.rateCertificationName === 'Second rate')
 
         if (!secondRate) {
             throw new Error('Unexpected Error: No rate found in contract')
