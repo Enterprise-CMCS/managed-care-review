@@ -458,15 +458,6 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             )
         }
 
-        const updateFormData = {
-            programIDs: [],
-            stateContacts: [],
-            contractDocuments: [],
-            supportingDocuments: [],
-            federalAuthorities: [],
-            managedCareEntities: [],
-        }
-
         // Update the draft to have complete data for submission.
         const updateResult = await server.executeOperation({
             query: UPDATE_CONTRACT_DRAFT_REVISION,
@@ -475,7 +466,6 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
                     contractID: contractID,
                     draftRevision: {
                         ...draftRevision,
-                        formData: updateFormData,
                     },
                 },
             },

@@ -3,21 +3,21 @@ import type {
     ContractDraftRevisionFormDataInput,
     ContractDraftRevisionInput,
 } from '../../gen/gqlServer'
-import { contractFormDataSchema } from './formDataTypes'
+import {
+    contractFormDataSchema,
+    nullishTransformWrapper,
+} from './formDataTypes'
 import {
     contractTypeSchema,
     populationCoveredSchema,
-    submissionTypeSchema,
 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
 import { z } from 'zod'
 import type { SafeParseReturnType } from 'zod'
 import { findStatePrograms } from '../../postgres'
 
 const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
-    submissionType: submissionTypeSchema.optional(),
-    contractType: contractTypeSchema.optional(),
-    submissionDescription: z.string().optional(),
-    statutoryRegulatoryAttestationDescription: z.string().optional(),
+    contractType: nullishTransformWrapper(contractTypeSchema),
+    submissionDescription: nullishTransformWrapper(z.string()),
 })
 
 type UpdateDraftContractFormDataType = z.infer<
@@ -31,9 +31,10 @@ const validateStatutoryRegulatoryAttestation = (
     z
         .string()
         .optional()
+        .nullish()
         .transform((val, ctx) => {
             if (featureFlags?.['438-attestation']) {
-                if (!formData.statutoryRegulatoryAttestation && !val) {
+                if (formData.statutoryRegulatoryAttestation === false && !val) {
                     ctx.addIssue({
                         code: z.ZodIssueCode.custom,
                         message:
@@ -47,7 +48,7 @@ const validateStatutoryRegulatoryAttestation = (
                 }
             }
 
-            return val
+            return val ?? undefined // return undefined if null.
         })
 
 const validateProgramIDs = (stateCode: string) => {

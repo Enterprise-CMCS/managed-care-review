@@ -48,6 +48,91 @@ describe('validateContractDraftRevisionInput', () => {
 
         expect(validatedFormData).toEqual(expectedResult)
     })
+    it('converts fields that are null to undefined', () => {
+        const stateCode = 'FL'
+        const formData = {
+            ...mockGqlContractDraftRevisionFormDataInput(stateCode),
+            stateContacts: [
+                {
+                    name: 'Bill',
+                    titleRole: 'A Title',
+                    email: '', // Accepts empty string because users can save as draft with incomplete data.
+                },
+            ],
+            submissionDescription: null,
+            contractType: null,
+            riskBasedContract: null,
+            contractDateStart: null,
+            contractDateEnd: null,
+            contractExecutionStatus: null,
+            inLieuServicesAndSettings: null,
+            modifiedBenefitsProvided: null,
+            modifiedGeoAreaServed: null,
+            modifiedMedicaidBeneficiaries: null,
+            modifiedRiskSharingStrategy: null,
+            modifiedIncentiveArrangements: null,
+            modifiedWitholdAgreements: null,
+            modifiedStateDirectedPayments: null,
+            modifiedPassThroughPayments: null,
+            modifiedPaymentsForMentalDiseaseInstitutions: null,
+            modifiedMedicalLossRatioStandards: null,
+            modifiedOtherFinancialPaymentIncentive: null,
+            modifiedEnrollmentProcess: null,
+            modifiedGrevienceAndAppeal: null,
+            modifiedNetworkAdequacyStandards: null,
+            modifiedLengthOfContract: null,
+            modifiedNonRiskPaymentArrangements: null,
+            statutoryRegulatoryAttestation: null,
+            statutoryRegulatoryAttestationDescription: null,
+        }
+
+        const expectedResult = {
+            success: true,
+            data: {
+                ...formData,
+                submissionDescription: undefined,
+                contractType: undefined,
+                riskBasedContract: undefined,
+                contractDateStart: undefined,
+                contractDateEnd: undefined,
+                contractExecutionStatus: undefined,
+                inLieuServicesAndSettings: undefined,
+                modifiedBenefitsProvided: undefined,
+                modifiedGeoAreaServed: undefined,
+                modifiedMedicaidBeneficiaries: undefined,
+                modifiedRiskSharingStrategy: undefined,
+                modifiedIncentiveArrangements: undefined,
+                modifiedWitholdAgreements: undefined,
+                modifiedStateDirectedPayments: undefined,
+                modifiedPassThroughPayments: undefined,
+                modifiedPaymentsForMentalDiseaseInstitutions: undefined,
+                modifiedMedicalLossRatioStandards: undefined,
+                modifiedOtherFinancialPaymentIncentive: undefined,
+                modifiedEnrollmentProcess: undefined,
+                modifiedGrevienceAndAppeal: undefined,
+                modifiedNetworkAdequacyStandards: undefined,
+                modifiedLengthOfContract: undefined,
+                modifiedNonRiskPaymentArrangements: undefined,
+                statutoryRegulatoryAttestation: undefined,
+                statutoryRegulatoryAttestationDescription: undefined,
+            },
+        }
+
+        const draftRevisionInput = mockGQLContractDraftRevisionInput(
+            {
+                formData: formData,
+            },
+            stateCode
+        )
+
+        const validatedFormData = validateContractDraftRevisionInput(
+            draftRevisionInput,
+            stateCode,
+            { '438-attestation': true }
+        )
+
+        expect(validatedFormData).toEqual(expectedResult)
+    })
     it('Returns error for invalid data', () => {
         const stateCode = 'FL'
         const formData: ContractDraftRevisionFormDataInput = {
