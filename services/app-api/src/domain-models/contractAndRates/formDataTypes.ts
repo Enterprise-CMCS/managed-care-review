@@ -1,4 +1,3 @@
-import type { ZodSchema } from 'zod'
 import { z } from 'zod'
 import {
     actuaryCommunicationTypeSchema,
@@ -14,6 +13,7 @@ import {
 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
 import { statusSchema } from './statusType'
 import type { ZodEffects } from 'zod/lib/types'
+import type { RawCreateParams, ZodTypeAny } from 'zod/lib/types'
 
 const documentSchema = z.object({
     name: z.string(),
@@ -36,8 +36,11 @@ const packagesWithSharedRateCerts = z.object({
     packageStatus: statusSchema.optional(),
 })
 
-function preprocessNulls<T extends ZodSchema>(schema: T): ZodEffects<T> {
-    return z.preprocess((val) => val ?? undefined, schema)
+function preprocessNulls<T extends ZodTypeAny>(
+    schema: T,
+    params?: RawCreateParams
+): ZodEffects<T, T['_output'], unknown> {
+    return z.preprocess((val) => val ?? undefined, schema, params)
 }
 
 const contractFormDataSchema = z.object({
