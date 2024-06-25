@@ -29,6 +29,7 @@ jobs:
         with:
           jira-token: ${{ secrets.JIRA_TOKEN }}
           jira-username: ${{ secrets.JIRA_USERNAME }}
+          jira-host: jiraent.cms.gov
           jira-project-key: 'MCR' # add issues to the 'MC-Review' project
           jira-custom-fields: '{ "customfield_10104": 32589, "customfield_10100": "MCR-2480"}' # Sprint, Epic
           jira-ignore-statuses: Done, Closed, Canceled
