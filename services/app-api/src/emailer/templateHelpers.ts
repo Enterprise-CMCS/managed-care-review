@@ -9,6 +9,7 @@ import type {
 import type { EmailConfiguration, StateAnalystsEmails } from '.'
 import type {
     ContractRevisionWithRatesType,
+    ContractType,
     ProgramType,
 } from '../domain-models'
 import { logError } from '../logger'
@@ -79,6 +80,28 @@ const handleAsCHIPSubmission = (
     }
 }
 
+const handleAsCHIPSubmissionForContract = (contract: ContractType): boolean => {
+    const contractFormData = contract.revisions[0].formData
+    //  This const is deprecated. No longer in use once we added population covered question, code remains only for backwards compatibility for existing Mississippi submissions.
+    const LEGACY_CHIP_PROGRAMS_UUID = {
+        MS: '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
+    }
+
+    if (contractFormData.populationCovered === 'CHIP') {
+        return true
+    } else if (
+        !contractFormData.populationCovered &&
+        contract.stateCode === 'MS'
+    ) {
+        const programIDs = findAllContractProgramIds(contract)
+        return programIDs.some(
+            (id: string) => LEGACY_CHIP_PROGRAMS_UUID.MS === id
+        )
+    } else {
+        return false
+    }
+}
+
 // Filter reviewers email list to ensure CHIP programs and state of PR submission do not include OACT and DMCP emails.
 const filterChipAndPRSubmissionReviewers = (
     reviewers: string[],
@@ -90,6 +113,61 @@ const filterChipAndPRSubmissionReviewers = (
         (email) =>
             !dmcpSubmissionEmails.includes(email) && !oactEmails.includes(email)
     )
+}
+
+/* 
+    Determine reviewers for a given health plan package and state
+    - devReviewTeamEmails added to all emails by default
+    - dmcpSubmissionEmails added in both CONTRACT_ONLY and CONTRACT_AND_RATES
+    - oactEmails added for CONTRACT_AND_RATES
+    - dmco is added to emails via state analysts
+    
+    Return should be wrapped in pruneDuplicate to ensure even if config is added twice, we get unique list of reviewers
+*/
+const generateCMSReviewerEmailsForContract = (
+    config: EmailConfiguration,
+    contract: ContractType,
+    stateAnalystsEmails: StateAnalystsEmails
+): string[] | Error => {
+    const contractFormData = contract.revisions[0].formData
+    if (
+        contractFormData.submissionType !== 'CONTRACT_AND_RATES' &&
+        contractFormData.submissionType !== 'CONTRACT_ONLY'
+    ) {
+        return new Error(
+            `generateCMSReviewerEmails does not currently support submission type: ${contractFormData.submissionType}.`
+        )
+    }
+
+    const { oactEmails, dmcpSubmissionEmails } = config
+    let reviewers: string[] = []
+
+    if (contractFormData.submissionType === 'CONTRACT_ONLY') {
+        // Contract submissions reviewer emails
+        reviewers = [
+            ...config.devReviewTeamEmails,
+            ...stateAnalystsEmails,
+            ...dmcpSubmissionEmails,
+        ]
+    } else if (contractFormData.submissionType === 'CONTRACT_AND_RATES') {
+        //Contract and rate submissions reviewer emails.
+        reviewers = [
+            ...config.devReviewTeamEmails,
+            ...stateAnalystsEmails,
+            ...dmcpSubmissionEmails,
+            ...oactEmails,
+        ]
+    }
+
+    //Remove OACT and DMCP emails from CHIP or State of PR submissions
+    if (
+        handleAsCHIPSubmissionForContract(contract) ||
+        contract.stateCode === 'PR'
+    ) {
+        reviewers = filterChipAndPRSubmissionReviewers(reviewers, config)
+    }
+
+    return pruneDuplicateEmails(reviewers)
 }
 
 /* 
@@ -161,6 +239,25 @@ const findAllPackageProgramIds = (
     return programs
 }
 
+//Finds all contract program and rate program ids in a contract and combines them into one array removing duplicates.
+const findAllContractProgramIds = (contract: ContractType): string[] => {
+    const contractFormData = contract.revisions[0].formData
+    const programs = [...contractFormData.programIDs]
+    if (
+        contractFormData.submissionType === 'CONTRACT_AND_RATES' &&
+        !!contract.draftRates?.length
+    ) {
+        const ratePrograms = contract.draftRates?.flatMap(
+            (rateInfo) => rateInfo.revisions[0].formData.rateProgramIDs
+        )
+        if (ratePrograms?.length) {
+            ratePrograms.forEach(
+                (id) => id && !programs.includes(id) && programs.push(id)
+            )
+        }
+    }
+    return programs
+}
 //Find state programs from package programs ids
 const findPackagePrograms = (
     pkg: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType,
@@ -245,10 +342,13 @@ const getQuestionRound = (
 export {
     stripHTMLFromTemplate,
     handleAsCHIPSubmission,
+    handleAsCHIPSubmissionForContract,
     generateCMSReviewerEmails,
+    generateCMSReviewerEmailsForContract,
     renderTemplate,
     SubmissionTypeRecord,
     findAllPackageProgramIds,
+    findAllContractProgramIds,
     findPackagePrograms,
     findContractPrograms,
     filterChipAndPRSubmissionReviewers,

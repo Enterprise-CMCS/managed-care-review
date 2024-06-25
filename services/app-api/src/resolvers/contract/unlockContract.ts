@@ -1,9 +1,6 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import type { UpdateInfoType, ContractType } from '../../domain-models'
-import {
-    isCMSUser,
-    packageSubmitters,
-} from '../../domain-models'
+import { isCMSUser, contractSubmitters } from '../../domain-models'
 import type { Emailer } from '../../emailer'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
@@ -37,10 +34,7 @@ export function unlockContractResolver(
 
         // This resolver is only callable by CMS users
         if (!isCMSUser(user)) {
-            logError(
-                'unlockContract',
-                'user not authorized to unlock contract'
-            )
+            logError('unlockContract', 'user not authorized to unlock contract')
             setErrorAttributesOnActiveSpan(
                 'user not authorized to unlock contract',
                 span
@@ -104,10 +98,7 @@ export function unlockContractResolver(
             })
         }
 
-
-        const formDataResult = contractResult.draftRevision!.formData
-        
-        if (contractResult.status === 'SUBMITTED') {
+        if (contract.status === 'SUBMITTED') {
             const errMessage = `Programming Error: Got SUBMITTED from an unlocked contract.`
             logError('unlockContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
@@ -121,9 +112,7 @@ export function unlockContractResolver(
 
         // Get state analysts emails from parameter store
         let stateAnalystsEmails =
-            await emailParameterStore.getStateAnalystsEmails(
-                contract.stateCode
-            )
+            await emailParameterStore.getStateAnalystsEmails(contract.stateCode)
         //If error, log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
         if (stateAnalystsEmails instanceof Error) {
             logError('getStateAnalystsEmails', stateAnalystsEmails.message)
@@ -132,7 +121,7 @@ export function unlockContractResolver(
         }
 
         // Get submitter email from every pkg submitted revision.
-        const submitterEmails = packageSubmitters(unlockedPackage)
+        const submitterEmails = contractSubmitters(contract)
 
         const statePrograms = store.findStatePrograms(contract.stateCode)
 
@@ -154,16 +143,16 @@ export function unlockContractResolver(
         }
 
         const unlockPackageCMSEmailResult =
-            await emailer.sendUnlockPackageCMSEmail(
-                formDataResult,
+            await emailer.sendUnlockContractCMSEmail(
+                contract,
                 updateInfo,
                 stateAnalystsEmails,
                 statePrograms
             )
 
         const unlockPackageStateEmailResult =
-            await emailer.sendUnlockPackageStateEmail(
-                draftformData,
+            await emailer.sendUnlockContractStateEmail(
+                contract,
                 updateInfo,
                 statePrograms,
                 submitterEmails

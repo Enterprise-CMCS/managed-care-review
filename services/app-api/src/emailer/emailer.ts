@@ -4,6 +4,8 @@ import {
     getSESEmailParams,
     newPackageCMSEmail,
     newPackageStateEmail,
+    unlockContractCMSEmail,
+    unlockContractStateEmail,
     unlockPackageCMSEmail,
     unlockPackageStateEmail,
     resubmitPackageStateEmail,
@@ -22,6 +24,7 @@ import type {
     ProgramType,
     ContractRevisionWithRatesType,
     Question,
+    ContractType,
 } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 
@@ -80,6 +83,18 @@ type Emailer = {
         formData: LockedHealthPlanFormDataType,
         submitterEmails: string[],
         statePrograms: ProgramType[]
+    ) => Promise<void | Error>
+    sendUnlockContractCMSEmail: (
+        contract: ContractType,
+        updateInfo: UpdateInfoType,
+        stateAnalystsEmails: StateAnalystsEmails,
+        statePrograms: ProgramType[]
+    ) => Promise<void | Error>
+    sendUnlockContractStateEmail: (
+        contract: ContractType,
+        updateInfo: UpdateInfoType,
+        statePrograms: ProgramType[],
+        submitterEmails: string[]
     ) => Promise<void | Error>
     sendUnlockPackageCMSEmail: (
         formData: UnlockedHealthPlanFormDataType,
@@ -174,6 +189,44 @@ function emailer(
                 submitterEmails,
                 config,
                 statePrograms
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendUnlockContractCMSEmail: async function (
+            contract,
+            updateInfo,
+            stateAnalystsEmails,
+            statePrograms
+        ) {
+            const emailData = await unlockContractCMSEmail(
+                contract,
+                updateInfo,
+                config,
+                stateAnalystsEmails,
+                statePrograms
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendUnlockContractStateEmail: async function (
+            contract,
+            updateInfo,
+            statePrograms,
+            submitterEmails
+        ) {
+            const emailData = await unlockContractStateEmail(
+                contract,
+                updateInfo,
+                config,
+                statePrograms,
+                submitterEmails
             )
             if (emailData instanceof Error) {
                 return emailData
