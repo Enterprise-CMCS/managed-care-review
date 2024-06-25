@@ -278,14 +278,14 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
 
         // update that draft.
         const updateFormData: ContractDraftRevisionFormDataInput = {
+            populationCovered: 'CHIP',
+            submissionType: 'CONTRACT_AND_RATES',
             programIDs: [],
             stateContacts: [],
             contractDocuments: [],
             supportingDocuments: [],
             managedCareEntities: ['MCO'],
             federalAuthorities: [],
-            statutoryRegulatoryAttestation: false,
-            statutoryRegulatoryAttestationDescription: undefined,
         }
 
         const updateResult = await server.executeOperation({
@@ -308,7 +308,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
 
         expect(updateResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(updateResult.errors[0].message).toContain(
-            'statutoryRegulatoryAttestationDescription must be defined when statutoryRegulatoryAttestation is false'
+            `populationCoveredSchema of CHIP cannot be submissionType of CONTRACT_AND_RATES`
         )
     })
 
