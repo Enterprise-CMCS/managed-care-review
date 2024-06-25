@@ -102,6 +102,32 @@ export async function submitContract(
             // relatedRateSubmissions: rateRevisionID, submissionID
             // packageSubmissions: submissionID, contractRevisionID, rateRevisionID
 
+            // Update the contract to include the submitInfo ID
+            await tx.contractRevisionTable.update({
+                where: {
+                    id: currentRev.id,
+                },
+                data: {
+                    submitInfo: {
+                        connect: {
+                            id: submitInfo.id,
+                        },
+                    },
+                },
+            })
+
+            // Update the rateRevision's submit info if it has not already been submitted
+            //    await tx.rateRevisionTable.updateMany({
+            //     where: {
+            //         id: {
+            //             in: unsubmittedChildRevs.map((rev) => rev.id),
+            //         },
+            //     },
+            //     data: {
+            //         submitInfoID: submitInfo.id,
+            //     },
+            // })
+
             const submissionRelatedContractRevs: ContractRevisionTable[] = []
             const submissionRelatedRateRevs: RateRevisionTable[] = []
 
