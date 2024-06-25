@@ -1,10 +1,10 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "module": "commonjs",
-        "lib": ["es2021", "DOM"],
+        "module": "ESNext",
         "target": "es2021",
         "moduleResolution": "node",
+        "lib": ["es2021", "DOM"],
         "baseUrl": "/",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
