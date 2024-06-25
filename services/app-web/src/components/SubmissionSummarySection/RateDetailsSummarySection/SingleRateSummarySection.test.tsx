@@ -272,22 +272,23 @@ describe('SingleRateSummarySection', () => {
         const relatedContractActions = screen.getByRole('definition', {
             name: 'Contract actions',
         })
-
-        // Expect submissions this rate was submitted with link to exists
-        expect(relatedContractActions).toBeInTheDocument()
-        expect(
-            within(relatedContractActions).getByRole('link', {
-                name: contractPackageName,
-            })
-        ).toBeInTheDocument()
-        expect(
-            within(relatedContractActions).getByRole('link', {
-                name: contractPackageName,
-            })
-        ).toHaveAttribute(
-            'href',
-            `/submissions/${parentContractRev.contract.id}`
-        )
+        await waitFor(() => {
+            // Expect submissions this rate was submitted with link to exists
+            expect(relatedContractActions).toBeInTheDocument()
+            expect(
+                within(relatedContractActions).getByRole('link', {
+                    name: contractPackageName,
+                })
+            ).toBeInTheDocument()
+            expect(
+                within(relatedContractActions).getByRole('link', {
+                    name: contractPackageName,
+                })
+            ).toHaveAttribute(
+                'href',
+                `/submissions/${parentContractRev.contract.id}`
+            )
+        })
     })
 
     describe('Unlock rate', () => {
