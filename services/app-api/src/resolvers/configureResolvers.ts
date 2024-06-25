@@ -33,6 +33,7 @@ import { rateResolver } from './rate/rateResolver'
 import { genericDocumentResolver } from './shared/genericDocumentResolver'
 import { fetchRateResolver } from './rate/fetchRate'
 import { updateContract } from './contract/updateContract'
+import { unlockContractResolver } from './contract/unlockContract'
 import { createAPIKeyResolver } from './APIKey'
 import { unlockRate } from './rate/unlockRate'
 import { submitRate } from './rate/submitRate'
@@ -90,6 +91,12 @@ export function configureResolvers(
                 launchDarkly
             ),
             unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
+                store,
+                emailer,
+                emailParameterStore,
+                launchDarkly
+            ),
+            unlockContract: unlockContractResolver(
                 store,
                 emailer,
                 emailParameterStore,
