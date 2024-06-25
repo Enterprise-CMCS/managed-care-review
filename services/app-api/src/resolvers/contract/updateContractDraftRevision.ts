@@ -98,7 +98,7 @@ export function updateContractDraftRevision(
             throw new UserInputError(errMessage)
         }
 
-        // Using zod to transform graphQL types into domain types.
+        // Using zod to validate and transform graphQL types into domain types.
         const parsedFormData = validateContractDraftRevisionInput(
             draftRevision,
             contractWithHistory.stateCode,

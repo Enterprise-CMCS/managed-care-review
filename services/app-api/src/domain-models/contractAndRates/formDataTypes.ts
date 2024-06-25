@@ -13,6 +13,7 @@ import {
     submissionTypeSchema,
 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
 import { statusSchema } from './statusType'
+import type { ZodEffects } from 'zod/lib/types'
 
 const documentSchema = z.object({
     name: z.string(),
@@ -35,54 +36,51 @@ const packagesWithSharedRateCerts = z.object({
     packageStatus: statusSchema.optional(),
 })
 
-// Wraps schema to make it optional and transforms null to undefined. This will take nulls from graphql inputs and turn them to undefined.
-const nullishTransformWrapper = (schema: ZodSchema) =>
-    schema
-        .optional()
-        .nullish()
-        .transform((value) => value ?? undefined)
+function preprocessNulls<T extends ZodSchema>(schema: T): ZodEffects<T> {
+    return z.preprocess((val) => val ?? undefined, schema)
+}
 
 const contractFormDataSchema = z.object({
     programIDs: z.array(z.string()),
-    populationCovered: nullishTransformWrapper(populationCoveredSchema),
+    populationCovered: preprocessNulls(populationCoveredSchema.optional()),
     submissionType: submissionTypeSchema,
-    riskBasedContract: nullishTransformWrapper(z.boolean()),
+    riskBasedContract: preprocessNulls(z.boolean().optional()),
     submissionDescription: z.string(),
     stateContacts: z.array(stateContactSchema),
     supportingDocuments: z.array(documentSchema),
     contractType: contractTypeSchema,
-    contractExecutionStatus: nullishTransformWrapper(
-        contractExecutionStatusSchema
+    contractExecutionStatus: preprocessNulls(
+        contractExecutionStatusSchema.optional()
     ),
     contractDocuments: z.array(documentSchema),
-    contractDateStart: nullishTransformWrapper(z.date()),
-    contractDateEnd: nullishTransformWrapper(z.date()),
+    contractDateStart: preprocessNulls(z.date().optional()),
+    contractDateEnd: preprocessNulls(z.date().optional()),
     managedCareEntities: z.array(managedCareEntitiesSchema),
     federalAuthorities: z.array(federalAuthoritySchema),
-    inLieuServicesAndSettings: nullishTransformWrapper(z.boolean()),
-    modifiedBenefitsProvided: nullishTransformWrapper(z.boolean()),
-    modifiedGeoAreaServed: nullishTransformWrapper(z.boolean()),
-    modifiedMedicaidBeneficiaries: nullishTransformWrapper(z.boolean()),
-    modifiedRiskSharingStrategy: nullishTransformWrapper(z.boolean()),
-    modifiedIncentiveArrangements: nullishTransformWrapper(z.boolean()),
-    modifiedWitholdAgreements: nullishTransformWrapper(z.boolean()),
-    modifiedStateDirectedPayments: nullishTransformWrapper(z.boolean()),
-    modifiedPassThroughPayments: nullishTransformWrapper(z.boolean()),
-    modifiedPaymentsForMentalDiseaseInstitutions: nullishTransformWrapper(
-        z.boolean()
+    inLieuServicesAndSettings: preprocessNulls(z.boolean().optional()),
+    modifiedBenefitsProvided: preprocessNulls(z.boolean().optional()),
+    modifiedGeoAreaServed: preprocessNulls(z.boolean().optional()),
+    modifiedMedicaidBeneficiaries: preprocessNulls(z.boolean().optional()),
+    modifiedRiskSharingStrategy: preprocessNulls(z.boolean().optional()),
+    modifiedIncentiveArrangements: preprocessNulls(z.boolean().optional()),
+    modifiedWitholdAgreements: preprocessNulls(z.boolean().optional()),
+    modifiedStateDirectedPayments: preprocessNulls(z.boolean().optional()),
+    modifiedPassThroughPayments: preprocessNulls(z.boolean().optional()),
+    modifiedPaymentsForMentalDiseaseInstitutions: preprocessNulls(
+        z.boolean().optional()
     ),
-    modifiedMedicalLossRatioStandards: nullishTransformWrapper(z.boolean()),
-    modifiedOtherFinancialPaymentIncentive: nullishTransformWrapper(
-        z.boolean()
+    modifiedMedicalLossRatioStandards: preprocessNulls(z.boolean().optional()),
+    modifiedOtherFinancialPaymentIncentive: preprocessNulls(
+        z.boolean().optional()
     ),
-    modifiedEnrollmentProcess: nullishTransformWrapper(z.boolean()),
-    modifiedGrevienceAndAppeal: nullishTransformWrapper(z.boolean()),
-    modifiedNetworkAdequacyStandards: nullishTransformWrapper(z.boolean()),
-    modifiedLengthOfContract: nullishTransformWrapper(z.boolean()),
-    modifiedNonRiskPaymentArrangements: nullishTransformWrapper(z.boolean()),
-    statutoryRegulatoryAttestation: nullishTransformWrapper(z.boolean()),
-    statutoryRegulatoryAttestationDescription: nullishTransformWrapper(
-        z.string()
+    modifiedEnrollmentProcess: preprocessNulls(z.boolean().optional()),
+    modifiedGrevienceAndAppeal: preprocessNulls(z.boolean().optional()),
+    modifiedNetworkAdequacyStandards: preprocessNulls(z.boolean().optional()),
+    modifiedLengthOfContract: preprocessNulls(z.boolean().optional()),
+    modifiedNonRiskPaymentArrangements: preprocessNulls(z.boolean().optional()),
+    statutoryRegulatoryAttestation: preprocessNulls(z.boolean().optional()),
+    statutoryRegulatoryAttestationDescription: preprocessNulls(
+        z.string().optional()
     ),
 })
 
@@ -116,7 +114,7 @@ type RateFormDataType = z.infer<typeof rateFormDataSchema>
 type ContractFormEditableType = Partial<ContractFormDataType>
 type RateFormEditableType = Partial<RateFormDataType>
 
-export { contractFormDataSchema, rateFormDataSchema, nullishTransformWrapper }
+export { contractFormDataSchema, rateFormDataSchema, preprocessNulls }
 
 export type {
     ContractFormDataType,

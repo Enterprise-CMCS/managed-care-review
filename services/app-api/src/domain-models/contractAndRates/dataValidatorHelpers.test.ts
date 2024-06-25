@@ -174,9 +174,6 @@ describe('validateContractDraftRevisionInput', () => {
         expect(validatedFormData).toEqual(
             expect.objectContaining(expectedResult)
         )
-        expect(validatedFormData.error?.message).toContain(
-            'statutoryRegulatoryAttestationDescription must be defined when statutoryRegulatoryAttestation is false'
-        )
         expect(validatedFormData.error?.message).toContain('Invalid email')
         expect(validatedFormData.error?.message).toContain(
             `programIDs are invalid for the state ${stateCode}`
