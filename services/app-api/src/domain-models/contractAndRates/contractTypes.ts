@@ -1,5 +1,8 @@
 import { z } from 'zod'
-import { contractRevisionWithRatesSchema } from './revisionTypes'
+import {
+    contractRevisionWithRatesSchema,
+    contractRevisionSchema,
+} from './revisionTypes'
 import { statusSchema } from './statusType'
 import { pruneDuplicateEmails } from '../../emailer/formatters'
 import { rateSchema } from './rateTypes'
@@ -17,7 +20,7 @@ const contractSchema = z.object({
     mccrsID: z.string().optional(),
     stateNumber: z.number().min(1),
     // If this contract is in a DRAFT or UNLOCKED status, there will be a draftRevision and draftRates
-    draftRevision: contractRevisionWithRatesSchema.optional(),
+    draftRevision: contractRevisionSchema.optional(),
     draftRates: z.array(rateSchema).optional(),
     // All revisions are submitted and in reverse chronological order
     revisions: z.array(contractRevisionWithRatesSchema),

@@ -14,6 +14,7 @@ import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
 import { findContractWithHistory } from './findContractWithHistory'
 import type { DraftContractType } from '../../domain-models/contractAndRates/contractTypes'
 import { updateDraftContractRates } from './updateDraftContractRates'
+import { convertContractToDraftRateRevisions } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
 
 describe('findRate', () => {
     // TODO: Enable this tests again after reimplementing rate change history that was in contractWithHistoryToDomainModel
@@ -179,10 +180,9 @@ describe('findRate', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateFormDatas:
-                    unlockedContract2.draftRevision?.rateRevisions.filter(
-                        (rate) => rate.formData.rateID !== submittedRateA.id
-                    ),
+                rateFormDatas: convertContractToDraftRateRevisions(
+                    unlockedContract2
+                ).filter((rate) => rate.formData.rateID !== submittedRateA.id),
             })
         )
         must(
@@ -690,7 +690,7 @@ describe('findRate', () => {
         )
 
         const draftRateRevision =
-            updatedContract.draftRevision?.rateRevisions[0]
+            convertContractToDraftRateRevisions(updatedContract)[0]
 
         if (!draftRateRevision) {
             throw new Error('Unexpected Error: No rate found in contract')

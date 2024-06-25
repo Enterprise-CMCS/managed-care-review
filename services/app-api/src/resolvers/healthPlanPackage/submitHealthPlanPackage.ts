@@ -39,6 +39,7 @@ import type {
     LDService,
 } from '../../launchDarkly/launchDarkly'
 import {
+    convertContractToDraftRateRevisions,
     convertContractWithRatesToFormData,
     convertContractWithRatesToUnlockedHPP,
 } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
@@ -288,6 +289,7 @@ export function submitHealthPlanPackageResolver(
         // reassign variable set up before rates feature flag
         const conversionResult = convertContractWithRatesToFormData(
             contractWithHistory.draftRevision,
+            convertContractToDraftRateRevisions(contractWithHistory),
             contractWithHistory.id,
             contractWithHistory.stateCode,
             contractWithHistory.stateNumber

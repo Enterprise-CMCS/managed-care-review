@@ -19,6 +19,7 @@ import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
 import { submitContract } from './submitContract'
 import { unlockContract } from './unlockContract'
+import { convertContractToDraftRateRevisions } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
 
 describe('updateDraftContractWithRates postgres', () => {
     afterEach(() => {
@@ -192,7 +193,7 @@ describe('updateDraftContractWithRates postgres', () => {
         expect(draft.draftRevision).toBeDefined()
         expect(draft.draftRevision?.formData.submissionDescription).toBe('Test')
 
-        const rateID = draft.draftRevision?.rateRevisions[0].id
+        const rateID = convertContractToDraftRateRevisions(draft)[0].id
 
         const emptyContract = emptyTestContract()
 
@@ -213,10 +214,12 @@ describe('updateDraftContractWithRates postgres', () => {
         )
 
         expect(
-            emptyDraft.draftRevision?.rateRevisions[0].formData.rateDateStart
+            convertContractToDraftRateRevisions(emptyDraft)[0].formData
+                .rateDateStart
         ).toBeUndefined()
         expect(
-            emptyDraft.draftRevision?.rateRevisions[0].formData.rateProgramIDs
+            convertContractToDraftRateRevisions(emptyDraft)[0].formData
+                .rateProgramIDs
         ).toEqual([])
     })
 
@@ -470,8 +473,9 @@ describe('updateDraftContractWithRates postgres', () => {
             throw Error('Unexpect error: draft contract missing draft revision')
         }
 
-        const newlyCreatedRates =
-            updatedContractWithNewRates.draftRevision?.rateRevisions
+        const newlyCreatedRates = convertContractToDraftRateRevisions(
+            updatedContractWithNewRates
+        )
 
         // Expect 3 rates
         expect(newlyCreatedRates).toHaveLength(3)
@@ -556,7 +560,7 @@ describe('updateDraftContractWithRates postgres', () => {
         }
 
         const updatedRateRevisions =
-            updatedContractRates.draftRevision.rateRevisions
+            convertContractToDraftRateRevisions(updatedContractRates)
 
         // expect three updated rates
         expect(updatedRateRevisions).toHaveLength(3)
@@ -634,7 +638,7 @@ describe('updateDraftContractWithRates postgres', () => {
 
         // expect two rate revisions
         expect(
-            contractAfterRateDisconnection.draftRevision?.rateRevisions
+            convertContractToDraftRateRevisions(contractAfterRateDisconnection)
         ).toHaveLength(2)
 
         // Create, Update and Disconnect many contracts
@@ -669,8 +673,9 @@ describe('updateDraftContractWithRates postgres', () => {
                         ],
                     }),
                     {
-                        ...contractAfterRateDisconnection.draftRevision
-                            ?.rateRevisions[0].formData,
+                        ...convertContractToDraftRateRevisions(
+                            contractAfterRateDisconnection
+                        )[0].formData,
                         certifyingActuaryContacts: [
                             {
                                 name: 'Actuary Contact 1 Last update',
@@ -689,8 +694,9 @@ describe('updateDraftContractWithRates postgres', () => {
             throw Error('Unexpect error: draft contract missing draft revision')
         }
 
-        const rateRevisionsAfterManyCrud =
-            contractAfterManyCrud.draftRevision?.rateRevisions
+        const rateRevisionsAfterManyCrud = convertContractToDraftRateRevisions(
+            contractAfterManyCrud
+        )
 
         // should expect 3 rates
         expect(rateRevisionsAfterManyCrud).toHaveLength(3)
@@ -806,9 +812,9 @@ describe('updateDraftContractWithRates postgres', () => {
         )
 
         // expect two rates connected to contract
-        expect(updatedDraftContract.draftRevision?.rateRevisions).toHaveLength(
-            2
-        )
+        expect(
+            convertContractToDraftRateRevisions(updatedDraftContract)
+        ).toHaveLength(2)
     })
 
     it('connects submitted rate to draft contract revision without updating rate', async () => {
@@ -851,8 +857,9 @@ describe('updateDraftContractWithRates postgres', () => {
             )
         }
 
-        const newlyCreatedRates =
-            updatedContractWithNewRates.draftRevision.rateRevisions
+        const newlyCreatedRates = convertContractToDraftRateRevisions(
+            updatedContractWithNewRates
+        )
 
         // lets make sure we have rate ids
         if (!newlyCreatedRates[0].formData.rateID) {

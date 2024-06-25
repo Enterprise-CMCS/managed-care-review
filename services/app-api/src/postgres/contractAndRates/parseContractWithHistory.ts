@@ -142,8 +142,7 @@ function contractWithHistoryToDomainModel(
     // between contract revision updates
     const allRevisionSets: ContractRevisionSet[] = []
     const contractRevisions = contract.revisions
-    let draftRevision: ContractRevisionWithRatesType | Error | undefined =
-        undefined
+    let draftRevision: ContractRevisionType | Error | undefined = undefined
     let draftRates: RateType[] | undefined = undefined
 
     for (const [contractRevIndex, contractRev] of contractRevisions.entries()) {
@@ -180,7 +179,6 @@ function contractWithHistoryToDomainModel(
                     contractRev.unlockInfo
                 ),
                 formData: contractFormDataToDomainModel(contractRev),
-                rateRevisions: domainRateRevisions,
             }
 
             // since we have a draft revision, we should also hold onto any set draftRates for later
