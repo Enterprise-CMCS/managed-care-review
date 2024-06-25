@@ -2,7 +2,11 @@ import type {
     RateInfoType,
     UnlockedHealthPlanFormDataType,
 } from 'app-web/src/common-code/healthPlanFormDataType'
-import type { ContractFormData, RateFormData } from '../../gen/gqlServer'
+import type {
+    ContractFormData,
+    RateFormData,
+    RateFormDataInput,
+} from '../../gen/gqlServer'
 import dayjs from 'dayjs'
 
 // interim solution -this file was made to deal with test helpers that may expect contract rates when we only have HPP coming from another test helper
@@ -39,6 +43,46 @@ function convertRateInfoToRateFormData(
             certifyingActuaryContacts: [rateInfo.actuaryContacts[0]],
             deprecatedRateProgramIDs: [], //ignore this deprecated field
             packagesWithSharedRateCerts: [], // ignore this depårecated field
+            addtlActuaryContacts,
+            actuaryCommunicationPreference,
+        }
+    })
+    return rates
+}
+
+// convertRateInfoToRateFormData converts a proto style RateInfo into a RateFormData type
+function convertRateInfoToRateFormDataInput(
+    rateInfos: RateInfoType[]
+): RateFormDataInput[] {
+    const rates = rateInfos.map((rateInfo): RateFormDataInput => {
+        const {
+            rateType,
+            rateCapitationType,
+            rateCertificationName,
+            rateDateCertified,
+            rateDateEnd,
+            rateDateStart,
+            rateDocuments = [],
+            supportingDocuments = [],
+            rateProgramIDs = [],
+            addtlActuaryContacts = [],
+            actuaryCommunicationPreference,
+        } = rateInfo
+
+        return {
+            rateType,
+            rateCapitationType,
+            rateCertificationName,
+            rateDateCertified: dayjs(rateDateCertified)
+                .utc()
+                .format('YYYY-MM-DD'),
+            rateDateEnd: dayjs(rateDateEnd).utc().format('YYYY-MM-DD'),
+            rateDateStart: dayjs(rateDateStart).utc().format('YYYY-MM-DD'),
+            rateDocuments,
+            supportingDocuments,
+            rateProgramIDs,
+            certifyingActuaryContacts: rateInfo.actuaryContacts,
+            deprecatedRateProgramIDs: [], //ignore this deprecated field
             addtlActuaryContacts,
             actuaryCommunicationPreference,
         }
@@ -149,4 +193,8 @@ const convertUnlockedHPPToContractAndRates = (
     return [contractFormData, rateFormDatas]
 }
 
-export { convertUnlockedHPPToContractAndRates, convertRateInfoToRateFormData }
+export {
+    convertUnlockedHPPToContractAndRates,
+    convertRateInfoToRateFormData,
+    convertRateInfoToRateFormDataInput,
+}

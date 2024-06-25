@@ -44,7 +44,7 @@ import { findStatePrograms } from '../postgres'
 import { must } from './assertionHelpers'
 import { newJWTLib } from '../jwt'
 import type { JWTLib } from '../jwt'
-import { convertRateInfoToRateFormData } from '../domain-models/contractAndRates/convertHPPtoContractWithRates'
+import { convertRateInfoToRateFormDataInput } from '../domain-models/contractAndRates/convertHPPtoContractWithRates'
 import { createAndUpdateTestContractWithoutRates } from './gqlContractHelpers'
 import { addNewRateToTestContract } from './gqlRateHelpers'
 
@@ -234,7 +234,7 @@ const createAndUpdateTestHealthPlanPackage = async (
     // the rates have to be added separately now
     let rateFormDatas = []
     if (partialUpdates?.rateInfos) {
-        rateFormDatas = convertRateInfoToRateFormData(
+        rateFormDatas = convertRateInfoToRateFormDataInput(
             partialUpdates?.rateInfos || []
         )
     } else {
