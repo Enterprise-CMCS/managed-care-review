@@ -2,6 +2,7 @@ import { validateContractDraftRevisionInput } from './dataValidatorHelpers'
 import {
     mockGqlContractDraftRevisionFormDataInput,
     mockGQLContractDraftRevisionInput,
+    must,
 } from '../../testHelpers'
 import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
 
@@ -25,12 +26,9 @@ describe('validateContractDraftRevisionInput', () => {
         }
 
         const expectedResult = {
-            success: true,
-            data: {
-                ...formData,
-                statutoryRegulatoryAttestation: true,
-                statutoryRegulatoryAttestationDescription: undefined,
-            },
+            ...formData,
+            statutoryRegulatoryAttestation: true,
+            statutoryRegulatoryAttestationDescription: undefined,
         }
 
         const draftRevisionInput = mockGQLContractDraftRevisionInput(
@@ -40,10 +38,10 @@ describe('validateContractDraftRevisionInput', () => {
             stateCode
         )
 
-        const validatedFormData = validateContractDraftRevisionInput(
-            draftRevisionInput,
-            stateCode,
-            { '438-attestation': true }
+        const validatedFormData = must(
+            validateContractDraftRevisionInput(draftRevisionInput, stateCode, {
+                '438-attestation': true,
+            })
         )
 
         expect(validatedFormData).toEqual(expectedResult)
@@ -87,35 +85,32 @@ describe('validateContractDraftRevisionInput', () => {
         }
 
         const expectedResult = {
-            success: true,
-            data: {
-                ...formData,
-                submissionDescription: undefined,
-                contractType: undefined,
-                riskBasedContract: undefined,
-                contractDateStart: undefined,
-                contractDateEnd: undefined,
-                contractExecutionStatus: undefined,
-                inLieuServicesAndSettings: undefined,
-                modifiedBenefitsProvided: undefined,
-                modifiedGeoAreaServed: undefined,
-                modifiedMedicaidBeneficiaries: undefined,
-                modifiedRiskSharingStrategy: undefined,
-                modifiedIncentiveArrangements: undefined,
-                modifiedWitholdAgreements: undefined,
-                modifiedStateDirectedPayments: undefined,
-                modifiedPassThroughPayments: undefined,
-                modifiedPaymentsForMentalDiseaseInstitutions: undefined,
-                modifiedMedicalLossRatioStandards: undefined,
-                modifiedOtherFinancialPaymentIncentive: undefined,
-                modifiedEnrollmentProcess: undefined,
-                modifiedGrevienceAndAppeal: undefined,
-                modifiedNetworkAdequacyStandards: undefined,
-                modifiedLengthOfContract: undefined,
-                modifiedNonRiskPaymentArrangements: undefined,
-                statutoryRegulatoryAttestation: undefined,
-                statutoryRegulatoryAttestationDescription: undefined,
-            },
+            ...formData,
+            submissionDescription: undefined,
+            contractType: undefined,
+            riskBasedContract: undefined,
+            contractDateStart: undefined,
+            contractDateEnd: undefined,
+            contractExecutionStatus: undefined,
+            inLieuServicesAndSettings: undefined,
+            modifiedBenefitsProvided: undefined,
+            modifiedGeoAreaServed: undefined,
+            modifiedMedicaidBeneficiaries: undefined,
+            modifiedRiskSharingStrategy: undefined,
+            modifiedIncentiveArrangements: undefined,
+            modifiedWitholdAgreements: undefined,
+            modifiedStateDirectedPayments: undefined,
+            modifiedPassThroughPayments: undefined,
+            modifiedPaymentsForMentalDiseaseInstitutions: undefined,
+            modifiedMedicalLossRatioStandards: undefined,
+            modifiedOtherFinancialPaymentIncentive: undefined,
+            modifiedEnrollmentProcess: undefined,
+            modifiedGrevienceAndAppeal: undefined,
+            modifiedNetworkAdequacyStandards: undefined,
+            modifiedLengthOfContract: undefined,
+            modifiedNonRiskPaymentArrangements: undefined,
+            statutoryRegulatoryAttestation: undefined,
+            statutoryRegulatoryAttestationDescription: undefined,
         }
 
         const draftRevisionInput = mockGQLContractDraftRevisionInput(
@@ -125,10 +120,10 @@ describe('validateContractDraftRevisionInput', () => {
             stateCode
         )
 
-        const validatedFormData = validateContractDraftRevisionInput(
-            draftRevisionInput,
-            stateCode,
-            { '438-attestation': true }
+        const validatedFormData = must(
+            validateContractDraftRevisionInput(draftRevisionInput, stateCode, {
+                '438-attestation': true,
+            })
         )
 
         expect(validatedFormData).toEqual(expectedResult)
@@ -153,11 +148,6 @@ describe('validateContractDraftRevisionInput', () => {
             populationCovered: 'CHIP',
         }
 
-        const expectedResult = {
-            success: false,
-            error: expect.arrayContaining([]),
-        }
-
         const draftRevisionInput = mockGQLContractDraftRevisionInput(
             {
                 formData: formData,
@@ -171,14 +161,17 @@ describe('validateContractDraftRevisionInput', () => {
             { '438-attestation': true }
         )
 
-        expect(validatedFormData).toEqual(
-            expect.objectContaining(expectedResult)
-        )
-        expect(validatedFormData.error?.message).toContain('Invalid email')
-        expect(validatedFormData.error?.message).toContain(
+        if (!(validatedFormData instanceof Error)) {
+            throw new Error(
+                'Unexpected error: Was expecting validateContractDraftRevisionInput to return and error'
+            )
+        }
+
+        expect(validatedFormData.message).toContain('Invalid email')
+        expect(validatedFormData.message).toContain(
             `programIDs are invalid for the state ${stateCode}`
         )
-        expect(validatedFormData.error?.message).toContain(
+        expect(validatedFormData.message).toContain(
             `populationCoveredSchema of CHIP cannot be submissionType of CONTRACT_AND_RATES`
         )
     })
