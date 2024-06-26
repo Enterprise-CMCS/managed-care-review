@@ -12,7 +12,6 @@ import {
     submissionTypeSchema,
 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
 import { statusSchema } from './statusType'
-import type { ZodEffects } from 'zod/lib/types'
 import type { RawCreateParams, ZodTypeAny } from 'zod/lib/types'
 
 const documentSchema = z.object({
@@ -39,7 +38,7 @@ const packagesWithSharedRateCerts = z.object({
 function preprocessNulls<T extends ZodTypeAny>(
     schema: T,
     params?: RawCreateParams
-): ZodEffects<T, T['_output'], unknown> {
+) {
     return z.preprocess((val) => val ?? undefined, schema, params)
 }
 
