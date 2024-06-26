@@ -9,7 +9,6 @@ import {
     populationCoveredSchema,
 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
 import { z } from 'zod'
-import type { SafeParseReturnType } from 'zod'
 import { findStatePrograms } from '../../postgres'
 
 const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
@@ -83,13 +82,10 @@ const validateContractDraftRevisionInput = (
     draftRevision: ContractDraftRevisionInput,
     stateCode: string,
     featureFlags?: FeatureFlagSettings
-): SafeParseReturnType<
-    ContractDraftRevisionFormDataInput,
-    UpdateDraftContractFormDataType
-> => {
+): UpdateDraftContractFormDataType | Error => {
     const formData = draftRevision.formData
 
-    return updateDraftContractFormDataSchema
+    const parsedData = updateDraftContractFormDataSchema
         .extend({
             statutoryRegulatoryAttestationDescription:
                 validateStatutoryRegulatoryAttestation(formData, featureFlags),
@@ -97,6 +93,18 @@ const validateContractDraftRevisionInput = (
             populationCovered: validatePopulationCovered(formData),
         })
         .safeParse(formData)
+
+    if (parsedData.error) {
+        return parsedData.error
+    }
+
+    if (!parsedData.data) {
+        return new Error(
+            'Error: validateContractDraftRevisionInput returned no data'
+        )
+    }
+
+    return parsedData.data
 }
 
 export { validateContractDraftRevisionInput }

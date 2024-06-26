@@ -105,14 +105,14 @@ export function updateContractDraftRevision(
             featureFlags
         )
 
-        if (parsedFormData.error) {
-            const errMessage = parsedFormData.error.message
+        if (parsedFormData instanceof Error) {
+            const errMessage = parsedFormData.message
             logError('updateContractDraftRevision', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage)
         }
 
-        const editableFormData = parsedFormData.data
+        const editableFormData = parsedFormData
 
         // Update contract draft revision
         const updateResult = await store.updateDraftContract({
