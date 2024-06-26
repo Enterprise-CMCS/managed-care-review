@@ -9,7 +9,7 @@ import {
 } from '@apollo/client'
 import { Amplify, Auth as AmplifyAuth, API } from 'aws-amplify'
 import { UnlockedHealthPlanFormDataType } from '../../app-web/src/common-code/healthPlanFormDataType'
-import { RateFormDataInput } from '../gen/gqlClient';
+import { RateFormDataInput } from '../gen/gqlClient'
 
 type StateUserType = {
     id: string
@@ -44,30 +44,33 @@ type UserType = StateUserType | AdminUserType | CMSUserType
 // programs for state used in tests
 const minnesotaStatePrograms = [
     {
-        "id": "abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce",
-        "fullName": "Special Needs Basic Care",
-        "name": "SNBC",
-        "isRateProgram": false
+        id: 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+        fullName: 'Special Needs Basic Care',
+        name: 'SNBC',
+        isRateProgram: false,
     },
     {
-        "id": "d95394e5-44d1-45df-8151-1cc1ee66f100",
-        "fullName": "Prepaid Medical Assistance Program",
-        "name": "PMAP",
-        "isRateProgram": false
+        id: 'd95394e5-44d1-45df-8151-1cc1ee66f100',
+        fullName: 'Prepaid Medical Assistance Program',
+        name: 'PMAP',
+        isRateProgram: false,
     },
     {
-        "id": "ea16a6c0-5fc6-4df8-adac-c627e76660ab",
-        "fullName": "Minnesota Senior Care Plus ",
-        "name": "MSC+",
-        "isRateProgram": false
+        id: 'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
+        fullName: 'Minnesota Senior Care Plus ',
+        name: 'MSC+',
+        isRateProgram: false,
     },
     {
-        "id": "3fd36500-bf2c-47bc-80e8-e7aa417184c5",
-        "fullName": "Minnesota Senior Health Options",
-        "name": "MSHO",
-        "isRateProgram": false
-    }
+        id: '3fd36500-bf2c-47bc-80e8-e7aa417184c5',
+        fullName: 'Minnesota Senior Health Options',
+        name: 'MSHO',
+        isRateProgram: false,
+    },
 ]
+
+const s3DlUrl =
+    'https://fake-bucket.s3.amazonaws.com/file.pdf?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1719564800&Signature=abc123def456ghijk' //pragma: allowlist secret
 
 const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType> => ({
     stateCode: 'MN',
@@ -106,10 +109,10 @@ const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType> => ({
     federalAuthorities: ['STATE_PLAN'],
     rateInfos: [],
     statutoryRegulatoryAttestation: true,
-    programIDs: [minnesotaStatePrograms[0].id]
+    programIDs: [minnesotaStatePrograms[0].id],
 })
 
-const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
+const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType> => ({
     stateCode: 'MN',
     stateContacts: [
         {
@@ -144,7 +147,7 @@ const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
     },
     managedCareEntities: ['MCO'],
     federalAuthorities: ['STATE_PLAN'],
-    rateInfos:[
+    rateInfos: [
         {
             id: uuidv4(),
             rateType: 'NEW' as const,
@@ -158,11 +161,13 @@ const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
                     sha256: 'fakesha',
                 },
             ],
-            supportingDocuments: [   {
-                name: 'rate1SupportingDocument1.pdf',
-                s3URL: 'fakeS3URL',
-                sha256: 'fakesha',
-            }],
+            supportingDocuments: [
+                {
+                    name: 'rate1SupportingDocument1.pdf',
+                    s3URL: 'fakeS3URL',
+                    sha256: 'fakesha',
+                },
+            ],
             rateProgramIDs: [minnesotaStatePrograms[0].id],
             actuaryContacts: [
                 {
@@ -176,40 +181,42 @@ const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
             packagesWithSharedRateCerts: [],
         },
-            {
-                id: uuidv4(),
-                rateType: 'NEW' as const,
-                rateDateStart: new Date(Date.UTC(2030, 5, 1)),
-                rateDateEnd: new Date(Date.UTC(2036, 4, 30)),
-                rateDateCertified: new Date(Date.UTC(2035, 3, 15)),
-                rateDocuments: [
-                    {
-                        name: 'rate2Document1.pdf',
-                        s3URL: 'fakeS3URL',
-                        sha256: 'fakesha',
-                    },
-                ],
-                supportingDocuments: [],
-                rateProgramIDs: [minnesotaStatePrograms[0].id],
-                actuaryContacts: [
-                    {
-                        name: 'actuary2',
-                        titleRole: 'test title',
-                        email: 'email@example.com',
-                        actuarialFirm: 'MERCER' as const,
-                        actuarialFirmOther: '',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
-                packagesWithSharedRateCerts: [],
-            },
+        {
+            id: uuidv4(),
+            rateType: 'NEW' as const,
+            rateDateStart: new Date(Date.UTC(2030, 5, 1)),
+            rateDateEnd: new Date(Date.UTC(2036, 4, 30)),
+            rateDateCertified: new Date(Date.UTC(2035, 3, 15)),
+            rateDocuments: [
+                {
+                    name: 'rate2Document1.pdf',
+                    s3URL: 'fakeS3URL',
+                    sha256: 'fakesha',
+                },
+            ],
+            supportingDocuments: [],
+            rateProgramIDs: [minnesotaStatePrograms[0].id],
+            actuaryContacts: [
+                {
+                    name: 'actuary2',
+                    titleRole: 'test title',
+                    email: 'email@example.com',
+                    actuarialFirm: 'MERCER' as const,
+                    actuarialFirmOther: '',
+                },
+            ],
+            actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
+            packagesWithSharedRateCerts: [],
+        },
     ],
     statutoryRegulatoryAttestation: false,
     statutoryRegulatoryAttestationDescription: 'No compliance',
-    programIDs: [minnesotaStatePrograms[0].id]
+    programIDs: [minnesotaStatePrograms[0].id],
 })
 
-const rateFormData = (data?: Partial<RateFormDataInput>): RateFormDataInput => ({
+const rateFormData = (
+    data?: Partial<RateFormDataInput>
+): RateFormDataInput => ({
     rateType: 'NEW',
     rateCapitationType: 'RATE_CELL',
     rateDocuments: [
@@ -217,13 +224,17 @@ const rateFormData = (data?: Partial<RateFormDataInput>): RateFormDataInput => (
             name: 'rate1Document1.pdf',
             s3URL: 's3://local-uploads/1684382956834-rate1Document1.pdf/rate1Document1.pdf',
             sha256: 'fakesha',
+            downloadURL: s3DlUrl,
         },
     ],
-    supportingDocuments: [   {
-        name: 'rate1SupportingDocument1.pdf',
-        s3URL: 's3://local-uploads/1684382956834-rate1SupportingDocument1.pdf/rate1SupportingDocument1.pdf',
-        sha256: 'fakesha2',
-    }],
+    supportingDocuments: [
+        {
+            name: 'rate1SupportingDocument1.pdf',
+            s3URL: 's3://local-uploads/1684382956834-rate1SupportingDocument1.pdf/rate1SupportingDocument1.pdf',
+            sha256: 'fakesha2',
+            downloadURL: s3DlUrl,
+        },
+    ],
     rateDateStart: '2025-05-01',
     rateDateEnd: '2026-04-30',
     rateDateCertified: '2025-03-15',
@@ -240,10 +251,12 @@ const rateFormData = (data?: Partial<RateFormDataInput>): RateFormDataInput => (
     deprecatedRateProgramIDs: [],
     addtlActuaryContacts: [],
     actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
-    ...data
+    ...data,
 })
 
-const newSubmissionInput = (overrides?: Partial<UnlockedHealthPlanFormDataType> ): Partial<UnlockedHealthPlanFormDataType> => {
+const newSubmissionInput = (
+    overrides?: Partial<UnlockedHealthPlanFormDataType>
+): Partial<UnlockedHealthPlanFormDataType> => {
     return Object.assign(
         {
             populationCovered: 'MEDICAID',
@@ -251,13 +264,13 @@ const newSubmissionInput = (overrides?: Partial<UnlockedHealthPlanFormDataType> 
             submissionType: 'CONTRACT_ONLY',
             riskBasedContract: false,
             submissionDescription: 'Test Q&A',
-            contractType: 'BASE'
+            contractType: 'BASE',
         },
         overrides
     )
-    }
+}
 
-const stateUser = ():StateUserType => ({
+const stateUser = (): StateUserType => ({
     id: 'user1',
     email: 'aang@example.com',
     givenName: 'Aang',
@@ -425,13 +438,11 @@ const apolloClientWrapper = async <T>(
 
     const httpLinkConfig = {
         uri: '/graphql',
-        headers:
-            isLocalAuth
-                ? {
-                      'cognito-authentication-provider':
-                          JSON.stringify(authUser),
-                  }
-                : undefined,
+        headers: isLocalAuth
+            ? {
+                  'cognito-authentication-provider': JSON.stringify(authUser),
+              }
+            : undefined,
         fetch: fakeAmplifyFetch,
         fetchOptions: {
             mode: 'no-cors',
@@ -475,7 +486,7 @@ export {
     adminUser,
     stateUser,
     rateFormData,
-    minnesotaStatePrograms
+    minnesotaStatePrograms,
 }
 export type {
     StateUserType,
