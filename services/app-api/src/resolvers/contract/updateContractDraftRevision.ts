@@ -102,6 +102,7 @@ export function updateContractDraftRevision(
         const parsedFormData = validateContractDraftRevisionInput(
             draftRevision,
             contractWithHistory.stateCode,
+            store,
             featureFlags
         )
 

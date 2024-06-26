@@ -9,7 +9,7 @@ import {
     populationCoveredSchema,
 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
 import { z } from 'zod'
-import { findStatePrograms } from '../../postgres'
+import type { Store } from '../../postgres'
 
 const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
     contractType: preprocessNulls(contractTypeSchema.optional()),
@@ -40,8 +40,8 @@ const validateStatutoryRegulatoryAttestation = (
             })
     )
 
-const validateProgramIDs = (stateCode: string) => {
-    const allPrograms = findStatePrograms(stateCode)
+const validateProgramIDs = (stateCode: string, store: Store) => {
+    const allPrograms = store.findStatePrograms(stateCode)
 
     return z.array(z.string()).superRefine((programs, ctx) => {
         if (allPrograms instanceof Error) {
@@ -81,6 +81,7 @@ const validatePopulationCovered = (
 const validateContractDraftRevisionInput = (
     draftRevision: ContractDraftRevisionInput,
     stateCode: string,
+    store: Store,
     featureFlags?: FeatureFlagSettings
 ): UpdateDraftContractFormDataType | Error => {
     const formData = draftRevision.formData
@@ -89,7 +90,7 @@ const validateContractDraftRevisionInput = (
         .extend({
             statutoryRegulatoryAttestationDescription:
                 validateStatutoryRegulatoryAttestation(formData, featureFlags),
-            programIDs: validateProgramIDs(stateCode),
+            programIDs: validateProgramIDs(stateCode, store),
             populationCovered: validatePopulationCovered(formData),
         })
         .safeParse(formData)

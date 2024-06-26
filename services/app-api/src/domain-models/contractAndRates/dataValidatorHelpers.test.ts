@@ -5,9 +5,13 @@ import {
     must,
 } from '../../testHelpers'
 import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { NewPostgresStore } from '../../postgres'
 
 describe('validateContractDraftRevisionInput', () => {
-    it('Validates input form data and removes statutoryRegulatoryAttestationDescription', () => {
+    it('Validates input form data and removes statutoryRegulatoryAttestationDescription', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
         const stateCode = 'FL'
         const formData = {
             ...mockGqlContractDraftRevisionFormDataInput(stateCode),
@@ -39,14 +43,21 @@ describe('validateContractDraftRevisionInput', () => {
         )
 
         const validatedFormData = must(
-            validateContractDraftRevisionInput(draftRevisionInput, stateCode, {
-                '438-attestation': true,
-            })
+            validateContractDraftRevisionInput(
+                draftRevisionInput,
+                stateCode,
+                postgresStore,
+                {
+                    '438-attestation': true,
+                }
+            )
         )
 
         expect(validatedFormData).toEqual(expectedResult)
     })
-    it('converts fields that are null to undefined', () => {
+    it('converts fields that are null to undefined', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
         const stateCode = 'FL'
         const formData = {
             ...mockGqlContractDraftRevisionFormDataInput(stateCode),
@@ -121,14 +132,21 @@ describe('validateContractDraftRevisionInput', () => {
         )
 
         const validatedFormData = must(
-            validateContractDraftRevisionInput(draftRevisionInput, stateCode, {
-                '438-attestation': true,
-            })
+            validateContractDraftRevisionInput(
+                draftRevisionInput,
+                stateCode,
+                postgresStore,
+                {
+                    '438-attestation': true,
+                }
+            )
         )
 
         expect(validatedFormData).toEqual(expectedResult)
     })
-    it('Returns error for invalid data', () => {
+    it('Returns error for invalid data', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
         const stateCode = 'FL'
         const formData: ContractDraftRevisionFormDataInput = {
             ...mockGqlContractDraftRevisionFormDataInput(stateCode),
@@ -158,6 +176,7 @@ describe('validateContractDraftRevisionInput', () => {
         const validatedFormData = validateContractDraftRevisionInput(
             draftRevisionInput,
             stateCode,
+            postgresStore,
             { '438-attestation': true }
         )
 
