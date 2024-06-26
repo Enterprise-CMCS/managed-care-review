@@ -36,9 +36,10 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
     const saveAsDraftOnClickWithLogging = (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>
     ) => {
-        logUserEvent({ tealium_event: 'save_draft' })
+        logUserEvent({ tealium_event: 'button_engagement' })
         if (saveAsDraftOnClick) saveAsDraftOnClick(e)
     }
+
     const leftElement =
         isFirstPage || !saveAsDraftOnClick ? undefined : (
             <ActionButton

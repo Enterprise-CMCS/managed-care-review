@@ -11,6 +11,7 @@ import type {
     TealiumLinkDataObject,
     TealiumViewDataObject,
     TealiumEvent,
+    TealiumButtonEngagementObject
 } from '../constants/tealium'
 import { useLocation } from 'react-router-dom'
 import { getRouteName } from '../routeHelpers'

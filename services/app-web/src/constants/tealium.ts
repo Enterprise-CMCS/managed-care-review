@@ -21,6 +21,18 @@ type TealiumDataObject = {
     tealium_event?: TealiumEvent // this is required by tealium, TBD what allowed values aer here, usually this is supposed to be configured first .
 }
 
+type TealiumButtonEngagementObject = {
+    tealium_event: 'button_engagement'
+    text: string
+    link_type: string
+    button_style: string
+    button_type: string
+    parent_component_heading?: string
+    parent_component_type?: string
+    link_url?: string
+    event_extension?: string
+} & Partial<TealiumDataObject>
+
 type TealiumLinkDataObject = {
     tealium_event: TealiumEvent // event is required for user tracking links
 } & Partial<TealiumDataObject>
@@ -64,6 +76,7 @@ type TealiumEvent =
     | 'user_login'
     | 'user_logout'
     | 'save_draft'
+    | 'button_engagement'
 
 // HELPER FUNCTIONS
 function getTealiumEnv(stage: string) {
@@ -133,4 +146,4 @@ const getTealiumPageName = ({
 }
 
 export { CONTENT_TYPE_BY_ROUTE, getTealiumEnv, getTealiumPageName }
-export type { TealiumLinkDataObject, TealiumViewDataObject, TealiumEvent }
+export type { TealiumLinkDataObject, TealiumViewDataObject, TealiumEvent, TealiumButtonEngagementObject }
