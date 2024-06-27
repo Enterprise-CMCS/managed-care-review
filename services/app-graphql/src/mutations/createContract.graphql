@@ -1,7 +1,7 @@
-mutation submitContract($input: SubmitContractInput!) {
-    submitContract(input: $input) {
+mutation createContract($input: CreateContractInput!) {
+    createContract(input: $input) {
         contract {
-            ...contractFields
+            ...contractFieldsFetchContract
 
             draftRevision {
                 ...contractRevisionFragment
@@ -26,14 +26,14 @@ mutation submitContract($input: SubmitContractInput!) {
     }
 }
 
-
-fragment contractFields on Contract {
+fragment contractFieldsFetchContract on Contract {
     id
     status
     createdAt
     updatedAt
     initiallySubmittedAt
     stateCode
+    mccrsID
     state {
         code
         name
@@ -90,17 +90,17 @@ fragment rateRevisionFragmentForFetchContract on RateRevision {
         rateCapitationType
         rateDocuments {
             name
-    s3URL
-    sha256
-    dateAdded
-    downloadURL
+            s3URL
+            sha256
+            dateAdded
+            downloadURL
         }
         supportingDocuments {
             name
-    s3URL
-    sha256
-    dateAdded
-    downloadURL
+            s3URL
+            sha256
+            dateAdded
+            downloadURL
         }
         rateDateStart
         rateDateEnd
@@ -175,20 +175,20 @@ fragment contractFormDataFragment on ContractFormData {
 
     supportingDocuments {
         name
-    s3URL
-    sha256
-    dateAdded
-    downloadURL
+        s3URL
+        sha256
+        dateAdded
+        downloadURL
     }
 
     contractType
     contractExecutionStatus
     contractDocuments {
         name
-    s3URL
-    sha256
-    dateAdded
-    downloadURL
+        s3URL
+        sha256
+        dateAdded
+        downloadURL
     }
 
     contractDateStart

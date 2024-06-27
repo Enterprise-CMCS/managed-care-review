@@ -53,21 +53,21 @@ import { addNewRateToTestContract } from './gqlRateHelpers'
 // Since our programs are checked into source code, we have a program we
 // use as our default
 function defaultFloridaProgram(): ProgramType {
-    return {
-        id: '5c10fe9f-bec9-416f-a20c-718b152ad633',
-        name: 'MMA',
-        fullName: 'Managed Medical Assistance Program ',
-        isRateProgram: false,
-    }
+    const program = must(findStatePrograms('FL'))[0]
+    return program
 }
 
 function defaultFloridaRateProgram(): ProgramType {
-    return {
-        id: '3b8d8fa1-1fa6-4504-9c5b-ef522877fe1e',
-        fullName: 'Long-term Care Program',
-        name: 'LTC',
-        isRateProgram: false,
+    const programs = must(findStatePrograms('FL'))
+    const rateProgram = programs.find((program) => program.isRateProgram)
+
+    if (!rateProgram) {
+        throw new Error(
+            'Unexpected error: Rate program not found in Florida programs'
+        )
     }
+
+    return rateProgram
 }
 
 const defaultContext = (): Context => {
