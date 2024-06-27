@@ -1326,6 +1326,8 @@ input UpdateContractRateInput {
 
 input UpdateDraftContractRatesInput {
     contractID: ID!
+    "date the contracts draft revision was last updated at"
+    lastSeenUpdatedAt: DateTime!
     """
     updatedRates contains ALL the existing rates associated with this contract.
     This includes rates that were previously linked or previously created (LINK & UPDATE)
