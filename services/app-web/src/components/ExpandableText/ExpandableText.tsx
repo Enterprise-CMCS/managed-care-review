@@ -1,6 +1,7 @@
 import React, { useLayoutEffect, useState } from 'react'
 import { Button } from '@trussworks/react-uswds'
 import styles from './ExpandableText.module.scss'
+import { useTealium } from '../../hooks'
 
 export type ExpandableTextProps = {
     clampedLines?: number
@@ -15,6 +16,7 @@ export const ExpandableText = ({
     const textRef = React.useRef<HTMLSpanElement>(null)
     const [showMore, setShowMore] = useState<boolean>(false)
     const [showMoreButton, setShowMoreButton] = useState<boolean>(false)
+    const { logButtonEvent } = useTealium()
 
     useLayoutEffect(() => {
         const ref = textRef?.current
@@ -50,7 +52,17 @@ export const ExpandableText = ({
                     unstyled
                     tabIndex={-1}
                     className={`${styles.showMoreButton} usa-link`}
-                    onClick={() => setShowMore(!showMore)}
+                    onClick={(e) =>
+                        logButtonEvent(
+                            {
+                                text: showMore ? 'Show Less' : 'Show More',
+                                button_style: 'link',
+                                button_type: 'button',
+                                parent_component_type: 'toggle',
+                            },
+                            () => setShowMore(!showMore)
+                        )
+                    }
                 >
                     {showMore ? 'Show Less' : 'Show More'}
                 </Button>
