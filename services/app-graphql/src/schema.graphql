@@ -571,7 +571,7 @@ input UnlockHealthPlanPackageInput {
 
 input UnlockContractInput {
     contractID: ID!
-    "User given reason this package was unlocked"
+    "User given reason this contract was unlocked"
     unlockedReason: String!
 }
 

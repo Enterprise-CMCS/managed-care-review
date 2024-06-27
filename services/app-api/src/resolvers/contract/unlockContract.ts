@@ -6,6 +6,7 @@ import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import { NotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
+
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
@@ -97,8 +98,7 @@ export function unlockContractResolver(
                 },
             })
         }
-
-        if (contract.status === 'SUBMITTED') {
+        if (unlockContractResult.status === 'SUBMITTED') {
             const errMessage = `Programming Error: Got SUBMITTED from an unlocked contract.`
             logError('unlockContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
@@ -112,7 +112,9 @@ export function unlockContractResolver(
 
         // Get state analysts emails from parameter store
         let stateAnalystsEmails =
-            await emailParameterStore.getStateAnalystsEmails(contract.stateCode)
+            await emailParameterStore.getStateAnalystsEmails(
+                unlockContractResult.stateCode
+            )
         //If error, log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
         if (stateAnalystsEmails instanceof Error) {
             logError('getStateAnalystsEmails', stateAnalystsEmails.message)
@@ -121,9 +123,11 @@ export function unlockContractResolver(
         }
 
         // Get submitter email from every pkg submitted revision.
-        const submitterEmails = contractSubmitters(contract)
+        const submitterEmails = contractSubmitters(unlockContractResult)
 
-        const statePrograms = store.findStatePrograms(contract.stateCode)
+        const statePrograms = store.findStatePrograms(
+            unlockContractResult.stateCode
+        )
 
         if (statePrograms instanceof Error) {
             logError('findStatePrograms', statePrograms.message)
@@ -144,7 +148,7 @@ export function unlockContractResolver(
 
         const unlockPackageCMSEmailResult =
             await emailer.sendUnlockContractCMSEmail(
-                contract,
+                unlockContractResult,
                 updateInfo,
                 stateAnalystsEmails,
                 statePrograms
@@ -152,7 +156,7 @@ export function unlockContractResolver(
 
         const unlockPackageStateEmailResult =
             await emailer.sendUnlockContractStateEmail(
-                contract,
+                unlockContractResult,
                 updateInfo,
                 statePrograms,
                 submitterEmails
@@ -187,6 +191,6 @@ export function unlockContractResolver(
         logSuccess('unlockContract')
         setSuccessAttributesOnActiveSpan(span)
 
-        return { contract: contractResult }
+        return { contract: unlockContractResult }
     }
 }
