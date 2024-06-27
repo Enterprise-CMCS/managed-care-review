@@ -5,7 +5,7 @@ import {
     Rate,
     Contract,
     useSubmitContractMutation,
-    useUnlockHealthPlanPackageMutation,
+    useUnlockContractMutation,
     FetchHealthPlanPackageWithQuestionsDocument,
     FetchContractDocument,
 } from '../../../gen/gqlClient'
@@ -19,7 +19,7 @@ import { GenericApiErrorProps } from '../../Banner/GenericApiErrorBanner/Generic
 import { ERROR_MESSAGES } from '../../../constants/errors'
 import {
     submitMutationWrapperV2,
-    unlockMutationWrapper,
+    unlockMutationWrapperV2,
 } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 
 const RATE_UNLOCK_SUBMIT_TYPES = [
@@ -143,10 +143,8 @@ export const UnlockSubmitModalV2 = ({
     const [submitContract, { loading: submitContractLoading }] =
         useSubmitContractMutation()
 
-    const [
-        unlockHealthPlanPackage,
-        { loading: unlockContractLoading, client },
-    ] = useUnlockHealthPlanPackageMutation()
+    const [unlockContract, { loading: unlockContractLoading, client }] =
+        useUnlockContractMutation()
 
     // TODO submitRate and unlockRate should also be set up here - unlock and edit rate epic
     const formik = useFormik({
@@ -213,8 +211,8 @@ export const UnlockSubmitModalV2 = ({
             case 'UNLOCK_CONTRACT':
                 if (unlockSubmitModalInput) {
                     // TODO: Remove HPP code fully from here, this is a hack to get through linked rates since we have no viable unlockContract
-                    result = await unlockMutationWrapper(
-                        unlockHealthPlanPackage,
+                    result = await unlockMutationWrapperV2(
+                        unlockContract,
                         submissionData.id,
                         unlockSubmitModalInput
                     )
