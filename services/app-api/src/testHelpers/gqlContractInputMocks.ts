@@ -1,15 +1,10 @@
-import { v4 as uuidv4 } from 'uuid'
-import type { StateCodeType } from './stateHelpers'
-import type {
-    ContractDraftRevisionFormDataInput,
-    ContractDraftRevisionInput,
-} from '../gen/gqlServer'
+import type { ContractDraftRevisionFormDataInput } from '../gen/gqlServer'
 import { must } from './assertionHelpers'
 import { findStatePrograms } from '../postgres'
 import { defaultFloridaProgram } from './gqlHelpers'
 // This mock is used for Graphql Input types
 const mockGqlContractDraftRevisionFormDataInput = (
-    stateCode?: StateCodeType,
+    stateCode?: string,
     formDataInput?: Partial<ContractDraftRevisionFormDataInput>
 ): ContractDraftRevisionFormDataInput => {
     const programs = stateCode
@@ -74,26 +69,4 @@ const mockGqlContractDraftRevisionFormDataInput = (
     }
 }
 
-const mockGQLContractDraftRevisionInput = (
-    draftRevInput?: Partial<ContractDraftRevisionInput>,
-    stateCode?: StateCodeType
-): ContractDraftRevisionInput => {
-    return {
-        id: uuidv4(),
-        contractName: 'Some name',
-        createdAt: new Date(),
-        submitInfo: null,
-        unlockInfo: null,
-        updatedAt: new Date(),
-        ...draftRevInput,
-        formData: mockGqlContractDraftRevisionFormDataInput(
-            stateCode,
-            draftRevInput?.formData
-        ),
-    }
-}
-
-export {
-    mockGqlContractDraftRevisionFormDataInput,
-    mockGQLContractDraftRevisionInput,
-}
+export { mockGqlContractDraftRevisionFormDataInput }

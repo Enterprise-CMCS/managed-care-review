@@ -18,7 +18,7 @@ import type { ContractType } from '../domain-models'
 import type { ApolloServer } from 'apollo-server-lambda'
 import type {
     Contract,
-    ContractDraftRevisionInput,
+    ContractDraftRevisionFormDataInput,
     RateFormData,
 } from '../gen/gqlServer'
 import { latestFormData } from './healthPlanPackageHelpers'
@@ -315,7 +315,8 @@ const updateRateOnDraftContract = async (
 const updateTestContractDraftRevision = async (
     server: ApolloServer,
     contractID: string,
-    draftRevisionInput?: Partial<ContractDraftRevisionInput>
+    lastSeenUpdatedAt?: Date,
+    formData?: Partial<ContractDraftRevisionFormDataInput>
 ): Promise<Contract> => {
     const draftContract = await fetchTestContract(server, contractID)
 
@@ -325,23 +326,20 @@ const updateTestContractDraftRevision = async (
         )
     }
 
-    const updateDraftRevisionData = {
-        ...draftContract.draftRevision,
-        ...draftRevisionInput,
-        formData:
-            draftRevisionInput?.formData ||
-            mockGqlContractDraftRevisionFormDataInput(
-                draftContract.stateCode as StateCodeType,
-                draftRevisionInput?.formData
-            ),
-    }
+    const updatedFormData =
+        formData ||
+        mockGqlContractDraftRevisionFormDataInput(
+            draftContract.stateCode as StateCodeType
+        )
 
     const updateResult = await server.executeOperation({
         query: UPDATE_CONTRACT_DRAFT_REVISION,
         variables: {
             input: {
                 contractID: contractID,
-                draftRevision: updateDraftRevisionData,
+                lastSeenUpdatedAt:
+                    lastSeenUpdatedAt || draftContract.draftRevision.updatedAt,
+                formData: updatedFormData,
             },
         },
     })

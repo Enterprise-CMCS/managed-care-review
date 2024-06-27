@@ -1,8 +1,5 @@
 import type { FeatureFlagSettings } from 'app-web/src/common-code/featureFlags'
-import type {
-    ContractDraftRevisionFormDataInput,
-    ContractDraftRevisionInput,
-} from '../../gen/gqlServer'
+import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
 import { contractFormDataSchema, preprocessNulls } from './formDataTypes'
 import {
     contractTypeSchema,
@@ -69,13 +66,11 @@ const validatePopulationCovered = (
     })
 
 const validateContractDraftRevisionInput = (
-    draftRevision: ContractDraftRevisionInput,
+    formData: ContractDraftRevisionFormDataInput,
     stateCode: string,
     store: Store,
     featureFlags?: FeatureFlagSettings
 ): UpdateDraftContractFormDataType | Error => {
-    const formData = draftRevision.formData
-
     const parsedData = updateDraftContractFormDataSchema
         .extend({
             statutoryRegulatoryAttestationDescription:

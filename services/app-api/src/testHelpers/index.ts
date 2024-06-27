@@ -45,7 +45,4 @@ export {
     clearMetadataFromRateFormData,
 } from './documentHelpers'
 
-export {
-    mockGqlContractDraftRevisionFormDataInput,
-    mockGQLContractDraftRevisionInput,
-} from './gqlContractInputMocks'
+export { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'

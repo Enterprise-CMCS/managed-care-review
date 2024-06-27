@@ -13,8 +13,20 @@ import {
 import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { submitTestContract } from '../../testHelpers/gqlContractHelpers'
+import { mockGqlContractDraftRevisionFormDataInput } from '../../testHelpers'
+
 describe(`Tests UpdateHealthPlanFormData`, () => {
     const cmsUser = testCMSUser()
+
+    const validEmptyFormData: ContractDraftRevisionFormDataInput = {
+        programIDs: [],
+        federalAuthorities: [],
+        managedCareEntities: [],
+        submissionType: 'CONTRACT_ONLY',
+        stateContacts: [],
+        contractDocuments: [],
+        supportingDocuments: [],
+    }
 
     afterEach(() => {
         jest.resetAllMocks()
@@ -35,53 +47,21 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         }
 
         // update that draft.
-        const updateFormData: ContractDraftRevisionFormDataInput = {
-            programIDs: [],
-            populationCovered: 'MEDICAID',
-            submissionType: 'CONTRACT_ONLY',
-            riskBasedContract: true,
-            submissionDescription: 'Updated submission',
-            stateContacts: [
-                {
-                    name: 'statecontact',
-                    titleRole: 'thestatestofcontacts',
-                    email: 'statemcstate@examepl.com',
-                },
-            ],
-            contractDocuments: [],
-            supportingDocuments: [],
-            contractType: 'BASE',
-            contractExecutionStatus: 'EXECUTED',
-            contractDateStart: '2025-06-01',
-            contractDateEnd: '2026-06-01',
-            managedCareEntities: ['MCO'],
-            federalAuthorities: [],
-            inLieuServicesAndSettings: true,
-            modifiedBenefitsProvided: true,
-            modifiedGeoAreaServed: true,
-            modifiedMedicaidBeneficiaries: true,
-            modifiedRiskSharingStrategy: true,
-            modifiedIncentiveArrangements: true,
-            modifiedWitholdAgreements: true,
-            modifiedStateDirectedPayments: true,
-            modifiedPassThroughPayments: false,
-            modifiedPaymentsForMentalDiseaseInstitutions: false,
-            modifiedMedicalLossRatioStandards: false,
-            modifiedOtherFinancialPaymentIncentive: false,
-            modifiedEnrollmentProcess: false,
-            modifiedGrevienceAndAppeal: false,
-            modifiedNetworkAdequacyStandards: undefined,
-            modifiedLengthOfContract: undefined,
-            modifiedNonRiskPaymentArrangements: undefined,
-            statutoryRegulatoryAttestation: true,
-            statutoryRegulatoryAttestationDescription:
-                'Hi, I should be gone after update.',
-        }
+        const updateFormData: ContractDraftRevisionFormDataInput =
+            mockGqlContractDraftRevisionFormDataInput(draftContract.stateCode, {
+                modifiedNetworkAdequacyStandards: undefined,
+                modifiedLengthOfContract: undefined,
+                modifiedNonRiskPaymentArrangements: undefined,
+                contractDocuments: [],
+                supportingDocuments: [],
+            })
         const updateResult = await updateTestContractDraftRevision(
             server,
             draftContract.id,
-            { formData: updateFormData }
+            draftRevision.updatedAt,
+            updateFormData
         )
+
         const updatedFormData = updateResult.draftRevision?.formData
 
         expect(updatedFormData).toEqual({
@@ -105,38 +85,41 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         }
 
         // update that draft.
-        const updateFormData: ContractDraftRevisionFormDataInput = {
-            programIDs: [],
-            federalAuthorities: [],
-            managedCareEntities: [],
-            submissionType: 'CONTRACT_ONLY',
-            stateContacts: [
-                {
-                    name: 'statecontact',
-                    titleRole: 'thestatestofcontacts',
-                    email: 'statemcstate@examepl.com',
-                },
-            ],
-            contractDocuments: [
-                {
-                    name: 'contractDocument1.pdf',
-                    s3URL: 's3://bucketname/key/contractDocument1.pdf',
-                    sha256: 'needs-to-be-there',
-                },
-            ],
-            supportingDocuments: [
-                {
-                    name: 'supportingDocument11.pdf',
-                    s3URL: 's3://bucketname/key/supportingDocument11.pdf',
-                    sha256: 'needs-to-be-there',
-                },
-            ],
-        }
+        const updateFormData: ContractDraftRevisionFormDataInput =
+            mockGqlContractDraftRevisionFormDataInput(draftContract.stateCode, {
+                stateContacts: [
+                    {
+                        name: 'statecontact',
+                        titleRole: 'thestatestofcontacts',
+                        email: 'statemcstate@examepl.com',
+                    },
+                ],
+                contractDocuments: [
+                    {
+                        name: 'contractDocument1.pdf',
+                        s3URL: 's3://bucketname/key/contractDocument1.pdf',
+                        sha256: 'needs-to-be-there',
+                    },
+                    {
+                        name: 'contractDocument1.pdf',
+                        s3URL: 's3://bucketname/key/contractDocument1.pdf',
+                        sha256: 'needs-to-be-there',
+                    },
+                ],
+                supportingDocuments: [
+                    {
+                        name: 'supportingDocument11.pdf',
+                        s3URL: 's3://bucketname/key/supportingDocument11.pdf',
+                        sha256: 'needs-to-be-there',
+                    },
+                ],
+            })
 
         const updateResult = await updateTestContractDraftRevision(
             server,
             draftContract.id,
-            { formData: updateFormData }
+            draftRevision.updatedAt,
+            updateFormData
         )
 
         if (!updateResult.draftRevision) {
@@ -176,25 +159,13 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             },
         })
 
-        const updateFormData: ContractDraftRevisionFormDataInput = {
-            programIDs: [],
-            federalAuthorities: [],
-            managedCareEntities: [],
-            submissionType: 'CONTRACT_ONLY',
-            stateContacts: [],
-            contractDocuments: [],
-            supportingDocuments: [],
-        }
-
         const updateResult = await cmsUserServer.executeOperation({
             query: UPDATE_CONTRACT_DRAFT_REVISION,
             variables: {
                 input: {
                     contractID: draftContract.id,
-                    draftRevision: {
-                        ...draftRevision,
-                        formData: updateFormData,
-                    },
+                    lastSeenUpdatedAt: draftRevision.updatedAt,
+                    formData: validEmptyFormData,
                 },
             },
         })
@@ -228,25 +199,13 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             },
         })
 
-        const updateFormData: ContractDraftRevisionFormDataInput = {
-            programIDs: [],
-            federalAuthorities: [],
-            managedCareEntities: [],
-            submissionType: 'CONTRACT_ONLY',
-            stateContacts: [],
-            contractDocuments: [],
-            supportingDocuments: [],
-        }
-
         const updateResult = await otherUserServer.executeOperation({
             query: UPDATE_CONTRACT_DRAFT_REVISION,
             variables: {
                 input: {
                     contractID: draftContract.id,
-                    draftRevision: {
-                        ...draftRevision,
-                        formData: updateFormData,
-                    },
+                    lastSeenUpdatedAt: draftRevision.updatedAt,
+                    formData: validEmptyFormData,
                 },
             },
         })
@@ -277,7 +236,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         }
 
         // update that draft.
-        const updateFormData: ContractDraftRevisionFormDataInput = {
+        const formData: ContractDraftRevisionFormDataInput = {
             populationCovered: 'CHIP',
             submissionType: 'CONTRACT_AND_RATES',
             programIDs: [],
@@ -293,10 +252,8 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             variables: {
                 input: {
                     contractID: draftContract.id,
-                    draftRevision: {
-                        ...draftRevision,
-                        formData: updateFormData,
-                    },
+                    lastSeenUpdatedAt: draftRevision.updatedAt,
+                    formData,
                 },
             },
         })
@@ -328,9 +285,8 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             variables: {
                 input: {
                     contractID,
-                    draftRevision: {
-                        ...updatedDraftContract.draftRevision,
-                    },
+                    lastSeenUpdatedAt: updatedDraftContract.updatedAt,
+                    formData: validEmptyFormData,
                 },
             },
         })
@@ -358,26 +314,14 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             )
         }
 
-        const updateFormData = {
-            programIDs: [],
-            stateContacts: [],
-            contractDocuments: [],
-            supportingDocuments: [],
-            federalAuthorities: [],
-            managedCareEntities: [],
-        }
-
         // Update the draft to have complete data for submission.
         const updateResult = await server.executeOperation({
             query: UPDATE_CONTRACT_DRAFT_REVISION,
             variables: {
                 input: {
                     contractID: contractID,
-                    draftRevision: {
-                        ...draftRevision,
-                        updatedAt: new Date(1999, 11, 12),
-                        formData: updateFormData,
-                    },
+                    lastSeenUpdatedAt: new Date(1999, 11, 12),
+                    formData: validEmptyFormData,
                 },
             },
         })
@@ -422,9 +366,8 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             variables: {
                 input: {
                     contractID: contractID,
-                    draftRevision: {
-                        ...draftRevision,
-                    },
+                    lastSeenUpdatedAt: draftRevision.updatedAt,
+                    formData: validEmptyFormData,
                 },
             },
         })

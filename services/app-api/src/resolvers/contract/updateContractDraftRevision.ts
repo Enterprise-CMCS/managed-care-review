@@ -26,16 +26,7 @@ export function updateContractDraftRevision(
             span
         )
         const featureFlags = await launchDarkly.allFlags(context)
-        const { draftRevision, contractID } = input
-
-        if (draftRevision.submitInfo) {
-            const errMessage = `Attempted to update with a submitted contract revision. Contract: ${input.contractID} Revision: ${draftRevision.id}`
-            logError('updateContractDraftRevision', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'draftRevision',
-            })
-        }
+        const { formData, contractID, lastSeenUpdatedAt } = input
 
         const contractWithHistory =
             await store.findContractWithHistory(contractID)
@@ -90,7 +81,7 @@ export function updateContractDraftRevision(
         // If updatedAt does not match concurrent editing occurred.
         if (
             contractWithHistory.draftRevision.updatedAt.getTime() !==
-            draftRevision.updatedAt.getTime()
+            lastSeenUpdatedAt.getTime()
         ) {
             const errMessage = `Concurrent update error: The data you are trying to modify has changed since you last retrieved it. Please refresh the page to continue.`
             logError('updateContractDraftRevision', errMessage)
@@ -100,7 +91,7 @@ export function updateContractDraftRevision(
 
         // Using zod to validate and transform graphQL types into domain types.
         const parsedFormData = validateContractDraftRevisionInput(
-            draftRevision,
+            formData,
             contractWithHistory.stateCode,
             store,
             featureFlags

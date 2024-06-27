@@ -1,7 +1,6 @@
 import { validateContractDraftRevisionInput } from './dataValidatorHelpers'
 import {
     mockGqlContractDraftRevisionFormDataInput,
-    mockGQLContractDraftRevisionInput,
     must,
 } from '../../testHelpers'
 import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
@@ -35,16 +34,9 @@ describe('validateContractDraftRevisionInput', () => {
             statutoryRegulatoryAttestationDescription: undefined,
         }
 
-        const draftRevisionInput = mockGQLContractDraftRevisionInput(
-            {
-                formData: formData,
-            },
-            stateCode
-        )
-
         const validatedFormData = must(
             validateContractDraftRevisionInput(
-                draftRevisionInput,
+                formData,
                 stateCode,
                 postgresStore,
                 {
@@ -124,16 +116,9 @@ describe('validateContractDraftRevisionInput', () => {
             statutoryRegulatoryAttestationDescription: undefined,
         }
 
-        const draftRevisionInput = mockGQLContractDraftRevisionInput(
-            {
-                formData: formData,
-            },
-            stateCode
-        )
-
         const validatedFormData = must(
             validateContractDraftRevisionInput(
-                draftRevisionInput,
+                formData,
                 stateCode,
                 postgresStore,
                 {
@@ -169,15 +154,8 @@ describe('validateContractDraftRevisionInput', () => {
             populationCovered: 'CHIP',
         }
 
-        const draftRevisionInput = mockGQLContractDraftRevisionInput(
-            {
-                formData: formData,
-            },
-            stateCode
-        )
-
         const validatedFormData = validateContractDraftRevisionInput(
-            draftRevisionInput,
+            formData,
             stateCode,
             postgresStore,
             { '438-attestation': true }
