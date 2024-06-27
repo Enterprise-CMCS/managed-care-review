@@ -34,9 +34,19 @@ export function createQuestionResponseResolver(
             setErrorAttributesOnActiveSpan(msg, span)
             throw new UserInputError(msg)
         }
-
+        const docs = input.documents.map((doc) => {
+            return {
+                name: doc.name,
+                s3URL: doc.s3URL,
+                downloadURL: doc.downloadURL ?? undefined,
+            }
+        })
+        const inputFormatted = {
+            ...input,
+            documents: docs,
+        }
         const createResponseResult = await store.insertQuestionResponse(
-            input,
+            inputFormatted,
             user
         )
 

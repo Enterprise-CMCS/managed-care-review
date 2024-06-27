@@ -13,10 +13,15 @@ import {
     submitTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { addNewRateToTestContract } from '../../testHelpers/gqlRateHelpers'
+import { testS3Client } from '../../testHelpers'
 
 describe('fetchContract', () => {
+    const mockS3 = testS3Client()
+
     it('fetches the draft contract and a new child rate', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         const stateSubmission =
             await createAndUpdateTestHealthPlanPackage(stateServer)
@@ -39,10 +44,16 @@ describe('fetchContract', () => {
         expect(draftRate).toHaveLength(1)
         expect(draftRate[0].status).toBe('DRAFT')
         expect(draftRate[0].stateCode).toBe('FL')
+        expect(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            draftRate[0].draftRevision?.formData.rateDocuments![0].downloadURL
+        ).toBeDefined()
     })
 
     it('gets the right contract name', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         const stateSubmission =
             await createAndUpdateTestHealthPlanPackage(stateServer)
@@ -65,11 +76,14 @@ describe('fetchContract', () => {
     })
 
     it('returns a stable initially submitted at', async () => {
-        const stateServer = await constructTestPostgresServer({})
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: testCMSUser(),
             },
+            s3Client: mockS3,
         })
 
         const draftA0 =
@@ -116,7 +130,9 @@ describe('fetchContract', () => {
     })
 
     it('errors if the wrong state user calls it', async () => {
-        const stateServerFL = await constructTestPostgresServer()
+        const stateServerFL = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         // Create a submission with a rate
         const stateSubmission =

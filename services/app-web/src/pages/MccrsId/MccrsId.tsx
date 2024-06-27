@@ -34,13 +34,9 @@ export interface MccrsIdFormValues {
 type FormError =
     FormikErrors<MccrsIdFormValues>[keyof FormikErrors<MccrsIdFormValues>]
 
-type RouteParams = {
-    id: string
-}
-
 export const MccrsId = (): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(true)
-    const { id } = useParams<keyof RouteParams>()
+    const { id } = useParams()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'

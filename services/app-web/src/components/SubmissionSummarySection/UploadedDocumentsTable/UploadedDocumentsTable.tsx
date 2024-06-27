@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
-import dayjs from 'dayjs'
+import { dayjs } from '../../../common-code/dateHelpers/dayjs'
 import styles from './UploadedDocumentsTable.module.scss'
 import {
     SharedRateCertDisplay,
@@ -75,9 +75,12 @@ export const UploadedDocumentsTable = ({
         }
 
         if (!previousSubmissionDate) {
-            return false // this document is on an initial submission or not submitted yet
+            return false // design require, don't show new tags on initial submission
         }
-        return doc.dateAdded > previousSubmissionDate
+        // compare the last submission with this documents first seen on package date (date added)
+        return dayjs(doc.dateAdded)
+            .utc()
+            .isSameOrAfter(dayjs(previousSubmissionDate).utc())
     }
 
     // show legacy shared rates across submissions (this is feature replaced by linked rates)

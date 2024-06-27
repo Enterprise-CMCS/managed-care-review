@@ -127,7 +127,7 @@ jobs:
           path: ./services/app-web/coverage/coverage-final.json
 
       - name: publish code coverage
-        uses: paambaati/codeclimate-action@v6.0.0
+        uses: paambaati/codeclimate-action@v8.0.0
         continue-on-error: true
         env:
           CC_TEST_REPORTER_ID: f7474ffe9522492f5380eb86189480f352c841718c1fe6a63f169353c7cee243
@@ -195,7 +195,7 @@ jobs:
           path: ./services/app-api/coverage/coverage-final.json
 
       - name: publish code coverage
-        uses: paambaati/codeclimate-action@v6.0.0
+        uses: paambaati/codeclimate-action@v8.0.0
         continue-on-error: true
         env:
           CC_TEST_REPORTER_ID: f7474ffe9522492f5380eb86189480f352c841718c1fe6a63f169353c7cee243
@@ -223,7 +223,7 @@ jobs:
 
       - name: Install packages
         working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
 
       - name: Generate protos
         run: npx lerna run generate && npx lerna run build --scope=app-proto
@@ -232,7 +232,7 @@ jobs:
       - name: Prepare prisma client
         working-directory: services/app-api
         env:
-          PRISMA_CLI_BINARY_TARGETS: rhel-openssl-1.0.x
+          PRISMA_CLI_BINARY_TARGETS: rhel-openssl-3.0.x
         run: yarn prisma generate
 
       - name: Prepare "@prisma/client" lambda layer
@@ -554,7 +554,7 @@ jobs:
           path: ./coverage-cypress/coverage-final.json
 
       - name: publish code coverage
-        uses: paambaati/codeclimate-action@v6.0.0
+        uses: paambaati/codeclimate-action@v8.0.0
         continue-on-error: true
         env:
           CC_TEST_REPORTER_ID: f7474ffe9522492f5380eb86189480f352c841718c1fe6a63f169353c7cee243

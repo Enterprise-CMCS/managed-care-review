@@ -38,6 +38,8 @@ custom:
   # because the secret is in JSON in secret manager, we have to pass it into jwtSecret when not running locally
   jwtSecretJSON: ${env:CF_CONFIG_IGNORED_LOCALLY, ssm:/aws/reference/secretsmanager/api_jwt_secret_${sls:stage}}
   jwtSecret: ${env:JWT_SECRET, self:custom.jwtSecretJSON.jwtsigningkey}
+  reactAppS3DocumentUploadsBucket: ${env:REACT_APP_S3_DOCUMENTS_BUCKET, cf:uploads-${sls:stage}.DocumentUploadsBucketName}
+  reactAppS3QABucket: ${env:REACT_APP_S3_QA_BUCKET, cf:uploads-${sls:stage}.QAUploadsBucketName}
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
@@ -87,14 +89,14 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs18.x
+  runtime: nodejs20.x
   region: us-east-1
   stage: dev
   apiGateway:
     restApiId: ${self:custom.appApiGatewayId}
     restApiRootResourceId: ${self:custom.appApiGatewayRootResourceId}
   layers:
-    - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
+    - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:3
   iam:
     role:
       path: ${ssm:/configuration/iam/path, "/"}
@@ -148,6 +150,7 @@ provider:
 
   environment:
     stage: ${sls:stage}
+    REGION: ${self:custom.region}
     DATABASE_URL: ${self:custom.dbURL}
     REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
     API_APP_OTEL_COLLECTOR_URL: ${self:custom.apiAppOtelCollectorUrl}
@@ -160,7 +163,8 @@ provider:
     LD_SDK_KEY: ${self:custom.ldSDKKey}
     ALLOWED_IP_ADDRESSES: ${self:custom.allowedIpAddresses}
     JWT_SECRET: ${self:custom.jwtSecret}
-
+    REACT_APP_S3_QA_BUCKET: ${self:custom.reactAppS3QABucket}
+    REACT_APP_S3_DOCUMENTS_BUCKET: ${self:custom.reactAppS3DocumentUploadsBucket}
 layers:
   prismaClientMigration:
     path: lambda-layers-prisma-client-migration
@@ -224,7 +228,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientEngineLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:3
 
   migrate:
     handler: src/handlers/postgres_migrate.main
@@ -235,7 +239,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientMigrationLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:3
 
   zip_keys:
     handler: src/handlers/bulk_download.main
@@ -252,7 +256,7 @@ functions:
     events:
       - schedule: cron(0 14 ? * MON-FRI *)
     layers:
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:1
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:3
 
 resources:
   Resources:

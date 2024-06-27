@@ -36,7 +36,7 @@ export const DataDetail = ({
         !children || children === '' || (handleArray && children.length === 0)
     if (!explainMissingData && noData) return null // displays nothing - this is generally used for submission summary page
     return (
-        <div className={styles.dataDetail}>
+        <div className={styles.dataDetail} data-testid={id}>
             <dt id={id}>{label}</dt>
             <dd role="definition" aria-labelledby={id}>
                 {explainMissingData && noData ? (

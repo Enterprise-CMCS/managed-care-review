@@ -25,6 +25,7 @@ export type SubmissionTypeSummarySectionProps = {
     initiallySubmittedAt?: Date
     submissionName: string
     isStateUser: boolean
+    explainMissingData?: boolean
 }
 
 export const SubmissionTypeSummarySection = ({
@@ -37,6 +38,7 @@ export const SubmissionTypeSummarySection = ({
     initiallySubmittedAt,
     submissionName,
     isStateUser,
+    explainMissingData,
 }: SubmissionTypeSummarySectionProps): React.ReactElement => {
     const contractOrRev = contractRev ? contractRev : contract
     const contractFormData = getVisibleLatestContractFormData(
@@ -87,7 +89,7 @@ export const SubmissionTypeSummarySection = ({
                         <DataDetail
                             id="program"
                             label="Program(s)"
-                            explainMissingData={!isSubmitted}
+                            explainMissingData={explainMissingData}
                             children={programNames}
                         />
                     )}
@@ -95,7 +97,7 @@ export const SubmissionTypeSummarySection = ({
                         <DataDetail
                             id="submissionType"
                             label="Submission type"
-                            explainMissingData={!isSubmitted}
+                            explainMissingData={explainMissingData}
                             children={
                                 SubmissionTypeRecord[
                                     contractFormData.submissionType
@@ -107,7 +109,7 @@ export const SubmissionTypeSummarySection = ({
                         <DataDetail
                             id="contractType"
                             label="Contract action type"
-                            explainMissingData={!isSubmitted}
+                            explainMissingData={explainMissingData}
                             children={
                                 contractFormData.contractType
                                     ? ContractTypeRecord[
@@ -123,7 +125,7 @@ export const SubmissionTypeSummarySection = ({
                         <DataDetail
                             id="riskBasedContract"
                             label="Is this a risk based contract"
-                            explainMissingData={!isSubmitted}
+                            explainMissingData={explainMissingData}
                             children={booleanAsYesNoUserValue(
                                 contractFormData.riskBasedContract
                             )}
@@ -133,7 +135,7 @@ export const SubmissionTypeSummarySection = ({
                         <DataDetail
                             id="populationCoverage"
                             label="Which populations does this contract action cover?"
-                            explainMissingData={!isSubmitted}
+                            explainMissingData={explainMissingData}
                             children={
                                 contractFormData.populationCovered &&
                                 PopulationCoveredRecord[
@@ -151,7 +153,7 @@ export const SubmissionTypeSummarySection = ({
                             <DataDetail
                                 id="submissionDescription"
                                 label="Submission description"
-                                explainMissingData={!isSubmitted}
+                                explainMissingData={explainMissingData}
                                 children={
                                     contractFormData.submissionDescription
                                 }

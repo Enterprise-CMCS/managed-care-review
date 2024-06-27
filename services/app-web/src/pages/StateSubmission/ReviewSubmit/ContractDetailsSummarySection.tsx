@@ -43,8 +43,11 @@ import {
 } from '../../../constants/statutoryRegulatoryAttestation'
 import { SectionCard } from '../../../components/SectionCard'
 import { Contract, ContractRevision } from '../../../gen/gqlClient'
+import { useParams } from 'react-router-dom'
 import {
+    getIndexFromRevisionVersion,
     getLastContractSubmission,
+    getPackageSubmissionAtIndex,
     getVisibleLatestContractFormData,
 } from '../../../gqlHelpers/contractsAndRates'
 
@@ -56,6 +59,7 @@ export type ContractDetailsSummarySectionProps = {
     isStateUser: boolean
     submissionName: string
     onDocumentError?: (error: true) => void
+    explainMissingData?: boolean
 }
 
 function renderDownloadButton(zippedFilesURL: string | undefined | Error) {
@@ -75,10 +79,10 @@ function renderDownloadButton(zippedFilesURL: string | undefined | Error) {
 export const ContractDetailsSummarySection = ({
     contract,
     contractRev,
-    isStateUser,
     editNavigateTo, // this is the edit link for the section. When this prop exists, summary section is loaded in edit mode
     submissionName,
     onDocumentError,
+    explainMissingData,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
     // Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
@@ -89,6 +93,7 @@ export const ContractDetailsSummarySection = ({
     >(undefined)
     const ldClient = useLDClient()
     const { loggedInUser } = useAuth()
+    const { revisionVersion } = useParams()
     const isSubmittedOrCMSUser =
         contract.status === 'SUBMITTED' ||
         contract.status === 'RESUBMITTED' ||
@@ -169,8 +174,16 @@ export const ContractDetailsSummarySection = ({
         submissionName,
         isPreviousSubmission,
     ])
-    const lastSubmittedDate =
-        getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
+    // Calculate last submitted data for document upload tables
+    const lastSubmittedIndex = getIndexFromRevisionVersion(
+        contract,
+        Number(revisionVersion)
+    )
+    const lastSubmittedDate = isPreviousSubmission
+        ? getPackageSubmissionAtIndex(contract, lastSubmittedIndex)?.submitInfo
+              .updatedAt
+        : getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
+
     return (
         <SectionCard
             id="contractDetailsSection"
@@ -198,9 +211,7 @@ export const ContractDetailsSummarySection = ({
                                         label={
                                             StatutoryRegulatoryAttestationQuestion
                                         }
-                                        explainMissingData={
-                                            !isSubmittedOrCMSUser
-                                        }
+                                        explainMissingData={explainMissingData}
                                         children={
                                             StatutoryRegulatoryAttestation[
                                                 attestationYesNo
@@ -217,7 +228,7 @@ export const ContractDetailsSummarySection = ({
                                 <DataDetail
                                     id="statutoryRegulatoryAttestationDescription"
                                     label="Non-compliance description"
-                                    explainMissingData={!isSubmittedOrCMSUser}
+                                    explainMissingData={explainMissingData}
                                     children={
                                         contractFormData?.statutoryRegulatoryAttestationDescription
                                     }
@@ -230,7 +241,7 @@ export const ContractDetailsSummarySection = ({
                     <DataDetail
                         id="contractExecutionStatus"
                         label="Contract status"
-                        explainMissingData={!isSubmittedOrCMSUser}
+                        explainMissingData={explainMissingData}
                         children={
                             contractFormData?.contractExecutionStatus
                                 ? ContractExecutionStatusRecord[
@@ -246,7 +257,7 @@ export const ContractDetailsSummarySection = ({
                                 ? 'Contract amendment effective dates'
                                 : 'Contract effective dates'
                         }
-                        explainMissingData={!isSubmittedOrCMSUser}
+                        explainMissingData={explainMissingData}
                         children={
                             contractFormData?.contractDateStart &&
                             contractFormData?.contractDateEnd
@@ -261,12 +272,13 @@ export const ContractDetailsSummarySection = ({
                     <DataDetail
                         id="managedCareEntities"
                         label="Managed care entities"
-                        explainMissingData={!isSubmittedOrCMSUser}
                         children={
                             contractFormData?.managedCareEntities && (
                                 <DataDetailCheckboxList
                                     list={contractFormData?.managedCareEntities}
                                     dict={ManagedCareEntityRecord}
+                                    // if showing error for missing data, then we do NOT display empty list
+                                    displayEmptyList={!explainMissingData}
                                 />
                             )
                         }
@@ -274,12 +286,13 @@ export const ContractDetailsSummarySection = ({
                     <DataDetail
                         id="federalAuthorities"
                         label="Active federal operating authority"
-                        explainMissingData={!isSubmittedOrCMSUser}
                         children={
                             applicableFederalAuthorities && (
                                 <DataDetailCheckboxList
                                     list={applicableFederalAuthorities}
                                     dict={FederalAuthorityRecord}
+                                    // if error for missing data, then we do NOT display empty list
+                                    displayEmptyList={!explainMissingData}
                                 />
                             )
                         }
@@ -295,7 +308,7 @@ export const ContractDetailsSummarySection = ({
                                     : 'This contract action includes new or modified provisions related to the following'
                             }
                             explainMissingData={
-                                provisionsAreInvalid && !isSubmittedOrCMSUser
+                                provisionsAreInvalid && explainMissingData
                             }
                         >
                             {provisionsAreInvalid ? null : (
@@ -315,7 +328,7 @@ export const ContractDetailsSummarySection = ({
                                     : 'This contract action does NOT include new or modified provisions related to the following'
                             }
                             explainMissingData={
-                                provisionsAreInvalid && !isSubmittedOrCMSUser
+                                provisionsAreInvalid && explainMissingData
                             }
                         >
                             {provisionsAreInvalid ? null : (

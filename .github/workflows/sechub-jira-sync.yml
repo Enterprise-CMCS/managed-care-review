@@ -25,15 +25,14 @@ jobs:
           stage-name: prod
 
       - name: Sync Security Hub and Jira
-        uses: Enterprise-CMCS/mac-fc-security-hub-visibility@v2.0.4
+        uses: Enterprise-CMCS/mac-fc-security-hub-visibility@v2.0.7
         with:
           jira-token: ${{ secrets.JIRA_TOKEN }}
           jira-username: ${{ secrets.JIRA_USERNAME }}
-          jira-host: qmacbis.atlassian.net
-          jira-project-key: MCR # add issues to the 'MC-Review' project
-          jira-epic-key: MCR-2480 # add issues to the '[Tech Maintenance] Security Hub' epic
-          jira-custom-fields: '{ "customfield_10006": 925 }' # add issues to the 'Tech Maintenance' sprint
-          jira-ignore-statuses: Done
+          jira-host: jiraent.cms.gov
+          jira-project-key: 'MCR' # add issues to the 'MC-Review' project
+          jira-custom-fields: '{ "customfield_10104": 32589, "customfield_10100": "MCR-2480"}' # Sprint, Epic
+          jira-ignore-statuses: Done, Closed, Canceled
           aws-region: us-east-1
           aws-severities: CRITICAL, HIGH, MEDIUM
 

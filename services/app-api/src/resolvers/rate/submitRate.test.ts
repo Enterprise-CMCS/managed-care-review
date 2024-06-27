@@ -9,7 +9,11 @@ import { testStateUser, testCMSUser } from '../../testHelpers/userHelpers'
 import SUBMIT_RATE from '../../../../app-graphql/src/mutations/submitRate.graphql'
 import FETCH_RATE from '../../../../app-graphql/src/queries/fetchRate.graphql'
 import UNLOCK_RATE from '../../../../app-graphql/src/mutations/unlockRate.graphql'
-import { submitTestRate, updateTestRate } from '../../testHelpers'
+import {
+    clearMetadataFromRateFormData,
+    submitTestRate,
+    updateTestRate,
+} from '../../testHelpers'
 import SUBMIT_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
 import {
     addLinkedRateToTestContract,
@@ -23,11 +27,13 @@ import {
     fetchTestContract,
     submitTestContract,
 } from '../../testHelpers/gqlContractHelpers'
+import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
 
 describe('submitRate', () => {
     const ldService = testLDService({
         'rate-edit-unlock': true,
     })
+    const mockS3 = testS3Client()
 
     it('can submit rate without updates', async () => {
         const stateUser = testStateUser()
@@ -37,6 +43,7 @@ describe('submitRate', () => {
                 user: stateUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -44,6 +51,7 @@ describe('submitRate', () => {
                 user: testCMSUser(),
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer)
@@ -78,8 +86,49 @@ describe('submitRate', () => {
         expect(submittedRate).toBeDefined()
         // expect status to be submitted.
         expect(submittedRate.status).toBe('RESUBMITTED')
-        // expect formData to be the same
-        expect(submittedRateFormData).toEqual(draftFormData)
+
+        expect(submittedRateFormData.rateCapitationType).toEqual(
+            draftFormData.rateCapitationType
+        )
+        expect(submittedRateFormData.rateDateStart).toEqual(
+            draftFormData.rateDateStart
+        )
+        expect(submittedRateFormData.rateDateEnd).toEqual(
+            draftFormData.rateDateEnd
+        )
+        expect(submittedRateFormData.rateDateCertified).toEqual(
+            draftFormData.rateDateCertified
+        )
+        expect(submittedRateFormData.amendmentEffectiveDateStart).toEqual(
+            draftFormData.amendmentEffectiveDateStart
+        )
+        expect(submittedRateFormData.amendmentEffectiveDateEnd).toEqual(
+            draftFormData.amendmentEffectiveDateEnd
+        )
+        expect(submittedRateFormData.deprecatedRateProgramIDs).toEqual(
+            draftFormData.deprecatedRateProgramIDs
+        )
+        expect(submittedRateFormData.rateProgramIDs).toEqual(
+            draftFormData.rateProgramIDs
+        )
+        expect(submittedRateFormData.rateCertificationName).toEqual(
+            draftFormData.rateCertificationName
+        )
+        expect(submittedRateFormData.certifyingActuaryContacts).toEqual(
+            draftFormData.certifyingActuaryContacts
+        )
+        expect(submittedRateFormData.addtlActuaryContacts).toEqual(
+            draftFormData.addtlActuaryContacts
+        )
+        expect(submittedRateFormData.actuaryCommunicationPreference).toEqual(
+            draftFormData.actuaryCommunicationPreference
+        )
+        expect(submittedRateFormData.packagesWithSharedRateCerts).toEqual(
+            draftFormData.packagesWithSharedRateCerts
+        )
+        expect(clearMetadataFromRateFormData(submittedRateFormData)).toEqual(
+            clearMetadataFromRateFormData(draftFormData)
+        )
     })
     it('can submit rate with formData updates', async () => {
         const stateUser = testStateUser()
@@ -89,6 +138,7 @@ describe('submitRate', () => {
                 user: stateUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -96,6 +146,7 @@ describe('submitRate', () => {
                 user: testCMSUser(),
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer)
@@ -143,6 +194,7 @@ describe('submitRate', () => {
                 user: stateUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -150,6 +202,7 @@ describe('submitRate', () => {
                 user: testCMSUser(),
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const draftRate = await createSubmitAndUnlockTestRate(
@@ -189,19 +242,25 @@ describe('submitRate', () => {
         expect(submittedRate).toBeDefined()
         // expect status to be submitted.
         expect(submittedRate.status).toBe('RESUBMITTED')
+
         // expect formData to be the same
-        expect(submittedRateFormData).toEqual(draftFormData)
+
+        expect(clearMetadataFromRateFormData(submittedRateFormData)).toEqual(
+            clearMetadataFromRateFormData(draftFormData)
+        )
     })
 
     it('returns the latest linked contracts', async () => {
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
                 user: testCMSUser(),
             },
+            s3Client: mockS3,
         })
 
         // 1. Submit A0 with Rate1 and Rate2
@@ -305,6 +364,7 @@ describe('submitRate', () => {
                 user: stateUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -312,6 +372,7 @@ describe('submitRate', () => {
                 user: cmsUser,
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const draftContractWithRate =
@@ -387,6 +448,7 @@ describe('submitRate', () => {
             ldService: testLDService({
                 'rate-edit-unlock': false,
             }),
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -394,6 +456,7 @@ describe('submitRate', () => {
                 user: testCMSUser(),
             },
             ldService,
+            s3Client: mockS3,
         })
 
         const draftRate = await createSubmitAndUnlockTestRate(

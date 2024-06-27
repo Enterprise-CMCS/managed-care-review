@@ -6,6 +6,7 @@ import styles from './Footer.module.scss'
 import { Logo } from '../Logo'
 import { GridContainer, Grid } from '@trussworks/react-uswds'
 import { useStringConstants } from '../../hooks/useStringConstants'
+import { useCurrentRoute } from '../../hooks/useCurrentRoute'
 
 /**
  * CMS Footer
@@ -13,7 +14,9 @@ import { useStringConstants } from '../../hooks/useStringConstants'
 export const Footer = (): React.ReactElement => {
     const stringConstants = useStringConstants()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
-    return (
+    const { currentRoute: route } = useCurrentRoute()
+
+    return route !== 'GRAPHQL_EXPLORER' ? (
         <footer>
             <div className={styles.logosRow}>
                 <GridContainer>
@@ -55,5 +58,7 @@ export const Footer = (): React.ReactElement => {
                 </GridContainer>
             </div>
         </footer>
+    ) : (
+        <></>
     )
 }

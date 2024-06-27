@@ -21,12 +21,14 @@ fragment rateRevisionFragmentForFetchRate on RateRevision {
             s3URL
             sha256
             dateAdded
+            downloadURL
         }
         supportingDocuments {
             name
             s3URL
             sha256
             dateAdded
+            downloadURL
         }
         rateDateStart
         rateDateEnd
@@ -94,6 +96,7 @@ fragment rateRevisionFragmentForFetchRate on RateRevision {
                 s3URL
                 sha256
                 dateAdded
+                downloadURL
             }
             contractType
             contractExecutionStatus
@@ -102,6 +105,7 @@ fragment rateRevisionFragmentForFetchRate on RateRevision {
                 s3URL
                 sha256
                 dateAdded
+                downloadURL
             }
             contractDateStart
             contractDateEnd

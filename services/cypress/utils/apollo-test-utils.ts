@@ -9,6 +9,7 @@ import {
 } from '@apollo/client'
 import { Amplify, Auth as AmplifyAuth, API } from 'aws-amplify'
 import { UnlockedHealthPlanFormDataType } from '../../app-web/src/common-code/healthPlanFormDataType'
+import { RateFormDataInput } from '../gen/gqlClient';
 
 type StateUserType = {
     id: string
@@ -41,7 +42,7 @@ type DivisionType = 'DMCO' | 'DMCP' | 'OACT'
 type UserType = StateUserType | AdminUserType | CMSUserType
 
 // programs for state used in tests
-const minnesotaStatePrograms =[
+const minnesotaStatePrograms = [
     {
         "id": "abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce",
         "fullName": "Special Needs Basic Care",
@@ -69,6 +70,7 @@ const minnesotaStatePrograms =[
 ]
 
 const deprecatedContractOnlyData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
+    stateCode: 'MN',
     stateContacts: [
         {
             name: 'Name',
@@ -103,7 +105,8 @@ const deprecatedContractOnlyData = (): Partial<UnlockedHealthPlanFormDataType>=>
     managedCareEntities: ['MCO'],
     federalAuthorities: ['STATE_PLAN'],
     rateInfos: [],
-    statutoryRegulatoryAttestation: true
+    statutoryRegulatoryAttestation: true,
+    programIDs: [minnesotaStatePrograms[0].id]
 })
 
 const deprecatedContractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
@@ -202,7 +205,42 @@ const deprecatedContractAndRatesData = (): Partial<UnlockedHealthPlanFormDataTyp
             },
     ],
     statutoryRegulatoryAttestation: false,
-    statutoryRegulatoryAttestationDescription: 'No compliance'
+    statutoryRegulatoryAttestationDescription: 'No compliance',
+    programIDs: [minnesotaStatePrograms[0].id]
+})
+
+const rateFormData = (data?: Partial<RateFormDataInput>): RateFormDataInput => ({
+    rateType: 'NEW',
+    rateCapitationType: 'RATE_CELL',
+    rateDocuments: [
+        {
+            name: 'rate1Document1.pdf',
+            s3URL: 's3://local-uploads/1684382956834-rate1Document1.pdf/rate1Document1.pdf',
+            sha256: 'fakesha',
+        },
+    ],
+    supportingDocuments: [   {
+        name: 'rate1SupportingDocument1.pdf',
+        s3URL: 's3://local-uploads/1684382956834-rate1SupportingDocument1.pdf/rate1SupportingDocument1.pdf',
+        sha256: 'fakesha2',
+    }],
+    rateDateStart: '2025-05-01',
+    rateDateEnd: '2026-04-30',
+    rateDateCertified: '2025-03-15',
+    rateProgramIDs: [minnesotaStatePrograms[0].id],
+    certifyingActuaryContacts: [
+        {
+            name: 'actuary1',
+            titleRole: 'test title',
+            email: 'email@example.com',
+            actuarialFirm: 'MERCER' as const,
+            actuarialFirmOther: '',
+        },
+    ],
+    deprecatedRateProgramIDs: [],
+    addtlActuaryContacts: [],
+    actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
+    ...data
 })
 
 const newSubmissionInput = (overrides?: Partial<UnlockedHealthPlanFormDataType> ): Partial<UnlockedHealthPlanFormDataType> => {
@@ -432,11 +470,11 @@ export {
     apolloClientWrapper,
     deprecatedContractOnlyData,
     deprecatedContractAndRatesData,
-    contractAndRatesData,
     newSubmissionInput,
     cmsUser,
     adminUser,
     stateUser,
+    rateFormData,
     minnesotaStatePrograms
 }
 export type {

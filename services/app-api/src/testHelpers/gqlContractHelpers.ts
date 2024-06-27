@@ -171,7 +171,7 @@ const createAndUpdateTestContractWithoutRates = async (
     draft.contractDocuments = [
         {
             name: 'contractDocument.pdf',
-            s3URL: 'fakeS3URL',
+            s3URL: 's3://bucketname/key/test1',
             sha256: 'fakesha',
         },
     ]

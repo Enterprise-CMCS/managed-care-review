@@ -457,6 +457,8 @@ input DocumentInput {
     name: String!
     "The S3 URL of the document"
     s3URL: String!
+    "The url used for downloading a file from S3"
+    downloadURL: String
 }
 
 input CreateQuestionInput {
@@ -795,6 +797,7 @@ by an authenticated user.
 type Document {
     name: String!
     s3URL: String!
+    downloadURL: String
 }
 
 """
@@ -865,8 +868,10 @@ type GenericDocument {
     s3URL: String!
     "The sha256 is a unique string representing the file, generated on the FE currently in the FileUpload component"
     sha256: String!
+    "URL received from S3 for downloading the document"
+    downloadURL: String
     "The first date this document was added to submitted package - if still an initial draft, this date is last updated, otherwise it is the submitInfo lastUpdated"
-    dateAdded: Date
+    dateAdded: DateTime
 }
 
 """
@@ -881,8 +886,10 @@ input GenericDocumentInput {
     s3URL: String!
     "The sha256 is a unique string representing the file, generated on the FE currently in the FileUpload component"
     sha256: String!
+    "The url used for downloading a file from S3"
+    downloadURL: String
      "The first date this document was added to submitted package - this is ignored on input and regenerated on return"
-    dateAdded: Date
+    dateAdded: DateTime
 }
 
 "The large overarching population of people that the program covers."

@@ -114,12 +114,14 @@ export const ReviewSubmit = (): React.ReactElement => {
                     editNavigateTo="../type"
                     statePrograms={statePrograms}
                     isStateUser={isStateUser}
+                    explainMissingData
                 />
                 <ContractDetailsSummarySection
                     contract={contract}
                     isStateUser={isStateUser}
                     editNavigateTo="../contract-details"
                     submissionName={submissionName}
+                    explainMissingData
                 />
 
                 {isContractActionAndRateCertification && (
@@ -128,6 +130,7 @@ export const ReviewSubmit = (): React.ReactElement => {
                         editNavigateTo="../rate-details"
                         submissionName={submissionName}
                         statePrograms={statePrograms}
+                        explainMissingData
                     />
                 )}
 
@@ -135,6 +138,7 @@ export const ReviewSubmit = (): React.ReactElement => {
                     contract={contract}
                     isStateUser={isStateUser}
                     editNavigateTo="../contacts"
+                    explainMissingData
                 />
 
                 <PageActionsContainer

@@ -379,26 +379,21 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
 Cypress.Commands.add('fillOutLinkedRate', () => {
     // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
-            cy.findByRole('radiogroup', {
-                name: /Was this rate certification included with another submission?/,
-            })
-                .should('exist')
-                .within(() => {
-                    cy.findByText('Yes, this rate certification is part of another submission').click()
-                })
-
-
-               cy.findByRole('combobox', { name: 'Which rate certification was it?' }).click({
-                    force: true,
-                })
-               cy.findAllByRole('option').first().click()
-               cy.findByText(/`Rate ID:/).should('be.visible')
-
-
-            cy.verifyDocumentsHaveNoErrors()
-            cy.waitForDocumentsToLoad()
-            cy.findAllByTestId('errorMessage').should('have.length', 0)
+    cy.findByRole('radiogroup', {
+        name: /Was this rate certification included with another submission?/,
+    })
+        .should('exist')
+        .within(() => {
+            cy.findByText('Yes, this rate certification is part of another submission').click()
         })
+
+
+   cy.findByRole('combobox', { name: 'linked rate (required)' }).click({
+        force: true,
+    })
+   cy.findAllByRole('option').first().click()
+   cy.findByText(/Submission date/).should('be.visible')
+})
 
 Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
     // Must be on '/submissions/:id/edit/rate-details'

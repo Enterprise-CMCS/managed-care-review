@@ -17,14 +17,9 @@ import {
 } from '../StateSubmission/ErrorOrLoadingPage'
 import { Error404 } from '../Errors/Error404Page'
 
-type RouteParams = {
-    id: string
-    revisionVersion: string
-}
-
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
-    const { id, revisionVersion } = useParams<keyof RouteParams>()
+    const { id, revisionVersion } = useParams()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'

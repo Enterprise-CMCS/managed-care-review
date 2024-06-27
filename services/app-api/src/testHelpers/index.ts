@@ -18,6 +18,7 @@ export {
     mockDraftRate,
 } from './rateDataMocks'
 
+export { testS3Client } from './s3Helpers'
 export { getStateRecord } from './stateHelpers'
 
 export { consoleLogFullData } from './debugHelpers'
@@ -38,4 +39,8 @@ export {
     // updateTestContract,
 } from './gqlContractHelpers'
 
-export { clearDocMetadata } from './documentHelpers'
+export {
+    clearDocMetadata,
+    clearMetadataFromContractFormData,
+    clearMetadataFromRateFormData,
+} from './documentHelpers'

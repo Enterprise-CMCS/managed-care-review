@@ -210,6 +210,7 @@ describe('ContractDetailsSummarySection', () => {
                     contract={contract}
                     isStateUser
                     submissionName="MN-PMAP-0001"
+                    explainMissingData
                 />,
                 {
                     apolloProvider: defaultApolloMocks,
@@ -753,6 +754,7 @@ describe('ContractDetailsSummarySection', () => {
                         submissionName="MN-PMAP-0001"
                         editNavigateTo="contract-details"
                         isStateUser
+                        explainMissingData
                     />,
                     {
                         apolloProvider: defaultApolloMocks,
@@ -797,6 +799,7 @@ describe('ContractDetailsSummarySection', () => {
                         isStateUser
                         submissionName="MN-PMAP-0001"
                         editNavigateTo="contract-details"
+                        explainMissingData
                     />,
                     {
                         apolloProvider: defaultApolloMocks,
