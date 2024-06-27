@@ -20,6 +20,7 @@ export {
 
 export { testS3Client } from './s3Helpers'
 export { getStateRecord } from './stateHelpers'
+export type { StateCodeType } from './stateHelpers'
 
 export { consoleLogFullData } from './debugHelpers'
 
@@ -31,12 +32,11 @@ export {
 } from './gqlRateHelpers'
 
 export {
-    createTestContract,
+    createTestContractWithDB,
     createAndSubmitTestContract,
-    // fetchTestContractById,
-    // submitTestContract,
-    // unlockTestContract,
-    // updateTestContract,
+    fetchTestContract,
+    updateTestContractDraftRevision,
+    createTestContract,
 } from './gqlContractHelpers'
 
 export {
@@ -44,3 +44,5 @@ export {
     clearMetadataFromContractFormData,
     clearMetadataFromRateFormData,
 } from './documentHelpers'
+
+export { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'

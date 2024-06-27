@@ -45,8 +45,8 @@ describe('fetchContract', () => {
         expect(draftRate).toHaveLength(1)
         expect(draftRate[0].status).toBe('DRAFT')
         expect(draftRate[0].stateCode).toBe('FL')
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         expect(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             draftRate[0].draftRevision?.formData.rateDocuments![0].downloadURL
         ).toBeDefined()
     })
@@ -73,7 +73,7 @@ describe('fetchContract', () => {
         const draftContract =
             fetchDraftContractResult.data?.fetchContract.contract.draftRevision
 
-        expect(draftContract.contractName).toMatch(/MCR-FL-\d{4}-MMA/)
+        expect(draftContract.contractName).toMatch(/MCR-FL-\d{4}-NEMTMTM/)
     })
 
     it('returns a stable initially submitted at', async () => {

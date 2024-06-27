@@ -12,6 +12,7 @@ import {
     submissionTypeSchema,
 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
 import { statusSchema } from './statusType'
+import type { RawCreateParams, ZodTypeAny } from 'zod/lib/types'
 
 const documentSchema = z.object({
     name: z.string(),
@@ -34,40 +35,55 @@ const packagesWithSharedRateCerts = z.object({
     packageStatus: statusSchema.optional(),
 })
 
+function preprocessNulls<T extends ZodTypeAny>(
+    schema: T,
+    params?: RawCreateParams
+) {
+    return z.preprocess((val) => val ?? undefined, schema, params)
+}
+
 const contractFormDataSchema = z.object({
     programIDs: z.array(z.string()),
-    populationCovered: populationCoveredSchema.optional(),
+    populationCovered: preprocessNulls(populationCoveredSchema.optional()),
     submissionType: submissionTypeSchema,
-    riskBasedContract: z.boolean().optional(),
+    riskBasedContract: preprocessNulls(z.boolean().optional()),
     submissionDescription: z.string(),
     stateContacts: z.array(stateContactSchema),
     supportingDocuments: z.array(documentSchema),
     contractType: contractTypeSchema,
-    contractExecutionStatus: contractExecutionStatusSchema.optional(),
+    contractExecutionStatus: preprocessNulls(
+        contractExecutionStatusSchema.optional()
+    ),
     contractDocuments: z.array(documentSchema),
-    contractDateStart: z.date().optional(),
-    contractDateEnd: z.date().optional(),
+    contractDateStart: preprocessNulls(z.date().optional()),
+    contractDateEnd: preprocessNulls(z.date().optional()),
     managedCareEntities: z.array(managedCareEntitiesSchema),
     federalAuthorities: z.array(federalAuthoritySchema),
-    inLieuServicesAndSettings: z.boolean().optional(),
-    modifiedBenefitsProvided: z.boolean().optional(),
-    modifiedGeoAreaServed: z.boolean().optional(),
-    modifiedMedicaidBeneficiaries: z.boolean().optional(),
-    modifiedRiskSharingStrategy: z.boolean().optional(),
-    modifiedIncentiveArrangements: z.boolean().optional(),
-    modifiedWitholdAgreements: z.boolean().optional(),
-    modifiedStateDirectedPayments: z.boolean().optional(),
-    modifiedPassThroughPayments: z.boolean().optional(),
-    modifiedPaymentsForMentalDiseaseInstitutions: z.boolean().optional(),
-    modifiedMedicalLossRatioStandards: z.boolean().optional(),
-    modifiedOtherFinancialPaymentIncentive: z.boolean().optional(),
-    modifiedEnrollmentProcess: z.boolean().optional(),
-    modifiedGrevienceAndAppeal: z.boolean().optional(),
-    modifiedNetworkAdequacyStandards: z.boolean().optional(),
-    modifiedLengthOfContract: z.boolean().optional(),
-    modifiedNonRiskPaymentArrangements: z.boolean().optional(),
-    statutoryRegulatoryAttestation: z.boolean().optional(),
-    statutoryRegulatoryAttestationDescription: z.string().optional(),
+    inLieuServicesAndSettings: preprocessNulls(z.boolean().optional()),
+    modifiedBenefitsProvided: preprocessNulls(z.boolean().optional()),
+    modifiedGeoAreaServed: preprocessNulls(z.boolean().optional()),
+    modifiedMedicaidBeneficiaries: preprocessNulls(z.boolean().optional()),
+    modifiedRiskSharingStrategy: preprocessNulls(z.boolean().optional()),
+    modifiedIncentiveArrangements: preprocessNulls(z.boolean().optional()),
+    modifiedWitholdAgreements: preprocessNulls(z.boolean().optional()),
+    modifiedStateDirectedPayments: preprocessNulls(z.boolean().optional()),
+    modifiedPassThroughPayments: preprocessNulls(z.boolean().optional()),
+    modifiedPaymentsForMentalDiseaseInstitutions: preprocessNulls(
+        z.boolean().optional()
+    ),
+    modifiedMedicalLossRatioStandards: preprocessNulls(z.boolean().optional()),
+    modifiedOtherFinancialPaymentIncentive: preprocessNulls(
+        z.boolean().optional()
+    ),
+    modifiedEnrollmentProcess: preprocessNulls(z.boolean().optional()),
+    modifiedGrevienceAndAppeal: preprocessNulls(z.boolean().optional()),
+    modifiedNetworkAdequacyStandards: preprocessNulls(z.boolean().optional()),
+    modifiedLengthOfContract: preprocessNulls(z.boolean().optional()),
+    modifiedNonRiskPaymentArrangements: preprocessNulls(z.boolean().optional()),
+    statutoryRegulatoryAttestation: preprocessNulls(z.boolean().optional()),
+    statutoryRegulatoryAttestationDescription: preprocessNulls(
+        z.string().optional()
+    ),
 })
 
 const rateFormDataSchema = z.object({
@@ -100,7 +116,7 @@ type RateFormDataType = z.infer<typeof rateFormDataSchema>
 type ContractFormEditableType = Partial<ContractFormDataType>
 type RateFormEditableType = Partial<RateFormDataType>
 
-export { contractFormDataSchema, rateFormDataSchema }
+export { contractFormDataSchema, rateFormDataSchema, preprocessNulls }
 
 export type {
     ContractFormDataType,

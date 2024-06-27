@@ -37,6 +37,7 @@ import {
     findAllRatesWithHistoryBySubmitInfo,
     submitContract,
     submitRate,
+    updateDraftContract,
 } from './contractAndRates'
 import type {
     SubmitContractArgsType,
@@ -106,6 +107,10 @@ type Store = {
     findRateWithHistory: (rateID: string) => Promise<RateType | Error>
     updateContract: (
         args: UpdateMCCRSIDFormArgsType
+    ) => Promise<ContractType | Error>
+
+    updateDraftContract: (
+        args: UpdateContractArgsType
     ) => Promise<ContractType | Error>
 
     updateDraftContractWithRates: (
@@ -180,6 +185,7 @@ function NewPostgresStore(client: PrismaClient): Store {
         updateDraftContractWithRates: (args) =>
             updateDraftContractWithRates(client, args),
         updateContract: (args) => updateMCCRSID(client, args),
+        updateDraftContract: (args) => updateDraftContract(client, args),
         updateDraftContractRates: (args) =>
             updateDraftContractRates(client, args),
         findAllContractsWithHistoryByState: (args) =>
