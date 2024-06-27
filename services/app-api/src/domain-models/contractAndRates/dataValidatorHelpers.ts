@@ -41,23 +41,13 @@ const validateStatutoryRegulatoryAttestation = (
     )
 
 const validateProgramIDs = (stateCode: string, store: Store) => {
-    const allPrograms = store.findStatePrograms(stateCode)
-
     return z.array(z.string()).superRefine((programs, ctx) => {
+        const allPrograms = store.findPrograms(stateCode, programs)
         if (allPrograms instanceof Error) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: allPrograms.message,
             })
-        } else {
-            const allProgramIDS = allPrograms.map((p) => p.id)
-
-            if (!programs.every((program) => allProgramIDS.includes(program))) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: `programIDs are invalid for the state ${stateCode}`,
-                })
-            }
         }
     })
 }
