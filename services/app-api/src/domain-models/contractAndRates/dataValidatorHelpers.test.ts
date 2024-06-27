@@ -161,7 +161,10 @@ describe('validateContractDraftRevisionInput', () => {
                     email: 'abc123@gmail',
                 },
             ],
-            programIDs: ['imNotAValidProgramID'],
+            programIDs: [
+                'imNotAValidProgramID',
+                '83d0e9d9-6592-439a-b46c-3235e8192fa0',
+            ],
             submissionType: 'CONTRACT_AND_RATES',
             populationCovered: 'CHIP',
         }
@@ -188,7 +191,7 @@ describe('validateContractDraftRevisionInput', () => {
 
         expect(validatedFormData.message).toContain('Invalid email')
         expect(validatedFormData.message).toContain(
-            `programIDs are invalid for the state ${stateCode}`
+            `Program(s) in [${formData.programIDs}] are not valid ${stateCode} programs`
         )
         expect(validatedFormData.message).toContain(
             `populationCoveredSchema of CHIP cannot be submissionType of CONTRACT_AND_RATES`
