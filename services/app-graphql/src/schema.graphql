@@ -644,7 +644,9 @@ type UpdateCMSUserPayload {
 
 input UpdateContractDraftRevisionInput {
     contractID: ID!
-    draftRevision: ContractDraftRevisionInput!
+    "date the contracts draft revision was last updated at"
+    lastSeenUpdatedAt: DateTime!
+    formData: ContractDraftRevisionFormDataInput!
 }
 
 type UpdateContractDraftRevisionPayload {
@@ -807,15 +809,6 @@ UpdateInformation is used for the unlockInfo and the submitInfo on HealthPlanRev
 It tracks who, when, and why the submission or unlock was performed.
 """
 type UpdateInformation {
-    "the datetime when the update occured"
-    updatedAt: DateTime!
-    "the email of the user who performed the update"
-    updatedBy: String!
-    "the reason provided by the user when performing the update"
-    updatedReason: String!
-}
-
-input UpdateInformationInput {
     "the datetime when the update occured"
     updatedAt: DateTime!
     "the email of the user who performed the update"
@@ -1579,24 +1572,6 @@ input UnlockRateInput {
     rateID: ID!
     "User given reason this rate was unlocked"
     unlockedReason: String!
-}
-
-input ContractDraftRevisionInput {
-    id: ID!
-    createdAt: DateTime!
-    updatedAt: DateTime!
-    "submitInfo is the who/when/why for this revision being submitted. An Unlocked revision has no submitInfo"
-    submitInfo: UpdateInformationInput
-    "unlockInfo is the who/when/why for this revision being unlocked. A DRAFT or SUBMITTED revision will not have one"
-    unlockInfo: UpdateInformationInput
-
-    "formData is all the contract specific info part of this submission"
-    formData: ContractDraftRevisionFormDataInput!
-    """
-    Represents the name of the contract pacakge.
-    This value is auto generated based on contract state number, contract type, dates, and state program details"\
-    """
-    contractName: String!
 }
 
 input ContractDraftRevisionFormDataInput {
