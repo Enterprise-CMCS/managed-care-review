@@ -1,5 +1,5 @@
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
-import type { ContractType } from '../../domain-models'
+import type { UnlockedContractType } from '../../domain-models'
 import { packageName as generatePackageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 import {
@@ -12,8 +12,7 @@ import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
 import type { ProgramType, UpdateInfoType } from '../../domain-models'
 
 export const unlockContractCMSEmail = async (
-    // contractRev: ContractRevisionWithRatesType,
-    contract: ContractType,
+    contract: UnlockedContractType,
     updateInfo: UpdateInfoType,
     config: EmailConfiguration,
     stateAnalystsEmails: StateAnalystsEmails,

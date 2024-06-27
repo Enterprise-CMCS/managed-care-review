@@ -1,9 +1,6 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-// import type { UpdateInfoType } from '../../domain-models'
-import {
-    isCMSUser,
-    // contractSubmitters
-} from '../../domain-models'
+import type { UpdateInfoType } from '../../domain-models'
+import { isCMSUser, contractSubmitters } from '../../domain-models'
 import type { Emailer } from '../../emailer'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
@@ -122,7 +119,7 @@ export function unlockContractResolver(
         }
 
         // Get submitter email from every pkg submitted revision.
-        // const submitterEmails = contractSubmitters(unlockContractResult)
+        const submitterEmails = contractSubmitters(unlockContractResult)
 
         const statePrograms = store.findStatePrograms(
             unlockContractResult.stateCode
@@ -139,53 +136,53 @@ export function unlockContractResolver(
             })
         }
 
-        // const updateInfo: UpdateInfoType = {
-        //     updatedAt: new Date(), // technically this is not right but it's close enough while we are supporting two systems
-        //     updatedBy: context.user.email,
-        //     updatedReason: unlockedReason,
-        // }
+        const updateInfo: UpdateInfoType = {
+            updatedAt: new Date(), // technically this is not right but it's close enough while we are supporting two systems
+            updatedBy: context.user.email,
+            updatedReason: unlockedReason,
+        }
 
-        // const unlockPackageCMSEmailResult =
-        //     await emailer.sendUnlockContractCMSEmail(
-        //         unlockContractResult,
-        //         updateInfo,
-        //         stateAnalystsEmails,
-        //         statePrograms
-        //     )
+        const unlockContractCMSEmailResult =
+            await emailer.sendUnlockContractCMSEmail(
+                unlockContractResult,
+                updateInfo,
+                stateAnalystsEmails,
+                statePrograms
+            )
 
-        // const unlockPackageStateEmailResult =
-        //     await emailer.sendUnlockContractStateEmail(
-        //         unlockContractResult,
-        //         updateInfo,
-        //         statePrograms,
-        //         submitterEmails
-        //     )
+        const unlockContractStateEmailResult =
+            await emailer.sendUnlockContractStateEmail(
+                unlockContractResult,
+                updateInfo,
+                statePrograms,
+                submitterEmails
+            )
 
-        // if (
-        //     unlockPackageCMSEmailResult instanceof Error ||
-        //     unlockPackageStateEmailResult instanceof Error
-        // ) {
-        //     if (unlockPackageCMSEmailResult instanceof Error) {
-        //         logError(
-        //             'unlockPackageCMSEmail - CMS email failed',
-        //             unlockPackageCMSEmailResult
-        //         )
-        //         setErrorAttributesOnActiveSpan('CMS email failed', span)
-        //     }
-        //     if (unlockPackageStateEmailResult instanceof Error) {
-        //         logError(
-        //             'unlockPackageStateEmail - state email failed',
-        //             unlockPackageStateEmailResult
-        //         )
-        //         setErrorAttributesOnActiveSpan('state email failed', span)
-        //     }
-        //     throw new GraphQLError('Email failed.', {
-        //         extensions: {
-        //             code: 'INTERNAL_SERVER_ERROR',
-        //             cause: 'EMAIL_ERROR',
-        //         },
-        //     })
-        // }
+        if (
+            unlockContractCMSEmailResult instanceof Error ||
+            unlockContractStateEmailResult instanceof Error
+        ) {
+            if (unlockContractCMSEmailResult instanceof Error) {
+                logError(
+                    'unlockContractCMSEmail - CMS email failed',
+                    unlockContractCMSEmailResult
+                )
+                setErrorAttributesOnActiveSpan('CMS email failed', span)
+            }
+            if (unlockContractStateEmailResult instanceof Error) {
+                logError(
+                    'unlockContractStateEmail - state email failed',
+                    unlockContractStateEmailResult
+                )
+                setErrorAttributesOnActiveSpan('state email failed', span)
+            }
+            throw new GraphQLError('Email failed.', {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
+        }
 
         logSuccess('unlockContract')
         setSuccessAttributesOnActiveSpan(span)

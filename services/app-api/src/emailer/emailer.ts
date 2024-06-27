@@ -24,7 +24,7 @@ import type {
     ProgramType,
     ContractRevisionWithRatesType,
     Question,
-    ContractType,
+    UnlockedContractType,
 } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 
@@ -85,13 +85,13 @@ type Emailer = {
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendUnlockContractCMSEmail: (
-        contract: ContractType,
+        contract: UnlockedContractType,
         updateInfo: UpdateInfoType,
         stateAnalystsEmails: StateAnalystsEmails,
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendUnlockContractStateEmail: (
-        contract: ContractType,
+        contract: UnlockedContractType,
         updateInfo: UpdateInfoType,
         statePrograms: ProgramType[],
         submitterEmails: string[]

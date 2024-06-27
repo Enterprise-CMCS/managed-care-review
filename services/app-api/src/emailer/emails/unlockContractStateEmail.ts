@@ -9,9 +9,9 @@ import type { EmailData, EmailConfiguration } from '../'
 import type { ProgramType, UpdateInfoType } from '../../domain-models'
 import { reviewAndSubmitURL } from '../generateURLs'
 import { pruneDuplicateEmails } from '../formatters'
-import type { ContractType } from '../../domain-models'
+import type { UnlockedContractType } from '../../domain-models'
 export const unlockContractStateEmail = async (
-    contract: ContractType,
+    contract: UnlockedContractType,
     updateInfo: UpdateInfoType,
     config: EmailConfiguration,
     statePrograms: ProgramType[],
