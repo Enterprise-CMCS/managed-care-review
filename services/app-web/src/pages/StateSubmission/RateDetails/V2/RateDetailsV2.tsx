@@ -172,6 +172,7 @@ const RateDetailsV2 = ({
 
     // Set up data for form. Either based on contract API (for multi rate) or rates API (for edit and submit of standalone rate)
     const contract = fetchContractData?.fetchContract.contract
+    const contractDraftRevision = contract?.draftRevision
     const ratesFromContract = contract?.draftRates
     const initialRequestLoading = fetchContractLoading || fetchRateLoading
     const initialRequestError = fetchContractError || fetchRateError
@@ -284,6 +285,7 @@ const RateDetailsV2 = ({
                     variables: {
                         input: {
                             contractID: id ?? 'no-id',
+                            lastSeenUpdatedAt: contractDraftRevision?.updatedAt,
                             updatedRates,
                         },
                     },
