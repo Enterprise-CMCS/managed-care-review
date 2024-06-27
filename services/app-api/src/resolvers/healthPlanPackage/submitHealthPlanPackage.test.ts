@@ -809,7 +809,8 @@ describe(`Tests $testName`, () => {
             sub.programIDs,
             programs
         )
-        const rateName = 'MCR-FL-LTC-20250501-20260430-CERTIFICATION-20250315'
+        const rateName =
+            'MCR-FL-NEMTMTM-20250501-20260430-CERTIFICATION-20250315'
 
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
