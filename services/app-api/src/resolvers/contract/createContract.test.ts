@@ -4,7 +4,7 @@ import CREATE_CONTRACT from 'app-graphql/src/mutations/createContract.graphql'
 import { testCMSUser } from '../../testHelpers/userHelpers'
 
 describe('createContract', () => {
-    it('returns package with unlocked form data', async () => {
+    it('returns contract with unlocked form data', async () => {
         const server = await constructTestPostgresServer()
 
         const input: CreateContractInput = {
@@ -13,7 +13,7 @@ describe('createContract', () => {
                 '5c10fe9f-bec9-416f-a20c-718b152ad633',
                 '037af66b-81eb-4472-8b80-01edf17d12d9',
             ],
-            riskBasedContract: false,
+            riskBasedContract: null,
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
             contractType: 'BASE',

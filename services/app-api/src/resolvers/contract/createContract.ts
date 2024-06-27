@@ -57,16 +57,11 @@ export function createContract(
             })
         }
 
-        const riskBasedContract =
-            input.riskBasedContract === undefined
-                ? undefined
-                : input.riskBasedContract?.valueOf()
-
         const insertArgs: InsertContractArgsType = {
             stateCode: stateFromCurrentUser,
             populationCovered: input.populationCovered,
             programIDs: input.programIDs,
-            riskBasedContract: riskBasedContract,
+            riskBasedContract: input.riskBasedContract ?? undefined,
             submissionDescription: input.submissionDescription,
             submissionType: input.submissionType,
             contractType: input.contractType,
