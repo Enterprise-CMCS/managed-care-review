@@ -21,7 +21,7 @@ async function updateDraftContract(
 
     try {
         return await client.$transaction(async (tx) => {
-            // Given all the Contracts associated with this draft, find the most recent submitted
+            // Find the latest contract revision with contractID and with no submitInfo,
             const currentContractRev = await tx.contractRevisionTable.findFirst(
                 {
                     where: {
