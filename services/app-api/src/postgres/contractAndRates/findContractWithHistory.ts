@@ -1,8 +1,5 @@
 import type { PrismaTransactionType } from '../prismaTypes'
-import type {
-    ContractType,
-    UnlockedContractType,
-} from '../../domain-models/contractAndRates'
+import type { ContractType } from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../postgresErrors'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaSubmittedContractHelpers'
@@ -14,13 +11,15 @@ import { includeFullContract } from './prismaSubmittedContractHelpers'
 async function findContractWithHistory(
     client: PrismaTransactionType,
     contractID: string
-): Promise<ContractType | UnlockedContractType | NotFoundError | Error> {
+): Promise<ContractType | NotFoundError | Error> {
     try {
         const contract = await client.contractTable.findUnique({
             where: {
                 id: contractID,
             },
-            include: includeFullContract,
+            include: {
+                ...includeFullContract,
+            },
         })
 
         if (!contract) {

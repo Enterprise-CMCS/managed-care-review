@@ -1,6 +1,9 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import type { UpdateInfoType, ContractType } from '../../domain-models'
-import { isCMSUser, contractSubmitters } from '../../domain-models'
+// import type { UpdateInfoType } from '../../domain-models'
+import {
+    isCMSUser,
+    // contractSubmitters
+} from '../../domain-models'
 import type { Emailer } from '../../emailer'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
@@ -44,7 +47,6 @@ export function unlockContractResolver(
         }
 
         const contractResult = await store.findContractWithHistory(contractID)
-
         if (contractResult instanceof Error) {
             if (contractResult instanceof NotFoundError) {
                 const errMessage = `A contract must exist to be unlocked: ${contractID}`
@@ -66,9 +68,7 @@ export function unlockContractResolver(
             })
         }
 
-        const contract: ContractType = contractResult
-
-        if (contract.draftRevision) {
+        if (contractResult.draftRevision) {
             const errMessage = `Attempted to unlock contract with wrong status`
             logError('unlockContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
@@ -78,17 +78,16 @@ export function unlockContractResolver(
             })
         }
 
-        // Now, unlock the contract!
         const unlockContractResult = await store.unlockContract(
             {
-                contractID: contract.id,
+                contractID: contractResult.id,
                 unlockReason: unlockedReason,
                 unlockedByUserID: user.id,
             },
             linkRatesFF
         )
         if (unlockContractResult instanceof Error) {
-            const errMessage = `Failed to unlock contract revision with ID: ${contract.id}; ${unlockContractResult.message}`
+            const errMessage = `Failed to unlock contract revision with ID: ${contractResult.id}; ${unlockContractResult.message}`
             logError('unlockContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
@@ -123,7 +122,7 @@ export function unlockContractResolver(
         }
 
         // Get submitter email from every pkg submitted revision.
-        const submitterEmails = contractSubmitters(unlockContractResult)
+        // const submitterEmails = contractSubmitters(unlockContractResult)
 
         const statePrograms = store.findStatePrograms(
             unlockContractResult.stateCode
@@ -140,53 +139,53 @@ export function unlockContractResolver(
             })
         }
 
-        const updateInfo: UpdateInfoType = {
-            updatedAt: new Date(), // technically this is not right but it's close enough while we are supporting two systems
-            updatedBy: context.user.email,
-            updatedReason: unlockedReason,
-        }
+        // const updateInfo: UpdateInfoType = {
+        //     updatedAt: new Date(), // technically this is not right but it's close enough while we are supporting two systems
+        //     updatedBy: context.user.email,
+        //     updatedReason: unlockedReason,
+        // }
 
-        const unlockPackageCMSEmailResult =
-            await emailer.sendUnlockContractCMSEmail(
-                unlockContractResult,
-                updateInfo,
-                stateAnalystsEmails,
-                statePrograms
-            )
+        // const unlockPackageCMSEmailResult =
+        //     await emailer.sendUnlockContractCMSEmail(
+        //         unlockContractResult,
+        //         updateInfo,
+        //         stateAnalystsEmails,
+        //         statePrograms
+        //     )
 
-        const unlockPackageStateEmailResult =
-            await emailer.sendUnlockContractStateEmail(
-                unlockContractResult,
-                updateInfo,
-                statePrograms,
-                submitterEmails
-            )
+        // const unlockPackageStateEmailResult =
+        //     await emailer.sendUnlockContractStateEmail(
+        //         unlockContractResult,
+        //         updateInfo,
+        //         statePrograms,
+        //         submitterEmails
+        //     )
 
-        if (
-            unlockPackageCMSEmailResult instanceof Error ||
-            unlockPackageStateEmailResult instanceof Error
-        ) {
-            if (unlockPackageCMSEmailResult instanceof Error) {
-                logError(
-                    'unlockPackageCMSEmail - CMS email failed',
-                    unlockPackageCMSEmailResult
-                )
-                setErrorAttributesOnActiveSpan('CMS email failed', span)
-            }
-            if (unlockPackageStateEmailResult instanceof Error) {
-                logError(
-                    'unlockPackageStateEmail - state email failed',
-                    unlockPackageStateEmailResult
-                )
-                setErrorAttributesOnActiveSpan('state email failed', span)
-            }
-            throw new GraphQLError('Email failed.', {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'EMAIL_ERROR',
-                },
-            })
-        }
+        // if (
+        //     unlockPackageCMSEmailResult instanceof Error ||
+        //     unlockPackageStateEmailResult instanceof Error
+        // ) {
+        //     if (unlockPackageCMSEmailResult instanceof Error) {
+        //         logError(
+        //             'unlockPackageCMSEmail - CMS email failed',
+        //             unlockPackageCMSEmailResult
+        //         )
+        //         setErrorAttributesOnActiveSpan('CMS email failed', span)
+        //     }
+        //     if (unlockPackageStateEmailResult instanceof Error) {
+        //         logError(
+        //             'unlockPackageStateEmail - state email failed',
+        //             unlockPackageStateEmailResult
+        //         )
+        //         setErrorAttributesOnActiveSpan('state email failed', span)
+        //     }
+        //     throw new GraphQLError('Email failed.', {
+        //         extensions: {
+        //             code: 'INTERNAL_SERVER_ERROR',
+        //             cause: 'EMAIL_ERROR',
+        //         },
+        //     })
+        // }
 
         logSuccess('unlockContract')
         setSuccessAttributesOnActiveSpan(span)

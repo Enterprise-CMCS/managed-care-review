@@ -16,6 +16,7 @@ import {
     CreateQuestionResponseInput,
     SubmitContractMutationFn,
     Contract,
+    UnlockedContract
 } from '../gen/gqlClient'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
@@ -125,7 +126,7 @@ export const unlockMutationWrapperV2 = async (
     unlockContract: UnlockContractMutationFn,
     id: string,
     unlockedReason: string
-): Promise<Contract | GraphQLErrors | Error> => {
+): Promise<UnlockedContract | GraphQLErrors | Error> => {
     try {
         const { data } = await unlockContract({
             variables: {

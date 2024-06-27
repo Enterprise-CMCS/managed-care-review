@@ -210,7 +210,6 @@ export const UnlockSubmitModalV2 = ({
                 break
             case 'UNLOCK_CONTRACT':
                 if (unlockSubmitModalInput) {
-                    // TODO: Remove HPP code fully from here, this is a hack to get through linked rates since we have no viable unlockContract
                     result = await unlockMutationWrapperV2(
                         unlockContract,
                         submissionData.id,

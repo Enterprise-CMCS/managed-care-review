@@ -1,7 +1,24 @@
 mutation unlockContract($input: UnlockContractInput!) {
     unlockContract(input: $input) {
         contract {
-            ...contractFields
+            id
+            status
+            createdAt
+            updatedAt
+            initiallySubmittedAt
+            stateCode
+            state {
+                code
+                name
+                programs {
+                    id
+                    name
+                    fullName
+                    isRateProgram
+                }
+            }
+
+            stateNumber
 
             draftRevision {
                 ...contractRevisionFragment
@@ -20,33 +37,26 @@ mutation unlockContract($input: UnlockContractInput!) {
             }
 
             packageSubmissions {
-                ...packageSubmissionsFragment
+                cause
+                submitInfo {
+                    ...updateInformationFields
+                }
+
+                submittedRevisions {
+                    ...submittableRevisionsFields
+                }
+
+                contractRevision {
+                    ...contractRevisionFragment
+                }
+                rateRevisions {
+                    ...rateRevisionFragmentForFetchContract
+                }
             }
         }
     }
 }
 
-
-fragment contractFields on Contract {
-    id
-    status
-    createdAt
-    updatedAt
-    initiallySubmittedAt
-    stateCode
-    state {
-        code
-        name
-        programs {
-            id
-            name
-            fullName
-            isRateProgram
-        }
-    }
-
-    stateNumber
-}
 
 fragment rateFields on Rate {
     id
@@ -284,23 +294,6 @@ fragment contractRevisionFragment on ContractRevision {
     }
 }
 
-fragment packageSubmissionsFragment on ContractPackageSubmission {
-    cause
-    submitInfo {
-        ...updateInformationFields
-    }
-
-    submittedRevisions {
-        ...submittableRevisionsFields
-    }
-
-    contractRevision {
-        ...contractRevisionFragment
-    }
-    rateRevisions {
-        ...rateRevisionFragmentForFetchContract
-    }
-}
 
 fragment submittableRevisionsFields on SubmittableRevision {
     ... on ContractRevision {
