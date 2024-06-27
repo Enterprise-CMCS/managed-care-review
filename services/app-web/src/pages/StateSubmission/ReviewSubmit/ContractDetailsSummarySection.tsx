@@ -1,57 +1,57 @@
 import React, { useState } from 'react'
-import { DataDetail } from '../../../../../components/DataDetail'
-import { SectionHeader } from '../../../../../components/SectionHeader'
-import { UploadedDocumentsTable } from '../../../../../components/SubmissionSummarySection'
+import { DataDetail } from '../../../components/DataDetail'
+import { SectionHeader } from '../../../components/SectionHeader'
+import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import {
     ContractExecutionStatusRecord,
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
-} from '../../../../../constants/index'
-import { useS3 } from '../../../../../contexts/S3Context'
-import { formatCalendarDate } from '../../../../../common-code/dateHelpers'
-import { DoubleColumnGrid } from '../../../../../components/DoubleColumnGrid'
-import { DownloadButton } from '../../../../../components/DownloadButton'
-import { usePreviousSubmission } from '../../../../../hooks/usePreviousSubmission'
-import styles from '../../../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
-import { useAuth } from '../../../../../contexts/AuthContext'
+} from '../../../constants/index'
+import { useS3 } from '../../../contexts/S3Context'
+import { formatCalendarDate } from '../../../common-code/dateHelpers'
+import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
+import { DownloadButton } from '../../../components/DownloadButton'
+import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
+import styles from '../../SubmissionSummary/SubmissionSummary.module.scss'
+import { useAuth } from '../../../contexts/AuthContext'
 
 import {
     sortModifiedProvisions,
     isMissingProvisions,
     getProvisionDictionary,
-} from '../../../../../common-code/ContractTypeProvisions'
-import { DataDetailCheckboxList } from '../../../../../components/DataDetail/DataDetailCheckboxList'
+} from '../../../common-code/ContractTypeProvisions'
+import { DataDetailCheckboxList } from '../../../components/DataDetail/DataDetailCheckboxList'
 import {
     isBaseContract,
     isCHIPOnly,
     isContractWithProvisions,
-} from '../../../../../common-code/ContractType'
+} from '../../../common-code/ContractType'
 import {
     federalAuthorityKeysForCHIP,
     CHIPFederalAuthority,
-} from '../../../../../common-code/healthPlanFormDataType'
-import { recordJSException } from '../../../../../otelHelpers'
+} from '../../../common-code/healthPlanFormDataType'
+import { recordJSException } from '../../../otelHelpers'
 import useDeepCompareEffect from 'use-deep-compare-effect'
-import { InlineDocumentWarning } from '../../../../../components/DocumentWarning'
+import { InlineDocumentWarning } from '../../../components/DocumentWarning'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../../../common-code/featureFlags'
+import { featureFlags } from '../../../common-code/featureFlags'
 import { Grid } from '@trussworks/react-uswds'
-import { booleanAsYesNoFormValue } from '../../../../../components/Form/FieldYesNo'
+import { booleanAsYesNoFormValue } from '../../../components/Form/FieldYesNo'
 import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationQuestion,
-} from '../../../../../constants/statutoryRegulatoryAttestation'
-import { SectionCard } from '../../../../../components/SectionCard'
-import { Contract, ContractRevision } from '../../../../../gen/gqlClient'
+} from '../../../constants/statutoryRegulatoryAttestation'
+import { SectionCard } from '../../../components/SectionCard'
+import { Contract, ContractRevision } from '../../../gen/gqlClient'
+import { useParams } from 'react-router-dom'
 import {
     getIndexFromRevisionVersion,
     getLastContractSubmission,
     getPackageSubmissionAtIndex,
     getVisibleLatestContractFormData,
-} from '../../../../../gqlHelpers/contractsAndRates'
-import { useParams } from 'react-router-dom'
+} from '../../../gqlHelpers/contractsAndRates'
 
-export type ContractDetailsSummarySectionV2Props = {
+export type ContractDetailsSummarySectionProps = {
     contract: Contract
     contractRev?: ContractRevision
     editNavigateTo?: string
@@ -76,14 +76,14 @@ function renderDownloadButton(zippedFilesURL: string | undefined | Error) {
     )
 }
 
-export const ContractDetailsSummarySectionV2 = ({
+export const ContractDetailsSummarySection = ({
     contract,
     contractRev,
     editNavigateTo, // this is the edit link for the section. When this prop exists, summary section is loaded in edit mode
     submissionName,
     onDocumentError,
     explainMissingData,
-}: ContractDetailsSummarySectionV2Props): React.ReactElement => {
+}: ContractDetailsSummarySectionProps): React.ReactElement => {
     // Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
     // Get the zip file for the contract

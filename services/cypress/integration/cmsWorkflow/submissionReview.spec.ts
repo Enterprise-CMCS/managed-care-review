@@ -3,12 +3,12 @@ describe('CMS user can view submission', () => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
     })
-    it('in the CMS dashboard', () => {
+    it('and navigate to a specific submission from the submissions dashboard', () => {
         // state user adds a new package
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
         cy.fillOutBaseContractDetails()
-        cy.navigateFormByButtonClick('CONTINUE')
+        cy.deprecatedNavigateV1Form('CONTINUE')
 
         cy.findByRole('heading', {
             level: 2,
@@ -16,21 +16,21 @@ describe('CMS user can view submission', () => {
         }).should('exist')
         cy.fillOutNewRateCertification()
         cy.fillOutAdditionalActuaryContact()
-        cy.navigateFormByButtonClick('CONTINUE')
+        cy.navigateContractRatesForm('CONTINUE')
 
         cy.findByRole('heading', {
             level: 2,
             name: /Contacts/,
         }).should('exist')
         cy.fillOutStateContact()
-        cy.navigateFormByButtonClick('CONTINUE')
+        cy.deprecatedNavigateV1Form('CONTINUE')
 
         cy.findByRole('heading', {
             level: 2,
             name: /Supporting documents/,
         }).should('exist')
         cy.fillOutSupportingDocuments()
-        cy.navigateFormByButtonClick('CONTINUE')
+        cy.deprecatedNavigateV1Form('CONTINUE')
 
         // store submission id for reference later
         let submissionId = ''
@@ -94,11 +94,15 @@ describe('CMS user can view submission', () => {
             // can navigate to submission summary  by clicking link
             cy.findByText(submissionName).should('exist').click()
             cy.url({ timeout: 10_000 }).should('contain', submissionId)
+            cy.wait('@fetchContractQuery', { timeout: 20_000 })
             cy.findByTestId('submission-summary').should('exist')
-
 
             // No document dates or other fields are undefined
             cy.findByText('N/A').should('not.exist')
+
+            // Double check we do not show any missing field text. This UI is not used for submitted packages
+           cy.findByText(/You must provide this information/).should('not.exist')
+
         })
     })
 })

@@ -5,15 +5,15 @@ import {
     formatDocumentsForGQL,
     formatForForm,
     formatFormDateForGQL,
-} from '../../../../formHelpers/formatters'
+} from '../../../formHelpers/formatters'
 import {
     ActuaryContact,
     Rate,
     RateFormData, RateFormDataInput,
     UpdateContractRateInput,
-} from '../../../../gen/gqlClient'
-import { S3ClientT } from '../../../../s3'
-import { type FormikRateForm } from './RateDetailsV2'
+} from '../../../gen/gqlClient'
+import { S3ClientT } from '../../../s3'
+import { type FormikRateForm } from './V2/RateDetailsV2'
 
 // generateUpdatedRates takes the Formik RateForm list used for multi-rates and prepares for contract with rates update mutation
 // ensure we link, create, and update the proper rates

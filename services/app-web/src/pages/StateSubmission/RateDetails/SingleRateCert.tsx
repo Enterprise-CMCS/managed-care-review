@@ -43,7 +43,6 @@ import {
     SharedRateCertDisplay,
 } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { ActuaryContactFields } from '../Contacts'
-import { PackagesWithSharedRates } from './PackagesWithSharedRates'
 import { useFocus } from '../../../hooks'
 
 const isRateTypeEmpty = (values: RateCertFormType): boolean =>
@@ -282,14 +281,6 @@ export const SingleRateCert = ({
                         }
                     />
                 </FormGroup>
-
-                <PackagesWithSharedRates
-                    index={index}
-                    keyProp={key}
-                    fieldNamePrefix={fieldNamePrefix}
-                    shouldValidate={shouldValidate}
-                    parentSubmissionID={parentSubmissionID}
-                />
 
                 <FormGroup error={Boolean(showFieldErrors('rateProgramIDs'))}>
                     <Label htmlFor={`${fieldNamePrefix}.rateProgramIDs`}>

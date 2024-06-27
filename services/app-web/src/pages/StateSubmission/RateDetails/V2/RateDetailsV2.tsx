@@ -31,7 +31,7 @@ import {
     useSubmitRateMutation,
     useUpdateDraftContractRatesMutation,
 } from '../../../../gen/gqlClient'
-import { SingleRateFormFields } from './SingleRateFormFields'
+import { SingleRateFormFields } from '../SingleRateFormFields'
 import { useFocus, useRouteParams } from '../../../../hooks'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
 import { PageBannerAlerts } from '../../PageBannerAlerts'
@@ -47,9 +47,9 @@ import {
     convertGQLRateToRateForm,
     convertRateFormToGQLRateFormData,
     generateUpdatedRates,
-} from './rateDetailsHelpers'
+} from '../rateDetailsHelpers'
 import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
-import { LinkedRateSummary } from './LinkedRateSummary'
+import { LinkedRateSummary } from '../LinkedRateSummary'
 import { usePage } from '../../../../contexts/PageContext'
 
 export type FormikRateForm = {
@@ -80,14 +80,14 @@ export type RateDetailFormConfig = {
     rateForms: FormikRateForm[]
 }
 
-type RateDetailsV2Props = {
+type RateDetailsProps = {
     type: 'SINGLE' | 'MULTI'
     showValidations?: boolean
 }
-const RateDetailsV2 = ({
+const RateDetails = ({
     showValidations = false,
     type,
-}: RateDetailsV2Props): React.ReactElement => {
+}: RateDetailsProps): React.ReactElement => {
     const navigate = useNavigate()
     const { getKey } = useS3()
     const displayAsStandaloneRate = type === 'SINGLE'
@@ -95,10 +95,6 @@ const RateDetailsV2 = ({
     const ldClient = useLDClient()
     const { updateHeading } = usePage()
 
-    const useLinkedRates = ldClient?.variation(
-        featureFlags.LINK_RATES.flag,
-        featureFlags.LINK_RATES.defaultValue
-    )
     const useEditUnlockRate = ldClient?.variation(
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
@@ -112,7 +108,6 @@ const RateDetailsV2 = ({
     const rateDetailsFormSchema = RateDetailsFormSchema(
         {
             'rate-edit-unlock': useEditUnlockRate,
-            'link-rates': useLinkedRates,
         },
         !displayAsStandaloneRate
     )
@@ -632,4 +627,4 @@ const RateDetailsV2 = ({
         </>
     )
 }
-export { RateDetailsV2 }
+export { RateDetails }

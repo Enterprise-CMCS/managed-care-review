@@ -14,15 +14,15 @@ import {
     FileUpload,
     PoliteErrorMessage,
     ProgramSelect,
-} from '../../../../components'
+} from '../../../components'
 
-import styles from '../../StateSubmissionForm.module.scss'
-import { formatUserInputDate, isDateRangeEmpty } from '../../../../formHelpers'
+import styles from '../StateSubmissionForm.module.scss'
+import { formatUserInputDate, isDateRangeEmpty } from '../../../formHelpers'
 import {
     ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES,
     ACCEPTED_RATE_CERTIFICATION_FILE_TYPES,
-} from '../../../../components/FileUpload'
-import { useS3 } from '../../../../contexts/S3Context'
+} from '../../../components/FileUpload'
+import { useS3 } from '../../../contexts/S3Context'
 
 import {
     FieldArray,
@@ -31,9 +31,9 @@ import {
     getIn,
     useFormikContext,
 } from 'formik'
-import { ActuaryContactFields } from '../../Contacts'
-import { FormikRateForm, RateDetailFormConfig } from './RateDetailsV2'
-import { useFocus } from '../../../../hooks/useFocus'
+import { ActuaryContactFields } from '../Contacts'
+import { FormikRateForm, RateDetailFormConfig } from './V2/RateDetailsV2'
+import { useFocus } from '../../../hooks/useFocus'
 const isRateTypeEmpty = (rateForm: FormikRateForm): boolean =>
     rateForm.rateType === undefined
 const isRateTypeAmendment = (rateForm: FormikRateForm): boolean =>

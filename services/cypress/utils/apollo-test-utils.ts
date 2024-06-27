@@ -69,7 +69,7 @@ const minnesotaStatePrograms = [
     }
 ]
 
-const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType> => ({
+const deprecatedContractOnlyData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
     stateCode: 'MN',
     stateContacts: [
         {
@@ -109,7 +109,7 @@ const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType> => ({
     programIDs: [minnesotaStatePrograms[0].id]
 })
 
-const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
+const deprecatedContractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
     stateCode: 'MN',
     stateContacts: [
         {
@@ -468,8 +468,8 @@ const apolloClientWrapper = async <T>(
 
 export {
     apolloClientWrapper,
-    contractOnlyData,
-    contractAndRatesData,
+    deprecatedContractOnlyData,
+    deprecatedContractAndRatesData,
     newSubmissionInput,
     cmsUser,
     adminUser,

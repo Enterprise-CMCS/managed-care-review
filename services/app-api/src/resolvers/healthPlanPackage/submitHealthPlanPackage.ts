@@ -132,7 +132,6 @@ export function parseAndSubmit(
             : draft.statutoryRegulatoryAttestation ||
               (draft.statutoryRegulatoryAttestation === false &&
                   draft.statutoryRegulatoryAttestationDescription)
-
     if (
         isValidAndCurrentLockedHealthPlanFormData(maybeStateSubmission) &&
         hasValid438Attestation

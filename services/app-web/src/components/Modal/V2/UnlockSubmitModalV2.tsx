@@ -120,7 +120,7 @@ const modalValueDictionary: { [Property in SharedModalType]: ModalValueType } =
         },
     }
 
-export const UnlockSubmitModalV2 = ({
+export const UnlockSubmitModal = ({
     submissionData,
     submissionName,
     modalType,

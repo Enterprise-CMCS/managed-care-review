@@ -43,7 +43,7 @@ export function createQuestionResponseResolver(
         })
         const inputFormatted = {
             ...input,
-            documents: docs
+            documents: docs,
         }
         const createResponseResult = await store.insertQuestionResponse(
             inputFormatted,

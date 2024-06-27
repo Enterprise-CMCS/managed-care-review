@@ -13,7 +13,7 @@ describe('Q&A', () => {
         // Assign Division to CMS user zuko
         cy.apiAssignDivisionToCMSUser(cmsUser(), 'DMCO').then(() => {
             // Create a new submission
-            cy.apiCreateAndSubmitContractOnlySubmission(stateUser()).then(
+            cy.apiDeprecatedCreateSubmitHPP(stateUser()).then(
                 (pkg) => {
                     // Log in as CMS user and upload question
                     cy.logInAsCMSUser({

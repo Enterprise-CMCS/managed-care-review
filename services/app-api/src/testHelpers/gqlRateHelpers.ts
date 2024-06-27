@@ -423,6 +423,7 @@ export {
     updateTestDraftRatesOnContract,
     updateRatesInputFromDraftContract,
     addNewRateToTestContract,
+    addNewRateToRateInput,
     addLinkedRateToTestContract,
     addLinkedRateToRateInput,
     fetchTestRateById,

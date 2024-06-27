@@ -1,25 +1,21 @@
 import { Grid } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
-import { DataDetail } from '../../../../../components/DataDetail'
-import { DoubleColumnGrid } from '../../../../../components/DoubleColumnGrid'
-import { SectionHeader } from '../../../../../components/SectionHeader'
+import { DataDetail } from '../../../components/DataDetail'
+import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
+import { SectionHeader } from '../../../components/SectionHeader'
 import {
     SubmissionTypeRecord,
     ContractTypeRecord,
     PopulationCoveredRecord,
-} from '../../../../../constants/healthPlanPackages'
-import { GenericErrorPage } from '../../../../Errors/GenericErrorPage'
-import { getVisibleLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
-import {
-    Program,
-    Contract,
-    ContractRevision,
-} from '../../../../../gen/gqlClient'
-import { booleanAsYesNoUserValue } from '../../../../../components/Form/FieldYesNo/FieldYesNo'
-import { SectionCard } from '../../../../../components/SectionCard'
-import styles from '../../../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
+} from '../../../constants/healthPlanPackages'
+import { GenericErrorPage } from '../../Errors/GenericErrorPage'
+import { getVisibleLatestContractFormData } from '../../../gqlHelpers/contractsAndRates'
+import { Program, Contract, ContractRevision } from '../../../gen/gqlClient'
+import { booleanAsYesNoUserValue } from '../../../components/Form/FieldYesNo/FieldYesNo'
+import { SectionCard } from '../../../components/SectionCard'
+import styles from '../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
 
-export type SubmissionTypeSummarySectionV2Props = {
+export type SubmissionTypeSummarySectionProps = {
     contract: Contract
     statePrograms: Program[]
     contractRev?: ContractRevision
@@ -32,7 +28,7 @@ export type SubmissionTypeSummarySectionV2Props = {
     explainMissingData?: boolean
 }
 
-export const SubmissionTypeSummarySectionV2 = ({
+export const SubmissionTypeSummarySection = ({
     contract,
     contractRev,
     statePrograms,
@@ -43,7 +39,7 @@ export const SubmissionTypeSummarySectionV2 = ({
     submissionName,
     isStateUser,
     explainMissingData,
-}: SubmissionTypeSummarySectionV2Props): React.ReactElement => {
+}: SubmissionTypeSummarySectionProps): React.ReactElement => {
     const contractOrRev = contractRev ? contractRev : contract
     const contractFormData = getVisibleLatestContractFormData(
         contractOrRev,

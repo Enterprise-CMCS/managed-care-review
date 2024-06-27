@@ -13,8 +13,8 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
     Yup.object().shape({
         rateDocuments: validateFileItemsListSingleUpload({ required: true }),
         supportingDocuments: validateFileItemsList({ required: false }),
-        hasSharedRateCert:  _activeFeatureFlags['rate-edit-unlock'] || _activeFeatureFlags['link-rates']?  Yup.string(): Yup.string().defined('You must select yes or no'),
-        packagesWithSharedRateCerts: _activeFeatureFlags['rate-edit-unlock'] || _activeFeatureFlags['link-rates']? Yup.array().optional():  Yup.array()
+        hasSharedRateCert: Yup.string().optional(), // legacy field
+        packagesWithSharedRateCerts:  Yup.array().optional() // legacy field
         .when('hasSharedRateCert', {
             is: 'YES',
             then: Yup.array().min(
@@ -161,16 +161,6 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
 
 
 const RateDetailsFormSchema = (activeFeatureFlags?: FeatureFlagSettings, isMultiRate?: boolean) => {
-    // LEGACY V1
-    if(!activeFeatureFlags?.['link-rates']) {
-        return  Yup.object().shape({
-            rateInfos: Yup.array().of(
-                SingleRateCertSchema(activeFeatureFlags || {})
-            )
-            })
-    } else {
-
-    // V2 SCHEMAS
     return isMultiRate ?
         Yup.object().shape({
             rateForms: Yup.array().of(
@@ -179,9 +169,9 @@ const RateDetailsFormSchema = (activeFeatureFlags?: FeatureFlagSettings, isMulti
                     // make the user select something for rate preivously submitted yes no question
                     is: undefined,
                     then: Yup.object().shape({
-                        ratePreviouslySubmitted: activeFeatureFlags['link-rates']? Yup.string().defined(
+                        ratePreviouslySubmitted: Yup.string().defined(
                             "You must select yes or no "
-                        ) : Yup.string(),
+                        ),
                     }),
                         })
                 .when('.ratePreviouslySubmitted', {
@@ -199,13 +189,12 @@ const RateDetailsFormSchema = (activeFeatureFlags?: FeatureFlagSettings, isMulti
         )})
         // This the standlaone rate unlock page schema
         // it does not use linked rate form fields at all - user must always fill rate data from scratch
-        // eventually this could be just a single rate cert schema, but for now since the UI is shared, it still uses an array like RateDetailsV2
+        // eventually this could be just a single rate cert schema, but for now since the UI is shared, it still uses an array like RateDetails
         : Yup.object().shape({
             rateForms: Yup.array().of(
                 SingleRateCertSchema(activeFeatureFlags || {})
             )
         })
     }
-}
 
 export { RateDetailsFormSchema }

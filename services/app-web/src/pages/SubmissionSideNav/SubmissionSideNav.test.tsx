@@ -8,9 +8,11 @@ import { renderWithProviders } from '../../testHelpers'
 import { RoutesRecord } from '../../constants/routes'
 import React from 'react'
 import {
+    fetchContractMockSuccess,
     fetchCurrentUserMock,
     fetchStateHealthPlanPackageWithQuestionsMockNotFound,
     fetchStateHealthPlanPackageWithQuestionsMockSuccess,
+    mockContractPackageSubmitted,
     mockDraftHealthPlanPackage,
     mockQuestionsPayload,
     mockSubmittedHealthPlanPackage,
@@ -88,6 +90,7 @@ describe('SubmissionSideNav', () => {
 
     it('sidebar nav links routes to correct pages', async () => {
         let testLocation: Location
+        const testContract = { ...mockContractPackageSubmitted(), id: '15' }
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -111,6 +114,8 @@ describe('SubmissionSideNav', () => {
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
                             id: '15',
                         }),
+                        fetchContractMockSuccess({ contract: testContract }),
+                        fetchContractMockSuccess({ contract: testContract }), // this is needed twice for the tests to pass since we navigate back and forth
                     ],
                 },
                 routerProvider: {

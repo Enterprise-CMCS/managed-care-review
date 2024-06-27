@@ -1,9 +1,6 @@
 import type { Resolvers } from '../../gen/gqlServer'
 
-import {
-    parseBucketName,
-    parseKey,
-} from '../../s3'
+import { parseBucketName, parseKey } from '../../s3'
 import type { S3ClientT } from '../../s3'
 import type { QuestionResponseDocument } from '../../domain-models'
 

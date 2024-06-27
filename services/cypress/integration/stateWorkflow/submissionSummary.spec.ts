@@ -1,21 +1,21 @@
-describe('dashboard', () => {
+describe('State user can view submissions', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
     })
 
-    it('can navigate to submission summary', () => {
+    it('and view a specific summary page from the dashboard', () => {
         cy.logInAsStateUser()
 
-        // add a draft submission
-        cy.startNewContractAndRatesSubmission()
-        cy.navigateFormByButtonClick('SAVE_DRAFT')
+        // add a draft contract only submission
+        cy.startNewContractOnlySubmissionWithBaseContract()
+        cy.deprecatedNavigateV1Form('SAVE_DRAFT')
 
-        // a submitted submission
+        // add a submitted contract and rates submission
         cy.startNewContractAndRatesSubmission()
 
         cy.fillOutBaseContractDetails()
-        cy.navigateFormByButtonClick('CONTINUE')
+        cy.deprecatedNavigateV1Form('CONTINUE')
 
         cy.findByRole('heading', {
             level: 2,
@@ -27,22 +27,22 @@ describe('dashboard', () => {
             name: /Actuaries' communication preference/
         })
             .should('exist')
-            .within(() => { 
+            .within(() => {
                 cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
                 .click()
             })
-        cy.navigateFormByButtonClick('CONTINUE')
+        cy.navigateContractRatesForm('CONTINUE')
 
         cy.findByRole('heading', {
             level: 2,
             name: /Contacts/,
         }).should('exist')
         cy.fillOutStateContact()
-        cy.navigateFormByButtonClick('CONTINUE')
+        cy.deprecatedNavigateV1Form('CONTINUE')
 
         cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
         cy.fillOutSupportingDocuments()
-        cy.navigateFormByButtonClick('CONTINUE')
+        cy.deprecatedNavigateV1Form('CONTINUE')
 
         // Store submission name for reference later
         let submissionId = ''
@@ -52,16 +52,7 @@ describe('dashboard', () => {
             submissionId = pathnameArray[2]
         })
 
-        // check accessibility of filled out review and submit page
-        // Commented out to get react-scripts/webpack 5 upgrade through
         cy.findByRole('heading', { level: 2, name: /Review and submit/ })
-        // check accessibility of filled out review and submit page
-        // Commented out to get react-scripts/webpack 5 upgrade through
-        // cy.pa11y({
-        //     actions: ['wait for element #submissionTypeSection to be visible'],
-        //     ignore: ['definition-list', 'dlitem', 'color-contrast'],
-        //     hideElements: '.usa-step-indicator',
-        // })
 
         // Submit, sent to dashboard
         cy.submitStateSubmissionForm()
@@ -104,15 +95,6 @@ describe('dashboard', () => {
 
             // Double check we do not show any missing field text. This UI is not used for submitted packages
            cy.findByText(/You must provide this information/).should('not.exist')
-
-            // check accessibility of filled out submission summary page
-            // Commented out to get react-scripts/webpack 5 upgrade through
-            // cy.pa11y({
-            //     actions: [
-            //         'wait for element #submissionTypeSection to be visible',
-            //     ],
-            //     ignore: ['definition-list', 'dlitem', 'color-contrast'],
-            // })
 
             // Link back to dashboard, submission visible in default program
             cy.findByText('Back to state dashboard').should('exist').click()

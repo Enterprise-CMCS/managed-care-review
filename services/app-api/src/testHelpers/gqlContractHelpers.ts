@@ -14,7 +14,7 @@ import { mockInsertContractArgs, mockContractData } from './contractDataMocks'
 import { sharedTestPrismaClient } from './storeHelpers'
 import { insertDraftContract } from '../postgres/contractAndRates/insertContract'
 
-import type { ContractType } from '../domain-models'
+import { type ContractType } from '../domain-models'
 import type { ApolloServer } from 'apollo-server-lambda'
 import type {
     Contract,
@@ -23,8 +23,8 @@ import type {
 } from '../gen/gqlServer'
 import { latestFormData } from './healthPlanPackageHelpers'
 import type {
+    HealthPlanFormDataType,
     StateCodeType,
-    UnlockedHealthPlanFormDataType,
 } from 'app-web/src/common-code/healthPlanFormDataType'
 import { addNewRateToTestContract } from './gqlRateHelpers'
 import UPDATE_CONTRACT_DRAFT_REVISION from 'app-graphql/src/mutations/updateContractDraftRevision.graphql'
@@ -195,7 +195,7 @@ async function createAndUpdateTestContractWithRate(
 const createAndUpdateTestContractWithoutRates = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
-    contractFormDataOverrides?: Partial<UnlockedHealthPlanFormDataType>
+    contractFormDataOverrides?: Partial<HealthPlanFormDataType>
 ): Promise<Contract> => {
     const pkg = await createTestHealthPlanPackage(server, stateCode)
     const draft = latestFormData(pkg)

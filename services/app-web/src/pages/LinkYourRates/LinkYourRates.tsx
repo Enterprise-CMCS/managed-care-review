@@ -6,8 +6,10 @@ import styles from '../StateSubmission/StateSubmissionForm.module.scss'
 import { FieldRadio, PoliteErrorMessage } from '../../components'
 import { getIn, useFormikContext } from 'formik'
 import { LinkRateSelect } from './LinkRateSelect'
-import { FormikRateForm } from '../StateSubmission/RateDetails/V2/RateDetailsV2'
-import { convertGQLRateToRateForm } from '../StateSubmission/RateDetails/V2/rateDetailsHelpers'
+import {
+    FormikRateForm,
+    convertGQLRateToRateForm,
+} from '../StateSubmission/RateDetails'
 import { useS3 } from '../../contexts/S3Context'
 
 export type LinkYourRatesProps = {
@@ -21,20 +23,29 @@ export const LinkYourRates = ({
     fieldNamePrefix,
     index,
     autofill,
-    shouldValidate
+    shouldValidate,
 }: LinkYourRatesProps): React.ReactElement | null => {
     const { values, errors } = useFormikContext()
     const { getKey } = useS3()
 
     const showFieldErrors = (
-        fieldName: 'ratePreviouslySubmitted' | 'linkRateSelect' | 'rateCertificationName'
+        fieldName:
+            | 'ratePreviouslySubmitted'
+            | 'linkRateSelect'
+            | 'rateCertificationName'
     ): string | undefined => {
         if (!shouldValidate) return undefined
         return getIn(errors, `${fieldNamePrefix}.${fieldName}`)
     }
 
     return (
-        <FormGroup data-testid="link-your-rates" error={Boolean(showFieldErrors('ratePreviouslySubmitted') || Boolean(showFieldErrors('linkRateSelect')))}>
+        <FormGroup
+            data-testid="link-your-rates"
+            error={Boolean(
+                showFieldErrors('ratePreviouslySubmitted') ||
+                    Boolean(showFieldErrors('linkRateSelect'))
+            )}
+        >
             <Fieldset
                 role="radiogroup"
                 className={styles.radioGroup}
@@ -84,8 +95,8 @@ export const LinkYourRates = ({
                         Required
                     </span>
                     <PoliteErrorMessage>
-                    {showFieldErrors('linkRateSelect')}
-                 </PoliteErrorMessage>
+                        {showFieldErrors('linkRateSelect')}
+                    </PoliteErrorMessage>
                     <LinkRateSelect
                         key={`rateOptions-${index}`}
                         inputId={`${fieldNamePrefix}.linkRateSelect`}

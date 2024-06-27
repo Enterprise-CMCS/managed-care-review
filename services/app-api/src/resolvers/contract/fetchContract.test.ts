@@ -13,8 +13,7 @@ import {
     submitTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { addNewRateToTestContract } from '../../testHelpers/gqlRateHelpers'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
-import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
+import { testS3Client } from '../../testHelpers'
 
 describe('fetchContract', () => {
     const mockS3 = testS3Client()
@@ -77,15 +76,10 @@ describe('fetchContract', () => {
     })
 
     it('returns a stable initially submitted at', async () => {
-        const ldService = testLDService({
-            'link-rates': true,
-        })
         const stateServer = await constructTestPostgresServer({
-            ldService,
             s3Client: mockS3,
         })
         const cmsServer = await constructTestPostgresServer({
-            ldService,
             context: {
                 user: testCMSUser(),
             },

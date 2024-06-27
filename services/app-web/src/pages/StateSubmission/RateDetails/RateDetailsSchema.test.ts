@@ -17,7 +17,7 @@ describe('RateDetailsSchema', () => {
         }
 
         try {
-            await RateDetailsFormSchema({'link-rates': true}).validate(badRateRev, {abortEarly: false})
+            await RateDetailsFormSchema().validate(badRateRev, {abortEarly: false})
         } catch (err) {
             return
         }
@@ -39,7 +39,7 @@ describe('RateDetailsSchema', () => {
         }
 
         try {
-            await RateDetailsFormSchema({'link-rates': true}).validate(badRateRev, {abortEarly: false})
+            await RateDetailsFormSchema().validate(badRateRev, {abortEarly: false})
         } catch (err) {
             return
         }
@@ -61,7 +61,7 @@ describe('RateDetailsSchema', () => {
         }
 
         try {
-            await RateDetailsFormSchema({'link-rates': true}).validate(badRateRev, {abortEarly: false})
+            await RateDetailsFormSchema().validate(badRateRev, {abortEarly: false})
         } catch (err) {
             return
         }

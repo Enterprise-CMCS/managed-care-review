@@ -429,9 +429,7 @@ describe('UploadedDocumentsTable', () => {
                         }),
                     ],
                 },
-                featureFlags: {
-                    'link-rates': false,
-                },
+                featureFlags: {},
             }
         )
 
@@ -470,9 +468,7 @@ describe('UploadedDocumentsTable', () => {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
-                featureFlags: {
-                    'link-rates': false,
-                },
+                featureFlags: {},
             }
         )
 
@@ -516,9 +512,7 @@ describe('UploadedDocumentsTable', () => {
                         }),
                     ],
                 },
-                featureFlags: {
-                    'link-rates': true,
-                },
+                featureFlags: {},
             }
         )
 
@@ -562,9 +556,7 @@ describe('UploadedDocumentsTable', () => {
                         }),
                     ],
                 },
-                featureFlags: {
-                    'link-rates': true,
-                },
+                featureFlags: {},
             }
         )
 
@@ -611,9 +603,7 @@ describe('UploadedDocumentsTable', () => {
                         }),
                     ],
                 },
-                featureFlags: {
-                    'link-rates': true,
-                },
+                featureFlags: {},
             }
         )
 
