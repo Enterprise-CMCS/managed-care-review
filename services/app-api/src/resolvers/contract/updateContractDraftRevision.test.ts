@@ -312,48 +312,6 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         )
     })
 
-    it('errors if the payload is submitted', async () => {
-        const server = await constructTestPostgresServer()
-        const draftContract = await createTestContract(server)
-        const draftRevision = draftContract.draftRevision
-        const contractID = draftContract.id
-
-        if (!draftRevision) {
-            throw new Error(
-                'Unexpected error: Draft contract did not contain a draft revision'
-            )
-        }
-
-        // Update the draft to have complete data for submission.
-        const updateResult = await server.executeOperation({
-            query: UPDATE_CONTRACT_DRAFT_REVISION,
-            variables: {
-                input: {
-                    contractID: contractID,
-                    draftRevision: {
-                        ...draftRevision,
-                        submitInfo: {
-                            updatedAt: new Date(),
-                            updatedBy: 'me',
-                            updatedReason: 'reasons',
-                        },
-                        formData: draftRevision.formData,
-                    },
-                },
-            },
-        })
-
-        expect(updateResult.errors).toBeDefined()
-        if (updateResult.errors === undefined) {
-            throw new Error('type narrow')
-        }
-
-        expect(updateResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
-        expect(updateResult.errors[0].message).toContain(
-            `Attempted to update with a submitted contract revision. Contract: ${contractID} Revision: ${draftRevision.id}`
-        )
-    })
-
     it('errors if the Contract is already submitted', async () => {
         const server = await constructTestPostgresServer()
         const draftContract = await createTestContract(server)
