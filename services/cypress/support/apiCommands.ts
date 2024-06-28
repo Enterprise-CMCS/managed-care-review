@@ -35,7 +35,6 @@ const createAndSubmitContractOnlyPackage = async (
 
     const draftContract = newContract.data.createContract.contract
     const draftRevision = draftContract.draftRevision
-    delete draftRevision.formData.__typename
     const updateFormData = contractFormData({
         submissionType: 'CONTRACT_ONLY'
     })
@@ -77,7 +76,6 @@ const createAndSubmitContractWithRates = async (
 
     const draftContract = newContract.data.createContract.contract
     const draftRevision = draftContract.draftRevision
-    delete draftRevision.formData.__typename
     const updateFormData = contractFormData({
         submissionType: 'CONTRACT_AND_RATES'
     })
@@ -97,7 +95,6 @@ const createAndSubmitContractWithRates = async (
 
     const updatedDraftRevision = updatedContract.data.updateContractDraftRevision.contract.draftRevision
 
-    // Using new API to create child rates
     const updateDraftContractRatesInput: UpdateDraftContractRatesInput = {
         contractID: draftContract.id,
         lastSeenUpdatedAt: updatedDraftRevision.updatedAt,

@@ -30,7 +30,6 @@ describe('CMS user can view rate reviews', () => {
             // Create a new contract and rates submission with two attached rates
             cy.apiCreateAndSubmitContractWithRates(stateUser()).then(
                 (contract) => {
-
                     const latestSubmission = contract.packageSubmissions[0]
 
                     const rate1 = latestSubmission.rateRevisions[0]
