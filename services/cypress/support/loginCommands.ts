@@ -36,6 +36,7 @@ Cypress.Commands.add(
     ({ initialURL } = { initialURL: '/' }) => {
         // Note: During the move to vite this stopped working, we had to move to visit /auth first
         //cy.visit(initialURL)
+        console.info(`visiting ${initialURL}`)
 
         cy.visit('/auth')
 
