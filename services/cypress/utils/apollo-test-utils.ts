@@ -9,7 +9,13 @@ import {
 } from '@apollo/client'
 import { Amplify, Auth as AmplifyAuth, API } from 'aws-amplify'
 import { UnlockedHealthPlanFormDataType } from '../../app-web/src/common-code/healthPlanFormDataType'
-import { RateFormDataInput } from '../gen/gqlClient';
+import {
+    RateFormDataInput,
+    Contract,
+    ContractFormData,
+    UpdateContractDraftRevisionInput,
+    ContractDraftRevisionFormDataInput
+} from '../gen/gqlClient';
 
 type StateUserType = {
     id: string
@@ -207,6 +213,56 @@ const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
     statutoryRegulatoryAttestation: false,
     statutoryRegulatoryAttestationDescription: 'No compliance',
     programIDs: [minnesotaStatePrograms[0].id]
+})
+
+const contractFormData = (overrides?: Partial<ContractFormData>): ContractFormData => ({
+    programIDs: [minnesotaStatePrograms[0].id],
+    populationCovered: 'MEDICAID',
+    submissionType: 'CONTRACT_ONLY',
+    riskBasedContract: false,
+    submissionDescription: 'A submission description',
+    stateContacts: [
+        {
+            name: 'Name',
+            titleRole: 'Title',
+            email: 'example@example.com',
+        },
+    ],
+    supportingDocuments: [],
+    contractType: 'BASE',
+    contractExecutionStatus: 'EXECUTED',
+    contractDocuments: [
+        {
+            name: 'Contract Cert.pdf',
+            s3URL: 's3://local-uploads/1684382956834-Contract Cert.pdf/Contract Cert.pdf',
+            sha256: 'abc123',
+        },
+    ],
+    contractDateStart: '2023-05-01',
+    contractDateEnd: '2024-05-31',
+    managedCareEntities: ['MCO'],
+    federalAuthorities: ['STATE_PLAN'],
+    inLieuServicesAndSettings: true,
+    modifiedBenefitsProvided: true,
+    modifiedGeoAreaServed: true,
+    modifiedMedicaidBeneficiaries: true,
+    modifiedRiskSharingStrategy: true,
+    modifiedIncentiveArrangements: true,
+    modifiedWitholdAgreements: true,
+    modifiedStateDirectedPayments: true,
+    modifiedPassThroughPayments: false,
+    modifiedPaymentsForMentalDiseaseInstitutions: false,
+    modifiedMedicalLossRatioStandards: false,
+    modifiedOtherFinancialPaymentIncentive: false,
+    modifiedEnrollmentProcess: false,
+    modifiedGrevienceAndAppeal: false,
+    modifiedNetworkAdequacyStandards: true,
+    modifiedLengthOfContract: true,
+    modifiedNonRiskPaymentArrangements: true,
+    statutoryRegulatoryAttestation: false,
+    statutoryRegulatoryAttestationDescription: 'No compliance',
+    ...overrides,
+
 })
 
 const rateFormData = (data?: Partial<RateFormDataInput>): RateFormDataInput => ({
@@ -475,6 +531,7 @@ export {
     adminUser,
     stateUser,
     rateFormData,
+    contractFormData,
     minnesotaStatePrograms
 }
 export type {
