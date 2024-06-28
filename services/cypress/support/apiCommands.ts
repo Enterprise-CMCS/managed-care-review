@@ -46,7 +46,7 @@ const createAndSubmitContractOnlyPackage = async (
         formData: updateFormData
     }
 
-    const updatedContract = await apolloClient.mutate({
+    await apolloClient.mutate({
         mutation: UpdateContractDraftRevisionDocument,
         variables: {
             input: updateContractDraftRevisionInput
@@ -68,7 +68,6 @@ const createAndSubmitContractOnlyPackage = async (
 const createAndSubmitContractWithRates = async (
     apolloClient: ApolloClient<NormalizedCacheObject>
 ): Promise<Contract> => {
-
     const newContract = await apolloClient.mutate({
         mutation: CreateContractDocument,
         variables: {
