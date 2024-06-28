@@ -1,94 +1,94 @@
 {
-  "name": "managed-care-review",
-  "type": "module",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "private": true,
-  "workspaces": {
-    "packages": [
-      "services/*",
-      "dev_tool",
-      "scripts"
-    ]
-  },
-  "directories": {
-    "test": "services/cypress"
-  },
-  "scripts": {
-    "clean": "npx lerna clean",
-    "format": "yarn prettier --write",
-    "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
-    "test:coverage": "npx lerna run test:coverage --scope=app-web --scope=app-api --scope=cypress",
-    "pretest:coverage": "rm -rf .nyc_output",
-    "posttest:coverage": "yarn run report:combined",
-    "mkdir:reports": "mkdir -p reports",
-    "precopy:reports": "yarn run mkdir:reports",
-    "copy:reports": "cp ./coverage-cypress/coverage-final.json ./reports/from-cypress.json && cp ./services/app-web/coverage/coverage-final.json ./reports/from-jest.json && cp ./services/app-api/coverage/coverage-final.json ./reports/from-api.json",
-    "precombine:reports": "yarn run copy:reports && mkdir -p .nyc_output",
-    "combine:reports": "npx nyc merge reports && mv coverage.json .nyc_output/out.json",
-    "prereport:combined": "yarn run combine:reports",
-    "report:combined": "mkdir -p coverage-all && npx nyc report --reporter lcov --reporter text --reporter json-summary --report-dir coverage-all"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Enterprise-CMCS/managed-care-review.git"
-  },
-  "jest": {
-    "coveragePathIgnorePatterns": [
-      "/*.stories.tsx",
-      "src/s3",
-      "src/api",
-      "src/testHelpers",
-      "src/localAuth",
-      "src/gen",
-      "src/components/Header/StateIcon/StateIcon.tsx",
-      "src/pages/Auth/CheckAuth.tsx",
-      "src/pages/Auth/CognitoLogin.tsx",
-      "src/pages/Auth/Signup",
-      "src/pages/Auth/ConfirmSignUp",
-      "src/pages/Help/Help.tsx",
-      "App.tsx",
-      "index.ts",
-      "reportWebVitals.ts"
-    ],
-    "coverageReporters": [
-      [
-        "json",
-        {
-          "projectRoot": "../../"
-        }
-      ],
-      [
-        "lcov",
-        {
-          "projectRoot": "../../"
-        }
-      ],
-      "text"
-    ]
-  },
-  "author": "",
-  "license": "CC0-1.0",
-  "bugs": {
-    "url": "https://github.com/Enterprise-CMCS/managed-care-review/issues"
-  },
-  "homepage": "https://github.com/Enterprise-CMCS/managed-care-review#readme",
-  "devDependencies": {
-    "@bahmutov/cypress-esbuild-preprocessor": "^2.2.0",
-    "@cypress-audit/pa11y": "^1.3.0",
-    "chromedriver": "^122.0.4",
-    "cypress": "^12.16.0",
-    "cypress-pipe": "^2.0.0",
-    "danger": "^11.2.6",
-    "esbuild": "^0.19.2",
-    "husky": "^9.0.11",
-    "lerna": "^8.0.2",
-    "lint-staged": "^15.2.2",
-    "prettier": "^3.1.0"
-  },
-  "dependencies": {
-    "cypress-file-upload": "^5.0.8",
-    "path-browserify": "^1.0.1"
-  }
+    "name": "managed-care-review",
+    "type": "module",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "private": true,
+    "workspaces": {
+        "packages": [
+            "services/*",
+            "dev_tool",
+            "scripts"
+        ]
+    },
+    "directories": {
+        "test": "services/cypress"
+    },
+    "scripts": {
+        "clean": "npx lerna clean",
+        "format": "yarn prettier --write",
+        "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
+        "test:coverage": "npx lerna run test:coverage --scope=app-web --scope=app-api --scope=cypress",
+        "pretest:coverage": "rm -rf .nyc_output",
+        "posttest:coverage": "yarn run report:combined",
+        "mkdir:reports": "mkdir -p reports",
+        "precopy:reports": "yarn run mkdir:reports",
+        "copy:reports": "cp ./coverage-cypress/coverage-final.json ./reports/from-cypress.json && cp ./services/app-web/coverage/coverage-final.json ./reports/from-jest.json && cp ./services/app-api/coverage/coverage-final.json ./reports/from-api.json",
+        "precombine:reports": "yarn run copy:reports && mkdir -p .nyc_output",
+        "combine:reports": "npx nyc merge reports && mv coverage.json .nyc_output/out.json",
+        "prereport:combined": "yarn run combine:reports",
+        "report:combined": "mkdir -p coverage-all && npx nyc report --reporter lcov --reporter text --reporter json-summary --report-dir coverage-all"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Enterprise-CMCS/managed-care-review.git"
+    },
+    "jest": {
+        "coveragePathIgnorePatterns": [
+            "/*.stories.tsx",
+            "src/s3",
+            "src/api",
+            "src/testHelpers",
+            "src/localAuth",
+            "src/gen",
+            "src/components/Header/StateIcon/StateIcon.tsx",
+            "src/pages/Auth/CheckAuth.tsx",
+            "src/pages/Auth/CognitoLogin.tsx",
+            "src/pages/Auth/Signup",
+            "src/pages/Auth/ConfirmSignUp",
+            "src/pages/Help/Help.tsx",
+            "App.tsx",
+            "index.ts",
+            "reportWebVitals.ts"
+        ],
+        "coverageReporters": [
+            [
+                "json",
+                {
+                    "projectRoot": "../../"
+                }
+            ],
+            [
+                "lcov",
+                {
+                    "projectRoot": "../../"
+                }
+            ],
+            "text"
+        ]
+    },
+    "author": "",
+    "license": "CC0-1.0",
+    "bugs": {
+        "url": "https://github.com/Enterprise-CMCS/managed-care-review/issues"
+    },
+    "homepage": "https://github.com/Enterprise-CMCS/managed-care-review#readme",
+    "devDependencies": {
+        "@bahmutov/cypress-esbuild-preprocessor": "^2.2.0",
+        "@cypress-audit/pa11y": "^1.3.0",
+        "chromedriver": "^126.0.4",
+        "cypress": "^13.0.0",
+        "cypress-pipe": "^2.0.0",
+        "danger": "^11.2.6",
+        "esbuild": "^0.19.2",
+        "husky": "^9.0.11",
+        "lerna": "^8.0.2",
+        "lint-staged": "^15.2.2",
+        "prettier": "^3.1.0"
+    },
+    "dependencies": {
+        "cypress-file-upload": "^5.0.8",
+        "path-browserify": "^1.0.1"
+    }
 }

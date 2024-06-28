@@ -7,7 +7,7 @@ const createBundler = require('@bahmutov/cypress-esbuild-preprocessor')
 
 module.exports = defineConfig({
     e2e: {
-        baseUrl: 'http://localhost:3000',
+        baseUrl: 'http://127.0.0.1:3000',
         supportFile: 'support/index.ts',
         fixturesFolder: 'fixtures',
         specPattern: 'integration/**/*.spec.ts',
@@ -68,5 +68,5 @@ module.exports = defineConfig({
     },
     videoUploadOnPasses: false,
     experimentalMemoryManagement: true,
-    numTestsKeptInMemory: 30,
+    numTestsKeptInMemory: 20,
 })
