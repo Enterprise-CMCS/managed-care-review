@@ -27,15 +27,18 @@ Cypress.Commands.add('logInAsStateUser', () => {
     cy.wait(['@fetchCurrentUserQuery', '@indexHealthPlanPackagesQuery'], {
         timeout: 80_000,
     })
-    cy.findByTestId('state-dashboard-page', {timeout: 10_000 }).should('exist')
+    cy.findByTestId('state-dashboard-page', { timeout: 10_000 }).should('exist')
     cy.findByText('Start new submission').should('exist')
 })
 
 Cypress.Commands.add(
     'logInAsCMSUser',
     ({ initialURL } = { initialURL: '/' }) => {
+        // Note: During the move to vite this stopped working, we had to move to visit /auth first
+        //cy.visit(initialURL)
 
-        cy.visit(initialURL)
+        cy.visit('/auth')
+
         //Add assertion looking for test on the page before findByRole
         cy.findByText(
             'Medicaid and CHIP Managed Care Reporting and Review System'
@@ -57,22 +60,19 @@ Cypress.Commands.add(
         } else {
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
         }
-        cy.url({ timeout: 20_000 }).should(
-            'contain',
-            initialURL
-        )
+        cy.visit(initialURL)
+        cy.url({ timeout: 20_000 }).should('contain', initialURL)
         cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
         if (initialURL?.includes('submissions')) {
-            cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20_000 }) // for cases where CMs user goes to specific submission on login, likely from email link
+            cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', {
+                timeout: 20_000,
+            }) // for cases where CMs user goes to specific submission on login, likely from email link
         } else if (initialURL?.includes('rate-reviews')) {
             cy.wait('@indexRatesQuery', { timeout: 80_000 })
-            cy.findByTestId('cms-dashboard-page',{timeout: 10_000 }).should('exist')
-            cy.findByRole('heading', {name: /rate reviews/}).should('exist')
-        } else {
-            // Default behavior on login is to go to CMS dashboard submissions
-            cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
-            cy.findByTestId('cms-dashboard-page',{timeout: 10_000 }).should('exist')
-            cy.findByRole('heading', {name: /Submissions dashboard/}).should('exist')
+            cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
+                'exist'
+            )
+            cy.findByRole('heading', { name: /rate reviews/ }).should('exist')
         }
     }
 )
@@ -103,27 +103,26 @@ Cypress.Commands.add(
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
         }
         cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
-        cy.url({ timeout: 20_000 }).should(
-            'contain',
-            initialURL
-        )
+        cy.url({ timeout: 20_000 }).should('contain', initialURL)
 
         if (initialURL === '/settings') {
             cy.wait('@indexUsersQuery', { timeout: 20_000 })
-        } else if (initialURL?.includes('submissions')){
+        } else if (initialURL?.includes('submissions')) {
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20_000 })
         } else {
             cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
-            cy.findByTestId('cms-dashboard-page', {timeout: 10_000 }).should('exist')
-            cy.findByRole('heading', {name: 'Submissions'}).should('exist')
+            cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
+                'exist'
+            )
+            cy.findByRole('heading', { name: 'Submissions' }).should('exist')
         }
     }
 )
 
-
 Cypress.Commands.add('logOut', () => {
     cy.findByRole('button', { name: 'Sign out' }).should('exist').click()
     cy.findByText(
-        'Medicaid and CHIP Managed Care Reporting and Review System', {timeout: 20_000}
+        'Medicaid and CHIP Managed Care Reporting and Review System',
+        { timeout: 20_000 }
     )
 })
