@@ -468,7 +468,7 @@ jobs:
     if: always() && needs.finishing-prep.result == 'success'
     runs-on: ubuntu-20.04
     container:
-      image: cypress/browsers:node18.12.0-chrome107
+      image: cypress/browsers:node-20.14.0-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
       options: --user 1001
     permissions:
       deployments: write
