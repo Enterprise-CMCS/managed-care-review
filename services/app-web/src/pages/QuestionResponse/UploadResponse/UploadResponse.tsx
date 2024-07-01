@@ -28,18 +28,18 @@ import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSide
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
 import { createResponseWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 import { RoutesRecord } from '../../../constants'
+import { useTealium } from '../../../hooks'
 
 export const UploadResponse = () => {
     // router context
     const { division, id, questionID } = useParams<{
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         division: string
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         id: string
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         questionID: string
     }>()
+
     const navigate = useNavigate()
+    const { logButtonEvent } = useTealium()
 
     // api
     const [createResponse, { loading: apiLoading, error: apiError }] =
@@ -128,7 +128,16 @@ export const UploadResponse = () => {
                 aria-describedby="form-guidance"
                 onSubmit={async (e) => {
                     e.preventDefault()
-                    await handleFormSubmit()
+                    logButtonEvent(
+                        {
+                            text: 'Send response',
+                            button_style: 'default',
+                            button_type: 'submit',
+                            parent_component_type: 'page body',
+                            link_url: `/submissions/${id}/question-and-answers?submit=question`,
+                        },
+                        () => handleFormSubmit()
+                    )
                 }}
             >
                 {apiError && <GenericApiErrorBanner />}
@@ -184,11 +193,21 @@ export const UploadResponse = () => {
                             variant="outline"
                             data-testid="page-actions-left-secondary"
                             disabled={apiLoading}
-                            onClick={() => {
-                                navigate(
-                                    `/submissions/${id}/question-and-answers`
+                            onClick={() =>
+                                logButtonEvent(
+                                    {
+                                        text: 'Cancel',
+                                        button_style: 'outline',
+                                        button_type: 'button',
+                                        parent_component_type: 'page body',
+                                        link_url: `/submissions/${id}/question-and-answers`,
+                                    },
+                                    () =>
+                                        navigate(
+                                            `/submissions/${id}/question-and-answers`
+                                        )
                                 )
-                            }}
+                            }
                         >
                             Cancel
                         </ActionButton>

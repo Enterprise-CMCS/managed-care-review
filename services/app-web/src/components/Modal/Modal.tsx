@@ -16,11 +16,12 @@ import styles from './Modal.module.scss'
 
 import { ActionButton } from '../ActionButton'
 import { useAuth } from '../../contexts/AuthContext'
+import { useTealium } from '../../hooks'
 
 interface ModalComponentProps {
     id: string
     modalHeading?: string
-    onSubmit?: React.MouseEventHandler<HTMLButtonElement>
+    onSubmit?: () => void
     onCancel?: () => void
     onSubmitText?: string
     onCancelText?: string
@@ -49,6 +50,7 @@ export const Modal = ({
     ...divProps
 }: ModalProps): React.ReactElement => {
     const { sessionIsExpiring } = useAuth()
+    const { logButtonEvent } = useTealium()
 
     /* unless it's the session expiring modal, close it if the session is expiring, so the user can interact
     with the session expiring modal */
@@ -92,7 +94,17 @@ export const Modal = ({
                         aria-label={`${onCancelText || 'Cancel'}`}
                         data-testid={`${id}-modal-cancel`}
                         id={`${id}-cancel`}
-                        onClick={cancelHandler}
+                        onClick={(e) =>
+                            logButtonEvent(
+                                {
+                                    text: onCancelText || 'Cancel',
+                                    button_style: 'outline',
+                                    button_type: 'button',
+                                    parent_component_type: 'modal',
+                                },
+                                () => cancelHandler(e)
+                            )
+                        }
                         outline
                         disabled={isSubmitting}
                     >
@@ -103,7 +115,17 @@ export const Modal = ({
                         data-testid={`${id}-modal-submit`}
                         variant="success"
                         id={`${id}-submit`}
-                        onClick={onSubmit}
+                        onClick={(e) =>
+                            logButtonEvent(
+                                {
+                                    text: onSubmitText || 'Submit',
+                                    button_style: 'success',
+                                    button_type: 'button',
+                                    parent_component_type: 'modal',
+                                },
+                                onSubmit
+                            )
+                        }
                         loading={isSubmitting}
                         {...submitButtonProps}
                     >

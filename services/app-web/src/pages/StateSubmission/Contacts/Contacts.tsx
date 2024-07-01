@@ -30,6 +30,7 @@ import {
     useCurrentRoute,
     useHealthPlanPackageForm,
     useRouteParams,
+    useTealium,
 } from '../../../hooks'
 import { useAuth } from '../../../contexts/AuthContext'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
@@ -72,6 +73,7 @@ const Contacts = ({
         React.useState(false)
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
+    const { logButtonEvent } = useTealium()
 
     // set up API handling and HPP data
     const { loggedInUser } = useAuth()
@@ -358,12 +360,25 @@ const Contacts = ({
                                                                                 className={
                                                                                     styles.removeContactBtn
                                                                                 }
-                                                                                onClick={() => {
-                                                                                    remove(
-                                                                                        index
+                                                                                onClick={() =>
+                                                                                    logButtonEvent(
+                                                                                        {
+                                                                                            text: 'Remove contact',
+                                                                                            button_style:
+                                                                                                'link',
+                                                                                            button_type:
+                                                                                                'button',
+                                                                                            parent_component_type:
+                                                                                                'page body',
+                                                                                        },
+                                                                                        () => {
+                                                                                            remove(
+                                                                                                index
+                                                                                            )
+                                                                                            setNewStateContactButtonFocus()
+                                                                                        }
                                                                                     )
-                                                                                    setNewStateContactButtonFocus()
-                                                                                }}
+                                                                                }
                                                                             >
                                                                                 Remove
                                                                                 contact
@@ -377,14 +392,27 @@ const Contacts = ({
                                                     <button
                                                         type="button"
                                                         className={`usa-button usa-button--outline ${styles.addContactBtn}`}
-                                                        onClick={() => {
-                                                            push(
-                                                                emptyStateContact
+                                                        onClick={() =>
+                                                            logButtonEvent(
+                                                                {
+                                                                    text: 'Add another state contact',
+                                                                    button_style:
+                                                                        'outline',
+                                                                    button_type:
+                                                                        'button',
+                                                                    parent_component_type:
+                                                                        'page body',
+                                                                },
+                                                                () => {
+                                                                    push(
+                                                                        emptyStateContact
+                                                                    )
+                                                                    setFocusNewContact(
+                                                                        true
+                                                                    )
+                                                                }
                                                             )
-                                                            setFocusNewContact(
-                                                                true
-                                                            )
-                                                        }}
+                                                        }
                                                         ref={
                                                             newStateContactButtonRef
                                                         }

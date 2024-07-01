@@ -27,6 +27,7 @@ import {
 import { useFetchHealthPlanPackageWithQuestionsWrapper } from '../../gqlHelpers'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import styles from './MccrsId.module.scss'
+import { useTealium } from '../../hooks'
 
 export interface MccrsIdFormValues {
     mccrsId: number | undefined
@@ -49,6 +50,7 @@ export const MccrsId = (): React.ReactElement => {
     // page context
     const { updateHeading } = usePage()
     const [pkgName, setPkgName] = useState<string | undefined>(undefined)
+    const { logButtonEvent } = useTealium()
 
     useEffect(() => {
         updateHeading({ customHeading: pkgName })
@@ -185,7 +187,16 @@ export const MccrsId = (): React.ReactElement => {
                             aria-describedby="form-guidance"
                             onSubmit={(e) => {
                                 setShouldValidate(true)
-                                handleSubmit(e)
+                                // This button even is here because onSubmit is called from here not from the button, but the button triggers this.
+                                logButtonEvent(
+                                    {
+                                        text: 'Save MC-CRS number',
+                                        button_style: 'default',
+                                        button_type: 'submit',
+                                        parent_component_heading: 'page body',
+                                    },
+                                    () => handleSubmit(e)
+                                )
                             }}
                         >
                             {showPageErrorMessage && <GenericApiErrorBanner />}
@@ -219,7 +230,6 @@ export const MccrsId = (): React.ReactElement => {
                                     disabled={
                                         shouldValidate && !!errors.mccrsId
                                     }
-                                    onSubmit={() => handleFormSubmit(values)}
                                     animationTimeout={1000}
                                     loading={
                                         isSubmitting &&

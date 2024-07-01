@@ -4,6 +4,7 @@ import { FileItemT } from '../FileProcessor/FileProcessor'
 import styles from '../FileUpload.module.scss'
 import { Button, Checkbox } from '@trussworks/react-uswds'
 import { SPACER_GIF } from '../constants'
+import { useTealium } from '../../../hooks'
 
 type FileRowProps = {
     errorRowClass?: string
@@ -41,6 +42,7 @@ export const FileRow = ({
     isContractOnly,
     hasNonDocumentError,
 }: FileRowProps): React.ReactElement => {
+    const { logButtonEvent } = useTealium()
     const { name, id } = item
     const shouldHideCheckbox = isContractOnly || hasNonDocumentError
 
@@ -121,7 +123,16 @@ export const FileRow = ({
                     type="button"
                     aria-label={`Remove ${name} document`}
                     unstyled
-                    onClick={handleDelete}
+                    onClick={(e) =>
+                        logButtonEvent(
+                            {
+                                text: 'Remove',
+                                button_style: 'link',
+                                button_type: 'button',
+                            },
+                            () => handleDelete(e)
+                        )
+                    }
                 >
                     Remove
                 </Button>
@@ -132,7 +143,16 @@ export const FileRow = ({
                         type="button"
                         aria-label={`Retry upload for ${name} document`}
                         unstyled
-                        onClick={handleRetry}
+                        onClick={(e) =>
+                            logButtonEvent(
+                                {
+                                    text: 'Remove',
+                                    button_style: 'link',
+                                    button_type: 'button',
+                                },
+                                () => handleRetry(e)
+                            )
+                        }
                     >
                         Retry
                     </Button>

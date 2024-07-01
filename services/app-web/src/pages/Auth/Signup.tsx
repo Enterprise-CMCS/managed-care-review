@@ -9,6 +9,7 @@ import {
 
 import { signUp } from './cognitoAuth'
 import { recordJSException } from '../../otelHelpers'
+import { useTealium } from '../../hooks'
 
 export function showError(error: string): void {
     console.info(error)
@@ -32,6 +33,8 @@ export function Signup({
     })
 
     const [isLoading, setIsLoading] = useState(false)
+
+    const { logButtonEvent } = useTealium()
 
     const onFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = event.target
@@ -130,7 +133,18 @@ export function Signup({
                     value={fields.confirmPassword}
                 />
             </FormGroup>
-            <Button type="submit" disabled={!validateForm() || isLoading}>
+            <Button
+                type="submit"
+                disabled={!validateForm() || isLoading}
+                onClick={(e) =>
+                    logButtonEvent({
+                        text: 'Signup',
+                        button_style: 'primary',
+                        button_type: 'submit',
+                        parent_component_type: 'constant header',
+                    })
+                }
+            >
                 Signup
             </Button>
         </Form>

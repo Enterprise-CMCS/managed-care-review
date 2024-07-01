@@ -31,14 +31,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
     const isLastPage = pageVariant === 'LAST'
     const isFirstPageEditing = pageVariant === 'EDIT_FIRST'
     const isStandalonePage = pageVariant === 'STANDALONE'
-    const { logUserEvent } = useTealium()
-
-    const saveAsDraftOnClickWithLogging = (
-        e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-    ) => {
-        logUserEvent({ tealium_event: 'button_engagement' })
-        if (saveAsDraftOnClick) saveAsDraftOnClick(e)
-    }
+    const { logButtonEvent } = useTealium()
 
     const leftElement =
         isFirstPage || !saveAsDraftOnClick ? undefined : (
@@ -47,7 +40,18 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                 variant="linkStyle"
                 disabled={actionInProgress}
                 onClick={
-                    actionInProgress ? undefined : saveAsDraftOnClickWithLogging
+                    actionInProgress
+                        ? undefined
+                        : (e) =>
+                              logButtonEvent(
+                                  {
+                                      text: 'Save as draft',
+                                      button_style: 'link',
+                                      button_type: 'submit',
+                                      parent_component_type: 'page body',
+                                  },
+                                  () => saveAsDraftOnClick(e)
+                              )
                 }
                 data-testid="page-actions-left-primary"
             >
@@ -63,7 +67,25 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                     variant="outline"
                     data-testid="page-actions-left-secondary"
                     disabled={actionInProgress}
-                    onClick={actionInProgress ? undefined : backOnClick}
+                    onClick={
+                        actionInProgress
+                            ? undefined
+                            : (e) =>
+                                  logButtonEvent(
+                                      {
+                                          text:
+                                              !isFirstPage &&
+                                              !isFirstPageEditing &&
+                                              !isStandalonePage
+                                                  ? 'Back'
+                                                  : 'Cancel',
+                                          button_style: 'outline',
+                                          button_type: 'submit',
+                                          parent_component_type: 'page body',
+                                      },
+                                      () => backOnClick(e)
+                                  )
+                    }
                 >
                     {!isFirstPage && !isFirstPageEditing && !isStandalonePage
                         ? 'Back'
@@ -78,7 +100,20 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                     onClick={
                         actionInProgress || disableContinue
                             ? undefined
-                            : continueOnClick
+                            : (e) =>
+                                  logButtonEvent(
+                                      {
+                                          text:
+                                              !isLastPage && !isStandalonePage
+                                                  ? 'Continue'
+                                                  : 'Submit',
+                                          button_style: 'default',
+                                          button_type: 'submit',
+                                          parent_component_type: 'page body',
+                                      },
+                                      () =>
+                                          continueOnClick && continueOnClick(e)
+                                  )
                     }
                     animationTimeout={1000}
                     loading={actionInProgress && !disableContinue}

@@ -34,6 +34,7 @@ import {
 import { ActuaryContactFields } from '../../Contacts'
 import { FormikRateForm, RateDetailFormConfig } from './RateDetailsV2'
 import { useFocus } from '../../../../hooks/useFocus'
+import { useTealium } from '../../../../hooks'
 const isRateTypeEmpty = (rateForm: FormikRateForm): boolean =>
     rateForm.rateType === undefined
 const isRateTypeAmendment = (rateForm: FormikRateForm): boolean =>
@@ -102,6 +103,7 @@ export const SingleRateFormFields = ({
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
     const { errors, setFieldValue } = useFormikContext<RateDetailFormConfig>()
     const [focusNewActuaryContact, setFocusNewActuaryContact] = useState(false)
+    const { logButtonEvent } = useTealium()
 
     const newActuaryContactNameRef = useRef<HTMLInputElement | null>(null)
     const [newActuaryContactButtonRef, setNewActuaryContactButtonFocus] =
@@ -528,10 +530,23 @@ export const SingleRateFormFields = ({
                                                 className={
                                                     styles.removeContactBtn
                                                 }
-                                                onClick={() => {
-                                                    remove(index)
-                                                    setNewActuaryContactButtonFocus()
-                                                }}
+                                                onClick={() =>
+                                                    logButtonEvent(
+                                                        {
+                                                            text: 'Remove certifying actuary',
+                                                            button_style:
+                                                                'link',
+                                                            button_type:
+                                                                'button',
+                                                            parent_component_type:
+                                                                'page body',
+                                                        },
+                                                        () => {
+                                                            remove(index)
+                                                            setNewActuaryContactButtonFocus()
+                                                        }
+                                                    )
+                                                }
                                                 data-testid="removeContactBtn"
                                             >
                                                 Remove certifying actuary
@@ -542,10 +557,20 @@ export const SingleRateFormFields = ({
                             <button
                                 type="button"
                                 className={`usa-button usa-button--outline ${styles.addRateBtn}`}
-                                onClick={() => {
-                                    push(emptyActuaryContact)
-                                    setFocusNewActuaryContact(true)
-                                }}
+                                onClick={() =>
+                                    logButtonEvent(
+                                        {
+                                            text: 'Add a certifying actuary',
+                                            button_style: 'outline',
+                                            button_type: 'button',
+                                            parent_component_type: 'page body',
+                                        },
+                                        () => {
+                                            push(emptyActuaryContact)
+                                            setFocusNewActuaryContact(true)
+                                        }
+                                    )
+                                }
                                 ref={newActuaryContactButtonRef}
                             >
                                 Add a certifying actuary

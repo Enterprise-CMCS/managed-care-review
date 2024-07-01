@@ -38,6 +38,7 @@ export const ExpandableText = ({
             <span
                 ref={textRef}
                 data-testid="clampElement"
+                id="expandable-text"
                 aria-expanded={showMore}
                 className={`usa-alert__text ${
                     showMore ? styles.textExpanded : styles.textContracted

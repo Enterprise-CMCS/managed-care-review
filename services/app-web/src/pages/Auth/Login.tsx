@@ -11,12 +11,14 @@ import { useNavigate } from 'react-router-dom'
 
 import { signIn } from '../Auth/cognitoAuth'
 import { useAuth } from '../../contexts/AuthContext'
+import { useTealium } from '../../hooks'
 
 type Props = {
     defaultEmail?: string
 }
 
 export function Login({ defaultEmail }: Props): React.ReactElement {
+    const { logButtonEvent } = useTealium()
     const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [fields, setFields] = useState({
         loginEmail: defaultEmail || '',
@@ -104,6 +106,14 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
             <Button
                 type="submit"
                 disabled={!validateForm() || loginStatus === 'LOADING'}
+                onClick={(e) =>
+                    logButtonEvent({
+                        text: 'Login',
+                        button_style: 'default',
+                        button_type: 'button',
+                        parent_component_heading: 'page body',
+                    })
+                }
             >
                 Login
             </Button>

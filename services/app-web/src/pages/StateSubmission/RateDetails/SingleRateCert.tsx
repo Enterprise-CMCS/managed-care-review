@@ -44,7 +44,7 @@ import {
 } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { ActuaryContactFields } from '../Contacts'
 import { PackagesWithSharedRates } from './PackagesWithSharedRates'
-import { useFocus } from '../../../hooks'
+import { useFocus, useTealium } from '../../../hooks'
 
 const isRateTypeEmpty = (values: RateCertFormType): boolean =>
     values.rateType === undefined
@@ -142,6 +142,7 @@ export const SingleRateCert = ({
     const rateCertNumber = index + 1
     const { errors, setFieldValue } = useFormikContext<RateInfoArrayType>()
     const [focusNewActuaryContact, setFocusNewActuaryContact] = useState(false)
+    const { logButtonEvent } = useTealium()
 
     const newActuaryContactNameRef = useRef<HTMLInputElement | null>(null)
     const [newActuaryContactButtonRef, setNewActuaryContactButtonFocus] =
@@ -611,10 +612,23 @@ export const SingleRateCert = ({
                                                     className={
                                                         styles.removeContactBtn
                                                     }
-                                                    onClick={() => {
-                                                        remove(index)
-                                                        setNewActuaryContactButtonFocus()
-                                                    }}
+                                                    onClick={() =>
+                                                        logButtonEvent(
+                                                            {
+                                                                text: 'Remove certifying actuary',
+                                                                button_style:
+                                                                    'link',
+                                                                button_type:
+                                                                    'button',
+                                                                parent_component_type:
+                                                                    'page body',
+                                                            },
+                                                            () => {
+                                                                remove(index)
+                                                                setNewActuaryContactButtonFocus()
+                                                            }
+                                                        )
+                                                    }
                                                     data-testid="removeContactBtn"
                                                 >
                                                     Remove certifying actuary
@@ -625,10 +639,21 @@ export const SingleRateCert = ({
                                 <Button
                                     type="button"
                                     unstyled
-                                    onClick={() => {
-                                        push(emptyActuaryContact)
-                                        setFocusNewActuaryContact(true)
-                                    }}
+                                    onClick={() =>
+                                        logButtonEvent(
+                                            {
+                                                text: 'Add a certifying actuary',
+                                                button_style: 'link',
+                                                button_type: 'button',
+                                                parent_component_type:
+                                                    'page body',
+                                            },
+                                            () => {
+                                                push(emptyActuaryContact)
+                                                setFocusNewActuaryContact(true)
+                                            }
+                                        )
+                                    }
                                     ref={newActuaryContactButtonRef}
                                 >
                                     Add a certifying actuary
@@ -689,7 +714,17 @@ export const SingleRateCert = ({
                         type="button"
                         unstyled
                         className={styles.removeContactBtn}
-                        onClick={multiRatesConfig.removeSelf}
+                        onClick={() =>
+                            logButtonEvent(
+                                {
+                                    text: 'Remove rate certification',
+                                    button_style: 'link',
+                                    button_type: 'button',
+                                    parent_component_type: 'page body',
+                                },
+                                multiRatesConfig.removeSelf
+                            )
+                        }
                     >
                         Remove rate certification
                     </Button>

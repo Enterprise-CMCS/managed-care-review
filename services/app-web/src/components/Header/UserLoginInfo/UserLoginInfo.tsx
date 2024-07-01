@@ -9,6 +9,7 @@ import { AuthModeType } from '../../../common-code/config'
 
 import styles from '../Header.module.scss'
 import { useStringConstants } from '../../../hooks/useStringConstants'
+import { useTealium } from '../../../hooks'
 
 type LogoutHandlerT = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -18,6 +19,7 @@ const LoggedInUserInfo = (
     user: User,
     logout: LogoutHandlerT
 ): React.ReactElement => {
+    const { logButtonEvent } = useTealium()
     const stringConstants = useStringConstants()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     return (
@@ -35,7 +37,20 @@ const LoggedInUserInfo = (
             <span>{user.email}</span>
             <span className={styles.divider}>|</span>
 
-            <Button type="button" unstyled onClick={logout}>
+            <Button
+                type="button"
+                unstyled
+                onClick={(e) =>
+                    logButtonEvent(
+                        {
+                            text: 'Sign out',
+                            button_style: 'link',
+                            button_type: 'button',
+                        },
+                        () => logout(e)
+                    )
+                }
+            >
                 Sign out
             </Button>
         </div>

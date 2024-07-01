@@ -4,6 +4,7 @@ import { FileItemT } from '../FileProcessor/FileProcessor'
 import styles from '../FileUpload.module.scss'
 import { Button } from '@trussworks/react-uswds'
 import { SPACER_GIF } from '../constants'
+import { useTealium } from '../../../hooks'
 
 type FileListItemProps = {
     errorRowClass?: string
@@ -29,6 +30,7 @@ export const FileListItem = ({
     handleDelete,
     handleRetry,
 }: FileListItemProps): React.ReactElement => {
+    const { logButtonEvent } = useTealium()
     const { name } = item
     return (
         <>
@@ -70,7 +72,16 @@ export const FileListItem = ({
                 <Button
                     type="button"
                     unstyled
-                    onClick={handleDelete}
+                    onClick={(e) =>
+                        logButtonEvent(
+                            {
+                                text: 'Remove',
+                                button_style: 'link',
+                                button_type: 'button',
+                            },
+                            () => handleDelete(e)
+                        )
+                    }
                     aria-label={`Remove ${name} document`}
                 >
                     Remove
@@ -79,7 +90,16 @@ export const FileListItem = ({
                     <Button
                         type="button"
                         unstyled
-                        onClick={handleRetry}
+                        onClick={(e) =>
+                            logButtonEvent(
+                                {
+                                    text: 'Retry',
+                                    button_style: 'link',
+                                    button_type: 'button',
+                                },
+                                () => handleRetry(e)
+                            )
+                        }
                         aria-label={`Retry upload for ${name} document`}
                     >
                         Retry

@@ -21,6 +21,7 @@ import {
     useFocus,
     useHealthPlanPackageForm,
     useRouteParams,
+    useTealium,
 } from '../../../hooks'
 
 import {
@@ -115,6 +116,7 @@ export const RateDetails = ({
 }: HealthPlanFormPageProps): React.ReactElement => {
     const navigate = useNavigate()
     const { getKey } = useS3()
+    const { logButtonEvent } = useTealium()
 
     // set up API handling and HPP data
     const { loggedInUser } = useAuth()
@@ -413,14 +415,29 @@ export const RateDetails = ({
                                                         <button
                                                             type="button"
                                                             className={`usa-button usa-button--outline ${styles.addRateBtn}`}
-                                                            onClick={() => {
-                                                                const newRate =
-                                                                    generateRateCertFormValues()
-                                                                push(newRate)
-                                                                setFocusNewRate(
-                                                                    true
+                                                            onClick={() =>
+                                                                logButtonEvent(
+                                                                    {
+                                                                        text: 'Add another rate certification',
+                                                                        button_style:
+                                                                            'outline',
+                                                                        button_type:
+                                                                            'button',
+                                                                        parent_component_type:
+                                                                            'page body',
+                                                                    },
+                                                                    () => {
+                                                                        const newRate =
+                                                                            generateRateCertFormValues()
+                                                                        push(
+                                                                            newRate
+                                                                        )
+                                                                        setFocusNewRate(
+                                                                            true
+                                                                        )
+                                                                    }
                                                                 )
-                                                            }}
+                                                            }
                                                             ref={
                                                                 newRateButtonRef
                                                             }

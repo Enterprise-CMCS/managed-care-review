@@ -32,7 +32,7 @@ import {
     useUpdateDraftContractRatesMutation,
 } from '../../../../gen/gqlClient'
 import { SingleRateFormFields } from './SingleRateFormFields'
-import { useFocus, useRouteParams } from '../../../../hooks'
+import { useFocus, useRouteParams, useTealium } from '../../../../hooks'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
 import { PageBannerAlerts } from '../../PageBannerAlerts'
 import { useAuth } from '../../../../contexts/AuthContext'
@@ -94,6 +94,7 @@ const RateDetailsV2 = ({
     const { loggedInUser } = useAuth()
     const ldClient = useLDClient()
     const { updateHeading } = usePage()
+    const { logButtonEvent } = useTealium()
 
     const useLinkedRates = ldClient?.variation(
         featureFlags.LINK_RATES.flag,
@@ -527,12 +528,25 @@ const RateDetailsV2 = ({
                                                                             className={
                                                                                 styles.removeContactBtn
                                                                             }
-                                                                            onClick={() => {
-                                                                                remove(
-                                                                                    index
+                                                                            onClick={() =>
+                                                                                logButtonEvent(
+                                                                                    {
+                                                                                        text: 'Remove rate certification',
+                                                                                        button_style:
+                                                                                            'link',
+                                                                                        button_type:
+                                                                                            'button',
+                                                                                        parent_component_type:
+                                                                                            'page body',
+                                                                                    },
+                                                                                    () => {
+                                                                                        remove(
+                                                                                            index
+                                                                                        )
+                                                                                        setNewRateButtonFocus()
+                                                                                    }
                                                                                 )
-                                                                                setNewRateButtonFocus()
-                                                                            }}
+                                                                            }
                                                                         >
                                                                             Remove
                                                                             rate
@@ -552,17 +566,32 @@ const RateDetailsV2 = ({
                                                         <button
                                                             type="button"
                                                             className={`usa-button usa-button--outline ${styles.addRateBtn}`}
-                                                            onClick={() => {
-                                                                const newRate =
-                                                                    convertGQLRateToRateForm(
-                                                                        getKey
-                                                                    ) // empty rate
+                                                            onClick={() =>
+                                                                logButtonEvent(
+                                                                    {
+                                                                        text: 'Add another rate certification',
+                                                                        button_style:
+                                                                            'outline',
+                                                                        button_type:
+                                                                            'button',
+                                                                        parent_component_type:
+                                                                            'page body',
+                                                                    },
+                                                                    () => {
+                                                                        const newRate =
+                                                                            convertGQLRateToRateForm(
+                                                                                getKey
+                                                                            ) // empty rate
 
-                                                                push(newRate)
-                                                                setFocusNewRate(
-                                                                    true
+                                                                        push(
+                                                                            newRate
+                                                                        )
+                                                                        setFocusNewRate(
+                                                                            true
+                                                                        )
+                                                                    }
                                                                 )
-                                                            }}
+                                                            }
                                                             ref={
                                                                 newRateButtonRef
                                                             }

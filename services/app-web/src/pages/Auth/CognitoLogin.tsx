@@ -4,8 +4,10 @@ import { Button, GridContainer, Grid } from '@trussworks/react-uswds'
 import { Signup } from './Signup'
 import { ConfirmSignUp } from './ConfirmSignUp'
 import { Login } from './Login'
+import { useTealium } from '../../hooks'
 
 export const CognitoLogin = (): React.ReactElement => {
+    const { logButtonEvent } = useTealium()
     const [showConfirmation, setShowConfirmation] = useState(false)
     const [showLogin, setShowLogin] = useState(false)
     const [enteredEmail, setEnteredEmail] = useState('')
@@ -43,18 +45,54 @@ export const CognitoLogin = (): React.ReactElement => {
                     <>
                         <Button
                             type="button"
-                            onClick={() => setShowLogin(true)}
+                            onClick={(e) =>
+                                logButtonEvent(
+                                    {
+                                        text: 'Show Login Form',
+                                        button_style: 'default',
+                                        button_type: 'button',
+                                        parent_component_heading: 'page body',
+                                    },
+                                    () => setShowLogin(true)
+                                )
+                            }
                         >
                             Show Login Form
                         </Button>
 
-                        <Button type="button" onClick={toggleConfirmationForm}>
+                        <Button
+                            type="button"
+                            onClick={(e) =>
+                                logButtonEvent(
+                                    {
+                                        text: 'Enter confirmation code',
+                                        button_style: 'default',
+                                        button_type: 'button',
+                                        parent_component_heading: 'page body',
+                                    },
+                                    () => toggleConfirmationForm(e)
+                                )
+                            }
+                        >
                             Enter confirmation code
                         </Button>
                     </>
                 )}
                 {showLogin && (
-                    <Button type="button" onClick={() => setShowLogin(false)}>
+                    <Button
+                        type="button"
+                        onClick={(e) =>
+                            logButtonEvent(
+                                {
+                                    text: 'Show Signup Form',
+                                    button_style: 'default',
+                                    button_type: 'button',
+                                    parent_component_heading: 'page body',
+                                },
+                                () => setShowLogin(false)
+                            )
+                        }
+                    >
                         Show Signup Form
                     </Button>
                 )}
@@ -71,7 +109,20 @@ export const CognitoLogin = (): React.ReactElement => {
                 }}
             />
             <div className="padding-y-2">
-                <Button type="button" onClick={toggleConfirmationForm}>
+                <Button
+                    type="button"
+                    onClick={(e) =>
+                        logButtonEvent(
+                            {
+                                text: 'Login',
+                                button_style: 'default',
+                                button_type: 'button',
+                                parent_component_heading: 'page body',
+                            },
+                            () => toggleConfirmationForm(e)
+                        )
+                    }
+                >
                     Show Signup/ Login
                 </Button>
             </div>

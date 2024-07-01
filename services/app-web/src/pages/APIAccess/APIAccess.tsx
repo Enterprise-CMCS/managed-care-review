@@ -11,6 +11,7 @@ import { handleApolloError } from '../../gqlHelpers/apolloErrors'
 import { recordJSException } from '../../otelHelpers'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './APIAccess.module.scss'
+import { useTealium } from '../../hooks'
 
 function APIAccess(): React.ReactElement {
     const apiURL = process.env.REACT_APP_API_URL
@@ -25,6 +26,7 @@ function APIAccess(): React.ReactElement {
     const [apiKey, setAPIKey] = useState<CreateApiKeyPayload | undefined>(
         undefined
     )
+    const { logButtonEvent } = useTealium()
 
     const callAPIKeyMutation = async () => {
         try {
@@ -71,7 +73,20 @@ curl -s ${thirdPartyAPIURL} -X POST \\
 
                 {!apiKey ? (
                     <div className={styles.centerButtonContainer}>
-                        <Button type="button" onClick={callAPIKeyMutation}>
+                        <Button
+                            type="button"
+                            onClick={(e) =>
+                                logButtonEvent(
+                                    {
+                                        text: 'Generate API Key',
+                                        button_style: 'default',
+                                        button_type: 'button',
+                                        parent_component_heading: 'page body',
+                                    },
+                                    callAPIKeyMutation
+                                )
+                            }
+                        >
                             Generate API Key
                         </Button>
                     </div>
@@ -84,10 +99,38 @@ curl -s ${thirdPartyAPIURL} -X POST \\
                             {apiKey.key}
                         </code>
                         <div className={styles.centerButtonContainer}>
-                            <Button type="button" onClick={callAPIKeyMutation}>
+                            <Button
+                                type="button"
+                                onClick={(e) =>
+                                    logButtonEvent(
+                                        {
+                                            text: 'Generate API Key',
+                                            button_style: 'default',
+                                            button_type: 'button',
+                                            parent_component_heading:
+                                                'page body',
+                                        },
+                                        callAPIKeyMutation
+                                    )
+                                }
+                            >
                                 Generate API Key
                             </Button>
-                            <Button type="button" onClick={copyKeyToClipboard}>
+                            <Button
+                                type="button"
+                                onClick={(e) =>
+                                    logButtonEvent(
+                                        {
+                                            text: 'Copy key to clipboard',
+                                            button_style: 'default',
+                                            button_type: 'button',
+                                            parent_component_heading:
+                                                'page body',
+                                        },
+                                        copyKeyToClipboard
+                                    )
+                                }
+                            >
                                 Copy key to clipboard
                             </Button>
                         </div>
