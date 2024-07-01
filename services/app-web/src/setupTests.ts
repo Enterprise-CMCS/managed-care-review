@@ -6,6 +6,9 @@ import { TextEncoder, TextDecoder } from 'util'
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom'
+import * as tealium from './hooks/useTealium';
+import {TealiumDataObjectTypes} from './hooks/useTealium';
+import {TealiumButtonEngagementObject} from './constants/tealium';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 Element.prototype.scrollIntoView = () => {}
@@ -16,3 +19,28 @@ Object.defineProperty(globalThis, 'crypto', {
 })
 
 Object.assign(global, { TextDecoder, TextEncoder })
+
+/**
+ * Our useTealium hook needs to be mocked and the implementation needs to be done before each test is ran otherwise
+ * the mock is reset to undefined.
+ * Since we use logButtonEvent everywhere, instead of adding this to each test file, we can do it here and apply it to all
+**/
+const spyOnUseTealium = jest.spyOn(tealium, 'useTealium')
+beforeEach(() => {
+    spyOnUseTealium.mockImplementation(() => ({
+        logUserEvent: (linkData: TealiumDataObjectTypes) => {
+            return
+        },
+        logPageView: () => {
+            return
+        },
+        logButtonEvent: (
+            tealiumData: Omit<TealiumButtonEngagementObject, 'event_name' | 'link_type'>,
+            onClick?: () => void,
+        ) => {
+            if (onClick) {
+                onClick()
+            }
+        },
+    }))
+})
