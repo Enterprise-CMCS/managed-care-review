@@ -6,6 +6,9 @@ import {
 import { mockMNState } from './stateMock'
 import { v4 as uuidv4 } from 'uuid'
 
+const s3DlUrl =
+    'https://fake-bucket.s3.amazonaws.com/file.pdf?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1719564800&Signature=abc123def456ghijk' //pragma: allowlist secret
+
 const contractRevisionOnRateDataMock = (
     data?: Partial<RelatedContractRevisions>
 ): RelatedContractRevisions => ({
@@ -50,7 +53,7 @@ const contractRevisionOnRateDataMock = (
                 name: 'contract-document.pdf',
                 s3URL: 's3://bucketname/key/contract-document',
                 sha256: 'fakeSha',
-                dateAdded: new Date()
+                dateAdded: new Date(),
             },
         ],
         contractDateStart: '2024-04-01',
@@ -99,7 +102,8 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
                     name: 'rate-document.pdf',
                     s3URL: 's3://bucketname/key/rate-document',
                     sha256: 'fakeSha',
-                    dateAdded: new Date() // new document
+                    dateAdded: new Date(), // new document
+                    downloadURL: s3DlUrl,
                 },
             ],
             supportingDocuments: [
@@ -108,7 +112,8 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
                     name: 'rate-supporting-document.pdf',
                     s3URL: 's3://bucketname/key/rate-supporting-document',
                     sha256: 'fakeSha',
-                    dateAdded: new Date('10/01/2023') //existing document
+                    dateAdded: new Date('10/01/2023'), //existing document
+                    downloadURL: s3DlUrl,
                 },
             ],
             rateDateStart: '2023-02-01',
@@ -165,7 +170,7 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
     }
 }
 
-const draftRateDataMock =  (
+const draftRateDataMock = (
     rate?: Partial<Rate>,
     draftRevision?: Partial<RateRevision>
 ): Rate => {
@@ -181,12 +186,11 @@ const draftRateDataMock =  (
         status: 'DRAFT',
         initiallySubmittedAt: '2023-10-16',
         draftRevision: {
-           ...rateRevisionDataMock({submitInfo: null,  ...draftRevision}),
+            ...rateRevisionDataMock({ submitInfo: null, ...draftRevision }),
         },
         revisions: [],
         ...rate,
         id: rateID,
-
     }
 }
 
