@@ -490,16 +490,6 @@ jobs:
           name: cypress-gen
           path: ./services/cypress/gen
 
-      - name: check ip
-        id: check-ip
-        shell: bash
-        run: curl ifconfig.me/ip
-
-      - name: Cypress hack
-        run: |
-          export DISPLAY=:1
-          Xvfb :1 -screen 0 1024x768x16 2>/dev/null &
-
       - name: Cypress -- Chrome
         id: cypress
         uses: cypress-io/github-action@v6
