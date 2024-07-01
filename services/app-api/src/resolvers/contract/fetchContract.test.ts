@@ -73,7 +73,7 @@ describe('fetchContract', () => {
         const draftContract =
             fetchDraftContractResult.data?.fetchContract.contract.draftRevision
 
-        expect(draftContract.contractName).toMatch(/MCR-FL-\d{4}-MMA/)
+        expect(draftContract.contractName).toMatch(/MCR-FL-\d{4}-NEMTMTM/)
     })
 
     it('returns a stable initially submitted at', async () => {

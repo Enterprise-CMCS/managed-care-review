@@ -5,7 +5,7 @@ export default {
     title: 'Components/Forms/FileUpload',
     component: FileUpload,
 }
-const resolveData = { key: 'testtest', s3URL: 'fakeS3url' }
+const resolveData = { key: 'testtest', s3URL: 's3://bucketname/key/fakeS3url' }
 
 export const DemoListUploadSuccess = (): React.ReactElement => {
     return (
