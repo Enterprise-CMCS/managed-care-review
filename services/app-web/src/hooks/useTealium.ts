@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { usePage } from '../contexts/PageContext'
 import { PageTitlesRecord, RouteT } from '../constants/routes'
 import { useAuth } from '../contexts/AuthContext'
@@ -11,7 +11,8 @@ import type {
     TealiumLinkDataObject,
     TealiumViewDataObject,
     TealiumEvent,
-    TealiumButtonEngagementObject
+    TealiumButtonEngagementObject,
+    TealiumInternalLinkClickedObject
 } from '../constants/tealium'
 import { useLocation } from 'react-router-dom'
 import { getRouteName } from '../routeHelpers'
@@ -27,11 +28,20 @@ Tealium is the data layer for Google Analytics and other data tracking at CMS
     In addition, useTealium returns a function for tracking user events. See Tealium docs on tracking: https://docs.tealium.com/platforms/javascript/track/
 */
 
+type TealiumDataObjectTypes =
+    | TealiumButtonEngagementObject
+    | TealiumInternalLinkClickedObject
+
 const useTealium = (): {
-    logUserEvent: (linkData: TealiumLinkDataObject) => void,
-    logPageView: () => void
+    logUserEvent: (linkData: TealiumDataObjectTypes) => void,
+    logPageView: () => void,
+    logButtonEvent: (
+        tealiumData: Omit<TealiumButtonEngagementObject, 'event_name' | 'link_type'>,
+        onClick?: () => void,
+    ) => void
 } => {
-    const { pathname } = useLocation()
+    const location = useLocation()
+    const { pathname } = location
     const { heading } = usePage()
     const { loggedInUser } = useAuth()
     const lastLoggedRoute = useRef<RouteT | 'UNKNOWN_ROUTE' | undefined>(
@@ -64,13 +74,10 @@ const useTealium = (): {
         lastLoggedRoute.current = currentRoute
      },[heading, pathname, loggedInUser])
 
-    const logUserEvent = useCallback((linkData: {
-        tealium_event: TealiumEvent
+    const logUserEvent = useCallback((linkData: TealiumDataObjectTypes & {
+        event_name: TealiumEvent
         content_type?: string
     }) => {
-        if (process.env.REACT_APP_STAGE_NAME === 'local') {
-            return
-        }
         const currentRoute = getRouteName(pathname)
 
         // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -85,11 +92,36 @@ const useTealium = (): {
             site_section: `${currentRoute}`,
             logged_in: `${Boolean(loggedInUser) ?? false}`,
             userId: loggedInUser?.email,
-            ...linkData,
+            tealium_event: linkData.event_name,
+            ...linkData
         }
+
+        console.log(tagData)
+
+        if (process.env.REACT_APP_STAGE_NAME === 'local') {
+            return
+        }
+
         utag.link(tagData)
 
     },[heading, pathname, loggedInUser])
+
+    const logButtonEvent = (
+        tealiumData: Omit<TealiumButtonEngagementObject, 'event_name' | 'link_type'>,
+        onClick?: () => void,
+    ) => {
+        console.log('logButtonEvent: '+tealiumData.text)
+
+        logUserEvent({
+            ...tealiumData,
+            link_type: 'link_other',
+            event_name: 'button_engagement',
+        })
+
+        if (onClick) {
+            onClick()
+        }
+    }
 
     // Add Tealium setup
     // This effect should only fire on initial app load
@@ -168,7 +200,9 @@ const useTealium = (): {
 
     }, [pathname, logPageView])
 
-    return { logUserEvent, logPageView }
+    return { logUserEvent, logPageView, logButtonEvent }
 }
 
 export { useTealium }
+
+export type {TealiumDataObjectTypes}

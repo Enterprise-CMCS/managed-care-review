@@ -22,7 +22,7 @@ type TealiumDataObject = {
 }
 
 type TealiumButtonEngagementObject = {
-    tealium_event: 'button_engagement'
+    event_name: TealiumEvent
     text: string
     link_type: string
     button_style: string
@@ -32,6 +32,15 @@ type TealiumButtonEngagementObject = {
     link_url?: string
     event_extension?: string
 } & Partial<TealiumDataObject>
+
+type TealiumInternalLinkClickedObject = {
+    event_name: TealiumEvent
+    text: string
+    link_url: string
+    //link_type: string //currently not sending
+    parent_component_heading?: string
+    parent_component_type?: string
+}
 
 type TealiumLinkDataObject = {
     tealium_event: TealiumEvent // event is required for user tracking links
@@ -77,6 +86,7 @@ type TealiumEvent =
     | 'user_logout'
     | 'save_draft'
     | 'button_engagement'
+    | 'internal_link_clicked'
 
 // HELPER FUNCTIONS
 function getTealiumEnv(stage: string) {
@@ -146,4 +156,4 @@ const getTealiumPageName = ({
 }
 
 export { CONTENT_TYPE_BY_ROUTE, getTealiumEnv, getTealiumPageName }
-export type { TealiumLinkDataObject, TealiumViewDataObject, TealiumEvent, TealiumButtonEngagementObject }
+export type { TealiumLinkDataObject, TealiumViewDataObject, TealiumEvent, TealiumButtonEngagementObject, TealiumInternalLinkClickedObject }
