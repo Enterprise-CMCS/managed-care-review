@@ -50,7 +50,7 @@ export async function runPostgresLocally(runner: LabeledProcessRunner) {
             '--name',
             'mc-postgres',
             '--env',
-            'REACT_APP_AUTH_MODE=LOCAL',
+            'VITE_APP_AUTH_MODE=LOCAL',
             '--env',
             'POSTGRES_PASSWORD=shhhsecret',
             '-p',

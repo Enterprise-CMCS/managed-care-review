@@ -9,7 +9,7 @@ import {
 describe('ContactsSummarySection', () => {
     const draftSubmission = mockContractPackageDraft()
     const stateSubmission = mockContractPackageSubmitted()
-    afterEach(() => jest.clearAllMocks())
+    afterEach(() => vi.clearAllMocks())
 
     it('can render draft submission without errors', () => {
         renderWithProviders(

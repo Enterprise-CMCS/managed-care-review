@@ -1,18 +1,18 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`FileItemList component renders correctly 1`] = `
+exports[`FileItemList component > renders correctly 1`] = `
 <ul
-  className="fileItemsList"
+  className="_fileItemsList_193f73"
   data-testid="file-input-preview-list"
   id="file-items-list"
   tabIndex={-1}
 >
   <li
-    className="fileItem usa-file-input__preview"
+    className="_fileItem_193f73 usa-file-input__preview"
     id="testFile"
   >
     <div
-      className="fileItemText"
+      className="_fileItemText_193f73"
     >
       <div
         aria-label="Status of file testFile.pdf"
@@ -29,7 +29,7 @@ exports[`FileItemList component renders correctly 1`] = `
       </div>
       <span
         style={
-          Object {
+          {
             "display": "flex",
             "flexDirection": "column",
             "fontSize": "inherit",
@@ -37,7 +37,7 @@ exports[`FileItemList component renders correctly 1`] = `
         }
       >
         <span
-          className="fileItemBoldMessage"
+          className="_fileItemBoldMessage_193f73"
         >
           Step 1 of 2: Uploading
         </span>
@@ -47,7 +47,7 @@ exports[`FileItemList component renders correctly 1`] = `
       </span>
     </div>
     <div
-      className="fileItemButtons"
+      className="_fileItemButtons_193f73"
     >
       <button
         aria-label="Remove testFile.pdf document"
@@ -61,11 +61,11 @@ exports[`FileItemList component renders correctly 1`] = `
     </div>
   </li>
   <li
-    className="fileItem bg-error-lighter border-secondary margin-top-1px"
+    className="_fileItem_193f73 bg-error-lighter border-secondary margin-top-1px"
     id="testFile2"
   >
     <div
-      className="fileItemText"
+      className="_fileItemText_193f73"
     >
       <div
         aria-label="Status of file testFile2.pdf"
@@ -82,7 +82,7 @@ exports[`FileItemList component renders correctly 1`] = `
       </div>
       <span
         style={
-          Object {
+          {
             "display": "flex",
             "flexDirection": "column",
             "fontSize": "inherit",
@@ -90,7 +90,7 @@ exports[`FileItemList component renders correctly 1`] = `
         }
       >
         <span
-          className="fileItemBoldMessage"
+          className="_fileItemBoldMessage_193f73"
         >
           Upload failed, please remove or retry
         </span>
@@ -100,7 +100,7 @@ exports[`FileItemList component renders correctly 1`] = `
       </span>
     </div>
     <div
-      className="fileItemButtons"
+      className="_fileItemButtons_193f73"
     >
       <button
         aria-label="Remove testFile2.pdf document"
@@ -123,11 +123,11 @@ exports[`FileItemList component renders correctly 1`] = `
     </div>
   </li>
   <li
-    className="fileItem bg-error-lighter border-secondary margin-top-1px"
+    className="_fileItem_193f73 bg-error-lighter border-secondary margin-top-1px"
     id="testFile3"
   >
     <div
-      className="fileItemText"
+      className="_fileItemText_193f73"
     >
       <div
         aria-label="Status of file testFile3.pdf"
@@ -144,7 +144,7 @@ exports[`FileItemList component renders correctly 1`] = `
       </div>
       <span
         style={
-          Object {
+          {
             "display": "flex",
             "flexDirection": "column",
             "fontSize": "inherit",
@@ -152,7 +152,7 @@ exports[`FileItemList component renders correctly 1`] = `
         }
       >
         <span
-          className="fileItemBoldMessage"
+          className="_fileItemBoldMessage_193f73"
         >
           Failed security scan, please remove
         </span>
@@ -162,7 +162,7 @@ exports[`FileItemList component renders correctly 1`] = `
       </span>
     </div>
     <div
-      className="fileItemButtons"
+      className="_fileItemButtons_193f73"
     >
       <button
         aria-label="Remove testFile3.pdf document"
@@ -185,11 +185,11 @@ exports[`FileItemList component renders correctly 1`] = `
     </div>
   </li>
   <li
-    className="fileItem usa-file-input__preview"
+    className="_fileItem_193f73 usa-file-input__preview"
     id="testFile4"
   >
     <div
-      className="fileItemText"
+      className="_fileItemText_193f73"
     >
       <div
         aria-label="Status of file testFile4.pdf"
@@ -206,7 +206,7 @@ exports[`FileItemList component renders correctly 1`] = `
       </div>
       <span
         style={
-          Object {
+          {
             "display": "flex",
             "flexDirection": "column",
             "fontSize": "inherit",
@@ -219,7 +219,7 @@ exports[`FileItemList component renders correctly 1`] = `
       </span>
     </div>
     <div
-      className="fileItemButtons"
+      className="_fileItemButtons_193f73"
     >
       <button
         aria-label="Remove testFile4.pdf document"
@@ -233,11 +233,11 @@ exports[`FileItemList component renders correctly 1`] = `
     </div>
   </li>
   <li
-    className="fileItem bg-error-lighter border-secondary margin-top-1px"
+    className="_fileItem_193f73 bg-error-lighter border-secondary margin-top-1px"
     id="testFile44"
   >
     <div
-      className="fileItemText"
+      className="_fileItemText_193f73"
     >
       <div
         aria-label="Status of file testFile4.pdf"
@@ -254,7 +254,7 @@ exports[`FileItemList component renders correctly 1`] = `
       </div>
       <span
         style={
-          Object {
+          {
             "display": "flex",
             "flexDirection": "column",
             "fontSize": "inherit",
@@ -262,7 +262,7 @@ exports[`FileItemList component renders correctly 1`] = `
         }
       >
         <span
-          className="fileItemBoldMessage"
+          className="_fileItemBoldMessage_193f73"
         >
           Duplicate file, please remove
         </span>
@@ -272,7 +272,7 @@ exports[`FileItemList component renders correctly 1`] = `
       </span>
     </div>
     <div
-      className="fileItemButtons"
+      className="_fileItemButtons_193f73"
     >
       <button
         aria-label="Remove testFile4.pdf document"

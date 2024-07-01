@@ -1,5 +1,5 @@
 import React from 'react'
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import ProvidersDecorator from '../../../.storybook/providersDecorator'
 import { FilterAccordion, FilterAccordionPropType } from './FilterAccordion'
 import { FilterSelect } from './FilterSelect/FilterSelect'
@@ -40,13 +40,13 @@ export default {
     component: FilterAccordion,
 }
 
-const Template: Story<FilterAccordionPropType> = (args) => {
+const Template: StoryFn<FilterAccordionPropType> = (args) => {
     return <FilterAccordion {...args}>{args.children}</FilterAccordion>
 }
 
 export const Default = Template.bind({})
 
-Default.decorators = [(Story) => ProvidersDecorator(Story, {})]
+Default.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 Default.args = {
     filterTitle: 'Filters',
     children: filters,

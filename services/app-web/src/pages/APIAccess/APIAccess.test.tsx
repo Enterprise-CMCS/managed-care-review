@@ -12,7 +12,7 @@ import { APIAccess } from './APIAccess'
 
 describe('APIAccess', () => {
     afterEach(() => {
-        jest.resetAllMocks()
+        vi.resetAllMocks()
     })
 
     it('renders without errors', async () => {

@@ -1,4 +1,4 @@
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import { Formik } from 'formik'
 import { FieldRadio, FieldRadioProps } from './FieldRadio'
 
@@ -7,7 +7,7 @@ export default {
     component: FieldRadio,
 }
 
-const Template: Story<FieldRadioProps> = (args) => (
+const Template: StoryFn<FieldRadioProps> = (args) => (
     <Formik
         initialValues={{ input1: '' }}
         onSubmit={(e) => console.info('submitted')}

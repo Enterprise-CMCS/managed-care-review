@@ -13,7 +13,7 @@ import { mockSubmittedHealthPlanPackage } from '../../testHelpers/apolloMocks'
 
 describe('MCCRSID', () => {
     afterEach(() => {
-        jest.resetAllMocks()
+        vi.resetAllMocks()
     })
 
     it('renders without errors', async () => {

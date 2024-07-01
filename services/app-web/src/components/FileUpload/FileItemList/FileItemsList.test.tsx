@@ -59,11 +59,11 @@ describe('FileItemList component', () => {
         status: 'DUPLICATE_NAME_ERROR',
     }
     const buttonActionProps = {
-        deleteItem: jest.fn(),
-        retryItem: jest.fn(),
+        deleteItem: vi.fn(),
+        retryItem: vi.fn(),
     }
 
-    beforeEach(() => jest.clearAllMocks())
+    beforeEach(() => vi.clearAllMocks())
     it('renders a list without errors', () => {
         const fileItems = [pending, uploadError]
         render(<FileItemsList fileItems={fileItems} {...buttonActionProps} />)

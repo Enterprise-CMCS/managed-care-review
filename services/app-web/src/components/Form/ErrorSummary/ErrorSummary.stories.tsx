@@ -1,4 +1,4 @@
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 
 import { ErrorSummary, ErrorSummaryProps } from './ErrorSummary'
 
@@ -7,7 +7,7 @@ export default {
     component: ErrorSummary,
 }
 
-const Template: Story<ErrorSummaryProps> = (args) => <ErrorSummary {...args} />
+const Template: StoryFn<ErrorSummaryProps> = (args) => <ErrorSummary {...args} />
 
 export const ErrorSummaryDefault = Template.bind({})
 ErrorSummaryDefault.args = {
@@ -28,7 +28,7 @@ ErrorSummaryMultiple.args = {
     }
 }
 
-const ErrorSummaryFocusIdsTemplate : Story<ErrorSummaryProps> = (args) => <>
+const ErrorSummaryFocusIdsTemplate : StoryFn<ErrorSummaryProps> = (args) => <>
   <ErrorSummary {...args} />
   <label>Title: <input name="title"></input></label>
   <ul tabIndex={-1} id="list">

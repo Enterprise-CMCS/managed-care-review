@@ -36,6 +36,11 @@ updates:
           - '@opentelemetry/sdk-trace-node'
           - '@opentelemetry/semantic-conventions'
           - '@opentelemetry/sdk-metrics'
+      storybook:
+          applies-to: version-updates
+          patterns:
+          - '@storybook/*'
+
     ignore:
       - dependency-name: '@types/node'
         versions: ['>14.999'] # I think this is how we don't ever go above 14?

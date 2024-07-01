@@ -44,11 +44,7 @@ describe('RateSummary', () => {
         })
 
         it('renders document download warning banner when download fails', async () => {
-            const error = jest
-                .spyOn(console, 'error')
-                .mockImplementation(() => {
-                    // mock expected console error to keep test output clear
-                })
+            const error = vi.spyOn(console, 'error').mockImplementation(vi.fn())
 
             const s3Provider = {
                 ...testS3Client(),
@@ -181,9 +177,9 @@ describe('RateSummary', () => {
         })
 
         it('renders expected error page when rate ID is invalid', async () => {
-            const consoleWarnMock = jest
+            const consoleWarnMock = vi
                 .spyOn(console, 'warn')
-                .mockImplementation()
+                .mockImplementation(vi.fn())
 
             renderWithProviders(wrapInRoutes(<RateSummary />), {
                 apolloProvider: {

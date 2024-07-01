@@ -1,4 +1,4 @@
-const getEnv = (variable: string) =>{
-    return process.env[variable] ?? ''
+const getEnv = (variable: string) => {
+    return import.meta.env[variable] ?? ''
 }
-export {getEnv}
+export { getEnv }

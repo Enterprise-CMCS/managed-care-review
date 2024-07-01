@@ -1,5 +1,5 @@
 import React from 'react'
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 
 import ProvidersDecorator from '../../../.storybook/providersDecorator'
 
@@ -19,12 +19,12 @@ export default {
     },
 }
 
-const Template: Story<DynamicStepIndicatorProps> = (args) => (
+const Template: StoryFn<DynamicStepIndicatorProps> = (args) => (
     <DynamicStepIndicator {...args} />
 )
 
 export const Default = Template.bind({})
-Default.decorators = [(Story) => ProvidersDecorator(Story, {})]
+Default.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 
 Default.args = {
     formPages: STATE_SUBMISSION_FORM_ROUTES,

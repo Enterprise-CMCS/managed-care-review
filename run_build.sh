@@ -1,7 +1,7 @@
 #! /bin/bash
 echo stage name
-echo "$REACT_APP_STAGE_NAME"
-if [ "$REACT_APP_STAGE_NAME" == "prod" ] || [ "$REACT_APP_STAGE_NAME" == "val" ];
+echo "$VITE_APP_STAGE_NAME"
+if [ "$VITE_APP_STAGE_NAME" == "prod" ] || [ "$VITE_APP_STAGE_NAME" == "val" ];
     then
         echo "building for prod or val without instrumentation"
         npx lerna run build:prod --scope=app-web

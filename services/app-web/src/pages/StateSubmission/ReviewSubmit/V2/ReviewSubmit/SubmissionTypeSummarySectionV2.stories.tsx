@@ -1,4 +1,4 @@
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import ProvidersDecorator from '../../../../../../.storybook/providersDecorator'
 import {
     SubmissionTypeSummarySectionV2Props,
@@ -15,12 +15,12 @@ export default {
     },
 }
 
-const Template: Story<SubmissionTypeSummarySectionV2Props> = (args) => (
+const Template: StoryFn<SubmissionTypeSummarySectionV2Props> = (args) => (
     <SubmissionTypeSummarySectionV2 {...args} />
 )
 
 export const WithAction = Template.bind({})
-WithAction.decorators = [(Story) => ProvidersDecorator(Story, {})]
+WithAction.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 
 WithAction.args = {
     contract: mockContractPackageDraft(),
@@ -30,7 +30,7 @@ WithAction.args = {
 }
 
 export const WithoutAction = Template.bind({})
-WithoutAction.decorators = [(Story) => ProvidersDecorator(Story, {})]
+WithoutAction.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 
 WithoutAction.args = {
     contract: mockContractPackageDraft(),

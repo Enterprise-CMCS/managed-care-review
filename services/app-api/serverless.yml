@@ -30,7 +30,7 @@ custom:
   document_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.DocumentUploadsBucketArn}
   qa_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.QAUploadsBucketArn}
   secretsManagerSecret: aurora_postgres_${sls:stage} #pragma: allowlist secret
-  reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
+  reactAppAuthMode: ${env:VITE_APP_AUTH_MODE}
   apiAppOtelCollectorUrl: ${env:API_APP_OTEL_COLLECTOR_URL, ssm:/configuration/api_app_otel_collector_url}
   dbURL: ${env:DATABASE_URL}
   ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key_feds}
@@ -38,8 +38,8 @@ custom:
   # because the secret is in JSON in secret manager, we have to pass it into jwtSecret when not running locally
   jwtSecretJSON: ${env:CF_CONFIG_IGNORED_LOCALLY, ssm:/aws/reference/secretsmanager/api_jwt_secret_${sls:stage}}
   jwtSecret: ${env:JWT_SECRET, self:custom.jwtSecretJSON.jwtsigningkey}
-  reactAppS3DocumentUploadsBucket: ${env:REACT_APP_S3_DOCUMENTS_BUCKET, cf:uploads-${sls:stage}.DocumentUploadsBucketName}
-  reactAppS3QABucket: ${env:REACT_APP_S3_QA_BUCKET, cf:uploads-${sls:stage}.QAUploadsBucketName}
+  reactAppS3DocumentUploadsBucket: ${env:VITE_APP_S3_DOCUMENTS_BUCKET, cf:uploads-${sls:stage}.DocumentUploadsBucketName}
+  reactAppS3QABucket: ${env:VITE_APP_S3_QA_BUCKET, cf:uploads-${sls:stage}.QAUploadsBucketName}
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
@@ -152,7 +152,7 @@ provider:
     stage: ${sls:stage}
     REGION: ${self:custom.region}
     DATABASE_URL: ${self:custom.dbURL}
-    REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
+    VITE_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
     API_APP_OTEL_COLLECTOR_URL: ${self:custom.apiAppOtelCollectorUrl}
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
     EMAILER_MODE: ${self:custom.emailerMode}
@@ -163,8 +163,8 @@ provider:
     LD_SDK_KEY: ${self:custom.ldSDKKey}
     ALLOWED_IP_ADDRESSES: ${self:custom.allowedIpAddresses}
     JWT_SECRET: ${self:custom.jwtSecret}
-    REACT_APP_S3_QA_BUCKET: ${self:custom.reactAppS3QABucket}
-    REACT_APP_S3_DOCUMENTS_BUCKET: ${self:custom.reactAppS3DocumentUploadsBucket}
+    VITE_APP_S3_QA_BUCKET: ${self:custom.reactAppS3QABucket}
+    VITE_APP_S3_DOCUMENTS_BUCKET: ${self:custom.reactAppS3DocumentUploadsBucket}
 layers:
   prismaClientMigration:
     path: lambda-layers-prisma-client-migration

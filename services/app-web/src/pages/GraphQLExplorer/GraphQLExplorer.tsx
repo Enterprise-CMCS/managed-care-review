@@ -2,15 +2,14 @@ import { ApolloExplorer } from '@apollo/explorer/react'
 import styles from './GraphQLExplorer.module.scss'
 import { useAuth } from '../../contexts/AuthContext'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
-import { loader } from 'graphql.macro'
 import { FetchCurrentUserDocument } from '../../gen/gqlClient'
 import { fakeAmplifyFetch } from '../../api'
 
+import schema from '../../gen/schema.graphql'
+
 export const GraphQLExplorer = () => {
-    const stageName = process.env.REACT_APP_STAGE_NAME
+    const stageName = import.meta.env.VITE_APP_STAGE_NAME
     const { loggedInUser } = useAuth()
-    const gqlSchema = loader('../../gen/schema.graphql')
-    const schema = gqlSchema.loc?.source.body
 
     if (!loggedInUser || !schema) {
         return <GenericErrorPage />

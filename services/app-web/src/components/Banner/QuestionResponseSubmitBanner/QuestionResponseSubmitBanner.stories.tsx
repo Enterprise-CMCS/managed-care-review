@@ -1,5 +1,5 @@
 import React from 'react'
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import { QuestionResponseSubmitBanner } from './QuestionResponseSubmitBanner'
 import type { QuestionResponseSubmitBannerProps } from './QuestionResponseSubmitBanner'
 
@@ -8,7 +8,7 @@ export default {
     component: QuestionResponseSubmitBanner,
 }
 
-const Template: Story<QuestionResponseSubmitBannerProps> = (args) => (
+const Template: StoryFn<QuestionResponseSubmitBannerProps> = (args) => (
     <QuestionResponseSubmitBanner {...args} />
 )
 

@@ -1,6 +1,5 @@
 import { Grid, GridContainer } from '@trussworks/react-uswds'
 import React from 'react'
-import onemacLogo from '../../assets/images/onemac-logo.svg'
 import { Logo } from '../Logo'
 import styles from './Header.module.scss'
 
@@ -13,6 +12,10 @@ export const EmptyHeader = ({
 }: {
     children: React.ReactNode
 }): React.ReactElement => {
+    const onemacLogo = new URL(
+        '../../assets/images/onemac-logo.svg',
+        import.meta.url
+    ).href
     return (
         <header>
             <div className={styles.banner}>

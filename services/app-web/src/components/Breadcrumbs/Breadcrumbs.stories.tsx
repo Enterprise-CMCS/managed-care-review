@@ -1,5 +1,5 @@
 import React from 'react'
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import { Breadcrumbs, BreadcrumbsProps } from './Breadcrumbs'
 import ProvidersDecorator from '../../../.storybook/providersDecorator'
 
@@ -12,10 +12,10 @@ export default {
     },
 }
 
-const Template: Story<BreadcrumbsProps> = (args) => <Breadcrumbs {...args} />
+const Template: StoryFn<BreadcrumbsProps> = (args) => <Breadcrumbs {...args} />
 
 export const Default = Template.bind({})
-Default.decorators = [(Story) => ProvidersDecorator(Story, {})]
+Default.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 Default.args = {
     items: [
         { text: 'First link', link: '/firstlink' },

@@ -18,10 +18,11 @@ on:
       aws_default_region:
         required: true
         type: string
+      vite_app_auth_mode:
+        required: true
+        type: string
     secrets:
       aws_account_id:
-        required: true
-      react_app_auth_mode:
         required: true
       nr_license_key:
         required: true
@@ -56,7 +57,7 @@ jobs:
         id: deploy-app-web
         env:
           NODE_OPTIONS: --max_old_space_size=6000
-          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
+          VITE_APP_AUTH_MODE: ${{ inputs.vite_app_auth_mode }}
         run: |
           pushd services/app-web && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -120,7 +121,7 @@ jobs:
           NODE_OPTIONS: --max_old_space_size=6000
           APP_VERSION: ${{ inputs.app_version }}
           DATABASE_URL: AWS_SM
-          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
+          VITE_APP_AUTH_MODE: ${{ inputs.vite_app_auth_mode }}
           EMAILER_MODE: SES
           NR_LICENSE_KEY: ${{ secrets.nr_license_key }}
         run: |

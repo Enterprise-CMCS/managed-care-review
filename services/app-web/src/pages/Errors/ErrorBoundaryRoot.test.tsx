@@ -4,13 +4,14 @@ import { ErrorBoundaryRoot } from './ErrorBoundaryRoot'
 import { screen, waitFor } from '@testing-library/react'
 import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks'
 import * as tracingHelper from '../../otelHelpers/tracingHelper'
+import { expect, vi } from 'vitest'
 
 describe('Error boundary tests', () => {
     it('react-error-boundary correctly renders ErrorBoundaryRoot', async () => {
         const ComponentThatThrowsError = () => {
             throw new Error('react-error-boundary caught the error')
         }
-        const recordJSExceptionSpy = jest.spyOn(
+        const recordJSExceptionSpy = vi.spyOn(
             tracingHelper,
             'recordJSException'
         )

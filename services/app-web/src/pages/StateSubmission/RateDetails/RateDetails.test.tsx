@@ -51,38 +51,37 @@ const emptyRateDetailsDraft = () => ({
 
 describe('RateDetails', () => {
     beforeAll(() => {
-        jest.setTimeout(10000)
         // TODO: These tests are too long and need to be fully refactored. They are starting to flake in recent versions of RTL, particularly the multi-rate and contract amendment tests
         // See this guidance for waitFor and getBy Role: https://github.com/testing-library/dom-testing-library/issues/820
-    })
-    const mockUpdateDraftFn = jest.fn()
+    }, 10000)
+    const mockUpdateDraftFn = vi.fn()
     beforeEach(() => {
-        jest.spyOn(
+        vi.spyOn(
             useHealthPlanPackageForm,
             'useHealthPlanPackageForm'
         ).mockReturnValue({
             updateDraft: mockUpdateDraftFn,
-            createDraft: jest.fn(),
+            createDraft: vi.fn(),
             showPageErrorMessage: false,
             draftSubmission: emptyRateDetailsDraft(),
         })
-        jest.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
+        vi.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
             id: '123-abc',
         })
     })
     afterEach(() => {
-        jest.clearAllMocks()
-        jest.spyOn(useStatePrograms, 'useStatePrograms').mockRestore()
-        jest.spyOn(
+        vi.clearAllMocks()
+        vi.spyOn(useStatePrograms, 'useStatePrograms').mockRestore()
+        vi.spyOn(
             useHealthPlanPackageForm,
             'useHealthPlanPackageForm'
         ).mockRestore()
-        jest.spyOn(useRouteParams, 'useRouteParams').mockRestore()
+        vi.spyOn(useRouteParams, 'useRouteParams').mockRestore()
     })
 
     describe('handles a single rate', () => {
         afterEach(() => {
-            jest.clearAllMocks()
+            vi.clearAllMocks()
         })
 
         it('renders without errors', async () => {
@@ -626,7 +625,7 @@ describe('RateDetails', () => {
     describe('handles rates across submissions', () => {
         it('correctly checks shared rate certification radios and selects shared packages', async () => {
             //Spy on useStatePrograms hook to get up-to-date state programs
-            jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
+            vi.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
                 mockMNState().programs
             )
 
@@ -667,12 +666,12 @@ describe('RateDetails', () => {
                 },
             ]
 
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockImplementation(() => {
                 return {
-                    createDraft: jest.fn(),
+                    createDraft: vi.fn(),
                     updateDraft: mockUpdateDraftFn,
                     showPageErrorMessage: false,
                     draftSubmission: currentSubmission,
@@ -862,7 +861,7 @@ describe('RateDetails', () => {
 
         it('cannot continue when shared rate radio is unchecked', async () => {
             //Spy on useStatePrograms hook to get up-to-date state programs
-            jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
+            vi.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
                 mockMNState().programs
             )
 
@@ -902,12 +901,12 @@ describe('RateDetails', () => {
                 },
             ]
 
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockImplementation(() => {
                 return {
-                    createDraft: jest.fn(),
+                    createDraft: vi.fn(),
                     updateDraft: mockUpdateDraftFn,
                     showPageErrorMessage: false,
                     draftSubmission: currentSubmission,
@@ -996,7 +995,7 @@ describe('RateDetails', () => {
 
         it('cannot continue when shared rate radio is checked and no package is selected', async () => {
             //Spy on useStatePrograms hook to get up-to-date state programs
-            jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
+            vi.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
                 mockMNState().programs
             )
 
@@ -1035,12 +1034,12 @@ describe('RateDetails', () => {
                     id: 'test-shared-rate',
                 },
             ]
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockImplementation(() => {
                 return {
-                    createDraft: jest.fn(),
+                    createDraft: vi.fn(),
                     updateDraft: mockUpdateDraftFn,
                     showPageErrorMessage: false,
                     draftSubmission: currentSubmission,
@@ -1204,12 +1203,12 @@ describe('RateDetails', () => {
         })
 
         it('disabled with alert if previously submitted with more than one rate cert file', async () => {
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockImplementation(() => {
                 return {
-                    createDraft: jest.fn(),
+                    createDraft: vi.fn(),
                     updateDraft: mockUpdateDraftFn,
                     showPageErrorMessage: false,
                     draftSubmission: mockContractAndRatesDraft({
@@ -1455,12 +1454,12 @@ describe('RateDetails', () => {
                 rateDateEnd: undefined,
                 rateDateCertified: undefined,
             }
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockImplementation(() => {
                 return {
-                    createDraft: jest.fn(),
+                    createDraft: vi.fn(),
                     updateDraft: mockUpdateDraftFn,
                     showPageErrorMessage: false,
                     draftSubmission: hasDocsDetailsDraft,

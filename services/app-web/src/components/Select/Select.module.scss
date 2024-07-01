@@ -22,7 +22,7 @@
         &:hover {
             background: color.adjust(
                 custom.$mcr-primary-lighter,
-                $lightness: -5
+                $lightness: -5 * 1%
             );
             color: custom.$mcr-foundation-ink;
         }

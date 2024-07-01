@@ -29,10 +29,10 @@ const CMSDashboardNestedRoutes = () => (
 
 describe('CMSDashboard', () => {
     afterEach(() => {
-        jest.resetAllMocks()
+        vi.resetAllMocks()
     })
     afterAll(() => {
-        jest.clearAllMocks()
+        vi.clearAllMocks()
     })
     it('rate reviews feature flag - should show rate review tab when expected', () => {
         const screen = renderWithProviders(<CMSDashboardNestedRoutes />, {

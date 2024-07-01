@@ -1,14 +1,14 @@
 import { screen, render } from '@testing-library/react'
 import { FieldDropdown } from './FieldDropdown'
 
-const mockOnChange = jest.fn()
-const mockSetValue = jest.fn()
+const mockOnChange = vi.fn()
+const mockSetValue = vi.fn()
 
-jest.mock('formik', () => {
+vi.mock('formik', () => {
     return {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore-next-line
-        ...jest.requireActual('formik'),
+        ...vi.importActual('formik'),
         useField: () => [
             {
                 onChange: mockOnChange,
@@ -21,7 +21,7 @@ jest.mock('formik', () => {
 
 describe('FieldDropdown component', () => {
     afterAll(() => {
-        jest.clearAllMocks()
+        vi.clearAllMocks()
     })
 
     it('renders without errors', () => {

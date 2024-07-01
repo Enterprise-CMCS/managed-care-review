@@ -27,7 +27,7 @@ describe('AuthenticatedRouteWrapper', () => {
     })
 
     it('shows the modal when sessionIsExpiring is true', async () => {
-        jest.spyOn(AuthContext, 'useAuth').mockReturnValue({
+        vi.spyOn(AuthContext, 'useAuth').mockReturnValue({
             loggedInUser: {
                 __typename: 'StateUser' as const,
                 state: {

@@ -10,7 +10,7 @@ import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataT
 
 describe('SubmissionTypeSummarySection', () => {
     afterEach(() => {
-        jest.clearAllMocks()
+        vi.clearAllMocks()
     })
     const draftSubmission = mockContractAndRatesDraft()
     const stateSubmission = mockStateSubmission()

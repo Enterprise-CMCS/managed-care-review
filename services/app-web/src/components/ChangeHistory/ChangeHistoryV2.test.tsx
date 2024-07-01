@@ -11,7 +11,7 @@ import {
 
 describe('SubmissionTypeSummarySection', () => {
     afterEach(() => {
-        jest.clearAllMocks()
+        vi.clearAllMocks()
     })
 
     it('can render history for initial submission', () => {

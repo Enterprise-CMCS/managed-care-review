@@ -158,9 +158,9 @@ function runPrisma(args: string[]) {
 
 async function main() {
     // check to see if local direnv vars have loaded
-    if (!process.env.REACT_APP_AUTH_MODE) {
+    if (!process.env.VITE_APP_AUTH_MODE) {
         console.info(
-            `ERROR: Could not find REACT_APP_AUTH_MODE environment variable.\n
+            `ERROR: Could not find VITE_APP_AUTH_MODE environment variable.\n
             Did you set your env vars locally? Hint: try running 'direnv allow'.`
         )
         process.exit(2)

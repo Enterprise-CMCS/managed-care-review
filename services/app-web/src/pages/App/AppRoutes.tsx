@@ -325,7 +325,7 @@ export const AppRoutes = ({
         'LOGIN_REDIRECT',
         null
     )
-    const stageName = process.env.REACT_APP_STAGE_NAME
+    const stageName = import.meta.env.VITE_APP_STAGE_NAME
     const showExpirationModal: boolean = ldClient?.variation(
         featureFlags.SESSION_EXPIRING_MODAL.flag,
         featureFlags.SESSION_EXPIRING_MODAL.defaultValue

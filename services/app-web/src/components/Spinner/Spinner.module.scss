@@ -1,4 +1,5 @@
 @use 'sass:list';
+@use 'sass:math';
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
@@ -23,7 +24,7 @@ $spacer-4: list.nth($spacers, 5) !default; // 32px
 $spacer-5: list.nth($spacers, 6) !default; // 40px
 $spacer-6: list.nth($spacers, 7) !default; // 48px
 $spacer-7: list.nth($spacers, 8) !default; // 56px
-$spacer-half: $spacer-1 / 2; // 4px
+$spacer-half: math.div($spacer-1, 2); // 4px
 
 // From CMS _animation
 $ease-in-out-expo: cubic-bezier(1, 0, 0, 1) !default;
@@ -65,11 +66,11 @@ $animation-speed-4: 0.8s * $speed-base !default;
 @mixin spinner-size($inner-size, $outer-size) {
     height: $outer-size;
     width: $outer-size;
-    $padding: (($outer-size - $inner-size) / 2);
+    $padding: math.div($outer-size - $inner-size, 2);
 
     &::before,
     &::after {
-        border-width: ($inner-size / 8);
+        border-width: (math.div($inner-size, 8));
         height: $inner-size;
         left: $padding;
         top: $padding;

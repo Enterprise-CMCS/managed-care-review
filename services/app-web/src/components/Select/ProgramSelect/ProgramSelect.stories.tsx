@@ -1,4 +1,4 @@
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import { ProgramSelect, ProgramSelectPropType } from './ProgramSelect'
 
 export default {
@@ -6,7 +6,7 @@ export default {
     component: ProgramSelect,
 }
 
-export const Default: Story<ProgramSelectPropType> = () => (
+export const Default: StoryFn<ProgramSelectPropType> = () => (
     <ProgramSelect
         name="programSelect"
         programIDs={['ea16a6c0-5fc6-4df8-adac-c627e76660ab']}

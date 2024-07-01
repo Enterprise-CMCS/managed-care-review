@@ -1,4 +1,4 @@
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import { FilterSelect, FilterSelectPropType } from './FilterSelect'
 import React from 'react'
 import ProvidersDecorator from '../../../../.storybook/providersDecorator'
@@ -15,13 +15,13 @@ export default {
     component: FilterSelect,
 }
 
-const Template: Story<FilterSelectPropType> = (args) => (
+const Template: StoryFn<FilterSelectPropType> = (args) => (
     <FilterSelect {...args} />
 )
 
 export const Default = Template.bind({})
 
-Default.decorators = [(Story) => ProvidersDecorator(Story, {})]
+Default.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 Default.args = {
     name: 'state',
     filterOptions,

@@ -1,5 +1,5 @@
 import * as Yup from 'yup'
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import { Formik } from 'formik'
 import { FieldDropdown, FieldDropdownProps } from './FieldDropdown'
 
@@ -11,7 +11,7 @@ const schema = Yup.object().shape({
     program: Yup.string().required('A program is required'),
 })
 
-const Template: Story<FieldDropdownProps> = (args) => (
+const Template: StoryFn<FieldDropdownProps> = (args) => (
     <Formik
         initialValues={{ program: '' }}
         validationSchema={schema}

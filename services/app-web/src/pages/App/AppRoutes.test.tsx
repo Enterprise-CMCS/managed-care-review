@@ -10,12 +10,15 @@ import {
 
 // Routing and routes configuration
 describe('AppRoutes', () => {
-    window.scrollTo = jest.fn()
+    Object.defineProperty(window, 'scrollTo', {
+        writable: true,
+        value: vi.fn(),
+    })
     afterEach(() => {
-        jest.resetAllMocks()
+        vi.resetAllMocks()
     })
     afterAll(() => {
-        jest.clearAllMocks()
+        vi.clearAllMocks()
     })
     describe('/[root]', () => {
         it('state dashboard when state user logged in', async () => {

@@ -6,11 +6,11 @@ Different env vars can be set in different environments [local dev, review apps,
 
 For local dev, we use `.envrc` and `.envrc.local` to set the appropriate environment variables. `.envrc` is loaded first, then `.envrc.local`, so if you need to set anything differently for your local environment you can set it in there. For more details, see the [`direnv` docs](https://direnv.net).
 
-Also, CreateReactApp only loads env vars that start with `REACT_APP_`, so any configuration that needs to be read by app-web must start that way.
+Also, CreateReactApp only loads env vars that start with `VITE_APP_`, so any configuration that needs to be read by app-web must start that way.
 
 ## List of Environment Variables
 
-### `REACT_APP_AUTH_MODE`
+### `VITE_APP_AUTH_MODE`
 
 Read by `app-api` and `app-web` and Cypress.
 
@@ -24,7 +24,7 @@ This tells the application how to perform authentication.
 
 `IDM` means to use CMS IDM as the auth provider. This is what is set in dev/val/prod. Users will be redirected to login in IDM and then redirected back to our site. Cognito will create users in a special Okta user pool and then everything will work the same as if you were auth'd with `AWS_COGNITO` above.
 
-### `REACT_APP_API_URL`
+### `VITE_APP_API_URL`
 
 Read by `app-web`
 
@@ -32,19 +32,19 @@ valid values: A URL where app-api is running
 
 This is the base URL that all requests are sent to from app-web
 
-### `REACT_APP_COGNITO_*`
+### `VITE_APP_COGNITO_*`
 
 Read by `app-api`
 
--   REACT_APP_COGNITO_REGION
--   REACT_APP_COGNITO_ID_POOL_ID
--   REACT_APP_COGNITO_USER_POOL_ID
--   REACT_APP_COGNITO_USER_POOL_CLIENT_ID
--   REACT_APP_COGNITO_USER_POOL_CLIENT_DOMAIN
+-   VITE_APP_COGNITO_REGION
+-   VITE_APP_COGNITO_ID_POOL_ID
+-   VITE_APP_COGNITO_USER_POOL_ID
+-   VITE_APP_COGNITO_USER_POOL_CLIENT_ID
+-   VITE_APP_COGNITO_USER_POOL_CLIENT_DOMAIN
 
-These four env vars configure cognito auth from the browser. They are ignored if `REACT_APP_AUTH_MODE` is set to `LOCAL` and thus are only set in deployed environments.
+These four env vars configure cognito auth from the browser. They are ignored if `VITE_APP_AUTH_MODE` is set to `LOCAL` and thus are only set in deployed environments.
 
-### `REACT_APP_APPLICATION_ENDPOINT`
+### `VITE_APP_APPLICATION_ENDPOINT`
 
 Read by app-web
 
@@ -70,7 +70,7 @@ Read by `ui-auth`
 
 This is the metatdata URL configured for reaching out to Otka auth. Reqired for `IDM` type auth.
 
-### `REACT_APP_STAGE_NAME`
+### `VITE_APP_STAGE_NAME`
 
 Read by `app-web`
 
@@ -87,21 +87,21 @@ Read by `app-api` to securely pull secrets out of AWS Secrets Manager. Only set 
 Read by `app-api` in configuring our connection to postgres. Required.
 Must be set to a valid `postgres://` url or the sentinel value of `AWS_SM` in which case the correct values will be pulled out of AWS Secrets Manager (which requires SECRETS_MANAGER_SECRET) be set.
 
-### `REACT_APP_S3_*`
+### `VITE_APP_S3_*`
 
 Read by `app-web`
 
--   REACT_APP_S3_DOCUMENTS_BUCKET
+-   VITE_APP_S3_DOCUMENTS_BUCKET
 
 The name of the bucket that documents are uploded to as part of the state submission form.
 
--   REACT_APP_S3_REGION
+-   VITE_APP_S3_REGION
 
-The region in AWS where the bucket is located. Cannot be set if REACT_APP_S3_LOCAL_URL is set.
+The region in AWS where the bucket is located. Cannot be set if VITE_APP_S3_LOCAL_URL is set.
 
--   REACT_APP_S3_LOCAL_URL
+-   VITE_APP_S3_LOCAL_URL
 
-The local URL where an s3 server is being run. Cannot be set if REACT_APP_S3_REGION is set.
+The local URL where an s3 server is being run. Cannot be set if VITE_APP_S3_REGION is set.
 
 ### `EMAILER_MODE`
 
@@ -181,24 +181,25 @@ Read by `app-api`
 
 This is the key for Launch Darkly SDK access in our backend. There is one per environment of local/dev/val/prod.
 
-### `REACT_APP_LD_CLIENT_ID`
+### `VITE_APP_LD_CLIENT_ID`
 
 Read by `app-web`
 
 This is the client ID for Launch Darkly in our frontend. This key is designed to have limited access since it's exposed in our client side code. There is one per environment of local/dev/val/prod.
 
-### `REACT_APP_NR_*`
+### `VITE_APP_NR_*`
 
 Read by `app-web`
 
 There are vars per environment for dev/val/prod.
-- REACT_APP_NR_ACCOUNT_ID
-- REACT_APP_NR_AGENT_ID
+
+-   VITE_APP_NR_ACCOUNT_ID
+-   VITE_APP_NR_AGENT_ID
 
 These are the same in all environments.
-- REACT_APP_NR_LICENSE_KEY
-- REACT_APP_NR_TRUST_KEY
 
+-   VITE_APP_NR_LICENSE_KEY
+-   VITE_APP_NR_TRUST_KEY
 
 These env vars configure new relic for browser monitoring. They are interpolated into browser monitoring inline script. If we move towards integration via New Relic APM instead, these variables can be deleted.
 
@@ -218,42 +219,40 @@ We plan to move this to the DB down the road. Until then, know that if these val
 
 #### `/configuration/email/sourceAddress`
 
-*[same in all env]* This is the application-wide email sender.
+_[same in all env]_ This is the application-wide email sender.
 
 #### `/configuration/email/helpDeskAddress`
 
-*[same in prod/val]* This is the help address displayed in state emails for getting help for the MC-Review application.
+_[same in prod/val]_ This is the help address displayed in state emails for getting help for the MC-Review application.
 
 #### `/configuration/email/rateHelpAddress`
 
-*[same in prod/val]* This the help address displayed in state emails for contacting the rate policy team.
+_[same in prod/val]_ This the help address displayed in state emails for contacting the rate policy team.
 
 #### `/configuration/email/reviewHelpAddress`
 
-*[same in prod/val]* This the help address displayed in state emails for contacting the analyst review team.
+_[same in prod/val]_ This the help address displayed in state emails for contacting the analyst review team.
 
 #### `/configuration/email/dmcpSubmission`
 
-*[environment specific]* This contains the DMCP primary inbox. The DMCP team is focused on policy issues related to managed care. They review all submissions, excluding CHIP and state of PR. This inbox is also primarily used for internal communication between DMCP, OACT, and DMCO.
+_[environment specific]_ This contains the DMCP primary inbox. The DMCP team is focused on policy issues related to managed care. They review all submissions, excluding CHIP and state of PR. This inbox is also primarily used for internal communication between DMCP, OACT, and DMCO.
 
 #### `/configuration/email/dmcpReview`
 
-*[environment specific]* This contains the DMCP inbox for external communication and Q&A notifications.
-
+_[environment specific]_ This contains the DMCP inbox for external communication and Q&A notifications.
 
 #### `/configuration/email/oact`
 
-*[environment specific]* This contains the OACT primary inbox. The OACT team is focused on actuarial overview of rates. They review submissions that have rates associated, excluding CHIP and state of PR.
+_[environment specific]_ This contains the OACT primary inbox. The OACT team is focused on actuarial overview of rates. They review submissions that have rates associated, excluding CHIP and state of PR.
 
 #### `/configuration/email/dmco`
 
-*[environment specific]* This contains the DMCO primary inbox. The DMCO team is focused on managed care contracts and they review all submissions.
-
+_[environment specific]_ This contains the DMCO primary inbox. The DMCO team is focused on managed care contracts and they review all submissions.
 
 #### `/configuration/email/reviewTeamAddresses`
 
-*[environment specific]* List of emails for dev teams/individuals that want to follow all emails. In prod, this is two addresses associated with MC-Review dev team.
+_[environment specific]_ List of emails for dev teams/individuals that want to follow all emails. In prod, this is two addresses associated with MC-Review dev team.
 
 #### `/configuration/**[state abbreviation]**/stateanalysts/email`
 
-*[environment specific]* This contains email addresses for analysts specific to a state. Use lower-cased state abbreviations as defined in `StateCodeType`.
+_[environment specific]_ This contains email addresses for analysts specific to a state. Use lower-cased state abbreviations as defined in `StateCodeType`.

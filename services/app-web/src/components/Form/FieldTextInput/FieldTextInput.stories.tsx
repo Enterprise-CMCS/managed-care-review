@@ -1,5 +1,5 @@
 import * as Yup from 'yup'
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import { Formik } from 'formik'
 import { FieldTextInput, TextInputProps } from './FieldTextInput'
 
@@ -13,7 +13,7 @@ const schema = Yup.object().shape({
     ),
 })
 
-const Template: Story<TextInputProps> = (args) => (
+const Template: StoryFn<TextInputProps> = (args) => (
     <Formik
         initialValues={{ submissionDescription: '' }}
         validationSchema={schema}

@@ -1,4 +1,4 @@
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import { Formik } from 'formik'
 import { FieldCheckbox, FieldCheckboxProps } from './FieldCheckbox'
 
@@ -7,7 +7,7 @@ export default {
     component: FieldCheckbox,
 }
 
-const Template: Story<FieldCheckboxProps> = (args) => (
+const Template: StoryFn<FieldCheckboxProps> = (args) => (
     <Formik
         initialValues={{ input1: '' }}
         onSubmit={(e) => console.info('submitted')}
