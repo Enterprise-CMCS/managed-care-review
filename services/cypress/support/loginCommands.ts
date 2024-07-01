@@ -61,9 +61,12 @@ Cypress.Commands.add(
         } else {
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
         }
+
+        cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
+
         cy.visit(initialURL)
         cy.url({ timeout: 20_000 }).should('contain', initialURL)
-        cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
+
         if (initialURL?.includes('submissions')) {
             cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', {
                 timeout: 20_000,
