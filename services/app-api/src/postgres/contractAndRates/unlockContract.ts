@@ -290,7 +290,11 @@ async function unlockContract(
 ): Promise<ContractType | NotFoundError | Error> {
     try {
         return await client.$transaction(async (tx) => {
-            const result = unlockContractInTransaction(tx, args, linkRatesFF)
+            const result = await unlockContractInTransaction(
+                tx,
+                args,
+                linkRatesFF
+            )
             if (result instanceof Error) {
                 throw result
             }
