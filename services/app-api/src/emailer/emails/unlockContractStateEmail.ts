@@ -9,9 +9,9 @@ import type { EmailData, EmailConfiguration } from '../'
 import type { ProgramType, UpdateInfoType } from '../../domain-models'
 import { reviewAndSubmitURL } from '../generateURLs'
 import { pruneDuplicateEmails } from '../formatters'
-import type { UnlockedContractType } from '../../domain-models'
+import type { ContractRevisionWithRatesType } from '../../domain-models'
 export const unlockContractStateEmail = async (
-    contract: UnlockedContractType,
+    contractRev: ContractRevisionWithRatesType,
     updateInfo: UpdateInfoType,
     config: EmailConfiguration,
     statePrograms: ProgramType[],
@@ -19,7 +19,6 @@ export const unlockContractStateEmail = async (
 ): Promise<EmailData | Error> => {
     const isTestEnvironment = config.stage !== 'prod'
     const stateContactEmails: string[] = []
-    const contractRev = contract.revisions[0]
     const contractFormData = contractRev.formData
     contractFormData.stateContacts.forEach((contact) => {
         if (contact.email) stateContactEmails.push(contact.email)
@@ -48,7 +47,10 @@ export const unlockContractStateEmail = async (
         contractFormData.submissionType === 'CONTRACT_AND_RATES' &&
         Boolean(contractRev.rateRevisions.length)
 
-    const contractURL = reviewAndSubmitURL(contract.id, config.baseUrl)
+    const contractURL = reviewAndSubmitURL(
+        contractRev.contract.id,
+        config.baseUrl
+    )
 
     const data = {
         packageName,
@@ -66,7 +68,7 @@ export const unlockContractStateEmail = async (
     }
 
     const result = await renderTemplate<typeof data>(
-        'unlockPackageStateEmail',
+        'unlockContractStateEmail',
         data
     )
     if (result instanceof Error) {
