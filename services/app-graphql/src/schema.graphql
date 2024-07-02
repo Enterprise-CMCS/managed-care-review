@@ -1520,23 +1520,6 @@ type ContractPackageSubmission {
 }
 
 """
-ContractPackageSubmission is a snapshot of a contract and all its related rates in time
-a ContractPackageSubmission can be created by the user submitting a contract or a related rate
-"""
-type UnlockedContractPackageSubmission {
-    "cause is a hint as to why this submission was created"
-    cause: SubmissionReason
-    "submitInfo provides the submission reason/date/by for this package submission"
-    submitInfo: UpdateInformation!
-    "submittedRevisions is a list of contract and/or rate revisions that were submitted to create this package submission"
-    submittedRevisions: [SubmittableRevision!]!
-    "contractRevision is the contract revision current at the time of this package submission"
-    contractRevision: ContractRevision!
-    "rateRevisions are the linked rate revisions current at the time of this package submission"
-    rateRevisions: [RateRevision!]!
-}
-
-"""
 Contact is a single contract submission, holding all the form data for a single contract
 and associated with zero or more Rates
 """
@@ -1623,7 +1606,7 @@ type UnlockedContract {
     a DRAFT Contract will have no packageSubmissions. Returned in _ascending_ order. Most recent
     submission is in the first position in the array.
     """
-    packageSubmissions: [UnlockedContractPackageSubmission!]!
+    packageSubmissions: [ContractPackageSubmission!]!
 }
 
 type RateEdge {

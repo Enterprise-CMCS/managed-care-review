@@ -39,6 +39,7 @@ import { unlockRate } from './rate/unlockRate'
 import { submitRate } from './rate/submitRate'
 import { updateDraftContractRates } from './contract/updateDraftContractRates'
 import { contractResolver } from './contract/contractResolver'
+import { unlockedContractResolver } from './contract/unlockedContractResolver'
 import { contractRevisionResolver } from './contract/contractRevisionResolver'
 import { fetchContractResolver } from './contract/fetchContract'
 import { submitContract } from './contract/submitContract'
@@ -159,6 +160,7 @@ export function configureResolvers(
         Rate: rateResolver,
         RateRevision: rateRevisionResolver,
         Contract: contractResolver(),
+        UnlockedContract: unlockedContractResolver(),
         ContractRevision: contractRevisionResolver(store),
         GenericDocument: genericDocumentResolver(s3Client),
         Document: questionResponseDocumentResolver(s3Client),
