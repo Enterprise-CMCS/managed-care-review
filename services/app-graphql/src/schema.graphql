@@ -1531,7 +1531,7 @@ type UnlockedContract {
     draftRates are the Rates that this editable submission are related to.
     On submission they are cemented into a new ContractPackageSubmission
     """
-    draftRates: [Rate!]
+    draftRates: [Rate!]!
 
     """
     packageSubmissions are a snapshot of the contract and its related rates through time
