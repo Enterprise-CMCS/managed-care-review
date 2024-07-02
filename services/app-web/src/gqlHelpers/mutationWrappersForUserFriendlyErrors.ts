@@ -3,6 +3,7 @@ import {
     HealthPlanPackage,
     SubmitHealthPlanPackageMutationFn,
     UnlockHealthPlanPackageMutationFn,
+    UnlockContractMutationFn,
     FetchHealthPlanPackageWithQuestionsQuery,
     FetchHealthPlanPackageWithQuestionsDocument,
     IndexQuestionsPayload,
@@ -15,6 +16,7 @@ import {
     CreateQuestionResponseInput,
     SubmitContractMutationFn,
     Contract,
+    UnlockedContract
 } from '../gen/gqlClient'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
@@ -106,6 +108,37 @@ export const unlockMutationWrapper = async (
 
         if (data?.unlockHealthPlanPackage.pkg) {
             return data?.unlockHealthPlanPackage.pkg
+        } else {
+            recordJSException(
+                `[UNEXPECTED]: Error attempting to unlock, no data present but returning 200.`
+            )
+            return new Error(ERROR_MESSAGES.unlock_error_generic)
+        }
+    } catch (error) {
+        return handleApolloErrorsAndAddUserFacingMessages(
+            error,
+            'UNLOCK_HEALTH_PLAN_PACKAGE'
+        )
+    }
+}
+
+export const unlockMutationWrapperV2 = async (
+    unlockContract: UnlockContractMutationFn,
+    id: string,
+    unlockedReason: string
+): Promise<UnlockedContract | GraphQLErrors | Error> => {
+    try {
+        const { data } = await unlockContract({
+            variables: {
+                input: {
+                    contractID: id,
+                    unlockedReason,
+                },
+            },
+        })
+
+        if (data?.unlockContract.contract) {
+            return data?.unlockContract.contract
         } else {
             recordJSException(
                 `[UNEXPECTED]: Error attempting to unlock, no data present but returning 200.`

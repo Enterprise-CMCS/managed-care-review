@@ -4,7 +4,7 @@ query fetchContract($input: FetchContractInput!) {
             ...contractFieldsFetchContract
 
             draftRevision {
-                ...contractRevisionFragment
+                ...contractRevisionFragmentForFetch
             }
 
             draftRates {
@@ -20,7 +20,7 @@ query fetchContract($input: FetchContractInput!) {
             }
 
             packageSubmissions {
-                ...packageSubmissionsFragment
+                ...packageSubmissionsFragmentForFetch
             }
         }
     }
@@ -153,12 +153,12 @@ fragment rateRevisionFragmentForFetchContract on RateRevision {
             updatedReason
         }
         formData {
-            ...contractFormDataFragment
+            ...contractFormDataFragmentForFetch
         }
     }
 }
 
-fragment contractFormDataFragment on ContractFormData {
+fragment contractFormDataFragmentForFetch on ContractFormData {
     programIDs
 
     populationCovered
@@ -217,7 +217,7 @@ fragment contractFormDataFragment on ContractFormData {
     statutoryRegulatoryAttestationDescription
 }
 
-fragment contractRevisionFragment on ContractRevision {
+fragment contractRevisionFragmentForFetch on ContractRevision {
     id
     createdAt
     updatedAt
@@ -236,31 +236,31 @@ fragment contractRevisionFragment on ContractRevision {
     }
 
     formData {
-        ...contractFormDataFragment
+        ...contractFormDataFragmentForFetch
     }
 }
 
-fragment packageSubmissionsFragment on ContractPackageSubmission {
+fragment packageSubmissionsFragmentForFetch on ContractPackageSubmission {
     cause
     submitInfo {
         ...updateInformationFields
     }
 
     submittedRevisions {
-        ...submittableRevisionsFields
+        ...submittableRevisionsFieldsForFetch
     }
 
     contractRevision {
-        ...contractRevisionFragment
+        ...contractRevisionFragmentForFetch
     }
     rateRevisions {
         ...rateRevisionFragmentForFetchContract
     }
 }
 
-fragment submittableRevisionsFields on SubmittableRevision {
+fragment submittableRevisionsFieldsForFetch on SubmittableRevision {
     ... on ContractRevision {
-        ...contractRevisionFragment
+        ...contractRevisionFragmentForFetch
     }
     ... on RateRevision {
         ...rateRevisionFragmentForFetchContract

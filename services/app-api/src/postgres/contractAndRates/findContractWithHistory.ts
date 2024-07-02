@@ -17,7 +17,9 @@ async function findContractWithHistory(
             where: {
                 id: contractID,
             },
-            include: includeFullContract,
+            include: {
+                ...includeFullContract,
+            },
         })
 
         if (!contract) {

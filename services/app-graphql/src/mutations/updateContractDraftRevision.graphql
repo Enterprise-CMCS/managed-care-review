@@ -4,23 +4,23 @@ mutation updateContractDraftRevision($input: UpdateContractDraftRevisionInput!) 
             ...contractFieldsFetchContract
 
             draftRevision {
-                ...contractRevisionFragment
+                ...contractRevisionFragmentForUpdate
             }
 
             draftRates {
                 ...rateFields
 
                 draftRevision {
-                    ...rateRevisionFragmentForFetchContract
+                    ...rateRevisionFragmentForUpdateContract
                 }
 
                 revisions {
-                    ...rateRevisionFragmentForFetchContract
+                    ...rateRevisionFragmentForUpdateContract
                 }
             }
 
             packageSubmissions {
-                ...packageSubmissionsFragment
+                ...packageSubmissionsFragmentForUpdate
             }
         }
     }
@@ -70,7 +70,7 @@ fragment rateFields on Rate {
     initiallySubmittedAt
 }
 
-fragment rateRevisionFragmentForFetchContract on RateRevision {
+fragment rateRevisionFragmentForUpdateContract on RateRevision {
     id
     rateID
     createdAt
@@ -153,12 +153,12 @@ fragment rateRevisionFragmentForFetchContract on RateRevision {
             updatedReason
         }
         formData {
-           ...contractFormDataFragment
+           ...contractFormDataFragmentForUpdate
         }
     }
 }
 
-fragment contractFormDataFragment on ContractFormData {
+fragment contractFormDataFragmentForUpdate on ContractFormData {
     programIDs
 
     populationCovered
@@ -217,7 +217,7 @@ fragment contractFormDataFragment on ContractFormData {
     statutoryRegulatoryAttestationDescription
 }
 
-fragment contractRevisionFragment on ContractRevision {
+fragment contractRevisionFragmentForUpdate on ContractRevision {
     id
     createdAt
     updatedAt
@@ -236,34 +236,34 @@ fragment contractRevisionFragment on ContractRevision {
     }
 
     formData {
-        ...contractFormDataFragment
+        ...contractFormDataFragmentForUpdate
     }
 }
 
-fragment packageSubmissionsFragment on ContractPackageSubmission {
+fragment packageSubmissionsFragmentForUpdate on ContractPackageSubmission {
     cause
     submitInfo {
         ...updateInformationFields
     }
 
     submittedRevisions {
-        ...submittableRevisionsFields
+        ...submittableRevisionsFieldsForUpdate
     }
 
     contractRevision {
-        ...contractRevisionFragment
+        ...contractRevisionFragmentForUpdate
     }
     rateRevisions {
-        ...rateRevisionFragmentForFetchContract
+        ...rateRevisionFragmentForUpdateContract
     }
 }
 
-fragment submittableRevisionsFields on SubmittableRevision {
+fragment submittableRevisionsFieldsForUpdate on SubmittableRevision {
     ... on ContractRevision {
-        ...contractRevisionFragment
+        ...contractRevisionFragmentForUpdate
     }
     ... on RateRevision {
-        ...rateRevisionFragmentForFetchContract
+        ...rateRevisionFragmentForUpdateContract
     }
 }
 

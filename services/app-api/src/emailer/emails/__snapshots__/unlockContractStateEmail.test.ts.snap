@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders overall email as expected 1`] = `
+"Submission MCR-MN-0003-SNBC was unlocked by CMS<br />
+<br />
+<b>Unlocked by:</b> josh@example.com<br />
+<b>Unlocked on:</b> 02/01/2022<br />
+<b>Reason for unlock:</b> Adding rate certification.<br />
+<b>Rate name</b>: Rate Cert Name<br />
+<br />
+<b>You must revise the submission before CMS can continue reviewing it.<br />
+<br />
+<a href="http://localhost/submissions/12345/edit/review-and-submit">Open the submission in MC-Review to make edits.</a>
+"
+`;

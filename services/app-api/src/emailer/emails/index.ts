@@ -1,5 +1,7 @@
 export { newPackageCMSEmail } from './newPackageCMSEmail'
 export { newPackageStateEmail } from './newPackageStateEmail'
+export { unlockContractCMSEmail } from './unlockContractCMSEmail'
+export { unlockContractStateEmail } from './unlockContractStateEmail'
 export { unlockPackageCMSEmail } from './unlockPackageCMSEmail'
 export { unlockPackageStateEmail } from './unlockPackageStateEmail'
 export { resubmitPackageCMSEmail } from './resubmitPackageCMSEmail'

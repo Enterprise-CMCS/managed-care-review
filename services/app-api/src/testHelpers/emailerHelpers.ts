@@ -145,7 +145,7 @@ const mockContractRev = (
         id: 'test-abc-125',
         formData: {
             programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-            populationCovered: 'CHIP',
+            populationCovered: 'MEDICAID',
             submissionType: 'CONTRACT_AND_RATES',
             riskBasedContract: false,
             submissionDescription: 'A submitted submission',
