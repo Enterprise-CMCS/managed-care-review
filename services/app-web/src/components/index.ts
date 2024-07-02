@@ -83,3 +83,5 @@ export { Breadcrumbs } from './Breadcrumbs'
 
 export { InlineDocumentWarning } from './DocumentWarning'
 export { SectionCard } from './SectionCard'
+
+export { NavLinkWithLogging, LinkWithLogging, ReactRouterLinkWithLogging, ButtonWithLogging } from './TealiumLogging'
