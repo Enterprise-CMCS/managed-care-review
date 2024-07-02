@@ -3,6 +3,7 @@ export { rateSchema, draftRateSchema } from './rateTypes'
 export {
     contractSchema,
     draftContractSchema,
+    unlockedContractSchema,
     contractSubmitters,
 } from './contractTypes'
 
@@ -23,7 +24,7 @@ export {
     convertContractWithRatesToFormData,
 } from './convertContractWithRatesToHPP'
 
-export type { ContractType } from './contractTypes'
+export type { ContractType, UnlockedContractType } from './contractTypes'
 export type { RateType } from './rateTypes'
 
 export type { PackageStatusType, UpdateInfoType } from './updateInfoType'

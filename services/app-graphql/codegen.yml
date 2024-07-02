@@ -23,6 +23,7 @@ generates:
         Rate: ../domain-models#RateType
         RateRevision: ../domain-models#RateRevisionWithContractsType
         Contract: ../domain-models#ContractType as ContractDomainType
+        UnlockedContract: ../domain-models#UnlockedContractType as UnlockedContractDomainType
         ContractRevision: ../domain-models#ContractRevisionType
         ContractPackageSubmission: ../domain-models#ContractPackageSubmissionWithCauseType
   ../app-web/src/gen/gqlClient.tsx:

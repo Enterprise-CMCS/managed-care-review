@@ -10,6 +10,8 @@ import type {
     InsertQuestionResponseArgs,
     StateType,
     RateType,
+    ContractType,
+    UnlockedContractType,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
 import type { InsertUserArgsType } from './user'
@@ -26,7 +28,6 @@ import {
     insertQuestionResponse,
 } from './questionResponse'
 import { findAllSupportedStates } from './state'
-import type { ContractType } from '../domain-models/contractAndRates'
 import {
     insertDraftContract,
     findContractWithHistory,
@@ -37,6 +38,7 @@ import {
     findAllRatesWithHistoryBySubmitInfo,
     submitContract,
     submitRate,
+    unlockContract,
     updateDraftContract,
 } from './contractAndRates'
 import type {
@@ -48,7 +50,6 @@ import type {
     RateOrErrorArrayType,
     UpdateMCCRSIDFormArgsType,
 } from './contractAndRates'
-import { unlockContract } from './contractAndRates/unlockContract'
 import type { UnlockContractArgsType } from './contractAndRates/unlockContract'
 import { unlockRate } from './contractAndRates/unlockRate'
 import type { UnlockRateArgsType } from './contractAndRates/unlockRate'
@@ -141,7 +142,7 @@ type Store = {
     unlockContract: (
         args: UnlockContractArgsType,
         linkRatesFF?: boolean
-    ) => Promise<ContractType | Error>
+    ) => Promise<UnlockedContractType | Error>
 
     unlockRate: (args: UnlockRateArgsType) => Promise<RateType | Error>
 }
@@ -170,7 +171,6 @@ function NewPostgresStore(client: PrismaClient): Store {
         findStatePrograms: findStatePrograms,
         findAllSupportedStates: () => findAllSupportedStates(client),
         findAllUsers: () => findAllUsers(client),
-
         insertQuestion: (questionInput, user) =>
             insertQuestion(client, questionInput, user),
         findAllQuestionsByContract: (pkgID) =>
