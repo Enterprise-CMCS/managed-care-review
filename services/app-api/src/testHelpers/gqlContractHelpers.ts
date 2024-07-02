@@ -17,18 +17,28 @@ import { insertDraftContract } from '../postgres/contractAndRates/insertContract
 
 import type { ContractType } from '../domain-models'
 import type { ApolloServer } from 'apollo-server-lambda'
-import type { Contract, RateFormData, UnlockedContract } from '../gen/gqlServer'
+import type {
+    Contract,
+    ContractDraftRevisionFormDataInput,
+    RateFormData,
+    UnlockedContract,
+} from '../gen/gqlServer'
 import { latestFormData } from './healthPlanPackageHelpers'
 import type {
     StateCodeType,
     UnlockedHealthPlanFormDataType,
 } from 'app-web/src/common-code/healthPlanFormDataType'
 import { addNewRateToTestContract } from './gqlRateHelpers'
+import UPDATE_CONTRACT_DRAFT_REVISION from 'app-graphql/src/mutations/updateContractDraftRevision.graphql'
+import type { ContractFormDataType } from '../domain-models'
+import type { CreateHealthPlanPackageInput } from '../gen/gqlServer'
+import CREATE_CONTRACT from 'app-graphql/src/mutations/createContract.graphql'
+import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
 
 const createAndSubmitTestContract = async (
     contractData?: InsertContractArgsType
 ): Promise<ContractType> => {
-    const contract = await createTestContract(contractData)
+    const contract = await createTestContractWithDB(contractData)
     return await must(submitTestContractWithDB(contract))
 }
 
@@ -160,7 +170,7 @@ async function fetchTestContract(
 }
 
 // USING PRISMA DIRECTLY BELOW ---  we have no createContract resolver yet, but we have integration tests needing the workflows
-const createTestContract = async (
+const createTestContractWithDB = async (
     contractData?: Partial<InsertContractArgsType>
 ): Promise<ContractType> => {
     const prismaClient = await sharedTestPrismaClient()
@@ -182,6 +192,43 @@ const createTestContract = async (
     })
 
     return must(await insertDraftContract(prismaClient, draftContractData))
+}
+
+const createTestContract = async (
+    server: ApolloServer,
+    stateCode?: StateCodeType,
+    formData?: Partial<ContractFormDataType>
+): Promise<Contract> => {
+    const programs = stateCode
+        ? [must(findStatePrograms(stateCode))[0]]
+        : [defaultFloridaProgram()]
+
+    const programIDs = programs.map((program) => program.id)
+    const input: CreateHealthPlanPackageInput = {
+        programIDs: programIDs,
+        populationCovered: 'MEDICAID',
+        riskBasedContract: false,
+        submissionType: 'CONTRACT_ONLY',
+        submissionDescription: 'A created submission',
+        contractType: 'BASE',
+        ...formData,
+    }
+    const result = await server.executeOperation({
+        query: CREATE_CONTRACT,
+        variables: { input },
+    })
+
+    if (result.errors) {
+        throw new Error(
+            `createTestContract mutation failed with errors ${result.errors}`
+        )
+    }
+
+    if (!result.data) {
+        throw new Error('createTestContract returned nothing')
+    }
+
+    return result.data.createContract.contract
 }
 
 async function createAndUpdateTestContractWithRate(
@@ -311,8 +358,54 @@ const updateRateOnDraftContract = async (
     return updatedContract.data?.contract
 }
 
+const updateTestContractDraftRevision = async (
+    server: ApolloServer,
+    contractID: string,
+    lastSeenUpdatedAt?: Date,
+    formData?: Partial<ContractDraftRevisionFormDataInput>
+): Promise<Contract> => {
+    const draftContract = await fetchTestContract(server, contractID)
+
+    if (!draftContract.draftRevision) {
+        throw new Error(
+            'Unexpected error: Draft contract did not contain a draft revision'
+        )
+    }
+
+    const updatedFormData =
+        formData ||
+        mockGqlContractDraftRevisionFormDataInput(
+            draftContract.stateCode as StateCodeType
+        )
+
+    const updateResult = await server.executeOperation({
+        query: UPDATE_CONTRACT_DRAFT_REVISION,
+        variables: {
+            input: {
+                contractID: contractID,
+                lastSeenUpdatedAt:
+                    lastSeenUpdatedAt || draftContract.draftRevision.updatedAt,
+                formData: updatedFormData,
+            },
+        },
+    })
+
+    if (updateResult.errors) {
+        console.info('errors', JSON.stringify(updateResult.errors))
+        throw new Error(
+            `updateTestContractDraftRevision mutation failed with errors ${updateResult.errors}`
+        )
+    }
+
+    if (!updateResult.data) {
+        throw new Error('updateTestContractDraftRevision returned nothing')
+    }
+
+    return updateResult.data.updateContractDraftRevision.contract
+}
+
 export {
-    createTestContract,
+    createTestContractWithDB,
     submitTestContract,
     unlockTestContract,
     createAndSubmitTestContract,
@@ -324,4 +417,6 @@ export {
     linkRateToDraftContract,
     updateRateOnDraftContract,
     clearRatesOnDraftContract,
+    updateTestContractDraftRevision,
+    createTestContract,
 }

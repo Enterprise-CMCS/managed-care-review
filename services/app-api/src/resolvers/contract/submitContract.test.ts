@@ -179,6 +179,55 @@ describe('submitContract', () => {
         console.info(ThreeID, FourID, contractD0)
     })
 
+    it('can submit a contract with a rate linked to an unsubmitted contract MCR-4245', async () => {
+        const ldService = testLDService({
+            'link-rates': true,
+        })
+
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            ldService,
+            context: {
+                user: testCMSUser(),
+            },
+            s3Client: mockS3,
+        })
+
+        // 1. Submit A0 with Rate1
+        const draftA0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const AID = draftA0.id
+        await addNewRateToTestContract(stateServer, draftA0)
+
+        const contractA0 = await submitTestContract(stateServer, AID)
+        const subA0 = contractA0.packageSubmissions[0]
+        const rate10 = subA0.rateRevisions[0]
+        const OneID = rate10.rateID
+
+        // 2. Create B0, link with Rate1
+        const draftB0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        await addLinkedRateToTestContract(stateServer, draftB0, OneID)
+
+        // 3. Unlock A0 and resubmit
+        await unlockTestHealthPlanPackage(
+            cmsServer,
+            AID,
+            'edit the linked rate, please'
+        )
+
+        const resubmittedA = await submitTestContract(
+            stateServer,
+            AID,
+            'and now it resubmits'
+        )
+
+        expect(resubmittedA.status).toBe('RESUBMITTED')
+    })
+
     it('unlocks a submission with a removed child rate', async () => {
         const ldService = testLDService({
             'link-rates': true,

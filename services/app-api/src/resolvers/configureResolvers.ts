@@ -44,6 +44,8 @@ import { fetchContractResolver } from './contract/fetchContract'
 import { submitContract } from './contract/submitContract'
 import { rateRevisionResolver } from './rate/rateRevisionResolver'
 import type { S3ClientT } from '../s3'
+import { createContract } from './contract/createContract'
+import { updateContractDraftRevision } from './contract/updateContractDraftRevision'
 
 export function configureResolvers(
     store: Store,
@@ -102,7 +104,12 @@ export function configureResolvers(
                 emailParameterStore,
                 launchDarkly
             ),
+            createContract: createContract(store),
             updateContract: updateContract(store),
+            updateContractDraftRevision: updateContractDraftRevision(
+                store,
+                launchDarkly
+            ),
             updateDraftContractRates: updateDraftContractRates(store),
             updateCMSUser: updateCMSUserResolver(store),
             createQuestion: createQuestionResolver(

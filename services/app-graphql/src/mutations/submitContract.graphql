@@ -4,23 +4,23 @@ mutation submitContract($input: SubmitContractInput!) {
             ...contractFields
 
             draftRevision {
-                ...contractRevisionFragment
+                ...contractRevisionFragmentForSubmit
             }
 
             draftRates {
                 ...rateFields
 
                 draftRevision {
-                    ...rateRevisionFragmentForFetchContract
+                    ...rateRevisionFragmentForSubmitContract
                 }
 
                 revisions {
-                    ...rateRevisionFragmentForFetchContract
+                    ...rateRevisionFragmentForSubmitContract
                 }
             }
 
             packageSubmissions {
-                ...packageSubmissionsFragment
+                ...packageSubmissionsFragmentForSubmit
             }
         }
     }
@@ -70,7 +70,7 @@ fragment rateFields on Rate {
     initiallySubmittedAt
 }
 
-fragment rateRevisionFragmentForFetchContract on RateRevision {
+fragment rateRevisionFragmentForSubmitContract on RateRevision {
     id
     rateID
     createdAt
@@ -90,17 +90,17 @@ fragment rateRevisionFragmentForFetchContract on RateRevision {
         rateCapitationType
         rateDocuments {
             name
-            s3URL
-            sha256
-            dateAdded
-            downloadURL
+    s3URL
+    sha256
+    dateAdded
+    downloadURL
         }
         supportingDocuments {
             name
-            s3URL
-            sha256
-            dateAdded
-            downloadURL
+    s3URL
+    sha256
+    dateAdded
+    downloadURL
         }
         rateDateStart
         rateDateEnd
@@ -153,58 +153,12 @@ fragment rateRevisionFragmentForFetchContract on RateRevision {
             updatedReason
         }
         formData {
-            programIDs
-            populationCovered
-            submissionType
-            riskBasedContract
-            submissionDescription
-            stateContacts {
-                name
-                titleRole
-                email
-            }
-            supportingDocuments {
-                name
-                s3URL
-                sha256
-                dateAdded
-                downloadURL
-            }
-            contractType
-            contractExecutionStatus
-            contractDocuments {
-                name
-                s3URL
-                sha256
-                dateAdded
-                downloadURL
-            }
-            contractDateStart
-            contractDateEnd
-            managedCareEntities
-            federalAuthorities
-            inLieuServicesAndSettings
-            modifiedBenefitsProvided
-            modifiedGeoAreaServed
-            modifiedMedicaidBeneficiaries
-            modifiedRiskSharingStrategy
-            modifiedIncentiveArrangements
-            modifiedWitholdAgreements
-            modifiedStateDirectedPayments
-            modifiedPassThroughPayments
-            modifiedPaymentsForMentalDiseaseInstitutions
-            modifiedMedicalLossRatioStandards
-            modifiedOtherFinancialPaymentIncentive
-            modifiedEnrollmentProcess
-            modifiedGrevienceAndAppeal
-            modifiedNetworkAdequacyStandards
-            modifiedLengthOfContract
-            modifiedNonRiskPaymentArrangements
+            ...contractFormDataFragmentForSubmit
         }
     }
 }
 
-fragment contractFormDataFragment on ContractFormData {
+fragment contractFormDataFragmentForSubmit on ContractFormData {
     programIDs
 
     populationCovered
@@ -221,20 +175,20 @@ fragment contractFormDataFragment on ContractFormData {
 
     supportingDocuments {
         name
-        s3URL
-        sha256
-        dateAdded
-        downloadURL
+    s3URL
+    sha256
+    dateAdded
+    downloadURL
     }
 
     contractType
     contractExecutionStatus
     contractDocuments {
         name
-        s3URL
-        sha256
-        dateAdded
-        downloadURL
+    s3URL
+    sha256
+    dateAdded
+    downloadURL
     }
 
     contractDateStart
@@ -259,9 +213,11 @@ fragment contractFormDataFragment on ContractFormData {
     modifiedNetworkAdequacyStandards
     modifiedLengthOfContract
     modifiedNonRiskPaymentArrangements
+    statutoryRegulatoryAttestation
+    statutoryRegulatoryAttestationDescription
 }
 
-fragment contractRevisionFragment on ContractRevision {
+fragment contractRevisionFragmentForSubmit on ContractRevision {
     id
     createdAt
     updatedAt
@@ -280,34 +236,34 @@ fragment contractRevisionFragment on ContractRevision {
     }
 
     formData {
-        ...contractFormDataFragment
+        ...contractFormDataFragmentForSubmit
     }
 }
 
-fragment packageSubmissionsFragment on ContractPackageSubmission {
+fragment packageSubmissionsFragmentForSubmit on ContractPackageSubmission {
     cause
     submitInfo {
         ...updateInformationFields
     }
 
     submittedRevisions {
-        ...submittableRevisionsFields
+        ...submittableRevisionsFieldsForSubmit
     }
 
     contractRevision {
-        ...contractRevisionFragment
+        ...contractRevisionFragmentForSubmit
     }
     rateRevisions {
-        ...rateRevisionFragmentForFetchContract
+        ...rateRevisionFragmentForSubmitContract
     }
 }
 
-fragment submittableRevisionsFields on SubmittableRevision {
+fragment submittableRevisionsFieldsForSubmit on SubmittableRevision {
     ... on ContractRevision {
-        ...contractRevisionFragment
+        ...contractRevisionFragmentForSubmit
     }
     ... on RateRevision {
-        ...rateRevisionFragmentForFetchContract
+        ...rateRevisionFragmentForSubmitContract
     }
 }
 

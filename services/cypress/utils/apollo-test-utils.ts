@@ -154,13 +154,13 @@ const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
             rateDocuments: [
                 {
                     name: 'rate1Document1.pdf',
-                    s3URL: 'fakeS3URL',
+                    s3URL: 's3://bucketname/key/rate1Document1.pdf',
                     sha256: 'fakesha',
                 },
             ],
             supportingDocuments: [   {
                 name: 'rate1SupportingDocument1.pdf',
-                s3URL: 'fakeS3URL',
+                s3URL: 's3://bucketname/key/rate1SupportingDocument1.pdf',
                 sha256: 'fakesha',
             }],
             rateProgramIDs: [minnesotaStatePrograms[0].id],
@@ -185,7 +185,7 @@ const contractAndRatesData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
                 rateDocuments: [
                     {
                         name: 'rate2Document1.pdf',
-                        s3URL: 'fakeS3URL',
+                        s3URL: 's3://bucketname/key/rate2Document1.pdf',
                         sha256: 'fakesha',
                     },
                 ],

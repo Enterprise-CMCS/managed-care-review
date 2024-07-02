@@ -1,62 +1,52 @@
-mutation unlockContract($input: UnlockContractInput!) {
-    unlockContract(input: $input) {
+mutation createContract($input: CreateContractInput!) {
+    createContract(input: $input) {
         contract {
-            id
-            status
-            createdAt
-            updatedAt
-            initiallySubmittedAt
-            stateCode
-            state {
-                code
-                name
-                programs {
-                    id
-                    name
-                    fullName
-                    isRateProgram
-                }
-            }
-
-            stateNumber
+            ...contractFieldsFetchContract
 
             draftRevision {
-                ...contractRevisionFragmentForUnlock
+                ...contractRevisionFragmentForCreate
             }
 
             draftRates {
                 ...rateFields
 
                 draftRevision {
-                    ...rateRevisionFragmentForUnlockContract
+                    ...rateRevisionFragmentForCreateContract
                 }
 
                 revisions {
-                    ...rateRevisionFragmentForUnlockContract
+                    ...rateRevisionFragmentForCreateContract
                 }
             }
 
             packageSubmissions {
-                cause
-                submitInfo {
-                    ...updateInformationFields
-                }
-
-                submittedRevisions {
-                    ...submittableRevisionsFieldsForUnlock
-                }
-
-                contractRevision {
-                    ...contractRevisionFragmentForUnlock
-                }
-                rateRevisions {
-                    ...rateRevisionFragmentForUnlockContract
-                }
+                ...packageSubmissionsFragmentForCreate
             }
         }
     }
 }
 
+fragment contractFieldsFetchContract on Contract {
+    id
+    status
+    createdAt
+    updatedAt
+    initiallySubmittedAt
+    stateCode
+    mccrsID
+    state {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+            isRateProgram
+        }
+    }
+
+    stateNumber
+}
 
 fragment rateFields on Rate {
     id
@@ -80,7 +70,7 @@ fragment rateFields on Rate {
     initiallySubmittedAt
 }
 
-fragment rateRevisionFragmentForUnlockContract on RateRevision {
+fragment rateRevisionFragmentForCreateContract on RateRevision {
     id
     rateID
     createdAt
@@ -163,58 +153,12 @@ fragment rateRevisionFragmentForUnlockContract on RateRevision {
             updatedReason
         }
         formData {
-            programIDs
-            populationCovered
-            submissionType
-            riskBasedContract
-            submissionDescription
-            stateContacts {
-                name
-                titleRole
-                email
-            }
-            supportingDocuments {
-                name
-                s3URL
-                sha256
-                dateAdded
-                downloadURL
-            }
-            contractType
-            contractExecutionStatus
-            contractDocuments {
-                name
-                s3URL
-                sha256
-                dateAdded
-                downloadURL
-            }
-            contractDateStart
-            contractDateEnd
-            managedCareEntities
-            federalAuthorities
-            inLieuServicesAndSettings
-            modifiedBenefitsProvided
-            modifiedGeoAreaServed
-            modifiedMedicaidBeneficiaries
-            modifiedRiskSharingStrategy
-            modifiedIncentiveArrangements
-            modifiedWitholdAgreements
-            modifiedStateDirectedPayments
-            modifiedPassThroughPayments
-            modifiedPaymentsForMentalDiseaseInstitutions
-            modifiedMedicalLossRatioStandards
-            modifiedOtherFinancialPaymentIncentive
-            modifiedEnrollmentProcess
-            modifiedGrevienceAndAppeal
-            modifiedNetworkAdequacyStandards
-            modifiedLengthOfContract
-            modifiedNonRiskPaymentArrangements
+            ...contractFormDataFragmentForCreate
         }
     }
 }
 
-fragment contractFormDataFragmentForUnlock on ContractFormData {
+fragment contractFormDataFragmentForCreate on ContractFormData {
     programIDs
 
     populationCovered
@@ -269,9 +213,11 @@ fragment contractFormDataFragmentForUnlock on ContractFormData {
     modifiedNetworkAdequacyStandards
     modifiedLengthOfContract
     modifiedNonRiskPaymentArrangements
+    statutoryRegulatoryAttestation
+    statutoryRegulatoryAttestationDescription
 }
 
-fragment contractRevisionFragmentForUnlock on ContractRevision {
+fragment contractRevisionFragmentForCreate on ContractRevision {
     id
     createdAt
     updatedAt
@@ -290,17 +236,34 @@ fragment contractRevisionFragmentForUnlock on ContractRevision {
     }
 
     formData {
-        ...contractFormDataFragmentForUnlock
+        ...contractFormDataFragmentForCreate
     }
 }
 
+fragment packageSubmissionsFragmentForCreate on ContractPackageSubmission {
+    cause
+    submitInfo {
+        ...updateInformationFields
+    }
 
-fragment submittableRevisionsFieldsForUnlock on SubmittableRevision {
+    submittedRevisions {
+        ...submittableRevisionsFieldsForCreate
+    }
+
+    contractRevision {
+        ...contractRevisionFragmentForCreate
+    }
+    rateRevisions {
+        ...rateRevisionFragmentForCreateContract
+    }
+}
+
+fragment submittableRevisionsFieldsForCreate on SubmittableRevision {
     ... on ContractRevision {
-        ...contractRevisionFragmentForUnlock
+        ...contractRevisionFragmentForCreate
     }
     ... on RateRevision {
-        ...rateRevisionFragmentForUnlockContract
+        ...rateRevisionFragmentForCreateContract
     }
 }
 

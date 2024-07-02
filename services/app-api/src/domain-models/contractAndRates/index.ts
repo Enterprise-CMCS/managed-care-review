@@ -48,3 +48,5 @@ export type {
     ContractPackageSubmissionType,
     ContractPackageSubmissionWithCauseType,
 } from './packageSubmissions'
+
+export { validateContractDraftRevisionInput } from './dataValidatorHelpers'
