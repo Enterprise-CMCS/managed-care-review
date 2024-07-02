@@ -546,9 +546,9 @@ describe('submitContract', () => {
             'Unlock A.0'
         )
         const a0FormData = latestFormData(unlockedA0Pkg)
-        const unlockedA0Contract = await fetchTestContract(stateServer, AID)
         a0FormData.submissionDescription = 'DESC A1'
         await updateTestHealthPlanFormData(stateServer, a0FormData)
+        const unlockedA0Contract = await fetchTestContract(stateServer, AID)
         const a0RatesUpdates =
             updateRatesInputFromDraftContract(unlockedA0Contract)
         expect(a0RatesUpdates.updatedRates[0].rateID).toBe(OneID)
@@ -644,10 +644,11 @@ describe('submitContract', () => {
             'Unlock B.0'
         )
         const b0FormData = latestFormData(unlockedB0Pkg)
-        const unlockedB0Contract = await fetchTestContract(stateServer, BID)
 
         b0FormData.submissionDescription = 'DESC B1'
         await updateTestHealthPlanFormData(stateServer, b0FormData)
+
+        const unlockedB0Contract = await fetchTestContract(stateServer, BID)
         const b0RatesUpdates =
             updateRatesInputFromDraftContract(unlockedB0Contract)
         expect(b0RatesUpdates.updatedRates[0].type).toBe('UPDATE')
@@ -693,10 +694,11 @@ describe('submitContract', () => {
             'Unlock C.0'
         )
         const c0FormData = latestFormData(unlockedC0Pkg)
-        const unlockedC0Contract = await fetchTestContract(stateServer, CID)
-
         c0FormData.submissionDescription = 'DESC C1'
         await updateTestHealthPlanFormData(stateServer, c0FormData)
+
+        const unlockedC0Contract = await fetchTestContract(stateServer, CID)
+
         const c0RatesUpdates =
             updateRatesInputFromDraftContract(unlockedC0Contract)
         expect(c0RatesUpdates.updatedRates[0].type).toBe('LINK')
@@ -1022,12 +1024,14 @@ describe('submitContract', () => {
             'Unlock A.0'
         )
         const a0FormData = latestFormData(unlockedA0Pkg)
-        const unlockedA0Contract = await fetchTestContract(stateServer, AID)
         a0FormData.submissionDescription = 'DESC A1'
         a0FormData.contractDocuments.push(dummyDoc('c2'))
         a0FormData.documents.push(dummyDoc('s2'))
 
         await updateTestHealthPlanFormData(stateServer, a0FormData)
+
+        const unlockedA0Contract = await fetchTestContract(stateServer, AID)
+
         const a0RatesUpdates =
             updateRatesInputFromDraftContract(unlockedA0Contract)
         expect(a0RatesUpdates.updatedRates[0].rateID).toBe(OneID)

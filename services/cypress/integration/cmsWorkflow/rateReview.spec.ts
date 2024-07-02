@@ -1,28 +1,10 @@
-import { HealthPlanFormDataType, packageName } from "../../../app-web/src/common-code/healthPlanFormDataType"
-import { base64ToDomain } from "../../../app-web/src/common-code/proto/healthPlanFormDataProto"
-import { HealthPlanPackage } from "../../gen/gqlClient"
-import { cmsUser, minnesotaStatePrograms, stateUser } from "../../utils/apollo-test-utils"
+import { cmsUser, stateUser } from "../../utils/apollo-test-utils"
 
 describe('CMS user can view rate reviews', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
     })
-    // By default return lastest revision
-    const getFormData = (pkg: HealthPlanPackage, indx = 0): HealthPlanFormDataType => {
-        const latestRevision = pkg.revisions[indx].node
-        if (!latestRevision) {
-            throw new Error('no revisions found for package' + pkg.id)
-        }
-
-        const unwrapResult = base64ToDomain(latestRevision.formDataProto)
-        if (unwrapResult instanceof Error) {
-            throw unwrapResult
-        }
-
-        return unwrapResult
-    }
-
 
     it('and navigate to a specific rate from the rates dashboard', () => {
           cy.apiAssignDivisionToCMSUser(cmsUser(), 'DMCO').then(() => {
@@ -30,7 +12,6 @@ describe('CMS user can view rate reviews', () => {
             // Create a new contract and rates submission with two attached rates
             cy.apiCreateAndSubmitContractWithRates(stateUser()).then(
                 (contract) => {
-
                     const latestSubmission = contract.packageSubmissions[0]
 
                     const rate1 = latestSubmission.rateRevisions[0]
