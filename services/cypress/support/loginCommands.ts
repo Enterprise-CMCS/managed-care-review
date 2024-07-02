@@ -57,7 +57,9 @@ Cypress.Commands.add(
             cy.findByText('Show Login Form').click()
             cy.findByTestId('loginEmail').type('zuko@example.com')
             cy.findByTestId('loginPassword').type(testUsersPassword)
-            cy.findByRole('button', { name: 'Login' }).click()
+            cy.findByRole('button', { name: 'Login' })
+                .click()
+                .wait('@fetchCurrentUserQuery', { timeout: 20_000 })
         } else {
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
         }
