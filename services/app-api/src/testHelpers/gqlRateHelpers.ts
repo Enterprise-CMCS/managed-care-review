@@ -210,6 +210,7 @@ function addNewRateToRateInput(
 
     return {
         contractID: input.contractID,
+        lastSeenUpdatedAt: input.lastSeenUpdatedAt,
         updatedRates: [
             ...input.updatedRates,
             {
@@ -238,6 +239,7 @@ function addLinkedRateToRateInput(
 ): UpdateDraftContractRatesInput {
     return {
         contractID: input.contractID,
+        lastSeenUpdatedAt: input.lastSeenUpdatedAt,
         updatedRates: [
             ...input.updatedRates,
             {
@@ -327,6 +329,8 @@ function updateRatesInputFromDraftContract(
 
     return {
         contractID: contract.id,
+        lastSeenUpdatedAt:
+            contract.draftRevision?.updatedAt || contract.updatedAt,
         updatedRates: rateInputs,
     }
 }
@@ -334,6 +338,7 @@ function updateRatesInputFromDraftContract(
 const createTestDraftRateOnContract = async (
     server: ApolloServer,
     contractID: string,
+    lastSeenUpdatedAt: Date,
     rateData?: RateFormDataInput
 ): Promise<Contract> => {
     if (!rateData) {
@@ -345,6 +350,7 @@ const createTestDraftRateOnContract = async (
         variables: {
             input: {
                 contractID,
+                lastSeenUpdatedAt: lastSeenUpdatedAt,
                 updatedRates: [
                     {
                         type: 'CREATE',
@@ -368,6 +374,7 @@ const createTestDraftRateOnContract = async (
 const updateTestDraftRateOnContract = async (
     server: ApolloServer,
     contractID: string,
+    lastSeenUpdatedAt: Date,
     rateID: string,
     rateData?: RateFormDataInput
 ): Promise<Contract> => {
@@ -380,6 +387,7 @@ const updateTestDraftRateOnContract = async (
         variables: {
             input: {
                 contractID,
+                lastSeenUpdatedAt,
                 updatedRates: [
                     {
                         type: 'UPDATE',

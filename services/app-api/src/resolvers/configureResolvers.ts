@@ -33,11 +33,13 @@ import { rateResolver } from './rate/rateResolver'
 import { genericDocumentResolver } from './shared/genericDocumentResolver'
 import { fetchRateResolver } from './rate/fetchRate'
 import { updateContract } from './contract/updateContract'
+import { unlockContractResolver } from './contract/unlockContract'
 import { createAPIKeyResolver } from './APIKey'
 import { unlockRate } from './rate/unlockRate'
 import { submitRate } from './rate/submitRate'
 import { updateDraftContractRates } from './contract/updateDraftContractRates'
 import { contractResolver } from './contract/contractResolver'
+import { unlockedContractResolver } from './contract/unlockedContractResolver'
 import { contractRevisionResolver } from './contract/contractRevisionResolver'
 import { fetchContractResolver } from './contract/fetchContract'
 import { submitContract } from './contract/submitContract'
@@ -92,6 +94,12 @@ export function configureResolvers(
                 launchDarkly
             ),
             unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
+                store,
+                emailer,
+                emailParameterStore,
+                launchDarkly
+            ),
+            unlockContract: unlockContractResolver(
                 store,
                 emailer,
                 emailParameterStore,
@@ -152,6 +160,7 @@ export function configureResolvers(
         Rate: rateResolver,
         RateRevision: rateRevisionResolver,
         Contract: contractResolver(),
+        UnlockedContract: unlockedContractResolver(),
         ContractRevision: contractRevisionResolver(store),
         GenericDocument: genericDocumentResolver(s3Client),
         Document: questionResponseDocumentResolver(s3Client),

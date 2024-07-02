@@ -45,6 +45,7 @@ const updateDraftContractRatesMockSuccess = ({
     const contractData = mockContractPackageDraft(contract)
     const contractInput = {
         contractID: contractData.id,
+        lastSeenUpdatedAt: contractData.draftRevision?.updatedAt,
         updatedRates: [
             {
                 formData: {

@@ -1,147 +1,104 @@
 import {
-    CreateHealthPlanPackageDocument,
-    HealthPlanPackage,
-    SubmitHealthPlanPackageDocument,
-    UpdateHealthPlanFormDataDocument,
     IndexUsersDocument,
     UserEdge,
     User,
     UpdateCmsUserDocument,
     FetchCurrentUserDocument,
     UpdateDraftContractRatesDocument,
+    UpdateDraftContractRatesInput,
     Contract,
     SubmitContractDocument,
-    UpdateDraftContractRatesInput,
+    CreateContractDocument,
+    UpdateContractDraftRevisionDocument,
+    UpdateContractDraftRevisionInput,
 } from '../gen/gqlClient'
-import {
-    domainToBase64,
-    base64ToDomain,
-} from '../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import {
     apolloClientWrapper,
     DivisionType,
     adminUser,
-    deprecatedContractOnlyData,
     newSubmissionInput,
     rateFormData,
-    CMSUserType, minnesotaStatePrograms, deprecatedContractAndRatesData,
+    contractFormData,
+    CMSUserType, 
+    minnesotaStatePrograms,
 } from '../utils/apollo-test-utils'
 import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
-import {UnlockedHealthPlanFormDataType} from 'app-web/src/common-code/healthPlanFormDataType';
 
-const deprecatedCreateSubmitHPP = async (
-    apolloClient: ApolloClient<NormalizedCacheObject>,
-    formData?: Partial<UnlockedHealthPlanFormDataType>
-): Promise<HealthPlanPackage> => {
-    const newSubmission = await apolloClient.mutate({
-        mutation: CreateHealthPlanPackageDocument,
+const createAndSubmitContractOnlyPackage = async (
+    apolloClient: ApolloClient<NormalizedCacheObject>
+): Promise<Contract> => {
+    const newContract = await apolloClient.mutate({
+        mutation: CreateContractDocument,
         variables: {
             input: newSubmissionInput(),
-        },
+        }
     })
 
-    const pkg = newSubmission.data.createHealthPlanPackage.pkg
-    const revision = pkg.revisions[0].node
+    const draftContract = newContract.data.createContract.contract
+    const draftRevision = draftContract.draftRevision
+    const updateFormData = contractFormData({
+        submissionType: 'CONTRACT_ONLY'
+    })
 
-    const initialFormData = base64ToDomain(revision.formDataProto)
-    if (formData instanceof Error) {
-        throw new Error(formData.message)
+    const updateContractDraftRevisionInput: UpdateContractDraftRevisionInput = {
+        contractID: draftContract.id,
+        lastSeenUpdatedAt: draftRevision.updatedAt,
+        formData: updateFormData
     }
-
-    const fullFormData = {
-        ...initialFormData,
-        ...formData? formData: deprecatedContractOnlyData(),
-    }
-
-    const formDataProto = domainToBase64(fullFormData as UnlockedHealthPlanFormDataType)
 
     await apolloClient.mutate({
-        mutation: UpdateHealthPlanFormDataDocument,
+        mutation: UpdateContractDraftRevisionDocument,
         variables: {
-            input: {
-                healthPlanFormData: formDataProto,
-                pkgID: pkg.id,
-            },
-        },
+            input: updateContractDraftRevisionInput
+        }
     })
 
     const submission = await apolloClient.mutate({
-        mutation: SubmitHealthPlanPackageDocument,
-        variables: {
-            input: {
-                pkgID: pkg.id,
-                submittedReason: 'Submit package for Q&A Tests',
-            },
-        },
-    })
-
-    return submission.data.submitHealthPlanPackage.pkg
-}
-
-const createAndSubmitBaseContract = async (
-    apolloClient: ApolloClient<NormalizedCacheObject>
-): Promise<Contract> => {
-
-    // we don't have createContract yet so have to use HPP API here
-    const newContract = await apolloClient.mutate({
-        mutation: CreateHealthPlanPackageDocument,
-        variables: {
-            input: newSubmissionInput(),
-        },
-    })
-    const contractID = newContract.data.createHealthPlanPackage.pkg.id
-
-    const submission1 = await apolloClient.mutate({
         mutation: SubmitContractDocument,
         variables: {
             input: {
-                pkgID: contractID,
-                submittedReason: 'Submit package for Rates Dashboard tests',
+                contractID: draftContract.id,
             },
         },
     })
-    return submission1.data.submitContract.contract
+
+    return submission.data.submitContract.contract
 }
 
 const createAndSubmitContractWithRates = async (
     apolloClient: ApolloClient<NormalizedCacheObject>
 ): Promise<Contract> => {
-    const newSubmission1 = await apolloClient.mutate({
-        mutation: CreateHealthPlanPackageDocument,
+    const newContract = await apolloClient.mutate({
+        mutation: CreateContractDocument,
         variables: {
-            input: newSubmissionInput({submissionType: 'CONTRACT_AND_RATES'}),
-        },
-    })
-    const pkg1 = newSubmission1.data.createHealthPlanPackage.pkg
-    const pkg1FirstRev = pkg1.revisions[0].node
-
-    const formData1 = base64ToDomain(pkg1FirstRev.formDataProto)
-    if (formData1 instanceof Error) {
-        throw new Error(formData1.message)
-    }
-
-    const fullFormData1: UnlockedHealthPlanFormDataType = {
-        ...formData1,
-        ...deprecatedContractAndRatesData(),
-        status: 'DRAFT',
-        rateInfos: []
-    }
-
-    const formDataProto = domainToBase64(fullFormData1 as UnlockedHealthPlanFormDataType)
-
-    await apolloClient.mutate({
-        mutation: UpdateHealthPlanFormDataDocument,
-        variables: {
-            input: {
-                healthPlanFormData: formDataProto,
-                pkgID: pkg1.id,
-            },
-        },
+            input: newSubmissionInput(),
+        }
     })
 
-    // Using new API to create child rates
+    const draftContract = newContract.data.createContract.contract
+    const draftRevision = draftContract.draftRevision
+    const updateFormData = contractFormData({
+        submissionType: 'CONTRACT_AND_RATES'
+    })
+
+    const updateContractDraftRevisionInput: UpdateContractDraftRevisionInput = {
+        contractID: draftContract.id,
+        lastSeenUpdatedAt: draftRevision.updatedAt,
+        formData: updateFormData
+    }
+
+    const updatedContract = await apolloClient.mutate({
+        mutation: UpdateContractDraftRevisionDocument,
+        variables: {
+            input: updateContractDraftRevisionInput
+        }
+    })
+
+    const updatedDraftRevision = updatedContract.data.updateContractDraftRevision.contract.draftRevision
+
     const updateDraftContractRatesInput: UpdateDraftContractRatesInput = {
-        contractID: pkg1.id,
+        contractID: draftContract.id,
+        lastSeenUpdatedAt: updatedDraftRevision.updatedAt,
         updatedRates: [
             {
                 formData: rateFormData({
@@ -177,7 +134,7 @@ const createAndSubmitContractWithRates = async (
         mutation: SubmitContractDocument,
         variables: {
             input: {
-                contractID: pkg1.id,
+                contractID: draftContract.id,
             },
         },
     })
@@ -232,13 +189,13 @@ const seedUserIntoDB = async (
 }
 
 Cypress.Commands.add(
-    'apiDeprecatedCreateSubmitHPP',
-    (stateUser): Cypress.Chainable<HealthPlanPackage> =>
+    'apiCreateAndSubmitContractOnlySubmission',
+    (stateUser): Cypress.Chainable<Contract> =>
         cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
             apolloClientWrapper(
                 schema,
                 stateUser,
-                deprecatedCreateSubmitHPP
+                createAndSubmitContractOnlyPackage
             )
         )
 )
@@ -262,7 +219,7 @@ Cypress.Commands.add(
             apolloClientWrapper(
                 schema,
                 stateUser,
-                createAndSubmitBaseContract
+                createAndSubmitContractOnlyPackage
             )
         )
 )

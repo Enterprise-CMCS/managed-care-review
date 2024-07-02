@@ -13,16 +13,16 @@ describe('Q&A', () => {
         // Assign Division to CMS user zuko
         cy.apiAssignDivisionToCMSUser(cmsUser(), 'DMCO').then(() => {
             // Create a new submission
-            cy.apiDeprecatedCreateSubmitHPP(stateUser()).then(
-                (pkg) => {
+            cy.apiCreateAndSubmitContractOnlySubmission(stateUser()).then(
+                (contract) => {
                     // Log in as CMS user and upload question
                     cy.logInAsCMSUser({
-                        initialURL: `/submissions/${pkg.id}/question-and-answers`,
+                        initialURL: `/submissions/${contract.id}/question-and-answers`,
                     })
 
                     cy.url({ timeout: 10_000 }).should(
                         'contain',
-                        `${pkg.id}/question-and-answers`
+                        `${contract.id}/question-and-answers`
                     )
 
                     cy.findByRole('link', {
@@ -49,7 +49,7 @@ describe('Q&A', () => {
 
                     cy.logInAsStateUser()
 
-                    cy.visit(`/submissions/${pkg.id}`)
+                    cy.visit(`/submissions/${contract.id}`)
 
                     cy.findByTestId('submission-summary').should('exist')
                     cy.findByRole('link', {
@@ -60,7 +60,7 @@ describe('Q&A', () => {
                     cy.findByRole('link', { name: /Q&A/ }).click()
                     cy.url({ timeout: 10_000 }).should(
                         'contain',
-                        `${pkg.id}/question-and-answers`
+                        `${contract.id}/question-and-answers`
                     )
 
                     // Make sure Heading is correct with 'Upload questions' in addition to submission name

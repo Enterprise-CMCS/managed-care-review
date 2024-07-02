@@ -105,6 +105,8 @@ declare global {
                 division: DivisionType
             }): void
 
+            apiCreateAndSubmitContractOnlySubmission(stateUser: StateUserType): Cypress.Chainable<Contract>
+            apiCreateAndSubmitContractWithRates(stateUser: StateUserType): Cypress.Chainable<Contract>
             apiDeprecatedCreateSubmitHPP(stateUser: StateUserType, formData?: Partial<UnlockedHealthPlanFormDataType>): Cypress.Chainable<HealthPlanPackage>
             apiCreateAndSubmitBaseContract(stateUser: StateUserType): Cypress.Chainable<Contract>
             apiAssignDivisionToCMSUser(cmsUser: CMSUserType, division: DivisionType): Cypress.Chainable<void>

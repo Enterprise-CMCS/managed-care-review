@@ -1,5 +1,6 @@
 import FETCH_CONTRACT from '../../../app-graphql/src/queries/fetchContract.graphql'
 import SUBMIT_CONTRACT from '../../../app-graphql/src/mutations/submitContract.graphql'
+import UNLOCK_CONTRACT from '../../../app-graphql/src/mutations/unlockContract.graphql'
 import UPDATE_DRAFT_CONTRACT_RATES from '../../../app-graphql/src/mutations/updateDraftContractRates.graphql'
 import { findStatePrograms } from '../postgres'
 import type { InsertContractArgsType } from '../postgres/contractAndRates/insertContract'
@@ -20,6 +21,7 @@ import type {
     Contract,
     ContractDraftRevisionFormDataInput,
     RateFormData,
+    UnlockedContract,
 } from '../gen/gqlServer'
 import { latestFormData } from './healthPlanPackageHelpers'
 import type {
@@ -90,6 +92,50 @@ async function submitTestContract(
     }
 
     return result.data.submitContract.contract
+}
+
+async function unlockTestContract(
+    server: ApolloServer,
+    contractID: string,
+    unlockedReason?: string
+): Promise<UnlockedContract> {
+    const result = await server.executeOperation({
+        query: UNLOCK_CONTRACT,
+        variables: {
+            input: {
+                contractID: contractID,
+                unlockedReason: unlockedReason,
+            },
+        },
+    })
+
+    if (result.errors) {
+        throw new Error(
+            `unlockTestContract query failed with errors ${result.errors}`
+        )
+    }
+
+    if (!result.data) {
+        throw new Error('unlockTestContract returned nothing')
+    }
+
+    return result.data.unlockContract.contract
+}
+
+async function createSubmitAndUnlockTestContract(
+    stateServer: ApolloServer,
+    cmsServer: ApolloServer
+): Promise<UnlockedContract> {
+    const contract = await createAndSubmitTestContractWithRate(stateServer)
+    const contractID = contract.id
+
+    const unlockedContract = await unlockTestContract(
+        cmsServer,
+        contractID,
+        'test unlock'
+    )
+
+    return unlockedContract
 }
 
 async function createAndSubmitTestContractWithRate(
@@ -361,11 +407,13 @@ const updateTestContractDraftRevision = async (
 export {
     createTestContractWithDB,
     submitTestContract,
+    unlockTestContract,
     createAndSubmitTestContract,
     fetchTestContract,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
     createAndSubmitTestContractWithRate,
+    createSubmitAndUnlockTestContract,
     linkRateToDraftContract,
     updateRateOnDraftContract,
     clearRatesOnDraftContract,

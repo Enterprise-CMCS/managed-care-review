@@ -176,8 +176,8 @@ function mockContractPackageDraft(
             submitInfo: undefined,
             unlockInfo: undefined,
             id: '123',
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            createdAt: new Date('01/01/2023'),
+            updatedAt: new Date('11/01/2023'),
             contractName: 'MCR-0005-alvhalfhdsalfee',
             formData: mockContractFormData(partial?.draftRevision?.formData)
         },
@@ -281,8 +281,8 @@ function mockContractWithLinkedRateDraft(
             submitInfo: undefined,
             unlockInfo: undefined,
             id: '123',
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            createdAt: new Date('01/01/2023'),
+            updatedAt: new Date('11/01/2023'),
             contractName: 'MCR-0005-alvhalfhdsalfss',
             formData: {
                 programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],

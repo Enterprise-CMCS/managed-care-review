@@ -192,6 +192,7 @@ describe(`Tests $testName`, () => {
         await updateTestDraftRateOnContract(
             server,
             submittedEditedRates.id,
+            existingContract1.updatedAt,
             rateToUpdate.id,
             formatRateDataForSending(rateToUpdateFormData)
         )

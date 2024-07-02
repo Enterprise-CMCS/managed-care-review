@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@prisma/client'
-import type { ContractType } from '../../domain-models/contractAndRates'
+import type { UnlockedContractType } from '../../domain-models/contractAndRates'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
 import { unlockRateInDB } from './unlockRate'
@@ -18,7 +18,7 @@ async function unlockContract(
     client: PrismaClient,
     args: UnlockContractArgsType,
     linkRatesFF?: boolean
-): Promise<ContractType | NotFoundError | Error> {
+): Promise<UnlockedContractType | NotFoundError | Error> {
     const { contractID, unlockedByUserID, unlockReason } = args
 
     try {
@@ -290,7 +290,19 @@ async function unlockContract(
                 skipDuplicates: true,
             })
 
-            return findContractWithHistory(tx, contractID)
+            const contract = await findContractWithHistory(tx, contractID)
+            if (contract instanceof Error) {
+                throw new Error('')
+            }
+            if (!contract.draftRevision) {
+                throw new Error('')
+            }
+            const unlockedContract: UnlockedContractType = {
+                ...contract,
+                draftRevision: contract.draftRevision,
+                packageSubmissions: contract.packageSubmissions,
+            }
+            return unlockedContract
         })
     } catch (err) {
         console.error('UNLOCK PRISMA CONTRACT ERR', err)
