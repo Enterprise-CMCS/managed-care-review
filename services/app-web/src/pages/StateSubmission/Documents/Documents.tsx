@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Form as UswdsForm, Link } from '@trussworks/react-uswds'
+import { Form as UswdsForm } from '@trussworks/react-uswds'
 import { useNavigate } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -26,7 +26,7 @@ import {
     useRouteParams,
 } from '../../../hooks'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
-import { DynamicStepIndicator } from '../../../components'
+import { DynamicStepIndicator, LinkWithLogging } from '../../../components'
 import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 
@@ -295,14 +295,14 @@ export const Documents = (): React.ReactElement => {
                             label="Upload contract-supporting documents"
                             hint={
                                 <>
-                                    <Link
+                                    <LinkWithLogging
                                         aria-label="Document definitions and requirements (opens in new window)"
                                         href={'/help#supporting-documents'}
                                         variant="external"
                                         target="_blank"
                                     >
                                         Document definitions and requirements
-                                    </Link>
+                                    </LinkWithLogging>
                                     <span className="padding-top-05">
                                         Upload any supporting documents related
                                         to the contract.

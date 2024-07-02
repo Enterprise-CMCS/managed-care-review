@@ -1,6 +1,4 @@
 import React from 'react'
-import { Button, Link } from '@trussworks/react-uswds'
-import { NavLink } from 'react-router-dom'
 
 import { LoginStatusType } from '../../../contexts/AuthContext'
 import { User } from '../../../gen/gqlClient'
@@ -9,7 +7,11 @@ import { AuthModeType } from '../../../common-code/config'
 
 import styles from '../Header.module.scss'
 import { useStringConstants } from '../../../hooks/useStringConstants'
-import { useTealium } from '../../../hooks'
+import {
+    NavLinkWithLogging,
+    LinkWithLogging,
+    ButtonWithLogging,
+} from '../../../components'
 
 type LogoutHandlerT = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -19,62 +21,53 @@ const LoggedInUserInfo = (
     user: User,
     logout: LogoutHandlerT
 ): React.ReactElement => {
-    const { logButtonEvent } = useTealium()
     const stringConstants = useStringConstants()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     return (
         <div className={styles.userInfo}>
             <span>Contact </span>
-            <a
+            <LinkWithLogging
                 href={`mailto: ${MAIL_TO_SUPPORT}, mc-review-team@truss.works`}
-                className="usa-link"
+                variant="unstyled"
                 target="_blank"
                 rel="noreferrer"
             >
                 {MAIL_TO_SUPPORT}
-            </a>
+            </LinkWithLogging>
             <span className={styles.divider}>|</span>
             <span>{user.email}</span>
             <span className={styles.divider}>|</span>
 
-            <Button
+            <ButtonWithLogging
                 type="button"
                 unstyled
-                onClick={(e) =>
-                    logButtonEvent(
-                        {
-                            text: 'Sign out',
-                            button_style: 'link',
-                            button_type: 'button',
-                        },
-                        () => logout(e)
-                    )
-                }
+                button_style="link"
+                parent_component_type="constant header"
+                onClick={logout}
             >
                 Sign out
-            </Button>
+            </ButtonWithLogging>
         </div>
     )
 }
 
 const LoggedOutUserInfo = (authMode: AuthModeType): React.ReactElement => {
     return authMode === 'IDM' ? (
-        <Link
+        <LinkWithLogging
             className="usa-button usa-button--outline usa-button--inverse"
             variant="unstyled"
             href={idmRedirectURL()}
         >
             Sign In
-        </Link>
+        </LinkWithLogging>
     ) : (
-        <Link
-            asCustom={NavLink}
+        <NavLinkWithLogging
             className="usa-button usa-button--outline usa-button--inverse"
             variant="unstyled"
             to="/auth"
         >
             Sign In
-        </Link>
+        </NavLinkWithLogging>
     )
 }
 

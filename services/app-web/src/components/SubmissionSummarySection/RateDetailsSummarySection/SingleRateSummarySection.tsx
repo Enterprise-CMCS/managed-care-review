@@ -18,8 +18,8 @@ import { DocumentWarningBanner } from '../../Banner'
 import { useS3 } from '../../../contexts/S3Context'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { recordJSException } from '../../../otelHelpers'
-import { Grid, Link } from '@trussworks/react-uswds'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { Grid } from '@trussworks/react-uswds'
+import { useNavigate } from 'react-router-dom'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
 import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -29,6 +29,7 @@ import { ActuaryCommunicationRecord, ERROR_MESSAGES } from '../../../constants'
 import { handleApolloErrorsAndAddUserFacingMessages } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
+import { NavLinkWithLogging } from '../../TealiumLogging/Link'
 
 const rateCapitationType = (formData: RateFormData) =>
     formData.rateCapitationType
@@ -79,8 +80,7 @@ const relatedSubmissions = (
         <ul className={styles.commaList}>
             {contractRevisions.map((contractRev) => (
                 <li key={contractRev.contract.id}>
-                    <Link
-                        asCustom={NavLink}
+                    <NavLinkWithLogging
                         to={`/submissions/${contractRev.contract.id}`}
                     >
                         {packageName(
@@ -89,7 +89,7 @@ const relatedSubmissions = (
                             contractRev.formData.programIDs,
                             statePrograms
                         )}
-                    </Link>
+                    </NavLinkWithLogging>
                 </li>
             ))}
         </ul>

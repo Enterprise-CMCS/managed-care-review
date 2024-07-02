@@ -6,7 +6,6 @@ import {
     ModalToggleButton,
 } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
-import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
 import { ContractDetailsSummarySectionV2 } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/ContractDetailsSummarySectionV2'
 import { ContactsSummarySection } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/ContactsSummarySectionV2'
@@ -16,6 +15,8 @@ import {
     SubmissionUnlockedBanner,
     SubmissionUpdatedBanner,
     DocumentWarningBanner,
+    NavLinkWithLogging,
+    LinkWithLogging,
 } from '../../../components'
 import { Loading } from '../../../components'
 import { usePage } from '../../../contexts/PageContext'
@@ -198,8 +199,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                 )}
 
                 {!showQuestionResponse && (
-                    <Link
-                        asCustom={NavLink}
+                    <NavLinkWithLogging
                         to={{
                             pathname: RoutesRecord.DASHBOARD_SUBMISSIONS,
                         }}
@@ -210,7 +210,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                         ) : (
                             <span>&nbsp;Back to dashboard</span>
                         )}
-                    </Link>
+                    </NavLinkWithLogging>
                 )}
 
                 {
@@ -229,7 +229,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                                             </Link>
                                         </span>
                                     )}
-                                    <Link
+                                    <LinkWithLogging
                                         href={`/submissions/${contract.id}/mccrs-record-number`}
                                         className={
                                             contract.mccrsID
@@ -239,7 +239,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                                         aria-label={editOrAddMCCRSID}
                                     >
                                         {editOrAddMCCRSID}
-                                    </Link>
+                                    </LinkWithLogging>
                                 </div>
                             ) : undefined
                         }

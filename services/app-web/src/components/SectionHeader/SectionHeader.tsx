@@ -1,7 +1,6 @@
-import { Link } from '@trussworks/react-uswds'
-import { NavLink } from 'react-router-dom'
 import styles from './SectionHeader.module.scss'
 import classNames from 'classnames'
+import { NavLinkWithLogging } from '../TealiumLogging/Link'
 
 export type SectionHeaderProps = {
     header: string
@@ -35,14 +34,13 @@ export const SectionHeader = ({
             </div>
             <div>
                 {editNavigateTo && (
-                    <Link
+                    <NavLinkWithLogging
                         variant="unstyled"
-                        asCustom={NavLink}
                         className="usa-button usa-button--outline"
                         to={editNavigateTo}
                     >
                         Edit <span className="srOnly">{header}</span>
-                    </Link>
+                    </NavLinkWithLogging>
                 )}
                 {children}
             </div>

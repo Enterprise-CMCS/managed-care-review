@@ -1,7 +1,8 @@
 import React from 'react'
 import styles from './ErrorAlert.module.scss'
-import { Alert, Link } from '@trussworks/react-uswds'
+import { Alert } from '@trussworks/react-uswds'
 import { useStringConstants } from '../../hooks/useStringConstants'
+import { LinkWithLogging } from '../TealiumLogging/Link'
 
 export type ErrorAlertFailedRequestProps = {
     message?: string
@@ -33,7 +34,14 @@ export const ErrorAlertFailedRequest = ({
                         Please refresh your browser and if you continue to
                         experience an error,&nbsp;
                     </span>
-                    <Link href={MAIL_TO_SUPPORT}>let us know.</Link>
+                    <LinkWithLogging
+                        variant="unstyled"
+                        href={MAIL_TO_SUPPORT}
+                        target="_blank"
+                        rel="noreferrer"
+                    >
+                        let us know.
+                    </LinkWithLogging>
                 </p>
             </div>
         </Alert>

@@ -6,12 +6,12 @@ import {
     Fieldset,
     FormGroup,
     Label,
-    Link,
 } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 import {
     FieldRadio,
     FileUpload,
+    LinkWithLogging,
     PoliteErrorMessage,
     ProgramSelect,
 } from '../../../../components'
@@ -137,14 +137,14 @@ export const SingleRateFormFields = ({
                     error={showFieldErrors('rateDocuments')}
                     hint={
                         <span className={styles.guidanceTextBlockNoPadding}>
-                            <Link
+                            <LinkWithLogging
                                 aria-label="Document definitions and requirements (opens in new window)"
                                 href={'/help#key-documents'}
                                 variant="external"
                                 target="_blank"
                             >
                                 Document definitions and requirements
-                            </Link>
+                            </LinkWithLogging>
                             <span className="padding-top-2">
                                 {`Upload only one rate certification document. Additional rates can be added later.`}
                             </span>
@@ -186,14 +186,14 @@ export const SingleRateFormFields = ({
                     error={showFieldErrors('supportingDocuments')}
                     hint={
                         <span className={styles.guidanceTextBlockNoPadding}>
-                            <Link
+                            <LinkWithLogging
                                 aria-label="Document definitions and requirements (opens in new window)"
                                 href={'/help#key-documents'}
                                 variant="external"
                                 target="_blank"
                             >
                                 Document definitions and requirements
-                            </Link>
+                            </LinkWithLogging>
                             <span className="padding-top-1">
                                 {`Upload any supporting documents for Rate certification ${index + 1}`}
                             </span>
@@ -259,14 +259,14 @@ export const SingleRateFormFields = ({
                         {showFieldErrors('rateType')}
                     </PoliteErrorMessage>
 
-                    <Link
+                    <LinkWithLogging
                         aria-label="Rate certification type definitions (opens in new window)"
                         href={'/help#rate-cert-type-definitions'}
                         variant="external"
                         target="_blank"
                     >
                         Rate certification type definitions
-                    </Link>
+                    </LinkWithLogging>
                     <FieldRadio
                         id={`newRate-${index}`}
                         name={`${fieldNamePrefix}.rateType`}

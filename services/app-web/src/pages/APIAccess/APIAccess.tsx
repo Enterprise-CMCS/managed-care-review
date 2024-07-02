@@ -12,6 +12,7 @@ import { recordJSException } from '../../otelHelpers'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './APIAccess.module.scss'
 import { useTealium } from '../../hooks'
+import { LinkWithLogging } from '../../components'
 
 function APIAccess(): React.ReactElement {
     const apiURL = process.env.REACT_APP_API_URL
@@ -169,9 +170,9 @@ curl -s ${thirdPartyAPIURL} -X POST \\
                 <ul>
                     <li>
                         The MC-Review&nbsp;
-                        <Link href={RoutesRecord.GRAPHQL_EXPLORER}>
+                        <LinkWithLogging href={RoutesRecord.GRAPHQL_EXPLORER}>
                             GraphQL Explorer
-                        </Link>
+                        </LinkWithLogging>
                         &nbsp; will allow you to format and run queries against
                         the API in all environments except production
                     </li>

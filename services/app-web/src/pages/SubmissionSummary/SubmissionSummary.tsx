@@ -1,12 +1,12 @@
 import {
     GridContainer,
-    Icon,
     Link,
+    Icon,
     ModalRef,
     ModalToggleButton,
 } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
-import { NavLink, useOutletContext } from 'react-router-dom'
+import { useOutletContext } from 'react-router-dom'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import {
     ContactsSummarySection,
@@ -18,6 +18,8 @@ import {
     SubmissionUnlockedBanner,
     SubmissionUpdatedBanner,
     DocumentWarningBanner,
+    LinkWithLogging,
+    NavLinkWithLogging,
 } from '../../components'
 import { usePage } from '../../contexts/PageContext'
 import { UpdateInformation } from '../../gen/gqlClient'
@@ -141,8 +143,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                 )}
 
                 {!showQuestionResponse && (
-                    <Link
-                        asCustom={NavLink}
+                    <NavLinkWithLogging
                         to={{
                             pathname: RoutesRecord.DASHBOARD_SUBMISSIONS,
                         }}
@@ -153,7 +154,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                         ) : (
                             <span>&nbsp;Back to dashboard</span>
                         )}
-                    </Link>
+                    </NavLinkWithLogging>
                 )}
 
                 <SubmissionTypeSummarySection
@@ -171,7 +172,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                         </Link>
                                     </span>
                                 )}
-                                <Link
+                                <LinkWithLogging
                                     href={`/submissions/${pkg.id}/mccrs-record-number`}
                                     className={
                                         pkg.mccrsID ? styles.editLink : ''
@@ -179,7 +180,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                     aria-label={editOrAddMCCRSID}
                                 >
                                     {editOrAddMCCRSID}
-                                </Link>
+                                </LinkWithLogging>
                             </div>
                         ) : undefined
                     }

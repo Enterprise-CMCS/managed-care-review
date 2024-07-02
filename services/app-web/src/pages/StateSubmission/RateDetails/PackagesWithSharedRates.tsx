@@ -7,8 +7,12 @@ import { getCurrentRevisionFromHealthPlanPackage } from '../../../gqlHelpers'
 import type { PackageOptionType } from '../../../components/Select'
 import { useStatePrograms } from '../../../hooks'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
-import { FieldYesNo, PoliteErrorMessage } from '../../../components'
-import { FormGroup, Label, Link } from '@trussworks/react-uswds'
+import {
+    FieldYesNo,
+    LinkWithLogging,
+    PoliteErrorMessage,
+} from '../../../components'
+import { FormGroup, Label } from '@trussworks/react-uswds'
 import { PackageSelect } from '../../../components/Select'
 import { getIn, useFormikContext } from 'formik'
 import { RateCertFormType, RateInfoArrayType } from './SingleRateCert'
@@ -135,14 +139,14 @@ export const PackagesWithSharedRates = ({
                     <span className={styles.requiredOptionalText}>
                         Required
                     </span>
-                    <Link
+                    <LinkWithLogging
                         aria-label="View all submissions (opens in new window)"
                         href={RoutesRecord.DASHBOARD_SUBMISSIONS}
                         variant="external"
                         target="_blank"
                     >
                         View all submissions
-                    </Link>
+                    </LinkWithLogging>
                     <PoliteErrorMessage>
                         {shouldValidate &&
                             getIn(

@@ -1,15 +1,9 @@
 import React, { useState, Dispatch, SetStateAction } from 'react'
-import {
-    Button,
-    Form,
-    FormGroup,
-    Label,
-    TextInput,
-} from '@trussworks/react-uswds'
+import { Form, FormGroup, Label, TextInput } from '@trussworks/react-uswds'
 
 import { signUp } from './cognitoAuth'
 import { recordJSException } from '../../otelHelpers'
-import { useTealium } from '../../hooks'
+import { ButtonWithLogging } from '../../components'
 
 export function showError(error: string): void {
     console.info(error)
@@ -33,8 +27,6 @@ export function Signup({
     })
 
     const [isLoading, setIsLoading] = useState(false)
-
-    const { logButtonEvent } = useTealium()
 
     const onFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = event.target
@@ -133,20 +125,14 @@ export function Signup({
                     value={fields.confirmPassword}
                 />
             </FormGroup>
-            <Button
+            <ButtonWithLogging
                 type="submit"
                 disabled={!validateForm() || isLoading}
-                onClick={(e) =>
-                    logButtonEvent({
-                        text: 'Signup',
-                        button_style: 'primary',
-                        button_type: 'submit',
-                        parent_component_type: 'constant header',
-                    })
-                }
+                button_style="primary"
+                parent_component_type="constant header"
             >
                 Signup
-            </Button>
+            </ButtonWithLogging>
         </Form>
     )
 }

@@ -3,6 +3,7 @@ import styles from '../Banner.module.scss'
 import { Alert } from '@trussworks/react-uswds'
 import { ERROR_MESSAGES } from '../../../constants/errors'
 import { useStringConstants } from '../../../hooks/useStringConstants'
+import { LinkWithLogging } from '../../TealiumLogging/Link'
 
 export type GenericApiErrorProps = {
     heading?: string
@@ -39,14 +40,14 @@ export const GenericApiErrorBanner = ({
                                 Please refresh your browser and if you continue
                                 to experience an error,&nbsp;
                             </span>
-                            <a
+                            <LinkWithLogging
                                 href={`mailto: ${MAIL_TO_SUPPORT}, mc-review-team@truss.works`}
-                                className="usa-link"
+                                variant="unstyled"
                                 target="_blank"
                                 rel="noreferrer"
                             >
                                 let us know.
-                            </a>
+                            </LinkWithLogging>
                         </>
                     )}
                 </p>

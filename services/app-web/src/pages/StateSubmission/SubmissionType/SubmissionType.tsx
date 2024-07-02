@@ -2,16 +2,11 @@ import {
     Form as UswdsForm,
     Fieldset,
     FormGroup,
-    Link,
     Label,
 } from '@trussworks/react-uswds'
 import { Formik, FormikErrors, FormikHelpers } from 'formik'
 import React, { useEffect } from 'react'
-import {
-    Link as ReactRouterLink,
-    useNavigate,
-    useLocation,
-} from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
     DynamicStepIndicator,
     ErrorSummary,
@@ -19,6 +14,7 @@ import {
     FieldTextarea,
     FieldYesNo,
     PoliteErrorMessage,
+    ReactRouterLinkWithLogging,
 } from '../../../components'
 import {
     PopulationCoveredRecord,
@@ -565,9 +561,8 @@ export const SubmissionType = ({
                                                     reviewers will need to be
                                                     aware of
                                                 </p>
-                                                <Link
+                                                <ReactRouterLinkWithLogging
                                                     variant="external"
-                                                    asCustom={ReactRouterLink}
                                                     to={{
                                                         pathname: '/help',
                                                         hash: '#submission-description',
@@ -575,7 +570,7 @@ export const SubmissionType = ({
                                                     target="_blank"
                                                 >
                                                     View description examples
-                                                </Link>
+                                                </ReactRouterLinkWithLogging>
                                             </>
                                         }
                                     />

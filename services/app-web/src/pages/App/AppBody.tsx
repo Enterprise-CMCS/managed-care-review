@@ -2,9 +2,7 @@ import React from 'react'
 import { GovBanner } from '@trussworks/react-uswds'
 import styles from './AppBody.module.scss'
 import { AppRoutes } from './AppRoutes'
-import { Footer } from '../../components/Footer'
-import { Header } from '../../components/Header'
-import { Loading } from '../../components/Loading'
+import { Footer, Header, LinkWithLogging, Loading } from '../../components'
 import { useOTEL } from '../../hooks/useOTEL'
 import { useTealium } from '../../hooks/useTealium'
 import { AuthModeType } from '../../common-code/config'
@@ -39,9 +37,9 @@ export function AppBody({
 
     return (
         <div id="App" className={styles.app}>
-            <a className="usa-skipnav" href="#main-content">
+            <LinkWithLogging className="usa-skipnav" href="#main-content">
                 Skip to main content
-            </a>
+            </LinkWithLogging>
             <GovBanner aria-label="Official government website" />
             {isLowerEnvironment && (
                 <div className={styles.testEnvironmentBanner}>
