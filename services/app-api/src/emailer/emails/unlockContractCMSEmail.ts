@@ -1,5 +1,5 @@
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
-import type { UnlockedContractType } from '../../domain-models'
+import type { ContractRevisionWithRatesType } from '../../domain-models'
 import { packageName as generatePackageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 import {
@@ -12,7 +12,7 @@ import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
 import type { ProgramType, UpdateInfoType } from '../../domain-models'
 
 export const unlockContractCMSEmail = async (
-    contract: UnlockedContractType,
+    contractRev: ContractRevisionWithRatesType,
     updateInfo: UpdateInfoType,
     config: EmailConfiguration,
     stateAnalystsEmails: StateAnalystsEmails,
@@ -21,14 +21,14 @@ export const unlockContractCMSEmail = async (
     const isTestEnvironment = config.stage !== 'prod'
     const reviewerEmails = generateCMSReviewerEmailsForContract(
         config,
-        contract,
+        contractRev,
         stateAnalystsEmails
     )
 
     if (reviewerEmails instanceof Error) {
         return reviewerEmails
     }
-    const contractRev = contract.revisions[0]
+
     //This checks to make sure all programs contained in submission exists for the state.
     const packagePrograms = findContractPrograms(contractRev, statePrograms)
     if (packagePrograms instanceof Error) {

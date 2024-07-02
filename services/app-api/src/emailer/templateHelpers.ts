@@ -9,7 +9,6 @@ import type {
 import type { EmailConfiguration, StateAnalystsEmails } from '.'
 import type {
     ContractRevisionWithRatesType,
-    ContractType,
     ProgramType,
 } from '../domain-models'
 import { logError } from '../logger'
@@ -80,8 +79,10 @@ const handleAsCHIPSubmission = (
     }
 }
 
-const handleAsCHIPSubmissionForContract = (contract: ContractType): boolean => {
-    const contractFormData = contract.revisions[0].formData
+const handleAsCHIPSubmissionForContract = (
+    contractRev: ContractRevisionWithRatesType
+): boolean => {
+    const contractFormData = contractRev.formData
     //  This const is deprecated. No longer in use once we added population covered question, code remains only for backwards compatibility for existing Mississippi submissions.
     const LEGACY_CHIP_PROGRAMS_UUID = {
         MS: '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
@@ -91,9 +92,9 @@ const handleAsCHIPSubmissionForContract = (contract: ContractType): boolean => {
         return true
     } else if (
         !contractFormData.populationCovered &&
-        contract.stateCode === 'MS'
+        contractRev.contract.stateCode === 'MS'
     ) {
-        const programIDs = findAllContractProgramIds(contract)
+        const programIDs = findAllContractProgramIds(contractRev)
         return programIDs.some(
             (id: string) => LEGACY_CHIP_PROGRAMS_UUID.MS === id
         )
@@ -126,16 +127,16 @@ const filterChipAndPRSubmissionReviewers = (
 */
 const generateCMSReviewerEmailsForContract = (
     config: EmailConfiguration,
-    contract: ContractType,
+    contractRev: ContractRevisionWithRatesType,
     stateAnalystsEmails: StateAnalystsEmails
 ): string[] | Error => {
-    const contractFormData = contract.revisions[0].formData
+    const contractFormData = contractRev.formData
     if (
         contractFormData.submissionType !== 'CONTRACT_AND_RATES' &&
         contractFormData.submissionType !== 'CONTRACT_ONLY'
     ) {
         return new Error(
-            `generateCMSReviewerEmails does not currently support submission type: ${contractFormData.submissionType}.`
+            `generateCMSReviewerEmailsForContract does not currently support submission type: ${contractFormData.submissionType}.`
         )
     }
 
@@ -161,8 +162,8 @@ const generateCMSReviewerEmailsForContract = (
 
     //Remove OACT and DMCP emails from CHIP or State of PR submissions
     if (
-        handleAsCHIPSubmissionForContract(contract) ||
-        contract.stateCode === 'PR'
+        handleAsCHIPSubmissionForContract(contractRev) ||
+        contractRev.contract.stateCode === 'PR'
     ) {
         reviewers = filterChipAndPRSubmissionReviewers(reviewers, config)
     }
@@ -240,15 +241,17 @@ const findAllPackageProgramIds = (
 }
 
 //Finds all contract program and rate program ids in a contract and combines them into one array removing duplicates.
-const findAllContractProgramIds = (contract: ContractType): string[] => {
-    const contractFormData = contract.revisions[0].formData
+const findAllContractProgramIds = (
+    contractRev: ContractRevisionWithRatesType
+): string[] => {
+    const contractFormData = contractRev.formData
     const programs = [...contractFormData.programIDs]
     if (
         contractFormData.submissionType === 'CONTRACT_AND_RATES' &&
-        !!contract.draftRates?.length
+        !!contractRev.rateRevisions?.length
     ) {
-        const ratePrograms = contract.draftRates?.flatMap(
-            (rateInfo) => rateInfo.revisions[0].formData.rateProgramIDs
+        const ratePrograms = contractRev.rateRevisions?.flatMap(
+            (rateInfo) => rateInfo.formData.rateProgramIDs
         )
         if (ratePrograms?.length) {
             ratePrograms.forEach(
