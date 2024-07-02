@@ -8,7 +8,7 @@ import { TextEncoder, TextDecoder } from 'util'
 import '@testing-library/jest-dom'
 import * as tealium from './hooks/useTealium';
 import {TealiumDataObjectTypes} from './hooks/useTealium';
-import {TealiumButtonEngagementObject} from './constants/tealium';
+import {TealiumButtonEventObject, TealiumInternalLinkEventObject} from './constants/tealium';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 Element.prototype.scrollIntoView = () => {}
@@ -35,12 +35,18 @@ beforeEach(() => {
             return
         },
         logButtonEvent: (
-            tealiumData: Omit<TealiumButtonEngagementObject, 'event_name' | 'link_type'>,
+            tealiumData: Omit<TealiumButtonEventObject, 'event_name'>,
             onClick?: () => void,
         ) => {
+            // trigger button clicks
             if (onClick) {
                 onClick()
             }
         },
+        logInternalLinkEvent: (
+            tealiumData: Omit<TealiumInternalLinkEventObject, 'event_name'>,
+        ) => {
+            return
+        }
     }))
 })

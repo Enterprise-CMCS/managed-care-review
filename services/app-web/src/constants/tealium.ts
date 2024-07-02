@@ -21,26 +21,55 @@ type TealiumDataObject = {
     tealium_event?: TealiumEvent // this is required by tealium, TBD what allowed values aer here, usually this is supposed to be configured first .
 }
 
-type TealiumButtonEngagementObject = {
-    event_name: TealiumEvent
+type ButtonEventStyle =
+    | 'default'
+    | 'primary'
+    | 'success'
+    | 'transparent'
+
+type ButtonEventType =
+    | 'submit'
+    | 'link'
+    | 'reset'
+    | 'button'
+
+type ButtonEventParentComponentType =
+    | 'help drawer'
+    | 'card'
+    | 'modal'
+    | 'overlay'
+    | 'toggle'
+    | 'page body'
+    | 'constant header'
+
+type TealiumButtonEventObject = {
+    event_name: 'button_engagement',
     text: string
-    link_type: string
-    button_style: string
-    button_type: string
+    //link_type: string
+    button_style?: ButtonEventStyle | string
+    button_type?: ButtonEventType | string
     parent_component_heading?: string
-    parent_component_type?: string
+    parent_component_type?: ButtonEventParentComponentType | string
     link_url?: string
     event_extension?: string
 } & Partial<TealiumDataObject>
 
-type TealiumInternalLinkClickedObject = {
-    event_name: TealiumEvent
+type TealiumInternalLinkEventObject = {
+    event_name: 'internal_link_clicked'
     text: string
     link_url: string
     //link_type: string //currently not sending
     parent_component_heading?: string
-    parent_component_type?: string
+    parent_component_type?: LinkEventParentComponentType | string
 }
+
+type LinkEventParentComponentType =
+    | 'card'
+    | 'modal'
+    | 'help drawer'
+    | 'resource-tray'
+    | 'app page'
+    | 'top navigation'
 
 type TealiumLinkDataObject = {
     tealium_event: TealiumEvent // event is required for user tracking links
@@ -156,4 +185,10 @@ const getTealiumPageName = ({
 }
 
 export { CONTENT_TYPE_BY_ROUTE, getTealiumEnv, getTealiumPageName }
-export type { TealiumLinkDataObject, TealiumViewDataObject, TealiumEvent, TealiumButtonEngagementObject, TealiumInternalLinkClickedObject }
+export type {
+    TealiumLinkDataObject,
+    TealiumViewDataObject,
+    TealiumEvent,
+    TealiumButtonEventObject,
+    TealiumInternalLinkEventObject,
+}

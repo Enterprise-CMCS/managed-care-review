@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { usePage } from '../contexts/PageContext'
 import { PageTitlesRecord, RouteT } from '../constants/routes'
 import { useAuth } from '../contexts/AuthContext'
@@ -11,8 +11,8 @@ import type {
     TealiumLinkDataObject,
     TealiumViewDataObject,
     TealiumEvent,
-    TealiumButtonEngagementObject,
-    TealiumInternalLinkClickedObject
+    TealiumButtonEventObject,
+    TealiumInternalLinkEventObject,
 } from '../constants/tealium'
 import { useLocation } from 'react-router-dom'
 import { getRouteName } from '../routeHelpers'
@@ -29,15 +29,18 @@ Tealium is the data layer for Google Analytics and other data tracking at CMS
 */
 
 type TealiumDataObjectTypes =
-    | TealiumButtonEngagementObject
-    | TealiumInternalLinkClickedObject
+    | TealiumButtonEventObject
+    | TealiumInternalLinkEventObject
 
 const useTealium = (): {
     logUserEvent: (linkData: TealiumDataObjectTypes) => void,
     logPageView: () => void,
     logButtonEvent: (
-        tealiumData: Omit<TealiumButtonEngagementObject, 'event_name' | 'link_type'>,
+        tealiumData: Omit<TealiumButtonEventObject, 'event_name'>,
         onClick?: () => void,
+    ) => void,
+    logInternalLinkEvent: (
+        tealiumData: Omit<TealiumInternalLinkEventObject, 'event_name'>,
     ) => void
 } => {
     const location = useLocation()
@@ -96,6 +99,7 @@ const useTealium = (): {
             ...linkData
         }
 
+        console.log(`Tag Data`)
         console.log(tagData)
 
         if (process.env.REACT_APP_STAGE_NAME === 'local') {
@@ -107,20 +111,30 @@ const useTealium = (): {
     },[heading, pathname, loggedInUser])
 
     const logButtonEvent = (
-        tealiumData: Omit<TealiumButtonEngagementObject, 'event_name' | 'link_type'>,
+        tealiumData: Omit<TealiumButtonEventObject, 'event_name'>,
         onClick?: () => void,
     ) => {
         console.log('logButtonEvent: '+tealiumData.text)
 
         logUserEvent({
             ...tealiumData,
-            link_type: 'link_other',
             event_name: 'button_engagement',
         })
 
         if (onClick) {
             onClick()
         }
+    }
+
+    const logInternalLinkEvent = (
+        tealiumData: Omit<TealiumInternalLinkEventObject, 'event_name'>
+    ) => {
+        console.log('logInternalLinkEvent: '+tealiumData.text)
+
+        logUserEvent({
+            ...tealiumData,
+            event_name: 'internal_link_clicked',
+        })
     }
 
     // Add Tealium setup
@@ -200,7 +214,7 @@ const useTealium = (): {
 
     }, [pathname, logPageView])
 
-    return { logUserEvent, logPageView, logButtonEvent }
+    return { logUserEvent, logPageView, logButtonEvent, logInternalLinkEvent }
 }
 
 export { useTealium }
