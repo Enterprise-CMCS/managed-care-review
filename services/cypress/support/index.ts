@@ -108,6 +108,7 @@ declare global {
             apiDeprecatedCreateSubmitHPP(stateUser: StateUserType, formData?: Partial<UnlockedHealthPlanFormDataType>): Cypress.Chainable<HealthPlanPackage>
             apiCreateAndSubmitBaseContract(stateUser: StateUserType): Cypress.Chainable<Contract>
             apiAssignDivisionToCMSUser(cmsUser: CMSUserType, division: DivisionType): Cypress.Chainable<void>
+            apiCreateAndSubmitContractWithRates(stateUser: StateUserType): Cypress.Chainable<Contract>
 
             interceptGraphQL(): void
         }

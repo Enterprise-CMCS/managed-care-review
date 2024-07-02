@@ -255,7 +255,7 @@ const newSubmissionInput = (overrides?: Partial<UnlockedHealthPlanFormDataType> 
         },
         overrides
     )
-    }
+}
 
 const stateUser = ():StateUserType => ({
     id: 'user1',
