@@ -165,18 +165,16 @@ export function LocalLogin(): React.ReactElement {
                                     data-testid={`${user.givenName}Button`}
                                     type="submit"
                                     disabled={loginStatus === 'LOADING'}
-                                    onClick={(e) =>
-                                        logButtonEvent(
-                                            {
-                                                text: 'Login',
-                                                button_style: 'default',
-                                                button_type: 'submit',
-                                                parent_component_heading:
-                                                    'page body',
-                                            },
-                                            () => login(user)
-                                        )
-                                    }
+                                    onClick={async () => {
+                                        logButtonEvent({
+                                            text: 'Login',
+                                            button_style: 'default',
+                                            button_type: 'submit',
+                                            parent_component_heading:
+                                                'page body',
+                                        })
+                                        await login(user)
+                                    }}
                                 >
                                     Login
                                 </Button>

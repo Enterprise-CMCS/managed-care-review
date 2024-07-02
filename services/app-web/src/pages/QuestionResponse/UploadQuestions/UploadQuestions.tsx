@@ -27,7 +27,6 @@ import { usePage } from '../../../contexts/PageContext'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
 import { createQuestionWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 import { RoutesRecord } from '../../../constants'
-import { useTealium } from '../../../hooks'
 
 export const UploadQuestions = () => {
     // router context
@@ -35,7 +34,6 @@ export const UploadQuestions = () => {
     const { division, id } = useParams<{ division: string; id: string }>()
     const navigate = useNavigate()
     const { packageName } = useOutletContext<SideNavOutletContextType>()
-    const { logButtonEvent } = useTealium()
 
     // api
     const [createQuestion, { loading: apiLoading, error: apiError }] =
@@ -116,18 +114,9 @@ export const UploadQuestions = () => {
                 id="AddQuestionsForm"
                 aria-label="Add Questions Form"
                 aria-describedby="form-guidance"
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                     e.preventDefault()
-                    logButtonEvent(
-                        {
-                            text: 'Add questions',
-                            button_style: 'default',
-                            button_type: 'submit',
-                            parent_component_type: 'page body',
-                            link_url: `/submissions/${id}/question-and-answers?submit=question`,
-                        },
-                        () => handleFormSubmit()
-                    )
+                    await handleFormSubmit()
                 }}
             >
                 {apiError && <GenericApiErrorBanner />}
@@ -183,19 +172,11 @@ export const UploadQuestions = () => {
                             variant="outline"
                             data-testid="page-actions-left-secondary"
                             disabled={apiLoading}
+                            parent_component_type="page body"
+                            link_url={`/submissions/${id}/question-and-answers`}
                             onClick={() =>
-                                logButtonEvent(
-                                    {
-                                        text: 'Cancel',
-                                        button_style: 'outline',
-                                        button_type: 'button',
-                                        parent_component_type: 'page body',
-                                        link_url: `/submissions/${id}/question-and-answers`,
-                                    },
-                                    () =>
-                                        navigate(
-                                            `/submissions/${id}/question-and-answers`
-                                        )
+                                navigate(
+                                    `/submissions/${id}/question-and-answers`
                                 )
                             }
                         >
@@ -206,6 +187,8 @@ export const UploadQuestions = () => {
                             type="submit"
                             variant="default"
                             data-testid="page-actions-right-primary"
+                            parent_component_type="page body"
+                            link_url={`/submissions/${id}/question-and-answers?submit=question`}
                             disabled={showFileUploadError}
                             animationTimeout={1000}
                             loading={apiLoading}

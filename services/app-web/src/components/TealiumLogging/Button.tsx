@@ -7,11 +7,11 @@ import { useTealium } from '../../hooks'
 
 type TealiumDataType = Omit<TealiumButtonEventObject, 'event_name' | 'text'>
 
-type ButtonWithLogginType = TealiumDataType &
+type ButtonWithLoggingType = TealiumDataType &
     ButtonProps &
     React.ButtonHTMLAttributes<HTMLButtonElement>
 
-const ButtonWithLogging = (props: ButtonWithLogginType) => {
+const ButtonWithLogging = (props: ButtonWithLoggingType) => {
     const { logButtonEvent } = useTealium()
     const {
         button_type,
@@ -49,7 +49,9 @@ const ButtonWithLogging = (props: ButtonWithLogginType) => {
                     parent_component_type,
                 })
 
-                if (onClick) onClick(e)
+                if (onClick) {
+                    onClick(e)
+                }
             }}
             type={type}
             {...rest}

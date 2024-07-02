@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import * as Yup from 'yup'
-import { Form as UswdsForm, Fieldset, Button } from '@trussworks/react-uswds'
+import { Form as UswdsForm, Fieldset } from '@trussworks/react-uswds'
 import {
     Formik,
     FormikErrors,
@@ -24,7 +24,11 @@ import {
     type HealthPlanFormPageProps,
 } from '../StateSubmissionForm'
 import { RoutesRecord } from '../../../constants'
-import { DynamicStepIndicator, SectionCard } from '../../../components'
+import {
+    ButtonWithLogging,
+    DynamicStepIndicator,
+    SectionCard,
+} from '../../../components'
 import { FormContainer } from '../FormContainer'
 import {
     useCurrentRoute,
@@ -354,35 +358,23 @@ const Contacts = ({
 
                                                                         {index >
                                                                             0 && (
-                                                                            <Button
+                                                                            <ButtonWithLogging
                                                                                 type="button"
                                                                                 unstyled
+                                                                                parent_component_type="page body"
                                                                                 className={
                                                                                     styles.removeContactBtn
                                                                                 }
-                                                                                onClick={() =>
-                                                                                    logButtonEvent(
-                                                                                        {
-                                                                                            text: 'Remove contact',
-                                                                                            button_style:
-                                                                                                'link',
-                                                                                            button_type:
-                                                                                                'button',
-                                                                                            parent_component_type:
-                                                                                                'page body',
-                                                                                        },
-                                                                                        () => {
-                                                                                            remove(
-                                                                                                index
-                                                                                            )
-                                                                                            setNewStateContactButtonFocus()
-                                                                                        }
+                                                                                onClick={() => {
+                                                                                    remove(
+                                                                                        index
                                                                                     )
-                                                                                }
+                                                                                    setNewStateContactButtonFocus()
+                                                                                }}
                                                                             >
                                                                                 Remove
                                                                                 contact
-                                                                            </Button>
+                                                                            </ButtonWithLogging>
                                                                         )}
                                                                     </Fieldset>
                                                                 </div>
@@ -392,27 +384,23 @@ const Contacts = ({
                                                     <button
                                                         type="button"
                                                         className={`usa-button usa-button--outline ${styles.addContactBtn}`}
-                                                        onClick={() =>
-                                                            logButtonEvent(
-                                                                {
-                                                                    text: 'Add another state contact',
-                                                                    button_style:
-                                                                        'outline',
-                                                                    button_type:
-                                                                        'button',
-                                                                    parent_component_type:
-                                                                        'page body',
-                                                                },
-                                                                () => {
-                                                                    push(
-                                                                        emptyStateContact
-                                                                    )
-                                                                    setFocusNewContact(
-                                                                        true
-                                                                    )
-                                                                }
+                                                        onClick={() => {
+                                                            logButtonEvent({
+                                                                text: 'Add another state contact',
+                                                                button_style:
+                                                                    'outline',
+                                                                button_type:
+                                                                    'button',
+                                                                parent_component_type:
+                                                                    'page body',
+                                                            })
+                                                            push(
+                                                                emptyStateContact
                                                             )
-                                                        }
+                                                            setFocusNewContact(
+                                                                true
+                                                            )
+                                                        }}
                                                         ref={
                                                             newStateContactButtonRef
                                                         }

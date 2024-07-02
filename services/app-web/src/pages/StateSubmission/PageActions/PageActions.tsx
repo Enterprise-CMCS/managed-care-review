@@ -3,7 +3,6 @@ import { ButtonGroup } from '@trussworks/react-uswds'
 
 import { PageActionsContainer } from './PageActionsContainer'
 import { ActionButton } from '../../../components/ActionButton'
-import { useTealium } from '../../../hooks'
 
 /*
    This is the main call to action element displayed at the bottom of form pages.
@@ -31,7 +30,6 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
     const isLastPage = pageVariant === 'LAST'
     const isFirstPageEditing = pageVariant === 'EDIT_FIRST'
     const isStandalonePage = pageVariant === 'STANDALONE'
-    const { logButtonEvent } = useTealium()
 
     const leftElement =
         isFirstPage || !saveAsDraftOnClick ? undefined : (
@@ -39,20 +37,8 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                 type="button"
                 variant="linkStyle"
                 disabled={actionInProgress}
-                onClick={
-                    actionInProgress
-                        ? undefined
-                        : (e) =>
-                              logButtonEvent(
-                                  {
-                                      text: 'Save as draft',
-                                      button_style: 'link',
-                                      button_type: 'submit',
-                                      parent_component_type: 'page body',
-                                  },
-                                  () => saveAsDraftOnClick(e)
-                              )
-                }
+                onClick={actionInProgress ? undefined : saveAsDraftOnClick}
+                parent_component_type="page body"
                 data-testid="page-actions-left-primary"
             >
                 Save as draft
@@ -67,25 +53,8 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                     variant="outline"
                     data-testid="page-actions-left-secondary"
                     disabled={actionInProgress}
-                    onClick={
-                        actionInProgress
-                            ? undefined
-                            : (e) =>
-                                  logButtonEvent(
-                                      {
-                                          text:
-                                              !isFirstPage &&
-                                              !isFirstPageEditing &&
-                                              !isStandalonePage
-                                                  ? 'Back'
-                                                  : 'Cancel',
-                                          button_style: 'outline',
-                                          button_type: 'submit',
-                                          parent_component_type: 'page body',
-                                      },
-                                      () => backOnClick(e)
-                                  )
-                    }
+                    parent_component_type="page body"
+                    onClick={actionInProgress ? undefined : backOnClick}
                 >
                     {!isFirstPage && !isFirstPageEditing && !isStandalonePage
                         ? 'Back'
@@ -97,23 +66,11 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                     variant="default"
                     data-testid="page-actions-right-primary"
                     disabled={disableContinue}
+                    parent_component_type="page body"
                     onClick={
                         actionInProgress || disableContinue
                             ? undefined
-                            : (e) =>
-                                  logButtonEvent(
-                                      {
-                                          text:
-                                              !isLastPage && !isStandalonePage
-                                                  ? 'Continue'
-                                                  : 'Submit',
-                                          button_style: 'default',
-                                          button_type: 'submit',
-                                          parent_component_type: 'page body',
-                                      },
-                                      () =>
-                                          continueOnClick && continueOnClick(e)
-                                  )
+                            : continueOnClick
                     }
                     animationTimeout={1000}
                     loading={actionInProgress && !disableContinue}

@@ -2,9 +2,9 @@ import React from 'react'
 import { FileItemT } from '../FileProcessor/FileProcessor'
 
 import styles from '../FileUpload.module.scss'
-import { Button, Checkbox } from '@trussworks/react-uswds'
+import { Checkbox } from '@trussworks/react-uswds'
 import { SPACER_GIF } from '../constants'
-import { useTealium } from '../../../hooks'
+import { ButtonWithLogging } from '../../TealiumLogging'
 
 type FileRowProps = {
     errorRowClass?: string
@@ -42,7 +42,6 @@ export const FileRow = ({
     isContractOnly,
     hasNonDocumentError,
 }: FileRowProps): React.ReactElement => {
-    const { logButtonEvent } = useTealium()
     const { name, id } = item
     const shouldHideCheckbox = isContractOnly || hasNonDocumentError
 
@@ -118,44 +117,26 @@ export const FileRow = ({
                 <td />
             )}
             <td style={{ textAlign: 'right' }}>
-                <Button
+                <ButtonWithLogging
                     style={{ marginTop: 0 }}
                     type="button"
                     aria-label={`Remove ${name} document`}
                     unstyled
-                    onClick={(e) =>
-                        logButtonEvent(
-                            {
-                                text: 'Remove',
-                                button_style: 'link',
-                                button_type: 'button',
-                            },
-                            () => handleDelete(e)
-                        )
-                    }
+                    onClick={handleDelete}
                 >
                     Remove
-                </Button>
+                </ButtonWithLogging>
                 {hasRecoverableError && <span> or </span>}
                 {hasRecoverableError && (
-                    <Button
+                    <ButtonWithLogging
                         style={{ marginTop: 0 }}
                         type="button"
                         aria-label={`Retry upload for ${name} document`}
                         unstyled
-                        onClick={(e) =>
-                            logButtonEvent(
-                                {
-                                    text: 'Remove',
-                                    button_style: 'link',
-                                    button_type: 'button',
-                                },
-                                () => handleRetry(e)
-                            )
-                        }
+                        onClick={handleRetry}
                     >
                         Retry
-                    </Button>
+                    </ButtonWithLogging>
                 )}
             </td>
         </tr>

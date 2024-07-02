@@ -1,14 +1,8 @@
 import React, { useState } from 'react'
-import {
-    Button,
-    Form,
-    FormGroup,
-    Label,
-    TextInput,
-} from '@trussworks/react-uswds'
+import { Form, FormGroup, Label, TextInput } from '@trussworks/react-uswds'
 
 import { confirmSignUp, resendSignUp } from './cognitoAuth'
-import { useTealium } from '../../hooks'
+import { ButtonWithLogging } from '../../components'
 
 export function showError(error: string): void {
     alert(error)
@@ -27,7 +21,6 @@ export function ConfirmSignUp({
         email: defaultEmail,
         confirmationCode: '',
     })
-    const { logButtonEvent } = useTealium()
     const [isLoading, setIsLoading] = useState(false)
 
     function validateForm() {
@@ -87,20 +80,13 @@ export function ConfirmSignUp({
                 />
                 <div>Please check your email for the code.</div>
             </FormGroup>
-            <Button
+            <ButtonWithLogging
                 type="submit"
                 disabled={!validateForm() || isLoading}
-                onClick={(e) =>
-                    logButtonEvent({
-                        text: 'Verify',
-                        button_style: 'primary',
-                        button_type: 'submit',
-                        parent_component_type: 'page body',
-                    })
-                }
+                parent_component_type="page body"
             >
                 Verify
-            </Button>
+            </ButtonWithLogging>
         </Form>
     )
 }

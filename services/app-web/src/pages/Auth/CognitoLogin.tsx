@@ -1,13 +1,12 @@
 import React, { useState } from 'react'
-import { Button, GridContainer, Grid } from '@trussworks/react-uswds'
+import { GridContainer, Grid } from '@trussworks/react-uswds'
 
 import { Signup } from './Signup'
 import { ConfirmSignUp } from './ConfirmSignUp'
 import { Login } from './Login'
-import { useTealium } from '../../hooks'
+import { ButtonWithLogging } from '../../components'
 
 export const CognitoLogin = (): React.ReactElement => {
-    const { logButtonEvent } = useTealium()
     const [showConfirmation, setShowConfirmation] = useState(false)
     const [showLogin, setShowLogin] = useState(false)
     const [enteredEmail, setEnteredEmail] = useState('')
@@ -43,58 +42,31 @@ export const CognitoLogin = (): React.ReactElement => {
             <Grid row className="padding-y-2">
                 {!showLogin && (
                     <>
-                        <Button
+                        <ButtonWithLogging
                             type="button"
-                            onClick={(e) =>
-                                logButtonEvent(
-                                    {
-                                        text: 'Show Login Form',
-                                        button_style: 'default',
-                                        button_type: 'button',
-                                        parent_component_heading: 'page body',
-                                    },
-                                    () => setShowLogin(true)
-                                )
-                            }
+                            parent_component_heading="page body"
+                            onClick={() => setShowLogin(true)}
                         >
                             Show Login Form
-                        </Button>
+                        </ButtonWithLogging>
 
-                        <Button
+                        <ButtonWithLogging
                             type="button"
-                            onClick={(e) =>
-                                logButtonEvent(
-                                    {
-                                        text: 'Enter confirmation code',
-                                        button_style: 'default',
-                                        button_type: 'button',
-                                        parent_component_heading: 'page body',
-                                    },
-                                    () => toggleConfirmationForm(e)
-                                )
-                            }
+                            parent_component_heading="page body"
+                            onClick={(e) => toggleConfirmationForm(e)}
                         >
                             Enter confirmation code
-                        </Button>
+                        </ButtonWithLogging>
                     </>
                 )}
                 {showLogin && (
-                    <Button
+                    <ButtonWithLogging
                         type="button"
-                        onClick={(e) =>
-                            logButtonEvent(
-                                {
-                                    text: 'Show Signup Form',
-                                    button_style: 'default',
-                                    button_type: 'button',
-                                    parent_component_heading: 'page body',
-                                },
-                                () => setShowLogin(false)
-                            )
-                        }
+                        parent_component_heading="page body"
+                        onClick={() => setShowLogin(false)}
                     >
                         Show Signup Form
-                    </Button>
+                    </ButtonWithLogging>
                 )}
             </Grid>
         </GridContainer>
@@ -109,22 +81,13 @@ export const CognitoLogin = (): React.ReactElement => {
                 }}
             />
             <div className="padding-y-2">
-                <Button
+                <ButtonWithLogging
                     type="button"
-                    onClick={(e) =>
-                        logButtonEvent(
-                            {
-                                text: 'Login',
-                                button_style: 'default',
-                                button_type: 'button',
-                                parent_component_heading: 'page body',
-                            },
-                            () => toggleConfirmationForm(e)
-                        )
-                    }
+                    parent_component_heading="page body"
+                    onClick={(e) => toggleConfirmationForm(e)}
                 >
                     Show Signup/ Login
-                </Button>
+                </ButtonWithLogging>
             </div>
         </GridContainer>
     )

@@ -1,10 +1,11 @@
 import React, { useState, ComponentProps, useLayoutEffect } from 'react'
 import { Button as UswdsButton } from '@trussworks/react-uswds'
 import classnames from 'classnames'
-
 import styles from './ActionButton.module.scss'
-
 import { Spinner } from '../Spinner'
+import { extractText } from '../TealiumLogging/tealiamLoggingHelpers'
+import { useTealium } from '../../hooks'
+import { TealiumButtonEventObject } from '../../constants/tealium'
 
 /* 
 Main application-wide action button. 
@@ -15,7 +16,8 @@ type ActionButtonProps = {
     variant?: 'default' | 'secondary' | 'outline' | 'linkStyle' | 'success'
     loading?: boolean
     animationTimeout?: number // used for loading animation
-} & ComponentProps<typeof UswdsButton>
+} & ComponentProps<typeof UswdsButton> &
+    Omit<TealiumButtonEventObject, 'event_name' | 'text'>
 
 export const ActionButton = ({
     disabled,
@@ -25,11 +27,15 @@ export const ActionButton = ({
     loading = false,
     animationTimeout = 750,
     onClick,
+    type,
+    parent_component_heading,
+    parent_component_type,
     ...inheritedProps
 }: ActionButtonProps): React.ReactElement | null => {
     const [showLoading, setShowLoading] = useState<boolean | undefined>(
         undefined
     )
+    const { logButtonEvent } = useTealium()
     const isDisabled = disabled || inheritedProps['aria-disabled']
     const isLinkStyled = variant === 'linkStyle'
     const isOutline = variant === 'outline'
@@ -81,10 +87,26 @@ export const ActionButton = ({
                 : inheritedProps['aria-label'],
     }
 
+    const onClickHandler = (
+        e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    ) => {
+        logButtonEvent({
+            text: extractText(children),
+            button_style: variant,
+            button_type: type,
+            parent_component_heading,
+            parent_component_type,
+        })
+        if (onClick) onClick(e)
+    }
+
     return (
         <UswdsButton
+            type={type}
             onClick={
-                isDisabled || isLoading ? (e) => e.preventDefault() : onClick
+                isDisabled || isLoading
+                    ? (e) => e.preventDefault()
+                    : (e) => onClickHandler(e)
             }
             {...inheritedProps}
             {...variantProps}

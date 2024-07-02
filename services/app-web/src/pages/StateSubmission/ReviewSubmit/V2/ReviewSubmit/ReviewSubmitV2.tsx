@@ -9,7 +9,11 @@ import { DynamicStepIndicator } from '../../../../../components'
 import { PageActionsContainer } from '../../../PageActions'
 import styles from '../../../ReviewSubmit/ReviewSubmit.module.scss'
 import { ActionButton } from '../../../../../components/ActionButton'
-import { useRouteParams, useStatePrograms } from '../../../../../hooks'
+import {
+    useRouteParams,
+    useStatePrograms,
+    useTealium,
+} from '../../../../../hooks'
 import { RoutesRecord } from '../../../../../constants'
 import { UnlockSubmitModalV2 } from '../../../../../components/Modal/V2/UnlockSubmitModalV2'
 import { getVisibleLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
@@ -36,6 +40,7 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
     const { updateHeading } = usePage()
     const { id } = useRouteParams()
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+    const { logButtonEvent } = useTealium()
 
     const { data, loading, error } = useFetchContractQuery({
         variables: {
@@ -146,6 +151,8 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                         <ActionButton
                             type="button"
                             variant="linkStyle"
+                            link_url={RoutesRecord.DASHBOARD_SUBMISSIONS}
+                            parent_component_type="page body"
                             onClick={() =>
                                 navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
                             }
@@ -158,6 +165,8 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                     <ActionButton
                         type="button"
                         variant="outline"
+                        link_url="../documents"
+                        parent_component_type="page body"
                         onClick={() => navigate('../documents')}
                         disabled={isSubmitting}
                     >
@@ -167,6 +176,14 @@ export const ReviewSubmitV2 = (): React.ReactElement => {
                         modalRef={modalRef}
                         className={styles.submitButton}
                         data-testid="form-submit"
+                        onClick={() =>
+                            logButtonEvent({
+                                text: 'Submit',
+                                button_type: 'button',
+                                button_style: 'success',
+                                parent_component_type: 'page body',
+                            })
+                        }
                         opener
                     >
                         Submit

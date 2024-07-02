@@ -2,9 +2,8 @@ import React from 'react'
 import { FileItemT } from '../FileProcessor/FileProcessor'
 
 import styles from '../FileUpload.module.scss'
-import { Button } from '@trussworks/react-uswds'
 import { SPACER_GIF } from '../constants'
-import { useTealium } from '../../../hooks'
+import { ButtonWithLogging } from '../../TealiumLogging'
 
 type FileListItemProps = {
     errorRowClass?: string
@@ -30,7 +29,6 @@ export const FileListItem = ({
     handleDelete,
     handleRetry,
 }: FileListItemProps): React.ReactElement => {
-    const { logButtonEvent } = useTealium()
     const { name } = item
     return (
         <>
@@ -69,41 +67,23 @@ export const FileListItem = ({
                 </span>
             </div>
             <div className={styles.fileItemButtons}>
-                <Button
+                <ButtonWithLogging
                     type="button"
                     unstyled
-                    onClick={(e) =>
-                        logButtonEvent(
-                            {
-                                text: 'Remove',
-                                button_style: 'link',
-                                button_type: 'button',
-                            },
-                            () => handleDelete(e)
-                        )
-                    }
+                    onClick={handleDelete}
                     aria-label={`Remove ${name} document`}
                 >
                     Remove
-                </Button>
+                </ButtonWithLogging>
                 {hasRecoverableError && (
-                    <Button
+                    <ButtonWithLogging
                         type="button"
                         unstyled
-                        onClick={(e) =>
-                            logButtonEvent(
-                                {
-                                    text: 'Retry',
-                                    button_style: 'link',
-                                    button_type: 'button',
-                                },
-                                () => handleRetry(e)
-                            )
-                        }
+                        onClick={handleRetry}
                         aria-label={`Retry upload for ${name} document`}
                     >
                         Retry
-                    </Button>
+                    </ButtonWithLogging>
                 )}
             </div>
         </>

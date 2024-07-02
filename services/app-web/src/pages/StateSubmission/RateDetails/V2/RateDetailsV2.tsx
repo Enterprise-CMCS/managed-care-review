@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Fieldset, Form as UswdsForm } from '@trussworks/react-uswds'
+import { Fieldset, Form as UswdsForm } from '@trussworks/react-uswds'
 import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
 import { generatePath, useNavigate } from 'react-router-dom'
 
 import styles from '../../StateSubmissionForm.module.scss'
 import {
+    ButtonWithLogging,
     DynamicStepIndicator,
     ErrorSummary,
     SectionCard,
@@ -522,13 +523,14 @@ const RateDetailsV2 = ({
                                                                 )}
                                                                 {index >= 1 &&
                                                                     !displayAsStandaloneRate && (
-                                                                        <Button
+                                                                        <ButtonWithLogging
                                                                             type="button"
                                                                             unstyled
+                                                                            parent_component_type="page body"
                                                                             className={
                                                                                 styles.removeContactBtn
                                                                             }
-                                                                            onClick={() =>
+                                                                            onClick={() => {
                                                                                 logButtonEvent(
                                                                                     {
                                                                                         text: 'Remove rate certification',
@@ -538,20 +540,18 @@ const RateDetailsV2 = ({
                                                                                             'button',
                                                                                         parent_component_type:
                                                                                             'page body',
-                                                                                    },
-                                                                                    () => {
-                                                                                        remove(
-                                                                                            index
-                                                                                        )
-                                                                                        setNewRateButtonFocus()
                                                                                     }
                                                                                 )
-                                                                            }
+                                                                                remove(
+                                                                                    index
+                                                                                )
+                                                                                setNewRateButtonFocus()
+                                                                            }}
                                                                         >
                                                                             Remove
                                                                             rate
                                                                             certification
-                                                                        </Button>
+                                                                        </ButtonWithLogging>
                                                                     )}
                                                             </Fieldset>
                                                         </SectionCard>
@@ -563,35 +563,29 @@ const RateDetailsV2 = ({
                                                             Additional rate
                                                             certification
                                                         </h3>
-                                                        <button
+                                                        <button //this has to be this button element to take the ref prop
                                                             type="button"
                                                             className={`usa-button usa-button--outline ${styles.addRateBtn}`}
-                                                            onClick={() =>
-                                                                logButtonEvent(
-                                                                    {
-                                                                        text: 'Add another rate certification',
-                                                                        button_style:
-                                                                            'outline',
-                                                                        button_type:
-                                                                            'button',
-                                                                        parent_component_type:
-                                                                            'page body',
-                                                                    },
-                                                                    () => {
-                                                                        const newRate =
-                                                                            convertGQLRateToRateForm(
-                                                                                getKey
-                                                                            ) // empty rate
+                                                            onClick={() => {
+                                                                logButtonEvent({
+                                                                    text: 'Add another rate certification',
+                                                                    button_style:
+                                                                        'outline',
+                                                                    button_type:
+                                                                        'button',
+                                                                    parent_component_type:
+                                                                        'page body',
+                                                                })
+                                                                const newRate =
+                                                                    convertGQLRateToRateForm(
+                                                                        getKey
+                                                                    ) // empty rate
 
-                                                                        push(
-                                                                            newRate
-                                                                        )
-                                                                        setFocusNewRate(
-                                                                            true
-                                                                        )
-                                                                    }
+                                                                push(newRate)
+                                                                setFocusNewRate(
+                                                                    true
                                                                 )
-                                                            }
+                                                            }}
                                                             ref={
                                                                 newRateButtonRef
                                                             }

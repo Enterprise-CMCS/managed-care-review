@@ -1,5 +1,5 @@
 import { ApolloError } from '@apollo/client'
-import { Button, Grid, GridContainer, Link } from '@trussworks/react-uswds'
+import { Grid, GridContainer, Link } from '@trussworks/react-uswds'
 import path from 'path-browserify'
 import { useState } from 'react'
 import { RoutesRecord } from '../../constants'
@@ -11,8 +11,7 @@ import { handleApolloError } from '../../gqlHelpers/apolloErrors'
 import { recordJSException } from '../../otelHelpers'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './APIAccess.module.scss'
-import { useTealium } from '../../hooks'
-import { LinkWithLogging } from '../../components'
+import { ButtonWithLogging, LinkWithLogging } from '../../components'
 
 function APIAccess(): React.ReactElement {
     const apiURL = process.env.REACT_APP_API_URL
@@ -27,7 +26,6 @@ function APIAccess(): React.ReactElement {
     const [apiKey, setAPIKey] = useState<CreateApiKeyPayload | undefined>(
         undefined
     )
-    const { logButtonEvent } = useTealium()
 
     const callAPIKeyMutation = async () => {
         try {
@@ -74,22 +72,13 @@ curl -s ${thirdPartyAPIURL} -X POST \\
 
                 {!apiKey ? (
                     <div className={styles.centerButtonContainer}>
-                        <Button
+                        <ButtonWithLogging
                             type="button"
-                            onClick={(e) =>
-                                logButtonEvent(
-                                    {
-                                        text: 'Generate API Key',
-                                        button_style: 'default',
-                                        button_type: 'button',
-                                        parent_component_heading: 'page body',
-                                    },
-                                    callAPIKeyMutation
-                                )
-                            }
+                            parent_component_heading="page body"
+                            onClick={callAPIKeyMutation}
                         >
                             Generate API Key
-                        </Button>
+                        </ButtonWithLogging>
                     </div>
                 ) : (
                     <>
@@ -100,40 +89,20 @@ curl -s ${thirdPartyAPIURL} -X POST \\
                             {apiKey.key}
                         </code>
                         <div className={styles.centerButtonContainer}>
-                            <Button
+                            <ButtonWithLogging
                                 type="button"
-                                onClick={(e) =>
-                                    logButtonEvent(
-                                        {
-                                            text: 'Generate API Key',
-                                            button_style: 'default',
-                                            button_type: 'button',
-                                            parent_component_heading:
-                                                'page body',
-                                        },
-                                        callAPIKeyMutation
-                                    )
-                                }
+                                parent_component_heading="page body"
+                                onClick={callAPIKeyMutation}
                             >
                                 Generate API Key
-                            </Button>
-                            <Button
+                            </ButtonWithLogging>
+                            <ButtonWithLogging
                                 type="button"
-                                onClick={(e) =>
-                                    logButtonEvent(
-                                        {
-                                            text: 'Copy key to clipboard',
-                                            button_style: 'default',
-                                            button_type: 'button',
-                                            parent_component_heading:
-                                                'page body',
-                                        },
-                                        copyKeyToClipboard
-                                    )
-                                }
+                                parent_component_heading="page body"
+                                onClick={copyKeyToClipboard}
                             >
                                 Copy key to clipboard
-                            </Button>
+                            </ButtonWithLogging>
                         </div>
                     </>
                 )}

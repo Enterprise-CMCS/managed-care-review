@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
 import {
-    Button,
     DatePicker,
     DateRangePicker,
     Fieldset,
@@ -9,6 +8,7 @@ import {
 } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 import {
+    ButtonWithLogging,
     FieldRadio,
     FileUpload,
     LinkWithLogging,
@@ -524,53 +524,37 @@ export const SingleRateFormFields = ({
                                                     newActuaryContactNameRef
                                                 }
                                             />
-                                            <Button
+                                            <ButtonWithLogging
                                                 type="button"
                                                 unstyled
                                                 className={
                                                     styles.removeContactBtn
                                                 }
-                                                onClick={() =>
-                                                    logButtonEvent(
-                                                        {
-                                                            text: 'Remove certifying actuary',
-                                                            button_style:
-                                                                'link',
-                                                            button_type:
-                                                                'button',
-                                                            parent_component_type:
-                                                                'page body',
-                                                        },
-                                                        () => {
-                                                            remove(index)
-                                                            setNewActuaryContactButtonFocus()
-                                                        }
-                                                    )
-                                                }
+                                                parent_component_type="page body"
+                                                onClick={() => {
+                                                    remove(index)
+                                                    setNewActuaryContactButtonFocus()
+                                                }}
                                                 data-testid="removeContactBtn"
                                             >
                                                 Remove certifying actuary
-                                            </Button>
+                                            </ButtonWithLogging>
                                         </div>
                                     )
                                 )}
-                            <button
+                            <button //this has to be this button element to take the ref prop
                                 type="button"
                                 className={`usa-button usa-button--outline ${styles.addRateBtn}`}
-                                onClick={() =>
-                                    logButtonEvent(
-                                        {
-                                            text: 'Add a certifying actuary',
-                                            button_style: 'outline',
-                                            button_type: 'button',
-                                            parent_component_type: 'page body',
-                                        },
-                                        () => {
-                                            push(emptyActuaryContact)
-                                            setFocusNewActuaryContact(true)
-                                        }
-                                    )
-                                }
+                                onClick={() => {
+                                    logButtonEvent({
+                                        text: 'Add a certifying actuary',
+                                        button_style: 'outline',
+                                        button_type: 'button',
+                                        parent_component_type: 'page body',
+                                    })
+                                    push(emptyActuaryContact)
+                                    setFocusNewActuaryContact(true)
+                                }}
                                 ref={newActuaryContactButtonRef}
                             >
                                 Add a certifying actuary

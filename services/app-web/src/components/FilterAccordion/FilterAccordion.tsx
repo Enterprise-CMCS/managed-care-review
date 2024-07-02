@@ -1,9 +1,9 @@
 import React from 'react'
 import styles from './FilterAccordion.module.scss'
-import { Accordion, Button } from '@trussworks/react-uswds'
+import { Accordion } from '@trussworks/react-uswds'
 import { FilterSelectPropType } from './FilterSelect/FilterSelect'
 import type { AccordionItemProps } from '@trussworks/react-uswds/lib/components/Accordion/Accordion'
-import { useTealium } from '../../hooks'
+import { ButtonWithLogging } from '../TealiumLogging'
 
 export interface FilterAccordionPropType {
     onClearFilters: () => void
@@ -18,7 +18,6 @@ export const FilterAccordion = ({
     filterTitle,
     children,
 }: FilterAccordionPropType) => {
-    const { logButtonEvent } = useTealium()
     /* multiple FilterSelect components are passed into the parent as children, and here we map
     over them to display them inside the accordion */
     const childFilters = React.Children.map(children, (child) => {
@@ -32,24 +31,15 @@ export const FilterAccordion = ({
             content: (
                 <>
                     <div>{childFilters}</div>
-                    <Button
+                    <ButtonWithLogging
                         id="clearFiltersButton"
                         type="button"
                         className={styles.clearFilterButton}
                         unstyled
-                        onClick={(e) =>
-                            logButtonEvent(
-                                {
-                                    text: 'Clear filters',
-                                    button_style: 'link',
-                                    button_type: 'button',
-                                },
-                                onClearFilters
-                            )
-                        }
+                        onClick={onClearFilters}
                     >
                         Clear filters
-                    </Button>
+                    </ButtonWithLogging>
                 </>
             ),
             expanded: false,

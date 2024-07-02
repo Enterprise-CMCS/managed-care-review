@@ -415,29 +415,23 @@ export const RateDetails = ({
                                                         <button
                                                             type="button"
                                                             className={`usa-button usa-button--outline ${styles.addRateBtn}`}
-                                                            onClick={() =>
-                                                                logButtonEvent(
-                                                                    {
-                                                                        text: 'Add another rate certification',
-                                                                        button_style:
-                                                                            'outline',
-                                                                        button_type:
-                                                                            'button',
-                                                                        parent_component_type:
-                                                                            'page body',
-                                                                    },
-                                                                    () => {
-                                                                        const newRate =
-                                                                            generateRateCertFormValues()
-                                                                        push(
-                                                                            newRate
-                                                                        )
-                                                                        setFocusNewRate(
-                                                                            true
-                                                                        )
-                                                                    }
+                                                            onClick={() => {
+                                                                logButtonEvent({
+                                                                    text: 'Add another rate certification',
+                                                                    button_style:
+                                                                        'outline',
+                                                                    button_type:
+                                                                        'button',
+                                                                    parent_component_type:
+                                                                        'page body',
+                                                                })
+                                                                const newRate =
+                                                                    generateRateCertFormValues()
+                                                                push(newRate)
+                                                                setFocusNewRate(
+                                                                    true
                                                                 )
-                                                            }
+                                                            }}
                                                             ref={
                                                                 newRateButtonRef
                                                             }

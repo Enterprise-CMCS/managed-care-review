@@ -24,6 +24,7 @@ import {
     useCurrentRoute,
     useHealthPlanPackageForm,
     useRouteParams,
+    useTealium,
 } from '../../../hooks'
 import { DynamicStepIndicator } from '../../../components'
 import { activeFormPages } from '../StateSubmissionForm'
@@ -34,7 +35,7 @@ export const ReviewSubmit = (): React.ReactElement => {
     const navigate = useNavigate()
     const modalRef = useRef<ModalRef>(null)
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
-
+    const { logButtonEvent } = useTealium()
     // set up API handling and HPP data
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
@@ -111,6 +112,8 @@ export const ReviewSubmit = (): React.ReactElement => {
                             <ActionButton
                                 type="button"
                                 variant="linkStyle"
+                                parent_component_type="page body"
+                                link_url={RoutesRecord.DASHBOARD_SUBMISSIONS}
                                 onClick={() =>
                                     navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
                                 }
@@ -123,6 +126,8 @@ export const ReviewSubmit = (): React.ReactElement => {
                         <ActionButton
                             type="button"
                             variant="outline"
+                            parent_component_type="page body"
+                            link_url={'../documents'}
                             onClick={() => navigate('../documents')}
                             disabled={isSubmitting}
                         >
@@ -132,6 +137,14 @@ export const ReviewSubmit = (): React.ReactElement => {
                             modalRef={modalRef}
                             className={styles.submitButton}
                             data-testid="form-submit"
+                            onClick={() =>
+                                logButtonEvent({
+                                    text: 'Submit',
+                                    button_type: 'button',
+                                    button_style: 'success',
+                                    parent_component_type: 'page body',
+                                })
+                            }
                             opener
                         >
                             Submit

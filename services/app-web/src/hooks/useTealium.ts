@@ -37,7 +37,6 @@ const useTealium = (): {
     logPageView: () => void,
     logButtonEvent: (
         tealiumData: Omit<TealiumButtonEventObject, 'event_name'>,
-        onClick?: () => void,
     ) => void,
     logInternalLinkEvent: (
         tealiumData: Omit<TealiumInternalLinkEventObject, 'event_name'>,
@@ -99,9 +98,6 @@ const useTealium = (): {
             ...linkData
         }
 
-        console.log(`Tag Data`)
-        console.log(tagData)
-
         if (process.env.REACT_APP_STAGE_NAME === 'local') {
             return
         }
@@ -112,25 +108,16 @@ const useTealium = (): {
 
     const logButtonEvent = (
         tealiumData: Omit<TealiumButtonEventObject, 'event_name'>,
-        onClick?: () => void,
     ) => {
-        console.log('logButtonEvent: '+tealiumData.text)
-
         logUserEvent({
             ...tealiumData,
             event_name: 'button_engagement',
         })
-
-        if (onClick) {
-            onClick()
-        }
     }
 
     const logInternalLinkEvent = (
         tealiumData: Omit<TealiumInternalLinkEventObject, 'event_name'>
     ) => {
-        console.log('logInternalLinkEvent: '+tealiumData.text)
-
         logUserEvent({
             ...tealiumData,
             event_name: 'internal_link_clicked',

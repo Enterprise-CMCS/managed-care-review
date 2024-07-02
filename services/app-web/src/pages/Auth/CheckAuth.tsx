@@ -1,15 +1,14 @@
 import React, { useState } from 'react'
-import { Button, Alert, GridContainer } from '@trussworks/react-uswds'
+import { Alert, GridContainer } from '@trussworks/react-uswds'
 
 import { useFetchCurrentUserLazyQuery } from '../../gen/gqlClient'
-import { useTealium } from '../../hooks'
+import { ButtonWithLogging } from '../../components'
 
 type AuthStatus = 'Unknown' | 'Authenticated' | 'Unauthenticated'
 
 // COMPONENTS
 export function CheckAuth(): React.ReactElement {
     const [authStatus, setAuthStatus] = useState<AuthStatus>('Unknown')
-    const { logButtonEvent } = useTealium()
     const [checkAuth, { called, loading, data }] = useFetchCurrentUserLazyQuery(
         {
             fetchPolicy: 'network-only',
@@ -57,23 +56,14 @@ export function CheckAuth(): React.ReactElement {
                 type={alertType()}
                 heading={alertHeading()}
             >
-                <Button
+                <ButtonWithLogging
                     type="submit"
-                    onClick={(e) =>
-                        logButtonEvent(
-                            {
-                                text: 'Check Auth',
-                                button_style: 'primary',
-                                button_type: 'button',
-                                parent_component_type: 'page body',
-                            },
-                            () => handleClick(e)
-                        )
-                    }
+                    parent_component_type="page body"
+                    onClick={handleClick}
                     disabled={called && loading}
                 >
                     Check Auth
-                </Button>
+                </ButtonWithLogging>
             </Alert>
         </GridContainer>
     )

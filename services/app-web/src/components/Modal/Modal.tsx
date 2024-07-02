@@ -6,7 +6,6 @@ import {
     ModalHeading,
     ModalRef,
     ModalProps as UswdsModalProps,
-    Button,
 } from '@trussworks/react-uswds'
 import {
     GenericApiErrorBanner,
@@ -16,7 +15,7 @@ import styles from './Modal.module.scss'
 
 import { ActionButton } from '../ActionButton'
 import { useAuth } from '../../contexts/AuthContext'
-import { useTealium } from '../../hooks'
+import { ButtonWithLogging } from '../TealiumLogging'
 
 interface ModalComponentProps {
     id: string
@@ -50,7 +49,6 @@ export const Modal = ({
     ...divProps
 }: ModalProps): React.ReactElement => {
     const { sessionIsExpiring } = useAuth()
-    const { logButtonEvent } = useTealium()
 
     /* unless it's the session expiring modal, close it if the session is expiring, so the user can interact
     with the session expiring modal */
@@ -89,43 +87,25 @@ export const Modal = ({
             <div id={`${id}-modal-description`}>{children}</div>
             <ModalFooter>
                 <ButtonGroup className="float-right">
-                    <Button
+                    <ButtonWithLogging
                         type="button"
                         aria-label={`${onCancelText || 'Cancel'}`}
                         data-testid={`${id}-modal-cancel`}
+                        parent_component_type="modal"
                         id={`${id}-cancel`}
-                        onClick={(e) =>
-                            logButtonEvent(
-                                {
-                                    text: onCancelText || 'Cancel',
-                                    button_style: 'outline',
-                                    button_type: 'button',
-                                    parent_component_type: 'modal',
-                                },
-                                () => cancelHandler(e)
-                            )
-                        }
+                        onClick={cancelHandler}
                         outline
                         disabled={isSubmitting}
                     >
                         {onCancelText || 'Cancel'}
-                    </Button>
+                    </ButtonWithLogging>
                     <ActionButton
                         type="submit"
                         data-testid={`${id}-modal-submit`}
                         variant="success"
                         id={`${id}-submit`}
-                        onClick={(e) =>
-                            logButtonEvent(
-                                {
-                                    text: onSubmitText || 'Submit',
-                                    button_style: 'success',
-                                    button_type: 'button',
-                                    parent_component_type: 'modal',
-                                },
-                                onSubmit
-                            )
-                        }
+                        parent_component_type="modal"
+                        onClick={onSubmit}
                         loading={isSubmitting}
                         {...submitButtonProps}
                     >

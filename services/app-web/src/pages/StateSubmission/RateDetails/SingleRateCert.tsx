@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
 import {
-    Button,
     DatePicker,
     DateRangePicker,
     Fieldset,
@@ -14,6 +13,7 @@ import {
     RateType,
 } from '../../../common-code/healthPlanFormDataType'
 import {
+    ButtonWithLogging,
     FieldRadio,
     FileItemT,
     FileUpload,
@@ -606,58 +606,41 @@ export const SingleRateCert = ({
                                                         newActuaryContactNameRef
                                                     }
                                                 />
-                                                <Button
+                                                <ButtonWithLogging
                                                     type="button"
                                                     unstyled
                                                     className={
                                                         styles.removeContactBtn
                                                     }
-                                                    onClick={() =>
-                                                        logButtonEvent(
-                                                            {
-                                                                text: 'Remove certifying actuary',
-                                                                button_style:
-                                                                    'link',
-                                                                button_type:
-                                                                    'button',
-                                                                parent_component_type:
-                                                                    'page body',
-                                                            },
-                                                            () => {
-                                                                remove(index)
-                                                                setNewActuaryContactButtonFocus()
-                                                            }
-                                                        )
-                                                    }
+                                                    parent_component_type="page body"
+                                                    onClick={() => {
+                                                        remove(index)
+                                                        setNewActuaryContactButtonFocus()
+                                                    }}
                                                     data-testid="removeContactBtn"
                                                 >
                                                     Remove certifying actuary
-                                                </Button>
+                                                </ButtonWithLogging>
                                             </div>
                                         )
                                     )}
-                                <Button
+                                <button //this has to be this button element to take the ref prop
                                     type="button"
-                                    unstyled
-                                    onClick={() =>
-                                        logButtonEvent(
-                                            {
-                                                text: 'Add a certifying actuary',
-                                                button_style: 'link',
-                                                button_type: 'button',
-                                                parent_component_type:
-                                                    'page body',
-                                            },
-                                            () => {
-                                                push(emptyActuaryContact)
-                                                setFocusNewActuaryContact(true)
-                                            }
-                                        )
-                                    }
+                                    className={`usa-button usa-button--outline ${styles.addRateBtn}`}
+                                    onClick={() => {
+                                        logButtonEvent({
+                                            text: 'Add a certifying actuary',
+                                            button_style: 'link',
+                                            button_type: 'button',
+                                            parent_component_type: 'page body',
+                                        })
+                                        push(emptyActuaryContact)
+                                        setFocusNewActuaryContact(true)
+                                    }}
                                     ref={newActuaryContactButtonRef}
                                 >
                                     Add a certifying actuary
-                                </Button>
+                                </button>
                             </FormGroup>
                         )}
                     </FieldArray>
@@ -710,24 +693,15 @@ export const SingleRateCert = ({
                     </Fieldset>
                 </FormGroup>
                 {index >= 1 && multiRatesConfig && (
-                    <Button
+                    <ButtonWithLogging
                         type="button"
                         unstyled
                         className={styles.removeContactBtn}
-                        onClick={() =>
-                            logButtonEvent(
-                                {
-                                    text: 'Remove rate certification',
-                                    button_style: 'link',
-                                    button_type: 'button',
-                                    parent_component_type: 'page body',
-                                },
-                                multiRatesConfig.removeSelf
-                            )
-                        }
+                        parent_component_type="page body"
+                        onClick={multiRatesConfig.removeSelf}
                     >
                         Remove rate certification
-                    </Button>
+                    </ButtonWithLogging>
                 )}
             </Fieldset>
         </SectionCard>
