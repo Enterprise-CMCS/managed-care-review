@@ -294,29 +294,47 @@ export const RateDetailsSummarySectionV2 = ({
                               </h3>
                               <dl>
                                   <DoubleColumnGrid>
-                                      {rateFormData.deprecatedRateProgramIDs
+                                      {((rateFormData.deprecatedRateProgramIDs
                                           .length > 0 &&
-                                          isSubmittedOrCMSUser && (
-                                              <DataDetail
-                                                  id="historicRatePrograms"
-                                                  label="Programs this rate certification covers"
-                                                  explainMissingData={
-                                                      false // this is a deprecated field, we never need to explain if its missing
-                                                  }
-                                                  children={ratePrograms(
-                                                      rate,
-                                                      true
-                                                  )}
-                                              />
-                                          )}
-                                      <DataDetail
-                                          id="ratePrograms"
-                                          label="Rates this rate certification covers"
-                                          explainMissingData={
-                                              explainMissingData
-                                          }
-                                          children={ratePrograms(rate, false)}
-                                      />
+                                          isSubmittedOrCMSUser) ||
+                                          (rateFormData.deprecatedRateProgramIDs
+                                              .length > 0 &&
+                                              rateFormData.rateProgramIDs
+                                                  .length === 0 &&
+                                              !rate.unlockInfo &&
+                                              rate.submitInfo)) && (
+                                          <DataDetail
+                                              id="historicRatePrograms"
+                                              label="Programs this rate certification covers"
+                                              explainMissingData={
+                                                  false // this is a deprecated field, we never need to explain if its missing
+                                              }
+                                              children={ratePrograms(
+                                                  rate,
+                                                  true
+                                              )}
+                                          />
+                                      )}
+                                      {!(
+                                          rateFormData.deprecatedRateProgramIDs
+                                              .length > 0 &&
+                                          rateFormData.rateProgramIDs.length ===
+                                              0 &&
+                                          !rate.unlockInfo &&
+                                          rate.submitInfo
+                                      ) && (
+                                          <DataDetail
+                                              id="ratePrograms"
+                                              label="Rates this rate certification covers"
+                                              explainMissingData={
+                                                  explainMissingData
+                                              }
+                                              children={ratePrograms(
+                                                  rate,
+                                                  false
+                                              )}
+                                          />
+                                      )}
                                       <DataDetail
                                           id="rateType"
                                           label="Rate certification type"
