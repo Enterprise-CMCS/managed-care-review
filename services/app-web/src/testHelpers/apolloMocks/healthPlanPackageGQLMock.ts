@@ -19,6 +19,9 @@ import {
     CreateHealthPlanPackageDocument,
     CreateHealthPlanPackageMutation,
     HealthPlanRevision,
+    UnlockContractMutation,
+    UnlockContractDocument,
+    Contract,
 } from '../../gen/gqlClient'
 import {
     mockContractAndRatesDraft,
@@ -33,6 +36,7 @@ import {
     GraphQLErrorCauseTypes,
     GraphQLErrorCodeTypes,
 } from './apolloErrorCodeMocks'
+import { mockContractPackageUnlocked } from './contractPackageDataMock'
 
 /*
     DEPRECATED - Remove after Wave 2
@@ -513,6 +517,26 @@ const unlockHealthPlanPackageMockSuccess = ({
     }
 }
 
+type unlockContractMockSuccessProps = {
+    contract?: Contract
+    id: string
+    reason: string
+}
+
+const unlockContractMockSuccess = ({
+    contract = mockContractPackageUnlocked(),
+    id,
+    reason,
+}: unlockContractMockSuccessProps): MockedResponse<UnlockContractMutation> => {
+    return {
+        request: {
+            query: UnlockContractDocument,
+            variables: { input: { contractID: id, unlockedReason: reason } },
+        },
+        result: { data: { unlockContract: { contract } } },
+    }
+}
+
 const unlockHealthPlanPackageMockError = ({
     id,
     reason,
@@ -541,6 +565,45 @@ const unlockHealthPlanPackageMockError = ({
         request: {
             query: UnlockHealthPlanPackageDocument,
             variables: { input: { pkgID: id, unlockedReason: reason } },
+        },
+        error: new ApolloError({
+            graphQLErrors: [graphQLError],
+        }),
+        result: {
+            data: null,
+            errors: [graphQLError],
+        },
+    }
+}
+
+const unlockContractMockError = ({
+    id,
+    reason,
+    error,
+}: {
+    id: string
+    reason: string
+    error?: {
+        code: GraphQLErrorCodeTypes
+        cause: GraphQLErrorCauseTypes
+    }
+}): MockedResponse<UnlockContractMutation> => {
+    const graphQLError = new GraphQLError(
+        error
+            ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
+            : 'Error attempting to submit.',
+        {
+            extensions: {
+                code: error?.code,
+                cause: error?.cause,
+            },
+        }
+    )
+
+    return {
+        request: {
+            query: UnlockContractDocument,
+            variables: { input: { contractID: id, unlockedReason: reason } },
         },
         error: new ApolloError({
             graphQLErrors: [graphQLError],
@@ -592,6 +655,8 @@ export {
     indexHealthPlanPackagesMockSuccess,
     unlockHealthPlanPackageMockSuccess,
     unlockHealthPlanPackageMockError,
+    unlockContractMockSuccess,
+    unlockContractMockError,
     mockSubmittedHealthPlanPackageWithRevision,
     createHealthPlanPackageMockSuccess,
     createHealthPlanPackageMockAuthFailure,

@@ -191,9 +191,15 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             ],
         }
 
+        const draftTwo = createdDraftContractTwo.draftRevision
+        if (!draftTwo) {
+            throw new Error('no Draft')
+        }
+
         await updateTestDraftRateOnContract(
             server,
             createdDraftContractTwo.id,
+            draftTwo.updatedAt,
             rateTwoID,
             rateTwo
         )
@@ -242,9 +248,15 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         }
 
+        const draftThree = createdDraftContractThree.draftRevision
+        if (!draftThree) {
+            throw new Error('no draft')
+        }
+
         await updateTestDraftRateOnContract(
             server,
             createdDraftThree.id,
+            draftThree.updatedAt,
             rateThreeID,
             rateThree
         )
@@ -256,8 +268,14 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             createdDraft.id
         )
 
+        const createdDraftRev = createdDraftContract.draftRevision
+        if (!createdDraftRev) {
+            throw new Error('no draft')
+        }
+
         await updateTestDraftRatesOnContract(server, {
             contractID: createdDraftContract.id,
+            lastSeenUpdatedAt: createdDraftRev.updatedAt,
             updatedRates: [
                 {
                     type: 'LINK',
@@ -320,8 +338,14 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             certifyingActuaryContacts: [],
         }
 
+        const draftRev = updatedContract.draftRevision
+        if (!draftRev) {
+            throw new Error('no draft')
+        }
+
         await updateTestDraftRatesOnContract(server, {
             contractID: createdDraftContract.id,
+            lastSeenUpdatedAt: draftRev.updatedAt,
             updatedRates: [
                 {
                     type: 'LINK',

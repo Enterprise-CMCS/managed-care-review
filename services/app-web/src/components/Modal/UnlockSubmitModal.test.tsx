@@ -7,7 +7,6 @@ import {
     mockContractPackageDraft,
     mockContractPackageSubmitted,
     unlockHealthPlanPackageMockError,
-    unlockHealthPlanPackageMockSuccess,
 } from '../../testHelpers/apolloMocks'
 import { UnlockSubmitModal } from './V2/UnlockSubmitModalV2'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
@@ -16,6 +15,10 @@ import {
     submitContractMockError,
     submitContractMockSuccess,
 } from '../../testHelpers/apolloMocks/contractGQLMock'
+import {
+    unlockContractMockError,
+    unlockContractMockSuccess,
+} from '../../testHelpers/apolloMocks/healthPlanPackageGQLMock'
 
 describe('UnlockSubmitModal', () => {
     const mockSetIsSubmitting = jest.fn()
@@ -298,7 +301,7 @@ describe('UnlockSubmitModal', () => {
                 {
                     apolloProvider: {
                         mocks: [
-                            unlockHealthPlanPackageMockSuccess({
+                            unlockContractMockSuccess({
                                 id: mockContractPackageSubmitted().id,
                                 reason: 'Test unlock summary',
                             }),
@@ -392,7 +395,7 @@ describe('UnlockSubmitModal', () => {
                 {
                     apolloProvider: {
                         mocks: [
-                            unlockHealthPlanPackageMockError({
+                            unlockContractMockError({
                                 id: mockContractPackageSubmitted().id,
                                 reason: 'Test unlock summary',
                                 error: {

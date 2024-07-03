@@ -20,7 +20,7 @@ export function unlockContractResolver(
     store: Store,
     emailer: Emailer,
     emailParameterStore: EmailParameterStore,
-    launchDarkly: LDService
+    _launchDarkly: LDService
 ): MutationResolvers['unlockContract'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
@@ -29,9 +29,6 @@ export function unlockContractResolver(
 
         const { unlockedReason, contractID } = input
         span?.setAttribute('mcreview.package_id', contractID)
-
-        const featureFlags = await launchDarkly.allFlags(context)
-        const linkRatesFF = featureFlags?.['link-rates'] === true
 
         // This resolver is only callable by CMS users
         if (!isCMSUser(user)) {
@@ -75,14 +72,11 @@ export function unlockContractResolver(
             })
         }
 
-        const unlockContractResult = await store.unlockContract(
-            {
-                contractID: contractResult.id,
-                unlockReason: unlockedReason,
-                unlockedByUserID: user.id,
-            },
-            linkRatesFF
-        )
+        const unlockContractResult = await store.unlockContract({
+            contractID: contractResult.id,
+            unlockReason: unlockedReason,
+            unlockedByUserID: user.id,
+        })
         if (unlockContractResult instanceof Error) {
             const errMessage = `Failed to unlock contract revision with ID: ${contractResult.id}; ${unlockContractResult.message}`
             logError('unlockContract', errMessage)

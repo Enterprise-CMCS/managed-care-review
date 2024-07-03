@@ -179,6 +179,11 @@ describe(`Tests $testName`, () => {
             server,
             submittedEditedRates.id
         )
+        const draftRev = existingContract1.draftRevision
+        if (!draftRev) {
+            throw new Error('must draft)')
+        }
+
         const rateToUpdate = existingContract1.draftRates?.[0]
         if (!rateToUpdate) {
             throw new Error('rate should exist.')
@@ -192,7 +197,7 @@ describe(`Tests $testName`, () => {
         await updateTestDraftRateOnContract(
             server,
             submittedEditedRates.id,
-            existingContract1.updatedAt,
+            draftRev.updatedAt,
             rateToUpdate.id,
             formatRateDataForSending(rateToUpdateFormData)
         )
