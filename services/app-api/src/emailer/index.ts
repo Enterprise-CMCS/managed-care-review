@@ -3,6 +3,8 @@ export { newLocalEmailer, newSESEmailer, emailer } from './emailer'
 export {
     newPackageCMSEmail,
     newPackageStateEmail,
+    unlockContractCMSEmail,
+    unlockContractStateEmail,
     unlockPackageCMSEmail,
     unlockPackageStateEmail,
     resubmitPackageStateEmail,

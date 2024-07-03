@@ -166,17 +166,15 @@ const RateDetailsV2 = ({
               .rateCertificationName
         : fetchContractData?.fetchContract.contract?.draftRevision?.contractName
     if (pageHeading) updateHeading({ customHeading: pageHeading })
-    const [updateDraftContractRates, { error: updateContractError }] =
-        useUpdateDraftContractRatesMutation()
-    const [submitRate, { error: submitRateError }] = useSubmitRateMutation()
+    const [updateDraftContractRates] = useUpdateDraftContractRatesMutation()
+    const [submitRate] = useSubmitRateMutation()
 
     // Set up data for form. Either based on contract API (for multi rate) or rates API (for edit and submit of standalone rate)
     const contract = fetchContractData?.fetchContract.contract
+    const contractDraftRevision = contract?.draftRevision
     const ratesFromContract = contract?.draftRates
     const initialRequestLoading = fetchContractLoading || fetchRateLoading
     const initialRequestError = fetchContractError || fetchRateError
-    const submitRequestError = updateContractError || submitRateError
-    const apiError = initialRequestError || submitRequestError
     const previousDocuments: string[] = []
 
     // Set up initial rate form values for Formik
@@ -208,9 +206,11 @@ const RateDetailsV2 = ({
         return <ErrorOrLoadingPage state="LOADING" />
     }
 
-    if (apiError) {
+    if (initialRequestError) {
         return (
-            <ErrorOrLoadingPage state={handleAndReturnErrorState(apiError)} />
+            <ErrorOrLoadingPage
+                state={handleAndReturnErrorState(initialRequestError)}
+            />
         )
     }
     // Redirect if in standalone rate workflow and rate not editable
@@ -284,6 +284,7 @@ const RateDetailsV2 = ({
                     variables: {
                         input: {
                             contractID: id ?? 'no-id',
+                            lastSeenUpdatedAt: contractDraftRevision?.updatedAt,
                             updatedRates,
                         },
                     },

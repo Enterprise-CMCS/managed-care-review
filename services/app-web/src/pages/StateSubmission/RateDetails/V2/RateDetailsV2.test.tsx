@@ -35,6 +35,10 @@ import { Rate } from '../../../../gen/gqlClient'
 
 describe('RateDetailsV2', () => {
     /* eslint-disable jest/no-disabled-tests, jest/expect-expect */
+    afterEach(() => {
+        jest.clearAllMocks()
+    })
+
     describe.skip('handles edit  of a single rate', () => {
         it('renders without errors', async () => {
             const rateID = 'test-abc-123'
