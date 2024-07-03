@@ -2,6 +2,12 @@ import React from 'react'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ExpandableText } from './ExpandableText'
+import * as tealium from '../../hooks/useTealium'
+import { TealiumDataObjectTypes } from '../../hooks/useTealium'
+import {
+    TealiumButtonEventObject,
+    TealiumInternalLinkEventObject,
+} from '../../constants/tealium'
 
 describe('ExpandableText', () => {
     type NodeWidth = Pick<
@@ -24,6 +30,29 @@ describe('ExpandableText', () => {
         }
         jest.spyOn(React, 'useRef').mockReturnValue(mockRef)
     }
+
+    const spyOnUseTealium = jest.spyOn(tealium, 'useTealium')
+
+    beforeEach(() => {
+        spyOnUseTealium.mockImplementation(() => ({
+            logUserEvent: (linkData: TealiumDataObjectTypes) => {
+                return
+            },
+            logPageView: () => {
+                return
+            },
+            logButtonEvent: (
+                tealiumData: Omit<TealiumButtonEventObject, 'event_name'>
+            ) => {
+                return
+            },
+            logInternalLinkEvent: (
+                tealiumData: Omit<TealiumInternalLinkEventObject, 'event_name'>
+            ) => {
+                return
+            },
+        }))
+    })
 
     const longText =
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet.'

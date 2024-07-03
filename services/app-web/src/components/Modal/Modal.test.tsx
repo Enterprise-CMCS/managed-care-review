@@ -1,13 +1,16 @@
 import React, { createRef } from 'react'
 import { ModalRef, ModalToggleButton } from '@trussworks/react-uswds'
-import { screen, render, waitFor, fireEvent } from '@testing-library/react'
+import { screen, waitFor, fireEvent } from '@testing-library/react'
 import { Modal } from './Modal'
-import { userClickByTestId } from '../../testHelpers/jestHelpers'
+import {
+    userClickByTestId,
+    renderWithProviders,
+} from '../../testHelpers/jestHelpers'
 
 describe('Modal', () => {
     it('Renders element by default with modal hidden', () => {
         const modalRef = createRef<ModalRef>()
-        render(
+        renderWithProviders(
             <div>
                 <Modal id="hiddenModal" modalRef={modalRef}>
                     <textarea id="textarea" data-testid="textarea" />
@@ -22,7 +25,7 @@ describe('Modal', () => {
         const modalRef = createRef<ModalRef>()
         const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
 
-        render(
+        renderWithProviders(
             <div>
                 <Modal
                     id="hiddenModal"
@@ -53,7 +56,7 @@ describe('Modal', () => {
         const modalRef = createRef<ModalRef>()
         const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
 
-        render(
+        renderWithProviders(
             <div>
                 <Modal
                     id="hiddenModal"
@@ -79,7 +82,7 @@ describe('Modal', () => {
         const modalRef = createRef<ModalRef>()
         const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
         const onSubmit = jest.fn()
-        render(
+        renderWithProviders(
             <div>
                 <Modal
                     id="test"
@@ -100,7 +103,7 @@ describe('Modal', () => {
         const modalRef = createRef<ModalRef>()
         const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
         const onCancel = jest.fn()
-        render(
+        renderWithProviders(
             <div>
                 <Modal
                     id="test"
@@ -121,7 +124,7 @@ describe('Modal', () => {
         const modalRef = createRef<ModalRef>()
         const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
         const onSubmit = jest.fn()
-        render(
+        renderWithProviders(
             <div>
                 <Modal
                     id="test"
@@ -143,7 +146,7 @@ describe('Modal', () => {
         const modalRef = createRef<ModalRef>()
         const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
         const onSubmit = jest.fn()
-        render(
+        renderWithProviders(
             <div>
                 <Modal
                     id="test"
@@ -165,7 +168,7 @@ describe('Modal', () => {
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
-            render(
+            renderWithProviders(
                 <div>
                     <Modal
                         id="hiddenModal"
@@ -187,7 +190,7 @@ describe('Modal', () => {
 
         it('Opens modal via opener button click', async () => {
             const modalRef = createRef<ModalRef>()
-            render(
+            renderWithProviders(
                 <div>
                     <Modal
                         id="hiddenModal"
@@ -213,7 +216,7 @@ describe('Modal', () => {
 
         it('Closes modal via Cancel button click', async () => {
             const modalRef = createRef<ModalRef>()
-            render(
+            renderWithProviders(
                 <div>
                     <Modal
                         id="test"
@@ -243,7 +246,7 @@ describe('Modal', () => {
 
         it('Closes modal via ESC key', async () => {
             const modalRef = createRef<ModalRef>()
-            render(
+            renderWithProviders(
                 <div>
                     <Modal
                         id="test"
@@ -280,7 +283,7 @@ describe('Modal', () => {
             const modalRef = createRef<ModalRef>()
             const handleClose = () =>
                 modalRef.current?.toggleModal(undefined, false)
-            render(
+            renderWithProviders(
                 <div>
                     <Modal
                         id="hiddenModal"
@@ -317,7 +320,7 @@ describe('Modal', () => {
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
             const onSubmit = jest.fn()
-            render(
+            renderWithProviders(
                 <div>
                     <Modal
                         id="test"

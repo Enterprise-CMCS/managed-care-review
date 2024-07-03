@@ -1,10 +1,11 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import {
     ActuaryContact,
     StateContact,
 } from '../../../common-code/healthPlanFormDataType'
 
 import { DataDetailContactField } from './DataDetailContactField'
+import { renderWithProviders } from '../../../testHelpers'
 
 describe('DataDetailContactField', () => {
     it('renders without errors', () => {
@@ -13,7 +14,7 @@ describe('DataDetailContactField', () => {
             titleRole: 'Writer/Detective',
             email: `wedsaddams@example.com`,
         }
-        render(<DataDetailContactField contact={contact} />)
+        renderWithProviders(<DataDetailContactField contact={contact} />)
         expect(screen.getByText(/Wednesday Addams/)).toBeInTheDocument()
         expect(screen.getByText(/Writer/)).toBeInTheDocument()
         expect(
@@ -29,7 +30,7 @@ describe('DataDetailContactField', () => {
             actuarialFirm: 'OTHER',
             actuarialFirmOther: 'All Black Incorporated',
         }
-        render(<DataDetailContactField contact={contact} />)
+        renderWithProviders(<DataDetailContactField contact={contact} />)
         expect(screen.getByText(/Wednesday Addams/)).toBeInTheDocument()
         expect(screen.getByText(/Numbers Expert/)).toBeInTheDocument()
         expect(

@@ -5,6 +5,12 @@ import userEvent from '@testing-library/user-event'
 import { FileItemT } from '../FileProcessor/FileProcessor'
 import { FileItemsList } from './FileItemsList'
 import { TEST_PDF_FILE } from '../../../testHelpers/jestHelpers'
+import * as tealium from '../../../hooks/useTealium'
+import { TealiumDataObjectTypes } from '../../../hooks/useTealium'
+import {
+    TealiumButtonEventObject,
+    TealiumInternalLinkEventObject,
+} from '../../../constants/tealium'
 
 describe('FileItemList component', () => {
     const pending: FileItemT = {
@@ -63,7 +69,29 @@ describe('FileItemList component', () => {
         retryItem: jest.fn(),
     }
 
-    beforeEach(() => jest.clearAllMocks())
+    const spyOnUseTealium = jest.spyOn(tealium, 'useTealium')
+
+    beforeEach(() => {
+        spyOnUseTealium.mockImplementation(() => ({
+            logUserEvent: (linkData: TealiumDataObjectTypes) => {
+                return
+            },
+            logPageView: () => {
+                return
+            },
+            logButtonEvent: (
+                tealiumData: Omit<TealiumButtonEventObject, 'event_name'>
+            ) => {
+                return
+            },
+            logInternalLinkEvent: (
+                tealiumData: Omit<TealiumInternalLinkEventObject, 'event_name'>
+            ) => {
+                return
+            },
+        }))
+    })
+    afterEach(() => jest.clearAllMocks())
     it('renders a list without errors', () => {
         const fileItems = [pending, uploadError]
         render(<FileItemsList fileItems={fileItems} {...buttonActionProps} />)

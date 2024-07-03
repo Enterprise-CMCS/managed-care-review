@@ -1,7 +1,6 @@
 import React from 'react'
 import {
     Alert,
-    Button,
     Card,
     CardHeader,
     CardMedia,
@@ -26,7 +25,7 @@ import shiAvatar from '../assets/images/shi-tong.png'
 
 import { useAuth } from '../contexts/AuthContext'
 import { LocalUserType } from './LocalUserType'
-import { useTealium } from '../hooks'
+import { ButtonWithLogging } from '../components'
 
 const localUsers: LocalUserType[] = [
     {
@@ -107,7 +106,6 @@ export function LocalLogin(): React.ReactElement {
     const [showFormAlert, setShowFormAlert] = React.useState(false)
     const navigate = useNavigate()
     const { checkAuth, loginStatus } = useAuth()
-    const { logButtonEvent } = useTealium()
 
     async function login(user: LocalUserType) {
         loginLocalUser(user)
@@ -161,23 +159,15 @@ export function LocalLogin(): React.ReactElement {
                                 <p>From {fromString}</p>
                             </CardBody>
                             <CardFooter>
-                                <Button
+                                <ButtonWithLogging
                                     data-testid={`${user.givenName}Button`}
                                     type="submit"
                                     disabled={loginStatus === 'LOADING'}
-                                    onClick={async () => {
-                                        logButtonEvent({
-                                            text: 'Login',
-                                            button_style: 'default',
-                                            button_type: 'submit',
-                                            parent_component_heading:
-                                                'page body',
-                                        })
-                                        await login(user)
-                                    }}
+                                    parent_component_type="card"
+                                    onClick={() => login(user)}
                                 >
                                     Login
-                                </Button>
+                                </ButtonWithLogging>
                             </CardFooter>
                         </Card>
                     )

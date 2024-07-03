@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ChangeHistory } from './ChangeHistory'
 import { HealthPlanPackage } from '../../gen/gqlClient'
+import { renderWithProviders } from '../../testHelpers'
 
 const submissionData: HealthPlanPackage = {
     id: '440d6a53-bb0a-49ae-9a9c-da7c5352789f',
@@ -163,17 +164,17 @@ const formDataProtoInitialSubmissionUnlocked: HealthPlanPackage = {
 
 describe('Change History', () => {
     it('renders without errors', () => {
-        render(<ChangeHistory submission={submissionData} />)
+        renderWithProviders(<ChangeHistory submission={submissionData} />)
         expect(screen.getByText('Change history')).toBeInTheDocument()
     })
 
     it('includes an accordion list of changes', () => {
-        render(<ChangeHistory submission={submissionData} />)
+        renderWithProviders(<ChangeHistory submission={submissionData} />)
         expect(screen.getByTestId('accordion')).toBeInTheDocument()
     })
 
     it('has expected text in the accordion title', () => {
-        render(<ChangeHistory submission={submissionData} />)
+        renderWithProviders(<ChangeHistory submission={submissionData} />)
         expect(
             screen.getByRole('button', {
                 name: '03/23/22 9:19pm ET - Submission',
@@ -182,14 +183,14 @@ describe('Change History', () => {
     })
 
     it('has expected text in the accordion content', () => {
-        render(<ChangeHistory submission={submissionData} />)
+        renderWithProviders(<ChangeHistory submission={submissionData} />)
         expect(
             screen.getByText('Placeholder resubmission reason')
         ).toBeInTheDocument()
     })
 
     it('should expand and collapse the accordion on click', async () => {
-        render(<ChangeHistory submission={submissionData} />)
+        renderWithProviders(<ChangeHistory submission={submissionData} />)
         expect(
             screen.getByText('Placeholder resubmission reason')
         ).not.toBeVisible()
@@ -202,7 +203,7 @@ describe('Change History', () => {
         ).not.toBeVisible()
     })
     it('should list the submission events in reverse chronological order', () => {
-        render(<ChangeHistory submission={submissionData} />)
+        renderWithProviders(<ChangeHistory submission={submissionData} />)
         expect(
             screen.getByText('Placeholder resubmission reason')
         ).not.toBeVisible()
@@ -224,7 +225,7 @@ describe('Change History', () => {
         )
     })
     it('has correct href values for previous submission links', () => {
-        render(<ChangeHistory submission={submissionData} />)
+        renderWithProviders(<ChangeHistory submission={submissionData} />)
         expect(screen.getByTestId(`revision-link-1`)).toHaveAttribute(
             'href',
             `/submissions/440d6a53-bb0a-49ae-9a9c-da7c5352789f/revisions/1`
@@ -235,7 +236,7 @@ describe('Change History', () => {
         )
     })
     it('should list accordion items with links when appropriate', () => {
-        render(<ChangeHistory submission={submissionData} />)
+        renderWithProviders(<ChangeHistory submission={submissionData} />)
         //Latest resubmission should not have a link.
         expect(
             screen.getByTestId('accordionItem_2022-03-25T01:19:46.154Z')
@@ -258,14 +259,16 @@ describe('Change History', () => {
         ).toHaveTextContent('View past submission version')
     })
     it('should not list links for initial submission without revisions', () => {
-        render(<ChangeHistory submission={formDataProtoInitialSubmission} />)
+        renderWithProviders(
+            <ChangeHistory submission={formDataProtoInitialSubmission} />
+        )
         //Initial submission should not have a link
         expect(
             screen.getByTestId('accordionItem_2022-03-23T02:08:52.259Z')
         ).not.toHaveTextContent('View past submission version')
     })
     it('should not list links for initial submission when initial submission is unlocked', () => {
-        render(
+        renderWithProviders(
             <ChangeHistory
                 submission={formDataProtoInitialSubmissionUnlocked}
             />

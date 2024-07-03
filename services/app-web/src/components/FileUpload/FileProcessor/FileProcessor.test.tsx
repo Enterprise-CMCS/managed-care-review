@@ -1,8 +1,11 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { FileProcessor, FileItemT } from './FileProcessor'
-import { TEST_PDF_FILE } from '../../../testHelpers/jestHelpers'
+import {
+    TEST_PDF_FILE,
+    renderWithProviders,
+} from '../../../testHelpers/jestHelpers'
 
 describe('FileProcessor component', () => {
     const pending: FileItemT = {
@@ -68,7 +71,7 @@ describe('FileProcessor component', () => {
 
     beforeEach(() => jest.clearAllMocks())
     it('renders a list without errors', () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={uploadComplete}
                 {...buttonActionProps}
@@ -80,7 +83,7 @@ describe('FileProcessor component', () => {
     })
 
     it('renders a table without errors', () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={uploadComplete}
                 {...buttonActionProps}
@@ -92,7 +95,7 @@ describe('FileProcessor component', () => {
     })
 
     it('includes appropriate aria- attributes in the list', () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={uploadError}
                 {...buttonActionProps}
@@ -111,7 +114,7 @@ describe('FileProcessor component', () => {
     })
 
     it('includes appropriate aria- attributes in the table', () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={uploadError}
                 {...buttonActionProps}
@@ -130,7 +133,7 @@ describe('FileProcessor component', () => {
     })
 
     it('button actions work as expected in the list', async () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={uploadError}
                 {...buttonActionProps}
@@ -146,7 +149,7 @@ describe('FileProcessor component', () => {
     })
 
     it('button actions work as expected in the table', async () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={uploadError}
                 {...buttonActionProps}
@@ -162,7 +165,7 @@ describe('FileProcessor component', () => {
     })
 
     it('displays loading image, loading text, and remove button when status is LOADING in the list', () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={pending}
                 {...buttonActionProps}
@@ -179,7 +182,7 @@ describe('FileProcessor component', () => {
     })
 
     it('displays loading image, loading text, and remove button when status is LOADING in the table', () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={pending}
                 {...buttonActionProps}
@@ -192,7 +195,7 @@ describe('FileProcessor component', () => {
     })
 
     it('displays loading image, scanning text, and remove button when status is SCANNING in the list', () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={scanning}
                 {...buttonActionProps}
@@ -209,7 +212,7 @@ describe('FileProcessor component', () => {
     })
 
     it('displays loading image, scanning text, and remove button when status is SCANNING in the table', () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={scanning}
                 {...buttonActionProps}
@@ -222,7 +225,7 @@ describe('FileProcessor component', () => {
     })
 
     it('displays file image and remove button when status is UPLOAD_COMPLETE in a list', () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={uploadComplete}
                 {...buttonActionProps}
@@ -239,7 +242,7 @@ describe('FileProcessor component', () => {
     })
 
     it('displays the remove button when status is UPLOAD_COMPLETE in a table', () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={uploadComplete}
                 {...buttonActionProps}
@@ -251,7 +254,7 @@ describe('FileProcessor component', () => {
     })
 
     it('displays upload failed message and both retry and remove buttons when status is UPLOAD_ERROR in a list', async () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={uploadError}
                 {...buttonActionProps}
@@ -277,7 +280,7 @@ describe('FileProcessor component', () => {
     })
 
     it('displays upload failed message, without checkboxes, and both retry and remove buttons when status is UPLOAD_ERROR in a table', async () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={uploadError}
                 {...buttonActionProps}
@@ -303,7 +306,7 @@ describe('FileProcessor component', () => {
     })
 
     it('displays security scan failed message and both retry and remove buttons when status is SCANNING_ERROR in a list', () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={scanningError}
                 {...buttonActionProps}
@@ -325,7 +328,7 @@ describe('FileProcessor component', () => {
     })
 
     it('displays security scan failed message, without checkboxes, and both retry and remove buttons when status is SCANNING_ERROR in a table', async () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={scanningError}
                 {...buttonActionProps}
@@ -353,7 +356,7 @@ describe('FileProcessor component', () => {
     })
 
     it('displays duplicate name error message and remove button when status is DUPLICATE_NAME_ERROR in a list', () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={duplicateError}
                 {...buttonActionProps}
@@ -373,7 +376,7 @@ describe('FileProcessor component', () => {
     })
 
     it('displays duplicate name error message, without checkboxes , and remove button when status is DUPLICATE_NAME_ERROR in a table', () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={duplicateError}
                 {...buttonActionProps}
@@ -396,7 +399,7 @@ describe('FileProcessor component', () => {
     })
 
     it('displays unexpected error message and remove button when status is UPLOAD_ERROR but file reference is undefined (this is an unexpected state but it would mean the upload cannot be retried) in a list', () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={{ ...uploadError, file: undefined }}
                 {...buttonActionProps}
@@ -414,7 +417,7 @@ describe('FileProcessor component', () => {
     })
 
     it('displays unexpected error message and remove button when status is UPLOAD_ERROR but file reference is undefined (this is an unexpected state but it would mean the upload cannot be retried) in a table', () => {
-        render(
+        renderWithProviders(
             <FileProcessor
                 item={{ ...uploadError, file: undefined }}
                 {...buttonActionProps}
