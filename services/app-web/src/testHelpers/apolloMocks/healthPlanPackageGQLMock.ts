@@ -22,6 +22,7 @@ import {
     UnlockContractMutation,
     UnlockContractDocument,
     Contract,
+    UnlockedContract,
 } from '../../gen/gqlClient'
 import {
     mockContractAndRatesDraft,
@@ -528,12 +529,16 @@ const unlockContractMockSuccess = ({
     id,
     reason,
 }: unlockContractMockSuccessProps): MockedResponse<UnlockContractMutation> => {
+    // HACK, for some reason tests started failing with getting the types just right
+    // As we get those types everywhere we can revisit this.
+    const unlockedContract = contract as UnlockedContract
+
     return {
         request: {
             query: UnlockContractDocument,
             variables: { input: { contractID: id, unlockedReason: reason } },
         },
-        result: { data: { unlockContract: { contract } } },
+        result: { data: { unlockContract: { contract: unlockedContract } } },
     }
 }
 

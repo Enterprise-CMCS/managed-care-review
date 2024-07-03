@@ -243,7 +243,7 @@ describe('UnlockSubmitModal', () => {
             )
             expect(modalSubmit).toHaveTextContent('Unlock')
             await userEvent.click(modalSubmit)
-            const dialog = await screen.getByRole('dialog')
+            const dialog = screen.getByRole('dialog')
             await waitFor(() => {
                 expect(dialog).toHaveClass('is-visible')
             })
@@ -517,7 +517,7 @@ describe('UnlockSubmitModal', () => {
             const dialog = screen.getByRole('dialog')
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
-            const textbox = await screen.getByTestId('unlockSubmitModalInput')
+            const textbox = screen.getByTestId('unlockSubmitModalInput')
 
             // submit without entering anything
             await userEvent.click(
