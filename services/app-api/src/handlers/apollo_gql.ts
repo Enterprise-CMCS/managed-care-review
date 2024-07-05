@@ -6,7 +6,7 @@ import type {
     APIGatewayProxyHandler,
     Handler,
 } from 'aws-lambda'
-import typeDefs from '../../../app-graphql/src/schema.graphql'
+import { typeDefs } from '../gen/graphql.gen'
 import { assertIsAuthMode } from '../../../app-web/src/common-code/config'
 import type { UserType } from '../domain-models'
 import type { userFromAuthProvider } from '../authn'
@@ -464,4 +464,4 @@ const gqlHandler: Handler = async (event, context, completion) => {
     return await initializedHandler(event, context, completion)
 }
 
-exports.graphqlHandler = gqlHandler
+export const graphqlHandler = gqlHandler

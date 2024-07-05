@@ -5,7 +5,7 @@
     "description": "A service that creates the resources necessary to use GitHub's OIDC provider to retrieve short-term AWS credentials in a GitHub Actions workflow",
     "license": "CC0-1.0",
     "devDependencies": {
-        "serverless": "^3.26.0",
+        "serverless": "^3.39.0",
         "serverless-stack-termination-protection": "^2.0.2"
     }
 }

@@ -8,7 +8,7 @@
         "build": "tsc"
     },
     "devDependencies": {
-        "serverless": "^3.26.0",
+        "serverless": "^3.39.0",
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "serverless-scriptable-plugin": "^1.3.1",

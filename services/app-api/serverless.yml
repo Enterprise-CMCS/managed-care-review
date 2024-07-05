@@ -10,13 +10,12 @@ package:
     - '!node_modules/@prisma'
 
 plugins:
-  - serverless-offline-ssm
-  - serverless-offline
-  - serverless-webpack
+  - serverless-esbuild
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
-  - serverless-idempotency-helper
   - serverless-iam-helper
+  - serverless-offline-ssm
+  - serverless-offline
 
 custom:
   region: ${aws:region}
@@ -40,29 +39,8 @@ custom:
   jwtSecret: ${env:JWT_SECRET, self:custom.jwtSecretJSON.jwtsigningkey}
   reactAppS3DocumentUploadsBucket: ${env:REACT_APP_S3_DOCUMENTS_BUCKET, cf:uploads-${sls:stage}.DocumentUploadsBucketName}
   reactAppS3QABucket: ${env:REACT_APP_S3_QA_BUCKET, cf:uploads-${sls:stage}.QAUploadsBucketName}
-  webpack:
-    webpackConfig: 'webpack.config.js'
-    packager: 'yarn'
-    includeModules:
-      forceExclude:
-        - '@prisma/client'
-        - '@opentelemetry/resources'
-        - '@opentelemetry/sdk-trace-base'
-        - '@opentelemetry/sdk-trace-node'
-        - '@opentelemetry/semantic-conventions'
-        - '@opentelemetry/api'
-        - '@opentelemetry/core'
-        - '@opentelemetry/id-generator-aws-xray'
-        - '@opentelemetry/instrumentation'
-        - '@opentelemetry/instrumentation-http'
-        - '@opentelemetry/propagator-aws-xray'
-        - '@opentelemetry/auto-instrumentations-node'
-        - '@opentelemetry/exporter-metrics-otlp-http'
-        - '@opentelemetry/sdk-metrics'
-      nodeModulesRelativeDir: '../../'
-    packagerOptions:
-      lockFile: '../../yarn.lock'
-    excludeRegex: 'darwin|debian'
+  esbuild:
+    config: './esbuild.config.js'
   serverlessTerminationProtection:
     stages:
       - dev
@@ -221,7 +199,7 @@ functions:
           authorizer:
             name: third_party_api_authorizer
             identitySource: method.request.header.Authorization
-    timeout: 60 # aurora cold start can be long
+    timeout: 30 # aurora cold start can be long
     vpc:
       securityGroupIds:
         - ${self:custom.sgId}
@@ -249,7 +227,7 @@ functions:
           method: post
           cors: true
           authorizer: aws_iam
-    timeout: 60 # zipping large amount of files hits default time out of 6 seconds
+    timeout: 30 # zipping large amount of files hits default time out of 6 seconds
 
   cleanup:
     handler: src/handlers/cleanup.main
