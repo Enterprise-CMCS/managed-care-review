@@ -1,5 +1,9 @@
 const fs = require('fs');
 const path = require('path');
+const {
+    generateGraphQLString,
+    generateContentsFromGraphqlString,
+} = require('@luckycatfactory/esbuild-graphql-loader');
 
 module.exports = () => {
     return {
@@ -23,6 +27,21 @@ module.exports = () => {
             '@opentelemetry/sdk-metrics',
         ],
         plugins: [
+            {
+                name: 'graphql-loader',
+                setup(build) {
+                    build.onLoad({ filter: /\.graphql$|\.gql$/ }, (args) =>
+                        generateGraphQLString(args.path).then(
+                            (graphqlString) => ({
+                                contents:
+                                    generateContentsFromGraphqlString(
+                                        graphqlString
+                                    ),
+                            })
+                        )
+                    );
+                },
+            },
             {
                 name: 'copy-and-replace-collector',
                 setup(build) {

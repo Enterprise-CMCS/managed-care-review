@@ -6,7 +6,7 @@ import type {
     APIGatewayProxyHandler,
     Handler,
 } from 'aws-lambda'
-import { typeDefs } from '../gen/graphql.gen'
+import typeDefs from '../../../app-graphql/src/schema.graphql'
 import { assertIsAuthMode } from '../../../app-web/src/common-code/config'
 import type { UserType } from '../domain-models'
 import type { userFromAuthProvider } from '../authn'
