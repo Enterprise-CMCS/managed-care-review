@@ -6,10 +6,10 @@ import { FileItemT } from '../FileProcessor/FileProcessor'
 import { FileItemsList } from './FileItemsList'
 import { TEST_PDF_FILE } from '../../../testHelpers/jestHelpers'
 import * as tealium from '../../../hooks/useTealium'
-import { TealiumDataObjectTypes } from '../../../hooks/useTealium'
 import {
     TealiumButtonEventObject,
     TealiumInternalLinkEventObject,
+    TealiumEventObjectTypes,
 } from '../../../constants/tealium'
 
 describe('FileItemList component', () => {
@@ -73,7 +73,7 @@ describe('FileItemList component', () => {
 
     beforeEach(() => {
         spyOnUseTealium.mockImplementation(() => ({
-            logUserEvent: (linkData: TealiumDataObjectTypes) => {
+            logUserEvent: (linkData: TealiumEventObjectTypes) => {
                 return
             },
             logPageView: () => {

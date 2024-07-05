@@ -4,7 +4,6 @@ import styles from './AppBody.module.scss'
 import { AppRoutes } from './AppRoutes'
 import { Footer, Header, LinkWithLogging, Loading } from '../../components'
 import { useOTEL } from '../../hooks/useOTEL'
-import { useTealium } from '../../hooks/useTealium'
 import { AuthModeType } from '../../common-code/config'
 import { useAuth } from '../../contexts/AuthContext'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
@@ -25,7 +24,6 @@ export function AppBody({
     const ldClient = useLDClient()
 
     // Add logging and metrics
-    useTealium()
     useOTEL()
 
     const siteUnderMaintenanceBannerFlag: string = ldClient?.variation(

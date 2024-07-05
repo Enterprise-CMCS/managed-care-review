@@ -5,6 +5,8 @@ import {
     STATE_SUBMISSION_FORM_ROUTES,
     STATE_SUBMISSION_SUMMARY_ROUTES,
 } from './routes'
+import * as React from 'react';
+import {getRouteName} from '../routeHelpers';
 
 // TYPES
 type TealiumDataObject = {
@@ -76,6 +78,10 @@ type TealiumLinkDataObject = {
 } & Partial<TealiumDataObject>
 
 type TealiumViewDataObject = TealiumDataObject // event default to page_view in useTealium hook
+
+type TealiumEventObjectTypes =
+    | TealiumButtonEventObject
+    | TealiumInternalLinkEventObject
 
 // CONSTANTS
 const CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
@@ -184,11 +190,80 @@ const getTealiumPageName = ({
     }
 }
 
-export { CONTENT_TYPE_BY_ROUTE, getTealiumEnv, getTealiumPageName }
+type TealiumClientType = {
+    logUserEvent: (
+        linkData: TealiumEventObjectTypes,
+        pathname: string,
+        loggedInUser?: User,
+        heading?: string | React.ReactElement
+    ) => void
+    logPageView: (
+        pathname: string,
+        loggedInUser?: User,
+        heading?: string | React.ReactElement
+    ) => void
+}
+
+const newTealiumClient = () => {
+    return {
+        logUserEvent: function (
+            linkData: TealiumEventObjectTypes,
+            pathname: string,
+            loggedInUser?: User,
+            heading?: string | React.ReactElement,
+        ) {
+            const currentRoute = getRouteName(pathname)
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            const utag = window.utag || { link: () => {}, view: () => {} }
+            const tagData: TealiumLinkDataObject = {
+                content_language: 'en',
+                page_name: `${heading}: ${PageTitlesRecord[currentRoute]}`,
+                page_path: pathname,
+                site_domain: 'cms.gov',
+                site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+                site_section: `${currentRoute}`,
+                logged_in: `${Boolean(loggedInUser) ?? false}`,
+                userId: loggedInUser?.email,
+                tealium_event: linkData.event_name,
+                ...linkData
+            }
+            utag.link(tagData)
+        },
+        logPageView: function (
+            pathname: string,
+            loggedInUser?: User,
+            heading?: string | React.ReactElement,
+        ) {
+            const currentRoute = getRouteName(pathname)
+            const tealiumPageName = getTealiumPageName({
+                heading,
+                route: currentRoute,
+                user: loggedInUser,
+            })
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            const utag = window.utag || { link: () => {}, view: () => {} }
+            const tagData: TealiumViewDataObject = {
+                content_language: 'en',
+                content_type: `${CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
+                page_name: tealiumPageName,
+                page_path: pathname,
+                site_domain: 'cms.gov',
+                site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+                site_section: `${currentRoute}`,
+                logged_in: `${Boolean(loggedInUser) ?? false}`,
+            }
+            utag.view(tagData)
+        }
+    }
+}
+
+export { CONTENT_TYPE_BY_ROUTE, getTealiumEnv, getTealiumPageName, newTealiumClient }
 export type {
     TealiumLinkDataObject,
     TealiumViewDataObject,
     TealiumEvent,
     TealiumButtonEventObject,
     TealiumInternalLinkEventObject,
+    TealiumEventObjectTypes,
+    TealiumClientType
 }
