@@ -441,7 +441,7 @@ describe('RateDetailsSummarySection', () => {
         ).not.toBeInTheDocument()
     })
 
-    it('does not render the deprecated rate programs when present on an unlocked historic linked rate', async () => {
+    it('does not render the deprecated rate programs when rate programs present on an submitted linked rate', async () => {
         const statePrograms = mockMNState().programs
         const contract = mockContractPackageSubmitted()
         await waitFor(() => {

@@ -278,6 +278,10 @@ export const RateDetailsSummarySectionV2 = ({
             {rates && rates.length > 0
                 ? rates.map((rate, rateIndex) => {
                       const rateFormData = getRateFormData(rate)
+                      const hasDeprecatedRatePrograms =
+                          rateFormData.deprecatedRateProgramIDs.length > 0
+                      const hasNoRatePrograms =
+                          rateFormData.rateProgramIDs.length === 0
                       if (!rateFormData) {
                           return <GenericErrorPage />
                       }
@@ -294,13 +298,10 @@ export const RateDetailsSummarySectionV2 = ({
                               </h3>
                               <dl>
                                   <DoubleColumnGrid>
-                                      {((rateFormData.deprecatedRateProgramIDs
-                                          .length > 0 &&
+                                      {((hasDeprecatedRatePrograms &&
                                           isSubmittedOrCMSUser) ||
-                                          (rateFormData.deprecatedRateProgramIDs
-                                              .length > 0 &&
-                                              rateFormData.rateProgramIDs
-                                                  .length === 0 &&
+                                          (hasDeprecatedRatePrograms &&
+                                              hasNoRatePrograms &&
                                               !rate.unlockInfo &&
                                               rate.submitInfo)) && (
                                           <DataDetail
@@ -316,10 +317,8 @@ export const RateDetailsSummarySectionV2 = ({
                                           />
                                       )}
                                       {!(
-                                          rateFormData.deprecatedRateProgramIDs
-                                              .length > 0 &&
-                                          rateFormData.rateProgramIDs.length ===
-                                              0 &&
+                                          hasDeprecatedRatePrograms &&
+                                          hasNoRatePrograms &&
                                           !rate.unlockInfo &&
                                           rate.submitInfo
                                       ) && (
