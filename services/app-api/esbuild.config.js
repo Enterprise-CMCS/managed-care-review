@@ -9,23 +9,7 @@ module.exports = () => {
     return {
         packager: 'yarn',
         bundle: true,
-        exclude: [
-            'prisma',
-            '@prisma/client',
-            '@opentelemetry/core',
-            '@opentelemetry/sdk-trace-base',
-            '@opentelemetry/sdk-trace-node',
-            '@opentelemetry/resources',
-            '@opentelemetry/semantic-conventions',
-            '@opentelemetry/api',
-            '@opentelemetry/id-generator-aws-xray',
-            '@opentelemetry/instrumentation',
-            '@opentelemetry/instrumentation-http',
-            '@opentelemetry/propagator-aws-xray',
-            '@opentelemetry/auto-instrumentations-node',
-            '@opentelemetry/exporter-metrics-otlp-http',
-            '@opentelemetry/sdk-metrics',
-        ],
+        exclude: ['prisma', '@prisma/client', 'aws-sdk'],
         plugins: [
             {
                 name: 'graphql-loader',
