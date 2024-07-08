@@ -39,7 +39,6 @@ describe('SingleRateSummarySection', () => {
                     },
                     featureFlags: {
                         'rate-edit-unlock': true,
-                        'link-rates': false,
                     },
                 }
             )
@@ -100,7 +99,7 @@ describe('SingleRateSummarySection', () => {
         ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', {
-                name: 'Submission this rate was submitted with',
+                name: 'Contract actions',
             })
         ).toBeInTheDocument()
 
@@ -166,7 +165,7 @@ describe('SingleRateSummarySection', () => {
         })
 
         const parentContractSubmission = screen.getByRole('definition', {
-            name: 'Submission this rate was submitted with',
+            name: 'Contract actions',
         })
 
         // Expect submissions this rate was submitted with link to exists
@@ -251,7 +250,6 @@ describe('SingleRateSummarySection', () => {
                     },
                     featureFlags: {
                         'rate-edit-unlock': true,
-                        'link-rates': true,
                     },
                 }
             )
@@ -351,7 +349,6 @@ describe('SingleRateSummarySection', () => {
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
-                        'link-rates': true,
                     },
                     location: (location) => (testLocation = location),
                 }

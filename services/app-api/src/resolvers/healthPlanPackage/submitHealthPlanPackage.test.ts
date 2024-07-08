@@ -11,15 +11,11 @@ import {
     createAndSubmitTestHealthPlanPackage,
     defaultFloridaRateProgram,
     submitTestHealthPlanPackage,
-    updateTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { base64ToDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import {
-    generateRateName,
-    packageName,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     latestFormData,
     previousFormData,
@@ -31,6 +27,13 @@ import {
 import * as awsSESHelpers from '../../testHelpers/awsSESHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import {
+    addNewRateToTestContract,
+    formatRateDataForSending,
+    updateTestDraftRateOnContract,
+} from '../../testHelpers/gqlRateHelpers'
+import { fetchTestContract } from '../../testHelpers/gqlContractHelpers'
+import { convertRateInfoToRateFormDataInput } from '../../domain-models/contractAndRates/convertHPPtoContractWithRates'
 
 describe(`Tests $testName`, () => {
     const cmsUser = testCMSUser()
@@ -141,8 +144,8 @@ describe(`Tests $testName`, () => {
                     actuarialFirmOther: '',
                 },
             ],
+            rateCapitationType: 'RATE_CELL' as const,
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
-            packagesWithSharedRateCerts: [],
         })
 
         // First, create new submissions
@@ -160,44 +163,67 @@ describe(`Tests $testName`, () => {
         )
 
         // Unlock both -  one to be rate edited in place, the other to add new rate
-        const existingRate1 = await unlockTestHealthPlanPackage(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             submittedEditedRates.id,
             'Unlock to edit an existing rate'
         )
-        const existingRate2 = await unlockTestHealthPlanPackage(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             submittedNewRates.id,
             'Unlock to add a new rate'
         )
 
-        // update one with a new rate start and end date
-        const existingFormData = latestFormData(existingRate1)
-        expect(existingFormData.rateInfos).toHaveLength(1)
-        await updateTestHealthPlanPackage(server, submittedEditedRates.id, {
-            rateInfos: [
-                {
-                    ...existingFormData.rateInfos[0],
-                    rateDateStart: new Date(Date.UTC(2025, 1, 1)),
-                    rateDateEnd: new Date(Date.UTC(2027, 1, 1)),
-                },
-            ],
-        })
+        // update one rate with a new rate start and end date
+        const existingContract1 = await fetchTestContract(
+            server,
+            submittedEditedRates.id
+        )
+        const draftRev = existingContract1.draftRevision
+        if (!draftRev) {
+            throw new Error('must draft)')
+        }
+
+        const rateToUpdate = existingContract1.draftRates?.[0]
+        if (!rateToUpdate) {
+            throw new Error('rate should exist.')
+        }
+        const rateToUpdateFormData = rateToUpdate.draftRevision?.formData
+        if (!rateToUpdateFormData) {
+            throw new Error('no rate form data')
+        }
+        rateToUpdateFormData.rateDateStart = '2025-01-01'
+        rateToUpdateFormData.rateDateEnd = '2027-01-01'
+        await updateTestDraftRateOnContract(
+            server,
+            submittedEditedRates.id,
+            draftRev.updatedAt,
+            rateToUpdate.id,
+            formatRateDataForSending(rateToUpdateFormData)
+        )
 
         // update the other with additional new rate
-        const existingFormData2 = latestFormData(existingRate2)
-        expect(existingFormData2.rateInfos).toHaveLength(1)
-        await updateTestHealthPlanPackage(server, submittedNewRates.id, {
-            rateInfos: [
-                existingFormData2.rateInfos[0],
-                {
-                    ...initialRateInfos(),
-                    id: uuidv4(), // this is a new rate
-                    rateDateStart: new Date(Date.UTC(2030, 1, 1)),
-                    rateDateEnd: new Date(Date.UTC(2030, 12, 1)),
-                },
-            ],
-        })
+        const existingContract2 = await fetchTestContract(
+            server,
+            submittedNewRates.id
+        )
+
+        expect(existingContract2.draftRates).toHaveLength(1)
+        expect(
+            existingContract2.draftRates?.[0].draftRevision?.formData
+                .rateDateStart
+        ).toBe('2025-06-01')
+        const additionalRateFormData = convertRateInfoToRateFormDataInput([
+            initialRateInfos(),
+        ])[0]
+        additionalRateFormData.rateDateStart = '2030-01-01'
+        additionalRateFormData.rateDateEnd = '2030-12-01'
+        await addNewRateToTestContract(
+            server,
+            existingContract2,
+            additionalRateFormData
+        )
+
         // resubmit both
         await resubmitTestHealthPlanPackage(
             server,
@@ -218,10 +244,10 @@ describe(`Tests $testName`, () => {
         expect(latestFormData(editedRatesPackage).rateInfos).toHaveLength(1)
         expect(
             latestFormData(editedRatesPackage).rateInfos[0].rateDateStart
-        ).toMatchObject(new Date(Date.UTC(2025, 1, 1)))
+        ).toMatchObject(new Date(Date.UTC(2025, 0, 1)))
         expect(
             latestFormData(editedRatesPackage).rateInfos[0].rateDateEnd
-        ).toMatchObject(new Date(Date.UTC(2027, 1, 1)))
+        ).toMatchObject(new Date(Date.UTC(2027, 0, 1)))
         expect(
             editedRatesPackage.revisions[0].node.submitInfo?.updatedReason
         ).toBe('Resubmit with edited rate description')
@@ -239,10 +265,10 @@ describe(`Tests $testName`, () => {
         ).toMatchObject(initialRateInfos().rateDateEnd)
         expect(
             latestFormData(newRatesPackage).rateInfos[1].rateDateStart
-        ).toMatchObject(new Date(Date.UTC(2030, 1, 1)))
+        ).toMatchObject(new Date(Date.UTC(2030, 0, 1)))
         expect(
             latestFormData(newRatesPackage).rateInfos[1].rateDateEnd
-        ).toMatchObject(new Date(Date.UTC(2030, 12, 1)))
+        ).toMatchObject(new Date(Date.UTC(2030, 11, 1)))
         expect(
             newRatesPackage.revisions[0].node.submitInfo?.updatedReason
         ).toBe('Resubmit with an additional rate added')
@@ -383,7 +409,6 @@ describe(`Tests $testName`, () => {
                     rateProgramIDs: ['3b8d8fa1-1fa6-4504-9c5b-ef522877fe1e'],
                     actuaryContacts: [], // This is supposed to have at least one contact.
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
-                    packagesWithSharedRateCerts: [],
                 },
             ],
         })
@@ -784,14 +809,14 @@ describe(`Tests $testName`, () => {
         }
 
         const programs = [defaultFloridaProgram()]
-        const ratePrograms = [defaultFloridaRateProgram()]
         const name = packageName(
             sub.stateCode,
             sub.stateNumber,
             sub.programIDs,
             programs
         )
-        const rateName = generateRateName(sub, sub.rateInfos[0], ratePrograms)
+        const rateName =
+            'MCR-FL-NEMTMTM-20250501-20260430-CERTIFICATION-20250315'
 
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
