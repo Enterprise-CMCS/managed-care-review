@@ -4,10 +4,9 @@ import { usePage } from './PageContext'
 import { useAuth } from './AuthContext'
 import { RouteT } from '../constants'
 import { getRouteName } from '../routeHelpers'
-import { createScript } from '../hooks/useScript'
 import { recordJSException } from '../otelHelpers'
-import { User } from '../gen/gqlClient'
-import type { TealiumClientType } from '../constants/tealium'
+import type { User } from '../gen/gqlClient'
+import type { TealiumClientType, TealiumEnv } from '../tealium'
 
 type TealiumContextType = {
     pathname: string
@@ -16,7 +15,7 @@ type TealiumContextType = {
 } & TealiumClientType
 
 type TealiumProviderProps = {
-    tealiumEnv?: 'prod' | 'qa' | 'dev'
+    tealiumEnv?: TealiumEnv
     client: TealiumClientType
     children?: React.ReactNode
 }
@@ -47,9 +46,9 @@ const TealiumProvider = ({
         undefined
     )
 
-    const { logPageView, logUserEvent } = client
+    const { logPageView, logUserEvent, initializeTealium } = client
 
-    const handlelogPageView = useCallback(() => {
+    const handleLogPageView = useCallback(() => {
         lastLoggedRoute.current = getRouteName(pathname)
         logPageView(pathname, loggedInUser, heading)
     }, [heading, pathname, loggedInUser, logPageView])
@@ -66,45 +65,9 @@ const TealiumProvider = ({
                 `Missing key configuration for Tealium. tealiumEnv: ${tealiumEnv} tealiumProfile: ${tealiumProfile}`
             )
         }
-        // Suppress automatic page views for SPA
-        window.utag_cfg_ovrd = window.utag_cfg_ovrd || {}
-        window.utag_cfg_ovrd.noview = true
-
-        // Load utag.sync.js - add to head element - SYNC load from src
-        const initializeTagManagerSnippet = createScript({
-            src: `https://tags.tiqcdn.com/utag/cmsgov/${tealiumProfile}/${tealiumEnv}/utag.sync.js`,
-            id: 'tealium-load-tags-sync',
-        })
-        if (document.getElementById(initializeTagManagerSnippet.id) === null) {
-            document.head.appendChild(initializeTagManagerSnippet)
-        }
-
-        // Load utag.js - Add to body element- ASYNC load inline script
-        const inlineScript = `(function (t, e, a, l, i, u, m) {
-            t = 'cmsgov/${tealiumProfile}'
-            e = '${tealiumEnv}'
-            a = '/' + t + '/' + e + '/utag.js'
-            l = '//tags.tiqcdn.com/utag' + a
-            i = document
-            u = 'script'
-            m = i.createElement(u)
-            m.src = l
-            m.type = 'text/java' + u
-            m.async = true
-            l = i.getElementsByTagName(u)[0]
-            l.parentNode.insertBefore(m, l)
-        })()`
-
-        const loadTagsSnippet = createScript({
-            src: '',
-            inlineScriptAsString: inlineScript,
-            id: 'tealium-load-tags-async',
-        })
-
-        if (document.getElementById(loadTagsSnippet.id) === null) {
-            document.body.appendChild(loadTagsSnippet)
-        }
-    }, [tealiumEnv])
+        initializeTealium(tealiumEnv, tealiumProfile)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     // This effect should only fire each time the url changes
     useEffect(() => {
@@ -118,7 +81,7 @@ const TealiumProvider = ({
                     recordJSException('Analytics did not load in time')
                     return
                 } else {
-                    handlelogPageView()
+                    handleLogPageView()
                 }
             })
             // Guardrail on subsequent page view  - protect against multiple calls when route seems similar
@@ -127,9 +90,9 @@ const TealiumProvider = ({
             lastLoggedRoute.current &&
             lastLoggedRoute.current !== getRouteName(pathname)
         ) {
-            handlelogPageView()
+            handleLogPageView()
         }
-    }, [pathname, handlelogPageView, tealiumEnv])
+    }, [pathname, handleLogPageView, tealiumEnv])
 
     return (
         <TealiumContext.Provider
@@ -137,6 +100,7 @@ const TealiumProvider = ({
                 pathname,
                 loggedInUser,
                 heading,
+                initializeTealium,
                 logUserEvent,
                 logPageView,
             }}

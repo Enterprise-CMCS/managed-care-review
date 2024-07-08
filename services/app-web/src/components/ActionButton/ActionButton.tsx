@@ -5,7 +5,7 @@ import styles from './ActionButton.module.scss'
 import { Spinner } from '../Spinner'
 import { extractText } from '../TealiumLogging/tealiamLoggingHelpers'
 import { useTealium } from '../../hooks'
-import { TealiumButtonEventObject } from '../../constants/tealium'
+import { TealiumButtonEventObject } from '../../tealium/tealium'
 
 /* 
 Main application-wide action button. 

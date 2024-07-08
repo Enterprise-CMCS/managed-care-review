@@ -2,11 +2,11 @@ import { User } from '../gen/gqlClient'
 import {
     PageTitlesRecord,
     RouteT,
-    STATE_SUBMISSION_FORM_ROUTES,
-    STATE_SUBMISSION_SUMMARY_ROUTES,
-} from './routes'
+} from '../constants'
 import * as React from 'react';
 import {getRouteName} from '../routeHelpers';
+import {createScript} from '../hooks/useScript';
+import { getTealiumPageName } from './tealiumHelpers';
 
 // TYPES
 type TealiumDataObject = {
@@ -123,74 +123,17 @@ type TealiumEvent =
     | 'button_engagement'
     | 'internal_link_clicked'
 
-// HELPER FUNCTIONS
-function getTealiumEnv(stage: string) {
-    switch (stage) {
-        case 'prod':
-            return 'prod'
-        case 'val':
-            return 'qa'
-        case 'main':
-            return 'dev'
-        default:
-            return 'dev'
-    }
-}
-
-const getTealiumPageName = ({
-    route,
-    heading,
-    user,
-}: {
-    route: RouteT | 'UNKNOWN_ROUTE'
-    heading: string | React.ReactElement | undefined
-    user: User | undefined
-}) => {
-    const addSubmissionNameHeading =
-        STATE_SUBMISSION_FORM_ROUTES.includes(route) ||
-        STATE_SUBMISSION_SUMMARY_ROUTES.includes(route)
-
-    const formatPageName = ({
-        heading,
-        title,
-    }: {
-        title: string
-        heading?: string | React.ReactElement
-    }) => {
-        const headingPrefix =
-            heading && addSubmissionNameHeading ? `${heading}: ` : ''
-        return `${headingPrefix}${title}`
-    }
-    switch (route) {
-        case 'ROOT':
-            if (!user) {
-                return formatPageName({ title: 'Landing' })
-            } else if (user.__typename === 'CMSUser') {
-                return formatPageName({ heading, title: 'CMS Dashboard' })
-            } else if (user.__typename === 'StateUser') {
-                return formatPageName({
-                    heading,
-                    title: 'State dashboard',
-                })
-            }
-            return formatPageName({ heading, title: PageTitlesRecord[route] })
-        case 'DASHBOARD_SUBMISSIONS' || 'DASHBOARD_RATES':
-            if (user && user.__typename === 'CMSUser') {
-                return formatPageName({ title: 'CMS Dashboard' })
-            } else if (user && user.__typename === 'StateUser') {
-                return formatPageName({
-                    heading,
-                    title: 'State dashboard',
-                })
-            }
-            return formatPageName({ heading, title: PageTitlesRecord[route] })
-
-        default:
-            return formatPageName({ heading, title: PageTitlesRecord[route] })
-    }
-}
+type TealiumEnv =
+    | 'prod'
+    | 'val'
+    | 'qa'
+    | 'dev'
 
 type TealiumClientType = {
+    initializeTealium: (
+        tealiumEnv: TealiumEnv,
+        tealiumProfile: string
+    ) => void
     logUserEvent: (
         linkData: TealiumEventObjectTypes,
         pathname: string,
@@ -204,14 +147,57 @@ type TealiumClientType = {
     ) => void
 }
 
-const newTealiumClient = () => {
+const tealiumClient = (): TealiumClientType => {
     return {
-        logUserEvent: function (
+        initializeTealium: (
+            tealiumEnv: TealiumEnv,
+            tealiumProfile: string
+        ) => {
+            // Suppress automatic page views for SPA
+            window.utag_cfg_ovrd = window.utag_cfg_ovrd || {}
+            window.utag_cfg_ovrd.noview = true
+
+            // Load utag.sync.js - add to head element - SYNC load from src
+            const initializeTagManagerSnippet = createScript({
+                src: `https://tags.tiqcdn.com/utag/cmsgov/${tealiumProfile}/${tealiumEnv}/utag.sync.js`,
+                id: 'tealium-load-tags-sync',
+            })
+            if (document.getElementById(initializeTagManagerSnippet.id) === null) {
+                document.head.appendChild(initializeTagManagerSnippet)
+            }
+
+            // Load utag.js - Add to body element- ASYNC load inline script
+            const inlineScript = `(function (t, e, a, l, i, u, m) {
+                t = 'cmsgov/${tealiumProfile}'
+                e = '${tealiumEnv}'
+                a = '/' + t + '/' + e + '/utag.js'
+                l = '//tags.tiqcdn.com/utag' + a
+                i = document
+                u = 'script'
+                m = i.createElement(u)
+                m.src = l
+                m.type = 'text/java' + u
+                m.async = true
+                l = i.getElementsByTagName(u)[0]
+                l.parentNode.insertBefore(m, l)
+            })()`
+
+            const loadTagsSnippet = createScript({
+                src: '',
+                inlineScriptAsString: inlineScript,
+                id: 'tealium-load-tags-async',
+            })
+
+            if (document.getElementById(loadTagsSnippet.id) === null) {
+                document.body.appendChild(loadTagsSnippet)
+            }
+        },
+        logUserEvent:  (
             linkData: TealiumEventObjectTypes,
             pathname: string,
             loggedInUser?: User,
             heading?: string | React.ReactElement,
-        ) {
+        ) => {
             const currentRoute = getRouteName(pathname)
             // eslint-disable-next-line @typescript-eslint/no-empty-function
             const utag = window.utag || { link: () => {}, view: () => {} }
@@ -229,11 +215,11 @@ const newTealiumClient = () => {
             }
             utag.link(tagData)
         },
-        logPageView: function (
+        logPageView: (
             pathname: string,
             loggedInUser?: User,
             heading?: string | React.ReactElement,
-        ) {
+        ) => {
             const currentRoute = getRouteName(pathname)
             const tealiumPageName = getTealiumPageName({
                 heading,
@@ -257,7 +243,7 @@ const newTealiumClient = () => {
     }
 }
 
-export { CONTENT_TYPE_BY_ROUTE, getTealiumEnv, getTealiumPageName, newTealiumClient }
+export { CONTENT_TYPE_BY_ROUTE, tealiumClient }
 export type {
     TealiumLinkDataObject,
     TealiumViewDataObject,
@@ -265,5 +251,6 @@ export type {
     TealiumButtonEventObject,
     TealiumInternalLinkEventObject,
     TealiumEventObjectTypes,
-    TealiumClientType
+    TealiumClientType,
+    TealiumEnv
 }

@@ -2,9 +2,9 @@ import React from 'react'
 import type {
     TealiumButtonEventObject,
     TealiumInternalLinkEventObject,
-} from '../constants/tealium'
+} from '../tealium'
 import { recordJSException } from '../otelHelpers'
-import {TealiumContext} from '../contexts/TealiumContext';
+import { TealiumContext } from '../contexts/TealiumContext';
 
 const useTealium = (): {
     logButtonEvent: (

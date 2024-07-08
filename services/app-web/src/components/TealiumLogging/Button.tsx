@@ -1,6 +1,6 @@
 import React from 'react'
 import { Button } from '@trussworks/react-uswds'
-import { TealiumButtonEventObject } from '../../constants/tealium'
+import type { TealiumButtonEventObject } from '../../tealium'
 import { ButtonProps } from '@trussworks/react-uswds/lib/components/Button/Button'
 import { extractText } from './tealiamLoggingHelpers'
 import { useTealium } from '../../hooks'

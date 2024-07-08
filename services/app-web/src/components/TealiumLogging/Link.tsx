@@ -6,7 +6,7 @@ import {
     CustomLinkProps,
     DefaultLinkProps,
 } from '@trussworks/react-uswds/lib/components/Link/Link'
-import { TealiumInternalLinkEventObject } from '../../constants/tealium'
+import type { TealiumInternalLinkEventObject } from '../../tealium'
 import { useTealium } from '../../hooks'
 import { extractText } from './tealiamLoggingHelpers'
 

@@ -20,7 +20,7 @@ import type { S3ClientT } from '../../s3'
 import { useScript } from '../../hooks'
 import { generateNRScriptContent } from '../../newRelic'
 import { getEnv } from '../../configHelpers/envHelpers'
-import { getTealiumEnv, newTealiumClient } from '../../constants/tealium'
+import { getTealiumEnv, tealiumClient } from '../../tealium'
 
 export type AppProps = {
     authMode: AuthModeType
@@ -47,7 +47,7 @@ function App({
         id: 'newrelic',
         showScript: isHigherEnv,
     })
-    const tealiumClient = newTealiumClient()
+    const newTealiumClient = tealiumClient()
     const tealiumEnv = getTealiumEnv(process.env.REACT_APP_STAGE_NAME || '')
 
     return (
@@ -59,7 +59,7 @@ function App({
                             <AuthProvider authMode={authMode}>
                                 <PageProvider>
                                     <TealiumProvider
-                                        client={tealiumClient}
+                                        client={newTealiumClient}
                                         tealiumEnv={tealiumEnv}
                                     >
                                         <AppBody authMode={authMode} />

@@ -32,7 +32,7 @@ import {
     LDClient,
 } from 'launchdarkly-react-client-sdk'
 import { tealiumTestClient } from './tealiumHelpers'
-import { TealiumClientType } from '../constants/tealium'
+import type { TealiumClientType } from '../tealium'
 
 function ldClientMock(featureFlags: FeatureFlagSettings): LDClient {
     return {
