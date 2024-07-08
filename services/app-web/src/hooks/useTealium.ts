@@ -22,7 +22,7 @@ const useTealium = (): {
         throw error
     }
 
-    const { pathname, loggedInUser, heading,logUserEvent } = context
+    const { pathname, loggedInUser, heading, logUserEvent } = context
 
     const logButtonEvent = (
         tealiumData: Omit<TealiumButtonEventObject, 'event_name'>,
