@@ -303,6 +303,27 @@ export function submitHealthPlanPackageResolver(
         const initialFormData = conversionResult
         const contractRevisionID = contractWithHistory.draftRevision.id
 
+        // Clear out linked rates form initial data before parse and submit. We should not validate on the linked rates at all (besides there being at least one rate)
+        const childRateIDs =
+            contractWithHistory.draftRates?.reduce<string[]>(
+                (rateIDs, rate) => {
+                    if (
+                        rate.id &&
+                        rate.parentContractID === contractWithHistory.id
+                    ) {
+                        rateIDs.push(rate.id)
+                    }
+                    return rateIDs
+                },
+                []
+            ) ?? []
+
+        const onlyChildRateInfos = initialFormData.rateInfos.filter(
+            (rateInfo) => {
+                return rateInfo.id && childRateIDs.includes(rateInfo.id)
+            }
+        )
+        initialFormData.rateInfos = onlyChildRateInfos
         // Final clean + check of data before submit - parse to state submission
         const maybeLocked = parseAndSubmit(initialFormData, featureFlags)
 

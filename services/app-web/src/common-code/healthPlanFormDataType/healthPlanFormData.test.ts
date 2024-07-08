@@ -329,7 +329,7 @@ describe('submission type assertions', () => {
         [mockDraft(), false],
         [mockContractAndRatesDraft(), false],
     ])(
-        'isValidAndCurrentLockedHealthPlanFormData evaluates as expected',
+        'isValidAndCurrentLockedHealthPlanFormData evaluates as expected for top level validation errors',
         (submission, expectedResponse) => {
             // type coercion to allow us to test
             expect(isLockedHealthPlanFormData(submission)).toEqual(
@@ -386,7 +386,7 @@ describe('submission type assertions', () => {
         [mockDraft(), false],
         [mockContractAndRatesDraft(), false],
     ])(
-        'isValidAndCurrentLockedHealthPlanFormData evaluates as expected',
+        'isValidAndCurrentLockedHealthPlanFormData evaluates as expected for form data specific issues',
         (submission, expectedResponse) => {
             // type coercion to allow us to test
             expect(

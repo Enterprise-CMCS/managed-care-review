@@ -95,10 +95,7 @@ const hasValidActuaries = (actuaries: ActuaryContact[]): boolean =>
     )
 
 const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
-    const validRates =
-        sub.rateInfos.length === 0
-            ? false
-            : sub.rateInfos.every((rateInfo) => {
+    const validRates = sub.rateInfos.every((rateInfo) => {
                   const validBaseRate =
                       rateInfo.rateType !== undefined &&
                       rateInfo.rateDateCertified !== undefined &&

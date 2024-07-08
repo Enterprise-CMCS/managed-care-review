@@ -7,8 +7,13 @@ import { Contract, ContractFormData, ContractPackageSubmission, ContractRevision
 import {ActuaryContact} from '../common-code/healthPlanFormDataType';
 import {ActuaryFirmsRecord} from '../constants';
 
+type RateRevisionWithIsLinked = {
+    isLinked: boolean
+} & RateRevision
 
-function getVisibleLatestRateRevisions(contract: Contract, isEditing: boolean): RateRevision[] | undefined {
+// This function returns a revision with isLinked field as well manually calculated from parent rate
+// There are cases where we need the revision itself to be able to track its own linked status, decontextualized from the parent rate or parent contract
+function getVisibleLatestRateRevisions(contract: Contract, isEditing: boolean): RateRevisionWithIsLinked[] | undefined {
     if (isEditing) {
         if (!contract.draftRates) {
             console.error('Programming Error: on the rate details page with no draft rates')
@@ -24,15 +29,23 @@ function getVisibleLatestRateRevisions(contract: Contract, isEditing: boolean): 
                     console.error('Programming Error: A child rate is not a draft')
                     return undefined
                 }
-                rateRevs.push(rate.draftRevision)
+                rateRevs.push({
+                    ...rate.draftRevision,
+                    isLinked: false,
+                }
+                )
             } else {
                 // otherwise return the latest revision submitted.
+                // this code will have to be fixed when we move to rate history - should rely on packageSubmissions
                 const lastRateSubmission = rate.revisions[0]
                 if (!lastRateSubmission) {
                     console.error('Programming Error: non-child rate was not previously submitted')
                     return undefined
                 }
-                rateRevs.push(lastRateSubmission)
+                rateRevs.push({
+                    ...lastRateSubmission,
+                    isLinked: true
+            })
             }
         }
         return rateRevs
@@ -42,7 +55,13 @@ function getVisibleLatestRateRevisions(contract: Contract, isEditing: boolean): 
             console.error('Programming Error: no contract submission for a contract were not editing')
             return undefined
         }
-        return lastContractSubmission.rateRevisions
+
+        return lastContractSubmission.rateRevisions.map ( (rrev) => {
+            return {
+            ...rrev,
+            isLinked:  rrev.rate? rrev.rate?.parentContractID !== contract.id : false
+            // TODO: need more clarity about when the revision has the rate attached or not and make sure test mock data matches this. for now just assume not linked if that rate data is not coming down
+        }})
     }
 }
 
@@ -90,3 +109,4 @@ const getActuaryFirm = (actuaryContact: ActuaryContact): string => {
 }
 
 export {getDraftRates, getLastContractSubmission, getVisibleLatestContractFormData, getVisibleLatestRateRevisions, getActuaryFirm, getPackageSubmissionAtIndex, getIndexFromRevisionVersion}
+export type {RateRevisionWithIsLinked}
