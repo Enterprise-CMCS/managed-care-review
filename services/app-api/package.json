@@ -56,7 +56,6 @@
         "eta": "^2.0.0",
         "graphql": "^16.2.0",
         "graphql-scalars": "^1.11.1",
-        "lodash": "^4.17.21",
         "neverthrow": "^6.0.0",
         "path-to-regexp": "^6.2.1",
         "prisma": "^4.6",
@@ -93,7 +92,6 @@
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^2.0.2",
         "ts-jest": "^29.1.1",
-        "ts-loader": "^9.2.8",
         "typescript": "4.9.5"
     }
 }
