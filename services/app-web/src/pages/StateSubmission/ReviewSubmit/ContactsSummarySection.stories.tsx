@@ -1,10 +1,10 @@
 import { StoryFn } from '@storybook/react'
-import ProvidersDecorator from '../../../../../../.storybook/providersDecorator'
+import ProvidersDecorator from '../../../../.storybook/providersDecorator'
 import {
     ContactsSummarySectionProps,
     ContactsSummarySection,
-} from './ContactsSummarySectionV2'
-import { mockContractPackageDraft } from '../../../../../testHelpers/apolloMocks'
+} from './ContactsSummarySection'
+import { mockContractPackageDraft } from '../../../testHelpers/apolloMocks'
 
 export default {
     title: 'Components/SubmissionSummary/ContactsSummarySection/V2',

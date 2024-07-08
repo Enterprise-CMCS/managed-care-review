@@ -19,7 +19,8 @@ import {
     newSubmissionInput,
     rateFormData,
     contractFormData,
-    CMSUserType, minnesotaStatePrograms,
+    CMSUserType, 
+    minnesotaStatePrograms,
 } from '../utils/apollo-test-utils'
 import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
 
@@ -142,6 +143,7 @@ const createAndSubmitContractWithRates = async (
 }
 
 
+
 const assignCmsDivision = async (
     apolloClient: ApolloClient<NormalizedCacheObject>,
     cmsUser: CMSUserType,
@@ -198,7 +200,6 @@ Cypress.Commands.add(
         )
 )
 
-
 Cypress.Commands.add(
     'apiCreateAndSubmitContractWithRates',
     (stateUser): Cypress.Chainable<Contract> =>
@@ -207,6 +208,18 @@ Cypress.Commands.add(
                 schema,
                 stateUser,
                 createAndSubmitContractWithRates
+            )
+        )
+)
+
+Cypress.Commands.add(
+    'apiCreateAndSubmitBaseContract',
+    (stateUser): Cypress.Chainable<Contract> =>
+        cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
+            apolloClientWrapper(
+                schema,
+                stateUser,
+                createAndSubmitContractOnlyPackage
             )
         )
 )

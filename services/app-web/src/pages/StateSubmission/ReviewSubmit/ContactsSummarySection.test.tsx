@@ -1,10 +1,10 @@
 import { screen } from '@testing-library/react'
-import { renderWithProviders } from '../../../../../testHelpers/jestHelpers'
-import { ContactsSummarySection } from './ContactsSummarySectionV2'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import { ContactsSummarySection } from './ContactsSummarySection'
 import {
     mockContractPackageDraft,
     mockContractPackageSubmitted,
-} from '../../../../../testHelpers/apolloMocks'
+} from '../../../testHelpers/apolloMocks'
 
 describe('ContactsSummarySection', () => {
     const draftSubmission = mockContractPackageDraft()

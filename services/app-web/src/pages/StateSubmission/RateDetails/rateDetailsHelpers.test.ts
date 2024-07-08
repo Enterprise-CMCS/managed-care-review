@@ -1,6 +1,6 @@
-import { FormikRateForm } from "./RateDetailsV2"
-import { convertGQLRateToRateForm, generateUpdatedRates, isRatePartiallyFilled, convertRateFormToGQLRateFormData } from "./rateDetailsHelpers"
-import {RateFormData} from '../../../../gen/gqlClient';
+import { FormikRateForm } from "./"
+import { convertGQLRateToRateForm, generateUpdatedRates, isRatePartiallyFilled } from "./rateDetailsHelpers"
+import {RateFormData} from '../../../gen/gqlClient';
 
 describe('generateUpdatedRates', () => {
     const emptyRateForm = () => convertGQLRateToRateForm(vi.fn())

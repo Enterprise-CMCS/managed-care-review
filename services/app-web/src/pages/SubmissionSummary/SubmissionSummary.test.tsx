@@ -1,23 +1,20 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router'
-import { basicLockedHealthPlanFormData } from '../../common-code/healthPlanFormDataMocks'
-import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
 import { RoutesRecord } from '../../constants/routes'
 import {
     fetchCurrentUserMock,
+    fetchContractMockSuccess,
     fetchStateHealthPlanPackageWithQuestionsMockSuccess,
-    mockUnlockedHealthPlanPackage,
     mockValidCMSUser,
-    mockSubmittedHealthPlanPackageWithRevision,
     mockValidUser,
-    mockStateSubmission,
-    mockSubmittedHealthPlanPackage,
     mockValidStateUser,
+    mockContractPackageSubmitted,
 } from '../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
-import { SubmissionSummary } from './SubmissionSummary'
+import { SubmissionSummary } from './V2/SubmissionSummaryV2'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { testS3Client } from '../../testHelpers/s3Helpers'
+import { mockContractPackageUnlocked } from '../../testHelpers/apolloMocks/contractPackageDataMock'
 
 describe('SubmissionSummary', () => {
     it('renders without errors', async () => {
@@ -34,28 +31,28 @@ describe('SubmissionSummary', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
-                            user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
+                        fetchContractMockSuccess({
+                            contract: mockContractPackageSubmitted(),
+                        }),
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: '15',
+                            id: 'test-abc-123',
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15',
+                    route: '/submissions/test-abc-123',
                 },
+                featureFlags: {},
             }
         )
-
         expect(
             await screen.findByRole('heading', { name: 'Contract details' })
         ).toBeInTheDocument()
     })
 
     it('renders submission updated banner', async () => {
-        const submissionsWithRevisions =
-            mockSubmittedHealthPlanPackageWithRevision({})
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -69,18 +66,22 @@ describe('SubmissionSummary', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
-                            user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
+                        fetchContractMockSuccess({
+                            contract: mockContractPackageSubmitted({
+                                status: 'RESUBMITTED',
+                            }),
+                        }),
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            stateSubmission: submissionsWithRevisions,
-                            id: '15',
+                            id: 'test-abc-123',
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15',
+                    route: '/submissions/test-abc-123',
                 },
+                featureFlags: {},
             }
         )
 
@@ -97,14 +98,13 @@ describe('SubmissionSummary', () => {
         )
         expect(
             await screen.findByTestId('updatedSubmissionBanner')
-        ).toHaveTextContent('Submitted by: aang@example.com')
+        ).toHaveTextContent('Submitted by: example@state.com')
         expect(
             await screen.findByTestId('updatedSubmissionBanner')
-        ).toHaveTextContent('Changes made: Placeholder resubmission reason')
+        ).toHaveTextContent('Changes made: contract submit')
     })
 
     it('renders submission unlocked banner for CMS user', async () => {
-        const submissionsWithRevisions = mockUnlockedHealthPlanPackage()
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -121,15 +121,18 @@ describe('SubmissionSummary', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
+                        fetchContractMockSuccess({
+                            contract: mockContractPackageUnlocked(),
+                        }),
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            stateSubmission: submissionsWithRevisions,
-                            id: '15',
+                            id: 'test-abc-123',
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15',
+                    route: '/submissions/test-abc-123',
                 },
+                featureFlags: {},
             }
         )
         await waitFor(() => {
@@ -141,16 +144,15 @@ describe('SubmissionSummary', () => {
                 /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
             )
             expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
-                'by: bob@dmas.mn.gov'
+                'by: cms@example.com'
             )
             expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
-                'Reason for unlock: Test unlock reason'
+                'Reason for unlock: unlocked for a test'
             )
         })
     })
 
-    it('renders add mccrs-id link for CMS user', async () => {
-        const submissionsWithRevisions = mockUnlockedHealthPlanPackage()
+    it('pulls the right version of UNLOCKED data for CMS users', async () => {
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -164,18 +166,105 @@ describe('SubmissionSummary', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
-                            user: mockValidCMSUser(),
                             statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                        fetchContractMockSuccess({
+                            contract: mockContractPackageUnlocked(),
                         }),
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            stateSubmission: submissionsWithRevisions,
-                            id: '15',
+                            id: 'test-abc-123',
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15',
+                    route: '/submissions/test-abc-123',
                 },
+                featureFlags: {},
+            }
+        )
+
+        expect(await screen.findByText('MCR-MN-0005-SNBC')).toBeInTheDocument()
+
+        const description = await screen.findByLabelText(
+            'Submission description'
+        )
+        expect(description).toHaveTextContent('An initial submission')
+        const ratingPeriod = await screen.findByLabelText(
+            'Rating period of original rate certification'
+        )
+        expect(ratingPeriod).toHaveTextContent('01/01/2020 to 01/01/2021')
+    })
+
+    it('displays the legacy shared rates across submissions UI for CMS users when unlocked', async () => {
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                        fetchContractMockSuccess({
+                            contract: mockContractPackageUnlocked(),
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: 'test-abc-123',
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123',
+                },
+                featureFlags: {},
+            }
+        )
+
+        expect(await screen.findByText('SHARED')).toBeInTheDocument()
+        expect(
+            await screen.findByText('Linked submissions')
+        ).toBeInTheDocument()
+    })
+
+    it('renders add mccrs-id link for CMS user', async () => {
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                        fetchContractMockSuccess({
+                            contract: mockContractPackageSubmitted({
+                                id: 'test-abc-123',
+                            }),
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: 'test-abc-123',
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123',
+                },
+                featureFlags: {},
             }
         )
         await waitFor(() => {
@@ -186,7 +275,6 @@ describe('SubmissionSummary', () => {
     })
 
     it('renders edit mccrs-id link for CMS user when submission has a mccrs id', async () => {
-        const submissionsWithRevisions = mockUnlockedHealthPlanPackage()
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -203,18 +291,21 @@ describe('SubmissionSummary', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            stateSubmission: {
-                                ...submissionsWithRevisions,
+                        fetchContractMockSuccess({
+                            contract: mockContractPackageSubmitted({
+                                id: 'test-abc-123',
                                 mccrsID: '3333',
-                            },
-                            id: '15',
+                            }),
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: 'test-abc-123',
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15',
+                    route: '/submissions/test-abc-123',
                 },
+                featureFlags: {},
             }
         )
         await waitFor(() => {
@@ -226,7 +317,6 @@ describe('SubmissionSummary', () => {
     })
 
     it('does not render an add mccrs-id link for state user', async () => {
-        const submissionsWithRevisions = mockUnlockedHealthPlanPackage()
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -243,15 +333,20 @@ describe('SubmissionSummary', () => {
                             user: mockValidUser(),
                             statusCode: 200,
                         }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                id: 'test-abc-123',
+                            },
+                        }),
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            stateSubmission: submissionsWithRevisions,
-                            id: '15',
+                            id: 'test-abc-123',
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15',
+                    route: '/submissions/test-abc-123',
                 },
+                featureFlags: {},
             }
         )
         await waitFor(() => {
@@ -262,7 +357,6 @@ describe('SubmissionSummary', () => {
     })
 
     it('renders submission unlocked banner for State user', async () => {
-        const submissionsWithRevisions = mockUnlockedHealthPlanPackage()
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -280,14 +374,17 @@ describe('SubmissionSummary', () => {
                             statusCode: 200,
                         }),
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            stateSubmission: submissionsWithRevisions,
-                            id: '15',
+                            id: 'test-abc-123',
+                        }),
+                        fetchContractMockSuccess({
+                            contract: mockContractPackageUnlocked(),
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15',
+                    route: '/submissions/test-abc-123',
                 },
+                featureFlags: {},
             }
         )
         await waitFor(() => {
@@ -299,10 +396,10 @@ describe('SubmissionSummary', () => {
                 /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
             )
             expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
-                'by: bob@dmas.mn.gov'
+                'by: cms@example.com'
             )
             expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
-                'Reason for unlock: Test unlock reason'
+                'Reason for unlock: unlocked for a test'
             )
         })
     })
@@ -311,15 +408,13 @@ describe('SubmissionSummary', () => {
         const s3Provider = {
             ...testS3Client(),
             getBulkDlURL: async (
-                keys: string[],
-                fileName: string
+                _keys: string[],
+                _fileName: string
             ): Promise<string | Error> => {
                 return new Error('Error: getBulkDlURL encountered an error')
             },
         }
-        const contractAndRate = mockSubmittedHealthPlanPackage(
-            mockStateSubmission()
-        )
+        const contract = mockContractPackageSubmitted()
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -337,14 +432,17 @@ describe('SubmissionSummary', () => {
                             statusCode: 200,
                         }),
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: '15',
-                            stateSubmission: contractAndRate,
+                            id: 'test-abc-123',
+                        }),
+                        fetchContractMockSuccess({
+                            contract,
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15',
+                    route: '/submissions/test-abc-123',
                 },
+                featureFlags: {},
                 s3Provider,
             }
         )
@@ -377,15 +475,20 @@ describe('SubmissionSummary', () => {
                             statusCode: 200,
                         }),
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: '15',
+                            id: 'test-abc-123',
+                        }),
+                        fetchContractMockSuccess({
+                            contract: mockContractPackageSubmitted(),
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15',
+                    route: '/submissions/test-abc-123',
                 },
+                featureFlags: {},
             }
         )
+        screen.debug()
         expect(
             await screen.findByRole('heading', {
                 name: 'Contract details',
@@ -414,13 +517,17 @@ describe('SubmissionSummary', () => {
                             statusCode: 200,
                         }),
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: '15',
+                            id: 'test-abc-123',
+                        }),
+                        fetchContractMockSuccess({
+                            contract: mockContractPackageUnlocked(),
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15',
+                    route: '/submissions/test-abc-123',
                 },
+                featureFlags: {},
             }
         )
 
@@ -449,13 +556,19 @@ describe('SubmissionSummary', () => {
                             statusCode: 200,
                         }),
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: '1337',
+                            id: 'test-abc-123',
+                        }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                id: 'test-abc-123',
+                            },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/1337',
+                    route: '/submissions/test-abc-123',
                 },
+                featureFlags: {},
             }
         )
 
@@ -482,13 +595,19 @@ describe('SubmissionSummary', () => {
                             statusCode: 200,
                         }),
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: '1337',
+                            id: 'test-abc-123',
+                        }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                id: 'test-abc-123',
+                            },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/1337',
+                    route: '/submissions/test-abc-123',
                 },
+                featureFlags: {},
             }
         )
 
@@ -499,16 +618,12 @@ describe('SubmissionSummary', () => {
 
     describe('Submission package data display', () => {
         it('renders the OLD data for an unlocked submission for CMS user, ignoring unsubmitted changes from state user', async () => {
-            const pkg = mockUnlockedHealthPlanPackage()
-
-            const oldPackageData = basicLockedHealthPlanFormData()
-            const newPackageData = basicLockedHealthPlanFormData()
-
-            oldPackageData.submissionDescription = 'OLD_DESCRIPTION'
-            newPackageData.submissionDescription = 'NEW_DESCRIPTION'
-
-            pkg.revisions[0].node.formDataProto = domainToBase64(newPackageData)
-            pkg.revisions[1].node.formDataProto = domainToBase64(oldPackageData)
+            const contract = mockContractPackageUnlocked()
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            contract.draftRevision!.formData.submissionDescription =
+                'NEW_DESCRIPTION'
+            contract.packageSubmissions[0].contractRevision.formData.submissionDescription =
+                'OLD_DESCRIPTION'
 
             renderWithProviders(
                 <Routes>
@@ -528,15 +643,18 @@ describe('SubmissionSummary', () => {
                             }),
                             fetchStateHealthPlanPackageWithQuestionsMockSuccess(
                                 {
-                                    id: '15',
-                                    stateSubmission: pkg,
+                                    id: 'test-abc-123',
                                 }
                             ),
+                            fetchContractMockSuccess({
+                                contract,
+                            }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15',
+                        route: '/submissions/test-abc-123',
                     },
+                    featureFlags: {},
                 }
             )
 
@@ -569,14 +687,18 @@ describe('SubmissionSummary', () => {
                             }),
                             fetchStateHealthPlanPackageWithQuestionsMockSuccess(
                                 {
-                                    id: '15',
+                                    id: 'test-abc-123',
                                 }
                             ),
+                            fetchContractMockSuccess({
+                                contract: mockContractPackageSubmitted(),
+                            }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15',
+                        route: '/submissions/test-abc-123',
                     },
+                    featureFlags: {},
                 }
             )
 
@@ -588,17 +710,6 @@ describe('SubmissionSummary', () => {
         })
 
         it('extracts the correct dates from the submission and displays them in tables', async () => {
-            const submission = mockSubmittedHealthPlanPackageWithRevision({
-                currentSubmitInfo: {
-                    updatedAt: new Date('2022-05-12T21:13:20.420Z'),
-                },
-                previousSubmitInfo: {
-                    updatedAt: new Date('2022-04-12T21:13:20.420Z'),
-                },
-                initialSubmitInfo: {
-                    updatedAt: new Date('2022-03-12T21:13:20.420Z'),
-                },
-            })
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -617,15 +728,18 @@ describe('SubmissionSummary', () => {
                             }),
                             fetchStateHealthPlanPackageWithQuestionsMockSuccess(
                                 {
-                                    id: submission.id,
-                                    stateSubmission: submission,
+                                    id: 'test-abc-123',
                                 }
                             ),
+                            fetchContractMockSuccess({
+                                contract: mockContractPackageSubmitted(),
+                            }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/${submission.id}`,
+                        route: '/submissions/test-abc-123',
                     },
+                    featureFlags: {},
                 }
             )
             await waitFor(() => {
@@ -634,12 +748,21 @@ describe('SubmissionSummary', () => {
                 expect(
                     within(rows[0]).getByText('Date added')
                 ).toBeInTheDocument()
-                expect(within(rows[1]).getByText('3/12/22')).toBeInTheDocument()
-                expect(within(rows[2]).getByText('5/12/22')).toBeInTheDocument()
+                expect(within(rows[1]).getByText('1/1/24')).toBeInTheDocument()
+                expect(
+                    within(rows[2]).getByText('Date added')
+                ).toBeInTheDocument()
+                expect(within(rows[3]).getByText('1/15/24')).toBeInTheDocument()
+                expect(within(rows[4]).getByText('1/13/24')).toBeInTheDocument()
                 expect(
                     within(rows[5]).getByText('Date added')
                 ).toBeInTheDocument()
-                expect(within(rows[7]).getByText('3/12/22')).toBeInTheDocument()
+                expect(within(rows[6]).getByText('1/1/23')).toBeInTheDocument()
+                expect(
+                    within(rows[7]).getByText('Date added')
+                ).toBeInTheDocument()
+                expect(within(rows[8]).getByText('1/15/23')).toBeInTheDocument()
+                expect(within(rows[9]).getByText('1/15/23')).toBeInTheDocument()
             })
         })
 
@@ -662,16 +785,18 @@ describe('SubmissionSummary', () => {
                             }),
                             fetchStateHealthPlanPackageWithQuestionsMockSuccess(
                                 {
-                                    id: '15',
-                                    stateSubmission:
-                                        mockUnlockedHealthPlanPackage(),
+                                    id: 'test-abc-123',
                                 }
                             ),
+                            fetchContractMockSuccess({
+                                contract: mockContractPackageUnlocked(),
+                            }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15',
+                        route: '/submissions/test-abc-123',
                     },
+                    featureFlags: {},
                 }
             )
 
@@ -687,12 +812,10 @@ describe('SubmissionSummary', () => {
         it('displays unlock banner with correct data for an unlocked submission', async () => {
             renderWithProviders(
                 <Routes>
-                    <Route element={<SubmissionSideNav />}>
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                            element={<SubmissionSummary />}
-                        />
-                    </Route>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
                 </Routes>,
                 {
                     apolloProvider: {
@@ -701,13 +824,11 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
+                            fetchContractMockSuccess({
+                                contract: mockContractPackageUnlocked({
                                     id: '15',
-                                    stateSubmission:
-                                        mockUnlockedHealthPlanPackage(),
-                                }
-                            ),
+                                }),
+                            }),
                         ],
                     },
                     routerProvider: {
@@ -729,10 +850,10 @@ describe('SubmissionSummary', () => {
             )
             expect(
                 await screen.findByTestId('unlockedBanner')
-            ).toHaveTextContent('Unlocked by: bob@dmas.mn.govUnlocked')
+            ).toHaveTextContent('Unlocked by: cms@example.com')
             expect(
                 await screen.findByTestId('unlockedBanner')
-            ).toHaveTextContent('Reason for unlock: Test unlock reason')
+            ).toHaveTextContent('Reason for unlock: unlocked for a test')
         })
     })
 })

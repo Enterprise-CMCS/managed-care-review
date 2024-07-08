@@ -1,10 +1,10 @@
 import { StoryFn } from '@storybook/react'
-import ProvidersDecorator from '../../../../../../.storybook/providersDecorator'
+import ProvidersDecorator from '../../../../.storybook/providersDecorator'
 import {
-    ContractDetailsSummarySectionV2Props,
-    ContractDetailsSummarySectionV2 as ContractDetailsSummarySection,
-} from './ContractDetailsSummarySectionV2'
-import { mockContractPackageDraft } from '../../../../../testHelpers/apolloMocks'
+    ContractDetailsSummarySectionProps,
+    ContractDetailsSummarySection,
+} from './ContractDetailsSummarySection'
+import { mockContractPackageDraft } from '../../../testHelpers/apolloMocks'
 
 export default {
     title: 'Components/SubmissionSummary/ContractDetailsSummarySection/V2',
@@ -15,7 +15,7 @@ export default {
     },
 }
 
-const Template: StoryFn<ContractDetailsSummarySectionV2Props> = (args) => (
+const Template: StoryFn<ContractDetailsSummarySectionProps> = (args) => (
     <ContractDetailsSummarySection {...args} />
 )
 
