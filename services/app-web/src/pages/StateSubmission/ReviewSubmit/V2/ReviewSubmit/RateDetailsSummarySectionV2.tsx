@@ -27,6 +27,7 @@ import {
     ActuaryContact,
 } from '../../../../../gen/gqlClient'
 import {
+    RateRevisionWithIsLinked,
     getIndexFromRevisionVersion,
     getLastContractSubmission,
     getPackageSubmissionAtIndex,
@@ -39,7 +40,7 @@ import { useParams } from 'react-router-dom'
 export type RateDetailsSummarySectionV2Props = {
     contract: Contract
     contractRev?: ContractRevision
-    rateRevs?: RateRevision[]
+    rateRevs?: RateRevisionWithIsLinked[]
     editNavigateTo?: string
     isCMSUser?: boolean
     submissionName: string
@@ -91,10 +92,8 @@ export const RateDetailsSummarySectionV2 = ({
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
     const isSubmittedOrCMSUser = isSubmitted || isCMSUser
-
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
-
     const rates = rateRevs
         ? rateRevs
         : getVisibleLatestRateRevisions(contract, isEditing)
@@ -212,7 +211,6 @@ export const RateDetailsSummarySectionV2 = ({
         }
         return true
     }
-
     useDeepCompareEffect(() => {
         // skip getting urls of this if this is a previous submission or draft
         if (!isSubmittedOrCMSUser || isPreviousSubmission) return
@@ -276,15 +274,30 @@ export const RateDetailsSummarySectionV2 = ({
                     renderDownloadButton(zippedFilesURL)}
             </SectionHeader>
             {rates && rates.length > 0
-                ? rates.map((rate, rateIndex) => {
+                ? rates.map((rate) => {
                       const rateFormData = getRateFormData(rate)
                       const hasDeprecatedRatePrograms =
                           rateFormData.deprecatedRateProgramIDs.length > 0
                       const hasNoRatePrograms =
                           rateFormData.rateProgramIDs.length === 0
+                      const isLinkedRate = rate.isLinked
+
+                      /*
+                    Rate programs switched in summer 2024. We still show deprecated program field values when
+                    - there's no new field values present and CMS user is viewing
+                    - theres no new field values present and contract is locked and state user viewing
+                    - theres no new field values present and the contract unlocked and the rate being displayed as a linked rate
+
+                    otherwise use new fields values going forward
+                    */
+                      const showLegacyRatePrograms =
+                          hasDeprecatedRatePrograms &&
+                          hasNoRatePrograms &&
+                          (isSubmittedOrCMSUser || isLinkedRate)
                       if (!rateFormData) {
                           return <GenericErrorPage />
                       }
+
                       return (
                           <SectionCard
                               id={`rate-details-${rate.id}`}
@@ -298,12 +311,7 @@ export const RateDetailsSummarySectionV2 = ({
                               </h3>
                               <dl>
                                   <DoubleColumnGrid>
-                                      {((hasDeprecatedRatePrograms &&
-                                          isSubmittedOrCMSUser) ||
-                                          (hasDeprecatedRatePrograms &&
-                                              hasNoRatePrograms &&
-                                              !rate.unlockInfo &&
-                                              rate.submitInfo)) && (
+                                      {showLegacyRatePrograms ? (
                                           <DataDetail
                                               id="historicRatePrograms"
                                               label="Programs this rate certification covers"
@@ -315,18 +323,14 @@ export const RateDetailsSummarySectionV2 = ({
                                                   true
                                               )}
                                           />
-                                      )}
-                                      {!(
-                                          hasDeprecatedRatePrograms &&
-                                          hasNoRatePrograms &&
-                                          !rate.unlockInfo &&
-                                          rate.submitInfo
-                                      ) && (
+                                      ) : (
                                           <DataDetail
                                               id="ratePrograms"
                                               label="Rates this rate certification covers"
                                               explainMissingData={
-                                                  explainMissingData
+                                                  isLinkedRate
+                                                      ? false
+                                                      : explainMissingData
                                               }
                                               children={ratePrograms(
                                                   rate,
