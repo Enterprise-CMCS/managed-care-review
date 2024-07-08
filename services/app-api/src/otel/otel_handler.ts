@@ -5,10 +5,8 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
 import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
-import { AwsLambdaInstrumentation } from '@opentelemetry/instrumentation-aws-lambda'
 
 export function createTracer(serviceName: string): Tracer {
     const provider = new NodeTracerProvider({
@@ -29,10 +27,6 @@ export function createTracer(serviceName: string): Tracer {
     // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
     provider.register({
         propagator: new AWSXRayPropagator(),
-    })
-
-    registerInstrumentations({
-        instrumentations: [new AwsLambdaInstrumentation()],
     })
 
     return trace.getTracer(serviceName)
