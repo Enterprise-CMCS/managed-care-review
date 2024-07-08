@@ -9,7 +9,7 @@ module.exports = () => {
     return {
         packager: 'yarn',
         bundle: true,
-        exclude: ['prisma', '@prisma/client', '@opentelemetry/*'],
+        exclude: ['prisma', '@prisma/client'],
         plugins: [
             {
                 name: 'graphql-loader',
