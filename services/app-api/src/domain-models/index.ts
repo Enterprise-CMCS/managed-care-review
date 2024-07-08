@@ -46,6 +46,7 @@ export type {
     PackageStatusType,
     ContractPackageSubmissionType,
     ContractPackageSubmissionWithCauseType,
+    UnlockedContractType,
 } from './contractAndRates'
 
 export type {

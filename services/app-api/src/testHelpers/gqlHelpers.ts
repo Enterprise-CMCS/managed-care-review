@@ -1,5 +1,4 @@
 import { ApolloServer } from 'apollo-server-lambda'
-import { v4 as uuidv4 } from 'uuid'
 import CREATE_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/createHealthPlanPackage.graphql'
 import SUBMIT_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/submitHealthPlanPackage.graphql'
 import UNLOCK_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
@@ -45,25 +44,30 @@ import { findStatePrograms } from '../postgres'
 import { must } from './assertionHelpers'
 import { newJWTLib } from '../jwt'
 import type { JWTLib } from '../jwt'
+import { testS3Client } from './s3Helpers'
+import type { S3ClientT } from '../s3'
+import { convertRateInfoToRateFormDataInput } from '../domain-models/contractAndRates/convertHPPtoContractWithRates'
+import { createAndUpdateTestContractWithoutRates } from './gqlContractHelpers'
+import { addNewRateToTestContract } from './gqlRateHelpers'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
 function defaultFloridaProgram(): ProgramType {
-    return {
-        id: '5c10fe9f-bec9-416f-a20c-718b152ad633',
-        name: 'MMA',
-        fullName: 'Managed Medical Assistance Program ',
-        isRateProgram: false,
-    }
+    const program = must(findStatePrograms('FL'))[0]
+    return program
 }
 
 function defaultFloridaRateProgram(): ProgramType {
-    return {
-        id: '3b8d8fa1-1fa6-4504-9c5b-ef522877fe1e',
-        fullName: 'Long-term Care Program',
-        name: 'LTC',
-        isRateProgram: false,
+    const programs = must(findStatePrograms('FL'))
+    const rateProgram = programs.find((program) => program.isRateProgram)
+
+    if (!rateProgram) {
+        throw new Error(
+            'Unexpected error: Rate program not found in Florida programs'
+        )
     }
+
+    return rateProgram
 }
 
 const defaultContext = (): Context => {
@@ -79,6 +83,7 @@ const constructTestPostgresServer = async (opts?: {
     emailParameterStore?: EmailParameterStore
     ldService?: LDService
     jwt?: JWTLib
+    s3Client?: S3ClientT
 }): Promise<ApolloServer> => {
     // set defaults
     const context = opts?.context || defaultContext()
@@ -98,13 +103,16 @@ const constructTestPostgresServer = async (opts?: {
         })
 
     await insertUserToLocalAurora(postgresStore, context.user)
+    const s3TestClient = testS3Client()
+    const s3 = opts?.s3Client || s3TestClient
 
     const postgresResolvers = configureResolvers(
         postgresStore,
         emailer,
         parameterStore,
         ldService,
-        jwt
+        jwt,
+        s3
     )
 
     return new ApolloServer({
@@ -229,97 +237,59 @@ const createAndUpdateTestHealthPlanPackage = async (
     partialUpdates?: Partial<UnlockedHealthPlanFormDataType>,
     stateCode?: StateCodeType
 ): Promise<HealthPlanPackage> => {
-    const pkg = await createTestHealthPlanPackage(server, stateCode)
-    const draft = latestFormData(pkg)
-
-    const ratePrograms = stateCode
-        ? [must(findStatePrograms(stateCode))[0]]
-        : [defaultFloridaRateProgram()]
-
-    ;(draft.submissionType = 'CONTRACT_AND_RATES' as const),
-        (draft.submissionDescription = 'An updated submission')
-    draft.stateContacts = [
-        {
-            name: 'test name',
-            titleRole: 'test title',
-            email: 'email@example.com',
-        },
-    ]
-    draft.rateInfos = [
-        {
-            id: uuidv4(),
-            rateType: 'NEW' as const,
-            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
-            rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
-            rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
-            rateDocuments: [
-                {
-                    name: 'rateDocument.pdf',
-                    s3URL: 'fakeS3URL',
-                    sha256: 'fakesha',
-                },
-            ],
-            supportingDocuments: [],
-            //We only want one rate ID and use last program in list to differentiate from programID if possible.
-            rateProgramIDs: [ratePrograms.reverse()[0].id],
-            actuaryContacts: [
-                {
-                    id: '123-abc',
-                    name: 'test name',
-                    titleRole: 'test title',
-                    email: 'email@example.com',
-                    actuarialFirm: 'MERCER' as const,
-                    actuarialFirmOther: '',
-                },
-            ],
-            actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
-            packagesWithSharedRateCerts: [],
-        },
-    ]
-    draft.addtlActuaryContacts = [
-        {
-            id: '123-addtl-abv',
-            name: 'test name',
-            titleRole: 'test title',
-            email: 'email@example.com',
-            actuarialFirm: 'MERCER' as const,
-            actuarialFirmOther: '',
-        },
-    ]
-    ;(draft.addtlActuaryCommunicationPreference = 'OACT_TO_ACTUARY' as const),
-        (draft.contractType = 'BASE' as const)
-    draft.contractExecutionStatus = 'EXECUTED' as const
-    draft.contractDateStart = new Date(Date.UTC(2025, 5, 1))
-    draft.contractDateEnd = new Date(Date.UTC(2026, 4, 30))
-    draft.contractDocuments = [
-        {
-            name: 'contractDocument.pdf',
-            s3URL: 'fakeS3URL',
-            sha256: 'fakesha',
-        },
-    ]
-    draft.managedCareEntities = ['MCO']
-    draft.federalAuthorities = ['STATE_PLAN' as const]
-    draft.populationCovered = 'MEDICAID' as const
-    draft.contractAmendmentInfo = {
-        modifiedProvisions: {
-            inLieuServicesAndSettings: true,
-            modifiedRiskSharingStrategy: false,
-            modifiedIncentiveArrangements: false,
-            modifiedWitholdAgreements: false,
-            modifiedStateDirectedPayments: true,
-            modifiedPassThroughPayments: true,
-            modifiedPaymentsForMentalDiseaseInstitutions: true,
-            modifiedNonRiskPaymentArrangements: true,
-        },
+    // the rates have to be added separately now
+    let rateFormDatas = []
+    if (partialUpdates?.rateInfos) {
+        rateFormDatas = convertRateInfoToRateFormDataInput(
+            partialUpdates?.rateInfos || []
+        )
+    } else {
+        const ratePrograms = stateCode
+            ? [must(findStatePrograms(stateCode))[0]]
+            : [defaultFloridaRateProgram()]
+        // let's have some default test data:
+        rateFormDatas = [
+            {
+                rateType: 'NEW' as const,
+                rateDateStart: '2025-05-01',
+                rateDateEnd: '2026-04-30',
+                rateDateCertified: '2025-03-15',
+                rateDocuments: [
+                    {
+                        name: 'rateDocument.pdf',
+                        s3URL: 's3://bucketname/key/test',
+                        sha256: 'fakesha',
+                    },
+                ],
+                supportingDocuments: [],
+                //We only want one rate ID and use last program in list to differentiate from programID if possible.
+                rateProgramIDs: [ratePrograms.reverse()[0].id],
+                certifyingActuaryContacts: [
+                    {
+                        name: 'test name',
+                        titleRole: 'test title',
+                        email: 'email@example.com',
+                        actuarialFirm: 'MERCER' as const,
+                        actuarialFirmOther: '',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
+            },
+        ]
     }
-    draft.statutoryRegulatoryAttestation = false
-    draft.statutoryRegulatoryAttestationDescription = 'No compliance'
 
-    Object.assign(draft, partialUpdates)
-
-    const updatedDraft = await updateTestHealthPlanFormData(server, draft)
-
+    let contract = await createAndUpdateTestContractWithoutRates(
+        server,
+        stateCode,
+        partialUpdates
+    )
+    for (const rateData of rateFormDatas) {
+        contract = await addNewRateToTestContract(server, contract, rateData)
+    }
+    const updatedDraft = await fetchTestHealthPlanPackageById(
+        server,
+        contract.id
+    )
     return updatedDraft
 }
 
@@ -331,6 +301,7 @@ const createAndSubmitTestHealthPlanPackage = async (
         server,
         partialUpdates
     )
+
     return await submitTestHealthPlanPackage(server, pkg.id)
 }
 
@@ -450,7 +421,7 @@ const createTestQuestion = async (
         documents: [
             {
                 name: 'Test Question',
-                s3URL: 'testS3Url',
+                s3URL: 's3://bucketname/key/test1',
             },
         ],
     }
@@ -510,7 +481,7 @@ const createTestQuestionResponse = async (
         documents: [
             {
                 name: 'Test Question Response',
-                s3URL: 'testS3Url',
+                s3URL: 's3://bucketname/key/test1',
             },
         ],
     }

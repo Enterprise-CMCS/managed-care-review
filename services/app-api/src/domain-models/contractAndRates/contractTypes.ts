@@ -28,6 +28,23 @@ const contractSchema = z.object({
     packageSubmissions: z.array(contractPackageSubmissionSchema),
 })
 
+const unlockedContractSchema = z.object({
+    id: z.string().uuid(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+    status: statusSchema,
+    stateCode: z.string(),
+    mccrsID: z.string().optional(),
+    stateNumber: z.number().min(1),
+    // If this contract is in a DRAFT or UNLOCKED status, there will be a draftRevision and draftRates
+    draftRevision: contractRevisionWithRatesSchema,
+    draftRates: z.array(rateSchema).optional(),
+    // All revisions are submitted and in reverse chronological order
+    revisions: z.array(contractRevisionWithRatesSchema),
+
+    packageSubmissions: z.array(contractPackageSubmissionSchema),
+})
+
 const draftContractSchema = contractSchema.extend({
     status: z.literal('DRAFT'),
     draftRevision: contractRevisionWithRatesSchema,
@@ -35,6 +52,7 @@ const draftContractSchema = contractSchema.extend({
 })
 
 type ContractType = z.infer<typeof contractSchema>
+type UnlockedContractType = z.infer<typeof unlockedContractSchema>
 type DraftContractType = z.infer<typeof draftContractSchema>
 
 function contractSubmitters(contract: ContractType): string[] {
@@ -50,9 +68,10 @@ function contractSubmitters(contract: ContractType): string[] {
 
 export {
     contractRevisionWithRatesSchema,
+    unlockedContractSchema,
     draftContractSchema,
     contractSchema,
     contractSubmitters,
 }
 
-export type { ContractType, DraftContractType }
+export type { ContractType, DraftContractType, UnlockedContractType }

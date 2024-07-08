@@ -15,8 +15,8 @@ import { formatCalendarDate } from '../../common-code/dateHelpers'
 import {
     FormikRateForm,
     RateDetailFormConfig,
-} from '../StateSubmission/RateDetails/V2/RateDetailsV2'
-import { convertGQLRateToRateForm } from '../StateSubmission/RateDetails/V2/rateDetailsHelpers'
+    convertGQLRateToRateForm,
+} from '../StateSubmission/RateDetails'
 import { useS3 } from '../../contexts/S3Context'
 import { useFormikContext } from 'formik'
 

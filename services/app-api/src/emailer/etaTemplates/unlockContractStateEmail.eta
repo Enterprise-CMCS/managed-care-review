@@ -1,0 +1,7 @@
+Submission <%= it.packageName %> was unlocked by CMS<br />
+<br />
+<%~ includeFile('./unlockPackageSummary', it) %>
+<br />
+<b>You must revise the submission before CMS can continue reviewing it.<br />
+<br />
+<a href="<%= it.submissionURL %>">Open the submission in MC-Review to make edits.</a>

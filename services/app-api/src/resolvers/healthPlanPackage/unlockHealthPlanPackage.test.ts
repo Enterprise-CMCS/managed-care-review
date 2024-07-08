@@ -1,6 +1,5 @@
 import type { GraphQLError } from 'graphql'
 import UNLOCK_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
-import { v4 as uuidv4 } from 'uuid'
 import type {
     HealthPlanPackage,
     HealthPlanRevisionEdge,
@@ -32,6 +31,12 @@ import {
     mockEmailParameterStoreError,
 } from '../../testHelpers/parameterStoreHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import { fetchTestContract } from '../../testHelpers/gqlContractHelpers'
+import {
+    addNewRateToTestContract,
+    updateRatesInputFromDraftContract,
+    updateTestDraftRatesOnContract,
+} from '../../testHelpers/gqlRateHelpers'
 
 describe(`Tests unlockHealthPlanPackage`, () => {
     const cmsUser = testCMSUser()
@@ -221,38 +226,43 @@ describe(`Tests unlockHealthPlanPackage`, () => {
         // after unlock we should be able to update that draft submission and get the results
         formData.submissionDescription = 'UPDATED_AFTER_UNLOCK'
 
-        formData.rateInfos.push(
+        // update the rates
+        // TODO: we can lose this fetchcontract once Contract API is done
+        const contractData = await fetchTestContract(stateServer, formData.id)
+
+        const oneRateAddedContract = await addNewRateToTestContract(
+            stateServer,
+            contractData,
             {
-                id: uuidv4(),
-                rateDateStart: new Date(),
-                rateDateEnd: new Date(),
+                rateDateStart: '2022-01-01',
+                rateDateEnd: '2022-12-31',
                 rateProgramIDs: ['5c10fe9f-bec9-416f-a20c-718b152ad633'],
                 rateType: 'NEW',
-                rateDateCertified: new Date(),
+                rateDateCertified: '2022-01-02',
                 rateDocuments: [
                     {
                         name: 'fake doc',
-                        s3URL: 'foo://bar',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'fakesha',
                     },
                     {
                         name: 'fake doc 2',
-                        s3URL: 'foo://bar',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'fakesha',
                     },
                     {
                         name: 'fake doc 3',
-                        s3URL: 'foo://bar',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'fakesha',
                     },
                     {
                         name: 'fake doc 4',
-                        s3URL: 'foo://bar',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'fakesha',
                     },
                 ],
                 supportingDocuments: [],
-                actuaryContacts: [
+                certifyingActuaryContacts: [
                     {
                         name: 'Enrico Soletzo 1',
                         titleRole: 'person',
@@ -274,33 +284,34 @@ describe(`Tests unlockHealthPlanPackage`, () => {
                         actuarialFirm: 'MERCER',
                     },
                 ],
-            },
-            {
-                id: uuidv4(),
-                rateDateStart: new Date(),
-                rateDateEnd: new Date(),
-                rateProgramIDs: ['08d114c2-0c01-4a1a-b8ff-e2b79336672d'],
-                rateType: 'NEW',
-                rateDateCertified: new Date(),
-                rateDocuments: [
-                    {
-                        name: 'fake doc number two',
-                        s3URL: 'foo://bar',
-                        sha256: 'fakesha',
-                    },
-                ],
-                supportingDocuments: [],
-                actuaryContacts: [
-                    {
-                        name: 'Enrico Soletzo',
-                        titleRole: 'person',
-                        email: 'en@example.com',
-                        actuarialFirm: 'MERCER',
-                    },
-                ],
             }
         )
 
+        await addNewRateToTestContract(stateServer, oneRateAddedContract, {
+            rateDateStart: '2023-01-01',
+            rateDateEnd: '2023-12-31',
+            rateProgramIDs: ['08d114c2-0c01-4a1a-b8ff-e2b79336672d'],
+            rateType: 'NEW',
+            rateDateCertified: '2022-12-31',
+            rateDocuments: [
+                {
+                    name: 'fake doc number two',
+                    s3URL: 's3://bucketname/key/test1',
+                    sha256: 'fakesha',
+                },
+            ],
+            supportingDocuments: [],
+            certifyingActuaryContacts: [
+                {
+                    name: 'Enrico Soletzo',
+                    titleRole: 'person',
+                    email: 'en@example.com',
+                    actuarialFirm: 'MERCER',
+                },
+            ],
+        })
+
+        // update the contract as well
         await updateTestHealthPlanFormData(stateServer, formData)
 
         const refetched = await fetchTestHealthPlanPackageById(
@@ -349,9 +360,16 @@ describe(`Tests unlockHealthPlanPackage`, () => {
         ])
 
         // remove the first rate
-        unlockedFormData.rateInfos = unlockedFormData.rateInfos.slice(1)
+        const unlockedTwiceContractData = await fetchTestContract(
+            stateServer,
+            formData.id
+        )
+        const rateInputs = updateRatesInputFromDraftContract(
+            unlockedTwiceContractData
+        )
 
-        await updateTestHealthPlanFormData(stateServer, unlockedFormData)
+        rateInputs.updatedRates = rateInputs.updatedRates.slice(1)
+        await updateTestDraftRatesOnContract(stateServer, rateInputs)
 
         const submittedThrice = await resubmitTestHealthPlanPackage(
             // SUBMISSION 3

@@ -10,6 +10,8 @@ import type {
     InsertQuestionResponseArgs,
     StateType,
     RateType,
+    ContractType,
+    UnlockedContractType,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
 import type { InsertUserArgsType } from './user'
@@ -26,7 +28,6 @@ import {
     insertQuestionResponse,
 } from './questionResponse'
 import { findAllSupportedStates } from './state'
-import type { ContractType } from '../domain-models/contractAndRates'
 import {
     insertDraftContract,
     findContractWithHistory,
@@ -37,6 +38,8 @@ import {
     findAllRatesWithHistoryBySubmitInfo,
     submitContract,
     submitRate,
+    unlockContract,
+    updateDraftContract,
 } from './contractAndRates'
 import type {
     SubmitContractArgsType,
@@ -47,7 +50,6 @@ import type {
     RateOrErrorArrayType,
     UpdateMCCRSIDFormArgsType,
 } from './contractAndRates'
-import { unlockContract } from './contractAndRates/unlockContract'
 import type { UnlockContractArgsType } from './contractAndRates/unlockContract'
 import { unlockRate } from './contractAndRates/unlockRate'
 import type { UnlockRateArgsType } from './contractAndRates/unlockRate'
@@ -108,6 +110,10 @@ type Store = {
         args: UpdateMCCRSIDFormArgsType
     ) => Promise<ContractType | Error>
 
+    updateDraftContract: (
+        args: UpdateContractArgsType
+    ) => Promise<ContractType | Error>
+
     updateDraftContractWithRates: (
         args: UpdateContractArgsType
     ) => Promise<ContractType | Error>
@@ -136,7 +142,7 @@ type Store = {
     unlockContract: (
         args: UnlockContractArgsType,
         linkRatesFF?: boolean
-    ) => Promise<ContractType | Error>
+    ) => Promise<UnlockedContractType | Error>
 
     unlockRate: (args: UnlockRateArgsType) => Promise<RateType | Error>
 }
@@ -165,7 +171,6 @@ function NewPostgresStore(client: PrismaClient): Store {
         findStatePrograms: findStatePrograms,
         findAllSupportedStates: () => findAllSupportedStates(client),
         findAllUsers: () => findAllUsers(client),
-
         insertQuestion: (questionInput, user) =>
             insertQuestion(client, questionInput, user),
         findAllQuestionsByContract: (pkgID) =>
@@ -180,6 +185,7 @@ function NewPostgresStore(client: PrismaClient): Store {
         updateDraftContractWithRates: (args) =>
             updateDraftContractWithRates(client, args),
         updateContract: (args) => updateMCCRSID(client, args),
+        updateDraftContract: (args) => updateDraftContract(client, args),
         updateDraftContractRates: (args) =>
             updateDraftContractRates(client, args),
         findAllContractsWithHistoryByState: (args) =>
@@ -190,8 +196,7 @@ function NewPostgresStore(client: PrismaClient): Store {
             findAllRatesWithHistoryBySubmitInfo(client),
         submitContract: (args) => submitContract(client, args),
         submitRate: (args) => submitRate(client, args),
-        unlockContract: (args, linkRatesFF) =>
-            unlockContract(client, args, linkRatesFF),
+        unlockContract: (args) => unlockContract(client, args),
         unlockRate: (args) => unlockRate(client, args),
     }
 }

@@ -31,7 +31,7 @@ import {
     useSubmitRateMutation,
     useUpdateDraftContractRatesMutation,
 } from '../../../../gen/gqlClient'
-import { SingleRateFormFields } from './SingleRateFormFields'
+import { SingleRateFormFields } from '../SingleRateFormFields'
 import { useFocus, useRouteParams } from '../../../../hooks'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
 import { PageBannerAlerts } from '../../PageBannerAlerts'
@@ -47,9 +47,9 @@ import {
     convertGQLRateToRateForm,
     convertRateFormToGQLRateFormData,
     generateUpdatedRates,
-} from './rateDetailsHelpers'
+} from '../rateDetailsHelpers'
 import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
-import { LinkedRateSummary } from './LinkedRateSummary'
+import { LinkedRateSummary } from '../LinkedRateSummary'
 import { usePage } from '../../../../contexts/PageContext'
 
 export type FormikRateForm = {
@@ -80,14 +80,14 @@ export type RateDetailFormConfig = {
     rateForms: FormikRateForm[]
 }
 
-type RateDetailsV2Props = {
+type RateDetailsProps = {
     type: 'SINGLE' | 'MULTI'
     showValidations?: boolean
 }
-const RateDetailsV2 = ({
+const RateDetails = ({
     showValidations = false,
     type,
-}: RateDetailsV2Props): React.ReactElement => {
+}: RateDetailsProps): React.ReactElement => {
     const navigate = useNavigate()
     const { getKey } = useS3()
     const displayAsStandaloneRate = type === 'SINGLE'
@@ -95,10 +95,6 @@ const RateDetailsV2 = ({
     const ldClient = useLDClient()
     const { updateHeading } = usePage()
 
-    const useLinkedRates = ldClient?.variation(
-        featureFlags.LINK_RATES.flag,
-        featureFlags.LINK_RATES.defaultValue
-    )
     const useEditUnlockRate = ldClient?.variation(
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
@@ -112,7 +108,6 @@ const RateDetailsV2 = ({
     const rateDetailsFormSchema = RateDetailsFormSchema(
         {
             'rate-edit-unlock': useEditUnlockRate,
-            'link-rates': useLinkedRates,
         },
         !displayAsStandaloneRate
     )
@@ -166,17 +161,15 @@ const RateDetailsV2 = ({
               .rateCertificationName
         : fetchContractData?.fetchContract.contract?.draftRevision?.contractName
     if (pageHeading) updateHeading({ customHeading: pageHeading })
-    const [updateDraftContractRates, { error: updateContractError }] =
-        useUpdateDraftContractRatesMutation()
-    const [submitRate, { error: submitRateError }] = useSubmitRateMutation()
+    const [updateDraftContractRates] = useUpdateDraftContractRatesMutation()
+    const [submitRate] = useSubmitRateMutation()
 
     // Set up data for form. Either based on contract API (for multi rate) or rates API (for edit and submit of standalone rate)
     const contract = fetchContractData?.fetchContract.contract
+    const contractDraftRevision = contract?.draftRevision
     const ratesFromContract = contract?.draftRates
     const initialRequestLoading = fetchContractLoading || fetchRateLoading
     const initialRequestError = fetchContractError || fetchRateError
-    const submitRequestError = updateContractError || submitRateError
-    const apiError = initialRequestError || submitRequestError
     const previousDocuments: string[] = []
 
     // Set up initial rate form values for Formik
@@ -208,9 +201,11 @@ const RateDetailsV2 = ({
         return <ErrorOrLoadingPage state="LOADING" />
     }
 
-    if (apiError) {
+    if (initialRequestError) {
         return (
-            <ErrorOrLoadingPage state={handleAndReturnErrorState(apiError)} />
+            <ErrorOrLoadingPage
+                state={handleAndReturnErrorState(initialRequestError)}
+            />
         )
     }
     // Redirect if in standalone rate workflow and rate not editable
@@ -284,6 +279,7 @@ const RateDetailsV2 = ({
                     variables: {
                         input: {
                             contractID: id ?? 'no-id',
+                            lastSeenUpdatedAt: contractDraftRevision?.updatedAt,
                             updatedRates,
                         },
                     },
@@ -632,4 +628,4 @@ const RateDetailsV2 = ({
         </>
     )
 }
-export { RateDetailsV2 }
+export { RateDetails }

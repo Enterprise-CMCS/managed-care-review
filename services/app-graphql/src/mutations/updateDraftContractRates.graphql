@@ -41,12 +41,14 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                         s3URL
                         sha256
                         dateAdded
+                        downloadURL
                     }
                     supportingDocuments {
                         name
                         s3URL
                         sha256
                         dateAdded
+                        downloadURL
                     }
                     contractExecutionStatus
                     contractDateStart
@@ -108,12 +110,14 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                             s3URL
                             sha256
                             dateAdded
+                            downloadURL
                         }
                         supportingDocuments {
                             name
                             s3URL
                             sha256
                             dateAdded
+                            downloadURL
                         }
                         packagesWithSharedRateCerts {
                             packageName
@@ -162,12 +166,14 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                             s3URL
                             sha256
                             dateAdded
+                            downloadURL
                         }
                         supportingDocuments {
                             name
                             s3URL
                             sha256
                             dateAdded
+                            downloadURL
                         }
                     }
                 }

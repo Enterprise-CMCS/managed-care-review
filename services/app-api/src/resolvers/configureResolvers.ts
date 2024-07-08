@@ -15,6 +15,7 @@ import {
     indexQuestionsResolver,
     createQuestionResolver,
     createQuestionResponseResolver,
+    questionResponseDocumentResolver,
 } from './questionResponse'
 import {
     fetchCurrentUserResolver,
@@ -29,24 +30,31 @@ import type { JWTLib } from '../jwt'
 import { fetchEmailSettingsResolver } from './email/fetchEmailSettings'
 import { indexRatesResolver } from './rate/indexRates'
 import { rateResolver } from './rate/rateResolver'
+import { genericDocumentResolver } from './shared/genericDocumentResolver'
 import { fetchRateResolver } from './rate/fetchRate'
 import { updateContract } from './contract/updateContract'
+import { unlockContractResolver } from './contract/unlockContract'
 import { createAPIKeyResolver } from './APIKey'
 import { unlockRate } from './rate/unlockRate'
 import { submitRate } from './rate/submitRate'
 import { updateDraftContractRates } from './contract/updateDraftContractRates'
 import { contractResolver } from './contract/contractResolver'
+import { unlockedContractResolver } from './contract/unlockedContractResolver'
 import { contractRevisionResolver } from './contract/contractRevisionResolver'
 import { fetchContractResolver } from './contract/fetchContract'
 import { submitContract } from './contract/submitContract'
 import { rateRevisionResolver } from './rate/rateRevisionResolver'
+import type { S3ClientT } from '../s3'
+import { createContract } from './contract/createContract'
+import { updateContractDraftRevision } from './contract/updateContractDraftRevision'
 
 export function configureResolvers(
     store: Store,
     emailer: Emailer,
     emailParameterStore: EmailParameterStore,
     launchDarkly: LDService,
-    jwt: JWTLib
+    jwt: JWTLib,
+    s3Client: S3ClientT
 ): Resolvers {
     const resolvers: Resolvers = {
         Date: GraphQLDate,
@@ -91,7 +99,18 @@ export function configureResolvers(
                 emailParameterStore,
                 launchDarkly
             ),
+            unlockContract: unlockContractResolver(
+                store,
+                emailer,
+                emailParameterStore,
+                launchDarkly
+            ),
+            createContract: createContract(store),
             updateContract: updateContract(store),
+            updateContractDraftRevision: updateContractDraftRevision(
+                store,
+                launchDarkly
+            ),
             updateDraftContractRates: updateDraftContractRates(store),
             updateCMSUser: updateCMSUserResolver(store),
             createQuestion: createQuestionResolver(
@@ -141,7 +160,10 @@ export function configureResolvers(
         Rate: rateResolver,
         RateRevision: rateRevisionResolver,
         Contract: contractResolver(),
+        UnlockedContract: unlockedContractResolver(),
         ContractRevision: contractRevisionResolver(store),
+        GenericDocument: genericDocumentResolver(s3Client),
+        Document: questionResponseDocumentResolver(s3Client),
     }
 
     return resolvers

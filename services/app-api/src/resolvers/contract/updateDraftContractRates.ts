@@ -53,7 +53,7 @@ function updateDraftContractRates(
         const span = tracer?.startSpan('updateDraftContractRates', {}, ctx)
         setResolverDetailsOnActiveSpan('updateDraftContractRates', user, span)
 
-        const { contractID, updatedRates } = input
+        const { contractID, updatedRates, lastSeenUpdatedAt } = input
         const parsedRatesResult = updatedRatesSchema.safeParse(updatedRates)
 
         if (!parsedRatesResult.success) {
@@ -137,12 +137,26 @@ function updateDraftContractRates(
         // state user is authorized
 
         // Can only update a contract that is editable
-        if (!(contract.status === 'DRAFT' || contract.status === 'UNLOCKED')) {
+        if (
+            !contract.draftRevision ||
+            !(contract.status === 'DRAFT' || contract.status === 'UNLOCKED')
+        ) {
             const errMsg =
                 'you cannot update a contract that is not DRAFT or UNLOCKED'
             logError('updateDraftContractRates', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw new UserInputError(errMsg)
+        }
+
+        // If updatedAt does not match concurrent editing occurred.
+        if (
+            contract.draftRevision.updatedAt.getTime() !==
+            lastSeenUpdatedAt.getTime()
+        ) {
+            const errMessage = `Concurrent update error: The data you are trying to modify has changed since you last retrieved it. Please refresh the page to continue.`
+            logError('updateDraftContractRates', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new UserInputError(errMessage)
         }
 
         // The Request is Valid!

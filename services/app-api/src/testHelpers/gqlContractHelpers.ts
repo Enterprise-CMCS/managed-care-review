@@ -1,5 +1,6 @@
 import FETCH_CONTRACT from '../../../app-graphql/src/queries/fetchContract.graphql'
 import SUBMIT_CONTRACT from '../../../app-graphql/src/mutations/submitContract.graphql'
+import UNLOCK_CONTRACT from '../../../app-graphql/src/mutations/unlockContract.graphql'
 import UPDATE_DRAFT_CONTRACT_RATES from '../../../app-graphql/src/mutations/updateDraftContractRates.graphql'
 import { findStatePrograms } from '../postgres'
 import type { InsertContractArgsType } from '../postgres/contractAndRates/insertContract'
@@ -14,20 +15,30 @@ import { mockInsertContractArgs, mockContractData } from './contractDataMocks'
 import { sharedTestPrismaClient } from './storeHelpers'
 import { insertDraftContract } from '../postgres/contractAndRates/insertContract'
 
-import type { ContractType } from '../domain-models'
+import { type ContractType } from '../domain-models'
 import type { ApolloServer } from 'apollo-server-lambda'
-import type { Contract, RateFormData } from '../gen/gqlServer'
+import type {
+    Contract,
+    ContractDraftRevisionFormDataInput,
+    RateFormData,
+    UnlockedContract,
+} from '../gen/gqlServer'
 import { latestFormData } from './healthPlanPackageHelpers'
 import type {
+    HealthPlanFormDataType,
     StateCodeType,
-    UnlockedHealthPlanFormDataType,
 } from 'app-web/src/common-code/healthPlanFormDataType'
 import { addNewRateToTestContract } from './gqlRateHelpers'
+import UPDATE_CONTRACT_DRAFT_REVISION from 'app-graphql/src/mutations/updateContractDraftRevision.graphql'
+import type { ContractFormDataType } from '../domain-models'
+import type { CreateHealthPlanPackageInput } from '../gen/gqlServer'
+import CREATE_CONTRACT from 'app-graphql/src/mutations/createContract.graphql'
+import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
 
 const createAndSubmitTestContract = async (
     contractData?: InsertContractArgsType
 ): Promise<ContractType> => {
-    const contract = await createTestContract(contractData)
+    const contract = await createTestContractWithDB(contractData)
     return await must(submitTestContractWithDB(contract))
 }
 
@@ -83,6 +94,50 @@ async function submitTestContract(
     return result.data.submitContract.contract
 }
 
+async function unlockTestContract(
+    server: ApolloServer,
+    contractID: string,
+    unlockedReason?: string
+): Promise<UnlockedContract> {
+    const result = await server.executeOperation({
+        query: UNLOCK_CONTRACT,
+        variables: {
+            input: {
+                contractID: contractID,
+                unlockedReason: unlockedReason,
+            },
+        },
+    })
+
+    if (result.errors) {
+        throw new Error(
+            `unlockTestContract query failed with errors ${result.errors}`
+        )
+    }
+
+    if (!result.data) {
+        throw new Error('unlockTestContract returned nothing')
+    }
+
+    return result.data.unlockContract.contract
+}
+
+async function createSubmitAndUnlockTestContract(
+    stateServer: ApolloServer,
+    cmsServer: ApolloServer
+): Promise<UnlockedContract> {
+    const contract = await createAndSubmitTestContractWithRate(stateServer)
+    const contractID = contract.id
+
+    const unlockedContract = await unlockTestContract(
+        cmsServer,
+        contractID,
+        'test unlock'
+    )
+
+    return unlockedContract
+}
+
 async function createAndSubmitTestContractWithRate(
     server: ApolloServer
 ): Promise<Contract> {
@@ -115,7 +170,7 @@ async function fetchTestContract(
 }
 
 // USING PRISMA DIRECTLY BELOW ---  we have no createContract resolver yet, but we have integration tests needing the workflows
-const createTestContract = async (
+const createTestContractWithDB = async (
     contractData?: Partial<InsertContractArgsType>
 ): Promise<ContractType> => {
     const prismaClient = await sharedTestPrismaClient()
@@ -139,6 +194,43 @@ const createTestContract = async (
     return must(await insertDraftContract(prismaClient, draftContractData))
 }
 
+const createTestContract = async (
+    server: ApolloServer,
+    stateCode?: StateCodeType,
+    formData?: Partial<ContractFormDataType>
+): Promise<Contract> => {
+    const programs = stateCode
+        ? [must(findStatePrograms(stateCode))[0]]
+        : [defaultFloridaProgram()]
+
+    const programIDs = programs.map((program) => program.id)
+    const input: CreateHealthPlanPackageInput = {
+        programIDs: programIDs,
+        populationCovered: 'MEDICAID',
+        riskBasedContract: false,
+        submissionType: 'CONTRACT_ONLY',
+        submissionDescription: 'A created submission',
+        contractType: 'BASE',
+        ...formData,
+    }
+    const result = await server.executeOperation({
+        query: CREATE_CONTRACT,
+        variables: { input },
+    })
+
+    if (result.errors) {
+        throw new Error(
+            `createTestContract mutation failed with errors ${result.errors}`
+        )
+    }
+
+    if (!result.data) {
+        throw new Error('createTestContract returned nothing')
+    }
+
+    return result.data.createContract.contract
+}
+
 async function createAndUpdateTestContractWithRate(
     server: ApolloServer
 ): Promise<Contract> {
@@ -149,7 +241,7 @@ async function createAndUpdateTestContractWithRate(
 const createAndUpdateTestContractWithoutRates = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
-    contractFormDataOverrides?: Partial<UnlockedHealthPlanFormDataType>
+    contractFormDataOverrides?: Partial<HealthPlanFormDataType>
 ): Promise<Contract> => {
     const pkg = await createTestHealthPlanPackage(server, stateCode)
     const draft = latestFormData(pkg)
@@ -171,7 +263,7 @@ const createAndUpdateTestContractWithoutRates = async (
     draft.contractDocuments = [
         {
             name: 'contractDocument.pdf',
-            s3URL: 'fakeS3URL',
+            s3URL: 's3://bucketname/key/test1',
             sha256: 'fakesha',
         },
     ]
@@ -200,11 +292,12 @@ const createAndUpdateTestContractWithoutRates = async (
     return updatedContract
 }
 
-const linkRateToDraftContract = async (  server: ApolloServer,
+const linkRateToDraftContract = async (
+    server: ApolloServer,
     contractID: string,
-    linkedRateID: string) => {
-
-    const updatedContract =    await server.executeOperation({
+    linkedRateID: string
+) => {
+    const updatedContract = await server.executeOperation({
         query: UPDATE_DRAFT_CONTRACT_RATES,
         variables: {
             input: {
@@ -221,18 +314,16 @@ const linkRateToDraftContract = async (  server: ApolloServer,
     return updatedContract
 }
 
-const clearRatesOnDraftContract = async (  server: ApolloServer,
-    contractID: string,
-    ) => {
-
-    const updatedContract =    await server.executeOperation({
+const clearRatesOnDraftContract = async (
+    server: ApolloServer,
+    contractID: string
+) => {
+    const updatedContract = await server.executeOperation({
         query: UPDATE_DRAFT_CONTRACT_RATES,
         variables: {
             input: {
                 contractID: contractID,
-                updatedRates: [
-
-                ],
+                updatedRates: [],
             },
         },
     })
@@ -243,10 +334,9 @@ const updateRateOnDraftContract = async (
     server: ApolloServer,
     contractID: string,
     rateID: string,
-    rateData: Partial<RateFormData>,
-) : Promise<ContractType> => {
-
-    const updatedContract =   await server.executeOperation({
+    rateData: Partial<RateFormData>
+): Promise<ContractType> => {
+    const updatedContract = await server.executeOperation({
         query: UPDATE_DRAFT_CONTRACT_RATES,
         variables: {
             input: {
@@ -255,7 +345,7 @@ const updateRateOnDraftContract = async (
                     {
                         type: 'UPDATE',
                         formData: rateData,
-                        rateID: rateID
+                        rateID: rateID,
                     },
                 ],
             },
@@ -263,20 +353,70 @@ const updateRateOnDraftContract = async (
     })
     must(updatedContract)
     const contractData = updatedContract.data?.updateDraftContractRates.contract
-    if (!contractData)throw Error (`malformatted response: ${updatedContract.data}` )
+    if (!contractData)
+        throw Error(`malformatted response: ${updatedContract.data}`)
     return updatedContract.data?.contract
 }
 
+const updateTestContractDraftRevision = async (
+    server: ApolloServer,
+    contractID: string,
+    lastSeenUpdatedAt?: Date,
+    formData?: Partial<ContractDraftRevisionFormDataInput>
+): Promise<Contract> => {
+    const draftContract = await fetchTestContract(server, contractID)
+
+    if (!draftContract.draftRevision) {
+        throw new Error(
+            'Unexpected error: Draft contract did not contain a draft revision'
+        )
+    }
+
+    const updatedFormData =
+        formData ||
+        mockGqlContractDraftRevisionFormDataInput(
+            draftContract.stateCode as StateCodeType
+        )
+
+    const updateResult = await server.executeOperation({
+        query: UPDATE_CONTRACT_DRAFT_REVISION,
+        variables: {
+            input: {
+                contractID: contractID,
+                lastSeenUpdatedAt:
+                    lastSeenUpdatedAt || draftContract.draftRevision.updatedAt,
+                formData: updatedFormData,
+            },
+        },
+    })
+
+    if (updateResult.errors) {
+        console.info('errors', JSON.stringify(updateResult.errors))
+        throw new Error(
+            `updateTestContractDraftRevision mutation failed with errors ${updateResult.errors}`
+        )
+    }
+
+    if (!updateResult.data) {
+        throw new Error('updateTestContractDraftRevision returned nothing')
+    }
+
+    return updateResult.data.updateContractDraftRevision.contract
+}
 
 export {
-    createTestContract,
+    createTestContractWithDB,
     submitTestContract,
+    unlockTestContract,
     createAndSubmitTestContract,
     fetchTestContract,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
     createAndSubmitTestContractWithRate,
+    createSubmitAndUnlockTestContract,
     linkRateToDraftContract,
     updateRateOnDraftContract,
-    clearRatesOnDraftContract
+    clearRatesOnDraftContract,
+    updateTestContractDraftRevision,
+    createTestContract,
 }

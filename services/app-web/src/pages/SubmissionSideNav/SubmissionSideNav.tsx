@@ -41,12 +41,8 @@ export type SideNavOutletContextType = {
     user: User
 }
 
-type RouteParams = {
-    id: string
-}
-
 export const SubmissionSideNav = () => {
-    const { id } = useParams<keyof RouteParams>()
+    const { id } = useParams()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'

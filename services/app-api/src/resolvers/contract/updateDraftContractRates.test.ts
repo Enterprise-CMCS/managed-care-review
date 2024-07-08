@@ -14,16 +14,22 @@ import {
 } from '../../testHelpers/gqlRateHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
 
 describe('updateDraftContractRates', () => {
+    const mockS3 = testS3Client()
+
     it('returns 404 for an unknown Contract', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         const result = await stateServer.executeOperation({
             query: UPDATE_DRAFT_CONTRACT_RATES,
             variables: {
                 input: {
                     contractID: 'foobar',
+                    lastSeenUpdatedAt: new Date(),
                     updatedRates: [],
                 },
             },
@@ -41,9 +47,12 @@ describe('updateDraftContractRates', () => {
     })
 
     it('errors for access from a different state', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         const draft = await createTestHealthPlanPackage(stateServer)
+        const draftFD = latestFormData(draft)
 
         const otherStateServer = await constructTestPostgresServer({
             context: {
@@ -58,6 +67,7 @@ describe('updateDraftContractRates', () => {
             variables: {
                 input: {
                     contractID: draft.id,
+                    lastSeenUpdatedAt: draftFD.updatedAt,
                     updatedRates: [],
                 },
             },
@@ -75,14 +85,18 @@ describe('updateDraftContractRates', () => {
     })
 
     it('errors for access from a CMS user', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         const draft = await createTestHealthPlanPackage(stateServer)
+        const draftFD = latestFormData(draft)
 
         const otherStateServer = await constructTestPostgresServer({
             context: {
                 user: testCMSUser(),
             },
+            s3Client: mockS3,
         })
 
         const result = await otherStateServer.executeOperation({
@@ -90,6 +104,7 @@ describe('updateDraftContractRates', () => {
             variables: {
                 input: {
                     contractID: draft.id,
+                    lastSeenUpdatedAt: draftFD.updatedAt,
                     updatedRates: [],
                 },
             },
@@ -107,15 +122,19 @@ describe('updateDraftContractRates', () => {
     })
 
     it('rejects updates to submitted contract', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         const draft = await createAndSubmitTestHealthPlanPackage(stateServer)
+        const draftFD = latestFormData(draft)
 
         const result = await stateServer.executeOperation({
             query: UPDATE_DRAFT_CONTRACT_RATES,
             variables: {
                 input: {
                     contractID: draft.id,
+                    lastSeenUpdatedAt: draftFD.updatedAt,
                     updatedRates: [],
                 },
             },
@@ -132,6 +151,37 @@ describe('updateDraftContractRates', () => {
         expect(result.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
     })
 
+    it('errors on concurrent updates', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const draft = await createTestHealthPlanPackage(stateServer)
+
+        const result = await stateServer.executeOperation({
+            query: UPDATE_DRAFT_CONTRACT_RATES,
+            variables: {
+                input: {
+                    contractID: draft.id,
+                    lastSeenUpdatedAt: new Date(1999, 11, 23),
+                    updatedRates: [],
+                },
+            },
+        })
+
+        expect(result.errors).toBeDefined()
+        if (!result.errors) {
+            throw new Error('No Errors')
+        }
+
+        expect(result.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
+
+        const expectedErrorMsg =
+            'Concurrent update error: The data you are trying to modify has changed since you last retrieved it. Please refresh the page to continue.'
+
+        expect(result.errors[0].message).toBe(expectedErrorMsg)
+    })
+
     it('rejects updates with bad update schema', async () => {
         const testRateFormData = {
             rateType: 'NEW',
@@ -143,7 +193,7 @@ describe('updateDraftContractRates', () => {
 
             rateDocuments: [
                 {
-                    s3URL: 'foo://bar',
+                    s3URL: 's3://bucketname/key/test1',
                     name: 'ratedoc1.doc',
                     sha256: 'foobar',
                 },
@@ -161,15 +211,19 @@ describe('updateDraftContractRates', () => {
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         }
 
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         const draft = await createAndSubmitTestHealthPlanPackage(stateServer)
+        const draftFD = latestFormData(draft)
 
         const result = await stateServer.executeOperation({
             query: UPDATE_DRAFT_CONTRACT_RATES,
             variables: {
                 input: {
                     contractID: draft.id,
+                    lastSeenUpdatedAt: draftFD.updatedAt,
                     updatedRates: [
                         {
                             // invalid
@@ -238,15 +292,19 @@ describe('updateDraftContractRates', () => {
     })
 
     it('adds a new rate', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         const draft = await createTestHealthPlanPackage(stateServer)
+        const draftFD = latestFormData(draft)
 
         const result = await stateServer.executeOperation({
             query: UPDATE_DRAFT_CONTRACT_RATES,
             variables: {
                 input: {
                     contractID: draft.id,
+                    lastSeenUpdatedAt: draftFD.updatedAt,
                     updatedRates: [
                         {
                             type: 'CREATE',
@@ -261,19 +319,19 @@ describe('updateDraftContractRates', () => {
                                 deprecatedRateProgramIDs: [],
                                 rateDocuments: [
                                     {
-                                        s3URL: 'foo://bar',
+                                        s3URL: 's3://bucketname/key/test1',
                                         name: 'ratedoc1.doc',
                                         sha256: 'foobar',
                                     },
                                 ],
                                 supportingDocuments: [
                                     {
-                                        s3URL: 'foo://bar1',
+                                        s3URL: 's3://bucketname/key/test11',
                                         name: 'ratesupdoc1.doc',
                                         sha256: 'foobar1',
                                     },
                                     {
-                                        s3URL: 'foo://bar2',
+                                        s3URL: 's3://bucketname/key/test12',
                                         name: 'ratesupdoc2.doc',
                                         sha256: 'foobar2',
                                     },
@@ -316,7 +374,9 @@ describe('updateDraftContractRates', () => {
     })
 
     it('updates an existing rate', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         const draft = await createAndUpdateTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(draft)
@@ -327,6 +387,7 @@ describe('updateDraftContractRates', () => {
             variables: {
                 input: {
                     contractID: draft.id,
+                    lastSeenUpdatedAt: draftFD.updatedAt,
                     updatedRates: [
                         {
                             type: 'UPDATE',
@@ -342,19 +403,19 @@ describe('updateDraftContractRates', () => {
                                 deprecatedRateProgramIDs: [],
                                 rateDocuments: [
                                     {
-                                        s3URL: 'foo://bar',
+                                        s3URL: 's3://bucketname/key/test1',
                                         name: 'updatedratedoc1.doc',
                                         sha256: 'foobar',
                                     },
                                 ],
                                 supportingDocuments: [
                                     {
-                                        s3URL: 'foo://bar1',
+                                        s3URL: 's3://bucketname/key/test11',
                                         name: 'ratesupdoc1.doc',
                                         sha256: 'foobar1',
                                     },
                                     {
-                                        s3URL: 'foo://bar2',
+                                        s3URL: 's3://bucketname/key/test12',
                                         name: 'ratesupdoc2.doc',
                                         sha256: 'foobar2',
                                     },
@@ -401,15 +462,19 @@ describe('updateDraftContractRates', () => {
     })
 
     it('doesnt allow updating a non-existent rate', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         const draft = await createAndUpdateTestHealthPlanPackage(stateServer)
+        const draftFD = latestFormData(draft)
 
         const result = await stateServer.executeOperation({
             query: UPDATE_DRAFT_CONTRACT_RATES,
             variables: {
                 input: {
                     contractID: draft.id,
+                    lastSeenUpdatedAt: draftFD.updatedAt,
                     updatedRates: [
                         {
                             type: 'UPDATE',
@@ -425,19 +490,19 @@ describe('updateDraftContractRates', () => {
                                 deprecatedRateProgramIDs: [],
                                 rateDocuments: [
                                     {
-                                        s3URL: 'foo://bar',
+                                        s3URL: 's3://bucketname/key/test1',
                                         name: 'updatedratedoc1.doc',
                                         sha256: 'foobar',
                                     },
                                 ],
                                 supportingDocuments: [
                                     {
-                                        s3URL: 'foo://bar1',
+                                        s3URL: 's3://bucketname/key/test11',
                                         name: 'ratesupdoc1.doc',
                                         sha256: 'foobar1',
                                     },
                                     {
-                                        s3URL: 'foo://bar2',
+                                        s3URL: 's3://bucketname/key/test12',
                                         name: 'ratesupdoc2.doc',
                                         sha256: 'foobar2',
                                     },
@@ -475,9 +540,12 @@ describe('updateDraftContractRates', () => {
     })
 
     it('doesnt allow updating an unassociated rate', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         const draft = await createAndUpdateTestHealthPlanPackage(stateServer)
+        const draftFD = latestFormData(draft)
         const draft2 = await createAndUpdateTestHealthPlanPackage(stateServer)
         const draft2FD = latestFormData(draft2)
         const rate = draft2FD.rateInfos[0]
@@ -487,6 +555,7 @@ describe('updateDraftContractRates', () => {
             variables: {
                 input: {
                     contractID: draft.id,
+                    lastSeenUpdatedAt: draftFD.updatedAt,
                     updatedRates: [
                         {
                             type: 'UPDATE',
@@ -502,19 +571,19 @@ describe('updateDraftContractRates', () => {
                                 deprecatedRateProgramIDs: [],
                                 rateDocuments: [
                                     {
-                                        s3URL: 'foo://bar',
+                                        s3URL: 's3://bucketname/key/test1',
                                         name: 'updatedratedoc1.doc',
                                         sha256: 'foobar',
                                     },
                                 ],
                                 supportingDocuments: [
                                     {
-                                        s3URL: 'foo://bar1',
+                                        s3URL: 's3://bucketname/key/test11',
                                         name: 'ratesupdoc1.doc',
                                         sha256: 'foobar1',
                                     },
                                     {
-                                        s3URL: 'foo://bar2',
+                                        s3URL: 's3://bucketname/key/test12',
                                         name: 'ratesupdoc2.doc',
                                         sha256: 'foobar2',
                                     },
@@ -552,13 +621,17 @@ describe('updateDraftContractRates', () => {
     })
 
     it('allows creating and updating a partial rate', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         const contractDraft = await createTestHealthPlanPackage(stateServer)
+        const draftFD = latestFormData(contractDraft)
 
         const ratesDraft = await createTestDraftRateOnContract(
             stateServer,
             contractDraft.id,
+            draftFD.updatedAt,
             {
                 rateType: 'AMENDMENT',
                 rateDateStart: '2021-02-02',
@@ -587,6 +660,7 @@ describe('updateDraftContractRates', () => {
         const finalDraft = await updateTestDraftRateOnContract(
             stateServer,
             contractDraft.id,
+            ratesDraft.draftRevision?.updatedAt,
             rateID,
             {
                 rateType: 'NEW',
@@ -609,7 +683,9 @@ describe('updateDraftContractRates', () => {
     })
 
     it('allows linking to another submitted rate', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         const otherPackage =
             await createAndSubmitTestHealthPlanPackage(stateServer)
@@ -618,12 +694,14 @@ describe('updateDraftContractRates', () => {
         const foreignRateID = otherFD.rateInfos[0].id
 
         const contractDraft = await createTestHealthPlanPackage(stateServer)
+        const draftFD = latestFormData(contractDraft)
 
         const result = await stateServer.executeOperation({
             query: UPDATE_DRAFT_CONTRACT_RATES,
             variables: {
                 input: {
                     contractID: contractDraft.id,
+                    lastSeenUpdatedAt: draftFD.updatedAt,
                     updatedRates: [
                         {
                             type: 'LINK',
@@ -652,7 +730,9 @@ describe('updateDraftContractRates', () => {
     })
 
     it('doesnt allow updating a linked rate', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         const otherPackage =
             await createAndSubmitTestHealthPlanPackage(stateServer)
@@ -661,12 +741,14 @@ describe('updateDraftContractRates', () => {
         const foreignRateID = otherFD.rateInfos[0].id
 
         const contractDraft = await createTestHealthPlanPackage(stateServer)
+        const draftFD = latestFormData(contractDraft)
 
         const result = await stateServer.executeOperation({
             query: UPDATE_DRAFT_CONTRACT_RATES,
             variables: {
                 input: {
                     contractID: contractDraft.id,
+                    lastSeenUpdatedAt: draftFD.updatedAt,
                     updatedRates: [
                         {
                             type: 'LINK',
@@ -685,6 +767,9 @@ describe('updateDraftContractRates', () => {
         const draftRates =
             result.data.updateDraftContractRates.contract.draftRates
 
+        const draftRevision =
+            result.data.updateDraftContractRates.contract.draftRates
+
         expect(draftRates).toHaveLength(1)
 
         const rateID = draftRates[0].id
@@ -694,6 +779,7 @@ describe('updateDraftContractRates', () => {
             variables: {
                 input: {
                     contractID: contractDraft.id,
+                    lastSeenUpdatedAt: draftRevision.updatedAt,
                     updatedRates: [
                         {
                             type: 'UPDATE',
@@ -709,19 +795,19 @@ describe('updateDraftContractRates', () => {
                                 deprecatedRateProgramIDs: [],
                                 rateDocuments: [
                                     {
-                                        s3URL: 'foo://bar',
+                                        s3URL: 's3://bucketname/key/test1',
                                         name: 'updatedratedoc1.doc',
                                         sha256: 'foobar',
                                     },
                                 ],
                                 supportingDocuments: [
                                     {
-                                        s3URL: 'foo://bar1',
+                                        s3URL: 's3://bucketname/key/test11',
                                         name: 'ratesupdoc1.doc',
                                         sha256: 'foobar1',
                                     },
                                     {
-                                        s3URL: 'foo://bar2',
+                                        s3URL: 's3://bucketname/key/test12',
                                         name: 'ratesupdoc2.doc',
                                         sha256: 'foobar2',
                                     },
@@ -761,7 +847,9 @@ describe('updateDraftContractRates', () => {
     })
 
     it('doesnt allow linking a DRAFT rate', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
         const otherPackage =
             await createAndUpdateTestHealthPlanPackage(stateServer)
 
@@ -769,12 +857,14 @@ describe('updateDraftContractRates', () => {
         const foreignRateID = otherFD.rateInfos[0].id
 
         const contractDraft = await createTestHealthPlanPackage(stateServer)
+        const draftFD = latestFormData(contractDraft)
 
         const result = await stateServer.executeOperation({
             query: UPDATE_DRAFT_CONTRACT_RATES,
             variables: {
                 input: {
                     contractID: contractDraft.id,
+                    lastSeenUpdatedAt: draftFD.updatedAt,
                     updatedRates: [
                         {
                             type: 'LINK',
@@ -797,11 +887,14 @@ describe('updateDraftContractRates', () => {
     })
 
     it('doesnt allow updating a non-child rate', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: testCMSUser(),
             },
+            s3Client: mockS3,
         })
 
         const otherPackage =
@@ -817,12 +910,14 @@ describe('updateDraftContractRates', () => {
         const foreignRateID = otherFD.rateInfos[0].id
 
         const contractDraft = await createTestHealthPlanPackage(stateServer)
+        const draftFD = latestFormData(contractDraft)
 
         const linkResult = await stateServer.executeOperation({
             query: UPDATE_DRAFT_CONTRACT_RATES,
             variables: {
                 input: {
                     contractID: contractDraft.id,
+                    lastSeenUpdatedAt: draftFD.updatedAt,
                     updatedRates: [
                         {
                             type: 'LINK',
@@ -835,11 +930,15 @@ describe('updateDraftContractRates', () => {
 
         expect(linkResult.errors).toBeUndefined()
 
+        const draftRevision =
+            linkResult?.data?.updateDraftContractRates.contract.draftRevision
+
         const result = await stateServer.executeOperation({
             query: UPDATE_DRAFT_CONTRACT_RATES,
             variables: {
                 input: {
                     contractID: contractDraft.id,
+                    lastSeenUpdatedAt: draftRevision.updatedAt,
                     updatedRates: [
                         {
                             type: 'UPDATE',
@@ -855,19 +954,19 @@ describe('updateDraftContractRates', () => {
                                 deprecatedRateProgramIDs: [],
                                 rateDocuments: [
                                     {
-                                        s3URL: 'foo://bar',
+                                        s3URL: 's3://bucketname/key/test1',
                                         name: 'updatedratedoc1.doc',
                                         sha256: 'foobar',
                                     },
                                 ],
                                 supportingDocuments: [
                                     {
-                                        s3URL: 'foo://bar1',
+                                        s3URL: 's3://bucketname/key/test11',
                                         name: 'ratesupdoc1.doc',
                                         sha256: 'foobar1',
                                     },
                                     {
-                                        s3URL: 'foo://bar2',
+                                        s3URL: 's3://bucketname/key/test12',
                                         name: 'ratesupdoc2.doc',
                                         sha256: 'foobar2',
                                     },
@@ -911,7 +1010,9 @@ describe('updateDraftContractRates', () => {
     })
 
     it('allows unlinking another submitted rate', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         const otherPackage =
             await createAndSubmitTestHealthPlanPackage(stateServer)
@@ -920,12 +1021,14 @@ describe('updateDraftContractRates', () => {
         const foreignRateID = otherFD.rateInfos[0].id
 
         const contractDraft = await createTestHealthPlanPackage(stateServer)
+        const draftFD = latestFormData(contractDraft)
 
         const linkResult = await stateServer.executeOperation({
             query: UPDATE_DRAFT_CONTRACT_RATES,
             variables: {
                 input: {
                     contractID: contractDraft.id,
+                    lastSeenUpdatedAt: draftFD.updatedAt,
                     updatedRates: [
                         {
                             type: 'LINK',
@@ -944,6 +1047,9 @@ describe('updateDraftContractRates', () => {
         const draftRates =
             linkResult.data.updateDraftContractRates.contract.draftRates
 
+        const draftRevision =
+            linkResult.data.updateDraftContractRates.contract.draftRevision
+
         expect(draftRates).toHaveLength(1)
 
         const unlinkResult = await stateServer.executeOperation({
@@ -951,6 +1057,7 @@ describe('updateDraftContractRates', () => {
             variables: {
                 input: {
                     contractID: contractDraft.id,
+                    lastSeenUpdatedAt: draftRevision.updatedAt,
                     updatedRates: [],
                 },
             },
@@ -968,7 +1075,9 @@ describe('updateDraftContractRates', () => {
     })
 
     it('deletes a draft rate', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         const draft = await createAndUpdateTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(draft)
@@ -986,6 +1095,7 @@ describe('updateDraftContractRates', () => {
             variables: {
                 input: {
                     contractID: draft.id,
+                    lastSeenUpdatedAt: draftFD.updatedAt,
                     updatedRates: [],
                 },
             },

@@ -259,31 +259,31 @@ describe('UploadedDocumentsTable', () => {
             })
         })
     })
-    it('renders the NEW tag when a document is submitted after the last submission', async () => {
+    it('renders the NEW tag when a document is submitted after the last submission, even if same day', async () => {
         const testDocuments: GenericDocument[] = [
             {
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
-                dateAdded: new Date('03/25/2022'),
+                dateAdded: new Date('06/30/2024'), // this is NEW, several days later
             },
             {
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
                 sha256: 'fakesha1',
-                dateAdded: new Date('03/26/2022'),
+                dateAdded: new Date('2024-06-03T14:24:16.244Z'), // this is NEW, same day
             },
             {
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
                 sha256: 'fakesha2',
-                dateAdded: new Date('03/27/2022'),
+                dateAdded: new Date('2024-06-03T08:08:16.244Z'), // this old, from earlier same day
             },
         ]
         renderWithProviders(
             <UploadedDocumentsTable
                 documents={testDocuments}
-                previousSubmissionDate={new Date('03/26/2022')}
+                previousSubmissionDate={new Date('2024-06-03T14:24:16.244Z')}
                 caption="Contract supporting"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
@@ -301,7 +301,8 @@ describe('UploadedDocumentsTable', () => {
             }
         )
         await waitFor(() => {
-            expect(screen.getByTestId('tag')).toHaveTextContent('NEW')
+            expect(screen.getAllByTestId('tag')).toHaveLength(2)
+            expect(screen.getAllByText('NEW')).toHaveLength(2)
         })
     })
 
@@ -428,9 +429,7 @@ describe('UploadedDocumentsTable', () => {
                         }),
                     ],
                 },
-                featureFlags: {
-                    'link-rates': false,
-                },
+                featureFlags: {},
             }
         )
 
@@ -469,9 +468,7 @@ describe('UploadedDocumentsTable', () => {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
-                featureFlags: {
-                    'link-rates': false,
-                },
+                featureFlags: {},
             }
         )
 
@@ -515,9 +512,7 @@ describe('UploadedDocumentsTable', () => {
                         }),
                     ],
                 },
-                featureFlags: {
-                    'link-rates': true,
-                },
+                featureFlags: {},
             }
         )
 
@@ -554,16 +549,21 @@ describe('UploadedDocumentsTable', () => {
             />,
             {
                 apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ user: mockValidStateUser(), statusCode: 200 })],
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidStateUser(),
+                            statusCode: 200,
+                        }),
+                    ],
                 },
-                featureFlags: {
-                    'link-rates': true,
-                },
+                featureFlags: {},
             }
         )
 
         expect(await screen.findByTestId('tag')).toHaveTextContent('SHARED')
-        expect(await screen.findByText('Linked submissions')).toBeInTheDocument()
+        expect(
+            await screen.findByText('Linked submissions')
+        ).toBeInTheDocument()
     })
 
     it('does not render SHARED tag to state user on review submit when linked rates flag on', async () => {
@@ -603,14 +603,14 @@ describe('UploadedDocumentsTable', () => {
                         }),
                     ],
                 },
-                featureFlags: {
-                    'link-rates': true,
-                },
+                featureFlags: {},
             }
         )
 
         expect(await screen.findByTestId('tag')).not.toBeInTheDocument()
-        expect(await screen.queryByText('Linked submissions')).not.toBeInTheDocument()
+        expect(
+            await screen.queryByText('Linked submissions')
+        ).not.toBeInTheDocument()
     })
 
     it('does not validations when hideDynamicFeedback is set to true', async () => {

@@ -8,6 +8,7 @@ import {
     updateTestHealthPlanFormData,
 } from '../../testHelpers/gqlHelpers'
 import SUBMIT_CONTRACT from '../../../../app-graphql/src/mutations/submitContract.graphql'
+import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
 
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import type {
@@ -32,10 +33,15 @@ import {
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import dayjs from 'dayjs'
 
 describe('submitContract', () => {
+    const mockS3 = testS3Client()
+
     it('submits a contract', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         const draft = await createAndUpdateTestContractWithoutRates(stateServer)
         const draftWithRates = await addNewRateToTestContract(
@@ -106,7 +112,9 @@ describe('submitContract', () => {
     })
 
     it('handles the first miro scenario', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
 
         // 1. Submit A0 with Rate1 and Rate2
         const draftA0 =
@@ -171,19 +179,62 @@ describe('submitContract', () => {
         console.info(ThreeID, FourID, contractD0)
     })
 
-    it('unlocks a submission with a removed child rate', async () => {
-        const ldService = testLDService({
-            'link-rates': true,
+    it('can submit a contract with a rate linked to an unsubmitted contract MCR-4245', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
         })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+            s3Client: mockS3,
+        })
+
+        // 1. Submit A0 with Rate1
+        const draftA0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const AID = draftA0.id
+        await addNewRateToTestContract(stateServer, draftA0)
+
+        const contractA0 = await submitTestContract(stateServer, AID)
+        const subA0 = contractA0.packageSubmissions[0]
+        const rate10 = subA0.rateRevisions[0]
+        const OneID = rate10.rateID
+
+        // 2. Create B0, link with Rate1
+        const draftB0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        await addLinkedRateToTestContract(stateServer, draftB0, OneID)
+
+        // 3. Unlock A0 and resubmit
+        await unlockTestHealthPlanPackage(
+            cmsServer,
+            AID,
+            'edit the linked rate, please'
+        )
+
+        const resubmittedA = await submitTestContract(
+            stateServer,
+            AID,
+            'and now it resubmits'
+        )
+
+        expect(resubmittedA.status).toBe('RESUBMITTED')
+    })
+
+    it('unlocks a submission with a removed child rate', async () => {
+        const ldService = testLDService({})
 
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
                 user: testCMSUser(),
             },
+            s3Client: mockS3,
         })
 
         // 1. Submit A0 with Rate1 and Rate2
@@ -255,19 +306,18 @@ describe('submitContract', () => {
     })
 
     it('handles cross related rates and contracts', async () => {
-        const ldService = testLDService({
-            'link-rates': true,
-        })
+        const ldService = testLDService({})
         const prismaClient = await sharedTestPrismaClient()
-
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
                 user: testCMSUser(),
             },
+            s3Client: mockS3,
         })
 
         // 1. Submit A0 with Rate1 and Rate2
@@ -375,18 +425,15 @@ describe('submitContract', () => {
     })
 
     it('handles complex submission etc', async () => {
-        const ldService = testLDService({
-            'link-rates': true,
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
         })
 
-        const stateServer = await constructTestPostgresServer({
-            ldService,
-        })
         const cmsServer = await constructTestPostgresServer({
-            ldService,
             context: {
                 user: testCMSUser(),
             },
+            s3Client: mockS3,
         })
 
         // 1. Submit A0 with Rate1 and Rate2
@@ -483,9 +530,9 @@ describe('submitContract', () => {
             'Unlock A.0'
         )
         const a0FormData = latestFormData(unlockedA0Pkg)
-        const unlockedA0Contract = await fetchTestContract(stateServer, AID)
         a0FormData.submissionDescription = 'DESC A1'
         await updateTestHealthPlanFormData(stateServer, a0FormData)
+        const unlockedA0Contract = await fetchTestContract(stateServer, AID)
         const a0RatesUpdates =
             updateRatesInputFromDraftContract(unlockedA0Contract)
         expect(a0RatesUpdates.updatedRates[0].rateID).toBe(OneID)
@@ -581,10 +628,11 @@ describe('submitContract', () => {
             'Unlock B.0'
         )
         const b0FormData = latestFormData(unlockedB0Pkg)
-        const unlockedB0Contract = await fetchTestContract(stateServer, BID)
 
         b0FormData.submissionDescription = 'DESC B1'
         await updateTestHealthPlanFormData(stateServer, b0FormData)
+
+        const unlockedB0Contract = await fetchTestContract(stateServer, BID)
         const b0RatesUpdates =
             updateRatesInputFromDraftContract(unlockedB0Contract)
         expect(b0RatesUpdates.updatedRates[0].type).toBe('UPDATE')
@@ -630,10 +678,11 @@ describe('submitContract', () => {
             'Unlock C.0'
         )
         const c0FormData = latestFormData(unlockedC0Pkg)
-        const unlockedC0Contract = await fetchTestContract(stateServer, CID)
-
         c0FormData.submissionDescription = 'DESC C1'
         await updateTestHealthPlanFormData(stateServer, c0FormData)
+
+        const unlockedC0Contract = await fetchTestContract(stateServer, CID)
+
         const c0RatesUpdates =
             updateRatesInputFromDraftContract(unlockedC0Contract)
         expect(c0RatesUpdates.updatedRates[0].type).toBe('LINK')
@@ -850,24 +899,24 @@ describe('submitContract', () => {
     }, 10000)
 
     it('returns the correct dateAdded for documents', async () => {
-        const ldService = testLDService({
-            'link-rates': true,
-        })
+        const ldService = testLDService({})
         const prismaClient = await sharedTestPrismaClient()
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
                 user: testCMSUser(),
             },
+            s3Client: mockS3,
         })
 
         const dummyDoc = (postfix: string) => {
             return {
                 name: `doc${postfix}.pdf`,
-                s3URL: `fakeS3URL${postfix}`,
+                s3URL: `s3://bucketname/key/test1${postfix}`,
                 sha256: `fakesha${postfix}`,
             }
         }
@@ -913,29 +962,42 @@ describe('submitContract', () => {
 
         expect(contractRev.formData.contractDocuments).toHaveLength(1)
         expect(contractRev.formData.contractDocuments[0].name).toBe('docc1.pdf')
-        expect(contractRev.formData.contractDocuments[0].dateAdded).toBe(
-            '2024-01-01'
-        )
+        expect(
+            dayjs
+                .tz(contractRev.formData.contractDocuments[0].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
+        ).toBe('2024-01-01')
 
         expect(contractRev.formData.supportingDocuments).toHaveLength(1)
         expect(contractRev.formData.supportingDocuments[0].name).toBe(
             'docs1.pdf'
         )
-        expect(contractRev.formData.supportingDocuments[0].dateAdded).toBe(
-            '2024-01-01'
-        )
+        expect(
+            dayjs
+                .tz(
+                    contractRev.formData.supportingDocuments[0].dateAdded,
+                    'UTC'
+                )
+                .format('YYYY-MM-DD')
+        ).toBe('2024-01-01')
 
         const rateRev = fixSubmitA0.packageSubmissions[0].rateRevisions[0]
 
         expect(rateRev.formData.rateDocuments).toHaveLength(1)
         expect(rateRev.formData.rateDocuments[0].name).toBe('docr1.pdf')
-        expect(rateRev.formData.rateDocuments[0].dateAdded).toBe('2024-01-01')
+        expect(
+            dayjs
+                .tz(rateRev.formData.rateDocuments[0].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
+        ).toBe('2024-01-01')
 
         expect(rateRev.formData.supportingDocuments).toHaveLength(1)
         expect(rateRev.formData.supportingDocuments[0].name).toBe('docx1.pdf')
-        expect(rateRev.formData.supportingDocuments[0].dateAdded).toBe(
-            '2024-01-01'
-        )
+        expect(
+            dayjs
+                .tz(rateRev.formData.supportingDocuments[0].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
+        ).toBe('2024-01-01')
 
         // 2. Unlock and add more documents
         const unlockedA0Pkg = await unlockTestHealthPlanPackage(
@@ -944,12 +1006,14 @@ describe('submitContract', () => {
             'Unlock A.0'
         )
         const a0FormData = latestFormData(unlockedA0Pkg)
-        const unlockedA0Contract = await fetchTestContract(stateServer, AID)
         a0FormData.submissionDescription = 'DESC A1'
         a0FormData.contractDocuments.push(dummyDoc('c2'))
         a0FormData.documents.push(dummyDoc('s2'))
 
         await updateTestHealthPlanFormData(stateServer, a0FormData)
+
+        const unlockedA0Contract = await fetchTestContract(stateServer, AID)
+
         const a0RatesUpdates =
             updateRatesInputFromDraftContract(unlockedA0Contract)
         expect(a0RatesUpdates.updatedRates[0].rateID).toBe(OneID)
@@ -992,60 +1056,92 @@ describe('submitContract', () => {
         expect(contractRevA1.formData.contractDocuments[0].name).toBe(
             'docc1.pdf'
         )
-        expect(contractRevA1.formData.contractDocuments[0].dateAdded).toBe(
-            '2024-01-01'
-        )
+        expect(
+            dayjs
+                .tz(
+                    contractRevA1.formData.contractDocuments[0].dateAdded,
+                    'UTC'
+                )
+                .format('YYYY-MM-DD')
+        ).toBe('2024-01-01')
 
         expect(contractRevA1.formData.contractDocuments[1].name).toBe(
             'docc2.pdf'
         )
-        expect(contractRevA1.formData.contractDocuments[1].dateAdded).toBe(
-            '2024-02-02'
-        )
+        expect(
+            dayjs
+                .tz(
+                    contractRevA1.formData.contractDocuments[1].dateAdded,
+                    'UTC'
+                )
+                .format('YYYY-MM-DD')
+        ).toBe('2024-02-02')
 
         expect(contractRevA1.formData.supportingDocuments).toHaveLength(2)
         expect(contractRevA1.formData.supportingDocuments[0].name).toBe(
             'docs1.pdf'
         )
-        expect(contractRevA1.formData.supportingDocuments[0].dateAdded).toBe(
-            '2024-01-01'
-        )
+        expect(
+            dayjs
+                .tz(
+                    contractRevA1.formData.supportingDocuments[0].dateAdded,
+                    'UTC'
+                )
+                .format('YYYY-MM-DD')
+        ).toBe('2024-01-01')
 
         expect(contractRevA1.formData.supportingDocuments[1].name).toBe(
             'docs2.pdf'
         )
-        expect(contractRevA1.formData.supportingDocuments[1].dateAdded).toBe(
-            '2024-02-02'
-        )
+        expect(
+            dayjs
+                .tz(
+                    contractRevA1.formData.supportingDocuments[1].dateAdded,
+                    'UTC'
+                )
+                .format('YYYY-MM-DD')
+        ).toBe('2024-02-02')
 
         const rateRevA1 = fixedContractA1.packageSubmissions[0].rateRevisions[0]
 
         expect(rateRevA1.formData.rateDocuments).toHaveLength(2)
         expect(rateRevA1.formData.rateDocuments[0].name).toBe('docr1.pdf')
-        expect(rateRevA1.formData.rateDocuments[0].dateAdded).toBe('2024-01-01')
+        expect(
+            dayjs
+                .tz(rateRevA1.formData.rateDocuments[0].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
+        ).toBe('2024-01-01')
 
         expect(rateRevA1.formData.rateDocuments[1].name).toBe('docr2.pdf')
-        expect(rateRevA1.formData.rateDocuments[1].dateAdded).toBe('2024-02-02')
+        expect(
+            dayjs
+                .tz(rateRevA1.formData.rateDocuments[1].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
+        ).toBe('2024-02-02')
 
         expect(rateRevA1.formData.supportingDocuments).toHaveLength(2)
         expect(rateRevA1.formData.supportingDocuments[0].name).toBe('docx1.pdf')
-        expect(rateRevA1.formData.supportingDocuments[0].dateAdded).toBe(
-            '2024-01-01'
-        )
+        expect(
+            dayjs
+                .tz(rateRevA1.formData.supportingDocuments[0].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
+        ).toBe('2024-01-01')
 
         expect(rateRevA1.formData.supportingDocuments[1].name).toBe('docx2.pdf')
-        expect(rateRevA1.formData.supportingDocuments[1].dateAdded).toBe(
-            '2024-02-02'
-        )
+        expect(
+            dayjs
+                .tz(rateRevA1.formData.supportingDocuments[1].dateAdded, 'UTC')
+                .format('YYYY-MM-DD')
+        ).toBe('2024-02-02')
     })
 
     it('handles unlock and editing rates', async () => {
         const ldService = testLDService({
-            'link-rates': true,
             'rate-edit-unlock': true,
         })
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -1053,6 +1149,7 @@ describe('submitContract', () => {
                 user: testCMSUser(),
             },
             ldService,
+            s3Client: mockS3,
         })
 
         console.info('1.')
@@ -1127,11 +1224,11 @@ describe('submitContract', () => {
 
     it('checks parent rates on update', async () => {
         const ldService = testLDService({
-            'link-rates': true,
             'rate-edit-unlock': true,
         })
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -1139,6 +1236,7 @@ describe('submitContract', () => {
                 user: testCMSUser(),
             },
             ldService,
+            s3Client: mockS3,
         })
 
         console.info('1.')
@@ -1244,11 +1342,11 @@ describe('submitContract', () => {
     it('can remove a child unlocked rate', async () => {
         //TODO: make a child rate, submit and unlock, then remove it.
         const ldService = testLDService({
-            'link-rates': true,
             'rate-edit-unlock': true,
         })
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -1256,6 +1354,7 @@ describe('submitContract', () => {
                 user: testCMSUser(),
             },
             ldService,
+            s3Client: mockS3,
         })
 
         console.info('1.')
@@ -1364,6 +1463,7 @@ describe('submitContract', () => {
             context: {
                 user: testCMSUser(),
             },
+            s3Client: mockS3,
         })
 
         const input: SubmitContractInput = {
@@ -1382,13 +1482,14 @@ describe('submitContract', () => {
         )
     })
 
-    it('tests actions from the diagram that Jason made', async () => {
+    // Find the change history diagram in contract-rate-change-history.md
+    it('tests actions from the MC-Review change diagram', async () => {
         const ldService = testLDService({
-            'link-rates': true,
             'rate-edit-unlock': true,
         })
         const stateServer = await constructTestPostgresServer({
             ldService,
+            s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -1396,6 +1497,7 @@ describe('submitContract', () => {
                 user: testCMSUser(),
             },
             ldService,
+            s3Client: mockS3,
         })
 
         // make draft contract 1.1 with rate A.1 and submit
@@ -1421,7 +1523,6 @@ describe('submitContract', () => {
             stateServer,
             S2draft
         )
-
         const S2 = await submitTestContract(
             stateServer,
             S2draftWithRateB.id,

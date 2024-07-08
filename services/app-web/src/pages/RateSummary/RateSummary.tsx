@@ -13,17 +13,13 @@ import { useAuth } from '../../contexts/AuthContext'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
 
-type RouteParams = {
-    id: string
-}
-
 export const RateSummary = (): React.ReactElement => {
     // Page level state
     const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
     const navigate = useNavigate()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
-    const { id } = useParams<keyof RouteParams>()
+    const { id } = useParams()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'

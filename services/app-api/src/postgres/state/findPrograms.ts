@@ -11,7 +11,7 @@ function findPrograms(
         ?.programs.filter((program) => programIDs.includes(program.id))
 
     if (!programs || programIDs.length !== programs.length) {
-        const errMessage = `Can't find programs ${programIDs} from state ${stateCode}`
+        const errMessage = `Program(s) in [${programIDs}] are not valid ${stateCode} programs`
         return new Error(errMessage)
     }
 

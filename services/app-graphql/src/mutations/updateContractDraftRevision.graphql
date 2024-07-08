@@ -1,0 +1,274 @@
+mutation updateContractDraftRevision($input: UpdateContractDraftRevisionInput!) {
+    updateContractDraftRevision(input: $input) {
+        contract {
+            ...contractFieldsFetchContract
+
+            draftRevision {
+                ...contractRevisionFragmentForUpdate
+            }
+
+            draftRates {
+                ...rateFields
+
+                draftRevision {
+                    ...rateRevisionFragmentForUpdateContract
+                }
+
+                revisions {
+                    ...rateRevisionFragmentForUpdateContract
+                }
+            }
+
+            packageSubmissions {
+                ...packageSubmissionsFragmentForUpdate
+            }
+        }
+    }
+}
+
+fragment contractFieldsFetchContract on Contract {
+    id
+    status
+    createdAt
+    updatedAt
+    initiallySubmittedAt
+    stateCode
+    mccrsID
+    state {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+            isRateProgram
+        }
+    }
+
+    stateNumber
+}
+
+fragment rateFields on Rate {
+    id
+    createdAt
+    updatedAt
+    stateCode
+    stateNumber
+    parentContractID
+    state {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+            isRateProgram
+        }
+    }
+    status
+    parentContractID
+    initiallySubmittedAt
+}
+
+fragment rateRevisionFragmentForUpdateContract on RateRevision {
+    id
+    rateID
+    createdAt
+    updatedAt
+    unlockInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+    submitInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+    formData {
+        rateType
+        rateCapitationType
+        rateDocuments {
+            name
+    s3URL
+    sha256
+    dateAdded
+    downloadURL
+        }
+        supportingDocuments {
+            name
+    s3URL
+    sha256
+    dateAdded
+    downloadURL
+        }
+        rateDateStart
+        rateDateEnd
+        rateDateCertified
+        amendmentEffectiveDateStart
+        amendmentEffectiveDateEnd
+        rateProgramIDs
+        deprecatedRateProgramIDs
+        rateCertificationName
+        certifyingActuaryContacts {
+            id
+            name
+            titleRole
+            email
+            actuarialFirm
+            actuarialFirmOther
+        }
+        addtlActuaryContacts {
+            id
+            name
+            titleRole
+            email
+            actuarialFirm
+            actuarialFirmOther
+        }
+        actuaryCommunicationPreference
+        packagesWithSharedRateCerts {
+            packageName
+            packageId
+            packageStatus
+        }
+    }
+    contractRevisions {
+        id
+        contract {
+            id
+            stateCode
+            stateNumber
+        }
+        createdAt
+        updatedAt
+        submitInfo {
+            updatedAt
+            updatedBy
+            updatedReason
+        }
+        unlockInfo {
+            updatedAt
+            updatedBy
+            updatedReason
+        }
+        formData {
+           ...contractFormDataFragmentForUpdate
+        }
+    }
+}
+
+fragment contractFormDataFragmentForUpdate on ContractFormData {
+    programIDs
+
+    populationCovered
+    submissionType
+
+    riskBasedContract
+    submissionDescription
+
+    stateContacts {
+        name
+        titleRole
+        email
+    }
+
+    supportingDocuments {
+        name
+    s3URL
+    sha256
+    dateAdded
+    downloadURL
+    }
+
+    contractType
+    contractExecutionStatus
+    contractDocuments {
+        name
+    s3URL
+    sha256
+    dateAdded
+    downloadURL
+    }
+
+    contractDateStart
+    contractDateEnd
+    managedCareEntities
+    federalAuthorities
+    inLieuServicesAndSettings
+    modifiedBenefitsProvided
+    modifiedGeoAreaServed
+    modifiedMedicaidBeneficiaries
+    modifiedRiskSharingStrategy
+    modifiedIncentiveArrangements
+    modifiedWitholdAgreements
+    modifiedStateDirectedPayments
+    modifiedPassThroughPayments
+    modifiedPaymentsForMentalDiseaseInstitutions
+    modifiedMedicaidBeneficiaries
+    modifiedMedicalLossRatioStandards
+    modifiedOtherFinancialPaymentIncentive
+    modifiedEnrollmentProcess
+    modifiedGrevienceAndAppeal
+    modifiedNetworkAdequacyStandards
+    modifiedLengthOfContract
+    modifiedNonRiskPaymentArrangements
+    statutoryRegulatoryAttestation
+    statutoryRegulatoryAttestationDescription
+}
+
+fragment contractRevisionFragmentForUpdate on ContractRevision {
+    id
+    createdAt
+    updatedAt
+    contractName
+
+    submitInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+
+    unlockInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+
+    formData {
+        ...contractFormDataFragmentForUpdate
+    }
+}
+
+fragment packageSubmissionsFragmentForUpdate on ContractPackageSubmission {
+    cause
+    submitInfo {
+        ...updateInformationFields
+    }
+
+    submittedRevisions {
+        ...submittableRevisionsFieldsForUpdate
+    }
+
+    contractRevision {
+        ...contractRevisionFragmentForUpdate
+    }
+    rateRevisions {
+        ...rateRevisionFragmentForUpdateContract
+    }
+}
+
+fragment submittableRevisionsFieldsForUpdate on SubmittableRevision {
+    ... on ContractRevision {
+        ...contractRevisionFragmentForUpdate
+    }
+    ... on RateRevision {
+        ...rateRevisionFragmentForUpdateContract
+    }
+}
+
+fragment updateInformationFields on UpdateInformation {
+    updatedAt
+    updatedBy
+    updatedReason
+}

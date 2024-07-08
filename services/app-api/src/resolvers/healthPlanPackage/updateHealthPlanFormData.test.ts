@@ -15,10 +15,18 @@ import {
 } from '../../testHelpers/storeHelpers'
 import {
     constructTestPostgresServer,
+    createAndUpdateTestHealthPlanPackage,
     createTestHealthPlanPackage,
+    submitTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import { must } from '../../testHelpers'
+import { fetchTestContract } from '../../testHelpers/gqlContractHelpers'
+import {
+    updateTestDraftRateOnContract,
+    updateTestDraftRatesOnContract,
+} from '../../testHelpers/gqlRateHelpers'
+import type { RateFormDataInput } from '../../gen/gqlServer'
 
 describe(`Tests UpdateHealthPlanFormData`, () => {
     const cmsUser = testCMSUser()
@@ -123,46 +131,26 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         )
         const statePrograms = must(findStatePrograms(createdDraft.stateCode))
 
-        // Create 2 valid contracts to attached to packagesWithSharedRateCerts
-        const createdDraftTwo = await createTestHealthPlanPackage(
+        // Create 2 valid contracts with custom rates to link
+        const createdDraftTwo = await createAndUpdateTestHealthPlanPackage(
             server,
+            {},
             stateCode
         )
-        const createdDraftThree = await createTestHealthPlanPackage(
+        const createdDraftContractTwo = await fetchTestContract(
             server,
-            stateCode
+            createdDraftTwo.id
         )
+        if (!createdDraftContractTwo.draftRates) {
+            throw new Error('should be created with a draft rate')
+        }
+        const rateTwoID = createdDraftContractTwo.draftRates[0].id
 
-        const createdDraftTwoFormData = latestFormData(createdDraftTwo)
-        const createdDraftThreeFormData = latestFormData(createdDraftThree)
-
-        const packageWithSharedRate1 = {
-            packageId: createdDraftTwo.id,
-            packageName: packageName(
-                createdDraftTwo.stateCode,
-                createdDraftTwoFormData.stateNumber,
-                createdDraftTwoFormData.programIDs,
-                statePrograms
-            ),
-        } as const
-
-        const packageWithSharedRate2 = {
-            packageId: createdDraftThree.id,
-            packageName: packageName(
-                createdDraftThree.stateCode,
-                createdDraftThreeFormData.stateNumber,
-                createdDraftThreeFormData.programIDs,
-                statePrograms
-            ),
-        } as const
-
-        // Create 2 rate data for insertion
-        const rate1 = {
-            id: uuidv4(),
+        const rateTwo: RateFormDataInput = {
             rateType: 'NEW' as const,
-            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
-            rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
-            rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+            rateDateStart: '2025-05-01',
+            rateDateEnd: '2026-04-21',
+            rateDateCertified: '2025-03-11',
             rateDocuments: [
                 {
                     name: 'rateDocument.pdf',
@@ -170,13 +158,13 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
                     sha256: 'rate1-sha',
                 },
             ],
-            rateAmendmentInfo: undefined,
             rateCapitationType: undefined,
             rateCertificationName: undefined,
             supportingDocuments: [],
             //We only want one rate ID and use last program in list to differentiate from programID if possible.
+            deprecatedRateProgramIDs: [],
             rateProgramIDs: [statePrograms.reverse()[0].id],
-            actuaryContacts: [
+            certifyingActuaryContacts: [
                 {
                     name: 'test name',
                     titleRole: 'test title',
@@ -185,18 +173,58 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
                     actuarialFirmOther: '',
                 },
             ],
-            packagesWithSharedRateCerts: [
-                packageWithSharedRate1,
-                packageWithSharedRate2,
+            addtlActuaryContacts: [
+                {
+                    name: 'additional actuary 1',
+                    titleRole: 'additional actuary title 1',
+                    email: 'additionalactuary1@example.com',
+                    actuarialFirm: 'MERCER' as const,
+                    actuarialFirmOther: '',
+                },
+                {
+                    name: 'additional actuary 2',
+                    titleRole: 'additional actuary title 2',
+                    email: 'additionalactuary1@example.com',
+                    actuarialFirm: 'MERCER' as const,
+                    actuarialFirmOther: '',
+                },
             ],
         }
 
-        const rate2 = {
-            id: uuidv4(),
+        const draftTwo = createdDraftContractTwo.draftRevision
+        if (!draftTwo) {
+            throw new Error('no Draft')
+        }
+
+        await updateTestDraftRateOnContract(
+            server,
+            createdDraftContractTwo.id,
+            draftTwo.updatedAt,
+            rateTwoID,
+            rateTwo
+        )
+
+        await submitTestHealthPlanPackage(server, createdDraftContractTwo.id)
+
+        const createdDraftThree = await createAndUpdateTestHealthPlanPackage(
+            server,
+            {},
+            stateCode
+        )
+        const createdDraftContractThree = await fetchTestContract(
+            server,
+            createdDraftThree.id
+        )
+        if (!createdDraftContractThree.draftRates) {
+            throw new Error('should be created with a draft rate')
+        }
+        const rateThreeID = createdDraftContractThree.draftRates?.[0].id
+
+        const rateThree: RateFormDataInput = {
             rateType: 'NEW' as const,
-            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
-            rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
-            rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+            rateDateStart: '2025-05-02',
+            rateDateEnd: '2026-04-22',
+            rateDateCertified: '2025-03-12',
             rateDocuments: [
                 {
                     name: 'rateDocument.pdf',
@@ -204,13 +232,11 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
                     sha256: 'rate2-sha',
                 },
             ],
-            rateAmendmentInfo: undefined,
-            rateCapitationType: undefined,
-            rateCertificationName: undefined,
             supportingDocuments: [],
             //We only want one rate ID and use last program in list to differentiate from programID if possible.
+            deprecatedRateProgramIDs: [],
             rateProgramIDs: [statePrograms.reverse()[0].id],
-            actuaryContacts: [
+            certifyingActuaryContacts: [
                 {
                     name: 'test name',
                     titleRole: 'test title',
@@ -219,181 +245,153 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
                     actuarialFirmOther: '',
                 },
             ],
-            packagesWithSharedRateCerts: [],
+            actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         }
 
-        // update that draft form data.
-        const formData = Object.assign(latestFormData(createdDraft), {
-            rateInfos: [
+        const draftThree = createdDraftContractThree.draftRevision
+        if (!draftThree) {
+            throw new Error('no draft')
+        }
+
+        await updateTestDraftRateOnContract(
+            server,
+            createdDraftThree.id,
+            draftThree.updatedAt,
+            rateThreeID,
+            rateThree
+        )
+        await submitTestHealthPlanPackage(server, createdDraftThree.id)
+
+        // now link those rates to our contract.
+        const createdDraftContract = await fetchTestContract(
+            server,
+            createdDraft.id
+        )
+
+        const createdDraftRev = createdDraftContract.draftRevision
+        if (!createdDraftRev) {
+            throw new Error('no draft')
+        }
+
+        await updateTestDraftRatesOnContract(server, {
+            contractID: createdDraftContract.id,
+            lastSeenUpdatedAt: createdDraftRev.updatedAt,
+            updatedRates: [
                 {
-                    ...rate1,
-                    addtlActuaryContacts: [
-                        {
-                            name: 'additional actuary 1',
-                            titleRole: 'additional actuary title 1',
-                            email: 'additionalactuary1@example.com',
-                            actuarialFirm: 'MERCER' as const,
-                            actuarialFirmOther: '',
-                        },
-                        {
-                            name: 'additional actuary 2',
-                            titleRole: 'additional actuary title 2',
-                            email: 'additionalactuary1@example.com',
-                            actuarialFirm: 'MERCER' as const,
-                            actuarialFirmOther: '',
-                        },
-                    ],
+                    type: 'LINK',
+                    rateID: rateTwoID,
                 },
-                rate2,
+                {
+                    type: 'LINK',
+                    rateID: rateThreeID,
+                },
             ],
         })
 
-        // convert to base64 proto
-        const updatedB64 = domainToBase64(formData)
-
-        // update the DB contract
-        const updateResult = await server.executeOperation({
-            query: UPDATE_HEALTH_PLAN_FORM_DATA,
-            variables: {
-                input: {
-                    pkgID: createdDraft.id,
-                    healthPlanFormData: updatedB64,
-                },
-            },
-        })
-
-        expect(updateResult.errors).toBeUndefined()
-
-        const updatedHealthPlanPackage =
-            updateResult.data?.updateHealthPlanFormData.pkg
-
-        const updatedFormData = latestFormData(updatedHealthPlanPackage)
+        const updatedContract = await fetchTestContract(server, createdDraft.id)
+        if (!updatedContract.draftRates) {
+            throw new Error('no draft rates on this draft')
+        }
 
         // Expect our rates to be in the contract from our database
-        expect(updatedFormData).toEqual(
-            expect.objectContaining({
-                ...formData,
-                updatedAt: expect.any(Date),
-                rateInfos: expect.arrayContaining([
-                    expect.objectContaining({
-                        ...rate1,
-                        id: expect.any(String),
-                        rateCertificationName: expect.any(String),
-                        packagesWithSharedRateCerts: expect.arrayContaining([
-                            expect.objectContaining({
-                                packageId: packageWithSharedRate1.packageId,
-                                packageName: packageWithSharedRate1.packageName,
-                            }),
-                            expect.objectContaining({
-                                packageId: packageWithSharedRate2.packageId,
-                                packageName: packageWithSharedRate2.packageName,
-                            }),
-                        ]),
-                        addtlActuaryContacts: expect.arrayContaining([
-                            expect.objectContaining({
-                                name: 'additional actuary 1',
-                                titleRole: 'additional actuary title 1',
-                                email: 'additionalactuary1@example.com',
-                            }),
-                            expect.objectContaining({
-                                name: 'additional actuary 2',
-                                titleRole: 'additional actuary title 2',
-                                email: 'additionalactuary1@example.com',
-                            }),
-                        ]),
-                    }),
-                    expect.objectContaining({
-                        ...rate2,
-                        id: expect.any(String),
-                        rateCertificationName: expect.any(String),
-                    }),
-                ]),
-            })
+        const draftFormDatas = updatedContract.draftRates.map(
+            (r) => r.revisions[0].formData
         )
 
-        const rate3 = {
-            id: uuidv4(),
+        expect(draftFormDatas).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    ...rateTwo,
+                    rateCertificationName: expect.any(String),
+                    addtlActuaryContacts: expect.any(Array),
+                    certifyingActuaryContacts: expect.any(Array),
+                    rateDocuments: expect.any(Array),
+                    rateCapitationType: null,
+                    amendmentEffectiveDateStart: null,
+                    amendmentEffectiveDateEnd: null,
+                }),
+                expect.objectContaining({
+                    ...rateThree,
+                    rateCertificationName: expect.any(String),
+                    addtlActuaryContacts: expect.any(Array),
+                    certifyingActuaryContacts: expect.any(Array),
+                    rateDocuments: expect.any(Array),
+                    rateCapitationType: null,
+                    amendmentEffectiveDateStart: null,
+                    amendmentEffectiveDateEnd: null,
+                }),
+            ])
+        )
+
+        const newRate: RateFormDataInput = {
             rateType: 'AMENDMENT' as const,
-            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
-            rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
-            rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+            rateDateStart: '2025-05-03',
+            rateDateEnd: '2026-04-23',
+            rateDateCertified: '2025-03-13',
             rateDocuments: [],
-            rateAmendmentInfo: undefined,
             rateCapitationType: undefined,
             rateCertificationName: undefined,
             supportingDocuments: [],
             //We only want one rate ID and use last program in list to differentiate from programID if possible.
+            deprecatedRateProgramIDs: [],
             rateProgramIDs: [statePrograms.reverse()[0].id],
-            actuaryContacts: [],
-            packagesWithSharedRateCerts: [],
+            certifyingActuaryContacts: [],
         }
 
-        // Update first rate and remove second from contract and add a new rate.
-        const formData2 = Object.assign(
-            latestFormData(updatedHealthPlanPackage),
-            {
-                rateInfos: [
-                    {
-                        ...updatedFormData.rateInfos[0],
-                        // updating the actuary on the first rate
-                        actuaryContacts: [
-                            {
-                                name: 'New actuary',
-                                titleRole: 'Better title',
-                                email: 'actuary@example.com',
-                                actuarialFirm: 'OPTUMAS' as const,
-                                actuarialFirmOther: '',
-                            },
-                        ],
-                        // remove second package with shared rate, by only passing in the first
-                        packagesWithSharedRateCerts: [],
-                    },
-                    {
-                        ...rate3,
-                    },
-                ],
-            }
-        )
+        const draftRev = updatedContract.draftRevision
+        if (!draftRev) {
+            throw new Error('no draft')
+        }
 
-        const secondUpdatedB64 = domainToBase64(formData2)
-
-        // update the DB contract again
-        const updateResult2 = await server.executeOperation({
-            query: UPDATE_HEALTH_PLAN_FORM_DATA,
-            variables: {
-                input: {
-                    pkgID: createdDraft.id,
-                    healthPlanFormData: secondUpdatedB64,
+        await updateTestDraftRatesOnContract(server, {
+            contractID: createdDraftContract.id,
+            lastSeenUpdatedAt: draftRev.updatedAt,
+            updatedRates: [
+                {
+                    type: 'LINK',
+                    rateID: rateTwoID,
                 },
-            },
+                {
+                    type: 'CREATE',
+                    formData: newRate,
+                },
+            ],
         })
 
-        expect(updateResult2.errors).toBeUndefined()
-
-        const updatedHealthPlanPackage2 =
-            updateResult2.data?.updateHealthPlanFormData.pkg
-
-        const updatedFormData2 = latestFormData(updatedHealthPlanPackage2)
+        const updatedDraftContract = await fetchTestContract(
+            server,
+            createdDraft.id
+        )
 
         // Expect our rates to be updated
-        expect(updatedFormData2).toEqual(
-            expect.objectContaining({
-                ...formData2,
-                updatedAt: expect.any(Date),
-                rateInfos: expect.arrayContaining([
-                    expect.objectContaining({
-                        ...formData2.rateInfos[0],
-                        id: expect.any(String),
-                        rateCertificationName: expect.any(String),
-                        packagesWithSharedRateCerts: [],
-                    }),
-                    expect.objectContaining({
-                        ...formData2.rateInfos[1],
-                        id: expect.any(String),
-                        rateCertificationName: expect.any(String),
-                    }),
-                ]),
-            })
+        const updatedDraftRateFormDatas = [
+            updatedDraftContract.draftRates?.[0].revisions[0].formData,
+            updatedDraftContract.draftRates?.[1].draftRevision?.formData,
+        ]
+
+        expect(updatedDraftRateFormDatas).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    ...rateTwo,
+                    rateCertificationName: expect.any(String),
+                    addtlActuaryContacts: expect.any(Array),
+                    certifyingActuaryContacts: expect.any(Array),
+                    rateDocuments: expect.any(Array),
+                    rateCapitationType: null,
+                    amendmentEffectiveDateStart: null,
+                    amendmentEffectiveDateEnd: null,
+                }),
+                expect.objectContaining({
+                    ...newRate,
+                    rateCertificationName: expect.any(String),
+                    addtlActuaryContacts: expect.any(Array),
+                    certifyingActuaryContacts: expect.any(Array),
+                    rateDocuments: expect.any(Array),
+                    rateCapitationType: null,
+                    amendmentEffectiveDateStart: null,
+                    amendmentEffectiveDateEnd: null,
+                }),
+            ])
         )
     })
 
@@ -577,7 +575,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             documents: [
                 {
                     name: 'supportingDocument11.pdf',
-                    s3URL: 'fakeS3URL',
+                    s3URL: 's3://bucketname/key/test1',
                     sha256: 'needs-to-be-there',
                 },
             ],

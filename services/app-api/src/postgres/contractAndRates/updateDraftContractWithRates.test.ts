@@ -72,12 +72,12 @@ describe('updateDraftContractWithRates postgres', () => {
             supportingDocuments: [
                 {
                     name: 'contract supporting doc',
-                    s3URL: 'fakeS3URL',
+                    s3URL: 's3://bucketname/key/test1',
                     sha256: '2342fwlkdmwvw',
                 },
                 {
                     name: 'contract supporting doc 2',
-                    s3URL: 'fakeS3URL',
+                    s3URL: 's3://bucketname/key/test1',
                     sha256: '45662342fwlkdmwvw',
                 },
             ],
@@ -86,7 +86,7 @@ describe('updateDraftContractWithRates postgres', () => {
             contractDocuments: [
                 {
                     name: 'contract doc',
-                    s3URL: 'fakeS3URL',
+                    s3URL: 's3://bucketname/key/test1',
                     sha256: '8984234fwlkdmwvw',
                 },
             ],
@@ -133,14 +133,14 @@ describe('updateDraftContractWithRates postgres', () => {
             rateDocuments: [
                 {
                     name: 'rate doc',
-                    s3URL: 'fakeS3URL',
+                    s3URL: 's3://bucketname/key/test1',
                     sha256: '8984234fwlkdmwvw',
                 },
             ],
             supportingDocuments: [
                 {
                     name: 'rate sup doc',
-                    s3URL: 'fakeS3URL',
+                    s3URL: 's3://bucketname/key/test1',
                     sha256: '8984234fwlkdmwvw',
                 },
             ],
@@ -488,7 +488,7 @@ describe('updateDraftContractWithRates postgres', () => {
                 rateDocuments: [
                     {
                         name: 'Rate 1 Doc',
-                        s3URL: 'fakeS3URL1',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'someShaForRateDoc1',
                     },
                 ],
@@ -509,7 +509,7 @@ describe('updateDraftContractWithRates postgres', () => {
                 rateDocuments: [
                     {
                         name: 'Rate 2 Doc',
-                        s3URL: 'fakeS3URL2',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'someShaForRateDoc2',
                     },
                 ],
@@ -529,7 +529,7 @@ describe('updateDraftContractWithRates postgres', () => {
                 rateDocuments: [
                     {
                         name: 'Rate 3 Doc',
-                        s3URL: 'fakeS3URL3',
+                        s3URL: 's3://bucketname/key/test1',
                         sha256: 'someShaForRateDoc3',
                     },
                 ],

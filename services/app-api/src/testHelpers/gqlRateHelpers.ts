@@ -21,6 +21,7 @@ import type { RateType } from '../domain-models'
 import type { ApolloServer } from 'apollo-server-lambda'
 import type { RateFormEditableType } from '../domain-models/contractAndRates'
 import { createAndSubmitTestContractWithRate } from './gqlContractHelpers'
+import { clearDocMetadata } from './documentHelpers'
 
 const fetchTestRateById = async (
     server: ApolloServer,
@@ -168,19 +169,19 @@ function addNewRateToRateInput(
 
         rateDocuments: [
             {
-                s3URL: 'foo://bar',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'ratedoc1.doc',
                 sha256: 'foobar',
             },
         ],
         supportingDocuments: [
             {
-                s3URL: 'foo://bar1',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'ratesupdoc1.doc',
                 sha256: 'foobar1',
             },
             {
-                s3URL: 'foo://bar2',
+                s3URL: 's3://bucketname/key/test1',
                 name: 'ratesupdoc2.doc',
                 sha256: 'foobar2',
             },
@@ -209,6 +210,7 @@ function addNewRateToRateInput(
 
     return {
         contractID: input.contractID,
+        lastSeenUpdatedAt: input.lastSeenUpdatedAt,
         updatedRates: [
             ...input.updatedRates,
             {
@@ -237,6 +239,7 @@ function addLinkedRateToRateInput(
 ): UpdateDraftContractRatesInput {
     return {
         contractID: input.contractID,
+        lastSeenUpdatedAt: input.lastSeenUpdatedAt,
         updatedRates: [
             ...input.updatedRates,
             {
@@ -263,8 +266,8 @@ function formatRateDataForSending(
     return {
         rateType: rateFormData.rateType,
         rateCapitationType: rateFormData.rateCapitationType,
-        rateDocuments: rateFormData.rateDocuments,
-        supportingDocuments: rateFormData.supportingDocuments,
+        rateDocuments: clearDocMetadata(rateFormData.rateDocuments),
+        supportingDocuments: clearDocMetadata(rateFormData.supportingDocuments),
         rateDateStart: rateFormData.rateDateStart,
         rateDateEnd: rateFormData.rateDateEnd,
         rateDateCertified: rateFormData.rateDateCertified,
@@ -326,6 +329,8 @@ function updateRatesInputFromDraftContract(
 
     return {
         contractID: contract.id,
+        lastSeenUpdatedAt:
+            contract.draftRevision?.updatedAt || contract.updatedAt,
         updatedRates: rateInputs,
     }
 }
@@ -333,6 +338,7 @@ function updateRatesInputFromDraftContract(
 const createTestDraftRateOnContract = async (
     server: ApolloServer,
     contractID: string,
+    lastSeenUpdatedAt: Date,
     rateData?: RateFormDataInput
 ): Promise<Contract> => {
     if (!rateData) {
@@ -344,6 +350,7 @@ const createTestDraftRateOnContract = async (
         variables: {
             input: {
                 contractID,
+                lastSeenUpdatedAt: lastSeenUpdatedAt,
                 updatedRates: [
                     {
                         type: 'CREATE',
@@ -367,6 +374,7 @@ const createTestDraftRateOnContract = async (
 const updateTestDraftRateOnContract = async (
     server: ApolloServer,
     contractID: string,
+    lastSeenUpdatedAt: Date,
     rateID: string,
     rateData?: RateFormDataInput
 ): Promise<Contract> => {
@@ -379,6 +387,7 @@ const updateTestDraftRateOnContract = async (
         variables: {
             input: {
                 contractID,
+                lastSeenUpdatedAt,
                 updatedRates: [
                     {
                         type: 'UPDATE',
@@ -422,6 +431,7 @@ export {
     updateTestDraftRatesOnContract,
     updateRatesInputFromDraftContract,
     addNewRateToTestContract,
+    addNewRateToRateInput,
     addLinkedRateToTestContract,
     addLinkedRateToRateInput,
     fetchTestRateById,

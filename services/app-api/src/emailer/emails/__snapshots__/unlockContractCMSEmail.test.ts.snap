@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`unlockPackageCMSEmail renders overall email as expected 1`] = `
+"Submission MCR-MN-0003-SNBC was unlocked<br />
+<br />
+<b>Unlocked by:</b> leslie@example.com<br />
+<b>Unlocked on:</b> 01/01/2022<br />
+<b>Reason for unlock:</b> Adding rate development guide.<br />
+<b>Rate name</b>: Rate Cert Name<br />
+<br />
+You will receive another notification when the state resubmits.
+"
+`;
