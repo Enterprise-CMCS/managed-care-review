@@ -26,9 +26,10 @@ import {
     FeatureFlagSettings,
 } from '../../app-web/src/common-code/featureFlags'
 import './apiCommands'
-import { HealthPlanPackage, Contract } from '../gen/gqlClient';
+import { Contract, HealthPlanPackage } from '../gen/gqlClient';
 import { CMSUserType, DivisionType } from '../utils/apollo-test-utils';
 import { StateUserType } from 'app-api/src/domain-models';
+import { UnlockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 
 type FormButtonKey =
     | 'CONTINUE_FROM_START_NEW'
@@ -71,11 +72,11 @@ declare global {
             unlockSubmission(unlockReason?: string): void
 
             // navigate commands
-            navigateFormByButtonClick(
+            deprecatedNavigateV1Form(
                 buttonName: FormButtonKey,
                 waitForLoad?: boolean
             ): void
-            navigateContractRatesFormByButtonClick(
+            navigateContractRatesForm(
                 buttonName: FormButtonKey,
                 waitForLoad?: boolean
             ): void
@@ -104,9 +105,12 @@ declare global {
                 division: DivisionType
             }): void
 
-            apiCreateAndSubmitContractOnlySubmission(stateUser: StateUserType): Cypress.Chainable<HealthPlanPackage>
+            apiCreateAndSubmitContractOnlySubmission(stateUser: StateUserType): Cypress.Chainable<Contract>
             apiCreateAndSubmitContractWithRates(stateUser: StateUserType): Cypress.Chainable<Contract>
+            apiDeprecatedCreateSubmitHPP(stateUser: StateUserType, formData?: Partial<UnlockedHealthPlanFormDataType>): Cypress.Chainable<HealthPlanPackage>
+            apiCreateAndSubmitBaseContract(stateUser: StateUserType): Cypress.Chainable<Contract>
             apiAssignDivisionToCMSUser(cmsUser: CMSUserType, division: DivisionType): Cypress.Chainable<void>
+            apiCreateAndSubmitContractWithRates(stateUser: StateUserType): Cypress.Chainable<Contract>
 
             interceptGraphQL(): void
         }

@@ -179,10 +179,51 @@ describe('submitContract', () => {
         console.info(ThreeID, FourID, contractD0)
     })
 
-    it('unlocks a submission with a removed child rate', async () => {
-        const ldService = testLDService({
-            'link-rates': true,
+    it('can submit a contract with a rate linked to an unsubmitted contract MCR-4245', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
         })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+            s3Client: mockS3,
+        })
+
+        // 1. Submit A0 with Rate1
+        const draftA0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const AID = draftA0.id
+        await addNewRateToTestContract(stateServer, draftA0)
+
+        const contractA0 = await submitTestContract(stateServer, AID)
+        const subA0 = contractA0.packageSubmissions[0]
+        const rate10 = subA0.rateRevisions[0]
+        const OneID = rate10.rateID
+
+        // 2. Create B0, link with Rate1
+        const draftB0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        await addLinkedRateToTestContract(stateServer, draftB0, OneID)
+
+        // 3. Unlock A0 and resubmit
+        await unlockTestHealthPlanPackage(
+            cmsServer,
+            AID,
+            'edit the linked rate, please'
+        )
+
+        const resubmittedA = await submitTestContract(
+            stateServer,
+            AID,
+            'and now it resubmits'
+        )
+
+        expect(resubmittedA.status).toBe('RESUBMITTED')
+    })
+
+    it('unlocks a submission with a removed child rate', async () => {
+        const ldService = testLDService({})
 
         const stateServer = await constructTestPostgresServer({
             ldService,
@@ -265,9 +306,7 @@ describe('submitContract', () => {
     })
 
     it('handles cross related rates and contracts', async () => {
-        const ldService = testLDService({
-            'link-rates': true,
-        })
+        const ldService = testLDService({})
         const prismaClient = await sharedTestPrismaClient()
         const stateServer = await constructTestPostgresServer({
             ldService,
@@ -386,17 +425,11 @@ describe('submitContract', () => {
     })
 
     it('handles complex submission etc', async () => {
-        const ldService = testLDService({
-            'link-rates': true,
-        })
-
         const stateServer = await constructTestPostgresServer({
-            ldService,
             s3Client: mockS3,
         })
 
         const cmsServer = await constructTestPostgresServer({
-            ldService,
             context: {
                 user: testCMSUser(),
             },
@@ -497,9 +530,9 @@ describe('submitContract', () => {
             'Unlock A.0'
         )
         const a0FormData = latestFormData(unlockedA0Pkg)
-        const unlockedA0Contract = await fetchTestContract(stateServer, AID)
         a0FormData.submissionDescription = 'DESC A1'
         await updateTestHealthPlanFormData(stateServer, a0FormData)
+        const unlockedA0Contract = await fetchTestContract(stateServer, AID)
         const a0RatesUpdates =
             updateRatesInputFromDraftContract(unlockedA0Contract)
         expect(a0RatesUpdates.updatedRates[0].rateID).toBe(OneID)
@@ -595,10 +628,11 @@ describe('submitContract', () => {
             'Unlock B.0'
         )
         const b0FormData = latestFormData(unlockedB0Pkg)
-        const unlockedB0Contract = await fetchTestContract(stateServer, BID)
 
         b0FormData.submissionDescription = 'DESC B1'
         await updateTestHealthPlanFormData(stateServer, b0FormData)
+
+        const unlockedB0Contract = await fetchTestContract(stateServer, BID)
         const b0RatesUpdates =
             updateRatesInputFromDraftContract(unlockedB0Contract)
         expect(b0RatesUpdates.updatedRates[0].type).toBe('UPDATE')
@@ -644,10 +678,11 @@ describe('submitContract', () => {
             'Unlock C.0'
         )
         const c0FormData = latestFormData(unlockedC0Pkg)
-        const unlockedC0Contract = await fetchTestContract(stateServer, CID)
-
         c0FormData.submissionDescription = 'DESC C1'
         await updateTestHealthPlanFormData(stateServer, c0FormData)
+
+        const unlockedC0Contract = await fetchTestContract(stateServer, CID)
+
         const c0RatesUpdates =
             updateRatesInputFromDraftContract(unlockedC0Contract)
         expect(c0RatesUpdates.updatedRates[0].type).toBe('LINK')
@@ -864,9 +899,7 @@ describe('submitContract', () => {
     }, 10000)
 
     it('returns the correct dateAdded for documents', async () => {
-        const ldService = testLDService({
-            'link-rates': true,
-        })
+        const ldService = testLDService({})
         const prismaClient = await sharedTestPrismaClient()
         const stateServer = await constructTestPostgresServer({
             ldService,
@@ -973,12 +1006,14 @@ describe('submitContract', () => {
             'Unlock A.0'
         )
         const a0FormData = latestFormData(unlockedA0Pkg)
-        const unlockedA0Contract = await fetchTestContract(stateServer, AID)
         a0FormData.submissionDescription = 'DESC A1'
         a0FormData.contractDocuments.push(dummyDoc('c2'))
         a0FormData.documents.push(dummyDoc('s2'))
 
         await updateTestHealthPlanFormData(stateServer, a0FormData)
+
+        const unlockedA0Contract = await fetchTestContract(stateServer, AID)
+
         const a0RatesUpdates =
             updateRatesInputFromDraftContract(unlockedA0Contract)
         expect(a0RatesUpdates.updatedRates[0].rateID).toBe(OneID)
@@ -1102,7 +1137,6 @@ describe('submitContract', () => {
 
     it('handles unlock and editing rates', async () => {
         const ldService = testLDService({
-            'link-rates': true,
             'rate-edit-unlock': true,
         })
         const stateServer = await constructTestPostgresServer({
@@ -1190,7 +1224,6 @@ describe('submitContract', () => {
 
     it('checks parent rates on update', async () => {
         const ldService = testLDService({
-            'link-rates': true,
             'rate-edit-unlock': true,
         })
         const stateServer = await constructTestPostgresServer({
@@ -1309,7 +1342,6 @@ describe('submitContract', () => {
     it('can remove a child unlocked rate', async () => {
         //TODO: make a child rate, submit and unlock, then remove it.
         const ldService = testLDService({
-            'link-rates': true,
             'rate-edit-unlock': true,
         })
         const stateServer = await constructTestPostgresServer({
@@ -1453,7 +1485,6 @@ describe('submitContract', () => {
     // Find the change history diagram in contract-rate-change-history.md
     it('tests actions from the MC-Review change diagram', async () => {
         const ldService = testLDService({
-            'link-rates': true,
             'rate-edit-unlock': true,
         })
         const stateServer = await constructTestPostgresServer({

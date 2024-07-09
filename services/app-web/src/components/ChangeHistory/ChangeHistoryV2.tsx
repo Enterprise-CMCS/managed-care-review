@@ -16,7 +16,7 @@ type flatRevisions = UpdateInformation & {
     revisionVersion: string | undefined
 }
 
-export const ChangeHistoryV2 = ({
+export const ChangeHistory = ({
     contract,
 }: ChangeHistoryProps): React.ReactElement => {
     const flattenedRevisions = (): flatRevisions[] => {
@@ -90,11 +90,10 @@ export const ChangeHistoryV2 = ({
         (r, index) => {
             const isInitialSubmission = r.updatedReason === 'Initial submission'
             const isSubsequentSubmission = r.kind === 'submit'
-            // console.log(isInitialSubmission, r, 'is initial submision')
+
             // We want to know if this contract has multiple submissions. To have multiple submissions, there must be minimum
             // more than the initial contract revision.
             const hasSubsequentSubmissions = revisionHistory.length > 1
-            // console.log(hasSubsequentSubmissions, 'has sub sub')
 
             return {
                 title: (
@@ -153,7 +152,7 @@ export const ChangeHistoryV2 = ({
                     </div>
                 ),
                 expanded: false,
-                id: r.updatedAt.toString(),
+                id: dayjs(r.updatedAt).toISOString(),
             }
         }
     )

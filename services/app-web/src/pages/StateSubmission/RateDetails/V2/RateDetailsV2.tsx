@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Fieldset, Form as UswdsForm } from '@trussworks/react-uswds'
+import { Button, Fieldset, Form as UswdsForm } from '@trussworks/react-uswds'
 import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
 import { generatePath, useNavigate } from 'react-router-dom'
 
 import styles from '../../StateSubmissionForm.module.scss'
 import {
-    ButtonWithLogging,
     DynamicStepIndicator,
     ErrorSummary,
     SectionCard,
@@ -32,8 +31,8 @@ import {
     useSubmitRateMutation,
     useUpdateDraftContractRatesMutation,
 } from '../../../../gen/gqlClient'
-import { SingleRateFormFields } from './SingleRateFormFields'
-import { useFocus, useRouteParams, useTealium } from '../../../../hooks'
+import { SingleRateFormFields } from '../SingleRateFormFields'
+import { useFocus, useRouteParams } from '../../../../hooks'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
 import { PageBannerAlerts } from '../../PageBannerAlerts'
 import { useAuth } from '../../../../contexts/AuthContext'
@@ -48,9 +47,9 @@ import {
     convertGQLRateToRateForm,
     convertRateFormToGQLRateFormData,
     generateUpdatedRates,
-} from './rateDetailsHelpers'
+} from '../rateDetailsHelpers'
 import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
-import { LinkedRateSummary } from './LinkedRateSummary'
+import { LinkedRateSummary } from '../LinkedRateSummary'
 import { usePage } from '../../../../contexts/PageContext'
 
 export type FormikRateForm = {
@@ -81,26 +80,21 @@ export type RateDetailFormConfig = {
     rateForms: FormikRateForm[]
 }
 
-type RateDetailsV2Props = {
+type RateDetailsProps = {
     type: 'SINGLE' | 'MULTI'
     showValidations?: boolean
 }
-const RateDetailsV2 = ({
+const RateDetails = ({
     showValidations = false,
     type,
-}: RateDetailsV2Props): React.ReactElement => {
+}: RateDetailsProps): React.ReactElement => {
     const navigate = useNavigate()
     const { getKey } = useS3()
     const displayAsStandaloneRate = type === 'SINGLE'
     const { loggedInUser } = useAuth()
     const ldClient = useLDClient()
     const { updateHeading } = usePage()
-    const { logButtonEvent } = useTealium()
 
-    const useLinkedRates = ldClient?.variation(
-        featureFlags.LINK_RATES.flag,
-        featureFlags.LINK_RATES.defaultValue
-    )
     const useEditUnlockRate = ldClient?.variation(
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
@@ -114,7 +108,6 @@ const RateDetailsV2 = ({
     const rateDetailsFormSchema = RateDetailsFormSchema(
         {
             'rate-edit-unlock': useEditUnlockRate,
-            'link-rates': useLinkedRates,
         },
         !displayAsStandaloneRate
     )
@@ -168,17 +161,15 @@ const RateDetailsV2 = ({
               .rateCertificationName
         : fetchContractData?.fetchContract.contract?.draftRevision?.contractName
     if (pageHeading) updateHeading({ customHeading: pageHeading })
-    const [updateDraftContractRates, { error: updateContractError }] =
-        useUpdateDraftContractRatesMutation()
-    const [submitRate, { error: submitRateError }] = useSubmitRateMutation()
+    const [updateDraftContractRates] = useUpdateDraftContractRatesMutation()
+    const [submitRate] = useSubmitRateMutation()
 
     // Set up data for form. Either based on contract API (for multi rate) or rates API (for edit and submit of standalone rate)
     const contract = fetchContractData?.fetchContract.contract
+    const contractDraftRevision = contract?.draftRevision
     const ratesFromContract = contract?.draftRates
     const initialRequestLoading = fetchContractLoading || fetchRateLoading
     const initialRequestError = fetchContractError || fetchRateError
-    const submitRequestError = updateContractError || submitRateError
-    const apiError = initialRequestError || submitRequestError
     const previousDocuments: string[] = []
 
     // Set up initial rate form values for Formik
@@ -210,9 +201,11 @@ const RateDetailsV2 = ({
         return <ErrorOrLoadingPage state="LOADING" />
     }
 
-    if (apiError) {
+    if (initialRequestError) {
         return (
-            <ErrorOrLoadingPage state={handleAndReturnErrorState(apiError)} />
+            <ErrorOrLoadingPage
+                state={handleAndReturnErrorState(initialRequestError)}
+            />
         )
     }
     // Redirect if in standalone rate workflow and rate not editable
@@ -286,6 +279,7 @@ const RateDetailsV2 = ({
                     variables: {
                         input: {
                             contractID: id ?? 'no-id',
+                            lastSeenUpdatedAt: contractDraftRevision?.updatedAt,
                             updatedRates,
                         },
                     },
@@ -523,25 +517,13 @@ const RateDetailsV2 = ({
                                                                 )}
                                                                 {index >= 1 &&
                                                                     !displayAsStandaloneRate && (
-                                                                        <ButtonWithLogging
+                                                                        <Button
                                                                             type="button"
                                                                             unstyled
-                                                                            parent_component_type="page body"
                                                                             className={
                                                                                 styles.removeContactBtn
                                                                             }
                                                                             onClick={() => {
-                                                                                logButtonEvent(
-                                                                                    {
-                                                                                        text: 'Remove rate certification',
-                                                                                        button_style:
-                                                                                            'link',
-                                                                                        button_type:
-                                                                                            'button',
-                                                                                        parent_component_type:
-                                                                                            'page body',
-                                                                                    }
-                                                                                )
                                                                                 remove(
                                                                                     index
                                                                                 )
@@ -551,7 +533,7 @@ const RateDetailsV2 = ({
                                                                             Remove
                                                                             rate
                                                                             certification
-                                                                        </ButtonWithLogging>
+                                                                        </Button>
                                                                     )}
                                                             </Fieldset>
                                                         </SectionCard>
@@ -563,19 +545,10 @@ const RateDetailsV2 = ({
                                                             Additional rate
                                                             certification
                                                         </h3>
-                                                        <button //this has to be this button element to take the ref prop
+                                                        <button
                                                             type="button"
                                                             className={`usa-button usa-button--outline ${styles.addRateBtn}`}
                                                             onClick={() => {
-                                                                logButtonEvent({
-                                                                    text: 'Add another rate certification',
-                                                                    button_style:
-                                                                        'outline',
-                                                                    button_type:
-                                                                        'button',
-                                                                    parent_component_type:
-                                                                        'page body',
-                                                                })
                                                                 const newRate =
                                                                     convertGQLRateToRateForm(
                                                                         getKey
@@ -655,4 +628,4 @@ const RateDetailsV2 = ({
         </>
     )
 }
-export { RateDetailsV2 }
+export { RateDetails }

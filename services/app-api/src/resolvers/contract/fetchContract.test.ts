@@ -13,8 +13,7 @@ import {
     submitTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { addNewRateToTestContract } from '../../testHelpers/gqlRateHelpers'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
-import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
+import { testS3Client } from '../../testHelpers'
 
 describe('fetchContract', () => {
     const mockS3 = testS3Client()
@@ -45,8 +44,8 @@ describe('fetchContract', () => {
         expect(draftRate).toHaveLength(1)
         expect(draftRate[0].status).toBe('DRAFT')
         expect(draftRate[0].stateCode).toBe('FL')
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         expect(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             draftRate[0].draftRevision?.formData.rateDocuments![0].downloadURL
         ).toBeDefined()
     })
@@ -73,19 +72,14 @@ describe('fetchContract', () => {
         const draftContract =
             fetchDraftContractResult.data?.fetchContract.contract.draftRevision
 
-        expect(draftContract.contractName).toMatch(/MCR-FL-\d{4}-MMA/)
+        expect(draftContract.contractName).toMatch(/MCR-FL-\d{4}-NEMTMTM/)
     })
 
     it('returns a stable initially submitted at', async () => {
-        const ldService = testLDService({
-            'link-rates': true,
-        })
         const stateServer = await constructTestPostgresServer({
-            ldService,
             s3Client: mockS3,
         })
         const cmsServer = await constructTestPostgresServer({
-            ldService,
             context: {
                 user: testCMSUser(),
             },

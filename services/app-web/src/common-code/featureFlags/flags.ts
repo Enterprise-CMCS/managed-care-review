@@ -24,14 +24,6 @@ const featureFlags = {
         flag: 'rate-edit-unlock',
         defaultValue: false,
     },
-     /**
-     * Enables state users to link and unlock rates from a contract submission
-     */
-      LINK_RATES: {
-        flag: 'link-rates',
-        defaultValue: false,
-    },
-
     // PERMANENT FLAGS
 
     /**

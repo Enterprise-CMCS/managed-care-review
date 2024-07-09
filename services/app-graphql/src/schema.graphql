@@ -115,6 +115,24 @@ type Mutation {
     ): CreateHealthPlanPackagePayload!
 
     """
+    createContract creates a new Contract.
+
+    The new Contract is created with a single contractRevision with
+    the information specified in the input parameters. The created contract will have
+    the DRAFT status. The stateCode of the contract will be set to the state the
+    user that calls this mutation is from.
+
+    This can only be called by StateUsers
+
+    Errors:
+    - ForbiddenError: A CMSUser calls this mutation
+    - UserInputError: ProgramID not found in this state's programs
+    """
+    createContract(
+        input: CreateContractInput!
+    ): CreateContractPayload!
+
+    """
     updateHealthPlanFormData updates a single package with the current
     state of the form encoded as a protobuf.
 
@@ -149,6 +167,25 @@ type Mutation {
     as opposed to an individual revision
     """
     updateContract(input: UpdateContractInput!): UpdateContractPayload!
+
+    """
+    updateContractDraftRevision updates a contract's draft revision with the current
+    state of the form.
+
+    The contract must be either in the DRAFT or UNLOCKED state.
+    Only a state user from the state this package is attached to can call this mutation
+
+    Errors:
+    - ForbiddenError:
+    - A CMSUser called this
+    - A state user from a different state called this.
+    UserInputError:
+    - The package is in the LOCKED or RESUBMITTED status
+    - A package cannot be found with the given `contractID`
+    """
+    updateContractDraftRevision(
+        input: UpdateContractDraftRevisionInput!
+    ): UpdateContractDraftRevisionPayload!
 
     """
     updateDraftContractRates updates the rates associated with a DRAFT contract revision.
@@ -231,6 +268,35 @@ type Mutation {
     unlockHealthPlanPackage(
         input: UnlockHealthPlanPackageInput!
     ): UnlockHealthPlanPackagePayload!
+
+    """
+    unlockHealthPlanPackage returns a submitted package to the state for additional
+    edits.
+
+    This can only be called by a CMSUser.
+    The package must be in the SUBMITTED or RESUBMITTED state to be unlocked.
+    Email notifications will be sent to all the relevant parties
+
+    Errors:
+    - ForbiddenError:
+        - A non CMSuser called this
+    - UserInputError
+        - A package cannot be found with the given `pkgID`
+    - INTERNAL_SERVER_ERROR
+        - DB_ERROR
+            - Postgres returns error when attempting to finding a package
+            - Postgres returns error when attempting to update a package
+        - INVALID_PACKAGE_STATUS
+            - Attempted to unlock a package in the DRAFT or UNLOCKED state
+        - PROTO_DECODE_ERROR
+            - Failed to decode draft proto
+        - EMAIL_ERROR
+            - Sending state or CMS email failed.
+    """
+    unlockContract(
+        input: UnlockContractInput!
+    ): UnlockContractPayload!
+
 
     """
     updateCMSUser updates CMSUser fields that are allowed to be modified.
@@ -410,6 +476,34 @@ type CreateHealthPlanPackagePayload {
     pkg: HealthPlanPackage!
 }
 
+input CreateContractInput {
+    """
+    The large overarching population of people that the program covers.
+    Options are MEDICAID, CHIP, MEDICAID_AND_CHIP
+    """
+    populationCovered: PopulationCovered!
+    "An array of managed care program IDs this package covers"
+    programIDs: [String!]!
+    "Whether or not this contract is risk based"
+    riskBasedContract: Boolean
+    """
+    The submission type of this package
+    Options are CONTRACT_ONLY and CONTRACT_AND_RATES
+    """
+    submissionType: SubmissionType!
+    "User description of the reason for the submission"
+    submissionDescription: String!
+    """
+    Type of contract the state is submitting
+    Options are: BASE, AMENDMENT
+    """
+    contractType: ContractType!
+}
+
+type CreateContractPayload {
+    contract: Contract!
+}
+
 input FetchHealthPlanPackageInput {
     "The ID of the package to fetch"
     pkgID: ID!
@@ -540,8 +634,18 @@ input UnlockHealthPlanPackageInput {
     unlockedReason: String!
 }
 
+input UnlockContractInput {
+    contractID: ID!
+    "User given reason this contract was unlocked"
+    unlockedReason: String!
+}
+
 type UnlockHealthPlanPackagePayload {
     pkg: HealthPlanPackage!
+}
+
+type UnlockContractPayload {
+    contract: UnlockedContract!
 }
 
 input UpdateHealthPlanFormDataInput {
@@ -575,6 +679,17 @@ input UpdateCMSUserInput {
 
 type UpdateCMSUserPayload {
     user: CMSUser!
+}
+
+input UpdateContractDraftRevisionInput {
+    contractID: ID!
+    "date the contracts draft revision was last updated at"
+    lastSeenUpdatedAt: DateTime!
+    formData: ContractDraftRevisionFormDataInput!
+}
+
+type UpdateContractDraftRevisionPayload {
+    contract: Contract!
 }
 
 input UpdateContractInput {
@@ -1111,6 +1226,14 @@ input ActuaryContactInput {
     actuarialFirmOther: String
 }
 
+"Contact information input for contacting states regarding their submission"
+input StateContactInput {
+    name: String
+    titleRole: String
+    email: String
+}
+
+
 """
 A package in the system
 that shares a rate with another package.
@@ -1242,6 +1365,8 @@ input UpdateContractRateInput {
 
 input UpdateDraftContractRatesInput {
     contractID: ID!
+    "The updatedAt of the contract draft revision at the time this mutation. This is used for optimistic concurrency control"
+    lastSeenUpdatedAt: DateTime!
     """
     updatedRates contains ALL the existing rates associated with this contract.
     This includes rates that were previously linked or previously created (LINK & UPDATE)
@@ -1441,6 +1566,51 @@ type Contract {
     packageSubmissions: [ContractPackageSubmission!]!
 }
 
+"""
+UnlockedContact is a single unlocked contract, holding all the draft form data for a single contract
+and associated with zero or more Rates
+"""
+type UnlockedContract {
+    id: ID!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+
+    """
+    Where the contract is in the submission flow.
+    Options are DRAFT, SUBMITTED, RESUBMITTED and UNLOCKED
+    SUBMITTED and RESUBMITTED packages cannot be modified
+    """
+    status: HealthPlanPackageStatus!
+    "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
+    initiallySubmittedAt: Date
+    "stateCode is the state code (e.g. CA or TN) for the submitting state"
+    stateCode: String!
+    "state is fuller state data for the submitting state"
+    state: State
+    """
+    stateNumber is a unique auto-incrementing number identifying this contract
+    This value is used to generate the contractName
+    """
+    stateNumber: Int!
+    mccrsID: String
+
+    "draftRevision is the currently modifiable revision if the rate is DRAFT or UNLOCKED"
+    draftRevision: ContractRevision!
+    """
+    draftRates are the Rates that this editable submission are related to.
+    On submission they are cemented into a new ContractPackageSubmission
+    """
+    draftRates: [Rate!]!
+
+    """
+    packageSubmissions are a snapshot of the contract and its related rates through time
+    each packageSubmission was created by a submission of this contract and/or its related rates
+    a DRAFT Contract will have no packageSubmissions. Returned in _ascending_ order. Most recent
+    submission is in the first position in the array.
+    """
+    packageSubmissions: [ContractPackageSubmission!]!
+}
+
 type RateEdge {
     node: Rate!
 }
@@ -1488,6 +1658,122 @@ input UnlockRateInput {
     rateID: ID!
     "User given reason this rate was unlocked"
     unlockedReason: String!
+}
+
+input ContractDraftRevisionFormDataInput {
+    """
+    An array of IDs representing state programs that the contract covers
+    """
+    programIDs: [String!]!
+    """
+    The large overarching population of people that the program covers.
+    Options are MEDICAID, CHIP, MEDICAID_AND_CHIP
+    """
+    populationCovered: PopulationCovered
+    """
+    The submission type of this package
+    Options are CONTRACT_ONLY and CONTRACT_AND_RATES
+    """
+    submissionType: SubmissionType
+    """
+    Whether or not this contract is risk based
+    Risk-based contracts have specific requirements that
+    non-risk based contracts do not have
+    """
+    riskBasedContract: Boolean
+    "State provided summary of the contract being submitted"
+    submissionDescription: String
+    """
+    Array of state contacts of state representatives who should be
+    contacted about updates to the contract
+    Each state contact contains string fields for: name, title, and email
+    """
+    stateContacts: [StateContactInput!]!
+    """
+    Additional documents the state uploads to support a contract
+    Files can be PDF, DOC, DOCX, XLSX, CSV format
+    """
+    supportingDocuments: [GenericDocumentInput!]!
+    """
+    Type of contract the state is submitting
+    Options are: BASE, AMENDMENT
+    """
+    contractType: ContractType
+    """
+    Execution status for a contract.
+    Contracts are fully executed or unexecuted by some or all parties
+    Status can be either EXECUTED or UNEXECUTED
+    """
+    contractExecutionStatus: ContractExecutionStatus
+    """
+    State upload of the submitted contract
+    """
+    contractDocuments: [GenericDocumentInput!]!
+    "Start date of the contract"
+    contractDateStart: Date
+    "End date of the contract"
+    contractDateEnd: Date
+    """
+    The type of organization the state is contracting with
+    in order to deliver managed care services
+    Options are MCO, PIHP, PAHP, and PCCM
+    """
+    managedCareEntities: [ManagedCareEntity!]!
+    """
+    The state plan and/or waiver authorities that allow the state
+    to run its managed care programs
+    """
+    federalAuthorities: [FederalAuthority!]!
+    """
+    If contract is in Lieu-of Services and Settings (ILOSs)
+    in accordance with 42 CFR § 438.3(e)(2)
+    """
+    inLieuServicesAndSettings: Boolean
+    "If contract includes modifications to benefits provided by the managed care plans"
+    modifiedBenefitsProvided: Boolean
+    "If contract includes modifications to the geographic areas served by the managed care plans"
+    modifiedGeoAreaServed: Boolean
+    """
+    If contract includes modifications to the Medicaid beneficiaries served by the managed care
+    plans (e.g. eligibility or enrollment criteria)
+    """
+    modifiedMedicaidBeneficiaries: Boolean
+    "If contract includes modifications to the risk sharing strategy"
+    modifiedRiskSharingStrategy: Boolean
+    "If contract includes modifications to incentive arrangements"
+    modifiedIncentiveArrangements: Boolean
+    "If contract includes modifications to the withold agreements"
+    modifiedWitholdAgreements: Boolean
+    "If contract includes modifications to the state directed payments"
+    modifiedStateDirectedPayments: Boolean
+    "If contract includes modifications to the pass-through payments"
+    modifiedPassThroughPayments: Boolean
+    """
+    If contract includes modifications to payments to MCOs and PIHPs for enrollees that
+    are a patient in an institution for mental disease
+    """
+    modifiedPaymentsForMentalDiseaseInstitutions: Boolean
+    "If contract includes modifications to the medical loss ratio standards"
+    modifiedMedicalLossRatioStandards: Boolean
+    """
+    If contract includes modifications to
+    other financial, payment, incentive or related contractual provisions
+    """
+    modifiedOtherFinancialPaymentIncentive: Boolean
+    "If contract includes modifications to the enrollment/disenrollment process"
+    modifiedEnrollmentProcess: Boolean
+    "If contract includes modifications to the grevience and appeal system"
+    modifiedGrevienceAndAppeal: Boolean
+    "If contract includes modifications to the network adequacy standards"
+    modifiedNetworkAdequacyStandards: Boolean
+    "If contract includes modifications to the length of the contract period"
+    modifiedLengthOfContract: Boolean
+    "If contract includes modifications to the non-risk payment arrangements"
+    modifiedNonRiskPaymentArrangements: Boolean,
+    "If contract has statutory regulatory attestation"
+    statutoryRegulatoryAttestation: Boolean,
+    "Description provided for if contract has statutory regulatory attestation"
+    statutoryRegulatoryAttestationDescription: String
 }
 
 input RateFormDataInput {

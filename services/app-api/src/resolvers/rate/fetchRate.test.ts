@@ -282,12 +282,8 @@ describe('fetchRate', () => {
     })
 
     it('returns the correct dateAdded for documents', async () => {
-        const ldService = testLDService({
-            'link-rates': true,
-        })
         const prismaClient = await sharedTestPrismaClient()
         const stateServer = await constructTestPostgresServer({
-            ldService,
             s3Client: mockS3,
         })
         const cmsServer = await constructTestPostgresServer({
@@ -376,12 +372,13 @@ describe('fetchRate', () => {
             'Unlock A.0'
         )
         const a0FormData = latestFormData(unlockedA0Pkg)
-        const unlockedA0Contract = await fetchTestContract(stateServer, AID)
         a0FormData.submissionDescription = 'DESC A1'
         a0FormData.contractDocuments.push(dummyDoc('c2'))
         a0FormData.documents.push(dummyDoc('s2'))
 
         await updateTestHealthPlanFormData(stateServer, a0FormData)
+
+        const unlockedA0Contract = await fetchTestContract(stateServer, AID)
         const a0RatesUpdates =
             updateRatesInputFromDraftContract(unlockedA0Contract)
         expect(a0RatesUpdates.updatedRates[0].rateID).toBe(OneID)
