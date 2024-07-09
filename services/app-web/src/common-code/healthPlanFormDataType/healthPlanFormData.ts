@@ -119,9 +119,9 @@ const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
                   return validBaseRate
               })
 
-    // Contract only should have no rate fields
+    // Contract only - skip all validations for hasValidRates
     if (sub.submissionType === 'CONTRACT_ONLY') {
-        return !validRates ? true : false
+       return  true
     } else {
         return validRates
     }

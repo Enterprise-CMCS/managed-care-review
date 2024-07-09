@@ -1,14 +1,14 @@
-import { formatCalendarDate } from '../../../../common-code/dateHelpers'
+import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import {
     DataDetail,
     DataDetailMissingField,
     DoubleColumnGrid,
     SectionCard,
     UploadedDocumentsTable,
-} from '../../../../components'
-import { FormikRateForm } from './RateDetailsV2'
-import { useStatePrograms } from '../../../../hooks'
-import { formatDocumentsForGQL } from '../../../../formHelpers/formatters'
+} from '../../../components'
+import type { FormikRateForm } from './'
+import { useStatePrograms } from '../../../hooks'
+import { formatDocumentsForGQL } from '../../../formHelpers/formatters'
 
 export const LinkedRateSummary = ({
     rateForm,

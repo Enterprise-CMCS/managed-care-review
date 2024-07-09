@@ -251,10 +251,6 @@ describe('submitRate', () => {
     })
 
     it('returns the latest linked contracts', async () => {
-        const ldService = testLDService({
-            'link-rates': true,
-        })
-
         const stateServer = await constructTestPostgresServer({
             ldService,
             s3Client: mockS3,

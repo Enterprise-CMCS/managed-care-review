@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react'
-import { renderWithProviders } from '../../../../../testHelpers/jestHelpers'
-import { SubmissionTypeSummarySectionV2 as SubmissionTypeSummarySection } from './SubmissionTypeSummarySectionV2'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import { SubmissionTypeSummarySection } from './SubmissionTypeSummarySection'
 import {
     mockContractPackageDraft,
     mockMNState,
@@ -8,7 +8,7 @@ import {
     fetchCurrentUserMock,
     mockValidStateUser,
     mockContractPackageUnlocked,
-} from '../../../../../testHelpers/apolloMocks'
+} from '../../../testHelpers/apolloMocks'
 
 describe('SubmissionTypeSummarySection', () => {
     afterEach(() => {

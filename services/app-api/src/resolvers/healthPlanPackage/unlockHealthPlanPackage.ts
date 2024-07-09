@@ -36,9 +36,6 @@ export function unlockHealthPlanPackageResolver(
         const { unlockedReason, pkgID } = input
         span?.setAttribute('mcreview.package_id', pkgID)
 
-        const featureFlags = await launchDarkly.allFlags(context)
-        const linkRatesFF = featureFlags?.['link-rates'] === true
-
         // This resolver is only callable by CMS users
         if (!isCMSUser(user)) {
             logError(
@@ -94,7 +91,7 @@ export function unlockHealthPlanPackageResolver(
                 unlockReason: unlockedReason,
                 unlockedByUserID: user.id,
             },
-            linkRatesFF
+            true // linked rates feature flag is permanently on
         )
         if (unlockContractResult instanceof Error) {
             const errMessage = `Failed to unlock contract revision with ID: ${contract.id}; ${unlockContractResult.message}`

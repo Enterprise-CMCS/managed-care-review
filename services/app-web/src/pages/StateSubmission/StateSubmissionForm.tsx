@@ -12,27 +12,17 @@ import {
 } from '../../constants/routes'
 import { getRelativePath } from '../../routeHelpers'
 import { ContractDetails } from './ContractDetails'
-import { RateDetails } from './RateDetails'
 import { Contacts } from './Contacts'
 import { Documents } from './Documents'
 import { ReviewSubmit } from './ReviewSubmit'
 import { SubmissionType } from './SubmissionType'
 import { UnlockedHealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
 import { ContractFormData } from '../../gen/gqlClient'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
-import { RateDetailsV2 } from './RateDetails/V2/RateDetailsV2'
-import { ReviewSubmitV2 } from './ReviewSubmit/V2/ReviewSubmit/ReviewSubmitV2'
+import { RateDetails } from './RateDetails'
 import styles from './StateSubmissionForm.module.scss'
 
 // Can move this AppRoutes on future pass - leaving it here now to make diff clear
 export const StateSubmissionForm = (): React.ReactElement => {
-    const ldClient = useLDClient()
-
-    const useLinkedRates = ldClient?.variation(
-        featureFlags.LINK_RATES.flag,
-        featureFlags.LINK_RATES.defaultValue
-    )
     return (
         <div
             data-testid="state-submission-form-page"
@@ -53,13 +43,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     path={getRelativePathFromNestedRoute(
                         'SUBMISSIONS_RATE_DETAILS'
                     )}
-                    element={
-                        useLinkedRates ? (
-                            <RateDetailsV2 type="MULTI" />
-                        ) : (
-                            <RateDetails />
-                        )
-                    }
+                    element={<RateDetails type="MULTI" />}
                 />
                 <Route
                     path={getRelativePathFromNestedRoute(
@@ -77,9 +61,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     path={getRelativePathFromNestedRoute(
                         'SUBMISSIONS_REVIEW_SUBMIT'
                     )}
-                    element={
-                        useLinkedRates ? <ReviewSubmitV2 /> : <ReviewSubmit />
-                    }
+                    element={<ReviewSubmit />}
                 />
                 <Route path="*" element={<Error404 />} />
             </Routes>

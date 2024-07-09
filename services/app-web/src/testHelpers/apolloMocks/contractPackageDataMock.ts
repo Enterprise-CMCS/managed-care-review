@@ -15,11 +15,7 @@ function mockContractRevision(name?: string, partial?: Partial<ContractRevision>
             updatedBy: 'example@state.com',
             updatedReason: 'contract submit'
         },
-        unlockInfo: {
-            updatedAt: new Date(),
-            updatedBy: 'example@state.com',
-            updatedReason: 'contract unlock'
-        },
+        unlockInfo: null,
         formData: {
             __typename: 'ContractFormData',
             programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
@@ -89,12 +85,12 @@ function mockRateRevision(name?: string, partial?: Partial<RateRevision>): RateR
         createdAt: new Date('01/01/2023'),
         updatedAt: new Date('01/01/2023'),
         submitInfo: {
-            updatedAt: new Date(),
+            updatedAt: '2023-01-01T16:54:39.173Z',
             updatedBy: 'example@state.com',
             updatedReason: 'contract submit'
         },
         unlockInfo: {
-            updatedAt: new Date(),
+            updatedAt: '2023-01-01T18:54:39.173Z',
             updatedBy: 'example@state.com',
             updatedReason: 'contract unlock'
         },
@@ -618,7 +614,7 @@ function mockContractPackageSubmitted(
             cause: 'CONTRACT_SUBMISSION',
             __typename: 'ContractPackageSubmission',
             submitInfo: {
-                updatedAt: new Date('12/18/2023'),
+                updatedAt: '2024-12-18T16:54:39.173Z',
                 updatedBy: 'example@state.com',
                 updatedReason: 'contract submit'
             },
@@ -626,7 +622,7 @@ function mockContractPackageSubmitted(
             contractRevision: {
                 contractName: 'MCR-MN-0005-SNBC',
                 createdAt: new Date('01/01/2024'),
-                updatedAt: new Date('12/31/2024'),
+                updatedAt:  '2024-12-18T16:54:39.173Z',
                 id: '123',
                 submitInfo: {
                     updatedAt: new Date(),
@@ -777,14 +773,20 @@ function mockContractPackageSubmittedWithRevisions(
                 cause: 'CONTRACT_SUBMISSION',
                 submitInfo: {
                     __typename: 'UpdateInformation',
-                    updatedAt: '2024-03-03',
+                    updatedAt: '2024-03-03T16:54:39.173Z',
                     updatedBy: 'example@state.com',
                     updatedReason: 'submit 3'
                 },
                 submittedRevisions: [
                     mockContractRevision('3'),
                 ],
-                contractRevision: mockContractRevision('3'),
+                contractRevision: mockContractRevision('3', {
+                    unlockInfo: {
+                    __typename: 'UpdateInformation',
+                    updatedAt: '2024-03-01T17:54:39.173Z',
+                    updatedBy: 'zuko@example.com',
+                    updatedReason: 'prepare to add documents',
+                },}),
                 rateRevisions: [
                     mockRateRevision('3'),
                 ],
@@ -794,14 +796,20 @@ function mockContractPackageSubmittedWithRevisions(
                 cause: 'CONTRACT_SUBMISSION',
                 submitInfo: {
                     __typename: 'UpdateInformation',
-                    updatedAt: '2024-02-02',
+                    updatedAt: '2024-02-02T17:45:39.173Z',
                     updatedBy: 'example@state.com',
                     updatedReason: 'submit 2'
                 },
                 submittedRevisions: [
                     mockContractRevision('2'),
                 ],
-                contractRevision: mockContractRevision('2'),
+                contractRevision: mockContractRevision('2', {
+                    unlockInfo: {
+                    __typename: 'UpdateInformation',
+                    updatedAt: '2024-01-25T21:13:56.174Z',
+                    updatedBy: 'zuko@example.com',
+                    updatedReason: 'test',
+                },}),
                 rateRevisions: [
                     mockRateRevision('2'),
                 ],
@@ -811,13 +819,12 @@ function mockContractPackageSubmittedWithRevisions(
                 cause: 'CONTRACT_SUBMISSION',
                 submitInfo: {
                     __typename: 'UpdateInformation',
-                    updatedAt: '2024-01-01',
+                    updatedAt: '2024-01-01T11:14:39.173Z',
                     updatedBy: 'example@state.com',
                     updatedReason: 'submit 1'
                 },
                 submittedRevisions: [
-                    mockContractRevision('1'),
-                ],
+                    mockContractRevision('1')],
                 contractRevision: mockContractRevision('1'),
                 rateRevisions: [
                     mockRateRevision('1'),
@@ -1223,9 +1230,9 @@ function mockContractPackageUnlocked(
     return {
         status: 'UNLOCKED',
         __typename: 'Contract',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        initiallySubmittedAt: new Date(),
+        createdAt: '2023-01-01T16:54:39.173Z',
+        updatedAt: '2024-12-01T16:54:39.173Z',
+        initiallySubmittedAt:'2023-01-01',
         id: 'test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
@@ -1235,7 +1242,7 @@ function mockContractPackageUnlocked(
             __typename: 'ContractRevision',
             submitInfo: undefined,
             unlockInfo: {
-                updatedAt: new Date(),
+                updatedAt: '2023-01-01T16:54:39.173Z',
                 updatedBy: 'cms@example.com',
                 updatedReason: 'unlocked for a test',
             },
@@ -1360,7 +1367,7 @@ function mockContractPackageUnlocked(
         packageSubmissions: [{
             cause: 'CONTRACT_SUBMISSION',
             submitInfo: {
-                updatedAt: new Date('01/01/2024'),
+                updatedAt:  '2023-01-01T16:54:39.173Z',
                 updatedBy: 'example@state.com',
                 updatedReason: 'initial submission'
             },
@@ -1368,14 +1375,14 @@ function mockContractPackageUnlocked(
                 {
                     contractName: 'MCR-MN-0005-SNBC',
                     createdAt: new Date('01/01/2024'),
-                    updatedAt: new Date('12/31/2024'),
+                    updatedAt:  '2023-01-01T16:54:39.173Z',
                     submitInfo: {
-                        updatedAt: new Date('01/01/2024'),
+                        updatedAt: '2023-01-01T16:54:39.173Z',
                         updatedBy: 'example@state.com',
                         updatedReason: 'initial submission'
                     },
                     unlockInfo: {
-                        updatedAt: new Date('01/01/2024'),
+                        updatedAt: '2023-01-01T16:54:39.173Z',
                         updatedBy: 'example@state.com',
                         updatedReason: 'unlocked for a test'
                     },
@@ -1427,14 +1434,14 @@ function mockContractPackageUnlocked(
             contractRevision: {
                 contractName: 'MCR-MN-0005-SNBC',
                 createdAt: new Date('01/01/2024'),
-                updatedAt: new Date('12/31/2024'),
+                updatedAt: '2024-01-01T18:54:39.173Z',
                 submitInfo: {
-                    updatedAt: new Date('01/01/2024'),
+                    updatedAt: '2024-01-01T18:54:39.173Z',
                     updatedBy: 'example@state.com',
                     updatedReason: 'initial submission'
                 },
                 unlockInfo: {
-                    updatedAt: new Date('01/01/2024'),
+                    updatedAt: '2024-02-01T16:54:39.173Z',
                     updatedBy: 'example@state.com',
                     updatedReason: 'unlocked'
                 },
