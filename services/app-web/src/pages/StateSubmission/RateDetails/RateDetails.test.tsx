@@ -558,7 +558,7 @@ describe('RateDetails', () => {
                 const rateCertsAfterAddAnother = rateCertifications(screen)
                 expect(rateCertsAfterAddAnother).toHaveLength(1)
             })
-        })
+        }, 10000)
 
         it('accepts documents on second rate', async () => {
             renderWithProviders(

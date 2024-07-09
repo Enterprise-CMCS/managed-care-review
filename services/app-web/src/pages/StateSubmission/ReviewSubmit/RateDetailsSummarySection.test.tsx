@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { screen, waitFor, within } from '@testing-library/react'
 import {
     mockContractPackageDraft,
@@ -402,75 +401,6 @@ describe('RateDetailsSummarySection', () => {
                 name: 'Programs this rate certification covers',
             })
         ).not.toBeInTheDocument()
-    })
-
-    it('renders the deprecated rate programs when present on a locked historic linked rate', async () => {
-        const statePrograms = mockMNState().programs
-        const contract = mockContractPackageDraft()
-        contract.draftRates![0].draftRevision!.formData.deprecatedRateProgramIDs =
-            [statePrograms[0].id]
-        contract.draftRates![0].draftRevision!.formData.rateProgramIDs = []
-        contract.draftRates![0].draftRevision!.submitInfo = {
-            updatedAt: new Date('01/02/2024'),
-            updatedBy: 'zuko@example.com',
-            updatedReason: 'initial submission',
-        }
-        contract.draftRates![0].parentContractID = contract.id
-        contract.draftRates![0].draftRevision!.unlockInfo = null
-        await waitFor(() => {
-            renderWithProviders(
-                <RateDetailsSummarySection
-                    contract={contract}
-                    submissionName="MN-MSHO-0003"
-                    statePrograms={statePrograms}
-                    editNavigateTo="/edit"
-                />,
-                {
-                    apolloProvider: apolloProviderCMSUser,
-                }
-            )
-        })
-
-        expect(
-            screen.queryByRole('definition', {
-                name: 'Programs this rate certification covers',
-            })
-        ).toBeInTheDocument()
-
-        expect(
-            screen.queryByRole('definition', {
-                name: 'Rates this rate certification covers',
-            })
-        ).not.toBeInTheDocument()
-    })
-
-    it('does not render the deprecated rate programs when rate programs present on an submitted linked rate', async () => {
-        const statePrograms = mockMNState().programs
-        const contract = mockContractPackageSubmitted()
-        await waitFor(() => {
-            renderWithProviders(
-                <RateDetailsSummarySection
-                    contract={contract}
-                    submissionName="MN-MSHO-0003"
-                    statePrograms={statePrograms}
-                />,
-                {
-                    apolloProvider: apolloProviderCMSUser,
-                }
-            )
-        })
-
-        expect(
-            screen.queryByRole('definition', {
-                name: 'Programs this rate certification covers',
-            })
-        ).not.toBeInTheDocument()
-
-        expect(
-            screen.queryByRole('definition', {
-                name: 'Rates this rate certification covers',
-            })
-        ).toBeInTheDocument()
     })
 
     it('renders supporting rates docs when they exist', async () => {

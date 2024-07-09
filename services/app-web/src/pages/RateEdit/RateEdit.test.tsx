@@ -84,19 +84,12 @@ describe('RateEdit', () => {
             ).not.toBeInTheDocument()
             expect(actuaryNameInput).toBeInTheDocument()
 
-            // delete some fields so we trigger validations
-            const startDateInput = screen.getAllByLabelText('Start date')
-            const endDateInput = screen.getAllByLabelText('End date')
-            await updateDateRange({
-                start: { elements: startDateInput, date: 'abc' },
-                end: { elements: endDateInput, date: 'abc' },
-            })
+            await user.clear(actuaryNameInput)
             await user.click(
                 screen.getByRole('button', {
                     name: 'Remove rate-document.pdf document',
                 })
             )
-            screen.debug()
             await user.click(
                 screen.getByRole('button', {
                     name: 'Submit',
@@ -104,14 +97,15 @@ describe('RateEdit', () => {
             )
 
             await screen.findByTestId('error-summary')
+            expect(screen.getAllByText('You must provide a name')).toHaveLength(
+                2
+            ) // we show only start date error messages inline if both fields have errors, see RateDatesErrorMessage
             expect(
-                screen.getAllByText('The end date must be in MM/DD/YYYY format')
-            ).toHaveLength(1) // we show only start date error messages inline if both fields have errors, see RateDatesErrorMessage
-            expect(
-                screen.getAllByText(
-                    'The start date must be in MM/DD/YYYY format'
-                )
+                screen.getAllByText('You must upload a rate certification')
             ).toHaveLength(2)
+            expect(screen.getAllByTestId('error-summary-message')).toHaveLength(
+                2
+            )
             // check that linked rates errors do not appear
             expect(
                 screen.queryAllByText('You must select a rate certification')
