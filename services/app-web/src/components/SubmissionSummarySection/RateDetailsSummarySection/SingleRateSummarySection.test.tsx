@@ -18,14 +18,6 @@ import { type Location, Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '../../../constants'
 
 describe('SingleRateSummarySection', () => {
-    // Using real times for these tests. Without it, LD variables are not getting updated between tests.
-    vi.useRealTimers()
-    beforeEach(() => {
-        vi.clearAllMocks()
-    })
-    afterAll(() => {
-        vi.useFakeTimers()
-    })
     it('can render rate details without errors', async () => {
         const rateData = rateDataMock()
         rateData.revisions[0].formData.deprecatedRateProgramIDs = ['123']
@@ -270,23 +262,22 @@ describe('SingleRateSummarySection', () => {
         const relatedContractActions = screen.getByRole('definition', {
             name: 'Contract actions',
         })
-        await waitFor(() => {
-            // Expect submissions this rate was submitted with link to exists
-            expect(relatedContractActions).toBeInTheDocument()
-            expect(
-                within(relatedContractActions).getByRole('link', {
-                    name: contractPackageName,
-                })
-            ).toBeInTheDocument()
-            expect(
-                within(relatedContractActions).getByRole('link', {
-                    name: contractPackageName,
-                })
-            ).toHaveAttribute(
-                'href',
-                `/submissions/${parentContractRev.contract.id}`
-            )
-        })
+
+        // Expect submissions this rate was submitted with link to exists
+        expect(relatedContractActions).toBeInTheDocument()
+        expect(
+            within(relatedContractActions).getByRole('link', {
+                name: contractPackageName,
+            })
+        ).toBeInTheDocument()
+        expect(
+            within(relatedContractActions).getByRole('link', {
+                name: contractPackageName,
+            })
+        ).toHaveAttribute(
+            'href',
+            `/submissions/${parentContractRev.contract.id}`
+        )
     })
 
     describe('Unlock rate', () => {
