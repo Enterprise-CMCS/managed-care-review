@@ -9,7 +9,7 @@ import {
     getIn,
     FieldArrayRenderProps,
 } from 'formik'
-import { useNavigate } from 'react-router-dom'
+import { generatePath, useNavigate } from 'react-router-dom'
 
 import styles from '../StateSubmissionForm.module.scss'
 
@@ -416,7 +416,9 @@ const Contacts = ({
                                 <PageActions
                                     saveAsDraftOnClick={() => {
                                         if (!dirty) {
-                                            navigate(`/dashboard/submissions`)
+                                            navigate(
+                                                RoutesRecord.DASHBOARD_SUBMISSIONS
+                                            )
                                         } else {
                                             setShouldValidate(true)
                                             setFocusErrorSummaryHeading(true)
@@ -438,6 +440,25 @@ const Contacts = ({
                                         setFocusErrorSummaryHeading(true)
                                     }}
                                     actionInProgress={isSubmitting}
+                                    backOnClickUrl={
+                                        draftSubmission.submissionType ===
+                                        'CONTRACT_ONLY'
+                                            ? generatePath(
+                                                  RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
+                                                  { id }
+                                              )
+                                            : generatePath(
+                                                  RoutesRecord.SUBMISSIONS_RATE_DETAILS,
+                                                  { id }
+                                              )
+                                    }
+                                    saveAsDraftOnClickUrl={
+                                        RoutesRecord.DASHBOARD_SUBMISSIONS
+                                    }
+                                    continueOnClickUrl={generatePath(
+                                        RoutesRecord.SUBMISSIONS_DOCUMENTS,
+                                        { id }
+                                    )}
                                 />
                             </UswdsForm>
                         </>

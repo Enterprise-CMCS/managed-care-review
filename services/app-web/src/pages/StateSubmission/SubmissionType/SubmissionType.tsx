@@ -6,7 +6,7 @@ import {
 } from '@trussworks/react-uswds'
 import { Formik, FormikErrors, FormikHelpers } from 'formik'
 import React, { useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, generatePath } from 'react-router-dom'
 import {
     DynamicStepIndicator,
     ErrorSummary,
@@ -596,6 +596,16 @@ export const SubmissionType = ({
                                         )
                                     }}
                                     actionInProgress={isSubmitting}
+                                    backOnClickUrl={
+                                        RoutesRecord.DASHBOARD_SUBMISSIONS
+                                    }
+                                    saveAsDraftOnClickUrl={
+                                        RoutesRecord.DASHBOARD_SUBMISSIONS
+                                    }
+                                    continueOnClickUrl={generatePath(
+                                        RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
+                                        { id: id ?? 'new' }
+                                    )}
                                 />
                             </UswdsForm>
                         </>

@@ -29,6 +29,7 @@ const useTealium = (): {
     ) => {
         const linkData: TealiumButtonEventObject = {
             ...tealiumData,
+            link_type: tealiumData.link_url ? 'link_other' : undefined,
             event_name: 'button_engagement',
         }
         logUserEvent(linkData, pathname, loggedInUser, heading)

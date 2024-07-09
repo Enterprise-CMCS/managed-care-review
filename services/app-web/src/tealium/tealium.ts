@@ -47,7 +47,7 @@ type ButtonEventParentComponentType =
 type TealiumButtonEventObject = {
     event_name: 'button_engagement',
     text: string
-    //link_type: string
+    link_type?: 'link_other'
     button_style?: ButtonEventStyle | string
     button_type?: ButtonEventType | string
     parent_component_heading?: string
@@ -213,6 +213,8 @@ const tealiumClient = (): TealiumClientType => {
                 tealium_event: linkData.event_name,
                 ...linkData
             }
+            console.log(linkData.event_name)
+            console.log(tagData)
             utag.link(tagData)
         },
         logPageView: (

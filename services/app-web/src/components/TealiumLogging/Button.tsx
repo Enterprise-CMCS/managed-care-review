@@ -5,7 +5,10 @@ import { ButtonProps } from '@trussworks/react-uswds/lib/components/Button/Butto
 import { extractText } from './tealiamLoggingHelpers'
 import { useTealium } from '../../hooks'
 
-type TealiumDataType = Omit<TealiumButtonEventObject, 'event_name' | 'text'>
+type TealiumDataType = Omit<
+    TealiumButtonEventObject,
+    'event_name' | 'text' | 'link_type'
+>
 
 type ButtonWithLoggingType = TealiumDataType &
     ButtonProps &
@@ -21,6 +24,7 @@ const ButtonWithLogging = (props: ButtonWithLoggingType) => {
         onClick,
         type,
         children,
+        link_url,
         ...rest
     } = props
 
@@ -47,6 +51,7 @@ const ButtonWithLogging = (props: ButtonWithLoggingType) => {
                     button_style: button_style || buttonStyle,
                     parent_component_heading,
                     parent_component_type,
+                    link_url,
                 })
 
                 if (onClick) {

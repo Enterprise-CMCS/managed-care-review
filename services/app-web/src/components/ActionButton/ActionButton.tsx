@@ -5,7 +5,7 @@ import styles from './ActionButton.module.scss'
 import { Spinner } from '../Spinner'
 import { extractText } from '../TealiumLogging/tealiamLoggingHelpers'
 import { useTealium } from '../../hooks'
-import { TealiumButtonEventObject } from '../../tealium/tealium'
+import { TealiumButtonEventObject } from '../../tealium'
 
 /* 
 Main application-wide action button. 
@@ -17,7 +17,7 @@ type ActionButtonProps = {
     loading?: boolean
     animationTimeout?: number // used for loading animation
 } & ComponentProps<typeof UswdsButton> &
-    Omit<TealiumButtonEventObject, 'event_name' | 'text'>
+    Omit<TealiumButtonEventObject, 'event_name' | 'text' | 'link_type'>
 
 export const ActionButton = ({
     disabled,
@@ -30,6 +30,7 @@ export const ActionButton = ({
     type,
     parent_component_heading,
     parent_component_type,
+    link_url,
     ...inheritedProps
 }: ActionButtonProps): React.ReactElement | null => {
     const [showLoading, setShowLoading] = useState<boolean | undefined>(
@@ -96,6 +97,7 @@ export const ActionButton = ({
             button_type: type,
             parent_component_heading,
             parent_component_type,
+            link_url,
         })
         if (onClick) onClick(e)
     }

@@ -29,7 +29,7 @@ import { ActuaryCommunicationRecord, ERROR_MESSAGES } from '../../../constants'
 import { handleApolloErrorsAndAddUserFacingMessages } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
-import { NavLinkWithLogging } from '../../TealiumLogging/Link'
+import { NavLinkWithLogging } from '../../TealiumLogging'
 
 const rateCapitationType = (formData: RateFormData) =>
     formData.rateCapitationType
@@ -258,6 +258,7 @@ export const SingleRateSummarySection = ({
                                     `/submissions/${parentContractSubmissionID}`
                                 )
                             }}
+                            link_url={`/submissions/${parentContractSubmissionID}`}
                         >
                             Unlock rate
                         </UnlockRateButton>

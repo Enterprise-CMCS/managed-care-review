@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Form as UswdsForm } from '@trussworks/react-uswds'
-import { useNavigate } from 'react-router-dom'
+import { generatePath, useNavigate } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
@@ -340,6 +340,17 @@ export const Documents = (): React.ReactElement => {
                             showFileUploadError && fileItems.length > 0
                         }
                         actionInProgress={isSubmitting}
+                        backOnClickUrl={generatePath(
+                            RoutesRecord.SUBMISSIONS_CONTACTS,
+                            { id }
+                        )}
+                        saveAsDraftOnClickUrl={
+                            RoutesRecord.DASHBOARD_SUBMISSIONS
+                        }
+                        continueOnClickUrl={generatePath(
+                            RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT,
+                            { id }
+                        )}
                     />
                 </UswdsForm>
             </FormContainer>

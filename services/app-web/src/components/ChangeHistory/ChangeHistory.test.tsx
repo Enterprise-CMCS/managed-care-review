@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ChangeHistory } from './ChangeHistoryV2'
 import {
@@ -62,7 +62,7 @@ describe('Change History', () => {
 
     it('has expected text in the accordion titles and content', () => {
         const submittedContract = mockContractPackageSubmittedWithRevisions()
-        render(<ChangeHistory contract={submittedContract} />)
+        renderWithProviders(<ChangeHistory contract={submittedContract} />)
         expect(
             screen.getByRole('button', {
                 name: `${dayjs(
@@ -81,7 +81,7 @@ describe('Change History', () => {
 
     it('should expand and collapse the accordion on click', async () => {
         const submittedContract = mockContractPackageSubmittedWithRevisions()
-        render(<ChangeHistory contract={submittedContract} />)
+        renderWithProviders(<ChangeHistory contract={submittedContract} />)
         // submitted reasons not visible initially, must expand
         expect(
             screen.getByText(
@@ -104,7 +104,7 @@ describe('Change History', () => {
     })
     it('should list the submission events in reverse chronological order', () => {
         const submittedContract = mockContractPackageSubmittedWithRevisions()
-        render(<ChangeHistory contract={submittedContract} />)
+        renderWithProviders(<ChangeHistory contract={submittedContract} />)
         const accordionRows = screen.getAllByRole('button')
         expect(accordionRows[0]).toHaveTextContent(
             `${dayjs(
@@ -146,7 +146,7 @@ describe('Change History', () => {
     })
     it('has correct href values for previous submission links', () => {
         const submittedContract = mockContractPackageSubmittedWithRevisions()
-        render(<ChangeHistory contract={submittedContract} />)
+        renderWithProviders(<ChangeHistory contract={submittedContract} />)
         expect(screen.getByTestId(`revision-link-1`)).toHaveAttribute(
             'href',
             `/submissions/${submittedContract.id}/revisions/1`
@@ -158,7 +158,7 @@ describe('Change History', () => {
     })
     it('should list accordion items with links when appropriate', () => {
         const submittedContract = mockContractPackageSubmittedWithRevisions()
-        render(<ChangeHistory contract={submittedContract} />)
+        renderWithProviders(<ChangeHistory contract={submittedContract} />)
         //Latest resubmission should not have a link.
         expect(
             screen.getByTestId(
@@ -192,7 +192,7 @@ describe('Change History', () => {
     })
     it('should not list links for initial submission without revisions', () => {
         const submittedContract = mockContractPackageSubmitted()
-        render(<ChangeHistory contract={submittedContract} />)
+        renderWithProviders(<ChangeHistory contract={submittedContract} />)
         //Initial submission should not have a link
         expect(
             screen.getByTestId(
@@ -202,7 +202,7 @@ describe('Change History', () => {
     })
     it('should not list links for initial submission when initial submission is unlocked', () => {
         const submittedContract = mockContractPackageUnlocked()
-        render(<ChangeHistory contract={submittedContract} />)
+        renderWithProviders(<ChangeHistory contract={submittedContract} />)
         //Initial submission should not have a link
         expect(
             screen.getByTestId(

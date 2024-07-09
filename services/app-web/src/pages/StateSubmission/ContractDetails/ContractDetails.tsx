@@ -8,7 +8,7 @@ import {
     Link,
 } from '@trussworks/react-uswds'
 import { v4 as uuidv4 } from 'uuid'
-import { useNavigate } from 'react-router-dom'
+import { generatePath, useNavigate } from 'react-router-dom'
 import { Formik, FormikErrors } from 'formik'
 import styles from '../StateSubmissionForm.module.scss'
 
@@ -1137,6 +1137,25 @@ export const ContractDetails = ({
                                     }}
                                     disableContinue={showFileUploadError}
                                     actionInProgress={isSubmitting}
+                                    backOnClickUrl={generatePath(
+                                        RoutesRecord.SUBMISSIONS_TYPE,
+                                        { id }
+                                    )}
+                                    saveAsDraftOnClickUrl={
+                                        RoutesRecord.DASHBOARD_SUBMISSIONS
+                                    }
+                                    continueOnClickUrl={
+                                        draftSubmission.submissionType ===
+                                        'CONTRACT_ONLY'
+                                            ? generatePath(
+                                                  RoutesRecord.SUBMISSIONS_CONTACTS,
+                                                  { id }
+                                              )
+                                            : generatePath(
+                                                  RoutesRecord.SUBMISSIONS_RATE_DETAILS,
+                                                  { id }
+                                              )
+                                    }
                                 />
                             </UswdsForm>
                         </>
