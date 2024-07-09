@@ -355,7 +355,9 @@ export const ContractDetailsSummarySection = ({
             {contractSupportingDocuments && (
                 <UploadedDocumentsTable
                     documents={contractSupportingDocuments}
-                    previousSubmissionDate={lastSubmittedDate}
+                    previousSubmissionDate={
+                        isInitialSubmission ? undefined : lastSubmittedDate
+                    }
                     caption="Contract supporting documents"
                     documentCategory="Contract-supporting"
                     isSupportingDocuments
