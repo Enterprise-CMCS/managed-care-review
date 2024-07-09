@@ -1147,14 +1147,8 @@ export const ContractDetails = ({
                                     continueOnClickUrl={
                                         draftSubmission.submissionType ===
                                         'CONTRACT_ONLY'
-                                            ? generatePath(
-                                                  RoutesRecord.SUBMISSIONS_CONTACTS,
-                                                  { id }
-                                              )
-                                            : generatePath(
-                                                  RoutesRecord.SUBMISSIONS_RATE_DETAILS,
-                                                  { id }
-                                              )
+                                            ? '/edit/contacts'
+                                            : '/edit/rate-details'
                                     }
                                 />
                             </UswdsForm>

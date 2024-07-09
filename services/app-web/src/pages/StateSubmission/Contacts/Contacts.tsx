@@ -455,10 +455,7 @@ const Contacts = ({
                                     saveAsDraftOnClickUrl={
                                         RoutesRecord.DASHBOARD_SUBMISSIONS
                                     }
-                                    continueOnClickUrl={generatePath(
-                                        RoutesRecord.SUBMISSIONS_DOCUMENTS,
-                                        { id }
-                                    )}
+                                    continueOnClickUrl="/edit/documents"
                                 />
                             </UswdsForm>
                         </>

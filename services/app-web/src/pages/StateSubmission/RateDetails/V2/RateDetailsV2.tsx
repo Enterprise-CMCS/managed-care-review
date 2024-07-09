@@ -628,14 +628,13 @@ const RateDetails = ({
                                                   { id }
                                               )
                                     }
-                                    saveAsDraftOnClickUrl="/dashboard/submissions"
+                                    saveAsDraftOnClickUrl={
+                                        RoutesRecord.DASHBOARD_SUBMISSIONS
+                                    }
                                     continueOnClickUrl={
                                         displayAsStandaloneRate
                                             ? RoutesRecord.DASHBOARD_SUBMISSIONS
-                                            : generatePath(
-                                                  RoutesRecord.SUBMISSIONS_CONTACTS,
-                                                  { id }
-                                              )
+                                            : '/edit/contacts'
                                     }
                                 />
                             </UswdsForm>

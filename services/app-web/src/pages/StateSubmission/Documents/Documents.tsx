@@ -347,10 +347,7 @@ export const Documents = (): React.ReactElement => {
                         saveAsDraftOnClickUrl={
                             RoutesRecord.DASHBOARD_SUBMISSIONS
                         }
-                        continueOnClickUrl={generatePath(
-                            RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT,
-                            { id }
-                        )}
+                        continueOnClickUrl="/edit/review-and-submit"
                     />
                 </UswdsForm>
             </FormContainer>

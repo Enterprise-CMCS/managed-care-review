@@ -213,8 +213,6 @@ const tealiumClient = (): TealiumClientType => {
                 tealium_event: linkData.event_name,
                 ...linkData
             }
-            console.log(linkData.event_name)
-            console.log(tagData)
             utag.link(tagData)
         },
         logPageView: (
