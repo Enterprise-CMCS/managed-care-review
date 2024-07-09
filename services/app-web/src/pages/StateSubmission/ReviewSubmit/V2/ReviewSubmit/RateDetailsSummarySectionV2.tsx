@@ -94,6 +94,7 @@ export const RateDetailsSummarySectionV2 = ({
 
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
+    const isInitialSubmission = contract.packageSubmissions.length === 1
 
     const rates = rateRevs
         ? rateRevs
@@ -446,7 +447,11 @@ export const RateDetailsSummarySectionV2 = ({
                                       multipleDocumentsAllowed={false}
                                       caption="Rate certification"
                                       documentCategory="Rate certification"
-                                      previousSubmissionDate={lastSubmittedDate}
+                                      previousSubmissionDate={
+                                          isInitialSubmission
+                                              ? undefined
+                                              : lastSubmittedDate
+                                      }
                                       hideDynamicFeedback={isSubmittedOrCMSUser}
                                   />
                               )}
@@ -455,7 +460,11 @@ export const RateDetailsSummarySectionV2 = ({
                                       documents={
                                           rateFormData.supportingDocuments
                                       }
-                                      previousSubmissionDate={lastSubmittedDate}
+                                      previousSubmissionDate={
+                                          isInitialSubmission
+                                              ? undefined
+                                              : lastSubmittedDate
+                                      }
                                       packagesWithSharedRateCerts={
                                           isEditing
                                               ? undefined

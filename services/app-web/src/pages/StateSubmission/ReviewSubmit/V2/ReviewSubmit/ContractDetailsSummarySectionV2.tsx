@@ -100,7 +100,7 @@ export const ContractDetailsSummarySectionV2 = ({
         loggedInUser?.role === 'CMS_USER'
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const contractOrRev = contractRev ? contractRev : contract
-
+    const isInitialSubmission = contract.packageSubmissions.length === 1
     const contractFormData = getVisibleLatestContractFormData(
         contractOrRev,
         isEditing
@@ -183,7 +183,6 @@ export const ContractDetailsSummarySectionV2 = ({
         ? getPackageSubmissionAtIndex(contract, lastSubmittedIndex)?.submitInfo
               .updatedAt
         : getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
-
     return (
         <SectionCard
             id="contractDetailsSection"
@@ -345,7 +344,9 @@ export const ContractDetailsSummarySectionV2 = ({
             {contractFormData?.contractDocuments && (
                 <UploadedDocumentsTable
                     documents={contractFormData.contractDocuments}
-                    previousSubmissionDate={lastSubmittedDate}
+                    previousSubmissionDate={
+                        isInitialSubmission ? undefined : lastSubmittedDate
+                    }
                     caption="Contract"
                     documentCategory="Contract"
                     hideDynamicFeedback={isSubmittedOrCMSUser}
