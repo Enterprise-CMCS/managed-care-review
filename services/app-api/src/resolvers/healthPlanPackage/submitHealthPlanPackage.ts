@@ -3,7 +3,6 @@ import {
     hasValidContract,
     hasValidDocuments,
     hasValidRates,
-    hasAnyValidRateData,
     isContractAndRates,
     removeRatesData,
     removeInvalidProvisionsAndAuthorities,
@@ -107,13 +106,14 @@ const validateStatusAndUpdateInfo = (
 // "parse, don't validate" article: https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
 export function parseAndSubmit(
     draft: HealthPlanFormDataType,
+    draftWithoutLinkedRates: HealthPlanFormDataType, // need this type for validations - HPP type doesnt understand linked rates  but we need to skip validations for them in some cases
     featureFlag?: FeatureFlagSettings
 ): LockedHealthPlanFormDataType | SubmissionError {
     // Remove fields from edits on irrelevant logic branches
     //  - CONTRACT_ONLY submission type should not contain any CONTRACT_AND_RATE rates data.
     // - CHIP_ONLY population covered should not contain any provision or authority relevant to other population.
     // - We delete at submission instead of update to preserve rates data in case user did not intend or would like to revert the submission type before submitting.
-    if (isContractOnly(draft) && hasAnyValidRateData(draft)) {
+    if (isContractOnly(draft)) {
         Object.assign(draft, removeRatesData(draft))
     }
     if (isCHIPOnly(draft)) {
@@ -126,18 +126,25 @@ export function parseAndSubmit(
         submittedAt: new Date(),
     }
 
+    const maybeStateSubmissionNoLinkedRates: Record<string, unknown> = {
+        ...draftWithoutLinkedRates,
+        status: 'SUBMITTED',
+        submittedAt: new Date(),
+    }
+
     const hasValid438Attestation =
         featureFlag?.['438-attestation'] === false
             ? true
             : draft.statutoryRegulatoryAttestation ||
               (draft.statutoryRegulatoryAttestation === false &&
                   draft.statutoryRegulatoryAttestationDescription)
-
     if (
-        isValidAndCurrentLockedHealthPlanFormData(maybeStateSubmission) &&
+        isValidAndCurrentLockedHealthPlanFormData(
+            maybeStateSubmissionNoLinkedRates
+        ) &&
         hasValid438Attestation
     ) {
-        return maybeStateSubmission
+        return maybeStateSubmission as LockedHealthPlanFormDataType
     } else if (
         !hasValidContract(
             maybeStateSubmission as LockedHealthPlanFormDataType
@@ -149,17 +156,24 @@ export function parseAndSubmit(
             message: 'formData is missing required contract fields',
         }
     } else if (
-        !hasValidRates(maybeStateSubmission as LockedHealthPlanFormDataType)
+        (maybeStateSubmission as LockedHealthPlanFormDataType).rateInfos
+            .length == 0 &&
+        isContractAndRates(draft)
     ) {
-        return isContractAndRates(draft)
-            ? {
-                  code: 'INCOMPLETE',
-                  message: 'formData is missing required rate fields',
-              }
-            : {
-                  code: 'INVALID',
-                  message: 'formData includes invalid rate fields',
-              }
+        return {
+            code: 'INCOMPLETE',
+            message: 'formData includes invalid rate fields',
+        }
+    } else if (
+        !hasValidRates(
+            maybeStateSubmissionNoLinkedRates as LockedHealthPlanFormDataType
+        ) &&
+        isContractAndRates(draft)
+    ) {
+        return {
+            code: 'INCOMPLETE',
+            message: 'formData is missing required rate fields',
+        }
     } else if (
         !hasValidDocuments(maybeStateSubmission as LockedHealthPlanFormDataType)
     ) {
@@ -323,9 +337,16 @@ export function submitHealthPlanPackageResolver(
                 return rateInfo.id && childRateIDs.includes(rateInfo.id)
             }
         )
-        initialFormData.rateInfos = onlyChildRateInfos
+        const formDataNoLinkedRates = {
+            ...initialFormData,
+            rateInfos: onlyChildRateInfos,
+        }
         // Final clean + check of data before submit - parse to state submission
-        const maybeLocked = parseAndSubmit(initialFormData, featureFlags)
+        const maybeLocked = parseAndSubmit(
+            initialFormData,
+            formDataNoLinkedRates,
+            featureFlags
+        )
 
         if (isSubmissionError(maybeLocked)) {
             const errMessage = maybeLocked.message
