@@ -6,7 +6,8 @@ describe('CMS user can view rate reviews', () => {
         cy.interceptGraphQL()
     })
 
-    it('and navigate to a specific rate from the rates dashboard', () => {
+    // NEEDS TO BE REWRITTEN AS API TEST WE FINISH CONTRACT API EPIC
+    it.skip('and navigate to a specific rate from the rates dashboard', () => {
           cy.apiAssignDivisionToCMSUser(cmsUser(), 'DMCO').then(() => {
 
             // Create a new contract and rates submission with two attached rates

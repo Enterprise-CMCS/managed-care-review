@@ -282,12 +282,8 @@ describe('fetchRate', () => {
     })
 
     it('returns the correct dateAdded for documents', async () => {
-        const ldService = testLDService({
-            'link-rates': true,
-        })
         const prismaClient = await sharedTestPrismaClient()
         const stateServer = await constructTestPostgresServer({
-            ldService,
             s3Client: mockS3,
         })
         const cmsServer = await constructTestPostgresServer({

@@ -1,22 +1,22 @@
 import { Story } from '@storybook/react'
-import ProvidersDecorator from '../../../../../../.storybook/providersDecorator'
+import ProvidersDecorator from '../../../../.storybook/providersDecorator'
 import {
-    SubmissionTypeSummarySectionV2Props,
-    SubmissionTypeSummarySectionV2,
-} from './SubmissionTypeSummarySectionV2'
-import { mockContractPackageDraft } from '../../../../../testHelpers/apolloMocks'
+    SubmissionTypeSummarySectionProps,
+    SubmissionTypeSummarySection,
+} from './SubmissionTypeSummarySection'
+import { mockContractPackageDraft } from '../../../testHelpers/apolloMocks'
 
 export default {
     title: 'Components/SubmissionSummary/SubmissionTypeSummarySection/V2',
-    component: SubmissionTypeSummarySectionV2,
+    component: SubmissionTypeSummarySection,
     parameters: {
         componentSubtitle:
             'SubmissionTypeSummarySection displays the Submission Type data for a Draft or State Submission',
     },
 }
 
-const Template: Story<SubmissionTypeSummarySectionV2Props> = (args) => (
-    <SubmissionTypeSummarySectionV2 {...args} />
+const Template: Story<SubmissionTypeSummarySectionProps> = (args) => (
+    <SubmissionTypeSummarySection {...args} />
 )
 
 export const WithAction = Template.bind({})
