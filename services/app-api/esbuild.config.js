@@ -8,6 +8,7 @@ const {
 module.exports = () => {
     return {
         packager: 'yarn',
+        format: 'esm',
         bundle: true,
         exclude: ['prisma', '@prisma/client'],
         plugins: [
