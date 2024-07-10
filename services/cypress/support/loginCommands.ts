@@ -53,7 +53,6 @@ Cypress.Commands.add(
             const testUsersPassword = Cypress.env('TEST_USERS_PASS')
             if (!testUsersPassword)
                 throw Error('Cannot login test user without a password')
-            console.info(testUsersPassword)
             cy.findByText('Show Login Form').click()
             cy.findByTestId('loginEmail').type('zuko@example.com')
             cy.findByTestId('loginPassword').type(testUsersPassword)

@@ -191,7 +191,7 @@ const seedUserIntoDB = async (
 Cypress.Commands.add(
     'apiCreateAndSubmitContractOnlySubmission',
     (stateUser): Cypress.Chainable<Contract> =>
-        cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
+        cy.task<DocumentNode>('readGraphQLSchema').then({ timeout: 30000 },(schema) =>
             apolloClientWrapper(
                 schema,
                 stateUser,
@@ -203,7 +203,7 @@ Cypress.Commands.add(
 Cypress.Commands.add(
     'apiCreateAndSubmitContractWithRates',
     (stateUser): Cypress.Chainable<Contract> =>
-        cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
+        cy.task<DocumentNode>('readGraphQLSchema').then({ timeout: 30000 },(schema) =>
             apolloClientWrapper(
                 schema,
                 stateUser,
@@ -215,7 +215,7 @@ Cypress.Commands.add(
 Cypress.Commands.add(
     'apiCreateAndSubmitBaseContract',
     (stateUser): Cypress.Chainable<Contract> =>
-        cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
+        cy.task<DocumentNode>('readGraphQLSchema').then({ timeout: 30000 },(schema) =>
             apolloClientWrapper(
                 schema,
                 stateUser,
