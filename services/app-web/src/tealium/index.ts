@@ -1,6 +1,7 @@
 export {
     tealiumClient,
     CONTENT_TYPE_BY_ROUTE,
+    devTealiumClient
 } from './tealium'
 
 export {

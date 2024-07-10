@@ -4,9 +4,8 @@ import { usePage } from './PageContext'
 import { useAuth } from './AuthContext'
 import { RouteT } from '../constants'
 import { getRouteName } from '../routeHelpers'
-import { recordJSException } from '../otelHelpers'
 import type { User } from '../gen/gqlClient'
-import type { TealiumClientType, TealiumEnv } from '../tealium'
+import type { TealiumClientType } from '../tealium'
 
 type TealiumContextType = {
     pathname: string
@@ -15,7 +14,6 @@ type TealiumContextType = {
 } & TealiumClientType
 
 type TealiumProviderProps = {
-    tealiumEnv?: TealiumEnv
     client: TealiumClientType
     children?: React.ReactNode
 }
@@ -33,11 +31,7 @@ Tealium is the data layer for Adobe Analytics and other data tracking at CMS
     In addition, context returns functions for tracking user events. See Tealium docs on tracking: https://docs.tealium.com/platforms/javascript/track/
 */
 
-const TealiumProvider = ({
-    tealiumEnv = 'dev',
-    client,
-    children,
-}: TealiumProviderProps) => {
+const TealiumProvider = ({ client, children }: TealiumProviderProps) => {
     const location = useLocation()
     const { pathname } = location
     const { heading } = usePage()
@@ -56,43 +50,16 @@ const TealiumProvider = ({
     // Add Tealium setup
     // This effect should only fire on initial app load
     useEffect(() => {
-        if (tealiumEnv === 'dev') {
-            return
-        }
-        const tealiumProfile = 'cms-mcreview'
-        if (!tealiumEnv || !tealiumProfile) {
-            console.error(
-                `Missing key configuration for Tealium. tealiumEnv: ${tealiumEnv} tealiumProfile: ${tealiumProfile}`
-            )
-        }
-        initializeTealium(tealiumEnv, tealiumProfile)
+        initializeTealium()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     // This effect should only fire each time the url changes
     useEffect(() => {
-        if (tealiumEnv === 'dev') {
-            return
-        }
-        // Guardrail on initial load - protect against trying to call utag page view before its loaded
-        if (!window.utag) {
-            new Promise((resolve) => setTimeout(resolve, 1000)).finally(() => {
-                if (!window.utag) {
-                    recordJSException('Analytics did not load in time')
-                    return
-                } else {
-                    handleLogPageView()
-                }
-            })
-            // Guardrail on subsequent page view  - protect against multiple calls when route seems similar
-        } else if (
-            window.utag &&
-            lastLoggedRoute.current &&
-            lastLoggedRoute.current !== getRouteName(pathname)
-        ) {
+        if (lastLoggedRoute.current !== getRouteName(pathname)) {
             handleLogPageView()
         }
-    }, [pathname, handleLogPageView, tealiumEnv])
+    }, [pathname, handleLogPageView])
 
     return (
         <TealiumContext.Provider

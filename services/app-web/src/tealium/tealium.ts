@@ -7,6 +7,7 @@ import * as React from 'react';
 import {getRouteName} from '../routeHelpers';
 import {createScript} from '../hooks/useScript';
 import { getTealiumPageName } from './tealiumHelpers';
+import {recordJSException} from '../otelHelpers';
 
 // TYPES
 type TealiumDataObject = {
@@ -125,15 +126,11 @@ type TealiumEvent =
 
 type TealiumEnv =
     | 'prod'
-    | 'val'
     | 'qa'
     | 'dev'
 
 type TealiumClientType = {
-    initializeTealium: (
-        tealiumEnv: TealiumEnv,
-        tealiumProfile: string
-    ) => void
+    initializeTealium: () => void
     logUserEvent: (
         linkData: TealiumEventObjectTypes,
         pathname: string,
@@ -147,15 +144,14 @@ type TealiumClientType = {
     ) => void
 }
 
-const tealiumClient = (): TealiumClientType => {
+const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType => {
     return {
-        initializeTealium: (
-            tealiumEnv: TealiumEnv,
-            tealiumProfile: string
-        ) => {
+        initializeTealium: () => {
             // Suppress automatic page views for SPA
             window.utag_cfg_ovrd = window.utag_cfg_ovrd || {}
             window.utag_cfg_ovrd.noview = true
+
+            const tealiumProfile = 'cms-mcreview'
 
             // Load utag.sync.js - add to head element - SYNC load from src
             const initializeTagManagerSnippet = createScript({
@@ -226,8 +222,7 @@ const tealiumClient = (): TealiumClientType => {
                 route: currentRoute,
                 user: loggedInUser,
             })
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
-            const utag = window.utag || { link: () => {}, view: () => {} }
+
             const tagData: TealiumViewDataObject = {
                 content_language: 'en',
                 content_type: `${CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
@@ -238,12 +233,81 @@ const tealiumClient = (): TealiumClientType => {
                 site_section: `${currentRoute}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
             }
-            utag.view(tagData)
+
+            if (!window.utag) {
+                new Promise((resolve) => setTimeout(resolve, 1000)).finally(() => {
+                    if (!window.utag) {
+                        recordJSException('Analytics did not load in time')
+                        return
+                    } else {
+                        window.utag.view(tagData)
+                    }
+                })
+                // Guardrail on subsequent page view  - protect against multiple calls when route seems similar
+            } else {
+                window.utag.view(tagData)
+            }
         }
     }
 }
 
-export { CONTENT_TYPE_BY_ROUTE, tealiumClient }
+const devTealiumClient = (): TealiumClientType => {
+    return {
+        initializeTealium: () => {
+            console.info('[Tealium - dev] initializeTealium - No logs will be sent in dev environment')
+        },
+        logUserEvent:  (
+            linkData: TealiumEventObjectTypes,
+            pathname: string,
+            loggedInUser?: User,
+            heading?: string | React.ReactElement,
+        ) => {
+            const currentRoute = getRouteName(pathname)
+            const tagData: TealiumLinkDataObject = {
+                content_language: 'en',
+                page_name: `${heading}: ${PageTitlesRecord[currentRoute]}`,
+                page_path: pathname,
+                site_domain: 'cms.gov',
+                site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+                site_section: `${currentRoute}`,
+                logged_in: `${Boolean(loggedInUser) ?? false}`,
+                userId: loggedInUser?.email,
+                tealium_event: linkData.event_name,
+                ...linkData
+            }
+
+            console.info(`[Tealium - dev] logUserEvent - ${linkData.event_name}`)
+            console.info(tagData)
+        },
+        logPageView: (
+            pathname: string,
+            loggedInUser?: User,
+            heading?: string | React.ReactElement,
+        ) => {
+            const currentRoute = getRouteName(pathname)
+            const tealiumPageName = getTealiumPageName({
+                heading,
+                route: currentRoute,
+                user: loggedInUser,
+            })
+            const tagData: TealiumViewDataObject = {
+                content_language: 'en',
+                content_type: `${CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
+                page_name: tealiumPageName,
+                page_path: pathname,
+                site_domain: 'cms.gov',
+                site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+                site_section: `${currentRoute}`,
+                logged_in: `${Boolean(loggedInUser) ?? false}`,
+            }
+
+            console.info('[Tealium - dev] logPageView')
+            console.info(tagData)
+        }
+    }
+}
+
+export { CONTENT_TYPE_BY_ROUTE, tealiumClient, devTealiumClient }
 export type {
     TealiumLinkDataObject,
     TealiumViewDataObject,
