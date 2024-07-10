@@ -3,9 +3,8 @@ import { Button as UswdsButton } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 import styles from './ActionButton.module.scss'
 import { Spinner } from '../Spinner'
-import { extractText } from '../TealiumLogging/tealiamLoggingHelpers'
-import { useTealium } from '../../hooks'
 import { TealiumButtonEventObject } from '../../tealium'
+import { ButtonWithLogging } from '../TealiumLogging'
 
 /* 
 Main application-wide action button. 
@@ -27,16 +26,11 @@ export const ActionButton = ({
     loading = false,
     animationTimeout = 750,
     onClick,
-    type,
-    parent_component_heading,
-    parent_component_type,
-    link_url,
     ...inheritedProps
 }: ActionButtonProps): React.ReactElement | null => {
     const [showLoading, setShowLoading] = useState<boolean | undefined>(
         undefined
     )
-    const { logButtonEvent } = useTealium()
     const isDisabled = disabled || inheritedProps['aria-disabled']
     const isLinkStyled = variant === 'linkStyle'
     const isOutline = variant === 'outline'
@@ -88,27 +82,10 @@ export const ActionButton = ({
                 : inheritedProps['aria-label'],
     }
 
-    const onClickHandler = (
-        e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-    ) => {
-        logButtonEvent({
-            text: extractText(children),
-            button_style: variant,
-            button_type: type,
-            parent_component_heading,
-            parent_component_type,
-            link_url,
-        })
-        if (onClick) onClick(e)
-    }
-
     return (
-        <UswdsButton
-            type={type}
+        <ButtonWithLogging
             onClick={
-                isDisabled || isLoading
-                    ? (e) => e.preventDefault()
-                    : (e) => onClickHandler(e)
+                isDisabled || isLoading ? (e) => e.preventDefault() : onClick
             }
             {...inheritedProps}
             {...variantProps}
@@ -125,6 +102,6 @@ export const ActionButton = ({
             >
                 {showLoading ? 'Loading' : children}
             </span>
-        </UswdsButton>
+        </ButtonWithLogging>
     )
 }
