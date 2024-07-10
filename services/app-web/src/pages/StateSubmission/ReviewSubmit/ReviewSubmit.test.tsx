@@ -198,9 +198,9 @@ describe('ReviewSubmit', () => {
             const rows = screen.getAllByRole('row')
             expect(rows).toHaveLength(4)
             expect(within(rows[0]).getByText('Date added')).toBeInTheDocument()
-            expect(within(rows[1]).getByText('2/2/23')).toBeInTheDocument()
+            expect(within(rows[1]).getByText(`2/2/23`)).toBeInTheDocument()
             expect(within(rows[2]).getByText('Date added')).toBeInTheDocument()
-            expect(within(rows[3]).getByText('3/2/23')).toBeInTheDocument()
+            expect(within(rows[3]).getByText(`3/2/23`)).toBeInTheDocument()
         })
     })
 

@@ -709,7 +709,7 @@ describe('SubmissionSummary', () => {
             ).toBeInTheDocument()
         })
 
-        it('extracts the correct dates from the submission and displays them in tables', async () => {
+        it('does not display date added on initial submission', async () => {
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -748,21 +748,33 @@ describe('SubmissionSummary', () => {
                 expect(
                     within(rows[0]).getByText('Date added')
                 ).toBeInTheDocument()
-                expect(within(rows[1]).getByText('1/1/24')).toBeInTheDocument()
+                expect(
+                    within(rows[1]).queryByText('1/1/24')
+                ).not.toBeInTheDocument()
                 expect(
                     within(rows[2]).getByText('Date added')
                 ).toBeInTheDocument()
-                expect(within(rows[3]).getByText('1/15/24')).toBeInTheDocument()
-                expect(within(rows[4]).getByText('1/13/24')).toBeInTheDocument()
+                expect(
+                    within(rows[3]).queryByText('1/15/24')
+                ).not.toBeInTheDocument()
+                expect(
+                    within(rows[4]).queryByText('1/13/24')
+                ).not.toBeInTheDocument()
                 expect(
                     within(rows[5]).getByText('Date added')
                 ).toBeInTheDocument()
-                expect(within(rows[6]).getByText('1/1/23')).toBeInTheDocument()
+                expect(
+                    within(rows[6]).queryByText('1/1/23')
+                ).not.toBeInTheDocument()
                 expect(
                     within(rows[7]).getByText('Date added')
                 ).toBeInTheDocument()
-                expect(within(rows[8]).getByText('1/15/23')).toBeInTheDocument()
-                expect(within(rows[9]).getByText('1/15/23')).toBeInTheDocument()
+                expect(
+                    within(rows[8]).queryByText('1/15/23')
+                ).not.toBeInTheDocument()
+                expect(
+                    within(rows[9]).queryByText('1/15/23')
+                ).not.toBeInTheDocument()
             })
         })
 

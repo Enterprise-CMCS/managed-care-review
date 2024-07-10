@@ -94,10 +94,11 @@ export const ContractDetailsSummarySection = ({
     const ldClient = useLDClient()
     const { loggedInUser } = useAuth()
     const { revisionVersion } = useParams()
+    const isCMSUser = loggedInUser?.role === 'CMS_USER'
     const isSubmittedOrCMSUser =
         contract.status === 'SUBMITTED' ||
         contract.status === 'RESUBMITTED' ||
-        loggedInUser?.role === 'CMS_USER'
+        isCMSUser
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const contractOrRev = contractRev ? contractRev : contract
     const isInitialSubmission = contract.packageSubmissions.length === 1
@@ -345,7 +346,9 @@ export const ContractDetailsSummarySection = ({
                 <UploadedDocumentsTable
                     documents={contractFormData.contractDocuments}
                     previousSubmissionDate={
-                        isInitialSubmission ? undefined : lastSubmittedDate
+                        isInitialSubmission && isCMSUser
+                            ? undefined
+                            : lastSubmittedDate
                     }
                     caption="Contract"
                     documentCategory="Contract"
@@ -356,7 +359,9 @@ export const ContractDetailsSummarySection = ({
                 <UploadedDocumentsTable
                     documents={contractSupportingDocuments}
                     previousSubmissionDate={
-                        isInitialSubmission ? undefined : lastSubmittedDate
+                        isInitialSubmission && isCMSUser
+                            ? undefined
+                            : lastSubmittedDate
                     }
                     caption="Contract supporting documents"
                     documentCategory="Contract-supporting"
