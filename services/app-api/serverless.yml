@@ -173,7 +173,7 @@ functions:
           cors: true
 
   graphql:
-    handler: src/handlers/apollo_gql.graphqlHandler
+    handler: src/handlers/apollo_gql.gqlHandler
     events:
       - http:
           path: graphql
