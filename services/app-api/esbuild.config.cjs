@@ -1,15 +1,19 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require('fs')
+const path = require('path')
 const {
     generateGraphQLString,
     generateContentsFromGraphqlString,
-} = require('@luckycatfactory/esbuild-graphql-loader');
+} = require('@luckycatfactory/esbuild-graphql-loader')
 
 module.exports = () => {
     return {
         packager: 'yarn',
-        format: 'esm',
         bundle: true,
+        format: 'esm',
+        outputFileExtension: '.mjs',
+        banner: {
+            js: "import { createRequire as topLevelCreateRequire } from 'module';\n const require = topLevelCreateRequire(import.meta.url);",
+        },
         exclude: ['prisma', '@prisma/client'],
         plugins: [
             {
@@ -24,7 +28,7 @@ module.exports = () => {
                                     ),
                             })
                         )
-                    );
+                    )
                 },
             },
             {
@@ -35,22 +39,22 @@ module.exports = () => {
                         fs.copyFileSync(
                             'collector.yml',
                             '.esbuild/.build/collector.yml'
-                        );
-                    });
+                        )
+                    })
 
                     // replace the license key
                     build.onEnd(() => {
                         const filePath = path.join(
                             __dirname,
                             '.esbuild/.build/collector.yml'
-                        );
-                        let contents = fs.readFileSync(filePath, 'utf8');
+                        )
+                        let contents = fs.readFileSync(filePath, 'utf8')
                         contents = contents.replace(
                             '$NR_LICENSE_KEY',
                             process.env.NR_LICENSE_KEY
-                        );
-                        fs.writeFileSync(filePath, contents);
-                    });
+                        )
+                        fs.writeFileSync(filePath, contents)
+                    })
                 },
             },
             {
@@ -61,16 +65,16 @@ module.exports = () => {
                             const prismaPath = path.join(
                                 __dirname,
                                 '../../node_modules/prisma/libquery_engine-darwin-arm64.dylib.node'
-                            );
+                            )
                             const outDir = path.join(
                                 __dirname,
                                 '../../node_modules/@prisma/client/libquery_engine-darwin-arm64.dylib.node'
-                            );
-                            fs.copyFileSync(prismaPath, outDir);
+                            )
+                            fs.copyFileSync(prismaPath, outDir)
                         }
-                    });
+                    })
                 },
             },
         ],
-    };
-};
+    }
+}
