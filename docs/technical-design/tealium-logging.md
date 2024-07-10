@@ -6,15 +6,23 @@ We use a tool called Tealium to hook into the CMS customer analytics tools. The 
 
 ### Setup
 We are using `TealiumProvider` in `App.tsx` to:
+- Configure Tealium.
 - Initialize Tealium.
 - Setup page view logging.
-- Provide `tealiumClient()` function in Context for user event logging.
-   - `initializeTealium()` initializes Tealium.
-   - `logUserEvent()`  Logs user events. It takes specific event type data, combines it with default event and parameter values, and sends it to Tealium.
-   - `logPageView()` logs when user vists a page.
+- Provide functions in Context for Tealium user event logging.
+
+`TealiumProvider` is configured using a tealium client passed in as a prop. The client contains functions that will handle forming data and sending the logs to Tealium.
+- `initializeTealium()` initializes Tealium.
+- `logUserEvent()`  Logs user events. It takes specific event type data, combines it with default event and parameter values, and sends it to Tealium.
+- `logPageView()` logs when user visits a page.
+
+There are three tealium clients in the codebase to use in different environments
+- `tealiumClient` is used in `prod` and `val` environments where events are logged to Tealium.
+- `devTealiumClient` is used in all lower environments and events will not be logged to Tealium.
+- `testTealiumClient` used in `renderWithProviders` for unit tests and functions do nothing, but are there so tests do not break.
 
 ### Use
-The `useTealium` hook utilizes `tealiumClient()` functions in the Context to provide user event functions for logging each event type.
+The `useTealium` hook utilizes tealium client functions in the Context to provide user event functions for logging each event type.
 
 There are wrapper functions in this hook for specific user event types to constrain the event and parameter values before passing it to `logUserEvent`. This allows type safety and a reference to what event and parameter values the event accepts.
 
@@ -39,12 +47,12 @@ const logButtonEvent = (
 ```
 These `useTealium` functions are then used in components like `Button` and `Link` to log when they are clicked. Since most of these components are configured and used similarly, wrapper components were made with built-in logging to replace the default components for easy implementation of logging. They can be found in `components/TealiumLogging`.
 
-Not all components are wrapped like this. Some like `ModalToggleButton` are rarely used, so in those cases we can directly use `logButtonEvent` in the `onClick` prop.
+Not all components are wrapped like this. Some, like `ModalToggleButton` are rarely used, so in those cases we can directly use `logButtonEvent` in the `onClick` prop.
 
 ### Adding user event types
 
 To add a new user event type: 
-- Define a type for the event parameter values for the even type. You can find all the data filed for a given event in the [Tagging Strategy](https://confluence.cms.gov/pages/viewpage.action?spaceKey=BLSTANALYT&title=mc-review.onemac.cms.gov+-+Tagging+Strategy) doc on confluence.
+- Define a type for the event parameter values for the event type. You can find all the data fields for a given event in the [Tagging Strategy](https://confluence.cms.gov/pages/viewpage.action?spaceKey=BLSTANALYT&title=mc-review.onemac.cms.gov+-+Tagging+Strategy) doc on confluence.
 - Then we add that type to `TealiumEventObjectTypes`.
 ```typescript
 type TealiumEventObjectTypes =
@@ -52,7 +60,7 @@ type TealiumEventObjectTypes =
 | TealiumInternalLinkEventObject
 | SomeNewTealiumEventObjext
 ```
-- Now `logUserEvent` is ready to take that even in as the linkData argument.
+- Now `logUserEvent` is ready to take that even in as the `linkData` argument.
 ```typescript
 const tealiumClient = (): TealiumClientType => {
   return {
