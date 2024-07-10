@@ -1,6 +1,6 @@
 import React from 'react'
 import { Button } from '@trussworks/react-uswds'
-import type { TealiumButtonEventObject } from '../../tealium'
+import type { ButtonEventStyle, TealiumButtonEventObject } from '../../tealium'
 import { ButtonProps } from '@trussworks/react-uswds/lib/components/Button/Button'
 import { extractText } from './tealiamLoggingHelpers'
 import { useTealium } from '../../hooks'
@@ -28,18 +28,18 @@ const ButtonWithLogging = (props: ButtonWithLoggingType) => {
         ...rest
     } = props
 
-    let buttonStyle = 'primary'
+    let buttonStyle: ButtonEventStyle = 'default'
 
     if (props.secondary) {
         buttonStyle = 'secondary'
     }
 
     if (props.outline) {
-        buttonStyle = 'outline'
+        buttonStyle = 'transparent'
     }
 
     if (props.unstyled) {
-        buttonStyle = 'linkStyle'
+        buttonStyle = 'unstyled'
     }
 
     return (
@@ -47,8 +47,8 @@ const ButtonWithLogging = (props: ButtonWithLoggingType) => {
             onClick={(e) => {
                 logButtonEvent({
                     text: extractText(children),
-                    button_type: button_type || type,
-                    button_style: button_style || buttonStyle,
+                    button_type: button_type ?? type,
+                    button_style: button_style ?? buttonStyle,
                     parent_component_heading,
                     parent_component_type,
                     link_url,

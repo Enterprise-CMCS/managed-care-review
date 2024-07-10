@@ -41,7 +41,6 @@ const LoggedInUserInfo = (
             <ButtonWithLogging
                 type="button"
                 unstyled
-                button_style="link"
                 parent_component_type="constant header"
                 onClick={logout}
             >

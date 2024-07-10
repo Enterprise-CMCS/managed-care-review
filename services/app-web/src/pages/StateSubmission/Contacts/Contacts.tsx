@@ -388,7 +388,7 @@ const Contacts = ({
                                                             logButtonEvent({
                                                                 text: 'Add another state contact',
                                                                 button_style:
-                                                                    'outline',
+                                                                    'transparent',
                                                                 button_type:
                                                                     'button',
                                                                 parent_component_type:

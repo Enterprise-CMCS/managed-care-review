@@ -17,5 +17,6 @@ export type {
     TealiumInternalLinkEventObject,
     TealiumEventObjectTypes,
     TealiumClientType,
-    TealiumEnv
+    TealiumEnv,
+    ButtonEventStyle
 } from './tealium'

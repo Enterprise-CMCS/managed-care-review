@@ -28,7 +28,9 @@ type ButtonEventStyle =
     | 'default'
     | 'primary'
     | 'success'
+    | 'secondary'
     | 'transparent'
+    | 'unstyled'
 
 type ButtonEventType =
     | 'submit'
@@ -49,7 +51,7 @@ type TealiumButtonEventObject = {
     event_name: 'button_engagement',
     text: string
     link_type?: 'link_other'
-    button_style?: ButtonEventStyle | string
+    button_style?: ButtonEventStyle
     button_type?: ButtonEventType | string
     parent_component_heading?: string
     parent_component_type?: ButtonEventParentComponentType | string
@@ -316,5 +318,6 @@ export type {
     TealiumInternalLinkEventObject,
     TealiumEventObjectTypes,
     TealiumClientType,
-    TealiumEnv
+    TealiumEnv,
+    ButtonEventStyle
 }
