@@ -12,7 +12,7 @@ import { RateTypeRecord } from '../../../constants/healthPlanPackages'
 
 const RateReviewsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
-const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
+    const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const { data, loading, error } = useIndexRatesQuery({
         fetchPolicy: 'network-only',
     })
@@ -112,7 +112,10 @@ const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     } else {
         return (
             <section className={styles.panel}>
-                <RateReviewsTable tableData={reviewRows} isAdminUser={isAdminUser} />
+                <RateReviewsTable
+                    tableData={reviewRows}
+                    isAdminUser={isAdminUser}
+                />
             </section>
         )
     }

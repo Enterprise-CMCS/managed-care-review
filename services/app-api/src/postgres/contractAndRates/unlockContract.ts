@@ -7,8 +7,7 @@ import type { PrismaTransactionType } from '../prismaTypes'
 
 async function unlockContractInTransaction(
     tx: PrismaTransactionType,
-    args: UnlockContractArgsType,
-    linkRatesFF?: boolean
+    args: UnlockContractArgsType
 ): Promise<UnlockedContractType | Error> {
     const currentDateTime = new Date()
     const { contractID, unlockedByUserID, unlockReason } = args
@@ -89,77 +88,58 @@ async function unlockContractInTransaction(
     }
 
     const childRateIDs: string[] = []
-    if (linkRatesFF) {
-        // This finds the child rates for this submission.
-        // A child rate is a rate that shares a submit info with this contract.
-        // technically only a rate that is _initially_ submitted with a contract
-        // is a child rate, but we should never allow re-submission so this simpler
-        // query that doesn't try to filter to initial revisions works.
-        const childRates = await tx.rateTable.findMany({
-            where: {
-                revisions: {
-                    some: {
-                        submitInfo: {
-                            submittedContracts: {
-                                some: {
-                                    contractID: contractID,
-                                },
+    // This finds the child rates for this submission.
+    // A child rate is a rate that shares a submit info with this contract.
+    // technically only a rate that is _initially_ submitted with a contract
+    // is a child rate, but we should never allow re-submission so this simpler
+    // query that doesn't try to filter to initial revisions works.
+    const childRates = await tx.rateTable.findMany({
+        where: {
+            revisions: {
+                some: {
+                    submitInfo: {
+                        submittedContracts: {
+                            some: {
+                                contractID: contractID,
                             },
                         },
                     },
                 },
             },
-        })
+        },
+    })
 
-        // only unlock children that were submitted in the latest submission
-        const submissionPackageEntries =
-            currentRev.relatedSubmisions[0].submissionPackages
+    // only unlock children that were submitted in the latest submission
+    const submissionPackageEntries =
+        currentRev.relatedSubmisions[0].submissionPackages
 
-        for (const childRate of childRates) {
-            if (
-                submissionPackageEntries.some(
-                    (p) => p.rateRevision.rateID === childRate.id
-                )
-            ) {
-                childRateIDs.push(childRate.id)
-            }
-        }
-    } else {
-        // without linked rates, we push all the valid rate revisions attached to the contract revision
-        for (const rrev of currentRev.rateRevisions) {
-            childRateIDs.push(rrev.rateRevision.rateID)
+    for (const childRate of childRates) {
+        if (
+            submissionPackageEntries.some(
+                (p) => p.rateRevision.rateID === childRate.id
+            )
+        ) {
+            childRateIDs.push(childRate.id)
         }
     }
 
     // unlock child rates with that unlock info
     for (const childRateID of childRateIDs) {
-        const unlockRate = await unlockRateInDB(
-            tx,
-            childRateID,
-            unlockInfo.id,
-            linkRatesFF
-        )
+        const unlockRate = await unlockRateInDB(tx, childRateID, unlockInfo.id)
         if (unlockRate instanceof Error) {
             return unlockRate
         }
     }
 
     const relatedRateIDs: string[] = []
-    if (linkRatesFF) {
-        // find the rates in the last submission package:
-        const lastSubmission = currentRev.relatedSubmisions[0]
-        const thisContractsRatePackages =
-            lastSubmission.submissionPackages.filter(
-                (p) => p.contractRevisionID === currentRev.id
-            )
+    // find the rates in the last submission package:
+    const lastSubmission = currentRev.relatedSubmisions[0]
+    const thisContractsRatePackages = lastSubmission.submissionPackages.filter(
+        (p) => p.contractRevisionID === currentRev.id
+    )
 
-        for (const ratePackage of thisContractsRatePackages) {
-            relatedRateIDs.push(ratePackage.rateRevision.rateID)
-        }
-    } else {
-        for (const rateRev of currentRev.rateRevisions) {
-            relatedRateIDs.push(rateRev.rateRevision.rateID)
-        }
+    for (const ratePackage of thisContractsRatePackages) {
+        relatedRateIDs.push(ratePackage.rateRevision.rateID)
     }
 
     await tx.contractRevisionTable.create({
@@ -296,16 +276,11 @@ type UnlockContractArgsType = {
 // * set relationships based on last submission
 async function unlockContract(
     client: PrismaClient,
-    args: UnlockContractArgsType,
-    linkRatesFF?: boolean
+    args: UnlockContractArgsType
 ): Promise<UnlockedContractType | NotFoundError | Error> {
     try {
         return await client.$transaction(async (tx) => {
-            const result = await unlockContractInTransaction(
-                tx,
-                args,
-                linkRatesFF
-            )
+            const result = await unlockContractInTransaction(tx, args)
             if (result instanceof Error) {
                 throw result
             }

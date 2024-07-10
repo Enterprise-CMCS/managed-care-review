@@ -1,17 +1,17 @@
 import { screen, waitFor, within } from '@testing-library/react'
-import { renderWithProviders } from '../../../../../testHelpers/jestHelpers'
-import { ContractDetailsSummarySectionV2 as ContractDetailsSummarySection } from './ContractDetailsSummarySectionV2'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import { ContractDetailsSummarySection } from './ContractDetailsSummarySection'
 import {
     fetchCurrentUserMock,
     mockContractPackageDraft,
     mockContractPackageSubmitted,
-} from '../../../../../testHelpers/apolloMocks'
-import { testS3Client } from '../../../../../testHelpers/s3Helpers'
+} from '../../../testHelpers/apolloMocks'
+import { testS3Client } from '../../../testHelpers/s3Helpers'
 import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationQuestion,
-} from '../../../../../constants/statutoryRegulatoryAttestation'
-import { mockContractFormData } from '../../../../../testHelpers/apolloMocks/contractPackageDataMock'
+} from '../../../constants/statutoryRegulatoryAttestation'
+import { mockContractFormData } from '../../../testHelpers/apolloMocks/contractPackageDataMock'
 
 describe('ContractDetailsSummarySection', () => {
     const defaultApolloMocks = {
