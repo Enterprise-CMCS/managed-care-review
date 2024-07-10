@@ -90,7 +90,12 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
     }
 
     const revision = targetPreviousSubmission.contractRevision
-    const rateRevisions = targetPreviousSubmission.rateRevisions
+    const rateRevisions = targetPreviousSubmission.rateRevisions.map((rrev) => {
+        return {
+            ...rrev,
+            isLinked: false, // just ignore isLinked, we are on revision summary for submitted rate and don't care at this point UI wise
+        }
+    })
     const contractData = revision.formData
     const statePrograms = contract.state.programs
     const submitInfo = revision.submitInfo || undefined
