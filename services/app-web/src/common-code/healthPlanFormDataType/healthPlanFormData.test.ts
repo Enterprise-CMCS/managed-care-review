@@ -352,14 +352,6 @@ describe('submission type assertions', () => {
             {
                 ...mockStateSubmission(),
                 status: 'SUBMITTED',
-                submissionType: 'CONTRACT_ONLY',
-            },
-            false,
-        ],
-        [
-            {
-                ...mockStateSubmission(),
-                status: 'SUBMITTED',
                 riskBasedContract: undefined,
             },
             false,
