@@ -1,4 +1,5 @@
 const fs = require('fs');
+const fse = require('fs-extra');
 const path = require('path');
 const {
     generateGraphQLString,
@@ -49,6 +50,17 @@ module.exports = () => {
                             process.env.NR_LICENSE_KEY
                         );
                         fs.writeFileSync(filePath, contents);
+                    });
+                },
+            },
+            {
+                name: 'copy-eta-templates',
+                setup(build) {
+                    build.onStart(() => {
+                        fse.copy(
+                            './src/emailer/etaTemplates',
+                            '.esbuild/.build/'
+                        );
                     });
                 },
             },
