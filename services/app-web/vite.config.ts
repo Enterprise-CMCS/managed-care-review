@@ -45,7 +45,7 @@ export default defineConfig(() => ({
         setupFiles: 'src/setupTests.ts',
         globals: true,
         coverage: {
-            reporter: ['text', 'json', 'html'],
+            reporter: ['text', 'json', 'lcov'],
         },
     },
 }))
