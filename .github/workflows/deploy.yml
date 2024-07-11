@@ -510,7 +510,6 @@ jobs:
           ci-build-id: ${{ github.run_id }}-${{ github.run_attempt }}
           # Point to the cypress config file from root
           config-file: services/cypress/cypress.config.ts
-          command: yarn run cy:run --env coverage=true
         env:
           VITE_APP_AUTH_MODE: AWS_COGNITO
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
