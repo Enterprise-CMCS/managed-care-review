@@ -510,7 +510,7 @@ jobs:
           ci-build-id: ${{ github.run_id }}-${{ github.run_attempt }}
           # Point to the cypress config file from root
           config-file: services/cypress/cypress.config.ts
-          command: yarn run cy:run
+          command: yarn run cy:run --env coverage=true
         env:
           VITE_APP_AUTH_MODE: AWS_COGNITO
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -531,6 +531,12 @@ jobs:
           CYPRESS_COVERAGE: true
           NODE_V8_COVERAGE: ./coverage-cypress
 
+      - name: Check coverage directory
+        if: always()
+        run: |
+          echo "Contents of coverage-cypress directory:"
+          ls -R ./coverage-cypress || echo "Directory not found"
+
       - name: Upload cypress screenshots
         uses: actions/upload-artifact@v4
         if: failure() && steps.cypress.outcome == 'failure'
@@ -549,13 +555,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: partial-cypress-coverage-${{ matrix.containers}}
-          path: ./coverage-cypress/lcov.info
+          path: ./coverage-cypress/*.info
 
       - name: upload partial cypress coverage json
         uses: actions/upload-artifact@v4
         with:
           name: cypress-json-coverage-${{ matrix.containers}}
-          path: ./coverage-cypress/coverage-final.json
+          path: ./coverage-cypress/*.json
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v8.0.0
@@ -577,6 +583,7 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
+
       - name: Collate test coverage reports
         run: |
           ls
@@ -584,10 +591,11 @@ jobs:
           cd ./services/app-web
           echo $(pwd)
           ls
-      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
 
       - name: Create combined test coverage report
+        working-directory: services/cypress
         run: |
           echo "Combining all coverage reports"
           echo "Prepare the folders to hold the reports"
