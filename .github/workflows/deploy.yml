@@ -127,6 +127,13 @@ jobs:
           name: unit-test-coverage
           path: ./services/app-web/coverage/coverage-final.json
 
+      - name: List directory structure
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Directory structure:"
+          ls -R
+
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v8.0.0
         continue-on-error: true
@@ -134,8 +141,9 @@ jobs:
           CC_TEST_REPORTER_ID: f7474ffe9522492f5380eb86189480f352c841718c1fe6a63f169353c7cee243
         with:
           debug: true
-          coverageLocations: |
-            ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
+          coverageLocations: ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
+          prefix: services/app-web/
+          workingDirectory: services/app-web
 
   api-unit-tests:
     name: test - api unit tests

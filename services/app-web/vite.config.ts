@@ -46,6 +46,7 @@ export default defineConfig(() => ({
         globals: true,
         coverage: {
             reporter: ['text', 'json', 'lcov'],
+            reportsDirectory: './coverage',
         },
     },
 }))
