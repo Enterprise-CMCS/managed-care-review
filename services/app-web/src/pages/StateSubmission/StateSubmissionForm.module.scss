@@ -12,6 +12,7 @@
     width: 100%;
     padding-left: 2rem;
     padding-right: 2rem;
+    display: flex;
 
     > [class^='usa-step-indicator'] {
         width: 100%;
@@ -24,7 +25,7 @@
     padding: uswds.units(4) 0;
 }
 .banner {
-    margin: uswds.units(2) auto;
+    margin: uswds.units(2);
 }
 
 .formContainer {
