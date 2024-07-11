@@ -861,6 +861,8 @@ describe('RateDetailsSummarySection', () => {
         expect(
             screen.queryByText(/You must provide this information/)
         ).toBeNull()
+        // Do not display any NEW tags on initial submission
+        expect(screen.queryByText(/NEW/)).toBeNull()
     })
 
     it('renders shared rate certifications when submission is locked', async () => {

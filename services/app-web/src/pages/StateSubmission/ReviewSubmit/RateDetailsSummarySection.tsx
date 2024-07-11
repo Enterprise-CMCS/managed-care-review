@@ -94,6 +94,7 @@ export const RateDetailsSummarySection = ({
 
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
+    const isInitialSubmission = contract.packageSubmissions.length === 1
 
     const rates = rateRevs
         ? rateRevs
@@ -463,7 +464,12 @@ export const RateDetailsSummarySection = ({
                                       multipleDocumentsAllowed={false}
                                       caption="Rate certification"
                                       documentCategory="Rate certification"
-                                      previousSubmissionDate={lastSubmittedDate}
+                                      isInitialSubmission={isInitialSubmission}
+                                      previousSubmissionDate={
+                                          isInitialSubmission && isCMSUser
+                                              ? undefined
+                                              : lastSubmittedDate
+                                      }
                                       hideDynamicFeedback={isSubmittedOrCMSUser}
                                   />
                               )}
@@ -472,7 +478,12 @@ export const RateDetailsSummarySection = ({
                                       documents={
                                           rateFormData.supportingDocuments
                                       }
-                                      previousSubmissionDate={lastSubmittedDate}
+                                      isInitialSubmission={isInitialSubmission}
+                                      previousSubmissionDate={
+                                          isInitialSubmission && isCMSUser
+                                              ? undefined
+                                              : lastSubmittedDate
+                                      }
                                       packagesWithSharedRateCerts={
                                           isEditing
                                               ? undefined
