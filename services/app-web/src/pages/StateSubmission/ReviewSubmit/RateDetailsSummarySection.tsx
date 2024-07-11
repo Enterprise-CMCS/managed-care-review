@@ -464,6 +464,7 @@ export const RateDetailsSummarySection = ({
                                       multipleDocumentsAllowed={false}
                                       caption="Rate certification"
                                       documentCategory="Rate certification"
+                                      isInitialSubmission={isInitialSubmission}
                                       previousSubmissionDate={
                                           isInitialSubmission && isCMSUser
                                               ? undefined
@@ -477,6 +478,7 @@ export const RateDetailsSummarySection = ({
                                       documents={
                                           rateFormData.supportingDocuments
                                       }
+                                      isInitialSubmission={isInitialSubmission}
                                       previousSubmissionDate={
                                           isInitialSubmission && isCMSUser
                                               ? undefined

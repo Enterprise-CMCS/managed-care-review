@@ -350,6 +350,7 @@ export const ContractDetailsSummarySection = ({
                             ? undefined
                             : lastSubmittedDate
                     }
+                    isInitialSubmission={isInitialSubmission}
                     caption="Contract"
                     documentCategory="Contract"
                     hideDynamicFeedback={isSubmittedOrCMSUser}
@@ -366,6 +367,7 @@ export const ContractDetailsSummarySection = ({
                     caption="Contract supporting documents"
                     documentCategory="Contract-supporting"
                     isSupportingDocuments
+                    isInitialSubmission={isInitialSubmission}
                     hideDynamicFeedback={isSubmittedOrCMSUser}
                 />
             )}

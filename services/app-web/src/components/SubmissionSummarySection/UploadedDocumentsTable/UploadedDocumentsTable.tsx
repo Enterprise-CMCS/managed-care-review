@@ -32,6 +32,7 @@ export type UploadedDocumentsTableProps = {
     previousSubmissionDate: Date | null // used to calculate NEW tag based on doc dateAdded
     hideDynamicFeedback: boolean // used to determine if we display static data the dynamic feedback UI (validations, edit buttons). If true, assume submission summary experience, if false, assume review submit experience
     packagesWithSharedRateCerts?: SharedRateCertDisplay[] // deprecated - could be deleted after we resolve all historical data linked rates
+    isInitialSubmission?: boolean // used to determine if we display the date added field
     isSupportingDocuments?: boolean // used to calculate empty state and styles around the secondary supporting docs tables - would be nice to remove this in favor of more domain agnostic prop such as 'emptyStateText'
     multipleDocumentsAllowed?: boolean // used to determined if we display validations based on doc list length
     documentCategory?: string // used to determine if we display document category column
@@ -43,6 +44,7 @@ export const UploadedDocumentsTable = ({
     documentCategory,
     packagesWithSharedRateCerts,
     previousSubmissionDate,
+    isInitialSubmission = false,
     isSupportingDocuments = false,
     multipleDocumentsAllowed = true,
     hideDynamicFeedback = false,
@@ -60,9 +62,12 @@ export const UploadedDocumentsTable = ({
         useState<DocumentWithS3Data[]>(initialDocState)
     const shouldShowEditButton = !hideDynamicFeedback && isSupportingDocuments // at this point only contract supporting documents need the inline EDIT button - this can be deleted when we move supporting docs to ContractDetails page
     // canDisplayDateForDocument -  guards against passing in null or undefined to dayjs
-    // don't display on new initial submission
+    // don't display prior to the initial submission
     const canDisplayDateAddedForDocument = (doc: DocumentWithS3Data) => {
-        return doc.dateAdded && previousSubmissionDate
+        return (
+            (doc.dateAdded && previousSubmissionDate) ||
+            (doc.dateAdded && isInitialSubmission)
+        )
     }
 
     const shouldHaveNewTag = (doc: DocumentWithS3Data) => {
