@@ -510,11 +510,13 @@ export const ContractDetails = ({
     }
     return (
         <>
-            <div className={styles.stepIndicator}>
-                <DynamicStepIndicator
-                    formPages={activeFormPages(draftSubmission)}
-                    currentFormPage={currentRoute}
-                />
+            <div>
+                <div>
+                    <DynamicStepIndicator
+                        formPages={activeFormPages(draftSubmission)}
+                        currentFormPage={currentRoute}
+                    />
+                </div>
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
                     unlockedInfo={unlockInfo}
