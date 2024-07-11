@@ -56,11 +56,21 @@ module.exports = () => {
             {
                 name: 'copy-eta-templates',
                 setup(build) {
-                    build.onStart(() => {
-                        fse.copy(
-                            './src/emailer/etaTemplates',
-                            '.esbuild/.build/'
-                        );
+                    build.onStart(async () => {
+                        try {
+                            await fse.ensureDir(
+                                '.esbuild/.build/etaTemplates/'
+                            );
+
+                            await fse.copy(
+                                './src/emailer/etaTemplates',
+                                '.esbuild/.build/etaTemplates/',
+                                { overwrite: true }
+                            );
+                            console.log('Eta templates copied successfully');
+                        } catch (err) {
+                            console.error('Error copying eta templates:', err);
+                        }
                     });
                 },
             },
