@@ -27,6 +27,13 @@ module.exports = defineConfig({
                 })
             )
             require('@cypress/code-coverage/task')(on, config)
+            on('before:browser:launch', (browser, launchOptions) => {
+                launchOptions.args.push('--js-flags=--expose-gc')
+                launchOptions.args.push(
+                    '--js-flags=--experimental-expose-v8-coverage'
+                )
+                return launchOptions
+            })
 
             const newConfig = config
 

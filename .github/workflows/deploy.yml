@@ -502,6 +502,7 @@ jobs:
           ci-build-id: ${{ github.run_id }}-${{ github.run_attempt }}
           # Point to the cypress config file from root
           config-file: services/cypress/cypress.config.ts
+          command: yarn run cy:run
         env:
           VITE_APP_AUTH_MODE: AWS_COGNITO
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -518,6 +519,9 @@ jobs:
           CYPRESS_SPEC_PATTERN: services/cypress/integration/**/*.spec.ts
           CYPRESS_SCREEN_SHOTS_FOLDER: services/cypress/screenshots
           CYPRESS_VIDEOS_FOLDER: services/cypress/videos
+          # Test coverage
+          CYPRESS_COVERAGE: true
+          NODE_V8_COVERAGE: ./coverage-cypress
 
       - name: Upload cypress screenshots
         uses: actions/upload-artifact@v4
@@ -532,6 +536,7 @@ jobs:
         with:
           name: cypress-videos-${{ matrix.containers}}
           path: services/cypress/videos
+
       - name: upload partial cypress coverage
         uses: actions/upload-artifact@v4
         with:
@@ -577,37 +582,41 @@ jobs:
       - name: Create combined test coverage report
         run: |
           echo "Combining all coverage reports"
-          echo "prepare the folders to hold the reports"
-          mkdir -p reports
-          mkdir -p cypress_temp
-          mkdir -p .nyc_output
-          echo "listing current folder"
+          echo "Prepare the folders to hold the reports"
+          mkdir -p reports cypress_temp coverage-all
+
+          echo "Listing current folder"
           ls
-          echo "listing a cypress folder"
-          ls ./cypress-json-coverage-1/
-          echo "copy the separate cypress reports from parallel runs to one folder"
-          cp ./cypress-json-coverage-1/coverage-final.json ./cypress_temp/from-cypress-1.json
-          cp ./cypress-json-coverage-2/coverage-final.json ./cypress_temp/from-cypress-2.json
-          cp ./cypress-json-coverage-3/coverage-final.json ./cypress_temp/from-cypress-3.json
-          cp ./cypress-json-coverage-4/coverage-final.json ./cypress_temp/from-cypress-4.json
-          cp ./cypress-json-coverage-5/coverage-final.json ./cypress_temp/from-cypress-5.json
-          cp ./cypress-json-coverage-6/coverage-final.json ./cypress_temp/from-cypress-6.json
-          cp ./cypress-json-coverage-7/coverage-final.json ./cypress_temp/from-cypress-7.json
-          cp ./cypress-json-coverage-8/coverage-final.json ./cypress_temp/from-cypress-8.json
-          echo "merge the collected cypress reports into one report"
-          npx nyc merge cypress_temp ./reports/from-cypress.json
+
+          echo "Copy the separate cypress reports from parallel runs to one folder"
+          for i in cypress-coverage-*; do
+              if [ -d "$i" ]; then
+                  container_num=${i##*-}
+                  cp -r "$i"/* cypress_temp/
+                  echo "Copied coverage from container $container_num"
+              fi
+          done
+          echo "Merge the collected cypress reports into one report"
+          npx c8 report -r lcov -r json -o ./reports/from-cypress --src ./services/app-web/src ./cypress_temp
+
           echo "Temp merge done"
           ls ./cypress_temp
-          echo "copy the web and api coverage reports to the reports folder"
-          cp ./api-test-coverage/coverage-final.json ./reports/from-api.json
-          cp ./unit-test-coverage/coverage-final.json ./reports/from-unit-test.json
+
+          echo "Copy the web and api coverage reports to the reports folder"
+          [ -f "./api-test-coverage/coverage-final.json" ] && cp ./api-test-coverage/coverage-final.json ./reports/from-api.json
+          [ -f "./unit-test-coverage/coverage-final.json" ] && cp ./unit-test-coverage/coverage-final.json ./reports/from-unit-test.json
+
           echo "Copied all files"
-          echo "merge the cypress, web, and api reports into one report"
-          npx nyc merge reports && mv coverage.json .nyc_output/out.json
-          echo "generate the html report from the combined coverage report"
-          mkdir -p coverage-all && npx nyc report --reporter lcov --reporter text --reporter json-summary --report-dir coverage-all
+
+          echo "Merge the cypress, web, and api reports into one report"
+          npx c8 merge reports -o ./coverage-all/coverage.json
+
+          echo "Generate the html report from the combined coverage report"
+          npx c8 report -r lcov -r text -r json-summary --report-dir coverage-all
+
           cd coverage-all
           echo "Coverage reports merged"
+
       - name: Upload combined test coverage
         uses: actions/upload-artifact@v4
         with:
