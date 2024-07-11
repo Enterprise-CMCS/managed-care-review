@@ -11,9 +11,6 @@ import {
 } from '../../testHelpers/apolloMocks'
 
 window.scrollTo = jest.fn()
-jest.mock('../../hooks/useTealium', () => ({
-    useTealium: jest.fn().mockReturnValue([]),
-}))
 
 // Looking for routing tests? Check AppRoutes.test.tsx
 describe('AppBody', () => {

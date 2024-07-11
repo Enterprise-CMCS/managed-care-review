@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Fieldset, Form as UswdsForm } from '@trussworks/react-uswds'
+import { Fieldset, Form as UswdsForm } from '@trussworks/react-uswds'
 import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
 import { generatePath, useNavigate } from 'react-router-dom'
 
 import styles from '../../StateSubmissionForm.module.scss'
 import {
+    ButtonWithLogging,
     DynamicStepIndicator,
     ErrorSummary,
     SectionCard,
@@ -517,7 +518,7 @@ const RateDetails = ({
                                                                 )}
                                                                 {index >= 1 &&
                                                                     !displayAsStandaloneRate && (
-                                                                        <Button
+                                                                        <ButtonWithLogging
                                                                             type="button"
                                                                             unstyled
                                                                             className={
@@ -533,7 +534,7 @@ const RateDetails = ({
                                                                             Remove
                                                                             rate
                                                                             certification
-                                                                        </Button>
+                                                                        </ButtonWithLogging>
                                                                     )}
                                                             </Fieldset>
                                                         </SectionCard>
@@ -545,7 +546,7 @@ const RateDetails = ({
                                                             Additional rate
                                                             certification
                                                         </h3>
-                                                        <button
+                                                        <button // using button element so ref works.
                                                             type="button"
                                                             className={`usa-button usa-button--outline ${styles.addRateBtn}`}
                                                             onClick={() => {
@@ -619,6 +620,22 @@ const RateDetails = ({
                                         !!Object.keys(errors).length
                                     }
                                     actionInProgress={isSubmitting}
+                                    backOnClickUrl={
+                                        displayAsStandaloneRate
+                                            ? RoutesRecord.DASHBOARD_SUBMISSIONS
+                                            : generatePath(
+                                                  RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
+                                                  { id }
+                                              )
+                                    }
+                                    saveAsDraftOnClickUrl={
+                                        RoutesRecord.DASHBOARD_SUBMISSIONS
+                                    }
+                                    continueOnClickUrl={
+                                        displayAsStandaloneRate
+                                            ? RoutesRecord.DASHBOARD_SUBMISSIONS
+                                            : '/edit/contacts'
+                                    }
                                 />
                             </UswdsForm>
                         </>

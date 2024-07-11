@@ -1,8 +1,7 @@
-import { GridContainer, Icon, Link } from '@trussworks/react-uswds'
+import { GridContainer, Icon } from '@trussworks/react-uswds'
 import React, { useEffect, useState } from 'react'
-import { NavLink, useNavigate, useParams } from 'react-router-dom'
-
-import { Loading } from '../../components'
+import { useNavigate, useParams } from 'react-router-dom'
+import { Loading, NavLinkWithLogging } from '../../components'
 import { usePage } from '../../contexts/PageContext'
 import { useFetchRateQuery } from '../../gen/gqlClient'
 import styles from '../SubmissionSummary/SubmissionSummary.module.scss'
@@ -83,8 +82,7 @@ export const RateSummary = (): React.ReactElement => {
                 className={styles.container}
             >
                 <div>
-                    <Link
-                        asCustom={NavLink}
+                    <NavLinkWithLogging
                         //TODO: Will have to remove this conditional once the rate dashboard is made available to state users
                         to={{
                             pathname:
@@ -95,7 +93,7 @@ export const RateSummary = (): React.ReactElement => {
                     >
                         <Icon.ArrowBack />
                         <span>&nbsp;Back to dashboard</span>
-                    </Link>
+                    </NavLinkWithLogging>
                 </div>
                 <SingleRateSummarySection
                     rate={rate}

@@ -1,8 +1,9 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { GenericApiErrorBanner } from './GenericApiErrorBanner'
+import { renderWithProviders } from '../../../testHelpers'
 
 test('renders default content when no props present', () => {
-    render(<GenericApiErrorBanner />)
+    renderWithProviders(<GenericApiErrorBanner />)
     expect(
         screen.getByRole('heading', {
             name: 'System error',
@@ -14,7 +15,7 @@ test('renders default content when no props present', () => {
 })
 
 test('renders custom heading', () => {
-    render(<GenericApiErrorBanner heading="Cool error" />)
+    renderWithProviders(<GenericApiErrorBanner heading="Cool error" />)
     const testText = 'Cool error'
     expect(screen.getByRole('heading', { name: testText })).toBeInTheDocument()
     expect(
@@ -24,7 +25,7 @@ test('renders custom heading', () => {
 
 test('renders custom message', async () => {
     const testText = 'Something else went wrong'
-    render(<GenericApiErrorBanner message={testText} />)
+    renderWithProviders(<GenericApiErrorBanner message={testText} />)
     await expect(screen.getByText(testText)).toBeInTheDocument()
     expect(
         screen.queryByText("We're having trouble loading this page.")

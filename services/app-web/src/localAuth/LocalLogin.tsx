@@ -1,7 +1,6 @@
 import React from 'react'
 import {
     Alert,
-    Button,
     Card,
     CardHeader,
     CardMedia,
@@ -26,6 +25,7 @@ import shiAvatar from '../assets/images/shi-tong.png'
 
 import { useAuth } from '../contexts/AuthContext'
 import { LocalUserType } from './LocalUserType'
+import { ButtonWithLogging } from '../components'
 
 const localUsers: LocalUserType[] = [
     {
@@ -159,14 +159,15 @@ export function LocalLogin(): React.ReactElement {
                                 <p>From {fromString}</p>
                             </CardBody>
                             <CardFooter>
-                                <Button
+                                <ButtonWithLogging
                                     data-testid={`${user.givenName}Button`}
                                     type="submit"
                                     disabled={loginStatus === 'LOADING'}
+                                    parent_component_type="card"
                                     onClick={() => login(user)}
                                 >
                                     Login
-                                </Button>
+                                </ButtonWithLogging>
                             </CardFooter>
                         </Card>
                     )

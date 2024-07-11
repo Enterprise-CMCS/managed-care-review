@@ -1,9 +1,14 @@
 import { useEffect } from 'react'
-import { GridContainer, Link } from '@trussworks/react-uswds'
+import { GridContainer } from '@trussworks/react-uswds'
 import styles from './QuestionResponse.module.scss'
 
-import { Loading, SectionHeader } from '../../components'
-import { NavLink, useLocation, useOutletContext } from 'react-router-dom'
+import {
+    Loading,
+    SectionHeader,
+    NavLinkWithLogging,
+    LinkWithLogging,
+} from '../../components'
+import { useLocation, useOutletContext } from 'react-router-dom'
 import { usePage } from '../../contexts/PageContext'
 import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
 import {
@@ -126,9 +131,14 @@ export const QuestionResponse = () => {
                             <span>
                                 You must be assigned to a division in order to
                                 ask questions about a submission. Contact{' '}
-                                <a href={`mailto:${MAIL_TO_SUPPORT}`}>
+                                <LinkWithLogging
+                                    variant="unstyled"
+                                    href={`mailto:${MAIL_TO_SUPPORT}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
                                     {MAIL_TO_SUPPORT}
-                                </a>{' '}
+                                </LinkWithLogging>{' '}
                                 to add your division.
                             </span>
                         }
@@ -140,14 +150,13 @@ export const QuestionResponse = () => {
                 <section>
                     <SectionHeader header="Contract questions" hideBorder>
                         {isCMSUser && division && (
-                            <Link
-                                asCustom={NavLink}
+                            <NavLinkWithLogging
                                 className="usa-button"
                                 variant="unstyled"
                                 to={`./${division.toLowerCase()}/upload-questions`}
                             >
                                 Add questions
-                            </Link>
+                            </NavLinkWithLogging>
                         )}
                     </SectionHeader>
                 </section>

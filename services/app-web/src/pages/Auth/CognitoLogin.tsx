@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { Button, GridContainer, Grid } from '@trussworks/react-uswds'
+import { GridContainer, Grid } from '@trussworks/react-uswds'
 
 import { Signup } from './Signup'
 import { ConfirmSignUp } from './ConfirmSignUp'
 import { Login } from './Login'
+import { ButtonWithLogging } from '../../components'
 
 export const CognitoLogin = (): React.ReactElement => {
     const [showConfirmation, setShowConfirmation] = useState(false)
@@ -41,22 +42,31 @@ export const CognitoLogin = (): React.ReactElement => {
             <Grid row className="padding-y-2">
                 {!showLogin && (
                     <>
-                        <Button
+                        <ButtonWithLogging
                             type="button"
+                            parent_component_heading="page body"
                             onClick={() => setShowLogin(true)}
                         >
                             Show Login Form
-                        </Button>
+                        </ButtonWithLogging>
 
-                        <Button type="button" onClick={toggleConfirmationForm}>
+                        <ButtonWithLogging
+                            type="button"
+                            parent_component_heading="page body"
+                            onClick={(e) => toggleConfirmationForm(e)}
+                        >
                             Enter confirmation code
-                        </Button>
+                        </ButtonWithLogging>
                     </>
                 )}
                 {showLogin && (
-                    <Button type="button" onClick={() => setShowLogin(false)}>
+                    <ButtonWithLogging
+                        type="button"
+                        parent_component_heading="page body"
+                        onClick={() => setShowLogin(false)}
+                    >
                         Show Signup Form
-                    </Button>
+                    </ButtonWithLogging>
                 )}
             </Grid>
         </GridContainer>
@@ -71,9 +81,13 @@ export const CognitoLogin = (): React.ReactElement => {
                 }}
             />
             <div className="padding-y-2">
-                <Button type="button" onClick={toggleConfirmationForm}>
+                <ButtonWithLogging
+                    type="button"
+                    parent_component_heading="page body"
+                    onClick={(e) => toggleConfirmationForm(e)}
+                >
                     Show Signup/ Login
-                </Button>
+                </ButtonWithLogging>
             </div>
         </GridContainer>
     )

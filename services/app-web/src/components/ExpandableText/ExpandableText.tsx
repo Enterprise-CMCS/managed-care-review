@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useState } from 'react'
-import { Button } from '@trussworks/react-uswds'
 import styles from './ExpandableText.module.scss'
+import { ButtonWithLogging } from '../TealiumLogging'
 
 export type ExpandableTextProps = {
     clampedLines?: number
@@ -36,6 +36,7 @@ export const ExpandableText = ({
             <span
                 ref={textRef}
                 data-testid="clampElement"
+                id="expandable-text"
                 aria-expanded={showMore}
                 className={`usa-alert__text ${
                     showMore ? styles.textExpanded : styles.textContracted
@@ -44,16 +45,17 @@ export const ExpandableText = ({
                 {children}
             </span>
             {showMoreButton && (
-                <Button
+                <ButtonWithLogging
                     aria-hidden // hide from screenreaders, they will read all the content by default and users can choose to skip ahead
                     type="button"
                     unstyled
                     tabIndex={-1}
+                    parent_component_type="toggle"
                     className={`${styles.showMoreButton} usa-link`}
                     onClick={() => setShowMore(!showMore)}
                 >
                     {showMore ? 'Show Less' : 'Show More'}
-                </Button>
+                </ButtonWithLogging>
             )}
         </p>
     )

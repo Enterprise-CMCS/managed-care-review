@@ -4,13 +4,12 @@ import {
     Form as UswdsForm,
     FormGroup,
     Fieldset,
-    Link,
     DateRangePicker,
+    Link,
 } from '@trussworks/react-uswds'
 import { v4 as uuidv4 } from 'uuid'
-import { Link as ReactRouterLink, useNavigate } from 'react-router-dom'
+import { generatePath, useNavigate } from 'react-router-dom'
 import { Formik, FormikErrors } from 'formik'
-
 import styles from '../StateSubmissionForm.module.scss'
 
 import {
@@ -24,6 +23,8 @@ import {
     FieldYesNo,
     FieldTextarea,
     DynamicStepIndicator,
+    LinkWithLogging,
+    ReactRouterLinkWithLogging,
 } from '../../../components'
 import {
     formatForForm,
@@ -596,7 +597,7 @@ export const ContractDetails = ({
                                                         styles.guidanceTextBlock
                                                     }
                                                 >
-                                                    <Link
+                                                    <LinkWithLogging
                                                         aria-label="Document definitions and requirements (opens in new window)"
                                                         href={
                                                             '/help#key-documents'
@@ -606,7 +607,7 @@ export const ContractDetails = ({
                                                     >
                                                         Document definitions and
                                                         requirements
-                                                    </Link>
+                                                    </LinkWithLogging>
                                                     <span className="padding-top-05">
                                                         Supporting documents can
                                                         be added later. If you
@@ -736,11 +737,8 @@ export const ContractDetails = ({
                                                         errors.statutoryRegulatoryAttestationDescription
                                                     )}
                                                     hint={
-                                                        <Link
+                                                        <ReactRouterLinkWithLogging
                                                             variant="external"
-                                                            asCustom={
-                                                                ReactRouterLink
-                                                            }
                                                             className={
                                                                 'margin-bottom-1'
                                                             }
@@ -754,7 +752,7 @@ export const ContractDetails = ({
                                                             Non-compliance
                                                             definitions and
                                                             examples
-                                                        </Link>
+                                                        </ReactRouterLinkWithLogging>
                                                     }
                                                 />
                                             </div>
@@ -844,7 +842,7 @@ export const ContractDetails = ({
                                                             }
                                                         />
                                                     )}
-                                                    <Link
+                                                    <LinkWithLogging
                                                         aria-label="Effective date guidance (opens in new window)"
                                                         href={
                                                             '/help#effective-date-guidance'
@@ -853,7 +851,7 @@ export const ContractDetails = ({
                                                         target="_blank"
                                                     >
                                                         Effective date guidance
-                                                    </Link>
+                                                    </LinkWithLogging>
                                                     <DateRangePicker
                                                         className={
                                                             styles.dateRangePicker
@@ -1139,6 +1137,19 @@ export const ContractDetails = ({
                                     }}
                                     disableContinue={showFileUploadError}
                                     actionInProgress={isSubmitting}
+                                    backOnClickUrl={generatePath(
+                                        RoutesRecord.SUBMISSIONS_TYPE,
+                                        { id }
+                                    )}
+                                    saveAsDraftOnClickUrl={
+                                        RoutesRecord.DASHBOARD_SUBMISSIONS
+                                    }
+                                    continueOnClickUrl={
+                                        draftSubmission.submissionType ===
+                                        'CONTRACT_ONLY'
+                                            ? '/edit/contacts'
+                                            : '/edit/rate-details'
+                                    }
                                 />
                             </UswdsForm>
                         </>
