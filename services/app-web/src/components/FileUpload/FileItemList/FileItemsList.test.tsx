@@ -64,7 +64,7 @@ describe('FileItemList component', () => {
         retryItem: vi.fn(),
     }
 
-    const spyOnUseTealium = jest.spyOn(tealium, 'useTealium')
+    const spyOnUseTealium = vi.spyOn(tealium, 'useTealium')
 
     beforeEach(() => {
         spyOnUseTealium.mockImplementation(() => ({

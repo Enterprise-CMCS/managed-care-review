@@ -26,7 +26,7 @@ describe('ExpandableText', () => {
         vi.spyOn(React, 'useRef').mockReturnValue(mockRef)
     }
 
-    const spyOnUseTealium = jest.spyOn(tealium, 'useTealium')
+    const spyOnUseTealium = vi.spyOn(tealium, 'useTealium')
 
     beforeEach(() => {
         spyOnUseTealium.mockImplementation(() => ({
@@ -40,7 +40,7 @@ describe('ExpandableText', () => {
     })
 
     afterEach(() => {
-        jest.resetAllMocks()
+        vi.resetAllMocks()
     })
 
     const longText =

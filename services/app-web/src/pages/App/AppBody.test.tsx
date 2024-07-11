@@ -17,11 +17,6 @@ describe('AppBody', () => {
         writable: true,
         value: vi.fn(),
     })
-    beforeEach(() => {
-        vi.mock('../../hooks/useTealium', () => ({
-            useTealium: vi.fn().mockReturnValue([]),
-        }))
-    })
     afterEach(() => {
         vi.resetAllMocks()
     })
