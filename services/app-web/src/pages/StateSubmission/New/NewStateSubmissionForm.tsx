@@ -13,12 +13,10 @@ export const NewStateSubmissionForm = (): React.ReactElement => {
         <div className={stylesSideNav.backgroundForm}>
             <GridContainer className={stylesSideNav.container}>
                 <div className={stylesForm.formPage}>
-                    <div>
-                        <DynamicStepIndicator
-                            formPages={STATE_SUBMISSION_FORM_ROUTES}
-                            currentFormPage={'SUBMISSIONS_TYPE'}
-                        />
-                    </div>
+                    <DynamicStepIndicator
+                        formPages={STATE_SUBMISSION_FORM_ROUTES}
+                        currentFormPage={'SUBMISSIONS_TYPE'}
+                    />
 
                     <FormContainer id="new-submission">
                         <SubmissionType />

@@ -374,14 +374,12 @@ const RateDetails = ({
     return (
         <>
             <div>
-                <div>
-                    {!displayAsStandaloneRate && (
-                        <DynamicStepIndicator
-                            formPages={STATE_SUBMISSION_FORM_ROUTES}
-                            currentFormPage="SUBMISSIONS_RATE_DETAILS"
-                        />
-                    )}
-                </div>
+                {!displayAsStandaloneRate && (
+                    <DynamicStepIndicator
+                        formPages={STATE_SUBMISSION_FORM_ROUTES}
+                        currentFormPage="SUBMISSIONS_RATE_DETAILS"
+                    />
+                )}
                 {!displayAsStandaloneRate && (
                     <PageBannerAlerts
                         loggedInUser={loggedInUser}

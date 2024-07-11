@@ -203,12 +203,10 @@ const Contacts = ({
     return (
         <>
             <div>
-                <div>
-                    <DynamicStepIndicator
-                        formPages={activeFormPages(draftSubmission)}
-                        currentFormPage={currentRoute}
-                    />
-                </div>
+                <DynamicStepIndicator
+                    formPages={activeFormPages(draftSubmission)}
+                    currentFormPage={currentRoute}
+                />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
                     unlockedInfo={unlockInfo}

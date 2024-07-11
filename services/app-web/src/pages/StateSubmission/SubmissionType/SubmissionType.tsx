@@ -255,16 +255,14 @@ export const SubmissionType = ({
     return (
         <>
             <div>
-                <div>
-                    <DynamicStepIndicator
-                        formPages={
-                            draftSubmission
-                                ? activeFormPages(draftSubmission)
-                                : STATE_SUBMISSION_FORM_ROUTES
-                        }
-                        currentFormPage={currentRoute}
-                    />
-                </div>
+                <DynamicStepIndicator
+                    formPages={
+                        draftSubmission
+                            ? activeFormPages(draftSubmission)
+                            : STATE_SUBMISSION_FORM_ROUTES
+                    }
+                    currentFormPage={currentRoute}
+                />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
                     unlockedInfo={unlockInfo}
