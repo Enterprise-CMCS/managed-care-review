@@ -4,7 +4,8 @@ import userEvent from '@testing-library/user-event'
 
 import { FileItemT } from '../FileProcessor/FileProcessor'
 import { FileItemsList } from './FileItemsList'
-import { TEST_PDF_FILE } from '../../../testHelpers/jestHelpers'
+import { TEST_PDF_FILE } from '../../../testHelpers'
+import * as tealium from '../../../hooks/useTealium'
 
 describe('FileItemList component', () => {
     const pending: FileItemT = {
@@ -63,7 +64,20 @@ describe('FileItemList component', () => {
         retryItem: vi.fn(),
     }
 
-    beforeEach(() => vi.clearAllMocks())
+    const spyOnUseTealium = jest.spyOn(tealium, 'useTealium')
+
+    beforeEach(() => {
+        spyOnUseTealium.mockImplementation(() => ({
+            logButtonEvent: () => {
+                return
+            },
+            logInternalLinkEvent: () => {
+                return
+            },
+        }))
+    })
+    afterEach(() => vi.clearAllMocks())
+
     it('renders a list without errors', () => {
         const fileItems = [pending, uploadError]
         render(<FileItemsList fileItems={fileItems} {...buttonActionProps} />)

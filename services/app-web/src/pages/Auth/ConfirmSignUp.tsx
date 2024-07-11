@@ -1,13 +1,8 @@
 import React, { useState } from 'react'
-import {
-    Button,
-    Form,
-    FormGroup,
-    Label,
-    TextInput,
-} from '@trussworks/react-uswds'
+import { Form, FormGroup, Label, TextInput } from '@trussworks/react-uswds'
 
 import { confirmSignUp, resendSignUp } from './cognitoAuth'
+import { ButtonWithLogging } from '../../components'
 
 export function showError(error: string): void {
     alert(error)
@@ -26,7 +21,6 @@ export function ConfirmSignUp({
         email: defaultEmail,
         confirmationCode: '',
     })
-
     const [isLoading, setIsLoading] = useState(false)
 
     function validateForm() {
@@ -86,9 +80,13 @@ export function ConfirmSignUp({
                 />
                 <div>Please check your email for the code.</div>
             </FormGroup>
-            <Button type="submit" disabled={!validateForm() || isLoading}>
+            <ButtonWithLogging
+                type="submit"
+                disabled={!validateForm() || isLoading}
+                parent_component_type="page body"
+            >
                 Verify
-            </Button>
+            </ButtonWithLogging>
         </Form>
     )
 }

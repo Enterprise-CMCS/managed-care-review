@@ -2,6 +2,7 @@ import React from 'react'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ExpandableText } from './ExpandableText'
+import * as tealium from '../../hooks/useTealium'
 
 describe('ExpandableText', () => {
     type NodeWidth = Pick<
@@ -24,6 +25,23 @@ describe('ExpandableText', () => {
         }
         vi.spyOn(React, 'useRef').mockReturnValue(mockRef)
     }
+
+    const spyOnUseTealium = jest.spyOn(tealium, 'useTealium')
+
+    beforeEach(() => {
+        spyOnUseTealium.mockImplementation(() => ({
+            logButtonEvent: () => {
+                return
+            },
+            logInternalLinkEvent: () => {
+                return
+            },
+        }))
+    })
+
+    afterEach(() => {
+        jest.resetAllMocks()
+    })
 
     const longText =
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet.'

@@ -1,4 +1,3 @@
-import { Link } from '@trussworks/react-uswds'
 import {
     ActuaryContact,
     StateContact,
@@ -9,6 +8,7 @@ import {
     ActuaryContact as GQLActuaryContact,
     StateContact as GQLStateContact,
 } from '../../../gen/gqlClient'
+import { LinkWithLogging } from '../../TealiumLogging/Link'
 
 type Contact =
     | ActuaryContact
@@ -35,14 +35,14 @@ export const DataDetailContactField = ({
             <br />
             {titleRole}
             <br />
-            <Link
+            <LinkWithLogging
                 href={`mailto:${email}`}
                 target="_blank"
                 variant="external"
                 rel="noreferrer"
             >
                 {email}
-            </Link>
+            </LinkWithLogging>
             {isCertainActuaryContact(contact) && (
                 <>
                     <br />

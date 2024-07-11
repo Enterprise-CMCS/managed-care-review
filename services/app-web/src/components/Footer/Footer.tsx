@@ -7,6 +7,7 @@ import { Logo } from '../Logo'
 import { GridContainer, Grid } from '@trussworks/react-uswds'
 import { useStringConstants } from '../../hooks/useStringConstants'
 import { useCurrentRoute } from '../../hooks/useCurrentRoute'
+import { LinkWithLogging } from '../TealiumLogging/Link'
 
 /**
  * CMS Footer
@@ -28,7 +29,7 @@ export const Footer = (): React.ReactElement => {
                             />
                         </div>
                         <span className={styles.federalLogos}>
-                            <HHSIcon  />
+                            <HHSIcon />
                             <span>
                                 A federal government website managed and paid
                                 for by the U.S. Centers for Medicare and
@@ -43,14 +44,14 @@ export const Footer = (): React.ReactElement => {
                     <Grid row className="flex-justify flex-align-center">
                         <span>
                             Email&nbsp;
-                            <a
+                            <LinkWithLogging
                                 href={`mailto: ${MAIL_TO_SUPPORT}, mc-review-team@truss.works`}
-                                className="usa-link"
+                                variant="unstyled"
                                 target="_blank"
                                 rel="noreferrer"
                             >
                                 {MAIL_TO_SUPPORT}
-                            </a>
+                            </LinkWithLogging>
                             &nbsp;to get help or send feedback
                         </span>
                         <span>7500 Security Boulevard Baltimore, MD 21244</span>

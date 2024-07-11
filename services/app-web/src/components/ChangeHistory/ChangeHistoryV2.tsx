@@ -1,10 +1,12 @@
 import React from 'react'
 import { dayjs } from '../../common-code/dateHelpers/dayjs'
 import { SectionHeader } from '../SectionHeader'
-import { Accordion, Link } from '@trussworks/react-uswds'
+import { Accordion } from '@trussworks/react-uswds'
 import type { AccordionItemProps } from '@trussworks/react-uswds/lib/components/Accordion/Accordion'
 import { UpdateInformation, Contract } from '../../gen/gqlClient'
 import styles from './ChangeHistory.module.scss'
+import { LinkWithLogging } from '../TealiumLogging/Link'
+
 type ChangeHistoryProps = {
     contract: Contract
 }
@@ -113,12 +115,12 @@ export const ChangeHistory = ({
                         <span> {r.updatedBy}&nbsp;</span>
                         <br />
                         {r.revisionVersion && hasSubsequentSubmissions && (
-                            <Link
+                            <LinkWithLogging
                                 href={`/submissions/${contract.id}/revisions/${r.revisionVersion}`}
                                 data-testid={`revision-link-${r.revisionVersion}`}
                             >
                                 View past submission version
-                            </Link>
+                            </LinkWithLogging>
                         )}
                     </div>
                 ) : (
@@ -140,12 +142,12 @@ export const ChangeHistory = ({
                             <span>{r.updatedReason}</span>
                         </div>
                         {isSubsequentSubmission && r.revisionVersion && (
-                            <Link
+                            <LinkWithLogging
                                 href={`/submissions/${contract.id}/revisions/${r.revisionVersion}`}
                                 data-testid={`revision-link-${r.revisionVersion}`}
                             >
                                 View past submission version
-                            </Link>
+                            </LinkWithLogging>
                         )}
                     </div>
                 ),

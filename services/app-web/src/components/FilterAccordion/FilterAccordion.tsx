@@ -1,8 +1,9 @@
 import React from 'react'
 import styles from './FilterAccordion.module.scss'
-import { Accordion, Button } from '@trussworks/react-uswds'
+import { Accordion } from '@trussworks/react-uswds'
 import { FilterSelectPropType } from './FilterSelect/FilterSelect'
 import type { AccordionItemProps } from '@trussworks/react-uswds/lib/components/Accordion/Accordion'
+import { ButtonWithLogging } from '../TealiumLogging'
 
 export interface FilterAccordionPropType {
     onClearFilters: () => void
@@ -30,7 +31,7 @@ export const FilterAccordion = ({
             content: (
                 <>
                     <div>{childFilters}</div>
-                    <Button
+                    <ButtonWithLogging
                         id="clearFiltersButton"
                         type="button"
                         className={styles.clearFilterButton}
@@ -38,7 +39,7 @@ export const FilterAccordion = ({
                         onClick={onClearFilters}
                     >
                         Clear filters
-                    </Button>
+                    </ButtonWithLogging>
                 </>
             ),
             expanded: false,

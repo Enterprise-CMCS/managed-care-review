@@ -1,4 +1,4 @@
-import { render, waitFor, screen } from '@testing-library/react'
+import { waitFor, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { FileUpload, FileUploadProps, S3FileData } from './FileUpload'
@@ -13,6 +13,7 @@ import {
     dragAndDrop,
     fakeRequest,
     userClickByRole,
+    renderWithProviders,
 } from '../../testHelpers/jestHelpers'
 
 describe('FileUpload component', () => {
@@ -46,7 +47,7 @@ describe('FileUpload component', () => {
     beforeEach(() => vi.clearAllMocks())
 
     it('renders without errors', async () => {
-        render(<FileUpload {...testProps} />)
+        renderWithProviders(<FileUpload {...testProps} />)
         expect(screen.getByTestId('file-input')).toBeInTheDocument()
         expect(screen.getByTestId('file-input')).toHaveClass('usa-file-input')
         expect(screen.getByText('File input label')).toBeInTheDocument()
@@ -63,7 +64,9 @@ describe('FileUpload component', () => {
             },
         ]
 
-        render(<FileUpload {...testProps} initialItems={initialItems} />)
+        renderWithProviders(
+            <FileUpload {...testProps} initialItems={initialItems} />
+        )
 
         // check for initial items
         const items = screen.getAllByRole('listitem')
@@ -83,7 +86,7 @@ describe('FileUpload component', () => {
     })
 
     it('renders a loading state while file is loading', async () => {
-        render(<FileUpload {...testProps} />)
+        renderWithProviders(<FileUpload {...testProps} />)
         const inputEl = screen.getByTestId('file-input-input')
         await userEvent.upload(inputEl, TEST_PDF_FILE)
         await screen.findByText(/Uploading/)
@@ -94,7 +97,7 @@ describe('FileUpload component', () => {
     })
 
     it('moves to scanning state when file is finished loading', async () => {
-        render(<FileUpload {...testProps} />)
+        renderWithProviders(<FileUpload {...testProps} />)
         const inputEl = screen.getByTestId('file-input-input')
         await userEvent.upload(inputEl, TEST_PDF_FILE)
         await screen.findByText(/Uploading/)
@@ -107,7 +110,7 @@ describe('FileUpload component', () => {
     })
 
     it('removes loading and scanning styles when file is complete', async () => {
-        render(<FileUpload {...testProps} />)
+        renderWithProviders(<FileUpload {...testProps} />)
         const inputEl = screen.getByTestId('file-input-input')
         await userEvent.upload(inputEl, TEST_PDF_FILE)
 
@@ -127,7 +130,7 @@ describe('FileUpload component', () => {
     })
 
     it('accepts multiple files', async () => {
-        render(<FileUpload {...testProps} />)
+        renderWithProviders(<FileUpload {...testProps} />)
 
         const inputEl = screen.getByTestId('file-input-input')
 
@@ -144,7 +147,7 @@ describe('FileUpload component', () => {
     })
 
     it('accepts an upload file of a valid type', async () => {
-        render(<FileUpload {...testProps} accept=".pdf,.txt" />)
+        renderWithProviders(<FileUpload {...testProps} accept=".pdf,.txt" />)
 
         const inputEl = screen.getByTestId('file-input-input')
         expect(inputEl).toHaveAttribute('accept', '.pdf,.txt')
@@ -161,7 +164,7 @@ describe('FileUpload component', () => {
     })
 
     it('does not accept upload file of invalid type', async () => {
-        render(<FileUpload {...testProps} accept=".pdf,.txt" />)
+        renderWithProviders(<FileUpload {...testProps} accept=".pdf,.txt" />)
 
         const inputEl = screen.getByTestId('file-input-input')
         expect(inputEl).toHaveAttribute('accept', '.pdf,.txt')
@@ -174,7 +177,9 @@ describe('FileUpload component', () => {
     })
 
     it('displays a duplicate file error when expected', async () => {
-        render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
+        renderWithProviders(
+            <FileUpload {...testProps} accept=".pdf,.txt,.doc" />
+        )
 
         const input = screen.getByTestId('file-input-input')
         await userEvent.upload(input, [TEST_DOC_FILE])
@@ -204,7 +209,7 @@ describe('FileUpload component', () => {
             accept: '.pdf,.txt',
         }
 
-        render(<FileUpload {...props} />)
+        renderWithProviders(<FileUpload {...props} />)
 
         const input = screen.getByTestId('file-input-input')
         await userEvent.upload(input, [TEST_PDF_FILE])
@@ -230,7 +235,7 @@ describe('FileUpload component', () => {
             accept: '.pdf,.txt',
         }
 
-        render(<FileUpload {...props} />)
+        renderWithProviders(<FileUpload {...props} />)
 
         const input = screen.getByTestId('file-input-input')
         await userEvent.upload(input, [TEST_PDF_FILE])
@@ -256,7 +261,7 @@ describe('FileUpload component', () => {
             accept: '.pdf,.txt',
         }
 
-        render(<FileUpload {...props} />)
+        renderWithProviders(<FileUpload {...props} />)
 
         const input = screen.getByTestId('file-input-input')
         await userEvent.upload(input, [TEST_PDF_FILE])
@@ -271,7 +276,9 @@ describe('FileUpload component', () => {
 
     describe('list summary heading', () => {
         it('display list count - X files added', async () => {
-            render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
+            renderWithProviders(
+                <FileUpload {...testProps} accept=".pdf,.txt,.doc" />
+            )
 
             const input = screen.getByTestId('file-input-input')
             await userEvent.upload(input, [TEST_DOC_FILE])
@@ -282,7 +289,7 @@ describe('FileUpload component', () => {
         })
 
         it('displays error count when scan error occurs', async () => {
-            render(
+            renderWithProviders(
                 <FileUpload
                     {...testProps}
                     scanFile={vi.fn().mockRejectedValue(new Error('failed'))}
@@ -299,7 +306,9 @@ describe('FileUpload component', () => {
         })
 
         it('displays error count when duplicate name occurs', async () => {
-            render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
+            renderWithProviders(
+                <FileUpload {...testProps} accept=".pdf,.txt,.doc" />
+            )
 
             const input = screen.getByTestId('file-input-input')
             await userEvent.upload(input, [TEST_DOC_FILE])
@@ -310,7 +319,9 @@ describe('FileUpload component', () => {
         })
 
         it('displays complete count when file upload completes without issue', async () => {
-            render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
+            renderWithProviders(
+                <FileUpload {...testProps} accept=".pdf,.txt,.doc" />
+            )
 
             const input = screen.getByTestId('file-input-input')
             await userEvent.upload(input, [TEST_DOC_FILE])
@@ -331,7 +342,9 @@ describe('FileUpload component', () => {
         })
 
         it('displays pending count when file upload is still in progress', async () => {
-            render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
+            renderWithProviders(
+                <FileUpload {...testProps} accept=".pdf,.txt,.doc" />
+            )
 
             const input = screen.getByTestId('file-input-input')
             await userEvent.upload(input, [TEST_DOC_FILE])
@@ -343,7 +356,7 @@ describe('FileUpload component', () => {
     })
     describe('drag and drop behavior', () => {
         it('does not accept a drop file that has an invalid type', async () => {
-            const { getByTestId, queryByTestId } = render(
+            const { getByTestId, queryByTestId } = renderWithProviders(
                 <FileUpload {...testProps} accept=".pdf" />
             )
 
@@ -367,7 +380,7 @@ describe('FileUpload component', () => {
         })
 
         it('does not accept a drop that has valid and invalid files together', () => {
-            const { getByTestId, queryByTestId } = render(
+            const { getByTestId, queryByTestId } = renderWithProviders(
                 <FileUpload {...testProps} accept=".pdf" />
             )
 

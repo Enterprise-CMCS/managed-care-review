@@ -25,6 +25,7 @@
             "**/src/localAuth",
             "**/src/gen",
             "**/src/contexts/TraceContext.tsx",
+            "**/src/contexts/TealiumContext.tsx",
             "**/src/hooks/useTealium.ts",
             "**/src/parameterStore/awsParameterStore.ts",
             "**/src/components/Header/StateIcon/StateIcon.tsx",

@@ -1,5 +1,6 @@
-import { screen, render } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { ErrorSummary } from './ErrorSummary'
+import { renderWithProviders } from '../../../testHelpers'
 
 describe('ErrorSummary component', () => {
     afterAll(() => {
@@ -7,13 +8,13 @@ describe('ErrorSummary component', () => {
     })
 
     it('renders nothing when errors is empty', () => {
-        render(<ErrorSummary errors={{}} />)
+        renderWithProviders(<ErrorSummary errors={{}} />)
 
         expect(screen.queryByTestId('error-summary')).not.toBeInTheDocument()
     })
 
     it('renders a summary for multiple errors', () => {
-        render(
+        renderWithProviders(
             <ErrorSummary
                 errors={{
                     title: 'You must provide a title',

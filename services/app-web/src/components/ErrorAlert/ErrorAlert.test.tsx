@@ -1,8 +1,9 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { ErrorAlert } from './ErrorAlert'
+import { renderWithProviders } from '../../testHelpers'
 
 test('renders default content when no props present', () => {
-    render(<ErrorAlert />)
+    renderWithProviders(<ErrorAlert />)
     expect(
         screen.getByRole('heading', {
             name: 'System error',
@@ -14,7 +15,7 @@ test('renders default content when no props present', () => {
 })
 
 test('renders custom heading', () => {
-    render(<ErrorAlert heading="Cool error" />)
+    renderWithProviders(<ErrorAlert heading="Cool error" />)
     const testText = 'Cool error'
     expect(screen.getByRole('heading', { name: testText })).toBeInTheDocument()
     expect(
@@ -24,7 +25,7 @@ test('renders custom heading', () => {
 
 test('renders custom message', async () => {
     const testText = 'Something else went wrong'
-    render(<ErrorAlert message={testText} />)
+    renderWithProviders(<ErrorAlert message={testText} />)
     await expect(screen.getByText(testText)).toBeInTheDocument()
     expect(screen.getByText(/Something else went wrong/)).toBeInTheDocument()
     expect(
@@ -34,7 +35,9 @@ test('renders custom message', async () => {
 
 test('renders with custom styles', async () => {
     const testText = 'custom styles'
-    render(<ErrorAlert message={testText} className={'test-class'} />)
+    renderWithProviders(
+        <ErrorAlert message={testText} className={'test-class'} />
+    )
     await expect(screen.getByText(testText)).toBeInTheDocument()
     expect(screen.queryByTestId('error-alert')).toHaveClass('test-class')
 })

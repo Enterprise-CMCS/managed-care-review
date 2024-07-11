@@ -12,6 +12,7 @@ import { AuthProvider } from '../../contexts/AuthContext'
 import { ErrorBoundaryRoot } from '../Errors/ErrorBoundaryRoot'
 import { PageProvider } from '../../contexts/PageContext'
 import TraceProvider from '../../contexts/TraceContext'
+import { TealiumProvider } from '../../contexts/TealiumContext'
 
 import { AuthModeType } from '../../common-code/config'
 import { S3Provider } from '../../contexts/S3Context'
@@ -19,6 +20,7 @@ import type { S3ClientT } from '../../s3'
 import { useScript } from '../../hooks'
 import { generateNRScriptContent } from '../../newRelic'
 import { getEnv } from '../../configHelpers/envHelpers'
+import { getTealiumEnv, tealiumClient, devTealiumClient } from '../../tealium'
 
 export type AppProps = {
     authMode: AuthModeType
@@ -34,10 +36,10 @@ function App({
     const environmentName = import.meta.env.VITE_APP_STAGE_NAME || ''
     const isHigherEnv = ['prod', 'val', 'main'].includes(environmentName)
     const nrSnippet = generateNRScriptContent({
-        accountID: getEnv('VITE_APP_NR_ACCOUNT_ID'),
-        trustKey: getEnv('VITE_APP_NR_TRUST_KEY'),
-        applicationID: getEnv('VITE_APP_NR_AGENT_ID'),
-        licenseKey: getEnv('VITE_APP_NR_LICENSE_KEY'),
+        accountID: getEnv('REACT_APP_NR_ACCOUNT_ID'),
+        trustKey: getEnv('REACT_APP_NR_TRUST_KEY'),
+        applicationID: getEnv('REACT_APP_NR_AGENT_ID'),
+        licenseKey: getEnv('REACT_APP_NR_LICENSE_KEY'),
     })
     useScript({
         inlineScriptAsString: nrSnippet,
@@ -45,6 +47,9 @@ function App({
         id: 'newrelic',
         showScript: isHigherEnv,
     })
+    const tealiumEnv = getTealiumEnv(environmentName)
+    const newTealiumClient =
+        tealiumEnv === 'dev' ? devTealiumClient() : tealiumClient(tealiumEnv)
 
     return (
         <ErrorBoundary FallbackComponent={ErrorBoundaryRoot}>
@@ -54,7 +59,9 @@ function App({
                         <S3Provider client={s3Client}>
                             <AuthProvider authMode={authMode}>
                                 <PageProvider>
-                                    <AppBody authMode={authMode} />
+                                    <TealiumProvider client={newTealiumClient}>
+                                        <AppBody authMode={authMode} />
+                                    </TealiumProvider>
                                 </PageProvider>
                             </AuthProvider>
                         </S3Provider>

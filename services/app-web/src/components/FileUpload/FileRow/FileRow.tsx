@@ -2,8 +2,9 @@ import React from 'react'
 import { FileItemT } from '../FileProcessor/FileProcessor'
 
 import styles from '../FileUpload.module.scss'
-import { Button, Checkbox } from '@trussworks/react-uswds'
+import { Checkbox } from '@trussworks/react-uswds'
 import { SPACER_GIF } from '../constants'
+import { ButtonWithLogging } from '../../TealiumLogging'
 
 type FileRowProps = {
     errorRowClass?: string
@@ -116,7 +117,7 @@ export const FileRow = ({
                 <td />
             )}
             <td style={{ textAlign: 'right' }}>
-                <Button
+                <ButtonWithLogging
                     style={{ marginTop: 0 }}
                     type="button"
                     aria-label={`Remove ${name} document`}
@@ -124,10 +125,10 @@ export const FileRow = ({
                     onClick={handleDelete}
                 >
                     Remove
-                </Button>
+                </ButtonWithLogging>
                 {hasRecoverableError && <span> or </span>}
                 {hasRecoverableError && (
-                    <Button
+                    <ButtonWithLogging
                         style={{ marginTop: 0 }}
                         type="button"
                         aria-label={`Retry upload for ${name} document`}
@@ -135,7 +136,7 @@ export const FileRow = ({
                         onClick={handleRetry}
                     >
                         Retry
-                    </Button>
+                    </ButtonWithLogging>
                 )}
             </td>
         </tr>

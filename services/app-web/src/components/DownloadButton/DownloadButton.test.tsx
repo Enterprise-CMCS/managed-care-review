@@ -1,9 +1,10 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { DownloadButton } from './DownloadButton'
+import { renderWithProviders } from '../../testHelpers'
 
 describe('DownloadButton', () => {
     it('renders without errors', () => {
-        render(
+        renderWithProviders(
             <DownloadButton
                 text="Download all documents"
                 zippedFilesURL="https://example.com"
@@ -15,7 +16,7 @@ describe('DownloadButton', () => {
         expect(screen.getByText('Download all documents')).toBeInTheDocument()
     })
     it('renders loading button', () => {
-        render(
+        renderWithProviders(
             <DownloadButton
                 text="Download all documents"
                 zippedFilesURL={undefined}

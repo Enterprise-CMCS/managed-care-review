@@ -2,7 +2,7 @@ import React from 'react'
 import { useStringConstants } from '../../hooks/useStringConstants'
 import styles from './Errors.module.scss'
 
-import { PageHeading } from '../../components/PageHeading'
+import { PageHeading, LinkWithLogging } from '../../components'
 import { GridContainer } from '@trussworks/react-uswds'
 
 export const GenericErrorPage = (): React.ReactElement => {
@@ -18,14 +18,14 @@ export const GenericErrorPage = (): React.ReactElement => {
                         your browser and if you continue to experience an
                         error,&nbsp;
                     </span>
-                    <a
+                    <LinkWithLogging
                         href={`mailto: ${MAIL_TO_SUPPORT}, mc-review-team@truss.works`}
-                        className="usa-link"
+                        variant="unstyled"
                         target="_blank"
                         rel="noreferrer"
                     >
                         let us know.
-                    </a>
+                    </LinkWithLogging>
                 </p>
             </GridContainer>
         </section>

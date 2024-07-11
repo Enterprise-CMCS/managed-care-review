@@ -216,10 +216,11 @@ export const MccrsId = (): React.ReactElement => {
                                     type="submit"
                                     variant="default"
                                     data-testid="page-actions-right-primary"
+                                    parent_component_type="page body"
+                                    link_url={`/submissions/${id}`}
                                     disabled={
                                         shouldValidate && !!errors.mccrsId
                                     }
-                                    onSubmit={() => handleFormSubmit(values)}
                                     animationTimeout={1000}
                                     loading={
                                         isSubmitting &&

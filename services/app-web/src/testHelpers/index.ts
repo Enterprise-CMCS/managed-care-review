@@ -22,3 +22,4 @@ export {
 
 export { testS3Client } from './s3Helpers'
 export { updateDateRange } from './userEventHelpers'
+export { tealiumTestClient } from './tealiumHelpers'

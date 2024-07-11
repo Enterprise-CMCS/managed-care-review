@@ -263,8 +263,14 @@
                 },
                 {
                     "id": "83b12618-4e53-40fa-9db8-c714fba64e49",
-                    "fullName": "Non-Emergency Medical Transportation - LogistiCare (NEMT LC)",
-                    "name": "NEMT LC",
+                    "fullName": "Non-Emergency Medical Transportation - LogistiCare",
+                    "name": "NEMT LTC",
+                    "isRateProgram": true
+                },
+                {
+                    "id": "9581bfee-7bf2-4433-a013-9c652fbed360",
+                    "fullName": "NEMT ModivCare",
+                    "name": "NEMT ModivCare",
                     "isRateProgram": true
                 },
                 {
@@ -816,25 +822,19 @@
                 {
                     "id": "09dae8a2-df85-40e7-815e-0262fc49528c",
                     "fullName": "NJ FamilyCare MLTSS",
-                    "name": "FamilyCare MLTSS",
+                    "name": "MLTSS",
                     "isRateProgram": true
                 },
                 {
                     "id": "060cff75-f126-4248-95d1-846b3305a886",
                     "fullName": "NJ FamilyCare Acute",
-                    "name": "FamilyCare Acute",
+                    "name": "Acute",
                     "isRateProgram": true
                 },
                 {
                     "id": "da99a50b-accc-4849-b4a6-ce1436391dc2",
                     "fullName": "NJFamilyCare",
                     "name": "NJ FamilyCare",
-                    "isRateProgram": false
-                },
-                {
-                    "id": "3e7133b4-f5bb-42a3-a076-f0c59beb9e10",
-                    "fullName": "FIDE SNP ",
-                    "name": "FIDE SNP ",
                     "isRateProgram": false
                 }
             ],
@@ -1122,8 +1122,20 @@
                 {
                     "id": "3fe3d26b-175f-4550-92a2-9f86b273c0f0",
                     "fullName": "TennCare II",
-                    "name": "TennCare",
+                    "name": "TennCare II",
                     "isRateProgram": false
+                },
+                {
+                    "id": "9a1ee3a4-5656-4f79-9f28-719e424c7b26",
+                    "fullName": "TennCare II",
+                    "name": "TennCare Choices",
+                    "isRateProgram": true
+                },
+                {
+                    "id": "c9f6a73e-89ab-4279-aac4-343235a317b5",
+                    "fullName": "TennCare II",
+                    "name": "TennCare Non-Choices",
+                    "isRateProgram": true
                 }
             ],
             "code": "TN"

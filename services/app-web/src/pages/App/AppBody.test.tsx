@@ -11,10 +11,6 @@ import {
 } from '../../testHelpers/apolloMocks'
 import { beforeEach } from 'vitest'
 
-vi.mock('../../hooks/useTealium', () => ({
-    useTealium: vi.fn().mockReturnValue([]),
-}))
-
 // Looking for routing tests? Check AppRoutes.test.tsx
 describe('AppBody', () => {
     Object.defineProperty(window, 'scrollTo', {

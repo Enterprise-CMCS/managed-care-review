@@ -28,15 +28,4 @@ export {
 
 export type { RouteT, RouteTWithUnknown } from './routes'
 
-export {
-    CONTENT_TYPE_BY_ROUTE,
-    getTealiumEnv,
-    getTealiumPageName,
-} from './tealium'
-export type {
-    TealiumLinkDataObject,
-    TealiumViewDataObject,
-    TealiumEvent,
-} from './tealium'
-
 export { ERROR_MESSAGES } from './errors'

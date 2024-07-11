@@ -1,9 +1,12 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import { ActionButton } from './ActionButton'
+import { renderWithProviders } from '../../testHelpers'
 
 describe('ActionButton', () => {
     it('renders without errors', () => {
-        render(<ActionButton type="button">Test Button</ActionButton>)
+        renderWithProviders(
+            <ActionButton type="button">Test Button</ActionButton>
+        )
         expect(
             screen.getByRole('button', {
                 name: 'Test Button',
@@ -13,7 +16,7 @@ describe('ActionButton', () => {
 
     describe('default state', () => {
         it('renders button with own text', () => {
-            render(
+            renderWithProviders(
                 <ActionButton type="button" onClick={vi.fn()}>
                     Test Button Default
                 </ActionButton>
@@ -27,7 +30,7 @@ describe('ActionButton', () => {
         })
 
         it('renders button without disabled styles and aria-disabled', () => {
-            render(
+            renderWithProviders(
                 <ActionButton type="button" onClick={vi.fn()}>
                     Test Button Default
                 </ActionButton>
@@ -42,7 +45,7 @@ describe('ActionButton', () => {
         })
 
         it('renders button without loading styles and spinner', async () => {
-            render(
+            renderWithProviders(
                 <ActionButton type="button" onClick={vi.fn()}>
                     Test Button Default
                 </ActionButton>
@@ -59,7 +62,7 @@ describe('ActionButton', () => {
 
     describe('loading state', () => {
         it('renders button with "Loading" instead instead of button text', () => {
-            render(
+            renderWithProviders(
                 <ActionButton
                     type="button"
                     onClick={vi.fn()}
@@ -78,7 +81,7 @@ describe('ActionButton', () => {
         })
 
         it('renders button with active styles, spinner, and cursor', async () => {
-            render(
+            renderWithProviders(
                 <ActionButton
                     type="button"
                     onClick={vi.fn()}
@@ -104,7 +107,7 @@ describe('ActionButton', () => {
 
         vi.useFakeTimers()
         it('by default, wait 750 ms before displaying loading spinner', async () => {
-            render(
+            renderWithProviders(
                 <ActionButton type="button" onClick={vi.fn()} loading>
                     Test Button Loading
                 </ActionButton>
@@ -127,7 +130,7 @@ describe('ActionButton', () => {
 
     describe('disabled state', () => {
         it('renders button with own text', () => {
-            render(
+            renderWithProviders(
                 <ActionButton type="button" onClick={vi.fn()} disabled>
                     Test Button Disabled
                 </ActionButton>
@@ -141,7 +144,7 @@ describe('ActionButton', () => {
         })
 
         it('renders button with aria-disabled attribute', () => {
-            render(
+            renderWithProviders(
                 <ActionButton type="button" onClick={vi.fn()} disabled>
                     Test Button Disabled
                 </ActionButton>
@@ -155,7 +158,7 @@ describe('ActionButton', () => {
         })
 
         it('renders button with disabled styles and cursor', () => {
-            render(
+            renderWithProviders(
                 <ActionButton type="button" onClick={vi.fn()} disabled>
                     Test Button Disabled
                 </ActionButton>
@@ -178,7 +181,7 @@ describe('ActionButton', () => {
         it('Console error when incompatible props are being used', () => {
             const consoleErrorMock = vi.spyOn(console, 'error')
 
-            render(
+            renderWithProviders(
                 <ActionButton type="button" onClick={vi.fn()} disabled loading>
                     Test Button
                 </ActionButton>

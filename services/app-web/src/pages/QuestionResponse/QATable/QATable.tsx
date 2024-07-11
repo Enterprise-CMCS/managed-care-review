@@ -6,11 +6,10 @@ import {
     QuestionResponse,
     User,
 } from '../../../gen/gqlClient'
-import { Link } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
-import { NavLink } from 'react-router-dom'
 import { useDocument } from '../../../hooks/useDocument'
 import useDeepCompareEffect from 'use-deep-compare-effect'
+import { LinkWithLogging, NavLinkWithLogging } from '../../../components'
 
 type QuestionDocumentWithLink = {
     s3URL: string
@@ -101,8 +100,7 @@ export const QATable = ({
             <div className={styles.tableHeader}>
                 <h4>{`Round ${round}`}</h4>
                 {isStateUser && (
-                    <Link
-                        asCustom={NavLink}
+                    <NavLinkWithLogging
                         className="usa-button"
                         variant="unstyled"
                         to={`./${division.toLowerCase()}/${
@@ -110,7 +108,7 @@ export const QATable = ({
                         }/upload-response`}
                     >
                         Upload response
-                    </Link>
+                    </NavLinkWithLogging>
                 )}
             </div>
             <table
@@ -129,14 +127,14 @@ export const QATable = ({
                         <tr key={doc.name + index}>
                             <td>
                                 {doc.url ? (
-                                    <Link
+                                    <LinkWithLogging
                                         className={styles.inlineLink}
                                         aria-label={`${doc.name} (opens in new window)`}
                                         href={doc.url}
                                         target="_blank"
                                     >
                                         {doc.name}
-                                    </Link>
+                                    </LinkWithLogging>
                                 ) : (
                                     doc.name
                                 )}

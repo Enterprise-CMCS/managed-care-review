@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from '@trussworks/react-uswds'
-import { NavLink } from 'react-router-dom'
 import { dayjs } from '../../../common-code/dateHelpers/dayjs'
 import styles from './UploadedDocumentsTable.module.scss'
 import {
@@ -13,6 +11,7 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 import { GenericDocument } from '../../../gen/gqlClient'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
+import { LinkWithLogging, NavLinkWithLogging } from '../../TealiumLogging'
 
 // This is used to convert from deprecated FE domain types from protos to GQL GenericDocuments by added in a dateAdded
 export const convertFromSubmissionDocumentsToGenericDocuments = (
@@ -101,14 +100,13 @@ export const UploadedDocumentsTable = ({
         <>
             <span>{caption}</span>
             {shouldShowEditButton && (
-                <Link
+                <NavLinkWithLogging
                     variant="unstyled"
-                    asCustom={NavLink}
                     className="usa-button usa-button--outline edit-btn"
                     to="../documents"
                 >
                     Edit <span className="srOnly">{caption}</span>
-                </Link>
+                </NavLinkWithLogging>
             )}
         </>
     )
@@ -182,14 +180,14 @@ export const UploadedDocumentsTable = ({
                                         isNew={shouldHaveNewTag(doc)}
                                         isShared={showLegacySharedRatesAcross}
                                     />
-                                    <Link
+                                    <LinkWithLogging
                                         className={styles.inlineLink}
                                         aria-label={`${doc.name} (opens in new window)`}
                                         href={doc.url}
                                         target="_blank"
                                     >
                                         {doc.name}
-                                    </Link>
+                                    </LinkWithLogging>
                                 </td>
                             ) : (
                                 <td>
@@ -243,9 +241,9 @@ const linkedPackagesList = ({
         return (
             <span key={item.packageId}>
                 {maybeComma}
-                <Link asCustom={NavLink} to={`/submissions/${item.packageId}`}>
+                <NavLinkWithLogging to={`/submissions/${item.packageId}`}>
                     {item.packageName}
-                </Link>
+                </NavLinkWithLogging>
             </span>
         )
     })
