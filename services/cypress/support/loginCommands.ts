@@ -34,10 +34,6 @@ Cypress.Commands.add('logInAsStateUser', () => {
 Cypress.Commands.add(
     'logInAsCMSUser',
     ({ initialURL } = { initialURL: '/' }) => {
-        // Note: During the move to vite this stopped working, we had to move to visit /auth first
-        //cy.visit(initialURL)
-        console.info(`visiting ${initialURL}`)
-
         cy.visit('/auth')
 
         //Add assertion looking for test on the page before findByRole
@@ -64,21 +60,26 @@ Cypress.Commands.add(
 
         cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
         cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
+        cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
+            'exist'
+        )
 
-        if (initialURL) {
+        if (initialURL !== '/') {
             cy.visit(initialURL)
             cy.url({ timeout: 20_000 }).should('contain', initialURL)
 
-            if (initialURL?.includes('submissions')) {
+            if (initialURL.includes('submissions/')) {
                 cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', {
                     timeout: 20_000,
                 }) // for cases where CMs user goes to specific submission on login, likely from email link
-            } else if (initialURL?.includes('rate-reviews')) {
+            } else if (initialURL.includes('rate-reviews')) {
                 cy.wait('@indexRatesQuery', { timeout: 80_000 })
                 cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
                     'exist'
                 )
                 cy.findByRole('heading', { name: /rate reviews/ }).should('exist')
+            } else {
+                cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
             }
         }
     }

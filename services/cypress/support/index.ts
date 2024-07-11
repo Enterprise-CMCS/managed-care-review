@@ -45,8 +45,8 @@ declare global {
 
             // login commands
             logInAsStateUser(): void
-            logInAsCMSUser(args?: { initialURL?: string }): void
-            logInAsAdminUser(args?: { initialURL?: string }): void
+            logInAsCMSUser(args?: { initialURL: string }): void
+            logInAsAdminUser(args?: { initialURL: string }): void
             logOut(): void
 
             // state submission form commands
