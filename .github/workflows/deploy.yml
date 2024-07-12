@@ -594,7 +594,6 @@ jobs:
       - uses: actions/download-artifact@v4
 
       - name: Create combined test coverage report
-        working-directory: services/cypress
         run: |
           echo "Combining all coverage reports"
           echo "Prepare the folders to hold the reports"
