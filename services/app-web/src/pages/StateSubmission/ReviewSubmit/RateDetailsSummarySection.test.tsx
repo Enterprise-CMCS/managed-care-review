@@ -9,6 +9,8 @@ import {
     mockContractPackageSubmittedWithRevisions,
     mockValidStateUser,
     mockContractPackageUnlocked,
+    mockContractWithLinkedRateDraft,
+    mockContractWithLinkedRateSubmitted,
 } from '../../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
@@ -351,11 +353,13 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
     })
 
-    it('can render the deprecated rate programs when present on a rate certification submission', async () => {
+    it('can render the deprecated rate programs when present and no new rate programs added to CMS user viewing an existing rate certification submission', async () => {
         const statePrograms = mockMNState().programs
         const contract = mockContractPackageSubmitted()
         contract.packageSubmissions[0].rateRevisions[0].formData.deprecatedRateProgramIDs =
             ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce']
+        contract.packageSubmissions[0].rateRevisions[0].formData.rateProgramIDs =
+            []
         await waitFor(() => {
             renderWithProviders(
                 <RateDetailsSummarySection
@@ -401,19 +405,15 @@ describe('RateDetailsSummarySection', () => {
         ).not.toBeInTheDocument()
     })
 
-    it('renders the deprecated rate programs when present on a locked historic linked rate', async () => {
+    it('renders the deprecated rate programs when no rate programs present on last submitted version of rate shown to state user editing draft contract with linked rates', async () => {
         const statePrograms = mockMNState().programs
-        const contract = mockContractPackageDraft()
-        contract.draftRates![0].draftRevision!.formData.deprecatedRateProgramIDs =
+        const contract = mockContractWithLinkedRateDraft()
+        // manually fixup last submitted revision of that linked late so getVisibleLatest function works as expected
+        //  we only ever reference the last submitted for linked rates in contract form UI -  all this has to change when we do rate history
+        contract.draftRates![0].revisions[0].formData.deprecatedRateProgramIDs =
             [statePrograms[0].id]
-        contract.draftRates![0].draftRevision!.formData.rateProgramIDs = []
-        contract.draftRates![0].draftRevision!.submitInfo = {
-            updatedAt: new Date('01/02/2024'),
-            updatedBy: 'zuko@example.com',
-            updatedReason: 'initial submission',
-        }
-        contract.draftRates![0].parentContractID = contract.id
-        contract.draftRates![0].draftRevision!.unlockInfo = null
+        contract.draftRates![0].revisions[0].formData.rateProgramIDs = []
+
         await waitFor(() => {
             renderWithProviders(
                 <RateDetailsSummarySection
@@ -423,7 +423,7 @@ describe('RateDetailsSummarySection', () => {
                     editNavigateTo="/edit"
                 />,
                 {
-                    apolloProvider: apolloProviderCMSUser,
+                    apolloProvider: apolloProviderStateUser,
                 }
             )
         })
@@ -443,11 +443,13 @@ describe('RateDetailsSummarySection', () => {
 
     it('does not render the deprecated rate programs when rate programs present on an submitted linked rate', async () => {
         const statePrograms = mockMNState().programs
-        const contract = mockContractPackageSubmitted()
+        const contract = mockContractWithLinkedRateSubmitted()
+
         await waitFor(() => {
             renderWithProviders(
                 <RateDetailsSummarySection
                     contract={contract}
+                    editNavigateTo="/rate-details"
                     submissionName="MN-MSHO-0003"
                     statePrograms={statePrograms}
                 />,

@@ -17,7 +17,6 @@ import {
     TEST_PNG_FILE,
     dragAndDrop,
     selectYesNoRadio,
-    prettyDebug,
 } from '../../../testHelpers/jestHelpers'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { ContractDetails } from './ContractDetails'
@@ -72,7 +71,7 @@ describe('ContractDetails', () => {
         renderWithProviders(<ContractDetails />, {
             apolloProvider: defaultApolloProvider,
         })
-        prettyDebug()
+
         expect(
             screen.queryByText(/All fields are required/)
         ).not.toBeInTheDocument()
