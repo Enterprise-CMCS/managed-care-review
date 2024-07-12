@@ -597,7 +597,7 @@ jobs:
         run: |
           echo "Combining all coverage reports"
           echo "Prepare the folders to hold the reports"
-          mkdir -p reports/from-cypress cypress_temp coverage-all
+          mkdir -p reports/from-cypress/tmp cypress_temp coverage-all
 
           echo "Listing current folder"
           ls
