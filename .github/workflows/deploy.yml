@@ -606,15 +606,17 @@ jobs:
           for dir in cypress-json-coverage-*; do
             if [[ $dir =~ cypress-json-coverage-([0-9]+) ]]; then
               num=${BASH_REMATCH[1]}
-              cp "$dir/coverage-final.json" "./cypress_temp/from-cypress-$num.json"
+              mkdir -p "./cypress_temp/$num"
+              cp "$dir"/*.json "./cypress_temp/$num/"
             fi
           done
 
           echo "Merge the collected cypress reports into one report"
-          npx c8 report -r lcov -r json -o ./reports/from-cypress --src ./services/app-web/src ./cypress_temp
+          npx c8 report -r lcov -r json -o ./reports/from-cypress --src ./services/app-web/src $(find ./cypress_temp -name '*.json')
 
           echo "Temp merge done"
           ls ./cypress_temp
+          ls ./reports/from-cypress
 
           echo "Copy the web and api coverage reports to the reports folder"
           [ -f "./api-test-coverage/coverage-final.json" ] && cp ./api-test-coverage/coverage-final.json ./reports/from-api.json
