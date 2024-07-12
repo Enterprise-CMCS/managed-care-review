@@ -101,7 +101,7 @@ export const ReviewSubmit = (): React.ReactElement => {
         ) || ''
     return (
         <>
-            <div className={styles.stepIndicator}>
+            <div>
                 <DynamicStepIndicator
                     formPages={activeFormPages(contractFormData)}
                     currentFormPage="SUBMISSIONS_REVIEW_SUBMIT"

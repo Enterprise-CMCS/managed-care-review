@@ -254,7 +254,7 @@ export const SubmissionType = ({
 
     return (
         <>
-            <div className={styles.stepIndicator}>
+            <div>
                 <DynamicStepIndicator
                     formPages={
                         draftSubmission

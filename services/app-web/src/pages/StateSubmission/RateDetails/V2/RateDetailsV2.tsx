@@ -373,7 +373,7 @@ const RateDetails = ({
 
     return (
         <>
-            <div className={styles.stepIndicator}>
+            <div>
                 {!displayAsStandaloneRate && (
                     <DynamicStepIndicator
                         formPages={STATE_SUBMISSION_FORM_ROUTES}

@@ -510,7 +510,7 @@ export const ContractDetails = ({
     }
     return (
         <>
-            <div className={styles.stepIndicator}>
+            <div>
                 <DynamicStepIndicator
                     formPages={activeFormPages(draftSubmission)}
                     currentFormPage={currentRoute}
