@@ -603,13 +603,13 @@ jobs:
           ls
 
           echo "Copy the separate cypress reports from parallel runs to one folder"
-          for i in cypress-coverage-*; do
-              if [ -d "$i" ]; then
-                  container_num=${i##*-}
-                  cp -r "$i"/* cypress_temp/
-                  echo "Copied coverage from container $container_num"
-              fi
+          for dir in cypress-json-coverage-*; do
+            if [[ $dir =~ cypress-json-coverage-([0-9]+) ]]; then
+              num=${BASH_REMATCH[1]}
+              cp "$dir/coverage-final.json" "./cypress_temp/from-cypress-$num.json"
+            fi
           done
+
           echo "Merge the collected cypress reports into one report"
           npx c8 report -r lcov -r json -o ./reports/from-cypress --src ./services/app-web/src ./cypress_temp
 
