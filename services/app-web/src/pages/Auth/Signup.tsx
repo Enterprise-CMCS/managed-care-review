@@ -1,14 +1,9 @@
 import React, { useState, Dispatch, SetStateAction } from 'react'
-import {
-    Button,
-    Form,
-    FormGroup,
-    Label,
-    TextInput,
-} from '@trussworks/react-uswds'
+import { Form, FormGroup, Label, TextInput } from '@trussworks/react-uswds'
 
 import { signUp } from './cognitoAuth'
 import { recordJSException } from '../../otelHelpers'
+import { ButtonWithLogging } from '../../components'
 
 export function showError(error: string): void {
     console.info(error)
@@ -130,9 +125,14 @@ export function Signup({
                     value={fields.confirmPassword}
                 />
             </FormGroup>
-            <Button type="submit" disabled={!validateForm() || isLoading}>
+            <ButtonWithLogging
+                type="submit"
+                disabled={!validateForm() || isLoading}
+                button_style="primary"
+                parent_component_type="constant header"
+            >
                 Signup
-            </Button>
+            </ButtonWithLogging>
         </Form>
     )
 }

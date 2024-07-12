@@ -121,7 +121,7 @@ const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
 
     // Contract only - skip all validations for hasValidRates
     if (sub.submissionType === 'CONTRACT_ONLY') {
-       return  true
+       return true
     } else {
         return validRates
     }

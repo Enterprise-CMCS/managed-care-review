@@ -101,6 +101,7 @@ describe('ContractDetailsSummarySection', () => {
                     name: 'Download all contract documents',
                 })
             ).toBeInTheDocument()
+            expect(screen.queryByText(/NEW/)).toBeNull()
         })
     })
 

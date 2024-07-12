@@ -6,7 +6,6 @@ import {
     ModalHeading,
     ModalRef,
     ModalProps as UswdsModalProps,
-    Button,
 } from '@trussworks/react-uswds'
 import {
     GenericApiErrorBanner,
@@ -16,11 +15,12 @@ import styles from './Modal.module.scss'
 
 import { ActionButton } from '../ActionButton'
 import { useAuth } from '../../contexts/AuthContext'
+import { ButtonWithLogging } from '../TealiumLogging'
 
 interface ModalComponentProps {
     id: string
     modalHeading?: string
-    onSubmit?: React.MouseEventHandler<HTMLButtonElement>
+    onSubmit?: () => void
     onCancel?: () => void
     onSubmitText?: string
     onCancelText?: string
@@ -87,22 +87,24 @@ export const Modal = ({
             <div id={`${id}-modal-description`}>{children}</div>
             <ModalFooter>
                 <ButtonGroup className="float-right">
-                    <Button
+                    <ButtonWithLogging
                         type="button"
                         aria-label={`${onCancelText || 'Cancel'}`}
                         data-testid={`${id}-modal-cancel`}
+                        parent_component_type="modal"
                         id={`${id}-cancel`}
                         onClick={cancelHandler}
                         outline
                         disabled={isSubmitting}
                     >
                         {onCancelText || 'Cancel'}
-                    </Button>
+                    </ButtonWithLogging>
                     <ActionButton
                         type="submit"
                         data-testid={`${id}-modal-submit`}
                         variant="success"
                         id={`${id}-submit`}
+                        parent_component_type="modal"
                         onClick={onSubmit}
                         loading={isSubmitting}
                         {...submitButtonProps}

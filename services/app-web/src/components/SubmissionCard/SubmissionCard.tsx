@@ -1,7 +1,7 @@
 //TODO: This file is unused since dashboard refactor
 import React from 'react'
-import { Link } from 'react-router-dom'
 import { Tag } from '@trussworks/react-uswds'
+import { ReactRouterLinkWithLogging } from '../TealiumLogging/Link'
 
 import styles from './SubmissionCard.module.scss'
 import dayjs from 'dayjs'
@@ -38,7 +38,9 @@ export const SubmissionCard = ({
     return (
         <li className={styles.cardContainer}>
             <div className={styles.cardLeft}>
-                <Link to={href}>{name}</Link>
+                <ReactRouterLinkWithLogging to={href}>
+                    {name}
+                </ReactRouterLinkWithLogging>
                 <p>{description}</p>
             </div>
             <div className={styles.cardRight}>

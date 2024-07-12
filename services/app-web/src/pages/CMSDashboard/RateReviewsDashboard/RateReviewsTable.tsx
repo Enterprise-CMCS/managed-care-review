@@ -23,8 +23,7 @@ import {
     RelatedContractRevisions,
 } from '../../../gen/gqlClient'
 import styles from '../../../components/HealthPlanPackageTable/HealthPlanPackageTable.module.scss'
-import { Table, Tag, Link } from '@trussworks/react-uswds'
-import { NavLink } from 'react-router-dom'
+import { Table, Tag } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
 import qs from 'qs'
 import {
@@ -37,7 +36,7 @@ import {
 import { pluralize } from '../../../common-code/formatters'
 import { DoubleColumnGrid } from '../../../components'
 import { FilterDateRangeRef } from '../../../components/FilterAccordion/FilterDateRange/FilterDateRange'
-import { Loading } from '../../../components'
+import { Loading, NavLinkWithLogging } from '../../../components'
 
 type RatingPeriodFilterType = [string, string] | []
 
@@ -244,17 +243,16 @@ export const RateReviewsTable = ({
             columnHelper.accessor((row) => row, {
                 header: 'Rate review',
                 cell: (info) => (
-                    <Link
+                    <NavLinkWithLogging
                         key={`${tableConfig.rowIDName}-id-${
                             info.getValue().id
                         }`}
-                        asCustom={NavLink}
                         to={rateURL(info.getValue())}
                         className={`${styles.ID}`}
                         data-testid={`rate-link-${info.getValue().id}`}
                     >
                         {info.getValue().name}
-                    </Link>
+                    </NavLinkWithLogging>
                 ),
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-id`,

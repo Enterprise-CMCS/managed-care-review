@@ -16,8 +16,7 @@ import { useAtom } from 'jotai/react'
 import { atomWithHash } from 'jotai-location'
 import { HealthPlanPackageStatus, Program, User } from '../../gen/gqlClient'
 import styles from './HealthPlanPackageTable.module.scss'
-import { Table, Tag, Link } from '@trussworks/react-uswds'
-import { NavLink } from 'react-router-dom'
+import { Table, Tag } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
 import qs from 'qs'
 import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
@@ -30,6 +29,7 @@ import {
 import { InfoTag, TagProps } from '../InfoTag/InfoTag'
 import { pluralize } from '../../common-code/formatters'
 import { DoubleColumnGrid } from '../DoubleColumnGrid'
+import { NavLinkWithLogging } from '../TealiumLogging/Link'
 
 declare module '@tanstack/table-core' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -229,11 +229,10 @@ export const HealthPlanPackageTable = ({
             columnHelper.accessor((row) => row, {
                 header: 'ID',
                 cell: (info) => (
-                    <Link
+                    <NavLinkWithLogging
                         key={`${tableConfig.rowIDName}-id-${
                             info.getValue().id
                         }`}
-                        asCustom={NavLink}
                         to={submissionURL(
                             info.getValue().id,
                             info.getValue().status,
@@ -242,7 +241,7 @@ export const HealthPlanPackageTable = ({
                         className={`${styles.ID}`}
                     >
                         {info.getValue().name}
-                    </Link>
+                    </NavLinkWithLogging>
                 ),
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-id`,

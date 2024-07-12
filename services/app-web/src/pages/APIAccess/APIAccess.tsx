@@ -1,5 +1,5 @@
 import { ApolloError } from '@apollo/client'
-import { Button, Grid, GridContainer, Link } from '@trussworks/react-uswds'
+import { Grid, GridContainer, Link } from '@trussworks/react-uswds'
 import path from 'path-browserify'
 import { useState } from 'react'
 import { RoutesRecord } from '../../constants'
@@ -11,6 +11,7 @@ import { handleApolloError } from '../../gqlHelpers/apolloErrors'
 import { recordJSException } from '../../otelHelpers'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './APIAccess.module.scss'
+import { ButtonWithLogging, LinkWithLogging } from '../../components'
 
 function APIAccess(): React.ReactElement {
     const apiURL = process.env.REACT_APP_API_URL
@@ -71,9 +72,13 @@ curl -s ${thirdPartyAPIURL} -X POST \\
 
                 {!apiKey ? (
                     <div className={styles.centerButtonContainer}>
-                        <Button type="button" onClick={callAPIKeyMutation}>
+                        <ButtonWithLogging
+                            type="button"
+                            parent_component_heading="page body"
+                            onClick={callAPIKeyMutation}
+                        >
                             Generate API Key
-                        </Button>
+                        </ButtonWithLogging>
                     </div>
                 ) : (
                     <>
@@ -84,12 +89,20 @@ curl -s ${thirdPartyAPIURL} -X POST \\
                             {apiKey.key}
                         </code>
                         <div className={styles.centerButtonContainer}>
-                            <Button type="button" onClick={callAPIKeyMutation}>
+                            <ButtonWithLogging
+                                type="button"
+                                parent_component_heading="page body"
+                                onClick={callAPIKeyMutation}
+                            >
                                 Generate API Key
-                            </Button>
-                            <Button type="button" onClick={copyKeyToClipboard}>
+                            </ButtonWithLogging>
+                            <ButtonWithLogging
+                                type="button"
+                                parent_component_heading="page body"
+                                onClick={copyKeyToClipboard}
+                            >
                                 Copy key to clipboard
-                            </Button>
+                            </ButtonWithLogging>
                         </div>
                     </>
                 )}
@@ -126,9 +139,9 @@ curl -s ${thirdPartyAPIURL} -X POST \\
                 <ul>
                     <li>
                         The MC-Review&nbsp;
-                        <Link href={RoutesRecord.GRAPHQL_EXPLORER}>
+                        <LinkWithLogging href={RoutesRecord.GRAPHQL_EXPLORER}>
                             GraphQL Explorer
-                        </Link>
+                        </LinkWithLogging>
                         &nbsp; will allow you to format and run queries against
                         the API in all environments except production
                     </li>

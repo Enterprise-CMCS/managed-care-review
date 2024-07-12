@@ -94,13 +94,14 @@ export const ContractDetailsSummarySection = ({
     const ldClient = useLDClient()
     const { loggedInUser } = useAuth()
     const { revisionVersion } = useParams()
+    const isCMSUser = loggedInUser?.role === 'CMS_USER'
     const isSubmittedOrCMSUser =
         contract.status === 'SUBMITTED' ||
         contract.status === 'RESUBMITTED' ||
-        loggedInUser?.role === 'CMS_USER'
+        isCMSUser
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const contractOrRev = contractRev ? contractRev : contract
-
+    const isInitialSubmission = contract.packageSubmissions.length === 1
     const contractFormData = getVisibleLatestContractFormData(
         contractOrRev,
         isEditing
@@ -183,7 +184,6 @@ export const ContractDetailsSummarySection = ({
         ? getPackageSubmissionAtIndex(contract, lastSubmittedIndex)?.submitInfo
               .updatedAt
         : getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
-
     return (
         <SectionCard
             id="contractDetailsSection"
@@ -345,7 +345,12 @@ export const ContractDetailsSummarySection = ({
             {contractFormData?.contractDocuments && (
                 <UploadedDocumentsTable
                     documents={contractFormData.contractDocuments}
-                    previousSubmissionDate={lastSubmittedDate}
+                    previousSubmissionDate={
+                        isInitialSubmission && isCMSUser
+                            ? undefined
+                            : lastSubmittedDate
+                    }
+                    isInitialSubmission={isInitialSubmission}
                     caption="Contract"
                     documentCategory="Contract"
                     hideDynamicFeedback={isSubmittedOrCMSUser}
@@ -354,10 +359,15 @@ export const ContractDetailsSummarySection = ({
             {contractSupportingDocuments && (
                 <UploadedDocumentsTable
                     documents={contractSupportingDocuments}
-                    previousSubmissionDate={lastSubmittedDate}
+                    previousSubmissionDate={
+                        isInitialSubmission && isCMSUser
+                            ? undefined
+                            : lastSubmittedDate
+                    }
                     caption="Contract supporting documents"
                     documentCategory="Contract-supporting"
                     isSupportingDocuments
+                    isInitialSubmission={isInitialSubmission}
                     hideDynamicFeedback={isSubmittedOrCMSUser}
                 />
             )}
