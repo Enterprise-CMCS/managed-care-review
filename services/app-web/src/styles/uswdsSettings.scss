@@ -4,7 +4,6 @@ https://designsystem.digital.gov/documentation/settings/
 */
 
 /* GENERAL */
-// Must be relative path because it will try to load assets from uswds/dist/scss/core/(path)
 // ~uswds is resolved in vite.config.ts to the absolute path.
 $theme-font-path: '~uswds/dist/fonts';
 $theme-image-path: '~uswds/dist/img';
