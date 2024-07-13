@@ -6,6 +6,7 @@ import react from '@vitejs/plugin-react'
 import svgr from 'vite-plugin-svgr'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import graphqlLoader from 'vite-plugin-graphql-loader'
+import path from 'path'
 
 export default defineConfig(() => ({
     base: '/',
@@ -39,6 +40,18 @@ export default defineConfig(() => ({
     },
     optimizeDeps: {
         include: ['protobufjs/minimal'],
+    },
+    resolve: {
+        alias: {
+            '~uswds': path.resolve(__dirname, '../../node_modules/uswds'),
+        },
+    },
+    css: {
+        preprocessorOptions: {
+            scss: {
+                includePaths: [path.resolve(__dirname, '../../node_modules/uswds/dist')]
+            }
+        }
     },
     test: {
         environment: 'jsdom',
