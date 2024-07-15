@@ -51,6 +51,22 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Generate GraphQL
+        run: npx lerna run gqlgen
+
+      - name: Generate Protos
+        run: npx lerna run generate
+
+      - name: Generate Prisma
+        env:
+          NODE_OPTIONS: --max_old_space_size=6000
+          VITE_APP_AUTH_MODE: AWS_COGNITO
+          DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
+        working-directory: services/app-api
+        run: |
+          npx lerna run generate --scope=app-api
+          npx prisma migrate reset --force
+
       - name: API Unit Tests
         env:
           VITE_APP_AUTH_MODE: IDM
