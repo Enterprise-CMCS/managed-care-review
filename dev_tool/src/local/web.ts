@@ -130,17 +130,17 @@ export async function runWebAgainstAWS(
 
     // set them
     process.env.PORT = '3003' // run hybrid on a different port
-    process.env.REACT_APP_AUTH_MODE = apiAuthMode // override local_login in .env
-    process.env.REACT_APP_API_URL = apiBase
-    process.env.REACT_APP_COGNITO_REGION = region
-    process.env.REACT_APP_COGNITO_ID_POOL_ID = idPool
-    process.env.REACT_APP_COGNITO_USER_POOL_ID = userPool
-    process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID = userPoolClient
-    process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_DOMAIN = userPoolDomain
-    process.env.REACT_APP_S3_REGION = s3Region
-    delete process.env.REACT_APP_S3_LOCAL_URL
-    process.env.REACT_APP_S3_DOCUMENTS_BUCKET = s3DocsBucket
-    process.env.REACT_APP_APPLICATION_ENDPOINT = 'http://localhost:3003/'
+    process.env.VITE_APP_AUTH_MODE = apiAuthMode // override local_login in .env
+    process.env.VITE_APP_API_URL = apiBase
+    process.env.VITE_APP_COGNITO_REGION = region
+    process.env.VITE_APP_COGNITO_ID_POOL_ID = idPool
+    process.env.VITE_APP_COGNITO_USER_POOL_ID = userPool
+    process.env.VITE_APP_COGNITO_USER_POOL_CLIENT_ID = userPoolClient
+    process.env.VITE_APP_COGNITO_USER_POOL_CLIENT_DOMAIN = userPoolDomain
+    process.env.VITE_APP_S3_REGION = s3Region
+    delete process.env.VITE_APP_S3_LOCAL_URL
+    process.env.VITE_APP_S3_DOCUMENTS_BUCKET = s3DocsBucket
+    process.env.VITE_APP_APPLICATION_ENDPOINT = 'http://localhost:3003/'
 
     // run it
     const runner = new LabeledProcessRunner()
@@ -153,9 +153,9 @@ export async function runWebAgainstAWS(
 export async function runWebAgainstDocker() {
     // configure all the right env vars
     process.env.PORT = '3005' // run docker-web on a different port
-    process.env.REACT_APP_AUTH_MODE = 'LOCAL'
-    process.env.REACT_APP_API_URL = 'http://host.docker.internal:3030/local'
-    process.env.REACT_APP_S3_LOCAL_URL = 'http://host.docker.internal:4569'
+    process.env.VITE_APP_AUTH_MODE = 'LOCAL'
+    process.env.VITE_APP_API_URL = 'http://host.docker.internal:3030/local'
+    process.env.VITE_APP_S3_LOCAL_URL = 'http://host.docker.internal:4569'
 
     const runner = new LabeledProcessRunner()
     await runWebLocally(runner)

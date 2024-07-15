@@ -4,7 +4,7 @@
         "project": ["./tsconfig.json"],
         "sourceType": "module",
     },
-    "plugins": ["@typescript-eslint", "jsx-a11y", "testing-library", "jest"],
+    "plugins": ["@typescript-eslint", "jsx-a11y", "jest"],
     "extends": [
         "eslint:recommended",
         "plugin:jest/recommended",
@@ -12,7 +12,6 @@
         "plugin:jsx-a11y/recommended",
         "plugin:@typescript-eslint/recommended",
         "prettier",
-        "react-app",
     ],
     "env": {
         "jest/globals": true,

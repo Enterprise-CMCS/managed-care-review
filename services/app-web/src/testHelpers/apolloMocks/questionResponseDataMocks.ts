@@ -20,6 +20,7 @@ function mockQuestionsPayload(contractID: string): IndexQuestionsPayload {
                             {
                                 s3URL: 's3://bucketname/key/dmco-question-1-document-1',
                                 name: 'dmco-question-1-document-1',
+                                downloadURL: expect.any(String),
                             },
                         ],
                         division: 'DMCO',
@@ -34,6 +35,7 @@ function mockQuestionsPayload(contractID: string): IndexQuestionsPayload {
                                     {
                                         s3URL: 's3://bucketname/key/response-to-dmco-1-document-1',
                                         name: 'response-to-dmco-1-document-1',
+                                        downloadURL: expect.any(String),
                                     },
                                 ],
                             },
@@ -52,10 +54,12 @@ function mockQuestionsPayload(contractID: string): IndexQuestionsPayload {
                             {
                                 s3URL: 's3://bucketname/key/dmco-question-2-document-1',
                                 name: 'dmco-question-2-document-1',
+                                downloadURL: expect.any(String),
                             },
                             {
                                 s3URL: 's3://bucketname/key/question-2-document-2',
                                 name: 'dmco-question-2-document-2',
+                                downloadURL: expect.any(String),
                             },
                         ],
                         division: 'DMCO',
@@ -70,6 +74,7 @@ function mockQuestionsPayload(contractID: string): IndexQuestionsPayload {
                                     {
                                         s3URL: 's3://bucketname/key/response-to-dmco-2-document-1',
                                         name: 'response-to-dmco-2-document-1',
+                                        downloadURL: expect.any(String),
                                     },
                                 ],
                             },
@@ -95,6 +100,7 @@ function mockQuestionsPayload(contractID: string): IndexQuestionsPayload {
                             {
                                 s3URL: 's3://bucketname/key/dmcp-question-1-document-1',
                                 name: 'dmcp-question-1-document-1',
+                                downloadURL: expect.any(String),
                             },
                         ],
                         division: 'DMCP',
@@ -109,6 +115,7 @@ function mockQuestionsPayload(contractID: string): IndexQuestionsPayload {
                                     {
                                         s3URL: 's3://bucketname/key/response-to-dmcp-1-document-1',
                                         name: 'response-to-dmcp-1-document-1',
+                                        downloadURL: expect.any(String),
                                     },
                                 ],
                             },
@@ -134,6 +141,7 @@ function mockQuestionsPayload(contractID: string): IndexQuestionsPayload {
                             {
                                 s3URL: 's3://bucketname/key/oact-question-1-document-1',
                                 name: 'oact-question-1-document-1',
+                                downloadURL: expect.any(String),
                             },
                         ],
                         division: 'OACT',
@@ -148,6 +156,7 @@ function mockQuestionsPayload(contractID: string): IndexQuestionsPayload {
                                     {
                                         s3URL: 's3://bucketname/key/response-to-oact-1-document-1',
                                         name: 'response-to-oact-1-document-1',
+                                        downloadURL: expect.any(String),
                                     },
                                 ],
                             },

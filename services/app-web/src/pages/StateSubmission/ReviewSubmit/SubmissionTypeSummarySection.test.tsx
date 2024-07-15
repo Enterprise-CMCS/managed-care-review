@@ -12,7 +12,7 @@ import {
 
 describe('SubmissionTypeSummarySection', () => {
     afterEach(() => {
-        jest.clearAllMocks()
+        vi.clearAllMocks()
     })
     const draftContract = mockContractPackageDraft()
     const stateSubmission = mockContractPackageSubmitted()

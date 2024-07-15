@@ -16,6 +16,7 @@ import { AuthProvider, AuthProviderProps } from '../contexts/AuthContext'
 
 import { PageProvider } from '../contexts/PageContext'
 import { S3Provider } from '../contexts/S3Context'
+import { TealiumProvider } from '../contexts/TealiumContext'
 import { testS3Client } from './s3Helpers'
 import { S3ClientT } from '../s3'
 import {
@@ -30,28 +31,32 @@ import {
     ProviderConfig,
     LDClient,
 } from 'launchdarkly-react-client-sdk'
+import { tealiumTestClient } from './tealiumHelpers'
+import type { TealiumClientType } from '../tealium'
+
+import { vi } from 'vitest'
 
 function ldClientMock(featureFlags: FeatureFlagSettings): LDClient {
     return {
-        track: jest.fn(),
-        identify: jest.fn(),
-        close: jest.fn(),
-        flush: jest.fn(),
-        getContext: jest.fn(),
-        off: jest.fn(),
-        on: jest.fn(),
-        setStreaming: jest.fn(),
-        variationDetail: jest.fn(),
-        waitForInitialization: jest.fn(),
-        waitUntilGoalsReady: jest.fn(),
-        waitUntilReady: jest.fn(),
-        variation: jest.fn(
+        track: vi.fn(),
+        identify: vi.fn(),
+        close: vi.fn(),
+        flush: vi.fn(),
+        getContext: vi.fn(),
+        off: vi.fn(),
+        on: vi.fn(),
+        setStreaming: vi.fn(),
+        variationDetail: vi.fn(),
+        waitForInitialization: vi.fn(),
+        waitUntilGoalsReady: vi.fn(),
+        waitUntilReady: vi.fn(),
+        variation: vi.fn(
             (
                 flag: FeatureFlagLDConstant,
                 defaultValue: FlagValue | undefined
             ) => featureFlags[flag] ?? defaultValue
         ),
-        allFlags: jest.fn(() => featureFlags),
+        allFlags: vi.fn(() => featureFlags),
     }
 }
 
@@ -64,6 +69,7 @@ const renderWithProviders = (
         apolloProvider?: MockedProviderProps // used to pass GraphQL related data via apollo client
         authProvider?: Partial<AuthProviderProps> // used to pass user authentication state via AuthContext
         s3Provider?: S3ClientT // used to pass AWS S3 related state via  S3Context
+        tealiumProvider?: TealiumClientType
         location?: (location: Location) => Location // used to pass a location url for react-router
         featureFlags?: FeatureFlagSettings
     }
@@ -73,12 +79,15 @@ const renderWithProviders = (
         apolloProvider = {},
         authProvider = {},
         s3Provider = undefined,
+        tealiumProvider = undefined,
         location = undefined,
         featureFlags = undefined,
     } = options || {}
 
     const { route } = routerProvider
     const s3Client: S3ClientT = s3Provider ?? testS3Client()
+    const tealiumClient: TealiumClientType =
+        tealiumProvider ?? tealiumTestClient()
     const user = userEvent.setup()
 
     const flags: FeatureFlagSettings = {
@@ -106,7 +115,11 @@ const renderWithProviders = (
                             {location && (
                                 <WithLocation setLocation={location} />
                             )}
-                            <PageProvider>{ui}</PageProvider>
+                            <PageProvider>
+                                <TealiumProvider client={tealiumClient}>
+                                    {ui}
+                                </TealiumProvider>
+                            </PageProvider>
                         </S3Provider>
                     </AuthProvider>
                 </MemoryRouter>

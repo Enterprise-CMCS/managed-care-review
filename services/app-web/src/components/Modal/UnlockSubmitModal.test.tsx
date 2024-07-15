@@ -21,7 +21,11 @@ import {
 } from '../../testHelpers/apolloMocks/healthPlanPackageGQLMock'
 
 describe('UnlockSubmitModal', () => {
-    const mockSetIsSubmitting = jest.fn()
+    // mock implementation so we can clear it between tests, otherwise the last tests will count function calls from previous tests.
+    const mockSetIsSubmitting = vi.fn().mockImplementation(vi.fn())
+    afterEach(() => {
+        vi.clearAllMocks()
+    })
 
     describe('initial submission modal', () => {
         it('displays correct modal when submitting initial submission', async () => {

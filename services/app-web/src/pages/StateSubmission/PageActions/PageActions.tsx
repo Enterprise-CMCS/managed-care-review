@@ -3,7 +3,6 @@ import { ButtonGroup } from '@trussworks/react-uswds'
 
 import { PageActionsContainer } from './PageActionsContainer'
 import { ActionButton } from '../../../components/ActionButton'
-import { useTealium } from '../../../hooks'
 
 /*
    This is the main call to action element displayed at the bottom of form pages.
@@ -11,8 +10,11 @@ import { useTealium } from '../../../hooks'
 */
 type PageActionProps = {
     backOnClick: React.MouseEventHandler<HTMLButtonElement>
+    backOnClickUrl?: string // this is used for logging the navigation urls to tealium
     saveAsDraftOnClick?: React.MouseEventHandler<HTMLButtonElement>
+    saveAsDraftOnClickUrl?: string // this is used for logging the navigation urls to tealium
     continueOnClick?: React.MouseEventHandler<HTMLButtonElement> // the reason this isn't required is the continue button is a type="submit" so is can use the form onsubmit as its event handler.
+    continueOnClickUrl?: string // this is used for logging the navigation urls to tealium
     actionInProgress?: boolean // disable all buttons e.g. while an async request is taking place
     disableContinue?: boolean // disable continue when errors outside formik have occured (e.g. relating to documents)
     pageVariant?: 'FIRST' | 'LAST' | 'EDIT_FIRST' | 'STANDALONE'
@@ -21,8 +23,11 @@ type PageActionProps = {
 export const PageActions = (props: PageActionProps): React.ReactElement => {
     const {
         backOnClick,
+        backOnClickUrl,
         saveAsDraftOnClick,
+        saveAsDraftOnClickUrl,
         continueOnClick,
+        continueOnClickUrl,
         disableContinue = false,
         actionInProgress = false,
         pageVariant,
@@ -31,24 +36,17 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
     const isLastPage = pageVariant === 'LAST'
     const isFirstPageEditing = pageVariant === 'EDIT_FIRST'
     const isStandalonePage = pageVariant === 'STANDALONE'
-    const { logUserEvent } = useTealium()
 
-    const saveAsDraftOnClickWithLogging = (
-        e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-    ) => {
-        logUserEvent({ tealium_event: 'save_draft' })
-        if (saveAsDraftOnClick) saveAsDraftOnClick(e)
-    }
     const leftElement =
         isFirstPage || !saveAsDraftOnClick ? undefined : (
             <ActionButton
                 type="button"
                 variant="linkStyle"
                 disabled={actionInProgress}
-                onClick={
-                    actionInProgress ? undefined : saveAsDraftOnClickWithLogging
-                }
+                onClick={actionInProgress ? undefined : saveAsDraftOnClick}
+                parent_component_type="page body"
                 data-testid="page-actions-left-primary"
+                link_url={saveAsDraftOnClickUrl}
             >
                 Save as draft
             </ActionButton>
@@ -62,7 +60,9 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                     variant="outline"
                     data-testid="page-actions-left-secondary"
                     disabled={actionInProgress}
+                    parent_component_type="page body"
                     onClick={actionInProgress ? undefined : backOnClick}
+                    link_url={backOnClickUrl}
                 >
                     {!isFirstPage && !isFirstPageEditing && !isStandalonePage
                         ? 'Back'
@@ -74,6 +74,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                     variant="default"
                     data-testid="page-actions-right-primary"
                     disabled={disableContinue}
+                    parent_component_type="page body"
                     onClick={
                         actionInProgress || disableContinue
                             ? undefined
@@ -81,6 +82,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                     }
                     animationTimeout={1000}
                     loading={actionInProgress && !disableContinue}
+                    link_url={continueOnClickUrl}
                 >
                     {!isLastPage && !isStandalonePage ? 'Continue' : 'Submit'}
                 </ActionButton>

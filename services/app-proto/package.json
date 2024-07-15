@@ -6,7 +6,7 @@
     "scripts": {
         "generate": "yarn proto:compile && yarn proto:ts && yarn proto:copy-web && yarn proto:copy-cypress",
         "generate:watch": "find src | entr yarn generate",
-        "proto:compile": "rm -rf gen && mkdir gen && pbjs -t static-module -w commonjs -o ./gen/healthPlanFormDataProto.js src/health_plan_form_data.proto",
+        "proto:compile": "rm -rf gen && mkdir gen && pbjs -t static-module -w es6 -o ./gen/healthPlanFormDataProto.js src/health_plan_form_data.proto",
         "proto:ts": "pbts -o ./gen/healthPlanFormDataProto.d.ts ./gen/healthPlanFormDataProto.js",
         "proto:copy-web": "rsync -av ./gen/ ../app-web/src/gen",
         "proto:copy-cypress": "rsync -av ./gen/ ../cypress/gen",
@@ -21,10 +21,11 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "protobufjs": "^6.11.2",
+        "protobufjs": "^7.3.0",
         "uuid": "^9.0.0"
     },
     "devDependencies": {
-        "lint-staged": "^15.2.2"
+        "lint-staged": "^15.2.2",
+        "protobufjs-cli": "^1.1.2"
     }
 }

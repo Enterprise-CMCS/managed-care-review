@@ -10,7 +10,7 @@ import type { GenericDocument } from '../../../gen/gqlClient'
 
 describe('UploadedDocumentsTable', () => {
     afterEach(() => {
-        jest.clearAllMocks()
+        vi.clearAllMocks()
     })
     it('renders documents without errors', async () => {
         const testDocuments = [
@@ -607,7 +607,10 @@ describe('UploadedDocumentsTable', () => {
             }
         )
 
-        expect(await screen.findByTestId('tag')).not.toBeInTheDocument()
+        const tag = await screen.queryByTestId('tag')
+        await waitFor(() => {
+            expect(tag).not.toBeInTheDocument()
+        })
         expect(
             await screen.queryByText('Linked submissions')
         ).not.toBeInTheDocument()

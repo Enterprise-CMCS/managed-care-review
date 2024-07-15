@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import {
     Alert,
-    Button,
     Form,
     FormGroup,
     Label,
@@ -11,6 +10,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { signIn } from '../Auth/cognitoAuth'
 import { useAuth } from '../../contexts/AuthContext'
+import { ButtonWithLogging } from '../../components'
 
 type Props = {
     defaultEmail?: string
@@ -101,12 +101,13 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
                     onChange={onFieldChange}
                 />
             </FormGroup>
-            <Button
+            <ButtonWithLogging
                 type="submit"
+                parent_component_heading="page body"
                 disabled={!validateForm() || loginStatus === 'LOADING'}
             >
                 Login
-            </Button>
+            </ButtonWithLogging>
         </Form>
     )
 }

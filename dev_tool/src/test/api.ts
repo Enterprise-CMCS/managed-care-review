@@ -45,7 +45,7 @@ export async function runAPITests(
 
     return await runner.runCommandAndOutput(
         'api - unit',
-        ['yarn', 'test:once', '--coverage'],
+        ['yarn', 'test:coverage'],
         'services/app-api'
     )
 }

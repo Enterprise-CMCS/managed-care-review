@@ -1,8 +1,10 @@
 import classnames from 'classnames'
 import React from 'react'
 import styles from './ErrorAlert.module.scss'
-import { Alert, Link } from '@trussworks/react-uswds'
+import { Alert } from '@trussworks/react-uswds'
 import { useStringConstants } from '../../hooks/useStringConstants'
+import { LinkWithLogging } from '../TealiumLogging/Link'
+
 export type ErrorAlertProps = {
     message?: React.ReactNode
     heading?: string
@@ -39,9 +41,15 @@ export const ErrorAlert = ({
             {showLink && (
                 <span>
                     &nbsp;email{' '}
-                    <Link className={styles.nowrap} href={MAIL_TO_SUPPORT}>
+                    <LinkWithLogging
+                        className={styles.nowrap}
+                        href={MAIL_TO_SUPPORT}
+                        variant="unstyled"
+                        target="_blank"
+                        rel="noreferrer"
+                    >
                         {MAIL_TO_SUPPORT}
-                    </Link>
+                    </LinkWithLogging>
                 </span>
             )}
         </Alert>

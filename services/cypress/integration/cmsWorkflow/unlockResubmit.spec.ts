@@ -242,7 +242,7 @@ describe('CMS user', () => {
         cy.interceptFeatureFlags({'438-attestation': true})
 
         // Set up a submission with linked rates
-        cy.apiCreateAndSubmitBaseContract(stateUser()).then(() => {
+        cy.apiCreateAndSubmitContractWithRates(stateUser()).then(() => {
             cy.logInAsStateUser()
 
             // This section still uses old API, so we want to do that first before using the new link-rates UI

@@ -1,6 +1,6 @@
-import { BreadcrumbBar, Breadcrumb, Link } from '@trussworks/react-uswds'
-import { NavLink } from 'react-router-dom'
+import { BreadcrumbBar, Breadcrumb } from '@trussworks/react-uswds'
 import styles from './Breadcrumbs.module.scss'
+import { NavLinkWithLogging } from '../TealiumLogging/Link'
 
 type BreadcrumbItem = {
     text: string
@@ -14,9 +14,9 @@ const Crumb = (crumb: BreadcrumbItem) => {
     const { link, text } = crumb
     return (
         <Breadcrumb>
-            <Link asCustom={NavLink} to={link} end>
+            <NavLinkWithLogging to={link} end>
                 <span>{text}</span>
-            </Link>
+            </NavLinkWithLogging>
         </Breadcrumb>
     )
 }

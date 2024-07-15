@@ -1,5 +1,5 @@
 import React from 'react'
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import dayjs from 'dayjs'
 import {
     SubmissionCard,
@@ -23,13 +23,14 @@ describe('SubmissionCard', () => {
         expect(screen.getByRole('listitem')).toBeInTheDocument()
     })
 
-    it('displays draft tag styling when submission type is draft', () => {
+    it('displays draft tag styling when submission type is draft', async () => {
         renderWithProviders(<SubmissionCard {...contractOnlyDraftSubmission} />)
-        expect(screen.getByTestId('tag')).toBeInTheDocument()
 
-        expect(screen.getByTestId('tag')).toHaveStyle(`
-            background-color: '#e4a61b',
-        `)
+        await waitFor(() => {
+            expect(screen.getByTestId('tag')).toBeInTheDocument()
+            expect(screen.getByTestId('tag')).toHaveTextContent('Draft')
+            expect(screen.getByTestId('tag')).toHaveClass(/tagWarning/)
+        })
     })
 
     it('displays submitted tag styling when submission type is submitted', () => {
@@ -39,14 +40,12 @@ describe('SubmissionCard', () => {
                 description="Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly."
                 submissionType={SubmissionType.ContractOnly}
                 status={SubmissionStatus.submitted}
+                date={dayjs()}
                 href="/foo"
             />
         )
         expect(screen.getByTestId('tag')).toBeInTheDocument()
-
-        expect(screen.getByTestId('tag')).toHaveStyle(`
-            background-color: '#2e8540',
-        `)
+        expect(screen.getByTestId('tag')).toHaveClass(/tagSuccess/)
     })
 
     it('displays draft tag text when submission type is draft', () => {

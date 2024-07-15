@@ -25,6 +25,7 @@
             "**/src/localAuth",
             "**/src/gen",
             "**/src/contexts/TraceContext.tsx",
+            "**/src/contexts/TealiumContext.tsx",
             "**/src/hooks/useTealium.ts",
             "**/src/parameterStore/awsParameterStore.ts",
             "**/src/components/Header/StateIcon/StateIcon.tsx",
@@ -39,15 +40,16 @@
         ]
     },
     "devDependencies": {
+        "c8": "^10.1.2",
         "husky": "^9.0.11",
         "lint-staged": "^15.2.2",
         "prettier": "^3.1.0"
     },
     "dependencies": {
-        "@apollo/client": "^3.4.15",
+        "@apollo/client": "3.8.8",
         "aws-amplify": "^5.0.10",
         "axios": "^1.1.3",
-        "graphql": "^16.2.0",
-        "protobufjs": "^6.11.2"
+        "graphql": "^16.8.1",
+        "protobufjs": "^7.3.0"
     }
 }

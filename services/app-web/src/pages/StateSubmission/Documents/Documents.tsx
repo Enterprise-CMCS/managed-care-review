@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { Form as UswdsForm, Link } from '@trussworks/react-uswds'
-import { useNavigate } from 'react-router-dom'
+import { Form as UswdsForm } from '@trussworks/react-uswds'
+import { generatePath, useNavigate } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
@@ -26,7 +26,7 @@ import {
     useRouteParams,
 } from '../../../hooks'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
-import { DynamicStepIndicator } from '../../../components'
+import { DynamicStepIndicator, LinkWithLogging } from '../../../components'
 import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 
@@ -249,7 +249,7 @@ export const Documents = (): React.ReactElement => {
 
     return (
         <>
-            <div className={styles.stepIndicator}>
+            <div>
                 <DynamicStepIndicator
                     formPages={activeFormPages(draftSubmission)}
                     currentFormPage={currentRoute}
@@ -295,14 +295,14 @@ export const Documents = (): React.ReactElement => {
                             label="Upload contract-supporting documents"
                             hint={
                                 <>
-                                    <Link
+                                    <LinkWithLogging
                                         aria-label="Document definitions and requirements (opens in new window)"
                                         href={'/help#supporting-documents'}
                                         variant="external"
                                         target="_blank"
                                     >
                                         Document definitions and requirements
-                                    </Link>
+                                    </LinkWithLogging>
                                     <span className="padding-top-05">
                                         Upload any supporting documents related
                                         to the contract.
@@ -340,6 +340,14 @@ export const Documents = (): React.ReactElement => {
                             showFileUploadError && fileItems.length > 0
                         }
                         actionInProgress={isSubmitting}
+                        backOnClickUrl={generatePath(
+                            RoutesRecord.SUBMISSIONS_CONTACTS,
+                            { id }
+                        )}
+                        saveAsDraftOnClickUrl={
+                            RoutesRecord.DASHBOARD_SUBMISSIONS
+                        }
+                        continueOnClickUrl="/edit/review-and-submit"
                     />
                 </UswdsForm>
             </FormContainer>

@@ -1,12 +1,11 @@
-import { GridContainer, Link } from '@trussworks/react-uswds'
+import { GridContainer } from '@trussworks/react-uswds'
 import React from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { useAuth } from '../../contexts/AuthContext'
 import { useIndexHealthPlanPackagesQuery } from '../../gen/gqlClient'
 import styles from './StateDashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
-import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import {
     handleApolloError,
     isLikelyUserAuthError,
@@ -16,6 +15,8 @@ import {
     HealthPlanPackageTable,
     PackageInDashboardType,
     Loading,
+    GenericApiErrorBanner,
+    NavLinkWithLogging,
 } from '../../components'
 import { getCurrentRevisionFromHealthPlanPackage } from '../../gqlHelpers'
 
@@ -111,8 +112,7 @@ export const StateDashboard = (): React.ReactElement => {
                             <div className={styles.panelHeader}>
                                 <h2>Submissions</h2>
                                 <div>
-                                    <Link
-                                        asCustom={NavLink}
+                                    <NavLinkWithLogging
                                         className="usa-button"
                                         variant="unstyled"
                                         to={{
@@ -120,7 +120,7 @@ export const StateDashboard = (): React.ReactElement => {
                                         }}
                                     >
                                         Start new submission
-                                    </Link>
+                                    </NavLinkWithLogging>
                                 </div>
                             </div>
                             <HealthPlanPackageTable
