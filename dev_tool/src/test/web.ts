@@ -39,7 +39,7 @@ export async function runWebTests(
 
     return await runner.runCommandAndOutput(
         'web - unit',
-        ['yarn', 'test:coveragee'],
+        ['yarn', 'test:coverage'],
         'services/app-web'
     )
 }

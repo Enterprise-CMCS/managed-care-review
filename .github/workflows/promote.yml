@@ -51,12 +51,23 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Unit Tests
+      - name: API Unit Tests
         env:
           VITE_APP_AUTH_MODE: IDM
+          VITE_APP_OTEL_COLLECTOR_URL: ${{vars.VITE_APP_OTEL_COLLECTOR_URL}}
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
           NODE_OPTIONS: --max_old_space_size=6000
-        run: ./dev test --unit
+        working-directory: services/app-api
+        run: yarn test:coverage
+
+      - name: Web Unit Tests
+        env:
+          VITE_APP_AUTH_MODE: IDM
+          VITE_APP_OTEL_COLLECTOR_URL: ${{vars.VITE_APP_OTEL_COLLECTOR_URL}}
+          DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
+          NODE_OPTIONS: --max_old_space_size=6000
+        working-directory: services/app-web
+        run: yarn test:coverage
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v8.0.0
