@@ -624,8 +624,18 @@ jobs:
 
           echo "Copied all files"
 
+          echo "DEBUG"
+          echo "c8 version:"
+          npx c8 --version
+
+          echo "Contents of reports directory:"
+          ls -R ./reports
+
+          echo "Contents of coverage-all directory:"
+          ls -R ./coverage-all
+
           echo "Merge the cypress, web, and api reports into one report"
-          npx c8 merge reports -o ./coverage-all/coverage.json
+          npx c8 merge ./reports/* -o ./coverage-all/coverage.json
 
           echo "Generate the html report from the combined coverage report"
           npx c8 report -r lcov -r text -r json-summary --report-dir coverage-all
