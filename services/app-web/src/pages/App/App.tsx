@@ -33,7 +33,7 @@ function App({
     apolloClient,
     s3Client,
 }: AppProps): React.ReactElement {
-    const environmentName = process.env.REACT_APP_STAGE_NAME || ''
+    const environmentName = import.meta.env.VITE_APP_STAGE_NAME || ''
     const isHigherEnv = ['prod', 'val', 'main'].includes(environmentName)
     const nrSnippet = generateNRScriptContent({
         accountID: getEnv('REACT_APP_NR_ACCOUNT_ID'),

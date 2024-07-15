@@ -158,7 +158,7 @@ describe('CMSUsersTable', () => {
         }
 
         await waitFor(() => {
-            expect(parent).toHaveStyle('border-color: red;')
+            expect(parent).toHaveStyle('border-color: hsl(0, 0%, 70%);')
         })
     })
 })

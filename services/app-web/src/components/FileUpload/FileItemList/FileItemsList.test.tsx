@@ -60,11 +60,11 @@ describe('FileItemList component', () => {
         status: 'DUPLICATE_NAME_ERROR',
     }
     const buttonActionProps = {
-        deleteItem: jest.fn(),
-        retryItem: jest.fn(),
+        deleteItem: vi.fn(),
+        retryItem: vi.fn(),
     }
 
-    const spyOnUseTealium = jest.spyOn(tealium, 'useTealium')
+    const spyOnUseTealium = vi.spyOn(tealium, 'useTealium')
 
     beforeEach(() => {
         spyOnUseTealium.mockImplementation(() => ({
@@ -76,7 +76,8 @@ describe('FileItemList component', () => {
             },
         }))
     })
-    afterEach(() => jest.clearAllMocks())
+    afterEach(() => vi.clearAllMocks())
+
     it('renders a list without errors', () => {
         const fileItems = [pending, uploadError]
         render(<FileItemsList fileItems={fileItems} {...buttonActionProps} />)

@@ -3,7 +3,7 @@ import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { Landing } from './Landing'
 
 describe('Landing', () => {
-    afterAll(() => jest.clearAllMocks())
+    afterAll(() => vi.clearAllMocks())
 
     it('displays session expired when query parameter included', async () => {
         renderWithProviders(<Landing />, {

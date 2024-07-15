@@ -61,15 +61,15 @@ describe('FileProcessor component', () => {
     }
 
     const buttonActionProps = {
-        deleteItem: jest.fn(),
-        retryItem: jest.fn(),
+        deleteItem: vi.fn(),
+        retryItem: vi.fn(),
     }
 
     const categoryCheckboxProps = {
-        handleCheckboxClick: jest.fn(),
+        handleCheckboxClick: vi.fn(),
     }
 
-    beforeEach(() => jest.clearAllMocks())
+    beforeEach(() => vi.clearAllMocks())
     it('renders a list without errors', () => {
         renderWithProviders(
             <FileProcessor

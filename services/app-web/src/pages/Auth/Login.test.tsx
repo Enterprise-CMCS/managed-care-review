@@ -90,7 +90,7 @@ describe('Cognito Login', () => {
     })
 
     it('when login is successful, redirect to /', async () => {
-        const loginSpy = jest.spyOn(CognitoAuthApi, 'signIn').mockResolvedValue(
+        const loginSpy = vi.spyOn(CognitoAuthApi, 'signIn').mockResolvedValue(
             new CognitoUser({
                 Username: 'foo@example.com',
                 Pool: { getClientId: () => '7' } as CognitoUserPool,
@@ -119,7 +119,7 @@ describe('Cognito Login', () => {
     })
 
     it('when login fails, stay on page and display error alert', async () => {
-        const loginSpy = jest
+        const loginSpy = vi
             .spyOn(CognitoAuthApi, 'signIn')
             .mockRejectedValue('Error has occurred')
 
@@ -146,7 +146,7 @@ describe('Cognito Login', () => {
     })
 
     it('when login is a failure, button is re-enabled', async () => {
-        const loginSpy = jest
+        const loginSpy = vi
             .spyOn(CognitoAuthApi, 'signIn')
             .mockRejectedValue(null)
 

@@ -29,7 +29,7 @@ export const Footer = (): React.ReactElement => {
                             />
                         </div>
                         <span className={styles.federalLogos}>
-                            <HHSIcon title="Federal government website" />
+                            <HHSIcon />
                             <span>
                                 A federal government website managed and paid
                                 for by the U.S. Centers for Medicare and

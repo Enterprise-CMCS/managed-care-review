@@ -4,7 +4,7 @@ import { renderWithProviders } from '../../../testHelpers'
 
 describe('ErrorSummary component', () => {
     afterAll(() => {
-        jest.clearAllMocks()
+        vi.clearAllMocks()
     })
 
     it('renders nothing when errors is empty', () => {

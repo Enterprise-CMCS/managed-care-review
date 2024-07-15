@@ -20,7 +20,7 @@ describe('state user in state submission form', () => {
                 `/submissions/${draftSubmissionId}/edit/type`
             )
 
-        // CHECK SUBMISSION TYPE PAGE NAVIGATION
+            // CHECK SUBMISSION TYPE PAGE NAVIGATION
             cy.findByRole('heading', {
                 level: 2,
                 name: /Submission type/,

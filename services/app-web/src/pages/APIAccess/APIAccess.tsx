@@ -14,7 +14,7 @@ import styles from './APIAccess.module.scss'
 import { ButtonWithLogging, LinkWithLogging } from '../../components'
 
 function APIAccess(): React.ReactElement {
-    const apiURL = process.env.REACT_APP_API_URL
+    const apiURL = import.meta.env.VITE_APP_API_URL
 
     const thirdPartyAPIURL = !apiURL
         ? undefined

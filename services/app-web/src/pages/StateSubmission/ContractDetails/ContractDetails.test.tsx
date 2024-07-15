@@ -35,32 +35,32 @@ import {
 import * as useRouteParams from '../../../hooks/useRouteParams'
 import * as useHealthPlanPackageForm from '../../../hooks/useHealthPlanPackageForm'
 
-const mockUpdateDraftFn = jest.fn()
-const scrollIntoViewMock = jest.fn()
+const mockUpdateDraftFn = vi.fn()
+const scrollIntoViewMock = vi.fn()
 HTMLElement.prototype.scrollIntoView = scrollIntoViewMock
 
 describe('ContractDetails', () => {
     beforeEach(() => {
-        jest.spyOn(
+        vi.spyOn(
             useHealthPlanPackageForm,
             'useHealthPlanPackageForm'
         ).mockReturnValue({
             updateDraft: mockUpdateDraftFn,
-            createDraft: jest.fn(),
+            createDraft: vi.fn(),
             showPageErrorMessage: false,
             draftSubmission: mockDraft(),
         })
-        jest.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
+        vi.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
             id: '123-abc',
         })
     })
     afterEach(() => {
-        jest.clearAllMocks()
-        jest.spyOn(
+        vi.clearAllMocks()
+        vi.spyOn(
             useHealthPlanPackageForm,
             'useHealthPlanPackageForm'
         ).mockRestore()
-        jest.spyOn(useRouteParams, 'useRouteParams').mockRestore()
+        vi.spyOn(useRouteParams, 'useRouteParams').mockRestore()
     })
 
     const defaultApolloProvider = {
@@ -150,12 +150,12 @@ describe('ContractDetails', () => {
 
     describe('Federal authorities', () => {
         it('displays correct form fields for federal authorities with medicaid contract', async () => {
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockImplementation(() => {
                 return {
-                    createDraft: jest.fn(),
+                    createDraft: vi.fn(),
                     updateDraft: mockUpdateDraftFn,
                     showPageErrorMessage: false,
                     draftSubmission: {
@@ -187,12 +187,12 @@ describe('ContractDetails', () => {
         })
 
         it('displays correct form fields for federal authorities with CHIP only contract', async () => {
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockImplementation(() => {
                 return {
-                    createDraft: jest.fn(),
+                    createDraft: vi.fn(),
                     updateDraft: mockUpdateDraftFn,
                     showPageErrorMessage: false,
                     draftSubmission: {
@@ -240,12 +240,12 @@ describe('ContractDetails', () => {
         })
 
         it('can set provisions for medicaid contract amendment', async () => {
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockImplementation(() => {
                 return {
-                    createDraft: jest.fn(),
+                    createDraft: vi.fn(),
                     updateDraft: mockUpdateDraftFn,
                     showPageErrorMessage: false,
                     draftSubmission: {
@@ -293,12 +293,12 @@ describe('ContractDetails', () => {
         })
         // eslint-disable-next-line jest/no-disabled-tests
         it.skip('shows correct validations for medicaid contract amendment', async () => {
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockImplementation(() => {
                 return {
-                    createDraft: jest.fn(),
+                    createDraft: vi.fn(),
                     updateDraft: mockUpdateDraftFn,
                     showPageErrorMessage: false,
                     draftSubmission: medicaidAmendmentPackage,
@@ -357,12 +357,12 @@ describe('ContractDetails', () => {
         })
         // eslint-disable-next-line jest/no-disabled-tests
         it.skip('can set provisions for medicaid base contract', async () => {
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockImplementation(() => {
                 return {
-                    createDraft: jest.fn(),
+                    createDraft: vi.fn(),
                     updateDraft: mockUpdateDraftFn,
                     showPageErrorMessage: false,
                     draftSubmission: medicaidBasePackage,
@@ -394,12 +394,12 @@ describe('ContractDetails', () => {
         })
         // eslint-disable-next-line jest/no-disabled-tests
         it.skip('shows correct validations for medicaid base contract', async () => {
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockImplementation(() => {
                 return {
-                    createDraft: jest.fn(),
+                    createDraft: vi.fn(),
                     updateDraft: mockUpdateDraftFn,
                     showPageErrorMessage: false,
                     draftSubmission: {
@@ -454,12 +454,12 @@ describe('ContractDetails', () => {
         })
 
         it('cannot set provisions for CHIP only base contract', async () => {
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockImplementation(() => {
                 return {
-                    createDraft: jest.fn(),
+                    createDraft: vi.fn(),
                     updateDraft: mockUpdateDraftFn,
                     showPageErrorMessage: false,
                     draftSubmission: chipBasePackage,
@@ -480,12 +480,12 @@ describe('ContractDetails', () => {
         })
 
         it('can set provisions for CHIP only amendment', async () => {
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockImplementation(() => {
                 return {
-                    createDraft: jest.fn(),
+                    createDraft: vi.fn(),
                     updateDraft: mockUpdateDraftFn,
                     showPageErrorMessage: false,
                     draftSubmission: chipAmendmentPackage,
@@ -526,12 +526,12 @@ describe('ContractDetails', () => {
         })
         // eslint-disable-next-line jest/no-disabled-tests
         it.skip('shows correct validations for CHIP only amendment', async () => {
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockImplementation(() => {
                 return {
-                    createDraft: jest.fn(),
+                    createDraft: vi.fn(),
                     updateDraft: mockUpdateDraftFn,
                     showPageErrorMessage: false,
                     draftSubmission: {
@@ -801,12 +801,12 @@ describe('ContractDetails', () => {
         })
 
         it('when existing file is removed, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockImplementation(() => {
                 return {
-                    createDraft: jest.fn(),
+                    createDraft: vi.fn(),
                     updateDraft: mockUpdateDraftFn,
                     showPageErrorMessage: false,
                     draftSubmission: {
@@ -964,12 +964,12 @@ describe('ContractDetails', () => {
 
     describe('Contract 438 attestation', () => {
         it('renders 438 attestation question without errors', async () => {
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockImplementation(() => {
                 return {
-                    createDraft: jest.fn(),
+                    createDraft: vi.fn(),
                     updateDraft: mockUpdateDraftFn,
                     showPageErrorMessage: false,
                     draftSubmission: mockBaseContract({
@@ -1021,12 +1021,12 @@ describe('ContractDetails', () => {
                 statutoryRegulatoryAttestation: undefined,
                 statutoryRegulatoryAttestationDescription: undefined,
             })
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockImplementation(() => {
                 return {
-                    createDraft: jest.fn(),
+                    createDraft: vi.fn(),
                     updateDraft: mockUpdateDraftFn,
                     showPageErrorMessage: false,
                     draftSubmission: testDraft,
@@ -1094,12 +1094,12 @@ describe('ContractDetails', () => {
                 statutoryRegulatoryAttestation: undefined,
                 statutoryRegulatoryAttestationDescription: undefined,
             })
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockImplementation(() => {
                 return {
-                    createDraft: jest.fn(),
+                    createDraft: vi.fn(),
                     updateDraft: mockUpdateDraftFn,
                     showPageErrorMessage: false,
                     draftSubmission: draft,

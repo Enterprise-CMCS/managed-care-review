@@ -26,8 +26,8 @@
         @include uswds.u-radius('md');
     }
     // for supporting documents
-    > & .tableContainer {
-        &[class^='usa-form'] {
+    .tableContainer {
+        [class^='usa-form'] {
             max-width: 100%;
             width: 75rem;
         }

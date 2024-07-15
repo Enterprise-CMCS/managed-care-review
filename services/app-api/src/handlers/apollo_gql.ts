@@ -189,7 +189,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     // Initializing our handler should be the only place we read environment variables. Everything
     // should be configured by parameters, per /docs/designPatterns.md#Dependency_Injection
 
-    const authMode = process.env.REACT_APP_AUTH_MODE
+    const authMode = process.env.VITE_APP_AUTH_MODE
     assertIsAuthMode(authMode)
 
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
@@ -202,8 +202,8 @@ async function initializeGQLHandler(): Promise<Handler> {
     const ldSDKKey = process.env.LD_SDK_KEY
     const allowedIpAddresses = process.env.ALLOWED_IP_ADDRESSES
     const jwtSecret = process.env.JWT_SECRET
-    const s3DocumentsBucket = process.env.REACT_APP_S3_DOCUMENTS_BUCKET
-    const s3QABucket = process.env.REACT_APP_S3_QA_BUCKET
+    const s3DocumentsBucket = process.env.VITE_APP_S3_DOCUMENTS_BUCKET
+    const s3QABucket = process.env.VITE_APP_S3_QA_BUCKET
     const region = process.env.REGION
     // START Assert configuration is valid
     if (emailerMode !== 'LOCAL' && emailerMode !== 'SES')
@@ -251,7 +251,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (s3DocumentsBucket === undefined || s3QABucket === undefined) {
         throw new Error(
-            'To configure s3, you  must set REACT_APP_S3_DOCUMENTS_BUCKET and REACT_APP_S3_QA_BUCKET'
+            'To configure s3, you  must set VITE_APP_S3_DOCUMENTS_BUCKET and VITE_APP_S3_QA_BUCKET'
         )
     }
 

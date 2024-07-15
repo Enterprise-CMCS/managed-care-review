@@ -17,7 +17,7 @@ describe('ActionButton', () => {
     describe('default state', () => {
         it('renders button with own text', () => {
             renderWithProviders(
-                <ActionButton type="button" onClick={jest.fn()}>
+                <ActionButton type="button" onClick={vi.fn()}>
                     Test Button Default
                 </ActionButton>
             )
@@ -31,7 +31,7 @@ describe('ActionButton', () => {
 
         it('renders button without disabled styles and aria-disabled', () => {
             renderWithProviders(
-                <ActionButton type="button" onClick={jest.fn()}>
+                <ActionButton type="button" onClick={vi.fn()}>
                     Test Button Default
                 </ActionButton>
             )
@@ -41,12 +41,12 @@ describe('ActionButton', () => {
 
             expect(defaultButton).not.toHaveAttribute('aria-disabled')
             expect(defaultButton).not.toHaveClass('usa-button--disabled')
-            expect(defaultButton).not.toHaveClass('disabledCursor')
+            expect(defaultButton).not.toHaveClass('_disabledCursor_b7011e')
         })
 
         it('renders button without loading styles and spinner', async () => {
             renderWithProviders(
-                <ActionButton type="button" onClick={jest.fn()}>
+                <ActionButton type="button" onClick={vi.fn()}>
                     Test Button Default
                 </ActionButton>
             )
@@ -55,7 +55,7 @@ describe('ActionButton', () => {
             })
 
             expect(defaultButton).not.toHaveClass('usa-button--active')
-            expect(defaultButton).not.toHaveClass('disabledCursor')
+            expect(defaultButton).not.toHaveClass('_disabledCursor_b7011e')
             expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
         })
     })
@@ -65,7 +65,7 @@ describe('ActionButton', () => {
             renderWithProviders(
                 <ActionButton
                     type="button"
-                    onClick={jest.fn()}
+                    onClick={vi.fn()}
                     loading
                     animationTimeout={0}
                 >
@@ -84,7 +84,7 @@ describe('ActionButton', () => {
             renderWithProviders(
                 <ActionButton
                     type="button"
-                    onClick={jest.fn()}
+                    onClick={vi.fn()}
                     loading
                     animationTimeout={0}
                 >
@@ -96,42 +96,42 @@ describe('ActionButton', () => {
             })
             expect(loadingButton).toHaveClass('usa-button--active')
 
-            expect(loadingButton).toHaveClass('disabledCursor')
+            expect(loadingButton).toHaveClass('_disabledCursor_b7011e')
             await waitFor(() => {
                 expect(screen.getByRole('progressbar')).toBeInTheDocument()
                 expect(screen.getByRole('progressbar')).toHaveClass(
-                    'ds-c-spinner'
+                    ' _ds-c-spinner_d122df'
                 )
             })
         })
 
-        jest.useFakeTimers()
+        vi.useFakeTimers()
         it('by default, wait 750 ms before displaying loading spinner', async () => {
             renderWithProviders(
-                <ActionButton type="button" onClick={jest.fn()} loading>
+                <ActionButton type="button" onClick={vi.fn()} loading>
                     Test Button Loading
                 </ActionButton>
             )
 
             expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
-            jest.advanceTimersByTime(749)
+            vi.advanceTimersByTime(749)
             expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
 
-            jest.advanceTimersByTime(1)
+            vi.advanceTimersByTime(1)
             await waitFor(() => {
                 expect(
                     screen.getByRole('button', { name: 'Loading' })
                 ).toBeInTheDocument()
                 expect(screen.getByRole('progressbar')).toBeInTheDocument()
             })
-            jest.useRealTimers()
+            vi.useRealTimers()
         })
     })
 
     describe('disabled state', () => {
         it('renders button with own text', () => {
             renderWithProviders(
-                <ActionButton type="button" onClick={jest.fn()} disabled>
+                <ActionButton type="button" onClick={vi.fn()} disabled>
                     Test Button Disabled
                 </ActionButton>
             )
@@ -145,7 +145,7 @@ describe('ActionButton', () => {
 
         it('renders button with aria-disabled attribute', () => {
             renderWithProviders(
-                <ActionButton type="button" onClick={jest.fn()} disabled>
+                <ActionButton type="button" onClick={vi.fn()} disabled>
                     Test Button Disabled
                 </ActionButton>
             )
@@ -159,7 +159,7 @@ describe('ActionButton', () => {
 
         it('renders button with disabled styles and cursor', () => {
             renderWithProviders(
-                <ActionButton type="button" onClick={jest.fn()} disabled>
+                <ActionButton type="button" onClick={vi.fn()} disabled>
                     Test Button Disabled
                 </ActionButton>
             )
@@ -173,23 +173,16 @@ describe('ActionButton', () => {
                 screen.getByRole('button', {
                     name: /Test Button/,
                 })
-            ).toHaveClass('disabledCursor')
+            ).toHaveClass('_disabledCursor_b7011e')
         })
     })
 
     describe('incompatible props warning', () => {
         it('Console error when incompatible props are being used', () => {
-            const consoleErrorMock = jest
-                .spyOn(console, 'error')
-                .mockImplementation()
+            const consoleErrorMock = vi.spyOn(console, 'error')
 
             renderWithProviders(
-                <ActionButton
-                    type="button"
-                    onClick={jest.fn()}
-                    disabled
-                    loading
-                >
+                <ActionButton type="button" onClick={vi.fn()} disabled loading>
                     Test Button
                 </ActionButton>
             )

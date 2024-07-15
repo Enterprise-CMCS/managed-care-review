@@ -18,7 +18,7 @@ export function AppBody({
     const [globalAlert, setGlobalAlert] = React.useState<
         React.ReactElement | undefined
     >(undefined)
-    const environmentName = process.env.REACT_APP_STAGE_NAME || ''
+    const environmentName = import.meta.env.VITE_APP_STAGE_NAME || ''
     const isLowerEnvironment = environmentName !== 'prod'
     const { loginStatus } = useAuth()
     const ldClient = useLDClient()

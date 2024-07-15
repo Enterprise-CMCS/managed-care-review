@@ -31,13 +31,13 @@ custom:
   ui_cloudfront_distribution_id: ${cf:ui-${sls:stage}.CloudFrontDistributionId}
   storybook_s3_bucket_name: ${cf:storybook-${sls:stage}.S3BucketName}
   storybook_cloudfront_distribution_id: ${cf:storybook-${sls:stage}.CloudFrontDistributionId}
-  react_app_auth_mode: ${env:REACT_APP_AUTH_MODE}
+  react_app_auth_mode: ${env:VITE_APP_AUTH_MODE}
   nr_license_key: ${env:NR_LICENSE_KEY, ssm:/configuration/nr_license_key}
-  react_app_ld_client_id: ${env:REACT_APP_LD_CLIENT_ID, ssm:/configuration/react_app_ld_client_id_feds}
-  react_app_nr_account_id: ${env:REACT_APP_NR_ACCOUNT_ID, ssm:/configuration/react_app_nr_account_id}
-  react_app_nr_trust_key: ${env:REACT_APP_NR_TRUST_KEY, ssm:/configuration/react_app_nr_trust_key}
-  react_app_nr_license_key: ${env:REACT_APP_NR_LICENSE_KEY, ssm:/configuration/react_app_nr_license_key}
-  react_app_nr_agent_id: ${env:REACT_APP_NR_AGENT_ID, ssm:/configuration/react_app_nr_agent_id}
+  react_app_ld_client_id: ${env:VITE_APP_LD_CLIENT_ID, ssm:/configuration/react_app_ld_client_id_feds}
+  react_app_nr_account_id: ${env:VITE_APP_NR_ACCOUNT_ID, ssm:/configuration/react_app_nr_account_id}
+  react_app_nr_trust_key: ${env:VITE_APP_NR_TRUST_KEY, ssm:/configuration/react_app_nr_trust_key}
+  react_app_nr_license_key: ${env:VITE_APP_NR_LICENSE_KEY, ssm:/configuration/react_app_nr_license_key}
+  react_app_nr_agent_id: ${env:VITE_APP_NR_AGENT_ID, ssm:/configuration/react_app_nr_agent_id}
   serverlessTerminationProtection:
     stages:
       - dev
@@ -66,24 +66,24 @@ custom:
       # Build the static archive and populate the config
       package:initialize: |
         set -e
-        export REACT_APP_AUTH_MODE=${self:custom.react_app_auth_mode}
-        export REACT_APP_API_URL=${self:custom.api_url}
-        export REACT_APP_APPLICATION_ENDPOINT=${self:custom.application_endpoint_url}
-        export REACT_APP_COGNITO_REGION=${self:custom.cognito_region}
-        export REACT_APP_COGNITO_ID_POOL_ID=${self:custom.cognito_identity_pool_id}
-        export REACT_APP_COGNITO_USER_POOL_ID=${self:custom.cognito_user_pool_id}
-        export REACT_APP_COGNITO_USER_POOL_CLIENT_ID=${self:custom.cognito_client_id}
-        export REACT_APP_COGNITO_USER_POOL_CLIENT_DOMAIN=${self:custom.cognito_user_pool_client_domain}
-        export REACT_APP_S3_REGION=${self:custom.s3_documents_bucket_region}
-        export REACT_APP_S3_DOCUMENTS_BUCKET=${self:custom.s3_documents_bucket_name}
-        export REACT_APP_S3_QA_BUCKET=${self:custom.s3_qa_bucket_name}
-        export REACT_APP_STAGE_NAME=${sls:stage}
-        export REACT_APP_OTEL_COLLECTOR_URL=${self:custom.api_url}/otel
-        export REACT_APP_LD_CLIENT_ID=${self:custom.react_app_ld_client_id}
-        export REACT_APP_NR_ACCOUNT_ID=${self:custom.react_app_nr_account_id}
-        export REACT_APP_NR_AGENT_ID=${self:custom.react_app_nr_agent_id}
-        export REACT_APP_NR_LICENSE_KEY=${self:custom.react_app_nr_license_key}
-        export REACT_APP_NR_TRUST_KEY=${self:custom.react_app_nr_trust_key}
+        export VITE_APP_AUTH_MODE=${self:custom.react_app_auth_mode}
+        export VITE_APP_API_URL=${self:custom.api_url}
+        export VITE_APP_APPLICATION_ENDPOINT=${self:custom.application_endpoint_url}
+        export VITE_APP_COGNITO_REGION=${self:custom.cognito_region}
+        export VITE_APP_COGNITO_ID_POOL_ID=${self:custom.cognito_identity_pool_id}
+        export VITE_APP_COGNITO_USER_POOL_ID=${self:custom.cognito_user_pool_id}
+        export VITE_APP_COGNITO_USER_POOL_CLIENT_ID=${self:custom.cognito_client_id}
+        export VITE_APP_COGNITO_USER_POOL_CLIENT_DOMAIN=${self:custom.cognito_user_pool_client_domain}
+        export VITE_APP_S3_REGION=${self:custom.s3_documents_bucket_region}
+        export VITE_APP_S3_DOCUMENTS_BUCKET=${self:custom.s3_documents_bucket_name}
+        export VITE_APP_S3_QA_BUCKET=${self:custom.s3_qa_bucket_name}
+        export VITE_APP_STAGE_NAME=${sls:stage}
+        export VITE_APP_OTEL_COLLECTOR_URL=${self:custom.api_url}/otel
+        export VITE_APP_LD_CLIENT_ID=${self:custom.react_app_ld_client_id}
+        export VITE_APP_NR_ACCOUNT_ID=${self:custom.react_app_nr_account_id}
+        export VITE_APP_NR_AGENT_ID=${self:custom.react_app_nr_agent_id}
+        export VITE_APP_NR_LICENSE_KEY=${self:custom.react_app_nr_license_key}
+        export VITE_APP_NR_TRUST_KEY=${self:custom.react_app_nr_trust_key}
 
 
         yarn run build

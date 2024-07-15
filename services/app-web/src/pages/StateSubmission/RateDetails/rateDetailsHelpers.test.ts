@@ -3,7 +3,7 @@ import { convertGQLRateToRateForm, generateUpdatedRates, isRatePartiallyFilled }
 import {RateFormData} from '../../../gen/gqlClient';
 
 describe('generateUpdatedRates', () => {
-    const emptyRateForm = () => convertGQLRateToRateForm(jest.fn())
+    const emptyRateForm = () => convertGQLRateToRateForm(vi.fn())
     const testCases = [
 
         {

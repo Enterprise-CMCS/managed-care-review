@@ -1,5 +1,5 @@
 import React from 'react'
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import {
     UserAccountWarningBanner,
     AccountWarningBannerProps,
@@ -11,7 +11,7 @@ export default {
     component: UserAccountWarningBanner,
 }
 
-const Template: Story<AccountWarningBannerProps> = ({ header, ...args }) => {
+const Template: StoryFn<AccountWarningBannerProps> = ({ header, ...args }) => {
     const stringConstants = useStringConstants()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
 

@@ -34,27 +34,29 @@ import {
 import { tealiumTestClient } from './tealiumHelpers'
 import type { TealiumClientType } from '../tealium'
 
+import { vi } from 'vitest'
+
 function ldClientMock(featureFlags: FeatureFlagSettings): LDClient {
     return {
-        track: jest.fn(),
-        identify: jest.fn(),
-        close: jest.fn(),
-        flush: jest.fn(),
-        getContext: jest.fn(),
-        off: jest.fn(),
-        on: jest.fn(),
-        setStreaming: jest.fn(),
-        variationDetail: jest.fn(),
-        waitForInitialization: jest.fn(),
-        waitUntilGoalsReady: jest.fn(),
-        waitUntilReady: jest.fn(),
-        variation: jest.fn(
+        track: vi.fn(),
+        identify: vi.fn(),
+        close: vi.fn(),
+        flush: vi.fn(),
+        getContext: vi.fn(),
+        off: vi.fn(),
+        on: vi.fn(),
+        setStreaming: vi.fn(),
+        variationDetail: vi.fn(),
+        waitForInitialization: vi.fn(),
+        waitUntilGoalsReady: vi.fn(),
+        waitUntilReady: vi.fn(),
+        variation: vi.fn(
             (
                 flag: FeatureFlagLDConstant,
                 defaultValue: FlagValue | undefined
             ) => featureFlags[flag] ?? defaultValue
         ),
-        allFlags: jest.fn(() => featureFlags),
+        allFlags: vi.fn(() => featureFlags),
     }
 }
 

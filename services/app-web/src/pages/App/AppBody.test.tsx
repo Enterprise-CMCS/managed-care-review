@@ -9,16 +9,19 @@ import {
     fetchCurrentUserMock,
     indexHealthPlanPackagesMockSuccess,
 } from '../../testHelpers/apolloMocks'
-
-window.scrollTo = jest.fn()
+import { beforeEach } from 'vitest'
 
 // Looking for routing tests? Check AppRoutes.test.tsx
 describe('AppBody', () => {
+    Object.defineProperty(window, 'scrollTo', {
+        writable: true,
+        value: vi.fn(),
+    })
     afterEach(() => {
-        jest.resetAllMocks()
+        vi.resetAllMocks()
     })
     afterAll(() => {
-        jest.clearAllMocks()
+        vi.clearAllMocks()
     })
 
     it('App renders without errors', () => {
@@ -75,19 +78,26 @@ describe('AppBody', () => {
     })
 
     describe('Environment specific banner', () => {
-        const OLD_ENV = process.env
+        const OLD_ENV = import.meta.env
 
         beforeEach(() => {
-            jest.resetModules() // Most important - clears the cache
-            process.env = { ...OLD_ENV } // Make a copy
+            vi.resetModules() // Most important - clears the cache
+            Object.defineProperty(import.meta, 'env', {
+                value: OLD_ENV,
+                writable: true,
+            })
         })
 
         afterAll(() => {
-            process.env = OLD_ENV // Restore old environment
+            Object.defineProperty(import.meta, 'env', {
+                value: {
+                    ...OLD_ENV,
+                },
+            })
         })
 
         it('shows test environment banner in val', () => {
-            process.env.REACT_APP_STAGE_NAME = 'val'
+            import.meta.env.VITE_APP_STAGE_NAME = 'val'
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
                     mocks: [
@@ -104,7 +114,7 @@ describe('AppBody', () => {
         })
 
         it('does not show test environment banner in prod', () => {
-            process.env.REACT_APP_STAGE_NAME = 'prod'
+            import.meta.env.VITE_APP_STAGE_NAME = 'prod'
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
                     mocks: [

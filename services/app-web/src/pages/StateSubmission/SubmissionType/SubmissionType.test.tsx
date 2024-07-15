@@ -10,11 +10,11 @@ import * as useRouteParams from '../../../hooks/useRouteParams'
 import * as useHealthPlanPackageForm from '../../../hooks/useHealthPlanPackageForm'
 
 // set up mocks for React Hooks in use
-const mockUpdateDraftFn = jest.fn()
-const mockCreateDraftFn = jest.fn()
+const mockUpdateDraftFn = vi.fn()
+const mockCreateDraftFn = vi.fn()
 describe('SubmissionType', () => {
     beforeEach(() => {
-        jest.spyOn(
+        vi.spyOn(
             useHealthPlanPackageForm,
             'useHealthPlanPackageForm'
         ).mockReturnValue({
@@ -23,17 +23,17 @@ describe('SubmissionType', () => {
             showPageErrorMessage: false,
             draftSubmission: contractOnly(),
         })
-        jest.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
+        vi.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
             id: '123-abc',
         })
     })
     afterEach(() => {
-        jest.clearAllMocks()
-        jest.spyOn(
+        vi.clearAllMocks()
+        vi.spyOn(
             useHealthPlanPackageForm,
             'useHealthPlanPackageForm'
         ).mockRestore()
-        jest.spyOn(useRouteParams, 'useRouteParams').mockRestore()
+        vi.spyOn(useRouteParams, 'useRouteParams').mockRestore()
     })
     it('displays correct form guidance', async () => {
         renderWithProviders(<SubmissionType />, {
@@ -214,7 +214,7 @@ describe('SubmissionType', () => {
         ).toBeInTheDocument()
     })
     it('new submissions does not automatically select contract only submission type when selecting CHIP-only coverage', async () => {
-        jest.spyOn(
+        vi.spyOn(
             useHealthPlanPackageForm,
             'useHealthPlanPackageForm'
         ).mockReturnValue({
@@ -317,7 +317,7 @@ describe('SubmissionType', () => {
         expect(contractOnlyRadio).toBeChecked()
     })
     it('shows validation message when population coverage is not selected', async () => {
-        jest.spyOn(
+        vi.spyOn(
             useHealthPlanPackageForm,
             'useHealthPlanPackageForm'
         ).mockReturnValue({
@@ -463,7 +463,7 @@ describe('SubmissionType', () => {
     })
 
     it('displays risk-based contract radio buttons and validation message', async () => {
-        jest.spyOn(
+        vi.spyOn(
             useHealthPlanPackageForm,
             'useHealthPlanPackageForm'
         ).mockReturnValue({
@@ -539,7 +539,7 @@ describe('SubmissionType', () => {
         })
 
         it('shows error messages when there are validation errors and showValidations is true', async () => {
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockReturnValue({
@@ -576,7 +576,7 @@ describe('SubmissionType', () => {
         })
 
         it('shows error messages when contract type is not selected', async () => {
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockReturnValue({
@@ -641,7 +641,7 @@ describe('SubmissionType', () => {
         })
 
         it('if form fields are invalid, shows validation error messages when continue button is clicked', async () => {
-            jest.spyOn(
+            vi.spyOn(
                 useHealthPlanPackageForm,
                 'useHealthPlanPackageForm'
             ).mockReturnValue({
