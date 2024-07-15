@@ -95,10 +95,7 @@ const hasValidActuaries = (actuaries: ActuaryContact[]): boolean =>
     )
 
 const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
-    const validRates =
-        sub.rateInfos.length === 0
-            ? false
-            : sub.rateInfos.every((rateInfo) => {
+    const validRates = sub.rateInfos.every((rateInfo) => {
                   const validBaseRate =
                       rateInfo.rateType !== undefined &&
                       rateInfo.rateDateCertified !== undefined &&
@@ -122,9 +119,9 @@ const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
                   return validBaseRate
               })
 
-    // Contract only should have no rate fields
+    // Contract only - skip all validations for hasValidRates
     if (sub.submissionType === 'CONTRACT_ONLY') {
-        return !validRates ? true : false
+       return true
     } else {
         return validRates
     }

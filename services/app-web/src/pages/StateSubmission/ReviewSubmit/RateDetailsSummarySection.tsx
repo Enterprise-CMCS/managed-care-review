@@ -27,6 +27,7 @@ import {
     ActuaryContact,
 } from '../../../gen/gqlClient'
 import {
+    RateRevisionWithIsLinked,
     getIndexFromRevisionVersion,
     getLastContractSubmission,
     getPackageSubmissionAtIndex,
@@ -39,7 +40,7 @@ import { useParams } from 'react-router-dom'
 export type RateDetailsSummarySectionProps = {
     contract: Contract
     contractRev?: ContractRevision
-    rateRevs?: RateRevision[]
+    rateRevs?: RateRevisionWithIsLinked[]
     editNavigateTo?: string
     isCMSUser?: boolean
     submissionName: string
@@ -91,9 +92,9 @@ export const RateDetailsSummarySection = ({
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
     const isSubmittedOrCMSUser = isSubmitted || isCMSUser
-
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
+    const isInitialSubmission = contract.packageSubmissions.length === 1
 
     const rates = rateRevs
         ? rateRevs
@@ -212,7 +213,6 @@ export const RateDetailsSummarySection = ({
         }
         return true
     }
-
     useDeepCompareEffect(() => {
         // skip getting urls of this if this is a previous submission or draft
         if (!isSubmittedOrCMSUser || isPreviousSubmission) return
@@ -282,9 +282,24 @@ export const RateDetailsSummarySection = ({
                           rateFormData.deprecatedRateProgramIDs.length > 0
                       const hasNoRatePrograms =
                           rateFormData.rateProgramIDs.length === 0
+                      const isLinkedRate = rate.isLinked
+
+                      /*
+                    Rate programs switched in summer 2024. We still show deprecated program field values when
+                    - there's no new field values present and CMS user is viewing
+                    - theres no new field values present and contract is locked and state user viewing
+                    - theres no new field values present and the contract unlocked and the rate being displayed as a linked rate
+
+                    otherwise use new fields values going forward
+                    */
+                      const showLegacyRatePrograms =
+                          hasDeprecatedRatePrograms &&
+                          hasNoRatePrograms &&
+                          (isSubmittedOrCMSUser || isLinkedRate)
                       if (!rateFormData) {
                           return <GenericErrorPage />
                       }
+
                       return (
                           <SectionCard
                               id={`rate-details-${rate.id}`}
@@ -298,12 +313,7 @@ export const RateDetailsSummarySection = ({
                               </h3>
                               <dl>
                                   <DoubleColumnGrid>
-                                      {((hasDeprecatedRatePrograms &&
-                                          isSubmittedOrCMSUser) ||
-                                          (hasDeprecatedRatePrograms &&
-                                              hasNoRatePrograms &&
-                                              !rate.unlockInfo &&
-                                              rate.submitInfo)) && (
+                                      {showLegacyRatePrograms ? (
                                           <DataDetail
                                               id="historicRatePrograms"
                                               label="Programs this rate certification covers"
@@ -315,18 +325,14 @@ export const RateDetailsSummarySection = ({
                                                   true
                                               )}
                                           />
-                                      )}
-                                      {!(
-                                          hasDeprecatedRatePrograms &&
-                                          hasNoRatePrograms &&
-                                          !rate.unlockInfo &&
-                                          rate.submitInfo
-                                      ) && (
+                                      ) : (
                                           <DataDetail
                                               id="ratePrograms"
                                               label="Rates this rate certification covers"
                                               explainMissingData={
-                                                  explainMissingData
+                                                  isLinkedRate
+                                                      ? false
+                                                      : explainMissingData
                                               }
                                               children={ratePrograms(
                                                   rate,
@@ -463,7 +469,12 @@ export const RateDetailsSummarySection = ({
                                       multipleDocumentsAllowed={false}
                                       caption="Rate certification"
                                       documentCategory="Rate certification"
-                                      previousSubmissionDate={lastSubmittedDate}
+                                      isInitialSubmission={isInitialSubmission}
+                                      previousSubmissionDate={
+                                          isInitialSubmission && isCMSUser
+                                              ? undefined
+                                              : lastSubmittedDate
+                                      }
                                       hideDynamicFeedback={isSubmittedOrCMSUser}
                                   />
                               )}
@@ -472,7 +483,12 @@ export const RateDetailsSummarySection = ({
                                       documents={
                                           rateFormData.supportingDocuments
                                       }
-                                      previousSubmissionDate={lastSubmittedDate}
+                                      isInitialSubmission={isInitialSubmission}
+                                      previousSubmissionDate={
+                                          isInitialSubmission && isCMSUser
+                                              ? undefined
+                                              : lastSubmittedDate
+                                      }
                                       packagesWithSharedRateCerts={
                                           isEditing
                                               ? undefined
