@@ -597,7 +597,7 @@ jobs:
         run: |
           echo "Combining all coverage reports"
           echo "Prepare the folders to hold the reports"
-          mkdir -p reports/from-cypress/tmp cypress_temp coverage-all
+          mkdir -p reports/from-cypress/tmp cypress_temp coverage-all/tmp
 
           echo "Listing current folder"
           ls
@@ -635,10 +635,10 @@ jobs:
           ls -R ./coverage-all
 
           echo "Merge all reports into one"
-          npx c8 report -r json -o ./coverage-all/coverage.json \
-            -i ./reports/from-api.json \
-            -i ./reports/from-cypress/coverage-final.json \
-            -i ./reports/from-unit-test.json
+          npx c8 report --reporter=json -o ./coverage-all \
+            ./reports/from-api.json \
+            ./reports/from-cypress/coverage-final.json \
+            ./reports/from-unit-test.json
 
           echo "Generate the html report from the combined coverage report"
           npx c8 report -r lcov -r text -r json-summary --report-dir coverage-all -i ./coverage-all/coverage.json
