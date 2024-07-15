@@ -3,7 +3,7 @@ import type { InsertRateArgsType } from '../postgres/contractAndRates/insertRate
 import type {
     RateTableFullPayload,
     RateRevisionTableWithContracts,
-} from '../postgres/contractAndRates/prismaSubmittedRateHelpers'
+} from '../postgres/contractAndRates/prismaFullContractRateHelpers'
 import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 import { findStatePrograms } from '../postgres'
 import { must } from './assertionHelpers'

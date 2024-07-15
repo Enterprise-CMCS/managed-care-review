@@ -1,7 +1,7 @@
 import type { PrismaTransactionType } from '../prismaTypes'
 import { NotFoundError } from '../postgresErrors'
 import { parseContractWithHistory } from './parseContractWithHistory'
-import { includeFullContract } from './prismaSubmittedContractHelpers'
+import { includeFullContract } from './prismaFullContractRateHelpers'
 import type { ContractOrErrorArrayType } from './findAllContractsWithHistoryByState'
 
 async function findAllContractsWithHistoryBySubmitInfo(

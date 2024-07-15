@@ -3,9 +3,6 @@ import {
     includeContractFormData,
     includeRateFormData,
 } from './prismaSharedContractRateHelpers'
-import { includeFullRate } from './prismaSubmittedRateHelpers'
-
-// Generated Types
 
 const includeLatestSubmittedRateRev = {
     revisions: {
@@ -20,17 +17,7 @@ const includeLatestSubmittedRateRev = {
 } satisfies Prisma.ContractTableInclude
 
 // The include parameters for everything in a Contract.
-const includeFullContract = {
-    draftRates: {
-        orderBy: {
-            ratePosition: 'asc',
-        },
-        include: {
-            rate: {
-                include: includeFullRate,
-            },
-        },
-    },
+const includeContractWithoutDraftRates = {
     revisions: {
         orderBy: {
             createdAt: 'asc',
@@ -66,16 +53,10 @@ const includeFullContract = {
     },
 } satisfies Prisma.ContractTableInclude
 
-// ContractTableFullPayload is the type returned by any ContractTable find prisma query given the
-// includeFullContract include: parameter.
-// See https://www.prisma.io/blog/satisfies-operator-ur8ys8ccq7zb for a discussion of how
-// the satisfies keyword enables the construction of this type.
-type ContractTableFullPayload = Prisma.ContractTableGetPayload<{
-    include: typeof includeFullContract
+type ContractTableWithoutDraftRates = Prisma.ContractTableGetPayload<{
+    include: typeof includeContractWithoutDraftRates
 }>
 
-type ContractRevisionTableWithRates = ContractTableFullPayload['revisions'][0]
+export { includeContractWithoutDraftRates, includeLatestSubmittedRateRev }
 
-export { includeFullContract, includeLatestSubmittedRateRev }
-
-export type { ContractRevisionTableWithRates, ContractTableFullPayload }
+export type { ContractTableWithoutDraftRates }

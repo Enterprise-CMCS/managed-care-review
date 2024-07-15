@@ -31,12 +31,25 @@ type ContractPackageSubmissionWithCauseType = z.infer<
     typeof contractPackageSubmissionWithCauseSchema
 >
 
+const ratePackageSubmissionSchema = z.object({
+    submitInfo: updateInfoSchema,
+    submittedRevisions: z.array(
+        z.union([contractRevisionSchema, rateRevisionSchema])
+    ),
+    rateRevision: rateRevisionSchema,
+    contractRevisions: z.array(contractRevisionSchema),
+})
+
+type RatePackageSubmissionType = z.infer<typeof ratePackageSubmissionSchema>
+
 export {
     contractPackageSubmissionSchema,
     contractPackageSubmissionWithCauseSchema,
+    ratePackageSubmissionSchema,
 }
 
 export type {
     ContractPackageSubmissionType,
     ContractPackageSubmissionWithCauseType,
+    RatePackageSubmissionType,
 }

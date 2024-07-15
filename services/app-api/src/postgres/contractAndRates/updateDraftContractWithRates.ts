@@ -11,7 +11,7 @@ import { rateRevisionToDomainModel } from './prismaSharedContractRateHelpers'
 import type { UpdateDraftContractRatesArgsType } from './updateDraftContractRates'
 import { updateDraftContractRatesInTransaction } from './updateDraftContractRates'
 import { prismaUpdateContractFormDataFromDomain } from './prismaContractRateAdaptors'
-import { includeFullRate } from './prismaSubmittedRateHelpers'
+import { includeFullRate } from './prismaFullContractRateHelpers'
 
 type UpdateContractArgsType = {
     contractID: string

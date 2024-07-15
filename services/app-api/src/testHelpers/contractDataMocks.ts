@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import type {
     ContractRevisionTableWithRates,
     ContractTableFullPayload,
-} from '../postgres/contractAndRates/prismaSubmittedContractHelpers'
+} from '../postgres/contractAndRates/prismaFullContractRateHelpers'
 import type { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 import type { ContractFormDataType } from '../domain-models/contractAndRates'
 import { findStatePrograms } from '../postgres'

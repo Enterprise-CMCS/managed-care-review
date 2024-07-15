@@ -43,17 +43,18 @@ async function submitRateInsideTransaction(
 
     // Given related contracts, confirm contracts valid by submitted by checking for revisions
     // If related contracts have no initial revision, we know that link is invalid and can throw error
-    const relatedContracts = currentRate.revisions[0].contractRevisions
-    // need to get full contract
-    const everyRelatedContractIsSubmitted = relatedContracts.every(
-        // eventually needs to be packageSubimssions approach
-        (contractRev) => contractRev.submitInfo !== undefined
-    )
-    if (!everyRelatedContractIsSubmitted) {
-        const message =
-            'Attempted to submit a rate related to a contract that has not been submitted'
-        console.error(message)
-        return new Error(message)
+    const draftContracts = currentRate.draftContracts
+
+    if (draftContracts) {
+        const everyRelatedContractIsSubmitted = draftContracts.every(
+            (contract) => contract.revisions.length > 0
+        )
+        if (!everyRelatedContractIsSubmitted) {
+            const message =
+                'Attempted to submit a rate related to a contract that has not been submitted'
+            console.error(message)
+            return new Error(message)
+        }
     }
 
     // update the rate with form data changes except for link/unlinking contracts.
@@ -61,7 +62,7 @@ async function submitRateInsideTransaction(
         const updatedDraftRate = await updateDraftRate(tx, {
             rateID: rateID,
             formData,
-            contractIDs: relatedContracts.map((cr) => cr.contract.id),
+            contractIDs: draftContracts?.map((c) => c.id) || [],
         })
 
         if (updatedDraftRate instanceof Error) {
@@ -73,7 +74,7 @@ async function submitRateInsideTransaction(
     // for rate and contract revisions on the RateRevisionsOnContractRevisionsTable.
     const updated = await tx.rateRevisionTable.update({
         where: {
-            id: rateID,
+            id: currentRev.id,
         },
         data: {
             submitInfo: {

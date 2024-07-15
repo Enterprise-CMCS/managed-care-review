@@ -1,4 +1,4 @@
-export { rateSchema, draftRateSchema } from './rateTypes'
+export { rateSchema } from './rateTypes'
 
 export {
     contractSchema,

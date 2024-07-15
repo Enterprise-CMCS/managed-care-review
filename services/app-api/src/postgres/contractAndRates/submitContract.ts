@@ -98,17 +98,17 @@ async function submitContractInsideTransaction(
         },
     })
 
-    // // we only want to update the rateRevision's submit info if it has not already been submitted
-    // await tx.rateRevisionTable.updateMany({
-    //     where: {
-    //         id: {
-    //             in: unsubmittedChildRevs.map((rev) => rev.id),
-    //         },
-    //     },
-    //     data: {
-    //         submitInfoID: submitInfo.id,
-    //     },
-    // })
+    // we only want to update the rateRevision's submit info if it has not already been submitted
+    await tx.rateRevisionTable.updateMany({
+        where: {
+            id: {
+                in: unsubmittedChildRevs.map((rev) => rev.id),
+            },
+        },
+        data: {
+            submitInfoID: submitInfo.id,
+        },
+    })
 
     // oldRev is the previously submitted revision of this contract (the one just superseded by the update)
     // on an initial submission, there won't be an oldRev

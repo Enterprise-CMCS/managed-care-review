@@ -2,7 +2,7 @@ import type { PrismaTransactionType } from '../prismaTypes'
 import type { ContractType } from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../postgresErrors'
 import { parseContractWithHistory } from './parseContractWithHistory'
-import { includeFullContract } from './prismaSubmittedContractHelpers'
+import { includeFullContract } from './prismaFullContractRateHelpers'
 
 type ContractOrErrorType = {
     contractID: string

@@ -75,8 +75,10 @@ describe('submitContract', () => {
 
         // check that they have the same submitInfos
         const contractSubmitInfo = result.revisions[0].submitInfo
-        const rateSubmitInfoA = result.revisions[0].rateRevisions[0].submitInfo
-        const rateSubmitInfoB = result.revisions[0].rateRevisions[1].submitInfo
+        const rateSubmitInfoA =
+            result.packageSubmissions[0].rateRevisions[0].submitInfo
+        const rateSubmitInfoB =
+            result.packageSubmissions[0].rateRevisions[1].submitInfo
         expect(contractSubmitInfo).toBeDefined()
         expect(rateSubmitInfoA).toBeDefined()
         expect(rateSubmitInfoB).toBeDefined()
@@ -156,8 +158,10 @@ describe('submitContract', () => {
 
         // check that they have the same submitInfos
         const contractSubmitInfo = result.revisions[0].submitInfo
-        const rateSubmitInfoA = result.revisions[0].rateRevisions[0].submitInfo
-        const rateSubmitInfoB = result.revisions[0].rateRevisions[1].submitInfo
+        const rateSubmitInfoA =
+            result.packageSubmissions[0].rateRevisions[0].submitInfo
+        const rateSubmitInfoB =
+            result.packageSubmissions[0].rateRevisions[1].submitInfo
         expect(contractSubmitInfo).toBeDefined()
         expect(rateSubmitInfoA).toBeDefined()
         expect(rateSubmitInfoB).toBeDefined()

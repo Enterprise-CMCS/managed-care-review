@@ -236,9 +236,13 @@ async function unlockContractInTransaction(
     if (!contract.draftRevision) {
         return new Error('Unlocked Contract is missing draft revision')
     }
+    if (!contract.draftRates) {
+        return new Error('Unlocked Contract is missing draft rates')
+    }
     const unlockedContract: UnlockedContractType = {
         ...contract,
         draftRevision: contract.draftRevision,
+        draftRates: contract.draftRates,
     }
     return unlockedContract
 }

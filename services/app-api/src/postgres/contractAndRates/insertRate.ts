@@ -4,7 +4,7 @@ import type {
     RateType,
 } from '../../domain-models/contractAndRates'
 import { parseRateWithHistory } from './parseRateWithHistory'
-import { includeFullRate } from './prismaSubmittedRateHelpers'
+import { includeFullRate } from './prismaFullContractRateHelpers'
 import type { PrismaClient } from '@prisma/client'
 
 type InsertRateArgsType = RateFormEditableType & {
