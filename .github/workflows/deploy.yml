@@ -634,14 +634,18 @@ jobs:
           echo "Contents of coverage-all directory:"
           ls -R ./coverage-all
 
-          echo "Merge the cypress, web, and api reports into one report"
-          npx c8 merge ./reports/* -o ./coverage-all/coverage.json
+          echo "Merge all reports into one"
+          npx c8 report -r json -o ./coverage-all/coverage.json \
+            -i ./reports/from-api.json \
+            -i ./reports/from-cypress/coverage-final.json \
+            -i ./reports/from-unit-test.json
 
           echo "Generate the html report from the combined coverage report"
-          npx c8 report -r lcov -r text -r json-summary --report-dir coverage-all
+          npx c8 report -r lcov -r text -r json-summary --report-dir coverage-all -i ./coverage-all/coverage.json
 
           cd coverage-all
-          echo "Coverage reports merged"
+          echo "Coverage reports merged and final report generated"
+          ls -R
 
       - name: Upload combined test coverage
         uses: actions/upload-artifact@v4
