@@ -4,13 +4,14 @@
     "version": "1.0.0",
     "description": "app-proto Typescript definitions and helpers",
     "scripts": {
-        "generate": "yarn proto:compile && yarn proto:generate-cjs && yarn proto:ts && yarn proto:copy-web && yarn proto:copy-cypress",
+        "generate": "yarn proto:compile && yarn proto:generate-cjs && yarn proto:copy-api && yarn proto:ts && yarn proto:copy-web && yarn proto:copy-cypress",
         "generate:watch": "find src | entr yarn generate",
         "proto:compile": "rm -rf gen && mkdir gen && pbjs -t static-module -w es6 -o ./gen/healthPlanFormDataProto.js src/health_plan_form_data.proto",
-        "proto:generate-cjs": "pbjs -t static-module -w commonjs -o ./gen/healthPlanFormDataProto.cjs src/health_plan_form_data.proto && cp ./gen/healthPlanFormDataProto.cjs ../app-api/src/gen/healthPlanFormDataProto.js && rm ./gen/healthPlanFormDataProto.cjs",
+        "proto:generate-cjs": "pbjs -t static-module -w commonjs -o ./gen/healthPlanFormDataProto.cjs src/health_plan_form_data.proto",
         "proto:ts": "pbts -o ./gen/healthPlanFormDataProto.d.ts ./gen/healthPlanFormDataProto.js",
         "proto:copy-web": "rsync -av ./gen/ ../app-web/src/gen",
         "proto:copy-cypress": "rsync -av ./gen/ ../cypress/gen",
+        "proto:copy-api": "rsync -av ./gen/healthPlanFormDataProto.cjs ../app-api/src/gen/ && mv ../app-api/src/gen/healthPlanFormDataProto.cjs ../app-api/src/gen/healthPlanFormDataProto.js && rm ./gen/healthPlanFormDataProto.cjs",
         "precommit": "lint-staged",
         "lint": "protolint lint ."
     },
