@@ -1,4 +1,4 @@
-import { Contract, ContractRevision } from '../gen/gqlClient'
+import type { Contract, ContractRevision } from '../gen/gqlClient'
 import { getLastContractSubmission } from '../gqlHelpers/contractsAndRates'
 
 const getContractRev = (contract: Contract): ContractRevision | undefined => {
@@ -10,9 +10,8 @@ const getContractRev = (contract: Contract): ContractRevision | undefined => {
 }
 const isContractOnly = (contract: Contract): boolean => {
     const contractRev = getContractRev(contract)
-    return contractRev?.formData?.submissionType === 'CONTRACT_ONLY' 
+    return contractRev?.formData?.submissionType === 'CONTRACT_ONLY'
 }
-
 
 const isBaseContract = (contract: Contract): boolean => {
     const contractRev = getContractRev(contract)
@@ -35,7 +34,8 @@ const isContractAndRates = (contract: Contract): boolean => {
 }
 
 const isContractWithProvisions = (contract: Contract): boolean =>
-    isContractAmendment(contract) || (isBaseContract(contract) && !isCHIPOnly(contract))
+    isContractAmendment(contract) ||
+    (isBaseContract(contract) && !isCHIPOnly(contract))
 
 const isSubmitted = (contract: Contract): boolean =>
     contract.status === 'SUBMITTED'
