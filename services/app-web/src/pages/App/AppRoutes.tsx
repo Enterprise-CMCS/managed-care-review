@@ -25,9 +25,7 @@ import { Landing } from '../Landing/Landing'
 import { MccrsId } from '../MccrsId/MccrsId'
 import { NewStateSubmissionForm, StateSubmissionForm } from '../StateSubmission'
 import { SubmissionSummary } from '../SubmissionSummary'
-import { SubmissionSummaryV2 } from '../SubmissionSummary/V2/SubmissionSummaryV2'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
-import { SubmissionRevisionSummaryV2 } from '../SubmissionRevisionSummary'
 import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
 import { featureFlags } from '../../common-code/featureFlags'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
@@ -82,10 +80,6 @@ const StateUserRoutes = ({
     const showRatePages: boolean = ldClient?.variation(
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
-    )
-    const useLinkedRates = ldClient?.variation(
-        featureFlags.LINK_RATES.flag,
-        featureFlags.LINK_RATES.defaultValue
     )
     return (
         <AuthenticatedRouteWrapper setAlert={setAlert} authMode={authMode}>
@@ -143,13 +137,7 @@ const StateUserRoutes = ({
                     )}
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={
-                            useLinkedRates ? (
-                                <SubmissionSummaryV2 />
-                            ) : (
-                                <SubmissionSummary />
-                            )
-                        }
+                        element={<SubmissionSummary />}
                     />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
@@ -158,13 +146,7 @@ const StateUserRoutes = ({
                 </Route>
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
-                    element={
-                        useLinkedRates ? (
-                            <SubmissionRevisionSummaryV2 />
-                        ) : (
-                            <SubmissionRevisionSummary />
-                        )
-                    }
+                    element={<SubmissionRevisionSummary />}
                 />
                 {UniversalRoutes}
                 {stageName !== 'prod' && (
@@ -191,11 +173,6 @@ const CMSUserRoutes = ({
     showQuestionResponse: boolean
     stageName?: string
 }): React.ReactElement => {
-    const ldClient = useLDClient()
-    const useLinkedRates = ldClient?.variation(
-        featureFlags.LINK_RATES.flag,
-        featureFlags.LINK_RATES.defaultValue
-    )
     return (
         <AuthenticatedRouteWrapper authMode={authMode} setAlert={setAlert}>
             <Routes>
@@ -239,13 +216,7 @@ const CMSUserRoutes = ({
                     )}
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={
-                            useLinkedRates ? (
-                                <SubmissionSummaryV2 />
-                            ) : (
-                                <SubmissionSummary />
-                            )
-                        }
+                        element={<SubmissionSummary />}
                     />
                 </Route>
 
@@ -261,13 +232,7 @@ const CMSUserRoutes = ({
 
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
-                    element={
-                        useLinkedRates ? (
-                            <SubmissionRevisionSummaryV2 />
-                        ) : (
-                            <SubmissionRevisionSummary />
-                        )
-                    }
+                    element={<SubmissionRevisionSummary />}
                 />
                 {stageName !== 'prod' && (
                     <Route
@@ -325,7 +290,7 @@ export const AppRoutes = ({
         'LOGIN_REDIRECT',
         null
     )
-    const stageName = process.env.REACT_APP_STAGE_NAME
+    const stageName = import.meta.env.VITE_APP_STAGE_NAME
     const showExpirationModal: boolean = ldClient?.variation(
         featureFlags.SESSION_EXPIRING_MODAL.flag,
         featureFlags.SESSION_EXPIRING_MODAL.defaultValue

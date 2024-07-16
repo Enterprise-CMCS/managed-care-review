@@ -1,12 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
 import {
-    Button,
     DatePicker,
     DateRangePicker,
     Fieldset,
     FormGroup,
     Label,
-    Link,
 } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 import {
@@ -15,9 +13,11 @@ import {
     RateType,
 } from '../../../common-code/healthPlanFormDataType'
 import {
+    ButtonWithLogging,
     FieldRadio,
     FileItemT,
     FileUpload,
+    LinkWithLogging,
     PoliteErrorMessage,
     ProgramSelect,
     SectionCard,
@@ -43,7 +43,6 @@ import {
     SharedRateCertDisplay,
 } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { ActuaryContactFields } from '../Contacts'
-import { PackagesWithSharedRates } from './PackagesWithSharedRates'
 import { useFocus } from '../../../hooks'
 
 const isRateTypeEmpty = (values: RateCertFormType): boolean =>
@@ -185,14 +184,14 @@ export const SingleRateCert = ({
                         error={showFieldErrors('rateDocuments')}
                         hint={
                             <span className={styles.guidanceTextBlockNoPadding}>
-                                <Link
+                                <LinkWithLogging
                                     aria-label="Document definitions and requirements (opens in new window)"
                                     href={'/help#key-documents'}
                                     variant="external"
                                     target="_blank"
                                 >
                                     Document definitions and requirements
-                                </Link>
+                                </LinkWithLogging>
                                 <span className="padding-top-2">
                                     {`Upload only one rate certification document. Additional rates can be added later.`}
                                 </span>
@@ -238,14 +237,14 @@ export const SingleRateCert = ({
                         error={showFieldErrors('supportingDocuments')}
                         hint={
                             <span className={styles.guidanceTextBlockNoPadding}>
-                                <Link
+                                <LinkWithLogging
                                     aria-label="Document definitions and requirements (opens in new window)"
                                     href={'/help#key-documents'}
                                     variant="external"
                                     target="_blank"
                                 >
                                     Document definitions and requirements
-                                </Link>
+                                </LinkWithLogging>
                                 <span className="padding-top-1">
                                     {`Upload any supporting documents for Rate certification ${rateCertNumber}`}
                                 </span>
@@ -283,14 +282,6 @@ export const SingleRateCert = ({
                     />
                 </FormGroup>
 
-                <PackagesWithSharedRates
-                    index={index}
-                    keyProp={key}
-                    fieldNamePrefix={fieldNamePrefix}
-                    shouldValidate={shouldValidate}
-                    parentSubmissionID={parentSubmissionID}
-                />
-
                 <FormGroup error={Boolean(showFieldErrors('rateProgramIDs'))}>
                     <Label htmlFor={`${fieldNamePrefix}.rateProgramIDs`}>
                         Programs this rate certification covers
@@ -323,14 +314,14 @@ export const SingleRateCert = ({
                             {showFieldErrors('rateType')}
                         </PoliteErrorMessage>
 
-                        <Link
+                        <LinkWithLogging
                             aria-label="Rate certification type definitions (opens in new window)"
                             href={'/help#rate-cert-type-definitions'}
                             variant="external"
                             target="_blank"
                         >
                             Rate certification type definitions
-                        </Link>
+                        </LinkWithLogging>
                         <FieldRadio
                             id={`newRate-${index}`}
                             name={`${fieldNamePrefix}.rateType`}
@@ -605,7 +596,7 @@ export const SingleRateCert = ({
                                                         newActuaryContactNameRef
                                                     }
                                                 />
-                                                <Button
+                                                <ButtonWithLogging
                                                     type="button"
                                                     unstyled
                                                     className={
@@ -618,13 +609,13 @@ export const SingleRateCert = ({
                                                     data-testid="removeContactBtn"
                                                 >
                                                     Remove certifying actuary
-                                                </Button>
+                                                </ButtonWithLogging>
                                             </div>
                                         )
                                     )}
-                                <Button
+                                <button //this has to be this button element to take the ref prop
                                     type="button"
-                                    unstyled
+                                    className={`usa-button usa-button--outline ${styles.addRateBtn}`}
                                     onClick={() => {
                                         push(emptyActuaryContact)
                                         setFocusNewActuaryContact(true)
@@ -632,7 +623,7 @@ export const SingleRateCert = ({
                                     ref={newActuaryContactButtonRef}
                                 >
                                     Add a certifying actuary
-                                </Button>
+                                </button>
                             </FormGroup>
                         )}
                     </FieldArray>
@@ -685,14 +676,14 @@ export const SingleRateCert = ({
                     </Fieldset>
                 </FormGroup>
                 {index >= 1 && multiRatesConfig && (
-                    <Button
+                    <ButtonWithLogging
                         type="button"
                         unstyled
                         className={styles.removeContactBtn}
                         onClick={multiRatesConfig.removeSelf}
                     >
                         Remove rate certification
-                    </Button>
+                    </ButtonWithLogging>
                 )}
             </Fieldset>
         </SectionCard>

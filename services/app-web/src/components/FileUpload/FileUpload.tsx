@@ -415,6 +415,10 @@ export const FileUpload = ({
                 ref={fileInputRef}
                 aria-required={inputRequired}
                 crossOrigin="anonymous"
+                // eslint-disable-next-line @typescript-eslint/no-empty-function
+                onPointerEnterCapture={() => {}}
+                // eslint-disable-next-line @typescript-eslint/no-empty-function
+                onPointerLeaveCapture={() => {}}
             />
             <h5 tabIndex={-1} ref={summaryRef} className={styles.fileSummary}>
                 {`${summary} ${summaryDetailText}`}

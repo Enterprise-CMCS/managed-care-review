@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import * as Yup from 'yup'
-import { Form as UswdsForm, Fieldset, Button } from '@trussworks/react-uswds'
+import { Form as UswdsForm, Fieldset } from '@trussworks/react-uswds'
 import {
     Formik,
     FormikErrors,
@@ -9,7 +9,7 @@ import {
     getIn,
     FieldArrayRenderProps,
 } from 'formik'
-import { useNavigate } from 'react-router-dom'
+import { generatePath, useNavigate } from 'react-router-dom'
 
 import styles from '../StateSubmissionForm.module.scss'
 
@@ -24,12 +24,17 @@ import {
     type HealthPlanFormPageProps,
 } from '../StateSubmissionForm'
 import { RoutesRecord } from '../../../constants'
-import { DynamicStepIndicator, SectionCard } from '../../../components'
+import {
+    ButtonWithLogging,
+    DynamicStepIndicator,
+    SectionCard,
+} from '../../../components'
 import { FormContainer } from '../FormContainer'
 import {
     useCurrentRoute,
     useHealthPlanPackageForm,
     useRouteParams,
+    useTealium,
 } from '../../../hooks'
 import { useAuth } from '../../../contexts/AuthContext'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
@@ -72,6 +77,7 @@ const Contacts = ({
         React.useState(false)
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
+    const { logButtonEvent } = useTealium()
 
     // set up API handling and HPP data
     const { loggedInUser } = useAuth()
@@ -196,7 +202,7 @@ const Contacts = ({
 
     return (
         <>
-            <div className={styles.stepIndicator}>
+            <div>
                 <DynamicStepIndicator
                     formPages={activeFormPages(draftSubmission)}
                     currentFormPage={currentRoute}
@@ -352,9 +358,10 @@ const Contacts = ({
 
                                                                         {index >
                                                                             0 && (
-                                                                            <Button
+                                                                            <ButtonWithLogging
                                                                                 type="button"
                                                                                 unstyled
+                                                                                parent_component_type="page body"
                                                                                 className={
                                                                                     styles.removeContactBtn
                                                                                 }
@@ -367,7 +374,7 @@ const Contacts = ({
                                                                             >
                                                                                 Remove
                                                                                 contact
-                                                                            </Button>
+                                                                            </ButtonWithLogging>
                                                                         )}
                                                                     </Fieldset>
                                                                 </div>
@@ -378,6 +385,15 @@ const Contacts = ({
                                                         type="button"
                                                         className={`usa-button usa-button--outline ${styles.addContactBtn}`}
                                                         onClick={() => {
+                                                            logButtonEvent({
+                                                                text: 'Add another state contact',
+                                                                button_style:
+                                                                    'transparent',
+                                                                button_type:
+                                                                    'button',
+                                                                parent_component_type:
+                                                                    'page body',
+                                                            })
                                                             push(
                                                                 emptyStateContact
                                                             )
@@ -400,7 +416,9 @@ const Contacts = ({
                                 <PageActions
                                     saveAsDraftOnClick={() => {
                                         if (!dirty) {
-                                            navigate(`/dashboard/submissions`)
+                                            navigate(
+                                                RoutesRecord.DASHBOARD_SUBMISSIONS
+                                            )
                                         } else {
                                             setShouldValidate(true)
                                             setFocusErrorSummaryHeading(true)
@@ -422,6 +440,22 @@ const Contacts = ({
                                         setFocusErrorSummaryHeading(true)
                                     }}
                                     actionInProgress={isSubmitting}
+                                    backOnClickUrl={
+                                        draftSubmission.submissionType ===
+                                        'CONTRACT_ONLY'
+                                            ? generatePath(
+                                                  RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
+                                                  { id }
+                                              )
+                                            : generatePath(
+                                                  RoutesRecord.SUBMISSIONS_RATE_DETAILS,
+                                                  { id }
+                                              )
+                                    }
+                                    saveAsDraftOnClickUrl={
+                                        RoutesRecord.DASHBOARD_SUBMISSIONS
+                                    }
+                                    continueOnClickUrl="/edit/documents"
                                 />
                             </UswdsForm>
                         </>

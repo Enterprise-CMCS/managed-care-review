@@ -1,10 +1,10 @@
 import React, { useState, ComponentProps, useLayoutEffect } from 'react'
 import { Button as UswdsButton } from '@trussworks/react-uswds'
 import classnames from 'classnames'
-
 import styles from './ActionButton.module.scss'
-
 import { Spinner } from '../Spinner'
+import { TealiumButtonEventObject } from '../../tealium'
+import { ButtonWithLogging } from '../TealiumLogging'
 
 /* 
 Main application-wide action button. 
@@ -15,7 +15,8 @@ type ActionButtonProps = {
     variant?: 'default' | 'secondary' | 'outline' | 'linkStyle' | 'success'
     loading?: boolean
     animationTimeout?: number // used for loading animation
-} & ComponentProps<typeof UswdsButton>
+} & ComponentProps<typeof UswdsButton> &
+    Omit<TealiumButtonEventObject, 'event_name' | 'text' | 'link_type'>
 
 export const ActionButton = ({
     disabled,
@@ -82,7 +83,7 @@ export const ActionButton = ({
     }
 
     return (
-        <UswdsButton
+        <ButtonWithLogging
             onClick={
                 isDisabled || isLoading ? (e) => e.preventDefault() : onClick
             }
@@ -101,6 +102,6 @@ export const ActionButton = ({
             >
                 {showLoading ? 'Loading' : children}
             </span>
-        </UswdsButton>
+        </ButtonWithLogging>
     )
 }

@@ -1,5 +1,5 @@
 import * as Yup from 'yup'
-import { Story } from '@storybook/react'
+import { StoryFn } from '@storybook/react'
 import { Formik } from 'formik'
 import { FieldTextarea, TextAreaProps } from './FieldTextarea'
 import { Link } from '@trussworks/react-uswds'
@@ -14,7 +14,7 @@ const schema = Yup.object().shape({
     ),
 })
 
-const Template: Story<TextAreaProps> = (args) => (
+const Template: StoryFn<TextAreaProps> = (args) => (
     <Formik
         initialValues={{ submissionDescription: '' }}
         validationSchema={schema}

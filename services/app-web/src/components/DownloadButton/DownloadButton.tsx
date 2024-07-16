@@ -1,5 +1,5 @@
 import React, { ComponentProps } from 'react'
-import { Link } from '@trussworks/react-uswds'
+import { LinkWithLogging } from '../TealiumLogging/Link'
 import { Spinner } from '../Spinner'
 import styles from './DownloadButton.module.scss'
 import classnames from 'classnames'
@@ -7,7 +7,7 @@ import classnames from 'classnames'
 type DownloadButtonProps = {
     text: string
     zippedFilesURL: string | undefined
-} & Partial<ComponentProps<typeof Link>>
+} & Partial<ComponentProps<typeof LinkWithLogging>>
 
 export const DownloadButton = ({
     text,
@@ -24,14 +24,14 @@ export const DownloadButton = ({
     return (
         <div>
             {zippedFilesURL ? (
-                <Link
+                <LinkWithLogging
                     className={classes}
                     variant="unstyled"
                     href={zippedFilesURL}
                     target="_blank"
                 >
                     <span className={styles.buttonTextWithoutIcon}>{text}</span>
-                </Link>
+                </LinkWithLogging>
             ) : (
                 <div className={classes} aria-label="Loading">
                     <Spinner size="small" />

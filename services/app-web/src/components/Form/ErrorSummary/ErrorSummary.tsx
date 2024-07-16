@@ -2,6 +2,7 @@ import classNames from 'classnames'
 import classnames from 'classnames'
 import React from 'react'
 import styles from './ErrorSummary.module.scss'
+import { LinkWithLogging } from '../../TealiumLogging/Link'
 
 type ErrorSummaryMessageProps = {
     errorKey: string
@@ -27,7 +28,7 @@ const ErrorSummaryMessage = ({
     }
 
     return (
-        <a
+        <LinkWithLogging
             href={href}
             className={classnames(styles.message)}
             data-testid="error-summary-message"
@@ -35,14 +36,14 @@ const ErrorSummaryMessage = ({
                 const fieldElement: HTMLElement | null =
                     document.querySelector(fieldSelector)
 
-                    if (fieldElement) {
+                if (fieldElement) {
                     event.preventDefault()
                     fieldElement.focus()
                 }
             }}
         >
             {message}
-        </a>
+        </LinkWithLogging>
     )
 }
 

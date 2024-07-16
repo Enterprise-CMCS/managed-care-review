@@ -2,7 +2,7 @@ import React from 'react'
 import { ExpandableText, ExpandableTextProps } from './ExpandableText'
 import { GridContainer } from '@trussworks/react-uswds'
 
-import type { Story } from '@storybook/react'
+import type { StoryFn } from '@storybook/react'
 
 export default {
     title: 'Components/ExpandableText',
@@ -20,7 +20,7 @@ const longText =
 
 const shortText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
 
-const Template: Story<
+const Template: StoryFn<
     ExpandableTextProps & React.HTMLAttributes<HTMLParagraphElement>
 > = (args) => {
     const { children, clampedLines } = args

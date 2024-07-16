@@ -2,8 +2,8 @@ import React from 'react'
 import { FileItemT } from '../FileProcessor/FileProcessor'
 
 import styles from '../FileUpload.module.scss'
-import { Button } from '@trussworks/react-uswds'
 import { SPACER_GIF } from '../constants'
+import { ButtonWithLogging } from '../../TealiumLogging'
 
 type FileListItemProps = {
     errorRowClass?: string
@@ -67,23 +67,23 @@ export const FileListItem = ({
                 </span>
             </div>
             <div className={styles.fileItemButtons}>
-                <Button
+                <ButtonWithLogging
                     type="button"
                     unstyled
                     onClick={handleDelete}
                     aria-label={`Remove ${name} document`}
                 >
                     Remove
-                </Button>
+                </ButtonWithLogging>
                 {hasRecoverableError && (
-                    <Button
+                    <ButtonWithLogging
                         type="button"
                         unstyled
                         onClick={handleRetry}
                         aria-label={`Retry upload for ${name} document`}
                     >
                         Retry
-                    </Button>
+                    </ButtonWithLogging>
                 )}
             </div>
         </>

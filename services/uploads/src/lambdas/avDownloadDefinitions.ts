@@ -18,10 +18,10 @@ async function avDownloadDefinitions(_event: S3Event, _context: Context) {
         throw new Error('Configuration Error: stage env var must be set')
     }
 
-    const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
+    const otelCollectorURL = process.env.VITE_APP_OTEL_COLLECTOR_URL
     if (!otelCollectorURL || otelCollectorURL === '') {
         throw new Error(
-            'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
+            'Configuration Error: VITE_APP_OTEL_COLLECTOR_URL must be set'
         )
     }
 

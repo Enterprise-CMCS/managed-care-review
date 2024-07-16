@@ -4,7 +4,8 @@ import userEvent from '@testing-library/user-event'
 
 import { FileItemT } from '../FileProcessor/FileProcessor'
 import { FileItemsList } from './FileItemsList'
-import { TEST_PDF_FILE } from '../../../testHelpers/jestHelpers'
+import { TEST_PDF_FILE } from '../../../testHelpers'
+import * as tealium from '../../../hooks/useTealium'
 
 describe('FileItemList component', () => {
     const pending: FileItemT = {
@@ -59,11 +60,24 @@ describe('FileItemList component', () => {
         status: 'DUPLICATE_NAME_ERROR',
     }
     const buttonActionProps = {
-        deleteItem: jest.fn(),
-        retryItem: jest.fn(),
+        deleteItem: vi.fn(),
+        retryItem: vi.fn(),
     }
 
-    beforeEach(() => jest.clearAllMocks())
+    const spyOnUseTealium = vi.spyOn(tealium, 'useTealium')
+
+    beforeEach(() => {
+        spyOnUseTealium.mockImplementation(() => ({
+            logButtonEvent: () => {
+                return
+            },
+            logInternalLinkEvent: () => {
+                return
+            },
+        }))
+    })
+    afterEach(() => vi.clearAllMocks())
+
     it('renders a list without errors', () => {
         const fileItems = [pending, uploadError]
         render(<FileItemsList fileItems={fileItems} {...buttonActionProps} />)

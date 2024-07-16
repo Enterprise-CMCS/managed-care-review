@@ -1,5 +1,4 @@
-import { Link, SideNav, GridContainer, Icon } from '@trussworks/react-uswds'
-import { NavLink } from 'react-router-dom'
+import { SideNav, GridContainer, Icon } from '@trussworks/react-uswds'
 import styles from './SubmissionSideNav.module.scss'
 import { useParams, useLocation, Outlet } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
@@ -10,7 +9,7 @@ import {
 } from '../../constants/routes'
 import { getRouteName } from '../../routeHelpers'
 import { useFetchHealthPlanPackageWithQuestionsWrapper } from '../../gqlHelpers'
-import { Loading } from '../../components'
+import { Loading, NavLinkWithLogging } from '../../components'
 import { ApolloError } from '@apollo/client'
 import { handleApolloError } from '../../gqlHelpers/apolloErrors'
 import { recordJSException } from '../../otelHelpers'
@@ -167,8 +166,7 @@ export const SubmissionSideNav = () => {
                 {showSidebar && (
                     <div className={styles.verticalNavContainer}>
                         <div className={styles.backLinkContainer}>
-                            <Link
-                                asCustom={NavLink}
+                            <NavLinkWithLogging
                                 to={{
                                     pathname:
                                         RoutesRecord.DASHBOARD_SUBMISSIONS,
@@ -180,18 +178,17 @@ export const SubmissionSideNav = () => {
                                 ) : (
                                     <span>&nbsp;Back to dashboard</span>
                                 )}
-                            </Link>
+                            </NavLinkWithLogging>
                         </div>
                         <SideNav
                             items={[
-                                <Link
+                                <NavLinkWithLogging
                                     to={
                                         isStateUser &&
                                         submissionStatus === 'UNLOCKED'
                                             ? `/submissions/${id}/edit/review-and-submit`
                                             : `/submissions/${id}`
                                     }
-                                    asCustom={NavLink}
                                     className={isSelectedLink(
                                         isStateUser &&
                                             submissionStatus === 'UNLOCKED'
@@ -203,16 +200,15 @@ export const SubmissionSideNav = () => {
                                     submissionStatus === 'UNLOCKED'
                                         ? 'Submission'
                                         : 'Submission summary'}
-                                </Link>,
-                                <Link
+                                </NavLinkWithLogging>,
+                                <NavLinkWithLogging
                                     to={`/submissions/${id}/question-and-answers`}
-                                    asCustom={NavLink}
                                     className={isSelectedLink(
                                         'SUBMISSIONS_QUESTIONS_AND_ANSWERS'
                                     )}
                                 >
                                     Q&A
-                                </Link>,
+                                </NavLinkWithLogging>,
                             ]}
                         />
                     </div>

@@ -10,7 +10,7 @@ import type { GenericDocument } from '../../../gen/gqlClient'
 
 describe('UploadedDocumentsTable', () => {
     afterEach(() => {
-        jest.clearAllMocks()
+        vi.clearAllMocks()
     })
     it('renders documents without errors', async () => {
         const testDocuments = [
@@ -429,9 +429,7 @@ describe('UploadedDocumentsTable', () => {
                         }),
                     ],
                 },
-                featureFlags: {
-                    'link-rates': false,
-                },
+                featureFlags: {},
             }
         )
 
@@ -470,9 +468,7 @@ describe('UploadedDocumentsTable', () => {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
-                featureFlags: {
-                    'link-rates': false,
-                },
+                featureFlags: {},
             }
         )
 
@@ -516,9 +512,7 @@ describe('UploadedDocumentsTable', () => {
                         }),
                     ],
                 },
-                featureFlags: {
-                    'link-rates': true,
-                },
+                featureFlags: {},
             }
         )
 
@@ -562,9 +556,7 @@ describe('UploadedDocumentsTable', () => {
                         }),
                     ],
                 },
-                featureFlags: {
-                    'link-rates': true,
-                },
+                featureFlags: {},
             }
         )
 
@@ -611,13 +603,14 @@ describe('UploadedDocumentsTable', () => {
                         }),
                     ],
                 },
-                featureFlags: {
-                    'link-rates': true,
-                },
+                featureFlags: {},
             }
         )
 
-        expect(await screen.findByTestId('tag')).not.toBeInTheDocument()
+        const tag = await screen.queryByTestId('tag')
+        await waitFor(() => {
+            expect(tag).not.toBeInTheDocument()
+        })
         expect(
             await screen.queryByText('Linked submissions')
         ).not.toBeInTheDocument()

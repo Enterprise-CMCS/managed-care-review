@@ -172,11 +172,13 @@ export const UploadQuestions = () => {
                             variant="outline"
                             data-testid="page-actions-left-secondary"
                             disabled={apiLoading}
-                            onClick={() => {
+                            parent_component_type="page body"
+                            link_url={`/submissions/${id}/question-and-answers`}
+                            onClick={() =>
                                 navigate(
                                     `/submissions/${id}/question-and-answers`
                                 )
-                            }}
+                            }
                         >
                             Cancel
                         </ActionButton>
@@ -185,6 +187,8 @@ export const UploadQuestions = () => {
                             type="submit"
                             variant="default"
                             data-testid="page-actions-right-primary"
+                            parent_component_type="page body"
+                            link_url={`/submissions/${id}/question-and-answers?submit=question`}
                             disabled={showFileUploadError}
                             animationTimeout={1000}
                             loading={apiLoading}

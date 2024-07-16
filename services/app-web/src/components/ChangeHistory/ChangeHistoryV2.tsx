@@ -1,10 +1,12 @@
 import React from 'react'
 import { dayjs } from '../../common-code/dateHelpers/dayjs'
 import { SectionHeader } from '../SectionHeader'
-import { Accordion, Link } from '@trussworks/react-uswds'
+import { Accordion } from '@trussworks/react-uswds'
 import type { AccordionItemProps } from '@trussworks/react-uswds/lib/components/Accordion/Accordion'
 import { UpdateInformation, Contract } from '../../gen/gqlClient'
 import styles from './ChangeHistory.module.scss'
+import { LinkWithLogging } from '../TealiumLogging/Link'
+
 type ChangeHistoryProps = {
     contract: Contract
 }
@@ -14,7 +16,7 @@ type flatRevisions = UpdateInformation & {
     revisionVersion: string | undefined
 }
 
-export const ChangeHistoryV2 = ({
+export const ChangeHistory = ({
     contract,
 }: ChangeHistoryProps): React.ReactElement => {
     const flattenedRevisions = (): flatRevisions[] => {
@@ -88,11 +90,10 @@ export const ChangeHistoryV2 = ({
         (r, index) => {
             const isInitialSubmission = r.updatedReason === 'Initial submission'
             const isSubsequentSubmission = r.kind === 'submit'
-            // console.log(isInitialSubmission, r, 'is initial submision')
+
             // We want to know if this contract has multiple submissions. To have multiple submissions, there must be minimum
             // more than the initial contract revision.
             const hasSubsequentSubmissions = revisionHistory.length > 1
-            // console.log(hasSubsequentSubmissions, 'has sub sub')
 
             return {
                 title: (
@@ -114,12 +115,12 @@ export const ChangeHistoryV2 = ({
                         <span> {r.updatedBy}&nbsp;</span>
                         <br />
                         {r.revisionVersion && hasSubsequentSubmissions && (
-                            <Link
+                            <LinkWithLogging
                                 href={`/submissions/${contract.id}/revisions/${r.revisionVersion}`}
                                 data-testid={`revision-link-${r.revisionVersion}`}
                             >
                                 View past submission version
-                            </Link>
+                            </LinkWithLogging>
                         )}
                     </div>
                 ) : (
@@ -141,17 +142,17 @@ export const ChangeHistoryV2 = ({
                             <span>{r.updatedReason}</span>
                         </div>
                         {isSubsequentSubmission && r.revisionVersion && (
-                            <Link
+                            <LinkWithLogging
                                 href={`/submissions/${contract.id}/revisions/${r.revisionVersion}`}
                                 data-testid={`revision-link-${r.revisionVersion}`}
                             >
                                 View past submission version
-                            </Link>
+                            </LinkWithLogging>
                         )}
                     </div>
                 ),
                 expanded: false,
-                id: r.updatedAt.toString(),
+                id: dayjs(r.updatedAt).toISOString(),
             }
         }
     )

@@ -32,13 +32,11 @@ import { RoutesRecord } from '../../../constants'
 export const UploadResponse = () => {
     // router context
     const { division, id, questionID } = useParams<{
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         division: string
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         id: string
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         questionID: string
     }>()
+
     const navigate = useNavigate()
 
     // api
@@ -184,11 +182,13 @@ export const UploadResponse = () => {
                             variant="outline"
                             data-testid="page-actions-left-secondary"
                             disabled={apiLoading}
-                            onClick={() => {
+                            link_url={`/submissions/${id}/question-and-answers`}
+                            parent_component_type="page body"
+                            onClick={() =>
                                 navigate(
                                     `/submissions/${id}/question-and-answers`
                                 )
-                            }}
+                            }
                         >
                             Cancel
                         </ActionButton>
@@ -200,6 +200,8 @@ export const UploadResponse = () => {
                             disabled={showFileUploadError}
                             animationTimeout={1000}
                             loading={apiLoading}
+                            link_url={`/submissions/${id}/question-and-answers?submit=question`}
+                            parent_component_type="page body"
                         >
                             Send response
                         </ActionButton>

@@ -145,7 +145,7 @@ const apolloProviderWithCMSUser = () => ({
 describe('HealthPlanPackageTable for CMS User (with filters)', () => {
     beforeEach(() => {
         window.location.assign('#')
-        jest.clearAllMocks()
+        vi.clearAllMocks()
     })
 
     it('renders table and caption if passed in', async () => {

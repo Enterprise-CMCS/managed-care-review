@@ -15,29 +15,29 @@ import * as useRouteParams from '../../../hooks/useRouteParams'
 import * as useHealthPlanPackageForm from '../../../hooks/useHealthPlanPackageForm'
 
 describe('Contacts', () => {
-    const mockUpdateDraftFn = jest.fn()
+    const mockUpdateDraftFn = vi.fn()
     beforeEach(() => {
-        jest.spyOn(
+        vi.spyOn(
             useHealthPlanPackageForm,
             'useHealthPlanPackageForm'
         ).mockReturnValue({
             updateDraft: mockUpdateDraftFn,
-            createDraft: jest.fn(),
+            createDraft: vi.fn(),
             showPageErrorMessage: false,
             draftSubmission: mockDraft(),
         })
-        jest.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
+        vi.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
             id: '123-abc',
         })
     })
 
     afterEach(() => {
-        jest.clearAllMocks()
-        jest.spyOn(
+        vi.clearAllMocks()
+        vi.spyOn(
             useHealthPlanPackageForm,
             'useHealthPlanPackageForm'
         ).mockRestore()
-        jest.spyOn(useRouteParams, 'useRouteParams').mockRestore()
+        vi.spyOn(useRouteParams, 'useRouteParams').mockRestore()
     })
 
     const contractAndRatesWithEmptyContacts =
@@ -80,12 +80,12 @@ describe('Contacts', () => {
     })
 
     it('checks saved mocked state contacts correctly', async () => {
-        jest.spyOn(
+        vi.spyOn(
             useHealthPlanPackageForm,
             'useHealthPlanPackageForm'
         ).mockImplementation(() => {
             return {
-                createDraft: jest.fn(),
+                createDraft: vi.fn(),
                 updateDraft: mockUpdateDraftFn,
                 showPageErrorMessage: false,
                 draftSubmission: mockBaseContract(),
@@ -159,12 +159,12 @@ describe('Contacts', () => {
                 },
             ],
         }
-        jest.spyOn(
+        vi.spyOn(
             useHealthPlanPackageForm,
             'useHealthPlanPackageForm'
         ).mockImplementation(() => {
             return {
-                createDraft: jest.fn(),
+                createDraft: vi.fn(),
                 updateDraft: mockUpdateDraftFn,
                 showPageErrorMessage: false,
                 draftSubmission: emptyContactsDraft,
@@ -245,12 +245,12 @@ describe('Contacts', () => {
     })
 
     it('when there are multiple state contacts, they should numbered', async () => {
-        jest.spyOn(
+        vi.spyOn(
             useHealthPlanPackageForm,
             'useHealthPlanPackageForm'
         ).mockImplementation(() => {
             return {
-                createDraft: jest.fn(),
+                createDraft: vi.fn(),
                 updateDraft: mockUpdateDraftFn,
                 showPageErrorMessage: false,
                 draftSubmission: contractAndRatesWithEmptyContacts(),

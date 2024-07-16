@@ -6,16 +6,17 @@ import {
     ModalToggleButton,
 } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
-import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
-import { ContractDetailsSummarySectionV2 } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/ContractDetailsSummarySectionV2'
-import { ContactsSummarySection } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/ContactsSummarySectionV2'
-import { RateDetailsSummarySectionV2 } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/RateDetailsSummarySectionV2'
-import { SubmissionTypeSummarySectionV2 } from '../../StateSubmission/ReviewSubmit/V2/ReviewSubmit/SubmissionTypeSummarySectionV2'
+import { ContractDetailsSummarySection } from '../../StateSubmission/ReviewSubmit/ContractDetailsSummarySection'
+import { ContactsSummarySection } from '../../StateSubmission/ReviewSubmit/ContactsSummarySection'
+import { RateDetailsSummarySection } from '../../StateSubmission/ReviewSubmit/RateDetailsSummarySection'
+import { SubmissionTypeSummarySection } from '../../StateSubmission/ReviewSubmit/SubmissionTypeSummarySection'
 import {
     SubmissionUnlockedBanner,
     SubmissionUpdatedBanner,
     DocumentWarningBanner,
+    NavLinkWithLogging,
+    LinkWithLogging,
 } from '../../../components'
 import { Loading } from '../../../components'
 import { usePage } from '../../../contexts/PageContext'
@@ -27,8 +28,8 @@ import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../Errors/Error404Page'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import styles from '../SubmissionSummary.module.scss'
-import { ChangeHistoryV2 } from '../../../components/ChangeHistory/ChangeHistoryV2'
-import { UnlockSubmitModalV2 } from '../../../components/Modal/V2/UnlockSubmitModalV2'
+import { ChangeHistory } from '../../../components/ChangeHistory'
+import { UnlockSubmitModal } from '../../../components/Modal'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
 import { RoutesRecord } from '../../../constants'
@@ -56,7 +57,7 @@ function UnlockModalButton({
     )
 }
 
-export const SubmissionSummaryV2 = (): React.ReactElement => {
+export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
     const { updateHeading } = usePage()
     const modalRef = useRef<ModalRef>(null)
@@ -198,8 +199,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                 )}
 
                 {!showQuestionResponse && (
-                    <Link
-                        asCustom={NavLink}
+                    <NavLinkWithLogging
                         to={{
                             pathname: RoutesRecord.DASHBOARD_SUBMISSIONS,
                         }}
@@ -210,11 +210,11 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                         ) : (
                             <span>&nbsp;Back to dashboard</span>
                         )}
-                    </Link>
+                    </NavLinkWithLogging>
                 )}
 
                 {
-                    <SubmissionTypeSummarySectionV2
+                    <SubmissionTypeSummarySection
                         subHeaderComponent={
                             isCMSUser ? (
                                 <div className={styles.subHeader}>
@@ -229,7 +229,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                                             </Link>
                                         </span>
                                     )}
-                                    <Link
+                                    <LinkWithLogging
                                         href={`/submissions/${contract.id}/mccrs-record-number`}
                                         className={
                                             contract.mccrsID
@@ -239,7 +239,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                                         aria-label={editOrAddMCCRSID}
                                     >
                                         {editOrAddMCCRSID}
-                                    </Link>
+                                    </LinkWithLogging>
                                 </div>
                             ) : undefined
                         }
@@ -263,7 +263,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                 }
 
                 {
-                    <ContractDetailsSummarySectionV2
+                    <ContractDetailsSummarySection
                         contract={contract}
                         isCMSUser={isCMSUser}
                         isStateUser={isStateUser}
@@ -274,7 +274,7 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                 }
 
                 {isContractActionAndRateCertification && (
-                    <RateDetailsSummarySectionV2
+                    <RateDetailsSummarySection
                         contract={contract}
                         submissionName={name}
                         isCMSUser={isCMSUser}
@@ -292,9 +292,9 @@ export const SubmissionSummaryV2 = (): React.ReactElement => {
                     />
                 }
 
-                {<ChangeHistoryV2 contract={contract} />}
+                {<ChangeHistory contract={contract} />}
                 {
-                    <UnlockSubmitModalV2
+                    <UnlockSubmitModal
                         modalRef={modalRef}
                         modalType="UNLOCK_CONTRACT"
                         submissionData={contract}

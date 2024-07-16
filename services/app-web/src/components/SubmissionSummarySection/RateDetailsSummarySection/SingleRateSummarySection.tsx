@@ -18,8 +18,8 @@ import { DocumentWarningBanner } from '../../Banner'
 import { useS3 } from '../../../contexts/S3Context'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { recordJSException } from '../../../otelHelpers'
-import { Grid, Link } from '@trussworks/react-uswds'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { Grid } from '@trussworks/react-uswds'
+import { useNavigate } from 'react-router-dom'
 import { packageName } from '../../../common-code/healthPlanFormDataType'
 import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -29,6 +29,7 @@ import { ActuaryCommunicationRecord, ERROR_MESSAGES } from '../../../constants'
 import { handleApolloErrorsAndAddUserFacingMessages } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
+import { NavLinkWithLogging } from '../../TealiumLogging'
 
 const rateCapitationType = (formData: RateFormData) =>
     formData.rateCapitationType
@@ -79,8 +80,7 @@ const relatedSubmissions = (
         <ul className={styles.commaList}>
             {contractRevisions.map((contractRev) => (
                 <li key={contractRev.contract.id}>
-                    <Link
-                        asCustom={NavLink}
+                    <NavLinkWithLogging
                         to={`/submissions/${contractRev.contract.id}`}
                     >
                         {packageName(
@@ -89,7 +89,7 @@ const relatedSubmissions = (
                             contractRev.formData.programIDs,
                             statePrograms
                         )}
-                    </Link>
+                    </NavLinkWithLogging>
                 </li>
             ))}
         </ul>
@@ -128,10 +128,8 @@ export const SingleRateSummarySection = ({
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
-    const showLinkedRates: boolean = ldClient?.variation(
-        featureFlags.LINK_RATES.flag,
-        featureFlags.LINK_RATES.defaultValue
-    )
+
+    const linkedContracts = rateRevision?.contractRevisions
 
     // TODO BULK DOWNLOAD
     // needs to be wrap in a standalone hook
@@ -252,7 +250,7 @@ export const SingleRateSummarySection = ({
                         </UnlockRateButton>
                     )}
                     {/* This second option is an interim state for unlock rate button (when linked rates is turned on but unlock and edit rate is not available yet). Remove when rate unlock is permanently on. */}
-                    {isCMSUser && showLinkedRates && !showRateUnlock && (
+                    {isCMSUser && !showRateUnlock && (
                         <UnlockRateButton
                             disabled={isUnlocked || unlockLoading}
                             onClick={() => {
@@ -260,6 +258,7 @@ export const SingleRateSummarySection = ({
                                     `/submissions/${parentContractSubmissionID}`
                                 )
                             }}
+                            link_url={`/submissions/${parentContractSubmissionID}`}
                         >
                             Unlock rate
                         </UnlockRateButton>
@@ -402,13 +401,9 @@ export const SingleRateSummarySection = ({
                         />
                         <DataDetail
                             id="submittedWithContract"
-                            label={
-                                showLinkedRates
-                                    ? 'Contract actions'
-                                    : 'Submission this rate was submitted with'
-                            }
+                            label="Contract actions"
                             children={relatedSubmissions(
-                                rateRevision?.contractRevisions,
+                                linkedContracts,
                                 statePrograms
                             )}
                         />

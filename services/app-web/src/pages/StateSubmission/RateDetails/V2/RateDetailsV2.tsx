@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Fieldset, Form as UswdsForm } from '@trussworks/react-uswds'
+import { Fieldset, Form as UswdsForm } from '@trussworks/react-uswds'
 import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
 import { generatePath, useNavigate } from 'react-router-dom'
 
 import styles from '../../StateSubmissionForm.module.scss'
 import {
+    ButtonWithLogging,
     DynamicStepIndicator,
     ErrorSummary,
     SectionCard,
@@ -31,7 +32,7 @@ import {
     useSubmitRateMutation,
     useUpdateDraftContractRatesMutation,
 } from '../../../../gen/gqlClient'
-import { SingleRateFormFields } from './SingleRateFormFields'
+import { SingleRateFormFields } from '../SingleRateFormFields'
 import { useFocus, useRouteParams } from '../../../../hooks'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
 import { PageBannerAlerts } from '../../PageBannerAlerts'
@@ -47,9 +48,9 @@ import {
     convertGQLRateToRateForm,
     convertRateFormToGQLRateFormData,
     generateUpdatedRates,
-} from './rateDetailsHelpers'
+} from '../rateDetailsHelpers'
 import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
-import { LinkedRateSummary } from './LinkedRateSummary'
+import { LinkedRateSummary } from '../LinkedRateSummary'
 import { usePage } from '../../../../contexts/PageContext'
 
 export type FormikRateForm = {
@@ -80,14 +81,14 @@ export type RateDetailFormConfig = {
     rateForms: FormikRateForm[]
 }
 
-type RateDetailsV2Props = {
+type RateDetailsProps = {
     type: 'SINGLE' | 'MULTI'
     showValidations?: boolean
 }
-const RateDetailsV2 = ({
+const RateDetails = ({
     showValidations = false,
     type,
-}: RateDetailsV2Props): React.ReactElement => {
+}: RateDetailsProps): React.ReactElement => {
     const navigate = useNavigate()
     const { getKey } = useS3()
     const displayAsStandaloneRate = type === 'SINGLE'
@@ -95,10 +96,6 @@ const RateDetailsV2 = ({
     const ldClient = useLDClient()
     const { updateHeading } = usePage()
 
-    const useLinkedRates = ldClient?.variation(
-        featureFlags.LINK_RATES.flag,
-        featureFlags.LINK_RATES.defaultValue
-    )
     const useEditUnlockRate = ldClient?.variation(
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
@@ -112,7 +109,6 @@ const RateDetailsV2 = ({
     const rateDetailsFormSchema = RateDetailsFormSchema(
         {
             'rate-edit-unlock': useEditUnlockRate,
-            'link-rates': useLinkedRates,
         },
         !displayAsStandaloneRate
     )
@@ -377,7 +373,7 @@ const RateDetailsV2 = ({
 
     return (
         <>
-            <div className={styles.stepIndicator}>
+            <div>
                 {!displayAsStandaloneRate && (
                     <DynamicStepIndicator
                         formPages={STATE_SUBMISSION_FORM_ROUTES}
@@ -522,7 +518,7 @@ const RateDetailsV2 = ({
                                                                 )}
                                                                 {index >= 1 &&
                                                                     !displayAsStandaloneRate && (
-                                                                        <Button
+                                                                        <ButtonWithLogging
                                                                             type="button"
                                                                             unstyled
                                                                             className={
@@ -538,7 +534,7 @@ const RateDetailsV2 = ({
                                                                             Remove
                                                                             rate
                                                                             certification
-                                                                        </Button>
+                                                                        </ButtonWithLogging>
                                                                     )}
                                                             </Fieldset>
                                                         </SectionCard>
@@ -550,7 +546,7 @@ const RateDetailsV2 = ({
                                                             Additional rate
                                                             certification
                                                         </h3>
-                                                        <button
+                                                        <button // using button element so ref works.
                                                             type="button"
                                                             className={`usa-button usa-button--outline ${styles.addRateBtn}`}
                                                             onClick={() => {
@@ -624,6 +620,22 @@ const RateDetailsV2 = ({
                                         !!Object.keys(errors).length
                                     }
                                     actionInProgress={isSubmitting}
+                                    backOnClickUrl={
+                                        displayAsStandaloneRate
+                                            ? RoutesRecord.DASHBOARD_SUBMISSIONS
+                                            : generatePath(
+                                                  RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
+                                                  { id }
+                                              )
+                                    }
+                                    saveAsDraftOnClickUrl={
+                                        RoutesRecord.DASHBOARD_SUBMISSIONS
+                                    }
+                                    continueOnClickUrl={
+                                        displayAsStandaloneRate
+                                            ? RoutesRecord.DASHBOARD_SUBMISSIONS
+                                            : '/edit/contacts'
+                                    }
                                 />
                             </UswdsForm>
                         </>
@@ -633,4 +645,4 @@ const RateDetailsV2 = ({
         </>
     )
 }
-export { RateDetailsV2 }
+export { RateDetails }
