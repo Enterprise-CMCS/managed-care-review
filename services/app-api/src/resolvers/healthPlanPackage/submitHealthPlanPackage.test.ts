@@ -14,8 +14,8 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { base64ToDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
+import { packageName } from '../../common-code/healthPlanFormDataType'
 import {
     latestFormData,
     previousFormData,

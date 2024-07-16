@@ -4,7 +4,7 @@ import { contractFormDataSchema, preprocessNulls } from './formDataTypes'
 import {
     contractTypeSchema,
     populationCoveredSchema,
-} from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
+} from '../../common-code/proto/healthPlanFormDataProto/zodSchemas'
 import { z } from 'zod'
 import type { Store } from '../../postgres'
 

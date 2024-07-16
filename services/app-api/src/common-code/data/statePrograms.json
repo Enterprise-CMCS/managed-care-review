@@ -1,0 +1,1360 @@
+{
+    "states": [
+        {
+            "name": "Alabama",
+            "programs": [
+                {
+                    "id": "276702fe-f835-46cd-9c97-e52940447f22",
+                    "fullName": "Alabama Coordinated Health Network",
+                    "name": "ACHN",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "9caab238-52b5-4f79-92d1-5d24cd84090d",
+                    "fullName": "Integrated Care Network",
+                    "name": "ICN",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "AL"
+        },
+        {
+            "name": "Arkansas",
+            "programs": [
+                {
+                    "id": "f93d4fdf-3751-4d33-b4c9-889c182047a2",
+                    "fullName": "Provider-Led Arkansas Shared Savings Entity ",
+                    "name": "PASSE",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "b6f8594a-7287-4e57-bd1c-eb68616bc9e3",
+                    "fullName": "Arkansas Dental Managed Care",
+                    "name": "Dental ",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "d93d8edb-b277-4062-a9ff-20cecf3c37f2",
+                    "fullName": "Arkansas Non-Emergency Medical Transport",
+                    "name": "NET",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "AR"
+        },
+        {
+            "name": "American Samoa",
+            "programs": [
+                {
+                    "id": "18648419-b1af-423d-8423-ff5fdf8e74e5",
+                    "fullName": "MC Review Test Program",
+                    "name": "MCRTP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "b4775eeb-365f-48e9-bf2e-8c2d0e8dbc70",
+                    "fullName": "TPPlus",
+                    "name": "tpplus",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "e112301b-72c7-4c8f-856a-2cf8c6a1465b",
+                    "fullName": "Samoa CHIP",
+                    "name": "SCHIP",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "AS"
+        },
+        {
+            "name": "Arizona",
+            "programs": [
+                {
+                    "id": "85bec420-0e7f-11ed-861d-0242ac120002",
+                    "fullName": "AHCCCS Complete Care - Regional Behavioral Health Agreements",
+                    "name": "ACC-RBHA",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "716fc058-4228-46db-ba7a-c922beb67de2",
+                    "fullName": "AHCCCS Complete Care",
+                    "name": "ACC",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "782bb063-8e2a-449d-b75c-b422f5b9f9fa",
+                    "fullName": "Department of Child Safety/Comprehensive Health Program",
+                    "name": "DCS/CHP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "06f8ca8e-e1d6-4438-b153-3a7f11956973",
+                    "fullName": "Department of Economic Security/Division of Developmental Disabilities",
+                    "name": "DES/DDD",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "ec6dea29-bf65-4dec-9292-09c64bb6bd6f",
+                    "fullName": "Arizona Long Term Care System - Elderly and Physically Disabled",
+                    "name": "ALTCS/EPD",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "bc07dfe3-4ecf-4f9c-bf3d-b8b105ce5e41",
+                    "fullName": "Regional Behavioral Health Agreements",
+                    "name": "RBHA",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "AZ"
+        },
+        {
+            "name": "California",
+            "programs": [
+                {
+                    "id": "5904a736-4422-4b78-abef-f3df3d0ae21d",
+                    "fullName": "Regional Model",
+                    "name": "Regional",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "78a70c07-3fe0-41df-a80c-9eab6ae34fa4",
+                    "fullName": "Geographic Managed Care",
+                    "name": "GMC",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "20cbf01d-f07e-4205-b9b2-77fd7d448040",
+                    "fullName": "County Organized Health Systems",
+                    "name": "COHS",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "4308b4a7-2f2d-4b5e-a8ef-504a01f342d4",
+                    "fullName": "Two-Plan Model ",
+                    "name": "Two-Plan",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "d902af57-b57b-4702-a492-3276bbf923e4",
+                    "fullName": "Dental Managed Care",
+                    "name": "DMC",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "db3ca337-7fd2-406a-9181-9109a82218f6",
+                    "fullName": "Coordinated Care Initiative",
+                    "name": "CCI",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "46680d23-ce69-49ec-a5f8-e2b3f0173578",
+                    "fullName": "AIDS Healthcare Foundation ",
+                    "name": "AHF",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "40ca8541-3f42-45e7-8baa-835337c299c6",
+                    "fullName": "Specialty Mental Health Services",
+                    "name": "SMHS",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "3aa176c3-9caa-4b9e-97b4-c12f4f579667",
+                    "fullName": "Drug Medi-Cal Organized Delivery System",
+                    "name": "DMC-ODS",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "2ba334c5-8001-4bf4-9e06-34e3850389fa",
+                    "fullName": "Single Plan Model",
+                    "name": "Single Plan",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "CA"
+        },
+        {
+            "name": "Colorado",
+            "programs": [
+                {
+                    "id": "03d1d530-6212-4206-985f-5bcd9e59be1b",
+                    "fullName": "CHIP Managed Care Contracts",
+                    "name": "CHP+",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "b670d90b-8117-47cf-a8ec-8361573aeca1",
+                    "fullName": "Accountable Care Collaborative: Rocky Mountain Health Plan",
+                    "name": "RMHP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "4c4b83a8-b8a0-4ee2-be53-0b07e9812321",
+                    "fullName": "Accountable Care Collaborative: Denver Health Medical Plan",
+                    "name": "Denver Health",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "0efb5b54-8c65-4463-a275-846a1e5cddea",
+                    "fullName": "Accountable Care Collaborative",
+                    "name": "ACC",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "d832d485-690f-428c-97a9-4e1ee117533f",
+                    "fullName": "DentaQuest USA Insurance Company-CHIP Only",
+                    "name": "CHP+ Oral",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "CO"
+        },
+        {
+            "name": "Washington, DC",
+            "programs": [
+                {
+                    "id": "63fb1834-fd23-4e74-80a9-888c7b614796",
+                    "fullName": "Non-Emergency Medical Transportation",
+                    "name": "NEMT",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "e2eabe95-ee87-4561-b164-b9b8a19d5c6a",
+                    "fullName": "DC Healthy Families Program",
+                    "name": "DCHFP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "678c8416-1dbd-45e5-b721-35ebe90f0499",
+                    "fullName": "Child and Adolescent Supplemental Security Income Program",
+                    "name": "CASSIP",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "DC"
+        },
+        {
+            "name": "Delaware",
+            "programs": [
+                {
+                    "id": "2427154a-4a1f-4adc-b205-f9b43ce166ba",
+                    "fullName": "Diamond State Health Plan",
+                    "name": "DSHP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "5b748c15-f0a4-4f7d-8603-684981bb6eef",
+                    "fullName": "Diamond State Health Plan Plus",
+                    "name": "DSHP Plus",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "DE"
+        },
+        {
+            "name": "Florida",
+            "programs": [
+                {
+                    "id": "83d0e9d9-6592-439a-b46c-3235e8192fa0",
+                    "fullName": "Non-Emergency Medical Transportation - Medical Transportation Management (NEMT MTM)",
+                    "name": "NEMT MTM",
+                    "isRateProgram": true
+                },
+                {
+                    "id": "83b12618-4e53-40fa-9db8-c714fba64e49",
+                    "fullName": "Non-Emergency Medical Transportation - LogistiCare",
+                    "name": "NEMT LTC",
+                    "isRateProgram": true
+                },
+                {
+                    "id": "9581bfee-7bf2-4433-a013-9c652fbed360",
+                    "fullName": "NEMT ModivCare",
+                    "name": "NEMT ModivCare",
+                    "isRateProgram": true
+                },
+                {
+                    "id": "712277fb-f43f-4eb5-98c5-6c6a97509201",
+                    "fullName": "Non-Emergency Medical Transportation",
+                    "name": "NEMT",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "037af66b-81eb-4472-8b80-01edf17d12d9",
+                    "fullName": "Healthy Start MomCare Network, Inc.",
+                    "name": "PCCMe",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "5c10fe9f-bec9-416f-a20c-718b152ad633",
+                    "fullName": "Managed Medical Assistance Program",
+                    "name": "MMA",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "3b8d8fa1-1fa6-4504-9c5b-ef522877fe1e",
+                    "fullName": "Long-term Care Program",
+                    "name": "LTC",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "08d114c2-0c01-4a1a-b8ff-e2b79336672d",
+                    "fullName": "Prepaid Dental Health Program",
+                    "name": "Dental",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "FL"
+        },
+        {
+            "name": "Georgia",
+            "programs": [
+                {
+                    "id": "fbb2df18-cb63-46d9-830f-63c0ca276ba8",
+                    "fullName": "Georgia Families ",
+                    "name": "Georgia Families ",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "c23d0f8f-70c8-42a1-8e51-cffc2b0211d5",
+                    "fullName": "Georgia Families 360",
+                    "name": "Families 360",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "c7c31e11-4d16-4b02-9102-8e2de515cdea",
+                    "fullName": "Non-Emergency Medical Transportation",
+                    "name": "NEMT",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "244343c8-b24c-4e1d-bcab-d08433c3b40a",
+                    "fullName": "Planning for Healthy Babies (P4HB)",
+                    "name": "P4HB",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "3cac5750-d48b-4572-bfa2-96794a3ca525",
+                    "fullName": "Pathways",
+                    "name": "Pathways",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "GA"
+        },
+        {
+            "name": "Hawaii",
+            "programs": [
+                {
+                    "id": "47995323-dd69-4ea5-afeb-eef15d6da27f",
+                    "fullName": "Hawaii QUEST Integration",
+                    "name": "Quest",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "2bf8cc98-2330-4e58-9e2c-96f25daa7b28",
+                    "fullName": "Community Care Services",
+                    "name": "CCS",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "HI"
+        },
+        {
+            "name": "Iowa",
+            "programs": [
+                {
+                    "id": "69cacade-9b01-40a6-853e-d7a8be9aebcd",
+                    "fullName": "Health Link ",
+                    "name": "Health Link ",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "0c098a2b-b315-488b-a7da-9386ef00ce04",
+                    "fullName": "Dental Wellness Plan ",
+                    "name": "DWP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "a475fbda-cea9-4ebf-ae5e-20e697ac77c7",
+                    "fullName": "Hawki CHIP-only Dental",
+                    "name": "Hawki Dental",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "IA"
+        },
+        {
+            "name": "Idaho",
+            "programs": [
+                {
+                    "id": "094f3ba7-f8c7-4ff1-8543-0b6aaef27a53",
+                    "fullName": "Medicare/Medicaid Coordinated Plan",
+                    "name": "MMCP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "8fe27905-3b75-49fc-b7d1-624011f1bb5e",
+                    "fullName": "Idaho Medicaid Plus",
+                    "name": "IMPlus",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "9cc424d8-b833-41be-994d-0f7d689b7c82",
+                    "fullName": "Behavioral Health Plan",
+                    "name": "BHP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "e53f0506-84a5-47de-8400-e71f15c8d590",
+                    "fullName": "Idaho Smiles",
+                    "name": "Idaho Smiles",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "d0c0f2cb-c295-4c23-a301-24214aa5fa3d",
+                    "fullName": "Healthy Connections",
+                    "name": "Healthy Connections",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "ID"
+        },
+        {
+            "name": "Illinois",
+            "programs": [
+                {
+                    "id": "bf209f98-036a-4eb1-8339-bf68f2948548",
+                    "fullName": "HealthChoice Illinois",
+                    "name": "HealthChoice ",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "47556fc7-642a-4d7e-992f-fc73ab15b6bf",
+                    "fullName": "DCFS Youth Specialty Plan",
+                    "name": "YouthCare",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "3cf7ad5b-cfcd-4579-930c-1c936792724c",
+                    "fullName": "Health Choice Special Needs Children and DCFS",
+                    "name": "HC SNC DCFS",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "IL"
+        },
+        {
+            "name": "Indiana",
+            "programs": [
+                {
+                    "id": "4c0b8717-8071-4bbe-922b-a8dcf8a57d82",
+                    "fullName": "Hoosier Care Connect",
+                    "name": "HCC",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "fa0aab1c-f3f1-48d5-8908-61292187dec0",
+                    "fullName": "Hoosier Healthwise",
+                    "name": "HHW",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "9862db8f-18e7-4d7f-af27-7d6bc50f2f5d",
+                    "fullName": "Healthy Indiana Plan 2.0",
+                    "name": "HIP 2.0",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "IN"
+        },
+        {
+            "name": "Kansas",
+            "programs": [
+                {
+                    "id": "71c8f178-9ee8-4838-860d-abb4a6e5e552",
+                    "fullName": "KanCare",
+                    "name": "KanCare",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "KS"
+        },
+        {
+            "name": "Kentucky",
+            "programs": [
+                {
+                    "id": "acb14791-7d88-4c10-a127-68f0a694d62f",
+                    "fullName": "Non-Emergency Medical Transportation Program",
+                    "name": "NEMT ",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "e630c36a-8c2b-4e5e-be07-c38424944b5f",
+                    "fullName": "KY Managed Care Organization Program",
+                    "name": "MCO",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "KY"
+        },
+        {
+            "name": "Louisiana",
+            "programs": [
+                {
+                    "id": "7289705b-dc2b-48bb-a368-3f7fa0519ec3",
+                    "fullName": "Healthy Louisiana",
+                    "name": "Healthy LA",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "9c0c2663-8469-4f47-b5bb-3c740902bcdc",
+                    "fullName": "Dental Benefit Program",
+                    "name": "DBP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "b3b3890d-2c72-4500-a318-6ac4c05868f3",
+                    "fullName": "Coordinated System of Care",
+                    "name": "CSoC",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "LA"
+        },
+        {
+            "name": "Massachusetts",
+            "programs": [
+                {
+                    "id": "1076bd88-69c7-470f-839c-481c0ad13b97",
+                    "fullName": "MassHealth Managed Care Organization Program",
+                    "name": "MCO",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "8f2b4595-3c77-4a74-82f9-674152615d74",
+                    "fullName": "Accountable Care Partnership Plans",
+                    "name": "ACPP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "eda1275a-01c9-40cd-a132-fcf43d44f1ca",
+                    "fullName": "Primary Care Accountable Care Organizations",
+                    "name": "PCACO",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "4e76c974-5741-4272-8c8a-9005d70259b6",
+                    "fullName": "Managed Behavioral Health Program",
+                    "name": "MBHP",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "MA"
+        },
+        {
+            "name": "Maryland",
+            "programs": [
+                {
+                    "id": "d64e707e-0f42-4c57-88f9-09bc065f3f22",
+                    "fullName": "HealthChoice",
+                    "name": "HealthChoice",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "MD"
+        },
+        {
+            "name": "Maine",
+            "programs": [
+                {
+                    "id": "b7d0546d-fc06-494a-9cc1-f31a7f53f2b1",
+                    "fullName": "MaineCare",
+                    "name": "MaineCare",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "57aa58ff-8e68-4dfd-8fd1-84f8d52cc059",
+                    "fullName": "Non-Emergency Medical Transportation",
+                    "name": "NEMT",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "ME"
+        },
+        {
+            "name": "Michigan",
+            "programs": [
+                {
+                    "id": "5b059d43-c222-4b43-ad01-c652b764995c",
+                    "fullName": "Behavioral Health",
+                    "name": "BH",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "056ed640-5d35-420c-baa2-27567cf10342",
+                    "fullName": "Healthy Michigan Program",
+                    "name": "HMP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "99c5160d-ff68-4f08-8737-40a92f04e613",
+                    "fullName": "MI Choice",
+                    "name": "MI Choice",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "af6a739a-b5b5-413b-b64f-5b79b3d6915f",
+                    "fullName": "Healthy Kids Dental",
+                    "name": "HKD",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "03e61a40-5f13-46bc-9749-2ab4b7ed9083",
+                    "fullName": "Children's Specialty Health Care Services",
+                    "name": "CSHCS",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "f1194072-b554-4247-8ba7-6d29ccf5d27b",
+                    "fullName": "Managed Care Health Plan Comprehensive Health Care Program",
+                    "name": "MCHP CHCP",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "MI"
+        },
+        {
+            "name": "Minnesota",
+            "programs": [
+                {
+                    "id": "abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce",
+                    "fullName": "Special Needs Basic Care",
+                    "name": "SNBC",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "d95394e5-44d1-45df-8151-1cc1ee66f100",
+                    "fullName": "Prepaid Medical Assistance Program",
+                    "name": "PMAP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "ea16a6c0-5fc6-4df8-adac-c627e76660ab",
+                    "fullName": "Minnesota Senior Care Plus ",
+                    "name": "MSC+",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "3fd36500-bf2c-47bc-80e8-e7aa417184c5",
+                    "fullName": "Minnesota Senior Health Options",
+                    "name": "MSHO",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "MN"
+        },
+        {
+            "name": "Missouri",
+            "programs": [
+                {
+                    "id": "8499f762-0ba8-4653-b054-0156e4733741",
+                    "fullName": "MO HealthNet Managed Care – Specialty Plan",
+                    "name": "HealthNet Specialty",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "08508600-0ce7-42fd-9e24-ceb11975a8c4",
+                    "fullName": "MO HealthNet Managed Care – General Plan",
+                    "name": "HealthNet General",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "820be0ba-6c98-4aea-8880-8a617f2d2ab5",
+                    "fullName": "HealthNet",
+                    "name": "HealthNet",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "79244a27-b8b2-4d3f-811c-ca74a51310a6",
+                    "fullName": "HealthNet Expansion",
+                    "name": "HN Expansion",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "MO"
+        },
+        {
+            "name": "Mississippi",
+            "programs": [
+                {
+                    "id": "e0819153-5894-4153-937e-aad00ab01a8f",
+                    "fullName": "Mississippi Coordinated Access Network",
+                    "name": "MSCAN",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "36c54daf-7611-4a15-8c3b-cdeb3fd7e25a",
+                    "fullName": "CHIP",
+                    "name": "CHIP",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "MS"
+        },
+        {
+            "name": "Montana",
+            "programs": [
+                {
+                    "id": "c757ddee-19a2-4aaa-aa70-3aaeee970f91",
+                    "fullName": "Tribal Health Improvement Program",
+                    "name": "T-HIP",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "MT"
+        },
+        {
+            "name": "North Carolina",
+            "programs": [
+                {
+                    "id": "75358ece-92f0-4c89-a45b-817f80d8be37",
+                    "fullName": "Medicaid Direct Behavioral Health PIHP",
+                    "name": "BH PIHP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "b4e8d1e4-0520-4fa6-b472-d3b655d3efdc",
+                    "fullName": "Standard Plan MCO",
+                    "name": "Standard Plans",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "fae74329-159c-42c1-9f7a-eb1e82afd2c5",
+                    "fullName": "BH I/DD Tailored Plan MCO",
+                    "name": "Tailored Plans",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "c08886b9-5fd0-4405-9e87-b23b0144ab30",
+                    "fullName": "Eastern Border of Cherokee Indians ",
+                    "name": "EBCI/Tribal Option",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "d58cc87a-4dc4-4aef-977e-4c3073fea9b9",
+                    "fullName": "Community Care of North Carolina",
+                    "name": "CCNC",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "NC"
+        },
+        {
+            "name": "North Dakota",
+            "programs": [
+                {
+                    "id": "88d112eb-7acc-493b-903d-bc1f44087212",
+                    "fullName": "North Dakota Medicaid Expansion",
+                    "name": "Expansion",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "2da0c64a-a8ff-42e2-ae54-25138ff68788",
+                    "fullName": "PCCM",
+                    "name": "PCCM",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "fc4292c1-5d34-4bc1-bb55-07b53583f56f",
+                    "fullName": "Health Management Program",
+                    "name": "HMP",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "ND"
+        },
+        {
+            "name": "Nebraska",
+            "programs": [
+                {
+                    "id": "269d27dd-a42a-4a1b-8810-bba668700b3b",
+                    "fullName": "Heritage Health",
+                    "name": "Heritage Health",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "d8886cd1-7fac-469c-9ce1-9a31f4e3ee71",
+                    "fullName": "Dental Benefit Manager",
+                    "name": "Dental",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "NE"
+        },
+        {
+            "name": "New Hampshire",
+            "programs": [
+                {
+                    "id": "fa2a5d94-ff57-4a4b-9f94-26f4a8de7668",
+                    "fullName": "Dental",
+                    "name": "Dental",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "8469324c-39a3-46f2-88b4-ed5bbb7dbe46",
+                    "fullName": "Medicaid Care Management",
+                    "name": "MCM ",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "f9a8ace4-1de4-443f-bf82-67fbb9558ff6",
+                    "fullName": "Granite Advantage Health Plan Program",
+                    "name": "GAHCP",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "NH"
+        },
+        {
+            "name": "New Jersey",
+            "programs": [
+                {
+                    "id": "09dae8a2-df85-40e7-815e-0262fc49528c",
+                    "fullName": "NJ FamilyCare MLTSS",
+                    "name": "MLTSS",
+                    "isRateProgram": true
+                },
+                {
+                    "id": "060cff75-f126-4248-95d1-846b3305a886",
+                    "fullName": "NJ FamilyCare Acute",
+                    "name": "Acute",
+                    "isRateProgram": true
+                },
+                {
+                    "id": "da99a50b-accc-4849-b4a6-ce1436391dc2",
+                    "fullName": "NJFamilyCare",
+                    "name": "NJ FamilyCare",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "NJ"
+        },
+        {
+            "name": "New Mexico",
+            "programs": [
+                {
+                    "id": "601937ba-a590-41a3-a006-57bec219e75f",
+                    "fullName": "Centennial Care 2.0",
+                    "name": "CC",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "2f12c537-716a-419d-9822-bc8163b91c13",
+                    "fullName": "Centennial Care BH",
+                    "name": "BH",
+                    "isRateProgram": true
+                },
+                {
+                    "id": "66efa54a-9a2b-4c0d-8097-f368da41e44c",
+                    "fullName": "Centennial Care PH",
+                    "name": "PH",
+                    "isRateProgram": true
+                },
+                {
+                    "id": "00b57070-60d6-4deb-8b79-72b960e5e512",
+                    "fullName": "Centennial Care LTSS",
+                    "name": "LTSS",
+                    "isRateProgram": true
+                },
+                {
+                    "id": "bb078c3f-9259-4a29-a370-04368154f0ef",
+                    "fullName": "Centennial Care OAG",
+                    "name": "OAG",
+                    "isRateProgram": true
+                }
+            ],
+            "code": "NM"
+        },
+        {
+            "name": "Nevada",
+            "programs": [
+                {
+                    "id": "d8d1da22-7a8f-45cf-8e79-184b3cc162aa",
+                    "fullName": "Mandatory Health Maintenance Program",
+                    "name": "MHMP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "19fba57a-33ff-4b24-ab7f-26afc100bdbc",
+                    "fullName": "Dental Benefits Administrator",
+                    "name": "Dental",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "042ce883-df96-4f97-bdb9-ee8b3e41bc4f",
+                    "fullName": "Managed Care",
+                    "name": "Managed Care",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "55ff1687-9f4d-4323-bdbd-290d9294919b",
+                    "fullName": "NEMT",
+                    "name": "NEMT",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "NV"
+        },
+        {
+            "name": "New York",
+            "programs": [
+                {
+                    "id": "bf868e4d-4706-46ae-b32e-c2dfe79c07be",
+                    "fullName": "Health and Recovery Plans",
+                    "name": "HARP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "1d9dbd18-9c31-41b8-a287-727e51949908",
+                    "fullName": "Medicaid Managed Care",
+                    "name": "MMC",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "856cf2b1-d888-441f-93d5-9b5be5d358ee",
+                    "fullName": "Medicaid Advantage Plus",
+                    "name": "MAP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "6c94f55a-79a7-4e65-97cf-a3f6fdf40455",
+                    "fullName": "Partial Capitation",
+                    "name": "Partial Capitation",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "01e1c24b-14aa-40bb-9365-a17271468bd2",
+                    "fullName": "Human Immunodeficiency Virus Special Needs Plan",
+                    "name": "HIV SNP",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "NY"
+        },
+        {
+            "name": "Ohio",
+            "programs": [
+                {
+                    "id": "889f525e-08c7-4e62-9df9-b67186a87975",
+                    "fullName": "Ohio Resilience through Integrated Systems and Excellence",
+                    "name": "RISE",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "c4ebe21a-5dd1-4308-a851-c31983b3b974",
+                    "fullName": "Ohio Medicaid Managed Care Program",
+                    "name": "MMC",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "d9e3bbf5-f3a3-404c-a510-998d603a3673",
+                    "fullName": "MyCare Ohio Opt-Out Program",
+                    "name": "MyCare",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "f8fb337f-6f69-4b3d-9cdd-0b257f3ba9da",
+                    "fullName": "Single Pharmacy Benefit Manager",
+                    "name": "SPBM",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "OH"
+        },
+        {
+            "name": "Oklahoma",
+            "programs": [
+                {
+                    "id": "6d1f77e3-1e97-4f57-9da0-e49358ab97e2",
+                    "fullName": "SoonerCare Choice",
+                    "name": "SoonerCare Choice",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "58b4e72f-219d-4648-84ae-deea4a703965",
+                    "fullName": "SoonerSelect Dental",
+                    "name": "SoonerSelect Dental",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "70239e21-dd55-47ae-9156-ef910eb69e49",
+                    "fullName": "SoonerSelect Children's Specialty",
+                    "name": "SoonerSelect Children's Specialty",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "4e274fe6-3645-432b-8629-b4b13bc0ee77",
+                    "fullName": "SoonerSelect Medical",
+                    "name": "SoonerSelect Medical",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "OK"
+        },
+        {
+            "name": "Oregon",
+            "programs": [
+                {
+                    "id": "7ae073dd-dbff-4bc9-86b8-d27954dd5776",
+                    "fullName": "Healthier Oregon Program",
+                    "name": "HOP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "46246196-3b63-40be-8db1-c09cec281dae",
+                    "fullName": "Coordinated Care Organizations",
+                    "name": "CCO",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "fd2589c9-c008-494d-bd56-16f3098f94b6",
+                    "fullName": "Dental Care Organizations",
+                    "name": "DCO",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "OR"
+        },
+        {
+            "name": "Pennsylvania",
+            "programs": [
+                {
+                    "id": "2dcfebda-7910-4c3d-a19f-174ee4c75cc0",
+                    "fullName": "Adult Community Autism Program",
+                    "name": "ACAP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "ef45f326-8b3a-44a9-aac6-8fa73400680a",
+                    "fullName": "HealthChoices Physical Health",
+                    "name": "PH",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "31567396-ddea-4bac-b7ef-8b2eb43f3154",
+                    "fullName": "Community HealthChoices",
+                    "name": "CHC",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "65f965cd-7823-4777-bfb1-688b36bb92b2",
+                    "fullName": "HealthChoices Behavioral Health",
+                    "name": "BH",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "PA"
+        },
+        {
+            "name": "Puerto Rico",
+            "programs": [
+                {
+                    "id": "3b9e94e3-867c-4d2c-9e9f-7220cc798f9c",
+                    "fullName": "Government Health Plan",
+                    "name": "Vital Government Health Plan",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "98d71743-efb4-433a-9bfc-de92a72f3bb2",
+                    "fullName": "Medicare Advantage - Platino",
+                    "name": "Platino ",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "PR"
+        },
+        {
+            "name": "Rhode Island",
+            "programs": [
+                {
+                    "id": "fc96ed4f-0371-4dae-892c-c2cc0d934f65",
+                    "fullName": "Rite Care",
+                    "name": "Core",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "a2f8a004-9b97-4a2d-9a19-2adaaa103e85",
+                    "fullName": "Rite Smiles",
+                    "name": "Dental",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "RI"
+        },
+        {
+            "name": "South Carolina",
+            "programs": [
+                {
+                    "id": "355ab401-4ca6-4961-a05a-6a3bc9b17cd9",
+                    "fullName": "PRIME",
+                    "name": "PRIME",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "9e038b72-50b8-406f-8454-d8d947823c33",
+                    "fullName": "South Carolina Managed Care Organizations",
+                    "name": "Managed Care",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "75034655-ebc5-4fc3-8415-578379eb3d74",
+                    "fullName": "South Carolina Medical Homes Network ",
+                    "name": "Medical Home Network",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "SC"
+        },
+        {
+            "name": "Tennessee",
+            "programs": [
+                {
+                    "id": "3fe3d26b-175f-4550-92a2-9f86b273c0f0",
+                    "fullName": "TennCare II",
+                    "name": "TennCare II",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "9a1ee3a4-5656-4f79-9f28-719e424c7b26",
+                    "fullName": "TennCare II",
+                    "name": "TennCare Choices",
+                    "isRateProgram": true
+                },
+                {
+                    "id": "c9f6a73e-89ab-4279-aac4-343235a317b5",
+                    "fullName": "TennCare II",
+                    "name": "TennCare Non-Choices",
+                    "isRateProgram": true
+                }
+            ],
+            "code": "TN"
+        },
+        {
+            "name": "Texas",
+            "programs": [
+                {
+                    "id": "004d41de-610c-427c-a626-361bdfefc495",
+                    "fullName": "STAR Health",
+                    "name": "STAR Health",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "b1aac1f0-8de4-478b-aff0-3dacf36b6365",
+                    "fullName": "STAR",
+                    "name": "STAR",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "dc3b71c4-2a1c-4dac-9435-b62b17c91c53",
+                    "fullName": "STAR Kids",
+                    "name": "STAR Kids",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "6c415640-e098-4164-8164-cff0e26abf60",
+                    "fullName": "STAR+ PLUS",
+                    "name": "STAR+ PLUS",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "a48457a6-466c-4a00-81fb-51594969b14d",
+                    "fullName": "Children's Medicaid Dental Services",
+                    "name": "Dental",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "0a9c93f7-803a-46f2-8a60-8c928efb6e7b",
+                    "fullName": "CHIP",
+                    "name": "CHIP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "6b6afeaf-aeff-45f7-a14c-992a03fa372f",
+                    "fullName": "Children's CHIP Dental Services",
+                    "name": "CHIP Dental ",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "TX"
+        },
+        {
+            "name": "Utah",
+            "programs": [
+                {
+                    "id": "58f8631b-da0e-461e-9f0a-ee70477e164a",
+                    "fullName": "Prepaid Mental Health Plan",
+                    "name": "PMHP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "2ea9b2f5-adee-4ee1-ba77-74bd5198361f",
+                    "fullName": "ACO Physical Health ",
+                    "name": "ACO",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "320e742d-e66a-449c-9328-8ba910f4cd41",
+                    "fullName": "Medicaid Dental",
+                    "name": "Dental",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "744582b5-201a-4abb-963b-5cd09404a5d0",
+                    "fullName": "Healthy Outcomes Medical Excellence",
+                    "name": "HOME",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "00d19765-a0e9-4d5d-9bdb-88b84eef9dff",
+                    "fullName": "Utah Medicaid Integrated Care ",
+                    "name": "UMIC",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "9ca2d8ef-8c27-4aea-803b-f4ec6d702d24",
+                    "fullName": "CHIP Medical",
+                    "name": "CHIP Medical",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "2f4bfd6c-c25a-44b1-9010-7367d13e7325",
+                    "fullName": "CHIP Dental",
+                    "name": "CHIP Dental",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "UT"
+        },
+        {
+            "name": "Virginia",
+            "programs": [
+                {
+                    "id": "05e5316f-b9ba-4f2a-9a24-9449b63ef8a1",
+                    "fullName": "Cardinal Care Managed Care",
+                    "name": "CCMC",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "VA"
+        },
+        {
+            "name": "Vermont",
+            "programs": [
+                {
+                    "id": "2dacc6c3-ed0b-4c95-a17c-47f8d3340511",
+                    "fullName": "Global Commitment to Health",
+                    "name": "GCTH",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "395aeb44-c728-4cbf-bc26-64318da4814e",
+                    "fullName": "Vermont Medicaid Next Generation Accountable Care Organization",
+                    "name": "VMNG",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "VT"
+        },
+        {
+            "name": "Washington",
+            "programs": [
+                {
+                    "id": "7877a1e5-bdda-4668-b379-e35bde146536",
+                    "fullName": "Apple Health Integrated Managed Care (FIMC)",
+                    "name": "AHIMC",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "9f5c066a-9e62-4f1a-8f77-090718b11c1a",
+                    "fullName": "Apple Health Integrated Foster Care",
+                    "name": "IFC",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "5601ebf2-5f94-49cb-9994-bc5d4b874bc0",
+                    "fullName": "PCCM",
+                    "name": "PCCM",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "WA"
+        },
+        {
+            "name": "Wisconsin",
+            "programs": [
+                {
+                    "id": "03152a0a-0888-4b24-87a8-1a7371e9b8e4",
+                    "fullName": "BadgerCare Plus",
+                    "name": "BadgerCare",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "9843c1dc-981c-4d2f-a04f-83b2a8ff254d",
+                    "fullName": "SSI Managed Care (Medicaid SSI)",
+                    "name": "SSI ",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "8d289aae-c5f5-4af8-a7a2-8b347273dfee",
+                    "fullName": "Family Care Partnership Program",
+                    "name": "Family Care Partnership",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "e00f0ae0-7282-4087-8e1f-232ce967d5c3",
+                    "fullName": "Family Care",
+                    "name": "Family Care",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "dc7d4bf5-c2bc-4b36-871b-f0761d040ecd",
+                    "fullName": "WrapAround Milwaukee",
+                    "name": "WAM",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "c41d618c-5e4d-4351-bf19-a9960caf976f",
+                    "fullName": "Care4Kids",
+                    "name": "Care4Kids",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "WI"
+        },
+        {
+            "name": "West Virginia",
+            "programs": [
+                {
+                    "id": "871d19a9-d555-469d-8af8-ce4897ace9d2",
+                    "fullName": "Mountain Health Trust (West Virginia Health Bridge Medicaid Expansion)",
+                    "name": "MHT/WVHB Expansion",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "76fd2c76-decd-41c4-924b-82820d8fe3f0",
+                    "fullName": "Mountain Health Promise",
+                    "name": "MHP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "7af85c9b-c9ee-455e-ad9a-b48e0c2b4848",
+                    "fullName": "West Virginia Children's Health Insurance Program",
+                    "name": "WVCHIP",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "WV"
+        }
+    ]
+}

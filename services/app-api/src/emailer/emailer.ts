@@ -18,7 +18,7 @@ import {
 import type {
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
-} from '../../../app-web/src/common-code/healthPlanFormDataType'
+} from '../common-code/healthPlanFormDataType'
 import type {
     UpdateInfoType,
     ProgramType,

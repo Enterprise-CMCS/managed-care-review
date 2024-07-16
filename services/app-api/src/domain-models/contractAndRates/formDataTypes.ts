@@ -10,7 +10,7 @@ import {
     rateTypeSchema,
     stateContactSchema,
     submissionTypeSchema,
-} from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
+} from '../../common-code/proto/healthPlanFormDataProto/zodSchemas'
 import { statusSchema } from './statusType'
 import type { RawCreateParams, ZodTypeAny } from 'zod/lib/types'
 

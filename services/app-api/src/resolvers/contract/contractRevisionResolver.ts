@@ -1,4 +1,4 @@
-import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { packageName } from '../../common-code/healthPlanFormDataType'
 import type { ContractRevisionType } from '../../domain-models'
 import type { Resolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
