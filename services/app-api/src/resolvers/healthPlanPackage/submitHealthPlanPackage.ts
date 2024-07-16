@@ -43,10 +43,8 @@ import {
     convertContractWithRatesToUnlockedHPP,
 } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
 import type { Span } from '@opentelemetry/api'
-import type {
-    PackageStatusType,
-    RateFormEditableType,
-} from '../../domain-models/contractAndRates'
+import type { PackageStatusType } from '../../domain-models/contractAndRates'
+import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = (typeof SubmissionErrorCodes)[number] // iterable union type
@@ -359,12 +357,53 @@ export function submitHealthPlanPackageResolver(
             })
         }
 
-        // Since submit can change the form data, we have to save it again.
-        // if the rates were removed, we remove them.
-        let removeRateInfos: RateFormEditableType[] | undefined = undefined
-        if (maybeLocked.rateInfos.length === 0) {
-            // undefined means ignore rates in updaterDraftContractWithRates, empty array means empty them.
-            removeRateInfos = []
+        // If this contract is being submitted as CONTRACT_ONLY but still has associations with rates
+        // we need to prune those rates at submission time to make the submission clean
+        if (
+            contractWithHistory.draftRevision.formData.submissionType ===
+                'CONTRACT_ONLY' &&
+            contractWithHistory.draftRates &&
+            contractWithHistory.draftRates.length > 0
+        ) {
+            const rateUpdates: UpdateDraftContractRatesArgsType = {
+                contractID: contractWithHistory.id,
+                rateUpdates: {
+                    create: [],
+                    update: [],
+                    link: [],
+                    unlink: [],
+                    delete: [],
+                },
+            }
+
+            for (const draftRate of contractWithHistory.draftRates) {
+                if (draftRate.parentContractID !== contractWithHistory.id) {
+                    // this is a linked rate, unlink it
+                    rateUpdates.rateUpdates.unlink.push({
+                        rateID: draftRate.id,
+                    })
+                } else if (draftRate.revisions.length === 0) {
+                    // this is a child draft rate, delete it
+                    rateUpdates.rateUpdates.delete.push({
+                        rateID: draftRate.id,
+                    })
+                } else {
+                    // this is a previously submitted child-rate. I'm not sure what to do with it
+                    console.warn(
+                        'Attempting to remove a previously submitted child rate in submit',
+                        contractWithHistory.id
+                    )
+                    throw new Error('no nonono bad child rate submit')
+                }
+            }
+            const rateResult = await store.updateDraftContractRates(rateUpdates)
+            if (rateResult instanceof Error) {
+                const errMessage =
+                    'Error while attempting to clean up rates from a now CONTRACT_ONLY submission'
+                logError('submitHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new Error(errMessage)
+            }
         }
 
         const updateResult = await store.updateDraftContractWithRates({
@@ -391,7 +430,6 @@ export function submitHealthPlanPackageResolver(
                     }
                 }),
             },
-            rateFormDatas: removeRateInfos,
         })
         if (updateResult instanceof Error) {
             const errMessage = `Failed to update submitted contract info with ID: ${contractRevisionID}; ${updateResult.message}`
