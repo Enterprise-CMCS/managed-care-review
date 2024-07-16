@@ -90,6 +90,7 @@ export const RateSummary = (): React.ReactElement => {
                                     ? RoutesRecord.DASHBOARD
                                     : RoutesRecord.DASHBOARD_RATES,
                         }}
+                        event_name="back_button"
                     >
                         <Icon.ArrowBack />
                         <span>&nbsp;Back to dashboard</span>

@@ -1,13 +1,13 @@
 import { User } from '../gen/gqlClient'
 import {
     PageTitlesRecord,
-    RouteT,
 } from '../constants'
 import * as React from 'react';
 import {getRouteName} from '../routeHelpers';
 import {createScript} from '../hooks/useScript';
 import { getTealiumPageName } from './tealiumHelpers';
 import {recordJSException} from '../otelHelpers';
+import { TEALIUM_CONTENT_TYPE_BY_ROUTE, TEALIUM_SUBSECTION_BY_ROUTE } from './constants';
 
 // TYPES
 type TealiumDataObject = {
@@ -29,7 +29,7 @@ type ButtonEventStyle =
     | 'primary'
     | 'success'
     | 'secondary'
-    | 'transparent'
+    | 'outline'
     | 'unstyled'
 
 type ButtonEventType =
@@ -59,8 +59,9 @@ type TealiumButtonEventObject = {
     event_extension?: string
 } & Partial<TealiumDataObject>
 
+// Used for internal links and navigation links
 type TealiumInternalLinkEventObject = {
-    event_name: 'internal_link_clicked'
+    event_name: 'internal_link_clicked' | "navigation_clicked" | "back_button"
     text: string
     link_url: string
     //link_type: string //currently not sending
@@ -86,37 +87,6 @@ type TealiumEventObjectTypes =
     | TealiumButtonEventObject
     | TealiumInternalLinkEventObject
 
-// CONSTANTS
-const CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
-    ROOT: 'root',
-    AUTH: 'login',
-    DASHBOARD: 'table',
-    DASHBOARD_SUBMISSIONS: 'table',
-    DASHBOARD_RATES: 'table',
-    HELP: 'glossary',
-    GRAPHQL_EXPLORER: 'dev',
-    API_ACCESS: 'dev',
-    SETTINGS: 'table',
-    RATES_SUMMARY: 'summary',
-    RATE_EDIT: 'form',
-    SUBMISSIONS: 'form',
-    SUBMISSIONS_NEW: 'form',
-    SUBMISSIONS_EDIT_TOP_LEVEL: 'form',
-    SUBMISSIONS_TYPE: 'form',
-    SUBMISSIONS_CONTRACT_DETAILS: 'form',
-    SUBMISSIONS_RATE_DETAILS: 'form',
-    SUBMISSIONS_CONTACTS: 'form',
-    SUBMISSIONS_DOCUMENTS: 'form',
-    SUBMISSIONS_REVIEW_SUBMIT: 'form',
-    SUBMISSIONS_SUMMARY: 'summary',
-    SUBMISSIONS_REVISION: 'summary',
-    SUBMISSIONS_QUESTIONS_AND_ANSWERS: 'summary',
-    SUBMISSIONS_MCCRSID: 'form',
-    SUBMISSIONS_UPLOAD_QUESTION: 'form',
-    SUBMISSIONS_UPLOAD_RESPONSE: 'form',
-    UNKNOWN_ROUTE: '404',
-}
-
 type TealiumEvent =
     | 'search'
     | 'submission_view'
@@ -125,6 +95,9 @@ type TealiumEvent =
     | 'save_draft'
     | 'button_engagement'
     | 'internal_link_clicked'
+    | "navigation_clicked"
+    | "external_link_clicked"
+    | "back_button"
 
 type TealiumEnv =
     | 'prod'
@@ -227,12 +200,12 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
 
             const tagData: TealiumViewDataObject = {
                 content_language: 'en',
-                content_type: `${CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
+                content_type: `${TEALIUM_CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
                 page_name: tealiumPageName,
                 page_path: pathname,
                 site_domain: 'cms.gov',
                 site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
-                site_section: `${currentRoute}`,
+                site_section: `${TEALIUM_SUBSECTION_BY_ROUTE[currentRoute]}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
             }
 
@@ -294,12 +267,12 @@ const devTealiumClient = (): TealiumClientType => {
             })
             const tagData: TealiumViewDataObject = {
                 content_language: 'en',
-                content_type: `${CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
+                content_type: `${TEALIUM_CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
                 page_name: tealiumPageName,
                 page_path: pathname,
                 site_domain: 'cms.gov',
                 site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
-                site_section: `${currentRoute}`,
+                site_section: `${TEALIUM_SUBSECTION_BY_ROUTE[currentRoute]}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
             }
 
@@ -309,7 +282,7 @@ const devTealiumClient = (): TealiumClientType => {
     }
 }
 
-export { CONTENT_TYPE_BY_ROUTE, tealiumClient, devTealiumClient }
+export {tealiumClient, devTealiumClient }
 export type {
     TealiumLinkDataObject,
     TealiumViewDataObject,

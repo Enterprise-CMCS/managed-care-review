@@ -203,6 +203,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                         to={{
                             pathname: RoutesRecord.DASHBOARD_SUBMISSIONS,
                         }}
+                        event_name="back_button"
                     >
                         <Icon.ArrowBack />
                         {loggedInUser?.__typename === 'StateUser' ? (

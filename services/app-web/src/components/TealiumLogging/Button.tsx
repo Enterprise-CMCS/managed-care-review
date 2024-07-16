@@ -35,7 +35,7 @@ const ButtonWithLogging = (props: ButtonWithLoggingType) => {
     }
 
     if (props.outline) {
-        buttonStyle = 'transparent'
+        buttonStyle = 'outline'
     }
 
     if (props.unstyled) {
