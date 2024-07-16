@@ -809,6 +809,10 @@ enum HealthPlanPackageStatus {
     RESUBMITTED
 }
 
+enum UnlockedStatus {
+    UNLOCKED
+}
+
 """
 HealthPlanPackage is the core type for a single package submission. All the
 submission data is contained in the HealthPlanRevision type, allowing us to store
@@ -1580,7 +1584,7 @@ type UnlockedContract {
     Options are DRAFT, SUBMITTED, RESUBMITTED and UNLOCKED
     SUBMITTED and RESUBMITTED packages cannot be modified
     """
-    status: HealthPlanPackageStatus!
+    status: UnlockedStatus!
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
     initiallySubmittedAt: Date
     "stateCode is the state code (e.g. CA or TN) for the submitting state"
