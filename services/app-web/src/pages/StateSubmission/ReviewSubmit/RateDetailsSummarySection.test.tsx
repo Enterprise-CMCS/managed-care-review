@@ -407,6 +407,38 @@ describe('RateDetailsSummarySection', () => {
         ).not.toBeInTheDocument()
     })
 
+    it('does not render explain missing data text for a linked rate', async () => {
+        const statePrograms = mockMNState().programs
+        const contract = mockContractWithLinkedRateDraft()
+        contract.draftRates![0].revisions[0].formData.rateDateStart = null
+        contract.draftRates![0].revisions[0].formData.rateDateEnd = null
+        contract.draftRates![0].revisions[0].formData.rateDateCertified = null
+        contract.draftRates![0].revisions[0].formData.rateCapitationType = null
+        contract.draftRates![0].revisions[0].formData.amendmentEffectiveDateEnd = null
+        contract.draftRates![0].revisions[0].formData.amendmentEffectiveDateStart = null
+        contract.draftRates![0].revisions[0].formData.rateCapitationType = null
+        contract.draftRates![0].revisions[0].formData.certifyingActuaryContacts = []
+        contract.draftRates![0].revisions[0].formData.actuaryCommunicationPreference = null
+
+        await waitFor(() => {
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    contract={contract}
+                    submissionName="MN-MSHO-0003"
+                    statePrograms={statePrograms}
+                    editNavigateTo="/edit"
+                />,
+                {
+                    apolloProvider: apolloProviderStateUser,
+                }
+            )
+        })
+
+        expect(
+            screen.queryByText('You must provide this information')
+        ).not.toBeInTheDocument()
+    })
+
     it('renders the deprecated rate programs when no rate programs present on last submitted version of rate shown to state user editing draft contract with linked rates', async () => {
         const statePrograms = mockMNState().programs
         const contract = mockContractWithLinkedRateDraft()

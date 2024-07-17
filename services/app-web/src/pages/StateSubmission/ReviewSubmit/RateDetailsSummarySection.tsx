@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React, { useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
@@ -344,8 +345,10 @@ export const RateDetailsSummarySection = ({
                                           id="rateType"
                                           label="Rate certification type"
                                           explainMissingData={
-                                              explainMissingData
-                                          }
+                                            isLinkedRate
+                                                ? false
+                                                : explainMissingData
+                                        }
                                           children={rateCertificationType(rate)}
                                       />
                                       <DataDetail
@@ -357,8 +360,10 @@ export const RateDetailsSummarySection = ({
                                                   : 'Rating period'
                                           }
                                           explainMissingData={
-                                              explainMissingData
-                                          }
+                                            isLinkedRate
+                                                ? false
+                                                : explainMissingData
+                                        }
                                           children={formatDatePeriod(
                                               rateFormData.rateDateStart,
                                               rateFormData.rateDateEnd
@@ -372,8 +377,10 @@ export const RateDetailsSummarySection = ({
                                                   : 'Date certified'
                                           }
                                           explainMissingData={
-                                              explainMissingData
-                                          }
+                                            isLinkedRate
+                                                ? false
+                                                : explainMissingData
+                                        }
                                           children={formatCalendarDate(
                                               rateFormData.rateDateCertified
                                           )}
@@ -383,8 +390,10 @@ export const RateDetailsSummarySection = ({
                                               id="effectiveRatingPeriod"
                                               label="Rate amendment effective dates"
                                               explainMissingData={
-                                                  explainMissingData
-                                              }
+                                                isLinkedRate
+                                                    ? false
+                                                    : explainMissingData
+                                            }
                                               children={formatDatePeriod(
                                                   rateFormData.amendmentEffectiveDateStart,
                                                   rateFormData.amendmentEffectiveDateEnd
@@ -395,16 +404,20 @@ export const RateDetailsSummarySection = ({
                                           id="rateCapitationType"
                                           label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
                                           explainMissingData={
-                                              explainMissingData
-                                          }
+                                            isLinkedRate
+                                                ? false
+                                                : explainMissingData
+                                        }
                                           children={rateCapitationType(rate)}
                                       />
                                       <DataDetail
                                           id="certifyingActuary"
                                           label="Certifying actuary"
                                           explainMissingData={
-                                              explainMissingData
-                                          }
+                                            isLinkedRate
+                                                ? false
+                                                : explainMissingData
+                                        }
                                           children={
                                               validateActuary(
                                                   rateFormData
@@ -426,7 +439,9 @@ export const RateDetailsSummarySection = ({
                                                   id={`addtlCertifyingActuary-${addtlContactIndex}`}
                                                   label="Certifying actuary"
                                                   explainMissingData={
-                                                      explainMissingData
+                                                    isLinkedRate
+                                                        ? false
+                                                        : explainMissingData
                                                   }
                                                   children={
                                                       validateActuary(
@@ -451,7 +466,9 @@ export const RateDetailsSummarySection = ({
                                               ]
                                           }
                                           explainMissingData={
-                                              explainMissingData
+                                            isLinkedRate
+                                                ? false
+                                                : explainMissingData
                                           }
                                       />
                                   </DoubleColumnGrid>
