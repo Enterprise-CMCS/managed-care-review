@@ -1,11 +1,10 @@
-import {
+import type {
     CreateQuestionMutationFn,
     HealthPlanPackage,
     SubmitHealthPlanPackageMutationFn,
     UnlockHealthPlanPackageMutationFn,
     UnlockContractMutationFn,
     FetchHealthPlanPackageWithQuestionsQuery,
-    FetchHealthPlanPackageWithQuestionsDocument,
     IndexQuestionsPayload,
     CreateQuestionMutation,
     CreateQuestionResponseMutationFn,
@@ -16,9 +15,11 @@ import {
     CreateQuestionResponseInput,
     SubmitContractMutationFn,
     Contract,
-    UnlockedContract
+    UnlockedContract,
 } from '../gen/gqlClient'
-import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
+
+import { FetchHealthPlanPackageWithQuestionsDocument } from '../gen/gqlClient'
+import type { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
 import { recordJSException } from '../otelHelpers'
 import { handleGQLErrors as handleGQLErrorLogging } from './apolloErrors'
@@ -44,7 +45,6 @@ const divisionToIndexQuestionDivision = (
     division: Division
 ): IndexQuestionDivisions =>
     `${division.toUpperCase()}Questions` as IndexQuestionDivisions
-
 
 export const handleApolloErrorsAndAddUserFacingMessages = (
     apolloError: ApolloError,
@@ -88,7 +88,7 @@ export const handleApolloErrorsAndAddUserFacingMessages = (
         })
     }
 
-    return new Error(message, options)
+    return new Error(message)
 }
 
 export const unlockMutationWrapper = async (
