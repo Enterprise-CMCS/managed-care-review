@@ -19,7 +19,11 @@ import type { PartialHealthPlanFormData } from '../../../../app-web/src/common-c
 function convertContractToDraftRateRevisions(contract: ContractType) {
     const rateRevisions: RateRevisionType[] = []
     contract.draftRates?.forEach((rate) => {
-        if (rate.draftRevision) rateRevisions.push(rate.draftRevision)
+        if (rate.draftRevision) {
+            rateRevisions.push(rate.draftRevision)
+        } else if (rate.revisions.length > 0) {
+            rateRevisions.push(rate.revisions[0])
+        }
     })
     return rateRevisions
 }
@@ -51,11 +55,10 @@ function convertContractWithRatesRevtoHPPRev(
     contract: ContractType
 ): HealthPlanRevisionType[] | Error {
     let healthPlanRevisions: HealthPlanRevisionType[] | Error = []
-    const rateRevisions = convertContractToDraftRateRevisions(contract)
     for (const contractRev of contract.revisions) {
         const unlockedHealthPlanFormData = convertContractWithRatesToFormData(
             contractRev,
-            rateRevisions,
+            contractRev.rateRevisions,
             contract.id,
             contract.stateCode,
             contract.stateNumber

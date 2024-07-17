@@ -10,7 +10,6 @@ import { SESServiceException } from '@aws-sdk/client-ses'
 import { testSendSESEmail } from './awsSESHelpers'
 import { testCMSUser, testStateUser } from './userHelpers'
 import { v4 as uuidv4 } from 'uuid'
-import { vi } from 'vitest'
 
 const testEmailConfig = (): EmailConfiguration => ({
     stage: 'LOCAL',
@@ -70,7 +69,7 @@ const sendTestEmails = async (emailData: EmailData): Promise<void | Error> => {
 
 function testEmailer(customConfig?: EmailConfiguration): Emailer {
     const config = customConfig || testEmailConfig()
-    return emailer(config, vi.fn(sendTestEmails))
+    return emailer(config, jest.fn(sendTestEmails))
 }
 
 type State = {

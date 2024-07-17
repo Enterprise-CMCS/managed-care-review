@@ -8,12 +8,12 @@ import type {
 } from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../postgresErrors'
 import type { PrismaTransactionType } from '../prismaTypes'
+import { submitContractAndRates } from './submitContract'
 
 async function submitRateInsideTransaction(
     tx: PrismaTransactionType,
     args: SubmitRateArgsType
 ) {
-    const currentDateTime = new Date()
     const { rateID, submittedByUserID, formData } = args
 
     const submittedReason = args.submittedReason ?? 'Initial submission' // all subsequent submissions will have a submit reason due to unlock submit modal
@@ -25,6 +25,13 @@ async function submitRateInsideTransaction(
         const err = `PRISMA ERROR: Cannot find the current rate to submit with rate id: ${rateID}`
         console.error(err)
         return new NotFoundError(err)
+    }
+
+    if (currentRate.packageSubmissions.length === 0) {
+        const msg =
+            'Attempted to submit a rate that was never submitted with a contract.'
+        console.error(msg)
+        return new Error(msg)
     }
 
     // find the current rate with related contracts
@@ -42,27 +49,20 @@ async function submitRateInsideTransaction(
     }
 
     // Given related contracts, confirm contracts valid by submitted by checking for revisions
-    // If related contracts have no initial revision, we know that link is invalid and can throw error
     const draftContracts = currentRate.draftContracts
 
-    if (draftContracts) {
-        const everyRelatedContractIsSubmitted = draftContracts.every(
-            (contract) => contract.revisions.length > 0
-        )
-        if (!everyRelatedContractIsSubmitted) {
-            const message =
-                'Attempted to submit a rate related to a contract that has not been submitted'
-            console.error(message)
-            return new Error(message)
-        }
-    }
+    // only memorialize submitted contracts. An unsubmitted contract is not a real connection yet.
+    const submittedContractIDs =
+        draftContracts
+            ?.filter((c) => c.revisions.length > 0)
+            .map((c) => c.id) || []
 
     // update the rate with form data changes except for link/unlinking contracts.
     if (formData) {
         const updatedDraftRate = await updateDraftRate(tx, {
             rateID: rateID,
             formData,
-            contractIDs: draftContracts?.map((c) => c.id) || [],
+            contractIDs: submittedContractIDs,
         })
 
         if (updatedDraftRate instanceof Error) {
@@ -70,26 +70,20 @@ async function submitRateInsideTransaction(
         }
     }
 
-    // update rate with submit info, remove connected between rateRevision and contract, and making entries
-    // for rate and contract revisions on the RateRevisionsOnContractRevisionsTable.
-    const updated = await tx.rateRevisionTable.update({
-        where: {
-            id: currentRev.id,
-        },
-        data: {
-            submitInfo: {
-                create: {
-                    updatedAt: currentDateTime,
-                    updatedByID: submittedByUserID,
-                    updatedReason: submittedReason,
-                },
-            },
-        },
-    })
+    // Now we call the big ol' sumitter to set all the related submissions etc.
 
-    // clean up old data -- TODO figure out which code from submitContract is relevant here (linking/delinking contract and rates not at play)
+    const submitResult = await submitContractAndRates(
+        tx,
+        undefined,
+        [rateID],
+        submittedByUserID,
+        submittedReason
+    )
+    if (submitResult instanceof Error) {
+        return submitResult
+    }
 
-    return findRateWithHistory(tx, updated.rateID)
+    return findRateWithHistory(tx, rateID)
 }
 
 type SubmitRateArgsType = {

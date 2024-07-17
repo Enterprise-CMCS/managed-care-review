@@ -5,7 +5,7 @@ import { submitContract } from './submitContract'
 import { submitRate } from './submitRate'
 import { insertDraftContract } from './insertContract'
 import { unlockContract } from './unlockContract'
-import { updateDraftContractWithRates } from './updateDraftContractWithRates'
+import { updateDraftContractFormData } from './updateDraftContractWithRates'
 import { insertDraftRate } from './insertRate'
 import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
@@ -13,6 +13,7 @@ import { findRateWithHistory } from './findRateWithHistory'
 import { must, mockInsertContractArgs } from '../../testHelpers'
 import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
 import { convertContractToDraftRateRevisions } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
+import { updateDraftContractRates } from './updateDraftContractRates'
 
 // TODO: Enable these tests again after reimplementing rate change history that was in contractWithHistoryToDomainModel
 // eslint-disable-next-line jest/no-disabled-tests
@@ -228,7 +229,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             })
         )
         must(
-            await updateDraftContractWithRates(client, {
+            await updateDraftContractFormData(client, {
                 contractID: contractA.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -238,17 +239,41 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateFormDatas: convertContractToDraftRateRevisions(
-                    unlockedContractA
-                )
-                    .filter(
-                        (rateRevision) =>
-                            rateRevision.formData.rateID !== rate1.id &&
-                            rateRevision.formData.rateID !== rate2.id
-                    )
-                    .map((rate) => rate.formData),
             })
         )
+
+        const remainingRateRevisions = convertContractToDraftRateRevisions(
+            unlockedContractA
+        ).filter(
+            (rateRevision) =>
+                rateRevision.formData.rateID !== rate1.id &&
+                rateRevision.formData.rateID !== rate2.id
+        )
+
+        must(
+            await updateDraftContractRates(client, {
+                contractID: contractA.id,
+                rateUpdates: {
+                    create: [],
+                    update: remainingRateRevisions.map((r, idx) => ({
+                        rateID: r.rateID,
+                        formData: r.formData,
+                        ratePosition: idx + 1,
+                    })),
+                    link: [],
+                    unlink: [
+                        {
+                            rateID: rate1.id,
+                        },
+                        {
+                            rateID: rate2.id,
+                        },
+                    ],
+                    delete: [],
+                },
+            })
+        )
+
         must(
             await submitContract(client, {
                 contractID: contractA.id,
@@ -539,7 +564,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         )
         // Remove rate 1 and rate 2 from contract
         must(
-            await updateDraftContractWithRates(client, {
+            await updateDraftContractFormData(client, {
                 contractID: contractA.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -549,15 +574,38 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateFormDatas: convertContractToDraftRateRevisions(
-                    unlockedContractA
-                )
-                    .filter(
-                        (rateRevision) =>
-                            rateRevision.formData.rateID !== rate1.id &&
-                            rateRevision.formData.rateID !== rate2.id
-                    )
-                    .map((rate) => rate.formData),
+            })
+        )
+
+        const remainingRateRevisions = convertContractToDraftRateRevisions(
+            unlockedContractA
+        ).filter(
+            (rateRevision) =>
+                rateRevision.formData.rateID !== rate1.id &&
+                rateRevision.formData.rateID !== rate2.id
+        )
+
+        must(
+            await updateDraftContractRates(client, {
+                contractID: contractA.id,
+                rateUpdates: {
+                    create: [],
+                    update: remainingRateRevisions.map((r, idx) => ({
+                        rateID: r.rateID,
+                        formData: r.formData,
+                        ratePosition: idx + 1,
+                    })),
+                    link: [],
+                    unlink: [
+                        {
+                            rateID: rate1.id,
+                        },
+                        {
+                            rateID: rate2.id,
+                        },
+                    ],
+                    delete: [],
+                },
             })
         )
 
@@ -673,7 +721,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await insertDraftContract(client, draftContractData)
         )
         const updatedDraftContractWithRates = must(
-            await updateDraftContractWithRates(client, {
+            await updateDraftContractFormData(client, {
                 contractID: contractA.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -683,7 +731,36 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateFormDatas: [rate1, rate2],
+            })
+        )
+
+        must(
+            await updateDraftContractRates(client, {
+                contractID: contractA.id,
+                rateUpdates: {
+                    create: [
+                        {
+                            formData: rate1,
+                            ratePosition: 1,
+                        },
+                        {
+                            formData: rate2,
+                            ratePosition: 2,
+                        },
+                    ],
+                    update: [],
+                    link: [],
+                    unlink: [],
+                    delete: [],
+                },
+            })
+        )
+
+        must(
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'Submitting A.2',
             })
         )
 
@@ -886,16 +963,23 @@ describe('findContractWithHistory with only contract history', () => {
         )
 
         const updatedContract = must(
-            await updateDraftContractWithRates(client, {
+            await updateDraftContractRates(client, {
                 contractID: draftContract.id,
-                formData: {},
-                rateFormDatas: [
-                    mockInsertRateArgs({
-                        id: uuidv4(),
-                        rateType: 'NEW',
-                        rateCertificationName: 'First rate',
-                    }),
-                ],
+                rateUpdates: {
+                    create: [
+                        {
+                            formData: mockInsertRateArgs({
+                                rateType: 'NEW',
+                                rateCertificationName: 'First rate',
+                            }),
+                            ratePosition: 1,
+                        },
+                    ],
+                    update: [],
+                    link: [],
+                    unlink: [],
+                    delete: [],
+                },
             })
         )
 
@@ -1053,19 +1137,34 @@ describe('findContractWithHistory with only contract history', () => {
         }
 
         const updatedContractWithRates = must(
-            await updateDraftContractWithRates(client, {
+            await updateDraftContractRates(client, {
                 contractID: draftContract.id,
-                formData: {},
-                rateFormDatas: [
-                    // Make sure existing rate is still included. If not it will be removed from the contract
-                    convertContractToDraftRateRevisions(unlockedContract)[0]
-                        .formData,
-                    mockInsertRateArgs({
-                        id: uuidv4(),
-                        rateType: 'NEW',
-                        rateCertificationName: 'Second rate',
-                    }),
-                ],
+                rateUpdates: {
+                    create: [
+                        {
+                            formData: mockInsertRateArgs({
+                                rateType: 'NEW',
+                                rateCertificationName: 'Second rate',
+                            }),
+                            ratePosition: 2,
+                        },
+                    ],
+                    update: [
+                        {
+                            rateID: convertContractToDraftRateRevisions(
+                                unlockedContract
+                            )[0].rateID,
+                            formData:
+                                convertContractToDraftRateRevisions(
+                                    unlockedContract
+                                )[0].formData,
+                            ratePosition: 1,
+                        },
+                    ],
+                    link: [],
+                    unlink: [],
+                    delete: [],
+                },
             })
         )
 

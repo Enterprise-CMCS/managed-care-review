@@ -11,7 +11,8 @@ import {
     mockInsertRateArgs,
 } from '../../testHelpers'
 import { NotFoundError } from '../postgresErrors'
-import { updateDraftContractWithRates } from './updateDraftContractWithRates'
+import { updateDraftContractFormData } from './updateDraftContractWithRates'
+import { updateDraftContractRates } from './updateDraftContractRates'
 
 describe('submitContract', () => {
     it('has the same submit infos', async () => {
@@ -55,10 +56,31 @@ describe('submitContract', () => {
         })
 
         const draftContractWithRates = must(
-            await updateDraftContractWithRates(client, {
+            await updateDraftContractFormData(client, {
                 contractID: contract.id,
                 formData: draftContractForm2,
-                rateFormDatas: [draftRateDataA, draftRateDataB],
+            })
+        )
+
+        must(
+            await updateDraftContractRates(client, {
+                contractID: contract.id,
+                rateUpdates: {
+                    create: [
+                        {
+                            formData: draftRateDataA,
+                            ratePosition: 1,
+                        },
+                        {
+                            formData: draftRateDataB,
+                            ratePosition: 2,
+                        },
+                    ],
+                    update: [],
+                    link: [],
+                    unlink: [],
+                    delete: [],
+                },
             })
         )
 
@@ -128,11 +150,32 @@ describe('submitContract', () => {
             rateCertificationName: 'rate-cert-number-two',
         })
 
-        const draftContractWithRates = must(
-            await updateDraftContractWithRates(client, {
+        must(
+            await updateDraftContractFormData(client, {
                 contractID: contract.id,
                 formData: draftContractForm2,
-                rateFormDatas: [draftRateDataA, draftRateDataB],
+            })
+        )
+
+        const draftContractWithRates = must(
+            await updateDraftContractRates(client, {
+                contractID: contract.id,
+                rateUpdates: {
+                    create: [
+                        {
+                            formData: draftRateDataA,
+                            ratePosition: 1,
+                        },
+                        {
+                            formData: draftRateDataB,
+                            ratePosition: 2,
+                        },
+                    ],
+                    update: [],
+                    link: [],
+                    unlink: [],
+                    delete: [],
+                },
             })
         )
 
@@ -235,7 +278,8 @@ describe('submitContract', () => {
         expect(resubmitStoreError).toBeInstanceOf(Error)
     })
 
-    it('handles concurrent drafts correctly', async () => {
+    //
+    it('doesnt allow submitting a rate never submitted without a parent', async () => {
         const client = await sharedTestPrismaClient()
 
         const stateUser = await client.user.create({
@@ -280,7 +324,7 @@ describe('submitContract', () => {
             throw new Error('must be an error')
         }
         expect(result.message).toBe(
-            'Attempted to submit a rate related to a contract that has not been submitted'
+            'Attempted to submit a rate that was never submitted with a contract.'
         )
     })
 })

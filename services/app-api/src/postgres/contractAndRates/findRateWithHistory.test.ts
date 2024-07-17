@@ -4,7 +4,7 @@ import { submitContract } from './submitContract'
 import { submitRate } from './submitRate'
 import { insertDraftContract } from './insertContract'
 import { unlockContract } from './unlockContract'
-import { updateDraftContractWithRates } from './updateDraftContractWithRates'
+import { updateDraftContractFormData } from './updateDraftContractWithRates'
 import { insertDraftRate } from './insertRate'
 import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
@@ -82,10 +82,27 @@ describe('findRate', () => {
             })
         )
         must(
-            await updateDraftContractWithRates(client, {
+            await updateDraftContractFormData(client, {
                 contractID: contract1.id,
                 formData: { submissionDescription: 'someurle.en' },
-                rateFormDatas: [rateA.draftRevision.formData],
+            })
+        )
+
+        must(
+            await updateDraftContractRates(client, {
+                contractID: contract1.id,
+                rateUpdates: {
+                    create: [],
+                    update: [],
+                    link: [
+                        {
+                            rateID: rateA.id,
+                            ratePosition: 1,
+                        },
+                    ],
+                    unlink: [],
+                    delete: [],
+                },
             })
         )
 
@@ -99,10 +116,27 @@ describe('findRate', () => {
             })
         )
         must(
-            await updateDraftContractWithRates(client, {
+            await updateDraftContractFormData(client, {
                 contractID: contract2.id,
                 formData: { submissionDescription: 'twopointo' },
-                rateFormDatas: [rateA.draftRevision.formData],
+            })
+        )
+
+        must(
+            await updateDraftContractRates(client, {
+                contractID: contract2.id,
+                rateUpdates: {
+                    create: [],
+                    update: [],
+                    link: [
+                        {
+                            rateID: rateA.id,
+                            ratePosition: 1,
+                        },
+                    ],
+                    unlink: [],
+                    delete: [],
+                },
             })
         )
 
@@ -116,10 +150,27 @@ describe('findRate', () => {
             })
         )
         must(
-            await updateDraftContractWithRates(client, {
+            await updateDraftContractFormData(client, {
                 contractID: contract3.id,
                 formData: { submissionDescription: 'threepointo' },
-                rateFormDatas: [rateA.draftRevision.formData],
+            })
+        )
+
+        must(
+            await updateDraftContractRates(client, {
+                contractID: contract3.id,
+                rateUpdates: {
+                    create: [],
+                    update: [],
+                    link: [
+                        {
+                            rateID: rateA.id,
+                            ratePosition: 1,
+                        },
+                    ],
+                    unlink: [],
+                    delete: [],
+                },
             })
         )
 
@@ -171,7 +222,7 @@ describe('findRate', () => {
             })
         )
         must(
-            await updateDraftContractWithRates(client, {
+            await updateDraftContractFormData(client, {
                 contractID: unlockedContract2.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -180,11 +231,26 @@ describe('findRate', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateFormDatas: convertContractToDraftRateRevisions(
-                    unlockedContract2
-                ).filter((rate) => rate.formData.rateID !== submittedRateA.id),
             })
         )
+
+        must(
+            await updateDraftContractRates(client, {
+                contractID: contract3.id,
+                rateUpdates: {
+                    create: [],
+                    update: [],
+                    link: [],
+                    unlink: [
+                        {
+                            rateID: submittedRateA.id,
+                        },
+                    ],
+                    delete: [],
+                },
+            })
+        )
+
         must(
             await submitContract(client, {
                 contractID: contract2.id,
@@ -193,7 +259,7 @@ describe('findRate', () => {
             })
         )
 
-        // Now, find that contract and assert the history is what we expected
+        // Now, find that rate and assert the history is what we expected
         const twoRate = must(
             await findRateWithHistory(client, submittedRateA.id)
         )
@@ -203,7 +269,7 @@ describe('findRate', () => {
         expect(twoRate.revisions).toHaveLength(5)
         expect(twoRate.revisions[0].contractRevisions).toHaveLength(2)
 
-        // update rate 1 to have a new version, should make one new rev.
+        // update contract 1 to have a new version, should make one new rev.
         const unlockedContract1 = must(
             await unlockContract(client, {
                 contractID: contract1.id,
@@ -212,10 +278,9 @@ describe('findRate', () => {
             })
         ) as DraftContractType
         must(
-            await updateDraftContractWithRates(client, {
+            await updateDraftContractFormData(client, {
                 contractID: unlockedContract1.id,
                 formData: { submissionDescription: 'onepointone' },
-                rateFormDatas: [rateA.draftRevision.formData],
             })
         )
         must(
@@ -226,7 +291,7 @@ describe('findRate', () => {
             })
         )
 
-        // Now, find that contract and assert the history is what we expected
+        // Now, find that rate and assert the history is what we expected
         const backAgainRate = must(
             await findRateWithHistory(client, submittedRateA.id)
         )
@@ -581,9 +646,7 @@ describe('findRate', () => {
         // Expect unlocked rate to have a draftRevision
         expect(fetchUnlockedRateOne.draftRevision).toBeDefined()
         // Expect our draft revision to have no contract revisions after we removed it
-        expect(
-            fetchUnlockedRateOne.draftRevision?.contractRevisions
-        ).toHaveLength(0)
+        expect(fetchUnlockedRateOne.draftContracts).toHaveLength(0)
         // Expect our unlocked rate to still have the same revision data (revision history)
         // Expect the earliest submission contract revision to be attached to first submission rate revision
         expect(
@@ -677,15 +740,23 @@ describe('findRate', () => {
         )
 
         const updatedContract = must(
-            await updateDraftContractWithRates(client, {
+            await updateDraftContractRates(client, {
                 contractID: draftContract.id,
-                formData: {},
-                rateFormDatas: [
-                    mockInsertRateArgs({
-                        id: uuidv4(),
-                        rateType: 'NEW',
-                    }),
-                ],
+                rateUpdates: {
+                    create: [
+                        {
+                            formData: mockInsertRateArgs({
+                                id: uuidv4(),
+                                rateType: 'NEW',
+                            }),
+                            ratePosition: 1,
+                        },
+                    ],
+                    update: [],
+                    link: [],
+                    unlink: [],
+                    delete: [],
+                },
             })
         )
 

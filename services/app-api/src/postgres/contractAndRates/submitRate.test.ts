@@ -8,9 +8,9 @@ import {
 } from '../../testHelpers'
 import { submitContract } from './submitContract'
 import { insertDraftContract } from './insertContract'
-import { updateDraftContractWithRates } from './updateDraftContractWithRates'
 import { unlockRate } from './unlockRate'
 import { convertContractToDraftRateRevisions } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
+import { updateDraftContractRates } from './updateDraftContractRates'
 
 describe('submitRate', () => {
     it('submits rate independent of contract status', async () => {
@@ -49,19 +49,25 @@ describe('submitRate', () => {
             )
         )
 
-        const contractID = draftContract.id
-
         // add new rate to contract
         const updatedDraftContract = must(
-            await updateDraftContractWithRates(client, {
-                contractID,
-                formData: {},
-                rateFormDatas: [
-                    mockInsertRateArgs({
-                        rateCertificationName: 'rate revision 1.0',
-                        rateType: 'NEW',
-                    }),
-                ],
+            await updateDraftContractRates(client, {
+                contractID: draftContract.id,
+                rateUpdates: {
+                    create: [
+                        {
+                            formData: mockInsertRateArgs({
+                                rateCertificationName: 'rate revision 1.0',
+                                rateType: 'NEW',
+                            }),
+                            ratePosition: 1,
+                        },
+                    ],
+                    update: [],
+                    link: [],
+                    unlink: [],
+                    delete: [],
+                },
             })
         )
 

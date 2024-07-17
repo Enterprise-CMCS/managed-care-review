@@ -15,8 +15,6 @@ async function submitContractInsideTransaction(
     submittedByUserID: string,
     submittedReason: string
 ): Promise<ContractType | Error> {
-    const currentDateTime = new Date()
-
     // New C+R code pre-submit
     const currentContract = await findContractWithHistory(tx, contractID)
     if (currentContract instanceof Error) {
@@ -71,8 +69,28 @@ async function submitContractInsideTransaction(
         }
     }
 
-    // this is all the revs that the newly submitted contract will be connected to. Those to be submitted and those already submitted.
-    // const draftRateRevs = unsubmittedChildRevs.concat(linkedRateRevs)
+    const submissionResult = await submitContractAndRates(
+        tx,
+        contractID,
+        unsubmittedChildRevs.map((r) => r.rateID),
+        submittedByUserID,
+        submittedReason
+    )
+    if (submissionResult instanceof Error) {
+        return submissionResult
+    }
+
+    return await findContractWithHistory(tx, contractID)
+}
+
+async function submitContractAndRates(
+    tx: PrismaTransactionType,
+    contractID: string | undefined,
+    rateIDs: string[],
+    submittedByUserID: string,
+    submittedReason: string
+): Promise<undefined | Error> {
+    const currentDateTime = new Date()
 
     // Create the submitInfo record in the updateInfoTable
     const submitInfo = await tx.updateInfoTable.create({
@@ -83,26 +101,59 @@ async function submitContractInsideTransaction(
         },
     })
 
-    // OLD SUBMIT STYLE
-    // Update the contract to include the submitInfo ID
-    await tx.contractRevisionTable.update({
-        where: {
-            id: currentRev.id,
-        },
-        data: {
-            submitInfo: {
-                connect: {
-                    id: submitInfo.id,
+    let submittedContractRev: ContractRevisionTable | undefined = undefined
+    if (contractID) {
+        const submittedRev = await tx.contractRevisionTable.findFirst({
+            where: {
+                contractID: contractID,
+                submitInfo: {
+                    is: null,
                 },
+            },
+        })
+
+        if (!submittedRev) {
+            return new Error(
+                'attempted to submit contract with no draft revision: ' +
+                    contractID
+            )
+        }
+
+        submittedContractRev = submittedRev
+
+        // Update the contract to include the submitInfo ID
+        await tx.contractRevisionTable.update({
+            where: {
+                id: submittedContractRev.id,
+            },
+            data: {
+                submitInfoID: submitInfo.id,
+            },
+        })
+    }
+    // next update the submitted rate revs
+    const submittedRateRevs = await tx.rateRevisionTable.findMany({
+        where: {
+            rateID: {
+                in: rateIDs,
+            },
+            submitInfo: {
+                is: null,
             },
         },
     })
+
+    if (submittedRateRevs.length !== rateIDs.length) {
+        return new Error(
+            'Not all rates to submit had draft revisions: ' + rateIDs.join(',')
+        )
+    }
 
     // we only want to update the rateRevision's submit info if it has not already been submitted
     await tx.rateRevisionTable.updateMany({
         where: {
             id: {
-                in: unsubmittedChildRevs.map((rev) => rev.id),
+                in: submittedRateRevs.map((rev) => rev.id),
             },
         },
         data: {
@@ -188,88 +239,94 @@ async function submitContractInsideTransaction(
         ratePosition: number
     }[] = []
 
-    // 1. This submitted contract
-    // all draft rates: mark related, get a connection.
-    const draftRates = await tx.draftRateJoinTable.findMany({
-        where: {
-            contractID: contractID,
-        },
-        include: {
-            rate: {
-                include: {
-                    revisions: {
-                        where: {
-                            submitInfoID: {
-                                not: null,
+    if (submittedContractRev) {
+        const contractID = submittedContractRev.contractID
+
+        // 1. This submitted contract
+        // all draft rates: mark related, get a connection.
+        const draftRates = await tx.draftRateJoinTable.findMany({
+            where: {
+                contractID: contractID,
+            },
+            include: {
+                rate: {
+                    include: {
+                        revisions: {
+                            where: {
+                                submitInfoID: {
+                                    not: null,
+                                },
                             },
+                            orderBy: {
+                                createdAt: 'desc',
+                            },
+                            take: 1,
                         },
-                        orderBy: {
-                            createdAt: 'desc',
-                        },
-                        take: 1,
                     },
                 },
             },
-        },
-    })
-    const theseDraftRateIDs = draftRates.map((r) => r.rateID)
-    for (const draftRateJoin of draftRates) {
-        const draftRate = draftRateJoin.rate
-        const draftRateRev = draftRate.revisions[0]
-        if (!draftRateRev) {
-            const msg = `attempted to submit connected to an UNsubmitted rate. contractID: ${contractID} rateID: ${draftRate.id}`
-            console.error(msg)
-            return new Error(msg)
-        }
-
-        // if not a newly submitted rate, add it to related rates.
-        if (draftRateRev.submitInfoID !== submitInfo.id) {
-            submissionRelatedRateRevs.push(draftRateRev)
-        }
-
-        // add a link.
-        linksToCreate.push({
-            contractRevID: currentRev.id,
-            rateRevID: draftRateRev.id,
-            ratePosition: draftRateJoin.ratePosition,
         })
-    }
+        const theseDraftRateIDs = draftRates.map((r) => r.rateID)
+        for (const draftRateJoin of draftRates) {
+            const draftRate = draftRateJoin.rate
+            const draftRateRev = draftRate.revisions[0]
+            if (!draftRateRev) {
+                const msg = `attempted to submit connected to an UNsubmitted rate. contractID: ${contractID} rateID: ${draftRate.id}`
+                console.error(msg)
+                return new Error(msg)
+            }
 
-    // -- get previous connections, disconnected rate: mark related
-    const prevRelatedSubmission = await tx.updateInfoTable.findFirst({
-        where: {
-            relatedContracts: {
-                some: {
-                    contractID: contractID,
-                },
-            },
-        },
-        orderBy: {
-            updatedAt: 'desc',
-        },
-        include: {
-            submissionPackages: {
-                where: {
-                    contractRevision: {
+            // if not a newly submitted rate, add it to related rates.
+            if (draftRateRev.submitInfoID !== submitInfo.id) {
+                submissionRelatedRateRevs.push(draftRateRev)
+            }
+
+            // add a link.
+            linksToCreate.push({
+                contractRevID: submittedContractRev.id,
+                rateRevID: draftRateRev.id,
+                ratePosition: draftRateJoin.ratePosition,
+            })
+        }
+
+        // -- get previous connections, disconnected rate: mark related
+        const prevRelatedSubmission = await tx.updateInfoTable.findFirst({
+            where: {
+                relatedContracts: {
+                    some: {
                         contractID: contractID,
                     },
                 },
-                include: {
-                    rateRevision: true,
+            },
+            orderBy: {
+                updatedAt: 'desc',
+            },
+            include: {
+                submissionPackages: {
+                    where: {
+                        contractRevision: {
+                            contractID: contractID,
+                        },
+                    },
+                    include: {
+                        rateRevision: true,
+                    },
                 },
             },
-        },
-    })
+        })
 
-    if (prevRelatedSubmission) {
-        for (const previousConnection of prevRelatedSubmission.submissionPackages) {
-            if (
-                !theseDraftRateIDs.includes(
-                    previousConnection.rateRevision.rateID
-                )
-            ) {
-                // this previous submission was connected to a now disconnected rate.
-                submissionRelatedRateRevs.push(previousConnection.rateRevision)
+        if (prevRelatedSubmission) {
+            for (const previousConnection of prevRelatedSubmission.submissionPackages) {
+                if (
+                    !theseDraftRateIDs.includes(
+                        previousConnection.rateRevision.rateID
+                    )
+                ) {
+                    // this previous submission was connected to a now disconnected rate.
+                    submissionRelatedRateRevs.push(
+                        previousConnection.rateRevision
+                    )
+                }
             }
         }
     }
@@ -279,7 +336,7 @@ async function submitContractInsideTransaction(
     const submittedRateDraftContracts = await tx.draftRateJoinTable.findMany({
         where: {
             rateID: {
-                in: unsubmittedChildRevs.map((r) => r.rateID),
+                in: rateIDs,
             },
         },
         include: {
@@ -326,6 +383,7 @@ async function submitContractInsideTransaction(
         const submittedRateRev = submittedRate.revisions[0]
 
         const draftContract = draftContractJoin.contract
+        // we only included revisions that are submitted, so this will be a submitted revision
         const draftContractRev = draftContract.revisions[0]
 
         if (!submittedRateRev) {
@@ -371,7 +429,7 @@ async function submitContractInsideTransaction(
         }
     }
     // -- get previous connections, disconnected contracts: mark related,
-    for (const submittedRateRev of unsubmittedChildRevs) {
+    for (const submittedRateRev of submittedRateRevs) {
         const prevRelatedContractSubmissions =
             await tx.updateInfoTable.findFirst({
                 where: {
@@ -497,15 +555,8 @@ async function submitContractInsideTransaction(
             return new Error(msg)
         }
 
-        // -- all connections that aren't these submitted rates, add connection
-        const submittedRateIDs = unsubmittedChildRevs.map((r) => r.rateID)
-
         for (const previousConnection of prevRelatedSubmission.submissionPackages) {
-            if (
-                !submittedRateIDs.includes(
-                    previousConnection.rateRevision.rateID
-                )
-            ) {
+            if (!rateIDs.includes(previousConnection.rateRevision.rateID)) {
                 // this previous submission has a link to be forwarded.
 
                 linksToCreate.push({
@@ -519,13 +570,21 @@ async function submitContractInsideTransaction(
 
     // Write the resulting data to the db
     // RelatedContractSubmission
-    const allContractRevisionIDsRelatedToThisSubmission = [
-        currentRev.id,
-    ].concat(submissionRelatedContractRevs.map((r) => r.id))
+    const allContractRevisionIDsRelatedToThisSubmission =
+        submissionRelatedContractRevs.map((r) => r.id)
+    if (submittedContractRev) {
+        allContractRevisionIDsRelatedToThisSubmission.push(
+            submittedContractRev.id
+        )
+    }
     // RelatedRateSubmission
-    const allRateRevisionIDsRelatedToThisSubmission = unsubmittedChildRevs
-        .map((r) => r.id)
-        .concat(submissionRelatedRateRevs.map((r) => r.id))
+    const allRateRevisionIDsRelatedToThisSubmission: string[] = []
+    allRateRevisionIDsRelatedToThisSubmission.push(
+        ...submittedRateRevs.map((r) => r.id)
+    )
+    allRateRevisionIDsRelatedToThisSubmission.push(
+        ...submissionRelatedRateRevs.map((r) => r.id)
+    )
     // Links
 
     // filter out any duplicate links, we may have double counted since we went through
@@ -578,7 +637,7 @@ async function submitContractInsideTransaction(
                     { contractID: contractID },
                     {
                         rateID: {
-                            in: unsubmittedChildRevs.map((r) => r.rateID),
+                            in: rateIDs,
                         },
                     },
                 ],
@@ -632,10 +691,10 @@ async function submitContractInsideTransaction(
         })
     }
 
-    return await findContractWithHistory(tx, contractID)
+    return
 }
 
-export type SubmitContractArgsType = {
+type SubmitContractArgsType = {
     contractID: string // revision ID
     submittedByUserID: UpdateInfoType['updatedBy']
     submittedReason: UpdateInfoType['updatedReason']
@@ -643,7 +702,7 @@ export type SubmitContractArgsType = {
 // Update the given revision
 // * invalidate relationships of previous revision by marking as outdated
 // * set the UpdateInfo
-export async function submitContract(
+async function submitContract(
     client: PrismaClient,
     args: SubmitContractArgsType
 ): Promise<ContractType | NotFoundError | Error> {
@@ -669,3 +728,7 @@ export async function submitContract(
         return err
     }
 }
+
+export { submitContract, submitContractAndRates }
+
+export type { SubmitContractArgsType }

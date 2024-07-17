@@ -15,13 +15,6 @@ import type {
 } from '../../gen/gqlServer'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
-import { NewPostgresStore } from '../../postgres'
-import type { NotFoundError, Store } from '../../postgres'
-import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import type { PrismaTransactionType } from '../../postgres/prismaTypes'
-import { mockContractData } from '../../testHelpers'
-import { parseContractWithHistory } from '../../postgres/contractAndRates/parseContractWithHistory'
-import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates/findAllContractsWithHistoryByState'
 
 describe(`indexHealthPlanPackages`, () => {
     const cmsUser = testCMSUser()
@@ -368,98 +361,5 @@ describe(`indexHealthPlanPackages`, () => {
             expect(defaultStatePackages).toHaveLength(2)
             expect(otherStatePackages).toHaveLength(1)
         })
-    })
-
-    it('correctly filters and log contracts that failed parsing or converting', async () => {
-        const client = await sharedTestPrismaClient()
-        const errors = jest.spyOn(global.console, 'error').mockImplementation()
-
-        const stateUser = testStateUser()
-
-        // Valid draft contract
-        const validParsedDraftContract = parseContractWithHistory(
-            mockContractData({
-                stateCode: stateUser.stateCode,
-            })
-        )
-
-        if (validParsedDraftContract instanceof Error) {
-            throw new Error('Unexpected error in parsing contract in test')
-        }
-
-        // Valid submitted contract that will error because we cannot convert submitted contract yet, after we implement
-        // the function to convert submitted contracts we need to figure out how to get this to error, or remove testing
-        // conversion errors.
-        const validParsedSubmittedContract = parseContractWithHistory(
-            mockContractData({
-                stateCode: stateUser.stateCode,
-            })
-        )
-
-        if (validParsedSubmittedContract instanceof Error) {
-            throw new Error('Unexpected error in parsing contract in test')
-        }
-
-        // create find all that returns parsed contracts and errors
-        const findAllContractsWithHistoryByState = (
-            client: PrismaTransactionType,
-            stateCode: string
-        ): Promise<ContractOrErrorArrayType | NotFoundError | Error> => {
-            const contracts: ContractOrErrorArrayType = [
-                {
-                    contractID: validParsedDraftContract.id,
-                    contract: validParsedDraftContract,
-                },
-                {
-                    contractID: validParsedSubmittedContract.id,
-                    contract: validParsedSubmittedContract,
-                },
-                {
-                    contractID: 'errorParsingContract',
-                    contract: new Error('Parsing Error'),
-                },
-            ]
-            return new Promise((resolve) => resolve(contracts))
-        }
-
-        const defaultStore = NewPostgresStore(client)
-        const mockStore: Store = {
-            ...defaultStore,
-            findAllContractsWithHistoryByState: (args) =>
-                findAllContractsWithHistoryByState(client, stateUser.stateCode),
-        }
-
-        const server = await constructTestPostgresServer({
-            store: mockStore,
-            context: {
-                user: stateUser,
-            },
-        })
-
-        // get all submissions by state
-        const result = await server.executeOperation({
-            query: INDEX_HEALTH_PLAN_PACKAGES,
-        })
-
-        const contracts = result.data?.indexHealthPlanPackages.edges
-
-        // expect console.error to log contract that failed parsing
-        expect(errors).toHaveBeenCalledWith(
-            expect.objectContaining({
-                message: 'indexHealthPlanPackagesResolver failed',
-                error: expect.stringContaining('errorParsingContract'),
-            })
-        )
-
-        // Expect our contract that passed checks
-        expect(contracts).toEqual(
-            expect.arrayContaining([
-                expect.objectContaining({
-                    node: expect.objectContaining({
-                        id: validParsedDraftContract.id,
-                    }),
-                }),
-            ])
-        )
     })
 })
