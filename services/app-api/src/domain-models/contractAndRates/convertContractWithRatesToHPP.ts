@@ -2,7 +2,7 @@ import type {
     HealthPlanFormDataType,
     RateInfoType,
     SubmissionDocument,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+} from '../../common-code/healthPlanFormDataType'
 import type {
     HealthPlanPackageType,
     HealthPlanRevisionType,
@@ -11,10 +11,10 @@ import type { ContractType } from './contractTypes'
 import {
     toDomain,
     toProtoBuffer,
-} from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+} from '../../common-code/proto/healthPlanFormDataProto'
+import { parsePartialHPFD } from '../../common-code/proto/healthPlanFormDataProto/toDomain'
+import type { PartialHealthPlanFormData } from '../../common-code/proto/healthPlanFormDataProto/toDomain'
 import type { ContractRevisionType, RateRevisionType } from './revisionTypes'
-import { parsePartialHPFD } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/toDomain'
-import type { PartialHealthPlanFormData } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/toDomain'
 
 function convertContractToDraftRateRevisions(contract: ContractType) {
     const rateRevisions: RateRevisionType[] = []

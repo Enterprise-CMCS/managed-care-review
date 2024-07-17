@@ -5,11 +5,11 @@ import {
     mockContractAndRatesFormData,
     mockMNState,
 } from '../../testHelpers/emailerHelpers'
-import type { LockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import type { LockedHealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
 import {
     generateRateName,
     packageName,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+} from '../../common-code/healthPlanFormDataType'
 import { newPackageStateEmail } from './index'
 import { formatEmailAddresses } from '../formatters'
 

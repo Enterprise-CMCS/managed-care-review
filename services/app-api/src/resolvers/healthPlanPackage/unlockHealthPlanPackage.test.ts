@@ -20,12 +20,12 @@ import {
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { mockStoreThatErrors } from '../../testHelpers/storeHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { base64ToDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import {
     generateRateName,
     packageName,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import type { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+} from '../../common-code/healthPlanFormDataType'
+import type { HealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
 import {
     getTestStateAnalystsEmails,
     mockEmailParameterStoreError,

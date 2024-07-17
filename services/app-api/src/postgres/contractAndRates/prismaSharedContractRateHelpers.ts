@@ -9,7 +9,7 @@ import type {
     ContractRevisionType,
 } from '../../domain-models/contractAndRates'
 import { findStatePrograms } from '../state'
-import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { packageName } from '../../common-code/healthPlanFormDataType'
 import { logError } from '../../logger'
 
 const subincludeUpdateInfo = {

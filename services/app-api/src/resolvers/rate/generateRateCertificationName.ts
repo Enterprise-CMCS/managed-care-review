@@ -1,6 +1,6 @@
 import { formatRateNameDate } from '../../../../app-web/src/common-code/dateHelpers'
-import { programNames } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import type { ProgramArgType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { programNames } from '../../common-code/healthPlanFormDataType'
+import type { ProgramArgType } from '../../common-code/healthPlanFormDataType'
 import type { RateFormEditableType } from '../../domain-models/contractAndRates'
 
 const naturalSort = (a: string, b: string): number => {
