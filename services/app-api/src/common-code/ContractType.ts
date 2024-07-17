@@ -1,5 +1,17 @@
-import type { Contract, ContractRevision } from '../gen/gqlServer'
-import { getLastContractSubmission } from '../gqlHelpers/contractsAndRates'
+import type {
+    Contract,
+    ContractPackageSubmission,
+    ContractRevision,
+} from '../gen/gqlServer'
+
+const getLastContractSubmission = (
+    contract: Contract
+): ContractPackageSubmission | undefined => {
+    return (
+        (contract.packageSubmissions && contract.packageSubmissions[0]) ??
+        undefined
+    )
+}
 
 const getContractRev = (contract: Contract): ContractRevision | undefined => {
     if (contract.draftRevision) {
