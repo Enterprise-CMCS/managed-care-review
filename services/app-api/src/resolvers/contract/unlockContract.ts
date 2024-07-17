@@ -92,7 +92,7 @@ export function unlockContractResolver(
             unlockContractResult.status != 'UNLOCKED' &&
             unlockContractResult.status != 'DRAFT'
         ) {
-            const errMessage = `Programming Error: Got incorrect from an unlocked contract.`
+            const errMessage = `Programming Error: Got incorrect status from an unlocked contract.`
             logError('unlockContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
