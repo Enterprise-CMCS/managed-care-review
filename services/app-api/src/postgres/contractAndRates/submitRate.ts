@@ -8,7 +8,7 @@ import type {
 } from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../postgresErrors'
 import type { PrismaTransactionType } from '../prismaTypes'
-import { submitContractAndRates } from './submitContract'
+import { submitContractAndOrRates } from './submitContractAndOrRates'
 
 async function submitRateInsideTransaction(
     tx: PrismaTransactionType,
@@ -72,7 +72,7 @@ async function submitRateInsideTransaction(
 
     // Now we call the big ol' sumitter to set all the related submissions etc.
 
-    const submitResult = await submitContractAndRates(
+    const submitResult = await submitContractAndOrRates(
         tx,
         undefined,
         [rateID],
